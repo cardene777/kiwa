@@ -50,9 +50,9 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L57) |
-| 'circuit breaker open' | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L72) |
-| &#96;workflow "$&#123;name&#125;" requires at least one step&#96; | [packages/workflow/src/steps.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L23) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L57) |
+| <code v-pre>circuit breaker open</code> | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L72) |
+| <code v-pre>workflow "$&#123;name&#125;" requires at least one step</code> | [packages/workflow/src/steps.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L23) |
 
 ## API 契約
 
@@ -60,17 +60,17 @@
 
 ### 値
 
-#### `batchOperate`
+#### <code v-pre>batchOperate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L111) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L111) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
-#### `createWorkflowClient`
+#### <code v-pre>createWorkflowClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L48) `packages/workflow/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L48) <code v-pre>packages/workflow/src/client.ts</code>
 
 provider 別のみ id prefix を差別化し、 execute pipeline は共通実装。 実 provider (Temporal SDK / Inngest / Trigger.dev / AWS SFN) の差し替え可能 signature を再現。
 
@@ -78,17 +78,17 @@ provider 別のみ id prefix を差別化し、 execute pipeline は共通実装
 export declare function createWorkflowClient(options?: CreateWorkflowClientOptions): WorkflowClient;
 ```
 
-#### `defineWorkflow`
+#### <code v-pre>defineWorkflow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L22) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L22) <code v-pre>packages/workflow/src/steps.ts</code>
 
 ```ts
 export declare function defineWorkflow(name: string, steps: WorkflowStep[]): WorkflowDefinition;
 ```
 
-#### `emitEvent`
+#### <code v-pre>emitEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L59) `packages/workflow/src/events.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L59) <code v-pre>packages/workflow/src/events.ts</code>
 
 event を emit して登録済 workflow を全 execute する。 emit 順で workflow 実行が並ぶ。
 
@@ -96,9 +96,9 @@ event を emit して登録済 workflow を全 execute する。 emit 順で wor
 export declare function emitEvent(client: WorkflowClient, event: EmittedEvent): Promise<WorkflowExecutionResult[]>;
 ```
 
-#### `eventDrivenTrigger`
+#### <code v-pre>eventDrivenTrigger</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L24) `packages/workflow/src/events.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L24) <code v-pre>packages/workflow/src/events.ts</code>
 
 event 名で workflow を trigger 登録する。 event が emit されると同名の workflow が execute される (Inngest event-driven / AWS EventBridge → SFN の挙動を再現)。
 
@@ -106,9 +106,9 @@ event 名で workflow を trigger 登録する。 event が emit されると同
 export declare function eventDrivenTrigger(client: WorkflowClient, eventName: string, workflow: WorkflowDefinition): EventTriggerHandle;
 ```
 
-#### `executeWorkflow`
+#### <code v-pre>executeWorkflow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L31) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L31) <code v-pre>packages/workflow/src/steps.ts</code>
 
 内部 helper — step 群を順次実行して各 step の output を次 step の previous に渡す。 実 provider (Temporal activity / Inngest step) が step 単位で durable state を保持する挙動を再現。
 
@@ -119,9 +119,9 @@ export declare function executeWorkflow(workflow: WorkflowDefinition, input: Wor
 }>;
 ```
 
-#### `retryStep`
+#### <code v-pre>retryStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/retry.ts#L22) `packages/workflow/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/retry.ts#L22) <code v-pre>packages/workflow/src/retry.ts</code>
 
 exponential backoff で fn を retry。 実 provider (Temporal RetryPolicy / Inngest step retry) の指数バックオフ挙動を再現。 delay は `baseDelayMs * 2 ** (attempt-1)`、 maxDelayMs で cap。
 
@@ -129,49 +129,49 @@ exponential backoff で fn を retry。 実 provider (Temporal RetryPolicy / Inn
 export declare function retryStep<T>(fn: (attempt: number) => Promise<T>, options: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L64) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L64) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L101) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L101) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L86) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L86) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L50) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L50) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L20) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L20) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L40) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L40) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
@@ -179,9 +179,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `BatchItem`
+#### <code v-pre>BatchItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L17) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L17) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export interface BatchItem<TIn = unknown> {
@@ -190,9 +190,9 @@ export interface BatchItem<TIn = unknown> {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L18) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L18) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export interface BatchResult {
@@ -205,9 +205,9 @@ export interface BatchResult {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L11) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L11) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -216,9 +216,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CreateWorkflowClientOptions`
+#### <code v-pre>CreateWorkflowClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L38) `packages/workflow/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L38) <code v-pre>packages/workflow/src/client.ts</code>
 
 ```ts
 export interface CreateWorkflowClientOptions {
@@ -228,9 +228,9 @@ export interface CreateWorkflowClientOptions {
 }
 ```
 
-#### `EmittedEvent`
+#### <code v-pre>EmittedEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L4) `packages/workflow/src/events.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L4) <code v-pre>packages/workflow/src/events.ts</code>
 
 ```ts
 export interface EmittedEvent {
@@ -240,9 +240,9 @@ export interface EmittedEvent {
 }
 ```
 
-#### `EventTriggerHandle`
+#### <code v-pre>EventTriggerHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L10) `packages/workflow/src/events.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/events.ts#L10) <code v-pre>packages/workflow/src/events.ts</code>
 
 ```ts
 export interface EventTriggerHandle {
@@ -253,9 +253,9 @@ export interface EventTriggerHandle {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L12) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L12) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -265,9 +265,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L10) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L10) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -276,7 +276,7 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `ResilienceRetryOptions`
+#### <code v-pre>ResilienceRetryOptions</code>
 
 公開 entry point から解決しています。
 
@@ -301,9 +301,9 @@ export {
 } from './resilience.js';
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/retry.ts#L1) `packages/workflow/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/retry.ts#L1) <code v-pre>packages/workflow/src/retry.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -315,9 +315,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/retry.ts#L9) `packages/workflow/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/retry.ts#L9) <code v-pre>packages/workflow/src/retry.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -329,9 +329,9 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L9) `packages/workflow/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L9) <code v-pre>packages/workflow/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {
@@ -339,9 +339,9 @@ export interface TimeoutOptions {
 }
 ```
 
-#### `WorkflowClient`
+#### <code v-pre>WorkflowClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L28) `packages/workflow/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L28) <code v-pre>packages/workflow/src/client.ts</code>
 
 ```ts
 export interface WorkflowClient {
@@ -355,9 +355,9 @@ export interface WorkflowClient {
 }
 ```
 
-#### `WorkflowDefinition`
+#### <code v-pre>WorkflowDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L17) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L17) <code v-pre>packages/workflow/src/steps.ts</code>
 
 ```ts
 export interface WorkflowDefinition {
@@ -366,9 +366,9 @@ export interface WorkflowDefinition {
 }
 ```
 
-#### `WorkflowExecutionRecord`
+#### <code v-pre>WorkflowExecutionRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L23) `packages/workflow/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L23) <code v-pre>packages/workflow/src/client.ts</code>
 
 ```ts
 export interface WorkflowExecutionRecord extends WorkflowExecutionResult {
@@ -377,9 +377,9 @@ export interface WorkflowExecutionRecord extends WorkflowExecutionResult {
 }
 ```
 
-#### `WorkflowExecutionResult`
+#### <code v-pre>WorkflowExecutionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L12) `packages/workflow/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L12) <code v-pre>packages/workflow/src/client.ts</code>
 
 ```ts
 export interface WorkflowExecutionResult {
@@ -394,33 +394,33 @@ export interface WorkflowExecutionResult {
 }
 ```
 
-#### `WorkflowInput`
+#### <code v-pre>WorkflowInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L1) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L1) <code v-pre>packages/workflow/src/steps.ts</code>
 
 ```ts
 export type WorkflowInput = Record<string, unknown>;
 ```
 
-#### `WorkflowOutput`
+#### <code v-pre>WorkflowOutput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L2) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L2) <code v-pre>packages/workflow/src/steps.ts</code>
 
 ```ts
 export type WorkflowOutput = Record<string, unknown>;
 ```
 
-#### `WorkflowProvider`
+#### <code v-pre>WorkflowProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L10) `packages/workflow/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/client.ts#L10) <code v-pre>packages/workflow/src/client.ts</code>
 
 ```ts
 export type WorkflowProvider = 'temporal' | 'inngest' | 'trigger' | 'aws-sfn';
 ```
 
-#### `WorkflowStep`
+#### <code v-pre>WorkflowStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L12) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L12) <code v-pre>packages/workflow/src/steps.ts</code>
 
 ```ts
 export interface WorkflowStep {
@@ -429,9 +429,9 @@ export interface WorkflowStep {
 }
 ```
 
-#### `WorkflowStepContext`
+#### <code v-pre>WorkflowStepContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L4) `packages/workflow/src/steps.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L4) <code v-pre>packages/workflow/src/steps.ts</code>
 
 ```ts
 export interface WorkflowStepContext {

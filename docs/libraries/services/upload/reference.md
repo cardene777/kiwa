@@ -27,7 +27,7 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'uploadMultipart: parts must not be empty' | [packages/upload/src/multipart.ts](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L28) |
+| <code v-pre>uploadMultipart: parts must not be empty</code> | [packages/upload/src/multipart.ts](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L28) |
 
 ## API 契約
 
@@ -35,41 +35,41 @@
 
 ### 値
 
-#### `computeChecksum`
+#### <code v-pre>computeChecksum</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L39) `packages/upload/src/checksum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L39) <code v-pre>packages/upload/src/checksum.ts</code>
 
 ```ts
 export declare function computeChecksum(body: Buffer | Uint8Array | string, algorithm?: ChecksumAlgorithm): string;
 ```
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L153) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L153) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(client: UploadClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L106) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L106) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L64) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L64) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `createPresignedUrl`
+#### <code v-pre>createPresignedUrl</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L28) `packages/upload/src/presign.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L28) <code v-pre>packages/upload/src/presign.ts</code>
 
 provider 別 presigned URL 発行 mock。 real SDK が生成する URL 形式に近い shape で host / query / signature を組み立てる。
 
@@ -77,9 +77,9 @@ provider 別 presigned URL 発行 mock。 real SDK が生成する URL 形式に
 export declare function createPresignedUrl(options: PresignedUrlOptions): PresignedUrlResult;
 ```
 
-#### `createUploadClient`
+#### <code v-pre>createUploadClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L53) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L53) <code v-pre>packages/upload/src/client.ts</code>
 
 provider 別のみ mock 差 (id prefix / etag format) を持たせつつ、 全 API 共通 interface。 実 provider (S3 / GCS / R2 / Cloudinary) の SDK を差し替えても同じ signature で呼べる想定。
 
@@ -87,17 +87,17 @@ provider 別のみ mock 差 (id prefix / etag format) を持たせつつ、 全 
 export declare function createUploadClient(options?: CreateUploadClientOptions): UploadClient;
 ```
 
-#### `uploadBatch`
+#### <code v-pre>uploadBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L41) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L41) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function uploadBatch(client: UploadClient, requests: readonly UploadRequest[], concurrency?: number): Promise<BatchUploadResult>;
 ```
 
-#### `uploadIdempotent`
+#### <code v-pre>uploadIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L74) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L74) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function uploadIdempotent(client: UploadClient, req: UploadRequest, idempotencyKey: string, cache: IdempotencyCache): Promise<UploadResult & {
@@ -105,9 +105,9 @@ export declare function uploadIdempotent(client: UploadClient, req: UploadReques
 }>;
 ```
 
-#### `uploadMultipart`
+#### <code v-pre>uploadMultipart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L21) `packages/upload/src/multipart.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L21) <code v-pre>packages/upload/src/multipart.ts</code>
 
 multipart chunked upload workflow。 部分 part を結合して 1 回の upload に集約する mock。 実 provider (S3 multipart / GCS resumable / R2 multipart) と同じ「N part を 1 object に統合」 経路を再現。
 
@@ -115,17 +115,17 @@ multipart chunked upload workflow。 部分 part を結合して 1 回の upload
 export declare function uploadMultipart(client: UploadClient, bucket: string, key: string, parts: MultipartPart[], contentType?: string): Promise<MultipartUploadResult>;
 ```
 
-#### `uploadObservable`
+#### <code v-pre>uploadObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L120) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L120) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function uploadObservable(client: UploadClient, req: UploadRequest, hooks: HookRegistry): Promise<UploadResult>;
 ```
 
-#### `uploadWithRetry`
+#### <code v-pre>uploadWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L14) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L14) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export declare function uploadWithRetry(client: UploadClient, req: UploadRequest, options?: RetryOptions): Promise<UploadResult & {
@@ -133,9 +133,9 @@ export declare function uploadWithRetry(client: UploadClient, req: UploadRequest
 }>;
 ```
 
-#### `verifyUpload`
+#### <code v-pre>verifyUpload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L24) `packages/upload/src/checksum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L24) <code v-pre>packages/upload/src/checksum.ts</code>
 
 upload された object の checksum + size を検証。 provider 側の etag と caller side で 事前計算した checksum の一致確認に使う。
 
@@ -145,9 +145,9 @@ export declare function verifyUpload(input: VerifyUploadInput): VerifyUploadResu
 
 ### 型
 
-#### `BatchUploadResult`
+#### <code v-pre>BatchUploadResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L34) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L34) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface BatchUploadResult {
@@ -158,17 +158,17 @@ export interface BatchUploadResult {
 }
 ```
 
-#### `ChecksumAlgorithm`
+#### <code v-pre>ChecksumAlgorithm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L3) `packages/upload/src/checksum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L3) <code v-pre>packages/upload/src/checksum.ts</code>
 
 ```ts
 export type ChecksumAlgorithm = 'md5' | 'sha1' | 'sha256';
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L146) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L146) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -181,9 +181,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L140) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L140) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -193,17 +193,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L138) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L138) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `CreateUploadClientOptions`
+#### <code v-pre>CreateUploadClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L41) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L41) <code v-pre>packages/upload/src/client.ts</code>
 
 ```ts
 export interface CreateUploadClientOptions {
@@ -215,17 +215,17 @@ export interface CreateUploadClientOptions {
 }
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L98) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L98) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L90) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L90) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface HookContext {
@@ -237,9 +237,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L100) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L100) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -249,9 +249,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L57) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L57) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -262,9 +262,9 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `MultipartPart`
+#### <code v-pre>MultipartPart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L3) `packages/upload/src/multipart.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L3) <code v-pre>packages/upload/src/multipart.ts</code>
 
 ```ts
 export interface MultipartPart {
@@ -273,9 +273,9 @@ export interface MultipartPart {
 }
 ```
 
-#### `MultipartUploadResult`
+#### <code v-pre>MultipartUploadResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L8) `packages/upload/src/multipart.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/multipart.ts#L8) <code v-pre>packages/upload/src/multipart.ts</code>
 
 ```ts
 export interface MultipartUploadResult {
@@ -287,17 +287,17 @@ export interface MultipartUploadResult {
 }
 ```
 
-#### `PresignedOperation`
+#### <code v-pre>PresignedOperation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L4) `packages/upload/src/presign.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L4) <code v-pre>packages/upload/src/presign.ts</code>
 
 ```ts
 export type PresignedOperation = 'get' | 'put';
 ```
 
-#### `PresignedUrlOptions`
+#### <code v-pre>PresignedUrlOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L6) `packages/upload/src/presign.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L6) <code v-pre>packages/upload/src/presign.ts</code>
 
 ```ts
 export interface PresignedUrlOptions {
@@ -311,9 +311,9 @@ export interface PresignedUrlOptions {
 }
 ```
 
-#### `PresignedUrlResult`
+#### <code v-pre>PresignedUrlResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L16) `packages/upload/src/presign.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/presign.ts#L16) <code v-pre>packages/upload/src/presign.ts</code>
 
 ```ts
 export interface PresignedUrlResult {
@@ -325,9 +325,9 @@ export interface PresignedUrlResult {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L8) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L8) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -337,9 +337,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `UploadClient`
+#### <code v-pre>UploadClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L32) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L32) <code v-pre>packages/upload/src/client.ts</code>
 
 ```ts
 export interface UploadClient {
@@ -352,9 +352,9 @@ export interface UploadClient {
 }
 ```
 
-#### `UploadedObjectRecord`
+#### <code v-pre>UploadedObjectRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L27) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L27) <code v-pre>packages/upload/src/client.ts</code>
 
 ```ts
 export interface UploadedObjectRecord extends UploadResult {
@@ -363,25 +363,25 @@ export interface UploadedObjectRecord extends UploadResult {
 }
 ```
 
-#### `UploadHookEvent`
+#### <code v-pre>UploadHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L88) `packages/upload/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/enhancements.ts#L88) <code v-pre>packages/upload/src/enhancements.ts</code>
 
 ```ts
 export type UploadHookEvent = 'before-upload' | 'after-upload' | 'error';
 ```
 
-#### `UploadProvider`
+#### <code v-pre>UploadProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L3) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L3) <code v-pre>packages/upload/src/client.ts</code>
 
 ```ts
 export type UploadProvider = 's3' | 'gcs' | 'r2' | 'cloudinary';
 ```
 
-#### `UploadRequest`
+#### <code v-pre>UploadRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L5) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L5) <code v-pre>packages/upload/src/client.ts</code>
 
 ```ts
 export interface UploadRequest {
@@ -395,9 +395,9 @@ export interface UploadRequest {
 }
 ```
 
-#### `UploadResult`
+#### <code v-pre>UploadResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L15) `packages/upload/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/client.ts#L15) <code v-pre>packages/upload/src/client.ts</code>
 
 ```ts
 export interface UploadResult {
@@ -413,9 +413,9 @@ export interface UploadResult {
 }
 ```
 
-#### `VerifyUploadInput`
+#### <code v-pre>VerifyUploadInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L5) `packages/upload/src/checksum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L5) <code v-pre>packages/upload/src/checksum.ts</code>
 
 ```ts
 export interface VerifyUploadInput {
@@ -426,9 +426,9 @@ export interface VerifyUploadInput {
 }
 ```
 
-#### `VerifyUploadResult`
+#### <code v-pre>VerifyUploadResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L12) `packages/upload/src/checksum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/upload/src/checksum.ts#L12) <code v-pre>packages/upload/src/checksum.ts</code>
 
 ```ts
 export interface VerifyUploadResult {

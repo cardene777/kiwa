@@ -60,8 +60,8 @@ expect(history.rolledBack).toHaveLength(1);
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;cyclic dependency detected at $&#123;id&#125;&#96; | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L47) |
-| &#96;unknown migration referenced: $&#123;id&#125;&#96; | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L49) |
+| <code v-pre>cyclic dependency detected at $&#123;id&#125;</code> | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L47) |
+| <code v-pre>unknown migration referenced: $&#123;id&#125;</code> | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L49) |
 
 ## API 契約
 
@@ -69,9 +69,9 @@ expect(history.rolledBack).toHaveLength(1);
 
 ### 値
 
-#### `applyPendingMigrations`
+#### <code v-pre>applyPendingMigrations</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L31) `packages/migration/src/up-down.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L31) <code v-pre>packages/migration/src/up-down.ts</code>
 
 pending 全 migration を id 昇順で適用。 failed が出た時点で以降 skip。
 
@@ -79,9 +79,9 @@ pending 全 migration を id 昇順で適用。 failed が出た時点で以降 
 export declare function applyPendingMigrations(client: MigrationClient, migrations: Migration[]): ApplyPendingResult;
 ```
 
-#### `createLockRegistry`
+#### <code v-pre>createLockRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/lock.ts#L12) `packages/migration/src/lock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/lock.ts#L12) <code v-pre>packages/migration/src/lock.ts</code>
 
 migration lock (advisory) を管理する mock。 real Postgres advisory lock / SQLite `PRAGMA locking_mode = EXCLUSIVE` 相当を in-memory で模倣。 並行走行を防ぎ、 duplicate migration apply を排除。
 
@@ -96,9 +96,9 @@ export declare function createLockRegistry(now?: () => number): {
 };
 ```
 
-#### `createMigrationClient`
+#### <code v-pre>createMigrationClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L49) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L49) <code v-pre>packages/migration/src/client.ts</code>
 
 provider 差 (Prisma / Drizzle / Kysely / Knex) を吸収した migration mock client。 runUp / runDown / applyPendingMigrations 経由でこの client の applied array を更新する。
 
@@ -106,9 +106,9 @@ provider 差 (Prisma / Drizzle / Kysely / Knex) を吸収した migration mock c
 export declare function createMigrationClient(options?: CreateMigrationClientOptions): MigrationClient;
 ```
 
-#### `diffSchema`
+#### <code v-pre>diffSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L36) `packages/migration/src/diff.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L36) <code v-pre>packages/migration/src/diff.ts</code>
 
 prev / next schema の diff を計算。 実 provider (Prisma introspect / Drizzle schema push / Kysely migration generate) が返す diff の抽象 shape。
 
@@ -116,9 +116,9 @@ prev / next schema の diff を計算。 実 provider (Prisma introspect / Drizz
 export declare function diffSchema(prev: Schema, next: Schema): SchemaDiff;
 ```
 
-#### `listAppliedMigrations`
+#### <code v-pre>listAppliedMigrations</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/history.ts#L16) `packages/migration/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/history.ts#L16) <code v-pre>packages/migration/src/history.ts</code>
 
 client.applied を category 別 (applied / rolled_back / failed) に集計。 latestApplied = appliedAt max の record (無ければ undefined)。
 
@@ -126,9 +126,9 @@ client.applied を category 別 (applied / rolled_back / failed) に集計。 la
 export declare function listAppliedMigrations(client: MigrationClient): MigrationHistory;
 ```
 
-#### `planDryRun`
+#### <code v-pre>planDryRun</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L13) `packages/migration/src/dryrun.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L13) <code v-pre>packages/migration/src/dryrun.ts</code>
 
 migration 列を「dry-run」 で解析、 実 SQL を実行せずに safe / risky / destructive の 3 段階リスク分類 + 総 step 数 + destructive 数を返す。 real Prisma `migrate diff --dry-run` 相当。
 
@@ -136,17 +136,17 @@ migration 列を「dry-run」 で解析、 実 SQL を実行せずに safe / ris
 export declare function planDryRun(pending: readonly Migration[], direction?: 'up' | 'down'): DryRunPlan;
 ```
 
-#### `resolveDependencyOrder`
+#### <code v-pre>resolveDependencyOrder</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L40) `packages/migration/src/dryrun.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L40) <code v-pre>packages/migration/src/dryrun.ts</code>
 
 ```ts
 export declare function resolveDependencyOrder(migrations: readonly MigrationWithDeps[]): MigrationWithDeps[];
 ```
 
-#### `runDown`
+#### <code v-pre>runDown</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L24) `packages/migration/src/up-down.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L24) <code v-pre>packages/migration/src/up-down.ts</code>
 
 1 migration の down 実行 mock。 markRolledBack で client.applied の status を更新。
 
@@ -154,9 +154,9 @@ export declare function resolveDependencyOrder(migrations: readonly MigrationWit
 export declare function runDown(client: MigrationClient, migrationId: string): MigrationResult;
 ```
 
-#### `runUp`
+#### <code v-pre>runUp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L13) `packages/migration/src/up-down.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L13) <code v-pre>packages/migration/src/up-down.ts</code>
 
 1 migration の up 実行 mock。 実 provider (Prisma migrate / Drizzle push / Kysely migrator / Knex migrate) は client.applied を更新する経路で invoke される。
 
@@ -166,9 +166,9 @@ export declare function runUp(client: MigrationClient, migration: Migration): Mi
 
 ### 型
 
-#### `ApplyPendingResult`
+#### <code v-pre>ApplyPendingResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L3) `packages/migration/src/up-down.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/up-down.ts#L3) <code v-pre>packages/migration/src/up-down.ts</code>
 
 ```ts
 export interface ApplyPendingResult {
@@ -178,9 +178,9 @@ export interface ApplyPendingResult {
 }
 ```
 
-#### `ColumnDiff`
+#### <code v-pre>ColumnDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L18) `packages/migration/src/diff.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L18) <code v-pre>packages/migration/src/diff.ts</code>
 
 ```ts
 export interface ColumnDiff {
@@ -192,9 +192,9 @@ export interface ColumnDiff {
 }
 ```
 
-#### `DryRunPlan`
+#### <code v-pre>DryRunPlan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L3) `packages/migration/src/dryrun.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L3) <code v-pre>packages/migration/src/dryrun.ts</code>
 
 ```ts
 export interface DryRunPlan {
@@ -209,9 +209,9 @@ export interface DryRunPlan {
 }
 ```
 
-#### `Migration`
+#### <code v-pre>Migration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L5) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L5) <code v-pre>packages/migration/src/client.ts</code>
 
 ```ts
 export interface Migration {
@@ -222,9 +222,9 @@ export interface Migration {
 }
 ```
 
-#### `MigrationClient`
+#### <code v-pre>MigrationClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L29) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L29) <code v-pre>packages/migration/src/client.ts</code>
 
 ```ts
 export interface MigrationClient {
@@ -238,9 +238,9 @@ export interface MigrationClient {
 }
 ```
 
-#### `MigrationHistory`
+#### <code v-pre>MigrationHistory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/history.ts#L3) `packages/migration/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/history.ts#L3) <code v-pre>packages/migration/src/history.ts</code>
 
 ```ts
 export interface MigrationHistory {
@@ -253,9 +253,9 @@ export interface MigrationHistory {
 }
 ```
 
-#### `MigrationLock`
+#### <code v-pre>MigrationLock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/lock.ts#L1) `packages/migration/src/lock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/lock.ts#L1) <code v-pre>packages/migration/src/lock.ts</code>
 
 ```ts
 export interface MigrationLock {
@@ -265,17 +265,17 @@ export interface MigrationLock {
 }
 ```
 
-#### `MigrationProvider`
+#### <code v-pre>MigrationProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L1) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L1) <code v-pre>packages/migration/src/client.ts</code>
 
 ```ts
 export type MigrationProvider = 'prisma' | 'drizzle' | 'kysely' | 'knex';
 ```
 
-#### `MigrationRecord`
+#### <code v-pre>MigrationRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L12) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L12) <code v-pre>packages/migration/src/client.ts</code>
 
 ```ts
 export interface MigrationRecord {
@@ -288,9 +288,9 @@ export interface MigrationRecord {
 }
 ```
 
-#### `MigrationResult`
+#### <code v-pre>MigrationResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L21) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L21) <code v-pre>packages/migration/src/client.ts</code>
 
 ```ts
 export interface MigrationResult {
@@ -302,17 +302,17 @@ export interface MigrationResult {
 }
 ```
 
-#### `MigrationStatus`
+#### <code v-pre>MigrationStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L3) `packages/migration/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/client.ts#L3) <code v-pre>packages/migration/src/client.ts</code>
 
 ```ts
 export type MigrationStatus = 'pending' | 'applied' | 'rolled_back' | 'failed';
 ```
 
-#### `MigrationWithDeps`
+#### <code v-pre>MigrationWithDeps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L36) `packages/migration/src/dryrun.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L36) <code v-pre>packages/migration/src/dryrun.ts</code>
 
 migration 間の dependency (id 参照) を解決、 topological order で並び替える。 real migration lib の depends-on 解決相当、 循環参照は throw。
 
@@ -322,9 +322,9 @@ export interface MigrationWithDeps extends Migration {
 }
 ```
 
-#### `Schema`
+#### <code v-pre>Schema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L14) `packages/migration/src/diff.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L14) <code v-pre>packages/migration/src/diff.ts</code>
 
 ```ts
 export interface Schema {
@@ -332,9 +332,9 @@ export interface Schema {
 }
 ```
 
-#### `SchemaColumn`
+#### <code v-pre>SchemaColumn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L1) `packages/migration/src/diff.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L1) <code v-pre>packages/migration/src/diff.ts</code>
 
 ```ts
 export interface SchemaColumn {
@@ -346,9 +346,9 @@ export interface SchemaColumn {
 }
 ```
 
-#### `SchemaDiff`
+#### <code v-pre>SchemaDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L26) `packages/migration/src/diff.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L26) <code v-pre>packages/migration/src/diff.ts</code>
 
 ```ts
 export interface SchemaDiff {
@@ -358,9 +358,9 @@ export interface SchemaDiff {
 }
 ```
 
-#### `SchemaTable`
+#### <code v-pre>SchemaTable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L9) `packages/migration/src/diff.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/diff.ts#L9) <code v-pre>packages/migration/src/diff.ts</code>
 
 ```ts
 export interface SchemaTable {

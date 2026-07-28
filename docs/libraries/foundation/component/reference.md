@@ -23,43 +23,43 @@ Playwright CT mock は `activeMounts` と `unmountAll` を提供します。loca
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;ChromaticVisualMock.review — cannot accept $&#123;key&#125;, no current capture found. Run capture() first.&#96; | [packages/component/src/chromatic.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L182) |
-| &#96;Canvas.getByText — no node with text $&#123;JSON.stringify(text)&#125;&#96; | [packages/component/src/dom.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L82) |
-| &#96;Canvas.getByRole — no node with role=$&#123;role&#125;$&#123;nameSuffix&#125;&#96; | [packages/component/src/dom.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L90) |
-| &#96;expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)&#96; | [packages/component/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L49) |
-| 'startFormActionSession: formId must not be empty' | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L22) |
-| 'markFormStatusPending: form is already pending' | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L41) |
-| &#96;applyOptimisticUpdate: session is $&#123;session.state&#125;, not pending&#96; | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L52) |
-| 'enableProgressiveEnhancement: actionUrl must not be empty' | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L68) |
-| 'resolveFormAction: action was not submitted' | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L83) |
-| 'rejectFormAction: resolved action cannot reject' | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L98) |
-| &#96;markIslandInteractive: session is $&#123;session.state&#125;&#96; | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L105) |
-| &#96;markIslandInteractive: island $&#123;islandId&#125; already interactive&#96; | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L108) |
-| &#96;assertStaticBoundary: boundary $&#123;boundaryId&#125; already asserted&#96; | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L127) |
-| 'bootstrapIslandsRoute: routeId must not be empty' | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L56) |
-| &#96;beginIslandHydration: island $&#123;islandId&#125; not registered&#96; | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L88) |
-| &#96;beginIslandHydration: session is $&#123;session.state&#125;&#96; | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L91) |
-| 'initializeReactActions: actionId must not be empty' | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L48) |
-| &#96;beginActionTransition: session is $&#123;session.state&#125;&#96; | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L67) |
-| &#96;applyOptimisticUpdate: session is $&#123;session.state&#125;&#96; | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L81) |
-| &#96;resolveAction: session is $&#123;session.state&#125;&#96; | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L93) |
-| 'startRscHarness: componentId must not be empty' | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L21) |
-| &#96;beginRscRender: session is $&#123;session.state&#125;, not idle&#96; | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L36) |
-| &#96;enterSuspenseBoundary: session is $&#123;session.state&#125;, not rendering&#96; | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L47) |
-| &#96;streamHtmlChunk: session is $&#123;session.state&#125;, cannot stream&#96; | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L59) |
-| 'streamHtmlChunk: chunk must not be empty' | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L62) |
-| &#96;completeRscRender: session is $&#123;session.state&#125;, cannot complete&#96; | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L75) |
-| 'failRscRender: completed session cannot fail' | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L89) |
-| 'startStreamingSsr: routeId must not be empty' | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L25) |
-| &#96;startProgressiveHydration: $&#123;boundaryId&#125; is not pending&#96; | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L72) |
-| &#96;completeSelectiveHydration: $&#123;boundaryId&#125; is not pending&#96; | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L84) |
-| 'boundaryId must not be empty' | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L98) |
-| 'startViewTransitionSession: transitionId must not be empty' | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L25) |
-| 'startElementTransition: elementId must not be empty' | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L43) |
-| &#96;finishElementTransition: $&#123;elementId&#125; is not active&#96; | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L55) |
-| 'startDocumentTransition: name must not be empty' | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L70) |
-| 'assertAnimation: durationMs must be &gt;= 0' | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L82) |
-| &#96;StoryRegistry — no entry for $&#123;id&#125;&#96; | [packages/component/src/storybook.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L91) |
+| <code v-pre>ChromaticVisualMock.review — cannot accept $&#123;key&#125;, no current capture found. Run capture() first.</code> | [packages/component/src/chromatic.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L182) |
+| <code v-pre>Canvas.getByText — no node with text $&#123;JSON.stringify(text)&#125;</code> | [packages/component/src/dom.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L82) |
+| <code v-pre>Canvas.getByRole — no node with role=$&#123;role&#125;$&#123;nameSuffix&#125;</code> | [packages/component/src/dom.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L90) |
+| <code v-pre>expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)</code> | [packages/component/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L49) |
+| <code v-pre>startFormActionSession: formId must not be empty</code> | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L22) |
+| <code v-pre>markFormStatusPending: form is already pending</code> | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L41) |
+| <code v-pre>applyOptimisticUpdate: session is $&#123;session.state&#125;, not pending</code> | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L52) |
+| <code v-pre>enableProgressiveEnhancement: actionUrl must not be empty</code> | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L68) |
+| <code v-pre>resolveFormAction: action was not submitted</code> | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L83) |
+| <code v-pre>rejectFormAction: resolved action cannot reject</code> | [packages/component/src/semantics/form-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L98) |
+| <code v-pre>markIslandInteractive: session is $&#123;session.state&#125;</code> | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L105) |
+| <code v-pre>markIslandInteractive: island $&#123;islandId&#125; already interactive</code> | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L108) |
+| <code v-pre>assertStaticBoundary: boundary $&#123;boundaryId&#125; already asserted</code> | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L127) |
+| <code v-pre>bootstrapIslandsRoute: routeId must not be empty</code> | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L56) |
+| <code v-pre>beginIslandHydration: island $&#123;islandId&#125; not registered</code> | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L88) |
+| <code v-pre>beginIslandHydration: session is $&#123;session.state&#125;</code> | [packages/component/src/semantics/islands-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L91) |
+| <code v-pre>initializeReactActions: actionId must not be empty</code> | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L48) |
+| <code v-pre>beginActionTransition: session is $&#123;session.state&#125;</code> | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L67) |
+| <code v-pre>applyOptimisticUpdate: session is $&#123;session.state&#125;</code> | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L81) |
+| <code v-pre>resolveAction: session is $&#123;session.state&#125;</code> | [packages/component/src/semantics/react-19-actions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L93) |
+| <code v-pre>startRscHarness: componentId must not be empty</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L21) |
+| <code v-pre>beginRscRender: session is $&#123;session.state&#125;, not idle</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L36) |
+| <code v-pre>enterSuspenseBoundary: session is $&#123;session.state&#125;, not rendering</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L47) |
+| <code v-pre>streamHtmlChunk: session is $&#123;session.state&#125;, cannot stream</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L59) |
+| <code v-pre>streamHtmlChunk: chunk must not be empty</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L62) |
+| <code v-pre>completeRscRender: session is $&#123;session.state&#125;, cannot complete</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L75) |
+| <code v-pre>failRscRender: completed session cannot fail</code> | [packages/component/src/semantics/rsc-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L89) |
+| <code v-pre>startStreamingSsr: routeId must not be empty</code> | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L25) |
+| <code v-pre>startProgressiveHydration: $&#123;boundaryId&#125; is not pending</code> | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L72) |
+| <code v-pre>completeSelectiveHydration: $&#123;boundaryId&#125; is not pending</code> | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L84) |
+| <code v-pre>boundaryId must not be empty</code> | [packages/component/src/semantics/streaming-ssr.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L98) |
+| <code v-pre>startViewTransitionSession: transitionId must not be empty</code> | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L25) |
+| <code v-pre>startElementTransition: elementId must not be empty</code> | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L43) |
+| <code v-pre>finishElementTransition: $&#123;elementId&#125; is not active</code> | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L55) |
+| <code v-pre>startDocumentTransition: name must not be empty</code> | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L70) |
+| <code v-pre>assertAnimation: durationMs must be &gt;= 0</code> | [packages/component/src/semantics/view-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L82) |
+| <code v-pre>StoryRegistry — no entry for $&#123;id&#125;</code> | [packages/component/src/storybook.ts](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L91) |
 
 ## API 契約
 
@@ -67,9 +67,9 @@ Playwright CT mock は `activeMounts` と `unmountAll` を提供します。loca
 
 ### 値
 
-#### `addHandler`
+#### <code v-pre>addHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L53) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L53) <code v-pre>packages/component/src/dom.ts</code>
 
 event handler を登録、 同一 event に複数 handler を許容する。
 
@@ -77,9 +77,9 @@ event handler を登録、 同一 event に複数 handler を許容する。
 export declare function addHandler(node: MockNode, event: string, handler: (event: MockEvent) => void): void;
 ```
 
-#### `appendChild`
+#### <code v-pre>appendChild</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L47) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L47) <code v-pre>packages/component/src/dom.ts</code>
 
 node に child を追加、 parent back reference も更新する。
 
@@ -87,15 +87,15 @@ node に child を追加、 parent back reference も更新する。
 export declare function appendChild(parent: MockNode, child: MockNode): void;
 ```
 
-#### `applyOptimisticUpdate`
+#### <code v-pre>applyOptimisticUpdate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L47) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L47) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export declare function applyOptimisticUpdate<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, patch: Partial<TForm>): AxisStep<FormActionState>;
 ```
 
-#### `applyReactActionOptimistic`
+#### <code v-pre>applyReactActionOptimistic</code>
 
 公開 entry point から解決しています。
 
@@ -112,9 +112,9 @@ export {
 } from './react-19-actions.js';
 ```
 
-#### `assertAnimation`
+#### <code v-pre>assertAnimation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L77) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L77) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export declare function assertAnimation(session: ViewTransitionSession, input: {
@@ -124,49 +124,49 @@ export declare function assertAnimation(session: ViewTransitionSession, input: {
 }): AxisStep<ViewTransitionState>;
 ```
 
-#### `assertMode`
+#### <code v-pre>assertMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L42) `packages/component/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L42) <code v-pre>packages/component/src/real-driver.ts</code>
 
 ```ts
 export declare function assertMode(provider: ComponentTarget, expected: KiwaTestMode, env?: Record<string, string | undefined>): void;
 ```
 
-#### `assertStaticBoundary`
+#### <code v-pre>assertStaticBoundary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L122) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L122) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export declare function assertStaticBoundary(session: IslandsSession, boundaryId: string): AxisStep<IslandsState>;
 ```
 
-#### `beginActionTransition`
+#### <code v-pre>beginActionTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L63) `packages/component/src/semantics/react-19-actions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L63) <code v-pre>packages/component/src/semantics/react-19-actions.ts</code>
 
 ```ts
 export declare function beginActionTransition(session: ReactActionsSession): AxisStep<ReactActionsState>;
 ```
 
-#### `beginIslandHydration`
+#### <code v-pre>beginIslandHydration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L82) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L82) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export declare function beginIslandHydration(session: IslandsSession, islandId: string): AxisStep<IslandsState>;
 ```
 
-#### `beginRscRender`
+#### <code v-pre>beginRscRender</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L34) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L34) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export declare function beginRscRender(session: RscHarnessSession): AxisStep<RscHarnessState>;
 ```
 
-#### `bootstrapIslandsRoute`
+#### <code v-pre>bootstrapIslandsRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L51) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L51) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export declare function bootstrapIslandsRoute(input: {
@@ -175,9 +175,9 @@ export declare function bootstrapIslandsRoute(input: {
 }): IslandsSession;
 ```
 
-#### `buildButton`
+#### <code v-pre>buildButton</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L31) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L31) <code v-pre>packages/component/src/fixture.ts</code>
 
 Button — text label + optional click handler + disabled state。 variant は class 属性に反映 (chromatic diff で variant 別 baseline を持てる)。
 
@@ -185,9 +185,9 @@ Button — text label + optional click handler + disabled state。 variant は c
 export declare const buildButton: ComponentRender<ButtonArgs>;
 ```
 
-#### `buildCard`
+#### <code v-pre>buildCard</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L234) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L234) <code v-pre>packages/component/src/fixture.ts</code>
 
 Card — title / body / optional footer の 3 slot。 chromatic diff で variant 別 baseline を持つ用途の代表 pattern。
 
@@ -195,9 +195,9 @@ Card — title / body / optional footer の 3 slot。 chromatic diff で variant
 export declare const buildCard: ComponentRender<CardArgs>;
 ```
 
-#### `buildForm`
+#### <code v-pre>buildForm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L112) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L112) <code v-pre>packages/component/src/fixture.ts</code>
 
 Form — title + 複数 input + submit button。 submit 時に全 field の value を 集めて onSubmit に渡す。 required field 未入力なら submit を発火しない (validation)、 UI 側で「必須」 表示を出す責務。
 
@@ -205,9 +205,9 @@ Form — title + 複数 input + submit button。 submit 時に全 field の valu
 export declare const buildForm: ComponentRender<FormArgs>;
 ```
 
-#### `buildInput`
+#### <code v-pre>buildInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L66) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L66) <code v-pre>packages/component/src/fixture.ts</code>
 
 Input — label + input の pair、 label[for] で id を関連付ける (a11y label rule を pass する)。 onChange は input event で発火。
 
@@ -215,9 +215,9 @@ Input — label + input の pair、 label[for] で id を関連付ける (a11y l
 export declare const buildInput: ComponentRender<InputArgs>;
 ```
 
-#### `buildModal`
+#### <code v-pre>buildModal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L177) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L177) <code v-pre>packages/component/src/fixture.ts</code>
 
 Modal — open=false なら空 div を返す (closed 状態を表現)。 open=true で backdrop + dialog を組む。 backdrop click / close button click で onClose を発火。
 
@@ -225,9 +225,9 @@ Modal — open=false なら空 div を返す (closed 状態を表現)。 open=tr
 export declare const buildModal: ComponentRender<ModalArgs>;
 ```
 
-#### `captureErrorBoundary`
+#### <code v-pre>captureErrorBoundary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L48) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L48) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export declare function captureErrorBoundary(session: StreamingSsrSession, input: {
@@ -237,41 +237,41 @@ export declare function captureErrorBoundary(session: StreamingSsrSession, input
 }): AxisStep<StreamingSsrState>;
 ```
 
-#### `collectFidelityCoverage`
+#### <code v-pre>collectFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L56) `packages/component/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L56) <code v-pre>packages/component/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare function collectFidelityCoverage(providers?: ComponentTarget[]): FidelityCoverage;
 ```
 
-#### `completeRscRender`
+#### <code v-pre>completeRscRender</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L73) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L73) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export declare function completeRscRender(session: RscHarnessSession): AxisStep<RscHarnessState>;
 ```
 
-#### `completeSelectiveHydration`
+#### <code v-pre>completeSelectiveHydration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L78) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L78) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export declare function completeSelectiveHydration(session: StreamingSsrSession, boundaryId: string): AxisStep<StreamingSsrState>;
 ```
 
-#### `COMPONENT_AXIS_TO_EVENTS`
+#### <code v-pre>COMPONENT&#95;AXIS&#95;TO&#95;EVENTS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L16) `packages/component/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L16) <code v-pre>packages/component/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare const COMPONENT_AXIS_TO_EVENTS: Record<ComponentAxis, NeutralEventName[]>;
 ```
 
-#### `componentFixtures`
+#### <code v-pre>componentFixtures</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L260) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L260) <code v-pre>packages/component/src/fixture.ts</code>
 
 全 component の render function を 1 record にまとめる (test 一括登録用)。
 
@@ -279,9 +279,9 @@ export declare const COMPONENT_AXIS_TO_EVENTS: Record<ComponentAxis, NeutralEven
 export declare const componentFixtures: Record<string, ComponentRender<Record<string, unknown>>>;
 ```
 
-#### `createCanvas`
+#### <code v-pre>createCanvas</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L76) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L76) <code v-pre>packages/component/src/dom.ts</code>
 
 CanvasElement 生成 — root node と lookup helpers を wrap する。 mount 完了後 story / component test / visual capture の全経路で使う。
 
@@ -289,9 +289,9 @@ CanvasElement 生成 — root node と lookup helpers を wrap する。 mount �
 export declare function createCanvas(root: MockNode): CanvasElement;
 ```
 
-#### `createChromaticVisualMock`
+#### <code v-pre>createChromaticVisualMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L73) `packages/component/src/chromatic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L73) <code v-pre>packages/component/src/chromatic.ts</code>
 
 ChromaticVisualMock を新規作成する。 baseline / current / review を全て in-memory Map で保持し、 reset() で全 clear できる (test isolation 用)。
 
@@ -299,9 +299,9 @@ ChromaticVisualMock を新規作成する。 baseline / current / review を全�
 export declare function createChromaticVisualMock(config?: ChromaticConfig): ChromaticVisualMock;
 ```
 
-#### `createNode`
+#### <code v-pre>createNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L17) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L17) <code v-pre>packages/component/src/dom.ts</code>
 
 node factory — attrs / children / text / value を任意で与える。
 
@@ -309,9 +309,9 @@ node factory — attrs / children / text / value を任意で与える。
 export declare function createNode(tag: string, options?: NodeOptions): MockNode;
 ```
 
-#### `createPlaywrightCTMock`
+#### <code v-pre>createPlaywrightCTMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/playwright-ct.ts#L46) `packages/component/src/playwright-ct.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/playwright-ct.ts#L46) <code v-pre>packages/component/src/playwright-ct.ts</code>
 
 PlaywrightCTMock を新規作成する。 mount 毎に in-memory canvas を組み、 ComponentLocator に wrap して返す。 activeMounts count は resource leak 検出用 (test で unmount 忘れを assert できる)。
 
@@ -319,9 +319,9 @@ PlaywrightCTMock を新規作成する。 mount 毎に in-memory canvas を組�
 export declare function createPlaywrightCTMock(): PlaywrightCTMock;
 ```
 
-#### `createStoryRegistry`
+#### <code v-pre>createStoryRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L75) `packages/component/src/storybook.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L75) <code v-pre>packages/component/src/storybook.ts</code>
 
 Registry を新規作成する。 内部は `Map&lt;storyId, StoryEntry&gt;`、 story id は `title--storyName` (Storybook 8 の SB URL param 互換 lowercase / kebab-case)。
 
@@ -329,9 +329,9 @@ Registry を新規作成する。 内部は `Map&lt;storyId, StoryEntry&gt;`、 
 export declare function createStoryRegistry(): StoryRegistry;
 ```
 
-#### `enableProgressiveEnhancement`
+#### <code v-pre>enableProgressiveEnhancement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L63) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L63) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export declare function enableProgressiveEnhancement<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, input: {
@@ -340,25 +340,25 @@ export declare function enableProgressiveEnhancement<TForm extends Record<string
 }): AxisStep<FormActionState>;
 ```
 
-#### `enterSuspenseBoundary`
+#### <code v-pre>enterSuspenseBoundary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L42) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L42) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export declare function enterSuspenseBoundary(session: RscHarnessSession, fallback?: string): AxisStep<RscHarnessState>;
 ```
 
-#### `failRscRender`
+#### <code v-pre>failRscRender</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L84) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L84) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export declare function failRscRender(session: RscHarnessSession, error: Error | string): AxisStep<RscHarnessState>;
 ```
 
-#### `findByRole`
+#### <code v-pre>findByRole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L144) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L144) <code v-pre>packages/component/src/dom.ts</code>
 
 role 属性 (`role="button"`) or implicit role (button tag) と、 aria-label / text で一致する node を返す。 mock は最小 subset (button / link / heading / textbox / checkbox) のみ。
 
@@ -366,9 +366,9 @@ role 属性 (`role="button"`) or implicit role (button tag) と、 aria-label / 
 export declare function findByRole(node: MockNode, role: string, accessibleName?: string): MockNode | null;
 ```
 
-#### `findByText`
+#### <code v-pre>findByText</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L130) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L130) <code v-pre>packages/component/src/dom.ts</code>
 
 text 一致で最初に見つかった node を返す。 深い node を優先する — root 側の aggregated text ではなく、 実際に text を持つ leaf 相当の node を先に返す (Storybook / Testing Library の getByText 挙動と揃える)。
 
@@ -376,17 +376,17 @@ text 一致で最初に見つかった node を返す。 深い node を優先�
 export declare function findByText(node: MockNode, text: string): MockNode | null;
 ```
 
-#### `finishElementTransition`
+#### <code v-pre>finishElementTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L50) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L50) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export declare function finishElementTransition(session: ViewTransitionSession, elementId: string): AxisStep<ViewTransitionState>;
 ```
 
-#### `fireEvent`
+#### <code v-pre>fireEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L64) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L64) <code v-pre>packages/component/src/dom.ts</code>
 
 event を発火する。 実 DOM のような bubble はせず target 単発、 mock harness では component 側で bubble 相当を実装する。 fill 相当は input event を発火。
 
@@ -394,9 +394,9 @@ event を発火する。 実 DOM のような bubble はせず target 単発、 
 export declare function fireEvent(node: MockNode, event: MockEvent): void;
 ```
 
-#### `hashMarkup`
+#### <code v-pre>hashMarkup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L121) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L121) <code v-pre>packages/component/src/dom.ts</code>
 
 markup 文字列を deterministic SHA-256 hex substring (先頭 16) に変換。
 
@@ -404,9 +404,9 @@ markup 文字列を deterministic SHA-256 hex substring (先頭 16) に変換。
 export declare function hashMarkup(markup: string): string;
 ```
 
-#### `initializeReactActions`
+#### <code v-pre>initializeReactActions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L43) `packages/component/src/semantics/react-19-actions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L43) <code v-pre>packages/component/src/semantics/react-19-actions.ts</code>
 
 ```ts
 export declare function initializeReactActions(input: {
@@ -415,41 +415,41 @@ export declare function initializeReactActions(input: {
 }): ReactActionsSession;
 ```
 
-#### `markFormStatusPending`
+#### <code v-pre>markFormStatusPending</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L36) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L36) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export declare function markFormStatusPending<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, submitter: string): AxisStep<FormActionState>;
 ```
 
-#### `markIslandInteractive`
+#### <code v-pre>markIslandInteractive</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L100) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L100) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export declare function markIslandInteractive(session: IslandsSession, islandId: string): AxisStep<IslandsState>;
 ```
 
-#### `markSuspensePending`
+#### <code v-pre>markSuspensePending</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L38) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L38) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export declare function markSuspensePending(session: StreamingSsrSession, boundaryId: string): AxisStep<StreamingSsrState>;
 ```
 
-#### `providerEventName`
+#### <code v-pre>providerEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L112) `packages/component/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L112) <code v-pre>packages/component/src/semantics/types.ts</code>
 
 ```ts
 export declare function providerEventName(target: ComponentTarget, neutral: NeutralEventName): string;
 ```
 
-#### `query`
+#### <code v-pre>query</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L215) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L215) <code v-pre>packages/component/src/dom.ts</code>
 
 querySelector の最小 subset。 tag / .class / #id / [attr=value] / 子孫 (space) 結合子を support する。 実 CSS selector 全対応ではないが、 mock 用途では十分。 MockNode tree では canvas.root が component 自体を指すため、 root も検査対象 に含める (実 DOM の `document.querySelector` は container を除くが、 mock は component rendering root = 検索対象という semantics に揃える)。
 
@@ -457,25 +457,25 @@ querySelector の最小 subset。 tag / .class / #id / [attr=value] / 子孫 (sp
 export declare function query(root: MockNode, selector: string, all: boolean): MockNode[];
 ```
 
-#### `registerIsland`
+#### <code v-pre>registerIsland</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L69) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L69) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export declare function registerIsland(session: IslandsSession, island: IslandSpec): AxisStep<IslandsState>;
 ```
 
-#### `rejectFormAction`
+#### <code v-pre>rejectFormAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L93) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L93) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export declare function rejectFormAction<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, error: Error | string): AxisStep<FormActionState>;
 ```
 
-#### `renderMarkup`
+#### <code v-pre>renderMarkup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L105) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L105) <code v-pre>packages/component/src/dom.ts</code>
 
 MockNode subtree を deterministic な pseudo-HTML 文字列に変換する。 event handler は含めず、 tag / attrs / text / children のみ。 Chromatic の hash / markup 保存に使う。
 
@@ -483,41 +483,41 @@ MockNode subtree を deterministic な pseudo-HTML 文字列に変換する。 e
 export declare function renderMarkup(node: MockNode): string;
 ```
 
-#### `resolveAction`
+#### <code v-pre>resolveAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L88) `packages/component/src/semantics/react-19-actions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L88) <code v-pre>packages/component/src/semantics/react-19-actions.ts</code>
 
 ```ts
 export declare function resolveAction(session: ReactActionsSession, resolvedValue: string): AxisStep<ReactActionsState>;
 ```
 
-#### `resolveAllModes`
+#### <code v-pre>resolveAllModes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L35) `packages/component/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L35) <code v-pre>packages/component/src/real-driver.ts</code>
 
 ```ts
 export declare function resolveAllModes(env?: Record<string, string | undefined>): ResolvedMode[];
 ```
 
-#### `resolveFormAction`
+#### <code v-pre>resolveFormAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L78) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L78) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export declare function resolveFormAction<TForm extends Record<string, unknown>>(session: FormActionSession<TForm>, result: Partial<TForm>): AxisStep<FormActionState>;
 ```
 
-#### `resolveMode`
+#### <code v-pre>resolveMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L17) `packages/component/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L17) <code v-pre>packages/component/src/real-driver.ts</code>
 
 ```ts
 export declare function resolveMode(provider: ComponentTarget, env?: Record<string, string | undefined>): ResolvedMode;
 ```
 
-#### `startDocumentTransition`
+#### <code v-pre>startDocumentTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L65) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L65) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export declare function startDocumentTransition(session: ViewTransitionSession, input: {
@@ -527,9 +527,9 @@ export declare function startDocumentTransition(session: ViewTransitionSession, 
 }): AxisStep<ViewTransitionState>;
 ```
 
-#### `startElementTransition`
+#### <code v-pre>startElementTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L38) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L38) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export declare function startElementTransition(session: ViewTransitionSession, input: {
@@ -539,9 +539,9 @@ export declare function startElementTransition(session: ViewTransitionSession, i
 }): AxisStep<ViewTransitionState>;
 ```
 
-#### `startFormActionSession`
+#### <code v-pre>startFormActionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L16) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L16) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export declare function startFormActionSession<TForm extends Record<string, unknown>>(input: {
@@ -551,17 +551,17 @@ export declare function startFormActionSession<TForm extends Record<string, unkn
 }): FormActionSession<TForm>;
 ```
 
-#### `startProgressiveHydration`
+#### <code v-pre>startProgressiveHydration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L66) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L66) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export declare function startProgressiveHydration(session: StreamingSsrSession, boundaryId: string): AxisStep<StreamingSsrState>;
 ```
 
-#### `startRscHarness`
+#### <code v-pre>startRscHarness</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L15) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L15) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export declare function startRscHarness(input: {
@@ -571,9 +571,9 @@ export declare function startRscHarness(input: {
 }): RscHarnessSession;
 ```
 
-#### `startStreamingSsr`
+#### <code v-pre>startStreamingSsr</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L20) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L20) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export declare function startStreamingSsr(input: {
@@ -582,9 +582,9 @@ export declare function startStreamingSsr(input: {
 }): StreamingSsrSession;
 ```
 
-#### `startViewTransitionSession`
+#### <code v-pre>startViewTransitionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L20) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L20) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export declare function startViewTransitionSession(input: {
@@ -593,9 +593,9 @@ export declare function startViewTransitionSession(input: {
 }): ViewTransitionSession;
 ```
 
-#### `streamHtmlChunk`
+#### <code v-pre>streamHtmlChunk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L54) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L54) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export declare function streamHtmlChunk(session: RscHarnessSession, chunk: string): AxisStep<RscHarnessState>;
@@ -603,9 +603,9 @@ export declare function streamHtmlChunk(session: RscHarnessSession, chunk: strin
 
 ### 型
 
-#### `A11yViolation`
+#### <code v-pre>A11yViolation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L132) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L132) <code v-pre>packages/component/src/types.ts</code>
 
 a11y violation を 1 件模倣。 実 axe-core の Result と field を揃える。 (mock harness では injectViolations で外部から注入して test 対象にする)
 
@@ -622,9 +622,9 @@ export interface A11yViolation {
 }
 ```
 
-#### `AxisStep`
+#### <code v-pre>AxisStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L47) `packages/component/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L47) <code v-pre>packages/component/src/semantics/types.ts</code>
 
 ```ts
 export interface AxisStep<TState extends string> {
@@ -636,9 +636,9 @@ export interface AxisStep<TState extends string> {
 }
 ```
 
-#### `ButtonArgs`
+#### <code v-pre>ButtonArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L20) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L20) <code v-pre>packages/component/src/fixture.ts</code>
 
 5 pattern の共通 component fixture。 Storybook story / Playwright CT mount / Chromatic capture の 3 経路で共有できる framework agnostic renderer。 実 SB / PW CT / Chromatic に持込む時は各 framework (React / Vue / Svelte / Solid) の component として書換えるが、 test だけ回す用途はこの fixture で完結する。 5 pattern の選定理由 = SaaS frontend で頻出する 5 primitive を全 cover する。 - Button (interactive、 click event、 disabled state) - Input (controlled、 input event、 label association) - Form (submit event、 field 集約、 validation) - Modal (open/close state、 backdrop click、 escape close) - Card (content wrapping、 title + body、 optional footer)
 
@@ -651,9 +651,9 @@ export interface ButtonArgs {
 }
 ```
 
-#### `CanvasElement`
+#### <code v-pre>CanvasElement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L82) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L82) <code v-pre>packages/component/src/types.ts</code>
 
 mount 済 root の抽象 handle。 実 DOM ではなく、 in-memory な要素 tree として 扱う。 test は `getByText` / `getByRole` / `querySelector` の subset を通じて 要素を取り出し、 `click` / `fill` / `assert` を実行する。
 
@@ -673,9 +673,9 @@ export interface CanvasElement {
 }
 ```
 
-#### `CardArgs`
+#### <code v-pre>CardArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L223) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L223) <code v-pre>packages/component/src/fixture.ts</code>
 
 ```ts
 export interface CardArgs {
@@ -686,9 +686,9 @@ export interface CardArgs {
 }
 ```
 
-#### `ChromaticConfig`
+#### <code v-pre>ChromaticConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L200) `packages/component/src/chromatic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L200) <code v-pre>packages/component/src/chromatic.ts</code>
 
 ```ts
 export interface ChromaticConfig {
@@ -701,9 +701,9 @@ export interface ChromaticConfig {
 }
 ```
 
-#### `ChromaticVisualMock`
+#### <code v-pre>ChromaticVisualMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L29) `packages/component/src/chromatic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/chromatic.ts#L29) <code v-pre>packages/component/src/chromatic.ts</code>
 
 Chromatic 型の visual regression mock。 real Chromatic は Storybook 8 を headless で snapshot 撮り、 baseline JSON を server 側に置いて diff を pixel single で計算する。 mock harness は browser を起動せず、 mount 後の MockNode を `renderMarkup` で pseudo-HTML 化 → SHA-256 hash → hash 比較で changed 判定を行う (pixel diff は hash 完全一致 = 0、 不一致 = 1、 partial diff の連続値は mock 対象外)。 mock で意味のある semantic は 4 つ ... (1) baseline capture (未登録なら status='new'、 hash を保存) (2) current capture + diff (hash 一致で passed、 不一致で failed / changed) (3) diffThreshold の適用 (StoryEntry.parameters.chromatic.diffThreshold) (4) accept / reject workflow (accept で baseline を current で置換) multi viewport support = parameters.chromatic.viewports に列挙された viewport 名を 1 回ずつ capture し、 viewport × storyId 単位で baseline / diff を管理。
 
@@ -749,17 +749,17 @@ export interface ChromaticVisualMock {
 }
 ```
 
-#### `ComponentAxis`
+#### <code v-pre>ComponentAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L10) `packages/component/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L10) <code v-pre>packages/component/src/semantics/types.ts</code>
 
 ```ts
 export type ComponentAxis = 'rsc-harness' | 'streaming-ssr' | 'view-transitions' | 'form-action-advanced' | 'react-19-actions' | 'islands-architecture';
 ```
 
-#### `ComponentLocator`
+#### <code v-pre>ComponentLocator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L159) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L159) <code v-pre>packages/component/src/types.ts</code>
 
 Playwright CT の `mount(component)` が返す ComponentLocator の subset。 実 Playwright CT は `Locator` を返して page 全体を操作するが、 mock は mount 済 canvas を直接返して interact に集中する。
 
@@ -779,9 +779,9 @@ export interface ComponentLocator {
 }
 ```
 
-#### `ComponentProvider`
+#### <code v-pre>ComponentProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L17) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L17) <code v-pre>packages/component/src/types.ts</code>
 
 どの integration が emit した mock かを識別する。 release-gate 11 軸 dispatch の provider prefix として使う。
 
@@ -789,9 +789,9 @@ export interface ComponentLocator {
 export type ComponentProvider = 'storybook' | 'playwright-ct' | 'chromatic';
 ```
 
-#### `ComponentRender`
+#### <code v-pre>ComponentRender</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L100) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L100) <code v-pre>packages/component/src/types.ts</code>
 
 mount 対象の component 表現。 実 React / Vue / Svelte component を直接 扱わず、 純関数 `(args) =&gt; MockNode` として抽象化する。 mock harness は framework agnostic — Storybook の render callback / Playwright CT の component 引数 / Chromatic の capture 対象を同じ関数で表現する。
 
@@ -799,9 +799,9 @@ mount 対象の component 表現。 実 React / Vue / Svelte component を直接
 export type ComponentRender<TArgs = Record<string, unknown>> = (args: TArgs) => MockNode;
 ```
 
-#### `ComponentTarget`
+#### <code v-pre>ComponentTarget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L8) `packages/component/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L8) <code v-pre>packages/component/src/semantics/types.ts</code>
 
 Advanced component semantics — target-neutral axis SSOT. The component package spans Storybook 8, Playwright Component Testing, and Chromatic. These helpers model the observable semantics without importing any of those runtimes, so the same axis can be replayed against each target.
 
@@ -809,9 +809,9 @@ Advanced component semantics — target-neutral axis SSOT. The component package
 export type ComponentTarget = 'storybook8' | 'playwright-ct' | 'chromatic';
 ```
 
-#### `FidelityCoverage`
+#### <code v-pre>FidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L10) `packages/component/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L10) <code v-pre>packages/component/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityCoverage {
@@ -821,9 +821,9 @@ export interface FidelityCoverage {
 }
 ```
 
-#### `FidelityRow`
+#### <code v-pre>FidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L3) `packages/component/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/fidelity.ts#L3) <code v-pre>packages/component/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityRow {
@@ -834,9 +834,9 @@ export interface FidelityRow {
 }
 ```
 
-#### `FormActionSession`
+#### <code v-pre>FormActionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L5) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L5) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export interface FormActionSession<TForm extends Record<string, unknown> = Record<string, unknown>> {
@@ -851,17 +851,17 @@ export interface FormActionSession<TForm extends Record<string, unknown> = Recor
 }
 ```
 
-#### `FormActionState`
+#### <code v-pre>FormActionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L3) `packages/component/src/semantics/form-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/form-action-advanced.ts#L3) <code v-pre>packages/component/src/semantics/form-action-advanced.ts</code>
 
 ```ts
 export type FormActionState = 'idle' | 'pending' | 'optimistic' | 'enhanced' | 'resolved' | 'rejected';
 ```
 
-#### `FormArgs`
+#### <code v-pre>FormArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L100) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L100) <code v-pre>packages/component/src/fixture.ts</code>
 
 ```ts
 export interface FormArgs {
@@ -872,9 +872,9 @@ export interface FormArgs {
 }
 ```
 
-#### `FormField`
+#### <code v-pre>FormField</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L92) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L92) <code v-pre>packages/component/src/fixture.ts</code>
 
 ```ts
 export interface FormField {
@@ -886,9 +886,9 @@ export interface FormField {
 }
 ```
 
-#### `InputArgs`
+#### <code v-pre>InputArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L52) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L52) <code v-pre>packages/component/src/fixture.ts</code>
 
 ```ts
 export interface InputArgs {
@@ -902,9 +902,9 @@ export interface InputArgs {
 }
 ```
 
-#### `IslandSpec`
+#### <code v-pre>IslandSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L15) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L15) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export interface IslandSpec {
@@ -914,9 +914,9 @@ export interface IslandSpec {
 }
 ```
 
-#### `IslandsSession`
+#### <code v-pre>IslandsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L21) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L21) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 ```ts
 export interface IslandsSession {
@@ -930,9 +930,9 @@ export interface IslandsSession {
 }
 ```
 
-#### `IslandsState`
+#### <code v-pre>IslandsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L8) `packages/component/src/semantics/islands-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/islands-architecture.ts#L8) <code v-pre>packages/component/src/semantics/islands-architecture.ts</code>
 
 v1.49 islands-architecture axis — Astro / Deno Fresh / Solid Start の Islands architecture (partial hydration + selective interactivity) を target-neutral に扱う state machine。
 
@@ -940,17 +940,17 @@ v1.49 islands-architecture axis — Astro / Deno Fresh / Solid Start の Islands
 export type IslandsState = 'idle' | 'registered' | 'hydrating' | 'interactive' | 'static-verified';
 ```
 
-#### `KiwaTestMode`
+#### <code v-pre>KiwaTestMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L3) `packages/component/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L3) <code v-pre>packages/component/src/real-driver.ts</code>
 
 ```ts
 export type KiwaTestMode = 'mock' | 'real';
 ```
 
-#### `MockEvent`
+#### <code v-pre>MockEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L121) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L121) <code v-pre>packages/component/src/types.ts</code>
 
 event handler に渡す minimal event object。
 
@@ -963,9 +963,9 @@ export interface MockEvent {
 }
 ```
 
-#### `MockNode`
+#### <code v-pre>MockNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L107) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L107) <code v-pre>packages/component/src/types.ts</code>
 
 in-memory な DOM node 表現。 実 DOM を使わず tag / attrs / children / text で tree を組む。 test で `click` / `fill` / `text` 操作を行うため event listener + value state だけ持たせる。
 
@@ -984,9 +984,9 @@ export interface MockNode {
 }
 ```
 
-#### `ModalArgs`
+#### <code v-pre>ModalArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L164) `packages/component/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/fixture.ts#L164) <code v-pre>packages/component/src/fixture.ts</code>
 
 ```ts
 export interface ModalArgs {
@@ -998,17 +998,17 @@ export interface ModalArgs {
 }
 ```
 
-#### `NeutralEventName`
+#### <code v-pre>NeutralEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L19) `packages/component/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/types.ts#L19) <code v-pre>packages/component/src/semantics/types.ts</code>
 
 ```ts
 export type NeutralEventName = 'rsc.render_started' | 'rsc.suspense_boundary' | 'rsc.html_chunk_streamed' | 'rsc.render_completed' | 'ssr.suspense_pending' | 'ssr.error_boundary_captured' | 'ssr.progressive_hydration_started' | 'ssr.selective_hydration_completed' | 'transition.element_started' | 'transition.element_finished' | 'transition.document_started' | 'transition.animation_asserted' | 'form.status_pending' | 'form.optimistic_applied' | 'form.progressive_enhanced' | 'form.action_resolved' | 'action.state_initialized' | 'action.transition_pending' | 'action.optimistic_committed' | 'action.resolved' | 'islands.registered' | 'islands.hydration_started' | 'islands.interactive_ready' | 'islands.static_boundary_asserted';
 ```
 
-#### `NodeLocator`
+#### <code v-pre>NodeLocator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L175) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L175) <code v-pre>packages/component/src/types.ts</code>
 
 Playwright Locator の subset — click / fill / textContent / count / expect。 mock は同一 API で real Playwright test と表面互換にする。
 
@@ -1023,9 +1023,9 @@ export interface NodeLocator {
 }
 ```
 
-#### `NodeOptions`
+#### <code v-pre>NodeOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L38) `packages/component/src/dom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/dom.ts#L38) <code v-pre>packages/component/src/dom.ts</code>
 
 ```ts
 export interface NodeOptions {
@@ -1037,9 +1037,9 @@ export interface NodeOptions {
 }
 ```
 
-#### `PlayContext`
+#### <code v-pre>PlayContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L65) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L65) <code v-pre>packages/component/src/types.ts</code>
 
 Storybook 8 の PlayFunction が受ける context。 mock 互換用に最小 shape のみ。
 
@@ -1057,9 +1057,9 @@ export interface PlayContext<TArgs = Record<string, unknown>> {
 }
 ```
 
-#### `PlaywrightCTMock`
+#### <code v-pre>PlaywrightCTMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/playwright-ct.ts#L30) `packages/component/src/playwright-ct.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/playwright-ct.ts#L30) <code v-pre>packages/component/src/playwright-ct.ts</code>
 
 Playwright Component Testing (CT) 互換の最小 mock。 real Playwright CT は `mount(component)` → `Locator` を返し、 `page.getByText().click()` 等で interact する。 mock は同じ API 表面 (mount / getByText / getByRole / click / fill / textContent / count) を持ち、 real vs mock で同じ test を回せる。 実 Playwright CT との差分 = (1) browser process を起動しない (in-memory)、 (2) network request の intercept / route は非 support (別の kiwa mock で 対応)、 (3) screenshot は Chromatic 経路に一本化する。 使い方 ... ```ts const ct = createPlaywrightCTMock(); const button = ct.mount((args) =&gt; createNode('button', { text: args.label, on: { click: args.onClick } }), { label: 'ok', onClick: () =&gt; hits++ }); await button.getByRole('button', { name: 'ok' }).click(); expect(hits).toBe(1); ```
 
@@ -1073,9 +1073,9 @@ export interface PlaywrightCTMock {
 }
 ```
 
-#### `ReactActionsSession`
+#### <code v-pre>ReactActionsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L13) `packages/component/src/semantics/react-19-actions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L13) <code v-pre>packages/component/src/semantics/react-19-actions.ts</code>
 
 ```ts
 export interface ReactActionsSession {
@@ -1089,9 +1089,9 @@ export interface ReactActionsSession {
 }
 ```
 
-#### `ReactActionsState`
+#### <code v-pre>ReactActionsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L7) `packages/component/src/semantics/react-19-actions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/react-19-actions.ts#L7) <code v-pre>packages/component/src/semantics/react-19-actions.ts</code>
 
 v1.49 react-19-actions axis — useActionState + useOptimistic + useFormStatus を統合した React 19 Actions API の deterministic state machine。
 
@@ -1099,9 +1099,9 @@ v1.49 react-19-actions axis — useActionState + useOptimistic + useFormStatus �
 export type ReactActionsState = 'idle' | 'transition-pending' | 'optimistic-committed' | 'resolved';
 ```
 
-#### `ResolvedMode`
+#### <code v-pre>ResolvedMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L5) `packages/component/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/real-driver.ts#L5) <code v-pre>packages/component/src/real-driver.ts</code>
 
 ```ts
 export interface ResolvedMode {
@@ -1111,9 +1111,9 @@ export interface ResolvedMode {
 }
 ```
 
-#### `RscHarnessSession`
+#### <code v-pre>RscHarnessSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L5) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L5) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export interface RscHarnessSession {
@@ -1127,17 +1127,17 @@ export interface RscHarnessSession {
 }
 ```
 
-#### `RscHarnessState`
+#### <code v-pre>RscHarnessState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L3) `packages/component/src/semantics/rsc-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/rsc-harness.ts#L3) <code v-pre>packages/component/src/semantics/rsc-harness.ts</code>
 
 ```ts
 export type RscHarnessState = 'idle' | 'rendering' | 'suspended' | 'streaming' | 'completed' | 'errored';
 ```
 
-#### `StoryEntry`
+#### <code v-pre>StoryEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L144) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L144) <code v-pre>packages/component/src/types.ts</code>
 
 StoryRegistry の 1 entry — story ID → StoryObj + render + meta の bind。 Storybook 8 の `Meta` + `StoryObj` を 1 record に flatten した shape。
 
@@ -1153,9 +1153,9 @@ export interface StoryEntry<TArgs = Record<string, unknown>> {
 }
 ```
 
-#### `StoryMeta`
+#### <code v-pre>StoryMeta</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L39) `packages/component/src/storybook.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L39) <code v-pre>packages/component/src/storybook.ts</code>
 
 Storybook 8 の CSF3 と互換な最小 mock。 real Storybook (SB8) は Meta + StoryObj 単位で `.stories.tsx` を書き、 storybook が collect して registry を作る。 mock はその registry 相当を in-memory Map で表現する。 使い方 ... ```ts const registry = createStoryRegistry(); registry.register({ title: 'Button', render: (args) =&gt; createNode('button', { text: args.label }), stories: { Primary: { args: { label: 'Click me' } }, Disabled: { args: { label: 'nope', disabled: true } }, }, }); const canvas = await registry.mount('Button', 'Primary'); await registry.play('Button', 'Primary', canvas); ``` SB8 の実 API 互換で意識するのは (1) StoryObj.args の merge (2) play の step wrapper (3) parameters.chromatic / parameters.a11y の透過保持 の 3 点。 実 SB8 の docs mode / decorators / loaders / addons は mock 対象外 (テストが吸収する semantic は絞る)。
 
@@ -1174,9 +1174,9 @@ export interface StoryMeta<TArgs = Record<string, unknown>> {
 }
 ```
 
-#### `StoryMountResult`
+#### <code v-pre>StoryMountResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L52) `packages/component/src/storybook.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L52) <code v-pre>packages/component/src/storybook.ts</code>
 
 ```ts
 export interface StoryMountResult {
@@ -1185,9 +1185,9 @@ export interface StoryMountResult {
 }
 ```
 
-#### `StoryObj`
+#### <code v-pre>StoryObj</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L27) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L27) <code v-pre>packages/component/src/types.ts</code>
 
 Storybook 8 の `StoryObj` (CSF3) と互換な最小 shape。 args + play + parameters の 3 field を持ち、 story 登録後に registry から名前指定で resolve できる。 Storybook 8 の実際の `StoryObj` は component / render / decorators 等の 追加 field を持つが、 mock harness は「args を解決して play を回して DOM を触る」 core loop だけを模倣する。
 
@@ -1207,9 +1207,9 @@ export interface StoryObj<TArgs = Record<string, unknown>> {
 }
 ```
 
-#### `StoryParameters`
+#### <code v-pre>StoryParameters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L42) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L42) <code v-pre>packages/component/src/types.ts</code>
 
 Storybook 8 の `parameters` field の最小 shape。 mock で意味のある値のみ抽出。
 
@@ -1237,9 +1237,9 @@ export interface StoryParameters {
 }
 ```
 
-#### `StoryPlayResult`
+#### <code v-pre>StoryPlayResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L57) `packages/component/src/storybook.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L57) <code v-pre>packages/component/src/storybook.ts</code>
 
 ```ts
 export interface StoryPlayResult {
@@ -1252,9 +1252,9 @@ export interface StoryPlayResult {
 }
 ```
 
-#### `StoryRegistry`
+#### <code v-pre>StoryRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L62) `packages/component/src/storybook.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/storybook.ts#L62) <code v-pre>packages/component/src/storybook.ts</code>
 
 ```ts
 export interface StoryRegistry {
@@ -1269,9 +1269,9 @@ export interface StoryRegistry {
 }
 ```
 
-#### `StreamingSsrSession`
+#### <code v-pre>StreamingSsrSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L10) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L10) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export interface StreamingSsrSession {
@@ -1288,17 +1288,17 @@ export interface StreamingSsrSession {
 }
 ```
 
-#### `StreamingSsrState`
+#### <code v-pre>StreamingSsrState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L3) `packages/component/src/semantics/streaming-ssr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/streaming-ssr.ts#L3) <code v-pre>packages/component/src/semantics/streaming-ssr.ts</code>
 
 ```ts
 export type StreamingSsrState = 'idle' | 'suspense-pending' | 'error-captured' | 'progressive-hydrating' | 'selective-hydrated';
 ```
 
-#### `ViewTransitionSession`
+#### <code v-pre>ViewTransitionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L10) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L10) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export interface ViewTransitionSession {
@@ -1312,17 +1312,17 @@ export interface ViewTransitionSession {
 }
 ```
 
-#### `ViewTransitionState`
+#### <code v-pre>ViewTransitionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L3) `packages/component/src/semantics/view-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/semantics/view-transitions.ts#L3) <code v-pre>packages/component/src/semantics/view-transitions.ts</code>
 
 ```ts
 export type ViewTransitionState = 'idle' | 'element-transitioning' | 'document-transitioning' | 'asserted' | 'finished';
 ```
 
-#### `VisualBaseline`
+#### <code v-pre>VisualBaseline</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L188) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L188) <code v-pre>packages/component/src/types.ts</code>
 
 Chromatic の 1 baseline entry — story id + viewport + markup + hash。 baseline JSON store に永続化される (mock は in-memory Map で代替)。
 
@@ -1338,9 +1338,9 @@ export interface VisualBaseline {
 }
 ```
 
-#### `VisualDiff`
+#### <code v-pre>VisualDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L202) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L202) <code v-pre>packages/component/src/types.ts</code>
 
 Chromatic の diff 結果 1 件。 changed=true なら pixel diff 検出、 pixelDiffRatio が threshold を超えると status=failed になる。
 
@@ -1359,9 +1359,9 @@ export interface VisualDiff {
 }
 ```
 
-#### `VisualReviewAction`
+#### <code v-pre>VisualReviewAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L219) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L219) <code v-pre>packages/component/src/types.ts</code>
 
 accept / reject workflow の 1 action。 accept は baseline を current で 置換、 reject は baseline を保持したまま diff status を残す。
 
@@ -1369,9 +1369,9 @@ accept / reject workflow の 1 action。 accept は baseline を current で 置
 export type VisualReviewAction = 'accept' | 'reject';
 ```
 
-#### `VisualReviewEntry`
+#### <code v-pre>VisualReviewEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L221) `packages/component/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/component/src/types.ts#L221) <code v-pre>packages/component/src/types.ts</code>
 
 ```ts
 export interface VisualReviewEntry {

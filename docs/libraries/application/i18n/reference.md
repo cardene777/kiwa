@@ -34,8 +34,8 @@ message は string、plural form の object、入れ子 object を使えます�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L57) |
-| 'circuit breaker open' | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L72) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L57) |
+| <code v-pre>circuit breaker open</code> | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L72) |
 
 ## API 契約
 
@@ -43,17 +43,17 @@ message は string、plural form の object、入れ子 object を使えます�
 
 ### 値
 
-#### `batchOperate`
+#### <code v-pre>batchOperate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L111) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L111) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
-#### `createI18nClient`
+#### <code v-pre>createI18nClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L53) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L53) <code v-pre>packages/i18n/src/client.ts</code>
 
 provider 別 mock 差 (setLocale event fire pattern / missing key marker) を持たせつつ、 全 API 共通 interface。 実 provider (next-intl / vue-i18n / react-i18next / Lingui) の SDK を差し替えても同じ signature で呼べる想定。
 
@@ -61,9 +61,9 @@ provider 別 mock 差 (setLocale event fire pattern / missing key marker) を持
 export declare function createI18nClient(options?: CreateI18nClientOptions): I18nClient;
 ```
 
-#### `interpolate`
+#### <code v-pre>interpolate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/interpolate.ts#L14) `packages/i18n/src/interpolate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/interpolate.ts#L14) <code v-pre>packages/i18n/src/interpolate.ts</code>
 
 `&#123;&#123;name&#125;&#125;` placeholder を values で置換する mustache-lite interpolation。 実 provider (next-intl / vue-i18n / react-i18next / Lingui) の interpolation engine を差し替えても 同じ signature で呼べる想定。
 
@@ -71,9 +71,9 @@ export declare function createI18nClient(options?: CreateI18nClientOptions): I18
 export declare function interpolate(template: string, values: InterpolationValues): InterpolateResult;
 ```
 
-#### `selectPlural`
+#### <code v-pre>selectPlural</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/plural.ts#L14) `packages/i18n/src/plural.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/plural.ts#L14) <code v-pre>packages/i18n/src/plural.ts</code>
 
 Intl.PluralRules 経由で count に対する plural category を返す。 実 provider の pluralization rule (CLDR SSOT) を差し替えても同じ signature で呼べる想定。 失敗時は 'other' を返す (safe default)。
 
@@ -81,9 +81,9 @@ Intl.PluralRules 経由で count に対する plural category を返す。 実 p
 export declare function selectPlural(locale: string, count: number): PluralCategory;
 ```
 
-#### `translate`
+#### <code v-pre>translate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/translator.ts#L26) `packages/i18n/src/translator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/translator.ts#L26) <code v-pre>packages/i18n/src/translator.ts</code>
 
 translation lookup + fallback + pluralization + interpolation の統合 entry。 実 provider の t() / $t() / gettext() を差し替えても同じ signature で呼べる想定。
 
@@ -91,49 +91,49 @@ translation lookup + fallback + pluralization + interpolation の統合 entry。
 export declare function translate(input: TranslateInput): TranslateResult;
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L64) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L64) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L101) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L101) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L86) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L86) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L50) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L50) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L20) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L20) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L40) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L40) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
@@ -141,9 +141,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `BatchItem`
+#### <code v-pre>BatchItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L17) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L17) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface BatchItem<TIn = unknown> {
@@ -152,9 +152,9 @@ export interface BatchItem<TIn = unknown> {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L18) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L18) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface BatchResult {
@@ -167,9 +167,9 @@ export interface BatchResult {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L11) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L11) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -178,9 +178,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CreateI18nClientOptions`
+#### <code v-pre>CreateI18nClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L41) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L41) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export interface CreateI18nClientOptions {
@@ -191,9 +191,9 @@ export interface CreateI18nClientOptions {
 }
 ```
 
-#### `I18nClient`
+#### <code v-pre>I18nClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L29) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L29) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export interface I18nClient {
@@ -209,17 +209,17 @@ export interface I18nClient {
 }
 ```
 
-#### `I18nProvider`
+#### <code v-pre>I18nProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L3) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L3) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export type I18nProvider = 'next-intl' | 'vue-i18n' | 'react-i18next' | 'lingui';
 ```
 
-#### `InterpolateResult`
+#### <code v-pre>InterpolateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/interpolate.ts#L3) `packages/i18n/src/interpolate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/interpolate.ts#L3) <code v-pre>packages/i18n/src/interpolate.ts</code>
 
 ```ts
 export interface InterpolateResult {
@@ -229,17 +229,17 @@ export interface InterpolateResult {
 }
 ```
 
-#### `Locale`
+#### <code v-pre>Locale</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L5) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L5) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export type Locale = string;
 ```
 
-#### `MessageBundle`
+#### <code v-pre>MessageBundle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L9) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L9) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export type MessageBundle = {
@@ -247,17 +247,17 @@ export type MessageBundle = {
 };
 ```
 
-#### `Messages`
+#### <code v-pre>Messages</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L11) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L11) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export type Messages = Record<Locale, MessageBundle>;
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L12) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L12) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -267,17 +267,17 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `PluralCategory`
+#### <code v-pre>PluralCategory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/plural.ts#L1) `packages/i18n/src/plural.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/plural.ts#L1) <code v-pre>packages/i18n/src/plural.ts</code>
 
 ```ts
 export type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 ```
 
-#### `PluralRule`
+#### <code v-pre>PluralRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/plural.ts#L3) `packages/i18n/src/plural.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/plural.ts#L3) <code v-pre>packages/i18n/src/plural.ts</code>
 
 ```ts
 export interface PluralRule {
@@ -287,9 +287,9 @@ export interface PluralRule {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L10) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L10) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -298,9 +298,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L4) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L4) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -310,9 +310,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L9) `packages/i18n/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L9) <code v-pre>packages/i18n/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {
@@ -320,9 +320,9 @@ export interface TimeoutOptions {
 }
 ```
 
-#### `TranslateInput`
+#### <code v-pre>TranslateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/translator.ts#L12) `packages/i18n/src/translator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/translator.ts#L12) <code v-pre>packages/i18n/src/translator.ts</code>
 
 ```ts
 export interface TranslateInput {
@@ -336,9 +336,9 @@ export interface TranslateInput {
 }
 ```
 
-#### `TranslateOptions`
+#### <code v-pre>TranslateOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L15) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L15) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export interface TranslateOptions {
@@ -349,9 +349,9 @@ export interface TranslateOptions {
 }
 ```
 
-#### `TranslateResult`
+#### <code v-pre>TranslateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L22) `packages/i18n/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/client.ts#L22) <code v-pre>packages/i18n/src/client.ts</code>
 
 ```ts
 export interface TranslateResult {

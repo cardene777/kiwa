@@ -65,7 +65,7 @@ const pool = await createPool({
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;createPool: size must be a positive integer, got $&#123;opts.size&#125;&#96; | [packages/core/src/pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L17) |
+| <code v-pre>createPool: size must be a positive integer, got $&#123;opts.size&#125;</code> | [packages/core/src/pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L17) |
 
 ## API 契約
 
@@ -73,17 +73,17 @@ const pool = await createPool({
 
 ### 値
 
-#### `createPool`
+#### <code v-pre>createPool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L15) `packages/core/src/pool.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L15) <code v-pre>packages/core/src/pool.ts</code>
 
 ```ts
 export declare function createPool<T>(opts: PoolFactoryOptions<T>): Promise<Pool<T>>;
 ```
 
-#### `parseSpec`
+#### <code v-pre>parseSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L74) `packages/core/src/parser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L74) <code v-pre>packages/core/src/parser.ts</code>
 
 ```ts
 export declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDoc;
@@ -91,9 +91,9 @@ export declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDo
 
 ### 型
 
-#### `Lease`
+#### <code v-pre>Lease</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L31) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L31) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export interface Lease<T> {
@@ -102,9 +102,9 @@ export interface Lease<T> {
 }
 ```
 
-#### `ParseOptions`
+#### <code v-pre>ParseOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L69) `packages/core/src/parser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L69) <code v-pre>packages/core/src/parser.ts</code>
 
 ```ts
 export interface ParseOptions {
@@ -113,9 +113,9 @@ export interface ParseOptions {
 }
 ```
 
-#### `Pool`
+#### <code v-pre>Pool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L36) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L36) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export interface Pool<T> {
@@ -125,9 +125,9 @@ export interface Pool<T> {
 }
 ```
 
-#### `PoolFactoryOptions`
+#### <code v-pre>PoolFactoryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L3) `packages/core/src/pool.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L3) <code v-pre>packages/core/src/pool.ts</code>
 
 ```ts
 export interface PoolFactoryOptions<T> {
@@ -138,9 +138,9 @@ export interface PoolFactoryOptions<T> {
 }
 ```
 
-#### `SpecCase`
+#### <code v-pre>SpecCase</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L10) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L10) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export interface SpecCase {
@@ -157,9 +157,9 @@ export interface SpecCase {
 }
 ```
 
-#### `SpecDoc`
+#### <code v-pre>SpecDoc</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L23) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L23) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export interface SpecDoc {
@@ -171,9 +171,9 @@ export interface SpecDoc {
 }
 ```
 
-#### `TestEnvBase`
+#### <code v-pre>TestEnvBase</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L5) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L5) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export interface TestEnvBase<TMode extends TestMode = TestMode> {
@@ -182,17 +182,17 @@ export interface TestEnvBase<TMode extends TestMode = TestMode> {
 }
 ```
 
-#### `TestLayer`
+#### <code v-pre>TestLayer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L1) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L1) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export type TestLayer = 'contract' | 'unit' | 'integration' | 'e2e' | 'api' | 'ui' | 'data' | 'cli';
 ```
 
-#### `TestMode`
+#### <code v-pre>TestMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L3) `packages/core/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/types.ts#L3) <code v-pre>packages/core/src/types.ts</code>
 
 ```ts
 export type TestMode = 'mock' | 'live' | 'hybrid';

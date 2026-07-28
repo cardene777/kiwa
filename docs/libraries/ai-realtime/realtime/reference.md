@@ -41,10 +41,10 @@ WebRTC、WebTransport、HTTP 3、QUIC、Media over QUIC、WebCodecs、音声 str
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| '0-RTT is not enabled for this connection' | [packages/realtime/src/semantics/quic-multiplex.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L154) |
-| &#96;data channel not open (state=$&#123;state&#125;)&#96; | [packages/realtime/src/semantics/webrtc-data-channel.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L122) |
-| &#96;bi stream not open (state=$&#123;state&#125;)&#96; | [packages/realtime/src/semantics/webtransport-bi.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L102) |
-| &#96;uni stream not open (state=$&#123;state&#125;)&#96; | [packages/realtime/src/semantics/webtransport-uni.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L95) |
+| <code v-pre>0-RTT is not enabled for this connection</code> | [packages/realtime/src/semantics/quic-multiplex.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L154) |
+| <code v-pre>data channel not open (state=$&#123;state&#125;)</code> | [packages/realtime/src/semantics/webrtc-data-channel.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L122) |
+| <code v-pre>bi stream not open (state=$&#123;state&#125;)</code> | [packages/realtime/src/semantics/webtransport-bi.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L102) |
+| <code v-pre>uni stream not open (state=$&#123;state&#125;)</code> | [packages/realtime/src/semantics/webtransport-uni.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L95) |
 
 ## API 契約
 
@@ -52,9 +52,9 @@ WebRTC、WebTransport、HTTP 3、QUIC、Media over QUIC、WebCodecs、音声 str
 
 ### 値
 
-#### `buildRealtimeReport`
+#### <code v-pre>buildRealtimeReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/report.ts#L62) `packages/realtime/src/report.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/report.ts#L62) <code v-pre>packages/realtime/src/report.ts</code>
 
 実測 fidelity + coverage + test count + mutation + perf を `QualityReport` に統合する。 Realtime 4 軸は fidelity + mockMetrics から 自動集計。
 
@@ -62,9 +62,9 @@ WebRTC、WebTransport、HTTP 3、QUIC、Media over QUIC、WebCodecs、音声 str
 export declare function buildRealtimeReport(input: BuildRealtimeReportInput): QualityReport;
 ```
 
-#### `createAblyMock`
+#### <code v-pre>createAblyMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L81) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L81) <code v-pre>packages/realtime/src/ably.ts</code>
 
 ```ts
 export declare function createAblyMock(config?: RealtimeMockConfig & {
@@ -72,17 +72,17 @@ export declare function createAblyMock(config?: RealtimeMockConfig & {
 }): AblyMock;
 ```
 
-#### `createHttp3PushMock`
+#### <code v-pre>createHttp3PushMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L54) `packages/realtime/src/semantics/http3-push.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L54) <code v-pre>packages/realtime/src/semantics/http3-push.ts</code>
 
 ```ts
 export declare function createHttp3PushMock(config?: SemanticsMockConfig): Http3PushMock;
 ```
 
-#### `createMockCollector`
+#### <code v-pre>createMockCollector</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L150) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L150) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 便利 helper — RealtimeMock を CollectedEvent stream に変換する minimum driver。 scenario 実装は user 側だが、 event collector は本 helper 経由で共通化できる。
 
@@ -93,25 +93,25 @@ export declare function createMockCollector(mock: RealtimeMock, expectedEvents: 
 };
 ```
 
-#### `createMoqDatagramMediaMock`
+#### <code v-pre>createMoqDatagramMediaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L32) `packages/realtime/src/semantics/moq-datagram-media.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L32) <code v-pre>packages/realtime/src/semantics/moq-datagram-media.ts</code>
 
 ```ts
 export declare function createMoqDatagramMediaMock(config?: SemanticsMockConfig): MoqDatagramMediaMock;
 ```
 
-#### `createMoqFetchMock`
+#### <code v-pre>createMoqFetchMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L39) `packages/realtime/src/semantics/moq-fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L39) <code v-pre>packages/realtime/src/semantics/moq-fetch.ts</code>
 
 ```ts
 export declare function createMoqFetchMock(config?: SemanticsMockConfig): MoqFetchMock;
 ```
 
-#### `createPusherMock`
+#### <code v-pre>createPusherMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L61) `packages/realtime/src/pusher.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L61) <code v-pre>packages/realtime/src/pusher.ts</code>
 
 ```ts
 export declare function createPusherMock(config?: RealtimeMockConfig & {
@@ -119,9 +119,9 @@ export declare function createPusherMock(config?: RealtimeMockConfig & {
 }): PusherMock;
 ```
 
-#### `createQuicMultiplexMock`
+#### <code v-pre>createQuicMultiplexMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L61) `packages/realtime/src/semantics/quic-multiplex.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L61) <code v-pre>packages/realtime/src/semantics/quic-multiplex.ts</code>
 
 ```ts
 export declare function createQuicMultiplexMock(config?: SemanticsMockConfig & {
@@ -129,121 +129,121 @@ export declare function createQuicMultiplexMock(config?: SemanticsMockConfig & {
 }): QuicMultiplexMock;
 ```
 
-#### `createRealtimeAiInferenceMock`
+#### <code v-pre>createRealtimeAiInferenceMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L37) `packages/realtime/src/semantics/realtime-ai-inference.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L37) <code v-pre>packages/realtime/src/semantics/realtime-ai-inference.ts</code>
 
 ```ts
 export declare function createRealtimeAiInferenceMock(config?: SemanticsMockConfig): RealtimeAiInferenceMock;
 ```
 
-#### `createSimulcastSvcMock`
+#### <code v-pre>createSimulcastSvcMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L32) `packages/realtime/src/semantics/simulcast-svc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L32) <code v-pre>packages/realtime/src/semantics/simulcast-svc.ts</code>
 
 ```ts
 export declare function createSimulcastSvcMock(config?: SemanticsMockConfig): SimulcastSvcMock;
 ```
 
-#### `createSocketioMock`
+#### <code v-pre>createSocketioMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L54) `packages/realtime/src/socketio.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L54) <code v-pre>packages/realtime/src/socketio.ts</code>
 
 ```ts
 export declare function createSocketioMock(config?: RealtimeMockConfig): SocketIoMock;
 ```
 
-#### `createSupabaseRealtimeMock`
+#### <code v-pre>createSupabaseRealtimeMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L94) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L94) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export declare function createSupabaseRealtimeMock(config?: RealtimeMockConfig): SupabaseMock;
 ```
 
-#### `createVoiceStreamingMock`
+#### <code v-pre>createVoiceStreamingMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L37) `packages/realtime/src/semantics/voice-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L37) <code v-pre>packages/realtime/src/semantics/voice-streaming.ts</code>
 
 ```ts
 export declare function createVoiceStreamingMock(config?: SemanticsMockConfig): VoiceStreamingMock;
 ```
 
-#### `createWebCodecsDecoderMock`
+#### <code v-pre>createWebCodecsDecoderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L29) `packages/realtime/src/semantics/webcodecs-decoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L29) <code v-pre>packages/realtime/src/semantics/webcodecs-decoder.ts</code>
 
 ```ts
 export declare function createWebCodecsDecoderMock(config?: SemanticsMockConfig): WebCodecsDecoderMock;
 ```
 
-#### `createWebCodecsEncoderMock`
+#### <code v-pre>createWebCodecsEncoderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L39) `packages/realtime/src/semantics/webcodecs-encoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L39) <code v-pre>packages/realtime/src/semantics/webcodecs-encoder.ts</code>
 
 ```ts
 export declare function createWebCodecsEncoderMock(config?: SemanticsMockConfig): WebCodecsEncoderMock;
 ```
 
-#### `createWebRtcDataChannelMock`
+#### <code v-pre>createWebRtcDataChannelMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L57) `packages/realtime/src/semantics/webrtc-data-channel.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L57) <code v-pre>packages/realtime/src/semantics/webrtc-data-channel.ts</code>
 
 ```ts
 export declare function createWebRtcDataChannelMock(config?: SemanticsMockConfig): WebRtcDataChannelMock;
 ```
 
-#### `createWebRtcIceMock`
+#### <code v-pre>createWebRtcIceMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L57) `packages/realtime/src/semantics/webrtc-ice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L57) <code v-pre>packages/realtime/src/semantics/webrtc-ice.ts</code>
 
 ```ts
 export declare function createWebRtcIceMock(config?: SemanticsMockConfig): WebRtcIceMock;
 ```
 
-#### `createWebRtcSignalingMock`
+#### <code v-pre>createWebRtcSignalingMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L65) `packages/realtime/src/semantics/webrtc-signaling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L65) <code v-pre>packages/realtime/src/semantics/webrtc-signaling.ts</code>
 
 ```ts
 export declare function createWebRtcSignalingMock(config?: SemanticsMockConfig): WebRtcSignalingMock;
 ```
 
-#### `createWebRtcTrackMock`
+#### <code v-pre>createWebRtcTrackMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L69) `packages/realtime/src/semantics/webrtc-track.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L69) <code v-pre>packages/realtime/src/semantics/webrtc-track.ts</code>
 
 ```ts
 export declare function createWebRtcTrackMock(config?: SemanticsMockConfig): WebRtcTrackMock;
 ```
 
-#### `createWebTransportBiMock`
+#### <code v-pre>createWebTransportBiMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L49) `packages/realtime/src/semantics/webtransport-bi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L49) <code v-pre>packages/realtime/src/semantics/webtransport-bi.ts</code>
 
 ```ts
 export declare function createWebTransportBiMock(config?: SemanticsMockConfig): WebTransportBiMock;
 ```
 
-#### `createWebTransportUniMock`
+#### <code v-pre>createWebTransportUniMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L49) `packages/realtime/src/semantics/webtransport-uni.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L49) <code v-pre>packages/realtime/src/semantics/webtransport-uni.ts</code>
 
 ```ts
 export declare function createWebTransportUniMock(config?: SemanticsMockConfig): WebTransportUniMock;
 ```
 
-#### `createWhisperStreamingMock`
+#### <code v-pre>createWhisperStreamingMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L32) `packages/realtime/src/semantics/whisper-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L32) <code v-pre>packages/realtime/src/semantics/whisper-streaming.ts</code>
 
 ```ts
 export declare function createWhisperStreamingMock(config?: SemanticsMockConfig): WhisperStreamingMock;
 ```
 
-#### `dispatchEvent`
+#### <code v-pre>dispatchEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L62) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L62) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 event driven state 遷移 SSOT。 5 state × 8 event = 40 セル。 payment 同様 soft-reject + invalid log (realtime 経路 も webhook 相当 の event 重複配信 が normal、 throw だと consumer が例外処理コード膨張)。
 
@@ -255,7 +255,7 @@ export declare function dispatchEvent(input: {
 }): RealtimeSession;
 ```
 
-#### `initialSemanticsMetrics`
+#### <code v-pre>initialSemanticsMetrics</code>
 
 公開 entry point から解決しています。
 
@@ -311,9 +311,9 @@ export {
 } from './semantics/index.js';
 ```
 
-#### `measureSemanticsAxis`
+#### <code v-pre>measureSemanticsAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L83) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L83) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 単一 axis の fidelity 計測。 mock を初期化 → scenario を実行 → event 列を 収集 → metrics + events を返す。
 
@@ -321,17 +321,17 @@ export {
 export declare function measureSemanticsAxis(input: SemanticsFidelityInput): Promise<SemanticsFidelityRow>;
 ```
 
-#### `measureSemanticsGrid`
+#### <code v-pre>measureSemanticsGrid</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L123) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L123) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 ```ts
 export declare function measureSemanticsGrid(input: SemanticsGridScenarios): Promise<SemanticsFidelityRow[]>;
 ```
 
-#### `REAL_DRIVER_REQUIRED_KEYS`
+#### <code v-pre>REAL&#95;DRIVER&#95;REQUIRED&#95;KEYS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L54) `packages/realtime/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L54) <code v-pre>packages/realtime/src/real-driver.ts</code>
 
 provider 別 default 必須 env key (SSOT)。
 
@@ -339,9 +339,9 @@ provider 別 default 必須 env key (SSOT)。
 export declare const REAL_DRIVER_REQUIRED_KEYS: Record<RealtimeProviderName, string[]>;
 ```
 
-#### `RealtimeEngine`
+#### <code v-pre>RealtimeEngine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/engine.ts#L53) `packages/realtime/src/engine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/engine.ts#L53) <code v-pre>packages/realtime/src/engine.ts</code>
 
 ```ts
 export declare class RealtimeEngine {
@@ -362,17 +362,17 @@ export declare class RealtimeEngine {
 }
 ```
 
-#### `resolveRealtimeDriver`
+#### <code v-pre>resolveRealtimeDriver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L61) `packages/realtime/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L61) <code v-pre>packages/realtime/src/real-driver.ts</code>
 
 ```ts
 export declare function resolveRealtimeDriver<TDriver>(input: RealDriverGateInput<TDriver>): RealDriverGateResult<TDriver>;
 ```
 
-#### `resolveRealtimeDriverByProvider`
+#### <code v-pre>resolveRealtimeDriverByProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L105) `packages/realtime/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L105) <code v-pre>packages/realtime/src/real-driver.ts</code>
 
 shorthand — provider 名から必須 key を lookup して gate 判定する。 使い分けは自由だが、 4 provider の default key set (SSOT `REAL_DRIVER_REQUIRED_KEYS`) を尊重する場合はこちらを使う。
 
@@ -380,17 +380,17 @@ shorthand — provider 名から必須 key を lookup して gate 判定する�
 export declare function resolveRealtimeDriverByProvider<TDriver>(provider: RealtimeProviderName, createReal: (env: Record<string, string>) => TDriver, createMock: () => TDriver, envSource?: Record<string, string | undefined>): RealDriverGateResult<TDriver>;
 ```
 
-#### `runRealtimeFidelityCheck`
+#### <code v-pre>runRealtimeFidelityCheck</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L74) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L74) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 ```ts
 export declare function runRealtimeFidelityCheck(input: RealtimeFidelityInput): Promise<RealtimeFidelityReport>;
 ```
 
-#### `SEMANTICS_GRID`
+#### <code v-pre>SEMANTICS&#95;GRID</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L28) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L28) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 3 protocol × 8 axis = 24 row grid の SSOT 定義。
 
@@ -398,9 +398,9 @@ export declare function runRealtimeFidelityCheck(input: RealtimeFidelityInput): 
 export declare const SEMANTICS_GRID: SemanticsGridRow[];
 ```
 
-#### `sequenceSimilarity`
+#### <code v-pre>sequenceSimilarity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L126) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L126) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 順序考慮 sequence similarity — LCS 系ではなく position-aware Jaccard で 計算する。 完全一致 = 1、 順序ずれ = 中間値、 完全不一致 = 0。
 
@@ -408,9 +408,9 @@ export declare const SEMANTICS_GRID: SemanticsGridRow[];
 export declare function sequenceSimilarity<T>(a: T[], b: T[]): number;
 ```
 
-#### `startSession`
+#### <code v-pre>startSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L45) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L45) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 ```ts
 export declare function startSession(input: {
@@ -418,9 +418,9 @@ export declare function startSession(input: {
 }): RealtimeSession;
 ```
 
-#### `summarizeSession`
+#### <code v-pre>summarizeSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L168) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L168) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 ```ts
 export declare function summarizeSession(session: RealtimeSession): RealtimeSessionSummary;
@@ -428,9 +428,9 @@ export declare function summarizeSession(session: RealtimeSession): RealtimeSess
 
 ### 型
 
-#### `AblyChannel`
+#### <code v-pre>AblyChannel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L42) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L42) <code v-pre>packages/realtime/src/ably.ts</code>
 
 ```ts
 export interface AblyChannel {
@@ -450,9 +450,9 @@ export interface AblyChannel {
 }
 ```
 
-#### `AblyChannels`
+#### <code v-pre>AblyChannels</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L64) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L64) <code v-pre>packages/realtime/src/ably.ts</code>
 
 ```ts
 export interface AblyChannels {
@@ -461,9 +461,9 @@ export interface AblyChannels {
 }
 ```
 
-#### `AblyMessage`
+#### <code v-pre>AblyMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L27) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L27) <code v-pre>packages/realtime/src/ably.ts</code>
 
 Ably mock。 SDK 呼出形式 (real `ably`) は以下 ... ```ts const client = new Ably.Realtime(...); const channel = client.channels.get('room-1'); channel.subscribe('chat', (msg) =&gt; {...}); await channel.presence.subscribe('enter', (msg) =&gt; {...}); await channel.presence.enter({ name: 'user' }); const messages = await channel.history({ untilAttach: true }); ``` 本 mock は上記 shape の薄い wrapper。 history rewind (`untilAttach`) は 直近 broadcast event を N 件保持して返却する簡易実装。
 
@@ -477,9 +477,9 @@ export interface AblyMessage<T = unknown> {
 }
 ```
 
-#### `AblyMock`
+#### <code v-pre>AblyMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L69) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L69) <code v-pre>packages/realtime/src/ably.ts</code>
 
 ```ts
 export interface AblyMock extends RealtimeMock {
@@ -497,9 +497,9 @@ export interface AblyMock extends RealtimeMock {
 }
 ```
 
-#### `AblyPresence`
+#### <code v-pre>AblyPresence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L54) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L54) <code v-pre>packages/realtime/src/ably.ts</code>
 
 ```ts
 export interface AblyPresence {
@@ -510,9 +510,9 @@ export interface AblyPresence {
 }
 ```
 
-#### `AblyPresenceMessage`
+#### <code v-pre>AblyPresenceMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L35) `packages/realtime/src/ably.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/ably.ts#L35) <code v-pre>packages/realtime/src/ably.ts</code>
 
 ```ts
 export interface AblyPresenceMessage {
@@ -523,9 +523,9 @@ export interface AblyPresenceMessage {
 }
 ```
 
-#### `AiInferenceRequest`
+#### <code v-pre>AiInferenceRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L15) `packages/realtime/src/semantics/realtime-ai-inference.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L15) <code v-pre>packages/realtime/src/semantics/realtime-ai-inference.ts</code>
 
 Realtime AI inference axis — per-frame prediction + latency budget enforcement + drop on budget exceed。 real-time AR / VR / robot control 用の budget-aware inference pipeline pattern (target &lt; 33ms for 30fps)。
 
@@ -538,9 +538,9 @@ export interface AiInferenceRequest {
 }
 ```
 
-#### `AiInferenceResponse`
+#### <code v-pre>AiInferenceResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L22) `packages/realtime/src/semantics/realtime-ai-inference.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L22) <code v-pre>packages/realtime/src/semantics/realtime-ai-inference.ts</code>
 
 ```ts
 export interface AiInferenceResponse {
@@ -550,9 +550,9 @@ export interface AiInferenceResponse {
 }
 ```
 
-#### `BiStreamHandle`
+#### <code v-pre>BiStreamHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L34) `packages/realtime/src/semantics/webtransport-bi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L34) <code v-pre>packages/realtime/src/semantics/webtransport-bi.ts</code>
 
 ```ts
 export interface BiStreamHandle {
@@ -565,9 +565,9 @@ export interface BiStreamHandle {
 }
 ```
 
-#### `BiStreamOptions`
+#### <code v-pre>BiStreamOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L29) `packages/realtime/src/semantics/webtransport-bi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L29) <code v-pre>packages/realtime/src/semantics/webtransport-bi.ts</code>
 
 WebTransport bi-directional axis — bi stream + flow control + backpressure + close を mock 化する。 実 WebTransport 呼出形式 (`WebTransport.createBidirectionalStream`) は以下 ... ```ts const stream = await transport.createBidirectionalStream(); const writer = stream.writable.getWriter(); await writer.ready; // backpressure — ready 待機 await writer.write(new Uint8Array(1024)); // reader 側 const reader = stream.readable.getReader(); const { value, done } = await reader.read(); ``` 本 mock は上記 4 event (bi-stream-open / write / close / backpressure) と flow control (window size ベース backpressure) を再現する。
 
@@ -578,9 +578,9 @@ export interface BiStreamOptions {
 }
 ```
 
-#### `BroadcastEvent`
+#### <code v-pre>BroadcastEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L66) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L66) <code v-pre>packages/realtime/src/types.ts</code>
 
 Broadcast event — channel 内の任意 event 名 payload 配信。 provider 全てで ordering は per-channel FIFO を保証する (Ably history rewind は除く、 see `historyRewind` in ChannelOptions)。
 
@@ -595,9 +595,9 @@ export interface BroadcastEvent<TPayload = unknown> {
 }
 ```
 
-#### `BuildRealtimeReportInput`
+#### <code v-pre>BuildRealtimeReportInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/report.ts#L31) `packages/realtime/src/report.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/report.ts#L31) <code v-pre>packages/realtime/src/report.ts</code>
 
 `@kiwa-lab/realtime` 実測値を `@kiwa-lab/quality-metrics` `QualityReport` に集約する adapter。 dogfood app が realtime fidelity harness を回した後、 本 adapter で `QualityReport` に変換 → `evaluateReleaseGate` に渡す、 の流れを想定。 Realtime は cost / token が LLM ほど直接的でないため、 - cost = mock 側の subscribe + publish 総回数 × 単価 (通信費近似) - latency = subscribe + publish latency サンプル - token = event payload の byte 数を token 相当として扱う - accuracy = fidelity harness の kind/payload 一致率 の 4 軸に mapping する。
 
@@ -645,9 +645,9 @@ export interface BuildRealtimeReportInput {
 }
 ```
 
-#### `CollectedEvent`
+#### <code v-pre>CollectedEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L26) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L26) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 driver から返される event の統一形式。 provider 別詳細は payload に格納。
 
@@ -663,9 +663,9 @@ export interface CollectedEvent {
 }
 ```
 
-#### `ConnectionState`
+#### <code v-pre>ConnectionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L18) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L18) <code v-pre>packages/realtime/src/types.ts</code>
 
 接続状態の 5 state machine。 disconnected → connecting → connected → reconnecting → disconnected を 4 provider 全てで模倣する。
 
@@ -673,9 +673,9 @@ export interface CollectedEvent {
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting' | 'closed';
 ```
 
-#### `DataChannelHandle`
+#### <code v-pre>DataChannelHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L42) `packages/realtime/src/semantics/webrtc-data-channel.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L42) <code v-pre>packages/realtime/src/semantics/webrtc-data-channel.ts</code>
 
 ```ts
 export interface DataChannelHandle {
@@ -688,9 +688,9 @@ export interface DataChannelHandle {
 }
 ```
 
-#### `DataChannelOptions`
+#### <code v-pre>DataChannelOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L31) `packages/realtime/src/semantics/webrtc-data-channel.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L31) <code v-pre>packages/realtime/src/semantics/webrtc-data-channel.ts</code>
 
 WebRTC data channel axis — ordered / unordered + reliable / unreliable + maxRetransmits + binaryType (arraybuffer / blob) を mock 化する。 実 WebRTC 呼出形式 (`RTCPeerConnection.createDataChannel`) は以下 ... ```ts const dc = pc.createDataChannel('chat', { ordered: true, maxRetransmits: 3, maxPacketLifeTime: null, }); dc.binaryType = 'arraybuffer'; dc.onopen = () =&gt; dc.send('hello'); dc.onmessage = (ev) =&gt; console.log(ev.data); dc.onclose = () =&gt; cleanup(); ``` 本 mock は上記 4 lifecycle event (open / message / close / error) と ordered / maxRetransmits 挙動を deterministic に再現する。
 
@@ -707,9 +707,9 @@ export interface DataChannelOptions {
 }
 ```
 
-#### `DecoderConfig`
+#### <code v-pre>DecoderConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L15) `packages/realtime/src/semantics/webcodecs-decoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L15) <code v-pre>packages/realtime/src/semantics/webcodecs-decoder.ts</code>
 
 WebCodecs decoder axis — VideoDecoder / AudioDecoder + frame buffer + reorder + drop policy. B-frame や out-of-order 到着に対応する reorder buffer + latency budget 超過時の drop path を含む。
 
@@ -720,9 +720,9 @@ export interface DecoderConfig {
 }
 ```
 
-#### `EncodedFrame`
+#### <code v-pre>EncodedFrame</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L23) `packages/realtime/src/semantics/webcodecs-encoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L23) <code v-pre>packages/realtime/src/semantics/webcodecs-encoder.ts</code>
 
 ```ts
 export interface EncodedFrame {
@@ -733,9 +733,9 @@ export interface EncodedFrame {
 }
 ```
 
-#### `EncoderConfig`
+#### <code v-pre>EncoderConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L15) `packages/realtime/src/semantics/webcodecs-encoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L15) <code v-pre>packages/realtime/src/semantics/webcodecs-encoder.ts</code>
 
 WebCodecs encoder axis — VideoEncoder / AudioEncoder direct API + hardware acceleration hints. Chrome / Safari / Firefox の WebCodecs 実装は codec config → frame encode → keyframe force → hardware fallback path を持つ。
 
@@ -749,9 +749,9 @@ export interface EncoderConfig {
 }
 ```
 
-#### `HpackEntry`
+#### <code v-pre>HpackEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L41) `packages/realtime/src/semantics/quic-multiplex.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L41) <code v-pre>packages/realtime/src/semantics/quic-multiplex.ts</code>
 
 ```ts
 export interface HpackEntry {
@@ -762,9 +762,9 @@ export interface HpackEntry {
 }
 ```
 
-#### `Http3PushMock`
+#### <code v-pre>Http3PushMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L47) `packages/realtime/src/semantics/http3-push.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L47) <code v-pre>packages/realtime/src/semantics/http3-push.ts</code>
 
 ```ts
 export interface Http3PushMock extends SemanticsMock {
@@ -775,9 +775,9 @@ export interface Http3PushMock extends SemanticsMock {
 }
 ```
 
-#### `IceCandidate`
+#### <code v-pre>IceCandidate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L42) `packages/realtime/src/semantics/webrtc-signaling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L42) <code v-pre>packages/realtime/src/semantics/webrtc-signaling.ts</code>
 
 ICE candidate 1 件 (mock は host / srflx / relay を type 別に配布)。
 
@@ -793,17 +793,17 @@ export interface IceCandidate {
 }
 ```
 
-#### `IceConnectionState`
+#### <code v-pre>IceConnectionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L29) `packages/realtime/src/semantics/webrtc-ice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L29) <code v-pre>packages/realtime/src/semantics/webrtc-ice.ts</code>
 
 ```ts
 export type IceConnectionState = 'new' | 'checking' | 'connected' | 'completed' | 'failed' | 'disconnected';
 ```
 
-#### `IceGatheringState`
+#### <code v-pre>IceGatheringState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L28) `packages/realtime/src/semantics/webrtc-ice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L28) <code v-pre>packages/realtime/src/semantics/webrtc-ice.ts</code>
 
 WebRTC ICE axis — candidate gathering + connectivity check + TURN relay + trickle ICE を mock 化する。 実 WebRTC 呼出形式 (`RTCPeerConnection.onicecandidate` + `iceGatheringState` + `iceConnectionState`) は以下 ... ```ts pc.oniceconnectionstatechange = () =&gt; { console.log(pc.iceConnectionState); // 'checking' → 'connected' → 'completed' }; pc.onicecandidate = (ev) =&gt; { if (ev.candidate) sendToRemote(ev.candidate); }; // trickle ICE — candidate は gathering 中に順次送出、 gathering 終了まで待たない ``` 本 mock は上記 4 event (gathering / checking / connected / relay-used) と trickle ICE (candidate を順次 emit)、 TURN relay 経路情報を再現する。
 
@@ -811,9 +811,9 @@ WebRTC ICE axis — candidate gathering + connectivity check + TURN relay + tric
 export type IceGatheringState = 'new' | 'gathering' | 'complete';
 ```
 
-#### `IceStats`
+#### <code v-pre>IceStats</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L31) `packages/realtime/src/semantics/webrtc-ice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L31) <code v-pre>packages/realtime/src/semantics/webrtc-ice.ts</code>
 
 ```ts
 export interface IceStats {
@@ -826,9 +826,9 @@ export interface IceStats {
 }
 ```
 
-#### `MediaTrack`
+#### <code v-pre>MediaTrack</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L34) `packages/realtime/src/semantics/webrtc-track.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L34) <code v-pre>packages/realtime/src/semantics/webrtc-track.ts</code>
 
 ```ts
 export interface MediaTrack {
@@ -841,9 +841,9 @@ export interface MediaTrack {
 }
 ```
 
-#### `MoqAnnouncement`
+#### <code v-pre>MoqAnnouncement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L17) `packages/realtime/src/semantics/moq-fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L17) <code v-pre>packages/realtime/src/semantics/moq-fetch.ts</code>
 
 Media over QUIC / MOQT axis — track announce + subscribe + object delivery. MOQT (draft-ietf-moq-transport) は QUIC 上の pub/sub media transport で、 publisher が track を announce → subscriber が subscribe → object を 送受信する pattern。 本 mock は 4 event (announce / subscribe / object-sent / object-received) を deterministic seed で emit。
 
@@ -855,9 +855,9 @@ export interface MoqAnnouncement {
 }
 ```
 
-#### `MoqDatagram`
+#### <code v-pre>MoqDatagram</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L16) `packages/realtime/src/semantics/moq-datagram-media.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L16) <code v-pre>packages/realtime/src/semantics/moq-datagram-media.ts</code>
 
 MoQ datagram media axis — partial reliability + priority + FEC recovery. MOQT の datagram delivery mode は QUIC datagram frame を使い、 packet drop を許容する pattern。 Forward Error Correction (FEC) で失われた datagram を再構成する path も含む。
 
@@ -870,9 +870,9 @@ export interface MoqDatagram {
 }
 ```
 
-#### `MoqDatagramMediaMock`
+#### <code v-pre>MoqDatagramMediaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L23) `packages/realtime/src/semantics/moq-datagram-media.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-datagram-media.ts#L23) <code v-pre>packages/realtime/src/semantics/moq-datagram-media.ts</code>
 
 ```ts
 export interface MoqDatagramMediaMock extends SemanticsMock {
@@ -894,9 +894,9 @@ export interface MoqDatagramMediaMock extends SemanticsMock {
 }
 ```
 
-#### `MoqFetchMock`
+#### <code v-pre>MoqFetchMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L30) `packages/realtime/src/semantics/moq-fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L30) <code v-pre>packages/realtime/src/semantics/moq-fetch.ts</code>
 
 ```ts
 export interface MoqFetchMock extends SemanticsMock {
@@ -912,9 +912,9 @@ export interface MoqFetchMock extends SemanticsMock {
 }
 ```
 
-#### `MoqObject`
+#### <code v-pre>MoqObject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L23) `packages/realtime/src/semantics/moq-fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/moq-fetch.ts#L23) <code v-pre>packages/realtime/src/semantics/moq-fetch.ts</code>
 
 ```ts
 export interface MoqObject {
@@ -925,9 +925,9 @@ export interface MoqObject {
 }
 ```
 
-#### `PostgresChangeEvent`
+#### <code v-pre>PostgresChangeEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L82) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L82) <code v-pre>packages/realtime/src/types.ts</code>
 
 ```ts
 export interface PostgresChangeEvent<TRow = Record<string, unknown>> {
@@ -943,9 +943,9 @@ export interface PostgresChangeEvent<TRow = Record<string, unknown>> {
 }
 ```
 
-#### `PostgresChangeType`
+#### <code v-pre>PostgresChangeType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L80) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L80) <code v-pre>packages/realtime/src/types.ts</code>
 
 Postgres changes event — Supabase Realtime 固有の semantics だが、 DB CDC を realtime 通知する共通 pattern として 4 provider mock で扱える (Ably / Pusher / Socket.io は broadcast の特殊形として emit)。
 
@@ -953,9 +953,9 @@ Postgres changes event — Supabase Realtime 固有の semantics だが、 DB CD
 export type PostgresChangeType = 'INSERT' | 'UPDATE' | 'DELETE';
 ```
 
-#### `PresenceEvent`
+#### <code v-pre>PresenceEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L53) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L53) <code v-pre>packages/realtime/src/types.ts</code>
 
 Presence event 1 件 (join / leave / sync)。
 
@@ -969,9 +969,9 @@ export interface PresenceEvent {
 }
 ```
 
-#### `PresenceEventType`
+#### <code v-pre>PresenceEventType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L41) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L41) <code v-pre>packages/realtime/src/types.ts</code>
 
 Presence event の種類。 実 provider (Supabase / Ably / Pusher) 全てで sync / join / leave の 3 event 相当が存在する。
 
@@ -979,9 +979,9 @@ Presence event の種類。 実 provider (Supabase / Ably / Pusher) 全てで sy
 export type PresenceEventType = 'sync' | 'join' | 'leave';
 ```
 
-#### `PresenceMember`
+#### <code v-pre>PresenceMember</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L44) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L44) <code v-pre>packages/realtime/src/types.ts</code>
 
 1 user 分の presence metadata。 provider 別 field は `payload` に格納。
 
@@ -995,9 +995,9 @@ export interface PresenceMember {
 }
 ```
 
-#### `PusherChannel`
+#### <code v-pre>PusherChannel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L44) `packages/realtime/src/pusher.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L44) <code v-pre>packages/realtime/src/pusher.ts</code>
 
 ```ts
 export interface PusherChannel {
@@ -1009,9 +1009,9 @@ export interface PusherChannel {
 }
 ```
 
-#### `PusherMember`
+#### <code v-pre>PusherMember</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L32) `packages/realtime/src/pusher.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L32) <code v-pre>packages/realtime/src/pusher.ts</code>
 
 Pusher mock。 SDK 呼出形式 (real `pusher-js`) は以下 ... ```ts const pusher = new Pusher(APP_KEY, { cluster: 'us2' }); const channel = pusher.subscribeChannel('my-channel'); channel.bind('my-event', (data) =&gt; {...}); const presence = pusher.subscribeChannel('presence-my-channel'); presence.bind('pusher:subscription_succeeded', (members) =&gt; {...}); presence.bind('pusher:member_added', (member) =&gt; {...}); presence.bind('pusher:member_removed', (member) =&gt; {...}); ``` 本 mock は上記 shape を提供、 real Pusher の `subscribe` メソッドは mock 側で `subscribeChannel` に rename している (base `RealtimeMock` の async `subscribe` と衝突するため)。 presence channel は `presence-` 接頭辞で判定、 通常 channel との内部処理は共通 (engine 側)。
 
@@ -1022,9 +1022,9 @@ export interface PusherMember {
 }
 ```
 
-#### `PusherMembers`
+#### <code v-pre>PusherMembers</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L37) `packages/realtime/src/pusher.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L37) <code v-pre>packages/realtime/src/pusher.ts</code>
 
 ```ts
 export interface PusherMembers {
@@ -1035,9 +1035,9 @@ export interface PusherMembers {
 }
 ```
 
-#### `PusherMock`
+#### <code v-pre>PusherMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L52) `packages/realtime/src/pusher.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/pusher.ts#L52) <code v-pre>packages/realtime/src/pusher.ts</code>
 
 ```ts
 export interface PusherMock extends RealtimeMock {
@@ -1052,9 +1052,9 @@ export interface PusherMock extends RealtimeMock {
 }
 ```
 
-#### `PushPriority`
+#### <code v-pre>PushPriority</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L30) `packages/realtime/src/semantics/http3-push.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L30) <code v-pre>packages/realtime/src/semantics/http3-push.ts</code>
 
 HTTP/3 priority signal (RFC 9218 準拠)。
 
@@ -1067,9 +1067,9 @@ export interface PushPriority {
 }
 ```
 
-#### `PushPromise`
+#### <code v-pre>PushPromise</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L37) `packages/realtime/src/semantics/http3-push.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/http3-push.ts#L37) <code v-pre>packages/realtime/src/semantics/http3-push.ts</code>
 
 ```ts
 export interface PushPromise {
@@ -1083,9 +1083,9 @@ export interface PushPromise {
 }
 ```
 
-#### `QuicMultiplexMock`
+#### <code v-pre>QuicMultiplexMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L48) `packages/realtime/src/semantics/quic-multiplex.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L48) <code v-pre>packages/realtime/src/semantics/quic-multiplex.ts</code>
 
 ```ts
 export interface QuicMultiplexMock extends SemanticsMock {
@@ -1102,9 +1102,9 @@ export interface QuicMultiplexMock extends SemanticsMock {
 }
 ```
 
-#### `QuicStreamHandle`
+#### <code v-pre>QuicStreamHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L34) `packages/realtime/src/semantics/quic-multiplex.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L34) <code v-pre>packages/realtime/src/semantics/quic-multiplex.ts</code>
 
 ```ts
 export interface QuicStreamHandle {
@@ -1115,9 +1115,9 @@ export interface QuicStreamHandle {
 }
 ```
 
-#### `QuicStreamOptions`
+#### <code v-pre>QuicStreamOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L29) `packages/realtime/src/semantics/quic-multiplex.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L29) <code v-pre>packages/realtime/src/semantics/quic-multiplex.ts</code>
 
 QUIC multiplex axis — stream multiplex + stream priority + HPACK dynamic table + 0-RTT を mock 化する。 実 QUIC (HTTP/3 下層) 呼出形式 (aioquic / quiche / ngtcp2 相当) は以下 ... ```ts // client 側 (aioquic 相当の JS 表現) const conn = new QuicConnection({ enable0RTT: true }); await conn.handshake(); const stream1 = conn.openStream({ priority: 3 }); const stream2 = conn.openStream({ priority: 5 }); // HPACK dynamic table 更新 conn.hpack.insertHeader('content-type', 'application/json'); ``` 本 mock は上記 4 event (stream-open / stream-close / hpack-insert / zero-rtt-used) と stream priority (低い数字が高優先) を再現する。
 
@@ -1128,9 +1128,9 @@ export interface QuicStreamOptions {
 }
 ```
 
-#### `RealDriverGateInput`
+#### <code v-pre>RealDriverGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L31) `packages/realtime/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L31) <code v-pre>packages/realtime/src/real-driver.ts</code>
 
 ```ts
 export interface RealDriverGateInput<TDriver> {
@@ -1146,9 +1146,9 @@ export interface RealDriverGateInput<TDriver> {
 }
 ```
 
-#### `RealDriverGateResult`
+#### <code v-pre>RealDriverGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L43) `packages/realtime/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L43) <code v-pre>packages/realtime/src/real-driver.ts</code>
 
 ```ts
 export interface RealDriverGateResult<TDriver> {
@@ -1162,9 +1162,9 @@ export interface RealDriverGateResult<TDriver> {
 }
 ```
 
-#### `RealtimeAiInferenceMock`
+#### <code v-pre>RealtimeAiInferenceMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L28) `packages/realtime/src/semantics/realtime-ai-inference.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/realtime-ai-inference.ts#L28) <code v-pre>packages/realtime/src/semantics/realtime-ai-inference.ts</code>
 
 ```ts
 export interface RealtimeAiInferenceMock extends SemanticsMock {
@@ -1184,9 +1184,9 @@ export interface RealtimeAiInferenceMock extends SemanticsMock {
 }
 ```
 
-#### `RealtimeAnyEvent`
+#### <code v-pre>RealtimeAnyEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L209) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L209) <code v-pre>packages/realtime/src/types.ts</code>
 
 subscribe の union event 型 (adapter 側で filter する)。
 
@@ -1204,9 +1204,9 @@ export type RealtimeAnyEvent = ({
 };
 ```
 
-#### `RealtimeDriver`
+#### <code v-pre>RealtimeDriver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L19) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L19) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 単一 scenario の driver — real 側 driver / mock 側 driver 両方に同じ shape で実装。
 
@@ -1218,17 +1218,17 @@ export interface RealtimeDriver {
 }
 ```
 
-#### `RealtimeEvent`
+#### <code v-pre>RealtimeEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L25) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L25) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 ```ts
 export type RealtimeEvent = 'connect-succeeded' | 'connect-failed' | 'subscribe-succeeded' | 'heartbeat-lost' | 'heartbeat-recovered' | 'reconnect-succeeded' | 'reconnect-exhausted' | 'user-disconnect';
 ```
 
-#### `RealtimeEventHandler`
+#### <code v-pre>RealtimeEventHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L206) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L206) <code v-pre>packages/realtime/src/types.ts</code>
 
 subscribe に渡す handler。 5 event 種を全て受け取れる union。
 
@@ -1236,9 +1236,9 @@ subscribe に渡す handler。 5 event 種を全て受け取れる union。
 export type RealtimeEventHandler = (event: RealtimeAnyEvent) => void;
 ```
 
-#### `RealtimeFidelityInput`
+#### <code v-pre>RealtimeFidelityInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L36) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L36) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 ```ts
 export interface RealtimeFidelityInput {
@@ -1251,9 +1251,9 @@ export interface RealtimeFidelityInput {
 }
 ```
 
-#### `RealtimeFidelityRecord`
+#### <code v-pre>RealtimeFidelityRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L45) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L45) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 ```ts
 export interface RealtimeFidelityRecord {
@@ -1273,9 +1273,9 @@ export interface RealtimeFidelityRecord {
 }
 ```
 
-#### `RealtimeFidelityReport`
+#### <code v-pre>RealtimeFidelityReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L61) `packages/realtime/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/fidelity.ts#L61) <code v-pre>packages/realtime/src/fidelity.ts</code>
 
 ```ts
 export interface RealtimeFidelityReport {
@@ -1292,9 +1292,9 @@ export interface RealtimeFidelityReport {
 }
 ```
 
-#### `RealtimeMetrics`
+#### <code v-pre>RealtimeMetrics</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L222) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L222) <code v-pre>packages/realtime/src/types.ts</code>
 
 mock が公開する累積 metric。 fidelity harness が集計に使う。
 
@@ -1317,9 +1317,9 @@ export interface RealtimeMetrics {
 }
 ```
 
-#### `RealtimeMock`
+#### <code v-pre>RealtimeMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L170) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L170) <code v-pre>packages/realtime/src/types.ts</code>
 
 kiwa realtime mock を全 SDK adapter が満たすべき最小 interface。 SDK 固有の API (`supabase.channel().on()` / `ably.channels.get().subscribe()` / `pusher.subscribe()` / `io.of().on()`) は adapter 別に定義、 本 interface は 4 provider 共通の低レベル操作 (subscribe / publish / presence / disconnect) を集約する。
 
@@ -1351,9 +1351,9 @@ export interface RealtimeMock {
 }
 ```
 
-#### `RealtimeMockConfig`
+#### <code v-pre>RealtimeMockConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L128) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L128) <code v-pre>packages/realtime/src/types.ts</code>
 
 Mock 設定 — 4 provider adapter で共通に使う。 `scenarios` は channel 名 → 発火 event 列で index、 event は subscribe 後の 順序で emit される。 reconnect 挙動は `reconnect` で override。
 
@@ -1378,9 +1378,9 @@ export interface RealtimeMockConfig {
 }
 ```
 
-#### `RealtimeProviderName`
+#### <code v-pre>RealtimeProviderName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L29) `packages/realtime/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/real-driver.ts#L29) <code v-pre>packages/realtime/src/real-driver.ts</code>
 
 Real driver env-gate — v0.2 (GH #971) で追加。 v1.13 の 4 provider (Supabase / Ably / Pusher / Socket.io) mock は default で完全に mock 化されており、 test 実行時に外部 network を叩かない。 一方、 dogfood app や real-vs-mock fidelity 計測では、 real provider に対して同じ scenario を回して差分を取りたい局面がある。 本 helper は「real driver を返すべきか」 を env variable で決定する gate。 `KIWA_MODE=real` かつ provider 別の必須 key set (env variable) が全て 揃った時にのみ real driver を作成する。 それ以外の場合は mock driver を 返す (fallback、 常に安全)。 呼出例 (real Supabase client を得たい場合) ... ```ts const driver = resolveRealtimeDriver({ provider: 'supabase', requiredKeys: ['SUPABASE_URL', 'SUPABASE_ANON_KEY'], createReal: (env) =&gt; createRealSupabaseDriver(env), createMock: () =&gt; createMockSupabaseDriver(), }); ``` real driver 実装は kiwa の SSOT には含まれない (外部 SDK 依存を避けるため)、 user (dogfood app 側) が real driver factory を渡す責務を持つ。
 
@@ -1388,9 +1388,9 @@ Real driver env-gate — v0.2 (GH #971) で追加。 v1.13 の 4 provider (Supab
 export type RealtimeProviderName = 'supabase' | 'ably' | 'pusher' | 'socketio';
 ```
 
-#### `RealtimeSession`
+#### <code v-pre>RealtimeSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L35) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L35) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 ```ts
 export interface RealtimeSession {
@@ -1404,9 +1404,9 @@ export interface RealtimeSession {
 }
 ```
 
-#### `RealtimeSessionState`
+#### <code v-pre>RealtimeSessionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L18) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L18) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 v2.1 realtime session-orchestrator = presence + broadcast + subscription + heartbeat + reconnect の 5 axis を 継続合成 する 上位 layer。 Realtime pair v0.1 → v2.1 = 5 段深化到達、 **depth-5 pattern 5 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime = 5 pair 到達で pattern 「rule」 化 → **systematic law** 昇格 candidate)。 auth v0.7 + payment v2.1 の 上位層 pattern を Realtime pair に転用、 systematic pattern 47 度目適用 (continuous state machine variant Realtime 転用)。 4 provider (Supabase / Ably / Pusher / Socket.io) 抽象 の 上位、 provider 独立 な pure state machine、 5 state SSOT + 8 event SSOT + 40 セル 遷移表。 shape 契約 preserving 絶対維持 = 既存 API (v0.1-v0.2) 変更 0、 新規 file 追加 のみ、 backward compat 絶対維持。
 
@@ -1414,9 +1414,9 @@ v2.1 realtime session-orchestrator = presence + broadcast + subscription + heart
 export type RealtimeSessionState = 'connecting' | 'subscribed' | 'reconnecting' | 'degraded' | 'closed';
 ```
 
-#### `RealtimeSessionSummary`
+#### <code v-pre>RealtimeSessionSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L157) `packages/realtime/src/semantics/session-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/session-orchestrator.ts#L157) <code v-pre>packages/realtime/src/semantics/session-orchestrator.ts</code>
 
 ```ts
 export interface RealtimeSessionSummary {
@@ -1431,9 +1431,9 @@ export interface RealtimeSessionSummary {
 }
 ```
 
-#### `ReconnectPolicy`
+#### <code v-pre>ReconnectPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L109) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L109) <code v-pre>packages/realtime/src/types.ts</code>
 
 Reconnect policy — provider 全てで指数 backoff + jitter が実装されている。 mock は artificial delay で挙動を模倣。
 
@@ -1452,9 +1452,9 @@ export interface ReconnectPolicy {
 }
 ```
 
-#### `Room`
+#### <code v-pre>Room</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L99) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L99) <code v-pre>packages/realtime/src/types.ts</code>
 
 Room semantics — Socket.io namespace + room の 2 階層構造、 Ably では channel、 Supabase では channel、 Pusher では channel-name 相当。 mock ではすべて `{ namespace?: string; room: string }` に正規化。
 
@@ -1466,9 +1466,9 @@ export interface Room {
 }
 ```
 
-#### `ScenarioEvent`
+#### <code v-pre>ScenarioEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L151) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L151) <code v-pre>packages/realtime/src/types.ts</code>
 
 1 scenario event — subscribe 後の n 番目に発火する event。 `delay` が指定されると、 直前 event から `delay` ms 後に emit される。
 
@@ -1495,9 +1495,9 @@ export type ScenarioEvent = ({
 };
 ```
 
-#### `SemanticsAxis`
+#### <code v-pre>SemanticsAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L25) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L25) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 axis tag — 8 base axis + 8 advanced III axis の identifier。
 
@@ -1505,9 +1505,9 @@ axis tag — 8 base axis + 8 advanced III axis の identifier。
 export type SemanticsAxis = 'webrtc-signaling' | 'webrtc-data-channel' | 'webrtc-track' | 'webrtc-ice' | 'webtransport-uni' | 'webtransport-bi' | 'http3-push' | 'quic-multiplex' | 'moq-fetch' | 'moq-datagram-media' | 'webcodecs-encoder' | 'webcodecs-decoder' | 'simulcast-svc' | 'voice-streaming' | 'whisper-streaming' | 'realtime-ai-inference';
 ```
 
-#### `SemanticsEvent`
+#### <code v-pre>SemanticsEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L128) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L128) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 共通 event shape — payload は event kind 別に stringly typed。
 
@@ -1524,9 +1524,9 @@ export interface SemanticsEvent<TPayload = unknown> {
 }
 ```
 
-#### `SemanticsEventKind`
+#### <code v-pre>SemanticsEventKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L45) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L45) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 共通 transport event kind (8 axis 横断)。
 
@@ -1534,9 +1534,9 @@ export interface SemanticsEvent<TPayload = unknown> {
 export type SemanticsEventKind = 'offer' | 'answer' | 'ice-candidate' | 'renegotiation' | 'data-open' | 'data-message' | 'data-close' | 'track-add' | 'track-remove' | 'track-mute' | 'track-unmute' | 'ice-gathering' | 'ice-checking' | 'ice-connected' | 'ice-relay-used' | 'uni-stream-open' | 'uni-stream-write' | 'uni-stream-reset' | 'datagram-recv' | 'bi-stream-open' | 'bi-stream-write' | 'bi-stream-close' | 'bi-backpressure' | 'push-promise' | 'push-headers' | 'push-body' | 'push-cancelled' | 'stream-open' | 'stream-close' | 'hpack-insert' | 'zero-rtt-used' | 'moq-track-announce' | 'moq-track-subscribe' | 'moq-object-sent' | 'moq-object-received' | 'moq-datagram-sent' | 'moq-datagram-dropped' | 'moq-priority-set' | 'moq-fec-recovered' | 'encoder-config-set' | 'encoder-frame-encoded' | 'encoder-keyframe-forced' | 'encoder-hardware-used' | 'decoder-config-set' | 'decoder-frame-decoded' | 'decoder-frame-reordered' | 'decoder-frame-dropped' | 'simulcast-layer-added' | 'svc-layer-selected' | 'bitrate-adapted' | 'layer-dropped' | 'voice-session-open' | 'voice-audio-chunk-sent' | 'voice-response-chunk-received' | 'voice-turn-completed' | 'whisper-audio-chunk-sent' | 'whisper-partial-transcript' | 'whisper-final-transcript' | 'whisper-vad-triggered' | 'ai-inference-request' | 'ai-inference-response' | 'ai-inference-latency-budget' | 'ai-inference-dropped';
 ```
 
-#### `SemanticsFidelityInput`
+#### <code v-pre>SemanticsFidelityInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L58) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L58) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 ```ts
 export interface SemanticsFidelityInput {
@@ -1548,9 +1548,9 @@ export interface SemanticsFidelityInput {
 }
 ```
 
-#### `SemanticsFidelityRow`
+#### <code v-pre>SemanticsFidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L66) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L66) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 ```ts
 export interface SemanticsFidelityRow {
@@ -1567,9 +1567,9 @@ export interface SemanticsFidelityRow {
 }
 ```
 
-#### `SemanticsGridRow`
+#### <code v-pre>SemanticsGridRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L20) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L20) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 ```ts
 export interface SemanticsGridRow {
@@ -1580,9 +1580,9 @@ export interface SemanticsGridRow {
 }
 ```
 
-#### `SemanticsGridScenarios`
+#### <code v-pre>SemanticsGridScenarios</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L116) `packages/realtime/src/semantics-fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics-fidelity.ts#L116) <code v-pre>packages/realtime/src/semantics-fidelity.ts</code>
 
 grid 全 24 row 分の scenario を map に登録して一括計測。 applicable=false の row は placeholder row として返す (visual matrix の 24 row を保つため)。
 
@@ -1595,9 +1595,9 @@ export interface SemanticsGridScenarios {
 }
 ```
 
-#### `SemanticsMetrics`
+#### <code v-pre>SemanticsMetrics</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L152) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L152) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 8 axis 共通の累積 metric。 axis 固有 metric は `custom` に格納。
 
@@ -1618,9 +1618,9 @@ export interface SemanticsMetrics {
 }
 ```
 
-#### `SemanticsMock`
+#### <code v-pre>SemanticsMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L140) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L140) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 各 axis mock が満たす最小 interface。
 
@@ -1637,9 +1637,9 @@ export interface SemanticsMock {
 }
 ```
 
-#### `SemanticsMockConfig`
+#### <code v-pre>SemanticsMockConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L168) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L168) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 共通 mock config — artificial latency / seed 等。
 
@@ -1652,9 +1652,9 @@ export interface SemanticsMockConfig {
 }
 ```
 
-#### `SemanticsProtocol`
+#### <code v-pre>SemanticsProtocol</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L15) `packages/realtime/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/types.ts#L15) <code v-pre>packages/realtime/src/semantics/types.ts</code>
 
 protocol tag — fidelity harness で grid 分類に使う。
 
@@ -1662,9 +1662,9 @@ protocol tag — fidelity harness で grid 分類に使う。
 export type SemanticsProtocol = 'webrtc' | 'webtransport' | 'http3-quic' | 'moqt' | 'webcodecs' | 'ai-media';
 ```
 
-#### `SignalingSdp`
+#### <code v-pre>SignalingSdp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L31) `packages/realtime/src/semantics/webrtc-signaling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L31) <code v-pre>packages/realtime/src/semantics/webrtc-signaling.ts</code>
 
 signaling 1 セッション分の SDP 情報 (mock 用の簡略化された JSON payload)。
 
@@ -1680,9 +1680,9 @@ export interface SignalingSdp {
 }
 ```
 
-#### `SimulcastLayer`
+#### <code v-pre>SimulcastLayer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L43) `packages/realtime/src/semantics/webrtc-track.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L43) <code v-pre>packages/realtime/src/semantics/webrtc-track.ts</code>
 
 ```ts
 export interface SimulcastLayer {
@@ -1692,9 +1692,9 @@ export interface SimulcastLayer {
 }
 ```
 
-#### `SimulcastSvcLayer`
+#### <code v-pre>SimulcastSvcLayer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L16) `packages/realtime/src/semantics/simulcast-svc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L16) <code v-pre>packages/realtime/src/semantics/simulcast-svc.ts</code>
 
 Simulcast + SVC axis — Simulcast (複数解像度 stream) + Scalable Video Coding (temporal / spatial / quality layer) + adaptive bitrate + layer drop policy。 WebRTC v1 / v2 と MoQ 両方で採用される layered delivery pattern。
 
@@ -1707,9 +1707,9 @@ export interface SimulcastSvcLayer {
 }
 ```
 
-#### `SimulcastSvcMock`
+#### <code v-pre>SimulcastSvcMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L23) `packages/realtime/src/semantics/simulcast-svc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/simulcast-svc.ts#L23) <code v-pre>packages/realtime/src/semantics/simulcast-svc.ts</code>
 
 ```ts
 export interface SimulcastSvcMock extends SemanticsMock {
@@ -1733,9 +1733,9 @@ export interface SimulcastSvcMock extends SemanticsMock {
 }
 ```
 
-#### `SocketIoMock`
+#### <code v-pre>SocketIoMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L46) `packages/realtime/src/socketio.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L46) <code v-pre>packages/realtime/src/socketio.ts</code>
 
 ```ts
 export interface SocketIoMock extends RealtimeMock {
@@ -1747,9 +1747,9 @@ export interface SocketIoMock extends RealtimeMock {
 }
 ```
 
-#### `SocketIoNamespace`
+#### <code v-pre>SocketIoNamespace</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L39) `packages/realtime/src/socketio.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L39) <code v-pre>packages/realtime/src/socketio.ts</code>
 
 ```ts
 export interface SocketIoNamespace {
@@ -1760,9 +1760,9 @@ export interface SocketIoNamespace {
 }
 ```
 
-#### `SocketIoSocket`
+#### <code v-pre>SocketIoSocket</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L24) `packages/realtime/src/socketio.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/socketio.ts#L24) <code v-pre>packages/realtime/src/socketio.ts</code>
 
 Socket.io mock。 SDK 呼出形式 (real `socket.io-client`) は以下 ... ```ts const socket = io('http://localhost:3000/chat'); // namespace = '/chat' socket.on('connect', () =&gt; {...}); socket.emit('message', payload); socket.on('message', (data) =&gt; {...}); // server side: io.of('/chat').to('room-1').emit('message', ...) ``` 本 mock は namespace + room の 2 階層 pub/sub を engine channel に normalize、 `join(room)` / `leave(room)` / `emit(event, data)` / `on(event, handler)` を 提供する。 reconnect + pending event replay + backpressure sim も内蔵。 mock channel 名 = `&lt;namespace&gt;|&lt;room&gt;` (namespace 未指定は `/`)。
 
@@ -1783,9 +1783,9 @@ export interface SocketIoSocket {
 }
 ```
 
-#### `SubscriptionHandle`
+#### <code v-pre>SubscriptionHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L216) `packages/realtime/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/types.ts#L216) <code v-pre>packages/realtime/src/types.ts</code>
 
 subscribe の返り値 handle。
 
@@ -1796,9 +1796,9 @@ export interface SubscriptionHandle {
 }
 ```
 
-#### `SupabaseBroadcastFilter`
+#### <code v-pre>SupabaseBroadcastFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L33) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L33) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabaseBroadcastFilter {
@@ -1806,9 +1806,9 @@ export interface SupabaseBroadcastFilter {
 }
 ```
 
-#### `SupabaseBroadcastPayload`
+#### <code v-pre>SupabaseBroadcastPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L49) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L49) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabaseBroadcastPayload<T = unknown> {
@@ -1818,9 +1818,9 @@ export interface SupabaseBroadcastPayload<T = unknown> {
 }
 ```
 
-#### `SupabaseChannel`
+#### <code v-pre>SupabaseChannel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L64) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L64) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabaseChannel {
@@ -1842,9 +1842,9 @@ export interface SupabaseChannel {
 }
 ```
 
-#### `SupabaseListenerType`
+#### <code v-pre>SupabaseListenerType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L27) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L27) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 Supabase Realtime mock。 SDK 呼出形式 (real `@supabase/supabase-js`) は以下 ... ```ts const channel = supabase.channel('room:1') .on('presence', { event: 'sync' }, () =&gt; {...}) .on('broadcast', { event: 'chat' }, (payload) =&gt; {...}) .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, (payload) =&gt; {...}) .subscribe(); ``` 本 mock は上記に近い interface を提供、 内部で {@link RealtimeEngine} を呼出す。 real Supabase SDK は import せず、 shape のみ互換。
 
@@ -1852,9 +1852,9 @@ Supabase Realtime mock。 SDK 呼出形式 (real `@supabase/supabase-js`) は以
 export type SupabaseListenerType = 'presence' | 'broadcast' | 'postgres_changes' | 'system';
 ```
 
-#### `SupabaseMock`
+#### <code v-pre>SupabaseMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L88) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L88) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabaseMock extends RealtimeMock {
@@ -1864,9 +1864,9 @@ export interface SupabaseMock extends RealtimeMock {
 }
 ```
 
-#### `SupabasePostgresChangesFilter`
+#### <code v-pre>SupabasePostgresChangesFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L37) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L37) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabasePostgresChangesFilter {
@@ -1876,9 +1876,9 @@ export interface SupabasePostgresChangesFilter {
 }
 ```
 
-#### `SupabasePostgresChangesPayload`
+#### <code v-pre>SupabasePostgresChangesPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L55) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L55) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabasePostgresChangesPayload<TRow = Record<string, unknown>> {
@@ -1891,9 +1891,9 @@ export interface SupabasePostgresChangesPayload<TRow = Record<string, unknown>> 
 }
 ```
 
-#### `SupabasePresenceFilter`
+#### <code v-pre>SupabasePresenceFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L29) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L29) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabasePresenceFilter {
@@ -1901,9 +1901,9 @@ export interface SupabasePresenceFilter {
 }
 ```
 
-#### `SupabasePresencePayload`
+#### <code v-pre>SupabasePresencePayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L43) `packages/realtime/src/supabase.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/supabase.ts#L43) <code v-pre>packages/realtime/src/supabase.ts</code>
 
 ```ts
 export interface SupabasePresencePayload {
@@ -1919,9 +1919,9 @@ export interface SupabasePresencePayload {
 }
 ```
 
-#### `TrackKind`
+#### <code v-pre>TrackKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L32) `packages/realtime/src/semantics/webrtc-track.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L32) <code v-pre>packages/realtime/src/semantics/webrtc-track.ts</code>
 
 WebRTC track axis — getUserMedia mock + MediaStream + track add/remove + simulcast layer を mock 化する。 実 WebRTC 呼出形式 (`getUserMedia` + `RTCPeerConnection.addTrack`) は以下 ... ```ts const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true }); for (const track of stream.getTracks()) { const sender = pc.addTrack(track, stream); sender.setParameters({ encodings: [ { rid: 'low', maxBitrate: 100000 }, { rid: 'med', maxBitrate: 300000 }, { rid: 'high', maxBitrate: 900000 }, ]}); } track.enabled = false; // mute ``` 本 mock は上記 4 event (track-add / track-remove / track-mute / track-unmute) と simulcast layer 情報を deterministic に再現する。
 
@@ -1929,9 +1929,9 @@ WebRTC track axis — getUserMedia mock + MediaStream + track add/remove + simul
 export type TrackKind = 'audio' | 'video';
 ```
 
-#### `UniStreamHandle`
+#### <code v-pre>UniStreamHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L33) `packages/realtime/src/semantics/webtransport-uni.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L33) <code v-pre>packages/realtime/src/semantics/webtransport-uni.ts</code>
 
 WebTransport uni-directional axis — uni stream + Datagram + reset stream を mock 化する。 実 WebTransport 呼出形式 (`WebTransport.createUnidirectionalStream` + `datagrams.writable`) は以下 ... ```ts const transport = new WebTransport('https://example.com/wt'); await transport.ready; // uni stream const stream = await transport.createUnidirectionalStream(); const writer = stream.getWriter(); await writer.write(new Uint8Array([1, 2, 3])); writer.close(); // datagram const dgramWriter = transport.datagrams.writable.getWriter(); await dgramWriter.write(new Uint8Array([9, 8, 7])); ``` 本 mock は上記 4 event (uni-stream-open / write / reset / datagram-recv) を 再現する。 stream reset は abort() 相当。
 
@@ -1946,9 +1946,9 @@ export interface UniStreamHandle {
 }
 ```
 
-#### `VoiceAudioChunk`
+#### <code v-pre>VoiceAudioChunk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L21) `packages/realtime/src/semantics/voice-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L21) <code v-pre>packages/realtime/src/semantics/voice-streaming.ts</code>
 
 ```ts
 export interface VoiceAudioChunk {
@@ -1959,9 +1959,9 @@ export interface VoiceAudioChunk {
 }
 ```
 
-#### `VoiceSession`
+#### <code v-pre>VoiceSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L15) `packages/realtime/src/semantics/voice-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L15) <code v-pre>packages/realtime/src/semantics/voice-streaming.ts</code>
 
 LLM voice streaming axis — OpenAI Realtime API + Anthropic voice + audio streaming chunk exchange + turn management. session open → audio chunk upload → response chunk stream → turn completed の 4-op flow を mock 化。
 
@@ -1973,9 +1973,9 @@ export interface VoiceSession {
 }
 ```
 
-#### `VoiceStreamingMock`
+#### <code v-pre>VoiceStreamingMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L28) `packages/realtime/src/semantics/voice-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/voice-streaming.ts#L28) <code v-pre>packages/realtime/src/semantics/voice-streaming.ts</code>
 
 ```ts
 export interface VoiceStreamingMock extends SemanticsMock {
@@ -1991,9 +1991,9 @@ export interface VoiceStreamingMock extends SemanticsMock {
 }
 ```
 
-#### `WebCodecsDecoderMock`
+#### <code v-pre>WebCodecsDecoderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L20) `packages/realtime/src/semantics/webcodecs-decoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-decoder.ts#L20) <code v-pre>packages/realtime/src/semantics/webcodecs-decoder.ts</code>
 
 ```ts
 export interface WebCodecsDecoderMock extends SemanticsMock {
@@ -2021,9 +2021,9 @@ export interface WebCodecsDecoderMock extends SemanticsMock {
 }
 ```
 
-#### `WebCodecsEncoderMock`
+#### <code v-pre>WebCodecsEncoderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L30) `packages/realtime/src/semantics/webcodecs-encoder.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webcodecs-encoder.ts#L30) <code v-pre>packages/realtime/src/semantics/webcodecs-encoder.ts</code>
 
 ```ts
 export interface WebCodecsEncoderMock extends SemanticsMock {
@@ -2049,9 +2049,9 @@ export interface WebCodecsEncoderMock extends SemanticsMock {
 }
 ```
 
-#### `WebRtcDataChannelMock`
+#### <code v-pre>WebRtcDataChannelMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L51) `packages/realtime/src/semantics/webrtc-data-channel.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L51) <code v-pre>packages/realtime/src/semantics/webrtc-data-channel.ts</code>
 
 ```ts
 export interface WebRtcDataChannelMock extends SemanticsMock {
@@ -2061,9 +2061,9 @@ export interface WebRtcDataChannelMock extends SemanticsMock {
 }
 ```
 
-#### `WebRtcIceMock`
+#### <code v-pre>WebRtcIceMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L40) `packages/realtime/src/semantics/webrtc-ice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-ice.ts#L40) <code v-pre>packages/realtime/src/semantics/webrtc-ice.ts</code>
 
 ```ts
 export interface WebRtcIceMock extends SemanticsMock {
@@ -2084,7 +2084,7 @@ export interface WebRtcIceMock extends SemanticsMock {
 }
 ```
 
-#### `WebRtcMediaStream`
+#### <code v-pre>WebRtcMediaStream</code>
 
 公開 entry point から解決しています。
 
@@ -2138,9 +2138,9 @@ export {
 } from './semantics/index.js';
 ```
 
-#### `WebRtcSignalingMock`
+#### <code v-pre>WebRtcSignalingMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L52) `packages/realtime/src/semantics/webrtc-signaling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-signaling.ts#L52) <code v-pre>packages/realtime/src/semantics/webrtc-signaling.ts</code>
 
 ```ts
 export interface WebRtcSignalingMock extends SemanticsMock {
@@ -2157,9 +2157,9 @@ export interface WebRtcSignalingMock extends SemanticsMock {
 }
 ```
 
-#### `WebRtcTrackMock`
+#### <code v-pre>WebRtcTrackMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L54) `packages/realtime/src/semantics/webrtc-track.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-track.ts#L54) <code v-pre>packages/realtime/src/semantics/webrtc-track.ts</code>
 
 ```ts
 export interface WebRtcTrackMock extends SemanticsMock {
@@ -2183,9 +2183,9 @@ export interface WebRtcTrackMock extends SemanticsMock {
 }
 ```
 
-#### `WebTransportBiMock`
+#### <code v-pre>WebTransportBiMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L43) `packages/realtime/src/semantics/webtransport-bi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L43) <code v-pre>packages/realtime/src/semantics/webtransport-bi.ts</code>
 
 ```ts
 export interface WebTransportBiMock extends SemanticsMock {
@@ -2195,9 +2195,9 @@ export interface WebTransportBiMock extends SemanticsMock {
 }
 ```
 
-#### `WebTransportUniMock`
+#### <code v-pre>WebTransportUniMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L42) `packages/realtime/src/semantics/webtransport-uni.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L42) <code v-pre>packages/realtime/src/semantics/webtransport-uni.ts</code>
 
 ```ts
 export interface WebTransportUniMock extends SemanticsMock {
@@ -2208,9 +2208,9 @@ export interface WebTransportUniMock extends SemanticsMock {
 }
 ```
 
-#### `WhisperStreamingMock`
+#### <code v-pre>WhisperStreamingMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L23) `packages/realtime/src/semantics/whisper-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L23) <code v-pre>packages/realtime/src/semantics/whisper-streaming.ts</code>
 
 ```ts
 export interface WhisperStreamingMock extends SemanticsMock {
@@ -2231,9 +2231,9 @@ export interface WhisperStreamingMock extends SemanticsMock {
 }
 ```
 
-#### `WhisperTranscript`
+#### <code v-pre>WhisperTranscript</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L15) `packages/realtime/src/semantics/whisper-streaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/whisper-streaming.ts#L15) <code v-pre>packages/realtime/src/semantics/whisper-streaming.ts</code>
 
 Whisper streaming ASR axis — Whisper streaming API (OpenAI + local WhisperCPP) + partial transcript + Voice Activity Detection (VAD) trigger。 partial transcript は音声区切りごと、 final transcript は VAD end で確定。
 

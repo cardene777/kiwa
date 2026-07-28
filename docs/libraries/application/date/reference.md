@@ -27,8 +27,8 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;parseDate: invalid input "$&#123;str&#125;"&#96; | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L54) |
-| &#96;parseDate: invalid input "$&#123;str&#125;"&#96; | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L58) |
+| <code v-pre>parseDate: invalid input "$&#123;str&#125;"</code> | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L54) |
+| <code v-pre>parseDate: invalid input "$&#123;str&#125;"</code> | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L58) |
 
 ## API 契約
 
@@ -36,9 +36,9 @@
 
 ### 値
 
-#### `addDays`
+#### <code v-pre>addDays</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/arithmetic.ts#L15) `packages/date/src/arithmetic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/arithmetic.ts#L15) <code v-pre>packages/date/src/arithmetic.ts</code>
 
 `addDays(date, N, provider)` は date から N 日進めた Date を返す。 全 provider で同一挙動 (UTC ベース、 DST 影響回避のため timestamp 演算)。
 
@@ -46,9 +46,9 @@
 export declare function addDays(date: Date, days: number, provider: DateProvider): ArithmeticResult;
 ```
 
-#### `createDateClient`
+#### <code v-pre>createDateClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L25) `packages/date/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L25) <code v-pre>packages/date/src/client.ts</code>
 
 4 provider (date-fns / dayjs / Luxon / Temporal) を統一 interface で叩ける mock client。 実 provider (real deps) を差替えても同じ signature で呼べる想定。
 
@@ -56,9 +56,9 @@ export declare function addDays(date: Date, days: number, provider: DateProvider
 export declare function createDateClient(options?: CreateDateClientOptions): DateClient;
 ```
 
-#### `createHolidayCalendar`
+#### <code v-pre>createHolidayCalendar</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L80) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L80) <code v-pre>packages/date/src/extensions.ts</code>
 
 holiday calendar — country 別祝日判定
 
@@ -66,17 +66,17 @@ holiday calendar — country 別祝日判定
 export declare function createHolidayCalendar(initial?: Holiday[]): HolidayCalendar;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L123) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L123) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `diffDays`
+#### <code v-pre>diffDays</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/arithmetic.ts#L23) `packages/date/src/arithmetic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/arithmetic.ts#L23) <code v-pre>packages/date/src/arithmetic.ts</code>
 
 `diffDays(a, b, provider)` は (a - b) の日数差を整数で返す。 fractional は切捨て。
 
@@ -84,9 +84,9 @@ export declare function createObservabilityHook(): ObservabilityHook;
 export declare function diffDays(a: Date, b: Date, provider: DateProvider): ArithmeticResult;
 ```
 
-#### `expandRecurrence`
+#### <code v-pre>expandRecurrence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L46) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L46) <code v-pre>packages/date/src/extensions.ts</code>
 
 RRULE subset expand — DAILY/WEEKLY/MONTHLY/YEARLY
 
@@ -94,9 +94,9 @@ RRULE subset expand — DAILY/WEEKLY/MONTHLY/YEARLY
 export declare function expandRecurrence(rule: RecurrenceRule, start: Date): Date[];
 ```
 
-#### `formatDate`
+#### <code v-pre>formatDate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L19) `packages/date/src/format.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L19) <code v-pre>packages/date/src/format.ts</code>
 
 pattern token = `YYYY / MM / DD / HH / mm / ss` を UTC ベースで置換。 全 provider (date-fns/dayjs/Luxon/Temporal) が最低限 support する共通 subset。
 
@@ -104,9 +104,9 @@ pattern token = `YYYY / MM / DD / HH / mm / ss` を UTC ベースで置換。 �
 export declare function formatDate(date: Date, pattern: string, provider: DateProvider): FormatResult;
 ```
 
-#### `parseDate`
+#### <code v-pre>parseDate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L40) `packages/date/src/format.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L40) <code v-pre>packages/date/src/format.ts</code>
 
 pattern に沿って date string を parse。 未対応 pattern は Date コンストラクタに fallback。
 
@@ -114,9 +114,9 @@ pattern に沿って date string を parse。 未対応 pattern は Date コン�
 export declare function parseDate(str: string, pattern: string, provider: DateProvider): ParseResult;
 ```
 
-#### `parseDuration`
+#### <code v-pre>parseDuration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L14) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L14) <code v-pre>packages/date/src/extensions.ts</code>
 
 ISO 8601 duration parse — "P1Y2M3DT4H5M6S" 対応
 
@@ -124,17 +124,17 @@ ISO 8601 duration parse — "P1Y2M3DT4H5M6S" 対応
 export declare function parseDuration(iso: string): DurationParseResult;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L99) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L99) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `timezoneConvert`
+#### <code v-pre>timezoneConvert</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/timezone.ts#L32) `packages/date/src/timezone.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/timezone.ts#L32) <code v-pre>packages/date/src/timezone.ts</code>
 
 `timezoneConvert(date, tz, provider)` は date を tz オフセット分ずらした Date を返す。 未知の tz は 0 offset (UTC 相当) に fallback。 DST 未対応 = mock として cover 十分。
 
@@ -144,9 +144,9 @@ export declare function timezoneConvert(date: Date, timezone: string, provider: 
 
 ### 型
 
-#### `ArithmeticResult`
+#### <code v-pre>ArithmeticResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/arithmetic.ts#L3) `packages/date/src/arithmetic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/arithmetic.ts#L3) <code v-pre>packages/date/src/arithmetic.ts</code>
 
 ```ts
 export interface ArithmeticResult {
@@ -156,9 +156,9 @@ export interface ArithmeticResult {
 }
 ```
 
-#### `CreateDateClientOptions`
+#### <code v-pre>CreateDateClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L7) `packages/date/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L7) <code v-pre>packages/date/src/client.ts</code>
 
 ```ts
 export interface CreateDateClientOptions {
@@ -167,9 +167,9 @@ export interface CreateDateClientOptions {
 }
 ```
 
-#### `DateClient`
+#### <code v-pre>DateClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L12) `packages/date/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L12) <code v-pre>packages/date/src/client.ts</code>
 
 ```ts
 export interface DateClient {
@@ -182,17 +182,17 @@ export interface DateClient {
 }
 ```
 
-#### `DateProvider`
+#### <code v-pre>DateProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L5) `packages/date/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/client.ts#L5) <code v-pre>packages/date/src/client.ts</code>
 
 ```ts
 export type DateProvider = 'date-fns' | 'dayjs' | 'luxon' | 'temporal';
 ```
 
-#### `DurationParseResult`
+#### <code v-pre>DurationParseResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L6) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L6) <code v-pre>packages/date/src/extensions.ts</code>
 
 v2.1 extensions — duration parse, recurrence rule (RRULE subset), holiday calendar, plus retry/batch/observability generics. Temporal Stage 3 追随。
 
@@ -212,9 +212,9 @@ export interface DurationParseResult {
 }
 ```
 
-#### `FormatResult`
+#### <code v-pre>FormatResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L3) `packages/date/src/format.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L3) <code v-pre>packages/date/src/format.ts</code>
 
 ```ts
 export interface FormatResult {
@@ -224,9 +224,9 @@ export interface FormatResult {
 }
 ```
 
-#### `Holiday`
+#### <code v-pre>Holiday</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L65) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L65) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export interface Holiday {
@@ -236,9 +236,9 @@ export interface Holiday {
 }
 ```
 
-#### `HolidayCalendar`
+#### <code v-pre>HolidayCalendar</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L71) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L71) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export interface HolidayCalendar {
@@ -250,9 +250,9 @@ export interface HolidayCalendar {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L117) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L117) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -268,9 +268,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `ParseResult`
+#### <code v-pre>ParseResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L9) `packages/date/src/format.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L9) <code v-pre>packages/date/src/format.ts</code>
 
 ```ts
 export interface ParseResult {
@@ -280,17 +280,17 @@ export interface ParseResult {
 }
 ```
 
-#### `RecurrenceFreq`
+#### <code v-pre>RecurrenceFreq</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L36) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L36) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export type RecurrenceFreq = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
 ```
 
-#### `RecurrenceRule`
+#### <code v-pre>RecurrenceRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L38) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L38) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export interface RecurrenceRule {
@@ -301,9 +301,9 @@ export interface RecurrenceRule {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L96) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L96) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -313,9 +313,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L97) `packages/date/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/extensions.ts#L97) <code v-pre>packages/date/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -326,9 +326,9 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `TimezoneResult`
+#### <code v-pre>TimezoneResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/timezone.ts#L3) `packages/date/src/timezone.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/date/src/timezone.ts#L3) <code v-pre>packages/date/src/timezone.ts</code>
 
 ```ts
 export interface TimezoneResult {

@@ -63,22 +63,22 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;anvil seed: script exited with code $&#123;exitCode&#125;&#96; | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L125) |
-| &#96;anvil seed: dump-state file was not produced at $&#123;outPath&#125;&#96; | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L128) |
-| &#96;anvil seed: failed to start on port $&#123;port&#125; within $&#123;timeoutMs&#125;ms&#96; | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L42) |
-| &#96;anvil seed: script not found: $&#123;scriptPath&#125;&#96; | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L68) |
-| &#96;kiwa init: --testDir must be a relative path inside the project, got "$&#123;value&#125;"&#96; | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L200) |
-| &#96;kiwa init: --config-suffix must match &#91;a-zA-Z0-9&#95;-&#93;+, got "$&#123;suffix&#125;"&#96; | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L212) |
-| 'kiwa init: --with-deploy requires a foundry project path' | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L236) |
-| &#96;kiwa init: --with-deploy must be a relative path, got absolute "$&#123;value&#125;"&#96; | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L240) |
-| &#96;Template not found: $&#123;source&#125;&#96; | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L305) |
-| 'kiwa run --watch: at least one layer is required (use --layer L)' | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L46) |
-| &#96;kiwa run --watch: unknown layer "$&#123;layer&#125;"&#96; | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L50) |
-| &#96;kiwa run --watch: no package.json found at $&#123;opts.cwd&#125;&#96; | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L54) |
-| &#96;spec-to-test: input not found: $&#123;inPath&#125;&#96; | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L307) |
-| &#96;spec-to-test: unsupported layer "$&#123;layer&#125;". Supported: api, ui, data, cli.&#96; | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L319) |
-| 'not found' | [packages/cli/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts#L163) |
-| &#96;kiwa init: $&#123;flag&#125; requires a value&#96; | [packages/cli/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts#L48) |
+| <code v-pre>anvil seed: script exited with code $&#123;exitCode&#125;</code> | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L125) |
+| <code v-pre>anvil seed: dump-state file was not produced at $&#123;outPath&#125;</code> | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L128) |
+| <code v-pre>anvil seed: failed to start on port $&#123;port&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L42) |
+| <code v-pre>anvil seed: script not found: $&#123;scriptPath&#125;</code> | [packages/cli/src/commands/anvil-seed.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/anvil-seed.ts#L68) |
+| <code v-pre>kiwa init: --testDir must be a relative path inside the project, got "$&#123;value&#125;"</code> | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L200) |
+| <code v-pre>kiwa init: --config-suffix must match &#91;a-zA-Z0-9&#95;-&#93;+, got "$&#123;suffix&#125;"</code> | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L212) |
+| <code v-pre>kiwa init: --with-deploy requires a foundry project path</code> | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L236) |
+| <code v-pre>kiwa init: --with-deploy must be a relative path, got absolute "$&#123;value&#125;"</code> | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L240) |
+| <code v-pre>Template not found: $&#123;source&#125;</code> | [packages/cli/src/commands/init.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/init.ts#L305) |
+| <code v-pre>kiwa run --watch: at least one layer is required (use --layer L)</code> | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L46) |
+| <code v-pre>kiwa run --watch: unknown layer "$&#123;layer&#125;"</code> | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L50) |
+| <code v-pre>kiwa run --watch: no package.json found at $&#123;opts.cwd&#125;</code> | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L54) |
+| <code v-pre>spec-to-test: input not found: $&#123;inPath&#125;</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L307) |
+| <code v-pre>spec-to-test: unsupported layer "$&#123;layer&#125;". Supported: api, ui, data, cli.</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L319) |
+| <code v-pre>not found</code> | [packages/cli/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts#L163) |
+| <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts#L48) |
 
 ## API 契約
 

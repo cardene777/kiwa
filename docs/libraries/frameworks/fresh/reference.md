@@ -48,7 +48,7 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'defineIsland: name is required' | [packages/fresh/src/islands.ts](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L53) |
+| <code v-pre>defineIsland: name is required</code> | [packages/fresh/src/islands.ts](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L53) |
 
 ## API 契約
 
@@ -56,9 +56,9 @@
 
 ### 値
 
-#### `defineHead`
+#### <code v-pre>defineHead</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L78) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L78) <code v-pre>packages/fresh/src/head.ts</code>
 
 Build a HeadFragment from a typed spec. Every field is optional; missing fields fall back to their neutral value (empty array / undefined) and get dropped during merge dedup.
 
@@ -72,9 +72,9 @@ export declare function defineHead(opts: {
 }): HeadFragment;
 ```
 
-#### `defineIsland`
+#### <code v-pre>defineIsland</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L48) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L48) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Register a Fresh island. `name` is the placeholder attribute (`&lt;div data-island="Name"&gt;`) that `hydrateIslands` looks for.
 
@@ -86,9 +86,9 @@ export declare function defineIsland<P extends IslandProps = IslandProps>(opts: 
 }): IslandDefinition<P>;
 ```
 
-#### `defineRoute`
+#### <code v-pre>defineRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L449) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L449) <code v-pre>packages/fresh/src/route.ts</code>
 
 Wrap a page fn so it registers as a Fresh-defined route (brand + passthrough).
 
@@ -96,9 +96,9 @@ Wrap a page fn so it registers as a Fresh-defined route (brand + passthrough).
 export declare function defineRoute<TData = unknown, TState = Record<string, unknown>>(fn: DefineRouteFn<TData, TState>): DefinedRoute<TData, TState>;
 ```
 
-#### `extractHead`
+#### <code v-pre>extractHead</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L233) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L233) <code v-pre>packages/fresh/src/head.ts</code>
 
 Walk a Fresh virtual tree, harvest every `&lt;Head&gt;` or `&lt;head&gt;` element's children (meta / title / link / script / base), and merge them into a single HeadFragment. This mirrors Fresh's server-side head collection where any component can drop a `&lt;Head&gt;` block anywhere in the tree.
 
@@ -106,9 +106,9 @@ Walk a Fresh virtual tree, harvest every `&lt;Head&gt;` or `&lt;head&gt;` elemen
 export declare function extractHead(tree: FreshChild): HeadFragment;
 ```
 
-#### `findNodes`
+#### <code v-pre>findNodes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L170) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L170) <code v-pre>packages/fresh/src/route.ts</code>
 
 Depth-first traversal of a Fresh virtual tree. Collects every node whose `type` matches the predicate; strings / numbers / nulls are skipped.
 
@@ -116,33 +116,33 @@ Depth-first traversal of a Fresh virtual tree. Collects every node whose `type` 
 export declare function findNodes(tree: FreshChild, predicate: (n: FreshVNode) => boolean): FreshVNode[];
 ```
 
-#### `FRESH_NOT_FOUND_SYMBOL`
+#### <code v-pre>FRESH&#95;NOT&#95;FOUND&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L29) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L29) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export declare const FRESH_NOT_FOUND_SYMBOL: unique symbol;
 ```
 
-#### `FRESH_REDIRECT_SYMBOL`
+#### <code v-pre>FRESH&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L28) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L28) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export declare const FRESH_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `FRESH_ROUTE_SYMBOL`
+#### <code v-pre>FRESH&#95;ROUTE&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L30) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L30) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export declare const FRESH_ROUTE_SYMBOL: unique symbol;
 ```
 
-#### `h`
+#### <code v-pre>h</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L98) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L98) <code v-pre>packages/fresh/src/route.ts</code>
 
 Lightweight JSX-shaped element factory. Tests write `h('div', { class: 'x' }, 'hello')` and pass the result to a Fresh route or Island.
 
@@ -150,17 +150,17 @@ Lightweight JSX-shaped element factory. Tests write `h('div', { class: 'x' }, 'h
 export declare function h(type: string, props: Record<string, unknown> | null, ...children: FreshChild[]): FreshVNode;
 ```
 
-#### `HEAD_SYMBOL`
+#### <code v-pre>HEAD&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L28) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L28) <code v-pre>packages/fresh/src/head.ts</code>
 
 ```ts
 export declare const HEAD_SYMBOL: unique symbol;
 ```
 
-#### `hydrateIslands`
+#### <code v-pre>hydrateIslands</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L200) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L200) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Walk the SSR tree, find every `&lt;div data-island="Name"&gt;` placeholder, mount the matching island definition (decoding `data-props`), and produce a diff describing which islands hydrated / which registered islands never appeared in the SSR tree / which placeholders had no matching island.
 
@@ -168,9 +168,9 @@ Walk the SSR tree, find every `&lt;div data-island="Name"&gt;` placeholder, moun
 export declare function hydrateIslands(opts: HydrateIslandsOptions): HydrateIslandsResult;
 ```
 
-#### `invokeDefineRoute`
+#### <code v-pre>invokeDefineRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L485) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L485) <code v-pre>packages/fresh/src/route.ts</code>
 
 Run a `defineRoute`-wrapped page. Synthesizes a minimal `ctx` (params / url / state / render is a no-op returning 200) and captures redirect / not-found signals the body throws.
 
@@ -178,9 +178,9 @@ Run a `defineRoute`-wrapped page. Synthesizes a minimal `ctx` (params / url / st
 export declare function invokeDefineRoute<TData = unknown, TState = Record<string, unknown>>(opts: InvokeDefineRouteOptions<TData, TState>): Promise<InvokeDefineRouteResult>;
 ```
 
-#### `invokeFreshHandler`
+#### <code v-pre>invokeFreshHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L266) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L266) <code v-pre>packages/fresh/src/route.ts</code>
 
 Dispatch a Fresh handler for the given `req.method`. If the handler returns a `Response` directly, that's the result. If the handler calls `ctx.render(data)`, we capture `data`, optionally invoke `page(props)` to materialize the tree, and synthesize a 200 HTML response. If the handler calls `ctx.renderNotFound()` / `ctx.redirect(...)`, the corresponding signal fields on the result are populated.
 
@@ -188,9 +188,9 @@ Dispatch a Fresh handler for the given `req.method`. If the handler returns a `R
 export declare function invokeFreshHandler<TData = unknown, TState = Record<string, unknown>>(opts: InvokeFreshHandlerOptions<TData, TState>): Promise<InvokeFreshHandlerResult<TData>>;
 ```
 
-#### `isDefinedRoute`
+#### <code v-pre>isDefinedRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L456) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L456) <code v-pre>packages/fresh/src/route.ts</code>
 
 Type guard: recognize a `defineRoute()`-wrapped page.
 
@@ -198,9 +198,9 @@ Type guard: recognize a `defineRoute()`-wrapped page.
 export declare function isDefinedRoute<TData, TState>(value: unknown): value is DefinedRoute<TData, TState>;
 ```
 
-#### `isFreshVNode`
+#### <code v-pre>isFreshVNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L111) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L111) <code v-pre>packages/fresh/src/route.ts</code>
 
 Type guard: recognize a Fresh virtual node (used by walkers + tests).
 
@@ -208,9 +208,9 @@ Type guard: recognize a Fresh virtual node (used by walkers + tests).
 export declare function isFreshVNode(value: unknown): value is FreshVNode;
 ```
 
-#### `isHeadFragment`
+#### <code v-pre>isHeadFragment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L96) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L96) <code v-pre>packages/fresh/src/head.ts</code>
 
 Type guard: recognize a HeadFragment.
 
@@ -218,9 +218,9 @@ Type guard: recognize a HeadFragment.
 export declare function isHeadFragment(value: unknown): value is HeadFragment;
 ```
 
-#### `isIslandDefinition`
+#### <code v-pre>isIslandDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L63) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L63) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Type guard: recognize an island definition.
 
@@ -228,9 +228,9 @@ Type guard: recognize an island definition.
 export declare function isIslandDefinition(value: unknown): value is IslandDefinition;
 ```
 
-#### `isIslandMount`
+#### <code v-pre>isIslandMount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L134) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L134) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Type guard: recognize a mounted island.
 
@@ -238,25 +238,25 @@ Type guard: recognize a mounted island.
 export declare function isIslandMount(value: unknown): value is IslandMount;
 ```
 
-#### `ISLAND_MOUNT_SYMBOL`
+#### <code v-pre>ISLAND&#95;MOUNT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L31) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L31) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export declare const ISLAND_MOUNT_SYMBOL: unique symbol;
 ```
 
-#### `ISLAND_SYMBOL`
+#### <code v-pre>ISLAND&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L30) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L30) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export declare const ISLAND_SYMBOL: unique symbol;
 ```
 
-#### `islandPlaceholder`
+#### <code v-pre>islandPlaceholder</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L76) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L76) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Render a Fresh island placeholder. Server-side output contains only the `&lt;div data-island="Name" data-props="..."&gt;` marker — no children — so hydration can find it and expand it into the real tree.
 
@@ -264,9 +264,9 @@ Render a Fresh island placeholder. Server-side output contains only the `&lt;div
 export declare function islandPlaceholder<P extends IslandProps = IslandProps>(island: IslandDefinition<P>, props?: Partial<P>): FreshVNode;
 ```
 
-#### `isNotFoundSignal`
+#### <code v-pre>isNotFoundSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L74) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L74) <code v-pre>packages/fresh/src/route.ts</code>
 
 Type guard: recognize a Fresh not-found signal (mirrors the internal check).
 
@@ -274,9 +274,9 @@ Type guard: recognize a Fresh not-found signal (mirrors the internal check).
 export declare function isNotFoundSignal(value: unknown): value is FreshNotFoundSignal;
 ```
 
-#### `isRedirectSignal`
+#### <code v-pre>isRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L69) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L69) <code v-pre>packages/fresh/src/route.ts</code>
 
 Type guard: recognize a Fresh redirect signal (mirrors the internal check).
 
@@ -284,9 +284,9 @@ Type guard: recognize a Fresh redirect signal (mirrors the internal check).
 export declare function isRedirectSignal(value: unknown): value is FreshRedirectSignal;
 ```
 
-#### `mergeHead`
+#### <code v-pre>mergeHead</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L114) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L114) <code v-pre>packages/fresh/src/head.ts</code>
 
 Merge N head fragments in order. Later fragments override earlier ones: - `title` — last non-empty wins - `meta` — dedup by `name` / `property` / `httpEquiv` (in that order), with `charset` treated as a singleton (last wins) - `link` — dedup by `rel + href` - `script` — dedup by `src` (inline scripts are always kept) - `base` — last non-null wins
 
@@ -294,9 +294,9 @@ Merge N head fragments in order. Later fragments override earlier ones: - `title
 export declare function mergeHead(fragments: readonly HeadFragment[]): HeadFragment;
 ```
 
-#### `mountIsland`
+#### <code v-pre>mountIsland</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L116) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L116) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Mount an island synchronously — invokes the component fn with the merged props and captures the returned virtual tree. Collects any event handlers present in the tree so `simulateInteraction` can dispatch against them.
 
@@ -304,9 +304,9 @@ Mount an island synchronously — invokes the component fn with the merged props
 export declare function mountIsland<P extends IslandProps = IslandProps>(island: IslandDefinition<P>, props?: Partial<P>): IslandMount<P>;
 ```
 
-#### `notFound`
+#### <code v-pre>notFound</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L48) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L48) <code v-pre>packages/fresh/src/route.ts</code>
 
 Throw this from a Fresh handler or a defineRoute page body to signal a 404.
 
@@ -314,9 +314,9 @@ Throw this from a Fresh handler or a defineRoute page body to signal a 404.
 export declare function notFound(): FreshNotFoundSignal;
 ```
 
-#### `redirect`
+#### <code v-pre>redirect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L43) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L43) <code v-pre>packages/fresh/src/route.ts</code>
 
 Throw this from a Fresh handler or a defineRoute page body to signal a redirect.
 
@@ -324,9 +324,9 @@ Throw this from a Fresh handler or a defineRoute page body to signal a redirect.
 export declare function redirect(location: string, status?: number): FreshRedirectSignal;
 ```
 
-#### `renderHead`
+#### <code v-pre>renderHead</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L194) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L194) <code v-pre>packages/fresh/src/head.ts</code>
 
 Stringify a merged head into an HTML fragment. The rendering order is deterministic (`title` → `base` → `meta` → `link` → `script`) so tests can diff on the exact serialized shape.
 
@@ -334,9 +334,9 @@ Stringify a merged head into an HTML fragment. The rendering order is determinis
 export declare function renderHead(head: HeadFragment): string;
 ```
 
-#### `simulateInteraction`
+#### <code v-pre>simulateInteraction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L279) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L279) <code v-pre>packages/fresh/src/islands.ts</code>
 
 Dispatch a synthetic event against a mounted island. `event` is the DOM event name (e.g. `click` / `input` / `submit`), `targetType` filters by element tag (e.g. only fire against `button` elements), and `value` is exposed on the event object for `input` handlers.
 
@@ -344,9 +344,9 @@ Dispatch a synthetic event against a mounted island. `event` is the DOM event na
 export declare function simulateInteraction(opts: SimulateInteractionOptions): SimulateInteractionResult;
 ```
 
-#### `stringify`
+#### <code v-pre>stringify</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L125) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L125) <code v-pre>packages/fresh/src/route.ts</code>
 
 Recursively serialize a Fresh virtual tree into an HTML string. Boolean attributes render as bare keys, `null` / `undefined` / `false` skip, and children are stringified without any XSS escaping — tests assert on shape, not on production output. Void elements (matching the HTML5 spec list) render as self-closing (`&lt;br /&gt;` / `&lt;meta ... /&gt;` / etc.) rather than `&lt;br&gt;&lt;/br&gt;` so `head.ts` can emit spec-shaped `&lt;meta&gt;` / `&lt;link&gt;` tags.
 
@@ -356,17 +356,17 @@ export declare function stringify(node: FreshChild): string;
 
 ### 型
 
-#### `AnyIslandDefinition`
+#### <code v-pre>AnyIslandDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L174) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L174) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export type AnyIslandDefinition = IslandDefinition<any>;
 ```
 
-#### `DefinedRoute`
+#### <code v-pre>DefinedRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L443) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L443) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface DefinedRoute<TData, TState> {
@@ -375,9 +375,9 @@ export interface DefinedRoute<TData, TState> {
 }
 ```
 
-#### `DefineRouteFn`
+#### <code v-pre>DefineRouteFn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L438) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L438) <code v-pre>packages/fresh/src/route.ts</code>
 
 `defineRoute&lt;T&gt;(fn)` mirrors Fresh's route wrapper. The returned brand lets `invokeDefineRoute` recognize the value; the handler itself just proxies to `fn(req, ctx)`.
 
@@ -385,25 +385,25 @@ export interface DefinedRoute<TData, TState> {
 export type DefineRouteFn<TData, TState> = (req: Request, ctx: FreshHandlerContext<TState>) => FreshChild | Promise<FreshChild>;
 ```
 
-#### `FreshChild`
+#### <code v-pre>FreshChild</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L91) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L91) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export type FreshChild = FreshVNode | string | number | boolean | null | undefined | FreshChild[];
 ```
 
-#### `FreshHandler`
+#### <code v-pre>FreshHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L216) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L216) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export type FreshHandler<TData = unknown, TState = Record<string, unknown>> = (req: Request, ctx: FreshHandlerContext<TState>) => Response | Promise<Response> | TData | Promise<TData>;
 ```
 
-#### `FreshHandlerContext`
+#### <code v-pre>FreshHandlerContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L205) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L205) <code v-pre>packages/fresh/src/route.ts</code>
 
 `HandlerContext&lt;S&gt;` shrinks Fresh's `ctx` to what tests observe: `render` to hand data to the page component, `renderNotFound` / `redirect` for direct 404 / 302 responses, and `next()` returning a 404 shape used by fall-through handlers. `state` is a mutable per-request bag matching Fresh's middleware→handler contract.
 
@@ -420,9 +420,9 @@ export interface FreshHandlerContext<TState = Record<string, unknown>> {
 }
 ```
 
-#### `FreshHandlers`
+#### <code v-pre>FreshHandlers</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L226) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L226) <code v-pre>packages/fresh/src/route.ts</code>
 
 `Handlers&lt;T, S&gt;` — Fresh's `export const handler` shape. Each optional method key maps to a handler for that HTTP method; missing methods fall through to a `405 Method Not Allowed` response.
 
@@ -430,17 +430,17 @@ export interface FreshHandlerContext<TState = Record<string, unknown>> {
 export type FreshHandlers<TData = unknown, TState = Record<string, unknown>> = Partial<Record<FreshHttpMethod, FreshHandler<TData, TState>>>;
 ```
 
-#### `FreshHttpMethod`
+#### <code v-pre>FreshHttpMethod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L78) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L78) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export type FreshHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 ```
 
-#### `FreshNotFoundSignal`
+#### <code v-pre>FreshNotFoundSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L38) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L38) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface FreshNotFoundSignal {
@@ -448,9 +448,9 @@ export interface FreshNotFoundSignal {
 }
 ```
 
-#### `FreshPageProps`
+#### <code v-pre>FreshPageProps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L190) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L190) <code v-pre>packages/fresh/src/route.ts</code>
 
 `PageProps&lt;T&gt;` mirrors Fresh's page component props. `data` is what the handler passed to `ctx.render(data)`, and `params` / `url` / `route` / `state` come from the router.
 
@@ -464,9 +464,9 @@ export interface FreshPageProps<TData = unknown, TState = Record<string, unknown
 }
 ```
 
-#### `FreshRedirectSignal`
+#### <code v-pre>FreshRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L32) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L32) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface FreshRedirectSignal {
@@ -476,9 +476,9 @@ export interface FreshRedirectSignal {
 }
 ```
 
-#### `FreshRouteParams`
+#### <code v-pre>FreshRouteParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L80) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L80) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface FreshRouteParams {
@@ -486,9 +486,9 @@ export interface FreshRouteParams {
 }
 ```
 
-#### `FreshVNode`
+#### <code v-pre>FreshVNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L85) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L85) <code v-pre>packages/fresh/src/route.ts</code>
 
 JSX-shaped virtual node returned by a Fresh route or Island.
 
@@ -500,9 +500,9 @@ export interface FreshVNode {
 }
 ```
 
-#### `HeadBaseTag`
+#### <code v-pre>HeadBaseTag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L59) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L59) <code v-pre>packages/fresh/src/head.ts</code>
 
 ```ts
 export interface HeadBaseTag {
@@ -511,9 +511,9 @@ export interface HeadBaseTag {
 }
 ```
 
-#### `HeadFragment`
+#### <code v-pre>HeadFragment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L64) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L64) <code v-pre>packages/fresh/src/head.ts</code>
 
 ```ts
 export interface HeadFragment {
@@ -526,9 +526,9 @@ export interface HeadFragment {
 }
 ```
 
-#### `HeadLinkTag`
+#### <code v-pre>HeadLinkTag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L38) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L38) <code v-pre>packages/fresh/src/head.ts</code>
 
 ```ts
 export interface HeadLinkTag {
@@ -542,9 +542,9 @@ export interface HeadLinkTag {
 }
 ```
 
-#### `HeadMetaTag`
+#### <code v-pre>HeadMetaTag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L30) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L30) <code v-pre>packages/fresh/src/head.ts</code>
 
 ```ts
 export interface HeadMetaTag {
@@ -556,9 +556,9 @@ export interface HeadMetaTag {
 }
 ```
 
-#### `HeadScriptTag`
+#### <code v-pre>HeadScriptTag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L48) `packages/fresh/src/head.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/head.ts#L48) <code v-pre>packages/fresh/src/head.ts</code>
 
 ```ts
 export interface HeadScriptTag {
@@ -573,9 +573,9 @@ export interface HeadScriptTag {
 }
 ```
 
-#### `HydratedIslandEntry`
+#### <code v-pre>HydratedIslandEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L181) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L181) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface HydratedIslandEntry {
@@ -585,9 +585,9 @@ export interface HydratedIslandEntry {
 }
 ```
 
-#### `HydrateIslandsOptions`
+#### <code v-pre>HydrateIslandsOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L176) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L176) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface HydrateIslandsOptions {
@@ -596,9 +596,9 @@ export interface HydrateIslandsOptions {
 }
 ```
 
-#### `HydrateIslandsResult`
+#### <code v-pre>HydrateIslandsResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L187) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L187) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface HydrateIslandsResult {
@@ -609,9 +609,9 @@ export interface HydrateIslandsResult {
 }
 ```
 
-#### `InvokeDefineRouteOptions`
+#### <code v-pre>InvokeDefineRouteOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L464) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L464) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface InvokeDefineRouteOptions<TData, TState> {
@@ -623,9 +623,9 @@ export interface InvokeDefineRouteOptions<TData, TState> {
 }
 ```
 
-#### `InvokeDefineRouteResult`
+#### <code v-pre>InvokeDefineRouteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L472) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L472) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface InvokeDefineRouteResult {
@@ -637,9 +637,9 @@ export interface InvokeDefineRouteResult {
 }
 ```
 
-#### `InvokeFreshHandlerOptions`
+#### <code v-pre>InvokeFreshHandlerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L230) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L230) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface InvokeFreshHandlerOptions<TData, TState> {
@@ -656,9 +656,9 @@ export interface InvokeFreshHandlerOptions<TData, TState> {
 }
 ```
 
-#### `InvokeFreshHandlerResult`
+#### <code v-pre>InvokeFreshHandlerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L243) `packages/fresh/src/route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/route.ts#L243) <code v-pre>packages/fresh/src/route.ts</code>
 
 ```ts
 export interface InvokeFreshHandlerResult<TData> {
@@ -671,17 +671,17 @@ export interface InvokeFreshHandlerResult<TData> {
 }
 ```
 
-#### `IslandComponent`
+#### <code v-pre>IslandComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L35) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L35) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export type IslandComponent<P extends IslandProps = IslandProps> = (props: P) => FreshChild;
 ```
 
-#### `IslandDefinition`
+#### <code v-pre>IslandDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L37) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L37) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface IslandDefinition<P extends IslandProps = IslandProps> {
@@ -692,9 +692,9 @@ export interface IslandDefinition<P extends IslandProps = IslandProps> {
 }
 ```
 
-#### `IslandMount`
+#### <code v-pre>IslandMount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L102) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L102) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface IslandMount<P extends IslandProps = IslandProps> {
@@ -707,17 +707,17 @@ export interface IslandMount<P extends IslandProps = IslandProps> {
 }
 ```
 
-#### `IslandProps`
+#### <code v-pre>IslandProps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L33) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L33) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export type IslandProps = Record<string, unknown>;
 ```
 
-#### `SimulateInteractionOptions`
+#### <code v-pre>SimulateInteractionOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L261) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L261) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface SimulateInteractionOptions {
@@ -728,9 +728,9 @@ export interface SimulateInteractionOptions {
 }
 ```
 
-#### `SimulateInteractionResult`
+#### <code v-pre>SimulateInteractionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L268) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L268) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface SimulateInteractionResult {
@@ -739,9 +739,9 @@ export interface SimulateInteractionResult {
 }
 ```
 
-#### `SyntheticEvent`
+#### <code v-pre>SyntheticEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L142) `packages/fresh/src/islands.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/fresh/src/islands.ts#L142) <code v-pre>packages/fresh/src/islands.ts</code>
 
 ```ts
 export interface SyntheticEvent {

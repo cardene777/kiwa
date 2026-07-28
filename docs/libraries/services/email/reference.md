@@ -23,7 +23,7 @@ client は実メール provider、DNS、inbox に接続しません。provider �
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;template not found: $&#123;templateId&#125;&#96; | [packages/email/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L95) |
+| <code v-pre>template not found: $&#123;templateId&#125;</code> | [packages/email/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L95) |
 
 ## API 契約
 
@@ -31,9 +31,9 @@ client は実メール provider、DNS、inbox に接続しません。provider �
 
 ### 値
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L22) `packages/email/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L22) <code v-pre>packages/email/src/circuit-breaker.ts</code>
 
 circuit breaker: failureThreshold 連続 failure で state=open、 resetTimeoutMs 経過後 half-open で 1 回試行、 success で closed 復帰。
 
@@ -41,9 +41,9 @@ circuit breaker: failureThreshold 連続 failure で state=open、 resetTimeoutM
 export declare function createCircuitBreaker(client: EmailClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createEmailClient`
+#### <code v-pre>createEmailClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L55) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L55) <code v-pre>packages/email/src/client.ts</code>
 
 provider 別のみ mock 差 (id prefix / accepted status label) を持たせつつ、 全 API 共通 interface。 実 provider (Resend / SendGrid / Postmark / SES) の SDK を差し替えても同じ signature で呼べる想定。
 
@@ -51,9 +51,9 @@ provider 別のみ mock 差 (id prefix / accepted status label) を持たせつ�
 export declare function createEmailClient(options?: CreateEmailClientOptions): EmailClient;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L22) `packages/email/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L22) <code v-pre>packages/email/src/observability.ts</code>
 
 observability hook registry。 send 前 / 後 / error 3 phase で callback を発火。
 
@@ -61,9 +61,9 @@ observability hook registry。 send 前 / 後 / error 3 phase で callback を�
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L11) `packages/email/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L11) <code v-pre>packages/email/src/idempotency.ts</code>
 
 in-memory idempotency cache (production では Redis 等に差替想定)。
 
@@ -71,9 +71,9 @@ in-memory idempotency cache (production では Redis 等に差替想定)。
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `parseDeliveryEvent`
+#### <code v-pre>parseDeliveryEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L23) `packages/email/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L23) <code v-pre>packages/email/src/delivery.ts</code>
 
 provider 別 event payload を統一 shape に正規化。 実 provider が返す field 名の違い (Resend = type / SendGrid = event / Postmark = RecordType / SES = eventType) を吸収。
 
@@ -81,9 +81,9 @@ provider 別 event payload を統一 shape に正規化。 実 provider が返�
 export declare function parseDeliveryEvent(rawEvent: RawDeliveryEvent): NormalizedDeliveryEvent;
 ```
 
-#### `renderTemplate`
+#### <code v-pre>renderTemplate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/template.ts#L13) `packages/email/src/template.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/template.ts#L13) <code v-pre>packages/email/src/template.ts</code>
 
 `&#123;&#123;name&#125;&#125;` placeholder を data で置換する mustache-lite template。 実 provider の template engine (Handlebars / MJML) を差し替えても同じ signature で呼べる想定。
 
@@ -91,9 +91,9 @@ export declare function parseDeliveryEvent(rawEvent: RawDeliveryEvent): Normaliz
 export declare function renderTemplate(template: string, data: EmailTemplateContext): TemplateRenderResult;
 ```
 
-#### `sendBatch`
+#### <code v-pre>sendBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/batch.ts#L19) `packages/email/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/batch.ts#L19) <code v-pre>packages/email/src/batch.ts</code>
 
 batch send with limited concurrency。 default concurrency = 5、 stopOnFirstFailure=true で最初の failure で中断。
 
@@ -101,9 +101,9 @@ batch send with limited concurrency。 default concurrency = 5、 stopOnFirstFai
 export declare function sendBatch(client: EmailClient, messages: readonly EmailMessage[], options?: BatchSendOptions): Promise<BatchSendResult>;
 ```
 
-#### `sendIdempotent`
+#### <code v-pre>sendIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L32) `packages/email/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L32) <code v-pre>packages/email/src/idempotency.ts</code>
 
 idempotent send: 同 idempotencyKey なら cached result を返却、 dup send 防止。 key 未登録なら send して cache に格納。
 
@@ -113,9 +113,9 @@ export declare function sendIdempotent(client: EmailClient, msg: EmailMessage, o
 }>;
 ```
 
-#### `sendObservable`
+#### <code v-pre>sendObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L48) `packages/email/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L48) <code v-pre>packages/email/src/observability.ts</code>
 
 observable send: before-send / after-send / error hook を発火しつつ send。 hook throw は catch して error hook に流す (send 自体は継続)。
 
@@ -123,9 +123,9 @@ observable send: before-send / after-send / error hook を発火しつつ send�
 export declare function sendObservable(client: EmailClient, msg: EmailMessage, hooks: HookRegistry): Promise<EmailSendResult>;
 ```
 
-#### `sendWithRetry`
+#### <code v-pre>sendWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/retry.ts#L19) `packages/email/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/retry.ts#L19) <code v-pre>packages/email/src/retry.ts</code>
 
 send with exponential backoff。 failed status で retry、 maxAttempts 到達で最後の result を返す。 default = maxAttempts 3 / initialDelayMs 100 / backoffMultiplier 2 / maxDelayMs 5000。
 
@@ -133,9 +133,9 @@ send with exponential backoff。 failed status で retry、 maxAttempts 到達�
 export declare function sendWithRetry(client: EmailClient, msg: EmailMessage, options?: RetryOptions): Promise<RetrySendResult>;
 ```
 
-#### `verifyWebhookSignature`
+#### <code v-pre>verifyWebhookSignature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/signature.ts#L15) `packages/email/src/signature.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/signature.ts#L15) <code v-pre>packages/email/src/signature.ts</code>
 
 provider 別 webhook 署名を検証。 real provider (Resend / SendGrid / Postmark / SES) が 実際に送る signature format (sha256 hex / base64) を再現。
 
@@ -145,9 +145,9 @@ export declare function verifyWebhookSignature(payload: string, signature: strin
 
 ### 型
 
-#### `BatchSendOptions`
+#### <code v-pre>BatchSendOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/batch.ts#L3) `packages/email/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/batch.ts#L3) <code v-pre>packages/email/src/batch.ts</code>
 
 ```ts
 export interface BatchSendOptions {
@@ -156,9 +156,9 @@ export interface BatchSendOptions {
 }
 ```
 
-#### `BatchSendResult`
+#### <code v-pre>BatchSendResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/batch.ts#L8) `packages/email/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/batch.ts#L8) <code v-pre>packages/email/src/batch.ts</code>
 
 ```ts
 export interface BatchSendResult {
@@ -169,9 +169,9 @@ export interface BatchSendResult {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L11) `packages/email/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L11) <code v-pre>packages/email/src/circuit-breaker.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -184,9 +184,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L5) `packages/email/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L5) <code v-pre>packages/email/src/circuit-breaker.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -196,25 +196,25 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L3) `packages/email/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/circuit-breaker.ts#L3) <code v-pre>packages/email/src/circuit-breaker.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `DeliveryEventType`
+#### <code v-pre>DeliveryEventType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L3) `packages/email/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L3) <code v-pre>packages/email/src/delivery.ts</code>
 
 ```ts
 export type DeliveryEventType = 'delivered' | 'bounced' | 'opened' | 'clicked' | 'complained' | 'unknown';
 ```
 
-#### `EmailClient`
+#### <code v-pre>EmailClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L35) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L35) <code v-pre>packages/email/src/client.ts</code>
 
 ```ts
 export interface EmailClient {
@@ -226,9 +226,9 @@ export interface EmailClient {
 }
 ```
 
-#### `EmailMessage`
+#### <code v-pre>EmailMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L5) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L5) <code v-pre>packages/email/src/client.ts</code>
 
 ```ts
 export interface EmailMessage {
@@ -246,17 +246,17 @@ export interface EmailMessage {
 }
 ```
 
-#### `EmailProvider`
+#### <code v-pre>EmailProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L3) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L3) <code v-pre>packages/email/src/client.ts</code>
 
 ```ts
 export type EmailProvider = 'resend' | 'sendgrid' | 'postmark' | 'ses';
 ```
 
-#### `EmailSendResult`
+#### <code v-pre>EmailSendResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L21) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L21) <code v-pre>packages/email/src/client.ts</code>
 
 ```ts
 export interface EmailSendResult {
@@ -268,25 +268,25 @@ export interface EmailSendResult {
 }
 ```
 
-#### `EmailTemplateContext`
+#### <code v-pre>EmailTemplateContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L19) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L19) <code v-pre>packages/email/src/client.ts</code>
 
 ```ts
 export type EmailTemplateContext = Record<string, string | number | boolean>;
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L13) `packages/email/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L13) <code v-pre>packages/email/src/observability.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void | Promise<void>;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L5) `packages/email/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L5) <code v-pre>packages/email/src/observability.ts</code>
 
 ```ts
 export interface HookContext {
@@ -298,9 +298,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L15) `packages/email/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L15) <code v-pre>packages/email/src/observability.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -310,9 +310,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L3) `packages/email/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L3) <code v-pre>packages/email/src/idempotency.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -323,9 +323,9 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `IdempotentSendOptions`
+#### <code v-pre>IdempotentSendOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L23) `packages/email/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/idempotency.ts#L23) <code v-pre>packages/email/src/idempotency.ts</code>
 
 ```ts
 export interface IdempotentSendOptions {
@@ -334,9 +334,9 @@ export interface IdempotentSendOptions {
 }
 ```
 
-#### `NormalizedDeliveryEvent`
+#### <code v-pre>NormalizedDeliveryEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L10) `packages/email/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L10) <code v-pre>packages/email/src/delivery.ts</code>
 
 ```ts
 export interface NormalizedDeliveryEvent {
@@ -349,9 +349,9 @@ export interface NormalizedDeliveryEvent {
 }
 ```
 
-#### `RawDeliveryEvent`
+#### <code v-pre>RawDeliveryEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L5) `packages/email/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/delivery.ts#L5) <code v-pre>packages/email/src/delivery.ts</code>
 
 ```ts
 export interface RawDeliveryEvent {
@@ -360,9 +360,9 @@ export interface RawDeliveryEvent {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/retry.ts#L3) `packages/email/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/retry.ts#L3) <code v-pre>packages/email/src/retry.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -374,9 +374,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetrySendResult`
+#### <code v-pre>RetrySendResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/retry.ts#L11) `packages/email/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/retry.ts#L11) <code v-pre>packages/email/src/retry.ts</code>
 
 ```ts
 export interface RetrySendResult extends EmailSendResult {
@@ -384,17 +384,17 @@ export interface RetrySendResult extends EmailSendResult {
 }
 ```
 
-#### `SendHookEvent`
+#### <code v-pre>SendHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L3) `packages/email/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/observability.ts#L3) <code v-pre>packages/email/src/observability.ts</code>
 
 ```ts
 export type SendHookEvent = 'before-send' | 'after-send' | 'error';
 ```
 
-#### `SentEmailRecord`
+#### <code v-pre>SentEmailRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L29) `packages/email/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L29) <code v-pre>packages/email/src/client.ts</code>
 
 ```ts
 export interface SentEmailRecord extends EmailSendResult {
@@ -404,9 +404,9 @@ export interface SentEmailRecord extends EmailSendResult {
 }
 ```
 
-#### `SignatureVerifyResult`
+#### <code v-pre>SignatureVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/signature.ts#L4) `packages/email/src/signature.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/signature.ts#L4) <code v-pre>packages/email/src/signature.ts</code>
 
 ```ts
 export interface SignatureVerifyResult {
@@ -417,9 +417,9 @@ export interface SignatureVerifyResult {
 }
 ```
 
-#### `TemplateRenderResult`
+#### <code v-pre>TemplateRenderResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/template.ts#L3) `packages/email/src/template.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/email/src/template.ts#L3) <code v-pre>packages/email/src/template.ts</code>
 
 ```ts
 export interface TemplateRenderResult {

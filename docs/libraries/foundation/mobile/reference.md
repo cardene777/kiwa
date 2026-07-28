@@ -55,58 +55,58 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;mobile real driver requested for $&#123;axis&#125; but KIWA&#95;MOBILE&#95;MODE!=='real'&#96; | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L56) |
-| &#96;mobile $&#123;axis&#125; URL env ($&#123;String(envKey)&#125;) not set; real driver unavailable&#96; | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L63) |
-| &#96;invokeMobileCli($&#123;inv.command&#125;): KIWA&#95;MOBILE&#95;MODE must be 'real'&#96; | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L73) |
-| &#96;invokeMobileCli($&#123;inv.command&#125;): args exceeds max 32 ($&#123;inv.args.length&#125;)&#96; | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L78) |
-| &#96;splitCommand: unable to derive executable from $&#123;command&#125;&#96; | [packages/mobile/src/adapters/spawn-executor.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L59) |
-| 'initAsyncStorage: storeId must not be empty' | [packages/mobile/src/semantics/async-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L37) |
-| 'setAsyncStorageItem: key must not be empty' | [packages/mobile/src/semantics/async-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L52) |
-| 'initCodegen: packageName must not be empty' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L40) |
-| 'loadCodegenSchema: schemaHash must not be empty' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L55) |
-| &#96;generateSpec: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L66) |
-| 'generateSpec: specCount must be &gt; 0' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L68) |
-| 'emitCodegenType: filePath must not be empty' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L77) |
-| &#96;completeCodegenBuild: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L88) |
-| 'loadExpoBuildConfig: appSlug must not be empty' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L44) |
-| 'loadExpoBuildConfig: configHash must not be empty' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L47) |
-| 'resolveDeepLink: build config must be loaded first' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L67) |
-| 'receivePushNotification: build config must be loaded first' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L84) |
-| 'completeExpoBuild: build config must be loaded first' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L99) |
-| 'initFabric: rootId must not be empty' | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L37) |
-| &#96;commitShadowTree: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L62) |
-| 'commitShadowTree: nodeCount must be &gt;= 0' | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L64) |
-| &#96;completeFabricMount: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L81) |
-| 'startMetroBundle: bundleId must not be empty' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L42) |
-| 'resolveMetroModule: bundle must be started first' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L61) |
-| 'applyMetroHmr: bundle must be started first' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L76) |
-| 'completeMetroBundle: bundle must be started first' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L90) |
-| 'initNavigation: navigatorId must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L39) |
-| 'pushNavigationStack: screenName must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L52) |
-| 'switchNavigationTab: tabName must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L59) |
-| 'openNavigationModal: modalId must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L66) |
-| 'navigateDeepLink: url must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L73) |
-| 'initNewArchitecture: appName must not be empty' | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L40) |
-| &#96;startNewArchInit: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L53) |
-| &#96;enableConcurrentReact: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L63) |
-| &#96;bridgeLegacyModule: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L75) |
-| 'bridgeLegacyModule: moduleName must not be empty' | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L77) |
-| &#96;markNewArchReady: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L90) |
-| 'mountReactNativeComponent: componentId must not be empty' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L42) |
-| 'invokeNativeModule: component is unmounted' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L61) |
-| 'recognizeGesture: component is unmounted' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L76) |
-| 'unmountReactNativeComponent: already unmounted' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L90) |
-| 'initReanimated: animationId must not be empty' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L37) |
-| 'executeWorklet: workletName must not be empty' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L62) |
-| 'startReanimatedAnimation: durationMs must be &gt;= 0' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L75) |
-| &#96;completeReanimatedAnimation: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L85) |
-| 'initSecureStorage: vaultId must not be empty' | [packages/mobile/src/semantics/secure-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L38) |
-| 'storeCredential: key must not be empty' | [packages/mobile/src/semantics/secure-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L53) |
-| 'initTurboModules: moduleName must not be empty' | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L41) |
-| 'registerTurboSpec: methods must not be empty' | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L57) |
-| &#96;bindJsiRuntime: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L68) |
-| &#96;invokeTurboMethod: session is $&#123;session.state&#125;, jsi not bound&#96; | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L80) |
-| &#96;invokeTurboMethod: $&#123;methodName&#125; not in registered methods&#96; | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L83) |
+| <code v-pre>mobile real driver requested for $&#123;axis&#125; but KIWA&#95;MOBILE&#95;MODE!=='real'</code> | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L56) |
+| <code v-pre>mobile $&#123;axis&#125; URL env ($&#123;String(envKey)&#125;) not set; real driver unavailable</code> | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L63) |
+| <code v-pre>invokeMobileCli($&#123;inv.command&#125;): KIWA&#95;MOBILE&#95;MODE must be 'real'</code> | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L73) |
+| <code v-pre>invokeMobileCli($&#123;inv.command&#125;): args exceeds max 32 ($&#123;inv.args.length&#125;)</code> | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L78) |
+| <code v-pre>splitCommand: unable to derive executable from $&#123;command&#125;</code> | [packages/mobile/src/adapters/spawn-executor.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L59) |
+| <code v-pre>initAsyncStorage: storeId must not be empty</code> | [packages/mobile/src/semantics/async-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L37) |
+| <code v-pre>setAsyncStorageItem: key must not be empty</code> | [packages/mobile/src/semantics/async-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L52) |
+| <code v-pre>initCodegen: packageName must not be empty</code> | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L40) |
+| <code v-pre>loadCodegenSchema: schemaHash must not be empty</code> | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L55) |
+| <code v-pre>generateSpec: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L66) |
+| <code v-pre>generateSpec: specCount must be &gt; 0</code> | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L68) |
+| <code v-pre>emitCodegenType: filePath must not be empty</code> | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L77) |
+| <code v-pre>completeCodegenBuild: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L88) |
+| <code v-pre>loadExpoBuildConfig: appSlug must not be empty</code> | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L44) |
+| <code v-pre>loadExpoBuildConfig: configHash must not be empty</code> | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L47) |
+| <code v-pre>resolveDeepLink: build config must be loaded first</code> | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L67) |
+| <code v-pre>receivePushNotification: build config must be loaded first</code> | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L84) |
+| <code v-pre>completeExpoBuild: build config must be loaded first</code> | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L99) |
+| <code v-pre>initFabric: rootId must not be empty</code> | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L37) |
+| <code v-pre>commitShadowTree: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L62) |
+| <code v-pre>commitShadowTree: nodeCount must be &gt;= 0</code> | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L64) |
+| <code v-pre>completeFabricMount: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L81) |
+| <code v-pre>startMetroBundle: bundleId must not be empty</code> | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L42) |
+| <code v-pre>resolveMetroModule: bundle must be started first</code> | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L61) |
+| <code v-pre>applyMetroHmr: bundle must be started first</code> | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L76) |
+| <code v-pre>completeMetroBundle: bundle must be started first</code> | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L90) |
+| <code v-pre>initNavigation: navigatorId must not be empty</code> | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L39) |
+| <code v-pre>pushNavigationStack: screenName must not be empty</code> | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L52) |
+| <code v-pre>switchNavigationTab: tabName must not be empty</code> | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L59) |
+| <code v-pre>openNavigationModal: modalId must not be empty</code> | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L66) |
+| <code v-pre>navigateDeepLink: url must not be empty</code> | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L73) |
+| <code v-pre>initNewArchitecture: appName must not be empty</code> | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L40) |
+| <code v-pre>startNewArchInit: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L53) |
+| <code v-pre>enableConcurrentReact: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L63) |
+| <code v-pre>bridgeLegacyModule: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L75) |
+| <code v-pre>bridgeLegacyModule: moduleName must not be empty</code> | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L77) |
+| <code v-pre>markNewArchReady: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L90) |
+| <code v-pre>mountReactNativeComponent: componentId must not be empty</code> | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L42) |
+| <code v-pre>invokeNativeModule: component is unmounted</code> | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L61) |
+| <code v-pre>recognizeGesture: component is unmounted</code> | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L76) |
+| <code v-pre>unmountReactNativeComponent: already unmounted</code> | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L90) |
+| <code v-pre>initReanimated: animationId must not be empty</code> | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L37) |
+| <code v-pre>executeWorklet: workletName must not be empty</code> | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L62) |
+| <code v-pre>startReanimatedAnimation: durationMs must be &gt;= 0</code> | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L75) |
+| <code v-pre>completeReanimatedAnimation: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L85) |
+| <code v-pre>initSecureStorage: vaultId must not be empty</code> | [packages/mobile/src/semantics/secure-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L38) |
+| <code v-pre>storeCredential: key must not be empty</code> | [packages/mobile/src/semantics/secure-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L53) |
+| <code v-pre>initTurboModules: moduleName must not be empty</code> | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L41) |
+| <code v-pre>registerTurboSpec: methods must not be empty</code> | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L57) |
+| <code v-pre>bindJsiRuntime: session is $&#123;session.state&#125;</code> | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L68) |
+| <code v-pre>invokeTurboMethod: session is $&#123;session.state&#125;, jsi not bound</code> | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L80) |
+| <code v-pre>invokeTurboMethod: $&#123;methodName&#125; not in registered methods</code> | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L83) |
 
 ## API 契約
 
@@ -114,41 +114,41 @@
 
 ### 値
 
-#### `applyMetroHmr`
+#### <code v-pre>applyMetroHmr</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L71) `packages/mobile/src/semantics/metro.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L71) <code v-pre>packages/mobile/src/semantics/metro.ts</code>
 
 ```ts
 export declare function applyMetroHmr(session: MetroSession, moduleId: string): AxisStep<MetroState>;
 ```
 
-#### `assertMobileRealDriverAvailable`
+#### <code v-pre>assertMobileRealDriverAvailable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L51) `packages/mobile/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L51) <code v-pre>packages/mobile/src/adapters/real-driver.ts</code>
 
 ```ts
 export declare function assertMobileRealDriverAvailable(axis: MobileRealDriverAxis, env: MobileRealDriverEnv | null): void;
 ```
 
-#### `bindJsiRuntime`
+#### <code v-pre>bindJsiRuntime</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L66) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L66) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 ```ts
 export declare function bindJsiRuntime(session: TurboModulesSession): AxisStep<TurboModulesState>;
 ```
 
-#### `bridgeLegacyModule`
+#### <code v-pre>bridgeLegacyModule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L70) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L70) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 ```ts
 export declare function bridgeLegacyModule(session: NewArchitectureSession, moduleName: string): AxisStep<NewArchitectureState>;
 ```
 
-#### `buildSpawnInvocation`
+#### <code v-pre>buildSpawnInvocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L118) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L118) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 ```ts
 export declare function buildSpawnInvocation(input: {
@@ -159,9 +159,9 @@ export declare function buildSpawnInvocation(input: {
 }): SpawnInvocation;
 ```
 
-#### `challengeBiometric`
+#### <code v-pre>challengeBiometric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L71) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L71) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 ```ts
 export declare function challengeBiometric(session: SecureStorageSession, input: {
@@ -170,25 +170,25 @@ export declare function challengeBiometric(session: SecureStorageSession, input:
 }): AxisStep<SecureStorageState>;
 ```
 
-#### `cliForAxis`
+#### <code v-pre>cliForAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L114) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L114) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 ```ts
 export declare function cliForAxis(axis: MobileAxis): MobileCliCommand | null;
 ```
 
-#### `collectFidelityCoverage`
+#### <code v-pre>collectFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L87) `packages/mobile/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L87) <code v-pre>packages/mobile/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare function collectFidelityCoverage(providers?: MobileTarget[]): FidelityCoverage;
 ```
 
-#### `commitShadowTree`
+#### <code v-pre>commitShadowTree</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L57) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L57) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 ```ts
 export declare function commitShadowTree(session: FabricSession, input: {
@@ -196,89 +196,89 @@ export declare function commitShadowTree(session: FabricSession, input: {
 }): AxisStep<FabricState>;
 ```
 
-#### `completeCodegenBuild`
+#### <code v-pre>completeCodegenBuild</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L86) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L86) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 ```ts
 export declare function completeCodegenBuild(session: CodegenSession): AxisStep<CodegenState>;
 ```
 
-#### `completeExpoBuild`
+#### <code v-pre>completeExpoBuild</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L95) `packages/mobile/src/semantics/expo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L95) <code v-pre>packages/mobile/src/semantics/expo.ts</code>
 
 ```ts
 export declare function completeExpoBuild(session: ExpoSession): AxisStep<ExpoState>;
 ```
 
-#### `completeFabricMount`
+#### <code v-pre>completeFabricMount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L79) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L79) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 ```ts
 export declare function completeFabricMount(session: FabricSession): AxisStep<FabricState>;
 ```
 
-#### `completeMetroBundle`
+#### <code v-pre>completeMetroBundle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L86) `packages/mobile/src/semantics/metro.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L86) <code v-pre>packages/mobile/src/semantics/metro.ts</code>
 
 ```ts
 export declare function completeMetroBundle(session: MetroSession): AxisStep<MetroState>;
 ```
 
-#### `completeReanimatedAnimation`
+#### <code v-pre>completeReanimatedAnimation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L83) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L83) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 ```ts
 export declare function completeReanimatedAnimation(session: ReanimatedSession): AxisStep<ReanimatedState>;
 ```
 
-#### `emitCodegenType`
+#### <code v-pre>emitCodegenType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L73) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L73) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 ```ts
 export declare function emitCodegenType(session: CodegenSession, filePath: string): AxisStep<CodegenState>;
 ```
 
-#### `enableConcurrentReact`
+#### <code v-pre>enableConcurrentReact</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L59) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L59) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 ```ts
 export declare function enableConcurrentReact(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
 ```
 
-#### `executeSpawn`
+#### <code v-pre>executeSpawn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L64) `packages/mobile/src/adapters/spawn-executor.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L64) <code v-pre>packages/mobile/src/adapters/spawn-executor.ts</code>
 
 ```ts
 export declare function executeSpawn(input: SpawnExecutorInput, spawnFn?: SpawnFn): Promise<SpawnExecutorResult>;
 ```
 
-#### `executeWorklet`
+#### <code v-pre>executeWorklet</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L61) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L61) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 ```ts
 export declare function executeWorklet(session: ReanimatedSession, workletName: string): AxisStep<ReanimatedState>;
 ```
 
-#### `flushAsyncStorageBatch`
+#### <code v-pre>flushAsyncStorageBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L79) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L79) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 ```ts
 export declare function flushAsyncStorageBatch(session: AsyncStorageSession): AxisStep<AsyncStorageState>;
 ```
 
-#### `generateSpec`
+#### <code v-pre>generateSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L61) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L61) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 ```ts
 export declare function generateSpec(session: CodegenSession, input: {
@@ -286,9 +286,9 @@ export declare function generateSpec(session: CodegenSession, input: {
 }): AxisStep<CodegenState>;
 ```
 
-#### `initAsyncStorage`
+#### <code v-pre>initAsyncStorage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L36) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L36) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 ```ts
 export declare function initAsyncStorage(input: {
@@ -297,9 +297,9 @@ export declare function initAsyncStorage(input: {
 }): AsyncStorageSession;
 ```
 
-#### `initCodegen`
+#### <code v-pre>initCodegen</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L36) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L36) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 ```ts
 export declare function initCodegen(input: {
@@ -308,9 +308,9 @@ export declare function initCodegen(input: {
 }): CodegenSession;
 ```
 
-#### `initFabric`
+#### <code v-pre>initFabric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L36) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L36) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 ```ts
 export declare function initFabric(input: {
@@ -319,9 +319,9 @@ export declare function initFabric(input: {
 }): FabricSession;
 ```
 
-#### `initNavigation`
+#### <code v-pre>initNavigation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L38) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L38) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 ```ts
 export declare function initNavigation(input: {
@@ -330,9 +330,9 @@ export declare function initNavigation(input: {
 }): NavigationSession;
 ```
 
-#### `initNewArchitecture`
+#### <code v-pre>initNewArchitecture</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L36) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L36) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 ```ts
 export declare function initNewArchitecture(input: {
@@ -341,9 +341,9 @@ export declare function initNewArchitecture(input: {
 }): NewArchitectureSession;
 ```
 
-#### `initReanimated`
+#### <code v-pre>initReanimated</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L36) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L36) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 ```ts
 export declare function initReanimated(input: {
@@ -352,9 +352,9 @@ export declare function initReanimated(input: {
 }): ReanimatedSession;
 ```
 
-#### `initSecureStorage`
+#### <code v-pre>initSecureStorage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L37) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L37) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 ```ts
 export declare function initSecureStorage(input: {
@@ -363,9 +363,9 @@ export declare function initSecureStorage(input: {
 }): SecureStorageSession;
 ```
 
-#### `initTurboModules`
+#### <code v-pre>initTurboModules</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L37) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L37) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 ```ts
 export declare function initTurboModules(input: {
@@ -374,9 +374,9 @@ export declare function initTurboModules(input: {
 }): TurboModulesSession;
 ```
 
-#### `invokeMobileCli`
+#### <code v-pre>invokeMobileCli</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L59) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L59) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 v0.6 実 spawn 実行 = env-gate 通過確認 + args 上限 32 + 実 child_process.spawn 実行。 `KIWA_MOBILE_MODE=real` + 対応 axis env 未設定なら throw で fail-closed。 `KIWA_MOBILE_SPAWN=dry-run` の時は v0.5 stub 相当の shape 契約を返す (実 CLI 未 install 環境向け backward compat 経路)。
 
@@ -384,9 +384,9 @@ v0.6 実 spawn 実行 = env-gate 通過確認 + args 上限 32 + 実 child_proce
 export declare function invokeMobileCli(inv: SpawnInvocation): Promise<SpawnResult>;
 ```
 
-#### `invokeMobileCliWith`
+#### <code v-pre>invokeMobileCliWith</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L67) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L67) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 DI 経路 = spawnFn を注入可能、 test で dummy spawn を差し込んで 決定的挙動を検証できる。 default は nodeSpawn。
 
@@ -394,33 +394,33 @@ DI 経路 = spawnFn を注入可能、 test で dummy spawn を差し込んで �
 export declare function invokeMobileCliWith(inv: SpawnInvocation, spawnFn: SpawnFn): Promise<SpawnResult>;
 ```
 
-#### `invokeNativeModule`
+#### <code v-pre>invokeNativeModule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L56) `packages/mobile/src/semantics/react-native.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L56) <code v-pre>packages/mobile/src/semantics/react-native.ts</code>
 
 ```ts
 export declare function invokeNativeModule(session: ReactNativeSession, moduleName: string): AxisStep<ReactNativeState>;
 ```
 
-#### `invokeTurboMethod`
+#### <code v-pre>invokeTurboMethod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L75) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L75) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 ```ts
 export declare function invokeTurboMethod(session: TurboModulesSession, methodName: string): AxisStep<TurboModulesState>;
 ```
 
-#### `loadCodegenSchema`
+#### <code v-pre>loadCodegenSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L51) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L51) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 ```ts
 export declare function loadCodegenSchema(session: CodegenSession, schemaHash: string): AxisStep<CodegenState>;
 ```
 
-#### `loadExpoBuildConfig`
+#### <code v-pre>loadExpoBuildConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L38) `packages/mobile/src/semantics/expo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L38) <code v-pre>packages/mobile/src/semantics/expo.ts</code>
 
 ```ts
 export declare function loadExpoBuildConfig(input: {
@@ -430,49 +430,49 @@ export declare function loadExpoBuildConfig(input: {
 }): ExpoSession;
 ```
 
-#### `makeMockAdapter`
+#### <code v-pre>makeMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L215) `packages/mobile/src/adapters/mock-factory.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L215) <code v-pre>packages/mobile/src/adapters/mock-factory.ts</code>
 
 ```ts
 export declare function makeMockAdapter(axis: MobileAxis): MobileAdapter;
 ```
 
-#### `makeRealAdapter`
+#### <code v-pre>makeRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L225) `packages/mobile/src/adapters/mock-factory.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L225) <code v-pre>packages/mobile/src/adapters/mock-factory.ts</code>
 
 ```ts
 export declare function makeRealAdapter(axis: MobileAxis): MobileAdapter;
 ```
 
-#### `markNewArchReady`
+#### <code v-pre>markNewArchReady</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L86) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L86) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 ```ts
 export declare function markNewArchReady(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
 ```
 
-#### `MOBILE_AXIS_TO_EVENTS`
+#### <code v-pre>MOBILE&#95;AXIS&#95;TO&#95;EVENTS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L16) `packages/mobile/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L16) <code v-pre>packages/mobile/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare const MOBILE_AXIS_TO_EVENTS: Record<MobileAxis, NeutralEventName[]>;
 ```
 
-#### `MOCK_ADAPTERS`
+#### <code v-pre>MOCK&#95;ADAPTERS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L236) `packages/mobile/src/adapters/mock-factory.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L236) <code v-pre>packages/mobile/src/adapters/mock-factory.ts</code>
 
 ```ts
 export declare const MOCK_ADAPTERS: Record<MobileAxis, MobileAdapter>;
 ```
 
-#### `mountReactNativeComponent`
+#### <code v-pre>mountReactNativeComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L37) `packages/mobile/src/semantics/react-native.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L37) <code v-pre>packages/mobile/src/semantics/react-native.ts</code>
 
 ```ts
 export declare function mountReactNativeComponent(input: {
@@ -481,65 +481,65 @@ export declare function mountReactNativeComponent(input: {
 }): ReactNativeSession;
 ```
 
-#### `navigateDeepLink`
+#### <code v-pre>navigateDeepLink</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L72) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L72) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 ```ts
 export declare function navigateDeepLink(session: NavigationSession, url: string): AxisStep<NavigationState>;
 ```
 
-#### `openNavigationModal`
+#### <code v-pre>openNavigationModal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L65) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L65) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 ```ts
 export declare function openNavigationModal(session: NavigationSession, modalId: string): AxisStep<NavigationState>;
 ```
 
-#### `providerEventName`
+#### <code v-pre>providerEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L230) `packages/mobile/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L230) <code v-pre>packages/mobile/src/semantics/types.ts</code>
 
 ```ts
 export declare function providerEventName(target: MobileTarget, neutral: NeutralEventName): string;
 ```
 
-#### `pushNavigationStack`
+#### <code v-pre>pushNavigationStack</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L51) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L51) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 ```ts
 export declare function pushNavigationStack(session: NavigationSession, screenName: string): AxisStep<NavigationState>;
 ```
 
-#### `readAsyncStorageItem`
+#### <code v-pre>readAsyncStorageItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L59) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L59) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 ```ts
 export declare function readAsyncStorageItem(session: AsyncStorageSession, key: string): AxisStep<AsyncStorageState>;
 ```
 
-#### `readMobileRealDriverEnv`
+#### <code v-pre>readMobileRealDriverEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L39) `packages/mobile/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L39) <code v-pre>packages/mobile/src/adapters/real-driver.ts</code>
 
 ```ts
 export declare function readMobileRealDriverEnv(env?: NodeJS.ProcessEnv): MobileRealDriverEnv | null;
 ```
 
-#### `REAL_ADAPTERS`
+#### <code v-pre>REAL&#95;ADAPTERS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L250) `packages/mobile/src/adapters/mock-factory.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/mock-factory.ts#L250) <code v-pre>packages/mobile/src/adapters/mock-factory.ts</code>
 
 ```ts
 export declare const REAL_ADAPTERS: Record<MobileAxis, MobileAdapter>;
 ```
 
-#### `receivePushNotification`
+#### <code v-pre>receivePushNotification</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L79) `packages/mobile/src/semantics/expo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L79) <code v-pre>packages/mobile/src/semantics/expo.ts</code>
 
 ```ts
 export declare function receivePushNotification(session: ExpoSession, input: {
@@ -548,41 +548,41 @@ export declare function receivePushNotification(session: ExpoSession, input: {
 }): AxisStep<ExpoState>;
 ```
 
-#### `recognizeGesture`
+#### <code v-pre>recognizeGesture</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L71) `packages/mobile/src/semantics/react-native.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L71) <code v-pre>packages/mobile/src/semantics/react-native.ts</code>
 
 ```ts
 export declare function recognizeGesture(session: ReactNativeSession, gesture: 'tap' | 'pan' | 'pinch' | 'rotation' | 'swipe'): AxisStep<ReactNativeState>;
 ```
 
-#### `registerTurboSpec`
+#### <code v-pre>registerTurboSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L53) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L53) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 ```ts
 export declare function registerTurboSpec(session: TurboModulesSession, methods: string[]): AxisStep<TurboModulesState>;
 ```
 
-#### `removeAsyncStorageItem`
+#### <code v-pre>removeAsyncStorageItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L69) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L69) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 ```ts
 export declare function removeAsyncStorageItem(session: AsyncStorageSession, key: string): AxisStep<AsyncStorageState>;
 ```
 
-#### `removeCredential`
+#### <code v-pre>removeCredential</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L84) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L84) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 ```ts
 export declare function removeCredential(session: SecureStorageSession, key: string): AxisStep<SecureStorageState>;
 ```
 
-#### `resolveDeepLink`
+#### <code v-pre>resolveDeepLink</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L62) `packages/mobile/src/semantics/expo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L62) <code v-pre>packages/mobile/src/semantics/expo.ts</code>
 
 ```ts
 export declare function resolveDeepLink(session: ExpoSession, input: {
@@ -591,49 +591,49 @@ export declare function resolveDeepLink(session: ExpoSession, input: {
 }): AxisStep<ExpoState>;
 ```
 
-#### `resolveMetroModule`
+#### <code v-pre>resolveMetroModule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L56) `packages/mobile/src/semantics/metro.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L56) <code v-pre>packages/mobile/src/semantics/metro.ts</code>
 
 ```ts
 export declare function resolveMetroModule(session: MetroSession, modulePath: string): AxisStep<MetroState>;
 ```
 
-#### `retrieveCredential`
+#### <code v-pre>retrieveCredential</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L62) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L62) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 ```ts
 export declare function retrieveCredential(session: SecureStorageSession, key: string): AxisStep<SecureStorageState>;
 ```
 
-#### `runFidelityCheck`
+#### <code v-pre>runFidelityCheck</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L18) `packages/mobile/src/adapters/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L18) <code v-pre>packages/mobile/src/adapters/fidelity-harness.ts</code>
 
 ```ts
 export declare function runFidelityCheck(axes: MobileAxis[], targets?: MobileTarget[]): Promise<FidelityDiff[]>;
 ```
 
-#### `sanitizeEnv`
+#### <code v-pre>sanitizeEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L43) `packages/mobile/src/adapters/spawn-executor.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L43) <code v-pre>packages/mobile/src/adapters/spawn-executor.ts</code>
 
 ```ts
 export declare function sanitizeEnv(command: MobileCliCommand, env: Record<string, string>): Record<string, string>;
 ```
 
-#### `scheduleFabricRender`
+#### <code v-pre>scheduleFabricRender</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L48) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L48) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 ```ts
 export declare function scheduleFabricRender(session: FabricSession, priority: 'discrete' | 'continuous' | 'idle'): AxisStep<FabricState>;
 ```
 
-#### `setAsyncStorageItem`
+#### <code v-pre>setAsyncStorageItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L48) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L48) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 ```ts
 export declare function setAsyncStorageItem(session: AsyncStorageSession, input: {
@@ -642,9 +642,9 @@ export declare function setAsyncStorageItem(session: AsyncStorageSession, input:
 }): AxisStep<AsyncStorageState>;
 ```
 
-#### `startMetroBundle`
+#### <code v-pre>startMetroBundle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L37) `packages/mobile/src/semantics/metro.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L37) <code v-pre>packages/mobile/src/semantics/metro.ts</code>
 
 ```ts
 export declare function startMetroBundle(input: {
@@ -653,17 +653,17 @@ export declare function startMetroBundle(input: {
 }): MetroSession;
 ```
 
-#### `startNewArchInit`
+#### <code v-pre>startNewArchInit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L51) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L51) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 ```ts
 export declare function startNewArchInit(session: NewArchitectureSession): AxisStep<NewArchitectureState>;
 ```
 
-#### `startReanimatedAnimation`
+#### <code v-pre>startReanimatedAnimation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L71) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L71) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 ```ts
 export declare function startReanimatedAnimation(session: ReanimatedSession, input: {
@@ -672,9 +672,9 @@ export declare function startReanimatedAnimation(session: ReanimatedSession, inp
 }): AxisStep<ReanimatedState>;
 ```
 
-#### `storeCredential`
+#### <code v-pre>storeCredential</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L49) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L49) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 ```ts
 export declare function storeCredential(session: SecureStorageSession, input: {
@@ -684,9 +684,9 @@ export declare function storeCredential(session: SecureStorageSession, input: {
 }): AxisStep<SecureStorageState>;
 ```
 
-#### `summarizeFidelity`
+#### <code v-pre>summarizeFidelity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L46) `packages/mobile/src/adapters/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L46) <code v-pre>packages/mobile/src/adapters/fidelity-harness.ts</code>
 
 ```ts
 export declare function summarizeFidelity(diffs: FidelityDiff[]): {
@@ -701,41 +701,41 @@ export declare function summarizeFidelity(diffs: FidelityDiff[]): {
 };
 ```
 
-#### `switchNavigationTab`
+#### <code v-pre>switchNavigationTab</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L58) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L58) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 ```ts
 export declare function switchNavigationTab(session: NavigationSession, tabName: string): AxisStep<NavigationState>;
 ```
 
-#### `unmountReactNativeComponent`
+#### <code v-pre>unmountReactNativeComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L86) `packages/mobile/src/semantics/react-native.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L86) <code v-pre>packages/mobile/src/semantics/react-native.ts</code>
 
 ```ts
 export declare function unmountReactNativeComponent(session: ReactNativeSession): AxisStep<ReactNativeState>;
 ```
 
-#### `unregisterTurboModule`
+#### <code v-pre>unregisterTurboModule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L93) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L93) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 ```ts
 export declare function unregisterTurboModule(session: TurboModulesSession): AxisStep<TurboModulesState>;
 ```
 
-#### `updateFabricPriority`
+#### <code v-pre>updateFabricPriority</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L70) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L70) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 ```ts
 export declare function updateFabricPriority(session: FabricSession, priority: 'discrete' | 'continuous' | 'idle'): AxisStep<FabricState>;
 ```
 
-#### `updateSharedValue`
+#### <code v-pre>updateSharedValue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L48) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L48) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 ```ts
 export declare function updateSharedValue(session: ReanimatedSession, input: {
@@ -746,9 +746,9 @@ export declare function updateSharedValue(session: ReanimatedSession, input: {
 
 ### 型
 
-#### `AdapterInvocation`
+#### <code v-pre>AdapterInvocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L21) `packages/mobile/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L21) <code v-pre>packages/mobile/src/adapters/types.ts</code>
 
 ```ts
 export interface AdapterInvocation {
@@ -759,17 +759,17 @@ export interface AdapterInvocation {
 }
 ```
 
-#### `AdapterMode`
+#### <code v-pre>AdapterMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L11) `packages/mobile/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L11) <code v-pre>packages/mobile/src/adapters/types.ts</code>
 
 ```ts
 export type AdapterMode = 'mock' | 'real';
 ```
 
-#### `AdapterResult`
+#### <code v-pre>AdapterResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L28) `packages/mobile/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L28) <code v-pre>packages/mobile/src/adapters/types.ts</code>
 
 ```ts
 export interface AdapterResult {
@@ -784,9 +784,9 @@ export interface AdapterResult {
 }
 ```
 
-#### `AsyncStorageSession`
+#### <code v-pre>AsyncStorageSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L8) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L8) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 ```ts
 export interface AsyncStorageSession {
@@ -799,9 +799,9 @@ export interface AsyncStorageSession {
 }
 ```
 
-#### `AsyncStorageState`
+#### <code v-pre>AsyncStorageState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L6) `packages/mobile/src/semantics/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L6) <code v-pre>packages/mobile/src/semantics/async-storage.ts</code>
 
 v1.51 async-storage axis — AsyncStorage / MMKV / web localStorage。
 
@@ -809,9 +809,9 @@ v1.51 async-storage axis — AsyncStorage / MMKV / web localStorage。
 export type AsyncStorageState = 'idle' | 'set' | 'read' | 'removed' | 'batch-flushed';
 ```
 
-#### `AxisStep`
+#### <code v-pre>AxisStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L82) `packages/mobile/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L82) <code v-pre>packages/mobile/src/semantics/types.ts</code>
 
 ```ts
 export interface AxisStep<TState extends string> {
@@ -822,9 +822,9 @@ export interface AxisStep<TState extends string> {
 }
 ```
 
-#### `CodegenSession`
+#### <code v-pre>CodegenSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L8) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L8) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 ```ts
 export interface CodegenSession {
@@ -837,9 +837,9 @@ export interface CodegenSession {
 }
 ```
 
-#### `CodegenState`
+#### <code v-pre>CodegenState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L6) `packages/mobile/src/semantics/codegen.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L6) <code v-pre>packages/mobile/src/semantics/codegen.ts</code>
 
 v1.52 codegen axis — React Native 0.76+ Codegen (typed bridge + schema-first + type generation)。
 
@@ -847,9 +847,9 @@ v1.52 codegen axis — React Native 0.76+ Codegen (typed bridge + schema-first +
 export type CodegenState = 'idle' | 'schema-loaded' | 'spec-generated' | 'type-emitted' | 'build-completed';
 ```
 
-#### `ExpoSession`
+#### <code v-pre>ExpoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L9) `packages/mobile/src/semantics/expo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L9) <code v-pre>packages/mobile/src/semantics/expo.ts</code>
 
 ```ts
 export interface ExpoSession {
@@ -863,9 +863,9 @@ export interface ExpoSession {
 }
 ```
 
-#### `ExpoState`
+#### <code v-pre>ExpoState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L7) `packages/mobile/src/semantics/expo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L7) <code v-pre>packages/mobile/src/semantics/expo.ts</code>
 
 Expo axis — build config load + deep link resolve + push notification + build complete の 4 step deterministic state machine。
 
@@ -873,9 +873,9 @@ Expo axis — build config load + deep link resolve + push notification + build 
 export type ExpoState = 'idle' | 'config-loaded' | 'link-resolved' | 'push-received' | 'build-completed';
 ```
 
-#### `FabricSession`
+#### <code v-pre>FabricSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L8) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L8) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 ```ts
 export interface FabricSession {
@@ -888,9 +888,9 @@ export interface FabricSession {
 }
 ```
 
-#### `FabricState`
+#### <code v-pre>FabricState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L6) `packages/mobile/src/semantics/fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L6) <code v-pre>packages/mobile/src/semantics/fabric.ts</code>
 
 v1.52 fabric axis — React Native 0.76+ Fabric renderer (concurrent + priority + shadow tree)。
 
@@ -898,9 +898,9 @@ v1.52 fabric axis — React Native 0.76+ Fabric renderer (concurrent + priority 
 export type FabricState = 'idle' | 'scheduled' | 'shadow-committed' | 'priority-updated' | 'mounted';
 ```
 
-#### `FidelityCoverage`
+#### <code v-pre>FidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L10) `packages/mobile/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L10) <code v-pre>packages/mobile/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityCoverage {
@@ -910,9 +910,9 @@ export interface FidelityCoverage {
 }
 ```
 
-#### `FidelityDiff`
+#### <code v-pre>FidelityDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L9) `packages/mobile/src/adapters/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/fidelity-harness.ts#L9) <code v-pre>packages/mobile/src/adapters/fidelity-harness.ts</code>
 
 ```ts
 export interface FidelityDiff {
@@ -925,9 +925,9 @@ export interface FidelityDiff {
 }
 ```
 
-#### `FidelityRow`
+#### <code v-pre>FidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L3) `packages/mobile/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fidelity.ts#L3) <code v-pre>packages/mobile/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityRow {
@@ -938,9 +938,9 @@ export interface FidelityRow {
 }
 ```
 
-#### `MetroSession`
+#### <code v-pre>MetroSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L9) `packages/mobile/src/semantics/metro.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L9) <code v-pre>packages/mobile/src/semantics/metro.ts</code>
 
 ```ts
 export interface MetroSession {
@@ -953,9 +953,9 @@ export interface MetroSession {
 }
 ```
 
-#### `MetroState`
+#### <code v-pre>MetroState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L7) `packages/mobile/src/semantics/metro.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L7) <code v-pre>packages/mobile/src/semantics/metro.ts</code>
 
 Metro axis — bundle start + module resolve + HMR + bundle complete の 4 step deterministic state machine。
 
@@ -963,9 +963,9 @@ Metro axis — bundle start + module resolve + HMR + bundle complete の 4 step 
 export type MetroState = 'idle' | 'bundling' | 'resolved' | 'hmr-applied' | 'completed';
 ```
 
-#### `MobileAdapter`
+#### <code v-pre>MobileAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L39) `packages/mobile/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/types.ts#L39) <code v-pre>packages/mobile/src/adapters/types.ts</code>
 
 ```ts
 export interface MobileAdapter {
@@ -974,25 +974,25 @@ export interface MobileAdapter {
 }
 ```
 
-#### `MobileAxis`
+#### <code v-pre>MobileAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L10) `packages/mobile/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L10) <code v-pre>packages/mobile/src/semantics/types.ts</code>
 
 ```ts
 export type MobileAxis = 'react-native' | 'expo' | 'metro' | 'navigation' | 'reanimated' | 'async-storage' | 'secure-storage' | 'fabric' | 'turbo-modules' | 'codegen' | 'new-architecture';
 ```
 
-#### `MobileCliCommand`
+#### <code v-pre>MobileCliCommand</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L14) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L14) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 ```ts
 export type MobileCliCommand = 'expo build' | 'metro bundle' | 'codegen run' | 'react-native start' | 'pod install' | 'gradle build';
 ```
 
-#### `MobileRealDriverAxis`
+#### <code v-pre>MobileRealDriverAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L12) `packages/mobile/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L12) <code v-pre>packages/mobile/src/adapters/real-driver.ts</code>
 
 Mobile real driver env-gate (v0.2)。 v1.51 で real CLI (Expo EAS + Metro real bundle + React Navigation deep link verify + Reanimated JSI worklet + AsyncStorage / MMKV native + Keychain / Keystore native) 呼出を stub 経由で隠蔽する契約。 env `KIWA_MOBILE_MODE=real` + 対応 URL env が全揃った時のみ real 呼出。 それ以外は explicit throw で fail-closed。
 
@@ -1000,9 +1000,9 @@ Mobile real driver env-gate (v0.2)。 v1.51 で real CLI (Expo EAS + Metro real 
 export type MobileRealDriverAxis = 'expo-eas' | 'metro' | 'navigation' | 'reanimated' | 'async-storage' | 'secure-storage';
 ```
 
-#### `MobileRealDriverEnv`
+#### <code v-pre>MobileRealDriverEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L20) `packages/mobile/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L20) <code v-pre>packages/mobile/src/adapters/real-driver.ts</code>
 
 ```ts
 export interface MobileRealDriverEnv {
@@ -1016,17 +1016,17 @@ export interface MobileRealDriverEnv {
 }
 ```
 
-#### `MobileTarget`
+#### <code v-pre>MobileTarget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L8) `packages/mobile/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L8) <code v-pre>packages/mobile/src/semantics/types.ts</code>
 
 ```ts
 export type MobileTarget = 'ios' | 'android' | 'web';
 ```
 
-#### `NavigationSession`
+#### <code v-pre>NavigationSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L9) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L9) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 ```ts
 export interface NavigationSession {
@@ -1040,9 +1040,9 @@ export interface NavigationSession {
 }
 ```
 
-#### `NavigationState`
+#### <code v-pre>NavigationState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L7) `packages/mobile/src/semantics/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L7) <code v-pre>packages/mobile/src/semantics/navigation.ts</code>
 
 v1.51 navigation axis — React Navigation / Expo Router を統一。 stack push + tab switch + modal open + deep link navigate。
 
@@ -1050,17 +1050,17 @@ v1.51 navigation axis — React Navigation / Expo Router を統一。 stack push
 export type NavigationState = 'idle' | 'stack-pushed' | 'tab-switched' | 'modal-opened' | 'deep-linked';
 ```
 
-#### `NeutralEventName`
+#### <code v-pre>NeutralEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L25) `packages/mobile/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/types.ts#L25) <code v-pre>packages/mobile/src/semantics/types.ts</code>
 
 ```ts
 export type NeutralEventName = 'rn.component_mounted' | 'rn.native_module_invoked' | 'rn.gesture_recognized' | 'rn.component_unmounted' | 'expo.build_config_loaded' | 'expo.deep_link_resolved' | 'expo.push_notification_received' | 'expo.build_completed' | 'metro.bundle_started' | 'metro.module_resolved' | 'metro.hmr_applied' | 'metro.bundle_completed' | 'navigation.stack_pushed' | 'navigation.tab_switched' | 'navigation.modal_opened' | 'navigation.deep_link_navigated' | 'reanimated.shared_value_updated' | 'reanimated.worklet_executed' | 'reanimated.animation_started' | 'reanimated.animation_completed' | 'async-storage.item_set' | 'async-storage.item_read' | 'async-storage.item_removed' | 'async-storage.batch_flushed' | 'secure-storage.credential_stored' | 'secure-storage.credential_retrieved' | 'secure-storage.biometric_challenged' | 'secure-storage.credential_removed' | 'fabric.render_scheduled' | 'fabric.shadow_tree_committed' | 'fabric.priority_updated' | 'fabric.mount_completed' | 'turbo-modules.spec_registered' | 'turbo-modules.jsi_bound' | 'turbo-modules.method_invoked' | 'turbo-modules.unregistered' | 'codegen.schema_loaded' | 'codegen.spec_generated' | 'codegen.type_emitted' | 'codegen.build_completed' | 'new-architecture.init_started' | 'new-architecture.concurrent_enabled' | 'new-architecture.interop_bridged' | 'new-architecture.ready';
 ```
 
-#### `NewArchitectureSession`
+#### <code v-pre>NewArchitectureSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L8) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L8) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 ```ts
 export interface NewArchitectureSession {
@@ -1073,9 +1073,9 @@ export interface NewArchitectureSession {
 }
 ```
 
-#### `NewArchitectureState`
+#### <code v-pre>NewArchitectureState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L6) `packages/mobile/src/semantics/new-architecture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L6) <code v-pre>packages/mobile/src/semantics/new-architecture.ts</code>
 
 v1.52 new-architecture axis — React Native 0.76+ New Architecture (async init + concurrent React + interop layer)。
 
@@ -1083,9 +1083,9 @@ v1.52 new-architecture axis — React Native 0.76+ New Architecture (async init 
 export type NewArchitectureState = 'idle' | 'initializing' | 'concurrent-enabled' | 'interop-bridged' | 'ready';
 ```
 
-#### `ReactNativeSession`
+#### <code v-pre>ReactNativeSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L9) `packages/mobile/src/semantics/react-native.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L9) <code v-pre>packages/mobile/src/semantics/react-native.ts</code>
 
 ```ts
 export interface ReactNativeSession {
@@ -1098,9 +1098,9 @@ export interface ReactNativeSession {
 }
 ```
 
-#### `ReactNativeState`
+#### <code v-pre>ReactNativeState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L7) `packages/mobile/src/semantics/react-native.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L7) <code v-pre>packages/mobile/src/semantics/react-native.ts</code>
 
 React Native axis — component mount + native module invocation + gesture recognition + unmount の 4 step deterministic state machine。
 
@@ -1108,9 +1108,9 @@ React Native axis — component mount + native module invocation + gesture recog
 export type ReactNativeState = 'idle' | 'mounted' | 'native-invoked' | 'gesture-recognized' | 'unmounted';
 ```
 
-#### `ReanimatedSession`
+#### <code v-pre>ReanimatedSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L8) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L8) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 ```ts
 export interface ReanimatedSession {
@@ -1123,9 +1123,9 @@ export interface ReanimatedSession {
 }
 ```
 
-#### `ReanimatedState`
+#### <code v-pre>ReanimatedState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L6) `packages/mobile/src/semantics/reanimated.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L6) <code v-pre>packages/mobile/src/semantics/reanimated.ts</code>
 
 v1.51 reanimated axis — Reanimated 3 shared value + worklet + animation。
 
@@ -1133,9 +1133,9 @@ v1.51 reanimated axis — Reanimated 3 shared value + worklet + animation。
 export type ReanimatedState = 'idle' | 'value-updated' | 'worklet-run' | 'animating' | 'completed';
 ```
 
-#### `SecureStorageSession`
+#### <code v-pre>SecureStorageSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L9) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L9) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 ```ts
 export interface SecureStorageSession {
@@ -1148,9 +1148,9 @@ export interface SecureStorageSession {
 }
 ```
 
-#### `SecureStorageState`
+#### <code v-pre>SecureStorageState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L7) `packages/mobile/src/semantics/secure-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L7) <code v-pre>packages/mobile/src/semantics/secure-storage.ts</code>
 
 v1.51 secure-storage axis — iOS Keychain / Android Keystore / web CredMgmt API。 biometric challenge (Face ID / Touch ID / Fingerprint / WebAuthn) 込み。
 
@@ -1158,9 +1158,9 @@ v1.51 secure-storage axis — iOS Keychain / Android Keystore / web CredMgmt API
 export type SecureStorageState = 'idle' | 'stored' | 'retrieved' | 'biometric-challenged' | 'removed';
 ```
 
-#### `SpawnExecutorInput`
+#### <code v-pre>SpawnExecutorInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L20) `packages/mobile/src/adapters/spawn-executor.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L20) <code v-pre>packages/mobile/src/adapters/spawn-executor.ts</code>
 
 ```ts
 export interface SpawnExecutorInput {
@@ -1173,9 +1173,9 @@ export interface SpawnExecutorInput {
 }
 ```
 
-#### `SpawnExecutorResult`
+#### <code v-pre>SpawnExecutorResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L11) `packages/mobile/src/adapters/spawn-executor.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L11) <code v-pre>packages/mobile/src/adapters/spawn-executor.ts</code>
 
 ```ts
 export interface SpawnExecutorResult {
@@ -1188,17 +1188,17 @@ export interface SpawnExecutorResult {
 }
 ```
 
-#### `SpawnFn`
+#### <code v-pre>SpawnFn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L29) `packages/mobile/src/adapters/spawn-executor.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L29) <code v-pre>packages/mobile/src/adapters/spawn-executor.ts</code>
 
 ```ts
 export type SpawnFn = typeof nodeSpawn;
 ```
 
-#### `SpawnInvocation`
+#### <code v-pre>SpawnInvocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L22) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L22) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 ```ts
 export interface SpawnInvocation {
@@ -1209,9 +1209,9 @@ export interface SpawnInvocation {
 }
 ```
 
-#### `SpawnResult`
+#### <code v-pre>SpawnResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L29) `packages/mobile/src/adapters/spawn-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L29) <code v-pre>packages/mobile/src/adapters/spawn-driver.ts</code>
 
 ```ts
 export interface SpawnResult {
@@ -1225,9 +1225,9 @@ export interface SpawnResult {
 }
 ```
 
-#### `TurboModulesSession`
+#### <code v-pre>TurboModulesSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L8) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L8) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 ```ts
 export interface TurboModulesSession {
@@ -1241,9 +1241,9 @@ export interface TurboModulesSession {
 }
 ```
 
-#### `TurboModulesState`
+#### <code v-pre>TurboModulesState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L6) `packages/mobile/src/semantics/turbo-modules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L6) <code v-pre>packages/mobile/src/semantics/turbo-modules.ts</code>
 
 v1.52 turbo-modules axis — React Native 0.76+ TurboModules (typed native module + JSI + spec generation)。
 

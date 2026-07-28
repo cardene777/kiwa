@@ -31,13 +31,13 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;Camera permission not granted (status=$&#123;permission&#125;)&#96; | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L57) |
-| &#96;Camera permission not granted (status=$&#123;permission&#125;)&#96; | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L70) |
-| 'circuit-open' | [packages/expo/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L183) |
-| &#96;File not found: $&#123;uri&#125;&#96; | [packages/expo/src/file-system.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L41) |
-| &#96;SecureStore setItemAsync failed for key: $&#123;key&#125;&#96; | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L24) |
-| &#96;SecureStore getItemAsync failed for key: $&#123;key&#125;&#96; | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L28) |
-| &#96;SecureStore deleteItemAsync failed for key: $&#123;key&#125;&#96; | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L32) |
+| <code v-pre>Camera permission not granted (status=$&#123;permission&#125;)</code> | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L57) |
+| <code v-pre>Camera permission not granted (status=$&#123;permission&#125;)</code> | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L70) |
+| <code v-pre>circuit-open</code> | [packages/expo/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L183) |
+| <code v-pre>File not found: $&#123;uri&#125;</code> | [packages/expo/src/file-system.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L41) |
+| <code v-pre>SecureStore setItemAsync failed for key: $&#123;key&#125;</code> | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L24) |
+| <code v-pre>SecureStore getItemAsync failed for key: $&#123;key&#125;</code> | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L28) |
+| <code v-pre>SecureStore deleteItemAsync failed for key: $&#123;key&#125;</code> | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L32) |
 
 ## API 契約
 
@@ -45,25 +45,25 @@
 
 ### 値
 
-#### `batchAsync`
+#### <code v-pre>batchAsync</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L113) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L113) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export declare function batchAsync<T>(fns: Array<() => Promise<T>>, concurrency?: number): Promise<BatchResult<T>>;
 ```
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L173) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L173) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(failureThreshold: number, resetTimeoutMs: number): CircuitBreaker;
 ```
 
-#### `createExpoTestEnv`
+#### <code v-pre>createExpoTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/env.ts#L30) `packages/expo/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/env.ts#L30) <code v-pre>packages/expo/src/env.ts</code>
 
 Expo runtime mock env。 Router / SecureStore / Notifications / FileSystem / Camera の 5 SDK mock を集約、 単一 env object 経由で全 SDK を叩ける。
 
@@ -71,25 +71,25 @@ Expo runtime mock env。 Router / SecureStore / Notifications / FileSystem / Cam
 export declare function createExpoTestEnv(options?: CreateExpoTestEnvOptions): ExpoTestEnv;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L132) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L132) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `createRateLimiter`
+#### <code v-pre>createRateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L151) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L151) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export declare function createRateLimiter(rps: number, burst?: number): RateLimiter;
 ```
 
-#### `dispatchNotification`
+#### <code v-pre>dispatchNotification</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L25) `packages/expo/src/notifications.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L25) <code v-pre>packages/expo/src/notifications.ts</code>
 
 expo-notifications の scheduleNotificationAsync / presentNotificationAsync mock。 env が保持する scheduled list に push、 identifier を返す。
 
@@ -101,9 +101,9 @@ export declare function dispatchNotification(env: {
 }, payload: NotificationPayload): NotificationDispatchResult;
 ```
 
-#### `mockCamera`
+#### <code v-pre>mockCamera</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L38) `packages/expo/src/camera.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L38) <code v-pre>packages/expo/src/camera.ts</code>
 
 expo-camera mock。 permission request + takePicture + recordVideo を deterministic に返す。 実 camera 起動なしで permission flow + capture pipeline の test を書ける。
 
@@ -111,9 +111,9 @@ expo-camera mock。 permission request + takePicture + recordVideo を determini
 export declare function mockCamera(options?: CameraOptions): CameraMock;
 ```
 
-#### `mockEASUpdate`
+#### <code v-pre>mockEASUpdate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L23) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L23) <code v-pre>packages/expo/src/extensions.ts</code>
 
 EAS Update API mock — expo-updates 相当
 
@@ -121,9 +121,9 @@ EAS Update API mock — expo-updates 相当
 export declare function mockEASUpdate(initial?: EASUpdateManifest[]): EASUpdateMock;
 ```
 
-#### `mockExpoRouter`
+#### <code v-pre>mockExpoRouter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L23) `packages/expo/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L23) <code v-pre>packages/expo/src/router.ts</code>
 
 expo-router (file-based routing) mock。 push / replace / back の 3 navigation を 内部 stack で管理、 history を snapshot 経由で verify 可能にする。
 
@@ -131,9 +131,9 @@ expo-router (file-based routing) mock。 push / replace / back の 3 navigation 
 export declare function mockExpoRouter(options?: ExpoRouterOptions): ExpoRouterMock;
 ```
 
-#### `mockFileSystem`
+#### <code v-pre>mockFileSystem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L29) `packages/expo/src/file-system.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L29) <code v-pre>packages/expo/src/file-system.ts</code>
 
 expo-file-system の read / write / info / delete mock。 in-memory Map で uri → content 保管、 実 file I/O なしで file 経路の test を書ける。
 
@@ -141,9 +141,9 @@ expo-file-system の read / write / info / delete mock。 in-memory Map で uri 
 export declare function mockFileSystem(options?: FileSystemOptions): FileSystemMock;
 ```
 
-#### `mockModal`
+#### <code v-pre>mockModal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L66) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L66) <code v-pre>packages/expo/src/extensions.ts</code>
 
 Modal presentation mock
 
@@ -151,9 +151,9 @@ Modal presentation mock
 export declare function mockModal(): ModalMock;
 ```
 
-#### `mockSecureStore`
+#### <code v-pre>mockSecureStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L18) `packages/expo/src/secure-store.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L18) <code v-pre>packages/expo/src/secure-store.ts</code>
 
 expo-secure-store (Keychain / Keystore backed) mock。 in-memory Map で key-value 保管、 async signature を維持して production code と同 API で叩ける。
 
@@ -161,17 +161,17 @@ expo-secure-store (Keychain / Keystore backed) mock。 in-memory Map で key-val
 export declare function mockSecureStore(options?: SecureStoreOptions): SecureStoreMock;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L93) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L93) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L141) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L141) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
@@ -179,9 +179,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number):
 
 ### 型
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L111) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L111) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface BatchResult<T> {
@@ -195,9 +195,9 @@ export interface BatchResult<T> {
 }
 ```
 
-#### `CameraMock`
+#### <code v-pre>CameraMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L23) `packages/expo/src/camera.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L23) <code v-pre>packages/expo/src/camera.ts</code>
 
 ```ts
 export interface CameraMock {
@@ -223,9 +223,9 @@ export interface CameraMock {
 }
 ```
 
-#### `CameraOptions`
+#### <code v-pre>CameraOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L16) `packages/expo/src/camera.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L16) <code v-pre>packages/expo/src/camera.ts</code>
 
 ```ts
 export interface CameraOptions {
@@ -236,17 +236,17 @@ export interface CameraOptions {
 }
 ```
 
-#### `CameraPermissionStatus`
+#### <code v-pre>CameraPermissionStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L1) `packages/expo/src/camera.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L1) <code v-pre>packages/expo/src/camera.ts</code>
 
 ```ts
 export type CameraPermissionStatus = 'granted' | 'denied' | 'undetermined';
 ```
 
-#### `CapturedPicture`
+#### <code v-pre>CapturedPicture</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L3) `packages/expo/src/camera.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L3) <code v-pre>packages/expo/src/camera.ts</code>
 
 ```ts
 export interface CapturedPicture {
@@ -258,9 +258,9 @@ export interface CapturedPicture {
 }
 ```
 
-#### `CapturedVideo`
+#### <code v-pre>CapturedVideo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L11) `packages/expo/src/camera.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L11) <code v-pre>packages/expo/src/camera.ts</code>
 
 ```ts
 export interface CapturedVideo {
@@ -269,9 +269,9 @@ export interface CapturedVideo {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L171) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L171) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -281,17 +281,17 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L169) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L169) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `CreateExpoTestEnvOptions`
+#### <code v-pre>CreateExpoTestEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/env.ts#L7) `packages/expo/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/env.ts#L7) <code v-pre>packages/expo/src/env.ts</code>
 
 ```ts
 export interface CreateExpoTestEnvOptions {
@@ -303,9 +303,9 @@ export interface CreateExpoTestEnvOptions {
 }
 ```
 
-#### `EASUpdateManifest`
+#### <code v-pre>EASUpdateManifest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L6) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L6) <code v-pre>packages/expo/src/extensions.ts</code>
 
 v2.1 extensions — EAS Update API mock, Modal presentation, retry, batch, observability, timeout, rate limit, circuit breaker for Expo SDK 52+.
 
@@ -319,9 +319,9 @@ export interface EASUpdateManifest {
 }
 ```
 
-#### `EASUpdateMock`
+#### <code v-pre>EASUpdateMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L14) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L14) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface EASUpdateMock {
@@ -342,9 +342,9 @@ export interface EASUpdateMock {
 }
 ```
 
-#### `ExpoRouterMock`
+#### <code v-pre>ExpoRouterMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L8) `packages/expo/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L8) <code v-pre>packages/expo/src/router.ts</code>
 
 ```ts
 export interface ExpoRouterMock {
@@ -359,9 +359,9 @@ export interface ExpoRouterMock {
 }
 ```
 
-#### `ExpoRouterOptions`
+#### <code v-pre>ExpoRouterOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L3) `packages/expo/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L3) <code v-pre>packages/expo/src/router.ts</code>
 
 ```ts
 export interface ExpoRouterOptions {
@@ -370,9 +370,9 @@ export interface ExpoRouterOptions {
 }
 ```
 
-#### `ExpoTestEnv`
+#### <code v-pre>ExpoTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/env.ts#L15) `packages/expo/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/env.ts#L15) <code v-pre>packages/expo/src/env.ts</code>
 
 ```ts
 export interface ExpoTestEnv {
@@ -387,9 +387,9 @@ export interface ExpoTestEnv {
 }
 ```
 
-#### `FileInfo`
+#### <code v-pre>FileInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L1) `packages/expo/src/file-system.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L1) <code v-pre>packages/expo/src/file-system.ts</code>
 
 ```ts
 export interface FileInfo {
@@ -401,9 +401,9 @@ export interface FileInfo {
 }
 ```
 
-#### `FileSystemMock`
+#### <code v-pre>FileSystemMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L14) `packages/expo/src/file-system.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L14) <code v-pre>packages/expo/src/file-system.ts</code>
 
 ```ts
 export interface FileSystemMock {
@@ -418,9 +418,9 @@ export interface FileSystemMock {
 }
 ```
 
-#### `FileSystemOptions`
+#### <code v-pre>FileSystemOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L9) `packages/expo/src/file-system.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L9) <code v-pre>packages/expo/src/file-system.ts</code>
 
 ```ts
 export interface FileSystemOptions {
@@ -429,9 +429,9 @@ export interface FileSystemOptions {
 }
 ```
 
-#### `ModalMock`
+#### <code v-pre>ModalMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L58) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L58) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface ModalMock {
@@ -446,9 +446,9 @@ export interface ModalMock {
 }
 ```
 
-#### `ModalOptions`
+#### <code v-pre>ModalOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L52) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L52) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface ModalOptions {
@@ -458,9 +458,9 @@ export interface ModalOptions {
 }
 ```
 
-#### `NotificationDispatchResult`
+#### <code v-pre>NotificationDispatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L15) `packages/expo/src/notifications.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L15) <code v-pre>packages/expo/src/notifications.ts</code>
 
 ```ts
 export interface NotificationDispatchResult {
@@ -470,9 +470,9 @@ export interface NotificationDispatchResult {
 }
 ```
 
-#### `NotificationPayload`
+#### <code v-pre>NotificationPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L1) `packages/expo/src/notifications.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L1) <code v-pre>packages/expo/src/notifications.ts</code>
 
 ```ts
 export interface NotificationPayload {
@@ -488,9 +488,9 @@ export interface NotificationPayload {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L126) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L126) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -508,9 +508,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RateLimiter`
+#### <code v-pre>RateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L149) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L149) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface RateLimiter {
@@ -520,9 +520,9 @@ export interface RateLimiter {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L85) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L85) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -532,9 +532,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L91) `packages/expo/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L91) <code v-pre>packages/expo/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -545,9 +545,9 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `RouterNavigation`
+#### <code v-pre>RouterNavigation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L1) `packages/expo/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/router.ts#L1) <code v-pre>packages/expo/src/router.ts</code>
 
 ```ts
 export type RouterNavigation = {
@@ -557,9 +557,9 @@ export type RouterNavigation = {
 };
 ```
 
-#### `ScheduledNotification`
+#### <code v-pre>ScheduledNotification</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L9) `packages/expo/src/notifications.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/notifications.ts#L9) <code v-pre>packages/expo/src/notifications.ts</code>
 
 ```ts
 export interface ScheduledNotification {
@@ -569,9 +569,9 @@ export interface ScheduledNotification {
 }
 ```
 
-#### `SecureStoreMock`
+#### <code v-pre>SecureStoreMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L6) `packages/expo/src/secure-store.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L6) <code v-pre>packages/expo/src/secure-store.ts</code>
 
 ```ts
 export interface SecureStoreMock {
@@ -583,9 +583,9 @@ export interface SecureStoreMock {
 }
 ```
 
-#### `SecureStoreOptions`
+#### <code v-pre>SecureStoreOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L1) `packages/expo/src/secure-store.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L1) <code v-pre>packages/expo/src/secure-store.ts</code>
 
 ```ts
 export interface SecureStoreOptions {

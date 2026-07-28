@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   existsSync,
+  lstatSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -24,12 +25,14 @@ import {
   escapeMarkdownText,
   fenceFor,
   findManagedBlock,
+  inlineCode,
   insideRoot,
   linkUrl,
   prepareWritePath,
   replaceManagedBlock,
   resolveReadPath,
   tableCell,
+  tableCodeCell,
   writeFileAtomic,
 } from './docs-sync-safety.mjs';
 
@@ -270,6 +273,27 @@ test('writeFileAtomic removes its temporary file when the rename fails', () => {
   });
 });
 
+// The write never goes through a link. The content lands in a fresh temporary
+// name, and the rename replaces the link itself rather than following it, so a
+// link left at the target cannot redirect the write out of the repository.
+// Refusing such a target outright is prepareWritePath's job, tested above.
+test('writeFileAtomic replaces a link at the target instead of writing through it', () => {
+  withTempDir((parent) => {
+    const root = join(parent, 'repo');
+    mkdirSync(root);
+    const outside = join(parent, 'victim.md');
+    writeFileSync(outside, 'original');
+    const target = join(root, 'README.md');
+    symlinkSync(outside, target);
+
+    writeFileAtomic(target, 'new');
+
+    assert.equal(readFileSync(outside, 'utf8'), 'original', 'the file outside is untouched');
+    assert.equal(readFileSync(target, 'utf8'), 'new');
+    assert.equal(lstatSync(target).isSymbolicLink(), false, 'the link was replaced by a file');
+  });
+});
+
 test('writeFileAtomic creates a file that was not there', () => {
   withTempDir((root) => {
     const target = join(root, 'new.md');
@@ -329,6 +353,30 @@ test('tableCell folds every run of whitespace into one space', () => {
 
 test('tableCell escapes what it folds', () => {
   assert.equal(tableCell('`a\nb`'), '&#96;a b&#96;');
+});
+
+// VitePress adds v-pre to fenced code blocks only (it decides from the language
+// tag). Inline code is left as an ordinary element, so Vue compiles its content
+// and runs any interpolation it finds. The attribute has to be written by hand.
+test('inlineCode carries v-pre so Vue does not compile the content', () => {
+  assert.equal(inlineCode('createClient'), '<code v-pre>createClient</code>');
+});
+
+test('inlineCode escapes the content as well as stopping interpolation', () => {
+  const rendered = inlineCode('{{ constructor.constructor("x")() }}');
+  assert.match(rendered, /^<code v-pre>/);
+  assert.equal(rendered.includes('{{'), false, 'the braces never reach the compiler');
+  assert.equal(rendered.includes('<script'), false);
+});
+
+test('inlineCode neutralises raw HTML in an export name', () => {
+  const rendered = inlineCode('<img src=x onerror=alert(1)>');
+  assert.equal(rendered.slice('<code v-pre>'.length, -'</code>'.length).includes('<'), false);
+});
+
+test('tableCodeCell folds whitespace and keeps the pipe out of the table parser', () => {
+  const rendered = tableCodeCell('a\n  |  b');
+  assert.equal(rendered, '<code v-pre>a &#124; b</code>');
 });
 
 test('fenceFor opens with three backticks when the code has none', () => {

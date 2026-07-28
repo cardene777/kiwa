@@ -43,166 +43,166 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;Poisson lambda must be &gt;= 0, got $&#123;lambda&#125;&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L44) |
-| &#96;Poisson lambda &gt; 30 unsupported by Knuth variant; use a larger-lambda algorithm or split into chunks (got $&#123;lambda&#125;)&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L49) |
-| &#96;Zipf n must be &gt;= 1, got $&#123;n&#125;&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L83) |
-| &#96;Zipf s must be &gt; 1 (Devroye rejection requires s &gt; 1), got $&#123;s&#125;&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L84) |
-| 'reflectAndCorrect: run react or tot first' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L123) |
-| 'selectTool: run react or tot first' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L153) |
-| 'selectTool: candidates must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L155) |
-| 'startAgentSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L55) |
-| &#96;reactStep: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L72) |
-| 'reactStep: tool must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L74) |
-| &#96;expandToT: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L91) |
-| 'expandToT: depth must be positive' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L93) |
-| 'expandToT: branches must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L94) |
-| 'reachConsensus: assign roles first' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L123) |
-| 'reachConsensus: votes must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L124) |
-| 'tolerateByzantine: assign roles first' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L154) |
-| 'tolerateByzantine: no agents assigned' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L156) |
-| 'startSwarmSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L53) |
-| 'startSwarmSession: faultThreshold must be in &#91;0, 1)' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L56) |
-| 'assignRoles: agents must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L73) |
-| 'assignRoles: roles must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L74) |
-| 'assignRoles: reliability must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L77) |
-| 'allocateTasks: assign roles first' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L98) |
-| 'allocateTasks: tasks must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L99) |
-| 'useTool: start sandbox first' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L117) |
-| 'useTool: tool name must not be empty' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L118) |
-| 'rollback: start sandbox first' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L136) |
-| 'rollback: steps must be positive' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L137) |
-| 'startCiSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L49) |
-| 'startSandbox: sandboxId must not be empty' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L69) |
-| 'startSandbox: timeoutMs must be positive' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L70) |
-| 'executeCode: start sandbox first' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L84) |
-| 'executeCode: code must not be empty' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L85) |
-| 'routeModel: check budget or measure latency first' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L121) |
-| 'routeModel: candidates must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L123) |
-| &#96;engageFallback: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L145) |
-| 'engageFallback: ladder must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L147) |
-| 'startSlaSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L45) |
-| 'startSlaSession: budgetUsd must be non-negative' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L47) |
-| 'checkBudget: cost must be non-negative' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L62) |
-| 'measureLatency: samples must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L90) |
-| &#96;measureLatency: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L92) |
-| 'stepCascade: tiers must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L100) |
-| 'lookupSemanticCache: queryHash must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L128) |
-| 'startCoSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L32) |
-| &#96;submitBatch: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L48) |
-| 'submitBatch: requests must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L51) |
-| 'compressPrompt: run submitBatch or startCoSession first' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L72) |
-| 'stepCascade: run submitBatch or compressPrompt first' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L97) |
-| 'detectCatastrophicForgetting: run sft/dpo eval first' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L122) |
-| 'detectCatastrophicForgetting: baseline / post length mismatch' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L125) |
-| &#96;detectBenchmarkDrift: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L154) |
-| 'detectBenchmarkDrift: baselineBenchmarks empty — run detectCatastrophicForgetting first to seed baseline' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L157) |
-| 'startFtSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L47) |
-| 'evaluateSft: samples must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L62) |
-| 'evaluateDpo: samples must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L91) |
-| &#96;evaluateDpo: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L93) |
-| 'stepRlhf: prepare dataset first' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L102) |
-| 'stepRlhf: rewards must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L103) |
-| 'stepRlhf: learningRate must be positive' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L105) |
-| 'runEvalLoop: prepare dataset first' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L126) |
-| 'runEvalLoop: epochScores must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L128) |
-| 'detectDrift: prepare dataset first' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L154) |
-| 'detectDrift: run eval loop first' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L156) |
-| 'detectDrift: threshold must be non-negative' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L157) |
-| 'startFtpSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L53) |
-| 'prepareDataset: samples must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L71) |
-| 'matchRegex: run schema validation first' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L121) |
-| 'blockToxicity: run earlier checks first' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L154) |
-| 'redactPii: run earlier checks first' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L192) |
-| 'checkConstitutional: run earlier checks first' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L217) |
-| 'startGuardrailSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L49) |
-| &#96;validateSchema: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L64) |
-| &#96;verifyCitation: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L113) |
-| 'verifyCitation: citations must not be empty' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L116) |
-| 'scoreConfidence: run other checks first' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L141) |
-| 'startHallucinationSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L37) |
-| 'scoreSelfConsistency: need at least 2 samples' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L53) |
-| 'checkFactuality: run self-consistency first' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L81) |
-| 'checkFactuality: evidence must not be empty' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L84) |
-| &#96;rankPreference: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L109) |
-| 'rankPreference: pairs must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L112) |
-| &#96;updateElo: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L153) |
-| 'updateElo: winner and loser must differ' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L156) |
-| 'startEvalSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L40) |
-| &#96;judgeCandidates: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L56) |
-| 'judgeCandidates: candidates must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L59) |
-| &#96;applyRubric: session is $&#123;session.state&#125;, expected judged&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L86) |
-| 'applyRubric: criteria must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L89) |
-| 'applyRubric: totalWeight must be positive' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L92) |
-| 'evaluateAb: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L114) |
-| 'evaluateAb: need at least 2 variants' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L115) |
-| 'promoteCanary: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L146) |
-| 'promoteCanary: errorRate must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L148) |
-| 'promoteCanary: threshold must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L150) |
-| 'compareShadow: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L172) |
-| 'compareShadow: scores must not be empty' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L174) |
-| 'startOpsSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L48) |
-| 'updateRegistry: version must not be empty' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L66) |
-| &#96;updateRegistry: version $&#123;input.version&#125; already registered&#96; | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L68) |
-| 'advanceRollout: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L90) |
-| 'advanceRollout: targetPercent must be in &#91;0, 100&#93;' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L92) |
-| 'advanceRollout: incrementPercent must be positive' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L94) |
-| 'delegateBySupervisor: assemble crew first' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L100) |
-| 'delegateBySupervisor: workerIds must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L102) |
-| 'delegateBySupervisor: task must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L103) |
-| &#96;delegateBySupervisor: supervisor $&#123;input.supervisorId&#125; not in crew&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L105) |
-| &#96;delegateBySupervisor: worker $&#123;worker&#125; not in crew&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L110) |
-| 'transitionGraph: assemble crew first' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L132) |
-| 'transitionGraph: nodes must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L133) |
-| &#96;transitionGraph: entry $&#123;input.entryNodeId&#125; not in nodes&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L135) |
-| 'completeRound: assemble crew first' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L164) |
-| 'completeRound: minDelegations must be non-negative' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L166) |
-| 'startMaoSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L60) |
-| 'assembleCrew: agents must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L80) |
-| 'assembleCrew: agent id must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L83) |
-| &#96;assembleCrew: duplicate agent id $&#123;a.id&#125;&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L84) |
-| 'cachePrompt: expand CoT first' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L113) |
-| 'cachePrompt: key must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L114) |
-| 'pinVersion: expand CoT first' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L140) |
-| 'pinVersion: semver must match N.N.N' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L142) |
-| 'pinVersion: hash must be at least 4 chars' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L143) |
-| 'startPeaSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L53) |
-| 'expandChainOfThought: thoughts must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L72) |
-| 'expandChainOfThought: individual thought must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L77) |
-| 'selectFewShot: expand CoT first' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L93) |
-| 'selectFewShot: pool must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L94) |
-| 'selectFewShot: k must be positive' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L95) |
-| &#96;classifyDirect: session is $&#123;session.state&#125;, expected analyzed&#96; | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L133) |
-| &#96;classifyIndirect: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L150) |
-| 'blockJailbreak: analyze first' | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L167) |
-| 'blockRoleHijacking: analyze first' | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L184) |
-| 'startInjectionSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L47) |
-| &#96;detectInjection: session is $&#123;session.state&#125;, cannot analyze&#96; | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L96) |
-| &#96;rerank: session is $&#123;session.state&#125;, expected hybrid-retrieved&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L118) |
-| 'rerank: hits must not be empty' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L120) |
-| &#96;compressContext: session is $&#123;session.state&#125;, expected reranked&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L142) |
-| 'compressContext: maxTokens must be positive' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L144) |
-| 'startRagSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L39) |
-| &#96;chunkDocument: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L55) |
-| 'chunkDocument: chunkSize must be positive' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L57) |
-| 'chunkDocument: overlap must be in &#91;0, chunkSize)' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L59) |
-| &#96;hybridRetrieve: session is $&#123;session.state&#125;, expected chunked&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L85) |
-| 'hybridRetrieve: topK must be positive' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L87) |
-| 'stepAgentic: traverse graph first' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L123) |
-| 'stepAgentic: confidence must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L125) |
-| 'stepAgentic: threshold must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L127) |
-| 'stepAgentic: reason must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L129) |
-| 'selfQuery: traverse graph first' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L148) |
-| 'selfQuery: question must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L150) |
-| 'selfQuery: schemaFields must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L152) |
-| 'expandParent: traverse graph first' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L175) |
-| 'expandParent: parents must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L177) |
-| 'expandParent: chunkId must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L179) |
-| 'startRag3Session: sessionId must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L59) |
-| 'traverseGraph: nodes must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L82) |
-| 'traverseGraph: maxHops must be positive' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L83) |
-| &#96;traverseGraph: startNode $&#123;input.startNodeId&#125; not in nodes&#96; | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L85) |
-| 'resolveBudgetGuard: KIWA&#95;LLM&#95;BUDGET&#95;USD must be a non-negative number' | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L79) |
-| 'resolveBudgetGuard: KIWA&#95;LLM&#95;PER&#95;CALL&#95;CAP&#95;USD must be a non-negative number' | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L82) |
+| <code v-pre>Poisson lambda must be &gt;= 0, got $&#123;lambda&#125;</code> | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L44) |
+| <code v-pre>Poisson lambda &gt; 30 unsupported by Knuth variant; use a larger-lambda algorithm or split into chunks (got $&#123;lambda&#125;)</code> | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L49) |
+| <code v-pre>Zipf n must be &gt;= 1, got $&#123;n&#125;</code> | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L83) |
+| <code v-pre>Zipf s must be &gt; 1 (Devroye rejection requires s &gt; 1), got $&#123;s&#125;</code> | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L84) |
+| <code v-pre>reflectAndCorrect: run react or tot first</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L123) |
+| <code v-pre>selectTool: run react or tot first</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L153) |
+| <code v-pre>selectTool: candidates must not be empty</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L155) |
+| <code v-pre>startAgentSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L55) |
+| <code v-pre>reactStep: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L72) |
+| <code v-pre>reactStep: tool must not be empty</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L74) |
+| <code v-pre>expandToT: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L91) |
+| <code v-pre>expandToT: depth must be positive</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L93) |
+| <code v-pre>expandToT: branches must not be empty</code> | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L94) |
+| <code v-pre>reachConsensus: assign roles first</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L123) |
+| <code v-pre>reachConsensus: votes must not be empty</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L124) |
+| <code v-pre>tolerateByzantine: assign roles first</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L154) |
+| <code v-pre>tolerateByzantine: no agents assigned</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L156) |
+| <code v-pre>startSwarmSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L53) |
+| <code v-pre>startSwarmSession: faultThreshold must be in &#91;0, 1)</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L56) |
+| <code v-pre>assignRoles: agents must not be empty</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L73) |
+| <code v-pre>assignRoles: roles must not be empty</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L74) |
+| <code v-pre>assignRoles: reliability must be in &#91;0, 1&#93;</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L77) |
+| <code v-pre>allocateTasks: assign roles first</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L98) |
+| <code v-pre>allocateTasks: tasks must not be empty</code> | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L99) |
+| <code v-pre>useTool: start sandbox first</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L117) |
+| <code v-pre>useTool: tool name must not be empty</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L118) |
+| <code v-pre>rollback: start sandbox first</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L136) |
+| <code v-pre>rollback: steps must be positive</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L137) |
+| <code v-pre>startCiSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L49) |
+| <code v-pre>startSandbox: sandboxId must not be empty</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L69) |
+| <code v-pre>startSandbox: timeoutMs must be positive</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L70) |
+| <code v-pre>executeCode: start sandbox first</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L84) |
+| <code v-pre>executeCode: code must not be empty</code> | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L85) |
+| <code v-pre>routeModel: check budget or measure latency first</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L121) |
+| <code v-pre>routeModel: candidates must not be empty</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L123) |
+| <code v-pre>engageFallback: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L145) |
+| <code v-pre>engageFallback: ladder must not be empty</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L147) |
+| <code v-pre>startSlaSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L45) |
+| <code v-pre>startSlaSession: budgetUsd must be non-negative</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L47) |
+| <code v-pre>checkBudget: cost must be non-negative</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L62) |
+| <code v-pre>measureLatency: samples must not be empty</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L90) |
+| <code v-pre>measureLatency: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L92) |
+| <code v-pre>stepCascade: tiers must not be empty</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L100) |
+| <code v-pre>lookupSemanticCache: queryHash must not be empty</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L128) |
+| <code v-pre>startCoSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L32) |
+| <code v-pre>submitBatch: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L48) |
+| <code v-pre>submitBatch: requests must not be empty</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L51) |
+| <code v-pre>compressPrompt: run submitBatch or startCoSession first</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L72) |
+| <code v-pre>stepCascade: run submitBatch or compressPrompt first</code> | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L97) |
+| <code v-pre>detectCatastrophicForgetting: run sft/dpo eval first</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L122) |
+| <code v-pre>detectCatastrophicForgetting: baseline / post length mismatch</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L125) |
+| <code v-pre>detectBenchmarkDrift: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L154) |
+| <code v-pre>detectBenchmarkDrift: baselineBenchmarks empty — run detectCatastrophicForgetting first to seed baseline</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L157) |
+| <code v-pre>startFtSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L47) |
+| <code v-pre>evaluateSft: samples must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L62) |
+| <code v-pre>evaluateDpo: samples must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L91) |
+| <code v-pre>evaluateDpo: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L93) |
+| <code v-pre>stepRlhf: prepare dataset first</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L102) |
+| <code v-pre>stepRlhf: rewards must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L103) |
+| <code v-pre>stepRlhf: learningRate must be positive</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L105) |
+| <code v-pre>runEvalLoop: prepare dataset first</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L126) |
+| <code v-pre>runEvalLoop: epochScores must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L128) |
+| <code v-pre>detectDrift: prepare dataset first</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L154) |
+| <code v-pre>detectDrift: run eval loop first</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L156) |
+| <code v-pre>detectDrift: threshold must be non-negative</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L157) |
+| <code v-pre>startFtpSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L53) |
+| <code v-pre>prepareDataset: samples must not be empty</code> | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L71) |
+| <code v-pre>matchRegex: run schema validation first</code> | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L121) |
+| <code v-pre>blockToxicity: run earlier checks first</code> | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L154) |
+| <code v-pre>redactPii: run earlier checks first</code> | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L192) |
+| <code v-pre>checkConstitutional: run earlier checks first</code> | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L217) |
+| <code v-pre>startGuardrailSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L49) |
+| <code v-pre>validateSchema: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L64) |
+| <code v-pre>verifyCitation: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L113) |
+| <code v-pre>verifyCitation: citations must not be empty</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L116) |
+| <code v-pre>scoreConfidence: run other checks first</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L141) |
+| <code v-pre>startHallucinationSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L37) |
+| <code v-pre>scoreSelfConsistency: need at least 2 samples</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L53) |
+| <code v-pre>checkFactuality: run self-consistency first</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L81) |
+| <code v-pre>checkFactuality: evidence must not be empty</code> | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L84) |
+| <code v-pre>rankPreference: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L109) |
+| <code v-pre>rankPreference: pairs must not be empty</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L112) |
+| <code v-pre>updateElo: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L153) |
+| <code v-pre>updateElo: winner and loser must differ</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L156) |
+| <code v-pre>startEvalSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L40) |
+| <code v-pre>judgeCandidates: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L56) |
+| <code v-pre>judgeCandidates: candidates must not be empty</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L59) |
+| <code v-pre>applyRubric: session is $&#123;session.state&#125;, expected judged</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L86) |
+| <code v-pre>applyRubric: criteria must not be empty</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L89) |
+| <code v-pre>applyRubric: totalWeight must be positive</code> | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L92) |
+| <code v-pre>evaluateAb: update registry first</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L114) |
+| <code v-pre>evaluateAb: need at least 2 variants</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L115) |
+| <code v-pre>promoteCanary: update registry first</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L146) |
+| <code v-pre>promoteCanary: errorRate must be in &#91;0, 1&#93;</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L148) |
+| <code v-pre>promoteCanary: threshold must be in &#91;0, 1&#93;</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L150) |
+| <code v-pre>compareShadow: update registry first</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L172) |
+| <code v-pre>compareShadow: scores must not be empty</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L174) |
+| <code v-pre>startOpsSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L48) |
+| <code v-pre>updateRegistry: version must not be empty</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L66) |
+| <code v-pre>updateRegistry: version $&#123;input.version&#125; already registered</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L68) |
+| <code v-pre>advanceRollout: update registry first</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L90) |
+| <code v-pre>advanceRollout: targetPercent must be in &#91;0, 100&#93;</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L92) |
+| <code v-pre>advanceRollout: incrementPercent must be positive</code> | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L94) |
+| <code v-pre>delegateBySupervisor: assemble crew first</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L100) |
+| <code v-pre>delegateBySupervisor: workerIds must not be empty</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L102) |
+| <code v-pre>delegateBySupervisor: task must not be empty</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L103) |
+| <code v-pre>delegateBySupervisor: supervisor $&#123;input.supervisorId&#125; not in crew</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L105) |
+| <code v-pre>delegateBySupervisor: worker $&#123;worker&#125; not in crew</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L110) |
+| <code v-pre>transitionGraph: assemble crew first</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L132) |
+| <code v-pre>transitionGraph: nodes must not be empty</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L133) |
+| <code v-pre>transitionGraph: entry $&#123;input.entryNodeId&#125; not in nodes</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L135) |
+| <code v-pre>completeRound: assemble crew first</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L164) |
+| <code v-pre>completeRound: minDelegations must be non-negative</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L166) |
+| <code v-pre>startMaoSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L60) |
+| <code v-pre>assembleCrew: agents must not be empty</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L80) |
+| <code v-pre>assembleCrew: agent id must not be empty</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L83) |
+| <code v-pre>assembleCrew: duplicate agent id $&#123;a.id&#125;</code> | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L84) |
+| <code v-pre>cachePrompt: expand CoT first</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L113) |
+| <code v-pre>cachePrompt: key must not be empty</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L114) |
+| <code v-pre>pinVersion: expand CoT first</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L140) |
+| <code v-pre>pinVersion: semver must match N.N.N</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L142) |
+| <code v-pre>pinVersion: hash must be at least 4 chars</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L143) |
+| <code v-pre>startPeaSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L53) |
+| <code v-pre>expandChainOfThought: thoughts must not be empty</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L72) |
+| <code v-pre>expandChainOfThought: individual thought must not be empty</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L77) |
+| <code v-pre>selectFewShot: expand CoT first</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L93) |
+| <code v-pre>selectFewShot: pool must not be empty</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L94) |
+| <code v-pre>selectFewShot: k must be positive</code> | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L95) |
+| <code v-pre>classifyDirect: session is $&#123;session.state&#125;, expected analyzed</code> | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L133) |
+| <code v-pre>classifyIndirect: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L150) |
+| <code v-pre>blockJailbreak: analyze first</code> | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L167) |
+| <code v-pre>blockRoleHijacking: analyze first</code> | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L184) |
+| <code v-pre>startInjectionSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L47) |
+| <code v-pre>detectInjection: session is $&#123;session.state&#125;, cannot analyze</code> | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L96) |
+| <code v-pre>rerank: session is $&#123;session.state&#125;, expected hybrid-retrieved</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L118) |
+| <code v-pre>rerank: hits must not be empty</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L120) |
+| <code v-pre>compressContext: session is $&#123;session.state&#125;, expected reranked</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L142) |
+| <code v-pre>compressContext: maxTokens must be positive</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L144) |
+| <code v-pre>startRagSession: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L39) |
+| <code v-pre>chunkDocument: session is $&#123;session.state&#125;</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L55) |
+| <code v-pre>chunkDocument: chunkSize must be positive</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L57) |
+| <code v-pre>chunkDocument: overlap must be in &#91;0, chunkSize)</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L59) |
+| <code v-pre>hybridRetrieve: session is $&#123;session.state&#125;, expected chunked</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L85) |
+| <code v-pre>hybridRetrieve: topK must be positive</code> | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L87) |
+| <code v-pre>stepAgentic: traverse graph first</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L123) |
+| <code v-pre>stepAgentic: confidence must be in &#91;0, 1&#93;</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L125) |
+| <code v-pre>stepAgentic: threshold must be in &#91;0, 1&#93;</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L127) |
+| <code v-pre>stepAgentic: reason must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L129) |
+| <code v-pre>selfQuery: traverse graph first</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L148) |
+| <code v-pre>selfQuery: question must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L150) |
+| <code v-pre>selfQuery: schemaFields must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L152) |
+| <code v-pre>expandParent: traverse graph first</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L175) |
+| <code v-pre>expandParent: parents must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L177) |
+| <code v-pre>expandParent: chunkId must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L179) |
+| <code v-pre>startRag3Session: sessionId must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L59) |
+| <code v-pre>traverseGraph: nodes must not be empty</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L82) |
+| <code v-pre>traverseGraph: maxHops must be positive</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L83) |
+| <code v-pre>traverseGraph: startNode $&#123;input.startNodeId&#125; not in nodes</code> | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L85) |
+| <code v-pre>resolveBudgetGuard: KIWA&#95;LLM&#95;BUDGET&#95;USD must be a non-negative number</code> | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L79) |
+| <code v-pre>resolveBudgetGuard: KIWA&#95;LLM&#95;PER&#95;CALL&#95;CAP&#95;USD must be a non-negative number</code> | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L82) |
 
 ## API 契約
 
@@ -210,9 +210,9 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 
 ### 値
 
-#### `advanceRollout`
+#### <code v-pre>advanceRollout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L86) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L86) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export declare function advanceRollout(session: OpsSession, input: {
@@ -225,17 +225,17 @@ export declare function advanceRollout(session: OpsSession, input: {
 };
 ```
 
-#### `AI_LLM_AXIS_TO_EVENTS`
+#### <code v-pre>AI&#95;LLM&#95;AXIS&#95;TO&#95;EVENTS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L21) `packages/ai-llm/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L21) <code v-pre>packages/ai-llm/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare const AI_LLM_AXIS_TO_EVENTS: Record<AiLlmAxis, NeutralEventName[]>;
 ```
 
-#### `allocateTasks`
+#### <code v-pre>allocateTasks</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L94) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L94) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export declare function allocateTasks(session: SwarmSession, input: {
@@ -249,17 +249,17 @@ export declare function allocateTasks(session: SwarmSession, input: {
 };
 ```
 
-#### `apiKeyEnvVar`
+#### <code v-pre>apiKeyEnvVar</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L48) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L48) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function apiKeyEnvVar(backend: LlmBackend): string;
 ```
 
-#### `applyRubric`
+#### <code v-pre>applyRubric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L81) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L81) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export declare function applyRubric(session: EvalSession, input: {
@@ -271,9 +271,9 @@ export declare function applyRubric(session: EvalSession, input: {
 };
 ```
 
-#### `assembleCrew`
+#### <code v-pre>assembleCrew</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L76) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L76) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export declare function assembleCrew(session: MaoSession, input: {
@@ -284,9 +284,9 @@ export declare function assembleCrew(session: MaoSession, input: {
 };
 ```
 
-#### `assignRoles`
+#### <code v-pre>assignRoles</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L69) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L69) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export declare function assignRoles(session: SwarmSession, input: {
@@ -301,9 +301,9 @@ export declare function assignRoles(session: SwarmSession, input: {
 };
 ```
 
-#### `blockJailbreak`
+#### <code v-pre>blockJailbreak</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L162) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L162) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export declare function blockJailbreak(session: InjectionSession, input: string): {
@@ -312,9 +312,9 @@ export declare function blockJailbreak(session: InjectionSession, input: string)
 };
 ```
 
-#### `blockRoleHijacking`
+#### <code v-pre>blockRoleHijacking</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L179) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L179) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export declare function blockRoleHijacking(session: InjectionSession, input: string): {
@@ -323,9 +323,9 @@ export declare function blockRoleHijacking(session: InjectionSession, input: str
 };
 ```
 
-#### `blockToxicity`
+#### <code v-pre>blockToxicity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L149) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L149) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export declare function blockToxicity(session: GuardrailSession, input: {
@@ -338,9 +338,9 @@ export declare function blockToxicity(session: GuardrailSession, input: {
 };
 ```
 
-#### `buildAiLlmReport`
+#### <code v-pre>buildAiLlmReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts#L59) `packages/ai-llm/src/report.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts#L59) <code v-pre>packages/ai-llm/src/report.ts</code>
 
 実測 fidelity + coverage + test count + mutation + perf を `QualityReport` に統合する。 AI-LLM 4 軸は `fidelity.records` から 自動集計。
 
@@ -348,9 +348,9 @@ export declare function blockToxicity(session: GuardrailSession, input: {
 export declare function buildAiLlmReport(input: BuildAiLlmReportInput): QualityReport;
 ```
 
-#### `buildAiLlmReportFromMock`
+#### <code v-pre>buildAiLlmReportFromMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts#L106) `packages/ai-llm/src/report.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts#L106) <code v-pre>packages/ai-llm/src/report.ts</code>
 
 mock adapter の `getMetrics()` から直接 `QualityReport` を組み立てる light path。 fidelity harness を回さず、 mock 単体の実測値だけを report 化する用途 (unit test 内で release gate 検証したいとき等)。
 
@@ -375,17 +375,17 @@ export declare function buildAiLlmReportFromMock(input: {
 }): QualityReport;
 ```
 
-#### `buildRealDriverConfig`
+#### <code v-pre>buildRealDriverConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L120) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L120) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function buildRealDriverConfig(backend: LlmBackend, overrides?: Partial<Omit<RealDriverConfig, 'backend'>>, env?: NodeJS.ProcessEnv): RealDriverConfig;
 ```
 
-#### `cachePrompt`
+#### <code v-pre>cachePrompt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L109) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L109) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export declare function cachePrompt(session: PeaSession, input: {
@@ -398,9 +398,9 @@ export declare function cachePrompt(session: PeaSession, input: {
 };
 ```
 
-#### `chargeBudget`
+#### <code v-pre>chargeBudget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L87) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L87) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function chargeBudget(guard: BudgetGuardConfig, costUsd: number): {
@@ -410,9 +410,9 @@ export declare function chargeBudget(guard: BudgetGuardConfig, costUsd: number):
 };
 ```
 
-#### `checkBudget`
+#### <code v-pre>checkBudget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L58) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L58) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export declare function checkBudget(session: SlaSession, input: {
@@ -424,9 +424,9 @@ export declare function checkBudget(session: SlaSession, input: {
 };
 ```
 
-#### `checkConstitutional`
+#### <code v-pre>checkConstitutional</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L212) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L212) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export declare function checkConstitutional(session: GuardrailSession, input: {
@@ -441,9 +441,9 @@ export declare function checkConstitutional(session: GuardrailSession, input: {
 };
 ```
 
-#### `checkFactuality`
+#### <code v-pre>checkFactuality</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L76) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L76) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 ```ts
 export declare function checkFactuality(session: HallucinationSession, input: {
@@ -456,9 +456,9 @@ export declare function checkFactuality(session: HallucinationSession, input: {
 };
 ```
 
-#### `chunkDocument`
+#### <code v-pre>chunkDocument</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L50) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L50) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export declare function chunkDocument(session: RagSession, input: {
@@ -474,9 +474,9 @@ export declare function chunkDocument(session: RagSession, input: {
 };
 ```
 
-#### `classifyDirect`
+#### <code v-pre>classifyDirect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L128) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L128) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export declare function classifyDirect(session: InjectionSession, input: string): {
@@ -485,9 +485,9 @@ export declare function classifyDirect(session: InjectionSession, input: string)
 };
 ```
 
-#### `classifyIndirect`
+#### <code v-pre>classifyIndirect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L145) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L145) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export declare function classifyIndirect(session: InjectionSession, input: string): {
@@ -496,17 +496,17 @@ export declare function classifyIndirect(session: InjectionSession, input: strin
 };
 ```
 
-#### `collectFidelityCoverage`
+#### <code v-pre>collectFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L118) `packages/ai-llm/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L118) <code v-pre>packages/ai-llm/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare function collectFidelityCoverage(providers?: AiLlmTarget[]): FidelityCoverage;
 ```
 
-#### `compareShadow`
+#### <code v-pre>compareShadow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L168) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L168) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export declare function compareShadow(session: OpsSession, input: {
@@ -519,9 +519,9 @@ export declare function compareShadow(session: OpsSession, input: {
 };
 ```
 
-#### `completeRound`
+#### <code v-pre>completeRound</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L160) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L160) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export declare function completeRound(session: MaoSession, input: {
@@ -533,9 +533,9 @@ export declare function completeRound(session: MaoSession, input: {
 };
 ```
 
-#### `compressContext`
+#### <code v-pre>compressContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L137) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L137) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export declare function compressContext(session: RagSession, input: {
@@ -549,9 +549,9 @@ export declare function compressContext(session: RagSession, input: {
 };
 ```
 
-#### `compressPrompt`
+#### <code v-pre>compressPrompt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L67) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L67) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 ```ts
 export declare function compressPrompt(session: CoSession, input: {
@@ -564,9 +564,9 @@ export declare function compressPrompt(session: CoSession, input: {
 };
 ```
 
-#### `costForTokens`
+#### <code v-pre>costForTokens</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L87) `packages/ai-llm/src/pricing.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L87) <code v-pre>packages/ai-llm/src/pricing.ts</code>
 
 Compute cost in USD for a request given raw `input_tokens` + `output_tokens`. The vendor SSE / JSON payload names are kept out of the signature — accepts plain numbers so both Anthropic-shaped (`input_tokens`) and OpenAI-shaped (`prompt_tokens`) callers wire in without a shim.
 
@@ -574,41 +574,41 @@ Compute cost in USD for a request given raw `input_tokens` + `output_tokens`. Th
 export declare function costForTokens(model: string, inputTokens: number, outputTokens: number): number;
 ```
 
-#### `createAnthropicMock`
+#### <code v-pre>createAnthropicMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L126) `packages/ai-llm/src/anthropic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L126) <code v-pre>packages/ai-llm/src/anthropic.ts</code>
 
 ```ts
 export declare function createAnthropicMock(config?: MockConfig): AnthropicMock;
 ```
 
-#### `createLangchainMock`
+#### <code v-pre>createLangchainMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L89) `packages/ai-llm/src/langchain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L89) <code v-pre>packages/ai-llm/src/langchain.ts</code>
 
 ```ts
 export declare function createLangchainMock(config?: MockConfig): LangchainMock;
 ```
 
-#### `createOpenAIMock`
+#### <code v-pre>createOpenAIMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L182) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L182) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 ```ts
 export declare function createOpenAIMock(config?: MockConfig): OpenAiMock;
 ```
 
-#### `createVercelAiMock`
+#### <code v-pre>createVercelAiMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L97) `packages/ai-llm/src/vercel-ai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L97) <code v-pre>packages/ai-llm/src/vercel-ai.ts</code>
 
 ```ts
 export declare function createVercelAiMock(config?: MockConfig): VercelAiMock;
 ```
 
-#### `delegateBySupervisor`
+#### <code v-pre>delegateBySupervisor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L96) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L96) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export declare function delegateBySupervisor(session: MaoSession, input: {
@@ -621,9 +621,9 @@ export declare function delegateBySupervisor(session: MaoSession, input: {
 };
 ```
 
-#### `detectBenchmarkDrift`
+#### <code v-pre>detectBenchmarkDrift</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L149) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L149) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export declare function detectBenchmarkDrift(session: FtSession, input: {
@@ -638,9 +638,9 @@ export declare function detectBenchmarkDrift(session: FtSession, input: {
 };
 ```
 
-#### `detectCatastrophicForgetting`
+#### <code v-pre>detectCatastrophicForgetting</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L113) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L113) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export declare function detectCatastrophicForgetting(session: FtSession, input: {
@@ -657,9 +657,9 @@ export declare function detectCatastrophicForgetting(session: FtSession, input: 
 };
 ```
 
-#### `detectDrift`
+#### <code v-pre>detectDrift</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L150) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L150) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export declare function detectDrift(session: FtpSession, input: {
@@ -671,9 +671,9 @@ export declare function detectDrift(session: FtpSession, input: {
 };
 ```
 
-#### `detectInjection`
+#### <code v-pre>detectInjection</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L91) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L91) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export declare function detectInjection(session: InjectionSession, input: string): {
@@ -682,17 +682,17 @@ export declare function detectInjection(session: InjectionSession, input: string
 };
 ```
 
-#### `endpointEnvKey`
+#### <code v-pre>endpointEnvKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L35) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L35) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function endpointEnvKey(backend: LlmBackend): string;
 ```
 
-#### `engageFallback`
+#### <code v-pre>engageFallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L140) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L140) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export declare function engageFallback(session: SlaSession, input: {
@@ -705,9 +705,9 @@ export declare function engageFallback(session: SlaSession, input: {
 };
 ```
 
-#### `estimateMultimodalTokens`
+#### <code v-pre>estimateMultimodalTokens</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L141) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L141) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 parts に含まれる image / audio の token 換算量を返す。 token 見積の内訳は `imageTokenCost` (default 1500) × image 数 + `audioTokenCost` (default 500) × audio 数 (durationSeconds &gt; 30 の場合は比例増分)。 detail hint は OpenAI vision の課金モデルに寄せて low = 1/2、 high = 実額、 auto = 実額の 0.8 を掛ける。
 
@@ -718,9 +718,9 @@ export declare function estimateMultimodalTokens(parts: MessagePart[] | undefine
 }): number;
 ```
 
-#### `evaluateAb`
+#### <code v-pre>evaluateAb</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L110) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L110) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export declare function evaluateAb(session: OpsSession, input: {
@@ -733,9 +733,9 @@ export declare function evaluateAb(session: OpsSession, input: {
 };
 ```
 
-#### `evaluateDpo`
+#### <code v-pre>evaluateDpo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L87) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L87) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export declare function evaluateDpo(session: FtSession, samples: DpoSample[]): {
@@ -745,9 +745,9 @@ export declare function evaluateDpo(session: FtSession, samples: DpoSample[]): {
 };
 ```
 
-#### `evaluateSft`
+#### <code v-pre>evaluateSft</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L58) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L58) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export declare function evaluateSft(session: FtSession, samples: SftSample[]): {
@@ -757,9 +757,9 @@ export declare function evaluateSft(session: FtSession, samples: SftSample[]): {
 };
 ```
 
-#### `executeCode`
+#### <code v-pre>executeCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L80) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L80) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export declare function executeCode(session: CiSession, input: {
@@ -771,9 +771,9 @@ export declare function executeCode(session: CiSession, input: {
 };
 ```
 
-#### `expandChainOfThought`
+#### <code v-pre>expandChainOfThought</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L67) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L67) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export declare function expandChainOfThought(session: PeaSession, input: {
@@ -784,9 +784,9 @@ export declare function expandChainOfThought(session: PeaSession, input: {
 };
 ```
 
-#### `expandParent`
+#### <code v-pre>expandParent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L171) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L171) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export declare function expandParent(session: Rag3Session, input: {
@@ -798,9 +798,9 @@ export declare function expandParent(session: Rag3Session, input: {
 };
 ```
 
-#### `expandToT`
+#### <code v-pre>expandToT</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L86) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L86) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export declare function expandToT(session: AgentSession, input: {
@@ -818,9 +818,9 @@ export declare function expandToT(session: AgentSession, input: {
 };
 ```
 
-#### `extractTextFromParts`
+#### <code v-pre>extractTextFromParts</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L126) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L126) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 parts から text 部分だけを結合 (adapter が下位 engine に渡す用)。
 
@@ -828,9 +828,9 @@ parts から text 部分だけを結合 (adapter が下位 engine に渡す用)�
 export declare function extractTextFromParts(parts: MessagePart[]): string;
 ```
 
-#### `hasAudioPart`
+#### <code v-pre>hasAudioPart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L181) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L181) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 「audio 1 件以上を含む parts」 の shape guard。
 
@@ -838,9 +838,9 @@ export declare function extractTextFromParts(parts: MessagePart[]): string;
 export declare function hasAudioPart(parts: MessagePart[] | undefined): boolean;
 ```
 
-#### `hasImagePart`
+#### <code v-pre>hasImagePart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L175) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L175) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 「image 1 件以上を含む parts」 の shape guard。 adapter の分岐用。
 
@@ -848,9 +848,9 @@ export declare function hasAudioPart(parts: MessagePart[] | undefined): boolean;
 export declare function hasImagePart(parts: MessagePart[] | undefined): boolean;
 ```
 
-#### `hasMultimodalParts`
+#### <code v-pre>hasMultimodalParts</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L120) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L120) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 `parts` に image / audio が 1 件でも含まれるか。
 
@@ -858,9 +858,9 @@ export declare function hasImagePart(parts: MessagePart[] | undefined): boolean;
 export declare function hasMultimodalParts(parts: MessagePart[] | undefined): boolean;
 ```
 
-#### `hybridRetrieve`
+#### <code v-pre>hybridRetrieve</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L80) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L80) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export declare function hybridRetrieve(session: RagSession, input: {
@@ -874,17 +874,17 @@ export declare function hybridRetrieve(session: RagSession, input: {
 };
 ```
 
-#### `isKiwaModeReal`
+#### <code v-pre>isKiwaModeReal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L15) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L15) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function isKiwaModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
-#### `jaccardSimilarity`
+#### <code v-pre>jaccardSimilarity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L103) `packages/ai-llm/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L103) <code v-pre>packages/ai-llm/src/fidelity.ts</code>
 
 Jaccard 単語 similarity — 実 LLM tokenizer なしで文字列近似を計算する 軽量 default。 embedding cosine と厳密には一致しないが、 mock 検証には 十分 (完全一致 = 1.0、 無関係 = 0.0)。
 
@@ -892,9 +892,9 @@ Jaccard 単語 similarity — 実 LLM tokenizer なしで文字列近似を計�
 export declare function jaccardSimilarity(a: string, b: string): number;
 ```
 
-#### `judgeCandidates`
+#### <code v-pre>judgeCandidates</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L51) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L51) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export declare function judgeCandidates(session: EvalSession, input: {
@@ -910,9 +910,9 @@ export declare function judgeCandidates(session: EvalSession, input: {
 };
 ```
 
-#### `lookupModelPrice`
+#### <code v-pre>lookupModelPrice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L70) `packages/ai-llm/src/pricing.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L70) <code v-pre>packages/ai-llm/src/pricing.ts</code>
 
 Look up a model's price entry. Alias-resolves first, then reads `PRICE_TABLE`. Unknown models fall back to Anthropic Sonnet 3.5 rates with `wasFallback: true` so callers can log the drift instead of silently emitting zero-cost figures. `Object.hasOwn` guards against inherited property lookups (e.g. `toString` / `__proto__`) that would otherwise resolve to non-price built-ins.
 
@@ -920,9 +920,9 @@ Look up a model's price entry. Alias-resolves first, then reads `PRICE_TABLE`. U
 export declare function lookupModelPrice(model: string): PriceLookupResult;
 ```
 
-#### `lookupSemanticCache`
+#### <code v-pre>lookupSemanticCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L123) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L123) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 ```ts
 export declare function lookupSemanticCache(session: CoSession, input: {
@@ -935,9 +935,9 @@ export declare function lookupSemanticCache(session: CoSession, input: {
 };
 ```
 
-#### `makeSeededRandom`
+#### <code v-pre>makeSeededRandom</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L20) `packages/ai-llm/src/sampling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L20) <code v-pre>packages/ai-llm/src/sampling.ts</code>
 
 mulberry32 seeded PRNG — 32-bit state, returns floats in [0, 1). Same seed always yields the same sequence, so a perf test with `seed=42` observes identical samples on every run and can gate on the resulting distribution shape.
 
@@ -945,9 +945,9 @@ mulberry32 seeded PRNG — 32-bit state, returns floats in [0, 1). Same seed alw
 export declare function makeSeededRandom(seed: number): () => number;
 ```
 
-#### `matchRegex`
+#### <code v-pre>matchRegex</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L116) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L116) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export declare function matchRegex(session: GuardrailSession, input: {
@@ -961,9 +961,9 @@ export declare function matchRegex(session: GuardrailSession, input: {
 };
 ```
 
-#### `measureLatency`
+#### <code v-pre>measureLatency</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L80) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L80) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export declare function measureLatency(session: SlaSession, samples: LatencySample[]): {
@@ -975,9 +975,9 @@ export declare function measureLatency(session: SlaSession, samples: LatencySamp
 };
 ```
 
-#### `MockEngine`
+#### <code v-pre>MockEngine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/engine.ts#L29) `packages/ai-llm/src/engine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/engine.ts#L29) <code v-pre>packages/ai-llm/src/engine.ts</code>
 
 ```ts
 export declare class MockEngine {
@@ -992,9 +992,9 @@ export declare class MockEngine {
 }
 ```
 
-#### `pinVersion`
+#### <code v-pre>pinVersion</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L136) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L136) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export declare function pinVersion(session: PeaSession, input: {
@@ -1006,9 +1006,9 @@ export declare function pinVersion(session: PeaSession, input: {
 };
 ```
 
-#### `prepareDataset`
+#### <code v-pre>prepareDataset</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L67) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L67) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export declare function prepareDataset(session: FtpSession, input: {
@@ -1021,9 +1021,9 @@ export declare function prepareDataset(session: FtpSession, input: {
 };
 ```
 
-#### `PRICE_ALIASES`
+#### <code v-pre>PRICE&#95;ALIASES</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L40) `packages/ai-llm/src/pricing.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L40) <code v-pre>packages/ai-llm/src/pricing.ts</code>
 
 Alias → canonical model name. Vendors publish moving aliases like `-latest` that we resolve.
 
@@ -1031,9 +1031,9 @@ Alias → canonical model name. Vendors publish moving aliases like `-latest` th
 export declare const PRICE_ALIASES: Readonly<Record<string, string>>;
 ```
 
-#### `PRICE_TABLE`
+#### <code v-pre>PRICE&#95;TABLE</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L27) `packages/ai-llm/src/pricing.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L27) <code v-pre>packages/ai-llm/src/pricing.ts</code>
 
 Prices per 1M tokens keyed by model identifier as the vendor names it. Aliases like `claude-3-5-sonnet-latest` route to the concrete versioned entry (`claude-3-5-sonnet-20241022`) via `PRICE_ALIASES` so a bump on the vendor side that renames the alias target does not silently break lookup.
 
@@ -1041,9 +1041,9 @@ Prices per 1M tokens keyed by model identifier as the vendor names it. Aliases l
 export declare const PRICE_TABLE: Readonly<Record<string, ModelPrice>>;
 ```
 
-#### `promoteCanary`
+#### <code v-pre>promoteCanary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L142) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L142) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export declare function promoteCanary(session: OpsSession, input: {
@@ -1056,17 +1056,17 @@ export declare function promoteCanary(session: OpsSession, input: {
 };
 ```
 
-#### `providerEventName`
+#### <code v-pre>providerEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L427) `packages/ai-llm/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L427) <code v-pre>packages/ai-llm/src/semantics/types.ts</code>
 
 ```ts
 export declare function providerEventName(target: AiLlmTarget, neutral: NeutralEventName): string;
 ```
 
-#### `rankPreference`
+#### <code v-pre>rankPreference</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L104) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L104) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export declare function rankPreference(session: EvalSession, input: {
@@ -1086,9 +1086,9 @@ export declare function rankPreference(session: EvalSession, input: {
 };
 ```
 
-#### `reachConsensus`
+#### <code v-pre>reachConsensus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L119) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L119) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export declare function reachConsensus(session: SwarmSession, input: {
@@ -1100,9 +1100,9 @@ export declare function reachConsensus(session: SwarmSession, input: {
 };
 ```
 
-#### `reactStep`
+#### <code v-pre>reactStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L67) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L67) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export declare function reactStep(session: AgentSession, input: {
@@ -1118,9 +1118,9 @@ export declare function reactStep(session: AgentSession, input: {
 };
 ```
 
-#### `redactPii`
+#### <code v-pre>redactPii</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L187) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L187) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export declare function redactPii(session: GuardrailSession, text: string): {
@@ -1133,9 +1133,9 @@ export declare function redactPii(session: GuardrailSession, text: string): {
 };
 ```
 
-#### `reflectAndCorrect`
+#### <code v-pre>reflectAndCorrect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L118) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L118) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export declare function reflectAndCorrect(session: AgentSession, input: {
@@ -1147,9 +1147,9 @@ export declare function reflectAndCorrect(session: AgentSession, input: {
 };
 ```
 
-#### `rerank`
+#### <code v-pre>rerank</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L113) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L113) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export declare function rerank(session: RagSession, input: {
@@ -1161,33 +1161,33 @@ export declare function rerank(session: RagSession, input: {
 };
 ```
 
-#### `resolveApiKey`
+#### <code v-pre>resolveApiKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L61) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L61) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function resolveApiKey(backend: LlmBackend, env?: NodeJS.ProcessEnv): string | null;
 ```
 
-#### `resolveBudgetGuard`
+#### <code v-pre>resolveBudgetGuard</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L75) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L75) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function resolveBudgetGuard(env?: NodeJS.ProcessEnv): BudgetGuardConfig;
 ```
 
-#### `resolveLlmEndpoint`
+#### <code v-pre>resolveLlmEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L26) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L26) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function resolveLlmEndpoint(backend: LlmBackend, env?: NodeJS.ProcessEnv): string;
 ```
 
-#### `rollback`
+#### <code v-pre>rollback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L132) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L132) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export declare function rollback(session: CiSession, input: {
@@ -1199,9 +1199,9 @@ export declare function rollback(session: CiSession, input: {
 };
 ```
 
-#### `routeModel`
+#### <code v-pre>routeModel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L112) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L112) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export declare function routeModel(session: SlaSession, input: {
@@ -1215,9 +1215,9 @@ export declare function routeModel(session: SlaSession, input: {
 };
 ```
 
-#### `runEvalLoop`
+#### <code v-pre>runEvalLoop</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L122) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L122) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export declare function runEvalLoop(session: FtpSession, input: {
@@ -1229,9 +1229,9 @@ export declare function runEvalLoop(session: FtpSession, input: {
 };
 ```
 
-#### `runFidelityCheck`
+#### <code v-pre>runFidelityCheck</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L61) `packages/ai-llm/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L61) <code v-pre>packages/ai-llm/src/fidelity.ts</code>
 
 fidelity 実行 — 全 prompt を real / mock 両方に投げて diff を計測。
 
@@ -1239,9 +1239,9 @@ fidelity 実行 — 全 prompt を real / mock 両方に投げて diff を計測
 export declare function runFidelityCheck(input: FidelityInput): Promise<FidelityReport>;
 ```
 
-#### `samplePoisson`
+#### <code v-pre>samplePoisson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L38) `packages/ai-llm/src/sampling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L38) <code v-pre>packages/ai-llm/src/sampling.ts</code>
 
 Poisson-distributed sample stream. Knuth's algorithm — simple, correct for the small lambdas (0.5–20) perf tests use for arrival-interval / request-count models. For lambda &gt; ~30 numerical underflow makes this variant unusable, but that regime is out of scope for the dogfood perf suite.
 
@@ -1249,9 +1249,9 @@ Poisson-distributed sample stream. Knuth's algorithm — simple, correct for the
 export declare function samplePoisson(count: number, lambda: number, rng: () => number): number[];
 ```
 
-#### `sampleZipf`
+#### <code v-pre>sampleZipf</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L76) `packages/ai-llm/src/sampling.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L76) <code v-pre>packages/ai-llm/src/sampling.ts</code>
 
 Zipf-distributed sample stream — heavy-tail integer draws from {1..n}. Rejection method with Devroye's shape parameter is used so larger `s` (skew) values still converge; perf tests use s ≈ 1.07 to approximate the observed prompt-length distribution in production chat traffic.
 
@@ -1259,9 +1259,9 @@ Zipf-distributed sample stream — heavy-tail integer draws from {1..n}. Rejecti
 export declare function sampleZipf(count: number, n: number, s: number, rng: () => number): number[];
 ```
 
-#### `scoreConfidence`
+#### <code v-pre>scoreConfidence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L136) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L136) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 ```ts
 export declare function scoreConfidence(session: HallucinationSession, text: string): {
@@ -1271,9 +1271,9 @@ export declare function scoreConfidence(session: HallucinationSession, text: str
 };
 ```
 
-#### `scoreSelfConsistency`
+#### <code v-pre>scoreSelfConsistency</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L48) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L48) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 ```ts
 export declare function scoreSelfConsistency(session: HallucinationSession, samples: string[]): {
@@ -1282,9 +1282,9 @@ export declare function scoreSelfConsistency(session: HallucinationSession, samp
 };
 ```
 
-#### `selectFewShot`
+#### <code v-pre>selectFewShot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L89) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L89) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export declare function selectFewShot(session: PeaSession, input: {
@@ -1296,9 +1296,9 @@ export declare function selectFewShot(session: PeaSession, input: {
 };
 ```
 
-#### `selectTool`
+#### <code v-pre>selectTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L148) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L148) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export declare function selectTool(session: AgentSession, input: {
@@ -1314,9 +1314,9 @@ export declare function selectTool(session: AgentSession, input: {
 };
 ```
 
-#### `selfQuery`
+#### <code v-pre>selfQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L144) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L144) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export declare function selfQuery(session: Rag3Session, input: {
@@ -1329,9 +1329,9 @@ export declare function selfQuery(session: Rag3Session, input: {
 };
 ```
 
-#### `skipUnlessReal`
+#### <code v-pre>skipUnlessReal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L134) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L134) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function skipUnlessReal(env?: NodeJS.ProcessEnv): {
@@ -1340,9 +1340,9 @@ export declare function skipUnlessReal(env?: NodeJS.ProcessEnv): {
 };
 ```
 
-#### `startAgentSession`
+#### <code v-pre>startAgentSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L50) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L50) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export declare function startAgentSession(input: {
@@ -1351,9 +1351,9 @@ export declare function startAgentSession(input: {
 }): AgentSession;
 ```
 
-#### `startCiSession`
+#### <code v-pre>startCiSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L44) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L44) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export declare function startCiSession(input: {
@@ -1362,9 +1362,9 @@ export declare function startCiSession(input: {
 }): CiSession;
 ```
 
-#### `startCoSession`
+#### <code v-pre>startCoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L27) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L27) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 ```ts
 export declare function startCoSession(input: {
@@ -1373,9 +1373,9 @@ export declare function startCoSession(input: {
 }): CoSession;
 ```
 
-#### `startEvalSession`
+#### <code v-pre>startEvalSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L35) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L35) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export declare function startEvalSession(input: {
@@ -1384,9 +1384,9 @@ export declare function startEvalSession(input: {
 }): EvalSession;
 ```
 
-#### `startFtpSession`
+#### <code v-pre>startFtpSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L48) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L48) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export declare function startFtpSession(input: {
@@ -1395,9 +1395,9 @@ export declare function startFtpSession(input: {
 }): FtpSession;
 ```
 
-#### `startFtSession`
+#### <code v-pre>startFtSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L42) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L42) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export declare function startFtSession(input: {
@@ -1406,9 +1406,9 @@ export declare function startFtSession(input: {
 }): FtSession;
 ```
 
-#### `startGuardrailSession`
+#### <code v-pre>startGuardrailSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L44) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L44) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export declare function startGuardrailSession(input: {
@@ -1417,9 +1417,9 @@ export declare function startGuardrailSession(input: {
 }): GuardrailSession;
 ```
 
-#### `startHallucinationSession`
+#### <code v-pre>startHallucinationSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L32) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L32) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 ```ts
 export declare function startHallucinationSession(input: {
@@ -1428,9 +1428,9 @@ export declare function startHallucinationSession(input: {
 }): HallucinationSession;
 ```
 
-#### `startInjectionSession`
+#### <code v-pre>startInjectionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L42) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L42) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export declare function startInjectionSession(input: {
@@ -1439,9 +1439,9 @@ export declare function startInjectionSession(input: {
 }): InjectionSession;
 ```
 
-#### `startMaoSession`
+#### <code v-pre>startMaoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L55) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L55) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export declare function startMaoSession(input: {
@@ -1450,9 +1450,9 @@ export declare function startMaoSession(input: {
 }): MaoSession;
 ```
 
-#### `startOpsSession`
+#### <code v-pre>startOpsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L43) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L43) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export declare function startOpsSession(input: {
@@ -1461,9 +1461,9 @@ export declare function startOpsSession(input: {
 }): OpsSession;
 ```
 
-#### `startPeaSession`
+#### <code v-pre>startPeaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L48) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L48) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export declare function startPeaSession(input: {
@@ -1472,9 +1472,9 @@ export declare function startPeaSession(input: {
 }): PeaSession;
 ```
 
-#### `startRag3Session`
+#### <code v-pre>startRag3Session</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L54) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L54) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export declare function startRag3Session(input: {
@@ -1483,9 +1483,9 @@ export declare function startRag3Session(input: {
 }): Rag3Session;
 ```
 
-#### `startRagSession`
+#### <code v-pre>startRagSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L34) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L34) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export declare function startRagSession(input: {
@@ -1494,9 +1494,9 @@ export declare function startRagSession(input: {
 }): RagSession;
 ```
 
-#### `startSandbox`
+#### <code v-pre>startSandbox</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L64) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L64) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export declare function startSandbox(session: CiSession, input: {
@@ -1508,9 +1508,9 @@ export declare function startSandbox(session: CiSession, input: {
 };
 ```
 
-#### `startSlaSession`
+#### <code v-pre>startSlaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L39) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L39) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export declare function startSlaSession(input: {
@@ -1520,9 +1520,9 @@ export declare function startSlaSession(input: {
 }): SlaSession;
 ```
 
-#### `startSwarmSession`
+#### <code v-pre>startSwarmSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L47) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L47) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export declare function startSwarmSession(input: {
@@ -1532,9 +1532,9 @@ export declare function startSwarmSession(input: {
 }): SwarmSession;
 ```
 
-#### `stepAgentic`
+#### <code v-pre>stepAgentic</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L119) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L119) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export declare function stepAgentic(session: Rag3Session, input: {
@@ -1548,9 +1548,9 @@ export declare function stepAgentic(session: Rag3Session, input: {
 };
 ```
 
-#### `stepCascade`
+#### <code v-pre>stepCascade</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L89) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L89) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 ```ts
 export declare function stepCascade(session: CoSession, input: {
@@ -1567,9 +1567,9 @@ export declare function stepCascade(session: CoSession, input: {
 };
 ```
 
-#### `stepRlhf`
+#### <code v-pre>stepRlhf</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L98) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L98) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export declare function stepRlhf(session: FtpSession, input: {
@@ -1581,9 +1581,9 @@ export declare function stepRlhf(session: FtpSession, input: {
 };
 ```
 
-#### `submitBatch`
+#### <code v-pre>submitBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L43) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L43) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 ```ts
 export declare function submitBatch(session: CoSession, input: {
@@ -1599,9 +1599,9 @@ export declare function submitBatch(session: CoSession, input: {
 };
 ```
 
-#### `tolerateByzantine`
+#### <code v-pre>tolerateByzantine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L150) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L150) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export declare function tolerateByzantine(session: SwarmSession, input: {
@@ -1613,9 +1613,9 @@ export declare function tolerateByzantine(session: SwarmSession, input: {
 };
 ```
 
-#### `toTranscriptionKey`
+#### <code v-pre>toTranscriptionKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L167) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L167) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 audio part を transcription key に変換 (mock dict lookup 用)。 base64 は `base64:{先頭 32 文字}`、 url は `url:{url}` を使う。 先頭 32 文字 hash は 「同じ audio を渡せば同じ key」 を担保する軽量 fingerprint。
 
@@ -1623,9 +1623,9 @@ audio part を transcription key に変換 (mock dict lookup 用)。 base64 は 
 export declare function toTranscriptionKey(source: MediaSource): string;
 ```
 
-#### `transitionGraph`
+#### <code v-pre>transitionGraph</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L128) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L128) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export declare function transitionGraph(session: MaoSession, input: {
@@ -1638,9 +1638,9 @@ export declare function transitionGraph(session: MaoSession, input: {
 };
 ```
 
-#### `traverseGraph`
+#### <code v-pre>traverseGraph</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L73) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L73) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export declare function traverseGraph(session: Rag3Session, input: {
@@ -1655,9 +1655,9 @@ export declare function traverseGraph(session: Rag3Session, input: {
 };
 ```
 
-#### `updateElo`
+#### <code v-pre>updateElo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L148) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L148) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export declare function updateElo(session: EvalSession, input: {
@@ -1671,9 +1671,9 @@ export declare function updateElo(session: EvalSession, input: {
 };
 ```
 
-#### `updateRegistry`
+#### <code v-pre>updateRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L61) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L61) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export declare function updateRegistry(session: OpsSession, input: {
@@ -1685,9 +1685,9 @@ export declare function updateRegistry(session: OpsSession, input: {
 };
 ```
 
-#### `useTool`
+#### <code v-pre>useTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L113) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L113) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export declare function useTool(session: CiSession, input: {
@@ -1699,9 +1699,9 @@ export declare function useTool(session: CiSession, input: {
 };
 ```
 
-#### `validateSchema`
+#### <code v-pre>validateSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L59) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L59) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export declare function validateSchema(session: GuardrailSession, input: {
@@ -1714,9 +1714,9 @@ export declare function validateSchema(session: GuardrailSession, input: {
 };
 ```
 
-#### `verifyCitation`
+#### <code v-pre>verifyCitation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L108) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L108) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 ```ts
 export declare function verifyCitation(session: HallucinationSession, input: {
@@ -1731,9 +1731,9 @@ export declare function verifyCitation(session: HallucinationSession, input: {
 
 ### 型
 
-#### `AgentSession`
+#### <code v-pre>AgentSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L15) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L15) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export interface AgentSession {
@@ -1746,9 +1746,9 @@ export interface AgentSession {
 }
 ```
 
-#### `AgentState`
+#### <code v-pre>AgentState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L8) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L8) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 Agent orchestration axis — ReAct + Tree-of-Thought + reflection + self-correction + planning + tool selection state machine。
 
@@ -1756,17 +1756,17 @@ Agent orchestration axis — ReAct + Tree-of-Thought + reflection + self-correct
 export type AgentState = 'idle' | 'react-stepped' | 'tot-expanded' | 'reflected' | 'tool-selected';
 ```
 
-#### `AiLlmAxis`
+#### <code v-pre>AiLlmAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L37) `packages/ai-llm/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L37) <code v-pre>packages/ai-llm/src/semantics/types.ts</code>
 
 ```ts
 export type AiLlmAxis = 'prompt-injection' | 'hallucination' | 'llm-eval' | 'guardrails' | 'rag-advanced' | 'agent-orchestration' | 'fine-tuning-eval' | 'cost-latency-sla' | 'multi-agent-orchestration' | 'agent-swarm' | 'code-interpreter' | 'fine-tuning-pipeline' | 'llm-ops' | 'prompt-engineering-advanced' | 'rag-iii' | 'cost-optimization';
 ```
 
-#### `AiLlmMock`
+#### <code v-pre>AiLlmMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L163) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L163) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 kiwa mock を全 SDK adapter が満たすべき最小 interface。 SDK 固有の API (`messages.create` / `chat.completions.create` / `generateText` / `invoke` 等) は adapter 別に定義、 本 interface は 4 SDK 共通の低レベル呼出だけ を集約する。 `chatCompletion` = non-streaming、 `chatStream` = SSE 相当の async iterable。 SDK 表面の名前 (`chat` / `stream`) と衝突しないよう prefix を付ける。
 
@@ -1788,9 +1788,9 @@ export interface AiLlmMock {
 }
 ```
 
-#### `AiLlmTarget`
+#### <code v-pre>AiLlmTarget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L35) `packages/ai-llm/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L35) <code v-pre>packages/ai-llm/src/semantics/types.ts</code>
 
 Advanced AI-LLM semantics — provider-neutral axis SSOT (v0.4 + v0.5). Model 4 canonical LLM SDK targets as pure state machines so kiwa fixture tests can assert on a neutral event name while still observing a provider-specific dialect through providerEventName. Provider targets (SDK 別 4): - anthropic ... Anthropic Messages API (Claude Haiku / Sonnet / Opus) - openai ... OpenAI Chat Completions (gpt-4o / gpt-4o-mini) - vercel-ai ... Vercel AI SDK (streamText + generateText、 provider agnostic) - langchain ... LangChain (BaseChatModel + Runnable) v0.4 Axes (8): - prompt-injection ... direct + indirect + jailbreak + role hijacking + XML injection defense - hallucination ... self-consistency + factuality + citation + confidence + hedging - llm-eval ... LLM-as-judge + rubric + preference + Elo + human-in-the-loop - guardrails ... JSON schema + regex + toxicity + PII + Constitutional AI - rag-advanced ... chunking + hybrid retrieval + reranking + citation + context compression - agent-orchestration ... ReAct + ToT + reflection + self-correction + planning + tool selection - fine-tuning-eval ... SFT/DPO + catastrophic forgetting + benchmark drift - cost-latency-sla ... budget + p50/p99 + model routing + fallback ladder v0.5 Axes (advanced III、 8 new): - multi-agent-orchestration ... CrewAI + AutoGen + LangGraph + supervisor + swarm coordination - agent-swarm ... role-based + task allocation + consensus + Byzantine fault tolerance - code-interpreter ... sandboxed Python REPL + tool use + rollback state machine - fine-tuning-pipeline ... dataset prep + RLHF/DPO + eval loop + drift detection - llm-ops ... model registry + rollout + A/B + canary + shadow - prompt-engineering-advanced ... CoT + few-shot + caching + versioning - rag-iii ... GraphRAG + agentic + self-querying + parent document - cost-optimization ... batch API + prompt compression + model cascade + semantic cache
 
@@ -1798,9 +1798,9 @@ Advanced AI-LLM semantics — provider-neutral axis SSOT (v0.4 + v0.5). Model 4 
 export type AiLlmTarget = 'anthropic' | 'openai' | 'vercel-ai' | 'langchain';
 ```
 
-#### `AnthropicContentBlock`
+#### <code v-pre>AnthropicContentBlock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L32) `packages/ai-llm/src/anthropic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L32) <code v-pre>packages/ai-llm/src/anthropic.ts</code>
 
 Anthropic content block union (v0.2 で image 追加、 real API 準拠)。 text / image は well-typed、 tool_use / tool_result は real SDK の柔軟な shape を保つため field を optional にしてある。 dogfood app が段階的に request を組み立てる経路 (id / name を後で埋める) を許容する。
 
@@ -1836,9 +1836,9 @@ export type AnthropicContentBlock = {
 };
 ```
 
-#### `AnthropicMessagesRequest`
+#### <code v-pre>AnthropicMessagesRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L60) `packages/ai-llm/src/anthropic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L60) <code v-pre>packages/ai-llm/src/anthropic.ts</code>
 
 ```ts
 export interface AnthropicMessagesRequest {
@@ -1859,9 +1859,9 @@ export interface AnthropicMessagesRequest {
 }
 ```
 
-#### `AnthropicMessagesResponse`
+#### <code v-pre>AnthropicMessagesResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L77) `packages/ai-llm/src/anthropic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L77) <code v-pre>packages/ai-llm/src/anthropic.ts</code>
 
 ```ts
 export interface AnthropicMessagesResponse {
@@ -1894,9 +1894,9 @@ export interface AnthropicMessagesResponse {
 }
 ```
 
-#### `AnthropicMock`
+#### <code v-pre>AnthropicMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L118) `packages/ai-llm/src/anthropic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L118) <code v-pre>packages/ai-llm/src/anthropic.ts</code>
 
 Anthropic mock client。 real SDK と同じ `messages.create` / `messages.stream` API surface を提供。
 
@@ -1910,9 +1910,9 @@ export interface AnthropicMock extends AiLlmMock {
 }
 ```
 
-#### `AnthropicStreamEvent`
+#### <code v-pre>AnthropicStreamEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L101) `packages/ai-llm/src/anthropic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/anthropic.ts#L101) <code v-pre>packages/ai-llm/src/anthropic.ts</code>
 
 ```ts
 export interface AnthropicStreamEvent {
@@ -1934,9 +1934,9 @@ export interface AnthropicStreamEvent {
 }
 ```
 
-#### `AudioPart`
+#### <code v-pre>AudioPart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L66) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L66) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 Audio 入力 (Whisper transcription や OpenAI audio input で使用)。
 
@@ -1955,9 +1955,9 @@ export interface AudioPart {
 }
 ```
 
-#### `AxisStep`
+#### <code v-pre>AxisStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L140) `packages/ai-llm/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L140) <code v-pre>packages/ai-llm/src/semantics/types.ts</code>
 
 ```ts
 export interface AxisStep<TState extends string> {
@@ -1969,9 +1969,9 @@ export interface AxisStep<TState extends string> {
 }
 ```
 
-#### `Base64Data`
+#### <code v-pre>Base64Data</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L34) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L34) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 base64 data + media type、 real API と shape 整合。
 
@@ -1985,9 +1985,9 @@ export interface Base64Data {
 }
 ```
 
-#### `BenchmarkResult`
+#### <code v-pre>BenchmarkResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L37) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L37) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export interface BenchmarkResult {
@@ -1996,9 +1996,9 @@ export interface BenchmarkResult {
 }
 ```
 
-#### `BudgetGuardConfig`
+#### <code v-pre>BudgetGuardConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L69) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L69) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export interface BudgetGuardConfig {
@@ -2008,9 +2008,9 @@ export interface BudgetGuardConfig {
 }
 ```
 
-#### `BuildAiLlmReportInput`
+#### <code v-pre>BuildAiLlmReportInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts#L28) `packages/ai-llm/src/report.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/report.ts#L28) <code v-pre>packages/ai-llm/src/report.ts</code>
 
 `@kiwa-lab/ai-llm` 実測値を `@kiwa-lab/quality-metrics` `QualityReport` に集約する adapter。 dogfood app が fidelity harness を回した後、 本 adapter で `QualityReport` に変換 → `evaluateReleaseGate` に渡す、 の流れを想定。 accuracy / cost / latency / token 4 軸は `FidelityReport.records` の 実測値 (mock 側) を集計、 fidelity の 5 軸目 (surface coverage) は 別途 mock 側の `mockCoveredMethods` / `realTotalMethods` 引数で指定。
 
@@ -2058,9 +2058,9 @@ export interface BuildAiLlmReportInput {
 }
 ```
 
-#### `ChatCompletion`
+#### <code v-pre>ChatCompletion</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L78) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L78) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 1 回の chat request 結果 (non-streaming)。
 
@@ -2078,9 +2078,9 @@ export interface ChatCompletion {
 }
 ```
 
-#### `ChatInput`
+#### <code v-pre>ChatInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L180) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L180) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 chat / stream 共通の入力。
 
@@ -2095,9 +2095,9 @@ export interface ChatInput {
 }
 ```
 
-#### `ChatMessage`
+#### <code v-pre>ChatMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L31) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L31) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 Provider agnostic chat message。 tool_call / tool_result は `toolCalls` / `toolCallId` field で表現する。 v0.2 (Issue #746) で multimodal 対応追加。 `parts` optional field に image / audio を含む `MessagePart[]` を渡せる。 `parts` 指定時は adapter が SDK 固有の image/audio shape に変換、 未指定時は従来通り `content: string` を使う (完全後方互換)。
 
@@ -2119,9 +2119,9 @@ export interface ChatMessage {
 }
 ```
 
-#### `CiExecution`
+#### <code v-pre>CiExecution</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L19) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L19) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export interface CiExecution {
@@ -2132,9 +2132,9 @@ export interface CiExecution {
 }
 ```
 
-#### `CiSession`
+#### <code v-pre>CiSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L32) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L32) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export interface CiSession {
@@ -2150,9 +2150,9 @@ export interface CiSession {
 }
 ```
 
-#### `CiState`
+#### <code v-pre>CiState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L12) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L12) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 Code interpreter axis — sandboxed Python REPL + tool use + rollback state machine。 Deterministic mock で 4 signal 系統。 sandbox start binds an isolated cell、 code execution accumulates history and side-effects、 tool use is external effect record、 rollback pops N most-recent executions and restores state。
 
@@ -2160,9 +2160,9 @@ Code interpreter axis — sandboxed Python REPL + tool use + rollback state mach
 export type CiState = 'idle' | 'sandbox-started' | 'code-executed' | 'tool-used' | 'rolled-back';
 ```
 
-#### `CiToolCall`
+#### <code v-pre>CiToolCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L26) `packages/ai-llm/src/semantics/code-interpreter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L26) <code v-pre>packages/ai-llm/src/semantics/code-interpreter.ts</code>
 
 ```ts
 export interface CiToolCall {
@@ -2172,9 +2172,9 @@ export interface CiToolCall {
 }
 ```
 
-#### `ConstitutionalPrinciple`
+#### <code v-pre>ConstitutionalPrinciple</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L38) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L38) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export interface ConstitutionalPrinciple {
@@ -2184,9 +2184,9 @@ export interface ConstitutionalPrinciple {
 }
 ```
 
-#### `CoSession`
+#### <code v-pre>CoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L19) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L19) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 ```ts
 export interface CoSession {
@@ -2198,9 +2198,9 @@ export interface CoSession {
 }
 ```
 
-#### `CoState`
+#### <code v-pre>CoState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L12) `packages/ai-llm/src/semantics/cost-optimization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L12) <code v-pre>packages/ai-llm/src/semantics/cost-optimization.ts</code>
 
 Cost optimization axis — batch API + prompt compression + model cascade + semantic cache state machine。 Deterministic mock で 4 signal 系統。 batch submit is size + estimate、 prompt compression is char delta、 model cascade is threshold + tier、 semantic cache is hash lookup。
 
@@ -2208,9 +2208,9 @@ Cost optimization axis — batch API + prompt compression + model cascade + sema
 export type CoState = 'idle' | 'batch-submitted' | 'prompt-compressed' | 'cascade-stepped' | 'semantic-cached';
 ```
 
-#### `CotStep`
+#### <code v-pre>CotStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L19) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L19) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export interface CotStep {
@@ -2219,9 +2219,9 @@ export interface CotStep {
 }
 ```
 
-#### `DpoSample`
+#### <code v-pre>DpoSample</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L29) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L29) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export interface DpoSample {
@@ -2233,9 +2233,9 @@ export interface DpoSample {
 }
 ```
 
-#### `EvalSession`
+#### <code v-pre>EvalSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L15) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L15) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export interface EvalSession {
@@ -2247,9 +2247,9 @@ export interface EvalSession {
 }
 ```
 
-#### `EvalState`
+#### <code v-pre>EvalState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L8) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L8) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 LLM eval axis — LLM-as-judge + rubric + preference + Elo + human-in-the-loop state machine。 deterministic mock で 4 signal 系統を提供。
 
@@ -2257,9 +2257,9 @@ LLM eval axis — LLM-as-judge + rubric + preference + Elo + human-in-the-loop s
 export type EvalState = 'idle' | 'judged' | 'rubric-applied' | 'preference-ranked' | 'elo-updated';
 ```
 
-#### `FewShotExample`
+#### <code v-pre>FewShotExample</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L24) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L24) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export interface FewShotExample {
@@ -2270,9 +2270,9 @@ export interface FewShotExample {
 }
 ```
 
-#### `FidelityCoverage`
+#### <code v-pre>FidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L15) `packages/ai-llm/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L15) <code v-pre>packages/ai-llm/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityCoverage {
@@ -2282,9 +2282,9 @@ export interface FidelityCoverage {
 }
 ```
 
-#### `FidelityInput`
+#### <code v-pre>FidelityInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L14) `packages/ai-llm/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L14) <code v-pre>packages/ai-llm/src/fidelity.ts</code>
 
 Real vs mock 差分計測 harness。 v1.12-2/-3/-4 dogfood app が real provider (Anthropic / OpenAI / Vercel AI) と kiwa mock の両方に同じ prompt を投げ、 4 metric (cost / latency / token / accuracy) の diff を計測する SSOT。 accuracy は「real 出力 vs mock 出力の similarity」 を 0-1 で返す。 default は文字列 Jaccard similarity (BLEU / embedding cosine は v1.12-3 で opt-in を検討)、 mock 検証には十分な近似。
 
@@ -2307,9 +2307,9 @@ export interface FidelityInput {
 }
 ```
 
-#### `FidelityRecord`
+#### <code v-pre>FidelityRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L32) `packages/ai-llm/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L32) <code v-pre>packages/ai-llm/src/fidelity.ts</code>
 
 1 prompt 単位の diff 記録。
 
@@ -2327,9 +2327,9 @@ export interface FidelityRecord {
 }
 ```
 
-#### `FidelityReport`
+#### <code v-pre>FidelityReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L45) `packages/ai-llm/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/fidelity.ts#L45) <code v-pre>packages/ai-llm/src/fidelity.ts</code>
 
 fidelity 実測結果全体。
 
@@ -2348,9 +2348,9 @@ export interface FidelityReport {
 }
 ```
 
-#### `FidelityRow`
+#### <code v-pre>FidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L8) `packages/ai-llm/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fidelity.ts#L8) <code v-pre>packages/ai-llm/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityRow {
@@ -2361,9 +2361,9 @@ export interface FidelityRow {
 }
 ```
 
-#### `FtpEvalRecord`
+#### <code v-pre>FtpEvalRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L32) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L32) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export interface FtpEvalRecord {
@@ -2372,9 +2372,9 @@ export interface FtpEvalRecord {
 }
 ```
 
-#### `FtpRlhfStep`
+#### <code v-pre>FtpRlhfStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L26) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L26) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export interface FtpRlhfStep {
@@ -2384,9 +2384,9 @@ export interface FtpRlhfStep {
 }
 ```
 
-#### `FtpSample`
+#### <code v-pre>FtpSample</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L20) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L20) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export interface FtpSample {
@@ -2396,9 +2396,9 @@ export interface FtpSample {
 }
 ```
 
-#### `FtpSession`
+#### <code v-pre>FtpSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L37) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L37) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 ```ts
 export interface FtpSession {
@@ -2413,9 +2413,9 @@ export interface FtpSession {
 }
 ```
 
-#### `FtpState`
+#### <code v-pre>FtpState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L13) `packages/ai-llm/src/semantics/fine-tuning-pipeline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L13) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-pipeline.ts</code>
 
 Fine-tuning pipeline axis — dataset prep + RLHF/DPO + eval loop + drift detection state machine。 Deterministic mock で 4 signal 系統。 dataset prep is dedup + shuffle by hash、 RLHF stepping is reward gradient sign + policy update、 eval loop accumulates score history、 drift detection compares latest eval vs baseline via absolute threshold。
 
@@ -2423,9 +2423,9 @@ Fine-tuning pipeline axis — dataset prep + RLHF/DPO + eval loop + drift detect
 export type FtpState = 'idle' | 'dataset-prepared' | 'rlhf-stepped' | 'eval-loop-ran' | 'drift-detected';
 ```
 
-#### `FtSession`
+#### <code v-pre>FtSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L15) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L15) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export interface FtSession {
@@ -2437,9 +2437,9 @@ export interface FtSession {
 }
 ```
 
-#### `FtState`
+#### <code v-pre>FtState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L8) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L8) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 Fine-tuning eval axis — SFT/DPO + catastrophic forgetting + benchmark drift state machine。 deterministic mock で 4 signal 系統。
 
@@ -2447,9 +2447,9 @@ Fine-tuning eval axis — SFT/DPO + catastrophic forgetting + benchmark drift st
 export type FtState = 'idle' | 'sft-evaluated' | 'dpo-evaluated' | 'forgetting-detected' | 'drift-detected';
 ```
 
-#### `GuardrailSession`
+#### <code v-pre>GuardrailSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L16) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L16) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export interface GuardrailSession {
@@ -2460,9 +2460,9 @@ export interface GuardrailSession {
 }
 ```
 
-#### `GuardrailState`
+#### <code v-pre>GuardrailState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L8) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L8) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 Guardrails axis — JSON schema + regex + toxicity + PII + Constitutional AI state machine。 deterministic mock で 5 signal 系統を提供。
 
@@ -2470,9 +2470,9 @@ Guardrails axis — JSON schema + regex + toxicity + PII + Constitutional AI sta
 export type GuardrailState = 'idle' | 'schema-validated' | 'regex-matched' | 'toxicity-blocked' | 'pii-redacted' | 'constitutional-checked';
 ```
 
-#### `HallucinationSession`
+#### <code v-pre>HallucinationSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L19) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L19) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 ```ts
 export interface HallucinationSession {
@@ -2489,9 +2489,9 @@ export interface HallucinationSession {
 }
 ```
 
-#### `HallucinationState`
+#### <code v-pre>HallucinationState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L12) `packages/ai-llm/src/semantics/hallucination.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L12) <code v-pre>packages/ai-llm/src/semantics/hallucination.ts</code>
 
 Hallucination detection axis — self-consistency + factuality + citation + confidence + hedging state machine。 Deterministic mock で 5 signal 系統。 self-consistency は複数 sample 間の token-overlap 比率、 factuality は claim vs evidence の string match、 citation は引用先の存在 check、 confidence / hedging は modal 語彙密度。
 
@@ -2499,9 +2499,9 @@ Hallucination detection axis — self-consistency + factuality + citation + conf
 export type HallucinationState = 'idle' | 'self-consistency-scored' | 'factuality-checked' | 'citation-verified' | 'confidence-scored';
 ```
 
-#### `ImagePart`
+#### <code v-pre>ImagePart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L58) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L58) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 Image 入力。 detail は OpenAI vision の resolution hint と互換。
 
@@ -2514,9 +2514,9 @@ export interface ImagePart {
 }
 ```
 
-#### `InjectionDetection`
+#### <code v-pre>InjectionDetection</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L35) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L35) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export interface InjectionDetection {
@@ -2527,9 +2527,9 @@ export interface InjectionDetection {
 }
 ```
 
-#### `InjectionKind`
+#### <code v-pre>InjectionKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L12) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L12) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 Prompt injection defense axis — direct + indirect + jailbreak + role hijacking + XML injection detection state machine。 Deterministic mock で 5 signal 系統を提供 (pattern-based classifier)。 real driver 経路では実 LLM に対し injection payload を投げて refusal を 観測する。
 
@@ -2537,9 +2537,9 @@ Prompt injection defense axis — direct + indirect + jailbreak + role hijacking
 export type InjectionKind = 'direct' | 'indirect' | 'jailbreak' | 'role-hijacking' | 'xml-injection';
 ```
 
-#### `InjectionSession`
+#### <code v-pre>InjectionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L27) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L27) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export interface InjectionSession {
@@ -2555,17 +2555,17 @@ export interface InjectionSession {
 }
 ```
 
-#### `InjectionState`
+#### <code v-pre>InjectionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L19) `packages/ai-llm/src/semantics/prompt-injection.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L19) <code v-pre>packages/ai-llm/src/semantics/prompt-injection.ts</code>
 
 ```ts
 export type InjectionState = 'idle' | 'analyzed' | 'direct-detected' | 'indirect-detected' | 'jailbreak-blocked' | 'role-hijacking-blocked';
 ```
 
-#### `JudgeVerdict`
+#### <code v-pre>JudgeVerdict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L23) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L23) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export interface JudgeVerdict {
@@ -2575,9 +2575,9 @@ export interface JudgeVerdict {
 }
 ```
 
-#### `LangchainAIMessage`
+#### <code v-pre>LangchainAIMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L48) `packages/ai-llm/src/langchain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L48) <code v-pre>packages/ai-llm/src/langchain.ts</code>
 
 ```ts
 export interface LangchainAIMessage {
@@ -2605,9 +2605,9 @@ export interface LangchainAIMessage {
 }
 ```
 
-#### `LangchainAIMessageChunk`
+#### <code v-pre>LangchainAIMessageChunk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L72) `packages/ai-llm/src/langchain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L72) <code v-pre>packages/ai-llm/src/langchain.ts</code>
 
 ```ts
 export interface LangchainAIMessageChunk {
@@ -2619,9 +2619,9 @@ export interface LangchainAIMessageChunk {
 }
 ```
 
-#### `LangchainContentBlock`
+#### <code v-pre>LangchainContentBlock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L28) `packages/ai-llm/src/langchain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L28) <code v-pre>packages/ai-llm/src/langchain.ts</code>
 
 LangChain content block (v0.2、 real
 
@@ -2643,9 +2643,9 @@ export type LangchainContentBlock = {
 };
 ```
 
-#### `LangchainInputMessage`
+#### <code v-pre>LangchainInputMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L41) `packages/ai-llm/src/langchain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L41) <code v-pre>packages/ai-llm/src/langchain.ts</code>
 
 ```ts
 export interface LangchainInputMessage {
@@ -2656,9 +2656,9 @@ export interface LangchainInputMessage {
 }
 ```
 
-#### `LangchainMock`
+#### <code v-pre>LangchainMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L80) `packages/ai-llm/src/langchain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/langchain.ts#L80) <code v-pre>packages/ai-llm/src/langchain.ts</code>
 
 ```ts
 export interface LangchainMock extends AiLlmMock {
@@ -2671,9 +2671,9 @@ export interface LangchainMock extends AiLlmMock {
 }
 ```
 
-#### `LatencySample`
+#### <code v-pre>LatencySample</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L27) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L27) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export interface LatencySample {
@@ -2682,9 +2682,9 @@ export interface LatencySample {
 }
 ```
 
-#### `LlmBackend`
+#### <code v-pre>LlmBackend</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L13) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L13) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 Real driver env-gate for ai-llm v0.4. Provides KIWA_MODE=real-based helpers for testing against actual LLM backends (Anthropic Messages API + OpenAI Chat Completions + Vercel AI SDK + LangChain). Consumers gate a describe block on `isKiwaModeReal()`, and use `resolveLlmEndpoint()` + `resolveApiKey()` to fetch backend URLs / keys. When KIWA_MODE != 'real', tests should skip. Budget guard は必須。 KIWA_LLM_BUDGET_USD で $ 上限を強制する SSOT。
 
@@ -2692,9 +2692,9 @@ Real driver env-gate for ai-llm v0.4. Provides KIWA_MODE=real-based helpers for 
 export type LlmBackend = 'anthropic' | 'openai' | 'vercel-ai' | 'langchain';
 ```
 
-#### `MaoAgent`
+#### <code v-pre>MaoAgent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L19) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L19) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export interface MaoAgent {
@@ -2704,9 +2704,9 @@ export interface MaoAgent {
 }
 ```
 
-#### `MaoDelegation`
+#### <code v-pre>MaoDelegation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L25) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L25) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export interface MaoDelegation {
@@ -2717,9 +2717,9 @@ export interface MaoDelegation {
 }
 ```
 
-#### `MaoGraphEdge`
+#### <code v-pre>MaoGraphEdge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L37) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L37) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export interface MaoGraphEdge {
@@ -2728,9 +2728,9 @@ export interface MaoGraphEdge {
 }
 ```
 
-#### `MaoGraphNode`
+#### <code v-pre>MaoGraphNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L32) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L32) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export interface MaoGraphNode {
@@ -2739,9 +2739,9 @@ export interface MaoGraphNode {
 }
 ```
 
-#### `MaoSession`
+#### <code v-pre>MaoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L42) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L42) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 ```ts
 export interface MaoSession {
@@ -2758,9 +2758,9 @@ export interface MaoSession {
 }
 ```
 
-#### `MaoState`
+#### <code v-pre>MaoState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L12) `packages/ai-llm/src/semantics/multi-agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L12) <code v-pre>packages/ai-llm/src/semantics/multi-agent-orchestration.ts</code>
 
 Multi-agent orchestration axis — CrewAI + AutoGen + LangGraph + supervisor pattern state machine。 Deterministic mock で 4 signal 系統。 crew assembly is role list snapshot、 supervisor delegation is deterministic round-robin、 graph transition is edge follow、 round completion is delegation count check。
 
@@ -2768,9 +2768,9 @@ Multi-agent orchestration axis — CrewAI + AutoGen + LangGraph + supervisor pat
 export type MaoState = 'idle' | 'crew-assembled' | 'supervisor-delegated' | 'graph-transitioned' | 'round-completed';
 ```
 
-#### `MediaSource`
+#### <code v-pre>MediaSource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L49) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L49) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 Image / Audio の source 表現統一。
 
@@ -2778,9 +2778,9 @@ Image / Audio の source 表現統一。
 export type MediaSource = Base64Data | UrlData;
 ```
 
-#### `MessagePart`
+#### <code v-pre>MessagePart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L80) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L80) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 MessagePart union — chat message の 1 sub-block。
 
@@ -2788,9 +2788,9 @@ MessagePart union — chat message の 1 sub-block。
 export type MessagePart = TextPart | ImagePart | AudioPart;
 ```
 
-#### `MessageRole`
+#### <code v-pre>MessageRole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L14) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L14) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 Chat message role — 4 SDK 全てで共通。
 
@@ -2798,9 +2798,9 @@ Chat message role — 4 SDK 全てで共通。
 export type MessageRole = 'system' | 'user' | 'assistant' | 'tool';
 ```
 
-#### `MockConfig`
+#### <code v-pre>MockConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L114) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L114) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 Mock 設定。 4 SDK adapter で共通に使う。 `responses` は user プロンプトを完全一致で index、 hit なしは `defaultResponse` を返す。 tool_calls / streaming も `responses` で 制御 (同じ user prompt に対し tool_use → 次 turn で最終応答、 等の multi-turn シナリオも表現可能)。 v0.2 (Issue #746) で multimodal 対応追加。 - `transcriptions` = audio → text の期待値 dict (Whisper mock)。 - `imageTokenCost` / `audioTokenCost` = multimodal token 計算 override。
 
@@ -2836,9 +2836,9 @@ export interface MockConfig {
 }
 ```
 
-#### `MockResponse`
+#### <code v-pre>MockResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L142) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L142) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 MockConfig.responses の 1 entry。
 
@@ -2856,9 +2856,9 @@ export interface MockResponse {
 }
 ```
 
-#### `MockTranscription`
+#### <code v-pre>MockTranscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L87) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L87) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 1 audio 入力に対する transcription 期待値。 `MockConfig.transcriptions` の dict value 型。 audio id は Base64 source なら `base64:{hash}` / URL source なら `url:{url}` を lookup key とする。
 
@@ -2878,9 +2878,9 @@ export interface MockTranscription {
 }
 ```
 
-#### `ModelPrice`
+#### <code v-pre>ModelPrice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L13) `packages/ai-llm/src/pricing.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L13) <code v-pre>packages/ai-llm/src/pricing.ts</code>
 
 Model-priced token cost lookup, shared across dogfood real adapters so one place tracks vendor pricing rather than each adapter hardcoding a single-model rate. Prices are USD per 1M tokens (the unit vendors publish); `costForTokens` converts to per-request USD given raw `input_tokens` + `output_tokens`. Prices refreshed 2026-07; when Anthropic / OpenAI publish new rates, update the table here — real adapters look up by model name and stay accurate without file-level edits.
 
@@ -2893,17 +2893,17 @@ export interface ModelPrice {
 }
 ```
 
-#### `NeutralEventName`
+#### <code v-pre>NeutralEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L55) `packages/ai-llm/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/types.ts#L55) <code v-pre>packages/ai-llm/src/semantics/types.ts</code>
 
 ```ts
 export type NeutralEventName = 'injection.direct_detected' | 'injection.indirect_detected' | 'injection.jailbreak_blocked' | 'injection.role_hijacking_blocked' | 'injection.xml_detected' | 'hallucination.self_consistency_scored' | 'hallucination.factuality_checked' | 'hallucination.citation_verified' | 'hallucination.confidence_scored' | 'eval.judge_scored' | 'eval.rubric_applied' | 'eval.preference_ranked' | 'eval.elo_updated' | 'guardrail.schema_validated' | 'guardrail.regex_matched' | 'guardrail.toxicity_blocked' | 'guardrail.pii_redacted' | 'guardrail.constitutional_checked' | 'rag.chunked' | 'rag.hybrid_retrieved' | 'rag.reranked' | 'rag.compressed' | 'agent.react_stepped' | 'agent.tot_expanded' | 'agent.reflected' | 'agent.tool_selected' | 'ft.sft_evaluated' | 'ft.dpo_evaluated' | 'ft.catastrophic_forgetting_detected' | 'ft.benchmark_drift_detected' | 'sla.budget_checked' | 'sla.latency_measured' | 'sla.model_routed' | 'sla.fallback_engaged' | 'mao.crew_assembled' | 'mao.supervisor_delegated' | 'mao.graph_transitioned' | 'mao.round_completed' | 'swarm.roles_assigned' | 'swarm.tasks_allocated' | 'swarm.consensus_reached' | 'swarm.byzantine_tolerated' | 'ci.sandbox_started' | 'ci.code_executed' | 'ci.tool_used' | 'ci.rolled_back' | 'ftp.dataset_prepared' | 'ftp.rlhf_stepped' | 'ftp.eval_loop_ran' | 'ftp.drift_detected' | 'ops.registry_updated' | 'ops.rollout_advanced' | 'ops.ab_evaluated' | 'ops.canary_promoted' | 'ops.shadow_compared' | 'pea.chain_of_thought_expanded' | 'pea.few_shot_selected' | 'pea.cached' | 'pea.version_pinned' | 'rag3.graph_traversed' | 'rag3.agentic_stepped' | 'rag3.self_queried' | 'rag3.parent_expanded' | 'co.batch_submitted' | 'co.prompt_compressed' | 'co.cascade_stepped' | 'co.semantic_cached';
 ```
 
-#### `OpenAiChatCompletionsRequest`
+#### <code v-pre>OpenAiChatCompletionsRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L46) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L46) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 ```ts
 export interface OpenAiChatCompletionsRequest {
@@ -2936,9 +2936,9 @@ export interface OpenAiChatCompletionsRequest {
 }
 ```
 
-#### `OpenAiChatCompletionsResponse`
+#### <code v-pre>OpenAiChatCompletionsResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L72) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L72) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 ```ts
 export interface OpenAiChatCompletionsResponse {
@@ -2973,9 +2973,9 @@ export interface OpenAiChatCompletionsResponse {
 }
 ```
 
-#### `OpenAiContentPart`
+#### <code v-pre>OpenAiContentPart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L26) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L26) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 OpenAI vision / audio content part (v0.2、 real Chat Completions vision + gpt-4o audio input 準拠)。
 
@@ -3001,9 +3001,9 @@ export type OpenAiContentPart = {
 };
 ```
 
-#### `OpenAiMock`
+#### <code v-pre>OpenAiMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L158) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L158) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 ```ts
 export interface OpenAiMock extends AiLlmMock {
@@ -3032,9 +3032,9 @@ export interface OpenAiMock extends AiLlmMock {
 }
 ```
 
-#### `OpenAiStreamChunk`
+#### <code v-pre>OpenAiStreamChunk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L100) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L100) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 ```ts
 export interface OpenAiStreamChunk {
@@ -3070,9 +3070,9 @@ export interface OpenAiStreamChunk {
 }
 ```
 
-#### `OpenAiTranscriptionJson`
+#### <code v-pre>OpenAiTranscriptionJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L140) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L140) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 Whisper transcription response (`json` 相当)。
 
@@ -3087,9 +3087,9 @@ export interface OpenAiTranscriptionJson {
 }
 ```
 
-#### `OpenAiTranscriptionRequest`
+#### <code v-pre>OpenAiTranscriptionRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L130) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L130) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 Whisper transcription request (real `client.audio.transcriptions.create` の shape 準拠)。 file は base64 data URL or URL string で受ける。
 
@@ -3104,9 +3104,9 @@ export interface OpenAiTranscriptionRequest {
 }
 ```
 
-#### `OpenAiTranscriptionVerboseJson`
+#### <code v-pre>OpenAiTranscriptionVerboseJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L147) `packages/ai-llm/src/openai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/openai.ts#L147) <code v-pre>packages/ai-llm/src/openai.ts</code>
 
 Whisper transcription response (`verbose_json` 相当)。
 
@@ -3123,9 +3123,9 @@ export interface OpenAiTranscriptionVerboseJson extends OpenAiTranscriptionJson 
 }
 ```
 
-#### `OpsAbResult`
+#### <code v-pre>OpsAbResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L27) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L27) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export interface OpsAbResult {
@@ -3135,9 +3135,9 @@ export interface OpsAbResult {
 }
 ```
 
-#### `OpsModelEntry`
+#### <code v-pre>OpsModelEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L21) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L21) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export interface OpsModelEntry {
@@ -3147,9 +3147,9 @@ export interface OpsModelEntry {
 }
 ```
 
-#### `OpsSession`
+#### <code v-pre>OpsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L33) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L33) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 ```ts
 export interface OpsSession {
@@ -3163,9 +3163,9 @@ export interface OpsSession {
 }
 ```
 
-#### `OpsState`
+#### <code v-pre>OpsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L13) `packages/ai-llm/src/semantics/llm-ops.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L13) <code v-pre>packages/ai-llm/src/semantics/llm-ops.ts</code>
 
 LLM ops axis — model registry + rollout + A/B + canary + shadow state machine。 Deterministic mock で 5 signal 系統。 registry updates append versioned entries、 rollout tracks percentage advancement、 A/B computes winner by mean score、 canary promotion is threshold check、 shadow comparison computes delta。
 
@@ -3173,9 +3173,9 @@ LLM ops axis — model registry + rollout + A/B + canary + shadow state machine�
 export type OpsState = 'idle' | 'registry-updated' | 'rollout-advanced' | 'ab-evaluated' | 'canary-promoted' | 'shadow-compared';
 ```
 
-#### `PeaCacheEntry`
+#### <code v-pre>PeaCacheEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L31) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L31) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export interface PeaCacheEntry {
@@ -3185,9 +3185,9 @@ export interface PeaCacheEntry {
 }
 ```
 
-#### `PeaSession`
+#### <code v-pre>PeaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L37) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L37) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 ```ts
 export interface PeaSession {
@@ -3202,9 +3202,9 @@ export interface PeaSession {
 }
 ```
 
-#### `PeaState`
+#### <code v-pre>PeaState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L12) `packages/ai-llm/src/semantics/prompt-engineering-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L12) <code v-pre>packages/ai-llm/src/semantics/prompt-engineering-advanced.ts</code>
 
 Prompt engineering advanced axis — chain-of-thought + few-shot + caching + versioning state machine。 Deterministic mock で 4 signal 系統。 CoT expands stepwise reasoning、 few-shot picks k best by score、 caching uses deterministic key hash、 versioning pins semver + hash pair。
 
@@ -3212,9 +3212,9 @@ Prompt engineering advanced axis — chain-of-thought + few-shot + caching + ver
 export type PeaState = 'idle' | 'chain-of-thought-expanded' | 'few-shot-selected' | 'cached' | 'version-pinned';
 ```
 
-#### `PriceLookupResult`
+#### <code v-pre>PriceLookupResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L54) `packages/ai-llm/src/pricing.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/pricing.ts#L54) <code v-pre>packages/ai-llm/src/pricing.ts</code>
 
 ```ts
 export interface PriceLookupResult {
@@ -3226,9 +3226,9 @@ export interface PriceLookupResult {
 }
 ```
 
-#### `Rag3Session`
+#### <code v-pre>Rag3Session</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L43) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L43) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export interface Rag3Session {
@@ -3243,9 +3243,9 @@ export interface Rag3Session {
 }
 ```
 
-#### `Rag3State`
+#### <code v-pre>Rag3State</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L13) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L13) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 RAG III axis — GraphRAG + agentic + self-querying + parent document state machine。 Deterministic mock で 4 signal 系統。 graph traversal follows entity edges with BFS、 agentic RAG step decides fetch vs answer via score gate、 self-querying converts NL to filter predicate deterministically、 parent document expansion returns full doc from chunk id lookup。
 
@@ -3253,9 +3253,9 @@ RAG III axis — GraphRAG + agentic + self-querying + parent document state mach
 export type Rag3State = 'idle' | 'graph-traversed' | 'agentic-stepped' | 'self-queried' | 'parent-expanded';
 ```
 
-#### `RagAgenticStep`
+#### <code v-pre>RagAgenticStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L31) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L31) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export interface RagAgenticStep {
@@ -3265,9 +3265,9 @@ export interface RagAgenticStep {
 }
 ```
 
-#### `RagGraphEdge`
+#### <code v-pre>RagGraphEdge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L25) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L25) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export interface RagGraphEdge {
@@ -3277,9 +3277,9 @@ export interface RagGraphEdge {
 }
 ```
 
-#### `RagGraphNode`
+#### <code v-pre>RagGraphNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L20) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L20) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export interface RagGraphNode {
@@ -3288,9 +3288,9 @@ export interface RagGraphNode {
 }
 ```
 
-#### `RagParentDoc`
+#### <code v-pre>RagParentDoc</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L37) `packages/ai-llm/src/semantics/rag-iii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L37) <code v-pre>packages/ai-llm/src/semantics/rag-iii.ts</code>
 
 ```ts
 export interface RagParentDoc {
@@ -3300,9 +3300,9 @@ export interface RagParentDoc {
 }
 ```
 
-#### `RagSession`
+#### <code v-pre>RagSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L15) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L15) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export interface RagSession {
@@ -3317,9 +3317,9 @@ export interface RagSession {
 }
 ```
 
-#### `RagState`
+#### <code v-pre>RagState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L8) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L8) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 RAG advanced axis — chunking + hybrid retrieval + reranking + citation + context compression state machine。 deterministic mock で 5 signal 系統。
 
@@ -3327,9 +3327,9 @@ RAG advanced axis — chunking + hybrid retrieval + reranking + citation + conte
 export type RagState = 'idle' | 'chunked' | 'hybrid-retrieved' | 'reranked' | 'compressed';
 ```
 
-#### `ReactStep`
+#### <code v-pre>ReactStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L24) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L24) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export interface ReactStep {
@@ -3343,9 +3343,9 @@ export interface ReactStep {
 }
 ```
 
-#### `RealDriverConfig`
+#### <code v-pre>RealDriverConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L112) `packages/ai-llm/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L112) <code v-pre>packages/ai-llm/src/semantics/real-driver.ts</code>
 
 ```ts
 export interface RealDriverConfig {
@@ -3357,9 +3357,9 @@ export interface RealDriverConfig {
 }
 ```
 
-#### `Reflection`
+#### <code v-pre>Reflection</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L38) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L38) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export interface Reflection {
@@ -3369,9 +3369,9 @@ export interface Reflection {
 }
 ```
 
-#### `RerankedHit`
+#### <code v-pre>RerankedHit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L30) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L30) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export interface RerankedHit extends RetrievalHit {
@@ -3379,9 +3379,9 @@ export interface RerankedHit extends RetrievalHit {
 }
 ```
 
-#### `RetrievalHit`
+#### <code v-pre>RetrievalHit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L23) `packages/ai-llm/src/semantics/rag-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L23) <code v-pre>packages/ai-llm/src/semantics/rag-advanced.ts</code>
 
 ```ts
 export interface RetrievalHit {
@@ -3392,9 +3392,9 @@ export interface RetrievalHit {
 }
 ```
 
-#### `RoutingCandidate`
+#### <code v-pre>RoutingCandidate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L32) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L32) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export interface RoutingCandidate {
@@ -3405,9 +3405,9 @@ export interface RoutingCandidate {
 }
 ```
 
-#### `RubricCriterion`
+#### <code v-pre>RubricCriterion</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L29) `packages/ai-llm/src/semantics/llm-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L29) <code v-pre>packages/ai-llm/src/semantics/llm-eval.ts</code>
 
 ```ts
 export interface RubricCriterion {
@@ -3417,9 +3417,9 @@ export interface RubricCriterion {
 }
 ```
 
-#### `SftSample`
+#### <code v-pre>SftSample</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L23) `packages/ai-llm/src/semantics/fine-tuning-eval.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L23) <code v-pre>packages/ai-llm/src/semantics/fine-tuning-eval.ts</code>
 
 ```ts
 export interface SftSample {
@@ -3429,9 +3429,9 @@ export interface SftSample {
 }
 ```
 
-#### `SimpleSchema`
+#### <code v-pre>SimpleSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L32) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L32) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export interface SimpleSchema {
@@ -3441,9 +3441,9 @@ export interface SimpleSchema {
 }
 ```
 
-#### `SimpleSchemaProperty`
+#### <code v-pre>SimpleSchemaProperty</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L23) `packages/ai-llm/src/semantics/guardrails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L23) <code v-pre>packages/ai-llm/src/semantics/guardrails.ts</code>
 
 ```ts
 export interface SimpleSchemaProperty {
@@ -3456,9 +3456,9 @@ export interface SimpleSchemaProperty {
 }
 ```
 
-#### `SlaSession`
+#### <code v-pre>SlaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L18) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L18) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 ```ts
 export interface SlaSession {
@@ -3471,9 +3471,9 @@ export interface SlaSession {
 }
 ```
 
-#### `SlaState`
+#### <code v-pre>SlaState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L11) `packages/ai-llm/src/semantics/cost-latency-sla.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L11) <code v-pre>packages/ai-llm/src/semantics/cost-latency-sla.ts</code>
 
 Cost / latency SLA axis — budget + p50/p99 + model routing + fallback ladder state machine。 deterministic mock で 4 signal 系統。 Budget guard は real driver 経路 (KIWA_MODE=real) で $ 上限を強制する SSOT。 mock 経路でも 4 SDK 全部に同じ SLA API を提供する。
 
@@ -3481,9 +3481,9 @@ Cost / latency SLA axis — budget + p50/p99 + model routing + fallback ladder s
 export type SlaState = 'idle' | 'budget-checked' | 'latency-measured' | 'model-routed' | 'fallback-engaged';
 ```
 
-#### `StreamEvent`
+#### <code v-pre>StreamEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L91) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L91) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 streaming で観測される 1 event (delta)。
 
@@ -3500,9 +3500,9 @@ export interface StreamEvent {
 }
 ```
 
-#### `SwarmAgent`
+#### <code v-pre>SwarmAgent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L19) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L19) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export interface SwarmAgent {
@@ -3512,9 +3512,9 @@ export interface SwarmAgent {
 }
 ```
 
-#### `SwarmSession`
+#### <code v-pre>SwarmSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L36) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L36) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export interface SwarmSession {
@@ -3529,9 +3529,9 @@ export interface SwarmSession {
 }
 ```
 
-#### `SwarmState`
+#### <code v-pre>SwarmState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L12) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L12) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 Agent swarm axis — role-based + task allocation + consensus + Byzantine fault tolerance state machine。 Deterministic mock で 4 signal 系統。 roles assign by index modulo、 tasks allocated by round robin、 consensus via majority vote、 Byzantine fault tolerance via &gt; 2/3 honest agreement (PBFT-lite invariant)。
 
@@ -3539,9 +3539,9 @@ Agent swarm axis — role-based + task allocation + consensus + Byzantine fault 
 export type SwarmState = 'idle' | 'roles-assigned' | 'tasks-allocated' | 'consensus-reached' | 'byzantine-tolerated';
 ```
 
-#### `SwarmTask`
+#### <code v-pre>SwarmTask</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L25) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L25) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export interface SwarmTask {
@@ -3551,9 +3551,9 @@ export interface SwarmTask {
 }
 ```
 
-#### `SwarmVote`
+#### <code v-pre>SwarmVote</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L31) `packages/ai-llm/src/semantics/agent-swarm.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L31) <code v-pre>packages/ai-llm/src/semantics/agent-swarm.ts</code>
 
 ```ts
 export interface SwarmVote {
@@ -3562,9 +3562,9 @@ export interface SwarmVote {
 }
 ```
 
-#### `TextPart`
+#### <code v-pre>TextPart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L52) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L52) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 text-only 分岐 (parts 混在時の従来 text 表現)。
 
@@ -3575,9 +3575,9 @@ export interface TextPart {
 }
 ```
 
-#### `ToolCall`
+#### <code v-pre>ToolCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L63) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L63) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 Assistant が生成する tool_use / function_call の統一表現。
 
@@ -3590,9 +3590,9 @@ export interface ToolCall {
 }
 ```
 
-#### `ToolCandidate`
+#### <code v-pre>ToolCandidate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L44) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L44) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export interface ToolCandidate {
@@ -3602,9 +3602,9 @@ export interface ToolCandidate {
 }
 ```
 
-#### `ToolDefinition`
+#### <code v-pre>ToolDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L51) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L51) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 Tool 定義 — 4 SDK で shape が違うため、 本 harness では JSON Schema ベースの共通形式で保持する。
 
@@ -3624,9 +3624,9 @@ export interface ToolDefinition {
 }
 ```
 
-#### `ToTNode`
+#### <code v-pre>ToTNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L31) `packages/ai-llm/src/semantics/agent-orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L31) <code v-pre>packages/ai-llm/src/semantics/agent-orchestration.ts</code>
 
 ```ts
 export interface ToTNode {
@@ -3637,9 +3637,9 @@ export interface ToTNode {
 }
 ```
 
-#### `TranscriptionResult`
+#### <code v-pre>TranscriptionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L102) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L102) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 Whisper 1 回分の transcription 結果 (real API shape 互換)。
 
@@ -3662,9 +3662,9 @@ export interface TranscriptionResult {
 }
 ```
 
-#### `UrlData`
+#### <code v-pre>UrlData</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L43) `packages/ai-llm/src/multimodal.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/multimodal.ts#L43) <code v-pre>packages/ai-llm/src/multimodal.ts</code>
 
 URL 参照、 4 SDK 全部で fetch 経路がある。
 
@@ -3675,9 +3675,9 @@ export interface UrlData {
 }
 ```
 
-#### `Usage`
+#### <code v-pre>Usage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L71) `packages/ai-llm/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/types.ts#L71) <code v-pre>packages/ai-llm/src/types.ts</code>
 
 LLM 呼出の token 使用量。
 
@@ -3689,9 +3689,9 @@ export interface Usage {
 }
 ```
 
-#### `VercelAiMock`
+#### <code v-pre>VercelAiMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L91) `packages/ai-llm/src/vercel-ai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L91) <code v-pre>packages/ai-llm/src/vercel-ai.ts</code>
 
 ```ts
 export interface VercelAiMock extends AiLlmMock {
@@ -3701,9 +3701,9 @@ export interface VercelAiMock extends AiLlmMock {
 }
 ```
 
-#### `VercelAiRequest`
+#### <code v-pre>VercelAiRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L44) `packages/ai-llm/src/vercel-ai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L44) <code v-pre>packages/ai-llm/src/vercel-ai.ts</code>
 
 ```ts
 export interface VercelAiRequest {
@@ -3721,9 +3721,9 @@ export interface VercelAiRequest {
 }
 ```
 
-#### `VercelContentPart`
+#### <code v-pre>VercelContentPart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L28) `packages/ai-llm/src/vercel-ai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L28) <code v-pre>packages/ai-llm/src/vercel-ai.ts</code>
 
 Vercel AI SDK v3+ multimodal content part (v0.2、 real SDK 準拠)。 SDK は `content: string` + `content: Array&lt;{type:'text'|'image', ...}&gt;` の 両方を受け入れる。 image は URL string or Uint8Array or base64 string。
 
@@ -3745,9 +3745,9 @@ export type VercelContentPart = {
 };
 ```
 
-#### `VercelGenerateTextResult`
+#### <code v-pre>VercelGenerateTextResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L61) `packages/ai-llm/src/vercel-ai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L61) <code v-pre>packages/ai-llm/src/vercel-ai.ts</code>
 
 ```ts
 export interface VercelGenerateTextResult {
@@ -3770,9 +3770,9 @@ export interface VercelGenerateTextResult {
 }
 ```
 
-#### `VercelStreamTextResult`
+#### <code v-pre>VercelStreamTextResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L80) `packages/ai-llm/src/vercel-ai.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/vercel-ai.ts#L80) <code v-pre>packages/ai-llm/src/vercel-ai.ts</code>
 
 ```ts
 export interface VercelStreamTextResult {

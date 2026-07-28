@@ -36,9 +36,9 @@ consumerのackはentryを完了にします。nackまたはackなしは再queue�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;createFakeClock.schedule: intervalMs must be &gt; 0, got $&#123;intervalMs&#125;&#96; | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L17) |
-| &#96;createFakeClock.advanceMs: ms must be &gt;= 0, got $&#123;ms&#125;&#96; | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L30) |
-| &#96;setupQueueEnv: mode must be "mock" or "live", got $&#123;String(opts.mode)&#125;&#96; | [packages/data/src/queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L133) |
+| <code v-pre>createFakeClock.schedule: intervalMs must be &gt; 0, got $&#123;intervalMs&#125;</code> | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L17) |
+| <code v-pre>createFakeClock.advanceMs: ms must be &gt;= 0, got $&#123;ms&#125;</code> | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L30) |
+| <code v-pre>setupQueueEnv: mode must be "mock" or "live", got $&#123;String(opts.mode)&#125;</code> | [packages/data/src/queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L133) |
 
 ## API 契約
 
@@ -46,17 +46,17 @@ consumerのackはentryを完了にします。nackまたはackなしは再queue�
 
 ### 値
 
-#### `createFakeClock`
+#### <code v-pre>createFakeClock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L8) `packages/data/src/fake-clock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L8) <code v-pre>packages/data/src/fake-clock.ts</code>
 
 ```ts
 export declare function createFakeClock(opts?: FakeClockOptions): FakeClock;
 ```
 
-#### `expectAtLeastOnce`
+#### <code v-pre>expectAtLeastOnce</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/expectations.ts#L27) `packages/data/src/expectations.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/expectations.ts#L27) <code v-pre>packages/data/src/expectations.ts</code>
 
 Asserts that a handler is invoked at least `minTimes` for a message that nacks before finally acking (at-least-once delivery semantics).
 
@@ -68,9 +68,9 @@ export declare function expectAtLeastOnce<T>(client: QueueClient<T>, body: T, mi
 }): Promise<number>;
 ```
 
-#### `expectIdempotent`
+#### <code v-pre>expectIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/expectations.ts#L11) `packages/data/src/expectations.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/expectations.ts#L11) <code v-pre>packages/data/src/expectations.ts</code>
 
 Asserts that two sends with the same dedupKey collapse into one queue entry (caller is expected to consume + ack the entry).
 
@@ -82,9 +82,9 @@ export declare function expectIdempotent<T>(client: QueueClient<T>, body: T, opt
 }): Promise<void>;
 ```
 
-#### `setupQueueEnv`
+#### <code v-pre>setupQueueEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L129) `packages/data/src/queue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L129) <code v-pre>packages/data/src/queue.ts</code>
 
 ```ts
 export declare function setupQueueEnv<T = unknown>(opts: SetupQueueEnvOptions<T>): Promise<QueueTestEnv<T>>;
@@ -92,9 +92,9 @@ export declare function setupQueueEnv<T = unknown>(opts: SetupQueueEnvOptions<T>
 
 ### 型
 
-#### `CronEntry`
+#### <code v-pre>CronEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L43) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L43) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface CronEntry {
@@ -105,9 +105,9 @@ export interface CronEntry {
 }
 ```
 
-#### `FakeClock`
+#### <code v-pre>FakeClock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L50) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L50) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface FakeClock {
@@ -119,9 +119,9 @@ export interface FakeClock {
 }
 ```
 
-#### `FakeClockOptions`
+#### <code v-pre>FakeClockOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L3) `packages/data/src/fake-clock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L3) <code v-pre>packages/data/src/fake-clock.ts</code>
 
 ```ts
 export interface FakeClockOptions {
@@ -130,9 +130,9 @@ export interface FakeClockOptions {
 }
 ```
 
-#### `IdempotencyOptions`
+#### <code v-pre>IdempotencyOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/expectations.ts#L3) `packages/data/src/expectations.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/expectations.ts#L3) <code v-pre>packages/data/src/expectations.ts</code>
 
 ```ts
 export interface IdempotencyOptions {
@@ -140,9 +140,9 @@ export interface IdempotencyOptions {
 }
 ```
 
-#### `QueueAckHandle`
+#### <code v-pre>QueueAckHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L11) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L11) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface QueueAckHandle {
@@ -151,9 +151,9 @@ export interface QueueAckHandle {
 }
 ```
 
-#### `QueueClient`
+#### <code v-pre>QueueClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L21) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L21) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface QueueClient<T = unknown> {
@@ -169,17 +169,17 @@ export interface QueueClient<T = unknown> {
 }
 ```
 
-#### `QueueHandler`
+#### <code v-pre>QueueHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L16) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L16) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export type QueueHandler<T> = (message: QueueMessage<T>, ack: QueueAckHandle) => void | Promise<void>;
 ```
 
-#### `QueueMessage`
+#### <code v-pre>QueueMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L3) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L3) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface QueueMessage<T = unknown> {
@@ -191,9 +191,9 @@ export interface QueueMessage<T = unknown> {
 }
 ```
 
-#### `QueueTestEnv`
+#### <code v-pre>QueueTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L39) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L39) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface QueueTestEnv<T = unknown> extends TestEnvBase<'mock' | 'live'> {
@@ -201,9 +201,9 @@ export interface QueueTestEnv<T = unknown> extends TestEnvBase<'mock' | 'live'> 
 }
 ```
 
-#### `SetupQueueEnvOptions`
+#### <code v-pre>SetupQueueEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L31) `packages/data/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/data/src/types.ts#L31) <code v-pre>packages/data/src/types.ts</code>
 
 ```ts
 export interface SetupQueueEnvOptions<T = unknown> {

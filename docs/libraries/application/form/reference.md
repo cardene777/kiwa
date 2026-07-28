@@ -39,9 +39,9 @@ client の `setValue`、`getValues`、`getSchema`、`getLastErrors`、`listSubmi
 
 ### 値
 
-#### `createFieldArray`
+#### <code v-pre>createFieldArray</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L53) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L53) <code v-pre>packages/form/src/extensions.ts</code>
 
 field array — React Hook Form useFieldArray 相当
 
@@ -49,9 +49,9 @@ field array — React Hook Form useFieldArray 相当
 export declare function createFieldArray<T>(initial?: T[]): FieldArray<T>;
 ```
 
-#### `createFormClient`
+#### <code v-pre>createFormClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L51) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L51) <code v-pre>packages/form/src/client.ts</code>
 
 form client は provider 別 (RHF/Zod/Formik/Conform) の validate + submit 挙動を統一 interface で叩く。 provider 差は id prefix と将来的な error message format のみで、 実 provider の SDK を差し替えても signature 一致で書ける想定。
 
@@ -59,17 +59,17 @@ form client は provider 別 (RHF/Zod/Formik/Conform) の validate + submit 挙�
 export declare function createFormClient(options?: CreateFormClientOptions): FormClient;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L124) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L124) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `getFieldError`
+#### <code v-pre>getFieldError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/fields.ts#L16) `packages/form/src/fields.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/fields.ts#L16) <code v-pre>packages/form/src/fields.ts</code>
 
 getFieldError = 直近 submit の field-level error を取得。 UI 側 field error 表示 (RHF formState.errors / Formik touched+errors) を再現する経路。
 
@@ -77,9 +77,9 @@ getFieldError = 直近 submit の field-level error を取得。 UI 側 field er
 export declare function getFieldError(client: FormClient, field: string): FieldError | null;
 ```
 
-#### `registerField`
+#### <code v-pre>registerField</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/fields.ts#L8) `packages/form/src/fields.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/fields.ts#L8) <code v-pre>packages/form/src/fields.ts</code>
 
 registerField = provider 別 field register API (RHF register / Formik useField 相当) を client に集約。 rule (required / min / max / pattern / custom) を同時に登録する経路。
 
@@ -87,17 +87,17 @@ registerField = provider 別 field register API (RHF register / Formik useField 
 export declare function registerField(client: FormClient, reg: FieldRegistration): void;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L100) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L100) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `submitForm`
+#### <code v-pre>submitForm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/submitter.ts#L14) `packages/form/src/submitter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/submitter.ts#L14) <code v-pre>packages/form/src/submitter.ts</code>
 
 client を受け取り、 optional な value override を setValue で反映してから submit を叩く convenience wrapper。 form submit workflow (form event → validate → onSubmit) の 1 shot 経路を shorten する。
 
@@ -105,9 +105,9 @@ client を受け取り、 optional な value override を setValue で反映し�
 export declare function submitForm(client: FormClient, opts: SubmitFlowOptions): Promise<SubmitResult>;
 ```
 
-#### `validateAsync`
+#### <code v-pre>validateAsync</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L21) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L21) <code v-pre>packages/form/src/extensions.ts</code>
 
 async validation — server 側 uniqueness chk 相当
 
@@ -115,9 +115,9 @@ async validation — server 側 uniqueness chk 相当
 export declare function validateAsync(values: Record<string, unknown>, validators: Record<string, AsyncValidator>, options?: AsyncValidationOptions): Promise<AsyncValidationResult>;
 ```
 
-#### `validateDependentFields`
+#### <code v-pre>validateDependentFields</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L84) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L84) <code v-pre>packages/form/src/extensions.ts</code>
 
 dependent field validation — 「country=US なら zipCode 必須」 相当
 
@@ -125,9 +125,9 @@ dependent field validation — 「country=US なら zipCode 必須」 相当
 export declare function validateDependentFields(values: Record<string, unknown>, rules: DependentFieldRule[]): DependentFieldResult;
 ```
 
-#### `validateSchema`
+#### <code v-pre>validateSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L34) `packages/form/src/validator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L34) <code v-pre>packages/form/src/validator.ts</code>
 
 provider 別 validate 挙動を統一 result で返す。 実 provider (Zod safeParse / Yup validate / RHF resolver / Conform parseWithZod) に差し替えても signature は変わらない想定。
 
@@ -135,9 +135,9 @@ provider 別 validate 挙動を統一 result で返す。 実 provider (Zod safe
 export declare function validateSchema(schema: SchemaLike, values: Record<string, unknown>, provider?: FormProvider): ValidateResult;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L129) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L129) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
@@ -145,9 +145,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number):
 
 ### 型
 
-#### `AsyncValidationOptions`
+#### <code v-pre>AsyncValidationOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L7) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L7) <code v-pre>packages/form/src/extensions.ts</code>
 
 v2.1 extensions — async validation, field array, dependent field validation, plus retry/batch/observability/timeout/rateLimit/circuitBreaker generics. React Hook Form v7.60+ / Zod v4 追随。
 
@@ -158,9 +158,9 @@ export interface AsyncValidationOptions {
 }
 ```
 
-#### `AsyncValidationResult`
+#### <code v-pre>AsyncValidationResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L12) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L12) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface AsyncValidationResult {
@@ -170,17 +170,17 @@ export interface AsyncValidationResult {
 }
 ```
 
-#### `AsyncValidator`
+#### <code v-pre>AsyncValidator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L18) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L18) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export type AsyncValidator = (value: unknown, field: string) => Promise<string | null>;
 ```
 
-#### `DependentFieldResult`
+#### <code v-pre>DependentFieldResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L77) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L77) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface DependentFieldResult {
@@ -190,9 +190,9 @@ export interface DependentFieldResult {
 }
 ```
 
-#### `DependentFieldRule`
+#### <code v-pre>DependentFieldRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L70) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L70) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface DependentFieldRule {
@@ -203,9 +203,9 @@ export interface DependentFieldRule {
 }
 ```
 
-#### `FieldArray`
+#### <code v-pre>FieldArray</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L42) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L42) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface FieldArray<T> {
@@ -219,9 +219,9 @@ export interface FieldArray<T> {
 }
 ```
 
-#### `FieldError`
+#### <code v-pre>FieldError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L3) `packages/form/src/validator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L3) <code v-pre>packages/form/src/validator.ts</code>
 
 ```ts
 export interface FieldError {
@@ -231,9 +231,9 @@ export interface FieldError {
 }
 ```
 
-#### `FieldRegistration`
+#### <code v-pre>FieldRegistration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L5) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L5) <code v-pre>packages/form/src/client.ts</code>
 
 ```ts
 export interface FieldRegistration {
@@ -243,9 +243,9 @@ export interface FieldRegistration {
 }
 ```
 
-#### `FormClient`
+#### <code v-pre>FormClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L27) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L27) <code v-pre>packages/form/src/client.ts</code>
 
 ```ts
 export interface FormClient {
@@ -261,17 +261,17 @@ export interface FormClient {
 }
 ```
 
-#### `FormProvider`
+#### <code v-pre>FormProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L3) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L3) <code v-pre>packages/form/src/client.ts</code>
 
 ```ts
 export type FormProvider = 'react-hook-form' | 'zod' | 'formik' | 'conform';
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L118) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L118) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -287,9 +287,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L97) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L97) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -299,9 +299,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L98) `packages/form/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/extensions.ts#L98) <code v-pre>packages/form/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -312,9 +312,9 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `SchemaLike`
+#### <code v-pre>SchemaLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L20) `packages/form/src/validator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L20) <code v-pre>packages/form/src/validator.ts</code>
 
 SchemaLike = 4 provider の schema 表現を統一。 各 field に validate rule (required / min / max / pattern / customFn) を declaratively 持たせる。 実 provider (Zod object / yup object / RHF resolver) を差し替えても shape は変わらない想定。
 
@@ -330,9 +330,9 @@ export interface SchemaLike {
 }
 ```
 
-#### `SubmitFlowOptions`
+#### <code v-pre>SubmitFlowOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/submitter.ts#L3) `packages/form/src/submitter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/submitter.ts#L3) <code v-pre>packages/form/src/submitter.ts</code>
 
 ```ts
 export interface SubmitFlowOptions {
@@ -346,9 +346,9 @@ export interface SubmitFlowOptions {
 }
 ```
 
-#### `SubmitOptions`
+#### <code v-pre>SubmitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L11) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L11) <code v-pre>packages/form/src/client.ts</code>
 
 ```ts
 export interface SubmitOptions {
@@ -357,9 +357,9 @@ export interface SubmitOptions {
 }
 ```
 
-#### `SubmitResult`
+#### <code v-pre>SubmitResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L16) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L16) <code v-pre>packages/form/src/client.ts</code>
 
 ```ts
 export interface SubmitResult {
@@ -372,18 +372,18 @@ export interface SubmitResult {
 }
 ```
 
-#### `SubmittedRecord`
+#### <code v-pre>SubmittedRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L25) `packages/form/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/client.ts#L25) <code v-pre>packages/form/src/client.ts</code>
 
 ```ts
 export interface SubmittedRecord extends SubmitResult {
 }
 ```
 
-#### `ValidateResult`
+#### <code v-pre>ValidateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L9) `packages/form/src/validator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/form/src/validator.ts#L9) <code v-pre>packages/form/src/validator.ts</code>
 
 ```ts
 export interface ValidateResult {

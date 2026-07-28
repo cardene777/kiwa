@@ -12,7 +12,7 @@
 // docs site は HTML を有効にした VitePress なので、escape しない table cell は
 // そのまま active markup として働く。
 
-import { lstatSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { lstatSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, sep } from 'node:path';
 import { randomBytes } from 'node:crypto';
 
@@ -127,17 +127,41 @@ export function prepareWritePath(path, root, label) {
   return target;
 }
 
+/** directory の同一性。名前ではなく実体で比べるために dev と inode を見る。 */
+function directoryIdentity(path, label) {
+  const stats = statSync(path, { throwIfNoEntry: false });
+  if (!stats || !stats.isDirectory()) {
+    throw new DocsSyncError(`${label}: ${path} is not a directory.`);
+  }
+  return `${stats.dev}:${stats.ino}`;
+}
+
 /**
  * 同じ directory へ一時 file を書いてから rename する。途中で落ちても、
  * 半分だけ書かれた file が次の実行で documentation として読み戻されない。
+ *
+ * 一時 file は `wx` で作る。link を張られていても作成の時点で失敗するので、
+ * 書き込みが link の先へ抜けない。加えて親 directory の実体を操作の前後で
+ * 見比べ、途中で別の directory へ差し替えられていたら書き込みを無効にする。
+ *
+ * これで窓は狭まるが閉じ切ってはいない。path を渡す API は「解決してから開く」
+ * ので、解決と open の間は原理的に残る。閉じるには directory の file descriptor を
+ * 基準に開く API が要るが、Node はそれを公開していない。checkout を他の process が
+ * 書き換えられない前提が別途要る。
  */
 export function writeFileAtomic(target, content) {
+  const directory = dirname(target);
+  const label = `atomic write to ${basename(target)}`;
+  const before = directoryIdentity(directory, label);
   const temporary = join(
-    dirname(target),
+    directory,
     `.${basename(target)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`,
   );
   try {
-    writeFileSync(temporary, content);
+    writeFileSync(temporary, content, { flag: 'wx', mode: 0o600 });
+    if (directoryIdentity(directory, label) !== before) {
+      throw new DocsSyncError(`${label}: ${directory} was replaced while writing.`);
+    }
     renameSync(temporary, target);
   } catch (error) {
     rmSync(temporary, { force: true });
@@ -178,6 +202,24 @@ export function escapeMarkdownText(text) {
  */
 export function tableCell(text) {
   return escapeMarkdownText(text.replace(/\s+/g, ' ').trim());
+}
+
+/**
+ * inline code。Markdown の backtick ではなく `<code v-pre>` で書き出す。
+ *
+ * VitePress は fenced code block にだけ `v-pre` を付ける (lang を見て判断している)。
+ * inline code には付かないので、backtick で囲んだだけの text は Vue の template として
+ * compile され、`{{ }}` が式として実行される。属性を自分で付けて補間を止める。
+ *
+ * 中身は escape 済みにする。`v-pre` は Vue の補間を止めるだけで、HTML の解釈は止めない。
+ */
+export function inlineCode(text) {
+  return `<code v-pre>${escapeMarkdownText(text)}</code>`;
+}
+
+/** 表のセルに入れる inline code。空白を畳んでから `<code v-pre>` に入れる。 */
+export function tableCodeCell(text) {
+  return inlineCode(text.replace(/\s+/g, ' ').trim());
 }
 
 /**

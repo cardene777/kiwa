@@ -27,10 +27,10 @@ AES 256 は 32 byte、AES 128 は 16 byte の key だけを受け付けます。
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;invalid key length for $&#123;mode&#125;: expected $&#123;expected&#125; bytes, got $&#123;key.length&#125;&#96; | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L22) |
-| 'authTag required for GCM decryption' | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L42) |
-| &#96;unsupported algorithm: $&#123;algorithm&#125;&#96; | [packages/crypto/src/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L53) |
-| &#96;unsupported key type: $&#123;type&#125;&#96; | [packages/crypto/src/keypair.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L35) |
+| <code v-pre>invalid key length for $&#123;mode&#125;: expected $&#123;expected&#125; bytes, got $&#123;key.length&#125;</code> | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L22) |
+| <code v-pre>authTag required for GCM decryption</code> | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L42) |
+| <code v-pre>unsupported algorithm: $&#123;algorithm&#125;</code> | [packages/crypto/src/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L53) |
+| <code v-pre>unsupported key type: $&#123;type&#125;</code> | [packages/crypto/src/keypair.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L35) |
 
 ## API 契約
 
@@ -38,9 +38,9 @@ AES 256 は 32 byte、AES 128 は 16 byte の key だけを受け付けます。
 
 ### 値
 
-#### `aesDecrypt`
+#### <code v-pre>aesDecrypt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L35) `packages/crypto/src/aes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L35) <code v-pre>packages/crypto/src/aes.ts</code>
 
 ```ts
 export declare function aesDecrypt(input: {
@@ -50,17 +50,17 @@ export declare function aesDecrypt(input: {
 }, key: Buffer, mode?: AesMode): Buffer;
 ```
 
-#### `aesEncrypt`
+#### <code v-pre>aesEncrypt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L19) `packages/crypto/src/aes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L19) <code v-pre>packages/crypto/src/aes.ts</code>
 
 ```ts
 export declare function aesEncrypt(plaintext: string | Buffer, key: Buffer, mode?: AesMode): AesEncryptResult;
 ```
 
-#### `deriveKey`
+#### <code v-pre>deriveKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L28) `packages/crypto/src/kdf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L28) <code v-pre>packages/crypto/src/kdf.ts</code>
 
 password → derived key の KDF ラッパー。 PBKDF2 と scrypt は node:crypto、 Argon2 は node:crypto 未対応のため scrypt を argon2-mock として代替 (bytes 契約は同一)。
 
@@ -68,9 +68,9 @@ password → derived key の KDF ラッパー。 PBKDF2 と scrypt は node:cryp
 export declare function deriveKey(password: string, opts?: KdfOptions): KdfResult;
 ```
 
-#### `ed25519Sign`
+#### <code v-pre>ed25519Sign</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L12) `packages/crypto/src/ed25519.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L12) <code v-pre>packages/crypto/src/ed25519.ts</code>
 
 Ed25519 で data に署名。 PEM 形式の privateKey (generateKeyPair('ed25519') の出力) を受取り、 base64 signature を返す。 real Ed25519 実装は node:crypto 経路。
 
@@ -78,17 +78,17 @@ Ed25519 で data に署名。 PEM 形式の privateKey (generateKeyPair('ed25519
 export declare function ed25519Sign(data: string, privateKeyPem: string): Ed25519SignResult;
 ```
 
-#### `ed25519Verify`
+#### <code v-pre>ed25519Verify</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L23) `packages/crypto/src/ed25519.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L23) <code v-pre>packages/crypto/src/ed25519.ts</code>
 
 ```ts
 export declare function ed25519Verify(data: string, signatureBase64: string, publicKeyPem: string): Ed25519VerifyResult;
 ```
 
-#### `generateKeyPair`
+#### <code v-pre>generateKeyPair</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L11) `packages/crypto/src/keypair.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L11) <code v-pre>packages/crypto/src/keypair.ts</code>
 
 ```ts
 export declare function generateKeyPair(type?: KeyPairType, options?: {
@@ -97,9 +97,9 @@ export declare function generateKeyPair(type?: KeyPairType, options?: {
 }): KeyPairResult;
 ```
 
-#### `generateRsaKeyPair`
+#### <code v-pre>generateRsaKeyPair</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L47) `packages/crypto/src/rsa.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L47) <code v-pre>packages/crypto/src/rsa.ts</code>
 
 ```ts
 export declare function generateRsaKeyPair(modulusLength?: number): {
@@ -108,81 +108,81 @@ export declare function generateRsaKeyPair(modulusLength?: number): {
 };
 ```
 
-#### `hashData`
+#### <code v-pre>hashData</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L7) `packages/crypto/src/hash.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L7) <code v-pre>packages/crypto/src/hash.ts</code>
 
 ```ts
 export declare function hashData(data: string | Buffer, algorithm?: HashAlgorithm, encoding?: 'hex' | 'base64' | 'binary'): string;
 ```
 
-#### `hmacDigest`
+#### <code v-pre>hmacDigest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L17) `packages/crypto/src/hash.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L17) <code v-pre>packages/crypto/src/hash.ts</code>
 
 ```ts
 export declare function hmacDigest(data: string | Buffer, secret: string | Buffer, algorithm?: HmacAlgorithm, encoding?: 'hex' | 'base64' | 'binary'): string;
 ```
 
-#### `parseX509`
+#### <code v-pre>parseX509</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/x509.ts#L15) `packages/crypto/src/x509.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/x509.ts#L15) <code v-pre>packages/crypto/src/x509.ts</code>
 
 ```ts
 export declare function parseX509(pem: string): X509CertInfo;
 ```
 
-#### `rsaDecrypt`
+#### <code v-pre>rsaDecrypt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L43) `packages/crypto/src/rsa.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L43) <code v-pre>packages/crypto/src/rsa.ts</code>
 
 ```ts
 export declare function rsaDecrypt(cipher: Buffer, privateKey: KeyLike): Buffer;
 ```
 
-#### `rsaEncrypt`
+#### <code v-pre>rsaEncrypt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L38) `packages/crypto/src/rsa.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L38) <code v-pre>packages/crypto/src/rsa.ts</code>
 
 ```ts
 export declare function rsaEncrypt(data: string | Buffer, publicKey: KeyLike): Buffer;
 ```
 
-#### `rsaSign`
+#### <code v-pre>rsaSign</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L15) `packages/crypto/src/rsa.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L15) <code v-pre>packages/crypto/src/rsa.ts</code>
 
 ```ts
 export declare function rsaSign(data: string | Buffer, privateKey: KeyLike, algorithm?: string): Buffer;
 ```
 
-#### `rsaVerify`
+#### <code v-pre>rsaVerify</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L21) `packages/crypto/src/rsa.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L21) <code v-pre>packages/crypto/src/rsa.ts</code>
 
 ```ts
 export declare function rsaVerify(data: string | Buffer, signature: Buffer, publicKey: KeyLike, algorithm?: string): RsaVerifyResult;
 ```
 
-#### `signJWT`
+#### <code v-pre>signJWT</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L37) `packages/crypto/src/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L37) <code v-pre>packages/crypto/src/jwt.ts</code>
 
 ```ts
 export declare function signJWT(payload: JWTPayload, secret: string | KeyLike, algorithm?: JWTAlgorithm): string;
 ```
 
-#### `streamDecrypt`
+#### <code v-pre>streamDecrypt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L29) `packages/crypto/src/stream.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L29) <code v-pre>packages/crypto/src/stream.ts</code>
 
 ```ts
 export declare function streamDecrypt(result: StreamEncryptResult, key: Buffer): string;
 ```
 
-#### `streamEncrypt`
+#### <code v-pre>streamEncrypt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L16) `packages/crypto/src/stream.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L16) <code v-pre>packages/crypto/src/stream.ts</code>
 
 stream cipher (AES-CTR / ChaCha20-Poly1305) で byte 流を encrypt。 real TLS record layer / Signal Protocol の対称暗号 stream mode 相当。
 
@@ -190,17 +190,17 @@ stream cipher (AES-CTR / ChaCha20-Poly1305) で byte 流を encrypt。 real TLS 
 export declare function streamEncrypt(plaintext: string, key: Buffer, algorithm?: StreamCipherAlgorithm): StreamEncryptResult;
 ```
 
-#### `verifyJWT`
+#### <code v-pre>verifyJWT</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L58) `packages/crypto/src/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L58) <code v-pre>packages/crypto/src/jwt.ts</code>
 
 ```ts
 export declare function verifyJWT(token: string, secret: string | KeyLike, algorithm?: JWTAlgorithm): JWTVerifyResult;
 ```
 
-#### `verifyPassword`
+#### <code v-pre>verifyPassword</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L49) `packages/crypto/src/kdf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L49) <code v-pre>packages/crypto/src/kdf.ts</code>
 
 password + 既存 salt/params で KDF を再実行、 hashHex 一致で verification 成功。
 
@@ -208,9 +208,9 @@ password + 既存 salt/params で KDF を再実行、 hashHex 一致で verifica
 export declare function verifyPassword(password: string, stored: KdfResult): boolean;
 ```
 
-#### `x25519Ecdh`
+#### <code v-pre>x25519Ecdh</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L37) `packages/crypto/src/ed25519.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L37) <code v-pre>packages/crypto/src/ed25519.ts</code>
 
 X25519 ECDH で共有秘密を導出。 real Signal Protocol / DTLS 相当の一時鍵交換を mock。
 
@@ -220,9 +220,9 @@ export declare function x25519Ecdh(privateKeyPem: string, remotePublicKeyPem: st
 
 ### 型
 
-#### `AesEncryptResult`
+#### <code v-pre>AesEncryptResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L5) `packages/crypto/src/aes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L5) <code v-pre>packages/crypto/src/aes.ts</code>
 
 ```ts
 export interface AesEncryptResult {
@@ -232,17 +232,17 @@ export interface AesEncryptResult {
 }
 ```
 
-#### `AesMode`
+#### <code v-pre>AesMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L3) `packages/crypto/src/aes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L3) <code v-pre>packages/crypto/src/aes.ts</code>
 
 ```ts
 export type AesMode = 'aes-256-cbc' | 'aes-256-gcm' | 'aes-128-cbc' | 'aes-128-gcm';
 ```
 
-#### `EcdhResult`
+#### <code v-pre>EcdhResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L29) `packages/crypto/src/ed25519.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L29) <code v-pre>packages/crypto/src/ed25519.ts</code>
 
 ```ts
 export interface EcdhResult {
@@ -251,9 +251,9 @@ export interface EcdhResult {
 }
 ```
 
-#### `Ed25519SignResult`
+#### <code v-pre>Ed25519SignResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L3) `packages/crypto/src/ed25519.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L3) <code v-pre>packages/crypto/src/ed25519.ts</code>
 
 ```ts
 export interface Ed25519SignResult {
@@ -262,9 +262,9 @@ export interface Ed25519SignResult {
 }
 ```
 
-#### `Ed25519VerifyResult`
+#### <code v-pre>Ed25519VerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L18) `packages/crypto/src/ed25519.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/ed25519.ts#L18) <code v-pre>packages/crypto/src/ed25519.ts</code>
 
 ```ts
 export interface Ed25519VerifyResult {
@@ -273,41 +273,41 @@ export interface Ed25519VerifyResult {
 }
 ```
 
-#### `HashAlgorithm`
+#### <code v-pre>HashAlgorithm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L3) `packages/crypto/src/hash.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L3) <code v-pre>packages/crypto/src/hash.ts</code>
 
 ```ts
 export type HashAlgorithm = 'sha256' | 'sha384' | 'sha512' | 'blake2b512' | 'blake2s256' | 'sha1' | 'md5';
 ```
 
-#### `HmacAlgorithm`
+#### <code v-pre>HmacAlgorithm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L5) `packages/crypto/src/hash.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/hash.ts#L5) <code v-pre>packages/crypto/src/hash.ts</code>
 
 ```ts
 export type HmacAlgorithm = HashAlgorithm;
 ```
 
-#### `JWTAlgorithm`
+#### <code v-pre>JWTAlgorithm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L3) `packages/crypto/src/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L3) <code v-pre>packages/crypto/src/jwt.ts</code>
 
 ```ts
 export type JWTAlgorithm = 'HS256' | 'HS384' | 'HS512' | 'RS256' | 'RS384' | 'RS512' | 'ES256';
 ```
 
-#### `JWTPayload`
+#### <code v-pre>JWTPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L5) `packages/crypto/src/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L5) <code v-pre>packages/crypto/src/jwt.ts</code>
 
 ```ts
 export type JWTPayload = Record<string, unknown>;
 ```
 
-#### `JWTVerifyResult`
+#### <code v-pre>JWTVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L7) `packages/crypto/src/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L7) <code v-pre>packages/crypto/src/jwt.ts</code>
 
 ```ts
 export interface JWTVerifyResult {
@@ -318,17 +318,17 @@ export interface JWTVerifyResult {
 }
 ```
 
-#### `KdfAlgorithm`
+#### <code v-pre>KdfAlgorithm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L3) `packages/crypto/src/kdf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L3) <code v-pre>packages/crypto/src/kdf.ts</code>
 
 ```ts
 export type KdfAlgorithm = 'pbkdf2' | 'scrypt' | 'argon2-mock';
 ```
 
-#### `KdfOptions`
+#### <code v-pre>KdfOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L5) `packages/crypto/src/kdf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L5) <code v-pre>packages/crypto/src/kdf.ts</code>
 
 ```ts
 export interface KdfOptions {
@@ -343,9 +343,9 @@ export interface KdfOptions {
 }
 ```
 
-#### `KdfResult`
+#### <code v-pre>KdfResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L16) `packages/crypto/src/kdf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/kdf.ts#L16) <code v-pre>packages/crypto/src/kdf.ts</code>
 
 ```ts
 export interface KdfResult {
@@ -357,9 +357,9 @@ export interface KdfResult {
 }
 ```
 
-#### `KeyPairResult`
+#### <code v-pre>KeyPairResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L5) `packages/crypto/src/keypair.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L5) <code v-pre>packages/crypto/src/keypair.ts</code>
 
 ```ts
 export interface KeyPairResult {
@@ -369,17 +369,17 @@ export interface KeyPairResult {
 }
 ```
 
-#### `KeyPairType`
+#### <code v-pre>KeyPairType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L3) `packages/crypto/src/keypair.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L3) <code v-pre>packages/crypto/src/keypair.ts</code>
 
 ```ts
 export type KeyPairType = 'rsa' | 'ec' | 'ed25519';
 ```
 
-#### `RsaVerifyResult`
+#### <code v-pre>RsaVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L10) `packages/crypto/src/rsa.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/rsa.ts#L10) <code v-pre>packages/crypto/src/rsa.ts</code>
 
 ```ts
 export interface RsaVerifyResult {
@@ -388,17 +388,17 @@ export interface RsaVerifyResult {
 }
 ```
 
-#### `StreamCipherAlgorithm`
+#### <code v-pre>StreamCipherAlgorithm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L3) `packages/crypto/src/stream.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L3) <code v-pre>packages/crypto/src/stream.ts</code>
 
 ```ts
 export type StreamCipherAlgorithm = 'aes-256-ctr' | 'chacha20-poly1305';
 ```
 
-#### `StreamEncryptResult`
+#### <code v-pre>StreamEncryptResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L5) `packages/crypto/src/stream.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/stream.ts#L5) <code v-pre>packages/crypto/src/stream.ts</code>
 
 ```ts
 export interface StreamEncryptResult {
@@ -409,9 +409,9 @@ export interface StreamEncryptResult {
 }
 ```
 
-#### `X509CertInfo`
+#### <code v-pre>X509CertInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/x509.ts#L3) `packages/crypto/src/x509.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/x509.ts#L3) <code v-pre>packages/crypto/src/x509.ts</code>
 
 ```ts
 export interface X509CertInfo {

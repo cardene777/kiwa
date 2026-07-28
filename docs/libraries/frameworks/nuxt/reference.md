@@ -27,9 +27,9 @@ cookie と response header は env に残るため環境を共有しません。
 
 ### 値
 
-#### `invokeEventHandler`
+#### <code v-pre>invokeEventHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L87) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L87) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 Invoke a Nuxt `defineEventHandler` callback in isolation and capture its return value + redirect signal + response headers / cookies / status.
 
@@ -37,9 +37,9 @@ Invoke a Nuxt `defineEventHandler` callback in isolation and capture its return 
 export declare function invokeEventHandler<TResult = unknown>(opts: InvokeEventHandlerOptions<TResult>): Promise<InvokeEventHandlerResult<TResult>>;
 ```
 
-#### `invokeNitroPlugin`
+#### <code v-pre>invokeNitroPlugin</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L65) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L65) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 Invoke a Nitro plugin setup in isolation and return the hooks it registered + a `callHook` driver to fire them with synthetic payloads.
 
@@ -47,9 +47,9 @@ Invoke a Nitro plugin setup in isolation and return the hooks it registered + a 
 export declare function invokeNitroPlugin(opts: InvokeNitroPluginOptions): Promise<InvokeNitroPluginResult>;
 ```
 
-#### `invokeRouteMiddleware`
+#### <code v-pre>invokeRouteMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L113) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L113) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 Invoke a Nuxt 3 route middleware in isolation and capture its outcome. Return-value semantics mirror Nuxt: - `undefined` / `void` → continue navigation (no redirect, no abort) - `false` → abort silently - `string` → navigate to that path (synchronous return form) - thrown redirect/abort signal → captured into `redirect` / `abort`
 
@@ -57,33 +57,33 @@ Invoke a Nuxt 3 route middleware in isolation and capture its outcome. Return-va
 export declare function invokeRouteMiddleware(opts: InvokeRouteMiddlewareOptions): Promise<InvokeRouteMiddlewareResult>;
 ```
 
-#### `NUXT_MIDDLEWARE_ABORT_SYMBOL`
+#### <code v-pre>NUXT&#95;MIDDLEWARE&#95;ABORT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L12) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L12) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export declare const NUXT_MIDDLEWARE_ABORT_SYMBOL: unique symbol;
 ```
 
-#### `NUXT_MIDDLEWARE_REDIRECT_SYMBOL`
+#### <code v-pre>NUXT&#95;MIDDLEWARE&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L11) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L11) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export declare const NUXT_MIDDLEWARE_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `NUXT_REDIRECT_SYMBOL`
+#### <code v-pre>NUXT&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L14) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L14) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export declare const NUXT_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `setupNuxtMiddlewareEnv`
+#### <code v-pre>setupNuxtMiddlewareEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L119) `packages/nuxt/src/setup-route-middleware-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L119) <code v-pre>packages/nuxt/src/setup-route-middleware-env.ts</code>
 
 Wrap a middleware (or chain) in a captured execution environment. Returns spy buffers + aggregated outcome. The helper never re-throws — captured signals are surfaced through `outcome.redirect` / `outcome.abort` and the spy buffers.
 
@@ -93,9 +93,9 @@ export declare function setupNuxtMiddlewareEnv(opts: SetupNuxtMiddlewareEnvOptio
 
 ### 型
 
-#### `EventHandlerEnv`
+#### <code v-pre>EventHandlerEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L36) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L36) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export interface EventHandlerEnv {
@@ -105,17 +105,17 @@ export interface EventHandlerEnv {
 }
 ```
 
-#### `EventHandlerFunction`
+#### <code v-pre>EventHandlerFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L42) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L42) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export type EventHandlerFunction<TResult = unknown> = (event: SimulatedH3Event) => Promise<TResult> | TResult;
 ```
 
-#### `InvokeEventHandlerOptions`
+#### <code v-pre>InvokeEventHandlerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L44) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L44) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export interface InvokeEventHandlerOptions<TResult = unknown> {
@@ -129,9 +129,9 @@ export interface InvokeEventHandlerOptions<TResult = unknown> {
 }
 ```
 
-#### `InvokeEventHandlerResult`
+#### <code v-pre>InvokeEventHandlerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L54) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L54) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export interface InvokeEventHandlerResult<TResult = unknown> {
@@ -142,9 +142,9 @@ export interface InvokeEventHandlerResult<TResult = unknown> {
 }
 ```
 
-#### `InvokeNitroPluginOptions`
+#### <code v-pre>InvokeNitroPluginOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L39) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L39) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export interface InvokeNitroPluginOptions {
@@ -157,9 +157,9 @@ export interface InvokeNitroPluginOptions {
 }
 ```
 
-#### `InvokeNitroPluginResult`
+#### <code v-pre>InvokeNitroPluginResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L54) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L54) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export interface InvokeNitroPluginResult {
@@ -173,9 +173,9 @@ export interface InvokeNitroPluginResult {
 }
 ```
 
-#### `InvokeRouteMiddlewareOptions`
+#### <code v-pre>InvokeRouteMiddlewareOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L62) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L62) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface InvokeRouteMiddlewareOptions {
@@ -185,9 +185,9 @@ export interface InvokeRouteMiddlewareOptions {
 }
 ```
 
-#### `InvokeRouteMiddlewareResult`
+#### <code v-pre>InvokeRouteMiddlewareResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L68) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L68) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface InvokeRouteMiddlewareResult {
@@ -198,9 +198,9 @@ export interface InvokeRouteMiddlewareResult {
 }
 ```
 
-#### `MiddlewareNavigateOptions`
+#### <code v-pre>MiddlewareNavigateOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L38) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L38) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface MiddlewareNavigateOptions {
@@ -210,33 +210,33 @@ export interface MiddlewareNavigateOptions {
 }
 ```
 
-#### `NitroHookHandler`
+#### <code v-pre>NitroHookHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L24) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L24) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export type NitroHookHandler<TPayload = unknown> = (payload: TPayload) => Promise<void> | void;
 ```
 
-#### `NitroHookName`
+#### <code v-pre>NitroHookName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L15) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L15) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export type NitroHookName = 'request' | 'beforeResponse' | 'afterResponse' | 'error' | 'render:html' | 'render:response' | 'close';
 ```
 
-#### `NitroPlugin`
+#### <code v-pre>NitroPlugin</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L37) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L37) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export type NitroPlugin = (nitroApp: SimulatedNitroApp) => Promise<void> | void;
 ```
 
-#### `NuxtMiddlewareAbortCall`
+#### <code v-pre>NuxtMiddlewareAbortCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L46) `packages/nuxt/src/setup-route-middleware-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L46) <code v-pre>packages/nuxt/src/setup-route-middleware-env.ts</code>
 
 Single recorded `abortNavigation()` call captured by the spy.
 
@@ -247,9 +247,9 @@ export interface NuxtMiddlewareAbortCall {
 }
 ```
 
-#### `NuxtMiddlewareAbortSignal`
+#### <code v-pre>NuxtMiddlewareAbortSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L22) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L22) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface NuxtMiddlewareAbortSignal {
@@ -259,9 +259,9 @@ export interface NuxtMiddlewareAbortSignal {
 }
 ```
 
-#### `NuxtMiddlewareNavigateCall`
+#### <code v-pre>NuxtMiddlewareNavigateCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L38) `packages/nuxt/src/setup-route-middleware-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L38) <code v-pre>packages/nuxt/src/setup-route-middleware-env.ts</code>
 
 Single recorded `navigateTo()` call captured by the spy.
 
@@ -272,9 +272,9 @@ export interface NuxtMiddlewareNavigateCall {
 }
 ```
 
-#### `NuxtMiddlewareRedirectSignal`
+#### <code v-pre>NuxtMiddlewareRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L14) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L14) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface NuxtMiddlewareRedirectSignal {
@@ -286,9 +286,9 @@ export interface NuxtMiddlewareRedirectSignal {
 }
 ```
 
-#### `NuxtMiddlewareUserFixture`
+#### <code v-pre>NuxtMiddlewareUserFixture</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L30) `packages/nuxt/src/setup-route-middleware-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L30) <code v-pre>packages/nuxt/src/setup-route-middleware-env.ts</code>
 
 User session fixture injected into `to.meta.userSession` so middleware that reads `useUserSession()` (or any equivalent composable mirrored into `meta`) can branch on auth state without a real Nuxt app. `state: 'expired'` is a sentinel value the middleware can opt-into; it does not carry meaning at the helper level beyond being placed in meta verbatim.
 
@@ -308,9 +308,9 @@ export type NuxtMiddlewareUserFixture = {
 };
 ```
 
-#### `NuxtRedirectSignal`
+#### <code v-pre>NuxtRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L16) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L16) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export interface NuxtRedirectSignal {
@@ -320,9 +320,9 @@ export interface NuxtRedirectSignal {
 }
 ```
 
-#### `RegisteredHook`
+#### <code v-pre>RegisteredHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L48) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L48) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export interface RegisteredHook {
@@ -332,9 +332,9 @@ export interface RegisteredHook {
 }
 ```
 
-#### `RouteLocationInput`
+#### <code v-pre>RouteLocationInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L53) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L53) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface RouteLocationInput {
@@ -347,9 +347,9 @@ export interface RouteLocationInput {
 }
 ```
 
-#### `RouteMiddlewareFunction`
+#### <code v-pre>RouteMiddlewareFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L44) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L44) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export type RouteMiddlewareFunction = (to: SimulatedRouteLocation, from: SimulatedRouteLocation, helpers: {
@@ -358,9 +358,9 @@ export type RouteMiddlewareFunction = (to: SimulatedRouteLocation, from: Simulat
 }) => Promise<void | false | string | NuxtMiddlewareRedirectSignal> | void | false | string | NuxtMiddlewareRedirectSignal;
 ```
 
-#### `SetupNuxtMiddlewareEnvOptions`
+#### <code v-pre>SetupNuxtMiddlewareEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L51) `packages/nuxt/src/setup-route-middleware-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L51) <code v-pre>packages/nuxt/src/setup-route-middleware-env.ts</code>
 
 ```ts
 export interface SetupNuxtMiddlewareEnvOptions {
@@ -382,9 +382,9 @@ export interface SetupNuxtMiddlewareEnvOptions {
 }
 ```
 
-#### `SetupNuxtMiddlewareEnvResult`
+#### <code v-pre>SetupNuxtMiddlewareEnvResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L69) `packages/nuxt/src/setup-route-middleware-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/setup-route-middleware-env.ts#L69) <code v-pre>packages/nuxt/src/setup-route-middleware-env.ts</code>
 
 ```ts
 export interface SetupNuxtMiddlewareEnvResult {
@@ -420,9 +420,9 @@ export interface SetupNuxtMiddlewareEnvResult {
 }
 ```
 
-#### `SimulatedH3Event`
+#### <code v-pre>SimulatedH3Event</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L22) `packages/nuxt/src/invoke-event-handler.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-event-handler.ts#L22) <code v-pre>packages/nuxt/src/invoke-event-handler.ts</code>
 
 ```ts
 export interface SimulatedH3Event {
@@ -440,9 +440,9 @@ export interface SimulatedH3Event {
 }
 ```
 
-#### `SimulatedNitroApp`
+#### <code v-pre>SimulatedNitroApp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L26) `packages/nuxt/src/invoke-nitro-plugin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-nitro-plugin.ts#L26) <code v-pre>packages/nuxt/src/invoke-nitro-plugin.ts</code>
 
 ```ts
 export interface SimulatedNitroApp {
@@ -457,9 +457,9 @@ export interface SimulatedNitroApp {
 }
 ```
 
-#### `SimulatedRouteLocation`
+#### <code v-pre>SimulatedRouteLocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L28) `packages/nuxt/src/invoke-route-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nuxt/src/invoke-route-middleware.ts#L28) <code v-pre>packages/nuxt/src/invoke-route-middleware.ts</code>
 
 ```ts
 export interface SimulatedRouteLocation {

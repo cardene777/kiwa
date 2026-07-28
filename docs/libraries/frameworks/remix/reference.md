@@ -27,7 +27,7 @@ request と context は呼び出しごとに作られます。`undefined` loader
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| LOADER&#95;UNDEFINED&#95;RETURN&#95;MESSAGE | [packages/remix/src/invoke-route.ts](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L127) |
+| <code v-pre>LOADER&#95;UNDEFINED&#95;RETURN&#95;MESSAGE</code> | [packages/remix/src/invoke-route.ts](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L127) |
 
 ## API 契約
 
@@ -35,17 +35,17 @@ request と context は呼び出しごとに作られます。`undefined` loader
 
 ### 値
 
-#### `defer`
+#### <code v-pre>defer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L423) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L423) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export declare function defer<TData extends Record<string, unknown>>(data: TData, init?: ResponseInit): DeferredData<TData>;
 ```
 
-#### `DEFERRED_DATA_SYMBOL`
+#### <code v-pre>DEFERRED&#95;DATA&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L415) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L415) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 defer() 互換 — `Record&lt;string, T | Promise&lt;T&gt;&gt;` を返す helper。 Remix 公式 `defer()` の TypedDeferredData と異なり、 kiwa は real Promise をそのまま保持し、 `resolveDeferred()` で deterministic に全 Promise を await する。
 
@@ -53,25 +53,25 @@ defer() 互換 — `Record&lt;string, T | Promise&lt;T&gt;&gt;` を返す helper
 export declare const DEFERRED_DATA_SYMBOL: unique symbol;
 ```
 
-#### `invokeAction`
+#### <code v-pre>invokeAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L138) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L138) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export declare function invokeAction(opts: InvokeActionOptions): Promise<InvokeRouteResult>;
 ```
 
-#### `invokeLoader`
+#### <code v-pre>invokeLoader</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L111) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L111) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export declare function invokeLoader(opts: InvokeLoaderOptions): Promise<InvokeRouteResult>;
 ```
 
-#### `invokeResourceRoute`
+#### <code v-pre>invokeResourceRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L76) `packages/remix/src/invoke-resource-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L76) <code v-pre>packages/remix/src/invoke-resource-route.ts</code>
 
 Resource Route dispatcher — picks `loader` for GET/HEAD and `action` for POST/PUT/PATCH/DELETE. Method is required (no implicit default) because Resource Routes intentionally rely on HTTP semantics to choose behavior. Methods not implemented by the route module return a 405 Response and a branded `methodNotAllowed` signal so tests can assert dispatch behavior without conflating it with the route's own 4xx responses.
 
@@ -79,41 +79,41 @@ Resource Route dispatcher — picks `loader` for GET/HEAD and `action` for POST/
 export declare function invokeResourceRoute(opts: InvokeResourceRouteOptions): Promise<InvokeResourceRouteResult>;
 ```
 
-#### `isDeferred`
+#### <code v-pre>isDeferred</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L432) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L432) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export declare function isDeferred(value: unknown): value is DeferredData<Record<string, unknown>>;
 ```
 
-#### `json`
+#### <code v-pre>json</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L160) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L160) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export declare function json<T>(body: T, init?: ResponseInit): Response;
 ```
 
-#### `redirect`
+#### <code v-pre>redirect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L156) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L156) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export declare function redirect(location: string, status?: number): Response;
 ```
 
-#### `REMIX_REDIRECT_SYMBOL`
+#### <code v-pre>REMIX&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L9) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L9) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export declare const REMIX_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `resolveDeferred`
+#### <code v-pre>resolveDeferred</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L448) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L448) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 defer() の値を全て deterministic に await。 settled Promise (resolved / rejected) を一括追跡、 errors map で個別 rejection を assertion 可能。 pendingKeys は 起動時に既に Promise だった key (= 「streaming で resolve した」 key) を保持する。
 
@@ -121,17 +121,17 @@ defer() の値を全て deterministic に await。 settled Promise (resolved / r
 export declare function resolveDeferred<TData extends Record<string, unknown>>(deferred: DeferredData<TData>): Promise<ResolveDeferredResult<TData>>;
 ```
 
-#### `RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL`
+#### <code v-pre>RESOURCE&#95;ROUTE&#95;METHOD&#95;NOT&#95;ALLOWED&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L25) `packages/remix/src/invoke-resource-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L25) <code v-pre>packages/remix/src/invoke-resource-route.ts</code>
 
 ```ts
 export declare const RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL: unique symbol;
 ```
 
-#### `setupRemixNestedRouteEnv`
+#### <code v-pre>setupRemixNestedRouteEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L321) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L321) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export declare function setupRemixNestedRouteEnv(options: SetupRemixNestedRouteEnvOptions): RemixNestedRouteEnv;
@@ -139,17 +139,17 @@ export declare function setupRemixNestedRouteEnv(options: SetupRemixNestedRouteE
 
 ### 型
 
-#### `ActionFunction`
+#### <code v-pre>ActionFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L24) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L24) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export type ActionFunction<TResult = unknown> = (args: SimulatedRouteArgs) => Promise<TResult> | TResult;
 ```
 
-#### `DeferredData`
+#### <code v-pre>DeferredData</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L417) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L417) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface DeferredData<TData extends Record<string, unknown>> {
@@ -159,9 +159,9 @@ export interface DeferredData<TData extends Record<string, unknown>> {
 }
 ```
 
-#### `InvokeActionOptions`
+#### <code v-pre>InvokeActionOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L35) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L35) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export interface InvokeActionOptions {
@@ -176,9 +176,9 @@ export interface InvokeActionOptions {
 }
 ```
 
-#### `InvokeLoaderOptions`
+#### <code v-pre>InvokeLoaderOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L26) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L26) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export interface InvokeLoaderOptions {
@@ -191,9 +191,9 @@ export interface InvokeLoaderOptions {
 }
 ```
 
-#### `InvokeResourceRouteOptions`
+#### <code v-pre>InvokeResourceRouteOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L38) `packages/remix/src/invoke-resource-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L38) <code v-pre>packages/remix/src/invoke-resource-route.ts</code>
 
 ```ts
 export interface InvokeResourceRouteOptions {
@@ -208,9 +208,9 @@ export interface InvokeResourceRouteOptions {
 }
 ```
 
-#### `InvokeResourceRouteResult`
+#### <code v-pre>InvokeResourceRouteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L49) `packages/remix/src/invoke-resource-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L49) <code v-pre>packages/remix/src/invoke-resource-route.ts</code>
 
 ```ts
 export interface InvokeResourceRouteResult extends InvokeRouteResult {
@@ -219,9 +219,9 @@ export interface InvokeResourceRouteResult extends InvokeRouteResult {
 }
 ```
 
-#### `InvokeRouteResult`
+#### <code v-pre>InvokeRouteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L46) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L46) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export interface InvokeRouteResult {
@@ -232,17 +232,17 @@ export interface InvokeRouteResult {
 }
 ```
 
-#### `LoaderFunction`
+#### <code v-pre>LoaderFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L23) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L23) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export type LoaderFunction<TResult = unknown> = (args: SimulatedRouteArgs) => Promise<TResult> | TResult;
 ```
 
-#### `RemixNestedRouteDefinition`
+#### <code v-pre>RemixNestedRouteDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L36) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L36) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface RemixNestedRouteDefinition<TResult = unknown> {
@@ -252,9 +252,9 @@ export interface RemixNestedRouteDefinition<TResult = unknown> {
 }
 ```
 
-#### `RemixNestedRouteEnv`
+#### <code v-pre>RemixNestedRouteEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L62) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L62) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface RemixNestedRouteEnv {
@@ -266,9 +266,9 @@ export interface RemixNestedRouteEnv {
 }
 ```
 
-#### `RemixNestedRouteHeadersArgs`
+#### <code v-pre>RemixNestedRouteHeadersArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L25) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L25) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface RemixNestedRouteHeadersArgs {
@@ -279,17 +279,17 @@ export interface RemixNestedRouteHeadersArgs {
 }
 ```
 
-#### `RemixNestedRouteHeadersFunction`
+#### <code v-pre>RemixNestedRouteHeadersFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L32) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L32) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export type RemixNestedRouteHeadersFunction = ((args: RemixNestedRouteHeadersArgs) => HeadersInit) | HeadersInit;
 ```
 
-#### `RemixRedirectSignal`
+#### <code v-pre>RemixRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L11) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L11) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export interface RemixRedirectSignal {
@@ -299,9 +299,9 @@ export interface RemixRedirectSignal {
 }
 ```
 
-#### `ResolveDeferredResult`
+#### <code v-pre>ResolveDeferredResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L436) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L436) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface ResolveDeferredResult<TData extends Record<string, unknown>> {
@@ -316,9 +316,9 @@ export interface ResolveDeferredResult<TData extends Record<string, unknown>> {
 }
 ```
 
-#### `ResourceRouteMethodNotAllowedSignal`
+#### <code v-pre>ResourceRouteMethodNotAllowedSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L27) `packages/remix/src/invoke-resource-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L27) <code v-pre>packages/remix/src/invoke-resource-route.ts</code>
 
 ```ts
 export interface ResourceRouteMethodNotAllowedSignal {
@@ -328,9 +328,9 @@ export interface ResourceRouteMethodNotAllowedSignal {
 }
 ```
 
-#### `ResourceRouteModule`
+#### <code v-pre>ResourceRouteModule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L33) `packages/remix/src/invoke-resource-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-resource-route.ts#L33) <code v-pre>packages/remix/src/invoke-resource-route.ts</code>
 
 ```ts
 export interface ResourceRouteModule {
@@ -339,9 +339,9 @@ export interface ResourceRouteModule {
 }
 ```
 
-#### `RunLoaderChainResult`
+#### <code v-pre>RunLoaderChainResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L53) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L53) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface RunLoaderChainResult {
@@ -354,9 +354,9 @@ export interface RunLoaderChainResult {
 }
 ```
 
-#### `SetupRemixNestedRouteEnvOptions`
+#### <code v-pre>SetupRemixNestedRouteEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L42) `packages/remix/src/setup-nested-route-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/setup-nested-route-env.ts#L42) <code v-pre>packages/remix/src/setup-nested-route-env.ts</code>
 
 ```ts
 export interface SetupRemixNestedRouteEnvOptions {
@@ -371,9 +371,9 @@ export interface SetupRemixNestedRouteEnvOptions {
 }
 ```
 
-#### `SimulatedRouteArgs`
+#### <code v-pre>SimulatedRouteArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L17) `packages/remix/src/invoke-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L17) <code v-pre>packages/remix/src/invoke-route.ts</code>
 
 ```ts
 export interface SimulatedRouteArgs<TContext = Record<string, unknown>> {

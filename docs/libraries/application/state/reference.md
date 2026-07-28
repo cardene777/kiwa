@@ -39,7 +39,7 @@ in-memory state store、action、subscription、extensionの公開APIです。
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'next() called multiple times' | [packages/state/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L14) |
+| <code v-pre>next() called multiple times</code> | [packages/state/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L14) |
 
 ## API 契約
 
@@ -47,9 +47,9 @@ in-memory state store、action、subscription、extensionの公開APIです。
 
 ### 値
 
-#### `composeMiddleware`
+#### <code v-pre>composeMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L10) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L10) <code v-pre>packages/state/src/extensions.ts</code>
 
 middleware chain — dispatch を wrap して logger / crash reporter / persistence を注入
 
@@ -57,9 +57,9 @@ middleware chain — dispatch を wrap して logger / crash reporter / persiste
 export declare function composeMiddleware<S>(...middlewares: StateMiddleware<S>[]): StateMiddleware<S>;
 ```
 
-#### `createMemoryPersistence`
+#### <code v-pre>createMemoryPersistence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L73) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L73) <code v-pre>packages/state/src/extensions.ts</code>
 
 in-memory persistence adapter (localStorage / AsyncStorage 相当)
 
@@ -67,17 +67,17 @@ in-memory persistence adapter (localStorage / AsyncStorage 相当)
 export declare function createMemoryPersistence(): PersistenceAdapter;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L129) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L129) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `createPersistedStore`
+#### <code v-pre>createPersistedStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L89) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L89) <code v-pre>packages/state/src/extensions.ts</code>
 
 persist store to adapter with serialization
 
@@ -85,17 +85,17 @@ persist store to adapter with serialization
 export declare function createPersistedStore<S>(key: string, adapter: PersistenceAdapter): PersistedStore<S>;
 ```
 
-#### `createStore`
+#### <code v-pre>createStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L29) `packages/state/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L29) <code v-pre>packages/state/src/client.ts</code>
 
 ```ts
 export declare function createStore<S extends object>(options: StateStoreOptions<S>): StateStore<S>;
 ```
 
-#### `createUndoRedoStack`
+#### <code v-pre>createUndoRedoStack</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L34) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L34) <code v-pre>packages/state/src/extensions.ts</code>
 
 undo/redo stack — history persistence + timeline navigation
 
@@ -103,9 +103,9 @@ undo/redo stack — history persistence + timeline navigation
 export declare function createUndoRedoStack<S>(initial?: S, maxSize?: number): UndoRedoStack<S>;
 ```
 
-#### `dispatch`
+#### <code v-pre>dispatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/dispatch.ts#L19) `packages/state/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/dispatch.ts#L19) <code v-pre>packages/state/src/dispatch.ts</code>
 
 provider 別 dispatch。 Redux reducer / Zustand setState / Jotai atom write / Valtio proxy mutation / MobX action の 5 経路を統一 interface で叩く。
 
@@ -113,9 +113,9 @@ provider 別 dispatch。 Redux reducer / Zustand setState / Jotai atom write / V
 export declare function dispatch<S extends object>(store: StateStore<S>, action: Action): DispatchResult<S>;
 ```
 
-#### `mockAction`
+#### <code v-pre>mockAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/mockAction.ts#L12) `packages/state/src/mockAction.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/mockAction.ts#L12) <code v-pre>packages/state/src/mockAction.ts</code>
 
 action creator mock。 Redux Toolkit createAction 相当、 type 判定 helper (match) を含む。
 
@@ -123,17 +123,17 @@ action creator mock。 Redux Toolkit createAction 相当、 type 判定 helper (
 export declare function mockAction<P = unknown>(name: string): MockActionCreator<P>;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L105) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L105) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `selectState`
+#### <code v-pre>selectState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/selector.ts#L9) `packages/state/src/selector.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/selector.ts#L9) <code v-pre>packages/state/src/selector.ts</code>
 
 store から state slice を抽出。 Zustand selector / Redux useSelector / Jotai atom read / Valtio snapshot read / MobX computed 相当。
 
@@ -141,9 +141,9 @@ store から state slice を抽出。 Zustand selector / Redux useSelector / Jot
 export declare function selectState<S extends object, R>(store: StateStore<S>, selector: Selector<S, R>): R;
 ```
 
-#### `subscribe`
+#### <code v-pre>subscribe</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L16) `packages/state/src/subscribe.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L16) <code v-pre>packages/state/src/subscribe.ts</code>
 
 store の state 変更に listener を登録。 unsubscribe 関数と callCount helper を返却。 Redux subscribe / Zustand subscribe / Jotai atom subscribe / Valtio subscribe / MobX autorun 相当。
 
@@ -153,9 +153,9 @@ export declare function subscribe<S extends object>(store: StateStore<S>, listen
 
 ### 型
 
-#### `Action`
+#### <code v-pre>Action</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/dispatch.ts#L3) `packages/state/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/dispatch.ts#L3) <code v-pre>packages/state/src/dispatch.ts</code>
 
 ```ts
 export interface Action {
@@ -164,9 +164,9 @@ export interface Action {
 }
 ```
 
-#### `DispatchResult`
+#### <code v-pre>DispatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/dispatch.ts#L8) `packages/state/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/dispatch.ts#L8) <code v-pre>packages/state/src/dispatch.ts</code>
 
 ```ts
 export interface DispatchResult<S extends object> {
@@ -177,9 +177,9 @@ export interface DispatchResult<S extends object> {
 }
 ```
 
-#### `MockActionCreator`
+#### <code v-pre>MockActionCreator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/mockAction.ts#L3) `packages/state/src/mockAction.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/mockAction.ts#L3) <code v-pre>packages/state/src/mockAction.ts</code>
 
 ```ts
 export interface MockActionCreator<P = unknown> {
@@ -189,9 +189,9 @@ export interface MockActionCreator<P = unknown> {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L123) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L123) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -207,9 +207,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `PersistedStore`
+#### <code v-pre>PersistedStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L82) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L82) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export interface PersistedStore<S> {
@@ -219,9 +219,9 @@ export interface PersistedStore<S> {
 }
 ```
 
-#### `PersistenceAdapter`
+#### <code v-pre>PersistenceAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L66) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L66) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export interface PersistenceAdapter {
@@ -231,9 +231,9 @@ export interface PersistenceAdapter {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L102) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L102) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -243,9 +243,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L103) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L103) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -256,25 +256,25 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `Selector`
+#### <code v-pre>Selector</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/selector.ts#L3) `packages/state/src/selector.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/selector.ts#L3) <code v-pre>packages/state/src/selector.ts</code>
 
 ```ts
 export type Selector<S extends object, R> = (state: S) => R;
 ```
 
-#### `StateListener`
+#### <code v-pre>StateListener</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L4) `packages/state/src/subscribe.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L4) <code v-pre>packages/state/src/subscribe.ts</code>
 
 ```ts
 export type StateListener<S extends object> = (state: S) => void;
 ```
 
-#### `StateMiddleware`
+#### <code v-pre>StateMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L7) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L7) <code v-pre>packages/state/src/extensions.ts</code>
 
 v2.1 extensions — middleware chain, undo/redo, persistence, plus retry/batch/observability/timeout generics. Zustand v5 / Redux Toolkit v2 追随。
 
@@ -285,17 +285,17 @@ export type StateMiddleware<S> = (state: S, action: {
 }, next: () => S) => S;
 ```
 
-#### `StateProvider`
+#### <code v-pre>StateProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L3) `packages/state/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L3) <code v-pre>packages/state/src/client.ts</code>
 
 ```ts
 export type StateProvider = 'zustand' | 'redux' | 'jotai' | 'valtio' | 'mobx';
 ```
 
-#### `StateSnapshot`
+#### <code v-pre>StateSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L11) `packages/state/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L11) <code v-pre>packages/state/src/client.ts</code>
 
 ```ts
 export interface StateSnapshot<S extends object> {
@@ -305,9 +305,9 @@ export interface StateSnapshot<S extends object> {
 }
 ```
 
-#### `StateStore`
+#### <code v-pre>StateStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L17) `packages/state/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L17) <code v-pre>packages/state/src/client.ts</code>
 
 ```ts
 export interface StateStore<S extends object> {
@@ -326,9 +326,9 @@ export interface StateStore<S extends object> {
 }
 ```
 
-#### `StateStoreOptions`
+#### <code v-pre>StateStoreOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L5) `packages/state/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/client.ts#L5) <code v-pre>packages/state/src/client.ts</code>
 
 ```ts
 export interface StateStoreOptions<S extends object> {
@@ -341,9 +341,9 @@ export interface StateStoreOptions<S extends object> {
 }
 ```
 
-#### `Subscription`
+#### <code v-pre>Subscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L6) `packages/state/src/subscribe.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L6) <code v-pre>packages/state/src/subscribe.ts</code>
 
 ```ts
 export interface Subscription<S extends object> {
@@ -353,9 +353,9 @@ export interface Subscription<S extends object> {
 }
 ```
 
-#### `UndoRedoStack`
+#### <code v-pre>UndoRedoStack</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L23) `packages/state/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/extensions.ts#L23) <code v-pre>packages/state/src/extensions.ts</code>
 
 ```ts
 export interface UndoRedoStack<S> {
@@ -372,9 +372,9 @@ export interface UndoRedoStack<S> {
 }
 ```
 
-#### `Unsubscribe`
+#### <code v-pre>Unsubscribe</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L3) `packages/state/src/subscribe.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/state/src/subscribe.ts#L3) <code v-pre>packages/state/src/subscribe.ts</code>
 
 ```ts
 export type Unsubscribe = () => void;

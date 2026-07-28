@@ -25,94 +25,94 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;rbac: role hierarchy cycle detected at "$&#123;name&#125;"&#96; | [packages/security/src/authorization.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L43) |
-| "csp: strict-dynamic requires at least one nonce or hash in script-src (otherwise the whole policy has no effect)" | [packages/security/src/csp.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L146) |
-| 'sliding-window: windowMs must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L147) |
-| 'sliding-window: maxRequests must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L150) |
-| 'distributed: shards must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L196) |
-| 'client-id: ip missing' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L244) |
-| 'client-id: userId missing' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L247) |
-| 'client-id: apiKey missing' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L250) |
-| 'token-bucket: capacity must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L38) |
-| 'token-bucket: refillPerMs must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L41) |
-| 'leaky-bucket: capacity must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L92) |
-| 'leaky-bucket: drainPerMs must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L95) |
-| &#96;hsts: maxAgeSec must be &gt;= 0 (got $&#123;hsts.maxAgeSec&#125;)&#96; | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L106) |
-| 'hsts: preload requires includeSubDomains + maxAgeSec &gt;= 31536000 (1 year) per Chrome policy' | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L109) |
-| 'applyNetworkPolicy: pod security must be enforced first' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L107) |
-| 'applyNetworkPolicy: podSelector must not be empty' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L110) |
-| 'decideAdmission: network policy must be applied first' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L127) |
-| 'startK8sSession: sessionId must not be empty' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L61) |
-| &#96;enforcePodSecurity: session is $&#123;session.state&#125;&#96; | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L78) |
-| 'deriveKey: salt must be &gt;= 8 bytes' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L107) |
-| 'deriveKey: iterations must be &gt;= 1' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L110) |
-| 'deriveKey: password-based KDF requires &gt;= 10000 iterations' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L113) |
-| 'wrapEnvelope: cek and kek must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L129) |
-| 'rotateKey: oldKeyId and newKeyId must differ' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L144) |
-| 'rotateKey: key ids must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L147) |
-| 'signWithHsm: digest must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L163) |
-| 'signWithHsm: keyId must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L166) |
-| 'encapsulatePq: ML-KEM public key must be &gt;= 800 bytes' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L181) |
-| 'startCryptoSession: sessionId must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L78) |
-| 'sealAead: lengths must be non-negative' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L91) |
-| 'sealAead: plaintext &gt; 64MB not supported by mock' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L94) |
-| 'classifySeverity: playbook must be triggered first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L108) |
-| 'classifySeverity: affectedUsers must be non-negative' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L111) |
-| 'escalate: severity must be classified first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L135) |
-| 'escalate: at least one channel required' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L138) |
-| 'escalate: primary on-call must be assigned' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L141) |
-| 'captureForensics: escalation must complete first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L157) |
-| 'captureForensics: artifact sizes must be non-negative' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L160) |
-| 'recordPostMortem: forensics must be captured first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L179) |
-| 'recordPostMortem: rootCause must be &gt;= 10 chars' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L182) |
-| 'recordPostMortem: must have &gt;= 1 action item' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L185) |
-| 'startIncidentSession: sessionId must not be empty' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L71) |
-| &#96;triggerPlaybook: session is $&#123;session.state&#125;, must be idle&#96; | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L89) |
-| 'triggerPlaybook: playbookId must not be empty' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L92) |
-| &#96;verifyOcsp: session is $&#123;session.state&#125;, need handshake / pin first&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L113) |
-| &#96;checkCtLog: session is $&#123;session.state&#125;, must have handshake first&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L128) |
-| 'checkCtLog: minSctRequired must be non-negative' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L131) |
-| 'startMtlsSession: sessionId must not be empty' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L59) |
-| &#96;completeHandshake: session is $&#123;session.state&#125;, cannot handshake&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L75) |
-| 'completeHandshake: only TLS 1.2 / 1.3 supported' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L78) |
-| &#96;verifyPin: session is $&#123;session.state&#125;, must have completed handshake&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L90) |
-| 'verifyPin: expectedPins must not be empty' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L93) |
-| 'sealEvents: no structured events to seal' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L106) |
-| 'sealEvents: 0 structured events, cannot seal empty batch' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L109) |
-| 'applyRetention: events must be sealed first' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L127) |
-| 'applyRetention: retention days must be non-negative' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L130) |
-| 'correlate: retention must be applied first' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L148) |
-| 'correlate: rule must require &gt;= 1 event id' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L151) |
-| 'startSiemAuditSession: sessionId must not be empty' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L63) |
-| &#96;structureEvent: session is $&#123;session.state&#125;, cannot structure&#96; | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L80) |
-| 'structureEvent: actor / action / target must not be empty' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L83) |
-| 'matchReproducibleBuild: SLSA level must be verified first' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L111) |
-| 'matchReproducibleBuild: build hashes must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L114) |
-| 'signProvenance: reproducible build must be matched first' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L131) |
-| 'signProvenance: builderId must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L134) |
-| 'signProvenance: materialsCount must be non-negative' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L137) |
-| 'verifyAttestation: provenance must be signed first' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L152) |
-| 'verifyAttestation: trustRootFingerprint must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L155) |
-| 'verifyAttestation: at least one valid signature required' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L158) |
-| 'startSupplyChainSession: sessionId must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L67) |
-| &#96;verifySlsaLevel: session is $&#123;session.state&#125;&#96; | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L83) |
-| 'enforceTrustedTypes: at least one policy name required' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L100) |
-| 'applyPermissionsPolicy: trusted types must be enforced first' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L115) |
-| 'applyPermissionsPolicy: at least one feature required' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L118) |
-| 'enforceCrossOriginIsolation: permissions policy must be applied first' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L133) |
-| 'startWvsSession: sessionId must not be empty' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L62) |
-| &#96;verifySri: session is $&#123;session.state&#125;&#96; | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L74) |
-| 'verifySri: integrity and computedHash must not be empty' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L77) |
-| 'verifySri: integrity must start with sha256- / sha384- / sha512-' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L80) |
-| 'enforceTrustedTypes: SRI must be verified first' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L97) |
-| 'requestJit: risk must be scored first' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L122) |
-| 'requestJit: ttlSeconds must be 1..3600' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L125) |
-| 'requestJit: justification must be &gt;= 10 chars' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L128) |
-| 'enforceMicroSegment: JIT must be granted first' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L150) |
-| 'startZeroTrustSession: sessionId must not be empty' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L58) |
-| &#96;evaluatePosture: session is $&#123;session.state&#125;, must be idle&#96; | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L75) |
-| 'scoreRisk: posture must be evaluated first' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L99) |
-| &#96;dread: factor out of range ($&#123;v&#125;); must be 1..10&#96; | [packages/security/src/threat-model.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L126) |
+| <code v-pre>rbac: role hierarchy cycle detected at "$&#123;name&#125;"</code> | [packages/security/src/authorization.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L43) |
+| <code v-pre>csp: strict-dynamic requires at least one nonce or hash in script-src (otherwise the whole policy has no effect)</code> | [packages/security/src/csp.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L146) |
+| <code v-pre>sliding-window: windowMs must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L147) |
+| <code v-pre>sliding-window: maxRequests must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L150) |
+| <code v-pre>distributed: shards must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L196) |
+| <code v-pre>client-id: ip missing</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L244) |
+| <code v-pre>client-id: userId missing</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L247) |
+| <code v-pre>client-id: apiKey missing</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L250) |
+| <code v-pre>token-bucket: capacity must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L38) |
+| <code v-pre>token-bucket: refillPerMs must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L41) |
+| <code v-pre>leaky-bucket: capacity must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L92) |
+| <code v-pre>leaky-bucket: drainPerMs must be &gt; 0</code> | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L95) |
+| <code v-pre>hsts: maxAgeSec must be &gt;= 0 (got $&#123;hsts.maxAgeSec&#125;)</code> | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L106) |
+| <code v-pre>hsts: preload requires includeSubDomains + maxAgeSec &gt;= 31536000 (1 year) per Chrome policy</code> | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L109) |
+| <code v-pre>applyNetworkPolicy: pod security must be enforced first</code> | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L107) |
+| <code v-pre>applyNetworkPolicy: podSelector must not be empty</code> | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L110) |
+| <code v-pre>decideAdmission: network policy must be applied first</code> | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L127) |
+| <code v-pre>startK8sSession: sessionId must not be empty</code> | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L61) |
+| <code v-pre>enforcePodSecurity: session is $&#123;session.state&#125;</code> | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L78) |
+| <code v-pre>deriveKey: salt must be &gt;= 8 bytes</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L107) |
+| <code v-pre>deriveKey: iterations must be &gt;= 1</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L110) |
+| <code v-pre>deriveKey: password-based KDF requires &gt;= 10000 iterations</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L113) |
+| <code v-pre>wrapEnvelope: cek and kek must not be empty</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L129) |
+| <code v-pre>rotateKey: oldKeyId and newKeyId must differ</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L144) |
+| <code v-pre>rotateKey: key ids must not be empty</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L147) |
+| <code v-pre>signWithHsm: digest must not be empty</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L163) |
+| <code v-pre>signWithHsm: keyId must not be empty</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L166) |
+| <code v-pre>encapsulatePq: ML-KEM public key must be &gt;= 800 bytes</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L181) |
+| <code v-pre>startCryptoSession: sessionId must not be empty</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L78) |
+| <code v-pre>sealAead: lengths must be non-negative</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L91) |
+| <code v-pre>sealAead: plaintext &gt; 64MB not supported by mock</code> | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L94) |
+| <code v-pre>classifySeverity: playbook must be triggered first</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L108) |
+| <code v-pre>classifySeverity: affectedUsers must be non-negative</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L111) |
+| <code v-pre>escalate: severity must be classified first</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L135) |
+| <code v-pre>escalate: at least one channel required</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L138) |
+| <code v-pre>escalate: primary on-call must be assigned</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L141) |
+| <code v-pre>captureForensics: escalation must complete first</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L157) |
+| <code v-pre>captureForensics: artifact sizes must be non-negative</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L160) |
+| <code v-pre>recordPostMortem: forensics must be captured first</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L179) |
+| <code v-pre>recordPostMortem: rootCause must be &gt;= 10 chars</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L182) |
+| <code v-pre>recordPostMortem: must have &gt;= 1 action item</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L185) |
+| <code v-pre>startIncidentSession: sessionId must not be empty</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L71) |
+| <code v-pre>triggerPlaybook: session is $&#123;session.state&#125;, must be idle</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L89) |
+| <code v-pre>triggerPlaybook: playbookId must not be empty</code> | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L92) |
+| <code v-pre>verifyOcsp: session is $&#123;session.state&#125;, need handshake / pin first</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L113) |
+| <code v-pre>checkCtLog: session is $&#123;session.state&#125;, must have handshake first</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L128) |
+| <code v-pre>checkCtLog: minSctRequired must be non-negative</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L131) |
+| <code v-pre>startMtlsSession: sessionId must not be empty</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L59) |
+| <code v-pre>completeHandshake: session is $&#123;session.state&#125;, cannot handshake</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L75) |
+| <code v-pre>completeHandshake: only TLS 1.2 / 1.3 supported</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L78) |
+| <code v-pre>verifyPin: session is $&#123;session.state&#125;, must have completed handshake</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L90) |
+| <code v-pre>verifyPin: expectedPins must not be empty</code> | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L93) |
+| <code v-pre>sealEvents: no structured events to seal</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L106) |
+| <code v-pre>sealEvents: 0 structured events, cannot seal empty batch</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L109) |
+| <code v-pre>applyRetention: events must be sealed first</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L127) |
+| <code v-pre>applyRetention: retention days must be non-negative</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L130) |
+| <code v-pre>correlate: retention must be applied first</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L148) |
+| <code v-pre>correlate: rule must require &gt;= 1 event id</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L151) |
+| <code v-pre>startSiemAuditSession: sessionId must not be empty</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L63) |
+| <code v-pre>structureEvent: session is $&#123;session.state&#125;, cannot structure</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L80) |
+| <code v-pre>structureEvent: actor / action / target must not be empty</code> | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L83) |
+| <code v-pre>matchReproducibleBuild: SLSA level must be verified first</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L111) |
+| <code v-pre>matchReproducibleBuild: build hashes must not be empty</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L114) |
+| <code v-pre>signProvenance: reproducible build must be matched first</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L131) |
+| <code v-pre>signProvenance: builderId must not be empty</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L134) |
+| <code v-pre>signProvenance: materialsCount must be non-negative</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L137) |
+| <code v-pre>verifyAttestation: provenance must be signed first</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L152) |
+| <code v-pre>verifyAttestation: trustRootFingerprint must not be empty</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L155) |
+| <code v-pre>verifyAttestation: at least one valid signature required</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L158) |
+| <code v-pre>startSupplyChainSession: sessionId must not be empty</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L67) |
+| <code v-pre>verifySlsaLevel: session is $&#123;session.state&#125;</code> | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L83) |
+| <code v-pre>enforceTrustedTypes: at least one policy name required</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L100) |
+| <code v-pre>applyPermissionsPolicy: trusted types must be enforced first</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L115) |
+| <code v-pre>applyPermissionsPolicy: at least one feature required</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L118) |
+| <code v-pre>enforceCrossOriginIsolation: permissions policy must be applied first</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L133) |
+| <code v-pre>startWvsSession: sessionId must not be empty</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L62) |
+| <code v-pre>verifySri: session is $&#123;session.state&#125;</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L74) |
+| <code v-pre>verifySri: integrity and computedHash must not be empty</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L77) |
+| <code v-pre>verifySri: integrity must start with sha256- / sha384- / sha512-</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L80) |
+| <code v-pre>enforceTrustedTypes: SRI must be verified first</code> | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L97) |
+| <code v-pre>requestJit: risk must be scored first</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L122) |
+| <code v-pre>requestJit: ttlSeconds must be 1..3600</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L125) |
+| <code v-pre>requestJit: justification must be &gt;= 10 chars</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L128) |
+| <code v-pre>enforceMicroSegment: JIT must be granted first</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L150) |
+| <code v-pre>startZeroTrustSession: sessionId must not be empty</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L58) |
+| <code v-pre>evaluatePosture: session is $&#123;session.state&#125;, must be idle</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L75) |
+| <code v-pre>scoreRisk: posture must be evaluated first</code> | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L99) |
+| <code v-pre>dread: factor out of range ($&#123;v&#125;); must be 1..10</code> | [packages/security/src/threat-model.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L126) |
 
 ## API 契約
 
@@ -120,73 +120,73 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 
 ### 値
 
-#### `addCustomRule`
+#### <code v-pre>addCustomRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L90) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L90) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export declare function addCustomRule(policy: WafPolicy, rule: WafRule): WafPolicy;
 ```
 
-#### `ADV_API_KEY_ENV_KEY`
+#### <code v-pre>ADV&#95;API&#95;KEY&#95;ENV&#95;KEY</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L24) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L24) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare const ADV_API_KEY_ENV_KEY: Record<SecurityAdvTarget, string>;
 ```
 
-#### `ADV_ENDPOINT_ENV_KEY`
+#### <code v-pre>ADV&#95;ENDPOINT&#95;ENV&#95;KEY</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L17) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L17) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare const ADV_ENDPOINT_ENV_KEY: Record<SecurityAdvTarget, string>;
 ```
 
-#### `ADV_REQUIRED_KEYS`
+#### <code v-pre>ADV&#95;REQUIRED&#95;KEYS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L31) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L31) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare const ADV_REQUIRED_KEYS: Record<SecurityAdvTarget, string[]>;
 ```
 
-#### `applyNetworkPolicy`
+#### <code v-pre>applyNetworkPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L102) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L102) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export declare function applyNetworkPolicy(session: K8sSession, policy: NetworkPolicySpec): AxisAdvStep<K8sState>;
 ```
 
-#### `applyPermissionsPolicy`
+#### <code v-pre>applyPermissionsPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L110) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L110) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export declare function applyPermissionsPolicy(session: WvsSession, input: PermissionsPolicyInput): AxisAdvStep<WvsState>;
 ```
 
-#### `applyRetention`
+#### <code v-pre>applyRetention</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L122) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L122) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export declare function applyRetention(session: SiemAuditSession, policy: RetentionPolicy): AxisAdvStep<SiemAuditState>;
 ```
 
-#### `buildAdvRealDriverConfig`
+#### <code v-pre>buildAdvRealDriverConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L101) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L101) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function buildAdvRealDriverConfig(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): AdvRealDriverConfig;
 ```
 
-#### `buildCspHeader`
+#### <code v-pre>buildCspHeader</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L106) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L106) <code v-pre>packages/security/src/csp.ts</code>
 
 CSP header を SSOT 定義から build する。 nonce / hash / strict-dynamic は 5 sub-axis の中で最も間違えやすい組合せ (nonce が同 header 内 2 回以上 出ると browser reject / strict-dynamic は nonce or hash なしに書くと whole policy が effect なし) を build 段階で予防する。
 
@@ -194,81 +194,81 @@ CSP header を SSOT 定義から build する。 nonce / hash / strict-dynamic �
 export declare function buildCspHeader(input: CspPolicyInput): CspHeaderOutput;
 ```
 
-#### `buildSecurityHeaders`
+#### <code v-pre>buildSecurityHeaders</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L78) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L78) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export declare function buildSecurityHeaders(input: SecurityHeadersInput): SecurityHeadersOutput;
 ```
 
-#### `captureForensics`
+#### <code v-pre>captureForensics</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L152) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L152) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export declare function captureForensics(session: IncidentSession, input: ForensicsInput): AxisAdvStep<IncidentState>;
 ```
 
-#### `checkCtLog`
+#### <code v-pre>checkCtLog</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L126) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L126) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export declare function checkCtLog(session: MtlsSession, input: CtLogInput): AxisAdvStep<MtlsState>;
 ```
 
-#### `classifySeverity`
+#### <code v-pre>classifySeverity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L103) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L103) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export declare function classifySeverity(session: IncidentSession, input: SeverityInput): AxisAdvStep<IncidentState>;
 ```
 
-#### `collectAdvFidelityCoverage`
+#### <code v-pre>collectAdvFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L84) `packages/security/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L84) <code v-pre>packages/security/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare function collectAdvFidelityCoverage(providers?: SecurityAdvTarget[]): AdvFidelityCoverage;
 ```
 
-#### `completeHandshake`
+#### <code v-pre>completeHandshake</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L70) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L70) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export declare function completeHandshake(session: MtlsSession, input: HandshakeInput): AxisAdvStep<MtlsState>;
 ```
 
-#### `correlate`
+#### <code v-pre>correlate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L143) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L143) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export declare function correlate(session: SiemAuditSession, rule: CorrelationRule): AxisAdvStep<SiemAuditState>;
 ```
 
-#### `createRbacPolicy`
+#### <code v-pre>createRbacPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L29) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L29) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export declare function createRbacPolicy(roles: RbacRole[]): RbacPolicy;
 ```
 
-#### `createWafPolicy`
+#### <code v-pre>createWafPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L85) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L85) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export declare function createWafPolicy(rules?: WafRule[]): WafPolicy;
 ```
 
-#### `decideAdmission`
+#### <code v-pre>decideAdmission</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L121) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L121) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export declare function decideAdmission(session: K8sSession, request: AdmissionRequest, input: {
@@ -277,17 +277,17 @@ export declare function decideAdmission(session: K8sSession, request: AdmissionR
 }): AxisAdvStep<K8sState>;
 ```
 
-#### `DEFAULT_LICENSE_POLICY`
+#### <code v-pre>DEFAULT&#95;LICENSE&#95;POLICY</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L163) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L163) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export declare const DEFAULT_LICENSE_POLICY: LicensePolicy;
 ```
 
-#### `DEFAULT_SIGNATURES`
+#### <code v-pre>DEFAULT&#95;SIGNATURES</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L35) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L35) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 TruffleHog + Gitleaks 由来の代表 signature を SSOT 化。 実 signature 全網羅は upstream に譲り、 kiwa fixture test で よく参照される 8 kind に絞る。
 
@@ -295,25 +295,25 @@ TruffleHog + Gitleaks 由来の代表 signature を SSOT 化。 実 signature �
 export declare const DEFAULT_SIGNATURES: SecretSignature[];
 ```
 
-#### `deriveKey`
+#### <code v-pre>deriveKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L105) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L105) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function deriveKey(session: CryptoSession, input: KdfInput): AxisAdvStep<CryptoState>;
 ```
 
-#### `detectBoundaryCrossings`
+#### <code v-pre>detectBoundaryCrossings</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L164) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L164) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export declare function detectBoundaryCrossings(zones: TrustZone[], flows: DataFlow[], membership: Map<string, string>): BoundaryCrossing[];
 ```
 
-#### `DistributedRateLimiter`
+#### <code v-pre>DistributedRateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L190) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L190) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export declare class DistributedRateLimiter {
@@ -322,97 +322,97 @@ export declare class DistributedRateLimiter {
 }
 ```
 
-#### `encapsulatePq`
+#### <code v-pre>encapsulatePq</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L176) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L176) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function encapsulatePq(session: CryptoSession, input: PqKemInput): AxisAdvStep<CryptoState>;
 ```
 
-#### `enforceCrossOriginIsolation`
+#### <code v-pre>enforceCrossOriginIsolation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L128) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L128) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export declare function enforceCrossOriginIsolation(session: WvsSession, input: CrossOriginInput): AxisAdvStep<WvsState>;
 ```
 
-#### `enforceMicroSegment`
+#### <code v-pre>enforceMicroSegment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L145) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L145) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export declare function enforceMicroSegment(session: ZeroTrustSession, policy: SegmentPolicy): AxisAdvStep<ZeroTrustState>;
 ```
 
-#### `enforcePodSecurity`
+#### <code v-pre>enforcePodSecurity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L72) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L72) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export declare function enforcePodSecurity(session: K8sSession, level: PodSecurityLevel, pod: PodSpec): AxisAdvStep<K8sState>;
 ```
 
-#### `enforceTrustedTypes`
+#### <code v-pre>enforceTrustedTypes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L92) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L92) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export declare function enforceTrustedTypes(session: WvsSession, input: TrustedTypesInput): AxisAdvStep<WvsState>;
 ```
 
-#### `escalate`
+#### <code v-pre>escalate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L130) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L130) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export declare function escalate(session: IncidentSession, input: EscalationInput): AxisAdvStep<IncidentState>;
 ```
 
-#### `evaluateAbac`
+#### <code v-pre>evaluateAbac</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L119) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L119) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export declare function evaluateAbac(policy: AbacPolicy, attrs: AbacAttributes): AbacDecision;
 ```
 
-#### `evaluateCombined`
+#### <code v-pre>evaluateCombined</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L160) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L160) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export declare function evaluateCombined(input: CombinedPolicyInput): AbacDecision;
 ```
 
-#### `evaluateLicense`
+#### <code v-pre>evaluateLicense</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L169) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L169) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export declare function evaluateLicense(license: string | undefined, policy?: LicensePolicy): LicenseVerdict;
 ```
 
-#### `evaluatePosture`
+#### <code v-pre>evaluatePosture</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L70) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L70) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export declare function evaluatePosture(session: ZeroTrustSession, posture: DevicePosture): AxisAdvStep<ZeroTrustState>;
 ```
 
-#### `evaluateWaf`
+#### <code v-pre>evaluateWaf</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L94) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L94) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export declare function evaluateWaf(policy: WafPolicy, request: WafRequest): WafDecision;
 ```
 
-#### `expandRoles`
+#### <code v-pre>expandRoles</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L57) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L57) <code v-pre>packages/security/src/authorization.ts</code>
 
 Given a subject, expand its assigned roles through the parent hierarchy and collect the transitive permission set. Used by the RBAC evaluator.
 
@@ -420,33 +420,33 @@ Given a subject, expand its assigned roles through the parent hierarchy and coll
 export declare function expandRoles(policy: RbacPolicy, subject: RbacSubject): Set<string>;
 ```
 
-#### `isKiwaAdvModeReal`
+#### <code v-pre>isKiwaAdvModeReal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L13) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L13) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function isKiwaAdvModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
-#### `isKiwaModeReal`
+#### <code v-pre>isKiwaModeReal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L60) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L60) <code v-pre>packages/security/src/real-driver.ts</code>
 
 ```ts
 export declare function isKiwaModeReal(env?: NodeJS.ProcessEnv): boolean;
 ```
 
-#### `isRotationOverdue`
+#### <code v-pre>isRotationOverdue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L156) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L156) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export declare function isRotationOverdue(tracker: RotationTracker, nowMs?: number): boolean;
 ```
 
-#### `LeakyBucket`
+#### <code v-pre>LeakyBucket</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L84) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L84) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export declare class LeakyBucket {
@@ -455,33 +455,33 @@ export declare class LeakyBucket {
 }
 ```
 
-#### `lookupAdvisories`
+#### <code v-pre>lookupAdvisories</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L126) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L126) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export declare function lookupAdvisories(doc: SbomDocument, feed: AdvisoryFeed): AdvisoryLookupResult[];
 ```
 
-#### `markRotated`
+#### <code v-pre>markRotated</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L163) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L163) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export declare function markRotated(tracker: RotationTracker, atMs?: number): RotationTracker;
 ```
 
-#### `matchReproducibleBuild`
+#### <code v-pre>matchReproducibleBuild</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L106) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L106) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export declare function matchReproducibleBuild(session: SupplyChainSession, input: ReproducibleInput): AxisAdvStep<SupplyChainState>;
 ```
 
-#### `OWASP_CRS_DEFAULT`
+#### <code v-pre>OWASP&#95;CRS&#95;DEFAULT</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L46) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L46) <code v-pre>packages/security/src/waf.ts</code>
 
 OWASP CRS の代表 rule id を kiwa が使う shape に写像した既定 rule 集。
 
@@ -489,9 +489,9 @@ OWASP CRS の代表 rule id を kiwa が使う shape に写像した既定 rule 
 export declare const OWASP_CRS_DEFAULT: WafRule[];
 ```
 
-#### `pastaCoverage`
+#### <code v-pre>pastaCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L68) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L68) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export declare function pastaCoverage(findings: PastaFinding[]): {
@@ -501,81 +501,81 @@ export declare function pastaCoverage(findings: PastaFinding[]): {
 };
 ```
 
-#### `providerAdvEventName`
+#### <code v-pre>providerAdvEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L241) `packages/security/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L241) <code v-pre>packages/security/src/semantics/types.ts</code>
 
 ```ts
 export declare function providerAdvEventName(target: SecurityAdvTarget, neutral: NeutralAdvEventName): string;
 ```
 
-#### `rbacAllows`
+#### <code v-pre>rbacAllows</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L75) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L75) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export declare function rbacAllows(policy: RbacPolicy, subject: RbacSubject, permission: string): boolean;
 ```
 
-#### `REAL_DRIVER_REQUIRED_KEYS`
+#### <code v-pre>REAL&#95;DRIVER&#95;REQUIRED&#95;KEYS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L13) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L13) <code v-pre>packages/security/src/real-driver.ts</code>
 
 ```ts
 export declare const REAL_DRIVER_REQUIRED_KEYS: Record<SecurityProvider, string[]>;
 ```
 
-#### `reasonSimilarity`
+#### <code v-pre>reasonSimilarity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L112) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L112) <code v-pre>packages/security/src/fidelity.ts</code>
 
 ```ts
 export declare function reasonSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): number;
 ```
 
-#### `recordPostMortem`
+#### <code v-pre>recordPostMortem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L174) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L174) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export declare function recordPostMortem(session: IncidentSession, input: PostMortemInput): AxisAdvStep<IncidentState>;
 ```
 
-#### `requestJit`
+#### <code v-pre>requestJit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L117) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L117) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export declare function requestJit(session: ZeroTrustSession, request: JitRequest): AxisAdvStep<ZeroTrustState>;
 ```
 
-#### `resolveAdvApiKey`
+#### <code v-pre>resolveAdvApiKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L85) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L85) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function resolveAdvApiKey(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): string | null;
 ```
 
-#### `resolveAdvEndpoint`
+#### <code v-pre>resolveAdvEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L76) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L76) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function resolveAdvEndpoint(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): string | null;
 ```
 
-#### `resolveAdvRealDriver`
+#### <code v-pre>resolveAdvRealDriver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L49) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L49) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function resolveAdvRealDriver(input: AdvRealDriverGateInput): AdvRealDriverGateResult;
 ```
 
-#### `resolveClientId`
+#### <code v-pre>resolveClientId</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L236) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L236) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export declare function resolveClientId(input: {
@@ -586,9 +586,9 @@ export declare function resolveClientId(input: {
 }): string;
 ```
 
-#### `resolveEndpoint`
+#### <code v-pre>resolveEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L89) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L89) <code v-pre>packages/security/src/real-driver.ts</code>
 
 provider 別の endpoint / api key を env から解決する。 testcontainers container の host / port 情報を渡す想定。
 
@@ -596,9 +596,9 @@ provider 別の endpoint / api key を env から解決する。 testcontainers 
 export declare function resolveEndpoint(provider: SecurityProvider, env?: NodeJS.ProcessEnv): RealDriverEndpoint;
 ```
 
-#### `resolveRealtimeDriver`
+#### <code v-pre>resolveRealtimeDriver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L35) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L35) <code v-pre>packages/security/src/real-driver.ts</code>
 
 env の状態から real driver を使うかどうか判定する。 KIWA_MODE=real + provider 別必須 env が揃った時のみ true。
 
@@ -606,41 +606,41 @@ env の状態から real driver を使うかどうか判定する。 KIWA_MODE=r
 export declare function resolveRealtimeDriver(input: RealDriverGateInput): RealDriverGateResult;
 ```
 
-#### `rotateKey`
+#### <code v-pre>rotateKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L139) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L139) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function rotateKey(session: CryptoSession, input: KeyRotationInput): AxisAdvStep<CryptoState>;
 ```
 
-#### `runSecurityFidelityCheck`
+#### <code v-pre>runSecurityFidelityCheck</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L55) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L55) <code v-pre>packages/security/src/fidelity.ts</code>
 
 ```ts
 export declare function runSecurityFidelityCheck(input: SecurityFidelityInput): Promise<SecurityFidelityReport>;
 ```
 
-#### `scanSecrets`
+#### <code v-pre>scanSecrets</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L111) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L111) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export declare function scanSecrets(source: string, signatures?: SecretSignature[]): SecretFinding[];
 ```
 
-#### `scoreDread`
+#### <code v-pre>scoreDread</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L116) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L116) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export declare function scoreDread(input: DreadInput): DreadResult;
 ```
 
-#### `scoreRisk`
+#### <code v-pre>scoreRisk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L89) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L89) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export declare function scoreRisk(session: ZeroTrustSession, input: {
@@ -651,9 +651,9 @@ export declare function scoreRisk(session: ZeroTrustSession, input: {
 }): AxisAdvStep<ZeroTrustState>;
 ```
 
-#### `scoreStride`
+#### <code v-pre>scoreStride</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L29) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L29) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export declare function scoreStride(threats: StrideThreat[]): {
@@ -663,17 +663,17 @@ export declare function scoreStride(threats: StrideThreat[]): {
 };
 ```
 
-#### `sealAead`
+#### <code v-pre>sealAead</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L89) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L89) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function sealAead(session: CryptoSession, input: AeadInput): AxisAdvStep<CryptoState>;
 ```
 
-#### `sealEvents`
+#### <code v-pre>sealEvents</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L101) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L101) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export declare function sealEvents(session: SiemAuditSession, input: {
@@ -681,17 +681,17 @@ export declare function sealEvents(session: SiemAuditSession, input: {
 }): AxisAdvStep<SiemAuditState>;
 ```
 
-#### `SECURITY_ADV_AXIS_TO_EVENTS`
+#### <code v-pre>SECURITY&#95;ADV&#95;AXIS&#95;TO&#95;EVENTS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L30) `packages/security/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L30) <code v-pre>packages/security/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare const SECURITY_ADV_AXIS_TO_EVENTS: Record<SecurityAdvAxis, NeutralAdvEventName[]>;
 ```
 
-#### `SECURITY_ADV_FIDELITY_GRID`
+#### <code v-pre>SECURITY&#95;ADV&#95;FIDELITY&#95;GRID</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L100) `packages/security/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L100) <code v-pre>packages/security/src/semantics/fidelity.ts</code>
 
 provider × axis = 4 × 8 = 32 grid の SSOT 列挙。
 
@@ -702,9 +702,9 @@ export declare const SECURITY_ADV_FIDELITY_GRID: Array<{
 }>;
 ```
 
-#### `SECURITY_FIDELITY_GRID`
+#### <code v-pre>SECURITY&#95;FIDELITY&#95;GRID</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L164) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L164) <code v-pre>packages/security/src/fidelity.ts</code>
 
 32 grid の全 combination を SSOT で列挙 — provider x axis の どの組合せが fidelity harness の一次対象か明示する。
 
@@ -715,9 +715,9 @@ export declare const SECURITY_FIDELITY_GRID: {
 }[];
 ```
 
-#### `shannonEntropy`
+#### <code v-pre>shannonEntropy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L96) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L96) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 Shannon entropy of a string over its own byte histogram. Values &gt;= 3.5 are typical for random secrets over base64/hex alphabets; anything closer to natural language sits well below.
 
@@ -725,25 +725,25 @@ Shannon entropy of a string over its own byte histogram. Values &gt;= 3.5 are ty
 export declare function shannonEntropy(input: string): number;
 ```
 
-#### `signProvenance`
+#### <code v-pre>signProvenance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L126) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L126) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export declare function signProvenance(session: SupplyChainSession, input: ProvenanceInput): AxisAdvStep<SupplyChainState>;
 ```
 
-#### `signWithHsm`
+#### <code v-pre>signWithHsm</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L158) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L158) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function signWithHsm(session: CryptoSession, input: HsmSignInput): AxisAdvStep<CryptoState>;
 ```
 
-#### `skipUnlessAdvReal`
+#### <code v-pre>skipUnlessAdvReal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L113) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L113) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export declare function skipUnlessAdvReal(provider: SecurityAdvTarget, env?: NodeJS.ProcessEnv): {
@@ -752,9 +752,9 @@ export declare function skipUnlessAdvReal(provider: SecurityAdvTarget, env?: Nod
 };
 ```
 
-#### `skipUnlessReal`
+#### <code v-pre>skipUnlessReal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L68) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L68) <code v-pre>packages/security/src/real-driver.ts</code>
 
 vitest 用 skip helper — describe block を real driver 未該当時に skip する経路の SSOT。 return.skip=true なら describe.skip 相当。
 
@@ -765,9 +765,9 @@ export declare function skipUnlessReal(provider: SecurityProvider, env?: NodeJS.
 };
 ```
 
-#### `SlidingWindow`
+#### <code v-pre>SlidingWindow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L140) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L140) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export declare class SlidingWindow {
@@ -776,9 +776,9 @@ export declare class SlidingWindow {
 }
 ```
 
-#### `startCryptoSession`
+#### <code v-pre>startCryptoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L73) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L73) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function startCryptoSession(input: {
@@ -787,9 +787,9 @@ export declare function startCryptoSession(input: {
 }): CryptoSession;
 ```
 
-#### `startIncidentSession`
+#### <code v-pre>startIncidentSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L66) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L66) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export declare function startIncidentSession(input: {
@@ -798,9 +798,9 @@ export declare function startIncidentSession(input: {
 }): IncidentSession;
 ```
 
-#### `startK8sSession`
+#### <code v-pre>startK8sSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L56) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L56) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export declare function startK8sSession(input: {
@@ -809,9 +809,9 @@ export declare function startK8sSession(input: {
 }): K8sSession;
 ```
 
-#### `startMtlsSession`
+#### <code v-pre>startMtlsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L54) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L54) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export declare function startMtlsSession(input: {
@@ -820,9 +820,9 @@ export declare function startMtlsSession(input: {
 }): MtlsSession;
 ```
 
-#### `startSiemAuditSession`
+#### <code v-pre>startSiemAuditSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L58) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L58) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export declare function startSiemAuditSession(input: {
@@ -831,9 +831,9 @@ export declare function startSiemAuditSession(input: {
 }): SiemAuditSession;
 ```
 
-#### `startSupplyChainSession`
+#### <code v-pre>startSupplyChainSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L62) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L62) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export declare function startSupplyChainSession(input: {
@@ -842,9 +842,9 @@ export declare function startSupplyChainSession(input: {
 }): SupplyChainSession;
 ```
 
-#### `startWvsSession`
+#### <code v-pre>startWvsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L57) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L57) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export declare function startWvsSession(input: {
@@ -853,9 +853,9 @@ export declare function startWvsSession(input: {
 }): WvsSession;
 ```
 
-#### `startZeroTrustSession`
+#### <code v-pre>startZeroTrustSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L53) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L53) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export declare function startZeroTrustSession(input: {
@@ -864,9 +864,9 @@ export declare function startZeroTrustSession(input: {
 }): ZeroTrustSession;
 ```
 
-#### `structureEvent`
+#### <code v-pre>structureEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L75) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L75) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export declare function structureEvent(session: SiemAuditSession, raw: SiemEvent): {
@@ -875,9 +875,9 @@ export declare function structureEvent(session: SiemAuditSession, raw: SiemEvent
 };
 ```
 
-#### `suppressFalsePositive`
+#### <code v-pre>suppressFalsePositive</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L122) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L122) <code v-pre>packages/security/src/waf.ts</code>
 
 False positive suppression — allow-list per path で特定 rule を除外する partial policy override。 使い方は既存 policy + 部分 rule の rebuild。
 
@@ -885,9 +885,9 @@ False positive suppression — allow-list per path で特定 rule を除外す�
 export declare function suppressFalsePositive(policy: WafPolicy, ruleId: string, exceptionPath: string): WafPolicy;
 ```
 
-#### `toAuthorizationEvent`
+#### <code v-pre>toAuthorizationEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L176) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L176) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export declare function toAuthorizationEvent(input: {
@@ -899,9 +899,9 @@ export declare function toAuthorizationEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toCspEvent`
+#### <code v-pre>toCspEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L209) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L209) <code v-pre>packages/security/src/csp.ts</code>
 
 CSP violation を統一 event 形式に変換する adapter。 fidelity harness が real (Report-To API) と mock (unit test) の 両方の event 列を同型で扱えるようにする。
 
@@ -915,9 +915,9 @@ export declare function toCspEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toCycloneDx`
+#### <code v-pre>toCycloneDx</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L30) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L30) <code v-pre>packages/security/src/sbom.ts</code>
 
 CycloneDX 1.5 minimal — components が bomFormat = "CycloneDX"、 specVersion = "1.5"。
 
@@ -925,9 +925,9 @@ CycloneDX 1.5 minimal — components が bomFormat = "CycloneDX"、 specVersion 
 export declare function toCycloneDx(components: SbomComponent[], nowIso?: string): SbomDocument;
 ```
 
-#### `TokenBucket`
+#### <code v-pre>TokenBucket</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L30) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L30) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export declare class TokenBucket {
@@ -936,9 +936,9 @@ export declare class TokenBucket {
 }
 ```
 
-#### `toRateLimitEvent`
+#### <code v-pre>toRateLimitEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L255) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L255) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export declare function toRateLimitEvent(input: {
@@ -950,9 +950,9 @@ export declare function toRateLimitEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toSbomEvent`
+#### <code v-pre>toSbomEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L186) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L186) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export declare function toSbomEvent(input: {
@@ -964,9 +964,9 @@ export declare function toSbomEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toSecretsEvent`
+#### <code v-pre>toSecretsEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L167) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L167) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export declare function toSecretsEvent(input: {
@@ -976,9 +976,9 @@ export declare function toSecretsEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toSecurityHeadersEvent`
+#### <code v-pre>toSecurityHeadersEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L181) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L181) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export declare function toSecurityHeadersEvent(input: {
@@ -990,9 +990,9 @@ export declare function toSecurityHeadersEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toSpdx`
+#### <code v-pre>toSpdx</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L40) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L40) <code v-pre>packages/security/src/sbom.ts</code>
 
 SPDX 2.3 minimal — packages list + relationships (DESCRIBES / DEPENDS_ON)。
 
@@ -1000,9 +1000,9 @@ SPDX 2.3 minimal — packages list + relationships (DESCRIBES / DEPENDS_ON)。
 export declare function toSpdx(components: SbomComponent[], nowIso?: string): SbomDocument;
 ```
 
-#### `toThreatModelEvent`
+#### <code v-pre>toThreatModelEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L201) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L201) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export declare function toThreatModelEvent(input: {
@@ -1014,9 +1014,9 @@ export declare function toThreatModelEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `toWafEvent`
+#### <code v-pre>toWafEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L137) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L137) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export declare function toWafEvent(input: {
@@ -1027,17 +1027,17 @@ export declare function toWafEvent(input: {
 }): SecurityEvent;
 ```
 
-#### `triggerPlaybook`
+#### <code v-pre>triggerPlaybook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L84) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L84) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export declare function triggerPlaybook(session: IncidentSession, input: PlaybookInput): AxisAdvStep<IncidentState>;
 ```
 
-#### `validateNonce`
+#### <code v-pre>validateNonce</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L194) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L194) <code v-pre>packages/security/src/csp.ts</code>
 
 nonce 検証 — 同 header 内で同じ nonce が 2 回以上出ないか、 32 char 以上か。
 
@@ -1048,9 +1048,9 @@ export declare function validateNonce(nonce: string): {
 };
 ```
 
-#### `validateSbom`
+#### <code v-pre>validateSbom</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L50) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L50) <code v-pre>packages/security/src/sbom.ts</code>
 
 SBOM validation — mandatory fields + purl syntax check。
 
@@ -1061,9 +1061,9 @@ export declare function validateSbom(doc: SbomDocument): {
 };
 ```
 
-#### `validateSecurityHeaders`
+#### <code v-pre>validateSecurityHeaders</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L153) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L153) <code v-pre>packages/security/src/security-headers.ts</code>
 
 Header header 値の syntactic validation。 実 browser 実装との fidelity は fidelity harness 側で確認、 ここでは build 段階の misuse だけ検知。
 
@@ -1074,57 +1074,57 @@ export declare function validateSecurityHeaders(input: SecurityHeadersInput): {
 };
 ```
 
-#### `verdictSimilarity`
+#### <code v-pre>verdictSimilarity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L102) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L102) <code v-pre>packages/security/src/fidelity.ts</code>
 
 ```ts
 export declare function verdictSimilarity(real: SecurityEvent[], mock: SecurityEvent[]): number;
 ```
 
-#### `verifyAttestation`
+#### <code v-pre>verifyAttestation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L147) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L147) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export declare function verifyAttestation(session: SupplyChainSession, input: AttestationInput): AxisAdvStep<SupplyChainState>;
 ```
 
-#### `verifyOcsp`
+#### <code v-pre>verifyOcsp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L111) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L111) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export declare function verifyOcsp(session: MtlsSession, input: OcspInput): AxisAdvStep<MtlsState>;
 ```
 
-#### `verifyPin`
+#### <code v-pre>verifyPin</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L88) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L88) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export declare function verifyPin(session: MtlsSession, input: PinInput): AxisAdvStep<MtlsState>;
 ```
 
-#### `verifySlsaLevel`
+#### <code v-pre>verifySlsaLevel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L78) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L78) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export declare function verifySlsaLevel(session: SupplyChainSession, input: SlsaLevelInput): AxisAdvStep<SupplyChainState>;
 ```
 
-#### `verifySri`
+#### <code v-pre>verifySri</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L72) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L72) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export declare function verifySri(session: WvsSession, input: SriInput): AxisAdvStep<WvsState>;
 ```
 
-#### `versionInRange`
+#### <code v-pre>versionInRange</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L85) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L85) <code v-pre>packages/security/src/sbom.ts</code>
 
 Simple semver "in range" check — accepts `&gt;= a.b.c`, `&lt; a.b.c`, `&lt; a.b.c || &gt;= x.y.z`, or an exact version string. Full semver range algebra is out of scope for the mock (real driver = actual OSV client)。
 
@@ -1132,9 +1132,9 @@ Simple semver "in range" check — accepts `&gt;= a.b.c`, `&lt; a.b.c`, `&lt; a.
 export declare function versionInRange(version: string, range: string): boolean;
 ```
 
-#### `wrapEnvelope`
+#### <code v-pre>wrapEnvelope</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L124) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L124) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export declare function wrapEnvelope(session: CryptoSession, input: EnvelopeInput): AxisAdvStep<CryptoState>;
@@ -1142,9 +1142,9 @@ export declare function wrapEnvelope(session: CryptoSession, input: EnvelopeInpu
 
 ### 型
 
-#### `AbacAttributes`
+#### <code v-pre>AbacAttributes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L84) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L84) <code v-pre>packages/security/src/authorization.ts</code>
 
 ABAC — subject / resource / action / environment 4 属性 + expression evaluator。
 
@@ -1157,9 +1157,9 @@ export interface AbacAttributes {
 }
 ```
 
-#### `AbacCombiningAlgo`
+#### <code v-pre>AbacCombiningAlgo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L106) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L106) <code v-pre>packages/security/src/authorization.ts</code>
 
 Rule combining algorithms follow XACML naming: - deny-overrides: any DENY wins - permit-overrides: any PERMIT wins - first-applicable: return the first rule that matches (default deny after)
 
@@ -1167,9 +1167,9 @@ Rule combining algorithms follow XACML naming: - deny-overrides: any DENY wins -
 export type AbacCombiningAlgo = 'deny-overrides' | 'permit-overrides' | 'first-applicable';
 ```
 
-#### `AbacDecision`
+#### <code v-pre>AbacDecision</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L113) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L113) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export interface AbacDecision {
@@ -1179,9 +1179,9 @@ export interface AbacDecision {
 }
 ```
 
-#### `AbacPolicy`
+#### <code v-pre>AbacPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L108) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L108) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export interface AbacPolicy {
@@ -1190,9 +1190,9 @@ export interface AbacPolicy {
 }
 ```
 
-#### `AbacRule`
+#### <code v-pre>AbacRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L93) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L93) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export interface AbacRule {
@@ -1203,17 +1203,17 @@ export interface AbacRule {
 }
 ```
 
-#### `AbacRuleEffect`
+#### <code v-pre>AbacRuleEffect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L91) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L91) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export type AbacRuleEffect = 'permit' | 'deny';
 ```
 
-#### `AdmissionRequest`
+#### <code v-pre>AdmissionRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L49) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L49) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export interface AdmissionRequest {
@@ -1224,9 +1224,9 @@ export interface AdmissionRequest {
 }
 ```
 
-#### `AdvFidelityCoverage`
+#### <code v-pre>AdvFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L24) `packages/security/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L24) <code v-pre>packages/security/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface AdvFidelityCoverage {
@@ -1236,9 +1236,9 @@ export interface AdvFidelityCoverage {
 }
 ```
 
-#### `AdvFidelityRow`
+#### <code v-pre>AdvFidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L17) `packages/security/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/fidelity.ts#L17) <code v-pre>packages/security/src/semantics/fidelity.ts</code>
 
 4 provider × 8 axis = 32 combination advanced fidelity grid (v0.2)。 v0.1 の `SECURITY_FIDELITY_GRID` は provider {helmet / express-rate-limit / casbin / coraza} × 基礎 8 axis を扱う。 本 v0.2 grid は provider {istio / opa / siem-splunk / vault} × 高度 8 axis を扱い、 `SECURITY_FIDELITY_GRID` と直交する 2 段目の grid 構造。
 
@@ -1251,9 +1251,9 @@ export interface AdvFidelityRow {
 }
 ```
 
-#### `Advisory`
+#### <code v-pre>Advisory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L63) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L63) <code v-pre>packages/security/src/sbom.ts</code>
 
 OSV / NVD advisory shape 。 kiwa の in-memory advisory feed で使用。
 
@@ -1270,9 +1270,9 @@ export interface Advisory {
 }
 ```
 
-#### `AdvisoryFeed`
+#### <code v-pre>AdvisoryFeed</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L71) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L71) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export interface AdvisoryFeed {
@@ -1280,9 +1280,9 @@ export interface AdvisoryFeed {
 }
 ```
 
-#### `AdvisoryLookupResult`
+#### <code v-pre>AdvisoryLookupResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L75) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L75) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export interface AdvisoryLookupResult {
@@ -1291,9 +1291,9 @@ export interface AdvisoryLookupResult {
 }
 ```
 
-#### `AdvRealDriverConfig`
+#### <code v-pre>AdvRealDriverConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L94) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L94) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export interface AdvRealDriverConfig {
@@ -1304,9 +1304,9 @@ export interface AdvRealDriverConfig {
 }
 ```
 
-#### `AdvRealDriverGateInput`
+#### <code v-pre>AdvRealDriverGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L38) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L38) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export interface AdvRealDriverGateInput {
@@ -1315,9 +1315,9 @@ export interface AdvRealDriverGateInput {
 }
 ```
 
-#### `AdvRealDriverGateResult`
+#### <code v-pre>AdvRealDriverGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L43) `packages/security/src/semantics/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/real-driver.ts#L43) <code v-pre>packages/security/src/semantics/real-driver.ts</code>
 
 ```ts
 export interface AdvRealDriverGateResult {
@@ -1327,9 +1327,9 @@ export interface AdvRealDriverGateResult {
 }
 ```
 
-#### `AeadAlgo`
+#### <code v-pre>AeadAlgo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L16) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L16) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 Cryptography advanced axis — AEAD + KDF + envelope encryption + key rotation + HSM signing + post-quantum KEM state machine。 Deterministic mock で 6 signal 系統を提供。 real driver 経路では Vault transit engine や AWS KMS / GCP KMS に対して encryption を発火する。
 
@@ -1337,9 +1337,9 @@ Cryptography advanced axis — AEAD + KDF + envelope encryption + key rotation +
 export type AeadAlgo = 'AES-256-GCM' | 'ChaCha20-Poly1305' | 'AES-256-GCM-SIV';
 ```
 
-#### `AeadInput`
+#### <code v-pre>AeadInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L37) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L37) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface AeadInput {
@@ -1349,9 +1349,9 @@ export interface AeadInput {
 }
 ```
 
-#### `AttestationInput`
+#### <code v-pre>AttestationInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L56) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L56) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export interface AttestationInput {
@@ -1361,9 +1361,9 @@ export interface AttestationInput {
 }
 ```
 
-#### `AxisAdvStep`
+#### <code v-pre>AxisAdvStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L82) `packages/security/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L82) <code v-pre>packages/security/src/semantics/types.ts</code>
 
 ```ts
 export interface AxisAdvStep<TState extends string> {
@@ -1375,9 +1375,9 @@ export interface AxisAdvStep<TState extends string> {
 }
 ```
 
-#### `BoundaryCrossing`
+#### <code v-pre>BoundaryCrossing</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L156) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L156) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export interface BoundaryCrossing {
@@ -1389,9 +1389,9 @@ export interface BoundaryCrossing {
 }
 ```
 
-#### `ClientIdKind`
+#### <code v-pre>ClientIdKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L234) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L234) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 Client identity keyspace resolver — IP / user / API-key の 3 通り。
 
@@ -1399,9 +1399,9 @@ Client identity keyspace resolver — IP / user / API-key の 3 通り。
 export type ClientIdKind = 'ip' | 'user' | 'api-key';
 ```
 
-#### `CombinedPolicyInput`
+#### <code v-pre>CombinedPolicyInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L155) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L155) <code v-pre>packages/security/src/authorization.ts</code>
 
 Combined policy engine — RBAC decision と ABAC decision を組合せる。 RBAC PERMIT + ABAC PERMIT → PERMIT、 いずれか DENY → DENY、 RBAC 未定義 permission は ABAC のみで判定。
 
@@ -1419,9 +1419,9 @@ export interface CombinedPolicyInput {
 }
 ```
 
-#### `CorrelationRule`
+#### <code v-pre>CorrelationRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L52) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L52) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export interface CorrelationRule {
@@ -1431,9 +1431,9 @@ export interface CorrelationRule {
 }
 ```
 
-#### `CrossOriginInput`
+#### <code v-pre>CrossOriginInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L51) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L51) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export interface CrossOriginInput {
@@ -1443,9 +1443,9 @@ export interface CrossOriginInput {
 }
 ```
 
-#### `CryptoSession`
+#### <code v-pre>CryptoSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L29) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L29) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface CryptoSession {
@@ -1457,17 +1457,17 @@ export interface CryptoSession {
 }
 ```
 
-#### `CryptoState`
+#### <code v-pre>CryptoState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L20) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L20) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export type CryptoState = 'idle' | 'aead-sealed' | 'kdf-derived' | 'envelope-wrapped' | 'key-rotated' | 'hsm-signed' | 'pq-encapsulated';
 ```
 
-#### `CspDirective`
+#### <code v-pre>CspDirective</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L18) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L18) <code v-pre>packages/security/src/csp.ts</code>
 
 CSP directive の完全列挙 (Fetch directive + Document directive + Reporting)。
 
@@ -1475,17 +1475,17 @@ CSP directive の完全列挙 (Fetch directive + Document directive + Reporting)
 export type CspDirective = 'default-src' | 'script-src' | 'script-src-elem' | 'script-src-attr' | 'style-src' | 'style-src-elem' | 'style-src-attr' | 'img-src' | 'connect-src' | 'font-src' | 'frame-src' | 'frame-ancestors' | 'form-action' | 'base-uri' | 'object-src' | 'worker-src' | 'child-src' | 'media-src' | 'manifest-src' | 'trusted-types' | 'require-trusted-types-for' | 'upgrade-insecure-requests' | 'block-all-mixed-content' | 'report-uri' | 'report-to';
 ```
 
-#### `CspHashAlgo`
+#### <code v-pre>CspHashAlgo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L52) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L52) <code v-pre>packages/security/src/csp.ts</code>
 
 ```ts
 export type CspHashAlgo = 'sha256' | 'sha384' | 'sha512';
 ```
 
-#### `CspHashOptions`
+#### <code v-pre>CspHashOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L54) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L54) <code v-pre>packages/security/src/csp.ts</code>
 
 ```ts
 export interface CspHashOptions {
@@ -1497,9 +1497,9 @@ export interface CspHashOptions {
 }
 ```
 
-#### `CspHeaderOutput`
+#### <code v-pre>CspHeaderOutput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L82) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L82) <code v-pre>packages/security/src/csp.ts</code>
 
 ```ts
 export interface CspHeaderOutput {
@@ -1510,9 +1510,9 @@ export interface CspHeaderOutput {
 }
 ```
 
-#### `CspNonceOptions`
+#### <code v-pre>CspNonceOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L45) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L45) <code v-pre>packages/security/src/csp.ts</code>
 
 ```ts
 export interface CspNonceOptions {
@@ -1523,9 +1523,9 @@ export interface CspNonceOptions {
 }
 ```
 
-#### `CspPolicyInput`
+#### <code v-pre>CspPolicyInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L62) `packages/security/src/csp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L62) <code v-pre>packages/security/src/csp.ts</code>
 
 ```ts
 export interface CspPolicyInput {
@@ -1549,9 +1549,9 @@ export interface CspPolicyInput {
 }
 ```
 
-#### `CtLogInput`
+#### <code v-pre>CtLogInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L49) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L49) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export interface CtLogInput {
@@ -1560,9 +1560,9 @@ export interface CtLogInput {
 }
 ```
 
-#### `DataFlow`
+#### <code v-pre>DataFlow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L148) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L148) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export interface DataFlow {
@@ -1574,9 +1574,9 @@ export interface DataFlow {
 }
 ```
 
-#### `DevicePosture`
+#### <code v-pre>DevicePosture</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L34) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L34) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export interface DevicePosture {
@@ -1587,9 +1587,9 @@ export interface DevicePosture {
 }
 ```
 
-#### `DistributedRateLimitConfig`
+#### <code v-pre>DistributedRateLimitConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L184) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L184) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 Distributed keyspace mock — Redis-backed のような multi-node coordination を hash-shard で emulate する。 node 数 = shards、 各 shard は独立 counter。
 
@@ -1601,9 +1601,9 @@ export interface DistributedRateLimitConfig {
 }
 ```
 
-#### `DreadInput`
+#### <code v-pre>DreadInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L102) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L102) <code v-pre>packages/security/src/threat-model.ts</code>
 
 DREAD scoring — each factor 1-10、 total = sum、 threshold = 30 (mitigation must-do)。 一般的な 5 factor 平均 6 以上 = critical。
 
@@ -1617,9 +1617,9 @@ export interface DreadInput {
 }
 ```
 
-#### `DreadResult`
+#### <code v-pre>DreadResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L110) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L110) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export interface DreadResult {
@@ -1629,9 +1629,9 @@ export interface DreadResult {
 }
 ```
 
-#### `EnvelopeInput`
+#### <code v-pre>EnvelopeInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L50) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L50) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface EnvelopeInput {
@@ -1641,9 +1641,9 @@ export interface EnvelopeInput {
 }
 ```
 
-#### `EscalationInput`
+#### <code v-pre>EscalationInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L48) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L48) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export interface EscalationInput {
@@ -1653,9 +1653,9 @@ export interface EscalationInput {
 }
 ```
 
-#### `ForensicsInput`
+#### <code v-pre>ForensicsInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L54) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L54) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export interface ForensicsInput {
@@ -1665,9 +1665,9 @@ export interface ForensicsInput {
 }
 ```
 
-#### `HandshakeInput`
+#### <code v-pre>HandshakeInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L33) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L33) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export interface HandshakeInput {
@@ -1677,9 +1677,9 @@ export interface HandshakeInput {
 }
 ```
 
-#### `HsmSignInput`
+#### <code v-pre>HsmSignInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L62) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L62) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface HsmSignInput {
@@ -1689,9 +1689,9 @@ export interface HsmSignInput {
 }
 ```
 
-#### `HstsOptions`
+#### <code v-pre>HstsOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L14) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L14) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export interface HstsOptions {
@@ -1701,9 +1701,9 @@ export interface HstsOptions {
 }
 ```
 
-#### `IncidentSession`
+#### <code v-pre>IncidentSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L26) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L26) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export interface IncidentSession {
@@ -1717,9 +1717,9 @@ export interface IncidentSession {
 }
 ```
 
-#### `IncidentSeverity`
+#### <code v-pre>IncidentSeverity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L16) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L16) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 Incident response axis — playbook trigger + severity classification + escalation + forensics capture + post-mortem recording state machine。 Deterministic mock で 5 signal 系統を提供。 real driver 経路では PagerDuty / Splunk Phantom SOAR platform への escalation を発火する。
 
@@ -1727,17 +1727,17 @@ Incident response axis — playbook trigger + severity classification + escalati
 export type IncidentSeverity = 'sev1' | 'sev2' | 'sev3' | 'sev4' | 'sev5';
 ```
 
-#### `IncidentState`
+#### <code v-pre>IncidentState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L18) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L18) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export type IncidentState = 'idle' | 'playbook-triggered' | 'severity-classified' | 'escalated' | 'forensics-captured' | 'post-mortem-recorded';
 ```
 
-#### `JitRequest`
+#### <code v-pre>JitRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L41) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L41) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export interface JitRequest {
@@ -1747,9 +1747,9 @@ export interface JitRequest {
 }
 ```
 
-#### `K8sSession`
+#### <code v-pre>K8sSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L25) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L25) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export interface K8sSession {
@@ -1761,25 +1761,25 @@ export interface K8sSession {
 }
 ```
 
-#### `K8sState`
+#### <code v-pre>K8sState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L19) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L19) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export type K8sState = 'idle' | 'pod-security-enforced' | 'network-policy-applied' | 'admission-decided';
 ```
 
-#### `KdfAlgo`
+#### <code v-pre>KdfAlgo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L17) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L17) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export type KdfAlgo = 'HKDF-SHA256' | 'HKDF-SHA512' | 'PBKDF2' | 'Argon2id' | 'scrypt';
 ```
 
-#### `KdfInput`
+#### <code v-pre>KdfInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L43) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L43) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface KdfInput {
@@ -1790,9 +1790,9 @@ export interface KdfInput {
 }
 ```
 
-#### `KeyRotationInput`
+#### <code v-pre>KeyRotationInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L56) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L56) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface KeyRotationInput {
@@ -1802,9 +1802,9 @@ export interface KeyRotationInput {
 }
 ```
 
-#### `LeakyBucketConfig`
+#### <code v-pre>LeakyBucketConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L78) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L78) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 Leaky bucket — queue-based、 steady-state throughput 保証。
 
@@ -1816,9 +1816,9 @@ export interface LeakyBucketConfig {
 }
 ```
 
-#### `LicensePolicy`
+#### <code v-pre>LicensePolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L157) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L157) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export interface LicensePolicy {
@@ -1828,9 +1828,9 @@ export interface LicensePolicy {
 }
 ```
 
-#### `LicenseVerdict`
+#### <code v-pre>LicenseVerdict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L155) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L155) <code v-pre>packages/security/src/sbom.ts</code>
 
 License policy — SPDX license id ごとに allow / warn / deny 判定。
 
@@ -1838,9 +1838,9 @@ License policy — SPDX license id ごとに allow / warn / deny 判定。
 export type LicenseVerdict = 'allow' | 'warn' | 'deny';
 ```
 
-#### `MtlsSession`
+#### <code v-pre>MtlsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L25) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L25) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export interface MtlsSession {
@@ -1852,9 +1852,9 @@ export interface MtlsSession {
 }
 ```
 
-#### `MtlsState`
+#### <code v-pre>MtlsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L17) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L17) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 mTLS + certificate pinning axis — mutual TLS handshake + pin verification + OCSP stapling + Certificate Transparency log check state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では実 istio / envoy sidecar に対して TLS handshake を張り、 SPKI pin と OCSP staple を 検証する。
 
@@ -1862,9 +1862,9 @@ mTLS + certificate pinning axis — mutual TLS handshake + pin verification + OC
 export type MtlsState = 'idle' | 'handshake-completed' | 'pinned' | 'ocsp-verified' | 'ct-verified' | 'failed';
 ```
 
-#### `NetworkPolicySpec`
+#### <code v-pre>NetworkPolicySpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L42) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L42) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export interface NetworkPolicySpec {
@@ -1875,17 +1875,17 @@ export interface NetworkPolicySpec {
 }
 ```
 
-#### `NeutralAdvEventName`
+#### <code v-pre>NeutralAdvEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L37) `packages/security/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L37) <code v-pre>packages/security/src/semantics/types.ts</code>
 
 ```ts
 export type NeutralAdvEventName = 'mtls.handshake_completed' | 'mtls.cert_pinned' | 'mtls.ocsp_verified' | 'mtls.ct_log_checked' | 'zt.device_posture_evaluated' | 'zt.risk_scored' | 'zt.jit_granted' | 'zt.micro_segment_enforced' | 'siem.event_structured' | 'siem.tamper_evident_sealed' | 'siem.retention_applied' | 'siem.correlation_matched' | 'ir.playbook_triggered' | 'ir.severity_classified' | 'ir.escalation_sent' | 'ir.forensics_captured' | 'ir.post_mortem_recorded' | 'crypto.aead_sealed' | 'crypto.kdf_derived' | 'crypto.envelope_wrapped' | 'crypto.key_rotated' | 'crypto.hsm_signed' | 'crypto.pq_kem_encapsulated' | 'k8s.pod_security_enforced' | 'k8s.network_policy_applied' | 'k8s.admission_denied' | 'k8s.admission_allowed' | 'sc.slsa_level_verified' | 'sc.reproducible_build_matched' | 'sc.provenance_signed' | 'sc.attestation_verified' | 'wvs.sri_hash_verified' | 'wvs.trusted_types_enforced' | 'wvs.permissions_policy_applied' | 'wvs.cross_origin_isolated';
 ```
 
-#### `OcspInput`
+#### <code v-pre>OcspInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L44) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L44) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export interface OcspInput {
@@ -1894,9 +1894,9 @@ export interface OcspInput {
 }
 ```
 
-#### `PastaFinding`
+#### <code v-pre>PastaFinding</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L61) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L61) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export interface PastaFinding {
@@ -1907,9 +1907,9 @@ export interface PastaFinding {
 }
 ```
 
-#### `PastaStage`
+#### <code v-pre>PastaStage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L52) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L52) <code v-pre>packages/security/src/threat-model.ts</code>
 
 PASTA stage identifiers — 7 stage は Tony UcedaVélez / Marco Morana 定義に沿う。
 
@@ -1917,9 +1917,9 @@ PASTA stage identifiers — 7 stage は Tony UcedaVélez / Marco Morana 定義�
 export type PastaStage = 'define-objectives' | 'define-technical-scope' | 'application-decomposition' | 'threat-analysis' | 'vulnerability-analysis' | 'attack-modeling' | 'risk-analysis';
 ```
 
-#### `PermissionsFeature`
+#### <code v-pre>PermissionsFeature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L36) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L36) <code v-pre>packages/security/src/security-headers.ts</code>
 
 Permissions-Policy feature 名 — Chrome/Firefox で実装されている代表 feature。
 
@@ -1927,9 +1927,9 @@ Permissions-Policy feature 名 — Chrome/Firefox で実装されている代表
 export type PermissionsFeature = 'accelerometer' | 'ambient-light-sensor' | 'autoplay' | 'battery' | 'camera' | 'display-capture' | 'document-domain' | 'encrypted-media' | 'execution-while-not-rendered' | 'execution-while-out-of-viewport' | 'fullscreen' | 'geolocation' | 'gyroscope' | 'magnetometer' | 'microphone' | 'midi' | 'payment' | 'picture-in-picture' | 'publickey-credentials-get' | 'screen-wake-lock' | 'sync-xhr' | 'usb' | 'web-share' | 'xr-spatial-tracking';
 ```
 
-#### `PermissionsPolicyInput`
+#### <code v-pre>PermissionsPolicyInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L44) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L44) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export interface PermissionsPolicyInput {
@@ -1940,9 +1940,9 @@ export interface PermissionsPolicyInput {
 }
 ```
 
-#### `PermissionsSource`
+#### <code v-pre>PermissionsSource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L63) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L63) <code v-pre>packages/security/src/security-headers.ts</code>
 
 allowlist source per feature — `*`, `self`, or explicit origin list.
 
@@ -1952,9 +1952,9 @@ export type PermissionsSource = '*' | 'self' | 'none' | {
 };
 ```
 
-#### `PinInput`
+#### <code v-pre>PinInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L39) `packages/security/src/semantics/mtls.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L39) <code v-pre>packages/security/src/semantics/mtls.ts</code>
 
 ```ts
 export interface PinInput {
@@ -1963,9 +1963,9 @@ export interface PinInput {
 }
 ```
 
-#### `PlaybookInput`
+#### <code v-pre>PlaybookInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L36) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L36) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export interface PlaybookInput {
@@ -1975,9 +1975,9 @@ export interface PlaybookInput {
 }
 ```
 
-#### `PodSecurityLevel`
+#### <code v-pre>PodSecurityLevel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L17) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L17) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 Container / Kubernetes security axis — Pod Security Standard enforcement + NetworkPolicy application + Admission Controller (Gatekeeper / Kyverno) decision state machine。 Deterministic mock で 3 signal 系統 + 2 admission verdict を提供。 real driver 経路では OPA Gatekeeper に対して webhook を発火する。
 
@@ -1985,9 +1985,9 @@ Container / Kubernetes security axis — Pod Security Standard enforcement + Net
 export type PodSecurityLevel = 'privileged' | 'baseline' | 'restricted';
 ```
 
-#### `PodSpec`
+#### <code v-pre>PodSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L33) `packages/security/src/semantics/container-k8s.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L33) <code v-pre>packages/security/src/semantics/container-k8s.ts</code>
 
 ```ts
 export interface PodSpec {
@@ -2000,9 +2000,9 @@ export interface PodSpec {
 }
 ```
 
-#### `PostMortemInput`
+#### <code v-pre>PostMortemInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L60) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L60) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export interface PostMortemInput {
@@ -2012,17 +2012,17 @@ export interface PostMortemInput {
 }
 ```
 
-#### `PqKemAlgo`
+#### <code v-pre>PqKemAlgo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L18) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L18) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export type PqKemAlgo = 'ML-KEM-768' | 'ML-KEM-1024' | 'Kyber768';
 ```
 
-#### `PqKemInput`
+#### <code v-pre>PqKemInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L68) `packages/security/src/semantics/crypto-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L68) <code v-pre>packages/security/src/semantics/crypto-advanced.ts</code>
 
 ```ts
 export interface PqKemInput {
@@ -2031,9 +2031,9 @@ export interface PqKemInput {
 }
 ```
 
-#### `ProvenanceInput`
+#### <code v-pre>ProvenanceInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L50) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L50) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export interface ProvenanceInput {
@@ -2043,9 +2043,9 @@ export interface ProvenanceInput {
 }
 ```
 
-#### `RateLimitDecision`
+#### <code v-pre>RateLimitDecision</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L16) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L16) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export interface RateLimitDecision {
@@ -2056,17 +2056,17 @@ export interface RateLimitDecision {
 }
 ```
 
-#### `RateLimitStrategy`
+#### <code v-pre>RateLimitStrategy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L14) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L14) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 ```ts
 export type RateLimitStrategy = 'token-bucket' | 'leaky-bucket' | 'sliding-window';
 ```
 
-#### `RbacPolicy`
+#### <code v-pre>RbacPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L25) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L25) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export interface RbacPolicy {
@@ -2074,9 +2074,9 @@ export interface RbacPolicy {
 }
 ```
 
-#### `RbacRole`
+#### <code v-pre>RbacRole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L13) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L13) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export interface RbacRole {
@@ -2087,9 +2087,9 @@ export interface RbacRole {
 }
 ```
 
-#### `RbacSubject`
+#### <code v-pre>RbacSubject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L20) `packages/security/src/authorization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L20) <code v-pre>packages/security/src/authorization.ts</code>
 
 ```ts
 export interface RbacSubject {
@@ -2098,9 +2098,9 @@ export interface RbacSubject {
 }
 ```
 
-#### `RealDriverEndpoint`
+#### <code v-pre>RealDriverEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L79) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L79) <code v-pre>packages/security/src/real-driver.ts</code>
 
 ```ts
 export interface RealDriverEndpoint {
@@ -2110,9 +2110,9 @@ export interface RealDriverEndpoint {
 }
 ```
 
-#### `RealDriverGateInput`
+#### <code v-pre>RealDriverGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L20) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L20) <code v-pre>packages/security/src/real-driver.ts</code>
 
 ```ts
 export interface RealDriverGateInput {
@@ -2121,9 +2121,9 @@ export interface RealDriverGateInput {
 }
 ```
 
-#### `RealDriverGateResult`
+#### <code v-pre>RealDriverGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L25) `packages/security/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/real-driver.ts#L25) <code v-pre>packages/security/src/real-driver.ts</code>
 
 ```ts
 export interface RealDriverGateResult {
@@ -2133,17 +2133,17 @@ export interface RealDriverGateResult {
 }
 ```
 
-#### `ReferrerPolicyValue`
+#### <code v-pre>ReferrerPolicyValue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L25) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L25) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export type ReferrerPolicyValue = 'no-referrer' | 'no-referrer-when-downgrade' | 'origin' | 'origin-when-cross-origin' | 'same-origin' | 'strict-origin' | 'strict-origin-when-cross-origin' | 'unsafe-url';
 ```
 
-#### `ReproducibleInput`
+#### <code v-pre>ReproducibleInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L44) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L44) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export interface ReproducibleInput {
@@ -2153,9 +2153,9 @@ export interface ReproducibleInput {
 }
 ```
 
-#### `RetentionPolicy`
+#### <code v-pre>RetentionPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L45) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L45) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export interface RetentionPolicy {
@@ -2166,9 +2166,9 @@ export interface RetentionPolicy {
 }
 ```
 
-#### `RotationPolicy`
+#### <code v-pre>RotationPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L142) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L142) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 Rotation policy — secret 発見時の rotation SLA + tracking。
 
@@ -2181,9 +2181,9 @@ export interface RotationPolicy {
 }
 ```
 
-#### `RotationTracker`
+#### <code v-pre>RotationTracker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L149) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L149) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export interface RotationTracker {
@@ -2194,9 +2194,9 @@ export interface RotationTracker {
 }
 ```
 
-#### `SbomComponent`
+#### <code v-pre>SbomComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L13) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L13) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export interface SbomComponent {
@@ -2209,9 +2209,9 @@ export interface SbomComponent {
 }
 ```
 
-#### `SbomDocument`
+#### <code v-pre>SbomDocument</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L22) `packages/security/src/sbom.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/sbom.ts#L22) <code v-pre>packages/security/src/sbom.ts</code>
 
 ```ts
 export interface SbomDocument {
@@ -2222,9 +2222,9 @@ export interface SbomDocument {
 }
 ```
 
-#### `SecretFinding`
+#### <code v-pre>SecretFinding</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L82) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L82) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export interface SecretFinding {
@@ -2237,17 +2237,17 @@ export interface SecretFinding {
 }
 ```
 
-#### `SecretKind`
+#### <code v-pre>SecretKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L13) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L13) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export type SecretKind = 'aws-access-key' | 'aws-secret-key' | 'github-token' | 'slack-token' | 'openai-key' | 'stripe-key' | 'generic-jwt' | 'generic-private-key';
 ```
 
-#### `SecretSignature`
+#### <code v-pre>SecretSignature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L23) `packages/security/src/secrets-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/secrets-scan.ts#L23) <code v-pre>packages/security/src/secrets-scan.ts</code>
 
 ```ts
 export interface SecretSignature {
@@ -2258,17 +2258,17 @@ export interface SecretSignature {
 }
 ```
 
-#### `SecurityAdvAxis`
+#### <code v-pre>SecurityAdvAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L27) `packages/security/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L27) <code v-pre>packages/security/src/semantics/types.ts</code>
 
 ```ts
 export type SecurityAdvAxis = 'mtls' | 'zero-trust' | 'siem-audit' | 'incident-response' | 'crypto-advanced' | 'container-k8s' | 'supply-chain' | 'web-vitals-security';
 ```
 
-#### `SecurityAdvTarget`
+#### <code v-pre>SecurityAdvTarget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L25) `packages/security/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/types.ts#L25) <code v-pre>packages/security/src/semantics/types.ts</code>
 
 Advanced Security semantics — provider-neutral axis SSOT (v0.2). Model 4 canonical security provider targets as pure state machines so kiwa fixture tests can assert on a neutral event name while still observing a provider-specific dialect through providerEventName. Provider targets (SDK 別 4): - istio ... Istio service mesh (mTLS + AuthorizationPolicy + PeerAuthentication) - opa ... Open Policy Agent (rego policy + zero-trust + admission control) - siem-splunk ... Splunk Enterprise SIEM (structured audit log + correlation) - vault ... HashiCorp Vault (KDF + envelope + key rotation + HSM 経路) Axes (8): - mtls ... mutual TLS + certificate pinning + OCSP stapling + CT log - zero-trust ... device posture + risk score + JIT + micro-segmentation - siem-audit ... structured + tamper-evident + retention + correlation rule - incident-response ... playbook + severity + escalation + forensics + post-mortem - crypto-advanced ... AEAD + KDF + envelope + key rotation + HSM + post-quantum - container-k8s ... pod security policy + network policy + admission controller - supply-chain ... SLSA level + reproducible build + signed provenance + attestation - web-vitals-security ... SRI + trusted types + permissions policy + cross-origin isolation
 
@@ -2276,9 +2276,9 @@ Advanced Security semantics — provider-neutral axis SSOT (v0.2). Model 4 canon
 export type SecurityAdvTarget = 'istio' | 'opa' | 'siem-splunk' | 'vault';
 ```
 
-#### `SecurityAxis`
+#### <code v-pre>SecurityAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L19) `packages/security/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L19) <code v-pre>packages/security/src/types.ts</code>
 
 8 axis の識別子。 SSOT なので追加変更は quality-metrics `SECURITY_AXES` と同期する必要がある。
 
@@ -2286,9 +2286,9 @@ export type SecurityAdvTarget = 'istio' | 'opa' | 'siem-splunk' | 'vault';
 export type SecurityAxis = 'csp' | 'rate-limit' | 'authorization' | 'waf' | 'threat-model' | 'secrets-scan' | 'sbom' | 'security-headers';
 ```
 
-#### `SecurityDriver`
+#### <code v-pre>SecurityDriver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L67) `packages/security/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L67) <code v-pre>packages/security/src/types.ts</code>
 
 driver 共通契約 — real / mock 両方に同じ shape で実装される。 fidelity harness が同一 scenario を real と mock に投げて event 列を照合する。
 
@@ -2301,9 +2301,9 @@ export interface SecurityDriver {
 }
 ```
 
-#### `SecurityEvent`
+#### <code v-pre>SecurityEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L53) `packages/security/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L53) <code v-pre>packages/security/src/types.ts</code>
 
 統一 mock 経路の共通 event — 4 provider adapter が emit する 全 event 列を fidelity harness で照合する。
 
@@ -2319,9 +2319,9 @@ export interface SecurityEvent<TPayload = unknown> {
 }
 ```
 
-#### `SecurityFidelityInput`
+#### <code v-pre>SecurityFidelityInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L18) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L18) <code v-pre>packages/security/src/fidelity.ts</code>
 
 ```ts
 export interface SecurityFidelityInput {
@@ -2334,9 +2334,9 @@ export interface SecurityFidelityInput {
 }
 ```
 
-#### `SecurityFidelityRecord`
+#### <code v-pre>SecurityFidelityRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L27) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L27) <code v-pre>packages/security/src/fidelity.ts</code>
 
 ```ts
 export interface SecurityFidelityRecord {
@@ -2356,9 +2356,9 @@ export interface SecurityFidelityRecord {
 }
 ```
 
-#### `SecurityFidelityReport`
+#### <code v-pre>SecurityFidelityReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L43) `packages/security/src/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/fidelity.ts#L43) <code v-pre>packages/security/src/fidelity.ts</code>
 
 ```ts
 export interface SecurityFidelityReport {
@@ -2374,9 +2374,9 @@ export interface SecurityFidelityReport {
 }
 ```
 
-#### `SecurityHeadersInput`
+#### <code v-pre>SecurityHeadersInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L65) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L65) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export interface SecurityHeadersInput {
@@ -2389,9 +2389,9 @@ export interface SecurityHeadersInput {
 }
 ```
 
-#### `SecurityHeadersOutput`
+#### <code v-pre>SecurityHeadersOutput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L74) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L74) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export interface SecurityHeadersOutput {
@@ -2399,9 +2399,9 @@ export interface SecurityHeadersOutput {
 }
 ```
 
-#### `SecurityProvider`
+#### <code v-pre>SecurityProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L33) `packages/security/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L33) <code v-pre>packages/security/src/types.ts</code>
 
 4 provider の識別子。 v0.1 でカバーする provider adapter は 4 種類固定 (fidelity harness の 32 grid 前提)。
 
@@ -2409,9 +2409,9 @@ export interface SecurityHeadersOutput {
 export type SecurityProvider = 'helmet' | 'express-rate-limit' | 'casbin' | 'coraza';
 ```
 
-#### `SecurityVerdict`
+#### <code v-pre>SecurityVerdict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L47) `packages/security/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/types.ts#L47) <code v-pre>packages/security/src/types.ts</code>
 
 8 axis 全部の判定 verdict の共通契約。
 
@@ -2419,9 +2419,9 @@ export type SecurityProvider = 'helmet' | 'express-rate-limit' | 'casbin' | 'cor
 export type SecurityVerdict = 'allow' | 'deny' | 'warn';
 ```
 
-#### `SegmentPolicy`
+#### <code v-pre>SegmentPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L47) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L47) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export interface SegmentPolicy {
@@ -2431,9 +2431,9 @@ export interface SegmentPolicy {
 }
 ```
 
-#### `SeverityInput`
+#### <code v-pre>SeverityInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L42) `packages/security/src/semantics/incident-response.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L42) <code v-pre>packages/security/src/semantics/incident-response.ts</code>
 
 ```ts
 export interface SeverityInput {
@@ -2443,9 +2443,9 @@ export interface SeverityInput {
 }
 ```
 
-#### `SiemAuditSession`
+#### <code v-pre>SiemAuditSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L36) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L36) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export interface SiemAuditSession {
@@ -2458,9 +2458,9 @@ export interface SiemAuditSession {
 }
 ```
 
-#### `SiemAuditState`
+#### <code v-pre>SiemAuditState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L16) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L16) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 SIEM / audit log axis — structured logging + tamper-evident sealing + retention policy + correlation rule state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では Splunk / Elastic SIEM に HEC endpoint 経由で event を送信する。
 
@@ -2468,9 +2468,9 @@ SIEM / audit log axis — structured logging + tamper-evident sealing + retentio
 export type SiemAuditState = 'idle' | 'structured' | 'sealed' | 'retention-tagged' | 'correlated';
 ```
 
-#### `SiemEvent`
+#### <code v-pre>SiemEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L23) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L23) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export interface SiemEvent {
@@ -2482,9 +2482,9 @@ export interface SiemEvent {
 }
 ```
 
-#### `SlidingWindowConfig`
+#### <code v-pre>SlidingWindowConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L135) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L135) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 Sliding window — time window の request timestamp 全部を記録し、 過去 windowMs 内の count で判定する経路。
 
@@ -2495,9 +2495,9 @@ export interface SlidingWindowConfig {
 }
 ```
 
-#### `SlsaLevel`
+#### <code v-pre>SlsaLevel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L16) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L16) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 Supply chain security axis — SLSA level verification + reproducible build matching + signed provenance + SLSA attestation verification state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では in-toto / sigstore に対して attestation 検証を発火する。
 
@@ -2505,9 +2505,9 @@ Supply chain security axis — SLSA level verification + reproducible build matc
 export type SlsaLevel = 0 | 1 | 2 | 3 | 4;
 ```
 
-#### `SlsaLevelInput`
+#### <code v-pre>SlsaLevelInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L33) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L33) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export interface SlsaLevelInput {
@@ -2522,9 +2522,9 @@ export interface SlsaLevelInput {
 }
 ```
 
-#### `SriInput`
+#### <code v-pre>SriInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L32) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L32) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export interface SriInput {
@@ -2534,17 +2534,17 @@ export interface SriInput {
 }
 ```
 
-#### `StrideCategory`
+#### <code v-pre>StrideCategory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L13) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L13) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export type StrideCategory = 'spoofing' | 'tampering' | 'repudiation' | 'information-disclosure' | 'denial-of-service' | 'elevation-of-privilege';
 ```
 
-#### `StrideThreat`
+#### <code v-pre>StrideThreat</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L21) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L21) <code v-pre>packages/security/src/threat-model.ts</code>
 
 ```ts
 export interface StrideThreat {
@@ -2556,9 +2556,9 @@ export interface StrideThreat {
 }
 ```
 
-#### `StructuredEvent`
+#### <code v-pre>StructuredEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L31) `packages/security/src/semantics/siem-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L31) <code v-pre>packages/security/src/semantics/siem-audit.ts</code>
 
 ```ts
 export interface StructuredEvent extends SiemEvent {
@@ -2567,9 +2567,9 @@ export interface StructuredEvent extends SiemEvent {
 }
 ```
 
-#### `SupplyChainSession`
+#### <code v-pre>SupplyChainSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L25) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L25) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export interface SupplyChainSession {
@@ -2581,17 +2581,17 @@ export interface SupplyChainSession {
 }
 ```
 
-#### `SupplyChainState`
+#### <code v-pre>SupplyChainState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L18) `packages/security/src/semantics/supply-chain.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L18) <code v-pre>packages/security/src/semantics/supply-chain.ts</code>
 
 ```ts
 export type SupplyChainState = 'idle' | 'slsa-verified' | 'reproducible-matched' | 'provenance-signed' | 'attestation-verified';
 ```
 
-#### `TokenBucketConfig`
+#### <code v-pre>TokenBucketConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L24) `packages/security/src/rate-limit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L24) <code v-pre>packages/security/src/rate-limit.ts</code>
 
 Token bucket — burst 対応 (max capacity まで貯蓄可)、 constant refill 経路。
 
@@ -2603,9 +2603,9 @@ export interface TokenBucketConfig {
 }
 ```
 
-#### `TrustedTypesInput`
+#### <code v-pre>TrustedTypesInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L38) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L38) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export interface TrustedTypesInput {
@@ -2615,9 +2615,9 @@ export interface TrustedTypesInput {
 }
 ```
 
-#### `TrustZone`
+#### <code v-pre>TrustZone</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L141) `packages/security/src/threat-model.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L141) <code v-pre>packages/security/src/threat-model.ts</code>
 
 Trust boundary — DFD-style zone crossing modeler。 subject と resource が異なる trust zone を跨ぐ dataflow は mitigation (authn / authz / encryption) を必ず要求する。
 
@@ -2630,9 +2630,9 @@ export interface TrustZone {
 }
 ```
 
-#### `WafDecision`
+#### <code v-pre>WafDecision</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L38) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L38) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export interface WafDecision {
@@ -2643,9 +2643,9 @@ export interface WafDecision {
 }
 ```
 
-#### `WafPolicy`
+#### <code v-pre>WafPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L81) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L81) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export interface WafPolicy {
@@ -2653,9 +2653,9 @@ export interface WafPolicy {
 }
 ```
 
-#### `WafRequest`
+#### <code v-pre>WafRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L14) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L14) <code v-pre>packages/security/src/waf.ts</code>
 
 WAF が判定する request の共通形状。
 
@@ -2670,9 +2670,9 @@ export interface WafRequest {
 }
 ```
 
-#### `WafRule`
+#### <code v-pre>WafRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L25) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L25) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export interface WafRule {
@@ -2689,17 +2689,17 @@ export interface WafRule {
 }
 ```
 
-#### `WafRuleAction`
+#### <code v-pre>WafRuleAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L23) `packages/security/src/waf.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/waf.ts#L23) <code v-pre>packages/security/src/waf.ts</code>
 
 ```ts
 export type WafRuleAction = 'block' | 'warn' | 'allow';
 ```
 
-#### `WvsSession`
+#### <code v-pre>WvsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L25) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L25) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 ```ts
 export interface WvsSession {
@@ -2710,9 +2710,9 @@ export interface WvsSession {
 }
 ```
 
-#### `WvsState`
+#### <code v-pre>WvsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L17) `packages/security/src/semantics/web-vitals-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L17) <code v-pre>packages/security/src/semantics/web-vitals-security.ts</code>
 
 Web Vitals security axis — Subresource Integrity (SRI) hash + Trusted Types + Permissions Policy + Cross-Origin Isolation (COOP/COEP) enforcement state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では headless browser (Playwright) に対して response header を発火する。
 
@@ -2720,9 +2720,9 @@ Web Vitals security axis — Subresource Integrity (SRI) hash + Trusted Types + 
 export type WvsState = 'idle' | 'sri-verified' | 'trusted-types-enforced' | 'permissions-policy-applied' | 'cross-origin-isolated' | 'failed';
 ```
 
-#### `XFrameOption`
+#### <code v-pre>XFrameOption</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L20) `packages/security/src/security-headers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L20) <code v-pre>packages/security/src/security-headers.ts</code>
 
 ```ts
 export type XFrameOption = {
@@ -2735,9 +2735,9 @@ export type XFrameOption = {
 };
 ```
 
-#### `ZeroTrustSession`
+#### <code v-pre>ZeroTrustSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L25) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L25) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 ```ts
 export interface ZeroTrustSession {
@@ -2750,9 +2750,9 @@ export interface ZeroTrustSession {
 }
 ```
 
-#### `ZeroTrustState`
+#### <code v-pre>ZeroTrustState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L17) `packages/security/src/semantics/zero-trust.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L17) <code v-pre>packages/security/src/semantics/zero-trust.ts</code>
 
 Zero-trust axis — device posture + risk scoring + Just-in-Time access + micro-segmentation state machine。 Deterministic mock で 4 signal 系統を提供。 real driver 経路では OPA rego policy や Google BeyondCorp 相当の verifier に対して posture 判定を 発火する。
 

@@ -23,9 +23,9 @@ orchestratorが返すreportは値です。mock runにもreal-mode runにも外�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;real driver requested but KIWA&#95;SECURITY&#95;MODE!=='real'; call skipped for $&#123;spec.cliName&#125;&#96; | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L45) |
-| &#96;$&#123;spec.cliName&#125; URL env ($&#123;String(spec.urlEnvKey)&#125;) not set; real driver unavailable&#96; | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L50) |
-| &#96;detectSastFinding: session is $&#123;session.state&#125;&#96; | [packages/security-devsecops/src/semantics/sast.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L53) |
+| <code v-pre>real driver requested but KIWA&#95;SECURITY&#95;MODE!=='real'; call skipped for $&#123;spec.cliName&#125;</code> | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L45) |
+| <code v-pre>$&#123;spec.cliName&#125; URL env ($&#123;String(spec.urlEnvKey)&#125;) not set; real driver unavailable</code> | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L50) |
+| <code v-pre>detectSastFinding: session is $&#123;session.state&#125;</code> | [packages/security-devsecops/src/semantics/sast.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L53) |
 
 ## API 契約
 
@@ -33,9 +33,9 @@ orchestratorが返すreportは値です。mock runにもreal-mode runにも外�
 
 ### 値
 
-#### `allowlistSecret`
+#### <code v-pre>allowlistSecret</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L98) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L98) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export declare function allowlistSecret(session: SecretScanSession, input: {
@@ -44,9 +44,9 @@ export declare function allowlistSecret(session: SecretScanSession, input: {
 }): AxisStep<SecretScanState>;
 ```
 
-#### `analyzeIacResource`
+#### <code v-pre>analyzeIacResource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L56) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L56) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export declare function analyzeIacResource(session: IacScanSession, input: {
@@ -54,9 +54,9 @@ export declare function analyzeIacResource(session: IacScanSession, input: {
 }): AxisStep<IacScanState>;
 ```
 
-#### `analyzeScaDependency`
+#### <code v-pre>analyzeScaDependency</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L55) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L55) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export declare function analyzeScaDependency(session: ScaSession, input: {
@@ -64,97 +64,97 @@ export declare function analyzeScaDependency(session: ScaSession, input: {
 }): AxisStep<ScaState>;
 ```
 
-#### `assertRealDriverAvailable`
+#### <code v-pre>assertRealDriverAvailable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L40) `packages/security-devsecops/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L40) <code v-pre>packages/security-devsecops/src/adapters/real-driver.ts</code>
 
 ```ts
 export declare function assertRealDriverAvailable(spec: CliDriverSpec, env: RealDriverEnv | null): void;
 ```
 
-#### `attemptDastAttack`
+#### <code v-pre>attemptDastAttack</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L71) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L71) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export declare function attemptDastAttack(session: DastSession, attack: DastAttack): AxisStep<DastState>;
 ```
 
-#### `axisForPreset`
+#### <code v-pre>axisForPreset</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/preset.ts#L19) `packages/security-devsecops/src/orchestrator/preset.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/preset.ts#L19) <code v-pre>packages/security-devsecops/src/orchestrator/preset.ts</code>
 
 ```ts
 export declare function axisForPreset(preset: AuditPreset): DevSecOpsAxis[];
 ```
 
-#### `checkIacCompliance`
+#### <code v-pre>checkIacCompliance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L92) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L92) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export declare function checkIacCompliance(session: IacScanSession, check: IacComplianceCheck): AxisStep<IacScanState>;
 ```
 
-#### `completeContainerScan`
+#### <code v-pre>completeContainerScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L124) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L124) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export declare function completeContainerScan(session: ContainerSecuritySession): AxisStep<ContainerSecState>;
 ```
 
-#### `completeDastScan`
+#### <code v-pre>completeDastScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L114) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L114) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export declare function completeDastScan(session: DastSession): AxisStep<DastState>;
 ```
 
-#### `completeIacScan`
+#### <code v-pre>completeIacScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L112) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L112) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export declare function completeIacScan(session: IacScanSession): AxisStep<IacScanState>;
 ```
 
-#### `completeSastScan`
+#### <code v-pre>completeSastScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L92) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L92) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 ```ts
 export declare function completeSastScan(session: SastSession): AxisStep<SastState>;
 ```
 
-#### `completeScaScan`
+#### <code v-pre>completeScaScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L106) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L106) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export declare function completeScaScan(session: ScaSession): AxisStep<ScaState>;
 ```
 
-#### `completeSecretScan`
+#### <code v-pre>completeSecretScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L117) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L117) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export declare function completeSecretScan(session: SecretScanSession): AxisStep<SecretScanState>;
 ```
 
-#### `confirmDastVuln`
+#### <code v-pre>confirmDastVuln</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L92) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L92) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export declare function confirmDastVuln(session: DastSession, vuln: DastVuln): AxisStep<DastState>;
 ```
 
-#### `containerSecurityMockAdapter`
+#### <code v-pre>containerSecurityMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/container-security-mock.ts#L18) `packages/security-devsecops/src/adapters/container-security-mock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/container-security-mock.ts#L18) <code v-pre>packages/security-devsecops/src/adapters/container-security-mock.ts</code>
 
 Container mock adapter — Grype-style deterministic replay。
 
@@ -162,9 +162,9 @@ Container mock adapter — Grype-style deterministic replay。
 export declare const containerSecurityMockAdapter: ContainerAdapter;
 ```
 
-#### `containerSecurityRealAdapter`
+#### <code v-pre>containerSecurityRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/container-security-real.ts#L22) `packages/security-devsecops/src/adapters/container-security-real.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/container-security-real.ts#L22) <code v-pre>packages/security-devsecops/src/adapters/container-security-real.ts</code>
 
 Container real adapter — Grype CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `KIWA_GRYPE_URL` opt-in。
 
@@ -172,9 +172,9 @@ Container real adapter — Grype CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=rea
 export declare const containerSecurityRealAdapter: ContainerAdapter;
 ```
 
-#### `crawlDastUrls`
+#### <code v-pre>crawlDastUrls</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L56) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L56) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export declare function crawlDastUrls(session: DastSession, input: {
@@ -182,9 +182,9 @@ export declare function crawlDastUrls(session: DastSession, input: {
 }): AxisStep<DastState>;
 ```
 
-#### `dastMockAdapter`
+#### <code v-pre>dastMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/dast-mock.ts#L18) `packages/security-devsecops/src/adapters/dast-mock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/dast-mock.ts#L18) <code v-pre>packages/security-devsecops/src/adapters/dast-mock.ts</code>
 
 DAST mock adapter — OWASP ZAP-style deterministic replay。
 
@@ -192,9 +192,9 @@ DAST mock adapter — OWASP ZAP-style deterministic replay。
 export declare const dastMockAdapter: DastAdapter;
 ```
 
-#### `dastRealAdapter`
+#### <code v-pre>dastRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/dast-real.ts#L22) `packages/security-devsecops/src/adapters/dast-real.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/dast-real.ts#L22) <code v-pre>packages/security-devsecops/src/adapters/dast-real.ts</code>
 
 DAST real adapter — OWASP ZAP CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `KIWA_ZAP_URL` opt-in。
 
@@ -202,57 +202,57 @@ DAST real adapter — OWASP ZAP CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real
 export declare const dastRealAdapter: DastAdapter;
 ```
 
-#### `detectContainerCve`
+#### <code v-pre>detectContainerCve</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L80) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L80) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export declare function detectContainerCve(session: ContainerSecuritySession, cve: ContainerCve): AxisStep<ContainerSecState>;
 ```
 
-#### `detectIacMisconfig`
+#### <code v-pre>detectIacMisconfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L71) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L71) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export declare function detectIacMisconfig(session: IacScanSession, misconfig: IacMisconfig): AxisStep<IacScanState>;
 ```
 
-#### `detectSastFinding`
+#### <code v-pre>detectSastFinding</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L48) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L48) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 ```ts
 export declare function detectSastFinding(session: SastSession, finding: SastFinding): AxisStep<SastState>;
 ```
 
-#### `detectScaVuln`
+#### <code v-pre>detectScaVuln</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L70) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L70) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export declare function detectScaVuln(session: ScaSession, vuln: ScaVuln): AxisStep<ScaState>;
 ```
 
-#### `flagContainerMalware`
+#### <code v-pre>flagContainerMalware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L103) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L103) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export declare function flagContainerMalware(session: ContainerSecuritySession, malware: ContainerMalware): AxisStep<ContainerSecState>;
 ```
 
-#### `flagScaLicense`
+#### <code v-pre>flagScaLicense</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L89) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L89) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export declare function flagScaLicense(session: ScaSession, flag: ScaLicenseFlag): AxisStep<ScaState>;
 ```
 
-#### `flagSecretEntropy`
+#### <code v-pre>flagSecretEntropy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L70) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L70) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export declare function flagSecretEntropy(session: SecretScanSession, input: {
@@ -263,9 +263,9 @@ export declare function flagSecretEntropy(session: SecretScanSession, input: {
 }): AxisStep<SecretScanState>;
 ```
 
-#### `iacScanMockAdapter`
+#### <code v-pre>iacScanMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/iac-scan-mock.ts#L19) `packages/security-devsecops/src/adapters/iac-scan-mock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/iac-scan-mock.ts#L19) <code v-pre>packages/security-devsecops/src/adapters/iac-scan-mock.ts</code>
 
 IaC mock adapter — tfsec-style deterministic replay。 1 misconfig + 1 pass + 1 fail compliance check。
 
@@ -273,9 +273,9 @@ IaC mock adapter — tfsec-style deterministic replay。 1 misconfig + 1 pass + 
 export declare const iacScanMockAdapter: IacAdapter;
 ```
 
-#### `iacScanRealAdapter`
+#### <code v-pre>iacScanRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/iac-scan-real.ts#L22) `packages/security-devsecops/src/adapters/iac-scan-real.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/iac-scan-real.ts#L22) <code v-pre>packages/security-devsecops/src/adapters/iac-scan-real.ts</code>
 
 IaC real adapter — tfsec CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `KIWA_TFSEC_URL` opt-in。
 
@@ -283,33 +283,33 @@ IaC real adapter — tfsec CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `
 export declare const iacScanRealAdapter: IacAdapter;
 ```
 
-#### `matchSecretPattern`
+#### <code v-pre>matchSecretPattern</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L48) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L48) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export declare function matchSecretPattern(session: SecretScanSession, match: Omit<SecretMatch, 'matchType'>): AxisStep<SecretScanState>;
 ```
 
-#### `PRESET_AXIS_MAP`
+#### <code v-pre>PRESET&#95;AXIS&#95;MAP</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/preset.ts#L12) `packages/security-devsecops/src/orchestrator/preset.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/preset.ts#L12) <code v-pre>packages/security-devsecops/src/orchestrator/preset.ts</code>
 
 ```ts
 export declare const PRESET_AXIS_MAP: Record<AuditPreset, DevSecOpsAxis[]>;
 ```
 
-#### `readRealDriverEnv`
+#### <code v-pre>readRealDriverEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L22) `packages/security-devsecops/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L22) <code v-pre>packages/security-devsecops/src/adapters/real-driver.ts</code>
 
 ```ts
 export declare function readRealDriverEnv(env?: NodeJS.ProcessEnv): RealDriverEnv | null;
 ```
 
-#### `runSecurityAudit`
+#### <code v-pre>runSecurityAudit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/run-audit.ts#L53) `packages/security-devsecops/src/orchestrator/run-audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/run-audit.ts#L53) <code v-pre>packages/security-devsecops/src/orchestrator/run-audit.ts</code>
 
 DevSecOps library single entry (v0.3、 Phase 3)。 skill 4 種の workflow を library 内に集約、 skill 側は preset 選択だけで 6 axis を横断的に扱える。 backward compat 維持 = v0.1 semantics 直接使用 + v0.2 adapter 個別使用も引き続き動作。
 
@@ -317,9 +317,9 @@ DevSecOps library single entry (v0.3、 Phase 3)。 skill 4 種の workflow を 
 export declare function runSecurityAudit(input: AuditInvocation): Promise<AuditReport>;
 ```
 
-#### `sastMockAdapter`
+#### <code v-pre>sastMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sast-mock.ts#L18) `packages/security-devsecops/src/adapters/sast-mock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sast-mock.ts#L18) <code v-pre>packages/security-devsecops/src/adapters/sast-mock.ts</code>
 
 SAST mock adapter — Semgrep-neutral pattern を semantics 経路で deterministic に再生する。 `input.metadata.presetFindings` に JSON 文字列で 事前 finding を渡す経路も持つ (test fixture 用)。
 
@@ -327,9 +327,9 @@ SAST mock adapter — Semgrep-neutral pattern を semantics 経路で determinis
 export declare const sastMockAdapter: SastAdapter;
 ```
 
-#### `sastRealAdapter`
+#### <code v-pre>sastRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sast-real.ts#L21) `packages/security-devsecops/src/adapters/sast-real.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sast-real.ts#L21) <code v-pre>packages/security-devsecops/src/adapters/sast-real.ts</code>
 
 SAST real adapter — Semgrep CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `KIWA_SEMGREP_URL` opt-in。
 
@@ -337,9 +337,9 @@ SAST real adapter — Semgrep CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` 
 export declare const sastRealAdapter: SastAdapter;
 ```
 
-#### `scaMockAdapter`
+#### <code v-pre>scaMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sca-mock.ts#L18) `packages/security-devsecops/src/adapters/sca-mock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sca-mock.ts#L18) <code v-pre>packages/security-devsecops/src/adapters/sca-mock.ts</code>
 
 SCA mock adapter — Trivy-style deterministic replay。 2 CVE + 1 license flag。
 
@@ -347,9 +347,9 @@ SCA mock adapter — Trivy-style deterministic replay。 2 CVE + 1 license flag�
 export declare const scaMockAdapter: ScaAdapter;
 ```
 
-#### `scanContainerImage`
+#### <code v-pre>scanContainerImage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L61) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L61) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export declare function scanContainerImage(session: ContainerSecuritySession, input: {
@@ -357,9 +357,9 @@ export declare function scanContainerImage(session: ContainerSecuritySession, in
 }): AxisStep<ContainerSecState>;
 ```
 
-#### `scaRealAdapter`
+#### <code v-pre>scaRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sca-real.ts#L22) `packages/security-devsecops/src/adapters/sca-real.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/sca-real.ts#L22) <code v-pre>packages/security-devsecops/src/adapters/sca-real.ts</code>
 
 SCA real adapter — Trivy CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `KIWA_TRIVY_URL` opt-in。
 
@@ -367,9 +367,9 @@ SCA real adapter — Trivy CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `
 export declare const scaRealAdapter: ScaAdapter;
 ```
 
-#### `secretScanMockAdapter`
+#### <code v-pre>secretScanMockAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/secret-scan-mock.ts#L17) `packages/security-devsecops/src/adapters/secret-scan-mock.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/secret-scan-mock.ts#L17) <code v-pre>packages/security-devsecops/src/adapters/secret-scan-mock.ts</code>
 
 Secret mock adapter — Gitleaks-style deterministic replay。
 
@@ -377,9 +377,9 @@ Secret mock adapter — Gitleaks-style deterministic replay。
 export declare const secretScanMockAdapter: SecretAdapter;
 ```
 
-#### `secretScanRealAdapter`
+#### <code v-pre>secretScanRealAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/secret-scan-real.ts#L21) `packages/security-devsecops/src/adapters/secret-scan-real.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/secret-scan-real.ts#L21) <code v-pre>packages/security-devsecops/src/adapters/secret-scan-real.ts</code>
 
 Secret real adapter — Gitleaks CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=real` + `KIWA_GITLEAKS_URL` opt-in。
 
@@ -387,9 +387,9 @@ Secret real adapter — Gitleaks CLI 呼出隠蔽。 env `KIWA_SECURITY_MODE=rea
 export declare const secretScanRealAdapter: SecretAdapter;
 ```
 
-#### `startContainerScan`
+#### <code v-pre>startContainerScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L37) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L37) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export declare function startContainerScan(input: {
@@ -398,9 +398,9 @@ export declare function startContainerScan(input: {
 }): ContainerSecuritySession;
 ```
 
-#### `startDastScan`
+#### <code v-pre>startDastScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L35) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L35) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export declare function startDastScan(input: {
@@ -409,9 +409,9 @@ export declare function startDastScan(input: {
 }): DastSession;
 ```
 
-#### `startIacScan`
+#### <code v-pre>startIacScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L35) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L35) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export declare function startIacScan(input: {
@@ -420,9 +420,9 @@ export declare function startIacScan(input: {
 }): IacScanSession;
 ```
 
-#### `startSastScan`
+#### <code v-pre>startSastScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L28) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L28) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 ```ts
 export declare function startSastScan(input: {
@@ -431,9 +431,9 @@ export declare function startSastScan(input: {
 }): SastSession;
 ```
 
-#### `startScaScan`
+#### <code v-pre>startScaScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L34) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L34) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export declare function startScaScan(input: {
@@ -442,9 +442,9 @@ export declare function startScaScan(input: {
 }): ScaSession;
 ```
 
-#### `startSecretScan`
+#### <code v-pre>startSecretScan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L28) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L28) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export declare function startSecretScan(input: {
@@ -453,9 +453,9 @@ export declare function startSecretScan(input: {
 }): SecretScanSession;
 ```
 
-#### `summarizeAuditReport`
+#### <code v-pre>summarizeAuditReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/summary.ts#L8) `packages/security-devsecops/src/orchestrator/summary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/summary.ts#L8) <code v-pre>packages/security-devsecops/src/orchestrator/summary.ts</code>
 
 Audit report 集約 API — skill 出力層 (STRIDE / DREAD 分類 tag 添付) に流し込む。 threat-model preset の時のみ STRIDE tag 添付、 他 preset は tag 空。
 
@@ -463,9 +463,9 @@ Audit report 集約 API — skill 出力層 (STRIDE / DREAD 分類 tag 添付) �
 export declare function summarizeAuditReport(report: AuditReport): AuditSummary;
 ```
 
-#### `suppressSastFinding`
+#### <code v-pre>suppressSastFinding</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L73) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L73) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 ```ts
 export declare function suppressSastFinding(session: SastSession, input: {
@@ -476,9 +476,9 @@ export declare function suppressSastFinding(session: SastSession, input: {
 
 ### 型
 
-#### `AdapterInvocation`
+#### <code v-pre>AdapterInvocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L21) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L21) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface AdapterInvocation {
@@ -489,17 +489,17 @@ export interface AdapterInvocation {
 }
 ```
 
-#### `AdapterMode`
+#### <code v-pre>AdapterMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L19) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L19) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export type AdapterMode = 'mock' | 'real';
 ```
 
-#### `AdapterResult`
+#### <code v-pre>AdapterResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L28) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L28) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface AdapterResult<TState> {
@@ -511,17 +511,17 @@ export interface AdapterResult<TState> {
 }
 ```
 
-#### `AnyAdapter`
+#### <code v-pre>AnyAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L66) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L66) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export type AnyAdapter = SastAdapter | ScaAdapter | SecretAdapter | IacAdapter | DastAdapter | ContainerAdapter;
 ```
 
-#### `AuditInvocation`
+#### <code v-pre>AuditInvocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L21) `packages/security-devsecops/src/orchestrator/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L21) <code v-pre>packages/security-devsecops/src/orchestrator/types.ts</code>
 
 ```ts
 export interface AuditInvocation {
@@ -532,17 +532,17 @@ export interface AuditInvocation {
 }
 ```
 
-#### `AuditPreset`
+#### <code v-pre>AuditPreset</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L15) `packages/security-devsecops/src/orchestrator/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L15) <code v-pre>packages/security-devsecops/src/orchestrator/types.ts</code>
 
 ```ts
 export type AuditPreset = 'audit-all' | 'supply-chain' | 'specialty' | 'threat-model';
 ```
 
-#### `AuditReport`
+#### <code v-pre>AuditReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L37) `packages/security-devsecops/src/orchestrator/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L37) <code v-pre>packages/security-devsecops/src/orchestrator/types.ts</code>
 
 ```ts
 export interface AuditReport {
@@ -555,9 +555,9 @@ export interface AuditReport {
 }
 ```
 
-#### `AuditSummary`
+#### <code v-pre>AuditSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L46) `packages/security-devsecops/src/orchestrator/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L46) <code v-pre>packages/security-devsecops/src/orchestrator/types.ts</code>
 
 ```ts
 export interface AuditSummary {
@@ -579,9 +579,9 @@ export interface AuditSummary {
 }
 ```
 
-#### `AxisAuditResult`
+#### <code v-pre>AxisAuditResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L28) `packages/security-devsecops/src/orchestrator/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/orchestrator/types.ts#L28) <code v-pre>packages/security-devsecops/src/orchestrator/types.ts</code>
 
 ```ts
 export interface AxisAuditResult {
@@ -594,9 +594,9 @@ export interface AxisAuditResult {
 }
 ```
 
-#### `AxisStep`
+#### <code v-pre>AxisStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L63) `packages/security-devsecops/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L63) <code v-pre>packages/security-devsecops/src/semantics/types.ts</code>
 
 ```ts
 export interface AxisStep<TState> {
@@ -607,9 +607,9 @@ export interface AxisStep<TState> {
 }
 ```
 
-#### `CliDriverSpec`
+#### <code v-pre>CliDriverSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L34) `packages/security-devsecops/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L34) <code v-pre>packages/security-devsecops/src/adapters/real-driver.ts</code>
 
 ```ts
 export interface CliDriverSpec {
@@ -619,9 +619,9 @@ export interface CliDriverSpec {
 }
 ```
 
-#### `ContainerAdapter`
+#### <code v-pre>ContainerAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L61) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L61) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface ContainerAdapter {
@@ -630,9 +630,9 @@ export interface ContainerAdapter {
 }
 ```
 
-#### `ContainerCve`
+#### <code v-pre>ContainerCve</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L9) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L9) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export interface ContainerCve {
@@ -645,9 +645,9 @@ export interface ContainerCve {
 }
 ```
 
-#### `ContainerMalware`
+#### <code v-pre>ContainerMalware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L18) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L18) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export interface ContainerMalware {
@@ -659,9 +659,9 @@ export interface ContainerMalware {
 }
 ```
 
-#### `ContainerSecState`
+#### <code v-pre>ContainerSecState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L7) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L7) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 Container security axis — Grype-style container image scan + CVE detection + malware detection。
 
@@ -669,9 +669,9 @@ Container security axis — Grype-style container image scan + CVE detection + m
 export type ContainerSecState = 'idle' | 'scanning' | 'threats-found' | 'completed';
 ```
 
-#### `ContainerSecuritySession`
+#### <code v-pre>ContainerSecuritySession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L26) `packages/security-devsecops/src/semantics/container-security.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/container-security.ts#L26) <code v-pre>packages/security-devsecops/src/semantics/container-security.ts</code>
 
 ```ts
 export interface ContainerSecuritySession {
@@ -686,9 +686,9 @@ export interface ContainerSecuritySession {
 }
 ```
 
-#### `DastAdapter`
+#### <code v-pre>DastAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L56) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L56) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface DastAdapter {
@@ -697,9 +697,9 @@ export interface DastAdapter {
 }
 ```
 
-#### `DastAttack`
+#### <code v-pre>DastAttack</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L9) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L9) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export interface DastAttack {
@@ -710,9 +710,9 @@ export interface DastAttack {
 }
 ```
 
-#### `DastSession`
+#### <code v-pre>DastSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L24) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L24) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export interface DastSession {
@@ -727,9 +727,9 @@ export interface DastSession {
 }
 ```
 
-#### `DastState`
+#### <code v-pre>DastState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L7) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L7) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 DAST (Dynamic Application Security Testing) axis — OWASP ZAP-style live-app crawl + attack attempt + vulnerability confirmation。
 
@@ -737,9 +737,9 @@ DAST (Dynamic Application Security Testing) axis — OWASP ZAP-style live-app cr
 export type DastState = 'idle' | 'crawling' | 'attacking' | 'vuln-found' | 'completed';
 ```
 
-#### `DastVuln`
+#### <code v-pre>DastVuln</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L16) `packages/security-devsecops/src/semantics/dast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/dast.ts#L16) <code v-pre>packages/security-devsecops/src/semantics/dast.ts</code>
 
 ```ts
 export interface DastVuln {
@@ -751,17 +751,17 @@ export interface DastVuln {
 }
 ```
 
-#### `DevSecOpsAxis`
+#### <code v-pre>DevSecOpsAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L21) `packages/security-devsecops/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L21) <code v-pre>packages/security-devsecops/src/semantics/types.ts</code>
 
 ```ts
 export type DevSecOpsAxis = 'sast' | 'sca' | 'secret-scan' | 'iac-scan' | 'dast' | 'container-security';
 ```
 
-#### `IacAdapter`
+#### <code v-pre>IacAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L51) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L51) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface IacAdapter {
@@ -770,9 +770,9 @@ export interface IacAdapter {
 }
 ```
 
-#### `IacComplianceCheck`
+#### <code v-pre>IacComplianceCheck</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L18) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L18) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export interface IacComplianceCheck {
@@ -782,9 +782,9 @@ export interface IacComplianceCheck {
 }
 ```
 
-#### `IacMisconfig`
+#### <code v-pre>IacMisconfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L9) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L9) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export interface IacMisconfig {
@@ -797,9 +797,9 @@ export interface IacMisconfig {
 }
 ```
 
-#### `IacScanSession`
+#### <code v-pre>IacScanSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L24) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L24) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 ```ts
 export interface IacScanSession {
@@ -814,9 +814,9 @@ export interface IacScanSession {
 }
 ```
 
-#### `IacScanState`
+#### <code v-pre>IacScanState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L7) `packages/security-devsecops/src/semantics/iac-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/iac-scan.ts#L7) <code v-pre>packages/security-devsecops/src/semantics/iac-scan.ts</code>
 
 IaC scan axis — tfsec-style Terraform / CloudFormation misconfiguration detection + compliance policy check (SOC 2 / CIS Benchmark)。
 
@@ -824,17 +824,17 @@ IaC scan axis — tfsec-style Terraform / CloudFormation misconfiguration detect
 export type IacScanState = 'idle' | 'analyzing' | 'misconfig-found' | 'completed';
 ```
 
-#### `NeutralEventName`
+#### <code v-pre>NeutralEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L29) `packages/security-devsecops/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L29) <code v-pre>packages/security-devsecops/src/semantics/types.ts</code>
 
 ```ts
 export type NeutralEventName = 'sast.scan-started' | 'sast.finding-detected' | 'sast.suppressed' | 'sast.scan-completed' | 'sca.dependency-analyzed' | 'sca.vuln-detected' | 'sca.license-flagged' | 'sca.scan-completed' | 'secret.pattern-matched' | 'secret.entropy-flagged' | 'secret.allowlisted' | 'secret.scan-completed' | 'iac.resource-analyzed' | 'iac.misconfig-detected' | 'iac.compliance-checked' | 'iac.scan-completed' | 'dast.crawl-started' | 'dast.attack-attempted' | 'dast.vulnerability-confirmed' | 'dast.scan-completed' | 'container.image-scanned' | 'container.cve-detected' | 'container.malware-flagged' | 'container.scan-completed';
 ```
 
-#### `RealDriverEnv`
+#### <code v-pre>RealDriverEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L12) `packages/security-devsecops/src/adapters/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L12) <code v-pre>packages/security-devsecops/src/adapters/real-driver.ts</code>
 
 Real driver 共通 helper — 実 CLI 呼出を child_process 経由で隠蔽する契約。 v0.2 では adapter interface を confirm し、 実 CLI 呼出は env-gate + spawnCliDriver に集約する。 env 未設定 or CLI 不在時は explicit throw、 test 側は mock adapter を使う (default 経路)。 production 経路。 `KIWA_SECURITY_MODE=real` + 各 CLI URL env が全部揃った時のみ 実 CLI 呼出、 それ以外は throw。 mock adapter は env に関係なく常時動作。
 
@@ -850,9 +850,9 @@ export interface RealDriverEnv {
 }
 ```
 
-#### `SastAdapter`
+#### <code v-pre>SastAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L36) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L36) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface SastAdapter {
@@ -861,9 +861,9 @@ export interface SastAdapter {
 }
 ```
 
-#### `SastFinding`
+#### <code v-pre>SastFinding</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L10) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L10) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 ```ts
 export interface SastFinding {
@@ -875,9 +875,9 @@ export interface SastFinding {
 }
 ```
 
-#### `SastSession`
+#### <code v-pre>SastSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L18) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L18) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 ```ts
 export interface SastSession {
@@ -891,9 +891,9 @@ export interface SastSession {
 }
 ```
 
-#### `SastState`
+#### <code v-pre>SastState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L8) `packages/security-devsecops/src/semantics/sast.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L8) <code v-pre>packages/security-devsecops/src/semantics/sast.ts</code>
 
 SAST (Static Application Security Testing) axis — code scan → finding detection → severity classification → suppression / completion。 Semgrep-neutral pattern。
 
@@ -901,9 +901,9 @@ SAST (Static Application Security Testing) axis — code scan → finding detect
 export type SastState = 'idle' | 'scanning' | 'findings-detected' | 'completed';
 ```
 
-#### `ScaAdapter`
+#### <code v-pre>ScaAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L41) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L41) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface ScaAdapter {
@@ -912,9 +912,9 @@ export interface ScaAdapter {
 }
 ```
 
-#### `ScaLicenseFlag`
+#### <code v-pre>ScaLicenseFlag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L17) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L17) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export interface ScaLicenseFlag {
@@ -924,9 +924,9 @@ export interface ScaLicenseFlag {
 }
 ```
 
-#### `ScanProvider`
+#### <code v-pre>ScanProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L13) `packages/security-devsecops/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L13) <code v-pre>packages/security-devsecops/src/semantics/types.ts</code>
 
 DevSecOps semantics — provider-neutral axis SSOT (v0.1)。 v0.1 covers 6 axis = SAST (Static Application Security Testing) + SCA (Software Composition Analysis) + Secret scan + IaC scan + DAST (Dynamic Application Security Testing) + Container security。 Each axis is a small pure state-machine helper that returns a neutral envelope。 downstream tests can drive the axis without knowing the provider payload dialect (Semgrep / Trivy / Gitleaks / tfsec / OWASP ZAP / Grype)。
 
@@ -934,9 +934,9 @@ DevSecOps semantics — provider-neutral axis SSOT (v0.1)。 v0.1 covers 6 axis 
 export type ScanProvider = 'semgrep' | 'trivy' | 'gitleaks' | 'tfsec' | 'owasp-zap' | 'grype';
 ```
 
-#### `ScaSession`
+#### <code v-pre>ScaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L23) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L23) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export interface ScaSession {
@@ -951,9 +951,9 @@ export interface ScaSession {
 }
 ```
 
-#### `ScaState`
+#### <code v-pre>ScaState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L7) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L7) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 SCA (Software Composition Analysis) axis — Trivy-style dependency scan + CVE lookup + license flagging。
 
@@ -961,9 +961,9 @@ SCA (Software Composition Analysis) axis — Trivy-style dependency scan + CVE l
 export type ScaState = 'idle' | 'analyzing' | 'vulns-detected' | 'completed';
 ```
 
-#### `ScaVuln`
+#### <code v-pre>ScaVuln</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L9) `packages/security-devsecops/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sca.ts#L9) <code v-pre>packages/security-devsecops/src/semantics/sca.ts</code>
 
 ```ts
 export interface ScaVuln {
@@ -975,9 +975,9 @@ export interface ScaVuln {
 }
 ```
 
-#### `SecretAdapter`
+#### <code v-pre>SecretAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L46) `packages/security-devsecops/src/adapters/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/types.ts#L46) <code v-pre>packages/security-devsecops/src/adapters/types.ts</code>
 
 ```ts
 export interface SecretAdapter {
@@ -986,9 +986,9 @@ export interface SecretAdapter {
 }
 ```
 
-#### `SecretMatch`
+#### <code v-pre>SecretMatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L9) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L9) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export interface SecretMatch {
@@ -1001,9 +1001,9 @@ export interface SecretMatch {
 }
 ```
 
-#### `SecretScanSession`
+#### <code v-pre>SecretScanSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L18) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L18) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 ```ts
 export interface SecretScanSession {
@@ -1017,9 +1017,9 @@ export interface SecretScanSession {
 }
 ```
 
-#### `SecretScanState`
+#### <code v-pre>SecretScanState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L7) `packages/security-devsecops/src/semantics/secret-scan.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/secret-scan.ts#L7) <code v-pre>packages/security-devsecops/src/semantics/secret-scan.ts</code>
 
 Secret scan axis — Gitleaks-style secret pattern matching + entropy analysis + allowlist support。
 
@@ -1027,9 +1027,9 @@ Secret scan axis — Gitleaks-style secret pattern matching + entropy analysis +
 export type SecretScanState = 'idle' | 'scanning' | 'secrets-found' | 'completed';
 ```
 
-#### `Severity`
+#### <code v-pre>Severity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L61) `packages/security-devsecops/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/types.ts#L61) <code v-pre>packages/security-devsecops/src/semantics/types.ts</code>
 
 ```ts
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';

@@ -29,39 +29,39 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;slot $&#123;input.slot&#125;: no default.tsx fallback supplied&#96; | [packages/nextjs/src/invoke-parallel-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L101) |
-| &#96;expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)&#96; | [packages/nextjs/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L49) |
-| 'startConcurrentTransition: transitionId must not be empty' | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L50) |
-| &#96;markTransitionPending: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L69) |
-| &#96;interruptTransition: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L82) |
-| &#96;commitTransition: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L96) |
-| 'startInterceptionRoutes: routeId must not be empty' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L20) |
-| 'openInterceptedModal: modalRoute must not be empty' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L61) |
-| 'openInterceptedModal: an interception match is required first' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L64) |
-| 'intercept: from and to must start with /' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L83) |
-| 'startParallelRoutesAdvanced: layoutId must not be empty' | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L25) |
-| 'navigateSlot: from and to must start with /' | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L83) |
-| 'slot must not be empty' | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L92) |
-| 'startPartialPrerendering: routeId must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L20) |
-| &#96;renderStaticShell: session is $&#123;session.state&#125;, not idle&#96; | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L38) |
-| 'renderStaticShell: html must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L41) |
-| 'openDynamicHole: static shell must be rendered first' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L53) |
-| 'openDynamicHole: holeId must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L56) |
-| &#96;flushStreamingBoundary: $&#123;input.holeId&#125; is not an open dynamic hole&#96; | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L72) |
-| 'flushStreamingBoundary: html must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L75) |
-| 'completePartialPrerendering: static shell was not rendered' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L90) |
-| 'startServerActionAdvanced: actionId must not be empty' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L26) |
-| &#96;submitFormAction: session is $&#123;session.state&#125;, not idle&#96; | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L45) |
-| 'revalidateActionPath: form action was not submitted' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L60) |
-| 'revalidateActionPath: path must start with /' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L63) |
-| 'revalidateActionTag: form action was not submitted' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L75) |
-| 'revalidateActionTag: tag must not be empty' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L78) |
-| 'redirectAction: form action was not submitted' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L90) |
-| 'redirectAction: url must not be empty' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L93) |
-| 'startTurbopackHmr: sessionId must not be empty' | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L44) |
-| &#96;findHmrBoundary: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L73) |
-| &#96;applyHmrPatch: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L84) |
-| &#96;completeFastRefresh: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L96) |
+| <code v-pre>slot $&#123;input.slot&#125;: no default.tsx fallback supplied</code> | [packages/nextjs/src/invoke-parallel-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L101) |
+| <code v-pre>expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)</code> | [packages/nextjs/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L49) |
+| <code v-pre>startConcurrentTransition: transitionId must not be empty</code> | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L50) |
+| <code v-pre>markTransitionPending: session is $&#123;session.state&#125;</code> | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L69) |
+| <code v-pre>interruptTransition: session is $&#123;session.state&#125;</code> | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L82) |
+| <code v-pre>commitTransition: session is $&#123;session.state&#125;</code> | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L96) |
+| <code v-pre>startInterceptionRoutes: routeId must not be empty</code> | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L20) |
+| <code v-pre>openInterceptedModal: modalRoute must not be empty</code> | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L61) |
+| <code v-pre>openInterceptedModal: an interception match is required first</code> | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L64) |
+| <code v-pre>intercept: from and to must start with /</code> | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L83) |
+| <code v-pre>startParallelRoutesAdvanced: layoutId must not be empty</code> | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L25) |
+| <code v-pre>navigateSlot: from and to must start with /</code> | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L83) |
+| <code v-pre>slot must not be empty</code> | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L92) |
+| <code v-pre>startPartialPrerendering: routeId must not be empty</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L20) |
+| <code v-pre>renderStaticShell: session is $&#123;session.state&#125;, not idle</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L38) |
+| <code v-pre>renderStaticShell: html must not be empty</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L41) |
+| <code v-pre>openDynamicHole: static shell must be rendered first</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L53) |
+| <code v-pre>openDynamicHole: holeId must not be empty</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L56) |
+| <code v-pre>flushStreamingBoundary: $&#123;input.holeId&#125; is not an open dynamic hole</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L72) |
+| <code v-pre>flushStreamingBoundary: html must not be empty</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L75) |
+| <code v-pre>completePartialPrerendering: static shell was not rendered</code> | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L90) |
+| <code v-pre>startServerActionAdvanced: actionId must not be empty</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L26) |
+| <code v-pre>submitFormAction: session is $&#123;session.state&#125;, not idle</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L45) |
+| <code v-pre>revalidateActionPath: form action was not submitted</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L60) |
+| <code v-pre>revalidateActionPath: path must start with /</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L63) |
+| <code v-pre>revalidateActionTag: form action was not submitted</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L75) |
+| <code v-pre>revalidateActionTag: tag must not be empty</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L78) |
+| <code v-pre>redirectAction: form action was not submitted</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L90) |
+| <code v-pre>redirectAction: url must not be empty</code> | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L93) |
+| <code v-pre>startTurbopackHmr: sessionId must not be empty</code> | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L44) |
+| <code v-pre>findHmrBoundary: session is $&#123;session.state&#125;</code> | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L73) |
+| <code v-pre>applyHmrPatch: session is $&#123;session.state&#125;</code> | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L84) |
+| <code v-pre>completeFastRefresh: session is $&#123;session.state&#125;</code> | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L96) |
 
 ## API 契約
 
@@ -69,25 +69,25 @@
 
 ### 値
 
-#### `applyHmrPatch`
+#### <code v-pre>applyHmrPatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L80) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L80) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 ```ts
 export declare function applyHmrPatch(session: TurbopackHmrSession): AxisStep<TurbopackHmrState>;
 ```
 
-#### `assertMode`
+#### <code v-pre>assertMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L42) `packages/nextjs/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L42) <code v-pre>packages/nextjs/src/real-driver.ts</code>
 
 ```ts
 export declare function assertMode(provider: NextTarget, expected: KiwaTestMode, env?: Record<string, string | undefined>): void;
 ```
 
-#### `captureParallelError`
+#### <code v-pre>captureParallelError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L62) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L62) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export declare function captureParallelError(session: ParallelRoutesAdvancedSession, input: {
@@ -96,41 +96,41 @@ export declare function captureParallelError(session: ParallelRoutesAdvancedSess
 }): AxisStep<ParallelRoutesAdvancedState>;
 ```
 
-#### `collectFidelityCoverage`
+#### <code v-pre>collectFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L56) `packages/nextjs/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L56) <code v-pre>packages/nextjs/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare function collectFidelityCoverage(providers?: NextTarget[]): FidelityCoverage;
 ```
 
-#### `commitTransition`
+#### <code v-pre>commitTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L91) `packages/nextjs/src/semantics/concurrent-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L91) <code v-pre>packages/nextjs/src/semantics/concurrent-transitions.ts</code>
 
 ```ts
 export declare function commitTransition(session: ConcurrentTransitionSession, committedValue: string): AxisStep<ConcurrentTransitionState>;
 ```
 
-#### `completeFastRefresh`
+#### <code v-pre>completeFastRefresh</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L92) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L92) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 ```ts
 export declare function completeFastRefresh(session: TurbopackHmrSession): AxisStep<TurbopackHmrState>;
 ```
 
-#### `completePartialPrerendering`
+#### <code v-pre>completePartialPrerendering</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L86) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L86) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export declare function completePartialPrerendering(session: PartialPrerenderingSession): AxisStep<PartialPrerenderingState>;
 ```
 
-#### `findAll`
+#### <code v-pre>findAll</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L77) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L77) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 Recursively walk an RSC tree and collect every node that satisfies the predicate. Children are read from `props.children` and are normalized to a flat array regardless of how the component spelled them.
 
@@ -138,17 +138,17 @@ Recursively walk an RSC tree and collect every node that satisfies the predicate
 export declare function findAll(tree: RscNode, predicate: (node: RscElement) => boolean): RscElement[];
 ```
 
-#### `findHmrBoundary`
+#### <code v-pre>findHmrBoundary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L68) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L68) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 ```ts
 export declare function findHmrBoundary(session: TurbopackHmrSession, boundaryModuleId: string): AxisStep<TurbopackHmrState>;
 ```
 
-#### `flushStreamingBoundary`
+#### <code v-pre>flushStreamingBoundary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L67) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L67) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export declare function flushStreamingBoundary(session: PartialPrerenderingSession, input: {
@@ -157,49 +157,49 @@ export declare function flushStreamingBoundary(session: PartialPrerenderingSessi
 }): AxisStep<PartialPrerenderingState>;
 ```
 
-#### `FORBIDDEN_SYMBOL`
+#### <code v-pre>FORBIDDEN&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L16) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L16) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export declare const FORBIDDEN_SYMBOL: unique symbol;
 ```
 
-#### `interceptCurrentSegment`
+#### <code v-pre>interceptCurrentSegment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L32) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L32) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export declare function interceptCurrentSegment(session: InterceptionRoutesSession, from: string, to: string): AxisStep<InterceptionRoutesState>;
 ```
 
-#### `interceptParentSegment`
+#### <code v-pre>interceptParentSegment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L40) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L40) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export declare function interceptParentSegment(session: InterceptionRoutesSession, from: string, to: string): AxisStep<InterceptionRoutesState>;
 ```
 
-#### `interceptRootCatchall`
+#### <code v-pre>interceptRootCatchall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L48) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L48) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export declare function interceptRootCatchall(session: InterceptionRoutesSession, from: string, to: string): AxisStep<InterceptionRoutesState>;
 ```
 
-#### `interruptTransition`
+#### <code v-pre>interruptTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L78) `packages/nextjs/src/semantics/concurrent-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L78) <code v-pre>packages/nextjs/src/semantics/concurrent-transitions.ts</code>
 
 ```ts
 export declare function interruptTransition(session: ConcurrentTransitionSession): AxisStep<ConcurrentTransitionState>;
 ```
 
-#### `invokeMiddleware`
+#### <code v-pre>invokeMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L120) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L120) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 Invoke a middleware function in isolation and capture its outgoing response shape + headers + cookies. Mirrors the kiwa style of invokeServerAction: no globals, no real Next.js runtime.
 
@@ -207,9 +207,9 @@ Invoke a middleware function in isolation and capture its outgoing response shap
 export declare function invokeMiddleware(opts: InvokeMiddlewareOptions): Promise<InvokeMiddlewareResult>;
 ```
 
-#### `invokeParallelRoutes`
+#### <code v-pre>invokeParallelRoutes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L120) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L120) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 Invoke an App Router parallel-routes layout in isolation. All slot components are rendered in parallel (Promise.all) so a slow slot cannot block fast siblings; per-slot errors are captured into `slotResults` without aborting the layout render.
 
@@ -217,9 +217,9 @@ Invoke an App Router parallel-routes layout in isolation. All slot components ar
 export declare function invokeParallelRoutes<TSlots extends string, TLayoutProps = Record<string, unknown>, TNode = unknown>(opts: InvokeParallelRoutesOptions<TSlots, TLayoutProps, TNode>): Promise<InvokeParallelRoutesResult<TSlots, TNode>>;
 ```
 
-#### `invokeServerAction`
+#### <code v-pre>invokeServerAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L99) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L99) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 Invoke a Next.js Server Action in isolation and capture its side-effects. The action is called as `await action(formData, ...args)`. The kiwa helper does NOT monkey-patch global `next/navigation` / `next/headers` / `next/cache` imports. Instead the action under test should accept its dependencies via an injectable seam (a parameter or a module-level setter) so tests stay deterministic. See `examples/nextjs-server-actions-poc/` for the pattern.
 
@@ -227,33 +227,33 @@ Invoke a Next.js Server Action in isolation and capture its side-effects. The ac
 export declare function invokeServerAction<TResult>(opts: ServerActionInvocation<TResult>): Promise<ServerActionResult<TResult>>;
 ```
 
-#### `markModuleUpdated`
+#### <code v-pre>markModuleUpdated</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L56) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L56) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 ```ts
 export declare function markModuleUpdated(session: TurbopackHmrSession, moduleId: string): AxisStep<TurbopackHmrState>;
 ```
 
-#### `markTransitionPending`
+#### <code v-pre>markTransitionPending</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L65) `packages/nextjs/src/semantics/concurrent-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L65) <code v-pre>packages/nextjs/src/semantics/concurrent-transitions.ts</code>
 
 ```ts
 export declare function markTransitionPending(session: ConcurrentTransitionSession): AxisStep<ConcurrentTransitionState>;
 ```
 
-#### `MIDDLEWARE_ACTION_SYMBOL`
+#### <code v-pre>MIDDLEWARE&#95;ACTION&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L15) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L15) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export declare const MIDDLEWARE_ACTION_SYMBOL: unique symbol;
 ```
 
-#### `middlewareActions`
+#### <code v-pre>middlewareActions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L100) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L100) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 Helpers your `middleware.ts` returns instead of constructing NextResponse directly. Keep the production code shape close by re-exporting these from a shared module; the helper expects the returned value to be a MiddlewareAction shaped object.
 
@@ -266,9 +266,9 @@ export declare const middlewareActions: {
 };
 ```
 
-#### `navigateSlot`
+#### <code v-pre>navigateSlot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L77) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L77) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export declare function navigateSlot(session: ParallelRoutesAdvancedSession, input: {
@@ -278,25 +278,25 @@ export declare function navigateSlot(session: ParallelRoutesAdvancedSession, inp
 }): AxisStep<ParallelRoutesAdvancedState>;
 ```
 
-#### `NEXT_AXIS_TO_EVENTS`
+#### <code v-pre>NEXT&#95;AXIS&#95;TO&#95;EVENTS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L16) `packages/nextjs/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L16) <code v-pre>packages/nextjs/src/semantics/fidelity.ts</code>
 
 ```ts
 export declare const NEXT_AXIS_TO_EVENTS: Record<NextAxis, NeutralEventName[]>;
 ```
 
-#### `NOT_FOUND_SYMBOL`
+#### <code v-pre>NOT&#95;FOUND&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L15) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L15) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export declare const NOT_FOUND_SYMBOL: unique symbol;
 ```
 
-#### `openDynamicHole`
+#### <code v-pre>openDynamicHole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L48) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L48) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export declare function openDynamicHole(session: PartialPrerenderingSession, input: {
@@ -305,65 +305,65 @@ export declare function openDynamicHole(session: PartialPrerenderingSession, inp
 }): AxisStep<PartialPrerenderingState>;
 ```
 
-#### `openInterceptedModal`
+#### <code v-pre>openInterceptedModal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L56) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L56) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export declare function openInterceptedModal(session: InterceptionRoutesSession, modalRoute: string): AxisStep<InterceptionRoutesState>;
 ```
 
-#### `PARALLEL_INTERCEPTION_SYMBOL`
+#### <code v-pre>PARALLEL&#95;INTERCEPTION&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L20) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L20) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export declare const PARALLEL_INTERCEPTION_SYMBOL: unique symbol;
 ```
 
-#### `providerEventName`
+#### <code v-pre>providerEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L136) `packages/nextjs/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L136) <code v-pre>packages/nextjs/src/semantics/types.ts</code>
 
 ```ts
 export declare function providerEventName(target: NextTarget, neutral: NeutralEventName): string;
 ```
 
-#### `REDIRECT_SYMBOL`
+#### <code v-pre>REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L14) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L14) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export declare const REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `redirectAction`
+#### <code v-pre>redirectAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L85) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L85) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export declare function redirectAction(session: ServerActionAdvancedSession, url: string): AxisStep<ServerActionAdvancedState>;
 ```
 
-#### `renderDefaultSlot`
+#### <code v-pre>renderDefaultSlot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L38) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L38) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export declare function renderDefaultSlot(session: ParallelRoutesAdvancedSession, slot: string, html: string): AxisStep<ParallelRoutesAdvancedState>;
 ```
 
-#### `renderLoadingState`
+#### <code v-pre>renderLoadingState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L49) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L49) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export declare function renderLoadingState(session: ParallelRoutesAdvancedSession, slot: string): AxisStep<ParallelRoutesAdvancedState>;
 ```
 
-#### `renderServerComponent`
+#### <code v-pre>renderServerComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L127) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L127) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 Invoke an async server component in isolation and capture its return tree. Throws of `notFound() / forbidden() / redirect()` from `next/navigation` should be replaced with the kiwa signals below (Pattern A from the server-action seam doc); the helper normalizes them into `result.signal` instead of leaving them as `result.error`.
 
@@ -371,65 +371,65 @@ Invoke an async server component in isolation and capture its return tree. Throw
 export declare function renderServerComponent<TProps = Record<string, unknown>>(opts: RenderServerComponentOptions<TProps>): Promise<RenderServerComponentResult>;
 ```
 
-#### `renderStaticShell`
+#### <code v-pre>renderStaticShell</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L33) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L33) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export declare function renderStaticShell(session: PartialPrerenderingSession, html: string): AxisStep<PartialPrerenderingState>;
 ```
 
-#### `resolveAllModes`
+#### <code v-pre>resolveAllModes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L35) `packages/nextjs/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L35) <code v-pre>packages/nextjs/src/real-driver.ts</code>
 
 ```ts
 export declare function resolveAllModes(env?: Record<string, string | undefined>): ResolvedMode[];
 ```
 
-#### `resolveMode`
+#### <code v-pre>resolveMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L17) `packages/nextjs/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L17) <code v-pre>packages/nextjs/src/real-driver.ts</code>
 
 ```ts
 export declare function resolveMode(provider: NextTarget, env?: Record<string, string | undefined>): ResolvedMode;
 ```
 
-#### `revalidateActionPath`
+#### <code v-pre>revalidateActionPath</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L55) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L55) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export declare function revalidateActionPath(session: ServerActionAdvancedSession, path: string): AxisStep<ServerActionAdvancedState>;
 ```
 
-#### `revalidateActionTag`
+#### <code v-pre>revalidateActionTag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L70) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L70) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export declare function revalidateActionTag(session: ServerActionAdvancedSession, tag: string): AxisStep<ServerActionAdvancedState>;
 ```
 
-#### `RSC_ERROR_BOUNDARY_SYMBOL`
+#### <code v-pre>RSC&#95;ERROR&#95;BOUNDARY&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L26) `packages/nextjs/src/setup-next-rsc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L26) <code v-pre>packages/nextjs/src/setup-next-rsc-env.ts</code>
 
 ```ts
 export declare const RSC_ERROR_BOUNDARY_SYMBOL: unique symbol;
 ```
 
-#### `RSC_REDIRECT_SYMBOL`
+#### <code v-pre>RSC&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L17) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L17) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export declare const RSC_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `setupNextRscEnv`
+#### <code v-pre>setupNextRscEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L199) `packages/nextjs/src/setup-next-rsc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L199) <code v-pre>packages/nextjs/src/setup-next-rsc-env.ts</code>
 
 Drive an async RSC stream through a single Suspense boundary and capture every chunk + the fallback + the resolved subtree + any error-boundary trigger. The helper is deterministic — chunks arrive in the order the source yields them, and the timeout is wall-clock-bounded so tests cannot hang on a stuck stream. Typical usage: const env = await setupNextRscEnv({ dataSource: streamItems(), suspenseFallback: &lt;Skeleton /&gt;, streamingTimeout: 1000, }); expect(env.fallback).toEqual(&lt;Skeleton /&gt;); expect(env.chunks).toHaveLength(3); expect(env.resolved).toEqual(&lt;ItemList items={items} /&gt;); expect(env.errorBoundary).toBeNull(); expect(env.timedOut).toBe(false);
 
@@ -437,9 +437,9 @@ Drive an async RSC stream through a single Suspense boundary and capture every c
 export declare function setupNextRscEnv(opts?: SetupNextRscEnvOptions): Promise<SetupNextRscEnvResult>;
 ```
 
-#### `startConcurrentTransition`
+#### <code v-pre>startConcurrentTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L45) `packages/nextjs/src/semantics/concurrent-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L45) <code v-pre>packages/nextjs/src/semantics/concurrent-transitions.ts</code>
 
 ```ts
 export declare function startConcurrentTransition(input: {
@@ -448,9 +448,9 @@ export declare function startConcurrentTransition(input: {
 }): ConcurrentTransitionSession;
 ```
 
-#### `startInterceptionRoutes`
+#### <code v-pre>startInterceptionRoutes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L15) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L15) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export declare function startInterceptionRoutes(input: {
@@ -459,9 +459,9 @@ export declare function startInterceptionRoutes(input: {
 }): InterceptionRoutesSession;
 ```
 
-#### `startParallelRoutesAdvanced`
+#### <code v-pre>startParallelRoutesAdvanced</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L20) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L20) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export declare function startParallelRoutesAdvanced(input: {
@@ -470,9 +470,9 @@ export declare function startParallelRoutesAdvanced(input: {
 }): ParallelRoutesAdvancedSession;
 ```
 
-#### `startPartialPrerendering`
+#### <code v-pre>startPartialPrerendering</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L15) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L15) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export declare function startPartialPrerendering(input: {
@@ -481,9 +481,9 @@ export declare function startPartialPrerendering(input: {
 }): PartialPrerenderingSession;
 ```
 
-#### `startServerActionAdvanced`
+#### <code v-pre>startServerActionAdvanced</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L21) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L21) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export declare function startServerActionAdvanced(input: {
@@ -492,9 +492,9 @@ export declare function startServerActionAdvanced(input: {
 }): ServerActionAdvancedSession;
 ```
 
-#### `startTurbopackHmr`
+#### <code v-pre>startTurbopackHmr</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L39) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L39) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 ```ts
 export declare function startTurbopackHmr(input: {
@@ -503,17 +503,17 @@ export declare function startTurbopackHmr(input: {
 }): TurbopackHmrSession;
 ```
 
-#### `submitFormAction`
+#### <code v-pre>submitFormAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L40) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L40) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export declare function submitFormAction(session: ServerActionAdvancedSession, form: Record<string, string>): AxisStep<ServerActionAdvancedState>;
 ```
 
-#### `textContent`
+#### <code v-pre>textContent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L100) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L100) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 Concatenate every string/number leaf of an RSC tree, joined by a single space. Useful for `expect(textContent(tree)).toContain('hello')` style assertions where the exact element structure does not matter.
 
@@ -523,9 +523,9 @@ export declare function textContent(tree: RscNode): string;
 
 ### 型
 
-#### `AxisStep`
+#### <code v-pre>AxisStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L47) `packages/nextjs/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L47) <code v-pre>packages/nextjs/src/semantics/types.ts</code>
 
 ```ts
 export interface AxisStep<TState extends string> {
@@ -537,9 +537,9 @@ export interface AxisStep<TState extends string> {
 }
 ```
 
-#### `ConcurrentTransitionSession`
+#### <code v-pre>ConcurrentTransitionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L15) `packages/nextjs/src/semantics/concurrent-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L15) <code v-pre>packages/nextjs/src/semantics/concurrent-transitions.ts</code>
 
 ```ts
 export interface ConcurrentTransitionSession {
@@ -553,9 +553,9 @@ export interface ConcurrentTransitionSession {
 }
 ```
 
-#### `ConcurrentTransitionState`
+#### <code v-pre>ConcurrentTransitionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L8) `packages/nextjs/src/semantics/concurrent-transitions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L8) <code v-pre>packages/nextjs/src/semantics/concurrent-transitions.ts</code>
 
 v1.49 concurrent-transitions axis — React 18/19 concurrent features (startTransition + useTransition + useDeferredValue) を target-neutral に 扱う state machine。 interrupt-and-restart semantics も含む。
 
@@ -563,9 +563,9 @@ v1.49 concurrent-transitions axis — React 18/19 concurrent features (startTran
 export type ConcurrentTransitionState = 'idle' | 'started' | 'pending' | 'interrupted' | 'committed';
 ```
 
-#### `CookieJar`
+#### <code v-pre>CookieJar</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L22) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L22) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export interface CookieJar {
@@ -576,17 +576,17 @@ export interface CookieJar {
 }
 ```
 
-#### `DefaultFallbackComponent`
+#### <code v-pre>DefaultFallbackComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L34) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L34) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export type DefaultFallbackComponent<TNode = unknown> = () => Promise<TNode> | TNode;
 ```
 
-#### `FidelityCoverage`
+#### <code v-pre>FidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L10) `packages/nextjs/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L10) <code v-pre>packages/nextjs/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityCoverage {
@@ -596,9 +596,9 @@ export interface FidelityCoverage {
 }
 ```
 
-#### `FidelityRow`
+#### <code v-pre>FidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L3) `packages/nextjs/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/fidelity.ts#L3) <code v-pre>packages/nextjs/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityRow {
@@ -609,9 +609,9 @@ export interface FidelityRow {
 }
 ```
 
-#### `ForbiddenSignal`
+#### <code v-pre>ForbiddenSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L22) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L22) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export interface ForbiddenSignal {
@@ -619,9 +619,9 @@ export interface ForbiddenSignal {
 }
 ```
 
-#### `InterceptionMatch`
+#### <code v-pre>InterceptionMatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L22) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L22) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export interface InterceptionMatch<TSlot extends string> {
@@ -633,17 +633,17 @@ export interface InterceptionMatch<TSlot extends string> {
 }
 ```
 
-#### `InterceptionMatcher`
+#### <code v-pre>InterceptionMatcher</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L4) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L4) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export type InterceptionMatcher = '(.)' | '(..)' | '(...)';
 ```
 
-#### `InterceptionRoutesSession`
+#### <code v-pre>InterceptionRoutesSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L6) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L6) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export interface InterceptionRoutesSession {
@@ -660,17 +660,17 @@ export interface InterceptionRoutesSession {
 }
 ```
 
-#### `InterceptionRoutesState`
+#### <code v-pre>InterceptionRoutesState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L3) `packages/nextjs/src/semantics/interception-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L3) <code v-pre>packages/nextjs/src/semantics/interception-routes.ts</code>
 
 ```ts
 export type InterceptionRoutesState = 'idle' | 'current' | 'parent' | 'root' | 'modal-open';
 ```
 
-#### `InvokeMiddlewareOptions`
+#### <code v-pre>InvokeMiddlewareOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L55) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L55) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export interface InvokeMiddlewareOptions {
@@ -687,9 +687,9 @@ export interface InvokeMiddlewareOptions {
 }
 ```
 
-#### `InvokeMiddlewareResult`
+#### <code v-pre>InvokeMiddlewareResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L68) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L68) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export interface InvokeMiddlewareResult {
@@ -698,9 +698,9 @@ export interface InvokeMiddlewareResult {
 }
 ```
 
-#### `InvokeParallelRoutesOptions`
+#### <code v-pre>InvokeParallelRoutesOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L57) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L57) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export interface InvokeParallelRoutesOptions<TSlots extends string, TLayoutProps, TNode = unknown> {
@@ -712,9 +712,9 @@ export interface InvokeParallelRoutesOptions<TSlots extends string, TLayoutProps
 }
 ```
 
-#### `InvokeParallelRoutesResult`
+#### <code v-pre>InvokeParallelRoutesResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L73) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L73) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export interface InvokeParallelRoutesResult<TSlots extends string, TNode = unknown> {
@@ -725,17 +725,17 @@ export interface InvokeParallelRoutesResult<TSlots extends string, TNode = unkno
 }
 ```
 
-#### `KiwaTestMode`
+#### <code v-pre>KiwaTestMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L3) `packages/nextjs/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L3) <code v-pre>packages/nextjs/src/real-driver.ts</code>
 
 ```ts
 export type KiwaTestMode = 'mock' | 'real';
 ```
 
-#### `MiddlewareAction`
+#### <code v-pre>MiddlewareAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L19) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L19) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export interface MiddlewareAction {
@@ -747,17 +747,17 @@ export interface MiddlewareAction {
 }
 ```
 
-#### `MiddlewareActionKind`
+#### <code v-pre>MiddlewareActionKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L17) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L17) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export type MiddlewareActionKind = 'next' | 'redirect' | 'rewrite' | 'json' | 'noop';
 ```
 
-#### `MiddlewareEnv`
+#### <code v-pre>MiddlewareEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L44) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L44) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export interface MiddlewareEnv {
@@ -767,9 +767,9 @@ export interface MiddlewareEnv {
 }
 ```
 
-#### `MiddlewareFunction`
+#### <code v-pre>MiddlewareFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L50) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L50) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export type MiddlewareFunction = (req: MiddlewareRequest, env: {
@@ -778,9 +778,9 @@ export type MiddlewareFunction = (req: MiddlewareRequest, env: {
 }) => MiddlewareAction | Promise<MiddlewareAction>;
 ```
 
-#### `MiddlewareRequest`
+#### <code v-pre>MiddlewareRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L27) `packages/nextjs/src/invoke-middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-middleware.ts#L27) <code v-pre>packages/nextjs/src/invoke-middleware.ts</code>
 
 ```ts
 export interface MiddlewareRequest {
@@ -801,25 +801,25 @@ export interface MiddlewareRequest {
 }
 ```
 
-#### `NeutralEventName`
+#### <code v-pre>NeutralEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L19) `packages/nextjs/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L19) <code v-pre>packages/nextjs/src/semantics/types.ts</code>
 
 ```ts
 export type NeutralEventName = 'action.form_submitted' | 'action.revalidate_path' | 'action.revalidate_tag' | 'action.redirected' | 'ppr.static_shell_rendered' | 'ppr.dynamic_hole_opened' | 'ppr.streaming_boundary_flushed' | 'ppr.completed' | 'intercept.current_segment' | 'intercept.parent_segment' | 'intercept.root_catchall' | 'intercept.modal_opened' | 'parallel.default_rendered' | 'parallel.loading_rendered' | 'parallel.error_boundary_captured' | 'parallel.slot_navigated' | 'turbopack.module_updated' | 'turbopack.hmr_boundary_found' | 'turbopack.hmr_applied' | 'turbopack.fast_refresh_completed' | 'transition.started' | 'transition.pending' | 'transition.interrupted' | 'transition.committed';
 ```
 
-#### `NextAxis`
+#### <code v-pre>NextAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L10) `packages/nextjs/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L10) <code v-pre>packages/nextjs/src/semantics/types.ts</code>
 
 ```ts
 export type NextAxis = 'server-action-advanced' | 'partial-prerendering' | 'interception-routes' | 'parallel-routes-advanced' | 'turbopack-hmr' | 'concurrent-transitions';
 ```
 
-#### `NextTarget`
+#### <code v-pre>NextTarget</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L8) `packages/nextjs/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/types.ts#L8) <code v-pre>packages/nextjs/src/semantics/types.ts</code>
 
 Advanced Next.js semantics — target-neutral axis SSOT. The helpers model App Router, Pages Router, and Edge Runtime behavior as pure state machines. Tests can assert the neutral event while still seeing a target-specific dialect through providerEventName.
 
@@ -827,9 +827,9 @@ Advanced Next.js semantics — target-neutral axis SSOT. The helpers model App R
 export type NextTarget = 'app-router' | 'pages-router' | 'edge-runtime';
 ```
 
-#### `NotFoundSignal`
+#### <code v-pre>NotFoundSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L19) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L19) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export interface NotFoundSignal {
@@ -837,9 +837,9 @@ export interface NotFoundSignal {
 }
 ```
 
-#### `ParallelLayoutChildren`
+#### <code v-pre>ParallelLayoutChildren</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L36) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L36) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export interface ParallelLayoutChildren<TSlots extends string, TNode = unknown> {
@@ -848,17 +848,17 @@ export interface ParallelLayoutChildren<TSlots extends string, TNode = unknown> 
 }
 ```
 
-#### `ParallelLayoutFunction`
+#### <code v-pre>ParallelLayoutFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L41) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L41) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export type ParallelLayoutFunction<TSlots extends string, TLayoutProps, TNode = unknown> = (props: TLayoutProps & ParallelLayoutChildren<TSlots, TNode>) => Promise<TNode> | TNode;
 ```
 
-#### `ParallelRoutesAdvancedSession`
+#### <code v-pre>ParallelRoutesAdvancedSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L10) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L10) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export interface ParallelRoutesAdvancedSession {
@@ -875,17 +875,17 @@ export interface ParallelRoutesAdvancedSession {
 }
 ```
 
-#### `ParallelRoutesAdvancedState`
+#### <code v-pre>ParallelRoutesAdvancedState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L3) `packages/nextjs/src/semantics/parallel-routes-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L3) <code v-pre>packages/nextjs/src/semantics/parallel-routes-advanced.ts</code>
 
 ```ts
 export type ParallelRoutesAdvancedState = 'idle' | 'default-rendered' | 'loading-rendered' | 'error-captured' | 'slot-navigated';
 ```
 
-#### `PartialPrerenderingSession`
+#### <code v-pre>PartialPrerenderingSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L5) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L5) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export interface PartialPrerenderingSession {
@@ -899,17 +899,17 @@ export interface PartialPrerenderingSession {
 }
 ```
 
-#### `PartialPrerenderingState`
+#### <code v-pre>PartialPrerenderingState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L3) `packages/nextjs/src/semantics/partial-prerendering.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L3) <code v-pre>packages/nextjs/src/semantics/partial-prerendering.ts</code>
 
 ```ts
 export type PartialPrerenderingState = 'idle' | 'static-shell' | 'dynamic-hole' | 'streaming' | 'completed';
 ```
 
-#### `RedirectSignal`
+#### <code v-pre>RedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L16) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L16) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export interface RedirectSignal {
@@ -919,9 +919,9 @@ export interface RedirectSignal {
 }
 ```
 
-#### `RenderServerComponentOptions`
+#### <code v-pre>RenderServerComponentOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L41) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L41) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export interface RenderServerComponentOptions<TProps> {
@@ -930,9 +930,9 @@ export interface RenderServerComponentOptions<TProps> {
 }
 ```
 
-#### `RenderServerComponentResult`
+#### <code v-pre>RenderServerComponentResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L46) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L46) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export interface RenderServerComponentResult {
@@ -942,9 +942,9 @@ export interface RenderServerComponentResult {
 }
 ```
 
-#### `ResolvedMode`
+#### <code v-pre>ResolvedMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L5) `packages/nextjs/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L5) <code v-pre>packages/nextjs/src/real-driver.ts</code>
 
 ```ts
 export interface ResolvedMode {
@@ -954,9 +954,9 @@ export interface ResolvedMode {
 }
 ```
 
-#### `RscElement`
+#### <code v-pre>RscElement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L33) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L33) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export interface RscElement {
@@ -966,9 +966,9 @@ export interface RscElement {
 }
 ```
 
-#### `RscErrorBoundarySignal`
+#### <code v-pre>RscErrorBoundarySignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L28) `packages/nextjs/src/setup-next-rsc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L28) <code v-pre>packages/nextjs/src/setup-next-rsc-env.ts</code>
 
 ```ts
 export interface RscErrorBoundarySignal {
@@ -977,17 +977,17 @@ export interface RscErrorBoundarySignal {
 }
 ```
 
-#### `RscNode`
+#### <code v-pre>RscNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L39) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L39) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export type RscNode = RscElement | string | number | boolean | null | undefined | RscNode[];
 ```
 
-#### `RscRedirectSignal`
+#### <code v-pre>RscRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L25) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L25) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export interface RscRedirectSignal {
@@ -997,17 +997,17 @@ export interface RscRedirectSignal {
 }
 ```
 
-#### `RscSignal`
+#### <code v-pre>RscSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L31) `packages/nextjs/src/render-server-component.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/render-server-component.ts#L31) <code v-pre>packages/nextjs/src/render-server-component.ts</code>
 
 ```ts
 export type RscSignal = NotFoundSignal | ForbiddenSignal | RscRedirectSignal;
 ```
 
-#### `RscStreamSource`
+#### <code v-pre>RscStreamSource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L46) `packages/nextjs/src/setup-next-rsc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L46) <code v-pre>packages/nextjs/src/setup-next-rsc-env.ts</code>
 
 An async source the helper consumes chunk-by-chunk. Each yielded value is one streaming frame; the helper appends it to `env.chunks` in arrival order and uses the last chunk as `env.resolved` once the source completes. Use a plain async generator for most cases: async function* source() { yield &lt;Spinner /&gt;; // initial chunk yield &lt;Skeleton rows={3} /&gt;; // partial data yield &lt;Items list={data} /&gt;; // final resolved chunk }
 
@@ -1015,9 +1015,9 @@ An async source the helper consumes chunk-by-chunk. Each yielded value is one st
 export type RscStreamSource = AsyncIterable<RscNode>;
 ```
 
-#### `ServerActionAdvancedSession`
+#### <code v-pre>ServerActionAdvancedSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L10) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L10) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export interface ServerActionAdvancedSession {
@@ -1032,17 +1032,17 @@ export interface ServerActionAdvancedSession {
 }
 ```
 
-#### `ServerActionAdvancedState`
+#### <code v-pre>ServerActionAdvancedState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L3) `packages/nextjs/src/semantics/server-action-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L3) <code v-pre>packages/nextjs/src/semantics/server-action-advanced.ts</code>
 
 ```ts
 export type ServerActionAdvancedState = 'idle' | 'submitted' | 'path-revalidated' | 'tag-revalidated' | 'redirected';
 ```
 
-#### `ServerActionEnv`
+#### <code v-pre>ServerActionEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L29) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L29) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export interface ServerActionEnv {
@@ -1056,17 +1056,17 @@ export interface ServerActionEnv {
 }
 ```
 
-#### `ServerActionFunction`
+#### <code v-pre>ServerActionFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L40) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L40) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export type ServerActionFunction<TResult> = (...args: any[]) => Promise<TResult> | TResult;
 ```
 
-#### `ServerActionInvocation`
+#### <code v-pre>ServerActionInvocation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L42) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L42) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export interface ServerActionInvocation<TResult> {
@@ -1083,9 +1083,9 @@ export interface ServerActionInvocation<TResult> {
 }
 ```
 
-#### `ServerActionResult`
+#### <code v-pre>ServerActionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L55) `packages/nextjs/src/invoke-server-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-server-action.ts#L55) <code v-pre>packages/nextjs/src/invoke-server-action.ts</code>
 
 ```ts
 export interface ServerActionResult<TResult> {
@@ -1098,9 +1098,9 @@ export interface ServerActionResult<TResult> {
 }
 ```
 
-#### `SetupNextRscEnvOptions`
+#### <code v-pre>SetupNextRscEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L48) `packages/nextjs/src/setup-next-rsc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L48) <code v-pre>packages/nextjs/src/setup-next-rsc-env.ts</code>
 
 ```ts
 export interface SetupNextRscEnvOptions {
@@ -1144,9 +1144,9 @@ export interface SetupNextRscEnvOptions {
 }
 ```
 
-#### `SetupNextRscEnvResult`
+#### <code v-pre>SetupNextRscEnvResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L88) `packages/nextjs/src/setup-next-rsc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/setup-next-rsc-env.ts#L88) <code v-pre>packages/nextjs/src/setup-next-rsc-env.ts</code>
 
 ```ts
 export interface SetupNextRscEnvResult {
@@ -1182,17 +1182,17 @@ export interface SetupNextRscEnvResult {
 }
 ```
 
-#### `SlotComponent`
+#### <code v-pre>SlotComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L30) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L30) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export type SlotComponent<TProps = Record<string, unknown>, TNode = unknown> = (props: TProps) => Promise<TNode> | TNode;
 ```
 
-#### `SlotInput`
+#### <code v-pre>SlotInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L45) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L45) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export interface SlotInput<TSlots extends string, TNode = unknown> {
@@ -1208,9 +1208,9 @@ export interface SlotInput<TSlots extends string, TNode = unknown> {
 }
 ```
 
-#### `SlotRenderResult`
+#### <code v-pre>SlotRenderResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L65) `packages/nextjs/src/invoke-parallel-routes.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L65) <code v-pre>packages/nextjs/src/invoke-parallel-routes.ts</code>
 
 ```ts
 export interface SlotRenderResult<TSlots extends string, TNode = unknown> {
@@ -1222,9 +1222,9 @@ export interface SlotRenderResult<TSlots extends string, TNode = unknown> {
 }
 ```
 
-#### `TurbopackHmrSession`
+#### <code v-pre>TurbopackHmrSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L10) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L10) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 ```ts
 export interface TurbopackHmrSession {
@@ -1237,9 +1237,9 @@ export interface TurbopackHmrSession {
 }
 ```
 
-#### `TurbopackHmrState`
+#### <code v-pre>TurbopackHmrState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L8) `packages/nextjs/src/semantics/turbopack-hmr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L8) <code v-pre>packages/nextjs/src/semantics/turbopack-hmr.ts</code>
 
 v1.49 turbopack-hmr axis — Next.js 15 Turbopack HMR + fast refresh を target-neutral に扱う state machine。 pages-router では webpack HMR、 edge-runtime では esbuild HMR に mapping。
 

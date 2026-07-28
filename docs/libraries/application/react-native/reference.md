@@ -25,7 +25,7 @@ Navigation listener は返り値の解除関数を呼んでください。これ
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'circuit-open' | [packages/react-native/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L202) |
+| <code v-pre>circuit-open</code> | [packages/react-native/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L202) |
 
 ## API 契約
 
@@ -33,25 +33,25 @@ Navigation listener は返り値の解除関数を呼んでください。これ
 
 ### 値
 
-#### `batchAsync`
+#### <code v-pre>batchAsync</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L228) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L228) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export declare function batchAsync<T>(fns: Array<() => Promise<T>>, options?: BatchOptions): Promise<BatchResult<T>>;
 ```
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L192) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L192) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createNotificationPermissionMock`
+#### <code v-pre>createNotificationPermissionMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L92) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L92) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 notification permission mock — iOS/Android 統一
 
@@ -59,25 +59,25 @@ notification permission mock — iOS/Android 統一
 export declare function createNotificationPermissionMock(initial?: NotificationPermission): NotificationPermissionMock;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L120) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L120) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `createRateLimiter`
+#### <code v-pre>createRateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L159) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L159) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export declare function createRateLimiter(options: RateLimitOptions): RateLimiter;
 ```
 
-#### `createRNTestEnv`
+#### <code v-pre>createRNTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L31) `packages/react-native/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L31) <code v-pre>packages/react-native/src/env.ts</code>
 
 RN test env bundle。 5 primitive (platform / dimensions / asyncStorage / navigation / linking) を 1 env に集約、 test setup で 1 呼出しすれば全 API mock が使える。
 
@@ -85,9 +85,9 @@ RN test env bundle。 5 primitive (platform / dimensions / asyncStorage / naviga
 export declare function createRNTestEnv(options?: CreateRNTestEnvOptions): RNTestEnv;
 ```
 
-#### `dispatchLinkingUrl`
+#### <code v-pre>dispatchLinkingUrl</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/linking.ts#L22) `packages/react-native/src/linking.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/linking.ts#L22) <code v-pre>packages/react-native/src/linking.ts</code>
 
 Linking.addEventListener 相当 event 発火 mock。 deep link / universal link の simulation を in-process で行う。
 
@@ -95,9 +95,9 @@ Linking.addEventListener 相当 event 発火 mock。 deep link / universal link 
 export declare function dispatchLinkingUrl(state: LinkingState, url: string, timestamp?: number): LinkingEvent;
 ```
 
-#### `matchDeepLink`
+#### <code v-pre>matchDeepLink</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L58) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L58) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 deep link URL を pattern に対して match、 param 抽出
 
@@ -105,33 +105,33 @@ deep link URL を pattern に対して match、 param 抽出
 export declare function matchDeepLink(url: string, patterns: DeepLinkPattern[]): DeepLinkMatch;
 ```
 
-#### `mockAsyncStorage`
+#### <code v-pre>mockAsyncStorage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L17) `packages/react-native/src/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L17) <code v-pre>packages/react-native/src/async-storage.ts</code>
 
 ```ts
 export declare function mockAsyncStorage(initial?: AsyncStorageInitial): AsyncStorageMock;
 ```
 
-#### `mockNavigation`
+#### <code v-pre>mockNavigation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L19) `packages/react-native/src/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L19) <code v-pre>packages/react-native/src/navigation.ts</code>
 
 ```ts
 export declare function mockNavigation(initialRoute: NavigationRoute): NavigationMock;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L21) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L21) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `setDimensions`
+#### <code v-pre>setDimensions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/dimensions.ts#L10) `packages/react-native/src/dimensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/dimensions.ts#L10) <code v-pre>packages/react-native/src/dimensions.ts</code>
 
 Dimensions.get('window') / .get('screen') 値差替。 iPhone / iPad / Android 各 form factor を切替、 responsive layout の test を書く経路。
 
@@ -142,9 +142,9 @@ export declare function setDimensions(state: DimensionsState, next: {
 }): DimensionsState;
 ```
 
-#### `setPlatform`
+#### <code v-pre>setPlatform</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/platform.ts#L14) `packages/react-native/src/platform.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/platform.ts#L14) <code v-pre>packages/react-native/src/platform.ts</code>
 
 Platform.OS / Platform.Version 値差替。 iOS / Android / web / windows / macos の 5 OS を 切替可能、 test 内で platform-dependent path の分岐を verify する経路。
 
@@ -157,9 +157,9 @@ export declare function setPlatform(state: PlatformState, next: {
 }): PlatformState;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L134) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L134) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): Promise<T>;
@@ -167,17 +167,17 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `AsyncStorageInitial`
+#### <code v-pre>AsyncStorageInitial</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L1) `packages/react-native/src/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L1) <code v-pre>packages/react-native/src/async-storage.ts</code>
 
 ```ts
 export type AsyncStorageInitial = Record<string, string>;
 ```
 
-#### `AsyncStorageMock`
+#### <code v-pre>AsyncStorageMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L3) `packages/react-native/src/async-storage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/async-storage.ts#L3) <code v-pre>packages/react-native/src/async-storage.ts</code>
 
 ```ts
 export interface AsyncStorageMock {
@@ -191,9 +191,9 @@ export interface AsyncStorageMock {
 }
 ```
 
-#### `BatchOptions`
+#### <code v-pre>BatchOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L218) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L218) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface BatchOptions {
@@ -201,9 +201,9 @@ export interface BatchOptions {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L222) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L222) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface BatchResult<T> {
@@ -217,9 +217,9 @@ export interface BatchResult<T> {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L186) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L186) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -229,9 +229,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L181) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L181) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -240,17 +240,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L179) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L179) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `CreateRNTestEnvOptions`
+#### <code v-pre>CreateRNTestEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L9) `packages/react-native/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L9) <code v-pre>packages/react-native/src/env.ts</code>
 
 ```ts
 export interface CreateRNTestEnvOptions {
@@ -272,9 +272,9 @@ export interface CreateRNTestEnvOptions {
 }
 ```
 
-#### `DeepLinkMatch`
+#### <code v-pre>DeepLinkMatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L49) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L49) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface DeepLinkMatch {
@@ -286,9 +286,9 @@ export interface DeepLinkMatch {
 }
 ```
 
-#### `DeepLinkPattern`
+#### <code v-pre>DeepLinkPattern</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L43) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L43) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface DeepLinkPattern {
@@ -298,9 +298,9 @@ export interface DeepLinkPattern {
 }
 ```
 
-#### `DimensionsState`
+#### <code v-pre>DimensionsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/dimensions.ts#L1) `packages/react-native/src/dimensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/dimensions.ts#L1) <code v-pre>packages/react-native/src/dimensions.ts</code>
 
 ```ts
 export interface DimensionsState {
@@ -317,9 +317,9 @@ export interface DimensionsState {
 }
 ```
 
-#### `LinkingEvent`
+#### <code v-pre>LinkingEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/linking.ts#L1) `packages/react-native/src/linking.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/linking.ts#L1) <code v-pre>packages/react-native/src/linking.ts</code>
 
 ```ts
 export interface LinkingEvent {
@@ -328,17 +328,17 @@ export interface LinkingEvent {
 }
 ```
 
-#### `LinkingListener`
+#### <code v-pre>LinkingListener</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/linking.ts#L6) `packages/react-native/src/linking.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/linking.ts#L6) <code v-pre>packages/react-native/src/linking.ts</code>
 
 ```ts
 export type LinkingListener = (event: LinkingEvent) => void;
 ```
 
-#### `NavigationMock`
+#### <code v-pre>NavigationMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L6) `packages/react-native/src/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L6) <code v-pre>packages/react-native/src/navigation.ts</code>
 
 ```ts
 export interface NavigationMock {
@@ -351,9 +351,9 @@ export interface NavigationMock {
 }
 ```
 
-#### `NavigationRoute`
+#### <code v-pre>NavigationRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L1) `packages/react-native/src/navigation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/navigation.ts#L1) <code v-pre>packages/react-native/src/navigation.ts</code>
 
 ```ts
 export interface NavigationRoute {
@@ -362,17 +362,17 @@ export interface NavigationRoute {
 }
 ```
 
-#### `NotificationPermission`
+#### <code v-pre>NotificationPermission</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L83) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L83) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export type NotificationPermission = 'granted' | 'denied' | 'undetermined';
 ```
 
-#### `NotificationPermissionMock`
+#### <code v-pre>NotificationPermissionMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L85) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L85) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface NotificationPermissionMock {
@@ -382,9 +382,9 @@ export interface NotificationPermissionMock {
 }
 ```
 
-#### `ObservabilityEvent`
+#### <code v-pre>ObservabilityEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L108) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L108) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityEvent {
@@ -394,9 +394,9 @@ export interface ObservabilityEvent {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L114) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L114) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -406,9 +406,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `PlatformState`
+#### <code v-pre>PlatformState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/platform.ts#L3) `packages/react-native/src/platform.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/platform.ts#L3) <code v-pre>packages/react-native/src/platform.ts</code>
 
 ```ts
 export interface PlatformState {
@@ -419,9 +419,9 @@ export interface PlatformState {
 }
 ```
 
-#### `RateLimiter`
+#### <code v-pre>RateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L153) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L153) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface RateLimiter {
@@ -431,9 +431,9 @@ export interface RateLimiter {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L148) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L148) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -442,9 +442,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L7) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L7) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 v2.1 extensions — deep link handling, notification permission, retry, batch, observability, timeout, rate limit, circuit breaker for React Native app tests. RN 0.75+ new architecture 追随。
 
@@ -457,9 +457,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L14) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L14) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -470,17 +470,17 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `RNPlatformOS`
+#### <code v-pre>RNPlatformOS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L7) `packages/react-native/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L7) <code v-pre>packages/react-native/src/env.ts</code>
 
 ```ts
 export type RNPlatformOS = 'ios' | 'android' | 'web' | 'windows' | 'macos';
 ```
 
-#### `RNTestEnv`
+#### <code v-pre>RNTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L19) `packages/react-native/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/env.ts#L19) <code v-pre>packages/react-native/src/env.ts</code>
 
 ```ts
 export interface RNTestEnv {
@@ -492,9 +492,9 @@ export interface RNTestEnv {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L129) `packages/react-native/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/react-native/src/extensions.ts#L129) <code v-pre>packages/react-native/src/extensions.ts</code>
 
 ```ts
 export interface TimeoutOptions {

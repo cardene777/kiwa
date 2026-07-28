@@ -50,7 +50,7 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;unknown event type: $&#123;String(type)&#125;&#96; | [packages/astro/src/setup-view-transition-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L381) |
+| <code v-pre>unknown event type: $&#123;String(type)&#125;</code> | [packages/astro/src/setup-view-transition-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L381) |
 
 ## API 契約
 
@@ -58,41 +58,41 @@
 
 ### 値
 
-#### `ASTRO_NOT_FOUND_SYMBOL`
+#### <code v-pre>ASTRO&#95;NOT&#95;FOUND&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L18) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L18) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export declare const ASTRO_NOT_FOUND_SYMBOL: unique symbol;
 ```
 
-#### `ASTRO_REDIRECT_SYMBOL`
+#### <code v-pre>ASTRO&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L17) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L17) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export declare const ASTRO_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `ASTRO_REWRITE_SYMBOL`
+#### <code v-pre>ASTRO&#95;REWRITE&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L19) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L19) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export declare const ASTRO_REWRITE_SYMBOL: unique symbol;
 ```
 
-#### `invokeEndpoint`
+#### <code v-pre>invokeEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L89) `packages/astro/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L89) <code v-pre>packages/astro/src/invoke-endpoint.ts</code>
 
 ```ts
 export declare function invokeEndpoint<TParams extends Record<string, string | undefined> = Record<string, string | undefined>>(opts: InvokeEndpointOptions<TParams>): Promise<InvokeEndpointResult>;
 ```
 
-#### `kiwaAstroNotFound`
+#### <code v-pre>kiwaAstroNotFound</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L198) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L198) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 Construct a notFound signal the same way `Astro.notFound(response?)` does in production. Pages can `throw Astro.notFound()` to short-circuit; in kiwa tests the page can `throw kiwaAstroNotFound()` to be captured.
 
@@ -100,9 +100,9 @@ Construct a notFound signal the same way `Astro.notFound(response?)` does in pro
 export declare function kiwaAstroNotFound(response?: Response): AstroNotFoundSignal;
 ```
 
-#### `renderAstroPage`
+#### <code v-pre>renderAstroPage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L129) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L129) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 Render a `.astro` page in isolation and capture HTML / Response / redirect / notFound / rewrite signals. The page receives a synthetic AstroContext with the same shape as the real `Astro` global.
 
@@ -110,9 +110,9 @@ Render a `.astro` page in isolation and capture HTML / Response / redirect / not
 export declare function renderAstroPage<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: RenderAstroPageOptions<TProps, TParams, TLocals>): Promise<RenderAstroPageResult>;
 ```
 
-#### `setupAstroViewTransitionEnv`
+#### <code v-pre>setupAstroViewTransitionEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L262) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L262) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export declare function setupAstroViewTransitionEnv(options: SetupAstroViewTransitionEnvOptions): AstroViewTransitionEnv;
@@ -120,17 +120,17 @@ export declare function setupAstroViewTransitionEnv(options: SetupAstroViewTrans
 
 ### 型
 
-#### `APIRoute`
+#### <code v-pre>APIRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L28) `packages/astro/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L28) <code v-pre>packages/astro/src/invoke-endpoint.ts</code>
 
 ```ts
 export type APIRoute<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> = (context: SimulatedAPIContext<TParams>) => Promise<Response> | Response;
 ```
 
-#### `AstroAfterPreparationEvent`
+#### <code v-pre>AstroAfterPreparationEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L61) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L61) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 Astro 公式 router は `triggerEvent(TRANSITION_AFTER_PREPARATION)` で plain `Event` を dispatch する。 listener は `e.type` だけ参照可能で、 from / to / newDocument は持たない。
 
@@ -140,9 +140,9 @@ export interface AstroAfterPreparationEvent {
 }
 ```
 
-#### `AstroAfterSwapEvent`
+#### <code v-pre>AstroAfterSwapEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L80) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L80) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 Astro 公式 router は `triggerEvent(TRANSITION_AFTER_SWAP)` で plain `Event` を dispatch する。 listener は `e.type` だけ参照可能で、 from / to は持たない (nav 後 URL は `document.location.href`)。
 
@@ -152,9 +152,9 @@ export interface AstroAfterSwapEvent {
 }
 ```
 
-#### `AstroBeforePreparationEvent`
+#### <code v-pre>AstroBeforePreparationEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L49) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L49) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface AstroBeforePreparationEvent extends AstroViewTransitionEventPayload {
@@ -166,9 +166,9 @@ export interface AstroBeforePreparationEvent extends AstroViewTransitionEventPay
 }
 ```
 
-#### `AstroBeforeSwapEvent`
+#### <code v-pre>AstroBeforeSwapEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L65) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L65) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface AstroBeforeSwapEvent extends AstroViewTransitionEventPayload {
@@ -183,9 +183,9 @@ export interface AstroBeforeSwapEvent extends AstroViewTransitionEventPayload {
 }
 ```
 
-#### `AstroNotFoundSignal`
+#### <code v-pre>AstroNotFoundSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L27) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L27) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export interface AstroNotFoundSignal {
@@ -194,17 +194,17 @@ export interface AstroNotFoundSignal {
 }
 ```
 
-#### `AstroPageComponent`
+#### <code v-pre>AstroPageComponent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L61) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L61) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export type AstroPageComponent<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>> = (context: SimulatedAstroContext<TProps, TParams, TLocals>) => Promise<string | Response> | string | Response;
 ```
 
-#### `AstroRedirectSignal`
+#### <code v-pre>AstroRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L21) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L21) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export interface AstroRedirectSignal {
@@ -214,9 +214,9 @@ export interface AstroRedirectSignal {
 }
 ```
 
-#### `AstroRewriteSignal`
+#### <code v-pre>AstroRewriteSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L32) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L32) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export interface AstroRewriteSignal {
@@ -225,17 +225,17 @@ export interface AstroRewriteSignal {
 }
 ```
 
-#### `AstroSignal`
+#### <code v-pre>AstroSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L37) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L37) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export type AstroSignal = AstroRedirectSignal | AstroNotFoundSignal | AstroRewriteSignal;
 ```
 
-#### `AstroViewTransitionDispatchResult`
+#### <code v-pre>AstroViewTransitionDispatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L168) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L168) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface AstroViewTransitionDispatchResult {
@@ -254,9 +254,9 @@ export interface AstroViewTransitionDispatchResult {
 }
 ```
 
-#### `AstroViewTransitionDomDiff`
+#### <code v-pre>AstroViewTransitionDomDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L183) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L183) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface AstroViewTransitionDomDiff {
@@ -269,9 +269,9 @@ export interface AstroViewTransitionDomDiff {
 }
 ```
 
-#### `AstroViewTransitionEnv`
+#### <code v-pre>AstroViewTransitionEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L124) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L124) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface AstroViewTransitionEnv {
@@ -317,17 +317,17 @@ export interface AstroViewTransitionEnv {
 }
 ```
 
-#### `AstroViewTransitionEvent`
+#### <code v-pre>AstroViewTransitionEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L84) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L84) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export type AstroViewTransitionEvent = AstroBeforePreparationEvent | AstroAfterPreparationEvent | AstroBeforeSwapEvent | AstroAfterSwapEvent;
 ```
 
-#### `AstroViewTransitionEventPayload`
+#### <code v-pre>AstroViewTransitionEventPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L37) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L37) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface AstroViewTransitionEventPayload {
@@ -345,25 +345,25 @@ export interface AstroViewTransitionEventPayload {
 }
 ```
 
-#### `AstroViewTransitionEventType`
+#### <code v-pre>AstroViewTransitionEventType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L90) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L90) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export type AstroViewTransitionEventType = AstroViewTransitionEvent['type'];
 ```
 
-#### `AstroViewTransitionListener`
+#### <code v-pre>AstroViewTransitionListener</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L92) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L92) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export type AstroViewTransitionListener<TEvent extends AstroViewTransitionEvent = AstroViewTransitionEvent> = (event: TEvent) => void | Promise<void>;
 ```
 
-#### `InvokeEndpointOptions`
+#### <code v-pre>InvokeEndpointOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L32) `packages/astro/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L32) <code v-pre>packages/astro/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface InvokeEndpointOptions<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
@@ -380,9 +380,9 @@ export interface InvokeEndpointOptions<TParams extends Record<string, string | u
 }
 ```
 
-#### `InvokeEndpointResult`
+#### <code v-pre>InvokeEndpointResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L45) `packages/astro/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L45) <code v-pre>packages/astro/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface InvokeEndpointResult {
@@ -394,9 +394,9 @@ export interface InvokeEndpointResult {
 }
 ```
 
-#### `RenderAstroPageOptions`
+#### <code v-pre>RenderAstroPageOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L69) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L69) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export interface RenderAstroPageOptions<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>> {
@@ -413,9 +413,9 @@ export interface RenderAstroPageOptions<TProps extends Record<string, unknown> =
 }
 ```
 
-#### `RenderAstroPageResult`
+#### <code v-pre>RenderAstroPageResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L86) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L86) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export interface RenderAstroPageResult {
@@ -428,9 +428,9 @@ export interface RenderAstroPageResult {
 }
 ```
 
-#### `SetupAstroViewTransitionEnvOptions`
+#### <code v-pre>SetupAstroViewTransitionEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L96) `packages/astro/src/setup-view-transition-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L96) <code v-pre>packages/astro/src/setup-view-transition-env.ts</code>
 
 ```ts
 export interface SetupAstroViewTransitionEnvOptions {
@@ -462,9 +462,9 @@ export interface SetupAstroViewTransitionEnvOptions {
 }
 ```
 
-#### `SimulatedAPIContext`
+#### <code v-pre>SimulatedAPIContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L13) `packages/astro/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/invoke-endpoint.ts#L13) <code v-pre>packages/astro/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface SimulatedAPIContext<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
@@ -485,9 +485,9 @@ export interface SimulatedAPIContext<TParams extends Record<string, string | und
 }
 ```
 
-#### `SimulatedAstroContext`
+#### <code v-pre>SimulatedAstroContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L39) `packages/astro/src/render-astro-page.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/render-astro-page.ts#L39) <code v-pre>packages/astro/src/render-astro-page.ts</code>
 
 ```ts
 export interface SimulatedAstroContext<TProps extends Record<string, unknown> = Record<string, unknown>, TParams extends Record<string, string | undefined> = Record<string, string | undefined>, TLocals extends Record<string, unknown> = Record<string, unknown>> {

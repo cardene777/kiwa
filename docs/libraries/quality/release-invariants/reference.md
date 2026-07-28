@@ -23,9 +23,9 @@
 
 ### 値
 
-#### `buildReleaseInvariantsSummary`
+#### <code v-pre>buildReleaseInvariantsSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/summary.ts#L21) `packages/release-invariants/src/summary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/summary.ts#L21) <code v-pre>packages/release-invariants/src/summary.ts</code>
 
 Build the 3-invariant summary in one shot. `ok` is the AND of every invariant — a caller (usually a release-smoke suite) can short-circuit on this single boolean.
 
@@ -33,9 +33,9 @@ Build the 3-invariant summary in one shot. `ok` is the AND of every invariant �
 export declare function buildReleaseInvariantsSummary(input: BuildReleaseInvariantsSummaryInput): ReleaseInvariantsSummary;
 ```
 
-#### `checkGateScriptPackageCoverage`
+#### <code v-pre>checkGateScriptPackageCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/gate-script-package-coverage.ts#L27) `packages/release-invariants/src/gate-script-package-coverage.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/gate-script-package-coverage.ts#L27) <code v-pre>packages/release-invariants/src/gate-script-package-coverage.ts</code>
 
 Check that every publishable package appears in the mutation gate script (typically `scripts.test:mutation`).
 
@@ -43,9 +43,9 @@ Check that every publishable package appears in the mutation gate script (typica
 export declare function checkGateScriptPackageCoverage(mutationGateScript: string, publishable: PublishablePackage[]): GateScriptPackageCoverageResult;
 ```
 
-#### `checkProvenanceFlagAbsence`
+#### <code v-pre>checkProvenanceFlagAbsence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/provenance-flag-absence.ts#L23) `packages/release-invariants/src/provenance-flag-absence.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/provenance-flag-absence.ts#L23) <code v-pre>packages/release-invariants/src/provenance-flag-absence.ts</code>
 
 Assert `--provenance` is absent from the release script. A match reports `ok: false` with up to 3 excerpts around the offending flag.
 
@@ -53,9 +53,9 @@ Assert `--provenance` is absent from the release script. A match reports `ok: fa
 export declare function checkProvenanceFlagAbsence(releaseScript: string): ProvenanceFlagAbsenceResult;
 ```
 
-#### `checkReleaseScriptFilter`
+#### <code v-pre>checkReleaseScriptFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/release-script-filter.ts#L31) `packages/release-invariants/src/release-script-filter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/release-script-filter.ts#L31) <code v-pre>packages/release-invariants/src/release-script-filter.ts</code>
 
 Check that every publishable package appears in **both** halves (`-F {name}` build + `--filter {name}` publish) of the release script.
 
@@ -65,9 +65,9 @@ export declare function checkReleaseScriptFilter(releaseScript: string, publisha
 
 ### 型
 
-#### `BuildReleaseInvariantsSummaryInput`
+#### <code v-pre>BuildReleaseInvariantsSummaryInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/summary.ts#L10) `packages/release-invariants/src/summary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/summary.ts#L10) <code v-pre>packages/release-invariants/src/summary.ts</code>
 
 ```ts
 export interface BuildReleaseInvariantsSummaryInput {
@@ -77,9 +77,9 @@ export interface BuildReleaseInvariantsSummaryInput {
 }
 ```
 
-#### `GateScriptPackageCoverageEntry`
+#### <code v-pre>GateScriptPackageCoverageEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L67) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L67) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 Per-package result of the `checkGateScriptPackageCoverage` invariant. `test:mutation` (and its downstream `gate:mutation` reader) must include every publishable package the release publishes — otherwise the mutation baseline drifts from what actually ships.
 
@@ -90,9 +90,9 @@ export interface GateScriptPackageCoverageEntry {
 }
 ```
 
-#### `GateScriptPackageCoverageResult`
+#### <code v-pre>GateScriptPackageCoverageResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L72) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L72) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 ```ts
 export interface GateScriptPackageCoverageResult {
@@ -102,9 +102,9 @@ export interface GateScriptPackageCoverageResult {
 }
 ```
 
-#### `ProvenanceFlagAbsenceResult`
+#### <code v-pre>ProvenanceFlagAbsenceResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L51) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L51) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 Per-package result of the `checkProvenanceFlagAbsence` invariant. `provenanceFlagPresent = true` means the release script contains a `--provenance` flag next to a `pnpm publish`. `ok = true` means the flag is **absent** — v1.14 removed provenance because it required OIDC federation (npm CLI 10+) that is not stable inside pnpm monorepos.
 
@@ -120,9 +120,9 @@ export interface ProvenanceFlagAbsenceResult {
 }
 ```
 
-#### `PublishablePackage`
+#### <code v-pre>PublishablePackage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L12) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L12) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 A publishable npm package descriptor. `name` is the `@scope/pkg` string as it appears in `package.json`. `dir` is optional and only used for error messages; the invariants themselves operate on names.
 
@@ -133,9 +133,9 @@ export interface PublishablePackage {
 }
 ```
 
-#### `ReleaseInvariantsSummary`
+#### <code v-pre>ReleaseInvariantsSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L82) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L82) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 Aggregate SSOT — the shape v1.29's `docs/concepts/release-invariants.md` pins as the 3-invariant release-gate ledger.
 
@@ -148,9 +148,9 @@ export interface ReleaseInvariantsSummary {
 }
 ```
 
-#### `ReleaseScriptFilterEntry`
+#### <code v-pre>ReleaseScriptFilterEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L20) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L20) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 Per-package result of the `checkReleaseScriptFilter` invariant.
 
@@ -170,9 +170,9 @@ export interface ReleaseScriptFilterEntry {
 }
 ```
 
-#### `ReleaseScriptFilterResult`
+#### <code v-pre>ReleaseScriptFilterResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L37) `packages/release-invariants/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/src/types.ts#L37) <code v-pre>packages/release-invariants/src/types.ts</code>
 
 Aggregate result of the `checkReleaseScriptFilter` invariant.
 

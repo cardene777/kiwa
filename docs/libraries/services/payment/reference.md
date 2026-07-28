@@ -51,113 +51,113 @@ advanced semantics は、同じ `PaymentAdapter` を通じて provider 方言の
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)&#96; | [packages/payment/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L81) |
-| 'scheduleInstallment: all installments already scheduled' | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L111) |
-| 'scoreRisk: score must be between 0 and 100' | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L133) |
-| &#96;chargeLateFee: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L157) |
-| 'chargeLateFee: installmentIndex out of range' | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L160) |
-| 'createBnplPlan: totalCents must be positive' | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L69) |
-| 'createBnplPlan: installments must be between 2 and 12' | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L76) |
-| &#96;submitEvidence: chargeback $&#123;chargeback.id&#125; is $&#123;chargeback.state&#125;&#96; | [packages/payment/src/semantics/chargeback.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L100) |
-| &#96;resolveChargeback: chargeback is $&#123;chargeback.state&#125;, submit evidence first&#96; | [packages/payment/src/semantics/chargeback.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L139) |
-| &#96;confirmTx: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L111) |
-| 'confirmTx: invoice expired' | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L116) |
-| 'abstractGas: gas abstraction disabled in config' | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L142) |
-| 'abstractGas: gasSubsidyCents must be non-negative' | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L145) |
-| 'linkWallet: walletAddress must not be empty' | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L163) |
-| 'linkWallet: signature required for wallet linkage' | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L166) |
-| 'createCryptoInvoice: amountCents must be positive' | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L72) |
-| 'escalateArbitration: dispute must be represented first' | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L110) |
-| 'shiftLiability: liability already shifted' | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L130) |
-| &#96;submitDisputeEvidence: session is $&#123;session.state&#125;, cannot add evidence&#96; | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L72) |
-| 'representDispute: evidence must be submitted first' | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L90) |
-| 'representDispute: cannot represent without evidence' | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L93) |
-| &#96;finalizeDunning: session already $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/dunning.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L123) |
-| &#96;dunningAttempt: session is $&#123;session.state&#125;, cannot attempt&#96; | [packages/payment/src/semantics/dunning.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L83) |
-| 'verifyKyb: KYB not required for this session' | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L124) |
-| 'issueCard: KYC must be verified before issuing a card' | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L144) |
-| 'issueCard: KYB must be verified before issuing a card' | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L147) |
-| &#96;verifyKyc: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L95) |
-| 'verifyKyc: score must be between 0 and 100' | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L98) |
-| 'scoreDevice: score must be between 0 and 100' | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L100) |
-| 'verifyBiometric: confidence must be between 0 and 1' | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L123) |
-| 'flagVelocity: attemptsInWindow must be non-negative' | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L144) |
-| 'scoreMlBlock: score must be between 0 and 1' | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L168) |
-| 'initiateSettlement: no rate locked' | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L133) |
-| 'initiateSettlement: rate lock expired' | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L137) |
-| &#96;completeSettlement: session is $&#123;session.state&#125;, must be settlement-initiated&#96; | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L157) |
-| 'completeSettlement: no rate locked' | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L163) |
-| 'expireRate: no rate locked' | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L183) |
-| 'lockRate: rate must be positive' | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L95) |
-| 'lockRate: amountFromCents must be positive' | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L98) |
-| &#96;payInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;&#96; | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L107) |
-| &#96;voidInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;, cannot void&#96; | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L142) |
-| &#96;markUncollectible: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;&#96; | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L176) |
-| &#96;creditNoteInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;, must be paid&#96; | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L212) |
-| 'creditNoteInvoice: creditAmountCents must be &gt; 0' | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L215) |
-| &#96;creditNoteInvoice: credit $&#123;input.creditAmountCents&#125; exceeds invoice $&#123;invoice.amountCents&#125;&#96; | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L218) |
-| &#96;openInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;&#96; | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L74) |
-| &#96;routeCharge: no adapter registered for $&#123;provider&#125;&#96; | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L101) |
-| &#96;routeCharge: no adapter for failover $&#123;session.config.providers&#91;session.currentProviderIndex&#93;&#125;&#96; | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L126) |
-| &#96;probeCircuit: session is $&#123;session.state&#125;, not circuit-open&#96; | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L147) |
-| 'probeCircuit: currentProviderIndex out of range' | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L153) |
-| &#96;probeCircuit: no adapter for $&#123;provider&#125;&#96; | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L172) |
-| 'startOrchestration: providers must not be empty' | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L64) |
-| 'routeCharge: session already terminated' | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L93) |
-| 'routeCharge: circuit is open, call probeCircuit first' | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L96) |
-| &#96;migrateToken: source token $&#123;input.tokenId&#125; not found&#96; | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L115) |
-| &#96;migrateToken: source token belongs to $&#123;source.provider&#125;, not $&#123;fromAdapter.provider&#125;&#96; | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L118) |
-| 'verifyPciScope: raw PAN/CVV detected in vault' | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L172) |
-| &#96;tokenizeCard: token $&#123;input.tokenId&#125; already exists&#96; | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L66) |
-| &#96;revokeToken: token $&#123;input.tokenId&#125; not found&#96; | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L92) |
-| 'scoreMl: ML scoring disabled in config' | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L118) |
-| 'scoreMl: score must be between 0 and 1' | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L121) |
-| &#96;scoreMl: no adapter for $&#123;providerName&#125;&#96; | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L128) |
-| 'triggerFallback: cascade already exhausted' | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L146) |
-| &#96;triggerFallback: no adapter for $&#123;lastProvider&#125;&#96; | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L159) |
-| 'triggerFallback: currentIndex out of range' | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L169) |
-| &#96;triggerFallback: no adapter for $&#123;providerName&#125;&#96; | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L173) |
-| 'startOrchestrationII: providers must not be empty' | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L64) |
-| &#96;smartRoute: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L90) |
-| 'smartRoute: currentIndex out of range' | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L94) |
-| &#96;smartRoute: no adapter for $&#123;providerName&#125;&#96; | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L98) |
-| &#96;revokeMandate: mandate $&#123;mandate.id&#125; is $&#123;mandate.state&#125;&#96; | [packages/payment/src/semantics/psd2.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L81) |
-| 'recordChurn: churnCents must be non-negative' | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L101) |
-| 'recordExpansion: expansionCents must be non-negative' | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L122) |
-| 'recordContraction: contractionCents must be non-negative' | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L170) |
-| 'startRecurringRevenue: mrrStartCents must be non-negative' | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L51) |
-| 'preventChargeback: chargebackPrevention disabled in policy' | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L138) |
-| 'refund window has expired' | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L145) |
-| 'amount below minAmountCents' | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L151) |
-| 'amount above maxAmountCents' | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L154) |
-| 'partialRefund: refund exceeds original charge' | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L81) |
-| 'fullRefund: no remaining amount to refund' | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L98) |
-| 'reportPsd2: challengeRate must be between 0 and 1' | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L103) |
-| 'reportDora: ictRiskScore must be between 0 and 100' | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L139) |
-| 'fileSar: SAR already filed for this session' | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L175) |
-| 'fileSar: reason must not be empty' | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L178) |
-| &#96;retryDeliver: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/retry.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L78) |
-| &#96;advanceCascade: session already $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L106) |
-| 'advanceCascade: cascade exhausted' | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L110) |
-| 'advanceCascade: cascade step index out of range' | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L115) |
-| 'applyCardUpdate: cardUpdater disabled in config' | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L136) |
-| 'applyNetworkToken: networkTokenization disabled in config' | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L156) |
-| &#96;scheduleSmartRetry: session already $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L88) |
-| &#96;scaAuthenticate: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/sca.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L119) |
-| &#96;scaEvaluate: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/sca.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L61) |
-| &#96;pauseSubscription: subscription is $&#123;subscription.state&#125;&#96; | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L132) |
-| &#96;resumeSubscription: subscription is $&#123;subscription.state&#125;&#96; | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L166) |
-| &#96;cancelSubscription: subscription is already canceled&#96; | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L200) |
-| &#96;reactivateSubscription: subscription is $&#123;subscription.state&#125;&#96; | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L234) |
-| &#96;changePlan: subscription $&#123;subscription.id&#125; is canceled&#96; | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L82) |
-| &#96;changePlan: subscription $&#123;subscription.id&#125; is paused, resume first&#96; | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L85) |
-| 'changePlan: newAmountCents equals current amountCents (no-op)' | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L88) |
-| &#96;exitGracePeriod: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/subscription-state-machine.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L101) |
-| 'applyProration: daysInCycle must be positive' | [packages/payment/src/semantics/subscription-state-machine.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L125) |
-| &#96;enterGracePeriod: session is $&#123;session.state&#125;, must be active&#96; | [packages/payment/src/semantics/subscription-state-machine.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L82) |
-| &#96;threeDsFrictionless: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/three-ds.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L136) |
-| &#96;threeDsRequestChallenge: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/three-ds.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L60) |
-| &#96;threeDsSubmitChallenge: session is $&#123;session.state&#125;&#96; | [packages/payment/src/semantics/three-ds.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L99) |
+| <code v-pre>expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)</code> | [packages/payment/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L81) |
+| <code v-pre>scheduleInstallment: all installments already scheduled</code> | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L111) |
+| <code v-pre>scoreRisk: score must be between 0 and 100</code> | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L133) |
+| <code v-pre>chargeLateFee: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L157) |
+| <code v-pre>chargeLateFee: installmentIndex out of range</code> | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L160) |
+| <code v-pre>createBnplPlan: totalCents must be positive</code> | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L69) |
+| <code v-pre>createBnplPlan: installments must be between 2 and 12</code> | [packages/payment/src/semantics/bnpl.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L76) |
+| <code v-pre>submitEvidence: chargeback $&#123;chargeback.id&#125; is $&#123;chargeback.state&#125;</code> | [packages/payment/src/semantics/chargeback.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L100) |
+| <code v-pre>resolveChargeback: chargeback is $&#123;chargeback.state&#125;, submit evidence first</code> | [packages/payment/src/semantics/chargeback.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L139) |
+| <code v-pre>confirmTx: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L111) |
+| <code v-pre>confirmTx: invoice expired</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L116) |
+| <code v-pre>abstractGas: gas abstraction disabled in config</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L142) |
+| <code v-pre>abstractGas: gasSubsidyCents must be non-negative</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L145) |
+| <code v-pre>linkWallet: walletAddress must not be empty</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L163) |
+| <code v-pre>linkWallet: signature required for wallet linkage</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L166) |
+| <code v-pre>createCryptoInvoice: amountCents must be positive</code> | [packages/payment/src/semantics/crypto-payment.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L72) |
+| <code v-pre>escalateArbitration: dispute must be represented first</code> | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L110) |
+| <code v-pre>shiftLiability: liability already shifted</code> | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L130) |
+| <code v-pre>submitDisputeEvidence: session is $&#123;session.state&#125;, cannot add evidence</code> | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L72) |
+| <code v-pre>representDispute: evidence must be submitted first</code> | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L90) |
+| <code v-pre>representDispute: cannot represent without evidence</code> | [packages/payment/src/semantics/dispute.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L93) |
+| <code v-pre>finalizeDunning: session already $&#123;session.state&#125;</code> | [packages/payment/src/semantics/dunning.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L123) |
+| <code v-pre>dunningAttempt: session is $&#123;session.state&#125;, cannot attempt</code> | [packages/payment/src/semantics/dunning.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L83) |
+| <code v-pre>verifyKyb: KYB not required for this session</code> | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L124) |
+| <code v-pre>issueCard: KYC must be verified before issuing a card</code> | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L144) |
+| <code v-pre>issueCard: KYB must be verified before issuing a card</code> | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L147) |
+| <code v-pre>verifyKyc: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L95) |
+| <code v-pre>verifyKyc: score must be between 0 and 100</code> | [packages/payment/src/semantics/embedded-finance.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L98) |
+| <code v-pre>scoreDevice: score must be between 0 and 100</code> | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L100) |
+| <code v-pre>verifyBiometric: confidence must be between 0 and 1</code> | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L123) |
+| <code v-pre>flagVelocity: attemptsInWindow must be non-negative</code> | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L144) |
+| <code v-pre>scoreMlBlock: score must be between 0 and 1</code> | [packages/payment/src/semantics/fraud-detection-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L168) |
+| <code v-pre>initiateSettlement: no rate locked</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L133) |
+| <code v-pre>initiateSettlement: rate lock expired</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L137) |
+| <code v-pre>completeSettlement: session is $&#123;session.state&#125;, must be settlement-initiated</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L157) |
+| <code v-pre>completeSettlement: no rate locked</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L163) |
+| <code v-pre>expireRate: no rate locked</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L183) |
+| <code v-pre>lockRate: rate must be positive</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L95) |
+| <code v-pre>lockRate: amountFromCents must be positive</code> | [packages/payment/src/semantics/fx-cross-border.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L98) |
+| <code v-pre>payInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L107) |
+| <code v-pre>voidInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;, cannot void</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L142) |
+| <code v-pre>markUncollectible: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L176) |
+| <code v-pre>creditNoteInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;, must be paid</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L212) |
+| <code v-pre>creditNoteInvoice: creditAmountCents must be &gt; 0</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L215) |
+| <code v-pre>creditNoteInvoice: credit $&#123;input.creditAmountCents&#125; exceeds invoice $&#123;invoice.amountCents&#125;</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L218) |
+| <code v-pre>openInvoice: invoice $&#123;invoice.id&#125; is $&#123;invoice.state&#125;</code> | [packages/payment/src/semantics/invoice.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L74) |
+| <code v-pre>routeCharge: no adapter registered for $&#123;provider&#125;</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L101) |
+| <code v-pre>routeCharge: no adapter for failover $&#123;session.config.providers&#91;session.currentProviderIndex&#93;&#125;</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L126) |
+| <code v-pre>probeCircuit: session is $&#123;session.state&#125;, not circuit-open</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L147) |
+| <code v-pre>probeCircuit: currentProviderIndex out of range</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L153) |
+| <code v-pre>probeCircuit: no adapter for $&#123;provider&#125;</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L172) |
+| <code v-pre>startOrchestration: providers must not be empty</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L64) |
+| <code v-pre>routeCharge: session already terminated</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L93) |
+| <code v-pre>routeCharge: circuit is open, call probeCircuit first</code> | [packages/payment/src/semantics/orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L96) |
+| <code v-pre>migrateToken: source token $&#123;input.tokenId&#125; not found</code> | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L115) |
+| <code v-pre>migrateToken: source token belongs to $&#123;source.provider&#125;, not $&#123;fromAdapter.provider&#125;</code> | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L118) |
+| <code v-pre>verifyPciScope: raw PAN/CVV detected in vault</code> | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L172) |
+| <code v-pre>tokenizeCard: token $&#123;input.tokenId&#125; already exists</code> | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L66) |
+| <code v-pre>revokeToken: token $&#123;input.tokenId&#125; not found</code> | [packages/payment/src/semantics/payment-method-vault.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L92) |
+| <code v-pre>scoreMl: ML scoring disabled in config</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L118) |
+| <code v-pre>scoreMl: score must be between 0 and 1</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L121) |
+| <code v-pre>scoreMl: no adapter for $&#123;providerName&#125;</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L128) |
+| <code v-pre>triggerFallback: cascade already exhausted</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L146) |
+| <code v-pre>triggerFallback: no adapter for $&#123;lastProvider&#125;</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L159) |
+| <code v-pre>triggerFallback: currentIndex out of range</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L169) |
+| <code v-pre>triggerFallback: no adapter for $&#123;providerName&#125;</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L173) |
+| <code v-pre>startOrchestrationII: providers must not be empty</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L64) |
+| <code v-pre>smartRoute: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L90) |
+| <code v-pre>smartRoute: currentIndex out of range</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L94) |
+| <code v-pre>smartRoute: no adapter for $&#123;providerName&#125;</code> | [packages/payment/src/semantics/payment-orchestration-ii.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L98) |
+| <code v-pre>revokeMandate: mandate $&#123;mandate.id&#125; is $&#123;mandate.state&#125;</code> | [packages/payment/src/semantics/psd2.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L81) |
+| <code v-pre>recordChurn: churnCents must be non-negative</code> | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L101) |
+| <code v-pre>recordExpansion: expansionCents must be non-negative</code> | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L122) |
+| <code v-pre>recordContraction: contractionCents must be non-negative</code> | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L170) |
+| <code v-pre>startRecurringRevenue: mrrStartCents must be non-negative</code> | [packages/payment/src/semantics/recurring-revenue-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L51) |
+| <code v-pre>preventChargeback: chargebackPrevention disabled in policy</code> | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L138) |
+| <code v-pre>refund window has expired</code> | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L145) |
+| <code v-pre>amount below minAmountCents</code> | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L151) |
+| <code v-pre>amount above maxAmountCents</code> | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L154) |
+| <code v-pre>partialRefund: refund exceeds original charge</code> | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L81) |
+| <code v-pre>fullRefund: no remaining amount to refund</code> | [packages/payment/src/semantics/refund-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L98) |
+| <code v-pre>reportPsd2: challengeRate must be between 0 and 1</code> | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L103) |
+| <code v-pre>reportDora: ictRiskScore must be between 0 and 100</code> | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L139) |
+| <code v-pre>fileSar: SAR already filed for this session</code> | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L175) |
+| <code v-pre>fileSar: reason must not be empty</code> | [packages/payment/src/semantics/regulatory-reporting.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L178) |
+| <code v-pre>retryDeliver: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/retry.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L78) |
+| <code v-pre>advanceCascade: session already $&#123;session.state&#125;</code> | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L106) |
+| <code v-pre>advanceCascade: cascade exhausted</code> | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L110) |
+| <code v-pre>advanceCascade: cascade step index out of range</code> | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L115) |
+| <code v-pre>applyCardUpdate: cardUpdater disabled in config</code> | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L136) |
+| <code v-pre>applyNetworkToken: networkTokenization disabled in config</code> | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L156) |
+| <code v-pre>scheduleSmartRetry: session already $&#123;session.state&#125;</code> | [packages/payment/src/semantics/revenue-recovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L88) |
+| <code v-pre>scaAuthenticate: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/sca.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L119) |
+| <code v-pre>scaEvaluate: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/sca.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L61) |
+| <code v-pre>pauseSubscription: subscription is $&#123;subscription.state&#125;</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L132) |
+| <code v-pre>resumeSubscription: subscription is $&#123;subscription.state&#125;</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L166) |
+| <code v-pre>cancelSubscription: subscription is already canceled</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L200) |
+| <code v-pre>reactivateSubscription: subscription is $&#123;subscription.state&#125;</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L234) |
+| <code v-pre>changePlan: subscription $&#123;subscription.id&#125; is canceled</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L82) |
+| <code v-pre>changePlan: subscription $&#123;subscription.id&#125; is paused, resume first</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L85) |
+| <code v-pre>changePlan: newAmountCents equals current amountCents (no-op)</code> | [packages/payment/src/semantics/subscription-lifecycle.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L88) |
+| <code v-pre>exitGracePeriod: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/subscription-state-machine.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L101) |
+| <code v-pre>applyProration: daysInCycle must be positive</code> | [packages/payment/src/semantics/subscription-state-machine.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L125) |
+| <code v-pre>enterGracePeriod: session is $&#123;session.state&#125;, must be active</code> | [packages/payment/src/semantics/subscription-state-machine.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L82) |
+| <code v-pre>threeDsFrictionless: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/three-ds.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L136) |
+| <code v-pre>threeDsRequestChallenge: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/three-ds.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L60) |
+| <code v-pre>threeDsSubmitChallenge: session is $&#123;session.state&#125;</code> | [packages/payment/src/semantics/three-ds.ts](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L99) |
 
 ## API 契約
 
@@ -165,9 +165,9 @@ advanced semantics は、同じ `PaymentAdapter` を通じて provider 方言の
 
 ### 値
 
-#### `abstractGas`
+#### <code v-pre>abstractGas</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L136) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L136) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 Abstract gas via paymaster (EIP-4337 or similar meta-tx). Customer pays in the invoice token; the paymaster covers the native gas token.
 
@@ -178,9 +178,9 @@ export declare function abstractGas(adapter: PaymentAdapter, session: CryptoPaym
 }): Promise<AxisStep<CryptoPaymentState>>;
 ```
 
-#### `advanceCascade`
+#### <code v-pre>advanceCascade</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L101) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L101) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Advance the dunning cascade one step. Emits `recovery.dunning_cascade_step` with the channel (email / in-app / sms / push) and step index.
 
@@ -188,9 +188,9 @@ Advance the dunning cascade one step. Emits `recovery.dunning_cascade_step` with
 export declare function advanceCascade(adapter: PaymentAdapter, session: RecoverySession): Promise<AxisStep<RecoveryState>>;
 ```
 
-#### `applyCardUpdate`
+#### <code v-pre>applyCardUpdate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L130) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L130) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Card updater ran — customer's expiring card was refreshed via the network. Emits `recovery.card_updated` with the new PAN suffix hint.
 
@@ -202,9 +202,9 @@ export declare function applyCardUpdate(adapter: PaymentAdapter, session: Recove
 }): Promise<AxisStep<RecoveryState>>;
 ```
 
-#### `applyNetworkToken`
+#### <code v-pre>applyNetworkToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L150) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L150) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Network tokenization applied — customer card issued a network token that survives PAN re-issue.
 
@@ -214,9 +214,9 @@ export declare function applyNetworkToken(adapter: PaymentAdapter, session: Reco
 }): Promise<AxisStep<RecoveryState>>;
 ```
 
-#### `applyProration`
+#### <code v-pre>applyProration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L115) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L115) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 Apply proration for a mid-cycle plan change. `daysElapsed` is the number of days into the current billing cycle; `newPlanPriceCents` is the target plan's monthly price.
 
@@ -228,9 +228,9 @@ export declare function applyProration(adapter: PaymentAdapter, session: Subscri
 }): Promise<AxisStep<SubscriptionMachineState>>;
 ```
 
-#### `assertMode`
+#### <code v-pre>assertMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L74) `packages/payment/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L74) <code v-pre>packages/payment/src/real-driver.ts</code>
 
 Assert that a provider is in a specific mode. Used by dogfood apps that expect real driver mode in CI + fail loudly if the env is not configured.
 
@@ -238,9 +238,9 @@ Assert that a provider is in a specific mode. Used by dogfood apps that expect r
 export declare function assertMode(provider: PaymentProvider, expected: PaymentMode, env?: Record<string, string | undefined>): void;
 ```
 
-#### `calculateLocalizedTax`
+#### <code v-pre>calculateLocalizedTax</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L67) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L67) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 Compute the tax line for a given jurisdiction + amount + B2B flag. Handles EU reverse charge (B2B intra-EU → tax borne by buyer) and emits the correct provider dialect for VAT vs GST vs sales-tax.
 
@@ -251,9 +251,9 @@ export declare function calculateLocalizedTax(adapter: PaymentAdapter, input: Ta
 }>;
 ```
 
-#### `calculateTax`
+#### <code v-pre>calculateTax</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L61) `packages/payment/src/semantics/tax.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L61) <code v-pre>packages/payment/src/semantics/tax.ts</code>
 
 Pure tax calculation — no adapter side effect. Returns a fully populated {@link TaxLine} so callers can decide whether to emit `tax.calculated`, `tax.reverse_charged` or `tax.exempted`. Rules: - buyer B2B (has VAT id) + cross-border EU + digital / service → reverse charge - buyer country not in table → exempt (out of coverage) - otherwise → standard calc netCents * rateBps / 10000
 
@@ -261,9 +261,9 @@ Pure tax calculation — no adapter side effect. Returns a fully populated {@lin
 export declare function calculateTax(input: TaxCalcInput): TaxLine;
 ```
 
-#### `cancelSubscription`
+#### <code v-pre>cancelSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L195) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L195) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Cancel the subscription. Emits `subscription.canceled`. Idempotent guard: cancelling an already-canceled subscription throws.
 
@@ -271,9 +271,9 @@ Cancel the subscription. Emits `subscription.canceled`. Idempotent guard: cancel
 export declare function cancelSubscription(adapter: PaymentAdapter, subscription: Subscription): Promise<AxisStep<SubscriptionState>>;
 ```
 
-#### `changePlan`
+#### <code v-pre>changePlan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L76) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L76) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Change plan (upgrade or downgrade). The amount change relative to the current plan determines the neutral event: strictly greater = `upgraded`, strictly less = `downgraded`. Equal-amount change is rejected so tests exercise no-op guards explicitly.
 
@@ -284,9 +284,9 @@ export declare function changePlan(adapter: PaymentAdapter, subscription: Subscr
 }): Promise<AxisStep<SubscriptionState>>;
 ```
 
-#### `chargeLateFee`
+#### <code v-pre>chargeLateFee</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L151) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L151) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 Charge a late fee for a missed installment.
 
@@ -296,9 +296,9 @@ export declare function chargeLateFee(adapter: PaymentAdapter, session: BnplSess
 }): Promise<AxisStep<BnplState>>;
 ```
 
-#### `checkoutCompleted`
+#### <code v-pre>checkoutCompleted</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L12) `packages/payment/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L12) <code v-pre>packages/payment/src/fixture.ts</code>
 
 Common fixture builders for the 3 provider mocks. Each fixture returns an already-signed webhook (rawBody + signature + parsed event) so tests can either pass the rawBody + signature into `verifyWebhook` or hand the event directly to `emit`. Only high-frequency event types are covered here — for provider-specific event types, call `signWebhook({ type: '...', ... })` directly.
 
@@ -314,9 +314,9 @@ export declare const checkoutCompleted: (adapter: PaymentAdapter, input: {
 };
 ```
 
-#### `closeAccount`
+#### <code v-pre>closeAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L162) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L162) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 Close the account — terminal state, no further ops accepted.
 
@@ -324,9 +324,9 @@ Close the account — terminal state, no further ops accepted.
 export declare function closeAccount(session: EmbeddedFinanceSession): EmbeddedFinanceSession;
 ```
 
-#### `collectFidelityCoverage`
+#### <code v-pre>collectFidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fidelity.ts#L166) `packages/payment/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fidelity.ts#L166) <code v-pre>packages/payment/src/semantics/fidelity.ts</code>
 
 Collect the provider × axis coverage grid. `adapters` is the list of adapters to inspect — usually all 3 (`createStripeMock()`, `createPaddleMock()`, `createLemonSqueezyMock()`). The output is a flat row list `adapters.length * 25 = 75` for the default setup (9 v0.3 axis + 8 v0.4 axis + 8 v0.5 axis = 25 axis × 3 provider), plus `providers` + `axes` roll-up lists so callers can assert on the grid dimensions.
 
@@ -334,9 +334,9 @@ Collect the provider × axis coverage grid. `adapters` is the list of adapters t
 export declare function collectFidelityCoverage(adapters: PaymentAdapter[]): FidelityCoverage;
 ```
 
-#### `completeSettlement`
+#### <code v-pre>completeSettlement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L151) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L151) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 Complete settlement — funds arrived at the beneficiary bank.
 
@@ -346,9 +346,9 @@ export declare function completeSettlement(adapter: PaymentAdapter, session: FxS
 }): Promise<AxisStep<FxState>>;
 ```
 
-#### `computeMrr`
+#### <code v-pre>computeMrr</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L79) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L79) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Compute MRR / ARR from the current snapshot. MRR = mrrEnd, ARR = MRR × 12.
 
@@ -356,9 +356,9 @@ Compute MRR / ARR from the current snapshot. MRR = mrrEnd, ARR = MRR × 12.
 export declare function computeMrr(adapter: PaymentAdapter, session: RecurringRevenueSession): Promise<AxisStep<RecurringRevenueState>>;
 ```
 
-#### `computeNrr`
+#### <code v-pre>computeNrr</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L140) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L140) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Compute NRR (Net Revenue Retention) — the industry-standard growth quality metric. NRR = (MRR_start - churn - contraction + expansion) / MRR_start × 100. NRR &gt; 100% means the cohort grew despite churn.
 
@@ -366,9 +366,9 @@ Compute NRR (Net Revenue Retention) — the industry-standard growth quality met
 export declare function computeNrr(adapter: PaymentAdapter, session: RecurringRevenueSession): Promise<AxisStep<RecurringRevenueState>>;
 ```
 
-#### `confirmTx`
+#### <code v-pre>confirmTx</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L105) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L105) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 Record an on-chain confirmation. Emits `crypto.tx_confirmed` once the required confirmation count is reached.
 
@@ -379,9 +379,9 @@ export declare function confirmTx(adapter: PaymentAdapter, session: CryptoPaymen
 }): Promise<AxisStep<CryptoPaymentState>>;
 ```
 
-#### `createBnplPlan`
+#### <code v-pre>createBnplPlan</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L58) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L58) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 Create a BNPL plan. Splits `totalCents` into equal installments (rounded to integer cents; the last installment absorbs any rounding remainder).
 
@@ -398,9 +398,9 @@ export declare function createBnplPlan(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `createCryptoInvoice`
+#### <code v-pre>createCryptoInvoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L59) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L59) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 Create a crypto invoice for the given amount + chain + token.
 
@@ -419,9 +419,9 @@ export declare function createCryptoInvoice(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `createLemonSqueezyMock`
+#### <code v-pre>createLemonSqueezyMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/lemonsqueezy.ts#L10) `packages/payment/src/lemonsqueezy.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/lemonsqueezy.ts#L10) <code v-pre>packages/payment/src/lemonsqueezy.ts</code>
 
 Lemon Squeezy webhook mock. Real Lemon Squeezy: `X-Signature: hmac_sha256({body})` (no timestamp mixed in — LS signs the raw body only, verified against a webhook secret). The mock still adds a timestamp for freshness checks so tests can exercise stale rejection.
 
@@ -433,9 +433,9 @@ export declare function createLemonSqueezyMock(config?: {
 }): PaymentAdapter;
 ```
 
-#### `createMandate`
+#### <code v-pre>createMandate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L29) `packages/payment/src/semantics/psd2.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L29) <code v-pre>packages/payment/src/semantics/psd2.ts</code>
 
 Create a new mandate. Emits `psd2.mandate_created` with the scheme embedded in metadata so downstream tests can filter per scheme.
 
@@ -451,9 +451,9 @@ export declare function createMandate(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `createPaddleMock`
+#### <code v-pre>createPaddleMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/paddle.ts#L10) `packages/payment/src/paddle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/paddle.ts#L10) <code v-pre>packages/payment/src/paddle.ts</code>
 
 Paddle Billing (Paddle v2) webhook mock. Real Paddle: `Paddle-Signature: ts=...;h1=...` over `{ts}:{body}` with HMAC-SHA256, notification secret. Shape difference vs Stripe: Paddle uses `data.attributes.*` instead of `data.object.*`.
 
@@ -465,9 +465,9 @@ export declare function createPaddleMock(config?: {
 }): PaymentAdapter;
 ```
 
-#### `createStripeMock`
+#### <code v-pre>createStripeMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/stripe.ts#L10) `packages/payment/src/stripe.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/stripe.ts#L10) <code v-pre>packages/payment/src/stripe.ts</code>
 
 Stripe webhook mock. Real Stripe: `Stripe-Signature: t={ts},v1={sig}` over `{ts}.{body}`, secret from `whsec_*`. This mock exercises the same HMAC-SHA256 signing so tests that verify with the real Stripe SDK can run against this fixture.
 
@@ -479,9 +479,9 @@ export declare function createStripeMock(config?: {
 }): PaymentAdapter;
 ```
 
-#### `createSubscription`
+#### <code v-pre>createSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L30) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L30) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Create a new subscription. Emits `subscription.created`.
 
@@ -497,9 +497,9 @@ export declare function createSubscription(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `creditNoteInvoice`
+#### <code v-pre>creditNoteInvoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L206) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L206) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Issue a credit note against a paid invoice. Emits `invoice.credit_noted` with the credit amount (negative, capped at the invoice amount so tests fail loudly on overrefund attempts).
 
@@ -509,9 +509,9 @@ export declare function creditNoteInvoice(adapter: PaymentAdapter, invoice: Invo
 }): Promise<AxisStep<InvoiceState>>;
 ```
 
-#### `deliver`
+#### <code v-pre>deliver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L70) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L70) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 Attempt to deliver an event to the handler. Returns true if the caller should invoke the handler; false if the event was deduped, replay-blocked, or already poisoned.
 
@@ -522,9 +522,9 @@ export declare function deliver(adapter: PaymentAdapter, session: WebhookIdempot
 }>;
 ```
 
-#### `denyByPolicy`
+#### <code v-pre>denyByPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L109) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L109) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Explicit deny — the merchant refuses the refund because it violates policy (e.g., digital goods post-download).
 
@@ -532,9 +532,9 @@ Explicit deny — the merchant refuses the refund because it violates policy (e.
 export declare function denyByPolicy(adapter: PaymentAdapter, session: RefundSession): Promise<AxisStep<RefundState>>;
 ```
 
-#### `draftInvoice`
+#### <code v-pre>draftInvoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L29) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L29) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Draft a new invoice. Emits `invoice.drafted`.
 
@@ -549,9 +549,9 @@ export declare function draftInvoice(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `dunningAttempt`
+#### <code v-pre>dunningAttempt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L78) `packages/payment/src/semantics/dunning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L78) <code v-pre>packages/payment/src/semantics/dunning.ts</code>
 
 Run the next dunning attempt. Emits `dunning.attempt` on every retry, transitions to `in-grace-period` after the last configured attempt, and finalises to `exhausted` when `finalizeDunning` is called with `succeed: false` (or `recovered` with `succeed: true`).
 
@@ -559,9 +559,9 @@ Run the next dunning attempt. Emits `dunning.attempt` on every retry, transition
 export declare function dunningAttempt(adapter: PaymentAdapter, session: DunningSession): Promise<AxisStep<DunningState>>;
 ```
 
-#### `emitTaxLine`
+#### <code v-pre>emitTaxLine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L105) `packages/payment/src/semantics/tax.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L105) <code v-pre>packages/payment/src/semantics/tax.ts</code>
 
 Emit the tax outcome. Neutral event = `tax.calculated` (standard), `tax.reverse_charged` (B2B intra-EU) or `tax.exempted` (out of coverage).
 
@@ -573,9 +573,9 @@ export declare function emitTaxLine(adapter: PaymentAdapter, input: {
 }): Promise<AxisStep<'calculated' | 'reverse-charged' | 'exempted'>>;
 ```
 
-#### `enterGracePeriod`
+#### <code v-pre>enterGracePeriod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L77) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L77) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 Enter grace period after payment failure. Grace period is a bounded window where the subscription is still active from the customer's POV but the merchant has stopped granting renewed entitlement.
 
@@ -583,9 +583,9 @@ Enter grace period after payment failure. Grace period is a bounded window where
 export declare function enterGracePeriod(adapter: PaymentAdapter, session: SubscriptionMachineSession): Promise<AxisStep<SubscriptionMachineState>>;
 ```
 
-#### `escalateArbitration`
+#### <code v-pre>escalateArbitration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L105) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L105) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Escalate to arbitration — final round in the card-network dispute process, decided by the network with a non-refundable filing fee.
 
@@ -593,9 +593,9 @@ Escalate to arbitration — final round in the card-network dispute process, dec
 export declare function escalateArbitration(adapter: PaymentAdapter, session: DisputeSession): Promise<AxisStep<DisputeState>>;
 ```
 
-#### `exitGracePeriod`
+#### <code v-pre>exitGracePeriod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L95) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L95) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 Exit grace period — either payment recovered (returns to active) or timeout reached (returns to expired).
 
@@ -605,9 +605,9 @@ export declare function exitGracePeriod(adapter: PaymentAdapter, session: Subscr
 }): Promise<AxisStep<SubscriptionMachineState>>;
 ```
 
-#### `expireRate`
+#### <code v-pre>expireRate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L178) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L178) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 Explicitly expire the current rate lock — used when the caller detects the lock window has passed.
 
@@ -615,9 +615,9 @@ Explicitly expire the current rate lock — used when the caller detects the loc
 export declare function expireRate(adapter: PaymentAdapter, session: FxSession): Promise<AxisStep<FxState>>;
 ```
 
-#### `fileSar`
+#### <code v-pre>fileSar</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L164) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L164) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 File a SAR (Suspicious Activity Report) with FinCEN / NCA. Terminal-ish — a filed SAR is not deletable, so the session enters `sar-filed` state and can only be moved to `audit-locked` afterwards.
 
@@ -630,9 +630,9 @@ export declare function fileSar(adapter: PaymentAdapter, session: RegulatoryRepo
 }): Promise<AxisStep<RegulatoryReportingState>>;
 ```
 
-#### `finalizeDispute`
+#### <code v-pre>finalizeDispute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L143) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L143) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Terminal — dispute resolved with an outcome. `won` returns funds to the merchant; `lost` finalises the chargeback.
 
@@ -642,9 +642,9 @@ export declare function finalizeDispute(session: DisputeSession, input: {
 }): DisputeSession;
 ```
 
-#### `finalizeDunning`
+#### <code v-pre>finalizeDunning</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L117) `packages/payment/src/semantics/dunning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L117) <code v-pre>packages/payment/src/semantics/dunning.ts</code>
 
 Terminal step — either the last attempt succeeded during grace period (`succeed: true` → `dunning.recovered`), or the grace period elapsed (`succeed: false` → `dunning.exhausted`).
 
@@ -654,9 +654,9 @@ export declare function finalizeDunning(adapter: PaymentAdapter, session: Dunnin
 }): Promise<AxisStep<DunningState>>;
 ```
 
-#### `finalizeRecovery`
+#### <code v-pre>finalizeRecovery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L167) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L167) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Mark the recovery terminal — succeeded (recovered) or exhausted (lost).
 
@@ -666,9 +666,9 @@ export declare function finalizeRecovery(session: RecoverySession, input: {
 }): RecoverySession;
 ```
 
-#### `flagVelocity`
+#### <code v-pre>flagVelocity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L138) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L138) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 Flag velocity — records that this customer exceeded the allowed transactions-per-hour threshold.
 
@@ -679,9 +679,9 @@ export declare function flagVelocity(adapter: PaymentAdapter, session: FraudDete
 }): Promise<AxisStep<FraudDetectionState>>;
 ```
 
-#### `fullRefund`
+#### <code v-pre>fullRefund</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L91) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L91) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Issue a full refund. Marks the session as fully refunded.
 
@@ -689,9 +689,9 @@ Issue a full refund. Marks the session as fully refunded.
 export declare function fullRefund(adapter: PaymentAdapter, session: RefundSession): Promise<AxisStep<RefundState>>;
 ```
 
-#### `grantConsent`
+#### <code v-pre>grantConsent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L112) `packages/payment/src/semantics/psd2.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L112) <code v-pre>packages/payment/src/semantics/psd2.ts</code>
 
 Grant open banking consent. Emits `psd2.consent_granted` with the scope list embedded — real OBIE consents scope to `accounts` / `payments`, this mock echoes whatever caller passes so tests can assert on custom scopes.
 
@@ -703,9 +703,9 @@ export declare function grantConsent(adapter: PaymentAdapter, input: {
 }): Promise<AxisStep<'granted'>>;
 ```
 
-#### `handleEvent`
+#### <code v-pre>handleEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L74) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L74) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 event driven state 遷移 SSOT。 5 state × 8 event = 40 セル の 遷移 表を 1 switch で 実装。 無効遷移 は 現 state を保持 + events log に "invalid" 記録 (throw ではなく soft-reject、 v0.7 continuous-auth の guard-throw と 区別 = payment 経路 は event 過剰受信 が normal で、 throw だと dogfood consumer が 例外処理 に多くの コード を割く 必要が出るため soft-reject)。
 
@@ -717,9 +717,9 @@ export declare function handleEvent(input: {
 }): LifecycleSession;
 ```
 
-#### `initiateSettlement`
+#### <code v-pre>initiateSettlement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L127) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L127) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 Initiate settlement via the configured rail (SWIFT / SEPA / ACH etc.). Rate must not have expired.
 
@@ -730,9 +730,9 @@ export declare function initiateSettlement(adapter: PaymentAdapter, session: FxS
 }): Promise<AxisStep<FxState>>;
 ```
 
-#### `issueCard`
+#### <code v-pre>issueCard</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L138) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L138) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 Issue a virtual or physical card against the account. Requires KYC verified (and KYB verified when required).
 
@@ -744,9 +744,9 @@ export declare function issueCard(adapter: PaymentAdapter, session: EmbeddedFina
 }): Promise<AxisStep<EmbeddedFinanceState>>;
 ```
 
-#### `linkWallet`
+#### <code v-pre>linkWallet</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L157) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L157) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 Link a wallet address to the customer id for repeat billing.
 
@@ -757,9 +757,9 @@ export declare function linkWallet(adapter: PaymentAdapter, session: CryptoPayme
 }): Promise<AxisStep<CryptoPaymentState>>;
 ```
 
-#### `lockForAudit`
+#### <code v-pre>lockForAudit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L201) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L201) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 Lock the session for audit — no further reports accepted.
 
@@ -767,9 +767,9 @@ Lock the session for audit — no further reports accepted.
 export declare function lockForAudit(session: RegulatoryReportingSession): RegulatoryReportingSession;
 ```
 
-#### `lockRate`
+#### <code v-pre>lockRate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L83) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L83) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 Lock an FX rate for the given currency pair + amount. The rate stays valid for `rateLockDurationMs`, after which callers must call `expireRate` and re-lock.
 
@@ -783,9 +783,9 @@ export declare function lockRate(adapter: PaymentAdapter, session: FxSession, in
 }): Promise<AxisStep<FxState>>;
 ```
 
-#### `markInstallmentPaid`
+#### <code v-pre>markInstallmentPaid</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L175) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L175) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 Mark an installment as paid. Once all installments are paid the session enters `settled`.
 
@@ -793,9 +793,9 @@ Mark an installment as paid. Once all installments are paid the session enters `
 export declare function markInstallmentPaid(session: BnplSession): BnplSession;
 ```
 
-#### `markUncollectible`
+#### <code v-pre>markUncollectible</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L171) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L171) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Mark an invoice uncollectible (dunning exhausted). Emits `invoice.uncollectible`. Only allowed from `open`.
 
@@ -803,9 +803,9 @@ Mark an invoice uncollectible (dunning exhausted). Emits `invoice.uncollectible`
 export declare function markUncollectible(adapter: PaymentAdapter, invoice: Invoice): Promise<AxisStep<InvoiceState>>;
 ```
 
-#### `markWindowExpired`
+#### <code v-pre>markWindowExpired</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L120) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L120) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Emit the window-expired terminal — refund attempted outside the window.
 
@@ -813,9 +813,9 @@ Emit the window-expired terminal — refund attempted outside the window.
 export declare function markWindowExpired(adapter: PaymentAdapter, session: RefundSession): Promise<AxisStep<RefundState>>;
 ```
 
-#### `migrateToken`
+#### <code v-pre>migrateToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L107) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L107) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 Migrate a token from one provider to another. The source token must exist; the target adapter receives a new token id under its provider namespace with the same fingerprint / network-token linkage.
 
@@ -826,9 +826,9 @@ export declare function migrateToken(fromAdapter: PaymentAdapter, toAdapter: Pay
 }): Promise<AxisStep<VaultState>>;
 ```
 
-#### `openAccount`
+#### <code v-pre>openAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L54) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L54) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 Open a fresh BaaS account for the customer.
 
@@ -844,9 +844,9 @@ export declare function openAccount(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `openChargeback`
+#### <code v-pre>openChargeback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L42) `packages/payment/src/semantics/chargeback.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L42) <code v-pre>packages/payment/src/semantics/chargeback.ts</code>
 
 Open a chargeback. Emits `chargeback.opened`.
 
@@ -863,9 +863,9 @@ export declare function openChargeback(adapter: PaymentAdapter, input: {
 }>;
 ```
 
-#### `openDispute`
+#### <code v-pre>openDispute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L38) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L38) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Open a dispute against an existing charge.
 
@@ -880,9 +880,9 @@ export declare function openDispute(input: {
 }): DisputeSession;
 ```
 
-#### `openInvoice`
+#### <code v-pre>openInvoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L69) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L69) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Open (finalise) a draft. Emits `invoice.opened`. Only allowed from `draft`.
 
@@ -890,9 +890,9 @@ Open (finalise) a draft. Emits `invoice.opened`. Only allowed from `draft`.
 export declare function openInvoice(adapter: PaymentAdapter, invoice: Invoice): Promise<AxisStep<InvoiceState>>;
 ```
 
-#### `partialRefund`
+#### <code v-pre>partialRefund</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L73) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L73) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Issue a partial refund. Fails if the window has expired, if the amount violates policy, or if a prior full refund has already exhausted the charge.
 
@@ -902,9 +902,9 @@ export declare function partialRefund(adapter: PaymentAdapter, session: RefundSe
 }): Promise<AxisStep<RefundState>>;
 ```
 
-#### `pauseSubscription`
+#### <code v-pre>pauseSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L127) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L127) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Pause the subscription. Emits `subscription.paused`. Only allowed from active / upgraded / downgraded states.
 
@@ -912,9 +912,9 @@ Pause the subscription. Emits `subscription.paused`. Only allowed from active / 
 export declare function pauseSubscription(adapter: PaymentAdapter, subscription: Subscription): Promise<AxisStep<SubscriptionState>>;
 ```
 
-#### `payInvoice`
+#### <code v-pre>payInvoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L102) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L102) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Mark invoice paid. Emits `invoice.paid`. Only allowed from `open`.
 
@@ -922,9 +922,9 @@ Mark invoice paid. Emits `invoice.paid`. Only allowed from `open`.
 export declare function payInvoice(adapter: PaymentAdapter, invoice: Invoice): Promise<AxisStep<InvoiceState>>;
 ```
 
-#### `PAYMENT_PROVIDERS`
+#### <code v-pre>PAYMENT&#95;PROVIDERS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L16) `packages/payment/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L16) <code v-pre>packages/payment/src/types.ts</code>
 
 Runtime tuple of every payment provider, kept in sync with the `PaymentProvider` union above via `satisfies`. Downstream consumers use this to iterate provider ids at runtime (release-gate axis dispatch, fixture registration) without duplicating the string literals or reaching for reflection.
 
@@ -932,9 +932,9 @@ Runtime tuple of every payment provider, kept in sync with the `PaymentProvider`
 export declare const PAYMENT_PROVIDERS: readonly ["stripe", "paddle", "lemonsqueezy"];
 ```
 
-#### `PaymentEngine`
+#### <code v-pre>PaymentEngine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/engine.ts#L29) `packages/payment/src/engine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/engine.ts#L29) <code v-pre>packages/payment/src/engine.ts</code>
 
 ```ts
 export declare class PaymentEngine implements PaymentAdapter {
@@ -961,9 +961,9 @@ export declare class PaymentEngine implements PaymentAdapter {
 }
 ```
 
-#### `paymentFailed`
+#### <code v-pre>paymentFailed</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L34) `packages/payment/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L34) <code v-pre>packages/payment/src/fixture.ts</code>
 
 ```ts
 export declare const paymentFailed: (adapter: PaymentAdapter, input: {
@@ -977,9 +977,9 @@ export declare const paymentFailed: (adapter: PaymentAdapter, input: {
 };
 ```
 
-#### `preventChargeback`
+#### <code v-pre>preventChargeback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L133) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L133) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Chargeback prevention utility — issues a full refund whenever the merchant preemptively wants to head off a chargeback. Only fires if the policy has `chargebackPrevention: true`.
 
@@ -987,9 +987,9 @@ Chargeback prevention utility — issues a full refund whenever the merchant pre
 export declare function preventChargeback(adapter: PaymentAdapter, session: RefundSession): Promise<AxisStep<RefundState>>;
 ```
 
-#### `probeCircuit`
+#### <code v-pre>probeCircuit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L142) `packages/payment/src/semantics/orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L142) <code v-pre>packages/payment/src/semantics/orchestration.ts</code>
 
 Probe the circuit breaker — closes the breaker if the outage window has elapsed, otherwise stays open. Emits `orchestration.circuit_closed` when the breaker closes.
 
@@ -997,9 +997,9 @@ Probe the circuit breaker — closes the breaker if the outage window has elapse
 export declare function probeCircuit(adapters: PaymentAdapter[], session: OrchestrationSession): Promise<AxisStep<OrchestrationState>>;
 ```
 
-#### `providerEventName`
+#### <code v-pre>providerEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L494) `packages/payment/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L494) <code v-pre>packages/payment/src/semantics/types.ts</code>
 
 Translate a neutral event name to the provider dialect. Falls back to the neutral name if the provider has no specific dialect entry — this makes the map partial-safe without silent typos.
 
@@ -1007,9 +1007,9 @@ Translate a neutral event name to the provider dialect. Falls back to the neutra
 export declare function providerEventName(provider: PaymentProvider, neutral: NeutralEventName): string;
 ```
 
-#### `reactivateSubscription`
+#### <code v-pre>reactivateSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L229) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L229) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Reactivate a canceled subscription. Emits `subscription.reactivated`. Only allowed from `canceled` — the subscription returns to `active`.
 
@@ -1017,9 +1017,9 @@ Reactivate a canceled subscription. Emits `subscription.reactivated`. Only allow
 export declare function reactivateSubscription(adapter: PaymentAdapter, subscription: Subscription): Promise<AxisStep<SubscriptionState>>;
 ```
 
-#### `recordChurn`
+#### <code v-pre>recordChurn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L95) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L95) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Record churned MRR — a subscription cancellation or downgrade to 0.
 
@@ -1030,9 +1030,9 @@ export declare function recordChurn(adapter: PaymentAdapter, session: RecurringR
 }): Promise<AxisStep<RecurringRevenueState>>;
 ```
 
-#### `recordContraction`
+#### <code v-pre>recordContraction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L165) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L165) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Record contraction (downgrade without churn) — separate from churn so NRR captures the difference.
 
@@ -1042,9 +1042,9 @@ export declare function recordContraction(session: RecurringRevenueSession, inpu
 }): RecurringRevenueSession;
 ```
 
-#### `recordExpansion`
+#### <code v-pre>recordExpansion</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L116) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L116) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Record expansion MRR — an upgrade or seat add that grew the account.
 
@@ -1056,9 +1056,9 @@ export declare function recordExpansion(adapter: PaymentAdapter, session: Recurr
 }): Promise<AxisStep<RecurringRevenueState>>;
 ```
 
-#### `refunded`
+#### <code v-pre>refunded</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L45) `packages/payment/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L45) <code v-pre>packages/payment/src/fixture.ts</code>
 
 ```ts
 export declare const refunded: (adapter: PaymentAdapter, input: {
@@ -1072,9 +1072,9 @@ export declare const refunded: (adapter: PaymentAdapter, input: {
 };
 ```
 
-#### `reportDac7`
+#### <code v-pre>reportDac7</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L119) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L119) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 Emit a DAC7 marketplace report entry. Real digital platforms must submit annual DAC7 reports to the EU tax authorities listing seller revenue by jurisdiction.
 
@@ -1088,9 +1088,9 @@ export declare function reportDac7(adapter: PaymentAdapter, input: {
 }): Promise<AxisStep<TaxLocalizationState>>;
 ```
 
-#### `reportDora`
+#### <code v-pre>reportDora</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L126) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L126) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 Submit a DORA (Digital Operational Resilience Act) report — ICT risk management self-assessment + third-party register.
 
@@ -1105,9 +1105,9 @@ export declare function reportDora(adapter: PaymentAdapter, session: RegulatoryR
 }): Promise<AxisStep<RegulatoryReportingState>>;
 ```
 
-#### `reportFailure`
+#### <code v-pre>reportFailure</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L125) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L125) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 Report handler failure — bumps the failure counter and eventually transitions to poison state.
 
@@ -1115,9 +1115,9 @@ Report handler failure — bumps the failure counter and eventually transitions 
 export declare function reportFailure(session: WebhookIdempotencySession, event: PaymentWebhookEvent): number;
 ```
 
-#### `reportPci`
+#### <code v-pre>reportPci</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L65) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L65) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 Submit a PCI DSS compliance report — attestation of Section 3.2 (do not store sensitive authentication data after authorisation).
 
@@ -1130,9 +1130,9 @@ export declare function reportPci(adapter: PaymentAdapter, session: RegulatoryRe
 }): Promise<AxisStep<RegulatoryReportingState>>;
 ```
 
-#### `reportPsd2`
+#### <code v-pre>reportPsd2</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L91) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L91) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 Submit a PSD2 SCA (Strong Customer Authentication) compliance report to the EBA. Includes exemption count + challenge rate.
 
@@ -1146,9 +1146,9 @@ export declare function reportPsd2(adapter: PaymentAdapter, session: RegulatoryR
 }): Promise<AxisStep<RegulatoryReportingState>>;
 ```
 
-#### `representDispute`
+#### <code v-pre>representDispute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L85) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L85) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Represent the dispute — merchant challenges the chargeback with the submitted evidence. Advances the case to second presentment.
 
@@ -1156,9 +1156,9 @@ Represent the dispute — merchant challenges the chargeback with the submitted 
 export declare function representDispute(adapter: PaymentAdapter, session: DisputeSession): Promise<AxisStep<DisputeState>>;
 ```
 
-#### `resolveAllModes`
+#### <code v-pre>resolveAllModes</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L62) `packages/payment/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L62) <code v-pre>packages/payment/src/real-driver.ts</code>
 
 Convenience — resolve modes for all 3 providers in one pass. Used by release-gate + fidelity harness to report which combinations are live.
 
@@ -1166,9 +1166,9 @@ Convenience — resolve modes for all 3 providers in one pass. Used by release-g
 export declare function resolveAllModes(env?: Record<string, string | undefined>): ResolvedMode[];
 ```
 
-#### `resolveChargeback`
+#### <code v-pre>resolveChargeback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L133) `packages/payment/src/semantics/chargeback.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L133) <code v-pre>packages/payment/src/semantics/chargeback.ts</code>
 
 Resolve the dispute. `merchantWon: true` → `chargeback.won` (funds returned), `false` → `chargeback.lost` (funds forfeit + fee). Only allowed from `evidence-submitted`.
 
@@ -1178,9 +1178,9 @@ export declare function resolveChargeback(adapter: PaymentAdapter, chargeback: C
 }): Promise<AxisStep<ChargebackState>>;
 ```
 
-#### `resolveMode`
+#### <code v-pre>resolveMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L39) `packages/payment/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L39) <code v-pre>packages/payment/src/real-driver.ts</code>
 
 Resolve the effective mode for a provider given a live env snapshot. `env` defaults to `process.env` so callers can inject a synthetic env for unit tests.
 
@@ -1188,9 +1188,9 @@ Resolve the effective mode for a provider given a live env snapshot. `env` defau
 export declare function resolveMode(provider: PaymentProvider, env?: Record<string, string | undefined>): ResolvedMode;
 ```
 
-#### `resumeSubscription`
+#### <code v-pre>resumeSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L161) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L161) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Resume a paused subscription. Emits `subscription.resumed`. Only allowed from `paused`.
 
@@ -1198,9 +1198,9 @@ Resume a paused subscription. Emits `subscription.resumed`. Only allowed from `p
 export declare function resumeSubscription(adapter: PaymentAdapter, subscription: Subscription): Promise<AxisStep<SubscriptionState>>;
 ```
 
-#### `retryBackoffMs`
+#### <code v-pre>retryBackoffMs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L38) `packages/payment/src/semantics/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L38) <code v-pre>packages/payment/src/semantics/retry.ts</code>
 
 Compute the deterministic delay for attempt N (1-indexed). Attempt 1 has no backoff (fires immediately), attempt N &gt; 1 waits baseBackoffMs * 2^(N-2).
 
@@ -1208,9 +1208,9 @@ Compute the deterministic delay for attempt N (1-indexed). Attempt 1 has no back
 export declare function retryBackoffMs(attempt: number, baseBackoffMs: number): number;
 ```
 
-#### `retryDeliver`
+#### <code v-pre>retryDeliver</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L72) `packages/payment/src/semantics/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L72) <code v-pre>packages/payment/src/semantics/retry.ts</code>
 
 Attempt to deliver the event. If `succeed: true` the event is emitted through the adapter and the session terminates in `delivered`. If `succeed: false` and attempts remain, emits `retry.scheduled` and returns with the next delay. Once maxAttempts is reached without success, the session terminates in `abandoned`.
 
@@ -1220,9 +1220,9 @@ export declare function retryDeliver(adapter: PaymentAdapter, session: RetrySess
 }): Promise<AxisStep<RetryState>>;
 ```
 
-#### `revokeMandate`
+#### <code v-pre>revokeMandate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L76) `packages/payment/src/semantics/psd2.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L76) <code v-pre>packages/payment/src/semantics/psd2.ts</code>
 
 Revoke an active mandate. Emits `psd2.mandate_revoked`. Idempotent — a second call on an already-revoked mandate throws so tests exercise the guard explicitly.
 
@@ -1230,9 +1230,9 @@ Revoke an active mandate. Emits `psd2.mandate_revoked`. Idempotent — a second 
 export declare function revokeMandate(adapter: PaymentAdapter, mandate: PsdMandate): Promise<AxisStep<PsdMandateState>>;
 ```
 
-#### `revokeToken`
+#### <code v-pre>revokeToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L85) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L85) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 Revoke an existing token — customer removed the card or the fraud team blacklisted the fingerprint.
 
@@ -1242,9 +1242,9 @@ export declare function revokeToken(adapter: PaymentAdapter, session: VaultSessi
 }): Promise<AxisStep<VaultState>>;
 ```
 
-#### `rotateSignature`
+#### <code v-pre>rotateSignature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L139) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L139) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 Rotate the signing secret. Emits `webhook.signature_rotated` so downstream consumers know to refresh their cached secret.
 
@@ -1252,9 +1252,9 @@ Rotate the signing secret. Emits `webhook.signature_rotated` so downstream consu
 export declare function rotateSignature(adapter: PaymentAdapter, session: WebhookIdempotencySession): Promise<AxisStep<WebhookState>>;
 ```
 
-#### `routeCharge`
+#### <code v-pre>routeCharge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L87) `packages/payment/src/semantics/orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L87) <code v-pre>packages/payment/src/semantics/orchestration.ts</code>
 
 Route a single charge attempt through the current provider adapter. `succeed=true` emits `orchestration.routed` and leaves the router on the same provider. `succeed=false` increments the failure counter and either triggers a failover, opens the breaker, or terminates.
 
@@ -1265,9 +1265,9 @@ export declare function routeCharge(adapters: PaymentAdapter[], session: Orchest
 }): Promise<AxisStep<OrchestrationState>>;
 ```
 
-#### `scaAuthenticate`
+#### <code v-pre>scaAuthenticate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L114) `packages/payment/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L114) <code v-pre>packages/payment/src/semantics/sca.ts</code>
 
 Complete SCA. Emits `sca.authenticated` and issues a synthetic strong auth token that downstream calls can attach for the 90-day validity window PSD2 mandates.
 
@@ -1275,9 +1275,9 @@ Complete SCA. Emits `sca.authenticated` and issues a synthetic strong auth token
 export declare function scaAuthenticate(adapter: PaymentAdapter, session: ScaSession): Promise<AxisStep<ScaState>>;
 ```
 
-#### `scaEvaluate`
+#### <code v-pre>scaEvaluate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L55) `packages/payment/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L55) <code v-pre>packages/payment/src/semantics/sca.ts</code>
 
 Evaluate SCA. If `exemption` is supplied the session terminates in `exempt`, otherwise it moves to `required`.
 
@@ -1287,9 +1287,9 @@ export declare function scaEvaluate(adapter: PaymentAdapter, session: ScaSession
 }): Promise<AxisStep<ScaState>>;
 ```
 
-#### `scheduleInstallment`
+#### <code v-pre>scheduleInstallment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L106) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L106) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 Schedule the next installment — advances the schedule pointer and emits the neutral event. Throws once all installments are scheduled.
 
@@ -1297,9 +1297,9 @@ Schedule the next installment — advances the schedule pointer and emits the ne
 export declare function scheduleInstallment(adapter: PaymentAdapter, session: BnplSession): Promise<AxisStep<BnplState>>;
 ```
 
-#### `scheduleSmartRetry`
+#### <code v-pre>scheduleSmartRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L83) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L83) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Schedule the next smart retry. Emits `recovery.smart_retry_scheduled` with the computed backoff and priority hint. Real Stripe uses ML to predict optimal retry times; the mock uses linear cascade timing.
 
@@ -1307,9 +1307,9 @@ Schedule the next smart retry. Emits `recovery.smart_retry_scheduled` with the c
 export declare function scheduleSmartRetry(adapter: PaymentAdapter, session: RecoverySession): Promise<AxisStep<RecoveryState>>;
 ```
 
-#### `scoreDevice`
+#### <code v-pre>scoreDevice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L89) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L89) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 Score device fingerprint — combines browser fingerprint, IP entropy, OS signature, canvas fingerprint into a 0-100 score.
 
@@ -1322,9 +1322,9 @@ export declare function scoreDevice(adapter: PaymentAdapter, session: FraudDetec
 }): Promise<AxisStep<FraudDetectionState>>;
 ```
 
-#### `scoreMl`
+#### <code v-pre>scoreMl</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L112) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L112) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 Run ML scoring on the current route. Score below `minMlScore` triggers fallback on the next `smartRoute` call.
 
@@ -1335,9 +1335,9 @@ export declare function scoreMl(adapters: PaymentAdapter[], session: Orchestrati
 }): Promise<AxisStep<OrchestrationIIState>>;
 ```
 
-#### `scoreMlBlock`
+#### <code v-pre>scoreMlBlock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L162) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L162) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 Run the ML fusion model — combines device / biometric / velocity signals plus features into a 0-1 score. Above `mlBlockThreshold` blocks the tx.
 
@@ -1349,9 +1349,9 @@ export declare function scoreMlBlock(adapter: PaymentAdapter, session: FraudDete
 }): Promise<AxisStep<FraudDetectionState>>;
 ```
 
-#### `scoreRisk`
+#### <code v-pre>scoreRisk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L127) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L127) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 Run risk scoring on the customer. Score below `config.minRiskScore` marks the plan as defaulted and blocks further activity.
 
@@ -1362,9 +1362,9 @@ export declare function scoreRisk(adapter: PaymentAdapter, session: BnplSession,
 }): Promise<AxisStep<BnplState>>;
 ```
 
-#### `shiftLiability`
+#### <code v-pre>shiftLiability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L124) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L124) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Liability shift — apply the 3DS liability shift for a passed challenge. Moves fraud loss from merchant to issuer; typically emitted right after dispute open when the original auth had a successful 3DS.
 
@@ -1374,9 +1374,9 @@ export declare function shiftLiability(adapter: PaymentAdapter, session: Dispute
 }): Promise<AxisStep<DisputeState>>;
 ```
 
-#### `smartRoute`
+#### <code v-pre>smartRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L85) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L85) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 Route the charge through the current provider — the primary route in the cascade ladder.
 
@@ -1384,9 +1384,9 @@ Route the charge through the current provider — the primary route in the casca
 export declare function smartRoute(adapters: PaymentAdapter[], session: OrchestrationIISession): Promise<AxisStep<OrchestrationIIState>>;
 ```
 
-#### `stackCoupon`
+#### <code v-pre>stackCoupon</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L148) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L148) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 Add a coupon to the stack. Non-stackable coupons replace any existing coupon; stackable coupons combine.
 
@@ -1394,9 +1394,9 @@ Add a coupon to the stack. Non-stackable coupons replace any existing coupon; st
 export declare function stackCoupon(adapter: PaymentAdapter, session: SubscriptionMachineSession, input: CouponEntry): Promise<AxisStep<SubscriptionMachineState>>;
 ```
 
-#### `startDunning`
+#### <code v-pre>startDunning</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L51) `packages/payment/src/semantics/dunning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L51) <code v-pre>packages/payment/src/semantics/dunning.ts</code>
 
 Start a dunning session. No webhook is emitted at start — the initial failed charge is assumed to have been emitted via `signWebhook` / `checkoutCompleted` etc. Call {@link dunningAttempt} to drive the retry sequence.
 
@@ -1410,9 +1410,9 @@ export declare function startDunning(input: {
 }): DunningSession;
 ```
 
-#### `startFraudDetection`
+#### <code v-pre>startFraudDetection</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L57) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L57) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 Start a fresh fraud detection session for a transaction.
 
@@ -1426,9 +1426,9 @@ export declare function startFraudDetection(input: {
 }): FraudDetectionSession;
 ```
 
-#### `startFxTransfer`
+#### <code v-pre>startFxTransfer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L58) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L58) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 Start a fresh FX session.
 
@@ -1440,9 +1440,9 @@ export declare function startFxTransfer(input: {
 }): FxSession;
 ```
 
-#### `startIdempotency`
+#### <code v-pre>startIdempotency</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L50) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L50) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 Start an idempotency session tied to a specific handler. Handler names scope the dedup table so different handlers can process the same event without interference.
 
@@ -1453,9 +1453,9 @@ export declare function startIdempotency(input: {
 }): WebhookIdempotencySession;
 ```
 
-#### `startLifecycle`
+#### <code v-pre>startLifecycle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L55) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L55) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 lifecycle orchestrator の 開始。 default で active-billing 状態、 subscription 契約成立直後 に 呼出。
 
@@ -1465,9 +1465,9 @@ export declare function startLifecycle(input: {
 }): LifecycleSession;
 ```
 
-#### `startOrchestration`
+#### <code v-pre>startOrchestration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L53) `packages/payment/src/semantics/orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L53) <code v-pre>packages/payment/src/semantics/orchestration.ts</code>
 
 Start an orchestration session. `adapters` supplies one adapter per provider in the same order as `config.providers`.
 
@@ -1480,9 +1480,9 @@ export declare function startOrchestration(input: {
 }): OrchestrationSession;
 ```
 
-#### `startOrchestrationII`
+#### <code v-pre>startOrchestrationII</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L52) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L52) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 Start an orchestration II session.
 
@@ -1496,9 +1496,9 @@ export declare function startOrchestrationII(input: {
 }): OrchestrationIISession;
 ```
 
-#### `startRecovery`
+#### <code v-pre>startRecovery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L54) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L54) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Start a recovery session. The initial failed charge is assumed to have been emitted through the base adapter already.
 
@@ -1512,9 +1512,9 @@ export declare function startRecovery(input: {
 }): RecoverySession;
 ```
 
-#### `startRecurringRevenue`
+#### <code v-pre>startRecurringRevenue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L44) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L44) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Start a recurring revenue analytics session for a cohort.
 
@@ -1527,9 +1527,9 @@ export declare function startRecurringRevenue(input: {
 }): RecurringRevenueSession;
 ```
 
-#### `startRefund`
+#### <code v-pre>startRefund</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L46) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L46) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Start a refund session against an existing charge. `chargedAt` is the original charge timestamp; the window policy is evaluated relative to this timestamp.
 
@@ -1544,9 +1544,9 @@ export declare function startRefund(input: {
 }): RefundSession;
 ```
 
-#### `startRegulatoryReporting`
+#### <code v-pre>startRegulatoryReporting</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L44) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L44) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 Start a regulatory reporting session for an entity (merchant / issuer).
 
@@ -1558,9 +1558,9 @@ export declare function startRegulatoryReporting(input: {
 }): RegulatoryReportingSession;
 ```
 
-#### `startRetry`
+#### <code v-pre>startRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L50) `packages/payment/src/semantics/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L50) <code v-pre>packages/payment/src/semantics/retry.ts</code>
 
 Start a retry session for a given webhook event. The event is not emitted yet — call {@link retryDeliver} with `succeed: true` to emit and mark delivered, or `succeed: false` to schedule the next backoff. The idempotencyKey defaults to `event.id` so downstream consumers can dedupe repeated deliveries of the same event.
 
@@ -1572,9 +1572,9 @@ export declare function startRetry(input: {
 }): RetrySession;
 ```
 
-#### `startSca`
+#### <code v-pre>startSca</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L34) `packages/payment/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L34) <code v-pre>packages/payment/src/semantics/sca.ts</code>
 
 Start an SCA evaluation session. Call {@link scaEvaluate} to decide.
 
@@ -1587,9 +1587,9 @@ export declare function startSca(input: {
 }): ScaSession;
 ```
 
-#### `startSubscriptionMachine`
+#### <code v-pre>startSubscriptionMachine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L49) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L49) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 Start a subscription state-machine session against an existing subscription. This wraps the v0.3 subscription-lifecycle axis with the fine-grained payment-side state (grace period + coupon stacking) that downstream tests need to assert on.
 
@@ -1603,9 +1603,9 @@ export declare function startSubscriptionMachine(input: {
 }): SubscriptionMachineSession;
 ```
 
-#### `startThreeDs`
+#### <code v-pre>startThreeDs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L34) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L34) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 Start a 3DS session. No webhook is emitted at start — this is the local fingerprint capture step; call {@link threeDsRequestChallenge} to transition to the challenge, or {@link threeDsFrictionless} to skip.
 
@@ -1618,9 +1618,9 @@ export declare function startThreeDs(input: {
 }): ThreeDsSession;
 ```
 
-#### `startVault`
+#### <code v-pre>startVault</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L41) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L41) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 Start a fresh vault session for a customer.
 
@@ -1631,9 +1631,9 @@ export declare function startVault(input: {
 }): VaultSession;
 ```
 
-#### `submitDisputeEvidence`
+#### <code v-pre>submitDisputeEvidence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L66) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L66) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Submit evidence for the dispute — receipt, shipping confirmation, customer communication, etc.
 
@@ -1643,9 +1643,9 @@ export declare function submitDisputeEvidence(adapter: PaymentAdapter, session: 
 }): Promise<AxisStep<DisputeState>>;
 ```
 
-#### `submitEvidence`
+#### <code v-pre>submitEvidence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L90) `packages/payment/src/semantics/chargeback.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L90) <code v-pre>packages/payment/src/semantics/chargeback.ts</code>
 
 Submit evidence to represent the dispute. Emits `chargeback.evidence_submitted`. Only allowed from `opened`.
 
@@ -1657,9 +1657,9 @@ export declare function submitEvidence(adapter: PaymentAdapter, chargeback: Char
 }): Promise<AxisStep<ChargebackState>>;
 ```
 
-#### `subscriptionCreated`
+#### <code v-pre>subscriptionCreated</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L23) `packages/payment/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/fixture.ts#L23) <code v-pre>packages/payment/src/fixture.ts</code>
 
 ```ts
 export declare const subscriptionCreated: (adapter: PaymentAdapter, input: {
@@ -1673,17 +1673,17 @@ export declare const subscriptionCreated: (adapter: PaymentAdapter, input: {
 };
 ```
 
-#### `summarizeLifecycle`
+#### <code v-pre>summarizeLifecycle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L179) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L179) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function summarizeLifecycle(session: LifecycleSession): LifecycleSummary;
 ```
 
-#### `threeDsFrictionless`
+#### <code v-pre>threeDsFrictionless</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L131) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L131) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 Frictionless path — issuer accepted the transaction without a challenge. Emits `3ds.frictionless` and terminates. Only valid from `fingerprint`.
 
@@ -1691,9 +1691,9 @@ Frictionless path — issuer accepted the transaction without a challenge. Emits
 export declare function threeDsFrictionless(adapter: PaymentAdapter, session: ThreeDsSession): Promise<AxisStep<ThreeDsState>>;
 ```
 
-#### `threeDsRequestChallenge`
+#### <code v-pre>threeDsRequestChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L55) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L55) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 Request a 3DS challenge. Emits `3ds.challenge_required`. Session moves to `challenge-pending` — call {@link threeDsSubmitChallenge} to complete.
 
@@ -1701,9 +1701,9 @@ Request a 3DS challenge. Emits `3ds.challenge_required`. Session moves to `chall
 export declare function threeDsRequestChallenge(adapter: PaymentAdapter, session: ThreeDsSession): Promise<AxisStep<ThreeDsState>>;
 ```
 
-#### `threeDsSubmitChallenge`
+#### <code v-pre>threeDsSubmitChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L93) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L93) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 Submit the challenge result. `transStatus` follows EMVCo values: `Y` = authenticated, `N` = not authenticated, `A` = attempt performed, `U` = unavailable, `C` = challenge required (should be pre-transitioned), `R` = rejected. `Y` / `A` → session `completed`; `N` / `R` / `U` throw so tests exercise both accept and reject explicitly.
 
@@ -1713,9 +1713,9 @@ export declare function threeDsSubmitChallenge(adapter: PaymentAdapter, session:
 }): Promise<AxisStep<ThreeDsState>>;
 ```
 
-#### `tokenizeCard`
+#### <code v-pre>tokenizeCard</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L60) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L60) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 Tokenize a card into the vault. Emits `vault.token_created` and moves the session to `tokenized`.
 
@@ -1723,9 +1723,9 @@ Tokenize a card into the vault. Emits `vault.token_created` and moves the sessio
 export declare function tokenizeCard(adapter: PaymentAdapter, session: VaultSession, input: Omit<VaultToken, 'provider'>): Promise<AxisStep<VaultState>>;
 ```
 
-#### `triggerFallback`
+#### <code v-pre>triggerFallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L141) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L141) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 Trigger a fallback to the next provider in the ladder. Increments the current index; exhausts the cascade when no more providers remain.
 
@@ -1733,9 +1733,9 @@ Trigger a fallback to the next provider in the ladder. Increments the current in
 export declare function triggerFallback(adapters: PaymentAdapter[], session: OrchestrationIISession): Promise<AxisStep<OrchestrationIIState>>;
 ```
 
-#### `verifyBiometric`
+#### <code v-pre>verifyBiometric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L117) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L117) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 Verify behavioral biometrics — typing rhythm + mouse motion + swipe pattern. Returns whether the observed pattern matches the historical profile.
 
@@ -1747,9 +1747,9 @@ export declare function verifyBiometric(adapter: PaymentAdapter, session: FraudD
 }): Promise<AxisStep<FraudDetectionState>>;
 ```
 
-#### `verifyKyb`
+#### <code v-pre>verifyKyb</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L118) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L118) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 Run KYB (Know Your Business) verification — only meaningful when `config.requireKyb=true`.
 
@@ -1760,9 +1760,9 @@ export declare function verifyKyb(adapter: PaymentAdapter, session: EmbeddedFina
 }): Promise<AxisStep<EmbeddedFinanceState>>;
 ```
 
-#### `verifyKyc`
+#### <code v-pre>verifyKyc</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L89) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L89) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 Run KYC verification on the account holder. Score is 0-100.
 
@@ -1772,9 +1772,9 @@ export declare function verifyKyc(adapter: PaymentAdapter, session: EmbeddedFina
 }): Promise<AxisStep<EmbeddedFinanceState>>;
 ```
 
-#### `verifyPciScope`
+#### <code v-pre>verifyPciScope</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L160) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L160) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 Assert PCI DSS SAQ-A compliance — verifies that no raw PAN or CVV is present in any token in the vault. Real merchants run this as a compile-time / runtime gate before every deploy.
 
@@ -1784,9 +1784,9 @@ export declare function verifyPciScope(adapter: PaymentAdapter, session: VaultSe
 }): Promise<AxisStep<VaultState>>;
 ```
 
-#### `voidInvoice`
+#### <code v-pre>voidInvoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L137) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L137) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Void an invoice. Emits `invoice.voided`. Allowed from `draft` or `open` (real providers reject voiding a paid invoice — must be credit-noted instead).
 
@@ -1796,9 +1796,9 @@ export declare function voidInvoice(adapter: PaymentAdapter, invoice: Invoice): 
 
 ### 型
 
-#### `AxisStep`
+#### <code v-pre>AxisStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L507) `packages/payment/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L507) <code v-pre>packages/payment/src/semantics/types.ts</code>
 
 Axis result envelope returned by every state-machine step. The event is already emitted through the adapter; the envelope surfaces the next state transition metadata so tests can drive the next call without re-reading the raw webhook body.
 
@@ -1812,9 +1812,9 @@ export interface AxisStep<TState> {
 }
 ```
 
-#### `BillingAxis`
+#### <code v-pre>BillingAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L13) `packages/payment/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L13) <code v-pre>packages/payment/src/semantics/types.ts</code>
 
 Advanced billing semantics — provider-neutral axis SSOT. v0.2 mocks only carried the webhook signature + dispatch primitive. v0.3 adds 9 production semantics that every real biller cares about — dunning, retry, 3DS, SCA, PSD2, subscription lifecycle, invoice, tax, chargeback. Each axis is expressed as a small state-machine helper that emits already signed webhook events through the existing PaymentAdapter, so downstream tests can drive the axis without knowing the provider's payload dialect.
 
@@ -1822,9 +1822,9 @@ Advanced billing semantics — provider-neutral axis SSOT. v0.2 mocks only carri
 export type BillingAxis = 'dunning' | 'retry' | '3ds' | 'sca' | 'psd2' | 'subscription-lifecycle' | 'invoice' | 'tax' | 'chargeback' | 'orchestration' | 'revenue-recovery' | 'refund-advanced' | 'dispute' | 'webhook-idempotency-advanced' | 'tax-localization' | 'subscription-state-machine' | 'payment-method-vault' | 'embedded-finance' | 'bnpl' | 'crypto-payment' | 'fx-cross-border' | 'recurring-revenue-advanced' | 'payment-orchestration-ii' | 'fraud-detection-advanced' | 'regulatory-reporting';
 ```
 
-#### `BnplConfig`
+#### <code v-pre>BnplConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L22) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L22) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 ```ts
 export interface BnplConfig {
@@ -1839,9 +1839,9 @@ export interface BnplConfig {
 }
 ```
 
-#### `BnplSession`
+#### <code v-pre>BnplSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L33) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L33) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 ```ts
 export interface BnplSession {
@@ -1860,9 +1860,9 @@ export interface BnplSession {
 }
 ```
 
-#### `BnplState`
+#### <code v-pre>BnplState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L12) `packages/payment/src/semantics/bnpl.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/bnpl.ts#L12) <code v-pre>packages/payment/src/semantics/bnpl.ts</code>
 
 BNPL (Buy Now Pay Later) axis — installment plan + risk scoring + credit decisioning + late fee. Real BNPL providers (Klarna / Affirm / Afterpay) split a purchase into 2-6 installments, run a soft credit check + risk score at checkout, and charge a late fee if a scheduled installment misses its due date. The mock reproduces plan creation, per-installment schedule emission, risk score emission, and late fee emission.
 
@@ -1870,17 +1870,17 @@ BNPL (Buy Now Pay Later) axis — installment plan + risk scoring + credit decis
 export type BnplState = 'initial' | 'plan-created' | 'installments-scheduled' | 'risk-scored' | 'active' | 'late-fee-charged' | 'settled' | 'defaulted';
 ```
 
-#### `Chain`
+#### <code v-pre>Chain</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L22) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L22) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 ```ts
 export type Chain = 'ethereum' | 'polygon' | 'base' | 'arbitrum' | 'solana';
 ```
 
-#### `Chargeback`
+#### <code v-pre>Chargeback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L28) `packages/payment/src/semantics/chargeback.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L28) <code v-pre>packages/payment/src/semantics/chargeback.ts</code>
 
 ```ts
 export interface Chargeback {
@@ -1895,17 +1895,17 @@ export interface Chargeback {
 }
 ```
 
-#### `ChargebackReason`
+#### <code v-pre>ChargebackReason</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L18) `packages/payment/src/semantics/chargeback.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L18) <code v-pre>packages/payment/src/semantics/chargeback.ts</code>
 
 ```ts
 export type ChargebackReason = 'fraudulent' | 'unrecognized' | 'duplicate' | 'product-not-received' | 'product-unacceptable' | 'subscription-canceled' | 'credit-not-processed' | 'general';
 ```
 
-#### `ChargebackState`
+#### <code v-pre>ChargebackState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L12) `packages/payment/src/semantics/chargeback.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/chargeback.ts#L12) <code v-pre>packages/payment/src/semantics/chargeback.ts</code>
 
 Chargeback / dispute semantics. Real card networks (Visa VCR, Mastercard MCOP) run a multi-step dispute flow: opened → evidence submitted (or accept) → representment → arbitration → final outcome. The mock reduces that to the observable 4-event envelope providers surface (opened / evidence_submitted / won / lost) with a state machine that guards transitions.
 
@@ -1913,9 +1913,9 @@ Chargeback / dispute semantics. Real card networks (Visa VCR, Mastercard MCOP) r
 export type ChargebackState = 'opened' | 'evidence-submitted' | 'won' | 'lost';
 ```
 
-#### `CouponEntry`
+#### <code v-pre>CouponEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L19) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L19) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 ```ts
 export interface CouponEntry {
@@ -1929,9 +1929,9 @@ export interface CouponEntry {
 }
 ```
 
-#### `CryptoInvoiceConfig`
+#### <code v-pre>CryptoInvoiceConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L25) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L25) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 ```ts
 export interface CryptoInvoiceConfig {
@@ -1944,9 +1944,9 @@ export interface CryptoInvoiceConfig {
 }
 ```
 
-#### `CryptoPaymentSession`
+#### <code v-pre>CryptoPaymentSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L34) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L34) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 ```ts
 export interface CryptoPaymentSession {
@@ -1966,9 +1966,9 @@ export interface CryptoPaymentSession {
 }
 ```
 
-#### `CryptoPaymentState`
+#### <code v-pre>CryptoPaymentState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L12) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L12) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 Crypto payment axis — stablecoin invoicing + on-chain confirmation + gas abstraction + wallet linking. Real crypto payment gateways (Coinbase Commerce / BitPay / MoonPay) accept USDC / USDT / ETH, poll the underlying chain for confirmations, absorb gas via meta-tx / paymaster (EIP-4337) so end users pay a stablecoin price, and link wallets to a customer id for repeat billing.
 
@@ -1976,9 +1976,9 @@ Crypto payment axis — stablecoin invoicing + on-chain confirmation + gas abstr
 export type CryptoPaymentState = 'initial' | 'invoice-created' | 'awaiting-confirmation' | 'confirmed' | 'gas-abstracted' | 'wallet-linked' | 'expired' | 'failed';
 ```
 
-#### `DisputeSession`
+#### <code v-pre>DisputeSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L21) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L21) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 ```ts
 export interface DisputeSession {
@@ -1996,9 +1996,9 @@ export interface DisputeSession {
 }
 ```
 
-#### `DisputeState`
+#### <code v-pre>DisputeState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L12) `packages/payment/src/semantics/dispute.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dispute.ts#L12) <code v-pre>packages/payment/src/semantics/dispute.ts</code>
 
 Dispute lifecycle axis — evidence submission + representment + arbitration + liability shift. Real card networks (Visa / Mastercard) define a 5-stage dispute cycle: retrieval → first chargeback → second presentment → arbitration → final ruling. Liability shift occurs when 3DS challenge was passed at authorisation, moving fraud loss from the merchant to the issuer.
 
@@ -2006,9 +2006,9 @@ Dispute lifecycle axis — evidence submission + representment + arbitration + l
 export type DisputeState = 'opened' | 'evidence-submitted' | 'represented' | 'arbitration-opened' | 'liability-shifted' | 'lost' | 'won';
 ```
 
-#### `DunningConfig`
+#### <code v-pre>DunningConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L19) `packages/payment/src/semantics/dunning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L19) <code v-pre>packages/payment/src/semantics/dunning.ts</code>
 
 ```ts
 export interface DunningConfig {
@@ -2021,9 +2021,9 @@ export interface DunningConfig {
 }
 ```
 
-#### `DunningSession`
+#### <code v-pre>DunningSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L28) `packages/payment/src/semantics/dunning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L28) <code v-pre>packages/payment/src/semantics/dunning.ts</code>
 
 ```ts
 export interface DunningSession {
@@ -2038,9 +2038,9 @@ export interface DunningSession {
 }
 ```
 
-#### `DunningState`
+#### <code v-pre>DunningState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L13) `packages/payment/src/semantics/dunning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/dunning.ts#L13) <code v-pre>packages/payment/src/semantics/dunning.ts</code>
 
 Dunning — payment retry sequence for a failed invoice. Real providers all run a scheduled retry cadence (Stripe Smart Retries default = 4 attempts over ~1 week, Paddle's dunning follows the merchant-configured schedule, Lemon Squeezy retries 4 times over 14 days). The mock reproduces the user-observable envelope: N attempts, each with a delay window, a grace period between last attempt and terminal state, and a notification hook that fires on every attempt.
 
@@ -2048,9 +2048,9 @@ Dunning — payment retry sequence for a failed invoice. Real providers all run 
 export type DunningState = 'active' | 'in-grace-period' | 'recovered' | 'exhausted';
 ```
 
-#### `EmbeddedFinanceConfig`
+#### <code v-pre>EmbeddedFinanceConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L26) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L26) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 ```ts
 export interface EmbeddedFinanceConfig {
@@ -2061,9 +2061,9 @@ export interface EmbeddedFinanceConfig {
 }
 ```
 
-#### `EmbeddedFinanceSession`
+#### <code v-pre>EmbeddedFinanceSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L33) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L33) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 ```ts
 export interface EmbeddedFinanceSession {
@@ -2080,9 +2080,9 @@ export interface EmbeddedFinanceSession {
 }
 ```
 
-#### `EmbeddedFinanceState`
+#### <code v-pre>EmbeddedFinanceState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L13) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L13) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 Embedded finance axis — Banking-as-a-Service (BaaS) + card issuance + KYC (Know Your Customer) + KYB (Know Your Business) verification. Real embedded finance providers (Stripe Treasury / Unit / Column) let a platform open bank accounts on behalf of end users, issue physical or virtual cards, and run compliance verification without the platform itself becoming a bank. The mock reproduces the observable envelope: account open → KYC / KYB verified → card issued.
 
@@ -2090,9 +2090,9 @@ Embedded finance axis — Banking-as-a-Service (BaaS) + card issuance + KYC (Kno
 export type EmbeddedFinanceState = 'initial' | 'account-opened' | 'kyc-pending' | 'kyc-verified' | 'kyb-pending' | 'kyb-verified' | 'card-issued' | 'suspended' | 'closed';
 ```
 
-#### `EngineConfig`
+#### <code v-pre>EngineConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/engine.ts#L20) `packages/payment/src/engine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/engine.ts#L20) <code v-pre>packages/payment/src/engine.ts</code>
 
 Shared engine used by all 3 provider adapters. Handles the HMAC signing + verify + registered handler dispatch. Provider-specific bits (signature scheme, timestamp format, event id prefix, payload shape) are injected via the {@link EngineConfig}. All 3 real providers use HMAC-SHA256 over some canonical serialization of `{timestamp}.{body}` — Stripe's `Stripe-Signature` header is the canonical example, Paddle uses `Paddle-Signature`, Lemon Squeezy uses `X-Signature`. The mock exercises the same bytes.
 
@@ -2107,9 +2107,9 @@ export interface EngineConfig {
 }
 ```
 
-#### `FidelityCoverage`
+#### <code v-pre>FidelityCoverage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fidelity.ts#L19) `packages/payment/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fidelity.ts#L19) <code v-pre>packages/payment/src/semantics/fidelity.ts</code>
 
 ```ts
 export interface FidelityCoverage {
@@ -2119,9 +2119,9 @@ export interface FidelityCoverage {
 }
 ```
 
-#### `FidelityRow`
+#### <code v-pre>FidelityRow</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fidelity.ts#L12) `packages/payment/src/semantics/fidelity.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fidelity.ts#L12) <code v-pre>packages/payment/src/semantics/fidelity.ts</code>
 
 Fidelity harness — collects the provider × axis coverage grid that downstream release-gate reports on. Not a runner (no side effect emit); pure inspection so tests / release-gate can assert "3 provider × 25 axis" (v0.3 9 axis + v0.4 8 axis + v0.5 8 axis) without walking every neutral event by hand. The v0.5 slice alone is 3 provider × 8 axis = 24 combination, extending the v0.4 total from 51 rows to 75 rows.
 
@@ -2134,9 +2134,9 @@ export interface FidelityRow {
 }
 ```
 
-#### `FraudDetectionConfig`
+#### <code v-pre>FraudDetectionConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L24) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L24) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 ```ts
 export interface FraudDetectionConfig {
@@ -2149,9 +2149,9 @@ export interface FraudDetectionConfig {
 }
 ```
 
-#### `FraudDetectionSession`
+#### <code v-pre>FraudDetectionSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L33) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L33) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 ```ts
 export interface FraudDetectionSession {
@@ -2170,9 +2170,9 @@ export interface FraudDetectionSession {
 }
 ```
 
-#### `FraudDetectionState`
+#### <code v-pre>FraudDetectionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L13) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L13) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 Fraud detection advanced axis — device fingerprint scoring + behavioral biometrics verification + velocity checking + ML-driven block decision. Real fraud engines (Stripe Radar / Sift / Signifyd) combine 4 signals to score a transaction: device fingerprint (browser + OS + IP entropy), behavioral biometrics (typing rhythm + mouse motion), velocity (attempts per unit time), and an ML model that fuses everything into a final accept / review / block verdict.
 
@@ -2180,17 +2180,17 @@ Fraud detection advanced axis — device fingerprint scoring + behavioral biomet
 export type FraudDetectionState = 'initial' | 'device-scored' | 'biometric-verified' | 'velocity-flagged' | 'ml-blocked' | 'accepted' | 'reviewing';
 ```
 
-#### `FraudVerdict`
+#### <code v-pre>FraudVerdict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L22) `packages/payment/src/semantics/fraud-detection-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fraud-detection-advanced.ts#L22) <code v-pre>packages/payment/src/semantics/fraud-detection-advanced.ts</code>
 
 ```ts
 export type FraudVerdict = 'accept' | 'review' | 'block';
 ```
 
-#### `FxConfig`
+#### <code v-pre>FxConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L33) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L33) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 ```ts
 export interface FxConfig {
@@ -2201,9 +2201,9 @@ export interface FxConfig {
 }
 ```
 
-#### `FxRateQuote`
+#### <code v-pre>FxRateQuote</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L22) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L22) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 ```ts
 export interface FxRateQuote {
@@ -2218,9 +2218,9 @@ export interface FxRateQuote {
 }
 ```
 
-#### `FxSession`
+#### <code v-pre>FxSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L40) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L40) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 ```ts
 export interface FxSession {
@@ -2234,9 +2234,9 @@ export interface FxSession {
 }
 ```
 
-#### `FxState`
+#### <code v-pre>FxState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L12) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L12) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 FX / cross-border axis — multi-currency rate lock + SWIFT / SEPA settlement + rate expiration. Real cross-border providers (Wise / Airwallex / Currencycloud) quote a rate that stays valid for a fixed window (typically 60-3600 seconds), then settle via SWIFT (global) or SEPA (EU). The mock reproduces rate lock, settlement initiation, settlement completion, and rate expiration.
 
@@ -2244,9 +2244,9 @@ FX / cross-border axis — multi-currency rate lock + SWIFT / SEPA settlement + 
 export type FxState = 'initial' | 'rate-locked' | 'settlement-initiated' | 'settlement-completed' | 'expired' | 'failed';
 ```
 
-#### `Invoice`
+#### <code v-pre>Invoice</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L17) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L17) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 ```ts
 export interface Invoice {
@@ -2259,9 +2259,9 @@ export interface Invoice {
 }
 ```
 
-#### `InvoiceState`
+#### <code v-pre>InvoiceState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L10) `packages/payment/src/semantics/invoice.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/invoice.ts#L10) <code v-pre>packages/payment/src/semantics/invoice.ts</code>
 
 Invoice lifecycle. Real providers use the state machine draft → open → paid (or void / uncollectible). Credit notes are emitted post-paid to refund partial amounts without voiding the invoice. Guards enforce the legal transitions so tests exercise each edge explicitly.
 
@@ -2269,17 +2269,17 @@ Invoice lifecycle. Real providers use the state machine draft → open → paid 
 export type InvoiceState = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
 ```
 
-#### `KycStatus`
+#### <code v-pre>KycStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L24) `packages/payment/src/semantics/embedded-finance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/embedded-finance.ts#L24) <code v-pre>packages/payment/src/semantics/embedded-finance.ts</code>
 
 ```ts
 export type KycStatus = 'pending' | 'verified' | 'failed';
 ```
 
-#### `LifecycleEvent`
+#### <code v-pre>LifecycleEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L31) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L31) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 遷移 trigger event、 evaluate 経路 で 使う。
 
@@ -2287,9 +2287,9 @@ export type KycStatus = 'pending' | 'verified' | 'failed';
 export type LifecycleEvent = 'payment-succeeded' | 'payment-failed' | 'dunning-succeeded' | 'dunning-exhausted' | 'chargeback-filed' | 'chargeback-won' | 'chargeback-lost' | 'user-canceled';
 ```
 
-#### `LifecycleSession`
+#### <code v-pre>LifecycleSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L41) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L41) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface LifecycleSession {
@@ -2303,9 +2303,9 @@ export interface LifecycleSession {
 }
 ```
 
-#### `LifecycleState`
+#### <code v-pre>LifecycleState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L23) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L23) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 lifecycle-orchestrator の 5 state。 subscription lifecycle と revenue-recovery を 統合 した 生命 サイクル SSOT。
 
@@ -2313,9 +2313,9 @@ lifecycle-orchestrator の 5 state。 subscription lifecycle と revenue-recover
 export type LifecycleState = 'active-billing' | 'grace-period' | 'dunning-active' | 'chargeback-dispute' | 'canceled';
 ```
 
-#### `LifecycleSummary`
+#### <code v-pre>LifecycleSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L169) `packages/payment/src/semantics/lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/lifecycle-orchestrator.ts#L169) <code v-pre>packages/payment/src/semantics/lifecycle-orchestrator.ts</code>
 
 lifecycle の 統計サマリー生成、 dogfood consumer が 監視 dashboard で 出力する 用途。 total events 数 + valid event 数 + 遷移 経路 の hash。
 
@@ -2331,9 +2331,9 @@ export interface LifecycleSummary {
 }
 ```
 
-#### `NeutralEventName`
+#### <code v-pre>NeutralEventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L54) `packages/payment/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/types.ts#L54) <code v-pre>packages/payment/src/semantics/types.ts</code>
 
 Provider-neutral event names used inside the axis helpers. Real providers emit different string ids (Stripe `invoice.payment_failed`, Paddle `transaction.payment_failed`, Lemon Squeezy `subscription_payment_failed`) — the {@link providerEventName} map handles the translation. Tests can assert on the neutral name via `event.type.endsWith(':&lt;neutral&gt;')` or on the provider-specific one via the raw type field.
 
@@ -2341,9 +2341,9 @@ Provider-neutral event names used inside the axis helpers. Real providers emit d
 export type NeutralEventName = 'dunning.attempt' | 'dunning.exhausted' | 'dunning.recovered' | 'retry.scheduled' | 'retry.delivered' | 'retry.abandoned' | '3ds.challenge_required' | '3ds.challenge_completed' | '3ds.frictionless' | 'sca.required' | 'sca.exempt' | 'sca.authenticated' | 'psd2.mandate_created' | 'psd2.mandate_revoked' | 'psd2.consent_granted' | 'subscription.created' | 'subscription.upgraded' | 'subscription.downgraded' | 'subscription.paused' | 'subscription.resumed' | 'subscription.canceled' | 'subscription.reactivated' | 'invoice.drafted' | 'invoice.opened' | 'invoice.paid' | 'invoice.voided' | 'invoice.uncollectible' | 'invoice.credit_noted' | 'tax.calculated' | 'tax.reverse_charged' | 'tax.exempted' | 'chargeback.opened' | 'chargeback.evidence_submitted' | 'chargeback.won' | 'chargeback.lost' | 'orchestration.routed' | 'orchestration.failed_over' | 'orchestration.circuit_opened' | 'orchestration.circuit_closed' | 'recovery.smart_retry_scheduled' | 'recovery.dunning_cascade_step' | 'recovery.card_updated' | 'recovery.network_tokenized' | 'refund.partial' | 'refund.full' | 'refund.window_expired' | 'refund.policy_denied' | 'dispute.evidence_submitted' | 'dispute.represented' | 'dispute.arbitration_opened' | 'dispute.liability_shifted' | 'webhook.dedup_hit' | 'webhook.replay_blocked' | 'webhook.signature_rotated' | 'webhook.poison_queued' | 'tax.vat_calculated' | 'tax.gst_calculated' | 'tax.sales_tax_calculated' | 'tax.dac7_reported' | 'subscription.grace_period_entered' | 'subscription.grace_period_exited' | 'subscription.proration_applied' | 'subscription.coupon_stacked' | 'vault.token_created' | 'vault.token_revoked' | 'vault.migrated' | 'vault.pci_scope_verified' | 'embedded.account_opened' | 'embedded.card_issued' | 'embedded.kyc_verified' | 'embedded.kyb_verified' | 'bnpl.plan_created' | 'bnpl.installment_scheduled' | 'bnpl.risk_scored' | 'bnpl.late_fee_charged' | 'crypto.invoice_created' | 'crypto.tx_confirmed' | 'crypto.gas_abstracted' | 'crypto.wallet_linked' | 'fx.rate_locked' | 'fx.settlement_initiated' | 'fx.settlement_completed' | 'fx.rate_expired' | 'rr.mrr_computed' | 'rr.churn_recorded' | 'rr.expansion_recorded' | 'rr.nrr_computed' | 'po2.smart_routed' | 'po2.ml_scored' | 'po2.fallback_triggered' | 'po2.cascade_exhausted' | 'fraud.device_scored' | 'fraud.biometric_verified' | 'fraud.velocity_flagged' | 'fraud.ml_blocked' | 'reg.pci_reported' | 'reg.psd2_reported' | 'reg.dora_reported' | 'reg.sar_filed';
 ```
 
-#### `OrchestrationConfig`
+#### <code v-pre>OrchestrationConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L19) `packages/payment/src/semantics/orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L19) <code v-pre>packages/payment/src/semantics/orchestration.ts</code>
 
 ```ts
 export interface OrchestrationConfig {
@@ -2358,9 +2358,9 @@ export interface OrchestrationConfig {
 }
 ```
 
-#### `OrchestrationIIConfig`
+#### <code v-pre>OrchestrationIIConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L19) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L19) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 ```ts
 export interface OrchestrationIIConfig {
@@ -2375,9 +2375,9 @@ export interface OrchestrationIIConfig {
 }
 ```
 
-#### `OrchestrationIISession`
+#### <code v-pre>OrchestrationIISession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L30) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L30) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 ```ts
 export interface OrchestrationIISession {
@@ -2394,9 +2394,9 @@ export interface OrchestrationIISession {
 }
 ```
 
-#### `OrchestrationIIState`
+#### <code v-pre>OrchestrationIIState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L11) `packages/payment/src/semantics/payment-orchestration-ii.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-orchestration-ii.ts#L11) <code v-pre>packages/payment/src/semantics/payment-orchestration-ii.ts</code>
 
 Payment orchestration II axis — smart routing (BIN-based / cost-optimised) + ML-driven route decisioning + fallback ladder + retry cascade with exhaustion. Extends the v0.4 `orchestration` axis with an ML scoring signal, an explicit fallback ladder (as opposed to a simple linear cascade), and a terminal `cascade-exhausted` state.
 
@@ -2404,9 +2404,9 @@ Payment orchestration II axis — smart routing (BIN-based / cost-optimised) + M
 export type OrchestrationIIState = 'initial' | 'smart-routed' | 'ml-scored' | 'fallback-triggered' | 'cascade-exhausted' | 'terminated';
 ```
 
-#### `OrchestrationSession`
+#### <code v-pre>OrchestrationSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L30) `packages/payment/src/semantics/orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L30) <code v-pre>packages/payment/src/semantics/orchestration.ts</code>
 
 ```ts
 export interface OrchestrationSession {
@@ -2423,9 +2423,9 @@ export interface OrchestrationSession {
 }
 ```
 
-#### `OrchestrationState`
+#### <code v-pre>OrchestrationState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L12) `packages/payment/src/semantics/orchestration.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/orchestration.ts#L12) <code v-pre>packages/payment/src/semantics/orchestration.ts</code>
 
 Orchestration axis — multi-provider routing + failover + retry ladder + circuit breaker. Real merchants split traffic across 2-3 providers to hedge against outages and to fine-tune per-BIN authorisation rates. The mock reproduces the observable envelope: a router that picks the primary provider, retries on failure, fails over to a secondary, and opens a circuit after a configurable failure threshold.
 
@@ -2433,9 +2433,9 @@ Orchestration axis — multi-provider routing + failover + retry ladder + circui
 export type OrchestrationState = 'routing' | 'failed-over' | 'circuit-open' | 'circuit-closed' | 'terminated';
 ```
 
-#### `PaymentAdapter`
+#### <code v-pre>PaymentAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L58) `packages/payment/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L58) <code v-pre>packages/payment/src/types.ts</code>
 
 Adapter contract every provider mock implements. The 3 ops are the intersection kiwa tests actually assert on: - `signWebhook` — build a raw payload + signature pair (fixture) - `verifyWebhook` — verify signature + parse (mock server) - `emit` — synchronous fake webhook dispatch to registered handlers
 
@@ -2463,9 +2463,9 @@ export interface PaymentAdapter {
 }
 ```
 
-#### `PaymentMode`
+#### <code v-pre>PaymentMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L20) `packages/payment/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L20) <code v-pre>packages/payment/src/real-driver.ts</code>
 
 Real-driver env-gate — inspects `process.env` to decide whether the
 
@@ -2473,9 +2473,9 @@ Real-driver env-gate — inspects `process.env` to decide whether the
 export type PaymentMode = 'mock' | 'real';
 ```
 
-#### `PaymentProvider`
+#### <code v-pre>PaymentProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L7) `packages/payment/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L7) <code v-pre>packages/payment/src/types.ts</code>
 
 Payment provider identifier — provider prefix used by release-gate to dispatch axis evaluation. All
 
@@ -2483,9 +2483,9 @@ Payment provider identifier — provider prefix used by release-gate to dispatch
 export type PaymentProvider = 'stripe' | 'paddle' | 'lemonsqueezy';
 ```
 
-#### `PaymentWebhookEvent`
+#### <code v-pre>PaymentWebhookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L28) `packages/payment/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L28) <code v-pre>packages/payment/src/types.ts</code>
 
 A canonical webhook event shape shared across the three providers. Real providers emit slightly different payloads (Stripe uses `data.object`, Paddle uses `data.attributes`, Lemon Squeezy nests under `data.attributes` too but with different keys). This shape captures the intersection that kiwa mocks assert on — id, event type, amount + currency, customer, and a timestamp. The provider-specific `raw` field carries the exact raw webhook body a real client would sign, so signature verify tests exercise the actual bytes.
 
@@ -2502,9 +2502,9 @@ export interface PaymentWebhookEvent {
 }
 ```
 
-#### `PsdMandate`
+#### <code v-pre>PsdMandate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L15) `packages/payment/src/semantics/psd2.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L15) <code v-pre>packages/payment/src/semantics/psd2.ts</code>
 
 ```ts
 export interface PsdMandate {
@@ -2518,9 +2518,9 @@ export interface PsdMandate {
 }
 ```
 
-#### `PsdMandateScheme`
+#### <code v-pre>PsdMandateScheme</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L11) `packages/payment/src/semantics/psd2.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L11) <code v-pre>packages/payment/src/semantics/psd2.ts</code>
 
 PSD2 open banking + mandate semantics. Under PSD2 (EU) and the equivalent UK OBIE spec, recurring debits require a signed customer mandate (SEPA DD B2C, SEPA DD B2B, UK BACS DDI). Open banking payment initiation requires a granular consent from the customer's bank. This module tracks both — mandate lifecycle (create / revoke) and consent grant.
 
@@ -2528,17 +2528,17 @@ PSD2 open banking + mandate semantics. Under PSD2 (EU) and the equivalent UK OBI
 export type PsdMandateScheme = 'sepa-core' | 'sepa-b2b' | 'bacs' | 'open-banking';
 ```
 
-#### `PsdMandateState`
+#### <code v-pre>PsdMandateState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L13) `packages/payment/src/semantics/psd2.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/psd2.ts#L13) <code v-pre>packages/payment/src/semantics/psd2.ts</code>
 
 ```ts
 export type PsdMandateState = 'active' | 'revoked';
 ```
 
-#### `RecoveryConfig`
+#### <code v-pre>RecoveryConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L21) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L21) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 ```ts
 export interface RecoveryConfig {
@@ -2553,9 +2553,9 @@ export interface RecoveryConfig {
 }
 ```
 
-#### `RecoverySession`
+#### <code v-pre>RecoverySession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L32) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L32) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 ```ts
 export interface RecoverySession {
@@ -2570,9 +2570,9 @@ export interface RecoverySession {
 }
 ```
 
-#### `RecoveryState`
+#### <code v-pre>RecoveryState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L12) `packages/payment/src/semantics/revenue-recovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/revenue-recovery.ts#L12) <code v-pre>packages/payment/src/semantics/revenue-recovery.ts</code>
 
 Revenue recovery axis — smart retry + dunning cascade + card updater + network tokenization. Real providers combine 4 mechanisms to recover failed payments: intelligent retry timing (Stripe Smart Retries), a multi-step dunning cascade (email + in-app + SMS), the card updater network to refresh expired cards, and network tokenization to survive card re-issue events without re-collecting PAN.
 
@@ -2580,9 +2580,9 @@ Revenue recovery axis — smart retry + dunning cascade + card updater + network
 export type RecoveryState = 'initial' | 'smart-retry-scheduled' | 'dunning-cascade' | 'card-updated' | 'network-tokenized' | 'recovered' | 'lost';
 ```
 
-#### `RecurringRevenueSession`
+#### <code v-pre>RecurringRevenueSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L29) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L29) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 ```ts
 export interface RecurringRevenueSession {
@@ -2598,9 +2598,9 @@ export interface RecurringRevenueSession {
 }
 ```
 
-#### `RecurringRevenueSnapshot`
+#### <code v-pre>RecurringRevenueSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L19) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L19) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 ```ts
 export interface RecurringRevenueSnapshot {
@@ -2614,9 +2614,9 @@ export interface RecurringRevenueSnapshot {
 }
 ```
 
-#### `RecurringRevenueState`
+#### <code v-pre>RecurringRevenueState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L12) `packages/payment/src/semantics/recurring-revenue-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/recurring-revenue-advanced.ts#L12) <code v-pre>packages/payment/src/semantics/recurring-revenue-advanced.ts</code>
 
 Recurring revenue advanced axis — MRR (Monthly Recurring Revenue) + ARR (Annual Recurring Revenue) + churn tracking + expansion revenue + NRR (Net Revenue Retention). Real SaaS billing platforms (Stripe / Chargebee / Recurly) roll these metrics into cohort analytics: NRR = (MRR_end - churn - contraction + expansion) / MRR_start × 100. The mock reproduces MRR / ARR computation, churn / expansion recording, and NRR rollup.
 
@@ -2624,9 +2624,9 @@ Recurring revenue advanced axis — MRR (Monthly Recurring Revenue) + ARR (Annua
 export type RecurringRevenueState = 'initial' | 'mrr-computed' | 'churn-recorded' | 'expansion-recorded' | 'nrr-computed';
 ```
 
-#### `RefundPolicy`
+#### <code v-pre>RefundPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L18) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L18) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 ```ts
 export interface RefundPolicy {
@@ -2641,9 +2641,9 @@ export interface RefundPolicy {
 }
 ```
 
-#### `RefundSession`
+#### <code v-pre>RefundSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L29) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L29) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 ```ts
 export interface RefundSession {
@@ -2659,9 +2659,9 @@ export interface RefundSession {
 }
 ```
 
-#### `RefundState`
+#### <code v-pre>RefundState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L11) `packages/payment/src/semantics/refund-advanced.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/refund-advanced.ts#L11) <code v-pre>packages/payment/src/semantics/refund-advanced.ts</code>
 
 Refund advanced axis — partial refund + refund policy + refund window + chargeback prevention. Real merchants apply time-window policies (30 day / 60 day / no-refund), partial refunds with amount caps, and use refunds proactively to head off chargebacks that would otherwise incur $15-$25 fees plus liability shift.
 
@@ -2669,17 +2669,17 @@ Refund advanced axis — partial refund + refund policy + refund window + charge
 export type RefundState = 'requested' | 'partial-issued' | 'full-issued' | 'window-expired' | 'policy-denied';
 ```
 
-#### `Regulator`
+#### <code v-pre>Regulator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L20) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L20) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 ```ts
 export type Regulator = 'PCI-SSC' | 'EBA' | 'ESA' | 'FinCEN' | 'NCA';
 ```
 
-#### `RegulatoryReportingSession`
+#### <code v-pre>RegulatoryReportingSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L31) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L31) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 ```ts
 export interface RegulatoryReportingSession {
@@ -2693,9 +2693,9 @@ export interface RegulatoryReportingSession {
 }
 ```
 
-#### `RegulatoryReportingState`
+#### <code v-pre>RegulatoryReportingState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L12) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L12) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 Regulatory reporting axis — PCI DSS + PSD2 SCA + DORA (Digital Operational Resilience Act) + AML/KYC + SAR (Suspicious Activity Report). Real payment processors submit periodic reports to regulators: PCI DSS to card networks, PSD2 to EBA (European Banking Authority), DORA to competent authorities under the ESAs, and SAR to FinCEN (US) / NCA (UK) on demand when suspicious activity is detected.
 
@@ -2703,17 +2703,17 @@ Regulatory reporting axis — PCI DSS + PSD2 SCA + DORA (Digital Operational Res
 export type RegulatoryReportingState = 'initial' | 'pci-reported' | 'psd2-reported' | 'dora-reported' | 'sar-filed' | 'audit-locked';
 ```
 
-#### `ReportPeriod`
+#### <code v-pre>ReportPeriod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L21) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L21) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 ```ts
 export type ReportPeriod = 'monthly' | 'quarterly' | 'annual' | 'on-demand';
 ```
 
-#### `ReportRecord`
+#### <code v-pre>ReportRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L23) `packages/payment/src/semantics/regulatory-reporting.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/regulatory-reporting.ts#L23) <code v-pre>packages/payment/src/semantics/regulatory-reporting.ts</code>
 
 ```ts
 export interface ReportRecord {
@@ -2725,9 +2725,9 @@ export interface ReportRecord {
 }
 ```
 
-#### `ResolvedMode`
+#### <code v-pre>ResolvedMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L22) `packages/payment/src/real-driver.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/real-driver.ts#L22) <code v-pre>packages/payment/src/real-driver.ts</code>
 
 ```ts
 export interface ResolvedMode {
@@ -2737,9 +2737,9 @@ export interface ResolvedMode {
 }
 ```
 
-#### `RetryConfig`
+#### <code v-pre>RetryConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L14) `packages/payment/src/semantics/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L14) <code v-pre>packages/payment/src/semantics/retry.ts</code>
 
 ```ts
 export interface RetryConfig {
@@ -2749,9 +2749,9 @@ export interface RetryConfig {
 }
 ```
 
-#### `RetrySession`
+#### <code v-pre>RetrySession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L20) `packages/payment/src/semantics/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L20) <code v-pre>packages/payment/src/semantics/retry.ts</code>
 
 ```ts
 export interface RetrySession {
@@ -2764,9 +2764,9 @@ export interface RetrySession {
 }
 ```
 
-#### `RetryState`
+#### <code v-pre>RetryState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L12) `packages/payment/src/semantics/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/retry.ts#L12) <code v-pre>packages/payment/src/semantics/retry.ts</code>
 
 Webhook delivery retry semantics. All 3 real providers retry undelivered webhooks with exponential backoff until a configured max attempt count (Stripe = 3 days at increasing intervals, Paddle = 3 attempts at 5s / 5m / 10m, Lemon Squeezy = up to 3 attempts). The mock reproduces the observable envelope: an idempotency key per event, backoff schedule, and a max-attempt abandon terminal state.
 
@@ -2774,17 +2774,17 @@ Webhook delivery retry semantics. All 3 real providers retry undelivered webhook
 export type RetryState = 'scheduled' | 'delivered' | 'abandoned';
 ```
 
-#### `ScaExemption`
+#### <code v-pre>ScaExemption</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L13) `packages/payment/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L13) <code v-pre>packages/payment/src/semantics/sca.ts</code>
 
 ```ts
 export type ScaExemption = 'low-value' | 'trusted-beneficiary' | 'transaction-risk-analysis' | 'merchant-initiated' | 'recurring-subsequent' | 'corporate';
 ```
 
-#### `ScaSession`
+#### <code v-pre>ScaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L21) `packages/payment/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L21) <code v-pre>packages/payment/src/semantics/sca.ts</code>
 
 ```ts
 export interface ScaSession {
@@ -2798,9 +2798,9 @@ export interface ScaSession {
 }
 ```
 
-#### `ScaState`
+#### <code v-pre>ScaState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L11) `packages/payment/src/semantics/sca.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/sca.ts#L11) <code v-pre>packages/payment/src/semantics/sca.ts</code>
 
 Strong Customer Authentication (SCA) semantics under PSD2. Real providers expose SCA through: (1) exemption evaluation (low-value, TRA, MIT, recurring subsequent), (2) required authentication when no exemption applies, (3) post-auth token issue. This module wraps the 3-state envelope: `required` / `exempt` / `authenticated`.
 
@@ -2808,25 +2808,25 @@ Strong Customer Authentication (SCA) semantics under PSD2. Real providers expose
 export type ScaState = 'evaluating' | 'required' | 'exempt' | 'authenticated';
 ```
 
-#### `SettlementRail`
+#### <code v-pre>SettlementRail</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L20) `packages/payment/src/semantics/fx-cross-border.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/fx-cross-border.ts#L20) <code v-pre>packages/payment/src/semantics/fx-cross-border.ts</code>
 
 ```ts
 export type SettlementRail = 'SWIFT' | 'SEPA' | 'ACH' | 'FASTER' | 'RTGS';
 ```
 
-#### `Stablecoin`
+#### <code v-pre>Stablecoin</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L23) `packages/payment/src/semantics/crypto-payment.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/crypto-payment.ts#L23) <code v-pre>packages/payment/src/semantics/crypto-payment.ts</code>
 
 ```ts
 export type Stablecoin = 'USDC' | 'USDT' | 'DAI' | 'ETH' | 'SOL';
 ```
 
-#### `Subscription`
+#### <code v-pre>Subscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L17) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L17) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 ```ts
 export interface Subscription {
@@ -2840,9 +2840,9 @@ export interface Subscription {
 }
 ```
 
-#### `SubscriptionMachineSession`
+#### <code v-pre>SubscriptionMachineSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L29) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L29) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 ```ts
 export interface SubscriptionMachineSession {
@@ -2860,9 +2860,9 @@ export interface SubscriptionMachineSession {
 }
 ```
 
-#### `SubscriptionMachineState`
+#### <code v-pre>SubscriptionMachineState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L12) `packages/payment/src/semantics/subscription-state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-state-machine.ts#L12) <code v-pre>packages/payment/src/semantics/subscription-state-machine.ts</code>
 
 Subscription state machine axis — grace period + pause / resume + proration + coupon stacking. Real subscription billing has a distinct grace period (past-due but not yet cancelled), first-class pause / resume (Stripe `paused_collection`, Paddle `subscription.paused`), mid-cycle proration for plan changes, and stackable discounts / coupons whose effective percent must be recomputed on every renewal.
 
@@ -2870,9 +2870,9 @@ Subscription state machine axis — grace period + pause / resume + proration + 
 export type SubscriptionMachineState = 'active' | 'grace-period' | 'paused' | 'canceled' | 'expired';
 ```
 
-#### `SubscriptionState`
+#### <code v-pre>SubscriptionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L10) `packages/payment/src/semantics/subscription-lifecycle.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/subscription-lifecycle.ts#L10) <code v-pre>packages/payment/src/semantics/subscription-lifecycle.ts</code>
 
 Subscription lifecycle state machine. Real providers converge on the same 7-state envelope: created → (upgraded / downgraded / paused / resumed) → canceled → reactivated. This module wraps that envelope with strict transition guards so tests fail loudly on invalid transitions.
 
@@ -2880,9 +2880,9 @@ Subscription lifecycle state machine. Real providers converge on the same 7-stat
 export type SubscriptionState = 'active' | 'upgraded' | 'downgraded' | 'paused' | 'canceled';
 ```
 
-#### `TaxCalcInput`
+#### <code v-pre>TaxCalcInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L24) `packages/payment/src/semantics/tax.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L24) <code v-pre>packages/payment/src/semantics/tax.ts</code>
 
 ```ts
 export interface TaxCalcInput {
@@ -2894,17 +2894,17 @@ export interface TaxCalcInput {
 }
 ```
 
-#### `TaxJurisdiction`
+#### <code v-pre>TaxJurisdiction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L17) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L17) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 ```ts
 export type TaxJurisdiction = 'EU' | 'UK' | 'US' | 'AU' | 'CA' | 'JP' | 'other';
 ```
 
-#### `TaxKind`
+#### <code v-pre>TaxKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L12) `packages/payment/src/semantics/tax.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L12) <code v-pre>packages/payment/src/semantics/tax.ts</code>
 
 Tax semantics — VAT / GST / sales tax + reverse charge + tax registration. Real providers surface tax through per-line calculation (Stripe Tax, Paddle Merchant of Record includes VAT/GST inclusive, Lemon Squeezy MOR). This module reproduces the observable envelope: a pure `calculateTax` helper for local decisions plus 3 emit helpers for the neutral events downstream harnesses filter on.
 
@@ -2912,17 +2912,17 @@ Tax semantics — VAT / GST / sales tax + reverse charge + tax registration. Rea
 export type TaxKind = 'vat' | 'gst' | 'sales-tax';
 ```
 
-#### `TaxKindLocalized`
+#### <code v-pre>TaxKindLocalized</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L26) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L26) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 ```ts
 export type TaxKindLocalized = 'vat' | 'gst' | 'sales-tax' | 'dac7-report';
 ```
 
-#### `TaxLine`
+#### <code v-pre>TaxLine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L14) `packages/payment/src/semantics/tax.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax.ts#L14) <code v-pre>packages/payment/src/semantics/tax.ts</code>
 
 ```ts
 export interface TaxLine {
@@ -2936,9 +2936,9 @@ export interface TaxLine {
 }
 ```
 
-#### `TaxLocalizationInput`
+#### <code v-pre>TaxLocalizationInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L32) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L32) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 ```ts
 export interface TaxLocalizationInput {
@@ -2953,9 +2953,9 @@ export interface TaxLocalizationInput {
 }
 ```
 
-#### `TaxLocalizationLine`
+#### <code v-pre>TaxLocalizationLine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L43) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L43) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 ```ts
 export interface TaxLocalizationLine {
@@ -2968,9 +2968,9 @@ export interface TaxLocalizationLine {
 }
 ```
 
-#### `TaxLocalizationState`
+#### <code v-pre>TaxLocalizationState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L11) `packages/payment/src/semantics/tax-localization.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/tax-localization.ts#L11) <code v-pre>packages/payment/src/semantics/tax-localization.ts</code>
 
 Tax localization axis — VAT + GST + sales tax + EU DAC7 reporting. Real merchants selling cross-border have to compute the correct indirect tax by jurisdiction (EU VAT MOSS / OSS, UK VAT, AU GST, US destination sales tax) and file periodic marketplace reporting under EU DAC7 for digital platforms.
 
@@ -2978,9 +2978,9 @@ Tax localization axis — VAT + GST + sales tax + EU DAC7 reporting. Real mercha
 export type TaxLocalizationState = 'calculating' | 'calculated' | 'reported' | 'exempt';
 ```
 
-#### `ThreeDsSession`
+#### <code v-pre>ThreeDsSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L20) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L20) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 ```ts
 export interface ThreeDsSession {
@@ -2993,9 +2993,9 @@ export interface ThreeDsSession {
 }
 ```
 
-#### `ThreeDsState`
+#### <code v-pre>ThreeDsState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L12) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L12) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 3D Secure v2 challenge flow. Real providers surface 3DS through a two- or three-step flow: fingerprint (device data collection), challenge (user interaction), result (accept/reject). Frictionless flow skips the challenge when the issuer risk assessment is low. The mock reproduces the observable envelope only — no real ACS callout, just event ordering with sensible metadata (transStatus, eci) drawn from EMVCo 3DS 2.2.
 
@@ -3003,17 +3003,17 @@ export interface ThreeDsSession {
 export type ThreeDsState = 'fingerprint' | 'challenge-pending' | 'completed' | 'frictionless';
 ```
 
-#### `ThreeDsTransStatus`
+#### <code v-pre>ThreeDsTransStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L18) `packages/payment/src/semantics/three-ds.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/three-ds.ts#L18) <code v-pre>packages/payment/src/semantics/three-ds.ts</code>
 
 ```ts
 export type ThreeDsTransStatus = 'Y' | 'N' | 'A' | 'C' | 'U' | 'R';
 ```
 
-#### `VaultSession`
+#### <code v-pre>VaultSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L29) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L29) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 ```ts
 export interface VaultSession {
@@ -3026,9 +3026,9 @@ export interface VaultSession {
 }
 ```
 
-#### `VaultState`
+#### <code v-pre>VaultState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L11) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L11) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 Payment method vault axis — tokenization + PCI DSS SAQ-A + cross-provider migration. Real merchants tokenize PAN + CVV so the raw card data never lands on their systems (SAQ-A / SAQ-A-EP compliance) and portable tokens (network tokens, PSP-agnostic tokens) let merchants migrate from Stripe to Paddle without asking customers to re-enter card details.
 
@@ -3036,9 +3036,9 @@ Payment method vault axis — tokenization + PCI DSS SAQ-A + cross-provider migr
 export type VaultState = 'empty' | 'tokenized' | 'revoked' | 'migrated' | 'pci-verified';
 ```
 
-#### `VaultToken`
+#### <code v-pre>VaultToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L18) `packages/payment/src/semantics/payment-method-vault.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/payment-method-vault.ts#L18) <code v-pre>packages/payment/src/semantics/payment-method-vault.ts</code>
 
 ```ts
 export interface VaultToken {
@@ -3053,9 +3053,9 @@ export interface VaultToken {
 }
 ```
 
-#### `WebhookIdempotencyConfig`
+#### <code v-pre>WebhookIdempotencyConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L20) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L20) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 ```ts
 export interface WebhookIdempotencyConfig {
@@ -3068,9 +3068,9 @@ export interface WebhookIdempotencyConfig {
 }
 ```
 
-#### `WebhookIdempotencySession`
+#### <code v-pre>WebhookIdempotencySession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L29) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L29) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 ```ts
 export interface WebhookIdempotencySession {
@@ -3084,9 +3084,9 @@ export interface WebhookIdempotencySession {
 }
 ```
 
-#### `WebhookState`
+#### <code v-pre>WebhookState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L13) `packages/payment/src/semantics/webhook-idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/semantics/webhook-idempotency.ts#L13) <code v-pre>packages/payment/src/semantics/webhook-idempotency.ts</code>
 
 Webhook idempotency advanced axis — dedup key + replay protection + signature rotation + poison queue. Real payment webhooks routinely duplicate (retry storms, at-least-once delivery), replay attackers can capture and resubmit a valid signed body inside the tolerance window, providers rotate signing secrets during incident response, and repeatedly failing handlers need to be sidelined into a poison queue so successful traffic isn't blocked.
 
@@ -3094,9 +3094,9 @@ Webhook idempotency advanced axis — dedup key + replay protection + signature 
 export type WebhookState = 'idle' | 'dedup-hit' | 'replay-blocked' | 'rotated' | 'poisoned';
 ```
 
-#### `WebhookVerifyResult`
+#### <code v-pre>WebhookVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L45) `packages/payment/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/payment/src/types.ts#L45) <code v-pre>packages/payment/src/types.ts</code>
 
 Signature verify result — returned by every provider's `verifyWebhook`. Includes the parsed event on success and a reason string on failure so kiwa tests can assert on specific rejection paths without string-matching the whole error message.
 

@@ -36,9 +36,9 @@
 
 ### 値
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L19) `packages/webhook/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L19) <code v-pre>packages/webhook/src/circuit-breaker.ts</code>
 
 circuit breaker: rejectionThreshold 連続 rejection で open、 resetTimeoutMs 後 half-open。
 
@@ -46,25 +46,25 @@ circuit breaker: rejectionThreshold 連続 rejection で open、 resetTimeoutMs 
 export declare function createCircuitBreaker(verifier: WebhookVerifier, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L20) `packages/webhook/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L20) <code v-pre>packages/webhook/src/observability.ts</code>
 
 ```ts
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L10) `packages/webhook/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L10) <code v-pre>packages/webhook/src/idempotency.ts</code>
 
 ```ts
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `createWebhookVerifier`
+#### <code v-pre>createWebhookVerifier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L47) `packages/webhook/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L47) <code v-pre>packages/webhook/src/client.ts</code>
 
 provider 別 verifier を作成。 verify() 呼出で signature + payload parse + record を atomic に実行し、 listDelivered() で受信ログを取り出せる in-process mock。 実 provider (Stripe Events API / GitHub webhook / Slack Events API / Twilio) の signature 検証と event shape を同じ signature で再現する。
 
@@ -72,9 +72,9 @@ provider 別 verifier を作成。 verify() 呼出で signature + payload parse 
 export declare function createWebhookVerifier(options: CreateWebhookVerifierOptions): WebhookVerifier;
 ```
 
-#### `dispatchWithRetry`
+#### <code v-pre>dispatchWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L28) `packages/webhook/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L28) <code v-pre>packages/webhook/src/delivery.ts</code>
 
 exponential backoff で handler を retry する delivery loop。 実 webhook subscriber (Stripe / GitHub の redelivery loop) を再現するための test helper。 sleep は injectable なので test では即 resolve で回せる。
 
@@ -82,9 +82,9 @@ exponential backoff で handler を retry する delivery loop。 実 webhook su
 export declare function dispatchWithRetry(handler: (event: NormalizedWebhookEvent) => Promise<void>, event: NormalizedWebhookEvent, options?: DispatchRetryOptions): Promise<DispatchRetryResult>;
 ```
 
-#### `parseWebhookPayload`
+#### <code v-pre>parseWebhookPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L34) `packages/webhook/src/payload.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L34) <code v-pre>packages/webhook/src/payload.ts</code>
 
 provider 別 event payload を統一 shape に正規化。 field 名の違い (Stripe = type / GitHub = X-GitHub-Event header header → raw.event / Slack = event.type / Twilio = MessageStatus) を吸収する。
 
@@ -92,9 +92,9 @@ provider 別 event payload を統一 shape に正規化。 field 名の違い (S
 export declare function parseWebhookPayload(rawEvent: RawWebhookEvent): NormalizedWebhookEvent;
 ```
 
-#### `verifyBatch`
+#### <code v-pre>verifyBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/batch.ts#L15) `packages/webhook/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/batch.ts#L15) <code v-pre>packages/webhook/src/batch.ts</code>
 
 batch verify: 複数 incoming webhook を一括 verify、 stopOnFirstRejection で中断。
 
@@ -102,9 +102,9 @@ batch verify: 複数 incoming webhook を一括 verify、 stopOnFirstRejection �
 export declare function verifyBatch(verifier: WebhookVerifier, incomings: readonly IncomingWebhook[], options?: BatchVerifyOptions): BatchVerifyResult;
 ```
 
-#### `verifyIdempotent`
+#### <code v-pre>verifyIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L21) `packages/webhook/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L21) <code v-pre>packages/webhook/src/idempotency.ts</code>
 
 idempotent verify: event id (or dedup key) で dup detection、 cached outcome 返却。
 
@@ -114,17 +114,17 @@ export declare function verifyIdempotent(verifier: WebhookVerifier, incoming: In
 };
 ```
 
-#### `verifyObservable`
+#### <code v-pre>verifyObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L38) `packages/webhook/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L38) <code v-pre>packages/webhook/src/observability.ts</code>
 
 ```ts
 export declare function verifyObservable(verifier: WebhookVerifier, incoming: IncomingWebhook, hooks: HookRegistry): WebhookVerifyOutcome;
 ```
 
-#### `verifyWebhookSignature`
+#### <code v-pre>verifyWebhookSignature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/signature.ts#L24) `packages/webhook/src/signature.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/signature.ts#L24) <code v-pre>packages/webhook/src/signature.ts</code>
 
 provider 別 webhook 署名を検証。 実 provider が送る signature format を再現。 - stripe = `t=&lt;ts&gt;,v1=&lt;hex&gt;` 形式、 sha256 hex、 toleranceSec 内のみ valid - github = `sha256=&lt;hex&gt;` 形式、 sha256 hex - slack = `v0=&lt;hex&gt;` 形式 (`v0:&lt;ts&gt;:&lt;body&gt;` を base string に)、 sha256 hex - twilio = base64、 sha1 (URL + form params) - mock では payload そのままを署名対象にする
 
@@ -132,9 +132,9 @@ provider 別 webhook 署名を検証。 実 provider が送る signature format 
 export declare function verifyWebhookSignature(payload: string, signature: string, secret: string, provider: WebhookProvider, options?: VerifySignatureOptions): SignatureVerifyResult;
 ```
 
-#### `verifyWithRetry`
+#### <code v-pre>verifyWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/retry.ts#L15) `packages/webhook/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/retry.ts#L15) <code v-pre>packages/webhook/src/retry.ts</code>
 
 verify with exponential backoff (transient signature failure retry)。
 
@@ -144,9 +144,9 @@ export declare function verifyWithRetry(verifier: WebhookVerifier, incoming: Inc
 
 ### 型
 
-#### `BatchVerifyOptions`
+#### <code v-pre>BatchVerifyOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/batch.ts#L3) `packages/webhook/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/batch.ts#L3) <code v-pre>packages/webhook/src/batch.ts</code>
 
 ```ts
 export interface BatchVerifyOptions {
@@ -154,9 +154,9 @@ export interface BatchVerifyOptions {
 }
 ```
 
-#### `BatchVerifyResult`
+#### <code v-pre>BatchVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/batch.ts#L7) `packages/webhook/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/batch.ts#L7) <code v-pre>packages/webhook/src/batch.ts</code>
 
 ```ts
 export interface BatchVerifyResult {
@@ -167,9 +167,9 @@ export interface BatchVerifyResult {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L11) `packages/webhook/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L11) <code v-pre>packages/webhook/src/circuit-breaker.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -182,9 +182,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L5) `packages/webhook/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L5) <code v-pre>packages/webhook/src/circuit-breaker.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -194,17 +194,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L3) `packages/webhook/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/circuit-breaker.ts#L3) <code v-pre>packages/webhook/src/circuit-breaker.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `DeliveredWebhookRecord`
+#### <code v-pre>DeliveredWebhookRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L21) `packages/webhook/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L21) <code v-pre>packages/webhook/src/client.ts</code>
 
 ```ts
 export interface DeliveredWebhookRecord extends WebhookVerifyOutcome {
@@ -213,9 +213,9 @@ export interface DeliveredWebhookRecord extends WebhookVerifyOutcome {
 }
 ```
 
-#### `DispatchAttempt`
+#### <code v-pre>DispatchAttempt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L10) `packages/webhook/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L10) <code v-pre>packages/webhook/src/delivery.ts</code>
 
 ```ts
 export interface DispatchAttempt {
@@ -226,9 +226,9 @@ export interface DispatchAttempt {
 }
 ```
 
-#### `DispatchRetryOptions`
+#### <code v-pre>DispatchRetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L3) `packages/webhook/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L3) <code v-pre>packages/webhook/src/delivery.ts</code>
 
 ```ts
 export interface DispatchRetryOptions {
@@ -239,9 +239,9 @@ export interface DispatchRetryOptions {
 }
 ```
 
-#### `DispatchRetryResult`
+#### <code v-pre>DispatchRetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L17) `packages/webhook/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/delivery.ts#L17) <code v-pre>packages/webhook/src/delivery.ts</code>
 
 ```ts
 export interface DispatchRetryResult {
@@ -251,17 +251,17 @@ export interface DispatchRetryResult {
 }
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L12) `packages/webhook/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L12) <code v-pre>packages/webhook/src/observability.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L5) `packages/webhook/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L5) <code v-pre>packages/webhook/src/observability.ts</code>
 
 ```ts
 export interface HookContext {
@@ -272,9 +272,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L14) `packages/webhook/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L14) <code v-pre>packages/webhook/src/observability.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -284,9 +284,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L3) `packages/webhook/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/idempotency.ts#L3) <code v-pre>packages/webhook/src/idempotency.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -297,9 +297,9 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `IncomingWebhook`
+#### <code v-pre>IncomingWebhook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L6) `packages/webhook/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L6) <code v-pre>packages/webhook/src/client.ts</code>
 
 ```ts
 export interface IncomingWebhook {
@@ -309,9 +309,9 @@ export interface IncomingWebhook {
 }
 ```
 
-#### `NormalizedWebhookEvent`
+#### <code v-pre>NormalizedWebhookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L21) `packages/webhook/src/payload.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L21) <code v-pre>packages/webhook/src/payload.ts</code>
 
 ```ts
 export interface NormalizedWebhookEvent {
@@ -323,9 +323,9 @@ export interface NormalizedWebhookEvent {
 }
 ```
 
-#### `RawWebhookEvent`
+#### <code v-pre>RawWebhookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L16) `packages/webhook/src/payload.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L16) <code v-pre>packages/webhook/src/payload.ts</code>
 
 ```ts
 export interface RawWebhookEvent {
@@ -334,9 +334,9 @@ export interface RawWebhookEvent {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/retry.ts#L3) `packages/webhook/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/retry.ts#L3) <code v-pre>packages/webhook/src/retry.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -347,9 +347,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryVerifyResult`
+#### <code v-pre>RetryVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/retry.ts#L10) `packages/webhook/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/retry.ts#L10) <code v-pre>packages/webhook/src/retry.ts</code>
 
 ```ts
 export interface RetryVerifyResult extends WebhookVerifyOutcome {
@@ -357,9 +357,9 @@ export interface RetryVerifyResult extends WebhookVerifyOutcome {
 }
 ```
 
-#### `SignatureVerifyResult`
+#### <code v-pre>SignatureVerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/signature.ts#L4) `packages/webhook/src/signature.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/signature.ts#L4) <code v-pre>packages/webhook/src/signature.ts</code>
 
 ```ts
 export interface SignatureVerifyResult {
@@ -370,17 +370,17 @@ export interface SignatureVerifyResult {
 }
 ```
 
-#### `VerifyHookEvent`
+#### <code v-pre>VerifyHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L3) `packages/webhook/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/observability.ts#L3) <code v-pre>packages/webhook/src/observability.ts</code>
 
 ```ts
 export type VerifyHookEvent = 'before-verify' | 'after-verify' | 'rejected';
 ```
 
-#### `VerifySignatureOptions`
+#### <code v-pre>VerifySignatureOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/signature.ts#L11) `packages/webhook/src/signature.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/signature.ts#L11) <code v-pre>packages/webhook/src/signature.ts</code>
 
 ```ts
 export interface VerifySignatureOptions {
@@ -389,25 +389,25 @@ export interface VerifySignatureOptions {
 }
 ```
 
-#### `WebhookEventType`
+#### <code v-pre>WebhookEventType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L3) `packages/webhook/src/payload.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/payload.ts#L3) <code v-pre>packages/webhook/src/payload.ts</code>
 
 ```ts
 export type WebhookEventType = 'payment.succeeded' | 'payment.failed' | 'subscription.updated' | 'push' | 'pull_request' | 'issues' | 'message' | 'app_mention' | 'sms.delivered' | 'sms.failed' | 'unknown';
 ```
 
-#### `WebhookProvider`
+#### <code v-pre>WebhookProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L4) `packages/webhook/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L4) <code v-pre>packages/webhook/src/client.ts</code>
 
 ```ts
 export type WebhookProvider = 'stripe' | 'github' | 'slack' | 'twilio';
 ```
 
-#### `WebhookVerifier`
+#### <code v-pre>WebhookVerifier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L26) `packages/webhook/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L26) <code v-pre>packages/webhook/src/client.ts</code>
 
 ```ts
 export interface WebhookVerifier {
@@ -418,9 +418,9 @@ export interface WebhookVerifier {
 }
 ```
 
-#### `WebhookVerifyOutcome`
+#### <code v-pre>WebhookVerifyOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L12) `packages/webhook/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/webhook/src/client.ts#L12) <code v-pre>packages/webhook/src/client.ts</code>
 
 ```ts
 export interface WebhookVerifyOutcome {

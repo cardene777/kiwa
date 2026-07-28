@@ -25,17 +25,17 @@
 
 ### 値
 
-#### `invokeApiRoute`
+#### <code v-pre>invokeApiRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L61) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L61) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export declare function invokeApiRoute<TParams extends Record<string, string | undefined> = Record<string, string | undefined>>(opts: InvokeApiRouteOptions<TParams>): Promise<InvokeApiRouteResult>;
 ```
 
-#### `invokeServerFunction`
+#### <code v-pre>invokeServerFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L51) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L51) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 Invoke a SolidStart server function in isolation and capture its return value + redirect signal. Headers / cookies are exposed for assertion but the function itself receives them via the args contract (kiwa stays minimal: pass any context the function needs through `args`).
 
@@ -43,33 +43,33 @@ Invoke a SolidStart server function in isolation and capture its return value + 
 export declare function invokeServerFunction<TArgs extends readonly unknown[] = readonly unknown[], TResult = unknown>(opts: InvokeServerFunctionOptions<TArgs, TResult>): Promise<InvokeServerFunctionResult<TResult>>;
 ```
 
-#### `json`
+#### <code v-pre>json</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L95) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L95) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export declare function json<T>(body: T, init?: ResponseInit): Response;
 ```
 
-#### `redirect`
+#### <code v-pre>redirect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L80) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L80) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 ```ts
 export declare function redirect(url: string, status?: number): SolidStartRedirectSignal;
 ```
 
-#### `redirectResponse`
+#### <code v-pre>redirectResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L101) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L101) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export declare function redirectResponse(location: string, status?: number): Response;
 ```
 
-#### `SOLIDSTART_REDIRECT_SYMBOL`
+#### <code v-pre>SOLIDSTART&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L8) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L8) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 ```ts
 export declare const SOLIDSTART_REDIRECT_SYMBOL: unique symbol;
@@ -77,17 +77,17 @@ export declare const SOLIDSTART_REDIRECT_SYMBOL: unique symbol;
 
 ### 型
 
-#### `APIRouteHandler`
+#### <code v-pre>APIRouteHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L15) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L15) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export type APIRouteHandler<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> = (event: SimulatedAPIEvent<TParams>) => Promise<Response> | Response;
 ```
 
-#### `InvokeApiRouteOptions`
+#### <code v-pre>InvokeApiRouteOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L19) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L19) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export interface InvokeApiRouteOptions<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
@@ -102,9 +102,9 @@ export interface InvokeApiRouteOptions<TParams extends Record<string, string | u
 }
 ```
 
-#### `InvokeApiRouteResult`
+#### <code v-pre>InvokeApiRouteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L30) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L30) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export interface InvokeApiRouteResult {
@@ -116,9 +116,9 @@ export interface InvokeApiRouteResult {
 }
 ```
 
-#### `InvokeServerFunctionOptions`
+#### <code v-pre>InvokeServerFunctionOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L20) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L20) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 ```ts
 export interface InvokeServerFunctionOptions<TArgs extends readonly unknown[], TResult> {
@@ -129,9 +129,9 @@ export interface InvokeServerFunctionOptions<TArgs extends readonly unknown[], T
 }
 ```
 
-#### `InvokeServerFunctionResult`
+#### <code v-pre>InvokeServerFunctionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L27) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L27) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 ```ts
 export interface InvokeServerFunctionResult<TResult> {
@@ -145,17 +145,17 @@ export interface InvokeServerFunctionResult<TResult> {
 }
 ```
 
-#### `ServerFunctionFunction`
+#### <code v-pre>ServerFunctionFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L16) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L16) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 ```ts
 export type ServerFunctionFunction<TArgs extends readonly unknown[] = readonly unknown[], TResult = unknown> = (...args: TArgs) => Promise<TResult> | TResult;
 ```
 
-#### `SimulatedAPIEvent`
+#### <code v-pre>SimulatedAPIEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L8) `packages/solidstart/src/invoke-api-route.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-api-route.ts#L8) <code v-pre>packages/solidstart/src/invoke-api-route.ts</code>
 
 ```ts
 export interface SimulatedAPIEvent<TParams extends Record<string, string | undefined> = Record<string, string | undefined>> {
@@ -166,9 +166,9 @@ export interface SimulatedAPIEvent<TParams extends Record<string, string | undef
 }
 ```
 
-#### `SolidStartRedirectSignal`
+#### <code v-pre>SolidStartRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L10) `packages/solidstart/src/invoke-server-function.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/solidstart/src/invoke-server-function.ts#L10) <code v-pre>packages/solidstart/src/invoke-server-function.ts</code>
 
 ```ts
 export interface SolidStartRedirectSignal {

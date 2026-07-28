@@ -53,7 +53,7 @@ state は `spawning`、`running`、`signaled`、`exited`、`cleaned` です。in
 
 ### 値
 
-#### `dispatchCliEvent`
+#### <code v-pre>dispatchCliEvent</code>
 
 公開 entry point から解決しています。
 
@@ -67,9 +67,9 @@ export {
 } from './cli-lifecycle-orchestrator.js';
 ```
 
-#### `expectExitCode`
+#### <code v-pre>expectExitCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L3) `packages/cli-test/src/expectations.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L3) <code v-pre>packages/cli-test/src/expectations.ts</code>
 
 ```ts
 export declare function expectExitCode(result: CliRunResult, expected: number, expect: {
@@ -79,9 +79,9 @@ export declare function expectExitCode(result: CliRunResult, expected: number, e
 }): void;
 ```
 
-#### `expectStderrContains`
+#### <code v-pre>expectStderrContains</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L19) `packages/cli-test/src/expectations.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L19) <code v-pre>packages/cli-test/src/expectations.ts</code>
 
 ```ts
 export declare function expectStderrContains(result: CliRunResult, needle: string, expect: {
@@ -91,9 +91,9 @@ export declare function expectStderrContains(result: CliRunResult, needle: strin
 }): void;
 ```
 
-#### `expectStdoutContains`
+#### <code v-pre>expectStdoutContains</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L11) `packages/cli-test/src/expectations.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/expectations.ts#L11) <code v-pre>packages/cli-test/src/expectations.ts</code>
 
 ```ts
 export declare function expectStdoutContains(result: CliRunResult, needle: string, expect: {
@@ -103,17 +103,17 @@ export declare function expectStdoutContains(result: CliRunResult, needle: strin
 }): void;
 ```
 
-#### `setupCliEnv`
+#### <code v-pre>setupCliEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/setup-cli-env.ts#L106) `packages/cli-test/src/setup-cli-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/setup-cli-env.ts#L106) <code v-pre>packages/cli-test/src/setup-cli-env.ts</code>
 
 ```ts
 export declare function setupCliEnv(opts?: SetupCliEnvOptions): Promise<CliTestEnv>;
 ```
 
-#### `startCli`
+#### <code v-pre>startCli</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L36) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L36) <code v-pre>packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function startCli(input: {
@@ -121,9 +121,9 @@ export declare function startCli(input: {
 }): CliSession;
 ```
 
-#### `summarizeCli`
+#### <code v-pre>summarizeCli</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L132) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L132) <code v-pre>packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function summarizeCli(session: CliSession): CliSummary;
@@ -131,17 +131,17 @@ export declare function summarizeCli(session: CliSession): CliSummary;
 
 ### 型
 
-#### `CliEvent`
+#### <code v-pre>CliEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L14) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L14) <code v-pre>packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts</code>
 
 ```ts
 export type CliEvent = 'spawn-succeeded' | 'stdout-received' | 'stderr-received' | 'signal-sent' | 'exit-detected' | 'cleanup-requested' | 'zombie-detected' | 'timeout';
 ```
 
-#### `CliRunOptions`
+#### <code v-pre>CliRunOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L12) `packages/cli-test/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L12) <code v-pre>packages/cli-test/src/types.ts</code>
 
 ```ts
 export interface CliRunOptions {
@@ -158,9 +158,9 @@ export interface CliRunOptions {
 }
 ```
 
-#### `CliRunResult`
+#### <code v-pre>CliRunResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L25) `packages/cli-test/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L25) <code v-pre>packages/cli-test/src/types.ts</code>
 
 ```ts
 export interface CliRunResult {
@@ -172,9 +172,9 @@ export interface CliRunResult {
 }
 ```
 
-#### `CliSession`
+#### <code v-pre>CliSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L24) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L24) <code v-pre>packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface CliSession {
@@ -190,9 +190,9 @@ export interface CliSession {
 }
 ```
 
-#### `CliState`
+#### <code v-pre>CliState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L7) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L7) <code v-pre>packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts</code>
 
 v0.6 cli-lifecycle-orchestrator = CLI process lifecycle (spawn + IO stream + signal + exit code + cleanup) の 継続合成 layer。 depth-5 pattern 13 例目 candidate、 backend systems layer 第 5 例 (backend layer 完全普及)、 systematic pattern 55 度目。
 
@@ -200,9 +200,9 @@ v0.6 cli-lifecycle-orchestrator = CLI process lifecycle (spawn + IO stream + sig
 export type CliState = 'spawning' | 'running' | 'signaled' | 'exited' | 'cleaned';
 ```
 
-#### `CliSummary`
+#### <code v-pre>CliSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L118) `packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts#L118) <code v-pre>packages/cli-test/src/semantics/cli-lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface CliSummary {
@@ -220,9 +220,9 @@ export interface CliSummary {
 }
 ```
 
-#### `CliTestEnv`
+#### <code v-pre>CliTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L33) `packages/cli-test/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L33) <code v-pre>packages/cli-test/src/types.ts</code>
 
 ```ts
 export interface CliTestEnv extends TestEnvBase<'mock'> {
@@ -240,9 +240,9 @@ export interface CliTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `SetupCliEnvOptions`
+#### <code v-pre>SetupCliEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L3) `packages/cli-test/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/types.ts#L3) <code v-pre>packages/cli-test/src/types.ts</code>
 
 ```ts
 export interface SetupCliEnvOptions {

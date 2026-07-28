@@ -50,10 +50,10 @@ in-process WebSocket server、client、message、binary frame、reconnect、room
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'frame too short' | [packages/websocket/src/binary.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L25) |
-| &#96;client $&#123;id&#125; is closed&#96; | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L39) |
-| &#96;client $&#123;id&#125; not attached to server&#96; | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L40) |
-| &#96;client not found: $&#123;clientId&#125;&#96; | [packages/websocket/src/message.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L25) |
+| <code v-pre>frame too short</code> | [packages/websocket/src/binary.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L25) |
+| <code v-pre>client $&#123;id&#125; is closed</code> | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L39) |
+| <code v-pre>client $&#123;id&#125; not attached to server</code> | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L40) |
+| <code v-pre>client not found: $&#123;clientId&#125;</code> | [packages/websocket/src/message.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L25) |
 
 ## API 契約
 
@@ -61,9 +61,9 @@ in-process WebSocket server、client、message、binary frame、reconnect、room
 
 ### 値
 
-#### `broadcastMessage`
+#### <code v-pre>broadcastMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L37) `packages/websocket/src/message.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L37) <code v-pre>packages/websocket/src/message.ts</code>
 
 server-side broadcast。 filter で選別可能 (room / tag 等の subset broadcast simulate)。
 
@@ -71,9 +71,9 @@ server-side broadcast。 filter で選別可能 (room / tag 等の subset broadc
 export declare function broadcastMessage(server: WSServer, payload: WSPayload, filter?: WSBroadcastFilter): void;
 ```
 
-#### `captureBinaryFrame`
+#### <code v-pre>captureBinaryFrame</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L24) `packages/websocket/src/binary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L24) <code v-pre>packages/websocket/src/binary.ts</code>
 
 RFC 6455 binary frame parse mock。 real ws.parser の subset (fin + opcode + mask + payload)。 mask key + extended payload length は簡易対応。
 
@@ -81,9 +81,9 @@ RFC 6455 binary frame parse mock。 real ws.parser の subset (fin + opcode + ma
 export declare function captureBinaryFrame(frame: Uint8Array): WSBinaryFrame;
 ```
 
-#### `computeReconnectDelay`
+#### <code v-pre>computeReconnectDelay</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L18) `packages/websocket/src/reconnect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L18) <code v-pre>packages/websocket/src/reconnect.ts</code>
 
 exponential backoff で reconnect delay を計算。 real WS client の reconnect strategy (Socket.IO / uWebSockets client) を mock。 jitter で thundering herd 回避。
 
@@ -91,9 +91,9 @@ exponential backoff で reconnect delay を計算。 real WS client の reconnec
 export declare function computeReconnectDelay(attempt: number, policy: ReconnectPolicy, rng?: () => number): ReconnectAttempt;
 ```
 
-#### `connectClient`
+#### <code v-pre>connectClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L29) `packages/websocket/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L29) <code v-pre>packages/websocket/src/client.ts</code>
 
 client mock。 server を受け取ってすぐ accept する経路 (auto handshake、 real WS の open event 相当)。
 
@@ -101,9 +101,9 @@ client mock。 server を受け取ってすぐ accept する経路 (auto handsha
 export declare function connectClient(server: WSServer, options?: WSClientOptions): WSClient;
 ```
 
-#### `createHeartbeatState`
+#### <code v-pre>createHeartbeatState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L36) `packages/websocket/src/reconnect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L36) <code v-pre>packages/websocket/src/reconnect.ts</code>
 
 ping/pong heartbeat 状態を追跡、 pong 未受信で missedPongs を increment、 閾値超えで healthy=false。 real WS keepalive パターンの mock。
 
@@ -116,9 +116,9 @@ export declare function createHeartbeatState(now?: () => number): {
 };
 ```
 
-#### `createRoomRegistry`
+#### <code v-pre>createRoomRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/room.ts#L23) `packages/websocket/src/room.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/room.ts#L23) <code v-pre>packages/websocket/src/room.ts</code>
 
 room/channel 抽象。 client を roomName で group 化し、 broadcastToRoom で 該当 member にのみ配信。 real Socket.IO room / Colyseus room 相当を mock。
 
@@ -126,9 +126,9 @@ room/channel 抽象。 client を roomName で group 化し、 broadcastToRoom �
 export declare function createRoomRegistry(now?: () => number): RoomRegistry;
 ```
 
-#### `createWSServer`
+#### <code v-pre>createWSServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L44) `packages/websocket/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L44) <code v-pre>packages/websocket/src/server.ts</code>
 
 provider 別 mock server。 provider 差は id prefix と挙動 default のみ、 API は共通 interface。
 
@@ -136,9 +136,9 @@ provider 別 mock server。 provider 差は id prefix と挙動 default のみ�
 export declare function createWSServer(options?: WSServerOptions): WSServer;
 ```
 
-#### `encodeBinaryFrame`
+#### <code v-pre>encodeBinaryFrame</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L63) `packages/websocket/src/binary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L63) <code v-pre>packages/websocket/src/binary.ts</code>
 
 text / binary payload を simple frame にエンコード (unmasked、 server → client 経路想定)。
 
@@ -146,9 +146,9 @@ text / binary payload を simple frame にエンコード (unmasked、 server �
 export declare function encodeBinaryFrame(opcode: WSOpcode, payload: Uint8Array): Uint8Array;
 ```
 
-#### `sendMessage`
+#### <code v-pre>sendMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L11) `packages/websocket/src/message.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L11) <code v-pre>packages/websocket/src/message.ts</code>
 
 target = server なら該当 client に direct send、 client なら server 経由で emit。
 
@@ -158,9 +158,9 @@ export declare function sendMessage(from: WSServer | WSClient, target: WSClient 
 
 ### 型
 
-#### `HeartbeatState`
+#### <code v-pre>HeartbeatState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L25) `packages/websocket/src/reconnect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L25) <code v-pre>packages/websocket/src/reconnect.ts</code>
 
 ```ts
 export interface HeartbeatState {
@@ -171,9 +171,9 @@ export interface HeartbeatState {
 }
 ```
 
-#### `PresenceInfo`
+#### <code v-pre>PresenceInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/room.ts#L13) `packages/websocket/src/room.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/room.ts#L13) <code v-pre>packages/websocket/src/room.ts</code>
 
 ```ts
 export interface PresenceInfo {
@@ -183,9 +183,9 @@ export interface PresenceInfo {
 }
 ```
 
-#### `ReconnectAttempt`
+#### <code v-pre>ReconnectAttempt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L8) `packages/websocket/src/reconnect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L8) <code v-pre>packages/websocket/src/reconnect.ts</code>
 
 ```ts
 export interface ReconnectAttempt {
@@ -195,9 +195,9 @@ export interface ReconnectAttempt {
 }
 ```
 
-#### `ReconnectPolicy`
+#### <code v-pre>ReconnectPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L1) `packages/websocket/src/reconnect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/reconnect.ts#L1) <code v-pre>packages/websocket/src/reconnect.ts</code>
 
 ```ts
 export interface ReconnectPolicy {
@@ -208,9 +208,9 @@ export interface ReconnectPolicy {
 }
 ```
 
-#### `RoomRegistry`
+#### <code v-pre>RoomRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/room.ts#L4) `packages/websocket/src/room.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/room.ts#L4) <code v-pre>packages/websocket/src/room.ts</code>
 
 ```ts
 export interface RoomRegistry {
@@ -223,9 +223,9 @@ export interface RoomRegistry {
 }
 ```
 
-#### `WSBinaryFrame`
+#### <code v-pre>WSBinaryFrame</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L3) `packages/websocket/src/binary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L3) <code v-pre>packages/websocket/src/binary.ts</code>
 
 ```ts
 export interface WSBinaryFrame {
@@ -237,17 +237,17 @@ export interface WSBinaryFrame {
 }
 ```
 
-#### `WSBroadcastFilter`
+#### <code v-pre>WSBroadcastFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L6) `packages/websocket/src/message.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L6) <code v-pre>packages/websocket/src/message.ts</code>
 
 ```ts
 export type WSBroadcastFilter = (client: WSClient) => boolean;
 ```
 
-#### `WSClient`
+#### <code v-pre>WSClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L12) `packages/websocket/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L12) <code v-pre>packages/websocket/src/client.ts</code>
 
 ```ts
 export interface WSClient {
@@ -265,9 +265,9 @@ export interface WSClient {
 }
 ```
 
-#### `WSClientOptions`
+#### <code v-pre>WSClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L7) `packages/websocket/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L7) <code v-pre>packages/websocket/src/client.ts</code>
 
 ```ts
 export interface WSClientOptions {
@@ -276,33 +276,33 @@ export interface WSClientOptions {
 }
 ```
 
-#### `WSCloseHandler`
+#### <code v-pre>WSCloseHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L5) `packages/websocket/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L5) <code v-pre>packages/websocket/src/client.ts</code>
 
 ```ts
 export type WSCloseHandler = (code: number, reason: string) => void;
 ```
 
-#### `WSMessageHandler`
+#### <code v-pre>WSMessageHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L4) `packages/websocket/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L4) <code v-pre>packages/websocket/src/client.ts</code>
 
 ```ts
 export type WSMessageHandler = (payload: WSPayload) => void;
 ```
 
-#### `WSOpcode`
+#### <code v-pre>WSOpcode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L1) `packages/websocket/src/binary.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L1) <code v-pre>packages/websocket/src/binary.ts</code>
 
 ```ts
 export type WSOpcode = 'continuation' | 'text' | 'binary' | 'close' | 'ping' | 'pong' | 'reserved';
 ```
 
-#### `WSPayload`
+#### <code v-pre>WSPayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L4) `packages/websocket/src/message.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L4) <code v-pre>packages/websocket/src/message.ts</code>
 
 ```ts
 export type WSPayload = string | Uint8Array | {
@@ -311,17 +311,17 @@ export type WSPayload = string | Uint8Array | {
 };
 ```
 
-#### `WSProvider`
+#### <code v-pre>WSProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L4) `packages/websocket/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L4) <code v-pre>packages/websocket/src/server.ts</code>
 
 ```ts
 export type WSProvider = 'ws' | 'uwebsockets' | 'socketio' | 'colyseus';
 ```
 
-#### `WSSentRecord`
+#### <code v-pre>WSSentRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L12) `packages/websocket/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L12) <code v-pre>packages/websocket/src/server.ts</code>
 
 ```ts
 export interface WSSentRecord {
@@ -334,9 +334,9 @@ export interface WSSentRecord {
 }
 ```
 
-#### `WSServer`
+#### <code v-pre>WSServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L27) `packages/websocket/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L27) <code v-pre>packages/websocket/src/server.ts</code>
 
 ```ts
 export interface WSServer {
@@ -354,9 +354,9 @@ export interface WSServer {
 }
 ```
 
-#### `WSServerEvents`
+#### <code v-pre>WSServerEvents</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L21) `packages/websocket/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L21) <code v-pre>packages/websocket/src/server.ts</code>
 
 ```ts
 export interface WSServerEvents {
@@ -366,9 +366,9 @@ export interface WSServerEvents {
 }
 ```
 
-#### `WSServerOptions`
+#### <code v-pre>WSServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L6) `packages/websocket/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/server.ts#L6) <code v-pre>packages/websocket/src/server.ts</code>
 
 ```ts
 export interface WSServerOptions {

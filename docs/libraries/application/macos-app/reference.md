@@ -29,8 +29,8 @@ accessibility の role と label を確認する場合は `captureAccessibilityT
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/macos-app/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L57) |
-| 'circuit breaker open' | [packages/macos-app/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L72) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/macos-app/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L57) |
+| <code v-pre>circuit breaker open</code> | [packages/macos-app/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L72) |
 
 ## API 契約
 
@@ -38,17 +38,17 @@ accessibility の role と label を確認する場合は `captureAccessibilityT
 
 ### 値
 
-#### `batchOperate`
+#### <code v-pre>batchOperate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L111) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L111) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
-#### `captureAccessibilityTree`
+#### <code v-pre>captureAccessibilityTree</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L34) `packages/macos-app/src/accessibility.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L34) <code v-pre>packages/macos-app/src/accessibility.ts</code>
 
 SwiftUI / AppKit view tree を macOS accessibility API (AXUIElement) が返す tree に mapping。 tree walk 済み snapshot を返し、 user assert (label 存在 / role 一致 / total node 数) を可能にする。 実 AX API は起動せず view attributes から機械的に role を 推定する。
 
@@ -56,9 +56,9 @@ SwiftUI / AppKit view tree を macOS accessibility API (AXUIElement) が返す t
 export declare function captureAccessibilityTree(env: MacAppEnv): AccessibilityTree;
 ```
 
-#### `createMacAppEnv`
+#### <code v-pre>createMacAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L55) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L55) <code v-pre>packages/macos-app/src/env.ts</code>
 
 mock native app env を生成。 mode = 'swiftui' は declarative View tree の初期状態、 'appkit' は imperative responder chain の初期 window を返す。 real XCTest 起動なしで bundle info / window / view tree / accessibility descriptor を保持する。
 
@@ -66,9 +66,9 @@ mock native app env を生成。 mode = 'swiftui' は declarative View tree の�
 export declare function createMacAppEnv(options?: CreateMacAppEnvOptions): MacAppEnv;
 ```
 
-#### `emitUserNotification`
+#### <code v-pre>emitUserNotification</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L35) `packages/macos-app/src/notification.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L35) <code v-pre>packages/macos-app/src/notification.ts</code>
 
 UserNotifications framework の schedule API 相当を mock。 実 UNUserNotificationCenter は 起動せず、 env.eventLog に notification schedule を記録して user が listSent 相当で assert 可能にする。
 
@@ -76,9 +76,9 @@ UserNotifications framework の schedule API 相当を mock。 実 UNUserNotific
 export declare function emitUserNotification(env: MacAppEnv, notification: UserNotification): NotificationResult;
 ```
 
-#### `mockScreencap`
+#### <code v-pre>mockScreencap</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L34) `packages/macos-app/src/screencap.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L34) <code v-pre>packages/macos-app/src/screencap.ts</code>
 
 CGDisplayCreateImage 相当の mock screencap を生成。 実 GPU capture ではなく、 region + 決定的 pixel data (env.id + region ハッシュ) から magic 付きの mock byte 列を 返す。 caller は format magic + length + region 契約を assert 可能。
 
@@ -86,9 +86,9 @@ CGDisplayCreateImage 相当の mock screencap を生成。 実 GPU capture で�
 export declare function mockScreencap(env: MacAppEnv, options?: ScreencapOptions): ScreencapResult;
 ```
 
-#### `simulateUserInteraction`
+#### <code v-pre>simulateUserInteraction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L27) `packages/macos-app/src/interaction.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L27) <code v-pre>packages/macos-app/src/interaction.ts</code>
 
 view tree を walk して target id を探索、 見つかったら enabled かつ mode-specific な dispatchable node であれば event を eventLog に記録する。 responder chain (AppKit) や SwiftUI の
 
@@ -96,49 +96,49 @@ view tree を walk して target id を探索、 見つかったら enabled か�
 export declare function simulateUserInteraction(env: MacAppEnv, event: InteractionEvent): InteractionResult;
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L64) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L64) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L101) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L101) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L86) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L86) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L50) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L50) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L20) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L20) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L40) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L40) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
@@ -146,9 +146,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `AccessibilityNode`
+#### <code v-pre>AccessibilityNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L13) `packages/macos-app/src/accessibility.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L13) <code v-pre>packages/macos-app/src/accessibility.ts</code>
 
 ```ts
 export interface AccessibilityNode {
@@ -161,17 +161,17 @@ export interface AccessibilityNode {
 }
 ```
 
-#### `AccessibilityRole`
+#### <code v-pre>AccessibilityRole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L3) `packages/macos-app/src/accessibility.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L3) <code v-pre>packages/macos-app/src/accessibility.ts</code>
 
 ```ts
 export type AccessibilityRole = 'AXWindow' | 'AXGroup' | 'AXStaticText' | 'AXButton' | 'AXTextField' | 'AXCheckBox' | 'AXImage' | 'AXUnknown';
 ```
 
-#### `AccessibilityTree`
+#### <code v-pre>AccessibilityTree</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L22) `packages/macos-app/src/accessibility.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/accessibility.ts#L22) <code v-pre>packages/macos-app/src/accessibility.ts</code>
 
 ```ts
 export interface AccessibilityTree {
@@ -181,9 +181,9 @@ export interface AccessibilityTree {
 }
 ```
 
-#### `BatchItem`
+#### <code v-pre>BatchItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L17) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L17) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface BatchItem<TIn = unknown> {
@@ -192,9 +192,9 @@ export interface BatchItem<TIn = unknown> {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L18) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L18) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface BatchResult {
@@ -207,9 +207,9 @@ export interface BatchResult {
 }
 ```
 
-#### `BundleInfo`
+#### <code v-pre>BundleInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L3) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L3) <code v-pre>packages/macos-app/src/env.ts</code>
 
 ```ts
 export interface BundleInfo {
@@ -220,9 +220,9 @@ export interface BundleInfo {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L11) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L11) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -231,9 +231,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CreateMacAppEnvOptions`
+#### <code v-pre>CreateMacAppEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L30) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L30) <code v-pre>packages/macos-app/src/env.ts</code>
 
 ```ts
 export interface CreateMacAppEnvOptions {
@@ -245,9 +245,9 @@ export interface CreateMacAppEnvOptions {
 }
 ```
 
-#### `InteractionEvent`
+#### <code v-pre>InteractionEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L5) `packages/macos-app/src/interaction.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L5) <code v-pre>packages/macos-app/src/interaction.ts</code>
 
 ```ts
 export interface InteractionEvent {
@@ -259,9 +259,9 @@ export interface InteractionEvent {
 }
 ```
 
-#### `InteractionResult`
+#### <code v-pre>InteractionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L13) `packages/macos-app/src/interaction.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L13) <code v-pre>packages/macos-app/src/interaction.ts</code>
 
 ```ts
 export interface InteractionResult {
@@ -273,17 +273,17 @@ export interface InteractionResult {
 }
 ```
 
-#### `InteractionType`
+#### <code v-pre>InteractionType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L3) `packages/macos-app/src/interaction.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/interaction.ts#L3) <code v-pre>packages/macos-app/src/interaction.ts</code>
 
 ```ts
 export type InteractionType = 'click' | 'keypress' | 'gesture' | 'focus';
 ```
 
-#### `MacAppEnv`
+#### <code v-pre>MacAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L38) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L38) <code v-pre>packages/macos-app/src/env.ts</code>
 
 ```ts
 export interface MacAppEnv {
@@ -301,17 +301,17 @@ export interface MacAppEnv {
 }
 ```
 
-#### `MacAppMode`
+#### <code v-pre>MacAppMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L1) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L1) <code v-pre>packages/macos-app/src/env.ts</code>
 
 ```ts
 export type MacAppMode = 'swiftui' | 'appkit';
 ```
 
-#### `NotificationAction`
+#### <code v-pre>NotificationAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L3) `packages/macos-app/src/notification.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L3) <code v-pre>packages/macos-app/src/notification.ts</code>
 
 ```ts
 export interface NotificationAction {
@@ -321,9 +321,9 @@ export interface NotificationAction {
 }
 ```
 
-#### `NotificationResult`
+#### <code v-pre>NotificationResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L20) `packages/macos-app/src/notification.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L20) <code v-pre>packages/macos-app/src/notification.ts</code>
 
 ```ts
 export interface NotificationResult {
@@ -335,9 +335,9 @@ export interface NotificationResult {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L12) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L12) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -347,9 +347,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L10) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L10) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -358,9 +358,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `Rect`
+#### <code v-pre>Rect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L3) `packages/macos-app/src/screencap.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L3) <code v-pre>packages/macos-app/src/screencap.ts</code>
 
 ```ts
 export interface Rect {
@@ -371,9 +371,9 @@ export interface Rect {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L4) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L4) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -383,9 +383,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `ScreencapOptions`
+#### <code v-pre>ScreencapOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L10) `packages/macos-app/src/screencap.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L10) <code v-pre>packages/macos-app/src/screencap.ts</code>
 
 ```ts
 export interface ScreencapOptions {
@@ -395,9 +395,9 @@ export interface ScreencapOptions {
 }
 ```
 
-#### `ScreencapResult`
+#### <code v-pre>ScreencapResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L16) `packages/macos-app/src/screencap.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/screencap.ts#L16) <code v-pre>packages/macos-app/src/screencap.ts</code>
 
 ```ts
 export interface ScreencapResult {
@@ -409,9 +409,9 @@ export interface ScreencapResult {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L9) `packages/macos-app/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/resilience.ts#L9) <code v-pre>packages/macos-app/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {
@@ -419,9 +419,9 @@ export interface TimeoutOptions {
 }
 ```
 
-#### `UserNotification`
+#### <code v-pre>UserNotification</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L9) `packages/macos-app/src/notification.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/notification.ts#L9) <code v-pre>packages/macos-app/src/notification.ts</code>
 
 ```ts
 export interface UserNotification {
@@ -436,9 +436,9 @@ export interface UserNotification {
 }
 ```
 
-#### `ViewNode`
+#### <code v-pre>ViewNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L20) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L20) <code v-pre>packages/macos-app/src/env.ts</code>
 
 ```ts
 export interface ViewNode {
@@ -452,9 +452,9 @@ export interface ViewNode {
 }
 ```
 
-#### `WindowInfo`
+#### <code v-pre>WindowInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L10) `packages/macos-app/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/macos-app/src/env.ts#L10) <code v-pre>packages/macos-app/src/env.ts</code>
 
 ```ts
 export interface WindowInfo {

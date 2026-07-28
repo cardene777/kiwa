@@ -31,8 +31,8 @@ generic dispatch は一致時に `{ matched: true }`、不一致時に `{ matche
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L57) |
-| 'circuit breaker open' | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L72) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L57) |
+| <code v-pre>circuit breaker open</code> | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L72) |
 
 ## API 契約
 
@@ -40,17 +40,17 @@ generic dispatch は一致時に `{ matched: true }`、不一致時に `{ matche
 
 ### 値
 
-#### `batchOperate`
+#### <code v-pre>batchOperate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L111) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L111) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
-#### `captureActiveRecord`
+#### <code v-pre>captureActiveRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L23) `packages/ruby/src/active-record.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L23) <code v-pre>packages/ruby/src/active-record.ts</code>
 
 activeRecordLog の集計 snapshot。 op 別 / model 別 count を assertion で使える shape で 露出、 「Post.where 3 回 + User.find 1 回」 等の invariant を書ける。
 
@@ -58,9 +58,9 @@ activeRecordLog の集計 snapshot。 op 別 / model 別 count を assertion で
 export declare function captureActiveRecord(env: RubyAppEnv): ActiveRecordSnapshot;
 ```
 
-#### `createRubyAppEnv`
+#### <code v-pre>createRubyAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L54) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L54) <code v-pre>packages/ruby/src/env.ts</code>
 
 Framework 別の request 転送先を返す minimal mock。 Rails は Sinatra 系より complex な before_action chain を持つが、 統一 shape に落とせる範囲は同一 interface で扱う。
 
@@ -68,9 +68,9 @@ Framework 別の request 転送先を返す minimal mock。 Rails は Sinatra �
 export declare function createRubyAppEnv(options?: CreateRubyAppEnvOptions): RubyAppEnv;
 ```
 
-#### `dispatchGenericRequest`
+#### <code v-pre>dispatchGenericRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/generic.ts#L13) `packages/ruby/src/generic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/generic.ts#L13) <code v-pre>packages/ruby/src/generic.ts</code>
 
 Sinatra / Roda / Hanami の統一 request dispatch。 routes を lookup し、 matched なら handler 実行、 unmatched なら 404 相当 default response を返す。
 
@@ -78,9 +78,9 @@ Sinatra / Roda / Hanami の統一 request dispatch。 routes を lookup し、 m
 export declare function dispatchGenericRequest(env: RubyAppEnv, req: RubyRequest): Promise<GenericDispatchResult>;
 ```
 
-#### `dispatchRailsRequest`
+#### <code v-pre>dispatchRailsRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L37) `packages/ruby/src/rails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L37) <code v-pre>packages/ruby/src/rails.ts</code>
 
 Rails controller の dispatch simulation。 before_action → action → render の chain を 順に走らせ、 redirect_to() 相当は throw で捕捉する。 実 Rails の render 経路 (json / text / partial) を統一 shape で捕捉して assertion 用に露出する。
 
@@ -88,9 +88,9 @@ Rails controller の dispatch simulation。 before_action → action → render 
 export declare function dispatchRailsRequest(env: RubyAppEnv, req: RubyRequest, controller: RailsControllerAction): Promise<RailsDispatchResult>;
 ```
 
-#### `renderERB`
+#### <code v-pre>renderERB</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/erb.ts#L13) `packages/ruby/src/erb.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/erb.ts#L13) <code v-pre>packages/ruby/src/erb.ts</code>
 
 ERB `&lt;%= name %&gt;` interpolation の minimal mock。 実 ERB engine の control flow (`&lt;% if %&gt;` 等) は未対応、 pure variable substitution のみ。
 
@@ -98,49 +98,49 @@ ERB `&lt;%= name %&gt;` interpolation の minimal mock。 実 ERB engine の con
 export declare function renderERB(template: string, locals: ERBLocals): ERBRenderResult;
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L64) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L64) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L101) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L101) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L86) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L86) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L50) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L50) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L20) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L20) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L40) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L40) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
@@ -148,17 +148,17 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `ActiveRecordOp`
+#### <code v-pre>ActiveRecordOp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L3) `packages/ruby/src/active-record.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L3) <code v-pre>packages/ruby/src/active-record.ts</code>
 
 ```ts
 export type ActiveRecordOp = 'find' | 'where' | 'create' | 'update' | 'destroy' | 'all';
 ```
 
-#### `ActiveRecordQuery`
+#### <code v-pre>ActiveRecordQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L5) `packages/ruby/src/active-record.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L5) <code v-pre>packages/ruby/src/active-record.ts</code>
 
 ```ts
 export interface ActiveRecordQuery {
@@ -169,9 +169,9 @@ export interface ActiveRecordQuery {
 }
 ```
 
-#### `ActiveRecordSnapshot`
+#### <code v-pre>ActiveRecordSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L12) `packages/ruby/src/active-record.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/active-record.ts#L12) <code v-pre>packages/ruby/src/active-record.ts</code>
 
 ```ts
 export interface ActiveRecordSnapshot {
@@ -182,9 +182,9 @@ export interface ActiveRecordSnapshot {
 }
 ```
 
-#### `BatchItem`
+#### <code v-pre>BatchItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L17) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L17) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface BatchItem<TIn = unknown> {
@@ -193,9 +193,9 @@ export interface BatchItem<TIn = unknown> {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L18) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L18) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface BatchResult {
@@ -208,9 +208,9 @@ export interface BatchResult {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L11) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L11) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -219,9 +219,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CreateRubyAppEnvOptions`
+#### <code v-pre>CreateRubyAppEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L31) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L31) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export interface CreateRubyAppEnvOptions {
@@ -232,17 +232,17 @@ export interface CreateRubyAppEnvOptions {
 }
 ```
 
-#### `ERBLocals`
+#### <code v-pre>ERBLocals</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/erb.ts#L1) `packages/ruby/src/erb.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/erb.ts#L1) <code v-pre>packages/ruby/src/erb.ts</code>
 
 ```ts
 export type ERBLocals = Record<string, string | number | boolean>;
 ```
 
-#### `ERBRenderResult`
+#### <code v-pre>ERBRenderResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/erb.ts#L3) `packages/ruby/src/erb.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/erb.ts#L3) <code v-pre>packages/ruby/src/erb.ts</code>
 
 ```ts
 export interface ERBRenderResult {
@@ -252,9 +252,9 @@ export interface ERBRenderResult {
 }
 ```
 
-#### `GenericDispatchResult`
+#### <code v-pre>GenericDispatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/generic.ts#L3) `packages/ruby/src/generic.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/generic.ts#L3) <code v-pre>packages/ruby/src/generic.ts</code>
 
 ```ts
 export interface GenericDispatchResult {
@@ -264,9 +264,9 @@ export interface GenericDispatchResult {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L12) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L12) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -276,9 +276,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RailsControllerAction`
+#### <code v-pre>RailsControllerAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L18) `packages/ruby/src/rails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L18) <code v-pre>packages/ruby/src/rails.ts</code>
 
 ```ts
 export interface RailsControllerAction {
@@ -291,9 +291,9 @@ export interface RailsControllerAction {
 }
 ```
 
-#### `RailsDispatchResult`
+#### <code v-pre>RailsDispatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L25) `packages/ruby/src/rails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L25) <code v-pre>packages/ruby/src/rails.ts</code>
 
 ```ts
 export interface RailsDispatchResult {
@@ -304,9 +304,9 @@ export interface RailsDispatchResult {
 }
 ```
 
-#### `RailsRedirectSignal`
+#### <code v-pre>RailsRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L5) `packages/ruby/src/rails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L5) <code v-pre>packages/ruby/src/rails.ts</code>
 
 ```ts
 export interface RailsRedirectSignal {
@@ -316,9 +316,9 @@ export interface RailsRedirectSignal {
 }
 ```
 
-#### `RailsRenderCall`
+#### <code v-pre>RailsRenderCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L11) `packages/ruby/src/rails.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/rails.ts#L11) <code v-pre>packages/ruby/src/rails.ts</code>
 
 ```ts
 export interface RailsRenderCall {
@@ -329,9 +329,9 @@ export interface RailsRenderCall {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L10) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L10) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -340,9 +340,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L4) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L4) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -352,9 +352,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RubyAppEnv`
+#### <code v-pre>RubyAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L38) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L38) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export interface RubyAppEnv {
@@ -370,17 +370,17 @@ export interface RubyAppEnv {
 }
 ```
 
-#### `RubyFramework`
+#### <code v-pre>RubyFramework</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L3) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L3) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export type RubyFramework = 'rails' | 'sinatra' | 'roda' | 'hanami';
 ```
 
-#### `RubyRequest`
+#### <code v-pre>RubyRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L5) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L5) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export interface RubyRequest {
@@ -394,9 +394,9 @@ export interface RubyRequest {
 }
 ```
 
-#### `RubyResponse`
+#### <code v-pre>RubyResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L15) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L15) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export interface RubyResponse {
@@ -408,9 +408,9 @@ export interface RubyResponse {
 }
 ```
 
-#### `RubyRoute`
+#### <code v-pre>RubyRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L25) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L25) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export interface RubyRoute {
@@ -420,17 +420,17 @@ export interface RubyRoute {
 }
 ```
 
-#### `RubyRouteHandler`
+#### <code v-pre>RubyRouteHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L23) `packages/ruby/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/env.ts#L23) <code v-pre>packages/ruby/src/env.ts</code>
 
 ```ts
 export type RubyRouteHandler = (req: RubyRequest, env: RubyAppEnv) => RubyResponse | Promise<RubyResponse>;
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L9) `packages/ruby/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L9) <code v-pre>packages/ruby/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {

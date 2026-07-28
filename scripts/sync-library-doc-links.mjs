@@ -35,7 +35,14 @@ function siteLibraries() {
       if (!required.every((file) => existsSync(join(libraryPath, file)))) continue;
       const packagePath = join(packagesRoot, library.name);
       if (!existsSync(join(packagePath, 'package.json'))) continue;
-      const packageJson = JSON.parse(readFileSync(join(packagePath, 'package.json'), 'utf8'));
+      // manifest も link を追って読まれる。package 名の出どころを repo 内に閉じる。
+      const manifestPath = join(packagePath, 'package.json');
+      const packageJson = JSON.parse(
+        readFileSync(
+          resolveReadPath(manifestPath, repositoryRoot, `${library.name} package.json`),
+          'utf8',
+        ),
+      );
       entries.push({
         category: category.name,
         directory: library.name,
@@ -127,15 +134,15 @@ function readInsideRepo(path, label, fallback) {
   return readFileSync(resolveReadPath(path, repositoryRoot, label), 'utf8');
 }
 
-/** repo 内にあることを確かめてから、同じ directory 経由の rename で置き換える。 */
-function writeInsideRepo(path, label, content) {
-  writeFileAtomic(prepareWritePath(path, repositoryRoot, label), content);
-}
-
 function main() {
   const entries = siteLibraries();
   const errors = [];
+  const plans = [];
 
+  // 第 1 段 = 全 package を読んで検証し、書く内容を組み立てるだけ。
+  // 途中で 1 件でも異常があれば、ここで例外が上がって 1 file も書かれない。
+  // 検証と書き込みを package ごとに交互に行うと、最後の package が壊れていた時に
+  // 先行 package だけ更新された生成物が残る。
   for (const entry of entries) {
     const readmePath = join(entry.packagePath, 'README.md');
     const docsDirectory = join(entry.packagePath, 'docs');
@@ -154,20 +161,31 @@ function main() {
         : expectedDocsReadme(entry),
     );
 
-    if (!write) {
-      if (readme !== updatedReadme) errors.push(`README link is out of date: ${entry.packageName}`);
-      if (docsReadme !== updatedDocsReadme) {
+    if (readme !== updatedReadme) {
+      if (write) plans.push({ path: readmePath, label: readmeLabel, content: updatedReadme });
+      else errors.push(`README link is out of date: ${entry.packageName}`);
+    }
+    if (docsReadme !== updatedDocsReadme) {
+      if (write) {
+        plans.push({
+          path: docsReadmePath,
+          label: docsReadmeLabel,
+          content: updatedDocsReadme,
+          directory: docsDirectory,
+        });
+      } else {
         errors.push(`docs README link is out of date: ${entry.packageName}`);
       }
-      continue;
     }
+  }
 
-    if (readme !== updatedReadme) writeInsideRepo(readmePath, readmeLabel, updatedReadme);
-    if (docsReadme !== updatedDocsReadme) {
-      // prepareWritePath は親 directory を realpath で確かめるので、先に作る。
-      if (!existsSync(docsDirectory)) mkdirSync(docsDirectory, { recursive: true });
-      writeInsideRepo(docsReadmePath, docsReadmeLabel, updatedDocsReadme);
+  // 第 2 段 = 全件の検証を通ってから書く。
+  for (const plan of plans) {
+    // prepareWritePath は親 directory の実体を確かめるので、先に作る。
+    if (plan.directory && !existsSync(plan.directory)) {
+      mkdirSync(plan.directory, { recursive: true });
     }
+    writeFileAtomic(prepareWritePath(plan.path, repositoryRoot, plan.label), plan.content);
   }
 
   if (errors.length > 0) {

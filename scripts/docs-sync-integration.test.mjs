@@ -33,7 +33,7 @@ const HAND_WRITTEN = '## 手書き\n\nこの節は生成対象ではない。\n'
  * 生成 script が動く最小の checkout を組み立てる。script は自分の位置から
  * repositoryRoot を決めるので、fixture 側の scripts/ へ複製して起動する。
  */
-function withFixture(body) {
+function withFixture(body, packageNames = ['sample']) {
   // /tmp は macOS で /private/tmp への symlink なので、canonical にしないと
   // root 判定が全て外れる。
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'docs-sync-integration-')));
@@ -43,20 +43,31 @@ function withFixture(body) {
       copyFileSync(join(scriptsDirectory, file), join(root, 'scripts', file));
     }
 
-    const packageDirectory = join(root, 'packages', 'sample');
-    mkdirSync(packageDirectory, { recursive: true });
-    writeFileSync(
-      join(packageDirectory, 'package.json'),
-      `${JSON.stringify({ name: '@kiwa-lab/sample', version: '0.0.0' }, null, 2)}\n`,
-    );
+    const packages = {};
+    for (const name of packageNames) {
+      const packageDirectory = join(root, 'packages', name);
+      mkdirSync(packageDirectory, { recursive: true });
+      writeFileSync(
+        join(packageDirectory, 'package.json'),
+        `${JSON.stringify({ name: `@kiwa-lab/${name}`, version: '0.0.0' }, null, 2)}\n`,
+      );
 
-    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
-    mkdirSync(docsDirectory, { recursive: true });
-    for (const page of ['index.md', 'quickstart.md', 'how-to.md', 'reference.md']) {
-      writeFileSync(join(docsDirectory, page), `# ${page}\n`);
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', name);
+      mkdirSync(docsDirectory, { recursive: true });
+      for (const page of ['index.md', 'quickstart.md', 'how-to.md', 'reference.md']) {
+        writeFileSync(join(docsDirectory, page), `# ${page}\n`);
+      }
+
+      packages[name] = { packageDirectory, readmePath: join(packageDirectory, 'README.md') };
     }
 
-    return body({ root, packageDirectory, readmePath: join(packageDirectory, 'README.md') });
+    const first = packages[packageNames[0]];
+    return body({
+      root,
+      packages,
+      packageDirectory: first.packageDirectory,
+      readmePath: first.readmePath,
+    });
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -138,6 +149,32 @@ test('a README whose markers are in the wrong order is rejected without being wr
     assert.match(result.stderr, /before the start marker/);
     assert.equal(readFileSync(readmePath, 'utf8'), content);
   });
+});
+
+// 検証と書き込みを package ごとに交互に行うと、後ろの package が壊れていた時に
+// 前の package だけ更新された生成物が残る。全件の検証を通ってから書く。
+test('a broken package later in the run leaves the earlier ones untouched', () => {
+  withFixture(
+    ({ root, packages }) => {
+      const healthy = packages['aaa-first'];
+      const broken = packages['zzz-last'];
+      const healthyBefore = `# @kiwa-lab/aaa-first\n\n${HAND_WRITTEN}`;
+      writeFileSync(healthy.readmePath, healthyBefore);
+      // 走査は package 名の順に進むので、壊すのは後ろ側。
+      writeFileSync(broken.readmePath, `# @kiwa-lab/zzz-last\n\n${HAND_WRITTEN}\n${END}\n`);
+
+      const result = runSync(root);
+      assert.notEqual(result.status, 0);
+      assert.match(result.stderr, /0 start marker and 1 end marker/);
+      assert.equal(
+        readFileSync(healthy.readmePath, 'utf8'),
+        healthyBefore,
+        'the healthy package was not written',
+      );
+      assert.equal(existsSync(join(healthy.packageDirectory, 'docs', 'README.md')), false);
+    },
+    ['aaa-first', 'zzz-last'],
+  );
 });
 
 // 細工された checkout。writeFileSync は link を追うので、guard が無ければ

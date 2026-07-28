@@ -33,8 +33,8 @@ route実行はstatus、body、header、matchedを返します。chiの未一致�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'circuit-open' | [packages/go-lib/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L219) |
-| 'next() called multiple times' | [packages/go-lib/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L276) |
+| <code v-pre>circuit-open</code> | [packages/go-lib/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L219) |
+| <code v-pre>next() called multiple times</code> | [packages/go-lib/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L276) |
 
 ## API 契約
 
@@ -42,9 +42,9 @@ route実行はstatus、body、header、matchedを返します。chiの未一致�
 
 ### 値
 
-#### `batchDispatch`
+#### <code v-pre>batchDispatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L66) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L66) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 batch handler dispatch — 並列/直列両対応
 
@@ -52,17 +52,17 @@ batch handler dispatch — 並列/直列両対応
 export declare function batchDispatch<T>(handlers: Array<() => Promise<T>>, options?: BatchDispatchOptions): Promise<BatchDispatchResult<T>>;
 ```
 
-#### `captureChiRoute`
+#### <code v-pre>captureChiRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L72) `packages/go-lib/src/chi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L72) <code v-pre>packages/go-lib/src/chi.ts</code>
 
 ```ts
 export declare function captureChiRoute(options: CaptureChiRouteOptions): Promise<CaptureChiRouteResult>;
 ```
 
-#### `composeMiddleware`
+#### <code v-pre>composeMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L272) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L272) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 middleware compose helper — 複数 middleware を 1 chain に連結
 
@@ -70,9 +70,9 @@ middleware compose helper — 複数 middleware を 1 chain に連結
 export declare function composeMiddleware(...middlewares: MiddlewareFn[]): MiddlewareFn;
 ```
 
-#### `createCancelToken`
+#### <code v-pre>createCancelToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L250) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L250) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 context.WithCancel simulation — Go の context 相当
 
@@ -80,9 +80,9 @@ context.WithCancel simulation — Go の context 相当
 export declare function createCancelToken(): CancelToken;
 ```
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L206) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L206) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 circuit breaker — 失敗閾値超えで open、 resetTimeout 経過で half-open
 
@@ -90,9 +90,9 @@ circuit breaker — 失敗閾値超えで open、 resetTimeout 経過で half-op
 export declare function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createGoAppEnv`
+#### <code v-pre>createGoAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L48) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L48) <code v-pre>packages/go-lib/src/env.ts</code>
 
 gin/echo/fiber/chi の mock env を生成。 route 一覧の宣言 + reset で 4 framework 共通で router state を扱えるようにする。
 
@@ -100,9 +100,9 @@ gin/echo/fiber/chi の mock env を生成。 route 一覧の宣言 + reset で 4
 export declare function createGoAppEnv(options: CreateGoAppEnvOptions): GoAppEnv;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L111) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L111) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 observability hook — request 一覧を蓄積
 
@@ -110,9 +110,9 @@ observability hook — request 一覧を蓄積
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `createRateLimiter`
+#### <code v-pre>createRateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L164) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L164) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 token bucket rate limiter
 
@@ -120,9 +120,9 @@ token bucket rate limiter
 export declare function createRateLimiter(options: RateLimitOptions): RateLimiter;
 ```
 
-#### `createRouteGroup`
+#### <code v-pre>createRouteGroup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L299) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L299) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 route group + subrouter helper — gin.Group / echo.Group / fiber.Group / chi.Route を統一
 
@@ -130,9 +130,9 @@ route group + subrouter helper — gin.Group / echo.Group / fiber.Group / chi.Ro
 export declare function createRouteGroup(options: RouteGroupOptions): RouteGroup;
 ```
 
-#### `invokeEchoHandler`
+#### <code v-pre>invokeEchoHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L28) `packages/go-lib/src/echo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L28) <code v-pre>packages/go-lib/src/echo.ts</code>
 
 echo.Context 相当を simulate。 JSON/String/NoContent/Response/Param/QueryParam を capture、 echo 慣例通り Error return を尊重 (nil = 成功 / err = handler error) して結果に含める。
 
@@ -140,9 +140,9 @@ echo.Context 相当を simulate。 JSON/String/NoContent/Response/Param/QueryPar
 export declare function invokeEchoHandler(options: InvokeEchoHandlerOptions): Promise<InvokeEchoHandlerResult>;
 ```
 
-#### `invokeFiberHandler`
+#### <code v-pre>invokeFiberHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L30) `packages/go-lib/src/fiber.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L30) <code v-pre>packages/go-lib/src/fiber.ts</code>
 
 fiber.Ctx 相当を simulate。 Status chain + JSON/SendString/SendStatus + Set/Params/Query/Body を fiber 慣例通り expose、 handler の Error return を結果に反映する。
 
@@ -150,9 +150,9 @@ fiber.Ctx 相当を simulate。 Status chain + JSON/SendString/SendStatus + Set/
 export declare function invokeFiberHandler(options: InvokeFiberHandlerOptions): Promise<InvokeFiberHandlerResult>;
 ```
 
-#### `invokeGinHandler`
+#### <code v-pre>invokeGinHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L30) `packages/go-lib/src/gin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L30) <code v-pre>packages/go-lib/src/gin.ts</code>
 
 gin.Context 相当を simulate。 JSON/String/Header/Param/Query の 5 primitive を capture し、 c.AbortWithStatus 相当の abort も expose。 gin の実 handler がそのまま渡せる signature。
 
@@ -160,9 +160,9 @@ gin.Context 相当を simulate。 JSON/String/Header/Param/Query の 5 primitive
 export declare function invokeGinHandler(options: InvokeGinHandlerOptions): Promise<InvokeGinHandlerResult>;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L26) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L26) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 exponential backoff retry — echo/gin middleware に組み込む想定
 
@@ -170,9 +170,9 @@ exponential backoff retry — echo/gin middleware に組み込む想定
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L132) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L132) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 handler timeout — timeoutMs 経過で reject
 
@@ -182,9 +182,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `BatchDispatchOptions`
+#### <code v-pre>BatchDispatchOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L54) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L54) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface BatchDispatchOptions {
@@ -193,9 +193,9 @@ export interface BatchDispatchOptions {
 }
 ```
 
-#### `BatchDispatchResult`
+#### <code v-pre>BatchDispatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L59) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L59) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface BatchDispatchResult<T> {
@@ -210,9 +210,9 @@ export interface BatchDispatchResult<T> {
 }
 ```
 
-#### `CancelToken`
+#### <code v-pre>CancelToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L243) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L243) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface CancelToken {
@@ -222,9 +222,9 @@ export interface CancelToken {
 }
 ```
 
-#### `CaptureChiRouteOptions`
+#### <code v-pre>CaptureChiRouteOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L14) `packages/go-lib/src/chi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L14) <code v-pre>packages/go-lib/src/chi.ts</code>
 
 ```ts
 export interface CaptureChiRouteOptions {
@@ -237,9 +237,9 @@ export interface CaptureChiRouteOptions {
 }
 ```
 
-#### `CaptureChiRouteResult`
+#### <code v-pre>CaptureChiRouteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L23) `packages/go-lib/src/chi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L23) <code v-pre>packages/go-lib/src/chi.ts</code>
 
 ```ts
 export interface CaptureChiRouteResult extends GoResponse {
@@ -249,9 +249,9 @@ export interface CaptureChiRouteResult extends GoResponse {
 }
 ```
 
-#### `ChiApp`
+#### <code v-pre>ChiApp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L6) `packages/go-lib/src/chi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L6) <code v-pre>packages/go-lib/src/chi.ts</code>
 
 ```ts
 export interface ChiApp {
@@ -274,9 +274,9 @@ export interface ChiApp {
 }
 ```
 
-#### `ChiHandler`
+#### <code v-pre>ChiHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L3) `packages/go-lib/src/chi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L3) <code v-pre>packages/go-lib/src/chi.ts</code>
 
 ```ts
 export type ChiHandler = (req: GoRequest) => {
@@ -290,17 +290,17 @@ export type ChiHandler = (req: GoRequest) => {
 }>;
 ```
 
-#### `ChiMiddleware`
+#### <code v-pre>ChiMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L4) `packages/go-lib/src/chi.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/chi.ts#L4) <code v-pre>packages/go-lib/src/chi.ts</code>
 
 ```ts
 export type ChiMiddleware = (name: string, next: () => void | Promise<void>) => void | Promise<void>;
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L199) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L199) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -310,9 +310,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L194) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L194) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -321,17 +321,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L192) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L192) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `EchoContext`
+#### <code v-pre>EchoContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L3) `packages/go-lib/src/echo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L3) <code v-pre>packages/go-lib/src/echo.ts</code>
 
 ```ts
 export interface EchoContext {
@@ -348,17 +348,17 @@ export interface EchoContext {
 }
 ```
 
-#### `EchoHandler`
+#### <code v-pre>EchoHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L13) `packages/go-lib/src/echo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L13) <code v-pre>packages/go-lib/src/echo.ts</code>
 
 ```ts
 export type EchoHandler = (c: EchoContext) => Error | null | Promise<Error | null>;
 ```
 
-#### `FiberContext`
+#### <code v-pre>FiberContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L3) `packages/go-lib/src/fiber.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L3) <code v-pre>packages/go-lib/src/fiber.ts</code>
 
 ```ts
 export interface FiberContext {
@@ -374,17 +374,17 @@ export interface FiberContext {
 }
 ```
 
-#### `FiberHandler`
+#### <code v-pre>FiberHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L15) `packages/go-lib/src/fiber.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L15) <code v-pre>packages/go-lib/src/fiber.ts</code>
 
 ```ts
 export type FiberHandler = (c: FiberContext) => Error | null | Promise<Error | null>;
 ```
 
-#### `GinContext`
+#### <code v-pre>GinContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L3) `packages/go-lib/src/gin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L3) <code v-pre>packages/go-lib/src/gin.ts</code>
 
 ```ts
 export interface GinContext {
@@ -400,17 +400,17 @@ export interface GinContext {
 }
 ```
 
-#### `GinHandler`
+#### <code v-pre>GinHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L15) `packages/go-lib/src/gin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L15) <code v-pre>packages/go-lib/src/gin.ts</code>
 
 ```ts
 export type GinHandler = (c: GinContext) => void | Promise<void>;
 ```
 
-#### `GoAppEnv`
+#### <code v-pre>GoAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L31) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L31) <code v-pre>packages/go-lib/src/env.ts</code>
 
 ```ts
 export interface GoAppEnv {
@@ -422,17 +422,17 @@ export interface GoAppEnv {
 }
 ```
 
-#### `GoFramework`
+#### <code v-pre>GoFramework</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L1) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L1) <code v-pre>packages/go-lib/src/env.ts</code>
 
 ```ts
 export type GoFramework = 'gin' | 'echo' | 'fiber' | 'chi';
 ```
 
-#### `GoMiddlewareTraceEntry`
+#### <code v-pre>GoMiddlewareTraceEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L25) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L25) <code v-pre>packages/go-lib/src/env.ts</code>
 
 ```ts
 export interface GoMiddlewareTraceEntry {
@@ -442,9 +442,9 @@ export interface GoMiddlewareTraceEntry {
 }
 ```
 
-#### `GoRequest`
+#### <code v-pre>GoRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L3) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L3) <code v-pre>packages/go-lib/src/env.ts</code>
 
 ```ts
 export interface GoRequest {
@@ -457,9 +457,9 @@ export interface GoRequest {
 }
 ```
 
-#### `GoResponse`
+#### <code v-pre>GoResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L12) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L12) <code v-pre>packages/go-lib/src/env.ts</code>
 
 ```ts
 export interface GoResponse {
@@ -470,9 +470,9 @@ export interface GoResponse {
 }
 ```
 
-#### `GoRouteDefinition`
+#### <code v-pre>GoRouteDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L19) `packages/go-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/env.ts#L19) <code v-pre>packages/go-lib/src/env.ts</code>
 
 ```ts
 export interface GoRouteDefinition {
@@ -482,9 +482,9 @@ export interface GoRouteDefinition {
 }
 ```
 
-#### `InvokeEchoHandlerOptions`
+#### <code v-pre>InvokeEchoHandlerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L15) `packages/go-lib/src/echo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L15) <code v-pre>packages/go-lib/src/echo.ts</code>
 
 ```ts
 export interface InvokeEchoHandlerOptions {
@@ -493,9 +493,9 @@ export interface InvokeEchoHandlerOptions {
 }
 ```
 
-#### `InvokeEchoHandlerResult`
+#### <code v-pre>InvokeEchoHandlerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L20) `packages/go-lib/src/echo.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/echo.ts#L20) <code v-pre>packages/go-lib/src/echo.ts</code>
 
 ```ts
 export interface InvokeEchoHandlerResult extends GoResponse {
@@ -503,9 +503,9 @@ export interface InvokeEchoHandlerResult extends GoResponse {
 }
 ```
 
-#### `InvokeFiberHandlerOptions`
+#### <code v-pre>InvokeFiberHandlerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L17) `packages/go-lib/src/fiber.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L17) <code v-pre>packages/go-lib/src/fiber.ts</code>
 
 ```ts
 export interface InvokeFiberHandlerOptions {
@@ -514,9 +514,9 @@ export interface InvokeFiberHandlerOptions {
 }
 ```
 
-#### `InvokeFiberHandlerResult`
+#### <code v-pre>InvokeFiberHandlerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L22) `packages/go-lib/src/fiber.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/fiber.ts#L22) <code v-pre>packages/go-lib/src/fiber.ts</code>
 
 ```ts
 export interface InvokeFiberHandlerResult extends GoResponse {
@@ -524,9 +524,9 @@ export interface InvokeFiberHandlerResult extends GoResponse {
 }
 ```
 
-#### `InvokeGinHandlerOptions`
+#### <code v-pre>InvokeGinHandlerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L17) `packages/go-lib/src/gin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L17) <code v-pre>packages/go-lib/src/gin.ts</code>
 
 ```ts
 export interface InvokeGinHandlerOptions {
@@ -535,9 +535,9 @@ export interface InvokeGinHandlerOptions {
 }
 ```
 
-#### `InvokeGinHandlerResult`
+#### <code v-pre>InvokeGinHandlerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L22) `packages/go-lib/src/gin.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/gin.ts#L22) <code v-pre>packages/go-lib/src/gin.ts</code>
 
 ```ts
 export interface InvokeGinHandlerResult extends GoResponse {
@@ -545,17 +545,17 @@ export interface InvokeGinHandlerResult extends GoResponse {
 }
 ```
 
-#### `MiddlewareFn`
+#### <code v-pre>MiddlewareFn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L269) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L269) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export type MiddlewareFn = (req: GoRequest, next: () => Promise<GoResponse>) => Promise<GoResponse>;
 ```
 
-#### `ObservabilityEvent`
+#### <code v-pre>ObservabilityEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L95) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L95) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityEvent {
@@ -568,9 +568,9 @@ export interface ObservabilityEvent {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L104) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L104) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -580,9 +580,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RateLimiter`
+#### <code v-pre>RateLimiter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L157) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L157) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface RateLimiter {
@@ -592,9 +592,9 @@ export interface RateLimiter {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L152) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L152) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -603,9 +603,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L11) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L11) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -616,9 +616,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L18) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L18) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -629,9 +629,9 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `RouteGroup`
+#### <code v-pre>RouteGroup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L290) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L290) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface RouteGroup {
@@ -647,9 +647,9 @@ export interface RouteGroup {
 }
 ```
 
-#### `RouteGroupOptions`
+#### <code v-pre>RouteGroupOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L285) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L285) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface RouteGroupOptions {
@@ -658,9 +658,9 @@ export interface RouteGroupOptions {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L126) `packages/go-lib/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/go-lib/src/extensions.ts#L126) <code v-pre>packages/go-lib/src/extensions.ts</code>
 
 ```ts
 export interface TimeoutOptions {

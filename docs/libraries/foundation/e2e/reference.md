@@ -99,9 +99,9 @@ type NodeRequestHandler = (
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupE2eEnv requires "@playwright/test" or "playwright". Run &#96;pnpm add -D @playwright/test&#96;.' | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L50) |
-| &#96;setupE2eEnv: playwright engine "$&#123;name&#125;" not available&#96; | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L64) |
-| 'setupE2eEnv: provide either &#123; app &#125; or &#123; staticHtml &#125;' | [packages/e2e/src/setup-e2e-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L19) |
+| <code v-pre>setupE2eEnv requires "@playwright/test" or "playwright". Run &#96;pnpm add -D @playwright/test&#96;.</code> | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L50) |
+| <code v-pre>setupE2eEnv: playwright engine "$&#123;name&#125;" not available</code> | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L64) |
+| <code v-pre>setupE2eEnv: provide either &#123; app &#125; or &#123; staticHtml &#125;</code> | [packages/e2e/src/setup-e2e-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L19) |
 
 ## API 契約
 
@@ -109,17 +109,17 @@ type NodeRequestHandler = (
 
 ### 値
 
-#### `setupE2eEnv`
+#### <code v-pre>setupE2eEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L5) `packages/e2e/src/setup-e2e-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L5) <code v-pre>packages/e2e/src/setup-e2e-env.ts</code>
 
 ```ts
 export declare function setupE2eEnv(opts?: SetupE2eEnvOptions): Promise<E2eTestEnv>;
 ```
 
-#### `startServer`
+#### <code v-pre>startServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L55) `packages/e2e/src/http-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L55) <code v-pre>packages/e2e/src/http-server.ts</code>
 
 ```ts
 export declare function startServer(source: ApiHandlerSource | NodeRequestHandler): Promise<ServerHandle>;
@@ -127,9 +127,9 @@ export declare function startServer(source: ApiHandlerSource | NodeRequestHandle
 
 ### 型
 
-#### `ApiHandlerSource`
+#### <code v-pre>ApiHandlerSource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L3) `packages/e2e/src/http-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L3) <code v-pre>packages/e2e/src/http-server.ts</code>
 
 ```ts
 export type ApiHandlerSource = {
@@ -141,9 +141,9 @@ export type ApiHandlerSource = {
 };
 ```
 
-#### `BrowserContextHandle`
+#### <code v-pre>BrowserContextHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L14) `packages/e2e/src/browser-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L14) <code v-pre>packages/e2e/src/browser-bridge.ts</code>
 
 ```ts
 export interface BrowserContextHandle {
@@ -152,9 +152,9 @@ export interface BrowserContextHandle {
 }
 ```
 
-#### `BrowserHandle`
+#### <code v-pre>BrowserHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L9) `packages/e2e/src/browser-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L9) <code v-pre>packages/e2e/src/browser-bridge.ts</code>
 
 ```ts
 export interface BrowserHandle {
@@ -163,9 +163,9 @@ export interface BrowserHandle {
 }
 ```
 
-#### `BrowserLocator`
+#### <code v-pre>BrowserLocator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L34) `packages/e2e/src/browser-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L34) <code v-pre>packages/e2e/src/browser-bridge.ts</code>
 
 ```ts
 export interface BrowserLocator {
@@ -177,9 +177,9 @@ export interface BrowserLocator {
 }
 ```
 
-#### `BrowserPageHandle`
+#### <code v-pre>BrowserPageHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L19) `packages/e2e/src/browser-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L19) <code v-pre>packages/e2e/src/browser-bridge.ts</code>
 
 ```ts
 export interface BrowserPageHandle {
@@ -206,17 +206,17 @@ export interface BrowserPageHandle {
 }
 ```
 
-#### `E2eMode`
+#### <code v-pre>E2eMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/types.ts#L4) `packages/e2e/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/types.ts#L4) <code v-pre>packages/e2e/src/types.ts</code>
 
 ```ts
 export type E2eMode = 'live' | 'static';
 ```
 
-#### `E2eTestEnv`
+#### <code v-pre>E2eTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/types.ts#L19) `packages/e2e/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/types.ts#L19) <code v-pre>packages/e2e/src/types.ts</code>
 
 ```ts
 export interface E2eTestEnv extends TestEnvBase<'live'> {
@@ -226,17 +226,17 @@ export interface E2eTestEnv extends TestEnvBase<'live'> {
 }
 ```
 
-#### `NodeRequestHandler`
+#### <code v-pre>NodeRequestHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L7) `packages/e2e/src/http-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L7) <code v-pre>packages/e2e/src/http-server.ts</code>
 
 ```ts
 export type NodeRequestHandler = (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void | Promise<void>;
 ```
 
-#### `ServerHandle`
+#### <code v-pre>ServerHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L49) `packages/e2e/src/http-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/http-server.ts#L49) <code v-pre>packages/e2e/src/http-server.ts</code>
 
 ```ts
 export interface ServerHandle {
@@ -246,9 +246,9 @@ export interface ServerHandle {
 }
 ```
 
-#### `SetupE2eEnvOptions`
+#### <code v-pre>SetupE2eEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/types.ts#L6) `packages/e2e/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/types.ts#L6) <code v-pre>packages/e2e/src/types.ts</code>
 
 ```ts
 export interface SetupE2eEnvOptions {

@@ -34,49 +34,49 @@ response headers は小文字の Map です。Endpoint の redirect signal と�
 
 ### 値
 
-#### `invokeEndpoint`
+#### <code v-pre>invokeEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L85) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L85) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export declare function invokeEndpoint<TParams extends Record<string, string> = Record<string, string>>(opts: InvokeEndpointOptions<TParams>): Promise<InvokeEndpointResult>;
 ```
 
-#### `invokeRouteAction`
+#### <code v-pre>invokeRouteAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L67) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L67) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export declare function invokeRouteAction<TFormValues extends Record<string, unknown> = Record<string, unknown>, TResult = unknown>(opts: InvokeRouteActionOptions<TFormValues, TResult>): Promise<InvokeRouteActionResult<TResult>>;
 ```
 
-#### `invokeRouteLoader`
+#### <code v-pre>invokeRouteLoader</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L48) `packages/qwikcity/src/invoke-route-loader.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L48) <code v-pre>packages/qwikcity/src/invoke-route-loader.ts</code>
 
 ```ts
 export declare function invokeRouteLoader<TParams extends Record<string, string> = Record<string, string>, TResult = unknown>(opts: InvokeRouteLoaderOptions<TParams, TResult>): Promise<InvokeRouteLoaderResult<TResult>>;
 ```
 
-#### `QWIK_ENDPOINT_REDIRECT_SYMBOL`
+#### <code v-pre>QWIK&#95;ENDPOINT&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L8) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L8) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export declare const QWIK_ENDPOINT_REDIRECT_SYMBOL: unique symbol;
 ```
 
-#### `QWIK_FAIL_SYMBOL`
+#### <code v-pre>QWIK&#95;FAIL&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L9) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L9) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export declare const QWIK_FAIL_SYMBOL: unique symbol;
 ```
 
-#### `QWIK_REDIRECT_SYMBOL`
+#### <code v-pre>QWIK&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L10) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L10) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export declare const QWIK_REDIRECT_SYMBOL: unique symbol;
@@ -84,17 +84,17 @@ export declare const QWIK_REDIRECT_SYMBOL: unique symbol;
 
 ### 型
 
-#### `EndpointHandler`
+#### <code v-pre>EndpointHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L35) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L35) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export type EndpointHandler<TParams extends Record<string, string> = Record<string, string>> = (event: SimulatedRequestEvent<TParams>) => Promise<void> | void;
 ```
 
-#### `EndpointResponse`
+#### <code v-pre>EndpointResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L16) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L16) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface EndpointResponse<T = unknown> {
@@ -105,9 +105,9 @@ export interface EndpointResponse<T = unknown> {
 }
 ```
 
-#### `InvokeEndpointOptions`
+#### <code v-pre>InvokeEndpointOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L39) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L39) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface InvokeEndpointOptions<TParams extends Record<string, string> = Record<string, string>> {
@@ -121,9 +121,9 @@ export interface InvokeEndpointOptions<TParams extends Record<string, string> = 
 }
 ```
 
-#### `InvokeEndpointResult`
+#### <code v-pre>InvokeEndpointResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L49) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L49) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface InvokeEndpointResult {
@@ -133,9 +133,9 @@ export interface InvokeEndpointResult {
 }
 ```
 
-#### `InvokeRouteActionOptions`
+#### <code v-pre>InvokeRouteActionOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L41) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L41) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export interface InvokeRouteActionOptions<TFormValues extends Record<string, unknown>, TResult> {
@@ -147,9 +147,9 @@ export interface InvokeRouteActionOptions<TFormValues extends Record<string, unk
 }
 ```
 
-#### `InvokeRouteActionResult`
+#### <code v-pre>InvokeRouteActionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L49) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L49) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export interface InvokeRouteActionResult<TResult> {
@@ -164,9 +164,9 @@ export interface InvokeRouteActionResult<TResult> {
 }
 ```
 
-#### `InvokeRouteLoaderOptions`
+#### <code v-pre>InvokeRouteLoaderOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L29) `packages/qwikcity/src/invoke-route-loader.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L29) <code v-pre>packages/qwikcity/src/invoke-route-loader.ts</code>
 
 ```ts
 export interface InvokeRouteLoaderOptions<TParams extends Record<string, string>, TResult> {
@@ -179,9 +179,9 @@ export interface InvokeRouteLoaderOptions<TParams extends Record<string, string>
 }
 ```
 
-#### `InvokeRouteLoaderResult`
+#### <code v-pre>InvokeRouteLoaderResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L38) `packages/qwikcity/src/invoke-route-loader.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L38) <code v-pre>packages/qwikcity/src/invoke-route-loader.ts</code>
 
 ```ts
 export interface InvokeRouteLoaderResult<TResult> {
@@ -191,9 +191,9 @@ export interface InvokeRouteLoaderResult<TResult> {
 }
 ```
 
-#### `QwikEndpointRedirectSignal`
+#### <code v-pre>QwikEndpointRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L10) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L10) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface QwikEndpointRedirectSignal {
@@ -203,9 +203,9 @@ export interface QwikEndpointRedirectSignal {
 }
 ```
 
-#### `QwikFailSignal`
+#### <code v-pre>QwikFailSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L12) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L12) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export interface QwikFailSignal {
@@ -215,9 +215,9 @@ export interface QwikFailSignal {
 }
 ```
 
-#### `QwikRedirectSignal`
+#### <code v-pre>QwikRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L18) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L18) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export interface QwikRedirectSignal {
@@ -227,25 +227,25 @@ export interface QwikRedirectSignal {
 }
 ```
 
-#### `RouteActionFunction`
+#### <code v-pre>RouteActionFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L36) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L36) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export type RouteActionFunction<TFormValues extends Record<string, unknown> = Record<string, unknown>, TResult = unknown> = (formValues: TFormValues, event: SimulatedActionEvent) => Promise<TResult | QwikFailSignal> | TResult | QwikFailSignal;
 ```
 
-#### `RouteLoaderFunction`
+#### <code v-pre>RouteLoaderFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L25) `packages/qwikcity/src/invoke-route-loader.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L25) <code v-pre>packages/qwikcity/src/invoke-route-loader.ts</code>
 
 ```ts
 export type RouteLoaderFunction<TParams extends Record<string, string> = Record<string, string>, TResult = unknown> = (event: SimulatedLoaderEvent<TParams>) => Promise<TResult> | TResult;
 ```
 
-#### `SimulatedActionEvent`
+#### <code v-pre>SimulatedActionEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L24) `packages/qwikcity/src/invoke-route-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-action.ts#L24) <code v-pre>packages/qwikcity/src/invoke-route-action.ts</code>
 
 ```ts
 export interface SimulatedActionEvent {
@@ -263,9 +263,9 @@ export interface SimulatedActionEvent {
 }
 ```
 
-#### `SimulatedLoaderEvent`
+#### <code v-pre>SimulatedLoaderEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L13) `packages/qwikcity/src/invoke-route-loader.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts#L13) <code v-pre>packages/qwikcity/src/invoke-route-loader.ts</code>
 
 ```ts
 export interface SimulatedLoaderEvent<TParams extends Record<string, string> = Record<string, string>> {
@@ -283,9 +283,9 @@ export interface SimulatedLoaderEvent<TParams extends Record<string, string> = R
 }
 ```
 
-#### `SimulatedRequestEvent`
+#### <code v-pre>SimulatedRequestEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L23) `packages/qwikcity/src/invoke-endpoint.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-endpoint.ts#L23) <code v-pre>packages/qwikcity/src/invoke-endpoint.ts</code>
 
 ```ts
 export interface SimulatedRequestEvent<TParams extends Record<string, string> = Record<string, string>> {

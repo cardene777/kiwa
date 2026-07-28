@@ -25,11 +25,11 @@ client 作成時に `provider`、`namespace`、`dimension` を指定します。
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| &#96;provider rejected id=$&#123;rec.id&#125;&#96; | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L57) |
-| &#96;dimension mismatch: expected $&#123;dimension&#125;, got $&#123;rec.values.length&#125;&#96; | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L60) |
-| &#96;dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;&#96; | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L16) |
-| &#96;dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;&#96; | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L26) |
-| &#96;dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;&#96; | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L7) |
+| <code v-pre>provider rejected id=$&#123;rec.id&#125;</code> | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L57) |
+| <code v-pre>dimension mismatch: expected $&#123;dimension&#125;, got $&#123;rec.values.length&#125;</code> | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L60) |
+| <code v-pre>dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;</code> | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L16) |
+| <code v-pre>dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;</code> | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L26) |
+| <code v-pre>dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;</code> | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L7) |
 
 ## API 契約
 
@@ -37,41 +37,41 @@ client 作成時に `provider`、`namespace`、`dimension` を指定します。
 
 ### 値
 
-#### `cosineSimilarity`
+#### <code v-pre>cosineSimilarity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L25) `packages/vector/src/distance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L25) <code v-pre>packages/vector/src/distance.ts</code>
 
 ```ts
 export declare function cosineSimilarity(a: readonly number[], b: readonly number[]): number;
 ```
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L156) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L156) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(client: VectorClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L110) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L110) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L69) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L69) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `createVectorClient`
+#### <code v-pre>createVectorClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L42) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L42) <code v-pre>packages/vector/src/client.ts</code>
 
 provider 別 mock client。 実 Pinecone / Weaviate / Qdrant / pgvector の SDK を差替えても 同じ signature で呼べる想定 (upsert / query / delete)。 mock 内部は Map で保持。
 
@@ -79,17 +79,17 @@ provider 別 mock client。 実 Pinecone / Weaviate / Qdrant / pgvector の SDK 
 export declare function createVectorClient(options?: CreateVectorClientOptions): VectorClient;
 ```
 
-#### `deleteVectors`
+#### <code v-pre>deleteVectors</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L68) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L68) <code v-pre>packages/vector/src/query.ts</code>
 
 ```ts
 export declare function deleteVectors(client: VectorClient, ids: string[]): Promise<DeleteResult>;
 ```
 
-#### `dotProduct`
+#### <code v-pre>dotProduct</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L6) `packages/vector/src/distance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L6) <code v-pre>packages/vector/src/distance.ts</code>
 
 Vector distance primitives — real Pinecone / Weaviate / Qdrant / pgvector と同じ 距離計算式で similarity score を再現。 caller が metric を切替えても同じ結果を得られる。
 
@@ -97,17 +97,17 @@ Vector distance primitives — real Pinecone / Weaviate / Qdrant / pgvector と�
 export declare function dotProduct(a: readonly number[], b: readonly number[]): number;
 ```
 
-#### `euclideanDistance`
+#### <code v-pre>euclideanDistance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L15) `packages/vector/src/distance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L15) <code v-pre>packages/vector/src/distance.ts</code>
 
 ```ts
 export declare function euclideanDistance(a: readonly number[], b: readonly number[]): number;
 ```
 
-#### `queryNearest`
+#### <code v-pre>queryNearest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L36) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L36) <code v-pre>packages/vector/src/query.ts</code>
 
 similarity search — provider に応じた metric (cosine default) で topK match を返す。 cosine / dot = 高いほど近い、 euclidean = 小さいほど近い、 の semantics に合わせて sort。
 
@@ -115,17 +115,17 @@ similarity search — provider に応じた metric (cosine default) で topK mat
 export declare function queryNearest(client: VectorClient, query: number[], options?: QueryOptions): QueryResult;
 ```
 
-#### `upsertBatch`
+#### <code v-pre>upsertBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L44) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L44) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function upsertBatch(client: VectorClient, records: VectorRecord[], batchSize?: number): Promise<BatchUpsertResult>;
 ```
 
-#### `upsertIdempotent`
+#### <code v-pre>upsertIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L79) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L79) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function upsertIdempotent(client: VectorClient, records: VectorRecord[], idempotencyKey: string, cache: IdempotencyCache): Promise<UpsertResult & {
@@ -133,17 +133,17 @@ export declare function upsertIdempotent(client: VectorClient, records: VectorRe
 }>;
 ```
 
-#### `upsertObservable`
+#### <code v-pre>upsertObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L124) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L124) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function upsertObservable(client: VectorClient, records: VectorRecord[], hooks: HookRegistry): Promise<UpsertResult>;
 ```
 
-#### `upsertVectors`
+#### <code v-pre>upsertVectors</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/upsert.ts#L12) `packages/vector/src/upsert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/upsert.ts#L12) <code v-pre>packages/vector/src/upsert.ts</code>
 
 batch upsert helper — 大量 record を chunk に分けて upsert し、 合計結果を返す。 real provider (Pinecone / Weaviate / Qdrant) の batch size 制限 (100 前後) を再現。
 
@@ -153,9 +153,9 @@ export declare function upsertVectors(client: VectorClient, vectors: VectorRecor
 }): Promise<UpsertVectorsResult>;
 ```
 
-#### `upsertWithRetry`
+#### <code v-pre>upsertWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L13) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L13) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export declare function upsertWithRetry(client: VectorClient, records: VectorRecord[], options?: RetryOptions): Promise<UpsertResult & {
@@ -165,9 +165,9 @@ export declare function upsertWithRetry(client: VectorClient, records: VectorRec
 
 ### 型
 
-#### `BatchUpsertResult`
+#### <code v-pre>BatchUpsertResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L37) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L37) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface BatchUpsertResult {
@@ -178,9 +178,9 @@ export interface BatchUpsertResult {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L149) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L149) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -193,9 +193,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L143) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L143) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -205,17 +205,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L141) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L141) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `CreateVectorClientOptions`
+#### <code v-pre>CreateVectorClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L17) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L17) <code v-pre>packages/vector/src/client.ts</code>
 
 ```ts
 export interface CreateVectorClientOptions {
@@ -226,9 +226,9 @@ export interface CreateVectorClientOptions {
 }
 ```
 
-#### `DeleteResult`
+#### <code v-pre>DeleteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L26) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L26) <code v-pre>packages/vector/src/query.ts</code>
 
 ```ts
 export interface DeleteResult {
@@ -238,25 +238,25 @@ export interface DeleteResult {
 }
 ```
 
-#### `DistanceMetric`
+#### <code v-pre>DistanceMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L4) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L4) <code v-pre>packages/vector/src/query.ts</code>
 
 ```ts
 export type DistanceMetric = 'cosine' | 'euclidean' | 'dot';
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L102) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L102) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L95) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L95) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface HookContext {
@@ -267,9 +267,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L104) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L104) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -279,9 +279,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L62) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L62) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -292,9 +292,9 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `QueryMatch`
+#### <code v-pre>QueryMatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L13) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L13) <code v-pre>packages/vector/src/query.ts</code>
 
 ```ts
 export interface QueryMatch {
@@ -305,9 +305,9 @@ export interface QueryMatch {
 }
 ```
 
-#### `QueryOptions`
+#### <code v-pre>QueryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L6) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L6) <code v-pre>packages/vector/src/query.ts</code>
 
 ```ts
 export interface QueryOptions {
@@ -318,9 +318,9 @@ export interface QueryOptions {
 }
 ```
 
-#### `QueryResult`
+#### <code v-pre>QueryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L20) `packages/vector/src/query.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/query.ts#L20) <code v-pre>packages/vector/src/query.ts</code>
 
 ```ts
 export interface QueryResult {
@@ -330,9 +330,9 @@ export interface QueryResult {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L7) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L7) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -342,17 +342,17 @@ export interface RetryOptions {
 }
 ```
 
-#### `UpsertHookEvent`
+#### <code v-pre>UpsertHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L93) `packages/vector/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/enhancements.ts#L93) <code v-pre>packages/vector/src/enhancements.ts</code>
 
 ```ts
 export type UpsertHookEvent = 'before-upsert' | 'after-upsert' | 'error';
 ```
 
-#### `UpsertResult`
+#### <code v-pre>UpsertResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L11) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L11) <code v-pre>packages/vector/src/client.ts</code>
 
 ```ts
 export interface UpsertResult {
@@ -362,9 +362,9 @@ export interface UpsertResult {
 }
 ```
 
-#### `UpsertVectorsResult`
+#### <code v-pre>UpsertVectorsResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/upsert.ts#L3) `packages/vector/src/upsert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/upsert.ts#L3) <code v-pre>packages/vector/src/upsert.ts</code>
 
 ```ts
 export interface UpsertVectorsResult extends UpsertResult {
@@ -373,9 +373,9 @@ export interface UpsertVectorsResult extends UpsertResult {
 }
 ```
 
-#### `VectorClient`
+#### <code v-pre>VectorClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L24) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L24) <code v-pre>packages/vector/src/client.ts</code>
 
 ```ts
 export interface VectorClient {
@@ -393,25 +393,25 @@ export interface VectorClient {
 }
 ```
 
-#### `VectorMetadata`
+#### <code v-pre>VectorMetadata</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L3) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L3) <code v-pre>packages/vector/src/client.ts</code>
 
 ```ts
 export type VectorMetadata = Record<string, string | number | boolean>;
 ```
 
-#### `VectorProvider`
+#### <code v-pre>VectorProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L1) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L1) <code v-pre>packages/vector/src/client.ts</code>
 
 ```ts
 export type VectorProvider = 'pinecone' | 'weaviate' | 'qdrant' | 'pgvector';
 ```
 
-#### `VectorRecord`
+#### <code v-pre>VectorRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L5) `packages/vector/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L5) <code v-pre>packages/vector/src/client.ts</code>
 
 ```ts
 export interface VectorRecord {
