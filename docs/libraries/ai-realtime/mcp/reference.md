@@ -36,10 +36,10 @@ fixture toolはtest専用です。weatherは固定都市、searchは小さなwor
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `mock db supports SELECT only, got: ${sql.slice(0, 20)}...` | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L221) |
+| &#96;mock db supports SELECT only, got: $&#123;sql.slice(0, 20)&#125;...&#96; | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L221) |
 | 'echo: message must be a string' | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L40) |
 | 'division by zero' | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L83) |
-| `unknown op: ${String(op)}` | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L88) |
+| &#96;unknown op: $&#123;String(op)&#125;&#96; | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L88) |
 | 'tool.name must be a non-empty string' | [packages/mcp/src/tools.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L30) |
 
 ## API 契約

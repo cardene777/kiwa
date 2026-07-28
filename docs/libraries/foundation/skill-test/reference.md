@@ -29,12 +29,12 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `assertToolCalled: expected tool "${toolName}" to be called at least once, but it was never invoked. actual calls = [${describeCalls(spy)}]` | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L101) |
-| `assertToolNotCalled: expected tool "${toolName}" to be never called, but it was invoked ${matches.length} time(s). actual calls = [${describeCalls(spy)}]` | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L115) |
-| `assertToolCalledWith: tool "${toolName}" was never called (expected args ${JSON.stringify(expectedArgs)}). actual calls = [${describeCalls(spy)}]` | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L137) |
-| `assertToolCalledWith: tool "${toolName}" was called ${matches.length} time(s) but no call matched expected args ${JSON.stringify(expectedArgs)}. observed args = [${observed}]` | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L148) |
-| `assertToolCallOrder: expected order ${JSON.stringify(expectedOrder)} not found as subsequence in actual calls ${JSON.stringify(actualNames)}. matched up to index ${cursor}.` | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L170) |
-| `assertToolCalled: expected tool "${toolName}" to be called ${opts.times} time(s), observed ${matches.length}. actual calls = [${describeCalls(spy)}]` | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L94) |
+| &#96;assertToolCalled: expected tool "$&#123;toolName&#125;" to be called at least once, but it was never invoked. actual calls = &#91;$&#123;describeCalls(spy)&#125;&#93;&#96; | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L101) |
+| &#96;assertToolNotCalled: expected tool "$&#123;toolName&#125;" to be never called, but it was invoked $&#123;matches.length&#125; time(s). actual calls = &#91;$&#123;describeCalls(spy)&#125;&#93;&#96; | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L115) |
+| &#96;assertToolCalledWith: tool "$&#123;toolName&#125;" was never called (expected args $&#123;JSON.stringify(expectedArgs)&#125;). actual calls = &#91;$&#123;describeCalls(spy)&#125;&#93;&#96; | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L137) |
+| &#96;assertToolCalledWith: tool "$&#123;toolName&#125;" was called $&#123;matches.length&#125; time(s) but no call matched expected args $&#123;JSON.stringify(expectedArgs)&#125;. observed args = &#91;$&#123;observed&#125;&#93;&#96; | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L148) |
+| &#96;assertToolCallOrder: expected order $&#123;JSON.stringify(expectedOrder)&#125; not found as subsequence in actual calls $&#123;JSON.stringify(actualNames)&#125;. matched up to index $&#123;cursor&#125;.&#96; | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L170) |
+| &#96;assertToolCalled: expected tool "$&#123;toolName&#125;" to be called $&#123;opts.times&#125; time(s), observed $&#123;matches.length&#125;. actual calls = &#91;$&#123;describeCalls(spy)&#125;&#93;&#96; | [packages/skill-test/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/skill-test/src/index.ts#L94) |
 
 ## API 契約
 

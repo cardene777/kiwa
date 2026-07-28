@@ -50,7 +50,7 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `unknown event type: ${String(type)}` | [packages/astro/src/setup-view-transition-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L381) |
+| &#96;unknown event type: $&#123;String(type)&#125;&#96; | [packages/astro/src/setup-view-transition-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/astro/src/setup-view-transition-env.ts#L381) |
 
 ## API 契約
 

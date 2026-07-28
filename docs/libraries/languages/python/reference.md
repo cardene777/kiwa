@@ -33,9 +33,9 @@ template描画は `html`、検出した `variables`、不足した `missing` を
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L57) |
+| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L57) |
 | 'circuit breaker open' | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L72) |
-| `template not found: ${name}` | [packages/python/src/template.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L18) |
+| &#96;template not found: $&#123;name&#125;&#96; | [packages/python/src/template.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L18) |
 
 ## API 契約
 

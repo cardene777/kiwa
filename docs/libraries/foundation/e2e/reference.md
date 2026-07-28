@@ -99,9 +99,9 @@ type NodeRequestHandler = (
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupE2eEnv requires "@playwright/test" or "playwright". Run `pnpm add -D @playwright/test`.' | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L50) |
-| `setupE2eEnv: playwright engine "${name}" not available` | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L64) |
-| 'setupE2eEnv: provide either { app } or { staticHtml }' | [packages/e2e/src/setup-e2e-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L19) |
+| 'setupE2eEnv requires "@playwright/test" or "playwright". Run &#96;pnpm add -D @playwright/test&#96;.' | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L50) |
+| &#96;setupE2eEnv: playwright engine "$&#123;name&#125;" not available&#96; | [packages/e2e/src/browser-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/browser-bridge.ts#L64) |
+| 'setupE2eEnv: provide either &#123; app &#125; or &#123; staticHtml &#125;' | [packages/e2e/src/setup-e2e-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/e2e/src/setup-e2e-env.ts#L19) |
 
 ## API 契約
 

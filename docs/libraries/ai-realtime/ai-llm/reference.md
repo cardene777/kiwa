@@ -43,17 +43,17 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `Poisson lambda must be >= 0, got ${lambda}` | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L44) |
-| `Poisson lambda > 30 unsupported by Knuth variant; use a larger-lambda algorithm or split into chunks (got ${lambda})` | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L49) |
-| `Zipf n must be >= 1, got ${n}` | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L83) |
-| `Zipf s must be > 1 (Devroye rejection requires s > 1), got ${s}` | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L84) |
+| &#96;Poisson lambda must be &gt;= 0, got $&#123;lambda&#125;&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L44) |
+| &#96;Poisson lambda &gt; 30 unsupported by Knuth variant; use a larger-lambda algorithm or split into chunks (got $&#123;lambda&#125;)&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L49) |
+| &#96;Zipf n must be &gt;= 1, got $&#123;n&#125;&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L83) |
+| &#96;Zipf s must be &gt; 1 (Devroye rejection requires s &gt; 1), got $&#123;s&#125;&#96; | [packages/ai-llm/src/sampling.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/sampling.ts#L84) |
 | 'reflectAndCorrect: run react or tot first' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L123) |
 | 'selectTool: run react or tot first' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L153) |
 | 'selectTool: candidates must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L155) |
 | 'startAgentSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L55) |
-| `reactStep: session is ${session.state}` | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L72) |
+| &#96;reactStep: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L72) |
 | 'reactStep: tool must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L74) |
-| `expandToT: session is ${session.state}` | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L91) |
+| &#96;expandToT: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L91) |
 | 'expandToT: depth must be positive' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L93) |
 | 'expandToT: branches must not be empty' | [packages/ai-llm/src/semantics/agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-orchestration.ts#L94) |
 | 'reachConsensus: assign roles first' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L123) |
@@ -61,10 +61,10 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 | 'tolerateByzantine: assign roles first' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L154) |
 | 'tolerateByzantine: no agents assigned' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L156) |
 | 'startSwarmSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L53) |
-| 'startSwarmSession: faultThreshold must be in [0, 1)' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L56) |
+| 'startSwarmSession: faultThreshold must be in &#91;0, 1)' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L56) |
 | 'assignRoles: agents must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L73) |
 | 'assignRoles: roles must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L74) |
-| 'assignRoles: reliability must be in [0, 1]' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L77) |
+| 'assignRoles: reliability must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L77) |
 | 'allocateTasks: assign roles first' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L98) |
 | 'allocateTasks: tasks must not be empty' | [packages/ai-llm/src/semantics/agent-swarm.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/agent-swarm.ts#L99) |
 | 'useTool: start sandbox first' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L117) |
@@ -78,28 +78,28 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 | 'executeCode: code must not be empty' | [packages/ai-llm/src/semantics/code-interpreter.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/code-interpreter.ts#L85) |
 | 'routeModel: check budget or measure latency first' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L121) |
 | 'routeModel: candidates must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L123) |
-| `engageFallback: session is ${session.state}` | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L145) |
+| &#96;engageFallback: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L145) |
 | 'engageFallback: ladder must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L147) |
 | 'startSlaSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L45) |
 | 'startSlaSession: budgetUsd must be non-negative' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L47) |
 | 'checkBudget: cost must be non-negative' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L62) |
 | 'measureLatency: samples must not be empty' | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L90) |
-| `measureLatency: session is ${session.state}` | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L92) |
+| &#96;measureLatency: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/cost-latency-sla.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-latency-sla.ts#L92) |
 | 'stepCascade: tiers must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L100) |
 | 'lookupSemanticCache: queryHash must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L128) |
 | 'startCoSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L32) |
-| `submitBatch: session is ${session.state}` | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L48) |
+| &#96;submitBatch: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L48) |
 | 'submitBatch: requests must not be empty' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L51) |
 | 'compressPrompt: run submitBatch or startCoSession first' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L72) |
 | 'stepCascade: run submitBatch or compressPrompt first' | [packages/ai-llm/src/semantics/cost-optimization.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/cost-optimization.ts#L97) |
 | 'detectCatastrophicForgetting: run sft/dpo eval first' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L122) |
 | 'detectCatastrophicForgetting: baseline / post length mismatch' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L125) |
-| `detectBenchmarkDrift: session is ${session.state}` | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L154) |
+| &#96;detectBenchmarkDrift: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L154) |
 | 'detectBenchmarkDrift: baselineBenchmarks empty — run detectCatastrophicForgetting first to seed baseline' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L157) |
 | 'startFtSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L47) |
 | 'evaluateSft: samples must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L62) |
 | 'evaluateDpo: samples must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L91) |
-| `evaluateDpo: session is ${session.state}` | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L93) |
+| &#96;evaluateDpo: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/fine-tuning-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-eval.ts#L93) |
 | 'stepRlhf: prepare dataset first' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L102) |
 | 'stepRlhf: rewards must not be empty' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L103) |
 | 'stepRlhf: learningRate must be positive' | [packages/ai-llm/src/semantics/fine-tuning-pipeline.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/fine-tuning-pipeline.ts#L105) |
@@ -115,51 +115,51 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 | 'redactPii: run earlier checks first' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L192) |
 | 'checkConstitutional: run earlier checks first' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L217) |
 | 'startGuardrailSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L49) |
-| `validateSchema: session is ${session.state}` | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L64) |
-| `verifyCitation: session is ${session.state}` | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L113) |
+| &#96;validateSchema: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/guardrails.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/guardrails.ts#L64) |
+| &#96;verifyCitation: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L113) |
 | 'verifyCitation: citations must not be empty' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L116) |
 | 'scoreConfidence: run other checks first' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L141) |
 | 'startHallucinationSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L37) |
 | 'scoreSelfConsistency: need at least 2 samples' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L53) |
 | 'checkFactuality: run self-consistency first' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L81) |
 | 'checkFactuality: evidence must not be empty' | [packages/ai-llm/src/semantics/hallucination.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/hallucination.ts#L84) |
-| `rankPreference: session is ${session.state}` | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L109) |
+| &#96;rankPreference: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L109) |
 | 'rankPreference: pairs must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L112) |
-| `updateElo: session is ${session.state}` | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L153) |
+| &#96;updateElo: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L153) |
 | 'updateElo: winner and loser must differ' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L156) |
 | 'startEvalSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L40) |
-| `judgeCandidates: session is ${session.state}` | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L56) |
+| &#96;judgeCandidates: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L56) |
 | 'judgeCandidates: candidates must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L59) |
-| `applyRubric: session is ${session.state}, expected judged` | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L86) |
+| &#96;applyRubric: session is $&#123;session.state&#125;, expected judged&#96; | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L86) |
 | 'applyRubric: criteria must not be empty' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L89) |
 | 'applyRubric: totalWeight must be positive' | [packages/ai-llm/src/semantics/llm-eval.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-eval.ts#L92) |
 | 'evaluateAb: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L114) |
 | 'evaluateAb: need at least 2 variants' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L115) |
 | 'promoteCanary: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L146) |
-| 'promoteCanary: errorRate must be in [0, 1]' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L148) |
-| 'promoteCanary: threshold must be in [0, 1]' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L150) |
+| 'promoteCanary: errorRate must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L148) |
+| 'promoteCanary: threshold must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L150) |
 | 'compareShadow: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L172) |
 | 'compareShadow: scores must not be empty' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L174) |
 | 'startOpsSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L48) |
 | 'updateRegistry: version must not be empty' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L66) |
-| `updateRegistry: version ${input.version} already registered` | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L68) |
+| &#96;updateRegistry: version $&#123;input.version&#125; already registered&#96; | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L68) |
 | 'advanceRollout: update registry first' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L90) |
-| 'advanceRollout: targetPercent must be in [0, 100]' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L92) |
+| 'advanceRollout: targetPercent must be in &#91;0, 100&#93;' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L92) |
 | 'advanceRollout: incrementPercent must be positive' | [packages/ai-llm/src/semantics/llm-ops.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/llm-ops.ts#L94) |
 | 'delegateBySupervisor: assemble crew first' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L100) |
 | 'delegateBySupervisor: workerIds must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L102) |
 | 'delegateBySupervisor: task must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L103) |
-| `delegateBySupervisor: supervisor ${input.supervisorId} not in crew` | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L105) |
-| `delegateBySupervisor: worker ${worker} not in crew` | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L110) |
+| &#96;delegateBySupervisor: supervisor $&#123;input.supervisorId&#125; not in crew&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L105) |
+| &#96;delegateBySupervisor: worker $&#123;worker&#125; not in crew&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L110) |
 | 'transitionGraph: assemble crew first' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L132) |
 | 'transitionGraph: nodes must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L133) |
-| `transitionGraph: entry ${input.entryNodeId} not in nodes` | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L135) |
+| &#96;transitionGraph: entry $&#123;input.entryNodeId&#125; not in nodes&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L135) |
 | 'completeRound: assemble crew first' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L164) |
 | 'completeRound: minDelegations must be non-negative' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L166) |
 | 'startMaoSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L60) |
 | 'assembleCrew: agents must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L80) |
 | 'assembleCrew: agent id must not be empty' | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L83) |
-| `assembleCrew: duplicate agent id ${a.id}` | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L84) |
+| &#96;assembleCrew: duplicate agent id $&#123;a.id&#125;&#96; | [packages/ai-llm/src/semantics/multi-agent-orchestration.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/multi-agent-orchestration.ts#L84) |
 | 'cachePrompt: expand CoT first' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L113) |
 | 'cachePrompt: key must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L114) |
 | 'pinVersion: expand CoT first' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L140) |
@@ -171,25 +171,25 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 | 'selectFewShot: expand CoT first' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L93) |
 | 'selectFewShot: pool must not be empty' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L94) |
 | 'selectFewShot: k must be positive' | [packages/ai-llm/src/semantics/prompt-engineering-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-engineering-advanced.ts#L95) |
-| `classifyDirect: session is ${session.state}, expected analyzed` | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L133) |
-| `classifyIndirect: session is ${session.state}` | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L150) |
+| &#96;classifyDirect: session is $&#123;session.state&#125;, expected analyzed&#96; | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L133) |
+| &#96;classifyIndirect: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L150) |
 | 'blockJailbreak: analyze first' | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L167) |
 | 'blockRoleHijacking: analyze first' | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L184) |
 | 'startInjectionSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L47) |
-| `detectInjection: session is ${session.state}, cannot analyze` | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L96) |
-| `rerank: session is ${session.state}, expected hybrid-retrieved` | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L118) |
+| &#96;detectInjection: session is $&#123;session.state&#125;, cannot analyze&#96; | [packages/ai-llm/src/semantics/prompt-injection.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/prompt-injection.ts#L96) |
+| &#96;rerank: session is $&#123;session.state&#125;, expected hybrid-retrieved&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L118) |
 | 'rerank: hits must not be empty' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L120) |
-| `compressContext: session is ${session.state}, expected reranked` | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L142) |
+| &#96;compressContext: session is $&#123;session.state&#125;, expected reranked&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L142) |
 | 'compressContext: maxTokens must be positive' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L144) |
 | 'startRagSession: sessionId must not be empty' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L39) |
-| `chunkDocument: session is ${session.state}` | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L55) |
+| &#96;chunkDocument: session is $&#123;session.state&#125;&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L55) |
 | 'chunkDocument: chunkSize must be positive' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L57) |
-| 'chunkDocument: overlap must be in [0, chunkSize)' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L59) |
-| `hybridRetrieve: session is ${session.state}, expected chunked` | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L85) |
+| 'chunkDocument: overlap must be in &#91;0, chunkSize)' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L59) |
+| &#96;hybridRetrieve: session is $&#123;session.state&#125;, expected chunked&#96; | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L85) |
 | 'hybridRetrieve: topK must be positive' | [packages/ai-llm/src/semantics/rag-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-advanced.ts#L87) |
 | 'stepAgentic: traverse graph first' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L123) |
-| 'stepAgentic: confidence must be in [0, 1]' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L125) |
-| 'stepAgentic: threshold must be in [0, 1]' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L127) |
+| 'stepAgentic: confidence must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L125) |
+| 'stepAgentic: threshold must be in &#91;0, 1&#93;' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L127) |
 | 'stepAgentic: reason must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L129) |
 | 'selfQuery: traverse graph first' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L148) |
 | 'selfQuery: question must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L150) |
@@ -200,9 +200,9 @@ AI LLM 用の release gate は、provider 名が `@kiwa-lab/ai-` で始まる場
 | 'startRag3Session: sessionId must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L59) |
 | 'traverseGraph: nodes must not be empty' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L82) |
 | 'traverseGraph: maxHops must be positive' | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L83) |
-| `traverseGraph: startNode ${input.startNodeId} not in nodes` | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L85) |
-| 'resolveBudgetGuard: KIWA_LLM_BUDGET_USD must be a non-negative number' | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L79) |
-| 'resolveBudgetGuard: KIWA_LLM_PER_CALL_CAP_USD must be a non-negative number' | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L82) |
+| &#96;traverseGraph: startNode $&#123;input.startNodeId&#125; not in nodes&#96; | [packages/ai-llm/src/semantics/rag-iii.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/rag-iii.ts#L85) |
+| 'resolveBudgetGuard: KIWA&#95;LLM&#95;BUDGET&#95;USD must be a non-negative number' | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L79) |
+| 'resolveBudgetGuard: KIWA&#95;LLM&#95;PER&#95;CALL&#95;CAP&#95;USD must be a non-negative number' | [packages/ai-llm/src/semantics/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/src/semantics/real-driver.ts#L82) |
 
 ## API 契約
 

@@ -25,11 +25,11 @@ client 作成時に `provider`、`namespace`、`dimension` を指定します。
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `provider rejected id=${rec.id}` | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L57) |
-| `dimension mismatch: expected ${dimension}, got ${rec.values.length}` | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L60) |
-| `dimension mismatch: ${a.length} vs ${b.length}` | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L16) |
-| `dimension mismatch: ${a.length} vs ${b.length}` | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L26) |
-| `dimension mismatch: ${a.length} vs ${b.length}` | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L7) |
+| &#96;provider rejected id=$&#123;rec.id&#125;&#96; | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L57) |
+| &#96;dimension mismatch: expected $&#123;dimension&#125;, got $&#123;rec.values.length&#125;&#96; | [packages/vector/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/client.ts#L60) |
+| &#96;dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;&#96; | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L16) |
+| &#96;dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;&#96; | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L26) |
+| &#96;dimension mismatch: $&#123;a.length&#125; vs $&#123;b.length&#125;&#96; | [packages/vector/src/distance.ts](https://github.com/cardene777/kiwa/blob/main/packages/vector/src/distance.ts#L7) |
 
 ## API 契約
 

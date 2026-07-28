@@ -59,8 +59,8 @@ Tauri command の payload は文字列として扱われます。command handler
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `invokeDesktopCli(${inv.command}): KIWA_DESKTOP_MODE must be 'real'` | [packages/desktop/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L76) |
-| `invokeDesktopCli(${inv.command}): args exceeds max 32 (${inv.args.length})` | [packages/desktop/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L81) |
+| &#96;invokeDesktopCli($&#123;inv.command&#125;): KIWA&#95;DESKTOP&#95;MODE must be 'real'&#96; | [packages/desktop/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L76) |
+| &#96;invokeDesktopCli($&#123;inv.command&#125;): args exceeds max 32 ($&#123;inv.args.length&#125;)&#96; | [packages/desktop/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/adapters/spawn-driver.ts#L81) |
 | 'startAutoUpdaterCheck: channel must not be empty' | [packages/desktop/src/semantics/auto-updater.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L48) |
 | 'recordUpdateDownloaded: check not started' | [packages/desktop/src/semantics/auto-updater.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L67) |
 | 'recordUpdateDownloaded: version must not be empty' | [packages/desktop/src/semantics/auto-updater.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/auto-updater.ts#L68) |
@@ -75,7 +75,7 @@ Tauri command の payload は文字列として扱われます。command handler
 | 'clearClipboard: already cleared' | [packages/desktop/src/semantics/clipboard.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/clipboard.ts#L96) |
 | 'subscribeDarkMode: observerId must not be empty' | [packages/desktop/src/semantics/dark-mode.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L50) |
 | 'notifyThemeChange: not subscribed' | [packages/desktop/src/semantics/dark-mode.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L69) |
-| `notifyThemeChange: theme unchanged (${newTheme})` | [packages/desktop/src/semantics/dark-mode.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L72) |
+| &#96;notifyThemeChange: theme unchanged ($&#123;newTheme&#125;)&#96; | [packages/desktop/src/semantics/dark-mode.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L72) |
 | 'recordUserPreference: not subscribed' | [packages/desktop/src/semantics/dark-mode.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L88) |
 | 'unsubscribeDarkMode: already unsubscribed' | [packages/desktop/src/semantics/dark-mode.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/dark-mode.ts#L99) |
 | 'startElectronApp: appId must not be empty' | [packages/desktop/src/semantics/electron.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/electron.ts#L37) |
@@ -86,28 +86,28 @@ Tauri command の payload は文字列として扱われます。command handler
 | 'quitElectronApp: already quit' | [packages/desktop/src/semantics/electron.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/electron.ts#L77) |
 | 'requestFsPermission: path must not be empty' | [packages/desktop/src/semantics/fs-permissions.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L45) |
 | 'grantFsPermission: no request pending' | [packages/desktop/src/semantics/fs-permissions.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L63) |
-| `revokeFsPermission: ${scope} not granted` | [packages/desktop/src/semantics/fs-permissions.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L77) |
+| &#96;revokeFsPermission: $&#123;scope&#125; not granted&#96; | [packages/desktop/src/semantics/fs-permissions.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L77) |
 | 'logFsPermissionAudit: reason must not be empty' | [packages/desktop/src/semantics/fs-permissions.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/fs-permissions.ts#L91) |
 | 'createGlobalShortcutSession: namespace must not be empty' | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L46) |
 | 'registerGlobalShortcut: session cleared' | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L61) |
 | 'registerGlobalShortcut: accelerator must not be empty' | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L62) |
-| `registerGlobalShortcut: ${accelerator} already registered` | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L64) |
-| `triggerGlobalShortcut: ${accelerator} not registered` | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L80) |
-| `unregisterGlobalShortcut: ${accelerator} not registered` | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L95) |
+| &#96;registerGlobalShortcut: $&#123;accelerator&#125; already registered&#96; | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L64) |
+| &#96;triggerGlobalShortcut: $&#123;accelerator&#125; not registered&#96; | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L80) |
+| &#96;unregisterGlobalShortcut: $&#123;accelerator&#125; not registered&#96; | [packages/desktop/src/semantics/global-shortcut.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/global-shortcut.ts#L95) |
 | 'buildMenuBar: menuId must not be empty' | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L45) |
 | 'appendMenuBarItem: menu destroyed' | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L63) |
 | 'appendMenuBarItem: id must not be empty' | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L64) |
 | 'appendMenuBarItem: label must not be empty' | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L65) |
-| `appendMenuBarItem: duplicate id ${item.id}` | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L67) |
+| &#96;appendMenuBarItem: duplicate id $&#123;item.id&#125;&#96; | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L67) |
 | 'clickMenuBarItem: menu destroyed' | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L83) |
-| `clickMenuBarItem: item ${itemId} not found` | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L85) |
+| &#96;clickMenuBarItem: item $&#123;itemId&#125; not found&#96; | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L85) |
 | 'destroyMenuBar: already destroyed' | [packages/desktop/src/semantics/menu-bar.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/menu-bar.ts#L96) |
 | 'dismissNotification: notification not displayed' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L110) |
 | 'scheduleNotification: notificationId must not be empty' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L52) |
 | 'scheduleNotification: title must not be empty' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L54) |
 | 'scheduleNotification: scheduledAtMs must be non-negative' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L55) |
 | 'displayNotification: not scheduled' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L78) |
-| 'displayNotification: displayedAtMs must be >= scheduledAtMs' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L80) |
+| 'displayNotification: displayedAtMs must be &gt;= scheduledAtMs' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L80) |
 | 'invokeNotificationAction: notification not displayed' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L95) |
 | 'invokeNotificationAction: actionId must not be empty' | [packages/desktop/src/semantics/notification.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/notification.ts#L97) |
 | 'stopScreenRecording: already stopped' | [packages/desktop/src/semantics/screen-recording.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/screen-recording.ts#L100) |
@@ -120,7 +120,7 @@ Tauri command の payload は文字列として扱われます。command handler
 | 'stopScreenRecording: recording not started' | [packages/desktop/src/semantics/screen-recording.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/screen-recording.ts#L98) |
 | 'startTauriApp: appName must not be empty' | [packages/desktop/src/semantics/tauri.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L38) |
 | 'registerTauriCommand: commandName must not be empty' | [packages/desktop/src/semantics/tauri.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L51) |
-| `invokeTauriCommand: ${input.commandName} not registered` | [packages/desktop/src/semantics/tauri.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L65) |
+| &#96;invokeTauriCommand: $&#123;input.commandName&#125; not registered&#96; | [packages/desktop/src/semantics/tauri.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L65) |
 | 'emitTauriEvent: eventName must not be empty' | [packages/desktop/src/semantics/tauri.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L80) |
 | 'closeTauriWindow: windowLabel must not be empty' | [packages/desktop/src/semantics/tauri.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tauri.ts#L91) |
 | 'createTrayIcon: trayId must not be empty' | [packages/desktop/src/semantics/tray-icon.ts](https://github.com/cardene777/kiwa/blob/main/packages/desktop/src/semantics/tray-icon.ts#L44) |

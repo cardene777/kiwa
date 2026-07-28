@@ -25,37 +25,37 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rbac: role hierarchy cycle detected at "${name}"` | [packages/security/src/authorization.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L43) |
+| &#96;rbac: role hierarchy cycle detected at "$&#123;name&#125;"&#96; | [packages/security/src/authorization.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/authorization.ts#L43) |
 | "csp: strict-dynamic requires at least one nonce or hash in script-src (otherwise the whole policy has no effect)" | [packages/security/src/csp.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/csp.ts#L146) |
-| 'sliding-window: windowMs must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L147) |
-| 'sliding-window: maxRequests must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L150) |
-| 'distributed: shards must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L196) |
+| 'sliding-window: windowMs must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L147) |
+| 'sliding-window: maxRequests must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L150) |
+| 'distributed: shards must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L196) |
 | 'client-id: ip missing' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L244) |
 | 'client-id: userId missing' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L247) |
 | 'client-id: apiKey missing' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L250) |
-| 'token-bucket: capacity must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L38) |
-| 'token-bucket: refillPerMs must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L41) |
-| 'leaky-bucket: capacity must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L92) |
-| 'leaky-bucket: drainPerMs must be > 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L95) |
-| `hsts: maxAgeSec must be >= 0 (got ${hsts.maxAgeSec})` | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L106) |
-| 'hsts: preload requires includeSubDomains + maxAgeSec >= 31536000 (1 year) per Chrome policy' | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L109) |
+| 'token-bucket: capacity must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L38) |
+| 'token-bucket: refillPerMs must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L41) |
+| 'leaky-bucket: capacity must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L92) |
+| 'leaky-bucket: drainPerMs must be &gt; 0' | [packages/security/src/rate-limit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/rate-limit.ts#L95) |
+| &#96;hsts: maxAgeSec must be &gt;= 0 (got $&#123;hsts.maxAgeSec&#125;)&#96; | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L106) |
+| 'hsts: preload requires includeSubDomains + maxAgeSec &gt;= 31536000 (1 year) per Chrome policy' | [packages/security/src/security-headers.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/security-headers.ts#L109) |
 | 'applyNetworkPolicy: pod security must be enforced first' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L107) |
 | 'applyNetworkPolicy: podSelector must not be empty' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L110) |
 | 'decideAdmission: network policy must be applied first' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L127) |
 | 'startK8sSession: sessionId must not be empty' | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L61) |
-| `enforcePodSecurity: session is ${session.state}` | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L78) |
-| 'deriveKey: salt must be >= 8 bytes' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L107) |
-| 'deriveKey: iterations must be >= 1' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L110) |
-| 'deriveKey: password-based KDF requires >= 10000 iterations' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L113) |
+| &#96;enforcePodSecurity: session is $&#123;session.state&#125;&#96; | [packages/security/src/semantics/container-k8s.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/container-k8s.ts#L78) |
+| 'deriveKey: salt must be &gt;= 8 bytes' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L107) |
+| 'deriveKey: iterations must be &gt;= 1' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L110) |
+| 'deriveKey: password-based KDF requires &gt;= 10000 iterations' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L113) |
 | 'wrapEnvelope: cek and kek must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L129) |
 | 'rotateKey: oldKeyId and newKeyId must differ' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L144) |
 | 'rotateKey: key ids must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L147) |
 | 'signWithHsm: digest must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L163) |
 | 'signWithHsm: keyId must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L166) |
-| 'encapsulatePq: ML-KEM public key must be >= 800 bytes' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L181) |
+| 'encapsulatePq: ML-KEM public key must be &gt;= 800 bytes' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L181) |
 | 'startCryptoSession: sessionId must not be empty' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L78) |
 | 'sealAead: lengths must be non-negative' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L91) |
-| 'sealAead: plaintext > 64MB not supported by mock' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L94) |
+| 'sealAead: plaintext &gt; 64MB not supported by mock' | [packages/security/src/semantics/crypto-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/crypto-advanced.ts#L94) |
 | 'classifySeverity: playbook must be triggered first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L108) |
 | 'classifySeverity: affectedUsers must be non-negative' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L111) |
 | 'escalate: severity must be classified first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L135) |
@@ -64,27 +64,27 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 | 'captureForensics: escalation must complete first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L157) |
 | 'captureForensics: artifact sizes must be non-negative' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L160) |
 | 'recordPostMortem: forensics must be captured first' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L179) |
-| 'recordPostMortem: rootCause must be >= 10 chars' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L182) |
-| 'recordPostMortem: must have >= 1 action item' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L185) |
+| 'recordPostMortem: rootCause must be &gt;= 10 chars' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L182) |
+| 'recordPostMortem: must have &gt;= 1 action item' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L185) |
 | 'startIncidentSession: sessionId must not be empty' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L71) |
-| `triggerPlaybook: session is ${session.state}, must be idle` | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L89) |
+| &#96;triggerPlaybook: session is $&#123;session.state&#125;, must be idle&#96; | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L89) |
 | 'triggerPlaybook: playbookId must not be empty' | [packages/security/src/semantics/incident-response.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/incident-response.ts#L92) |
-| `verifyOcsp: session is ${session.state}, need handshake / pin first` | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L113) |
-| `checkCtLog: session is ${session.state}, must have handshake first` | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L128) |
+| &#96;verifyOcsp: session is $&#123;session.state&#125;, need handshake / pin first&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L113) |
+| &#96;checkCtLog: session is $&#123;session.state&#125;, must have handshake first&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L128) |
 | 'checkCtLog: minSctRequired must be non-negative' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L131) |
 | 'startMtlsSession: sessionId must not be empty' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L59) |
-| `completeHandshake: session is ${session.state}, cannot handshake` | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L75) |
+| &#96;completeHandshake: session is $&#123;session.state&#125;, cannot handshake&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L75) |
 | 'completeHandshake: only TLS 1.2 / 1.3 supported' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L78) |
-| `verifyPin: session is ${session.state}, must have completed handshake` | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L90) |
+| &#96;verifyPin: session is $&#123;session.state&#125;, must have completed handshake&#96; | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L90) |
 | 'verifyPin: expectedPins must not be empty' | [packages/security/src/semantics/mtls.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/mtls.ts#L93) |
 | 'sealEvents: no structured events to seal' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L106) |
 | 'sealEvents: 0 structured events, cannot seal empty batch' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L109) |
 | 'applyRetention: events must be sealed first' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L127) |
 | 'applyRetention: retention days must be non-negative' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L130) |
 | 'correlate: retention must be applied first' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L148) |
-| 'correlate: rule must require >= 1 event id' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L151) |
+| 'correlate: rule must require &gt;= 1 event id' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L151) |
 | 'startSiemAuditSession: sessionId must not be empty' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L63) |
-| `structureEvent: session is ${session.state}, cannot structure` | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L80) |
+| &#96;structureEvent: session is $&#123;session.state&#125;, cannot structure&#96; | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L80) |
 | 'structureEvent: actor / action / target must not be empty' | [packages/security/src/semantics/siem-audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/siem-audit.ts#L83) |
 | 'matchReproducibleBuild: SLSA level must be verified first' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L111) |
 | 'matchReproducibleBuild: build hashes must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L114) |
@@ -95,24 +95,24 @@ rate limit は Token Bucket、Leaky Bucket、Sliding Window、Distributed Rate L
 | 'verifyAttestation: trustRootFingerprint must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L155) |
 | 'verifyAttestation: at least one valid signature required' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L158) |
 | 'startSupplyChainSession: sessionId must not be empty' | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L67) |
-| `verifySlsaLevel: session is ${session.state}` | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L83) |
+| &#96;verifySlsaLevel: session is $&#123;session.state&#125;&#96; | [packages/security/src/semantics/supply-chain.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/supply-chain.ts#L83) |
 | 'enforceTrustedTypes: at least one policy name required' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L100) |
 | 'applyPermissionsPolicy: trusted types must be enforced first' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L115) |
 | 'applyPermissionsPolicy: at least one feature required' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L118) |
 | 'enforceCrossOriginIsolation: permissions policy must be applied first' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L133) |
 | 'startWvsSession: sessionId must not be empty' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L62) |
-| `verifySri: session is ${session.state}` | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L74) |
+| &#96;verifySri: session is $&#123;session.state&#125;&#96; | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L74) |
 | 'verifySri: integrity and computedHash must not be empty' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L77) |
 | 'verifySri: integrity must start with sha256- / sha384- / sha512-' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L80) |
 | 'enforceTrustedTypes: SRI must be verified first' | [packages/security/src/semantics/web-vitals-security.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/web-vitals-security.ts#L97) |
 | 'requestJit: risk must be scored first' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L122) |
 | 'requestJit: ttlSeconds must be 1..3600' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L125) |
-| 'requestJit: justification must be >= 10 chars' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L128) |
+| 'requestJit: justification must be &gt;= 10 chars' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L128) |
 | 'enforceMicroSegment: JIT must be granted first' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L150) |
 | 'startZeroTrustSession: sessionId must not be empty' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L58) |
-| `evaluatePosture: session is ${session.state}, must be idle` | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L75) |
+| &#96;evaluatePosture: session is $&#123;session.state&#125;, must be idle&#96; | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L75) |
 | 'scoreRisk: posture must be evaluated first' | [packages/security/src/semantics/zero-trust.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/semantics/zero-trust.ts#L99) |
-| `dread: factor out of range (${v}); must be 1..10` | [packages/security/src/threat-model.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L126) |
+| &#96;dread: factor out of range ($&#123;v&#125;); must be 1..10&#96; | [packages/security/src/threat-model.ts](https://github.com/cardene777/kiwa/blob/main/packages/security/src/threat-model.ts#L126) |
 
 ## API 契約
 

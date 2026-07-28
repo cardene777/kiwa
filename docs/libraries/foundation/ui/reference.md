@@ -52,18 +52,18 @@ helper ごとに container、wrapper、element の型と操作が異なります
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupAngularComponentEnv requires "@testing-library/angular". Run `pnpm add -D @testing-library/angular @angular/core @angular/platform-browser-dynamic zone.js`.' | [packages/ui/src/angular.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L56) |
-| `setupComponentEnv: playwright engine "${browserName}" not available` | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L102) |
-| 'setupComponentEnv({ mode: "browser" }) requires "@playwright/test" or "playwright". Run `pnpm add -D @playwright/test`.' | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L75) |
-| 'setupComponentEnv({ mode: "browser" }) requires "react-dom" to be installed.' | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L89) |
-| 'setupLitComponentEnv requires "@open-wc/testing-helpers". Run `pnpm add -D @open-wc/testing-helpers lit`.' | [packages/ui/src/lit.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L38) |
-| 'setupQwikComponentEnv requires "@noma.to/qwik-testing-library". Run `pnpm add -D @noma.to/qwik-testing-library @builder.io/qwik`.' | [packages/ui/src/qwik.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L46) |
-| 'setupComponentEnv requires "@testing-library/react" to be installed. Run `pnpm add -D @testing-library/react`.' | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L30) |
-| 'setupComponentEnv({ mode: "interaction" }) requires "@testing-library/user-event". Run `pnpm add -D @testing-library/user-event`.' | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L40) |
-| `setupComponentEnv: unknown mode "${String(opts.mode)}"` | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L95) |
-| 'setupSolidComponentEnv requires "@solidjs/testing-library". Run `pnpm add -D @solidjs/testing-library solid-js`.' | [packages/ui/src/solid.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L39) |
-| 'setupSvelteComponentEnv requires "@testing-library/svelte". Run `pnpm add -D @testing-library/svelte svelte`.' | [packages/ui/src/svelte.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L36) |
-| 'setupVueComponentEnv requires "@vue/test-utils". Run `pnpm add -D @vue/test-utils vue`.' | [packages/ui/src/vue.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L47) |
+| 'setupAngularComponentEnv requires "@testing-library/angular". Run &#96;pnpm add -D @testing-library/angular @angular/core @angular/platform-browser-dynamic zone.js&#96;.' | [packages/ui/src/angular.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L56) |
+| &#96;setupComponentEnv: playwright engine "$&#123;browserName&#125;" not available&#96; | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L102) |
+| 'setupComponentEnv(&#123; mode: "browser" &#125;) requires "@playwright/test" or "playwright". Run &#96;pnpm add -D @playwright/test&#96;.' | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L75) |
+| 'setupComponentEnv(&#123; mode: "browser" &#125;) requires "react-dom" to be installed.' | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L89) |
+| 'setupLitComponentEnv requires "@open-wc/testing-helpers". Run &#96;pnpm add -D @open-wc/testing-helpers lit&#96;.' | [packages/ui/src/lit.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L38) |
+| 'setupQwikComponentEnv requires "@noma.to/qwik-testing-library". Run &#96;pnpm add -D @noma.to/qwik-testing-library @builder.io/qwik&#96;.' | [packages/ui/src/qwik.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L46) |
+| &#96;setupComponentEnv: unknown mode "$&#123;String(opts.mode)&#125;"&#96; | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L115) |
+| 'setupComponentEnv requires "@testing-library/react" to be installed. Run &#96;pnpm add -D @testing-library/react&#96;.' | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L30) |
+| 'setupComponentEnv(&#123; mode: "interaction" &#125;) requires "@testing-library/user-event". Run &#96;pnpm add -D @testing-library/user-event&#96;.' | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L40) |
+| 'setupSolidComponentEnv requires "@solidjs/testing-library". Run &#96;pnpm add -D @solidjs/testing-library solid-js&#96;.' | [packages/ui/src/solid.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L39) |
+| 'setupSvelteComponentEnv requires "@testing-library/svelte". Run &#96;pnpm add -D @testing-library/svelte svelte&#96;.' | [packages/ui/src/svelte.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L36) |
+| 'setupVueComponentEnv requires "@vue/test-utils". Run &#96;pnpm add -D @vue/test-utils vue&#96;.' | [packages/ui/src/vue.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L47) |
 
 ## API 契約
 

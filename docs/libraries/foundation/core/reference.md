@@ -65,7 +65,7 @@ const pool = await createPool({
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `createPool: size must be a positive integer, got ${opts.size}` | [packages/core/src/pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L17) |
+| &#96;createPool: size must be a positive integer, got $&#123;opts.size&#125;&#96; | [packages/core/src/pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L17) |
 
 ## API 契約
 

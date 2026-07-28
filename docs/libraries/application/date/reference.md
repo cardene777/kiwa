@@ -27,8 +27,8 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `parseDate: invalid input "${str}"` | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L54) |
-| `parseDate: invalid input "${str}"` | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L58) |
+| &#96;parseDate: invalid input "$&#123;str&#125;"&#96; | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L54) |
+| &#96;parseDate: invalid input "$&#123;str&#125;"&#96; | [packages/date/src/format.ts](https://github.com/cardene777/kiwa/blob/main/packages/date/src/format.ts#L58) |
 
 ## API 契約
 

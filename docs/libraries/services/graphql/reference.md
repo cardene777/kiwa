@@ -29,14 +29,14 @@ retry、batch、idempotency、observability、circuit breaker の API は server
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'expected {' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L41) |
+| 'expected &#123;' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L41) |
 | 'unterminated selection set' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L50) |
-| `unexpected token at position 0 near "${source.slice(0, 20)}"` | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L56) |
+| &#96;unexpected token at position 0 near "$&#123;source.slice(0, 20)&#125;"&#96; | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L56) |
 | 'unterminated arguments' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L66) |
-| `subscribeSubscription requires a subscription operation, got ${parsed.type}` | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L26) |
+| &#96;subscribeSubscription requires a subscription operation, got $&#123;parsed.type&#125;&#96; | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L26) |
 | 'no Subscription resolvers registered' | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L30) |
 | 'subscription requires at least 1 selection' | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L33) |
-| `no subscription resolver for ${rootSel.name}` | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L35) |
+| &#96;no subscription resolver for $&#123;rootSel.name&#125;&#96; | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L35) |
 
 ## API 契約
 

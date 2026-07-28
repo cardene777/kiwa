@@ -60,8 +60,8 @@ expect(history.rolledBack).toHaveLength(1);
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `cyclic dependency detected at ${id}` | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L47) |
-| `unknown migration referenced: ${id}` | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L49) |
+| &#96;cyclic dependency detected at $&#123;id&#125;&#96; | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L47) |
+| &#96;unknown migration referenced: $&#123;id&#125;&#96; | [packages/migration/src/dryrun.ts](https://github.com/cardene777/kiwa/blob/main/packages/migration/src/dryrun.ts#L49) |
 
 ## API 契約
 

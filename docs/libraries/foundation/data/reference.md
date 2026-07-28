@@ -36,9 +36,9 @@ consumerのackはentryを完了にします。nackまたはackなしは再queue�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `createFakeClock.schedule: intervalMs must be > 0, got ${intervalMs}` | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L17) |
-| `createFakeClock.advanceMs: ms must be >= 0, got ${ms}` | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L30) |
-| `setupQueueEnv: mode must be "mock" or "live", got ${String(opts.mode)}` | [packages/data/src/queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L133) |
+| &#96;createFakeClock.schedule: intervalMs must be &gt; 0, got $&#123;intervalMs&#125;&#96; | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L17) |
+| &#96;createFakeClock.advanceMs: ms must be &gt;= 0, got $&#123;ms&#125;&#96; | [packages/data/src/fake-clock.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/fake-clock.ts#L30) |
+| &#96;setupQueueEnv: mode must be "mock" or "live", got $&#123;String(opts.mode)&#125;&#96; | [packages/data/src/queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/data/src/queue.ts#L133) |
 
 ## API 契約
 

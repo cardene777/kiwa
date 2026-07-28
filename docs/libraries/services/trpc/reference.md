@@ -38,7 +38,7 @@ procedure の `type` と handler を指定します。router の global middlewa
 | 送出する message | 発生箇所 |
 | --- | --- |
 | 'circuit breaker open' | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L111) |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L92) |
+| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L92) |
 
 ## API 契約
 

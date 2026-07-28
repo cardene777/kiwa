@@ -27,10 +27,10 @@ AES 256 は 32 byte、AES 128 は 16 byte の key だけを受け付けます。
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `invalid key length for ${mode}: expected ${expected} bytes, got ${key.length}` | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L22) |
+| &#96;invalid key length for $&#123;mode&#125;: expected $&#123;expected&#125; bytes, got $&#123;key.length&#125;&#96; | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L22) |
 | 'authTag required for GCM decryption' | [packages/crypto/src/aes.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/aes.ts#L42) |
-| `unsupported algorithm: ${algorithm}` | [packages/crypto/src/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L53) |
-| `unsupported key type: ${type}` | [packages/crypto/src/keypair.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L35) |
+| &#96;unsupported algorithm: $&#123;algorithm&#125;&#96; | [packages/crypto/src/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/jwt.ts#L53) |
+| &#96;unsupported key type: $&#123;type&#125;&#96; | [packages/crypto/src/keypair.ts](https://github.com/cardene777/kiwa/blob/main/packages/crypto/src/keypair.ts#L35) |
 
 ## API 契約
 

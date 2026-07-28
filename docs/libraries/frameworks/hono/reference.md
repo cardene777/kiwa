@@ -27,7 +27,7 @@ KV は get、put、delete、metadata、expiration、prefix list を in-memory �
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `missing param "${key}" for path segment "${seg}"` | [packages/hono/src/rpc.ts](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L85) |
+| &#96;missing param "$&#123;key&#125;" for path segment "$&#123;seg&#125;"&#96; | [packages/hono/src/rpc.ts](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L85) |
 
 ## API 契約
 

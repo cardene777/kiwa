@@ -38,7 +38,7 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'runAxe requires "axe-core" to be installed. Run `pnpm add -D axe-core`.' | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L20) |
+| 'runAxe requires "axe-core" to be installed. Run &#96;pnpm add -D axe-core&#96;.' | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L20) |
 | 'runAxe: no context and no global document (jsdom env required).' | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L29) |
 | report.summary | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L64) |
 | 'ssrHydration layer requires a jsdom-like global document (vitest env=jsdom).' | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L312) |

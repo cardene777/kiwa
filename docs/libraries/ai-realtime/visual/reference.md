@@ -47,10 +47,10 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'comparePngBuffers requires "pixelmatch". Run `pnpm add -D pixelmatch`.' | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L28) |
-| 'comparePngBuffers requires "pngjs". Run `pnpm add -D pngjs`.' | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L37) |
-| `comparePngBuffers: size mismatch ${a.width}x${a.height} vs ${b.width}x${b.height}. Resize before comparing.` | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L50) |
-| `Visual diff exceeded threshold: ${result.diffPixels} pixels (${(result.diffRatio * 100).toFixed(2)}%).` | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L81) |
+| 'comparePngBuffers requires "pixelmatch". Run &#96;pnpm add -D pixelmatch&#96;.' | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L28) |
+| 'comparePngBuffers requires "pngjs". Run &#96;pnpm add -D pngjs&#96;.' | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L37) |
+| &#96;comparePngBuffers: size mismatch $&#123;a.width&#125;x$&#123;a.height&#125; vs $&#123;b.width&#125;x$&#123;b.height&#125;. Resize before comparing.&#96; | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L50) |
+| &#96;Visual diff exceeded threshold: $&#123;result.diffPixels&#125; pixels ($&#123;(result.diffRatio &#42; 100).toFixed(2)&#125;%).&#96; | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L81) |
 
 ## API 契約
 

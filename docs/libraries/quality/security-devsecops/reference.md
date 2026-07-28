@@ -23,9 +23,9 @@ orchestratorが返すreportは値です。mock runにもreal-mode runにも外�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `real driver requested but KIWA_SECURITY_MODE!=='real'; call skipped for ${spec.cliName}` | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L45) |
-| `${spec.cliName} URL env (${String(spec.urlEnvKey)}) not set; real driver unavailable` | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L50) |
-| `detectSastFinding: session is ${session.state}` | [packages/security-devsecops/src/semantics/sast.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L53) |
+| &#96;real driver requested but KIWA&#95;SECURITY&#95;MODE!=='real'; call skipped for $&#123;spec.cliName&#125;&#96; | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L45) |
+| &#96;$&#123;spec.cliName&#125; URL env ($&#123;String(spec.urlEnvKey)&#125;) not set; real driver unavailable&#96; | [packages/security-devsecops/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/adapters/real-driver.ts#L50) |
+| &#96;detectSastFinding: session is $&#123;session.state&#125;&#96; | [packages/security-devsecops/src/semantics/sast.ts](https://github.com/cardene777/kiwa/blob/main/packages/security-devsecops/src/semantics/sast.ts#L53) |
 
 ## API 契約
 

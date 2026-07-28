@@ -58,8 +58,8 @@ const snapshot = {
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `layout regression detected (${result.regressions.length} issues):\n${summary}` | [packages/design-check/src/layout-regression.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L130) |
-| `design spec conformance failed (${result.divergences.length} divergences):\n${summary}` | [packages/design-check/src/spec-conformance.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L106) |
+| &#96;layout regression detected ($&#123;result.regressions.length&#125; issues):&#92;n$&#123;summary&#125;&#96; | [packages/design-check/src/layout-regression.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L130) |
+| &#96;design spec conformance failed ($&#123;result.divergences.length&#125; divergences):&#92;n$&#123;summary&#125;&#96; | [packages/design-check/src/spec-conformance.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L106) |
 
 ## API 契約
 

@@ -50,9 +50,9 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L57) |
+| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L57) |
 | 'circuit breaker open' | [packages/workflow/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/resilience.ts#L72) |
-| `workflow "${name}" requires at least one step` | [packages/workflow/src/steps.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L23) |
+| &#96;workflow "$&#123;name&#125;" requires at least one step&#96; | [packages/workflow/src/steps.ts](https://github.com/cardene777/kiwa/blob/main/packages/workflow/src/steps.ts#L23) |
 
 ## API 契約
 

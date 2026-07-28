@@ -31,7 +31,7 @@ Tower traceはenteredとexitedを返します。handlerを省略した場合は 
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L57) |
+| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L57) |
 | 'circuit breaker open' | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L72) |
 
 ## API 契約

@@ -42,9 +42,9 @@ WebRTC、WebTransport、HTTP 3、QUIC、Media over QUIC、WebCodecs、音声 str
 | 送出する message | 発生箇所 |
 | --- | --- |
 | '0-RTT is not enabled for this connection' | [packages/realtime/src/semantics/quic-multiplex.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/quic-multiplex.ts#L154) |
-| `data channel not open (state=${state})` | [packages/realtime/src/semantics/webrtc-data-channel.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L122) |
-| `bi stream not open (state=${state})` | [packages/realtime/src/semantics/webtransport-bi.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L102) |
-| `uni stream not open (state=${state})` | [packages/realtime/src/semantics/webtransport-uni.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L95) |
+| &#96;data channel not open (state=$&#123;state&#125;)&#96; | [packages/realtime/src/semantics/webrtc-data-channel.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webrtc-data-channel.ts#L122) |
+| &#96;bi stream not open (state=$&#123;state&#125;)&#96; | [packages/realtime/src/semantics/webtransport-bi.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-bi.ts#L102) |
+| &#96;uni stream not open (state=$&#123;state&#125;)&#96; | [packages/realtime/src/semantics/webtransport-uni.ts](https://github.com/cardene777/kiwa/blob/main/packages/realtime/src/semantics/webtransport-uni.ts#L95) |
 
 ## API 契約
 

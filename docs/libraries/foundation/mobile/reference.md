@@ -55,28 +55,28 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `mobile real driver requested for ${axis} but KIWA_MOBILE_MODE!=='real'` | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L56) |
-| `mobile ${axis} URL env (${String(envKey)}) not set; real driver unavailable` | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L63) |
-| `invokeMobileCli(${inv.command}): KIWA_MOBILE_MODE must be 'real'` | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L73) |
-| `invokeMobileCli(${inv.command}): args exceeds max 32 (${inv.args.length})` | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L78) |
-| `splitCommand: unable to derive executable from ${command}` | [packages/mobile/src/adapters/spawn-executor.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L59) |
+| &#96;mobile real driver requested for $&#123;axis&#125; but KIWA&#95;MOBILE&#95;MODE!=='real'&#96; | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L56) |
+| &#96;mobile $&#123;axis&#125; URL env ($&#123;String(envKey)&#125;) not set; real driver unavailable&#96; | [packages/mobile/src/adapters/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/real-driver.ts#L63) |
+| &#96;invokeMobileCli($&#123;inv.command&#125;): KIWA&#95;MOBILE&#95;MODE must be 'real'&#96; | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L73) |
+| &#96;invokeMobileCli($&#123;inv.command&#125;): args exceeds max 32 ($&#123;inv.args.length&#125;)&#96; | [packages/mobile/src/adapters/spawn-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-driver.ts#L78) |
+| &#96;splitCommand: unable to derive executable from $&#123;command&#125;&#96; | [packages/mobile/src/adapters/spawn-executor.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/adapters/spawn-executor.ts#L59) |
 | 'initAsyncStorage: storeId must not be empty' | [packages/mobile/src/semantics/async-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L37) |
 | 'setAsyncStorageItem: key must not be empty' | [packages/mobile/src/semantics/async-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/async-storage.ts#L52) |
 | 'initCodegen: packageName must not be empty' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L40) |
 | 'loadCodegenSchema: schemaHash must not be empty' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L55) |
-| `generateSpec: session is ${session.state}` | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L66) |
-| 'generateSpec: specCount must be > 0' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L68) |
+| &#96;generateSpec: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L66) |
+| 'generateSpec: specCount must be &gt; 0' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L68) |
 | 'emitCodegenType: filePath must not be empty' | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L77) |
-| `completeCodegenBuild: session is ${session.state}` | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L88) |
+| &#96;completeCodegenBuild: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/codegen.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/codegen.ts#L88) |
 | 'loadExpoBuildConfig: appSlug must not be empty' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L44) |
 | 'loadExpoBuildConfig: configHash must not be empty' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L47) |
 | 'resolveDeepLink: build config must be loaded first' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L67) |
 | 'receivePushNotification: build config must be loaded first' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L84) |
 | 'completeExpoBuild: build config must be loaded first' | [packages/mobile/src/semantics/expo.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/expo.ts#L99) |
 | 'initFabric: rootId must not be empty' | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L37) |
-| `commitShadowTree: session is ${session.state}` | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L62) |
-| 'commitShadowTree: nodeCount must be >= 0' | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L64) |
-| `completeFabricMount: session is ${session.state}` | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L81) |
+| &#96;commitShadowTree: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L62) |
+| 'commitShadowTree: nodeCount must be &gt;= 0' | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L64) |
+| &#96;completeFabricMount: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/fabric.ts#L81) |
 | 'startMetroBundle: bundleId must not be empty' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L42) |
 | 'resolveMetroModule: bundle must be started first' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L61) |
 | 'applyMetroHmr: bundle must be started first' | [packages/mobile/src/semantics/metro.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/metro.ts#L76) |
@@ -87,26 +87,26 @@
 | 'openNavigationModal: modalId must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L66) |
 | 'navigateDeepLink: url must not be empty' | [packages/mobile/src/semantics/navigation.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/navigation.ts#L73) |
 | 'initNewArchitecture: appName must not be empty' | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L40) |
-| `startNewArchInit: session is ${session.state}` | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L53) |
-| `enableConcurrentReact: session is ${session.state}` | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L63) |
-| `bridgeLegacyModule: session is ${session.state}` | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L75) |
+| &#96;startNewArchInit: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L53) |
+| &#96;enableConcurrentReact: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L63) |
+| &#96;bridgeLegacyModule: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L75) |
 | 'bridgeLegacyModule: moduleName must not be empty' | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L77) |
-| `markNewArchReady: session is ${session.state}` | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L90) |
+| &#96;markNewArchReady: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/new-architecture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/new-architecture.ts#L90) |
 | 'mountReactNativeComponent: componentId must not be empty' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L42) |
 | 'invokeNativeModule: component is unmounted' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L61) |
 | 'recognizeGesture: component is unmounted' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L76) |
 | 'unmountReactNativeComponent: already unmounted' | [packages/mobile/src/semantics/react-native.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/react-native.ts#L90) |
 | 'initReanimated: animationId must not be empty' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L37) |
 | 'executeWorklet: workletName must not be empty' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L62) |
-| 'startReanimatedAnimation: durationMs must be >= 0' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L75) |
-| `completeReanimatedAnimation: session is ${session.state}` | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L85) |
+| 'startReanimatedAnimation: durationMs must be &gt;= 0' | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L75) |
+| &#96;completeReanimatedAnimation: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/reanimated.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/reanimated.ts#L85) |
 | 'initSecureStorage: vaultId must not be empty' | [packages/mobile/src/semantics/secure-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L38) |
 | 'storeCredential: key must not be empty' | [packages/mobile/src/semantics/secure-storage.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/secure-storage.ts#L53) |
 | 'initTurboModules: moduleName must not be empty' | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L41) |
 | 'registerTurboSpec: methods must not be empty' | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L57) |
-| `bindJsiRuntime: session is ${session.state}` | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L68) |
-| `invokeTurboMethod: session is ${session.state}, jsi not bound` | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L80) |
-| `invokeTurboMethod: ${methodName} not in registered methods` | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L83) |
+| &#96;bindJsiRuntime: session is $&#123;session.state&#125;&#96; | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L68) |
+| &#96;invokeTurboMethod: session is $&#123;session.state&#125;, jsi not bound&#96; | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L80) |
+| &#96;invokeTurboMethod: $&#123;methodName&#125; not in registered methods&#96; | [packages/mobile/src/semantics/turbo-modules.ts](https://github.com/cardene777/kiwa/blob/main/packages/mobile/src/semantics/turbo-modules.ts#L83) |
 
 ## API 契約
 

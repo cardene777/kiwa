@@ -23,7 +23,7 @@ client は実メール provider、DNS、inbox に接続しません。provider �
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `template not found: ${templateId}` | [packages/email/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L95) |
+| &#96;template not found: $&#123;templateId&#125;&#96; | [packages/email/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/email/src/client.ts#L95) |
 
 ## API 契約
 

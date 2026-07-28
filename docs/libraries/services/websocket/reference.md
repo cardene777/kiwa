@@ -51,9 +51,9 @@ in-process WebSocket server、client、message、binary frame、reconnect、room
 | 送出する message | 発生箇所 |
 | --- | --- |
 | 'frame too short' | [packages/websocket/src/binary.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/binary.ts#L25) |
-| `client ${id} is closed` | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L39) |
-| `client ${id} not attached to server` | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L40) |
-| `client not found: ${clientId}` | [packages/websocket/src/message.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L25) |
+| &#96;client $&#123;id&#125; is closed&#96; | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L39) |
+| &#96;client $&#123;id&#125; not attached to server&#96; | [packages/websocket/src/client.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/client.ts#L40) |
+| &#96;client not found: $&#123;clientId&#125;&#96; | [packages/websocket/src/message.ts](https://github.com/cardene777/kiwa/blob/main/packages/websocket/src/message.ts#L25) |
 
 ## API 契約
 

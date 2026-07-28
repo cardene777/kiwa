@@ -31,7 +31,7 @@ generic dispatch は一致時に `{ matched: true }`、不一致時に `{ matche
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L57) |
+| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L57) |
 | 'circuit breaker open' | [packages/ruby/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/ruby/src/resilience.ts#L72) |
 
 ## API 契約

@@ -29,12 +29,12 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `slot ${input.slot}: no default.tsx fallback supplied` | [packages/nextjs/src/invoke-parallel-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L101) |
-| `expected ${provider} in ${expected} mode but resolved ${resolved.mode} (${resolved.reason})` | [packages/nextjs/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L49) |
+| &#96;slot $&#123;input.slot&#125;: no default.tsx fallback supplied&#96; | [packages/nextjs/src/invoke-parallel-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/invoke-parallel-routes.ts#L101) |
+| &#96;expected $&#123;provider&#125; in $&#123;expected&#125; mode but resolved $&#123;resolved.mode&#125; ($&#123;resolved.reason&#125;)&#96; | [packages/nextjs/src/real-driver.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/real-driver.ts#L49) |
 | 'startConcurrentTransition: transitionId must not be empty' | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L50) |
-| `markTransitionPending: session is ${session.state}` | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L69) |
-| `interruptTransition: session is ${session.state}` | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L82) |
-| `commitTransition: session is ${session.state}` | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L96) |
+| &#96;markTransitionPending: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L69) |
+| &#96;interruptTransition: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L82) |
+| &#96;commitTransition: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/concurrent-transitions.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/concurrent-transitions.ts#L96) |
 | 'startInterceptionRoutes: routeId must not be empty' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L20) |
 | 'openInterceptedModal: modalRoute must not be empty' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L61) |
 | 'openInterceptedModal: an interception match is required first' | [packages/nextjs/src/semantics/interception-routes.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/interception-routes.ts#L64) |
@@ -43,15 +43,15 @@
 | 'navigateSlot: from and to must start with /' | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L83) |
 | 'slot must not be empty' | [packages/nextjs/src/semantics/parallel-routes-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/parallel-routes-advanced.ts#L92) |
 | 'startPartialPrerendering: routeId must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L20) |
-| `renderStaticShell: session is ${session.state}, not idle` | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L38) |
+| &#96;renderStaticShell: session is $&#123;session.state&#125;, not idle&#96; | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L38) |
 | 'renderStaticShell: html must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L41) |
 | 'openDynamicHole: static shell must be rendered first' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L53) |
 | 'openDynamicHole: holeId must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L56) |
-| `flushStreamingBoundary: ${input.holeId} is not an open dynamic hole` | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L72) |
+| &#96;flushStreamingBoundary: $&#123;input.holeId&#125; is not an open dynamic hole&#96; | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L72) |
 | 'flushStreamingBoundary: html must not be empty' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L75) |
 | 'completePartialPrerendering: static shell was not rendered' | [packages/nextjs/src/semantics/partial-prerendering.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/partial-prerendering.ts#L90) |
 | 'startServerActionAdvanced: actionId must not be empty' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L26) |
-| `submitFormAction: session is ${session.state}, not idle` | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L45) |
+| &#96;submitFormAction: session is $&#123;session.state&#125;, not idle&#96; | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L45) |
 | 'revalidateActionPath: form action was not submitted' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L60) |
 | 'revalidateActionPath: path must start with /' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L63) |
 | 'revalidateActionTag: form action was not submitted' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L75) |
@@ -59,9 +59,9 @@
 | 'redirectAction: form action was not submitted' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L90) |
 | 'redirectAction: url must not be empty' | [packages/nextjs/src/semantics/server-action-advanced.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/server-action-advanced.ts#L93) |
 | 'startTurbopackHmr: sessionId must not be empty' | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L44) |
-| `findHmrBoundary: session is ${session.state}` | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L73) |
-| `applyHmrPatch: session is ${session.state}` | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L84) |
-| `completeFastRefresh: session is ${session.state}` | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L96) |
+| &#96;findHmrBoundary: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L73) |
+| &#96;applyHmrPatch: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L84) |
+| &#96;completeFastRefresh: session is $&#123;session.state&#125;&#96; | [packages/nextjs/src/semantics/turbopack-hmr.ts](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/src/semantics/turbopack-hmr.ts#L96) |
 
 ## API 契約
 

@@ -31,13 +31,13 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `Camera permission not granted (status=${permission})` | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L57) |
-| `Camera permission not granted (status=${permission})` | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L70) |
+| &#96;Camera permission not granted (status=$&#123;permission&#125;)&#96; | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L57) |
+| &#96;Camera permission not granted (status=$&#123;permission&#125;)&#96; | [packages/expo/src/camera.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/camera.ts#L70) |
 | 'circuit-open' | [packages/expo/src/extensions.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/extensions.ts#L183) |
-| `File not found: ${uri}` | [packages/expo/src/file-system.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L41) |
-| `SecureStore setItemAsync failed for key: ${key}` | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L24) |
-| `SecureStore getItemAsync failed for key: ${key}` | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L28) |
-| `SecureStore deleteItemAsync failed for key: ${key}` | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L32) |
+| &#96;File not found: $&#123;uri&#125;&#96; | [packages/expo/src/file-system.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/file-system.ts#L41) |
+| &#96;SecureStore setItemAsync failed for key: $&#123;key&#125;&#96; | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L24) |
+| &#96;SecureStore getItemAsync failed for key: $&#123;key&#125;&#96; | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L28) |
+| &#96;SecureStore deleteItemAsync failed for key: $&#123;key&#125;&#96; | [packages/expo/src/secure-store.ts](https://github.com/cardene777/kiwa/blob/main/packages/expo/src/secure-store.ts#L32) |
 
 ## API 契約
 

@@ -21,17 +21,17 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `unknown assistant id: ${assistantId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L101) |
-| `unknown thread id: ${threadId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L141) |
-| `unknown thread id: ${params.threadId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L167) |
-| `unknown assistant id: ${params.assistantId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L170) |
-| `assistant ${params.assistantId} has no handler registered — call registerHandler() first` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L173) |
-| `unknown run id: ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L205) |
-| `pollUntilFinal exceeded ${maxAttempts} attempts for run ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L227) |
-| `unknown run id: ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L242) |
-| `run ${runId} is not requires_action (current: ${run.status}), cannot submit tool outputs` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L245) |
-| `unknown run id: ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L271) |
-| `run ${run.id} references missing thread or handler` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L303) |
+| &#96;unknown assistant id: $&#123;assistantId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L101) |
+| &#96;unknown thread id: $&#123;threadId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L141) |
+| &#96;unknown thread id: $&#123;params.threadId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L167) |
+| &#96;unknown assistant id: $&#123;params.assistantId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L170) |
+| &#96;assistant $&#123;params.assistantId&#125; has no handler registered — call registerHandler() first&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L173) |
+| &#96;unknown run id: $&#123;runId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L205) |
+| &#96;pollUntilFinal exceeded $&#123;maxAttempts&#125; attempts for run $&#123;runId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L227) |
+| &#96;unknown run id: $&#123;runId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L242) |
+| &#96;run $&#123;runId&#125; is not requires&#95;action (current: $&#123;run.status&#125;), cannot submit tool outputs&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L245) |
+| &#96;unknown run id: $&#123;runId&#125;&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L271) |
+| &#96;run $&#123;run.id&#125; references missing thread or handler&#96; | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L303) |
 
 ## API 契約
 

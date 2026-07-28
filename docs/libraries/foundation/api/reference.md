@@ -64,12 +64,12 @@ object body は JSON に変換されます。string、`ArrayBuffer`、`Uint8Arra
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupApiServer({ mode: "mock" \| "hybrid" }) requires "msw" to be installed. Run `pnpm add -D msw`.' | [packages/api/src/msw-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L27) |
-| 'setupApiServer({ mode: "mock" }) requires mockHandlers' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L20) |
-| 'setupApiServer({ mode: "live" }) requires app' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L38) |
-| 'setupApiServer({ mode: "hybrid" }) requires app' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L53) |
-| 'setupApiServer({ mode: "hybrid" }) requires mockHandlers' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L56) |
-| `setupApiServer: unknown mode "${String(opts.mode)}"` | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L74) |
+| 'setupApiServer(&#123; mode: "mock" &#124; "hybrid" &#125;) requires "msw" to be installed. Run &#96;pnpm add -D msw&#96;.' | [packages/api/src/msw-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L27) |
+| 'setupApiServer(&#123; mode: "mock" &#125;) requires mockHandlers' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L20) |
+| 'setupApiServer(&#123; mode: "live" &#125;) requires app' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L38) |
+| 'setupApiServer(&#123; mode: "hybrid" &#125;) requires app' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L53) |
+| 'setupApiServer(&#123; mode: "hybrid" &#125;) requires mockHandlers' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L56) |
+| &#96;setupApiServer: unknown mode "$&#123;String(opts.mode)&#125;"&#96; | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L74) |
 
 ## API 契約
 

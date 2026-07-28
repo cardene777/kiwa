@@ -31,13 +31,13 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `measureConcurrent: concurrency must be >= 1, got ${input.concurrency}` | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L37) |
-| `measureConcurrent: iterationsPerWorker must be >= 1, got ${input.iterationsPerWorker}` | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L40) |
-| `measureConcurrent: warmup must be >= 0, got ${warmup}` | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L46) |
-| `measure: iterations must be >= 1, got ${input.iterations}` | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L15) |
-| `measure: warmup must be >= 0, got ${warmupCount}` | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L24) |
-| `measureMemory: iterations must be >= 1, got ${input.iterations}` | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L30) |
-| `Could not resolve repo root from ${start}` | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L325) |
+| &#96;measureConcurrent: concurrency must be &gt;= 1, got $&#123;input.concurrency&#125;&#96; | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L37) |
+| &#96;measureConcurrent: iterationsPerWorker must be &gt;= 1, got $&#123;input.iterationsPerWorker&#125;&#96; | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L40) |
+| &#96;measureConcurrent: warmup must be &gt;= 0, got $&#123;warmup&#125;&#96; | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L46) |
+| &#96;measure: iterations must be &gt;= 1, got $&#123;input.iterations&#125;&#96; | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L15) |
+| &#96;measure: warmup must be &gt;= 0, got $&#123;warmupCount&#125;&#96; | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L24) |
+| &#96;measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;&#96; | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L30) |
+| &#96;Could not resolve repo root from $&#123;start&#125;&#96; | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L442) |
 
 ## API 契約
 
@@ -55,7 +55,7 @@ export declare function buildMeasureResult(name: string, iterations: number, war
 
 #### `captureEnv`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L61) `packages/perf-harness/src/baseline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L76) `packages/perf-harness/src/baseline.ts`
 
 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。
 
@@ -65,7 +65,7 @@ export declare function captureEnv(): BaselineEnv;
 
 #### `defaultBaselinePath`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L56) `packages/perf-harness/src/baseline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L71) `packages/perf-harness/src/baseline.ts`
 
 ```ts
 export declare function defaultBaselinePath(moduleName: string): string;
@@ -83,7 +83,7 @@ export declare function detectRegression(input: RegressionInput): RegressionResu
 
 #### `detectRegressionStrict`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L58) `packages/perf-harness/src/regression.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L64) `packages/perf-harness/src/regression.ts`
 
 strict mode — CI 99% + threshold 10%。 false negative を最小化。 見逃し (regressed を stable と判定) が致命的な release gate 経路で使う。
 
@@ -110,9 +110,19 @@ export declare function emitPerfReport(result: MeasureResult, opts?: {
 export declare function evaluatePerfGate(input: PerfGateInput): PerfGateResult;
 ```
 
+#### `isComparableEnv`
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L96) `packages/perf-harness/src/baseline.ts`
+
+baseline を比較対象として使えるかを判定する。 `gitSha` や `hostname` の違いは測定値の意味を変えないが、GC を呼べるかどうかは memory 測定の前提そのものを変える。前提が違う baseline と比べると、実装が 変わっていなくても回帰と判定されてしまう。
+
+```ts
+export declare function isComparableEnv(baseline: BaselineEnv, current: BaselineEnv): boolean;
+```
+
 #### `loadBaseline`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L16) `packages/perf-harness/src/baseline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L17) `packages/perf-harness/src/baseline.ts`
 
 Baseline を load して現行環境と envelope の env を比較、 mismatch field を検出する。 legacy schema (単一 MeasureResult) は自動 upgrade して読む。
 
@@ -146,7 +156,7 @@ export declare function measureMemory(input: MemoryInput): Promise<MemorySample>
 
 #### `resolveKiwaRepoRoot`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L316) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L433) `packages/perf-harness/src/three-layer.ts`
 
 resolveKiwaRepoRoot — walk upward from `start` until finding a package.json whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to resolve the report path regardless of vitest cwd.
 
@@ -156,7 +166,7 @@ export declare function resolveKiwaRepoRoot(start: string): string;
 
 #### `runPerf3Layer`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L102) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L152) `packages/perf-harness/src/three-layer.ts`
 
 ```ts
 export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
@@ -172,7 +182,7 @@ export declare function runPerf3LayerLive(input: RunPerf3LayerLiveInput): Promis
 
 #### `runPerf3LayerStrict`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L298) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L415) `packages/perf-harness/src/three-layer.ts`
 
 runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + Welch |t|&gt;3 + delta 10%。 test 漏れゼロを狙う fail-fast mode。 defaults ... - serialIterations: 400 (v0.2 200) - serialWarmup: 10 (v0.2 5) - concurrency: 20 (v0.2 10) - iterationsPerWorker: 100 (v0.2 50) - memoryIterations: 400 (v0.2 200) regression 判定は detectRegressionStrict 経由 (|t|&gt;3 + delta 10%)。
 
@@ -182,7 +192,7 @@ export declare function runPerf3LayerStrict(input: RunPerf3LayerInput): Promise<
 
 #### `saveBaseline`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L34) `packages/perf-harness/src/baseline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L39) `packages/perf-harness/src/baseline.ts`
 
 単一結果 baseline を保存する compat 経路。 内部で envelope に wrap して保存する。 `moduleName` は複数 op を 1 baseline に集約する時 (three-layer) に使う default key。
 
@@ -194,7 +204,7 @@ export declare function saveBaseline(path: string, result: MeasureResult, opts?:
 
 #### `saveBaselineEnvelope`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L48) `packages/perf-harness/src/baseline.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L53) `packages/perf-harness/src/baseline.ts`
 
 Envelope を直接保存する経路。 three-layer 等で複数 op を集約する場合に使う。
 
@@ -340,7 +350,7 @@ export interface MemorySample {
 
 #### `OpOutcome`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L85) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L117) `packages/perf-harness/src/three-layer.ts`
 
 ```ts
 export interface OpOutcome {
@@ -357,7 +367,7 @@ export interface OpOutcome {
 
 #### `PerfGateInput`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L156) `packages/perf-harness/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L174) `packages/perf-harness/src/types.ts`
 
 ```ts
 export interface PerfGateInput {
@@ -374,7 +384,7 @@ export interface PerfGateInput {
 
 #### `PerfGateResult`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L167) `packages/perf-harness/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L185) `packages/perf-harness/src/types.ts`
 
 ```ts
 export interface PerfGateResult {
@@ -386,7 +396,7 @@ export interface PerfGateResult {
 
 #### `PerfOpSpec`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L29) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L35) `packages/perf-harness/src/three-layer.ts`
 
 ```ts
 export interface PerfOpSpec {
@@ -400,6 +410,14 @@ export interface PerfOpSpec {
      * Optional override for concurrent cap. Default = 2 × serial cap per SSOT.
      */
     concurrentP95CapMs?: number;
+    /**
+     * 回帰と判定する p95 差の下限 (ms、default 0.5)。
+     *
+     * 既定値は測定の揺らぎを除くためのものだが、高頻度 op には緩すぎる。
+     * 0.10ms → 0.59ms は 490% の悪化でも差が 0.49ms なので既定では stable になる。
+     * そうした op は実測の noise floor に合わせて小さくする。
+     */
+    regressionMinDeltaMs?: number;
     /**
      * Optional override for memory arrayBuffers cap.
      * Default = 100 KB across 200 iterations.
@@ -424,12 +442,19 @@ export interface RegressionInput {
     bootstrapIterations?: number;
     /** 信頼区間 (default 0.95)。 */
     confidenceLevel?: number;
+    /**
+     * p95 の差がこの ms 未満なら回帰と判定しない (default 0.5)。
+     *
+     * 相対比だけで判定すると値が小さいほど厳しくなる。 0.03ms から 0.04ms への
+     * 変化はサンプルが安定していれば「有意な 33% 悪化」になるが、 実害はない。
+     */
+    minDeltaMs?: number;
 }
 ```
 
 #### `RegressionResult`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L102) `packages/perf-harness/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L109) `packages/perf-harness/src/types.ts`
 
 ```ts
 export interface RegressionResult {
@@ -449,7 +474,7 @@ export interface RegressionResult {
 
 #### `RunPerf3LayerInput`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L47) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L61) `packages/perf-harness/src/three-layer.ts`
 
 ```ts
 export interface RunPerf3LayerInput {
@@ -488,6 +513,24 @@ export interface RunPerf3LayerInput {
      * as the threshold SSOT. Default: '../../quality/perf-thresholds'.
      */
     thresholdDocLink?: string;
+    /**
+     * 今回測っていない op を baseline から削除する (default false)。
+     *
+     * op 名を別処理へ付け替えたときに無関係な過去値と比較しないための掃除だが、
+     * 常に有効だと絞り込み実行で op が一度欠けるだけで過去値が消える。
+     * 次の完全実行では再 seed されて直前の退行を見逃すので、suite 全体を
+     * 回す呼出だけが明示的に有効化する。
+     */
+    pruneStaleBaselineOps?: boolean;
+    /**
+     * GC を呼べない測定を memory gate の失敗として扱う (default false)。
+     *
+     * `--expose-gc` 無しの測定は解放される一時使用まで拾うため上限との比較が
+     * 成立しない。 ただし既定で失敗にすると、 GC 無しでも動いていた既存の
+     * 呼出が一斉に落ちる。 kiwa 内部の suite のように前提を固定できる呼出だけが
+     * 有効化する。
+     */
+    requireGc?: boolean;
 }
 ```
 
@@ -525,7 +568,7 @@ export interface RunPerf3LayerLiveResult {
 
 #### `RunPerf3LayerResult`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L96) `packages/perf-harness/src/three-layer.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L128) `packages/perf-harness/src/three-layer.ts`
 
 ```ts
 export interface RunPerf3LayerResult {
@@ -537,7 +580,7 @@ export interface RunPerf3LayerResult {
 
 #### `Thresholds`
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L149) `packages/perf-harness/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L167) `packages/perf-harness/src/types.ts`
 
 ```ts
 export interface Thresholds {

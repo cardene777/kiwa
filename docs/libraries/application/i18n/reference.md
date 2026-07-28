@@ -34,7 +34,7 @@ message は string、plural form の object、入れ子 object を使えます�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L57) |
+| &#96;rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded&#96; | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L57) |
 | 'circuit breaker open' | [packages/i18n/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/i18n/src/resilience.ts#L72) |
 
 ## API 契約

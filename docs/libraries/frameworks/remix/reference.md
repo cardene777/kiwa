@@ -27,7 +27,7 @@ request と context は呼び出しごとに作られます。`undefined` loader
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| LOADER_UNDEFINED_RETURN_MESSAGE | [packages/remix/src/invoke-route.ts](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L127) |
+| LOADER&#95;UNDEFINED&#95;RETURN&#95;MESSAGE | [packages/remix/src/invoke-route.ts](https://github.com/cardene777/kiwa/blob/main/packages/remix/src/invoke-route.ts#L127) |
 
 ## API 契約
 
