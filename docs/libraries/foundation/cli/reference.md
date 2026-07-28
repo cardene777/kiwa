@@ -77,8 +77,8 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 | <code v-pre>kiwa run --watch: no package.json found at $&#123;opts.cwd&#125;</code> | [packages/cli/src/commands/run-watch.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/run-watch.ts#L54) |
 | <code v-pre>spec-to-test: input not found: $&#123;inPath&#125;</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L307) |
 | <code v-pre>spec-to-test: unsupported layer "$&#123;layer&#125;". Supported: api, ui, data, cli.</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L319) |
-| <code v-pre>not found</code> | [packages/cli/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts#L163) |
-| <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/index.ts#L48) |
+| <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L104) |
+| <code v-pre>not found</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L219) |
 
 ## API 契約
 
@@ -86,5 +86,6 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 
 | 宣言元 | 値 | 型 |
 | --- | --- | --- |
+| [runCli.ts](./api/runCli) | 4 | 2 |
 
 <!-- kiwa-public-api:end -->
