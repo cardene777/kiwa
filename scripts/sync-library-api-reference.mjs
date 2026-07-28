@@ -8,10 +8,21 @@
 // 宣言として成立しないものが並ぶ。emitter を通せば ambient declaration として
 // 正しい形が得られる。
 
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+
+import {
+  DocsSyncError,
+  fenceFor,
+  linkUrl,
+  prepareWritePath,
+  replaceManagedBlock,
+  resolveReadPath,
+  tableCell,
+  writeFileAtomic,
+} from './docs-sync-safety.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const librariesRoot = join(repositoryRoot, 'docs', 'libraries');
@@ -20,8 +31,14 @@ const scope = '@kiwa-lab';
 const start = '<!-- kiwa-public-api:start -->';
 const end = '<!-- kiwa-public-api:end -->';
 
+function repoRelativePosix(path) {
+  // Windows の separator は 1 文字。2 文字を探していたので、生成される link が
+  // その環境でだけ壊れていた。
+  return relative(repositoryRoot, path).replaceAll('\\', '/');
+}
+
 function sourceUrl(path, line) {
-  return `https://github.com/cardene777/kiwa/blob/main/${relative(repositoryRoot, path).replaceAll('\\\\', '/')}#L${line}`;
+  return linkUrl(`https://github.com/cardene777/kiwa/blob/main/${repoRelativePosix(path)}#L${line}`);
 }
 
 function sourceLine(sourceFile, node) {
@@ -241,14 +258,9 @@ function documentation(checker, symbol) {
     .trim();
 }
 
-// 表のセルに入れる値は 1 行に畳む。複数行の文字列連結や条件式をそのまま
-// 入れると、改行のところで表が途切れて以降が本文として描画される。
-function tableCell(text) {
-  return text
-    .replaceAll(/\s+/g, ' ')
-    .replaceAll('|', '\\|')
-    .trim();
-}
+// 表のセルに入れる値の畳み込みと escape は docs-sync-safety の tableCell に集約した。
+// 以前は縦棒だけを escape していたので、throw の引数に書かれた raw HTML や Vue の
+// 波括弧が、HTML を有効にした VitePress でそのまま active markup として働いた。
 
 function errorDiagnostics(program, library) {
   const errors = [];
@@ -265,7 +277,7 @@ function errorDiagnostics(program, library) {
       ) {
         errors.push({
           message: tableCell(node.expression.arguments[0].getText(sourceFile)),
-          path: relative(repositoryRoot, sourceFile.fileName).replaceAll('\\\\', '/'),
+          path: repoRelativePosix(sourceFile.fileName),
           url: sourceUrl(sourceFile.fileName, sourceLine(sourceFile, node)),
         });
       }
@@ -313,7 +325,10 @@ function contractEntry(contract) {
     : '公開 entry point から解決しています。';
   const note = contract.note ? `\n\n${contract.note}` : '';
   const description = contract.description ? `\n\n${contract.description}` : '';
-  return `#### \`${contract.name}\`\n\n${source}${note}${description}\n\n\`\`\`ts\n${contract.code}\n\`\`\``;
+  // 固定長の fence は、閉じ fence を含む文字列 literal を持つ宣言で block を途中で
+  // 閉じ、以降の宣言を本文として描画させる。中身より 1 つ長い fence で開く。
+  const fence = fenceFor(contract.code);
+  return `#### \`${contract.name}\`\n\n${source}${note}${description}\n\n${fence}ts\n${contract.code}\n${fence}`;
 }
 
 function group(title, contracts) {
@@ -328,13 +343,19 @@ function section(library, contracts, diagnostics) {
   return `${start}\n${diagnostics ? `${diagnostics}\n\n` : ''}## API 契約\n\nこの section は [公開 entry point](${source}) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。\n\n${group('値', values)}\n\n${group('型', types)}\n${end}`;
 }
 
-function replace(content, replacement) {
-  const from = content.indexOf(start);
-  const to = content.indexOf(end);
-  if (from !== -1 && to !== -1 && to > from) {
-    return `${content.slice(0, from)}${replacement}${content.slice(to + end.length)}`;
-  }
-  return `${content.replace(/\s*$/, '')}\n\n${replacement}\n`;
+/**
+ * 管理ブロックを 1 回だけ差し替える。marker が 1 組そろっていない reference.md は
+ * DocsSyncError で止める。以前は最初の start marker と最初の end marker を無条件に
+ * 置換していたので、正規 marker より前に stray marker があるとその間の手書き本文が消えた。
+ */
+function replace(content, replacement, label) {
+  return replaceManagedBlock(content, {
+    startMarker: start,
+    endMarker: end,
+    block: replacement,
+    insert: (body, block) => `${body.replace(/\s*$/, '')}\n\n${block}\n`,
+    label,
+  });
 }
 
 const targets = collectTargets();
@@ -357,12 +378,30 @@ if (unresolved.length > 0) {
   process.exit(1);
 }
 
-let updated = 0;
-for (const target of targets) {
-  const contracts = contractsFrom(program, emitted, target.library, target.entry);
-  const diagnostics = errorDiagnostics(program, target.library);
-  const content = readFileSync(target.reference, 'utf8');
-  writeFileSync(target.reference, replace(content, section(target.library, contracts, diagnostics)));
-  updated += 1;
+function main() {
+  let updated = 0;
+  for (const target of targets) {
+    const label = `${target.library} reference.md`;
+    const contracts = contractsFrom(program, emitted, target.library, target.entry);
+    const diagnostics = errorDiagnostics(program, target.library);
+    // 読み書きとも canonical path で許可 root の内側を確かめる。どちらの API も
+    // symlink を追うので、checkout に link を 1 本置くだけで repo の外を読み書きできる。
+    const content = readFileSync(resolveReadPath(target.reference, repositoryRoot, label), 'utf8');
+    const updatedContent = replace(content, section(target.library, contracts, diagnostics), label);
+    writeFileAtomic(prepareWritePath(target.reference, repositoryRoot, label), updatedContent);
+    updated += 1;
+  }
+  console.log(`Synchronized detailed API contracts for ${updated} library references.`);
 }
-console.log(`Synchronized detailed API contracts for ${updated} library references.`);
+
+try {
+  main();
+} catch (error) {
+  // 壊れた marker と repo の外を指す path は、直すまで生成を続けない。
+  if (error instanceof DocsSyncError) {
+    console.error(error.message);
+    process.exitCode = 1;
+  } else {
+    throw error;
+  }
+}
