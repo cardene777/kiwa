@@ -475,7 +475,8 @@ function unitPage(library, unit, contracts, sourcePath) {
     '',
     `[ソース](${source}) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。`,
     '',
-    `[リファレンスの目次へ戻る](./)`,
+    // `./` は api/ を指す。目次は 1 つ上の reference.md にある。
+    `[リファレンスの目次へ戻る](../reference.md)`,
     '',
     group('値', values),
     '',

@@ -8,7 +8,7 @@ title: "@kiwa-lab/queue cloudflare-queues__wrangler-cloudflare-queues の API �
 
 [ソース](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。
 
-[リファレンスの目次へ戻る](./)
+[リファレンスの目次へ戻る](../reference.md)
 
 ### 値
 

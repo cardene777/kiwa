@@ -8,6 +8,9 @@ import { defineConfig } from 'vitepress';
 import definition from '../libraries.json' with { type: 'json' };
 // 組み立ては共有 module に置く。test も同じ関数を呼ぶので、書き直した側がずれる余地がない。
 import { buildLibrarySidebar } from './library-sidebar.mjs';
+// 生成物かどうかの判定は削除経路と共有する。片方だけ判定が変わると、
+// 消される file と索引から外れる file がずれる。
+import { isGeneratedApiPageSource } from '../../scripts/docs-api-pages.mjs';
 
 const librarySidebar = buildLibrarySidebar(definition);
 
@@ -69,8 +72,11 @@ function stripGeneratedApi(source: string) {
       continue;
     }
     if (fence !== null) continue;
-    if (from === -1 && line.includes(start)) from = offsets[index] + line.indexOf(start);
-    else if (from !== -1 && to === -1 && line.includes(end)) to = offsets[index] + line.indexOf(end);
+    // 目印は独立した行として置かれる。説明文や inline code で触れただけの行を
+    // 境界と見なすと、その間にある本文が索引から落ちる。
+    const trimmed = line.trim();
+    if (from === -1 && trimmed === start) from = offsets[index] + line.indexOf(start);
+    else if (from !== -1 && to === -1 && trimmed === end) to = offsets[index] + line.indexOf(end);
   }
   if (from === -1 || to === -1) return source;
 
@@ -87,8 +93,10 @@ function stripGeneratedApi(source: string) {
 function searchSource(source: string, relativePath: string) {
   // 生成した API 契約のページ。宣言元ごとに分けてあり、中身は型宣言そのもの。
   // 索引は見出しごとに 1 件を作るので、公開名の数だけ件数が積み上がる。
-  const isGeneratedApiPage = /^libraries\/[^/]+\/[^/]+\/api\//.test(relativePath);
-  if (isGeneratedApiPage || isExcludedFromSearch(relativePath)) {
+  //
+  // 場所ではなく中身の印で判定する。同じ directory に人が置いたページがあれば、
+  // そちらは本文ごと索引に載せる。削除経路と同じ判定を使う。
+  if (isGeneratedApiPageSource(source) || isExcludedFromSearch(relativePath)) {
     return pageTitle(source, relativePath);
   }
   return stripGeneratedApi(source);
@@ -104,6 +112,12 @@ function isExcludedFromSearch(relativePath: string) {
   return SEARCH_EXCLUDED.some(
     (prefix) => relativePath.startsWith(prefix) || relativePath.startsWith(`en/${prefix}`),
   );
+}
+
+/** frontmatter で検索から外すと指定しているか。縮約する前の source を見る。 */
+function excludedByFrontmatter(source: string) {
+  const frontmatter = source.match(/^---\n([\s\S]*?)\n---/);
+  return /^search:\s*false\s*$/m.test(frontmatter?.[1] ?? '');
 }
 
 /**
@@ -945,9 +959,11 @@ export default defineConfig({
         },
         // 索引に入れる前に本文を落とす。何をどこまで落とすかは searchSource が決める。
         async _render(src, env, md) {
-          const html = md.render(searchSource(src, env.relativePath ?? ''), env);
           // 独自の描画を渡すと、frontmatter による除外は自分で見る必要がある。
-          // frontmatter は描画を通した後に env へ入るので、判定は描画の後に置く。
+          // 本文を落とすと frontmatter も一緒に消えるので、縮約する前の source から読む。
+          if (excludedByFrontmatter(src)) return '';
+          const html = md.render(searchSource(src, env.relativePath ?? ''), env);
+          // 縮約しなかったページは env にも入るので、そちらでも見ておく。
           if (env.frontmatter?.search === false) return '';
           return html;
         },
