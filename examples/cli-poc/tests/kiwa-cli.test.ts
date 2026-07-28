@@ -12,7 +12,7 @@ import {
 const envs: CliTestEnv[] = [];
 const here = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = kiwa repo root
-const KIWA_CLI = resolve(here, '../../../..', 'packages/cli/dist/index.js');
+const KIWA_CLI = resolve(here, '../../../..', 'packages/cli/dist/bin.js');
 
 afterEach(async () => {
   while (envs.length > 0) {
