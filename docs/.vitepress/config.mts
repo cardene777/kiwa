@@ -26,8 +26,8 @@ const libraryPageItems = (slug: string, packageName: string) =>
 const exemptItemsIn = (category: string) =>
   exemptDocuments
     .filter((document) => document.category === category)
-    .map(({ name, sidebarText }) => ({
-      text: sidebarText,
+    .map(({ name, label }) => ({
+      text: label,
       collapsed: true,
       items: libraryPageItems(category, name),
     }));

@@ -36,7 +36,18 @@ function loadDefinition() {
     if (error instanceof DocsSyncError) throw error;
     throw new DocsSyncError(`${label}: cannot read the definition: ${error.message}`);
   }
-  for (const key of ['libraryCategories', 'exemptDocuments', 'standaloneCategory', 'requiredPages', 'packageScope']) {
+  // 正本として揃っているべき key。この検査 script が使わないもの (sidebar だけが読む
+  // `documentKinds` と `standaloneCategory`) も含める。欠けたまま build へ進むと、
+  // 見出しや link が消えた状態で公開されるため、読んだ時点で止める。
+  const required = [
+    'libraryCategories',
+    'exemptDocuments',
+    'standaloneCategory',
+    'documentKinds',
+    'requiredPages',
+    'packageScope',
+  ];
+  for (const key of required) {
     if (parsed[key] === undefined) throw new DocsSyncError(`${label}: ${key} is missing.`);
   }
   return parsed;
@@ -208,7 +219,7 @@ function main() {
 
   for (const [name, slug] of sidebar) {
     if (!packages.has(name)) {
-      problems.push(`${name}: listed in docs/libraries.mjs but has no package under packages/`);
+      problems.push(`${name}: listed in docs/libraries.json but has no package under packages/`);
       continue;
     }
     const actual = documents.get(name);
