@@ -3,7 +3,7 @@
 // sidebar と整合検査の両方がこの file を読むので、定義に矛盾があると両方が同時に
 // おかしくなる。突き合わせでは気付けない「定義の中だけで閉じた誤り」をここで押さえる。
 //
-//   node --test scripts/taxonomy.test.mjs
+//   node --test scripts/docs-libraries-definition.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -14,7 +14,7 @@ import {
   packageScope,
   requiredPages,
   standaloneCategory,
-} from '../docs/taxonomy.mjs';
+} from '../docs/libraries.mjs';
 
 test('every category has a slug, a label and at least one package', () => {
   for (const category of libraryCategories) {

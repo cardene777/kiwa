@@ -20,7 +20,7 @@ import {
   packageScope,
   requiredPages,
   standaloneCategory,
-} from '../docs/taxonomy.mjs';
+} from '../docs/libraries.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const packagesRoot = join(repositoryRoot, 'packages');
@@ -113,7 +113,7 @@ function libraryDocuments(problems) {
 }
 
 /**
- * 分類の定義。共有の正本 (docs/taxonomy.mjs) を読む。
+ * 分類の定義。共有の正本 (docs/libraries.mjs) を読む。
  *
  * 以前は sidebar の config を構文解析して配列を取り出していた。定義の書き方を変えると
  * 検査だけが壊れる関係だったので、両方が同じ file を import する形にした。
@@ -174,7 +174,7 @@ function main() {
       problems.push(`${name}: no library document under docs/libraries/<category>/${name}/`);
     }
     if (!sidebar.has(name)) {
-      problems.push(`${name}: missing from libraryCategories in docs/taxonomy.mjs`);
+      problems.push(`${name}: missing from libraryCategories in docs/libraries.mjs`);
     }
     if (!tests.has(name)) {
       problems.push(`${name}: no packages/${name}/tests/docs-library-${name}.test.ts`);
@@ -196,7 +196,7 @@ function main() {
 
   for (const [name, slug] of sidebar) {
     if (!packages.has(name)) {
-      problems.push(`${name}: listed in docs/taxonomy.mjs but has no package under packages/`);
+      problems.push(`${name}: listed in docs/libraries.mjs but has no package under packages/`);
       continue;
     }
     const actual = documents.get(name);

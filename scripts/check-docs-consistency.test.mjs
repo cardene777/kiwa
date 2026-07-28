@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 
-/** 共有の分類定義 (docs/taxonomy.mjs)。検査 script が読む形を再現する。 */
+/** 共有の分類定義 (docs/libraries.mjs)。検査 script が読む形を再現する。 */
 function taxonomySource(categories, exempt) {
   const stringify = (value) => JSON.stringify(value, null, 2);
   return [
@@ -135,7 +135,7 @@ function withFixture(layout, body) {
       (entry) => !overridden.has(`${entry.category}/${entry.name}`),
     ).map(({ name, category }) => ({ name, category, sidebarText: name }));
     mkdirSync(join(root, 'docs'), { recursive: true });
-    writeFileSync(join(root, 'docs', 'taxonomy.mjs'), taxonomySource(categories, exempt));
+    writeFileSync(join(root, 'docs', 'libraries.mjs'), taxonomySource(categories, exempt));
 
     // packages/ が空だと readdirSync が落ちる。全 entry が manifest なしの構成でも動くよう作る。
     mkdirSync(join(root, 'packages'), { recursive: true });
@@ -336,7 +336,7 @@ test('a library with documents in two categories fails and names both', () => {
 // 残って余分な定義を見逃す。
 test('a package listed under two categories in the definition fails', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    const taxonomyPath = join(root, 'docs', 'taxonomy.mjs');
+    const taxonomyPath = join(root, 'docs', 'libraries.mjs');
     const source = readFileSync(taxonomyPath, 'utf8');
     const categories = JSON.parse(
       source.match(/export const libraryCategories = ([\s\S]*?);\n/)[1],
@@ -381,7 +381,7 @@ test('an exempt document that moved to another category fails', () => {
 // `text: 'AI: リアルタイム'` のような値で壊れていた。import する形にして制約が消えた。
 test('a category label containing a colon is read correctly', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    const taxonomyPath = join(root, 'docs', 'taxonomy.mjs');
+    const taxonomyPath = join(root, 'docs', 'libraries.mjs');
     const source = readFileSync(taxonomyPath, 'utf8').replace('"foundation"', '"AI: realtime"');
     writeFileSync(taxonomyPath, source);
     const result = runCheck(root);
@@ -414,7 +414,7 @@ test('a directory without an entry in the definition fails', () => {
 // 共有定義そのものが読めない状態で、黙って空集合として通らないこと。
 test('an unreadable definition fails instead of passing silently', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    writeFileSync(join(root, 'docs', 'taxonomy.mjs'), 'export const libraryCategories = [\n');
+    writeFileSync(join(root, 'docs', 'libraries.mjs'), 'export const libraryCategories = [\n');
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
   });

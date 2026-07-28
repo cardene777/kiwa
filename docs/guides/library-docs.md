@@ -30,7 +30,7 @@ file 名と URL は英語のまま変えません。読者が見る言葉と、�
 | `how-to.md` | `/libraries/<分類>/<名前>/how-to` | 使い方 |
 | `reference.md` | `/libraries/<分類>/<名前>/reference` | リファレンス |
 
-呼び方の正本は `docs/taxonomy.mjs` の `documentKinds` です。
+呼び方の正本は `docs/libraries.mjs` の `documentKinds` です。
 sidebar はここから呼び方を読むので、表の右列を変えるとサイト全体に反映されます。
 本文で文書種別に言及するときも、同じ言葉を使います。
 
