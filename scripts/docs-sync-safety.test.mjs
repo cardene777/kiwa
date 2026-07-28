@@ -9,6 +9,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  renameSync,
   readdirSync,
   realpathSync,
   rmSync,
@@ -340,6 +341,27 @@ test('writeFileAtomic replaces a link at the target instead of writing through i
     assert.equal(readFileSync(outside, 'utf8'), 'original', 'the file outside is untouched');
     assert.equal(readFileSync(target, 'utf8'), 'new');
     assert.equal(lstatSync(target).isSymbolicLink(), false, 'the link was replaced by a file');
+  });
+});
+
+// 検証と書き込みの間に対象を差し替えられると、別の file を上書きすることになる。
+// 親 directory の照合だけでは、親が同じまま中身が変わる場合に気付けない。
+test('writeFileAtomic refuses a target replaced after it was checked', () => {
+  withTempDir((root) => {
+    const target = join(root, 'page.md');
+    writeFileSync(target, '生成物\n');
+    const verified = prepareWritePath(target, root, 'page.md');
+
+    // 同じ名前へ別の file を rename する (inode が変わる)。
+    const decoy = join(root, '.decoy');
+    writeFileSync(decoy, '手書きの内容\n');
+    renameSync(decoy, target);
+
+    assert.throws(
+      () => writeFileAtomic(verified, '新しい生成物\n'),
+      /was replaced after it was checked/,
+    );
+    assert.equal(readFileSync(target, 'utf8'), '手書きの内容\n');
   });
 });
 

@@ -28,6 +28,7 @@ import {
   deleteVerifiedPage,
   generatedApiPageMarker,
   isGeneratedApiPage,
+  isGeneratedApiPageSource,
   prepareDeletePath,
   staleApiPages,
 } from './docs-api-pages.mjs';
@@ -59,6 +60,55 @@ test('a generated page is recognised by its marker', () => {
     assert.equal(isGeneratedApiPage(generated), true);
     assert.equal(isGeneratedApiPage(handwritten), false);
     assert.equal(isGeneratedApiPage(join(apiDirectory, 'absent.md')), false);
+  });
+});
+
+// 印は frontmatter の直後に置く。どこかに含まれるだけで生成物と見なすと、
+// 手書きのページが説明や code block でこの文字列に触れただけで削除対象になる。
+test('the marker only counts at the top of the body', () => {
+  assert.equal(isGeneratedApiPageSource(`---\ntitle: "x"\n---\n\n${generatedApiPageMarker}\n\n本文\n`), true);
+  assert.equal(isGeneratedApiPageSource(`${generatedApiPageMarker}\n\n本文\n`), true);
+  // 説明文の中で印に触れただけ。
+  assert.equal(
+    isGeneratedApiPageSource(`# 手で書いた説明\n\n生成物には ${generatedApiPageMarker} が付きます。\n`),
+    false,
+  );
+  // code block の中に印がある。
+  assert.equal(
+    isGeneratedApiPageSource('# 説明\n\n```md\n' + generatedApiPageMarker + '\n```\n'),
+    false,
+  );
+});
+
+test('a hand written page that mentions the marker is not collected', () => {
+  withFixture(({ apiDirectory }) => {
+    const handwritten = join(apiDirectory, 'about-generation.md');
+    writeFileSync(handwritten, `# 生成の仕組み\n\n印は ${generatedApiPageMarker} です。\n`);
+    const problems = [];
+    assert.deepEqual(staleApiPages(apiDirectory, [], problems), []);
+    assert.equal(existsSync(handwritten), true);
+  });
+});
+
+// 親が同じまま対象 file だけを差し替えられると、親の照合では気付けない。
+test('a replaced target file is detected before deleting', () => {
+  withFixture(({ root, apiDirectory }) => {
+    const path = join(apiDirectory, 'gone.md');
+    writeGenerated(path);
+    const verified = prepareDeletePath(path, root, 'gone.md');
+
+    // 同じ名前へ別の file を rename する (inode が変わる)。
+    const decoy = join(apiDirectory, '.decoy');
+    writeFileSync(decoy, '手書きの内容\n');
+    renameSync(decoy, path);
+
+    const deleted = [];
+    assert.throws(
+      () => deleteVerifiedPage(verified, (target) => deleted.push(target)),
+      /was replaced before deleting/,
+    );
+    assert.deepEqual(deleted, []);
+    assert.equal(readFileSync(path, 'utf8'), '手書きの内容\n');
   });
 });
 

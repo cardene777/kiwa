@@ -18,13 +18,31 @@ import { DocsSyncError, insideRoot } from './docs-sync-safety.mjs';
  */
 export const generatedApiPageMarker = '<!-- kiwa-generated-api-page -->';
 
-/** その file が生成物か。読めない file は生成物でないものとして扱う。 */
+/**
+ * その file が生成物か。
+ *
+ * 印は frontmatter の直後に置く。file のどこかに含まれるだけで生成物と見なすと、
+ * 手書きのページが説明や code block でこの文字列に触れただけで削除対象になる。
+ * 位置まで含めて判定する。
+ *
+ * 読めない file は生成物でないものとして扱う。消さない側に倒す。
+ */
 export function isGeneratedApiPage(path) {
+  let source;
   try {
-    return readFileSync(path, 'utf8').includes(generatedApiPageMarker);
+    source = readFileSync(path, 'utf8');
   } catch {
     return false;
   }
+  return isGeneratedApiPageSource(source);
+}
+
+/** 中身が生成物の形をしているか。印の位置まで見る。 */
+export function isGeneratedApiPageSource(source) {
+  const withoutFrontmatter = source.startsWith('---\n')
+    ? source.slice(source.indexOf('\n---\n', 4) + '\n---\n'.length)
+    : source;
+  return withoutFrontmatter.trimStart().startsWith(generatedApiPageMarker);
 }
 
 /**
@@ -100,7 +118,14 @@ export function prepareDeletePath(path, root, label) {
   if (!stats.isFile()) {
     throw new DocsSyncError(`${label}: ${target} is not a regular file.`);
   }
-  return { path: target, directoryIdentity: directoryIdentity(directory, label), label };
+  return {
+    path: target,
+    directoryIdentity: directoryIdentity(directory, label),
+    // 対象そのものの実体も控える。親が変わらないまま中身だけ差し替えられると、
+    // 親の照合では気付けない。
+    fileIdentity: `${stats.dev}:${stats.ino}`,
+    label,
+  };
 }
 
 /**
@@ -117,6 +142,12 @@ export function deleteVerifiedPage(verified, unlink) {
   const directory = dirname(verified.path);
   if (directoryIdentity(directory, verified.label) !== verified.directoryIdentity) {
     throw new DocsSyncError(`${verified.label}: ${directory} was replaced before deleting.`);
+  }
+  // 対象そのものも見直す。親が同じまま中身を差し替えられると、別の file を消す。
+  const stats = lstatSync(verified.path, { throwIfNoEntry: false });
+  if (!stats) return;
+  if (`${stats.dev}:${stats.ino}` !== verified.fileIdentity) {
+    throw new DocsSyncError(`${verified.label}: ${verified.path} was replaced before deleting.`);
   }
   unlink(verified.path);
 }
