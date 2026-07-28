@@ -41,10 +41,31 @@ const SEARCH_EXCLUDED = [
 function stripGeneratedApi(source: string) {
   const start = '<!-- kiwa-public-api:start -->';
   const end = '<!-- kiwa-public-api:end -->';
-  const from = source.indexOf(start);
-  if (from === -1) return source;
-  const to = source.indexOf(end, from);
-  if (to === -1) return source;
+  // 目印は行として置かれる。生成した型宣言の中に同じ文字列があっても拾わないよう、
+  // code block の外にある行だけを見る。
+  const lines = source.split('\n');
+  let fence: string | null = null;
+  let from = -1;
+  let to = -1;
+  let offset = 0;
+  const offsets: number[] = [];
+  for (const line of lines) {
+    offsets.push(offset);
+    offset += line.length + 1;
+  }
+  for (const [index, line] of lines.entries()) {
+    const opened = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (opened) {
+      const run = opened[1];
+      if (fence === null) fence = run;
+      else if (run[0] === fence[0] && run.length >= fence.length) fence = null;
+      continue;
+    }
+    if (fence !== null) continue;
+    if (from === -1 && line.includes(start)) from = offsets[index] + line.indexOf(start);
+    else if (from !== -1 && to === -1 && line.includes(end)) to = offsets[index] + line.indexOf(end);
+  }
+  if (from === -1 || to === -1) return source;
 
   return `${source.slice(0, from)}${source.slice(to + end.length)}`;
 }
@@ -60,11 +81,39 @@ function searchSource(source: string, relativePath: string) {
   // 生成した API 契約のページ。宣言元ごとに分けてあり、中身は型宣言そのもの。
   // 索引は見出しごとに 1 件を作るので、公開名の数だけ件数が積み上がる。
   const isGeneratedApiPage = /^libraries\/[^/]+\/[^/]+\/api\//.test(relativePath);
-  if (isGeneratedApiPage || SEARCH_EXCLUDED.some((prefix) => relativePath.startsWith(prefix))) {
-    const title = source.split('\n').find((line) => /^#\s/.test(line));
-    return title ?? '';
+  if (isGeneratedApiPage || isExcludedFromSearch(relativePath)) {
+    return pageTitle(source, relativePath);
   }
   return stripGeneratedApi(source);
+}
+
+/**
+ * 索引から本文を落とす場所か。
+ *
+ * 英語の旧ページ群は locale ごとの写しも同じ扱いにする。`concepts/` を外して
+ * `en/concepts/` を残すと、外した理由 (日本語の索引に英語の全文を載せない) と食い違う。
+ */
+function isExcludedFromSearch(relativePath: string) {
+  return SEARCH_EXCLUDED.some(
+    (prefix) => relativePath.startsWith(prefix) || relativePath.startsWith(`en/${prefix}`),
+  );
+}
+
+/**
+ * ページを索引に載せるための題名。
+ *
+ * 見出しがあればそれを使う。無ければ frontmatter の題名から作る。
+ * どちらも無いページを空にすると索引から完全に消えて、名前でも辿れなくなる。
+ * その場合は path を題名にする。
+ */
+function pageTitle(source: string, relativePath: string) {
+  const heading = source.split('\n').find((line) => /^#\s/.test(line));
+  if (heading) return heading;
+  const frontmatter = source.match(/^---\n([\s\S]*?)\n---/);
+  const title = frontmatter?.[1].match(/^title:\s*(.+)$/m)?.[1]?.trim();
+  if (title) return `# ${title.replace(/^["']|["']$/g, '')}`;
+  // 見出しも題名も無いページ。空にすると索引から完全に消えるので、path から作る。
+  return `# ${relativePath.replace(/\.md$/, '')}`;
 }
 
 const englishFoundationSidebar = [

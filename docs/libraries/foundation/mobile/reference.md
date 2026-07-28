@@ -114,24 +114,24 @@
 
 | 宣言元 | 値 | 型 |
 | --- | --- | --- |
-| [adapters/fidelity-harness.ts](./api/adapters-fidelity-harness) | 2 | 1 |
-| [adapters/mock-factory.ts](./api/adapters-mock-factory) | 4 | 0 |
-| [adapters/real-driver.ts](./api/adapters-real-driver) | 2 | 2 |
-| [adapters/spawn-driver.ts](./api/adapters-spawn-driver) | 4 | 3 |
-| [adapters/spawn-executor.ts](./api/adapters-spawn-executor) | 2 | 3 |
-| [adapters/types.ts](./api/adapters-types) | 0 | 4 |
-| [semantics/async-storage.ts](./api/semantics-async-storage) | 5 | 2 |
-| [semantics/codegen.ts](./api/semantics-codegen) | 5 | 2 |
-| [semantics/expo.ts](./api/semantics-expo) | 4 | 2 |
-| [semantics/fabric.ts](./api/semantics-fabric) | 5 | 2 |
-| [semantics/fidelity.ts](./api/semantics-fidelity) | 2 | 2 |
-| [semantics/metro.ts](./api/semantics-metro) | 4 | 2 |
-| [semantics/navigation.ts](./api/semantics-navigation) | 5 | 2 |
-| [semantics/new-architecture.ts](./api/semantics-new-architecture) | 5 | 2 |
-| [semantics/react-native.ts](./api/semantics-react-native) | 4 | 2 |
-| [semantics/reanimated.ts](./api/semantics-reanimated) | 5 | 2 |
-| [semantics/secure-storage.ts](./api/semantics-secure-storage) | 5 | 2 |
-| [semantics/turbo-modules.ts](./api/semantics-turbo-modules) | 5 | 2 |
-| [semantics/types.ts](./api/semantics-types) | 1 | 4 |
+| [adapters/fidelity-harness.ts](./api/adapters__fidelity-harness) | 2 | 1 |
+| [adapters/mock-factory.ts](./api/adapters__mock-factory) | 4 | 0 |
+| [adapters/real-driver.ts](./api/adapters__real-driver) | 2 | 2 |
+| [adapters/spawn-driver.ts](./api/adapters__spawn-driver) | 4 | 3 |
+| [adapters/spawn-executor.ts](./api/adapters__spawn-executor) | 2 | 3 |
+| [adapters/types.ts](./api/adapters__types) | 0 | 4 |
+| [semantics/async-storage.ts](./api/semantics__async-storage) | 5 | 2 |
+| [semantics/codegen.ts](./api/semantics__codegen) | 5 | 2 |
+| [semantics/expo.ts](./api/semantics__expo) | 4 | 2 |
+| [semantics/fabric.ts](./api/semantics__fabric) | 5 | 2 |
+| [semantics/fidelity.ts](./api/semantics__fidelity) | 2 | 2 |
+| [semantics/metro.ts](./api/semantics__metro) | 4 | 2 |
+| [semantics/navigation.ts](./api/semantics__navigation) | 5 | 2 |
+| [semantics/new-architecture.ts](./api/semantics__new-architecture) | 5 | 2 |
+| [semantics/react-native.ts](./api/semantics__react-native) | 4 | 2 |
+| [semantics/reanimated.ts](./api/semantics__reanimated) | 5 | 2 |
+| [semantics/secure-storage.ts](./api/semantics__secure-storage) | 5 | 2 |
+| [semantics/turbo-modules.ts](./api/semantics__turbo-modules) | 5 | 2 |
+| [semantics/types.ts](./api/semantics__types) | 1 | 4 |
 
 <!-- kiwa-public-api:end -->

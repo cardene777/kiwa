@@ -2,6 +2,8 @@
 title: "@kiwa-lab/design-check spec-conformance の API 契約"
 ---
 
+<!-- kiwa-generated-api-page -->
+
 # <code v-pre>@kiwa-lab/design-check</code> <code v-pre>spec-conformance</code> の API 契約
 
 [ソース](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。

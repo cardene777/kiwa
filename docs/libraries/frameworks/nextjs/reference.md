@@ -74,14 +74,14 @@
 | [invoke-server-action.ts](./api/invoke-server-action) | 2 | 6 |
 | [real-driver.ts](./api/real-driver) | 3 | 2 |
 | [render-server-component.ts](./api/render-server-component) | 6 | 8 |
-| [semantics/concurrent-transitions.ts](./api/semantics-concurrent-transitions) | 4 | 2 |
-| [semantics/fidelity.ts](./api/semantics-fidelity) | 2 | 2 |
-| [semantics/interception-routes.ts](./api/semantics-interception-routes) | 5 | 3 |
-| [semantics/parallel-routes-advanced.ts](./api/semantics-parallel-routes-advanced) | 5 | 2 |
-| [semantics/partial-prerendering.ts](./api/semantics-partial-prerendering) | 5 | 2 |
-| [semantics/server-action-advanced.ts](./api/semantics-server-action-advanced) | 5 | 2 |
-| [semantics/turbopack-hmr.ts](./api/semantics-turbopack-hmr) | 5 | 2 |
-| [semantics/types.ts](./api/semantics-types) | 1 | 4 |
+| [semantics/concurrent-transitions.ts](./api/semantics__concurrent-transitions) | 4 | 2 |
+| [semantics/fidelity.ts](./api/semantics__fidelity) | 2 | 2 |
+| [semantics/interception-routes.ts](./api/semantics__interception-routes) | 5 | 3 |
+| [semantics/parallel-routes-advanced.ts](./api/semantics__parallel-routes-advanced) | 5 | 2 |
+| [semantics/partial-prerendering.ts](./api/semantics__partial-prerendering) | 5 | 2 |
+| [semantics/server-action-advanced.ts](./api/semantics__server-action-advanced) | 5 | 2 |
+| [semantics/turbopack-hmr.ts](./api/semantics__turbopack-hmr) | 5 | 2 |
+| [semantics/types.ts](./api/semantics__types) | 1 | 4 |
 | [setup-next-rsc-env.ts](./api/setup-next-rsc-env) | 2 | 4 |
 
 <!-- kiwa-public-api:end -->

@@ -2,6 +2,8 @@
 title: "@kiwa-lab/qwikcity invoke-route-loader の API 契約"
 ---
 
+<!-- kiwa-generated-api-page -->
+
 # <code v-pre>@kiwa-lab/qwikcity</code> <code v-pre>invoke-route-loader</code> の API 契約
 
 [ソース](https://github.com/cardene777/kiwa/blob/main/packages/qwikcity/src/invoke-route-loader.ts) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。

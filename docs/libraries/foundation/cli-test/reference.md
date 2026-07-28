@@ -56,7 +56,7 @@ state は `spawning`、`running`、`signaled`、`exited`、`cleaned` です。in
 | --- | --- | --- |
 | [expectations.ts](./api/expectations) | 3 | 0 |
 | [index.ts](./api/index) | 1 | 0 |
-| [semantics/cli-lifecycle-orchestrator.ts](./api/semantics-cli-lifecycle-orchestrator) | 2 | 4 |
+| [semantics/cli-lifecycle-orchestrator.ts](./api/semantics__cli-lifecycle-orchestrator) | 2 | 4 |
 | [setup-cli-env.ts](./api/setup-cli-env) | 1 | 0 |
 | [types.ts](./api/types) | 0 | 4 |
 

@@ -73,14 +73,14 @@ Playwright CT mock は `activeMounts` と `unmountAll` を提供します。loca
 | [index.ts](./api/index) | 1 | 0 |
 | [playwright-ct.ts](./api/playwright-ct) | 1 | 1 |
 | [real-driver.ts](./api/real-driver) | 3 | 2 |
-| [semantics/fidelity.ts](./api/semantics-fidelity) | 2 | 2 |
-| [semantics/form-action-advanced.ts](./api/semantics-form-action-advanced) | 6 | 2 |
-| [semantics/islands-architecture.ts](./api/semantics-islands-architecture) | 5 | 3 |
-| [semantics/react-19-actions.ts](./api/semantics-react-19-actions) | 3 | 2 |
-| [semantics/rsc-harness.ts](./api/semantics-rsc-harness) | 6 | 2 |
-| [semantics/streaming-ssr.ts](./api/semantics-streaming-ssr) | 5 | 2 |
-| [semantics/types.ts](./api/semantics-types) | 1 | 4 |
-| [semantics/view-transitions.ts](./api/semantics-view-transitions) | 5 | 2 |
+| [semantics/fidelity.ts](./api/semantics__fidelity) | 2 | 2 |
+| [semantics/form-action-advanced.ts](./api/semantics__form-action-advanced) | 6 | 2 |
+| [semantics/islands-architecture.ts](./api/semantics__islands-architecture) | 5 | 3 |
+| [semantics/react-19-actions.ts](./api/semantics__react-19-actions) | 3 | 2 |
+| [semantics/rsc-harness.ts](./api/semantics__rsc-harness) | 6 | 2 |
+| [semantics/streaming-ssr.ts](./api/semantics__streaming-ssr) | 5 | 2 |
+| [semantics/types.ts](./api/semantics__types) | 1 | 4 |
+| [semantics/view-transitions.ts](./api/semantics__view-transitions) | 5 | 2 |
 | [storybook.ts](./api/storybook) | 1 | 4 |
 | [types.ts](./api/types) | 0 | 16 |
 

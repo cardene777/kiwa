@@ -123,16 +123,16 @@ KV の `watch` は変更を待ち続ける watcher ではなく、呼び出し�
 | [nats.ts](./api/nats) | 8 | 14 |
 | [redpanda.ts](./api/redpanda) | 3 | 2 |
 | [schema-registry.ts](./api/schema-registry) | 3 | 4 |
-| [semantics/consumer-lag-telemetry.ts](./api/semantics-consumer-lag-telemetry) | 3 | 3 |
-| [semantics/exactly-once.ts](./api/semantics-exactly-once) | 3 | 3 |
-| [semantics/fidelity-harness.ts](./api/semantics-fidelity-harness) | 5 | 4 |
-| [semantics/kafka-consumer-group.ts](./api/semantics-kafka-consumer-group) | 3 | 5 |
-| [semantics/kafka-raw-protocol.ts](./api/semantics-kafka-raw-protocol) | 3 | 5 |
-| [semantics/nats-jetstream-durable.ts](./api/semantics-nats-jetstream-durable) | 3 | 6 |
-| [semantics/nats-kv-object.ts](./api/semantics-nats-kv-object) | 3 | 8 |
-| [semantics/pipeline-orchestrator.ts](./api/semantics-pipeline-orchestrator) | 2 | 4 |
-| [semantics/redpanda-schema-evolution.ts](./api/semantics-redpanda-schema-evolution) | 3 | 5 |
-| [semantics/redpanda-transactions.ts](./api/semantics-redpanda-transactions) | 3 | 5 |
+| [semantics/consumer-lag-telemetry.ts](./api/semantics__consumer-lag-telemetry) | 3 | 3 |
+| [semantics/exactly-once.ts](./api/semantics__exactly-once) | 3 | 3 |
+| [semantics/fidelity-harness.ts](./api/semantics__fidelity-harness) | 5 | 4 |
+| [semantics/kafka-consumer-group.ts](./api/semantics__kafka-consumer-group) | 3 | 5 |
+| [semantics/kafka-raw-protocol.ts](./api/semantics__kafka-raw-protocol) | 3 | 5 |
+| [semantics/nats-jetstream-durable.ts](./api/semantics__nats-jetstream-durable) | 3 | 6 |
+| [semantics/nats-kv-object.ts](./api/semantics__nats-kv-object) | 3 | 8 |
+| [semantics/pipeline-orchestrator.ts](./api/semantics__pipeline-orchestrator) | 2 | 4 |
+| [semantics/redpanda-schema-evolution.ts](./api/semantics__redpanda-schema-evolution) | 3 | 5 |
+| [semantics/redpanda-transactions.ts](./api/semantics__redpanda-transactions) | 3 | 5 |
 | [types.ts](./api/types) | 0 | 8 |
 
 <!-- kiwa-public-api:end -->
