@@ -58,11 +58,21 @@ claude /docs-generate
 
 生成完了確認 (`docs/api/typescript/index.html` 存在 + `docs/api/rust/kiwa/index.html` 存在 + `docs/api/solidity/dogfood-foundry-dapp/*.md` 存在)。
 
-### Step 2: VitePress build
+### Step 2: 生成物の更新と VitePress build
 
 ```bash
+pnpm docs:api-reference:write
+pnpm docs:links:write
+git status --porcelain docs packages
 pnpm docs:build
 ```
+
+`docs:api-reference` と `docs:links` は検査のみで書き込まない (名前に `:write` が付くものだけが更新する)。
+先に `:write` 側を実行して生成物を最新にし、差分が出たら内容を確認して commit してから build へ進む。
+
+`docs:build` は `docs:gen:test` → `docs:consistency` → `docs:api-reference` → `docs:links` → `vitepress build` の順に走る。
+生成物が古いまま build すると `docs:api-reference` が不一致を列挙して非 0 で止まる (書き換えはしない)。
+その場合は `pnpm docs:api-reference:write` を実行して差分を commit してから再実行する。
 
 出力は `docs/.vitepress/dist/`、 build 成功確認 (`index.html` 存在 + `assets/` dir 存在)。 build error 時は abort、 error log を user に提示。
 

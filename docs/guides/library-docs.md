@@ -38,8 +38,13 @@ Quickstart のコードは保存する file 名、実行する command、成功�
 2. 対応する4ページを更新します。実装の変更で API、既定値、失敗条件、cleanup が変わる場合は必ず反映します。
 3. Overview、Quickstart、How-to、Reference がそれぞれ異なる問いに答えているかを読み返します。機能名の列挙だけになっている箇所は、利用者の入力、期待する結果、判断に必要な境界へ書き換えます。Quickstart の command と期待結果、How-to の保存可能な file、失敗時の判断、実環境の境界も確認します。本文を削って箇条書きへ置き換えていないことも確認します。
 4. 実行経路または依存関係が文章だけでは追いにくい場合は、`images/` に静的 PNG 図を追加します。図は `article-diagram-styles` と `imagegen` で生成し、装飾ではなく選択や分岐の判断に使います。
-5. `pnpm docs:links` で package README と package-local docs の案内を同期します。
-6. `pnpm docs:links:check` と `pnpm docs:build` を実行します。
+5. `pnpm docs:links:write` で package README と package-local docs の案内を同期します。
+6. `pnpm docs:api-reference:write` で API リファレンスを再生成し、差分を確認して commit します。
+7. `pnpm docs:build` を実行します。
+
+`docs:links` と `docs:api-reference` は検査のみで、書き込みません。
+名前に `:write` が付くものだけが file を更新します。
+生成物を commit し忘れたまま build すると、`docs:build` は書き換えずに不一致を報告して止まります。
 
 ## 図を置く判断
 

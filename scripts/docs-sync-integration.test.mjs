@@ -210,6 +210,36 @@ test('a symlinked target later in the run leaves the earlier ones untouched', ()
   );
 });
 
+// 既定が書き込みだと、生成物を commit し忘れても手元の build が黙って修復するので、
+// repo の内容と公開される内容が分岐する。名前に `:write` が付くものだけが更新する。
+test('the default run reports drift without writing, and --write updates', () => {
+  withFixture(({ root, readmePath }) => {
+    const before = `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`;
+    writeFileSync(readmePath, before);
+
+    const checked = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(checked.status, 0, 'drift must be reported');
+    assert.match(checked.stderr, /out of date/);
+    assert.equal(readFileSync(readmePath, 'utf8'), before, 'the file was not written');
+
+    const written = runSync(root);
+    assert.equal(written.status, 0, written.stderr);
+    assert.match(readFileSync(readmePath, 'utf8'), /kiwa-docs:start/);
+
+    // 書いた後は検査が通る。
+    const rechecked = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.equal(rechecked.status, 0, rechecked.stderr);
+  });
+});
+
 // 細工された checkout。writeFileSync は link を追うので、guard が無ければ
 // 生成 script は repo の外の file を書き換える。
 test('a README that is a symlink out of the repository is refused', () => {
