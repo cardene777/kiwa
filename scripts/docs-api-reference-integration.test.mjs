@@ -17,6 +17,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   realpathSync,
   rmSync,
   symlinkSync,
@@ -31,6 +32,9 @@ const repositoryRoot = join(scriptsDirectory, '..');
 const START = '<!-- kiwa-public-api:start -->';
 const END = '<!-- kiwa-public-api:end -->';
 const HAND_WRITTEN = '## 手書き\n\nこの節は生成対象ではない。\n';
+// program が repo の外の file を読んだ時の文言。`outside` だけで照合すると
+// 別の理由で落ちた実行や、path に outside を含む dir 名まで一致する。
+const COMPILER_READ_OUTSIDE = /the compiler read \d+ file\(s\) outside .*; refusing to generate/;
 
 /** reference.md の初期内容。生成 script は marker の間だけを差し替える。 */
 function referenceBody() {
@@ -64,12 +68,18 @@ function minimalSource(name) {
  * link すると許可 root は repo の node_modules の実体になり、実 repo と同じ判定になる。
  */
 function withFixture(body, packageNames = ['alpha']) {
-  // /tmp は macOS で /private/tmp への symlink なので、canonical にしないと
-  // root 判定が全て外れる。
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'docs-api-reference-')));
-  // repo の外に置く細工用の領域。fixture root の内側に作ると「外」 にならない。
-  const outside = realpathSync(mkdtempSync(join(tmpdir(), 'docs-api-reference-outside-')));
+  // 作成自体を try の中へ入れる。2 つ目の作成が失敗すると 1 つ目が残るため。
+  let root;
+  let outside;
   try {
+    // /tmp は macOS で /private/tmp への symlink なので、canonical にしないと
+    // root 判定が全て外れる。
+    root = realpathSync(mkdtempSync(join(tmpdir(), 'docs-api-reference-')));
+    // repo の外に置く細工用の領域。fixture root の内側に作ると「外」 にならない。
+    // 名前に outside を含めない。stderr の照合が dir 名に引っかかると、
+    // 別の理由で落ちた実行まで「境界を検出した」 と読めてしまう。
+    outside = realpathSync(mkdtempSync(join(tmpdir(), 'docs-api-reference-external-')));
+
     mkdirSync(join(root, 'scripts'), { recursive: true });
     for (const file of [
       'docs-sync-safety.mjs',
@@ -108,8 +118,12 @@ function withFixture(body, packageNames = ['alpha']) {
       referencePath: first.referencePath,
     });
   } finally {
-    rmSync(root, { recursive: true, force: true });
-    rmSync(outside, { recursive: true, force: true });
+    // 片方の削除が例外になっても、もう片方は消す。
+    try {
+      if (root !== undefined) rmSync(root, { recursive: true, force: true });
+    } finally {
+      if (outside !== undefined) rmSync(outside, { recursive: true, force: true });
+    }
   }
 }
 
@@ -228,7 +242,14 @@ test('an import that leaves the repository is refused', () => {
     const result = runSync(root);
 
     assert.notEqual(result.status, 0, 'the run must not report success');
-    assert.match(result.stderr, /outside/, 'the reason names the repository boundary');
+    // guard 固有の文言で照合する。`outside` だけを見ると、module 解決に失敗した
+    // 実行や、path に outside を含む dir 名まで一致してしまう。
+    assert.match(result.stderr, COMPILER_READ_OUTSIDE, 'the compiler boundary guard fired');
+    assert.doesNotMatch(
+      result.stderr,
+      /Module resolution failed/,
+      'the import must resolve, otherwise the boundary guard is never reached',
+    );
     assert.equal(readFileSync(referencePath, 'utf8'), before, 'the reference is left untouched');
   });
 });
@@ -253,6 +274,7 @@ test('a declaration that only claims to live in node_modules is refused', () => 
     const result = runSync(root);
 
     assert.notEqual(result.status, 0, 'the run must not report success');
+    assert.match(result.stderr, COMPILER_READ_OUTSIDE, 'the compiler boundary guard fired');
     assert.equal(readFileSync(referencePath, 'utf8'), before, 'the reference is left untouched');
   });
 });
@@ -260,22 +282,33 @@ test('a declaration that only claims to live in node_modules is refused', () => 
 test('a broken package later in the run leaves the earlier one untouched', () => {
   withFixture(
     ({ root, outside, packages }) => {
-      const alpha = packages['alpha'];
-      const omega = packages['omega'];
-      const alphaBefore = readFileSync(alpha.referencePath, 'utf8');
+      // `collectTargets()` は `readdirSync` の順に処理する。順序は環境依存なので
+      // 名前で「先」「後」 を決め打ちすると、逆順の環境では先頭側が未処理のまま
+      // test が通ってしまう。実際の列挙順から決める。
+      const category = join(root, 'docs', 'libraries', 'foundation');
+      const order = readdirSync(category, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .filter((name) => packages[name] !== undefined);
+      assert.ok(order.length >= 2, 'the fixture must enumerate at least two packages');
+
+      const earlier = packages[order[0]];
+      const later = packages[order[order.length - 1]];
+      const earlierBefore = readFileSync(earlier.referencePath, 'utf8');
 
       const target = join(outside, 'stolen.md');
       const targetBefore = '# 外の file\n\nこの内容は変わってはいけない。\n';
       writeFileSync(target, targetBefore);
-      rmSync(omega.referencePath);
-      symlinkSync(target, omega.referencePath);
+      rmSync(later.referencePath);
+      symlinkSync(target, later.referencePath);
 
       const result = runSync(root);
 
       assert.notEqual(result.status, 0, 'the run must not report success');
+      assert.match(result.stderr, /resolves to .* which is outside/, 'the write-path guard fired');
       assert.equal(
-        readFileSync(alpha.referencePath, 'utf8'),
-        alphaBefore,
+        readFileSync(earlier.referencePath, 'utf8'),
+        earlierBefore,
         'the earlier package is not half-written',
       );
       assert.equal(readFileSync(target, 'utf8'), targetBefore, 'the link target is untouched');
@@ -291,6 +324,8 @@ test('the check-only run reports drift without writing', () => {
     const result = runSync(root, { write: false });
 
     assert.notEqual(result.status, 0, 'drift is reported as a failure');
+    // 差分の報告であることまで見る。別の理由で非 0 終了した実行と区別する。
+    assert.match(result.stderr, /Generated API references are out of date/, 'drift is the reason');
     assert.equal(readFileSync(referencePath, 'utf8'), before, 'nothing is written without --write');
   });
 });
