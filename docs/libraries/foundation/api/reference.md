@@ -64,12 +64,12 @@ object body は JSON に変換されます。string、`ArrayBuffer`、`Uint8Arra
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupApiServer({ mode: "mock" \| "hybrid" }) requires "msw" to be installed. Run `pnpm add -D msw`.' | [packages/api/src/msw-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L27) |
-| 'setupApiServer({ mode: "mock" }) requires mockHandlers' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L20) |
-| 'setupApiServer({ mode: "live" }) requires app' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L38) |
-| 'setupApiServer({ mode: "hybrid" }) requires app' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L53) |
-| 'setupApiServer({ mode: "hybrid" }) requires mockHandlers' | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L56) |
-| `setupApiServer: unknown mode "${String(opts.mode)}"` | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L74) |
+| <code v-pre>setupApiServer(&#123; mode: "mock" &#124; "hybrid" &#125;) requires "msw" to be installed. Run &#96;pnpm add -D msw&#96;.</code> | [packages/api/src/msw-bridge.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L27) |
+| <code v-pre>setupApiServer(&#123; mode: "mock" &#125;) requires mockHandlers</code> | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L20) |
+| <code v-pre>setupApiServer(&#123; mode: "live" &#125;) requires app</code> | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L38) |
+| <code v-pre>setupApiServer(&#123; mode: "hybrid" &#125;) requires app</code> | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L53) |
+| <code v-pre>setupApiServer(&#123; mode: "hybrid" &#125;) requires mockHandlers</code> | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L56) |
+| <code v-pre>setupApiServer: unknown mode "$&#123;String(opts.mode)&#125;"</code> | [packages/api/src/setup-api-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L74) |
 
 ## API 契約
 
@@ -77,33 +77,33 @@ object body は JSON に変換されます。string、`ArrayBuffer`、`Uint8Arra
 
 ### 値
 
-#### `createRequestClient`
+#### <code v-pre>createRequestClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/request-client.ts#L30) `packages/api/src/request-client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/request-client.ts#L30) <code v-pre>packages/api/src/request-client.ts</code>
 
 ```ts
 export declare function createRequestClient(opts: RequestClientOptions): ApiRequestClient;
 ```
 
-#### `setupApiServer`
+#### <code v-pre>setupApiServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L15) `packages/api/src/setup-api-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/setup-api-server.ts#L15) <code v-pre>packages/api/src/setup-api-server.ts</code>
 
 ```ts
 export declare function setupApiServer<TMode extends TestMode>(opts: SetupApiServerOptions<TMode>): Promise<ApiTestEnv>;
 ```
 
-#### `startLiveServer`
+#### <code v-pre>startLiveServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/live-server.ts#L64) `packages/api/src/live-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/live-server.ts#L64) <code v-pre>packages/api/src/live-server.ts</code>
 
 ```ts
 export declare function startLiveServer(source: ApiHandlerSource | NodeRequestHandler): Promise<LiveServerHandle>;
 ```
 
-#### `startMockServer`
+#### <code v-pre>startMockServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L33) `packages/api/src/msw-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L33) <code v-pre>packages/api/src/msw-bridge.ts</code>
 
 ```ts
 export declare function startMockServer(opts: StartMockServerOptions): Promise<MockServerHandle>;
@@ -111,9 +111,9 @@ export declare function startMockServer(opts: StartMockServerOptions): Promise<M
 
 ### 型
 
-#### `ApiHandlerSource`
+#### <code v-pre>ApiHandlerSource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L3) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L3) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export type ApiHandlerSource = {
@@ -125,9 +125,9 @@ export type ApiHandlerSource = {
 };
 ```
 
-#### `ApiRequestClient`
+#### <code v-pre>ApiRequestClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L45) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L45) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export interface ApiRequestClient {
@@ -139,9 +139,9 @@ export interface ApiRequestClient {
 }
 ```
 
-#### `ApiResponseSnapshot`
+#### <code v-pre>ApiResponseSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L53) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L53) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export interface ApiResponseSnapshot {
@@ -152,17 +152,17 @@ export interface ApiResponseSnapshot {
 }
 ```
 
-#### `ApiTestEnv`
+#### <code v-pre>ApiTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L43) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L43) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export type ApiTestEnv = MockTestEnvApi | LiveTestEnvApi | HybridTestEnvApi;
 ```
 
-#### `HybridTestEnvApi`
+#### <code v-pre>HybridTestEnvApi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L37) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L37) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export interface HybridTestEnvApi extends TestEnvBase<'hybrid'> {
@@ -174,9 +174,9 @@ export interface HybridTestEnvApi extends TestEnvBase<'hybrid'> {
 }
 ```
 
-#### `LiveServerHandle`
+#### <code v-pre>LiveServerHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/live-server.ts#L58) `packages/api/src/live-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/live-server.ts#L58) <code v-pre>packages/api/src/live-server.ts</code>
 
 ```ts
 export interface LiveServerHandle {
@@ -186,9 +186,9 @@ export interface LiveServerHandle {
 }
 ```
 
-#### `LiveTestEnvApi`
+#### <code v-pre>LiveTestEnvApi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L32) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L32) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export interface LiveTestEnvApi extends TestEnvBase<'live'> {
@@ -197,17 +197,17 @@ export interface LiveTestEnvApi extends TestEnvBase<'live'> {
 }
 ```
 
-#### `MockHandler`
+#### <code v-pre>MockHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L12) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L12) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export type MockHandler = unknown;
 ```
 
-#### `MockServerHandle`
+#### <code v-pre>MockServerHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L15) `packages/api/src/msw-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L15) <code v-pre>packages/api/src/msw-bridge.ts</code>
 
 ```ts
 export interface MockServerHandle {
@@ -216,9 +216,9 @@ export interface MockServerHandle {
 }
 ```
 
-#### `MockTestEnvApi`
+#### <code v-pre>MockTestEnvApi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L26) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L26) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export interface MockTestEnvApi extends TestEnvBase<'mock'> {
@@ -230,17 +230,17 @@ export interface MockTestEnvApi extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `NodeRequestHandler`
+#### <code v-pre>NodeRequestHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L7) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L7) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export type NodeRequestHandler = (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => void | Promise<void>;
 ```
 
-#### `RequestClientOptions`
+#### <code v-pre>RequestClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/request-client.ts#L24) `packages/api/src/request-client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/request-client.ts#L24) <code v-pre>packages/api/src/request-client.ts</code>
 
 ```ts
 export interface RequestClientOptions {
@@ -250,9 +250,9 @@ export interface RequestClientOptions {
 }
 ```
 
-#### `SetupApiServerOptions`
+#### <code v-pre>SetupApiServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L14) `packages/api/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/types.ts#L14) <code v-pre>packages/api/src/types.ts</code>
 
 ```ts
 export interface SetupApiServerOptions<TMode extends TestMode = TestMode> {
@@ -268,9 +268,9 @@ export interface SetupApiServerOptions<TMode extends TestMode = TestMode> {
 }
 ```
 
-#### `StartMockServerOptions`
+#### <code v-pre>StartMockServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L10) `packages/api/src/msw-bridge.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/api/src/msw-bridge.ts#L10) <code v-pre>packages/api/src/msw-bridge.ts</code>
 
 ```ts
 export interface StartMockServerOptions {

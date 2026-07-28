@@ -58,57 +58,57 @@ KV の `watch` は変更を待ち続ける watcher ではなく、呼び出し�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'DLQ: maxAttempts must be >= 1' | [packages/streaming/src/dlq.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L54) |
-| 'transactional producer: already initialized' | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L124) |
-| 'transactional producer: initTransactions() not called' | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L129) |
-| 'transactional producer: transaction already active' | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L131) |
-| 'transactional producer: no active transaction' | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L141) |
-| 'transactional producer: no active transaction to commit' | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L154) |
-| 'transactional producer: no active transaction to abort' | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L166) |
-| `kafka mock: partition ${explicit} out of range 0..${topic.numPartitions - 1} for topic "${topic.topic}"` | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L174) |
-| `kafka mock: partition ${partition} missing on "${topic.topic}"` | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L203) |
-| 'kafka mock: producer.send before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L273) |
-| 'kafka mock: consumer.subscribe before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L358) |
-| 'kafka mock: consumer.run before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L373) |
-| 'kafka mock: admin.createTopics before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L436) |
-| 'kafka mock: admin.listTopics before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L442) |
-| 'kafka mock: admin.deleteTopics before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L446) |
-| 'kafka mock: admin.fetchTopicMetadata before connect' | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L450) |
-| `kafka mock: unknown topic "${name}"` | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L454) |
-| `nats mock: '>' wildcard must be the last token in "${pattern}"` | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L162) |
-| 'jetstream: stream must declare at least one subject' | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L212) |
-| `jetstream: no stream matches subject "${subject}"` | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L223) |
-| `jetstream: stream "${streamName}" not found` | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L243) |
-| `nats mock: request to "${subject}" received no reply` | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L364) |
-| `nats mock: kv bucket "${bucket}" not found` | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L377) |
-| `nats mock: object bucket "${bucket}" not found` | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L415) |
-| `schema-registry: incompatible schema for subject "${input.subject}" (mode=${check.mode}): ${check.reasons.join('; ')}` | [packages/streaming/src/schema-registry.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L97) |
-| `exactly-once (${cfg.provider}): abort without active transaction` | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L113) |
-| `exactly-once (${cfg.provider}): begin without commit/abort of previous txn` | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L74) |
-| `exactly-once (${cfg.provider}): send without active transaction` | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L85) |
-| `exactly-once (${cfg.provider}): commit without active transaction` | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L91) |
-| `kafka consumer-group: unknown member ${memberId}` | [packages/streaming/src/semantics/kafka-consumer-group.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L220) |
-| `kafka raw-protocol: unknown producer id ${producerId}` | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L144) |
-| `kafka raw-protocol: txn state mismatch — current=${txnState}, requested from=${from}` | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L156) |
-| `kafka raw-protocol: invalid txn transition ${from} -> ${to}` | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L162) |
-| `kafka raw-protocol: fetch session ${sessionId} not open` | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L178) |
-| `kafka raw-protocol: ISR size cannot exceed replicationFactor=${cfg.replicationFactor}` | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L187) |
-| `nats kv-object: unknown KV bucket "${bucket}"` | [packages/streaming/src/semantics/nats-kv-object.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L135) |
-| `nats kv-object: unknown object bucket "${bucket}"` | [packages/streaming/src/semantics/nats-kv-object.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L141) |
-| `redpanda schema-evolution: incompatible schema for "${input.subject}" (mode=${check.mode}): ${check.reasons.join('; ')}` | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L157) |
-| `redpanda schema-evolution: unknown reference subject "${r.subject}"` | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L166) |
-| `redpanda schema-evolution: reference version ${r.version} not registered for "${r.subject}"` | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L170) |
-| 'redpanda schema-evolution: record-name strategy needs a recordName' | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L215) |
-| 'redpanda schema-evolution: topic-record-name strategy needs a recordName' | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L219) |
-| `redpanda transactions: transaction already ongoing for "${transactionalId}"` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L130) |
-| `redpanda transactions: no open transaction for "${transactionalId}"` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L142) |
-| `redpanda transactions: cannot add partition in phase=${txn.phase}` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L144) |
-| `redpanda transactions: no open transaction for "${transactionalId}"` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L150) |
-| `redpanda transactions: cannot commit in phase=${txn.phase}` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L152) |
-| `redpanda transactions: no open transaction for "${transactionalId}"` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L159) |
-| `redpanda transactions: unknown transactionalId "${transactionalId}"` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L183) |
-| `redpanda transactions: producer id mismatch — got ${provided.producerId}, current ${current.producerId}` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L186) |
-| `redpanda transactions: InvalidProducerEpoch — got ${provided.epoch}, current ${current.epoch}` | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L191) |
+| <code v-pre>DLQ: maxAttempts must be &gt;= 1</code> | [packages/streaming/src/dlq.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L54) |
+| <code v-pre>transactional producer: already initialized</code> | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L124) |
+| <code v-pre>transactional producer: initTransactions() not called</code> | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L129) |
+| <code v-pre>transactional producer: transaction already active</code> | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L131) |
+| <code v-pre>transactional producer: no active transaction</code> | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L141) |
+| <code v-pre>transactional producer: no active transaction to commit</code> | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L154) |
+| <code v-pre>transactional producer: no active transaction to abort</code> | [packages/streaming/src/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L166) |
+| <code v-pre>kafka mock: partition $&#123;explicit&#125; out of range 0..$&#123;topic.numPartitions - 1&#125; for topic "$&#123;topic.topic&#125;"</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L174) |
+| <code v-pre>kafka mock: partition $&#123;partition&#125; missing on "$&#123;topic.topic&#125;"</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L203) |
+| <code v-pre>kafka mock: producer.send before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L273) |
+| <code v-pre>kafka mock: consumer.subscribe before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L358) |
+| <code v-pre>kafka mock: consumer.run before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L373) |
+| <code v-pre>kafka mock: admin.createTopics before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L436) |
+| <code v-pre>kafka mock: admin.listTopics before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L442) |
+| <code v-pre>kafka mock: admin.deleteTopics before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L446) |
+| <code v-pre>kafka mock: admin.fetchTopicMetadata before connect</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L450) |
+| <code v-pre>kafka mock: unknown topic "$&#123;name&#125;"</code> | [packages/streaming/src/kafka.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L454) |
+| <code v-pre>nats mock: '&gt;' wildcard must be the last token in "$&#123;pattern&#125;"</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L162) |
+| <code v-pre>jetstream: stream must declare at least one subject</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L212) |
+| <code v-pre>jetstream: no stream matches subject "$&#123;subject&#125;"</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L223) |
+| <code v-pre>jetstream: stream "$&#123;streamName&#125;" not found</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L243) |
+| <code v-pre>nats mock: request to "$&#123;subject&#125;" received no reply</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L364) |
+| <code v-pre>nats mock: kv bucket "$&#123;bucket&#125;" not found</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L377) |
+| <code v-pre>nats mock: object bucket "$&#123;bucket&#125;" not found</code> | [packages/streaming/src/nats.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L415) |
+| <code v-pre>schema-registry: incompatible schema for subject "$&#123;input.subject&#125;" (mode=$&#123;check.mode&#125;): $&#123;check.reasons.join('; ')&#125;</code> | [packages/streaming/src/schema-registry.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L97) |
+| <code v-pre>exactly-once ($&#123;cfg.provider&#125;): abort without active transaction</code> | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L113) |
+| <code v-pre>exactly-once ($&#123;cfg.provider&#125;): begin without commit/abort of previous txn</code> | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L74) |
+| <code v-pre>exactly-once ($&#123;cfg.provider&#125;): send without active transaction</code> | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L85) |
+| <code v-pre>exactly-once ($&#123;cfg.provider&#125;): commit without active transaction</code> | [packages/streaming/src/semantics/exactly-once.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L91) |
+| <code v-pre>kafka consumer-group: unknown member $&#123;memberId&#125;</code> | [packages/streaming/src/semantics/kafka-consumer-group.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L220) |
+| <code v-pre>kafka raw-protocol: unknown producer id $&#123;producerId&#125;</code> | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L144) |
+| <code v-pre>kafka raw-protocol: txn state mismatch — current=$&#123;txnState&#125;, requested from=$&#123;from&#125;</code> | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L156) |
+| <code v-pre>kafka raw-protocol: invalid txn transition $&#123;from&#125; -&gt; $&#123;to&#125;</code> | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L162) |
+| <code v-pre>kafka raw-protocol: fetch session $&#123;sessionId&#125; not open</code> | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L178) |
+| <code v-pre>kafka raw-protocol: ISR size cannot exceed replicationFactor=$&#123;cfg.replicationFactor&#125;</code> | [packages/streaming/src/semantics/kafka-raw-protocol.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L187) |
+| <code v-pre>nats kv-object: unknown KV bucket "$&#123;bucket&#125;"</code> | [packages/streaming/src/semantics/nats-kv-object.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L135) |
+| <code v-pre>nats kv-object: unknown object bucket "$&#123;bucket&#125;"</code> | [packages/streaming/src/semantics/nats-kv-object.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L141) |
+| <code v-pre>redpanda schema-evolution: incompatible schema for "$&#123;input.subject&#125;" (mode=$&#123;check.mode&#125;): $&#123;check.reasons.join('; ')&#125;</code> | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L157) |
+| <code v-pre>redpanda schema-evolution: unknown reference subject "$&#123;r.subject&#125;"</code> | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L166) |
+| <code v-pre>redpanda schema-evolution: reference version $&#123;r.version&#125; not registered for "$&#123;r.subject&#125;"</code> | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L170) |
+| <code v-pre>redpanda schema-evolution: record-name strategy needs a recordName</code> | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L215) |
+| <code v-pre>redpanda schema-evolution: topic-record-name strategy needs a recordName</code> | [packages/streaming/src/semantics/redpanda-schema-evolution.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L219) |
+| <code v-pre>redpanda transactions: transaction already ongoing for "$&#123;transactionalId&#125;"</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L130) |
+| <code v-pre>redpanda transactions: no open transaction for "$&#123;transactionalId&#125;"</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L142) |
+| <code v-pre>redpanda transactions: cannot add partition in phase=$&#123;txn.phase&#125;</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L144) |
+| <code v-pre>redpanda transactions: no open transaction for "$&#123;transactionalId&#125;"</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L150) |
+| <code v-pre>redpanda transactions: cannot commit in phase=$&#123;txn.phase&#125;</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L152) |
+| <code v-pre>redpanda transactions: no open transaction for "$&#123;transactionalId&#125;"</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L159) |
+| <code v-pre>redpanda transactions: unknown transactionalId "$&#123;transactionalId&#125;"</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L183) |
+| <code v-pre>redpanda transactions: producer id mismatch — got $&#123;provided.producerId&#125;, current $&#123;current.producerId&#125;</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L186) |
+| <code v-pre>redpanda transactions: InvalidProducerEpoch — got $&#123;provided.epoch&#125;, current $&#123;current.epoch&#125;</code> | [packages/streaming/src/semantics/redpanda-transactions.ts](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L191) |
 
 ## API 契約
 
@@ -116,9 +116,9 @@ KV の `watch` は変更を待ち続ける watcher ではなく、呼び出し�
 
 ### 値
 
-#### `compileSubject`
+#### <code v-pre>compileSubject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L156) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L156) <code v-pre>packages/streaming/src/nats.ts</code>
 
 Compile a NATS subject pattern (`orders.&gt;`, `orders.*.created`) into a regex. `*` matches exactly one token, `&gt;` matches one or more trailing tokens. Literal matches are supported as-is.
 
@@ -126,17 +126,17 @@ Compile a NATS subject pattern (`orders.&gt;`, `orders.*.created`) into a regex.
 export declare function compileSubject(pattern: string): SubjectMatcher;
 ```
 
-#### `CONSUMER_LAG_TELEMETRY_SYMBOL`
+#### <code v-pre>CONSUMER&#95;LAG&#95;TELEMETRY&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L13) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L13) <code v-pre>packages/streaming/src/semantics/consumer-lag-telemetry.ts</code>
 
 ```ts
 export declare const CONSUMER_LAG_TELEMETRY_SYMBOL: unique symbol;
 ```
 
-#### `createConsumerLagTelemetry`
+#### <code v-pre>createConsumerLagTelemetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L97) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L97) <code v-pre>packages/streaming/src/semantics/consumer-lag-telemetry.ts</code>
 
 Create a consumer-lag + telemetry aggregator. Producers call `recordHighWatermark` on each append, consumers call `recordCommittedOffset` on each commit. `snapshot()` returns the pair as a single row — the same shape observability platforms pull off Kafka via JMX exports.
 
@@ -144,9 +144,9 @@ Create a consumer-lag + telemetry aggregator. Producers call `recordHighWatermar
 export declare function createConsumerLagTelemetry(config: ConsumerLagTelemetryConfig): ConsumerLagTelemetry;
 ```
 
-#### `createDeadLetterQueue`
+#### <code v-pre>createDeadLetterQueue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L50) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L50) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 Create a DLQ-aware handler. Each incoming message is invoked against `handler`; on error, the message is re-tried up to `retryPolicy.maxAttempts` total attempts. When the budget is exhausted, the message is quarantined with the last error message + attempt count.
 
@@ -154,9 +154,9 @@ Create a DLQ-aware handler. Each incoming message is invoked against `handler`; 
 export declare function createDeadLetterQueue<TValue = unknown, TKey = string>(config: DeadLetterQueueConfig<TValue, TKey>): DeadLetterQueue<TValue, TKey>;
 ```
 
-#### `createExactlyOnceSemantics`
+#### <code v-pre>createExactlyOnceSemantics</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L55) `packages/streaming/src/semantics/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L55) <code v-pre>packages/streaming/src/semantics/exactly-once.ts</code>
 
 Create the cross-provider exactly-once semantics wrapper. Records enqueued between `begin()` and `commit()` become part of an atomic batch — nothing lands until commit succeeds. `abort()` discards the batch, and a `read-committed` filter excludes any message tagged with an aborted batch id (delivered as a header `x-kiwa-txn-aborted: true`).
 
@@ -164,9 +164,9 @@ Create the cross-provider exactly-once semantics wrapper. Records enqueued betwe
 export declare function createExactlyOnceSemantics<TValue = unknown>(config: ExactlyOnceConfig): ExactlyOnceSemantics<TValue>;
 ```
 
-#### `createFidelityHarness`
+#### <code v-pre>createFidelityHarness</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L59) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L59) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 Default grid — Kafka + Redpanda cover the Kafka-shaped axes (raw protocol, consumer group, schema evolution, transactions, exactly-once, lag). NATS covers the JetStream + KV/Object axes + shares exactly-once + lag. `not-applicable` marks a real-world mismatch (e.g. NATS has no raw Kafka wire protocol) so tests can distinguish "missing on purpose" from "todo".
 
@@ -174,9 +174,9 @@ Default grid — Kafka + Redpanda cover the Kafka-shaped axes (raw protocol, con
 export declare function createFidelityHarness(): FidelityHarness;
 ```
 
-#### `createIdempotentProducer`
+#### <code v-pre>createIdempotentProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L39) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L39) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 Idempotent producer — dedups (producerId, sequenceNumber) pairs so retries from the client side don't produce double writes. Kafka's real implementation stores (pid, seq) → last offset per partition; the mock uses a single global set which is enough to model the observable behavior.
 
@@ -184,9 +184,9 @@ Idempotent producer — dedups (producerId, sequenceNumber) pairs so retries fro
 export declare function createIdempotentProducer(config: IdempotentProducerConfig): IdempotentProducer;
 ```
 
-#### `createKafkaConsumerGroup`
+#### <code v-pre>createKafkaConsumerGroup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L91) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L91) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 Create a coordinator-side consumer-group model. Static members (`groupInstanceId` set) survive a re-join without triggering a rebalance — this is the KIP-345 flow that keeps assignments sticky across pod restarts. Cooperative protocol emits `reassignedMembers` = only those whose partitions moved, so tests can assert incremental behavior.
 
@@ -194,9 +194,9 @@ Create a coordinator-side consumer-group model. Static members (`groupInstanceId
 export declare function createKafkaConsumerGroup(config: KafkaConsumerGroupConfig): KafkaConsumerGroup;
 ```
 
-#### `createKafkaMock`
+#### <code v-pre>createKafkaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L141) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L141) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 Create a Kafka-shaped mock — the object returned mirrors the surface of `new Kafka({...})` from the `kafkajs` package. Every producer / consumer / admin issued from the same mock shares topic state so tests can write in one client and assert in another.
 
@@ -204,9 +204,9 @@ Create a Kafka-shaped mock — the object returned mirrors the surface of `new K
 export declare function createKafkaMock(config?: KafkaMockConfig): KafkaMock;
 ```
 
-#### `createKafkaRawProtocol`
+#### <code v-pre>createKafkaRawProtocol</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L114) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L114) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 Create a Kafka raw-protocol semantics model. Exposes the pieces of the wire protocol that show up in exactly-once tests: producer id + epoch, txn coordinator state, incremental fetch sessions, and ISR + high-watermark.
 
@@ -214,9 +214,9 @@ Create a Kafka raw-protocol semantics model. Exposes the pieces of the wire prot
 export declare function createKafkaRawProtocol(config?: KafkaRawProtocolConfig): KafkaRawProtocol;
 ```
 
-#### `createNatsJetStreamDurable`
+#### <code v-pre>createNatsJetStreamDurable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L102) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L102) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 Create a durable-consumer model. `deliver(now)` picks the next eligible message (either a new one or a redelivery whose backoff has elapsed) and increments its attempt count. On the `maxDeliver`+1st failure, the message is quarantined for inspection.
 
@@ -224,9 +224,9 @@ Create a durable-consumer model. `deliver(now)` picks the next eligible message 
 export declare function createNatsJetStreamDurable<TValue = unknown>(config: DurableConsumerConfig): NatsJetStreamDurable<TValue>;
 ```
 
-#### `createNatsKvObject`
+#### <code v-pre>createNatsKvObject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L129) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L129) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 Create a combined KV + Object-store model. KV supports history depth + delete tombstones; Object splits inputs into chunks with per-chunk digest and an optional LZ4-tagged compression pass so tests can validate the chunk boundary + digest + reassembly.
 
@@ -234,9 +234,9 @@ Create a combined KV + Object-store model. KV supports history depth + delete to
 export declare function createNatsKvObject(): NatsKvObject;
 ```
 
-#### `createNatsMock`
+#### <code v-pre>createNatsMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L187) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L187) <code v-pre>packages/streaming/src/nats.ts</code>
 
 Create a NATS-shaped mock — the returned object mirrors the surface of `connect({...})` from the `nats` package. All subscriptions / streams / stores share one instance so tests can publish in one place and observe in another.
 
@@ -244,9 +244,9 @@ Create a NATS-shaped mock — the returned object mirrors the surface of `connec
 export declare function createNatsMock(config?: NatsMockConfig): NatsMock;
 ```
 
-#### `createReadCommittedFilter`
+#### <code v-pre>createReadCommittedFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L203) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L203) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 Read-committed filter — shaped like kafkajs's `isolationLevel: 'read_committed'` consumer flag. In the mock, aborted transactions are never flushed to the underlying broker so the filter is a no-op by construction; the identity exists as a symmetric API surface for tests.
 
@@ -254,9 +254,9 @@ Read-committed filter — shaped like kafkajs's `isolationLevel: 'read_committed
 export declare function createReadCommittedFilter(level?: IsolationLevel): ReadCommittedFilter;
 ```
 
-#### `createRedpandaMock`
+#### <code v-pre>createRedpandaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L35) `packages/streaming/src/redpanda.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L35) <code v-pre>packages/streaming/src/redpanda.ts</code>
 
 Create a Redpanda-shaped mock. Under the hood it's the same broker mock as Kafka + a schema registry — the split exists so tests targeting Redpanda can pick the exact symbol / surface they want to assert against.
 
@@ -264,9 +264,9 @@ Create a Redpanda-shaped mock. Under the hood it's the same broker mock as Kafka
 export declare function createRedpandaMock(config?: RedpandaMockConfig): RedpandaMock;
 ```
 
-#### `createRedpandaSchemaEvolution`
+#### <code v-pre>createRedpandaSchemaEvolution</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L131) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L131) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 Create a Redpanda schema-evolution registry. Registration enforces the subject's current compat mode + tracks a schema reference graph (`references`) so tests can validate composed schemas (Order → Address).
 
@@ -274,9 +274,9 @@ Create a Redpanda schema-evolution registry. Registration enforces the subject's
 export declare function createRedpandaSchemaEvolution(config?: RedpandaSchemaEvolutionConfig): RedpandaSchemaEvolution;
 ```
 
-#### `createRedpandaTransactions`
+#### <code v-pre>createRedpandaTransactions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L82) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L82) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 Create the Redpanda transaction coordinator model. Fencing is enforced via `guardEpoch(transactionalId, providedEpoch)` — the same call the broker uses to reject stale producers when the same `transactional.id` re-registers.
 
@@ -284,9 +284,9 @@ Create the Redpanda transaction coordinator model. Fencing is enforced via `guar
 export declare function createRedpandaTransactions(config?: RedpandaTransactionsConfig): RedpandaTransactions;
 ```
 
-#### `createSchemaRegistry`
+#### <code v-pre>createSchemaRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L74) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L74) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 Create a Confluent-shaped schema registry mock. Every registered schema gets a monotonically increasing id + subject-scoped version. Compatibility enforcement is structural — see `checkCompatibility` for the rule set.
 
@@ -294,9 +294,9 @@ Create a Confluent-shaped schema registry mock. Every registered schema gets a m
 export declare function createSchemaRegistry(config?: SchemaRegistryConfig): SchemaRegistry;
 ```
 
-#### `createTransactionalProducer`
+#### <code v-pre>createTransactionalProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L104) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L104) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 Transactional producer — messages sent between beginTransaction() and commitTransaction() are only visible to read-committed consumers after the commit lands. abortTransaction() marks the batch aborted and read-committed consumers skip it entirely. The mock defers the actual `producer.send()` until commit — this matches the observable behavior read-committed consumers see, without modeling the transaction coordinator's on-disk state.
 
@@ -304,11 +304,11 @@ Transactional producer — messages sent between beginTransaction() and commitTr
 export declare function createTransactionalProducer(config: TransactionalProducerConfig): TransactionalProducer;
 ```
 
-#### `dispatchPipelineEvent`
+#### <code v-pre>dispatchPipelineEvent</code>
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchPipelineEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchPipelineEvent</code> として公開しています。
 
 ```ts
 export {
@@ -318,41 +318,41 @@ export {
 } from './pipeline-orchestrator.js';
 ```
 
-#### `DLQ_SYMBOL`
+#### <code v-pre>DLQ&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L10) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L10) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 ```ts
 export declare const DLQ_SYMBOL: unique symbol;
 ```
 
-#### `EXACTLY_ONCE_SEMANTICS_SYMBOL`
+#### <code v-pre>EXACTLY&#95;ONCE&#95;SEMANTICS&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L12) `packages/streaming/src/semantics/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L12) <code v-pre>packages/streaming/src/semantics/exactly-once.ts</code>
 
 ```ts
 export declare const EXACTLY_ONCE_SEMANTICS_SYMBOL: unique symbol;
 ```
 
-#### `FIDELITY_HARNESS_SYMBOL`
+#### <code v-pre>FIDELITY&#95;HARNESS&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L9) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L9) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 ```ts
 export declare const FIDELITY_HARNESS_SYMBOL: unique symbol;
 ```
 
-#### `IDEMPOTENT_PRODUCER_SYMBOL`
+#### <code v-pre>IDEMPOTENT&#95;PRODUCER&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L10) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L10) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export declare const IDEMPOTENT_PRODUCER_SYMBOL: unique symbol;
 ```
 
-#### `isConsumerLagTelemetry`
+#### <code v-pre>isConsumerLagTelemetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L193) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L193) <code v-pre>packages/streaming/src/semantics/consumer-lag-telemetry.ts</code>
 
 Type guard: recognize a ConsumerLagTelemetry.
 
@@ -360,9 +360,9 @@ Type guard: recognize a ConsumerLagTelemetry.
 export declare function isConsumerLagTelemetry(value: unknown): value is ConsumerLagTelemetry;
 ```
 
-#### `isDeadLetterQueue`
+#### <code v-pre>isDeadLetterQueue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L120) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L120) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 Type guard: recognize a DeadLetterQueue.
 
@@ -370,9 +370,9 @@ Type guard: recognize a DeadLetterQueue.
 export declare function isDeadLetterQueue(value: unknown): value is DeadLetterQueue;
 ```
 
-#### `isExactlyOnceSemantics`
+#### <code v-pre>isExactlyOnceSemantics</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L142) `packages/streaming/src/semantics/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L142) <code v-pre>packages/streaming/src/semantics/exactly-once.ts</code>
 
 Type guard: recognize an ExactlyOnceSemantics wrapper.
 
@@ -380,9 +380,9 @@ Type guard: recognize an ExactlyOnceSemantics wrapper.
 export declare function isExactlyOnceSemantics(value: unknown): value is ExactlyOnceSemantics<unknown>;
 ```
 
-#### `isFidelityHarness`
+#### <code v-pre>isFidelityHarness</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L121) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L121) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 Type guard: recognize a FidelityHarness.
 
@@ -390,9 +390,9 @@ Type guard: recognize a FidelityHarness.
 export declare function isFidelityHarness(value: unknown): value is FidelityHarness;
 ```
 
-#### `isIdempotentProducer`
+#### <code v-pre>isIdempotentProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L221) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L221) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 Type guard: recognize an IdempotentProducer.
 
@@ -400,9 +400,9 @@ Type guard: recognize an IdempotentProducer.
 export declare function isIdempotentProducer(value: unknown): value is IdempotentProducer;
 ```
 
-#### `isKafkaConsumerGroup`
+#### <code v-pre>isKafkaConsumerGroup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L264) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L264) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 Type guard: recognize a KafkaConsumerGroup.
 
@@ -410,9 +410,9 @@ Type guard: recognize a KafkaConsumerGroup.
 export declare function isKafkaConsumerGroup(value: unknown): value is KafkaConsumerGroup;
 ```
 
-#### `isKafkaMock`
+#### <code v-pre>isKafkaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L488) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L488) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 Type guard: recognize a KafkaMock.
 
@@ -420,9 +420,9 @@ Type guard: recognize a KafkaMock.
 export declare function isKafkaMock(value: unknown): value is KafkaMock;
 ```
 
-#### `isKafkaRawProtocol`
+#### <code v-pre>isKafkaRawProtocol</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L235) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L235) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 Type guard: recognize a KafkaRawProtocol.
 
@@ -430,9 +430,9 @@ Type guard: recognize a KafkaRawProtocol.
 export declare function isKafkaRawProtocol(value: unknown): value is KafkaRawProtocol;
 ```
 
-#### `isNatsJetStreamDurable`
+#### <code v-pre>isNatsJetStreamDurable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L247) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L247) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 Type guard: recognize a NatsJetStreamDurable.
 
@@ -440,9 +440,9 @@ Type guard: recognize a NatsJetStreamDurable.
 export declare function isNatsJetStreamDurable(value: unknown): value is NatsJetStreamDurable<unknown>;
 ```
 
-#### `isNatsKvObject`
+#### <code v-pre>isNatsKvObject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L296) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L296) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 Type guard: recognize a NatsKvObject.
 
@@ -450,9 +450,9 @@ Type guard: recognize a NatsKvObject.
 export declare function isNatsKvObject(value: unknown): value is NatsKvObject;
 ```
 
-#### `isNatsMock`
+#### <code v-pre>isNatsMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L488) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L488) <code v-pre>packages/streaming/src/nats.ts</code>
 
 Type guard: recognize a NatsMock.
 
@@ -460,9 +460,9 @@ Type guard: recognize a NatsMock.
 export declare function isNatsMock(value: unknown): value is NatsMock;
 ```
 
-#### `isRealDriverMode`
+#### <code v-pre>isRealDriverMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L130) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L130) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 Env-gate — returns whether tests should also run the real driver against KIWA_MODE=real.
 
@@ -470,9 +470,9 @@ Env-gate — returns whether tests should also run the real driver against KIWA_
 export declare function isRealDriverMode(env?: NodeJS.ProcessEnv): boolean;
 ```
 
-#### `isRedpandaMock`
+#### <code v-pre>isRedpandaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L63) `packages/streaming/src/redpanda.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L63) <code v-pre>packages/streaming/src/redpanda.ts</code>
 
 Type guard: recognize a RedpandaMock.
 
@@ -480,9 +480,9 @@ Type guard: recognize a RedpandaMock.
 export declare function isRedpandaMock(value: unknown): value is RedpandaMock;
 ```
 
-#### `isRedpandaSchemaEvolution`
+#### <code v-pre>isRedpandaSchemaEvolution</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L243) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L243) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 Type guard: recognize a RedpandaSchemaEvolution.
 
@@ -490,9 +490,9 @@ Type guard: recognize a RedpandaSchemaEvolution.
 export declare function isRedpandaSchemaEvolution(value: unknown): value is RedpandaSchemaEvolution;
 ```
 
-#### `isRedpandaTransactions`
+#### <code v-pre>isRedpandaTransactions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L206) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L206) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 Type guard: recognize a RedpandaTransactions instance.
 
@@ -500,9 +500,9 @@ Type guard: recognize a RedpandaTransactions instance.
 export declare function isRedpandaTransactions(value: unknown): value is RedpandaTransactions;
 ```
 
-#### `isSchemaRegistry`
+#### <code v-pre>isSchemaRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L237) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L237) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 Type guard: recognize a SchemaRegistry.
 
@@ -510,9 +510,9 @@ Type guard: recognize a SchemaRegistry.
 export declare function isSchemaRegistry(value: unknown): value is SchemaRegistry;
 ```
 
-#### `isTransactionalProducer`
+#### <code v-pre>isTransactionalProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L230) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L230) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 Type guard: recognize a TransactionalProducer.
 
@@ -520,57 +520,57 @@ Type guard: recognize a TransactionalProducer.
 export declare function isTransactionalProducer(value: unknown): value is TransactionalProducer;
 ```
 
-#### `KAFKA_ADMIN_SYMBOL`
+#### <code v-pre>KAFKA&#95;ADMIN&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L18) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L18) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export declare const KAFKA_ADMIN_SYMBOL: unique symbol;
 ```
 
-#### `KAFKA_CONSUMER_GROUP_SYMBOL`
+#### <code v-pre>KAFKA&#95;CONSUMER&#95;GROUP&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L10) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L10) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 ```ts
 export declare const KAFKA_CONSUMER_GROUP_SYMBOL: unique symbol;
 ```
 
-#### `KAFKA_CONSUMER_SYMBOL`
+#### <code v-pre>KAFKA&#95;CONSUMER&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L17) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L17) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export declare const KAFKA_CONSUMER_SYMBOL: unique symbol;
 ```
 
-#### `KAFKA_MOCK_SYMBOL`
+#### <code v-pre>KAFKA&#95;MOCK&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L15) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L15) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export declare const KAFKA_MOCK_SYMBOL: unique symbol;
 ```
 
-#### `KAFKA_PRODUCER_SYMBOL`
+#### <code v-pre>KAFKA&#95;PRODUCER&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L16) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L16) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export declare const KAFKA_PRODUCER_SYMBOL: unique symbol;
 ```
 
-#### `KAFKA_RAW_PROTOCOL_SYMBOL`
+#### <code v-pre>KAFKA&#95;RAW&#95;PROTOCOL&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L15) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L15) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 ```ts
 export declare const KAFKA_RAW_PROTOCOL_SYMBOL: unique symbol;
 ```
 
-#### `matchSubject`
+#### <code v-pre>matchSubject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L177) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L177) <code v-pre>packages/streaming/src/nats.ts</code>
 
 Match a subject against a compiled pattern.
 
@@ -578,89 +578,89 @@ Match a subject against a compiled pattern.
 export declare function matchSubject(matcher: SubjectMatcher, subject: string): boolean;
 ```
 
-#### `NATS_JETSTREAM_DURABLE_SYMBOL`
+#### <code v-pre>NATS&#95;JETSTREAM&#95;DURABLE&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L12) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L12) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export declare const NATS_JETSTREAM_DURABLE_SYMBOL: unique symbol;
 ```
 
-#### `NATS_JETSTREAM_SYMBOL`
+#### <code v-pre>NATS&#95;JETSTREAM&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L13) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L13) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export declare const NATS_JETSTREAM_SYMBOL: unique symbol;
 ```
 
-#### `NATS_KV_OBJECT_SYMBOL`
+#### <code v-pre>NATS&#95;KV&#95;OBJECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L11) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L11) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export declare const NATS_KV_OBJECT_SYMBOL: unique symbol;
 ```
 
-#### `NATS_KV_SYMBOL`
+#### <code v-pre>NATS&#95;KV&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L14) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L14) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export declare const NATS_KV_SYMBOL: unique symbol;
 ```
 
-#### `NATS_MOCK_SYMBOL`
+#### <code v-pre>NATS&#95;MOCK&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L12) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L12) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export declare const NATS_MOCK_SYMBOL: unique symbol;
 ```
 
-#### `NATS_OBJECT_SYMBOL`
+#### <code v-pre>NATS&#95;OBJECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L15) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L15) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export declare const NATS_OBJECT_SYMBOL: unique symbol;
 ```
 
-#### `READ_COMMITTED_SYMBOL`
+#### <code v-pre>READ&#95;COMMITTED&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L12) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L12) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export declare const READ_COMMITTED_SYMBOL: unique symbol;
 ```
 
-#### `REDPANDA_MOCK_SYMBOL`
+#### <code v-pre>REDPANDA&#95;MOCK&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L14) `packages/streaming/src/redpanda.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L14) <code v-pre>packages/streaming/src/redpanda.ts</code>
 
 ```ts
 export declare const REDPANDA_MOCK_SYMBOL: unique symbol;
 ```
 
-#### `REDPANDA_SCHEMA_EVOLUTION_SYMBOL`
+#### <code v-pre>REDPANDA&#95;SCHEMA&#95;EVOLUTION&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L13) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L13) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 ```ts
 export declare const REDPANDA_SCHEMA_EVOLUTION_SYMBOL: unique symbol;
 ```
 
-#### `REDPANDA_TRANSACTIONS_SYMBOL`
+#### <code v-pre>REDPANDA&#95;TRANSACTIONS&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L11) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L11) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 ```ts
 export declare const REDPANDA_TRANSACTIONS_SYMBOL: unique symbol;
 ```
 
-#### `requiredKeyFor`
+#### <code v-pre>requiredKeyFor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L139) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L139) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 Which real-driver key an axis requires when KIWA_MODE=real is set. Tests check `requiredKeyFor(cell.axis)` and skip the real-driver assertion when the corresponding env var isn't present.
 
@@ -668,17 +668,17 @@ Which real-driver key an axis requires when KIWA_MODE=real is set. Tests check `
 export declare function requiredKeyFor(axis: SemanticsAxis): string | null;
 ```
 
-#### `SCHEMA_REGISTRY_SYMBOL`
+#### <code v-pre>SCHEMA&#95;REGISTRY&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L12) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L12) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 ```ts
 export declare const SCHEMA_REGISTRY_SYMBOL: unique symbol;
 ```
 
-#### `startPipeline`
+#### <code v-pre>startPipeline</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L41) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L41) <code v-pre>packages/streaming/src/semantics/pipeline-orchestrator.ts</code>
 
 ```ts
 export declare function startPipeline(input: {
@@ -686,17 +686,17 @@ export declare function startPipeline(input: {
 }): PipelineSession;
 ```
 
-#### `summarizePipeline`
+#### <code v-pre>summarizePipeline</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L158) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L158) <code v-pre>packages/streaming/src/semantics/pipeline-orchestrator.ts</code>
 
 ```ts
 export declare function summarizePipeline(session: PipelineSession): PipelineSummary;
 ```
 
-#### `TRANSACTIONAL_PRODUCER_SYMBOL`
+#### <code v-pre>TRANSACTIONAL&#95;PRODUCER&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L11) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L11) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export declare const TRANSACTIONAL_PRODUCER_SYMBOL: unique symbol;
@@ -704,9 +704,9 @@ export declare const TRANSACTIONAL_PRODUCER_SYMBOL: unique symbol;
 
 ### 型
 
-#### `AckPendingEntry`
+#### <code v-pre>AckPendingEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L40) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L40) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export interface AckPendingEntry {
@@ -716,33 +716,33 @@ export interface AckPendingEntry {
 }
 ```
 
-#### `AckPolicy`
+#### <code v-pre>AckPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L16) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L16) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export type AckPolicy = 'explicit' | 'all' | 'none';
 ```
 
-#### `BackoffKind`
+#### <code v-pre>BackoffKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L12) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L12) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 ```ts
 export type BackoffKind = 'constant' | 'linear' | 'exponential';
 ```
 
-#### `CellStatus`
+#### <code v-pre>CellStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L21) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L21) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 ```ts
 export type CellStatus = 'implemented' | 'not-applicable' | 'planned';
 ```
 
-#### `CommittedOffset`
+#### <code v-pre>CommittedOffset</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L82) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L82) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface CommittedOffset {
@@ -752,9 +752,9 @@ export interface CommittedOffset {
 }
 ```
 
-#### `CompatibilityCheckResult`
+#### <code v-pre>CompatibilityCheckResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L30) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L30) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 ```ts
 export interface CompatibilityCheckResult {
@@ -764,9 +764,9 @@ export interface CompatibilityCheckResult {
 }
 ```
 
-#### `CompatibilityMode`
+#### <code v-pre>CompatibilityMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L51) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L51) <code v-pre>packages/streaming/src/types.ts</code>
 
 Compatibility mode — controls whether a new schema version can be registered against an existing subject. See Confluent Schema Registry docs for the canonical semantics; the mock enforces the intent, not every corner case.
 
@@ -774,17 +774,17 @@ Compatibility mode — controls whether a new schema version can be registered a
 export type CompatibilityMode = 'BACKWARD' | 'FORWARD' | 'FULL' | 'BACKWARD_TRANSITIVE' | 'FORWARD_TRANSITIVE' | 'FULL_TRANSITIVE' | 'NONE';
 ```
 
-#### `CompressionKind`
+#### <code v-pre>CompressionKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L13) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L13) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export type CompressionKind = 'none' | 'lz4';
 ```
 
-#### `ConsumerConfig`
+#### <code v-pre>ConsumerConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L49) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L49) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface ConsumerConfig {
@@ -794,9 +794,9 @@ export interface ConsumerConfig {
 }
 ```
 
-#### `ConsumerLagTelemetry`
+#### <code v-pre>ConsumerLagTelemetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L36) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L36) <code v-pre>packages/streaming/src/semantics/consumer-lag-telemetry.ts</code>
 
 ```ts
 export interface ConsumerLagTelemetry {
@@ -825,9 +825,9 @@ export interface ConsumerLagTelemetry {
 }
 ```
 
-#### `ConsumerLagTelemetryConfig`
+#### <code v-pre>ConsumerLagTelemetryConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L17) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L17) <code v-pre>packages/streaming/src/semantics/consumer-lag-telemetry.ts</code>
 
 ```ts
 export interface ConsumerLagTelemetryConfig {
@@ -837,9 +837,9 @@ export interface ConsumerLagTelemetryConfig {
 }
 ```
 
-#### `DeadLetterEntry`
+#### <code v-pre>DeadLetterEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L33) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L33) <code v-pre>packages/streaming/src/types.ts</code>
 
 DLQ (dead-letter queue) entry — a message that exceeded retry budget.
 
@@ -852,9 +852,9 @@ export interface DeadLetterEntry<TValue = unknown, TKey = string> {
 }
 ```
 
-#### `DeadLetterQueue`
+#### <code v-pre>DeadLetterQueue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L31) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L31) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 ```ts
 export interface DeadLetterQueue<TValue = unknown, TKey = string> {
@@ -871,9 +871,9 @@ export interface DeadLetterQueue<TValue = unknown, TKey = string> {
 }
 ```
 
-#### `DeadLetterQueueConfig`
+#### <code v-pre>DeadLetterQueueConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L23) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L23) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 ```ts
 export interface DeadLetterQueueConfig<TValue = unknown, TKey = string> {
@@ -885,9 +885,9 @@ export interface DeadLetterQueueConfig<TValue = unknown, TKey = string> {
 }
 ```
 
-#### `DeliveryAttempt`
+#### <code v-pre>DeliveryAttempt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L33) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L33) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export interface DeliveryAttempt<TValue = unknown> {
@@ -898,9 +898,9 @@ export interface DeliveryAttempt<TValue = unknown> {
 }
 ```
 
-#### `DurableConsumerConfig`
+#### <code v-pre>DurableConsumerConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L18) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L18) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export interface DurableConsumerConfig {
@@ -919,9 +919,9 @@ export interface DurableConsumerConfig {
 }
 ```
 
-#### `EvolutionCheckResult`
+#### <code v-pre>EvolutionCheckResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L38) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L38) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 ```ts
 export interface EvolutionCheckResult {
@@ -931,9 +931,9 @@ export interface EvolutionCheckResult {
 }
 ```
 
-#### `EvolutionSchema`
+#### <code v-pre>EvolutionSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L28) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L28) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 ```ts
 export interface EvolutionSchema {
@@ -947,9 +947,9 @@ export interface EvolutionSchema {
 }
 ```
 
-#### `ExactlyOnceConfig`
+#### <code v-pre>ExactlyOnceConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L18) `packages/streaming/src/semantics/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L18) <code v-pre>packages/streaming/src/semantics/exactly-once.ts</code>
 
 ```ts
 export interface ExactlyOnceConfig {
@@ -959,11 +959,11 @@ export interface ExactlyOnceConfig {
 }
 ```
 
-#### `ExactlyOnceIsolationLevel`
+#### <code v-pre>ExactlyOnceIsolationLevel</code>
 
 公開 entry point から解決しています。
 
-`IsolationLevel` を `ExactlyOnceIsolationLevel` として公開しています。
+<code v-pre>IsolationLevel</code> を <code v-pre>ExactlyOnceIsolationLevel</code> として公開しています。
 
 ```ts
 export {
@@ -978,9 +978,9 @@ export {
 } from './exactly-once.js';
 ```
 
-#### `ExactlyOnceSemantics`
+#### <code v-pre>ExactlyOnceSemantics</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L32) `packages/streaming/src/semantics/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L32) <code v-pre>packages/streaming/src/semantics/exactly-once.ts</code>
 
 ```ts
 export interface ExactlyOnceSemantics<TValue = unknown> {
@@ -997,11 +997,11 @@ export interface ExactlyOnceSemantics<TValue = unknown> {
 }
 ```
 
-#### `ExactlyOnceTxnState`
+#### <code v-pre>ExactlyOnceTxnState</code>
 
 公開 entry point から解決しています。
 
-`TxnState` を `ExactlyOnceTxnState` として公開しています。
+<code v-pre>TxnState</code> を <code v-pre>ExactlyOnceTxnState</code> として公開しています。
 
 ```ts
 export {
@@ -1016,9 +1016,9 @@ export {
 } from './exactly-once.js';
 ```
 
-#### `FetchSession`
+#### <code v-pre>FetchSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L37) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L37) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 ```ts
 export interface FetchSession {
@@ -1027,9 +1027,9 @@ export interface FetchSession {
 }
 ```
 
-#### `FidelityCell`
+#### <code v-pre>FidelityCell</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L23) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L23) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 ```ts
 export interface FidelityCell {
@@ -1040,9 +1040,9 @@ export interface FidelityCell {
 }
 ```
 
-#### `FidelityHarness`
+#### <code v-pre>FidelityHarness</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L30) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L30) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 ```ts
 export interface FidelityHarness {
@@ -1055,9 +1055,9 @@ export interface FidelityHarness {
 }
 ```
 
-#### `GroupMember`
+#### <code v-pre>GroupMember</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L22) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L22) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 ```ts
 export interface GroupMember {
@@ -1070,9 +1070,9 @@ export interface GroupMember {
 }
 ```
 
-#### `IdempotentProducer`
+#### <code v-pre>IdempotentProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L20) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L20) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export interface IdempotentProducer {
@@ -1086,9 +1086,9 @@ export interface IdempotentProducer {
 }
 ```
 
-#### `IdempotentProducerConfig`
+#### <code v-pre>IdempotentProducerConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L14) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L14) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export interface IdempotentProducerConfig {
@@ -1098,17 +1098,17 @@ export interface IdempotentProducerConfig {
 }
 ```
 
-#### `IsolationLevel`
+#### <code v-pre>IsolationLevel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L179) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L179) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export type IsolationLevel = 'read-committed' | 'read-uncommitted';
 ```
 
-#### `JetStreamConfig`
+#### <code v-pre>JetStreamConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L33) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L33) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface JetStreamConfig {
@@ -1120,9 +1120,9 @@ export interface JetStreamConfig {
 }
 ```
 
-#### `JetStreamConsumer`
+#### <code v-pre>JetStreamConsumer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L53) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L53) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface JetStreamConsumer {
@@ -1136,9 +1136,9 @@ export interface JetStreamConsumer {
 }
 ```
 
-#### `JetStreamConsumerConfig`
+#### <code v-pre>JetStreamConsumerConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L47) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L47) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface JetStreamConsumerConfig {
@@ -1148,9 +1148,9 @@ export interface JetStreamConsumerConfig {
 }
 ```
 
-#### `JetStreamPublishAck`
+#### <code v-pre>JetStreamPublishAck</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L41) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L41) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface JetStreamPublishAck {
@@ -1160,9 +1160,9 @@ export interface JetStreamPublishAck {
 }
 ```
 
-#### `JetStreamStore`
+#### <code v-pre>JetStreamStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L60) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L60) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface JetStreamStore {
@@ -1175,9 +1175,9 @@ export interface JetStreamStore {
 }
 ```
 
-#### `KafkaAdmin`
+#### <code v-pre>KafkaAdmin</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L88) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L88) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface KafkaAdmin {
@@ -1202,9 +1202,9 @@ export interface KafkaAdmin {
 }
 ```
 
-#### `KafkaConsumer`
+#### <code v-pre>KafkaConsumer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L66) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L66) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface KafkaConsumer {
@@ -1231,9 +1231,9 @@ export interface KafkaConsumer {
 }
 ```
 
-#### `KafkaConsumerGroup`
+#### <code v-pre>KafkaConsumerGroup</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L39) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L39) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 ```ts
 export interface KafkaConsumerGroup {
@@ -1268,9 +1268,9 @@ export interface KafkaConsumerGroup {
 }
 ```
 
-#### `KafkaConsumerGroupConfig`
+#### <code v-pre>KafkaConsumerGroupConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L14) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L14) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 ```ts
 export interface KafkaConsumerGroupConfig {
@@ -1282,9 +1282,9 @@ export interface KafkaConsumerGroupConfig {
 }
 ```
 
-#### `KafkaMock`
+#### <code v-pre>KafkaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L105) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L105) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface KafkaMock {
@@ -1301,9 +1301,9 @@ export interface KafkaMock {
 }
 ```
 
-#### `KafkaMockConfig`
+#### <code v-pre>KafkaMockConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L22) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L22) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface KafkaMockConfig {
@@ -1314,9 +1314,9 @@ export interface KafkaMockConfig {
 }
 ```
 
-#### `KafkaProducer`
+#### <code v-pre>KafkaProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L55) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L55) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface KafkaProducer {
@@ -1329,9 +1329,9 @@ export interface KafkaProducer {
 }
 ```
 
-#### `KafkaRawProtocol`
+#### <code v-pre>KafkaRawProtocol</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L42) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L42) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 ```ts
 export interface KafkaRawProtocol {
@@ -1373,9 +1373,9 @@ export interface KafkaRawProtocol {
 }
 ```
 
-#### `KafkaRawProtocolConfig`
+#### <code v-pre>KafkaRawProtocolConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L17) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L17) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 ```ts
 export interface KafkaRawProtocolConfig {
@@ -1386,9 +1386,9 @@ export interface KafkaRawProtocolConfig {
 }
 ```
 
-#### `KafkaTopicSpec`
+#### <code v-pre>KafkaTopicSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L29) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L29) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface KafkaTopicSpec {
@@ -1399,9 +1399,9 @@ export interface KafkaTopicSpec {
 }
 ```
 
-#### `KvBucketConfig`
+#### <code v-pre>KvBucketConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L15) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L15) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface KvBucketConfig {
@@ -1413,9 +1413,9 @@ export interface KvBucketConfig {
 }
 ```
 
-#### `KVEntry`
+#### <code v-pre>KVEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L79) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L79) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface KVEntry<TValue = unknown> {
@@ -1427,9 +1427,9 @@ export interface KVEntry<TValue = unknown> {
 }
 ```
 
-#### `KvRevision`
+#### <code v-pre>KvRevision</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L23) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L23) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface KvRevision<TValue = unknown> {
@@ -1442,9 +1442,9 @@ export interface KvRevision<TValue = unknown> {
 }
 ```
 
-#### `KVStore`
+#### <code v-pre>KVStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L69) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L69) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface KVStore {
@@ -1458,9 +1458,9 @@ export interface KVStore {
 }
 ```
 
-#### `KvWatchEvent`
+#### <code v-pre>KvWatchEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L32) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L32) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface KvWatchEvent<TValue = unknown> {
@@ -1468,9 +1468,9 @@ export interface KvWatchEvent<TValue = unknown> {
 }
 ```
 
-#### `MessageHandler`
+#### <code v-pre>MessageHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L28) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L28) <code v-pre>packages/streaming/src/types.ts</code>
 
 Handler shape shared by consumer / group / subject subscribers.
 
@@ -1478,9 +1478,9 @@ Handler shape shared by consumer / group / subject subscribers.
 export type MessageHandler<TValue = unknown, TKey = string> = (message: StreamingMessage<TValue, TKey>) => void | Promise<void>;
 ```
 
-#### `NatsJetStreamDurable`
+#### <code v-pre>NatsJetStreamDurable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L53) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L53) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export interface NatsJetStreamDurable<TValue = unknown> {
@@ -1517,9 +1517,9 @@ export interface NatsJetStreamDurable<TValue = unknown> {
 }
 ```
 
-#### `NatsKvObject`
+#### <code v-pre>NatsKvObject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L58) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L58) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface NatsKvObject {
@@ -1539,9 +1539,9 @@ export interface NatsKvObject {
 }
 ```
 
-#### `NatsMock`
+#### <code v-pre>NatsMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L109) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L109) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface NatsMock {
@@ -1559,9 +1559,9 @@ export interface NatsMock {
 }
 ```
 
-#### `NatsMockConfig`
+#### <code v-pre>NatsMockConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L17) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L17) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface NatsMockConfig {
@@ -1570,9 +1570,9 @@ export interface NatsMockConfig {
 }
 ```
 
-#### `NatsPublishOptions`
+#### <code v-pre>NatsPublishOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L22) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L22) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface NatsPublishOptions {
@@ -1581,9 +1581,9 @@ export interface NatsPublishOptions {
 }
 ```
 
-#### `NatsSubscription`
+#### <code v-pre>NatsSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L27) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L27) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface NatsSubscription {
@@ -1593,9 +1593,9 @@ export interface NatsSubscription {
 }
 ```
 
-#### `ObjectBucketConfig`
+#### <code v-pre>ObjectBucketConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L36) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L36) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface ObjectBucketConfig {
@@ -1606,9 +1606,9 @@ export interface ObjectBucketConfig {
 }
 ```
 
-#### `ObjectChunk`
+#### <code v-pre>ObjectChunk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L43) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L43) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface ObjectChunk {
@@ -1618,9 +1618,9 @@ export interface ObjectChunk {
 }
 ```
 
-#### `ObjectEntry`
+#### <code v-pre>ObjectEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L104) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L104) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface ObjectEntry {
@@ -1629,9 +1629,9 @@ export interface ObjectEntry {
 }
 ```
 
-#### `ObjectInfo`
+#### <code v-pre>ObjectInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L96) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L96) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface ObjectInfo {
@@ -1643,9 +1643,9 @@ export interface ObjectInfo {
 }
 ```
 
-#### `ObjectRecord`
+#### <code v-pre>ObjectRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L49) `packages/streaming/src/semantics/nats-kv-object.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-kv-object.ts#L49) <code v-pre>packages/streaming/src/semantics/nats-kv-object.ts</code>
 
 ```ts
 export interface ObjectRecord {
@@ -1658,9 +1658,9 @@ export interface ObjectRecord {
 }
 ```
 
-#### `ObjectStore`
+#### <code v-pre>ObjectStore</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L87) `packages/streaming/src/nats.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/nats.ts#L87) <code v-pre>packages/streaming/src/nats.ts</code>
 
 ```ts
 export interface ObjectStore {
@@ -1673,9 +1673,9 @@ export interface ObjectStore {
 }
 ```
 
-#### `OffsetSnapshot`
+#### <code v-pre>OffsetSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L23) `packages/streaming/src/semantics/consumer-lag-telemetry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/consumer-lag-telemetry.ts#L23) <code v-pre>packages/streaming/src/semantics/consumer-lag-telemetry.ts</code>
 
 ```ts
 export interface OffsetSnapshot {
@@ -1692,17 +1692,17 @@ export interface OffsetSnapshot {
 }
 ```
 
-#### `PartitionAssigner`
+#### <code v-pre>PartitionAssigner</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L20) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L20) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export type PartitionAssigner = 'range' | 'round-robin';
 ```
 
-#### `PendingRecord`
+#### <code v-pre>PendingRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L24) `packages/streaming/src/semantics/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/exactly-once.ts#L24) <code v-pre>packages/streaming/src/semantics/exactly-once.ts</code>
 
 ```ts
 export interface PendingRecord<TValue = unknown> {
@@ -1712,17 +1712,17 @@ export interface PendingRecord<TValue = unknown> {
 }
 ```
 
-#### `PipelineEvent`
+#### <code v-pre>PipelineEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L21) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L21) <code v-pre>packages/streaming/src/semantics/pipeline-orchestrator.ts</code>
 
 ```ts
 export type PipelineEvent = 'produce-succeeded' | 'produce-failed' | 'consume-succeeded' | 'consume-failed' | 'rebalance-triggered' | 'rebalance-completed' | 'dlq-message-added' | 'stop-requested';
 ```
 
-#### `PipelineSession`
+#### <code v-pre>PipelineSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L31) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L31) <code v-pre>packages/streaming/src/semantics/pipeline-orchestrator.ts</code>
 
 ```ts
 export interface PipelineSession {
@@ -1736,9 +1736,9 @@ export interface PipelineSession {
 }
 ```
 
-#### `PipelineState`
+#### <code v-pre>PipelineState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L14) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L14) <code v-pre>packages/streaming/src/semantics/pipeline-orchestrator.ts</code>
 
 v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + schema registry の 継続合成 layer。 Streaming pair v0.1 → v2.1 = 5 段深化到達 = **depth-5 pattern 6 例目発生** (Mobile + Desktop + quality-metrics + Payment + Realtime + Streaming = 6 pair 到達 = **systematic law confirmed**)、 pattern 昇格階段 の 最上位 = kiwa 全体 の 必ず守る 最上位規範化 confirmed。 shape 契約 preserving 絶対維持 = 既存 API (v0.1-v0.3) 変更 0、 新規 file 追加 のみ、 backward compat 絶対維持。
 
@@ -1746,9 +1746,9 @@ v2.1 pipeline-orchestrator = producer + consumer group + exactly-once + DLQ + sc
 export type PipelineState = 'producing' | 'consuming' | 'rebalancing' | 'dlq-active' | 'stopped';
 ```
 
-#### `PipelineSummary`
+#### <code v-pre>PipelineSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L146) `packages/streaming/src/semantics/pipeline-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/pipeline-orchestrator.ts#L146) <code v-pre>packages/streaming/src/semantics/pipeline-orchestrator.ts</code>
 
 ```ts
 export interface PipelineSummary {
@@ -1764,9 +1764,9 @@ export interface PipelineSummary {
 }
 ```
 
-#### `ProducerEpoch`
+#### <code v-pre>ProducerEpoch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L18) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L18) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 ```ts
 export interface ProducerEpoch {
@@ -1776,9 +1776,9 @@ export interface ProducerEpoch {
 }
 ```
 
-#### `ProducerIdentity`
+#### <code v-pre>ProducerIdentity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L32) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L32) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 ```ts
 export interface ProducerIdentity {
@@ -1787,9 +1787,9 @@ export interface ProducerIdentity {
 }
 ```
 
-#### `ProducerMessage`
+#### <code v-pre>ProducerMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L41) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L41) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface ProducerMessage<TValue = unknown, TKey = string> {
@@ -1801,9 +1801,9 @@ export interface ProducerMessage<TValue = unknown, TKey = string> {
 }
 ```
 
-#### `ProducerRecord`
+#### <code v-pre>ProducerRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L36) `packages/streaming/src/kafka.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/kafka.ts#L36) <code v-pre>packages/streaming/src/kafka.ts</code>
 
 ```ts
 export interface ProducerRecord<TValue = unknown, TKey = string> {
@@ -1812,9 +1812,9 @@ export interface ProducerRecord<TValue = unknown, TKey = string> {
 }
 ```
 
-#### `PublishResult`
+#### <code v-pre>PublishResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L9) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L9) <code v-pre>packages/streaming/src/types.ts</code>
 
 Result of a single message publish.
 
@@ -1827,9 +1827,9 @@ export interface PublishResult {
 }
 ```
 
-#### `QuarantinedMessage`
+#### <code v-pre>QuarantinedMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L46) `packages/streaming/src/semantics/nats-jetstream-durable.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/nats-jetstream-durable.ts#L46) <code v-pre>packages/streaming/src/semantics/nats-jetstream-durable.ts</code>
 
 ```ts
 export interface QuarantinedMessage<TValue = unknown> {
@@ -1840,9 +1840,9 @@ export interface QuarantinedMessage<TValue = unknown> {
 }
 ```
 
-#### `ReadCommittedFilter`
+#### <code v-pre>ReadCommittedFilter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L181) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L181) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export interface ReadCommittedFilter {
@@ -1860,17 +1860,17 @@ export interface ReadCommittedFilter {
 }
 ```
 
-#### `RebalanceProtocol`
+#### <code v-pre>RebalanceProtocol</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L12) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L12) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 ```ts
 export type RebalanceProtocol = 'eager' | 'cooperative';
 ```
 
-#### `RebalanceResult`
+#### <code v-pre>RebalanceResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L31) `packages/streaming/src/semantics/kafka-consumer-group.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-consumer-group.ts#L31) <code v-pre>packages/streaming/src/semantics/kafka-consumer-group.ts</code>
 
 ```ts
 export interface RebalanceResult {
@@ -1882,9 +1882,9 @@ export interface RebalanceResult {
 }
 ```
 
-#### `RedpandaMock`
+#### <code v-pre>RedpandaMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L25) `packages/streaming/src/redpanda.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L25) <code v-pre>packages/streaming/src/redpanda.ts</code>
 
 RedpandaMock exposes the same producer/consumer/admin surface as KafkaMock (structural compatibility) + a colocated `schemaRegistry` field so tests can register schemas + assert compatibility without a second setup call.
 
@@ -1895,9 +1895,9 @@ export interface RedpandaMock extends KafkaMock {
 }
 ```
 
-#### `RedpandaMockConfig`
+#### <code v-pre>RedpandaMockConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L16) `packages/streaming/src/redpanda.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/redpanda.ts#L16) <code v-pre>packages/streaming/src/redpanda.ts</code>
 
 ```ts
 export interface RedpandaMockConfig extends KafkaMockConfig {
@@ -1905,9 +1905,9 @@ export interface RedpandaMockConfig extends KafkaMockConfig {
 }
 ```
 
-#### `RedpandaSchemaEvolution`
+#### <code v-pre>RedpandaSchemaEvolution</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L44) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L44) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 ```ts
 export interface RedpandaSchemaEvolution {
@@ -1934,9 +1934,9 @@ export interface RedpandaSchemaEvolution {
 }
 ```
 
-#### `RedpandaSchemaEvolutionConfig`
+#### <code v-pre>RedpandaSchemaEvolutionConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L17) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L17) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 ```ts
 export interface RedpandaSchemaEvolutionConfig {
@@ -1945,9 +1945,9 @@ export interface RedpandaSchemaEvolutionConfig {
 }
 ```
 
-#### `RedpandaTransactions`
+#### <code v-pre>RedpandaTransactions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L40) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L40) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 ```ts
 export interface RedpandaTransactions {
@@ -1978,9 +1978,9 @@ export interface RedpandaTransactions {
 }
 ```
 
-#### `RedpandaTransactionsConfig`
+#### <code v-pre>RedpandaTransactionsConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L13) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L13) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 ```ts
 export interface RedpandaTransactionsConfig {
@@ -1989,9 +1989,9 @@ export interface RedpandaTransactionsConfig {
 }
 ```
 
-#### `RegisteredSchema`
+#### <code v-pre>RegisteredSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L21) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L21) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 ```ts
 export interface RegisteredSchema {
@@ -2004,9 +2004,9 @@ export interface RegisteredSchema {
 }
 ```
 
-#### `RetryPolicy`
+#### <code v-pre>RetryPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L14) `packages/streaming/src/dlq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/dlq.ts#L14) <code v-pre>packages/streaming/src/dlq.ts</code>
 
 ```ts
 export interface RetryPolicy {
@@ -2019,9 +2019,9 @@ export interface RetryPolicy {
 }
 ```
 
-#### `SchemaKind`
+#### <code v-pre>SchemaKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L41) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L41) <code v-pre>packages/streaming/src/types.ts</code>
 
 Schema kind supported by the schema-registry mock.
 
@@ -2029,9 +2029,9 @@ Schema kind supported by the schema-registry mock.
 export type SchemaKind = 'avro' | 'protobuf' | 'json';
 ```
 
-#### `SchemaReference`
+#### <code v-pre>SchemaReference</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L22) `packages/streaming/src/semantics/redpanda-schema-evolution.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-schema-evolution.ts#L22) <code v-pre>packages/streaming/src/semantics/redpanda-schema-evolution.ts</code>
 
 ```ts
 export interface SchemaReference {
@@ -2041,9 +2041,9 @@ export interface SchemaReference {
 }
 ```
 
-#### `SchemaRegistry`
+#### <code v-pre>SchemaRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L36) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L36) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 ```ts
 export interface SchemaRegistry {
@@ -2074,9 +2074,9 @@ export interface SchemaRegistry {
 }
 ```
 
-#### `SchemaRegistryConfig`
+#### <code v-pre>SchemaRegistryConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L14) `packages/streaming/src/schema-registry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/schema-registry.ts#L14) <code v-pre>packages/streaming/src/schema-registry.ts</code>
 
 ```ts
 export interface SchemaRegistryConfig {
@@ -2087,17 +2087,17 @@ export interface SchemaRegistryConfig {
 }
 ```
 
-#### `SemanticsAxis`
+#### <code v-pre>SemanticsAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L11) `packages/streaming/src/semantics/fidelity-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/fidelity-harness.ts#L11) <code v-pre>packages/streaming/src/semantics/fidelity-harness.ts</code>
 
 ```ts
 export type SemanticsAxis = 'kafka-raw-protocol' | 'kafka-consumer-group' | 'redpanda-schema-evolution' | 'redpanda-transactions' | 'nats-jetstream-durable' | 'nats-kv-object' | 'exactly-once' | 'consumer-lag-telemetry';
 ```
 
-#### `StreamingMessage`
+#### <code v-pre>StreamingMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L17) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L17) <code v-pre>packages/streaming/src/types.ts</code>
 
 Single received message shared across all provider mocks.
 
@@ -2113,17 +2113,17 @@ export interface StreamingMessage<TValue = unknown, TKey = string> {
 }
 ```
 
-#### `StreamingProvider`
+#### <code v-pre>StreamingProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L6) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L6) <code v-pre>packages/streaming/src/types.ts</code>
 
 ```ts
 export type StreamingProvider = 'kafka' | 'redpanda' | 'nats';
 ```
 
-#### `SubjectNamingStrategy`
+#### <code v-pre>SubjectNamingStrategy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L44) `packages/streaming/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/types.ts#L44) <code v-pre>packages/streaming/src/types.ts</code>
 
 Subject naming strategy — how subjects derive from topic.
 
@@ -2131,9 +2131,9 @@ Subject naming strategy — how subjects derive from topic.
 export type SubjectNamingStrategy = 'topic-name' | 'record-name' | 'topic-record-name';
 ```
 
-#### `TransactionalProducer`
+#### <code v-pre>TransactionalProducer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L79) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L79) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export interface TransactionalProducer {
@@ -2150,9 +2150,9 @@ export interface TransactionalProducer {
 }
 ```
 
-#### `TransactionalProducerConfig`
+#### <code v-pre>TransactionalProducerConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L72) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L72) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export interface TransactionalProducerConfig {
@@ -2161,33 +2161,33 @@ export interface TransactionalProducerConfig {
 }
 ```
 
-#### `TransactionCoordinatorState`
+#### <code v-pre>TransactionCoordinatorState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L24) `packages/streaming/src/semantics/kafka-raw-protocol.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/kafka-raw-protocol.ts#L24) <code v-pre>packages/streaming/src/semantics/kafka-raw-protocol.ts</code>
 
 ```ts
 export type TransactionCoordinatorState = 'Empty' | 'Ongoing' | 'PrepareCommit' | 'CompleteCommit' | 'PrepareAbort' | 'CompleteAbort';
 ```
 
-#### `TransactionState`
+#### <code v-pre>TransactionState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L77) `packages/streaming/src/exactly-once.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/exactly-once.ts#L77) <code v-pre>packages/streaming/src/exactly-once.ts</code>
 
 ```ts
 export type TransactionState = 'idle' | 'active' | 'committed' | 'aborted';
 ```
 
-#### `TxnPhase`
+#### <code v-pre>TxnPhase</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L24) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L24) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 ```ts
 export type TxnPhase = 'idle' | 'ongoing' | 'prepareCommit' | 'prepareAbort' | 'committed' | 'aborted';
 ```
 
-#### `TxnRecord`
+#### <code v-pre>TxnRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L32) `packages/streaming/src/semantics/redpanda-transactions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/streaming/src/semantics/redpanda-transactions.ts#L32) <code v-pre>packages/streaming/src/semantics/redpanda-transactions.ts</code>
 
 ```ts
 export interface TxnRecord {

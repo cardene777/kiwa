@@ -58,8 +58,8 @@ const snapshot = {
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `layout regression detected (${result.regressions.length} issues):\n${summary}` | [packages/design-check/src/layout-regression.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L130) |
-| `design spec conformance failed (${result.divergences.length} divergences):\n${summary}` | [packages/design-check/src/spec-conformance.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L106) |
+| <code v-pre>layout regression detected ($&#123;result.regressions.length&#125; issues):&#92;n$&#123;summary&#125;</code> | [packages/design-check/src/layout-regression.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L130) |
+| <code v-pre>design spec conformance failed ($&#123;result.divergences.length&#125; divergences):&#92;n$&#123;summary&#125;</code> | [packages/design-check/src/spec-conformance.ts](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L106) |
 
 ## API 契約
 
@@ -67,9 +67,9 @@ const snapshot = {
 
 ### 値
 
-#### `assertDesignConformance`
+#### <code v-pre>assertDesignConformance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L97) `packages/design-check/src/spec-conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L97) <code v-pre>packages/design-check/src/spec-conformance.ts</code>
 
 assertion helper — spec conformance が pass しない場合 throw する。 vitest の expect と同じ contract (test body で自然に fail する)。
 
@@ -77,9 +77,9 @@ assertion helper — spec conformance が pass しない場合 throw する。 v
 export declare function assertDesignConformance(spec: DesignSpec, actual: DesignActual): void;
 ```
 
-#### `assertNoLayoutRegression`
+#### <code v-pre>assertNoLayoutRegression</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L120) `packages/design-check/src/layout-regression.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L120) <code v-pre>packages/design-check/src/layout-regression.ts</code>
 
 assertion helper — layout regression 検知時 throw。
 
@@ -87,9 +87,9 @@ assertion helper — layout regression 検知時 throw。
 export declare function assertNoLayoutRegression(baseline: LayoutSnapshot, actual: LayoutSnapshot, opts?: CheckLayoutRegressionOptions): void;
 ```
 
-#### `checkLayoutRegression`
+#### <code v-pre>checkLayoutRegression</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L21) `packages/design-check/src/layout-regression.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/layout-regression.ts#L21) <code v-pre>packages/design-check/src/layout-regression.ts</code>
 
 layout regression check — baseline と actual の bounding box 差分を検知する。 pass = true when 全 element が tolerance 内 + missing なし、 false when 差分あり。
 
@@ -97,9 +97,9 @@ layout regression check — baseline と actual の bounding box 差分を検知
 export declare function checkLayoutRegression(baseline: LayoutSnapshot, actual: LayoutSnapshot, opts?: CheckLayoutRegressionOptions): LayoutRegressionResult;
 ```
 
-#### `checkSpecConformance`
+#### <code v-pre>checkSpecConformance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L7) `packages/design-check/src/spec-conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/spec-conformance.ts#L7) <code v-pre>packages/design-check/src/spec-conformance.ts</code>
 
 spec conformance check — design spec と actual UI values の差分を検知する。 pass = true when 全 spec key が actual に存在 + 値一致、 false when 差分あり。
 
@@ -109,9 +109,9 @@ export declare function checkSpecConformance(spec: DesignSpec, actual: DesignAct
 
 ### 型
 
-#### `DesignActual`
+#### <code v-pre>DesignActual</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L14) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L14) <code v-pre>packages/design-check/src/types.ts</code>
 
 実 UI (実装済 component) から抽出した design values。 shape は DesignSpec と同じ。
 
@@ -119,9 +119,9 @@ export declare function checkSpecConformance(spec: DesignSpec, actual: DesignAct
 export type DesignActual = DesignSpec;
 ```
 
-#### `DesignSpec`
+#### <code v-pre>DesignSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L6) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L6) <code v-pre>packages/design-check/src/types.ts</code>
 
 design spec object shape。 デザイン仕様書 (colors / spacing / typography / components) を型付きで表現する。 Markdown / JSON / YAML の parser は別 module で この shape に変換する経路。
 
@@ -138,9 +138,9 @@ export interface DesignSpec {
 }
 ```
 
-#### `LayoutRegression`
+#### <code v-pre>LayoutRegression</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L44) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L44) <code v-pre>packages/design-check/src/types.ts</code>
 
 ```ts
 export interface LayoutRegression {
@@ -164,9 +164,9 @@ export interface LayoutRegression {
 }
 ```
 
-#### `LayoutRegressionResult`
+#### <code v-pre>LayoutRegressionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L52) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L52) <code v-pre>packages/design-check/src/types.ts</code>
 
 ```ts
 export interface LayoutRegressionResult {
@@ -176,9 +176,9 @@ export interface LayoutRegressionResult {
 }
 ```
 
-#### `LayoutSnapshot`
+#### <code v-pre>LayoutSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L33) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L33) <code v-pre>packages/design-check/src/types.ts</code>
 
 layout snapshot = element ごとの bounding box + visibility。 Playwright / jsdom / browser DOM から生成する形式で保持する。
 
@@ -195,9 +195,9 @@ export interface LayoutSnapshot {
 }
 ```
 
-#### `SpecConformanceResult`
+#### <code v-pre>SpecConformanceResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L23) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L23) <code v-pre>packages/design-check/src/types.ts</code>
 
 ```ts
 export interface SpecConformanceResult {
@@ -207,9 +207,9 @@ export interface SpecConformanceResult {
 }
 ```
 
-#### `SpecDivergence`
+#### <code v-pre>SpecDivergence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L16) `packages/design-check/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/design-check/src/types.ts#L16) <code v-pre>packages/design-check/src/types.ts</code>
 
 ```ts
 export interface SpecDivergence {

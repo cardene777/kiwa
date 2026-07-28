@@ -52,18 +52,18 @@ helper ごとに container、wrapper、element の型と操作が異なります
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupAngularComponentEnv requires "@testing-library/angular". Run `pnpm add -D @testing-library/angular @angular/core @angular/platform-browser-dynamic zone.js`.' | [packages/ui/src/angular.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L56) |
-| `setupComponentEnv: playwright engine "${browserName}" not available` | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L102) |
-| 'setupComponentEnv({ mode: "browser" }) requires "@playwright/test" or "playwright". Run `pnpm add -D @playwright/test`.' | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L75) |
-| 'setupComponentEnv({ mode: "browser" }) requires "react-dom" to be installed.' | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L89) |
-| 'setupLitComponentEnv requires "@open-wc/testing-helpers". Run `pnpm add -D @open-wc/testing-helpers lit`.' | [packages/ui/src/lit.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L38) |
-| 'setupQwikComponentEnv requires "@noma.to/qwik-testing-library". Run `pnpm add -D @noma.to/qwik-testing-library @builder.io/qwik`.' | [packages/ui/src/qwik.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L46) |
-| 'setupComponentEnv requires "@testing-library/react" to be installed. Run `pnpm add -D @testing-library/react`.' | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L30) |
-| 'setupComponentEnv({ mode: "interaction" }) requires "@testing-library/user-event". Run `pnpm add -D @testing-library/user-event`.' | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L40) |
-| `setupComponentEnv: unknown mode "${String(opts.mode)}"` | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L95) |
-| 'setupSolidComponentEnv requires "@solidjs/testing-library". Run `pnpm add -D @solidjs/testing-library solid-js`.' | [packages/ui/src/solid.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L39) |
-| 'setupSvelteComponentEnv requires "@testing-library/svelte". Run `pnpm add -D @testing-library/svelte svelte`.' | [packages/ui/src/svelte.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L36) |
-| 'setupVueComponentEnv requires "@vue/test-utils". Run `pnpm add -D @vue/test-utils vue`.' | [packages/ui/src/vue.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L47) |
+| <code v-pre>setupAngularComponentEnv requires "@testing-library/angular". Run &#96;pnpm add -D @testing-library/angular @angular/core @angular/platform-browser-dynamic zone.js&#96;.</code> | [packages/ui/src/angular.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L56) |
+| <code v-pre>setupComponentEnv: playwright engine "$&#123;browserName&#125;" not available</code> | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L102) |
+| <code v-pre>setupComponentEnv(&#123; mode: "browser" &#125;) requires "@playwright/test" or "playwright". Run &#96;pnpm add -D @playwright/test&#96;.</code> | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L75) |
+| <code v-pre>setupComponentEnv(&#123; mode: "browser" &#125;) requires "react-dom" to be installed.</code> | [packages/ui/src/browser.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L89) |
+| <code v-pre>setupLitComponentEnv requires "@open-wc/testing-helpers". Run &#96;pnpm add -D @open-wc/testing-helpers lit&#96;.</code> | [packages/ui/src/lit.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L38) |
+| <code v-pre>setupQwikComponentEnv requires "@noma.to/qwik-testing-library". Run &#96;pnpm add -D @noma.to/qwik-testing-library @builder.io/qwik&#96;.</code> | [packages/ui/src/qwik.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L46) |
+| <code v-pre>setupComponentEnv: unknown mode "$&#123;String(opts.mode)&#125;"</code> | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L115) |
+| <code v-pre>setupComponentEnv requires "@testing-library/react" to be installed. Run &#96;pnpm add -D @testing-library/react&#96;.</code> | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L30) |
+| <code v-pre>setupComponentEnv(&#123; mode: "interaction" &#125;) requires "@testing-library/user-event". Run &#96;pnpm add -D @testing-library/user-event&#96;.</code> | [packages/ui/src/setup-component-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L40) |
+| <code v-pre>setupSolidComponentEnv requires "@solidjs/testing-library". Run &#96;pnpm add -D @solidjs/testing-library solid-js&#96;.</code> | [packages/ui/src/solid.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L39) |
+| <code v-pre>setupSvelteComponentEnv requires "@testing-library/svelte". Run &#96;pnpm add -D @testing-library/svelte svelte&#96;.</code> | [packages/ui/src/svelte.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L36) |
+| <code v-pre>setupVueComponentEnv requires "@vue/test-utils". Run &#96;pnpm add -D @vue/test-utils vue&#96;.</code> | [packages/ui/src/vue.ts](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L47) |
 
 ## API 契約
 
@@ -71,65 +71,65 @@ helper ごとに container、wrapper、element の型と操作が異なります
 
 ### 値
 
-#### `setupAngularComponentEnv`
+#### <code v-pre>setupAngularComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L62) `packages/ui/src/angular.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L62) <code v-pre>packages/ui/src/angular.ts</code>
 
 ```ts
 export declare function setupAngularComponentEnv(opts: SetupAngularComponentEnvOptions): Promise<AngularTestEnvUi>;
 ```
 
-#### `setupBrowserComponentEnv`
+#### <code v-pre>setupBrowserComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L95) `packages/ui/src/browser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L95) <code v-pre>packages/ui/src/browser.ts</code>
 
 ```ts
 export declare function setupBrowserComponentEnv(opts: SetupBrowserComponentEnvOptions): Promise<BrowserTestEnvUi>;
 ```
 
-#### `setupComponentEnv`
+#### <code v-pre>setupComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L46) `packages/ui/src/setup-component-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/setup-component-env.ts#L46) <code v-pre>packages/ui/src/setup-component-env.ts</code>
 
 ```ts
 export declare function setupComponentEnv(opts: SetupComponentEnvOptions): Promise<UiTestEnv>;
 ```
 
-#### `setupLitComponentEnv`
+#### <code v-pre>setupLitComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L44) `packages/ui/src/lit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L44) <code v-pre>packages/ui/src/lit.ts</code>
 
 ```ts
 export declare function setupLitComponentEnv(opts: SetupLitComponentEnvOptions): Promise<LitTestEnvUi>;
 ```
 
-#### `setupQwikComponentEnv`
+#### <code v-pre>setupQwikComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L52) `packages/ui/src/qwik.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L52) <code v-pre>packages/ui/src/qwik.ts</code>
 
 ```ts
 export declare function setupQwikComponentEnv(opts: SetupQwikComponentEnvOptions): Promise<QwikTestEnvUi>;
 ```
 
-#### `setupSolidComponentEnv`
+#### <code v-pre>setupSolidComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L45) `packages/ui/src/solid.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L45) <code v-pre>packages/ui/src/solid.ts</code>
 
 ```ts
 export declare function setupSolidComponentEnv(opts: SetupSolidComponentEnvOptions): Promise<SolidTestEnvUi>;
 ```
 
-#### `setupSvelteComponentEnv`
+#### <code v-pre>setupSvelteComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L42) `packages/ui/src/svelte.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L42) <code v-pre>packages/ui/src/svelte.ts</code>
 
 ```ts
 export declare function setupSvelteComponentEnv(opts: SetupSvelteComponentEnvOptions): Promise<SvelteTestEnvUi>;
 ```
 
-#### `setupVueComponentEnv`
+#### <code v-pre>setupVueComponentEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L53) `packages/ui/src/vue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L53) <code v-pre>packages/ui/src/vue.ts</code>
 
 ```ts
 export declare function setupVueComponentEnv(opts: SetupVueComponentEnvOptions): Promise<VueTestEnvUi>;
@@ -137,9 +137,9 @@ export declare function setupVueComponentEnv(opts: SetupVueComponentEnvOptions):
 
 ### 型
 
-#### `AngularContainerLike`
+#### <code v-pre>AngularContainerLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L27) `packages/ui/src/angular.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L27) <code v-pre>packages/ui/src/angular.ts</code>
 
 ```ts
 export interface AngularContainerLike {
@@ -149,9 +149,9 @@ export interface AngularContainerLike {
 }
 ```
 
-#### `AngularTestEnvUi`
+#### <code v-pre>AngularTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L33) `packages/ui/src/angular.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L33) <code v-pre>packages/ui/src/angular.ts</code>
 
 ```ts
 export interface AngularTestEnvUi extends TestEnvBase<'mock' | 'live'> {
@@ -161,9 +161,9 @@ export interface AngularTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 }
 ```
 
-#### `BrowserLocator`
+#### <code v-pre>BrowserLocator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L33) `packages/ui/src/browser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L33) <code v-pre>packages/ui/src/browser.ts</code>
 
 ```ts
 export interface BrowserLocator {
@@ -174,9 +174,9 @@ export interface BrowserLocator {
 }
 ```
 
-#### `BrowserPageHandle`
+#### <code v-pre>BrowserPageHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L21) `packages/ui/src/browser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L21) <code v-pre>packages/ui/src/browser.ts</code>
 
 ```ts
 export interface BrowserPageHandle {
@@ -198,9 +198,9 @@ export interface BrowserPageHandle {
 }
 ```
 
-#### `BrowserTestEnvUi`
+#### <code v-pre>BrowserTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L50) `packages/ui/src/browser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L50) <code v-pre>packages/ui/src/browser.ts</code>
 
 ```ts
 export interface BrowserTestEnvUi {
@@ -213,9 +213,9 @@ export interface BrowserTestEnvUi {
 }
 ```
 
-#### `InteractionTestEnvUi`
+#### <code v-pre>InteractionTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L25) `packages/ui/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L25) <code v-pre>packages/ui/src/types.ts</code>
 
 ```ts
 export interface InteractionTestEnvUi extends TestEnvBase<'live'> {
@@ -226,9 +226,9 @@ export interface InteractionTestEnvUi extends TestEnvBase<'live'> {
 }
 ```
 
-#### `LitElementHandle`
+#### <code v-pre>LitElementHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L15) `packages/ui/src/lit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L15) <code v-pre>packages/ui/src/lit.ts</code>
 
 ```ts
 export interface LitElementHandle {
@@ -241,9 +241,9 @@ export interface LitElementHandle {
 }
 ```
 
-#### `LitTestEnvUi`
+#### <code v-pre>LitTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L24) `packages/ui/src/lit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L24) <code v-pre>packages/ui/src/lit.ts</code>
 
 ```ts
 export interface LitTestEnvUi extends TestEnvBase<'mock' | 'live'> {
@@ -253,9 +253,9 @@ export interface LitTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 }
 ```
 
-#### `QwikContainerLike`
+#### <code v-pre>QwikContainerLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L19) `packages/ui/src/qwik.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L19) <code v-pre>packages/ui/src/qwik.ts</code>
 
 ```ts
 export interface QwikContainerLike {
@@ -265,9 +265,9 @@ export interface QwikContainerLike {
 }
 ```
 
-#### `QwikTestEnvUi`
+#### <code v-pre>QwikTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L25) `packages/ui/src/qwik.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L25) <code v-pre>packages/ui/src/qwik.ts</code>
 
 ```ts
 export interface QwikTestEnvUi extends TestEnvBase<'mock' | 'live'> {
@@ -277,9 +277,9 @@ export interface QwikTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 }
 ```
 
-#### `RenderTestEnvUi`
+#### <code v-pre>RenderTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L19) `packages/ui/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L19) <code v-pre>packages/ui/src/types.ts</code>
 
 ```ts
 export interface RenderTestEnvUi extends TestEnvBase<'mock'> {
@@ -289,9 +289,9 @@ export interface RenderTestEnvUi extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `SetupAngularComponentEnvOptions`
+#### <code v-pre>SetupAngularComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L21) `packages/ui/src/angular.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/angular.ts#L21) <code v-pre>packages/ui/src/angular.ts</code>
 
 ```ts
 export interface SetupAngularComponentEnvOptions {
@@ -301,9 +301,9 @@ export interface SetupAngularComponentEnvOptions {
 }
 ```
 
-#### `SetupBrowserComponentEnvOptions`
+#### <code v-pre>SetupBrowserComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L40) `packages/ui/src/browser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/browser.ts#L40) <code v-pre>packages/ui/src/browser.ts</code>
 
 ```ts
 export interface SetupBrowserComponentEnvOptions {
@@ -317,9 +317,9 @@ export interface SetupBrowserComponentEnvOptions {
 }
 ```
 
-#### `SetupComponentEnvOptions`
+#### <code v-pre>SetupComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L8) `packages/ui/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L8) <code v-pre>packages/ui/src/types.ts</code>
 
 ```ts
 export interface SetupComponentEnvOptions<TMode extends UiTestMode = UiTestMode> {
@@ -332,9 +332,9 @@ export interface SetupComponentEnvOptions<TMode extends UiTestMode = UiTestMode>
 }
 ```
 
-#### `SetupLitComponentEnvOptions`
+#### <code v-pre>SetupLitComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L10) `packages/ui/src/lit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/lit.ts#L10) <code v-pre>packages/ui/src/lit.ts</code>
 
 ```ts
 export interface SetupLitComponentEnvOptions {
@@ -343,9 +343,9 @@ export interface SetupLitComponentEnvOptions {
 }
 ```
 
-#### `SetupQwikComponentEnvOptions`
+#### <code v-pre>SetupQwikComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L14) `packages/ui/src/qwik.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/qwik.ts#L14) <code v-pre>packages/ui/src/qwik.ts</code>
 
 ```ts
 export interface SetupQwikComponentEnvOptions {
@@ -354,9 +354,9 @@ export interface SetupQwikComponentEnvOptions {
 }
 ```
 
-#### `SetupSolidComponentEnvOptions`
+#### <code v-pre>SetupSolidComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L9) `packages/ui/src/solid.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L9) <code v-pre>packages/ui/src/solid.ts</code>
 
 ```ts
 export interface SetupSolidComponentEnvOptions {
@@ -366,9 +366,9 @@ export interface SetupSolidComponentEnvOptions {
 }
 ```
 
-#### `SetupSvelteComponentEnvOptions`
+#### <code v-pre>SetupSvelteComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L9) `packages/ui/src/svelte.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L9) <code v-pre>packages/ui/src/svelte.ts</code>
 
 ```ts
 export interface SetupSvelteComponentEnvOptions {
@@ -378,9 +378,9 @@ export interface SetupSvelteComponentEnvOptions {
 }
 ```
 
-#### `SetupVueComponentEnvOptions`
+#### <code v-pre>SetupVueComponentEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L9) `packages/ui/src/vue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L9) <code v-pre>packages/ui/src/vue.ts</code>
 
 ```ts
 export interface SetupVueComponentEnvOptions {
@@ -391,9 +391,9 @@ export interface SetupVueComponentEnvOptions {
 }
 ```
 
-#### `SnapshotTestEnvUi`
+#### <code v-pre>SnapshotTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L32) `packages/ui/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L32) <code v-pre>packages/ui/src/types.ts</code>
 
 ```ts
 export interface SnapshotTestEnvUi extends TestEnvBase<'mock'> {
@@ -404,9 +404,9 @@ export interface SnapshotTestEnvUi extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `SolidContainerLike`
+#### <code v-pre>SolidContainerLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L15) `packages/ui/src/solid.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L15) <code v-pre>packages/ui/src/solid.ts</code>
 
 ```ts
 export interface SolidContainerLike {
@@ -416,9 +416,9 @@ export interface SolidContainerLike {
 }
 ```
 
-#### `SolidTestEnvUi`
+#### <code v-pre>SolidTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L21) `packages/ui/src/solid.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/solid.ts#L21) <code v-pre>packages/ui/src/solid.ts</code>
 
 ```ts
 export interface SolidTestEnvUi extends TestEnvBase<'mock' | 'live'> {
@@ -428,9 +428,9 @@ export interface SolidTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 }
 ```
 
-#### `SvelteContainerLike`
+#### <code v-pre>SvelteContainerLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L15) `packages/ui/src/svelte.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L15) <code v-pre>packages/ui/src/svelte.ts</code>
 
 ```ts
 export interface SvelteContainerLike {
@@ -440,9 +440,9 @@ export interface SvelteContainerLike {
 }
 ```
 
-#### `SvelteTestEnvUi`
+#### <code v-pre>SvelteTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L21) `packages/ui/src/svelte.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/svelte.ts#L21) <code v-pre>packages/ui/src/svelte.ts</code>
 
 ```ts
 export interface SvelteTestEnvUi extends TestEnvBase<'mock' | 'live'> {
@@ -452,25 +452,25 @@ export interface SvelteTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 }
 ```
 
-#### `UiTestEnv`
+#### <code v-pre>UiTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L39) `packages/ui/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L39) <code v-pre>packages/ui/src/types.ts</code>
 
 ```ts
 export type UiTestEnv = RenderTestEnvUi | InteractionTestEnvUi | SnapshotTestEnvUi;
 ```
 
-#### `UiTestMode`
+#### <code v-pre>UiTestMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L6) `packages/ui/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/types.ts#L6) <code v-pre>packages/ui/src/types.ts</code>
 
 ```ts
 export type UiTestMode = 'render' | 'interaction' | 'snapshot' | 'browser';
 ```
 
-#### `VueTestEnvUi`
+#### <code v-pre>VueTestEnvUi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L33) `packages/ui/src/vue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L33) <code v-pre>packages/ui/src/vue.ts</code>
 
 ```ts
 export interface VueTestEnvUi extends TestEnvBase<'mock' | 'live'> {
@@ -480,9 +480,9 @@ export interface VueTestEnvUi extends TestEnvBase<'mock' | 'live'> {
 }
 ```
 
-#### `VueWrapperLike`
+#### <code v-pre>VueWrapperLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L24) `packages/ui/src/vue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/ui/src/vue.ts#L24) <code v-pre>packages/ui/src/vue.ts</code>
 
 ```ts
 export interface VueWrapperLike {

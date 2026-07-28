@@ -27,9 +27,9 @@ Leanを実行するAPIはproject fileを作る場合があります。出力先�
 
 ### 値
 
-#### `checkConformance`
+#### <code v-pre>checkConformance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L75) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L75) <code v-pre>packages/lean/src/conformance.ts</code>
 
 Compare an implementation against a spec. Every cell is asked about, including the ones the spec refuses: an implementation that quietly accepts an event the spec calls impossible is the more dangerous half of the disagreement, and it is the half a test written from the spec's happy path never reaches.
 
@@ -37,9 +37,9 @@ Compare an implementation against a spec. Every cell is asked about, including t
 export declare function checkConformance(spec: OrchestratorSpec, observe: Observe): ConformanceReport;
 ```
 
-#### `checkLeanTable`
+#### <code v-pre>checkLeanTable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L283) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L283) <code v-pre>packages/lean/src/extract.ts</code>
 
 Ask Lean what table a source holds, and compare it with the spec. `ok` is false when Lean could not be run, since a check that did not happen has established nothing. `status` says which it was.
 
@@ -47,9 +47,9 @@ Ask Lean what table a source holds, and compare it with the spec. `ok` is false 
 export declare function checkLeanTable(spec: OrchestratorSpec, opts?: CheckLeanTableOptions): LeanTableReport;
 ```
 
-#### `checkLeanTableAsync`
+#### <code v-pre>checkLeanTableAsync</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L299) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L299) <code v-pre>packages/lean/src/extract.ts</code>
 
 The same comparison, awaited. A caller with five machines runs Lean five times. Through `checkLeanTable` they run one after another, because a synchronous call gives no other option: five of them took 1462ms, and the same five Lean processes started at once finished in 169ms. Awaiting these, a `Promise.all` is the caller's to write.
 
@@ -57,9 +57,9 @@ The same comparison, awaited. A caller with five machines runs Lean five times. 
 export declare function checkLeanTableAsync(spec: OrchestratorSpec, opts?: CheckLeanTableOptions): Promise<LeanTableReport>;
 ```
 
-#### `extractLeanTable`
+#### <code v-pre>extractLeanTable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L140) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L140) <code v-pre>packages/lean/src/extract.ts</code>
 
 Run a generated Lean source and read back the table it computes. `source` is taken rather than generated so that a test can hand in a file with one cell moved, which is the only way to know this function can fail.
 
@@ -67,9 +67,9 @@ Run a generated Lean source and read back the table it computes. `source` is tak
 export declare function extractLeanTable(source: string, spec: OrchestratorSpec, opts?: ExtractOptions): ExtractResult;
 ```
 
-#### `extractLeanTableAsync`
+#### <code v-pre>extractLeanTableAsync</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L159) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L159) <code v-pre>packages/lean/src/extract.ts</code>
 
 The same extraction, awaited. `execFileSync` stops the event loop while Lean works. This does not. Every decision below the run belongs to `interpretExtract`, which both call, so a rule learned by one path cannot be missed by the other.
 
@@ -77,9 +77,9 @@ The same extraction, awaited. `execFileSync` stops the event loop while Lean wor
 export declare function extractLeanTableAsync(source: string, spec: OrchestratorSpec, opts?: ExtractOptions): Promise<ExtractResult>;
 ```
 
-#### `formatConformance`
+#### <code v-pre>formatConformance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L187) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L187) <code v-pre>packages/lean/src/conformance.ts</code>
 
 Render a report for a test failure message, one disagreement per line.
 
@@ -87,17 +87,17 @@ Render a report for a test failure message, one disagreement per line.
 export declare function formatConformance(spec: OrchestratorSpec, report: ConformanceReport): string;
 ```
 
-#### `generateLakeProject`
+#### <code v-pre>generateLakeProject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lake.ts#L48) `packages/lean/src/lake.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lake.ts#L48) <code v-pre>packages/lean/src/lake.ts</code>
 
 ```ts
 export declare function generateLakeProject(config: LakeProjectConfig): LakeProjectFiles;
 ```
 
-#### `generateLeanSpec`
+#### <code v-pre>generateLeanSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/generator.ts#L57) `packages/lean/src/generator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/generator.ts#L57) <code v-pre>packages/lean/src/generator.ts</code>
 
 Generate a Lean 4 spec for a lifecycle-orchestrator state machine. The generated file lists every `(state, event)` cell and has no catch-all. That is deliberate: Lean refuses a non-exhaustive match, so the exhaustiveness of the table is checked by Lean rather than asserted by a theorem that cannot fail. ```lean inductive Step where | to : State → Step | invalid : Step def dispatch : State → Event → Step | .Beginning, .BeginCompleted =&gt; .to .Active | .Beginning, .QueryExecuted =&gt; .invalid ... theorem aborted_absorbing : ∀ e, dispatch .Aborted e = .invalid := by intro e; cases e &lt;;&gt; rfl theorem beginning_can_leave : ∃ e, escapes .Beginning e = true := ⟨.BeginCompleted, rfl⟩ ``` The theorems say things a reader could otherwise get wrong: which states are terminal, which can actually be left, which accept events and go nowhere, and which paths reach which states. Their proofs are mechanical because the generator already knows the table, and they fail to compile if it is misread.
 
@@ -105,17 +105,17 @@ Generate a Lean 4 spec for a lifecycle-orchestrator state machine. The generated
 export declare function generateLeanSpec(spec: OrchestratorSpec): LeanSpecOutput;
 ```
 
-#### `isInvalid`
+#### <code v-pre>isInvalid</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L37) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L37) <code v-pre>packages/lean/src/types.ts</code>
 
 ```ts
 export declare function isInvalid(t: Transition): t is InvalidTransition;
 ```
 
-#### `LeanError`
+#### <code v-pre>LeanError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/errors.ts#L11) `packages/lean/src/errors.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/errors.ts#L11) <code v-pre>packages/lean/src/errors.ts</code>
 
 Base class, so `catch (e) { if (e instanceof LeanError) ... }` works.
 
@@ -125,9 +125,9 @@ export declare class LeanError extends Error {
 }
 ```
 
-#### `SpecError`
+#### <code v-pre>SpecError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/errors.ts#L26) `packages/lean/src/errors.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/errors.ts#L26) <code v-pre>packages/lean/src/errors.ts</code>
 
 The spec cannot be turned into a machine: a name that is not usable, a cell nobody declared, a state nothing reaches, a table that contradicts what the author said about it.
 
@@ -136,9 +136,9 @@ export declare class SpecError extends LeanError {
 }
 ```
 
-#### `UsageError`
+#### <code v-pre>UsageError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/errors.ts#L32) `packages/lean/src/errors.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/errors.ts#L32) <code v-pre>packages/lean/src/errors.ts</code>
 
 The call itself is wrong, whatever the spec says: no specs to verify, two specs that would land on one path.
 
@@ -147,9 +147,9 @@ export declare class UsageError extends LeanError {
 }
 ```
 
-#### `verifyLeanSpec`
+#### <code v-pre>verifyLeanSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L107) `packages/lean/src/verify.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L107) <code v-pre>packages/lean/src/verify.ts</code>
 
 Verify one or more generated Lean specs by elaborating them with Lean. Behavior: - If Lean is not installed (or `leanBin` is not on PATH), returns `{ status: 'lean-not-installed' }` without throwing. - If `opts.skip === true` or `KIWA_LEAN_SKIP_VERIFY=1`, returns `{ status: 'skipped-by-env' }`. - Otherwise writes the specs into one file and runs `lean` over it once. A non-zero exit surfaces as `{ status: 'verification-failed', diagnostics }`, with positions named after the spec they came from, and a run that outlives `timeoutMs` as `{ status: 'timed-out' }`. Success returns `{ status: 'ok', verifiedFiles }`. Lean is invoked with the file as its only argument. It has no `--check` flag, and it refuses more than one file: elaborating a file *is* checking it, and a failed proof or a non-exhaustive match is a non-zero exit. Passing an unrecognized flag makes every file fail identically, which reads as "the spec is wrong" when it means "the command was wrong". No Lake project is written. Building one and then never calling `lake` is what this used to do, and the lakefile it wrote had no effect on anything. Generated specs import nothing, so they need no build system to be checked. The one file that would have an effect is `lean-toolchain`, and it is written only when `leanToolchain` asks for it. The scratch directory is always cleaned up (best effort) on return.
 
@@ -157,9 +157,9 @@ Verify one or more generated Lean specs by elaborating them with Lean. Behavior:
 export declare function verifyLeanSpec(specs: readonly LeanSpecOutput[], opts?: VerifyOptions): VerifyResult;
 ```
 
-#### `verifyLeanSpecAsync`
+#### <code v-pre>verifyLeanSpecAsync</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L130) `packages/lean/src/verify.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L130) <code v-pre>packages/lean/src/verify.ts</code>
 
 The same verification, awaited. `execFileSync` stops the event loop for as long as Lean works — a hundred and thirty-nine milliseconds on the smallest machine in this repository, during which a five-millisecond timer fires exactly zero times. A build plugin, a watch mode, or a server sharing the process freezes with it. Everything this decides is decided by `planVerify` and `interpretVerify`, which the synchronous function calls too. The only difference is which of the two runners does the waiting.
 
@@ -169,9 +169,9 @@ export declare function verifyLeanSpecAsync(specs: readonly LeanSpecOutput[], op
 
 ### 型
 
-#### `CheckLeanTableOptions`
+#### <code v-pre>CheckLeanTableOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L264) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L264) <code v-pre>packages/lean/src/extract.ts</code>
 
 ```ts
 export interface CheckLeanTableOptions extends ExtractOptions {
@@ -188,9 +188,9 @@ export interface CheckLeanTableOptions extends ExtractOptions {
 }
 ```
 
-#### `ConformanceReport`
+#### <code v-pre>ConformanceReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L56) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L56) <code v-pre>packages/lean/src/conformance.ts</code>
 
 ```ts
 export interface ConformanceReport {
@@ -205,9 +205,9 @@ export interface ConformanceReport {
 }
 ```
 
-#### `Disagreement`
+#### <code v-pre>Disagreement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L44) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L44) <code v-pre>packages/lean/src/conformance.ts</code>
 
 ```ts
 export interface Disagreement {
@@ -223,9 +223,9 @@ export interface Disagreement {
 }
 ```
 
-#### `DisagreementKind`
+#### <code v-pre>DisagreementKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L34) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L34) <code v-pre>packages/lean/src/conformance.ts</code>
 
 ```ts
 export type DisagreementKind = 
@@ -239,9 +239,9 @@ export type DisagreementKind =
  | 'unknown-state';
 ```
 
-#### `ExtractOptions`
+#### <code v-pre>ExtractOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L123) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L123) <code v-pre>packages/lean/src/extract.ts</code>
 
 ```ts
 export interface ExtractOptions extends LeanRunOptions {
@@ -256,9 +256,9 @@ export interface ExtractOptions extends LeanRunOptions {
 }
 ```
 
-#### `ExtractResult`
+#### <code v-pre>ExtractResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L115) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L115) <code v-pre>packages/lean/src/extract.ts</code>
 
 ```ts
 export interface ExtractResult {
@@ -270,9 +270,9 @@ export interface ExtractResult {
 }
 ```
 
-#### `ExtractStatus`
+#### <code v-pre>ExtractStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L90) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L90) <code v-pre>packages/lean/src/extract.ts</code>
 
 ```ts
 export type ExtractStatus = 'ok' | 'lean-not-installed'
@@ -299,9 +299,9 @@ export type ExtractStatus = 'ok' | 'lean-not-installed'
  | 'output-too-large';
 ```
 
-#### `InvalidTransition`
+#### <code v-pre>InvalidTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L29) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L29) <code v-pre>packages/lean/src/types.ts</code>
 
 A cell the machine rejects. This is distinct from a self-loop. `{ from: 'active', event: 'query', to: 'active' }` says the event is expected and changes nothing; `{ from: 'active', event: 'commit', invalid: true }` says the event must never arrive in this state. Collapsing the two hides the second one, which is the bug the machine exists to surface.
 
@@ -313,9 +313,9 @@ export interface InvalidTransition {
 }
 ```
 
-#### `LakeProjectConfig`
+#### <code v-pre>LakeProjectConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lake.ts#L16) `packages/lean/src/lake.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lake.ts#L16) <code v-pre>packages/lean/src/lake.ts</code>
 
 ```ts
 export interface LakeProjectConfig {
@@ -336,9 +336,9 @@ export interface LakeProjectConfig {
 }
 ```
 
-#### `LakeProjectFiles`
+#### <code v-pre>LakeProjectFiles</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lake.ts#L33) `packages/lean/src/lake.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lake.ts#L33) <code v-pre>packages/lean/src/lake.ts</code>
 
 ```ts
 export interface LakeProjectFiles {
@@ -346,9 +346,9 @@ export interface LakeProjectFiles {
 }
 ```
 
-#### `LeanRunOptions`
+#### <code v-pre>LeanRunOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lean-runner.ts#L35) `packages/lean/src/lean-runner.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/lean-runner.ts#L35) <code v-pre>packages/lean/src/lean-runner.ts</code>
 
 ```ts
 export interface LeanRunOptions {
@@ -377,9 +377,9 @@ export interface LeanRunOptions {
 }
 ```
 
-#### `LeanSpecOutput`
+#### <code v-pre>LeanSpecOutput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L89) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L89) <code v-pre>packages/lean/src/types.ts</code>
 
 ```ts
 export interface LeanSpecOutput {
@@ -412,9 +412,9 @@ export interface LeanSpecOutput {
 }
 ```
 
-#### `LeanTableReport`
+#### <code v-pre>LeanTableReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L256) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L256) <code v-pre>packages/lean/src/extract.ts</code>
 
 ```ts
 export interface LeanTableReport {
@@ -426,9 +426,9 @@ export interface LeanTableReport {
 }
 ```
 
-#### `Observation`
+#### <code v-pre>Observation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L20) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L20) <code v-pre>packages/lean/src/conformance.ts</code>
 
 What an implementation did with one cell.
 
@@ -441,9 +441,9 @@ export type Observation = {
 };
 ```
 
-#### `Observe`
+#### <code v-pre>Observe</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L32) `packages/lean/src/conformance.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/conformance.ts#L32) <code v-pre>packages/lean/src/conformance.ts</code>
 
 Put the machine in `state`, feed it `event`, and say what happened. Return `{ kind: 'rejected' }` when the implementation refuses the event, by whatever means it refuses: throwing, returning a marker, leaving the state untouched and logging. Deciding what counts as a refusal is the caller's, since only they know what their code does when it disagrees with its input.
 
@@ -451,9 +451,9 @@ Put the machine in `state`, feed it `event`, and say what happened. Return `{ ki
 export type Observe = (state: string, event: string) => Observation;
 ```
 
-#### `OrchestratorSpec`
+#### <code v-pre>OrchestratorSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L53) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L53) <code v-pre>packages/lean/src/types.ts</code>
 
 ```ts
 export interface OrchestratorSpec {
@@ -493,9 +493,9 @@ export interface OrchestratorSpec {
 }
 ```
 
-#### `Table`
+#### <code v-pre>Table</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/table.ts#L15) `packages/lean/src/table.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/table.ts#L15) <code v-pre>packages/lean/src/table.ts</code>
 
 `null` marks a rejected cell; a string is the target state.
 
@@ -503,9 +503,9 @@ export interface OrchestratorSpec {
 export type Table = ReadonlyMap<string, string | null>;
 ```
 
-#### `TableDisagreement`
+#### <code v-pre>TableDisagreement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L246) `packages/lean/src/extract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/extract.ts#L246) <code v-pre>packages/lean/src/extract.ts</code>
 
 ```ts
 export interface TableDisagreement {
@@ -519,17 +519,17 @@ export interface TableDisagreement {
 }
 ```
 
-#### `Transition`
+#### <code v-pre>Transition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L35) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L35) <code v-pre>packages/lean/src/types.ts</code>
 
 ```ts
 export type Transition = ValidTransition | InvalidTransition;
 ```
 
-#### `UnspecifiedPolicy`
+#### <code v-pre>UnspecifiedPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L51) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L51) <code v-pre>packages/lean/src/types.ts</code>
 
 What to do with a `(state, event)` cell the spec never mentions. `error` — refuse to generate, and name the cells. The default. An unmentioned cell is a cell nobody decided about, and the whole point of writing the table down is to have decided. `invalid` — treat it as rejected. Choose this when the table is large and most of it is rejection, and say so out loud by passing the option.
 
@@ -537,9 +537,9 @@ What to do with a `(state, event)` cell the spec never mentions. `error` — ref
 export type UnspecifiedPolicy = 'error' | 'invalid';
 ```
 
-#### `ValidTransition`
+#### <code v-pre>ValidTransition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L14) `packages/lean/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/types.ts#L14) <code v-pre>packages/lean/src/types.ts</code>
 
 A cell that moves the machine from `from` to `to` when `event` arrives.
 
@@ -552,9 +552,9 @@ export interface ValidTransition {
 }
 ```
 
-#### `VerifyOptions`
+#### <code v-pre>VerifyOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L21) `packages/lean/src/verify.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L21) <code v-pre>packages/lean/src/verify.ts</code>
 
 ```ts
 export interface VerifyOptions {
@@ -595,9 +595,9 @@ export interface VerifyOptions {
 }
 ```
 
-#### `VerifyResult`
+#### <code v-pre>VerifyResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L58) `packages/lean/src/verify.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L58) <code v-pre>packages/lean/src/verify.ts</code>
 
 ```ts
 export interface VerifyResult {
@@ -622,9 +622,9 @@ export interface VerifyResult {
 }
 ```
 
-#### `VerifyStatus`
+#### <code v-pre>VerifyStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L11) `packages/lean/src/verify.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/lean/src/verify.ts#L11) <code v-pre>packages/lean/src/verify.ts</code>
 
 ```ts
 export type VerifyStatus = 'ok' | 'lean-not-installed' | 'skipped-by-env' | 'verification-failed'

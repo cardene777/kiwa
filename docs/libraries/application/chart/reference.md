@@ -31,9 +31,9 @@
 
 ### 値
 
-#### `animateChartFrames`
+#### <code v-pre>animateChartFrames</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L20) `packages/chart/src/animation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L20) <code v-pre>packages/chart/src/animation.ts</code>
 
 animation frame 列を生成、 fromValues → toValues を frames 数で補間。 real Recharts / Chart.js の animation stream を mock。
 
@@ -41,9 +41,9 @@ animation frame 列を生成、 fromValues → toValues を frames 数で補間�
 export declare function animateChartFrames(build: (values: number[]) => ChartNode, opts: AnimateChartOptions): AnimationFrame[];
 ```
 
-#### `captureLegend`
+#### <code v-pre>captureLegend</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/legend.ts#L14) `packages/chart/src/legend.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/legend.ts#L14) <code v-pre>packages/chart/src/legend.ts</code>
 
 rendered chart tree を走査して series 名 + 色 + 表示状態を legend entry 化。 real chart library の Legend component が render する data table 相当。
 
@@ -51,9 +51,9 @@ rendered chart tree を走査して series 名 + 色 + 表示状態を legend en
 export declare function captureLegend(rendered: ChartNode): LegendEntry[];
 ```
 
-#### `computeAxis`
+#### <code v-pre>computeAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/axis.ts#L18) `packages/chart/src/axis.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/axis.ts#L18) <code v-pre>packages/chart/src/axis.ts</code>
 
 numeric data から axis の domain + tick + scale を計算。 real chart library の d3-scale 相当を mock、 nice=true で見栄えの良い round 値に丸める。
 
@@ -61,9 +61,9 @@ numeric data から axis の domain + tick + scale を計算。 real chart libra
 export declare function computeAxis(values: number[], options?: AxisOptions): AxisResult;
 ```
 
-#### `computeResponsiveDimensions`
+#### <code v-pre>computeResponsiveDimensions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L50) `packages/chart/src/animation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L50) <code v-pre>packages/chart/src/animation.ts</code>
 
 viewport width から chart dimensions + breakpoint を導出。 responsive chart の mock、 container width に応じて aspect ratio 調整。
 
@@ -71,9 +71,9 @@ viewport width から chart dimensions + breakpoint を導出。 responsive char
 export declare function computeResponsiveDimensions(containerWidth: number, aspectRatio?: number): ResponsiveDimensions;
 ```
 
-#### `createChartClient`
+#### <code v-pre>createChartClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L34) `packages/chart/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L34) <code v-pre>packages/chart/src/client.ts</code>
 
 provider 別のみ id prefix + 属性 default を持たせる。 全 API 共通 interface で Recharts / Chart.js / D3 / Visx を差し替え可能。
 
@@ -81,9 +81,9 @@ provider 別のみ id prefix + 属性 default を持たせる。 全 API 共通 
 export declare function createChartClient(options?: CreateChartClientOptions): ChartClient;
 ```
 
-#### `dispatchTooltip`
+#### <code v-pre>dispatchTooltip</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/tooltip.ts#L19) `packages/chart/src/tooltip.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/tooltip.ts#L19) <code v-pre>packages/chart/src/tooltip.ts</code>
 
 event 座標に最も近い data node (rect / circle / path) を探して tooltip 内容を決定。 real chart library の hover handler + tooltip content builder 相当。
 
@@ -91,9 +91,9 @@ event 座標に最も近い data node (rect / circle / path) を探して toolti
 export declare function dispatchTooltip(rendered: ChartNode, event: TooltipEvent): TooltipContent;
 ```
 
-#### `drillDown`
+#### <code v-pre>drillDown</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L20) `packages/chart/src/drilldown.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L20) <code v-pre>packages/chart/src/drilldown.ts</code>
 
 chart tree を掘り下げて特定 series + data index の detail node を取得。 real chart lib の onClick → drill-down navigation を mock。
 
@@ -101,9 +101,9 @@ chart tree を掘り下げて特定 series + data index の detail node を取�
 export declare function drillDown(tree: ChartNode, request: DrillDownRequest): DrillDownResult;
 ```
 
-#### `exportChart`
+#### <code v-pre>exportChart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L44) `packages/chart/src/drilldown.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L44) <code v-pre>packages/chart/src/drilldown.ts</code>
 
 chart tree を SVG string or PNG mock bytes に変換。 real Chart.js の canvas.toDataURL / Recharts の SVG export を mock。
 
@@ -115,9 +115,9 @@ export declare function exportChart(tree: ChartNode, options?: ExportOptions): {
 };
 ```
 
-#### `renderChart`
+#### <code v-pre>renderChart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L39) `packages/chart/src/render.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L39) <code v-pre>packages/chart/src/render.ts</code>
 
 spec を svg-like tree に変換。 real chart library (Recharts / Chart.js / D3 / Visx) の rendered DOM 相当を mock 生成、 kind 別に shape / rect / path / circle を配置。
 
@@ -125,9 +125,9 @@ spec を svg-like tree に変換。 real chart library (Recharts / Chart.js / D3
 export declare function renderChart(spec: ChartSpec): ChartNode;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/observability.ts#L19) `packages/chart/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/observability.ts#L19) <code v-pre>packages/chart/src/observability.ts</code>
 
 render 動作を metric として emit、 downstream (Datadog / OTel / console) に渡す hook 経路。 real chart lib の performance measurement 相当。
 
@@ -142,9 +142,9 @@ export declare function withObservability<T>(fn: () => T, hook: ObservabilityHoo
 
 ### 型
 
-#### `AnimateChartOptions`
+#### <code v-pre>AnimateChartOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L9) `packages/chart/src/animation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L9) <code v-pre>packages/chart/src/animation.ts</code>
 
 ```ts
 export interface AnimateChartOptions {
@@ -155,9 +155,9 @@ export interface AnimateChartOptions {
 }
 ```
 
-#### `AnimationFrame`
+#### <code v-pre>AnimationFrame</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L3) `packages/chart/src/animation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L3) <code v-pre>packages/chart/src/animation.ts</code>
 
 ```ts
 export interface AnimationFrame {
@@ -167,9 +167,9 @@ export interface AnimationFrame {
 }
 ```
 
-#### `AxisOptions`
+#### <code v-pre>AxisOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/axis.ts#L1) `packages/chart/src/axis.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/axis.ts#L1) <code v-pre>packages/chart/src/axis.ts</code>
 
 ```ts
 export interface AxisOptions {
@@ -179,9 +179,9 @@ export interface AxisOptions {
 }
 ```
 
-#### `AxisResult`
+#### <code v-pre>AxisResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/axis.ts#L7) `packages/chart/src/axis.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/axis.ts#L7) <code v-pre>packages/chart/src/axis.ts</code>
 
 ```ts
 export interface AxisResult {
@@ -192,9 +192,9 @@ export interface AxisResult {
 }
 ```
 
-#### `ChartClient`
+#### <code v-pre>ChartClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L15) `packages/chart/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L15) <code v-pre>packages/chart/src/client.ts</code>
 
 ```ts
 export interface ChartClient {
@@ -207,9 +207,9 @@ export interface ChartClient {
 }
 ```
 
-#### `ChartDataPoint`
+#### <code v-pre>ChartDataPoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L3) `packages/chart/src/render.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L3) <code v-pre>packages/chart/src/render.ts</code>
 
 ```ts
 export interface ChartDataPoint {
@@ -219,17 +219,17 @@ export interface ChartDataPoint {
 }
 ```
 
-#### `ChartKind`
+#### <code v-pre>ChartKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L1) `packages/chart/src/render.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L1) <code v-pre>packages/chart/src/render.ts</code>
 
 ```ts
 export type ChartKind = 'bar' | 'line' | 'pie' | 'scatter';
 ```
 
-#### `ChartNode`
+#### <code v-pre>ChartNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L28) `packages/chart/src/render.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L28) <code v-pre>packages/chart/src/render.ts</code>
 
 svg-like tree node — real chart library の rendered element を mock 表現。 type = svg element 名 / attrs = attribute map / children = ネスト tree。
 
@@ -242,17 +242,17 @@ export interface ChartNode {
 }
 ```
 
-#### `ChartProvider`
+#### <code v-pre>ChartProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L5) `packages/chart/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L5) <code v-pre>packages/chart/src/client.ts</code>
 
 ```ts
 export type ChartProvider = 'recharts' | 'chartjs' | 'd3' | 'visx';
 ```
 
-#### `ChartSeries`
+#### <code v-pre>ChartSeries</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L9) `packages/chart/src/render.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L9) <code v-pre>packages/chart/src/render.ts</code>
 
 ```ts
 export interface ChartSeries {
@@ -263,9 +263,9 @@ export interface ChartSeries {
 }
 ```
 
-#### `ChartSpec`
+#### <code v-pre>ChartSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L16) `packages/chart/src/render.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/render.ts#L16) <code v-pre>packages/chart/src/render.ts</code>
 
 ```ts
 export interface ChartSpec {
@@ -277,9 +277,9 @@ export interface ChartSpec {
 }
 ```
 
-#### `DrillDownRequest`
+#### <code v-pre>DrillDownRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L3) `packages/chart/src/drilldown.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L3) <code v-pre>packages/chart/src/drilldown.ts</code>
 
 ```ts
 export interface DrillDownRequest {
@@ -288,9 +288,9 @@ export interface DrillDownRequest {
 }
 ```
 
-#### `DrillDownResult`
+#### <code v-pre>DrillDownResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L8) `packages/chart/src/drilldown.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L8) <code v-pre>packages/chart/src/drilldown.ts</code>
 
 ```ts
 export interface DrillDownResult {
@@ -302,9 +302,9 @@ export interface DrillDownResult {
 }
 ```
 
-#### `ExportOptions`
+#### <code v-pre>ExportOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L35) `packages/chart/src/drilldown.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/drilldown.ts#L35) <code v-pre>packages/chart/src/drilldown.ts</code>
 
 ```ts
 export interface ExportOptions {
@@ -313,9 +313,9 @@ export interface ExportOptions {
 }
 ```
 
-#### `LegendEntry`
+#### <code v-pre>LegendEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/legend.ts#L3) `packages/chart/src/legend.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/legend.ts#L3) <code v-pre>packages/chart/src/legend.ts</code>
 
 ```ts
 export interface LegendEntry {
@@ -326,9 +326,9 @@ export interface LegendEntry {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/observability.ts#L10) `packages/chart/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/observability.ts#L10) <code v-pre>packages/chart/src/observability.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -337,9 +337,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RenderedChart`
+#### <code v-pre>RenderedChart</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L7) `packages/chart/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/client.ts#L7) <code v-pre>packages/chart/src/client.ts</code>
 
 ```ts
 export interface RenderedChart {
@@ -351,9 +351,9 @@ export interface RenderedChart {
 }
 ```
 
-#### `RenderMetric`
+#### <code v-pre>RenderMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/observability.ts#L1) `packages/chart/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/observability.ts#L1) <code v-pre>packages/chart/src/observability.ts</code>
 
 ```ts
 export interface RenderMetric {
@@ -366,9 +366,9 @@ export interface RenderMetric {
 }
 ```
 
-#### `ResponsiveDimensions`
+#### <code v-pre>ResponsiveDimensions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L40) `packages/chart/src/animation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/animation.ts#L40) <code v-pre>packages/chart/src/animation.ts</code>
 
 ```ts
 export interface ResponsiveDimensions {
@@ -378,9 +378,9 @@ export interface ResponsiveDimensions {
 }
 ```
 
-#### `TooltipContent`
+#### <code v-pre>TooltipContent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/tooltip.ts#L8) `packages/chart/src/tooltip.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/tooltip.ts#L8) <code v-pre>packages/chart/src/tooltip.ts</code>
 
 ```ts
 export interface TooltipContent {
@@ -391,9 +391,9 @@ export interface TooltipContent {
 }
 ```
 
-#### `TooltipEvent`
+#### <code v-pre>TooltipEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/tooltip.ts#L3) `packages/chart/src/tooltip.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/chart/src/tooltip.ts#L3) <code v-pre>packages/chart/src/tooltip.ts</code>
 
 ```ts
 export interface TooltipEvent {

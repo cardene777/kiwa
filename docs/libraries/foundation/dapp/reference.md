@@ -68,37 +68,37 @@ import { dappE2eTest as test } from "@kiwa-lab/dapp";
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `createAnvilPool: size must be a positive integer, got ${opts.size}` | [packages/dapp/src/anvil-pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L40) |
-| `anvil failed to listen within ${STARTUP_TIMEOUT_MS}ms` | [packages/dapp/src/anvil.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L158) |
-| 'Could not determine free port' | [packages/dapp/src/anvil.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L31) |
-| `deployContract did not return contractAddress for tx ${txHash}` | [packages/dapp/src/deploy-contract.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L69) |
-| `forge artifact abi missing or invalid: ${artifactPath}` | [packages/dapp/src/deploy-contract.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L86) |
-| `forge artifact bytecode missing or invalid: ${artifactPath}` | [packages/dapp/src/deploy-contract.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L92) |
-| 'kiwa: page script runner is unavailable' | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L289) |
-| `kiwa: WalletConfig at index ${index} must be an object` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L393) |
-| `kiwa: WalletConfig.name must be a non-empty string, got ${typeof name}` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L399) |
-| `kiwa: WalletConfig.rdns must be a reverse-DNS name (alnum/./-), got "${String(rdns)}"` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L402) |
-| `kiwa: WalletConfig.icon must be a data URI (data:image/...), got "${typeof icon === 'string' ? icon.slice(0, 30) : typeof icon}"` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L407) |
-| `kiwa: WalletConfig.privateKey at index ${index} must be a 0x-prefixed 64-char hex string (32 bytes), got "${typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey}"` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L412) |
-| `kiwa: WalletConfig.chainId at index ${index} must be a positive integer when specified, got ${typeof wallet.chainId === 'number' ? wallet.chainId : typeof wallet.chainId}` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L422) |
-| `kiwa: WalletConfig.isContractAccount at index ${index} must be a boolean when specified, got ${typeof wallet.isContractAccount}` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L431) |
-| `kiwa: WalletConfig.contractAccountAddress at index ${index} must be a 0x-prefixed 40-char address when specified, got "${typeof wallet.contractAccountAddress === 'string' ? wallet.contractAccountAddress : typeof wallet.contractAccountAddress}"` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L440) |
-| `kiwa: WalletConfig.contractAccountExecuteAbi at index ${index} must be a non-empty string[] when specified` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L450) |
-| `kiwa: WalletConfig.contractAccountAddress at index ${index} is required when isContractAccount=true` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L456) |
-| `kiwa: wallet rdns collision after sanitization: "${rdns}" -> "${sanitizedRdns}" (already used by "${existingRdns}")` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L464) |
-| `kiwa: unknown wallet rdns "${prop}"` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L599) |
-| `kiwa: missing ${label}` | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L660) |
-| `kiwa: setStorageSlot value must be a 32-byte hex (0x + 64 hex chars), got "${value}"` | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L17) |
-| `kiwa: setStorageSlot RPC failed with HTTP ${response.status} (${response.statusText})` | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L36) |
-| `kiwa: setStorageSlot RPC error ${payload.error.code}: ${payload.error.message}` | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L47) |
-| `kiwa: setStorageSlot slot number must be a non-negative integer, got ${slot}` | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L56) |
-| `kiwa: setStorageSlot slot bigint must be non-negative, got ${slot}` | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L62) |
-| `kiwa: setStorageSlot slot hex must match /^0x[0-9a-fA-F]+$/, got "${slot}"` | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L67) |
-| 'withAnvil must be called inside a vitest test file (beforeAll / afterAll missing)' | [packages/dapp/src/vitest.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L101) |
-| 'withAnvil env() called before beforeAll resolved' | [packages/dapp/src/vitest.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L114) |
-| 'setupTestEnv: anvil and pool options are mutually exclusive' | [packages/dapp/src/vitest.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L54) |
-| `waitForChainState timeout after ${timeoutMs}ms: ${String(functionName)} did not satisfy predicate (last value: ${String(lastValue)})` | [packages/dapp/src/wait-for-chain-state.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L90) |
-| `kiwa: waitForWalletConnected timed out after ${timeout}ms (testId=${testId}, expected="${expectedText}", lastSeen="${lastSeen}")` | [packages/dapp/src/wait-for-wallet-connected.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L42) |
+| <code v-pre>createAnvilPool: size must be a positive integer, got $&#123;opts.size&#125;</code> | [packages/dapp/src/anvil-pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L40) |
+| <code v-pre>anvil failed to listen within $&#123;STARTUP&#95;TIMEOUT&#95;MS&#125;ms</code> | [packages/dapp/src/anvil.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L158) |
+| <code v-pre>Could not determine free port</code> | [packages/dapp/src/anvil.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L31) |
+| <code v-pre>deployContract did not return contractAddress for tx $&#123;txHash&#125;</code> | [packages/dapp/src/deploy-contract.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L69) |
+| <code v-pre>forge artifact abi missing or invalid: $&#123;artifactPath&#125;</code> | [packages/dapp/src/deploy-contract.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L86) |
+| <code v-pre>forge artifact bytecode missing or invalid: $&#123;artifactPath&#125;</code> | [packages/dapp/src/deploy-contract.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L92) |
+| <code v-pre>kiwa: page script runner is unavailable</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L289) |
+| <code v-pre>kiwa: WalletConfig at index $&#123;index&#125; must be an object</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L393) |
+| <code v-pre>kiwa: WalletConfig.name must be a non-empty string, got $&#123;typeof name&#125;</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L399) |
+| <code v-pre>kiwa: WalletConfig.rdns must be a reverse-DNS name (alnum/./-), got "$&#123;String(rdns)&#125;"</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L402) |
+| <code v-pre>kiwa: WalletConfig.icon must be a data URI (data:image/...), got "$&#123;typeof icon === 'string' ? icon.slice(0, 30) : typeof icon&#125;"</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L407) |
+| <code v-pre>kiwa: WalletConfig.privateKey at index $&#123;index&#125; must be a 0x-prefixed 64-char hex string (32 bytes), got "$&#123;typeof privateKey === 'string' ? privateKey.slice(0, 20) : typeof privateKey&#125;"</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L412) |
+| <code v-pre>kiwa: WalletConfig.chainId at index $&#123;index&#125; must be a positive integer when specified, got $&#123;typeof wallet.chainId === 'number' ? wallet.chainId : typeof wallet.chainId&#125;</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L422) |
+| <code v-pre>kiwa: WalletConfig.isContractAccount at index $&#123;index&#125; must be a boolean when specified, got $&#123;typeof wallet.isContractAccount&#125;</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L431) |
+| <code v-pre>kiwa: WalletConfig.contractAccountAddress at index $&#123;index&#125; must be a 0x-prefixed 40-char address when specified, got "$&#123;typeof wallet.contractAccountAddress === 'string' ? wallet.contractAccountAddress : typeof wallet.contractAccountAddress&#125;"</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L440) |
+| <code v-pre>kiwa: WalletConfig.contractAccountExecuteAbi at index $&#123;index&#125; must be a non-empty string&#91;&#93; when specified</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L450) |
+| <code v-pre>kiwa: WalletConfig.contractAccountAddress at index $&#123;index&#125; is required when isContractAccount=true</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L456) |
+| <code v-pre>kiwa: wallet rdns collision after sanitization: "$&#123;rdns&#125;" -&gt; "$&#123;sanitizedRdns&#125;" (already used by "$&#123;existingRdns&#125;")</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L464) |
+| <code v-pre>kiwa: unknown wallet rdns "$&#123;prop&#125;"</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L599) |
+| <code v-pre>kiwa: missing $&#123;label&#125;</code> | [packages/dapp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L660) |
+| <code v-pre>kiwa: setStorageSlot value must be a 32-byte hex (0x + 64 hex chars), got "$&#123;value&#125;"</code> | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L17) |
+| <code v-pre>kiwa: setStorageSlot RPC failed with HTTP $&#123;response.status&#125; ($&#123;response.statusText&#125;)</code> | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L36) |
+| <code v-pre>kiwa: setStorageSlot RPC error $&#123;payload.error.code&#125;: $&#123;payload.error.message&#125;</code> | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L47) |
+| <code v-pre>kiwa: setStorageSlot slot number must be a non-negative integer, got $&#123;slot&#125;</code> | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L56) |
+| <code v-pre>kiwa: setStorageSlot slot bigint must be non-negative, got $&#123;slot&#125;</code> | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L62) |
+| <code v-pre>kiwa: setStorageSlot slot hex must match /^0x&#91;0-9a-fA-F&#93;+$/, got "$&#123;slot&#125;"</code> | [packages/dapp/src/set-storage-slot.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L67) |
+| <code v-pre>withAnvil must be called inside a vitest test file (beforeAll / afterAll missing)</code> | [packages/dapp/src/vitest.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L101) |
+| <code v-pre>withAnvil env() called before beforeAll resolved</code> | [packages/dapp/src/vitest.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L114) |
+| <code v-pre>setupTestEnv: anvil and pool options are mutually exclusive</code> | [packages/dapp/src/vitest.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L54) |
+| <code v-pre>waitForChainState timeout after $&#123;timeoutMs&#125;ms: $&#123;String(functionName)&#125; did not satisfy predicate (last value: $&#123;String(lastValue)&#125;)</code> | [packages/dapp/src/wait-for-chain-state.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L90) |
+| <code v-pre>kiwa: waitForWalletConnected timed out after $&#123;timeout&#125;ms (testId=$&#123;testId&#125;, expected="$&#123;expectedText&#125;", lastSeen="$&#123;lastSeen&#125;")</code> | [packages/dapp/src/wait-for-wallet-connected.ts](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L42) |
 
 ## API 契約
 
@@ -106,9 +106,9 @@ import { dappE2eTest as test } from "@kiwa-lab/dapp";
 
 ### 値
 
-#### `ANVIL_DEFAULT_PRIVATE_KEYS`
+#### <code v-pre>ANVIL&#95;DEFAULT&#95;PRIVATE&#95;KEYS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-default-keys.ts#L11) `packages/dapp/src/anvil-default-keys.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-default-keys.ts#L11) <code v-pre>packages/dapp/src/anvil-default-keys.ts</code>
 
 anvil default mnemonic から生成される 10 個の dev account private keys。 anvil は `--mnemonic "test test test test test test test test test test test junk"` を default に持ち、固定 10 account の private key を生成する。これらは public で安全な値。 `setActiveAccount(index)` で 0-9 のいずれかに切替えて test 内で account picker UI を検証する。
 
@@ -116,33 +116,33 @@ anvil default mnemonic から生成される 10 個の dev account private keys�
 export declare const ANVIL_DEFAULT_PRIVATE_KEYS: readonly Hex[];
 ```
 
-#### `createAnvilPool`
+#### <code v-pre>createAnvilPool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L38) `packages/dapp/src/anvil-pool.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L38) <code v-pre>packages/dapp/src/anvil-pool.ts</code>
 
 ```ts
 export declare function createAnvilPool(opts: AnvilPoolOptions): Promise<AnvilPool>;
 ```
 
-#### `createEventEmitter`
+#### <code v-pre>createEventEmitter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/event-emitter.ts#L8) `packages/dapp/src/event-emitter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/event-emitter.ts#L8) <code v-pre>packages/dapp/src/event-emitter.ts</code>
 
 ```ts
 export declare function createEventEmitter(): DappE2eEventEmitter;
 ```
 
-#### `createInjectorScript`
+#### <code v-pre>createInjectorScript</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/injector-script.ts#L6) `packages/dapp/src/injector-script.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/injector-script.ts#L6) <code v-pre>packages/dapp/src/injector-script.ts</code>
 
 ```ts
 export declare function createInjectorScript(opts: InjectorOptions): string;
 ```
 
-#### `createRpcHandler`
+#### <code v-pre>createRpcHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L472) `packages/dapp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L472) <code v-pre>packages/dapp/src/fixture.ts</code>
 
 ```ts
 export declare function createRpcHandler(ctx: RpcContext, tracker: InternalFixtures['_rpcTracker']): (request: {
@@ -151,33 +151,33 @@ export declare function createRpcHandler(ctx: RpcContext, tracker: InternalFixtu
 }) => Promise<unknown>;
 ```
 
-#### `dappE2eTest`
+#### <code v-pre>dappE2eTest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L82) `packages/dapp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L82) <code v-pre>packages/dapp/src/fixture.ts</code>
 
 ```ts
 export declare const dappE2eTest: import("@playwright/test").TestType<import("@playwright/test").PlaywrightTestArgs & import("@playwright/test").PlaywrightTestOptions & DappE2eOptions & DappE2eFixtures & InternalFixtures, import("@playwright/test").PlaywrightWorkerArgs & import("@playwright/test").PlaywrightWorkerOptions>;
 ```
 
-#### `DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI`
+#### <code v-pre>DEFAULT&#95;CONTRACT&#95;ACCOUNT&#95;EXECUTE&#95;ABI</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L62) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L62) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 ```ts
 export declare const DEFAULT_CONTRACT_ACCOUNT_EXECUTE_ABI: readonly ["function execute(address target, uint256 value, bytes data) returns (bytes)"];
 ```
 
-#### `deployContract`
+#### <code v-pre>deployContract</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L45) `packages/dapp/src/deploy-contract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L45) <code v-pre>packages/dapp/src/deploy-contract.ts</code>
 
 ```ts
 export declare function deployContract<TAbi extends Abi | readonly unknown[] = Abi>(opts: DeployContractOptions<TAbi>): Promise<DeployContractResult>;
 ```
 
-#### `Eip1193Error`
+#### <code v-pre>Eip1193Error</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L14) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L14) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export declare class Eip1193Error extends Error {
@@ -186,57 +186,57 @@ export declare class Eip1193Error extends Error {
 }
 ```
 
-#### `EIP1271_MAGIC_VALUE`
+#### <code v-pre>EIP1271&#95;MAGIC&#95;VALUE</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L17) `packages/dapp/src/eip1271.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L17) <code v-pre>packages/dapp/src/eip1271.ts</code>
 
 ```ts
 export declare const EIP1271_MAGIC_VALUE: "0x1626ba7e";
 ```
 
-#### `expectBalanceChange`
+#### <code v-pre>expectBalanceChange</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/balance-change.ts#L4) `packages/dapp/src/balance-change.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/balance-change.ts#L4) <code v-pre>packages/dapp/src/balance-change.ts</code>
 
 ```ts
 export declare function expectBalanceChange(client: PublicClient, token: Address, account: Address, delta: bigint, action: () => Promise<void>): Promise<void>;
 ```
 
-#### `expectCustomError`
+#### <code v-pre>expectCustomError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/expect-custom-error.ts#L52) `packages/dapp/src/expect-custom-error.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/expect-custom-error.ts#L52) <code v-pre>packages/dapp/src/expect-custom-error.ts</code>
 
 ```ts
 export declare function expectCustomError(error: unknown, errorName: string, expectedArgs?: readonly unknown[]): void;
 ```
 
-#### `expectEthBalanceChange`
+#### <code v-pre>expectEthBalanceChange</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/balance-change.ts#L30) `packages/dapp/src/balance-change.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/balance-change.ts#L30) <code v-pre>packages/dapp/src/balance-change.ts</code>
 
 ```ts
 export declare function expectEthBalanceChange(client: PublicClient, account: Address, delta: bigint, action: () => Promise<void>): Promise<void>;
 ```
 
-#### `expectEvent`
+#### <code v-pre>expectEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/expect-event.ts#L4) `packages/dapp/src/expect-event.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/expect-event.ts#L4) <code v-pre>packages/dapp/src/expect-event.ts</code>
 
 ```ts
 export declare function expectEvent<TAbi extends Abi>(receipt: TransactionReceipt, abi: TAbi, eventName: string, expectedArgs?: Record<string, unknown>): void;
 ```
 
-#### `getFreePort`
+#### <code v-pre>getFreePort</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L22) `packages/dapp/src/anvil.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L22) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export declare function getFreePort(): Promise<number>;
 ```
 
-#### `handleRpcRequest`
+#### <code v-pre>handleRpcRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L185) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L185) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 Handle a single EIP-1193 JSON-RPC request from the injected provider. personal_sign accepts either: - A 0x-prefixed even-length hex string (signed as raw bytes, MetaMask compatible) - A plain UTF-8 string (signed with the \x19Ethereum Signed Message:\n prefix) Strings prefixed with 0x that contain non-hex characters or have odd length are rejected with EIP-1193 code -32602 (invalid params).
 
@@ -244,33 +244,33 @@ Handle a single EIP-1193 JSON-RPC request from the injected provider. personal_s
 export declare function handleRpcRequest(ctx: RpcContext, request: Eip1193Request): Promise<unknown>;
 ```
 
-#### `impersonateAccount`
+#### <code v-pre>impersonateAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L12) `packages/dapp/src/impersonate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L12) <code v-pre>packages/dapp/src/impersonate.ts</code>
 
 ```ts
 export declare function impersonateAccount(client: PublicClient, address: Address): Promise<void>;
 ```
 
-#### `increaseTime`
+#### <code v-pre>increaseTime</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L12) `packages/dapp/src/time.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L12) <code v-pre>packages/dapp/src/time.ts</code>
 
 ```ts
 export declare function increaseTime(client: PublicClient, seconds: number | bigint): Promise<void>;
 ```
 
-#### `injectMultipleWallets`
+#### <code v-pre>injectMultipleWallets</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L24) `packages/dapp/src/inject-multiple-wallets.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L24) <code v-pre>packages/dapp/src/inject-multiple-wallets.ts</code>
 
 ```ts
 export declare function injectMultipleWallets<TName extends string>(browser: Browser, entries: Record<TName, InjectMultipleWalletsEntry>, options?: InjectMultipleWalletsOptions): Promise<Record<TName, InjectMultipleWalletsResult>>;
 ```
 
-#### `killAnvilFromPidFile`
+#### <code v-pre>killAnvilFromPidFile</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L157) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L157) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 Kill anvil whose pid was recorded by previous prepare-env run. Used by `tests/global-teardown.ts` (and idempotently by prepare-env itself before respawn).
 
@@ -278,9 +278,9 @@ Kill anvil whose pid was recorded by previous prepare-env run. Used by `tests/gl
 export declare function killAnvilFromPidFile(pidFilePath: string): void;
 ```
 
-#### `loadForgeArtifact`
+#### <code v-pre>loadForgeArtifact</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L78) `packages/dapp/src/deploy-contract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L78) <code v-pre>packages/dapp/src/deploy-contract.ts</code>
 
 ```ts
 export declare function loadForgeArtifact(opts: LoadForgeArtifactOptions): {
@@ -289,23 +289,23 @@ export declare function loadForgeArtifact(opts: LoadForgeArtifactOptions): {
 };
 ```
 
-#### `mineBlock`
+#### <code v-pre>mineBlock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L20) `packages/dapp/src/time.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L20) <code v-pre>packages/dapp/src/time.ts</code>
 
 ```ts
 export declare function mineBlock(client: PublicClient, count?: number): Promise<void>;
 ```
 
-#### `parseEip712TypedDataJson`
+#### <code v-pre>parseEip712TypedDataJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L543) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L543) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 ```ts
 export declare function parseEip712TypedDataJson(typedDataJson: string): NormalizedEip712TypedData;
 ```
 
-#### `parseSpec`
+#### <code v-pre>parseSpec</code>
 
 公開 entry point から解決しています。
 
@@ -313,17 +313,17 @@ export declare function parseEip712TypedDataJson(typedDataJson: string): Normali
 export { parseSpec } from '@kiwa-lab/core';
 ```
 
-#### `resolveActiveAddress`
+#### <code v-pre>resolveActiveAddress</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L136) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L136) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 ```ts
 export declare function resolveActiveAddress(ctx: RpcContext): Address;
 ```
 
-#### `resolveActivePrivateKey`
+#### <code v-pre>resolveActivePrivateKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L120) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L120) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 現在 active な private key を返す。accounts / activeIndex が設定されていればそこから解決、 なければ ctx.privateKey にフォールバックする (下位互換)。
 
@@ -331,17 +331,17 @@ export declare function resolveActiveAddress(ctx: RpcContext): Address;
 export declare function resolveActivePrivateKey(ctx: RpcContext): Hex;
 ```
 
-#### `revertChain`
+#### <code v-pre>revertChain</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/snapshot.ts#L16) `packages/dapp/src/snapshot.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/snapshot.ts#L16) <code v-pre>packages/dapp/src/snapshot.ts</code>
 
 ```ts
 export declare function revertChain(client: PublicClient, snapshotId: Hex): Promise<boolean>;
 ```
 
-#### `runE2EPrepareEnv`
+#### <code v-pre>runE2EPrepareEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L79) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L79) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 Prepare anvil + contracts + .env.local before Next.js build. Designed to be invoked from `playwright.config.ts` webServer.command as `tsx tests/prepare-env.ts && pnpm build && pnpm start`. After deploy finishes the anvil child is detached so the prepare-env Node process can exit (event loop empty), letting `pnpm build` start next.
 
@@ -349,105 +349,105 @@ Prepare anvil + contracts + .env.local before Next.js build. Designed to be invo
 export declare function runE2EPrepareEnv(opts: PrepareEnvOptions): Promise<void>;
 ```
 
-#### `sendTransaction`
+#### <code v-pre>sendTransaction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/tx.ts#L79) `packages/dapp/src/tx.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/tx.ts#L79) <code v-pre>packages/dapp/src/tx.ts</code>
 
 ```ts
 export declare function sendTransaction(ctx: TxBroadcastCtx, params: SendTxParams): Promise<Hex>;
 ```
 
-#### `setBalance`
+#### <code v-pre>setBalance</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L23) `packages/dapp/src/impersonate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L23) <code v-pre>packages/dapp/src/impersonate.ts</code>
 
 ```ts
 export declare function setBalance(client: PublicClient, address: Address, wei: bigint): Promise<void>;
 ```
 
-#### `setNextBlockTimestamp`
+#### <code v-pre>setNextBlockTimestamp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L26) `packages/dapp/src/time.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/time.ts#L26) <code v-pre>packages/dapp/src/time.ts</code>
 
 ```ts
 export declare function setNextBlockTimestamp(client: PublicClient, ts: number | bigint): Promise<void>;
 ```
 
-#### `setStorageSlot`
+#### <code v-pre>setStorageSlot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L13) `packages/dapp/src/set-storage-slot.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L13) <code v-pre>packages/dapp/src/set-storage-slot.ts</code>
 
 ```ts
 export declare function setStorageSlot(params: SetStorageSlotParams): Promise<void>;
 ```
 
-#### `setupTestEnv`
+#### <code v-pre>setupTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L51) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L51) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export declare function setupTestEnv(opts?: SetupTestEnvOptions): Promise<TestEnv>;
 ```
 
-#### `snapshotChain`
+#### <code v-pre>snapshotChain</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/snapshot.ts#L12) `packages/dapp/src/snapshot.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/snapshot.ts#L12) <code v-pre>packages/dapp/src/snapshot.ts</code>
 
 ```ts
 export declare function snapshotChain(client: PublicClient): Promise<Hex>;
 ```
 
-#### `startAnvil`
+#### <code v-pre>startAnvil</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L80) `packages/dapp/src/anvil.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L80) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export declare function startAnvil(opts?: StartAnvilOptions): Promise<AnvilHandle>;
 ```
 
-#### `startAnvilCluster`
+#### <code v-pre>startAnvilCluster</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L15) `packages/dapp/src/anvil-cluster.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L15) <code v-pre>packages/dapp/src/anvil-cluster.ts</code>
 
 ```ts
 export declare function startAnvilCluster(opts: AnvilClusterConfig): Promise<AnvilClusterHandle>;
 ```
 
-#### `startAnvilFork`
+#### <code v-pre>startAnvilFork</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-fork.ts#L9) `packages/dapp/src/anvil-fork.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-fork.ts#L9) <code v-pre>packages/dapp/src/anvil-fork.ts</code>
 
 ```ts
 export declare function startAnvilFork(options: ForkOptions): Promise<AnvilHandle>;
 ```
 
-#### `stopImpersonateAccount`
+#### <code v-pre>stopImpersonateAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L16) `packages/dapp/src/impersonate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/impersonate.ts#L16) <code v-pre>packages/dapp/src/impersonate.ts</code>
 
 ```ts
 export declare function stopImpersonateAccount(client: PublicClient, address: Address): Promise<void>;
 ```
 
-#### `verifyAnvilChainId`
+#### <code v-pre>verifyAnvilChainId</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L574) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L574) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 ```ts
 export declare function verifyAnvilChainId(anvilPort: number, expectedChainId: number): Promise<void>;
 ```
 
-#### `verifyEip1271Signature`
+#### <code v-pre>verifyEip1271Signature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L26) `packages/dapp/src/eip1271.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L26) <code v-pre>packages/dapp/src/eip1271.ts</code>
 
 ```ts
 export declare function verifyEip1271Signature(params: VerifyEip1271SignatureParams): Promise<boolean>;
 ```
 
-#### `verifySignature`
+#### <code v-pre>verifySignature</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L688) `packages/dapp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L688) <code v-pre>packages/dapp/src/fixture.ts</code>
 
 ```ts
 export declare function verifySignature(address: Hex, signature: Hex, message: string | {
@@ -455,9 +455,9 @@ export declare function verifySignature(address: Hex, signature: Hex, message: s
 }): Promise<boolean>;
 ```
 
-#### `waitForChainState`
+#### <code v-pre>waitForChainState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L40) `packages/dapp/src/wait-for-chain-state.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L40) <code v-pre>packages/dapp/src/wait-for-chain-state.ts</code>
 
 Poll a contract view function until `predicate` returns true. Replaces `await page.waitForTimeout(N)` + UI text scraping by direct on-chain read with a deterministic stop condition. Used by examples to remove order-dependent assertion timing.
 
@@ -465,33 +465,33 @@ Poll a contract view function until `predicate` returns true. Replaces `await pa
 export declare function waitForChainState<TValue = unknown, TAbi extends Abi = Abi, TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<TAbi, 'pure' | 'view'>, TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName> = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>>(opts: WaitForChainStateOptions<TValue, TAbi, TFunctionName, TArgs>): Promise<TValue>;
 ```
 
-#### `waitForPendingRpcs`
+#### <code v-pre>waitForPendingRpcs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L331) `packages/dapp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/fixture.ts#L331) <code v-pre>packages/dapp/src/fixture.ts</code>
 
 ```ts
 export declare function waitForPendingRpcs(page: Page, pendingRpcs: Map<number, PendingRpcEntry>, timeoutMs?: number): Promise<void>;
 ```
 
-#### `waitForWalletConnected`
+#### <code v-pre>waitForWalletConnected</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L15) `packages/dapp/src/wait-for-wallet-connected.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L15) <code v-pre>packages/dapp/src/wait-for-wallet-connected.ts</code>
 
 ```ts
 export declare function waitForWalletConnected(page: Page, options?: WaitForWalletConnectedOptions): Promise<void>;
 ```
 
-#### `withAnvil`
+#### <code v-pre>withAnvil</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L94) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L94) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export declare function withAnvil(opts?: SetupTestEnvOptions): WithAnvilLifecycle;
 ```
 
-#### `writePidEntry`
+#### <code v-pre>writePidEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L165) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L165) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export declare function writePidEntry(pidFilePath: string, entry: PidEntry): void;
@@ -499,17 +499,17 @@ export declare function writePidEntry(pidFilePath: string, entry: PidEntry): voi
 
 ### 型
 
-#### `Address`
+#### <code v-pre>Address</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L2) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L2) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export type Address = `0x${string}`;
 ```
 
-#### `AnvilClusterConfig`
+#### <code v-pre>AnvilClusterConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L3) `packages/dapp/src/anvil-cluster.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L3) <code v-pre>packages/dapp/src/anvil-cluster.ts</code>
 
 ```ts
 export interface AnvilClusterConfig {
@@ -520,9 +520,9 @@ export interface AnvilClusterConfig {
 }
 ```
 
-#### `AnvilClusterHandle`
+#### <code v-pre>AnvilClusterHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L10) `packages/dapp/src/anvil-cluster.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-cluster.ts#L10) <code v-pre>packages/dapp/src/anvil-cluster.ts</code>
 
 ```ts
 export interface AnvilClusterHandle {
@@ -533,9 +533,9 @@ export interface AnvilClusterHandle {
 }
 ```
 
-#### `AnvilHandle`
+#### <code v-pre>AnvilHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L16) `packages/dapp/src/anvil.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L16) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export interface AnvilHandle {
@@ -545,9 +545,9 @@ export interface AnvilHandle {
 }
 ```
 
-#### `AnvilLease`
+#### <code v-pre>AnvilLease</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L10) `packages/dapp/src/anvil-pool.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L10) <code v-pre>packages/dapp/src/anvil-pool.ts</code>
 
 ```ts
 export interface AnvilLease {
@@ -558,9 +558,9 @@ export interface AnvilLease {
 }
 ```
 
-#### `AnvilModeOption`
+#### <code v-pre>AnvilModeOption</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L5) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L5) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export type AnvilModeOption = boolean | (StartAnvilOptions & {
@@ -568,9 +568,9 @@ export type AnvilModeOption = boolean | (StartAnvilOptions & {
 });
 ```
 
-#### `AnvilPool`
+#### <code v-pre>AnvilPool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L17) `packages/dapp/src/anvil-pool.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L17) <code v-pre>packages/dapp/src/anvil-pool.ts</code>
 
 ```ts
 export interface AnvilPool {
@@ -582,9 +582,9 @@ export interface AnvilPool {
 }
 ```
 
-#### `AnvilPoolOptions`
+#### <code v-pre>AnvilPoolOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L3) `packages/dapp/src/anvil-pool.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-pool.ts#L3) <code v-pre>packages/dapp/src/anvil-pool.ts</code>
 
 ```ts
 export interface AnvilPoolOptions {
@@ -595,9 +595,9 @@ export interface AnvilPoolOptions {
 }
 ```
 
-#### `AnvilTestEnv`
+#### <code v-pre>AnvilTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L32) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L32) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export interface AnvilTestEnv {
@@ -610,17 +610,17 @@ export interface AnvilTestEnv {
 }
 ```
 
-#### `ApprovalMode`
+#### <code v-pre>ApprovalMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L113) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L113) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export type ApprovalMode = 'approve' | 'reject';
 ```
 
-#### `ApprovalPolicy`
+#### <code v-pre>ApprovalPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L115) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L115) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface ApprovalPolicy {
@@ -632,9 +632,9 @@ export interface ApprovalPolicy {
 }
 ```
 
-#### `ChainConfig`
+#### <code v-pre>ChainConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L52) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L52) <code v-pre>packages/dapp/src/types.ts</code>
 
 EIP-3085 (wallet_addEthereumChain) parameters の subset。 chain registry に登録されるエントリの最小形式。
 
@@ -652,9 +652,9 @@ export interface ChainConfig {
 }
 ```
 
-#### `ContractAccountRpcConfig`
+#### <code v-pre>ContractAccountRpcConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L106) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L106) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface ContractAccountRpcConfig {
@@ -663,9 +663,9 @@ export interface ContractAccountRpcConfig {
 }
 ```
 
-#### `DappE2eApi`
+#### <code v-pre>DappE2eApi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L154) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L154) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface DappE2eApi {
@@ -699,9 +699,9 @@ export interface DappE2eApi {
 }
 ```
 
-#### `DappE2eEventEmitter`
+#### <code v-pre>DappE2eEventEmitter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L147) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L147) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface DappE2eEventEmitter {
@@ -712,9 +712,9 @@ export interface DappE2eEventEmitter {
 }
 ```
 
-#### `DeployContractOptions`
+#### <code v-pre>DeployContractOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L14) `packages/dapp/src/deploy-contract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L14) <code v-pre>packages/dapp/src/deploy-contract.ts</code>
 
 ```ts
 export interface DeployContractOptions<TAbi extends Abi | readonly unknown[] = Abi> {
@@ -729,9 +729,9 @@ export interface DeployContractOptions<TAbi extends Abi | readonly unknown[] = A
 }
 ```
 
-#### `DeployContractResult`
+#### <code v-pre>DeployContractResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L23) `packages/dapp/src/deploy-contract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L23) <code v-pre>packages/dapp/src/deploy-contract.ts</code>
 
 ```ts
 export interface DeployContractResult {
@@ -741,25 +741,25 @@ export interface DeployContractResult {
 }
 ```
 
-#### `Eip1193EventHandler`
+#### <code v-pre>Eip1193EventHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L111) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L111) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export type Eip1193EventHandler = (...args: unknown[]) => void;
 ```
 
-#### `Eip1193EventName`
+#### <code v-pre>Eip1193EventName</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L64) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L64) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export type Eip1193EventName = 'accountsChanged' | 'chainChanged' | 'connect' | 'disconnect';
 ```
 
-#### `Eip1193Provider`
+#### <code v-pre>Eip1193Provider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L9) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L9) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface Eip1193Provider {
@@ -768,9 +768,9 @@ export interface Eip1193Provider {
 }
 ```
 
-#### `Eip1193Request`
+#### <code v-pre>Eip1193Request</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L4) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L4) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface Eip1193Request {
@@ -779,9 +779,9 @@ export interface Eip1193Request {
 }
 ```
 
-#### `Eip6963ProviderInfo`
+#### <code v-pre>Eip6963ProviderInfo</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L24) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L24) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface Eip6963ProviderInfo {
@@ -792,9 +792,9 @@ export interface Eip6963ProviderInfo {
 }
 ```
 
-#### `Eip712Domain`
+#### <code v-pre>Eip712Domain</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L70) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L70) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface Eip712Domain {
@@ -806,9 +806,9 @@ export interface Eip712Domain {
 }
 ```
 
-#### `Eip712TypedData`
+#### <code v-pre>Eip712TypedData</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L78) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L78) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface Eip712TypedData {
@@ -822,9 +822,9 @@ export interface Eip712TypedData {
 }
 ```
 
-#### `ForkOptions`
+#### <code v-pre>ForkOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-fork.ts#L3) `packages/dapp/src/anvil-fork.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil-fork.ts#L3) <code v-pre>packages/dapp/src/anvil-fork.ts</code>
 
 ```ts
 export interface ForkOptions {
@@ -834,17 +834,17 @@ export interface ForkOptions {
 }
 ```
 
-#### `Hex`
+#### <code v-pre>Hex</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L1) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L1) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export type Hex = `0x${string}`;
 ```
 
-#### `InjectMultipleWalletsEntry`
+#### <code v-pre>InjectMultipleWalletsEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L5) `packages/dapp/src/inject-multiple-wallets.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L5) <code v-pre>packages/dapp/src/inject-multiple-wallets.ts</code>
 
 ```ts
 export interface InjectMultipleWalletsEntry {
@@ -854,9 +854,9 @@ export interface InjectMultipleWalletsEntry {
 }
 ```
 
-#### `InjectMultipleWalletsOptions`
+#### <code v-pre>InjectMultipleWalletsOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L17) `packages/dapp/src/inject-multiple-wallets.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L17) <code v-pre>packages/dapp/src/inject-multiple-wallets.ts</code>
 
 ```ts
 export interface InjectMultipleWalletsOptions {
@@ -865,9 +865,9 @@ export interface InjectMultipleWalletsOptions {
 }
 ```
 
-#### `InjectMultipleWalletsResult`
+#### <code v-pre>InjectMultipleWalletsResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L11) `packages/dapp/src/inject-multiple-wallets.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/inject-multiple-wallets.ts#L11) <code v-pre>packages/dapp/src/inject-multiple-wallets.ts</code>
 
 ```ts
 export interface InjectMultipleWalletsResult {
@@ -877,9 +877,9 @@ export interface InjectMultipleWalletsResult {
 }
 ```
 
-#### `InjectorOptions`
+#### <code v-pre>InjectorOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L42) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L42) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface InjectorOptions {
@@ -889,9 +889,9 @@ export interface InjectorOptions {
 }
 ```
 
-#### `LoadForgeArtifactOptions`
+#### <code v-pre>LoadForgeArtifactOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L29) `packages/dapp/src/deploy-contract.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/deploy-contract.ts#L29) <code v-pre>packages/dapp/src/deploy-contract.ts</code>
 
 ```ts
 export interface LoadForgeArtifactOptions {
@@ -900,9 +900,9 @@ export interface LoadForgeArtifactOptions {
 }
 ```
 
-#### `MockTestEnv`
+#### <code v-pre>MockTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L23) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L23) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export interface MockTestEnv {
@@ -915,9 +915,9 @@ export interface MockTestEnv {
 }
 ```
 
-#### `PidEntry`
+#### <code v-pre>PidEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L65) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L65) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export interface PidEntry {
@@ -928,9 +928,9 @@ export interface PidEntry {
 }
 ```
 
-#### `PrepareEnvDeployContext`
+#### <code v-pre>PrepareEnvDeployContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L38) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L38) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export interface PrepareEnvDeployContext {
@@ -943,17 +943,17 @@ export interface PrepareEnvDeployContext {
 }
 ```
 
-#### `PrepareEnvDeployFn`
+#### <code v-pre>PrepareEnvDeployFn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L47) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L47) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export type PrepareEnvDeployFn = (ctx: PrepareEnvDeployContext) => Promise<Record<string, string>>;
 ```
 
-#### `PrepareEnvOptions`
+#### <code v-pre>PrepareEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L51) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L51) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export interface PrepareEnvOptions {
@@ -971,25 +971,25 @@ export interface PrepareEnvOptions {
 }
 ```
 
-#### `PrepareEnvPublicClient`
+#### <code v-pre>PrepareEnvPublicClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L36) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L36) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export type PrepareEnvPublicClient = PublicClient<HttpTransport, Chain>;
 ```
 
-#### `PrepareEnvWalletClient`
+#### <code v-pre>PrepareEnvWalletClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L35) `packages/dapp/src/e2e-prepare-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/e2e-prepare-env.ts#L35) <code v-pre>packages/dapp/src/e2e-prepare-env.ts</code>
 
 ```ts
 export type PrepareEnvWalletClient = WalletClient<HttpTransport, Chain, PrivateKeyAccount>;
 ```
 
-#### `RpcContext`
+#### <code v-pre>RpcContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L28) `packages/dapp/src/rpc-handlers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/rpc-handlers.ts#L28) <code v-pre>packages/dapp/src/rpc-handlers.ts</code>
 
 ```ts
 export interface RpcContext {
@@ -1039,9 +1039,9 @@ export interface RpcContext {
 }
 ```
 
-#### `SendTxParams`
+#### <code v-pre>SendTxParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L88) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L88) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface SendTxParams {
@@ -1053,9 +1053,9 @@ export interface SendTxParams {
 }
 ```
 
-#### `SetStorageSlotParams`
+#### <code v-pre>SetStorageSlotParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L3) `packages/dapp/src/set-storage-slot.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/set-storage-slot.ts#L3) <code v-pre>packages/dapp/src/set-storage-slot.ts</code>
 
 ```ts
 export interface SetStorageSlotParams {
@@ -1066,9 +1066,9 @@ export interface SetStorageSlotParams {
 }
 ```
 
-#### `SetupTestEnvOptions`
+#### <code v-pre>SetupTestEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L7) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L7) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export interface SetupTestEnvOptions {
@@ -1088,7 +1088,7 @@ export interface SetupTestEnvOptions {
 }
 ```
 
-#### `SpecCase`
+#### <code v-pre>SpecCase</code>
 
 公開 entry point から解決しています。
 
@@ -1104,7 +1104,7 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `SpecDoc`
+#### <code v-pre>SpecDoc</code>
 
 公開 entry point から解決しています。
 
@@ -1120,11 +1120,11 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `SpecLease`
+#### <code v-pre>SpecLease</code>
 
 公開 entry point から解決しています。
 
-`Lease` を `SpecLease` として公開しています。
+<code v-pre>Lease</code> を <code v-pre>SpecLease</code> として公開しています。
 
 ```ts
 export type {
@@ -1138,11 +1138,11 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `SpecPool`
+#### <code v-pre>SpecPool</code>
 
 公開 entry point から解決しています。
 
-`Pool` を `SpecPool` として公開しています。
+<code v-pre>Pool</code> を <code v-pre>SpecPool</code> として公開しています。
 
 ```ts
 export type {
@@ -1156,9 +1156,9 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `StartAnvilOptions`
+#### <code v-pre>StartAnvilOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L67) `packages/dapp/src/anvil.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L67) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export interface StartAnvilOptions {
@@ -1175,15 +1175,15 @@ export interface StartAnvilOptions {
 }
 ```
 
-#### `TestEnv`
+#### <code v-pre>TestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L41) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L41) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export type TestEnv = MockTestEnv | AnvilTestEnv;
 ```
 
-#### `TestEnvBase`
+#### <code v-pre>TestEnvBase</code>
 
 公開 entry point から解決しています。
 
@@ -1199,7 +1199,7 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `TestLayer`
+#### <code v-pre>TestLayer</code>
 
 公開 entry point から解決しています。
 
@@ -1215,7 +1215,7 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `TestMode`
+#### <code v-pre>TestMode</code>
 
 公開 entry point から解決しています。
 
@@ -1231,9 +1231,9 @@ export type {
 } from '@kiwa-lab/core';
 ```
 
-#### `TxBroadcastCtx`
+#### <code v-pre>TxBroadcastCtx</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L96) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L96) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface TxBroadcastCtx {
@@ -1247,9 +1247,9 @@ export interface TxBroadcastCtx {
 }
 ```
 
-#### `VerifyEip1271SignatureParams`
+#### <code v-pre>VerifyEip1271SignatureParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L19) `packages/dapp/src/eip1271.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/eip1271.ts#L19) <code v-pre>packages/dapp/src/eip1271.ts</code>
 
 ```ts
 export interface VerifyEip1271SignatureParams {
@@ -1260,9 +1260,9 @@ export interface VerifyEip1271SignatureParams {
 }
 ```
 
-#### `WaitForChainStateOptions`
+#### <code v-pre>WaitForChainStateOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L8) `packages/dapp/src/wait-for-chain-state.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-chain-state.ts#L8) <code v-pre>packages/dapp/src/wait-for-chain-state.ts</code>
 
 ```ts
 export interface WaitForChainStateOptions<TValue, TAbi extends Abi = Abi, TFunctionName extends ContractFunctionName<TAbi, 'pure' | 'view'> = ContractFunctionName<TAbi, 'pure' | 'view'>, TArgs extends ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName> = ContractFunctionArgs<TAbi, 'pure' | 'view', TFunctionName>> {
@@ -1277,9 +1277,9 @@ export interface WaitForChainStateOptions<TValue, TAbi extends Abi = Abi, TFunct
 }
 ```
 
-#### `WaitForWalletConnectedOptions`
+#### <code v-pre>WaitForWalletConnectedOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L3) `packages/dapp/src/wait-for-wallet-connected.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/wait-for-wallet-connected.ts#L3) <code v-pre>packages/dapp/src/wait-for-wallet-connected.ts</code>
 
 ```ts
 export interface WaitForWalletConnectedOptions {
@@ -1290,9 +1290,9 @@ export interface WaitForWalletConnectedOptions {
 }
 ```
 
-#### `WalletApi`
+#### <code v-pre>WalletApi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L120) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L120) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface WalletApi {
@@ -1323,9 +1323,9 @@ export interface WalletApi {
 }
 ```
 
-#### `WalletConfig`
+#### <code v-pre>WalletConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L31) `packages/dapp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/types.ts#L31) <code v-pre>packages/dapp/src/types.ts</code>
 
 ```ts
 export interface WalletConfig {
@@ -1340,9 +1340,9 @@ export interface WalletConfig {
 }
 ```
 
-#### `WithAnvilLifecycle`
+#### <code v-pre>WithAnvilLifecycle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L90) `packages/dapp/src/vitest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/vitest.ts#L90) <code v-pre>packages/dapp/src/vitest.ts</code>
 
 ```ts
 export interface WithAnvilLifecycle {

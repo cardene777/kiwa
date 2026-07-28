@@ -33,9 +33,9 @@ template描画は `html`、検出した `variables`、不足した `missing` を
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L57) |
-| 'circuit breaker open' | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L72) |
-| `template not found: ${name}` | [packages/python/src/template.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L18) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L57) |
+| <code v-pre>circuit breaker open</code> | [packages/python/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L72) |
+| <code v-pre>template not found: $&#123;name&#125;</code> | [packages/python/src/template.ts](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L18) |
 
 ## API 契約
 
@@ -43,17 +43,17 @@ template描画は `html`、検出した `variables`、不足した `missing` を
 
 ### 値
 
-#### `batchOperate`
+#### <code v-pre>batchOperate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L111) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L111) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
-#### `captureMiddlewareCall`
+#### <code v-pre>captureMiddlewareCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/middleware.ts#L13) `packages/python/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/middleware.ts#L13) <code v-pre>packages/python/src/middleware.ts</code>
 
 dispatch 経由で invoke された middleware の呼出履歴を返す。 middleware chain の順序 / 呼出回数 / 対象 path を assertion するための API。
 
@@ -61,9 +61,9 @@ dispatch 経由で invoke された middleware の呼出履歴を返す。 middl
 export declare function captureMiddlewareCall(env: PythonAppEnv): MiddlewareCall[];
 ```
 
-#### `createPythonAppEnv`
+#### <code v-pre>createPythonAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L35) `packages/python/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L35) <code v-pre>packages/python/src/env.ts</code>
 
 framework 別 mock env を返す。 real Django/Flask/FastAPI/Starlette の request pipeline を再現する in-process env。 django/flask = WSGI default、 fastapi/starlette = ASGI default (option で override 可能)。
 
@@ -71,9 +71,9 @@ framework 別 mock env を返す。 real Django/Flask/FastAPI/Starlette の requ
 export declare function createPythonAppEnv(options?: CreatePythonAppEnvOptions): PythonAppEnv;
 ```
 
-#### `dispatchRequest`
+#### <code v-pre>dispatchRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L23) `packages/python/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L23) <code v-pre>packages/python/src/dispatch.ts</code>
 
 WSGI/ASGI request-response cycle を in-process で dispatch。 middleware chain を 順次実行 → route handler にたどり着き response を返す。 route 未登録は 404。
 
@@ -81,9 +81,9 @@ WSGI/ASGI request-response cycle を in-process で dispatch。 middleware chain
 export declare function dispatchRequest(env: PythonAppEnv, request: PythonRequest): Promise<PythonResponse>;
 ```
 
-#### `renderTemplate`
+#### <code v-pre>renderTemplate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L15) `packages/python/src/template.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L15) <code v-pre>packages/python/src/template.ts</code>
 
 Jinja2 相当の `&#123;&#123; var &#125;&#125;` interpolation。 template を env に register してから name 指定で render。 real Jinja2 の filter / for loop は含まない minimal 実装。
 
@@ -91,49 +91,49 @@ Jinja2 相当の `&#123;&#123; var &#125;&#125;` interpolation。 template を e
 export declare function renderTemplate(env: PythonAppEnv, name: string, context: TemplateContext): TemplateRenderResult;
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L64) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L64) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L101) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L101) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L86) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L86) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L50) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L50) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L20) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L20) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L40) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L40) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
@@ -141,9 +141,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `BatchItem`
+#### <code v-pre>BatchItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L17) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L17) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface BatchItem<TIn = unknown> {
@@ -152,9 +152,9 @@ export interface BatchItem<TIn = unknown> {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L18) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L18) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface BatchResult {
@@ -167,9 +167,9 @@ export interface BatchResult {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L11) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L11) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -178,9 +178,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CreatePythonAppEnvOptions`
+#### <code v-pre>CreatePythonAppEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L24) `packages/python/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L24) <code v-pre>packages/python/src/env.ts</code>
 
 ```ts
 export interface CreatePythonAppEnvOptions {
@@ -190,9 +190,9 @@ export interface CreatePythonAppEnvOptions {
 }
 ```
 
-#### `MiddlewareCall`
+#### <code v-pre>MiddlewareCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/middleware.ts#L3) `packages/python/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/middleware.ts#L3) <code v-pre>packages/python/src/middleware.ts</code>
 
 ```ts
 export interface MiddlewareCall {
@@ -202,9 +202,9 @@ export interface MiddlewareCall {
 }
 ```
 
-#### `MiddlewareEntry`
+#### <code v-pre>MiddlewareEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L7) `packages/python/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L7) <code v-pre>packages/python/src/env.ts</code>
 
 ```ts
 export interface MiddlewareEntry {
@@ -213,9 +213,9 @@ export interface MiddlewareEntry {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L12) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L12) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -225,9 +225,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `PythonAppEnv`
+#### <code v-pre>PythonAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L12) `packages/python/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L12) <code v-pre>packages/python/src/env.ts</code>
 
 ```ts
 export interface PythonAppEnv {
@@ -247,33 +247,33 @@ export interface PythonAppEnv {
 }
 ```
 
-#### `PythonFramework`
+#### <code v-pre>PythonFramework</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L3) `packages/python/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L3) <code v-pre>packages/python/src/env.ts</code>
 
 ```ts
 export type PythonFramework = 'django' | 'flask' | 'fastapi' | 'starlette';
 ```
 
-#### `PythonHeaders`
+#### <code v-pre>PythonHeaders</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L3) `packages/python/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L3) <code v-pre>packages/python/src/dispatch.ts</code>
 
 ```ts
 export type PythonHeaders = Record<string, string>;
 ```
 
-#### `PythonMode`
+#### <code v-pre>PythonMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L5) `packages/python/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/env.ts#L5) <code v-pre>packages/python/src/env.ts</code>
 
 ```ts
 export type PythonMode = 'wsgi' | 'asgi';
 ```
 
-#### `PythonRequest`
+#### <code v-pre>PythonRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L5) `packages/python/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L5) <code v-pre>packages/python/src/dispatch.ts</code>
 
 ```ts
 export interface PythonRequest {
@@ -285,9 +285,9 @@ export interface PythonRequest {
 }
 ```
 
-#### `PythonResponse`
+#### <code v-pre>PythonResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L13) `packages/python/src/dispatch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/dispatch.ts#L13) <code v-pre>packages/python/src/dispatch.ts</code>
 
 ```ts
 export interface PythonResponse {
@@ -297,9 +297,9 @@ export interface PythonResponse {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L10) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L10) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -308,9 +308,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L4) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L4) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -320,17 +320,17 @@ export interface RetryOptions {
 }
 ```
 
-#### `TemplateContext`
+#### <code v-pre>TemplateContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L3) `packages/python/src/template.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L3) <code v-pre>packages/python/src/template.ts</code>
 
 ```ts
 export type TemplateContext = Record<string, string | number | boolean>;
 ```
 
-#### `TemplateRenderResult`
+#### <code v-pre>TemplateRenderResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L5) `packages/python/src/template.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/template.ts#L5) <code v-pre>packages/python/src/template.ts</code>
 
 ```ts
 export interface TemplateRenderResult {
@@ -340,9 +340,9 @@ export interface TemplateRenderResult {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L9) `packages/python/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/python/src/resilience.ts#L9) <code v-pre>packages/python/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {

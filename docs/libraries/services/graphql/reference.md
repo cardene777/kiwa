@@ -29,14 +29,14 @@ retry、batch、idempotency、observability、circuit breaker の API は server
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'expected {' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L41) |
-| 'unterminated selection set' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L50) |
-| `unexpected token at position 0 near "${source.slice(0, 20)}"` | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L56) |
-| 'unterminated arguments' | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L66) |
-| `subscribeSubscription requires a subscription operation, got ${parsed.type}` | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L26) |
-| 'no Subscription resolvers registered' | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L30) |
-| 'subscription requires at least 1 selection' | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L33) |
-| `no subscription resolver for ${rootSel.name}` | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L35) |
+| <code v-pre>expected &#123;</code> | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L41) |
+| <code v-pre>unterminated selection set</code> | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L50) |
+| <code v-pre>unexpected token at position 0 near "$&#123;source.slice(0, 20)&#125;"</code> | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L56) |
+| <code v-pre>unterminated arguments</code> | [packages/graphql/src/parser.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L66) |
+| <code v-pre>subscribeSubscription requires a subscription operation, got $&#123;parsed.type&#125;</code> | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L26) |
+| <code v-pre>no Subscription resolvers registered</code> | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L30) |
+| <code v-pre>subscription requires at least 1 selection</code> | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L33) |
+| <code v-pre>no subscription resolver for $&#123;rootSel.name&#125;</code> | [packages/graphql/src/subscription.ts](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L35) |
 
 ## API 契約
 
@@ -44,17 +44,17 @@ retry、batch、idempotency、observability、circuit breaker の API は server
 
 ### 値
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L148) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L148) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(server: GraphQLServer, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createGraphQLClient`
+#### <code v-pre>createGraphQLClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L27) `packages/graphql/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L27) <code v-pre>packages/graphql/src/client.ts</code>
 
 mock GraphQL client。 内部で server.executeQuery を叩くだけの thin wrapper だが、 client 側の呼出を独立に記録して urql / Relay 相当の caller inspection を可能にする。
 
@@ -62,9 +62,9 @@ mock GraphQL client。 内部で server.executeQuery を叩くだけの thin wra
 export declare function createGraphQLClient(options: GraphQLClientOptions): GraphQLClient;
 ```
 
-#### `createGraphQLServer`
+#### <code v-pre>createGraphQLServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L67) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L67) <code v-pre>packages/graphql/src/server.ts</code>
 
 schema + resolvers を受け取って mock GraphQL server を作る。 executeQuery で query / mutation を dispatch し、 対応する resolver を呼出、 結果を data / errors 形式で返す。 subscription は subscribeSubscription 経由で呼出 (別 module)。
 
@@ -72,25 +72,25 @@ schema + resolvers を受け取って mock GraphQL server を作る。 executeQu
 export declare function createGraphQLServer(schema: GraphQLSchemaDef, resolvers: GraphQLResolvers, options?: CreateGraphQLServerOptions): GraphQLServer;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L101) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L101) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L58) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L58) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `executeBatch`
+#### <code v-pre>executeBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L41) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L41) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function executeBatch(server: GraphQLServer, queries: readonly {
@@ -99,9 +99,9 @@ export declare function executeBatch(server: GraphQLServer, queries: readonly {
 }[]): Promise<BatchExecuteResult>;
 ```
 
-#### `executeIdempotent`
+#### <code v-pre>executeIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L68) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L68) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function executeIdempotent(server: GraphQLServer, query: string, variables: GraphQLVariables, idempotencyKey: string, cache: IdempotencyCache): Promise<GraphQLExecutionResult & {
@@ -109,17 +109,17 @@ export declare function executeIdempotent(server: GraphQLServer, query: string, 
 }>;
 ```
 
-#### `executeObservable`
+#### <code v-pre>executeObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L115) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L115) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function executeObservable(server: GraphQLServer, query: string, variables: GraphQLVariables, hooks: HookRegistry): Promise<GraphQLExecutionResult>;
 ```
 
-#### `executeQuery`
+#### <code v-pre>executeQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L97) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L97) <code v-pre>packages/graphql/src/server.ts</code>
 
 mock server 経由で GraphQL query / mutation を実行する。 parser で operation を分解し、 対応する resolver を selection ごとに呼出、 data を組み立てる。 subscription は subscribeSubscription 経由で呼出。
 
@@ -127,9 +127,9 @@ mock server 経由で GraphQL query / mutation を実行する。 parser で ope
 export declare function executeQuery(server: GraphQLServer, query: string, variables?: GraphQLVariables, context?: GraphQLContext, onCall?: (call: GraphQLServerCall) => void, now?: () => number): Promise<GraphQLExecutionResult>;
 ```
 
-#### `executeWithRetry`
+#### <code v-pre>executeWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L13) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L13) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export declare function executeWithRetry(server: GraphQLServer, query: string, variables?: GraphQLVariables, options?: RetryOptions): Promise<GraphQLExecutionResult & {
@@ -137,9 +137,9 @@ export declare function executeWithRetry(server: GraphQLServer, query: string, v
 }>;
 ```
 
-#### `parseGraphQLOperation`
+#### <code v-pre>parseGraphQLOperation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L21) `packages/graphql/src/parser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L21) <code v-pre>packages/graphql/src/parser.ts</code>
 
 最小 GraphQL parser。 operation type (query/mutation/subscription) + name + selection set + 引数を抜き出す。 fragment / directive / inline union は非対応 (mock 用途では十分)。
 
@@ -147,9 +147,9 @@ export declare function executeWithRetry(server: GraphQLServer, query: string, v
 export declare function parseGraphQLOperation(source: string): ParsedOperation;
 ```
 
-#### `subscribeSubscription`
+#### <code v-pre>subscribeSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L18) `packages/graphql/src/subscription.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L18) <code v-pre>packages/graphql/src/subscription.ts</code>
 
 subscription mock。 real WebSocket transport は張らず、 resolver が返す AsyncIterable を そのまま purely-in-process で iterate する。 close を呼ぶまで active。
 
@@ -159,9 +159,9 @@ export declare function subscribeSubscription(server: GraphQLServer, query: stri
 
 ### 型
 
-#### `BatchExecuteResult`
+#### <code v-pre>BatchExecuteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L34) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L34) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface BatchExecuteResult {
@@ -172,9 +172,9 @@ export interface BatchExecuteResult {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L141) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L141) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -187,9 +187,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L135) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L135) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -199,17 +199,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L133) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L133) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `GraphQLClient`
+#### <code v-pre>GraphQLClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L15) `packages/graphql/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L15) <code v-pre>packages/graphql/src/client.ts</code>
 
 ```ts
 export interface GraphQLClient {
@@ -221,9 +221,9 @@ export interface GraphQLClient {
 }
 ```
 
-#### `GraphQLClientCall`
+#### <code v-pre>GraphQLClientCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L8) `packages/graphql/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L8) <code v-pre>packages/graphql/src/client.ts</code>
 
 ```ts
 export interface GraphQLClientCall {
@@ -234,9 +234,9 @@ export interface GraphQLClientCall {
 }
 ```
 
-#### `GraphQLClientOptions`
+#### <code v-pre>GraphQLClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L3) `packages/graphql/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/client.ts#L3) <code v-pre>packages/graphql/src/client.ts</code>
 
 ```ts
 export interface GraphQLClientOptions {
@@ -245,17 +245,17 @@ export interface GraphQLClientOptions {
 }
 ```
 
-#### `GraphQLContext`
+#### <code v-pre>GraphQLContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L6) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L6) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export type GraphQLContext = Record<string, unknown>;
 ```
 
-#### `GraphQLError`
+#### <code v-pre>GraphQLError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L8) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L8) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export interface GraphQLError {
@@ -265,9 +265,9 @@ export interface GraphQLError {
 }
 ```
 
-#### `GraphQLExecutionResult`
+#### <code v-pre>GraphQLExecutionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L14) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L14) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export interface GraphQLExecutionResult {
@@ -277,17 +277,17 @@ export interface GraphQLExecutionResult {
 }
 ```
 
-#### `GraphQLProvider`
+#### <code v-pre>GraphQLProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L3) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L3) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export type GraphQLProvider = 'apollo' | 'yoga' | 'urql' | 'relay';
 ```
 
-#### `GraphQLResolvers`
+#### <code v-pre>GraphQLResolvers</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L25) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L25) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export interface GraphQLResolvers {
@@ -297,9 +297,9 @@ export interface GraphQLResolvers {
 }
 ```
 
-#### `GraphQLSchemaDef`
+#### <code v-pre>GraphQLSchemaDef</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L31) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L31) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export interface GraphQLSchemaDef {
@@ -307,9 +307,9 @@ export interface GraphQLSchemaDef {
 }
 ```
 
-#### `GraphQLServer`
+#### <code v-pre>GraphQLServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L44) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L44) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export interface GraphQLServer {
@@ -322,9 +322,9 @@ export interface GraphQLServer {
 }
 ```
 
-#### `GraphQLServerCall`
+#### <code v-pre>GraphQLServerCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L35) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L35) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export interface GraphQLServerCall {
@@ -337,25 +337,25 @@ export interface GraphQLServerCall {
 }
 ```
 
-#### `GraphQLVariables`
+#### <code v-pre>GraphQLVariables</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L5) `packages/graphql/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/server.ts#L5) <code v-pre>packages/graphql/src/server.ts</code>
 
 ```ts
 export type GraphQLVariables = Record<string, string | number | boolean | null>;
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L93) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L93) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L85) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L85) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface HookContext {
@@ -367,9 +367,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L95) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L95) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -379,9 +379,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L51) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L51) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -392,17 +392,17 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `OperationType`
+#### <code v-pre>OperationType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L1) `packages/graphql/src/parser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L1) <code v-pre>packages/graphql/src/parser.ts</code>
 
 ```ts
 export type OperationType = 'query' | 'mutation' | 'subscription';
 ```
 
-#### `ParsedOperation`
+#### <code v-pre>ParsedOperation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L10) `packages/graphql/src/parser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L10) <code v-pre>packages/graphql/src/parser.ts</code>
 
 ```ts
 export interface ParsedOperation {
@@ -413,17 +413,17 @@ export interface ParsedOperation {
 }
 ```
 
-#### `QueryHookEvent`
+#### <code v-pre>QueryHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L83) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L83) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export type QueryHookEvent = 'before-query' | 'after-query' | 'error';
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L7) `packages/graphql/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/enhancements.ts#L7) <code v-pre>packages/graphql/src/enhancements.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -433,9 +433,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `SelectionField`
+#### <code v-pre>SelectionField</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L3) `packages/graphql/src/parser.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/parser.ts#L3) <code v-pre>packages/graphql/src/parser.ts</code>
 
 ```ts
 export interface SelectionField {
@@ -446,9 +446,9 @@ export interface SelectionField {
 }
 ```
 
-#### `SubscriptionEvent`
+#### <code v-pre>SubscriptionEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L4) `packages/graphql/src/subscription.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L4) <code v-pre>packages/graphql/src/subscription.ts</code>
 
 ```ts
 export interface SubscriptionEvent {
@@ -459,9 +459,9 @@ export interface SubscriptionEvent {
 }
 ```
 
-#### `SubscriptionHandle`
+#### <code v-pre>SubscriptionHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L9) `packages/graphql/src/subscription.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/graphql/src/subscription.ts#L9) <code v-pre>packages/graphql/src/subscription.ts</code>
 
 ```ts
 export interface SubscriptionHandle {

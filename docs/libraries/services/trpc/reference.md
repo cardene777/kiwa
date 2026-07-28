@@ -37,8 +37,8 @@ procedure の `type` と handler を指定します。router の global middlewa
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'circuit breaker open' | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L111) |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L92) |
+| <code v-pre>circuit breaker open</code> | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L111) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/trpc/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L92) |
 
 ## API 契約
 
@@ -46,9 +46,9 @@ procedure の `type` と handler を指定します。router の global middlewa
 
 ### 値
 
-#### `batchInvoke`
+#### <code v-pre>batchInvoke</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L151) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L151) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 batchInvoke — 複数 procedure を Promise.all で並列 invoke、 各結果を BatchInvokeResult shape で正規化 (individual failure が全体 fail しない)。
 
@@ -56,9 +56,9 @@ batchInvoke — 複数 procedure を Promise.all で並列 invoke、 各結果�
 export declare function batchInvoke(router: Router, items: BatchInvokeItem[], ctx?: ProcedureContext): Promise<BatchInvokeResult[]>;
 ```
 
-#### `createClient`
+#### <code v-pre>createClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/client.ts#L17) `packages/trpc/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/client.ts#L17) <code v-pre>packages/trpc/src/client.ts</code>
 
 tRPC の createTRPCProxyClient 相当。 client.&lt;path&gt;.query(input) / .mutate(input) を呼ぶと 内部で invokeProcedure に translate される。 real tRPC の typed client と同じ shape の assertion が書ける。
 
@@ -66,9 +66,9 @@ tRPC の createTRPCProxyClient 相当。 client.&lt;path&gt;.query(input) / .mut
 export declare function createClient(router: Router): TypedClient;
 ```
 
-#### `createContext`
+#### <code v-pre>createContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/context.ts#L13) `packages/trpc/src/context.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/context.ts#L13) <code v-pre>packages/trpc/src/context.ts</code>
 
 tRPC 実 server の createContext 相当。 request 単位で context を組み立てる。 実運用では cookie / auth header を読んで userId / session を注入する pattern を mock で再現。
 
@@ -76,9 +76,9 @@ tRPC 実 server の createContext 相当。 request 単位で context を組み�
 export declare function createContext(options?: CreateContextOptions): ProcedureContext;
 ```
 
-#### `createRouter`
+#### <code v-pre>createRouter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L24) `packages/trpc/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L24) <code v-pre>packages/trpc/src/router.ts</code>
 
 tRPC v10 の router() 相当。 path (dot-notation もフラット key もサポート) と procedure の map を保持する。 globalMiddlewares は全 procedure 呼出前に走らせる。
 
@@ -86,9 +86,9 @@ tRPC v10 の router() 相当。 path (dot-notation もフラット key もサポ
 export declare function createRouter(options: CreateRouterOptions): Router;
 ```
 
-#### `defineProcedure`
+#### <code v-pre>defineProcedure</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L22) `packages/trpc/src/procedure.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L22) <code v-pre>packages/trpc/src/procedure.ts</code>
 
 tRPC v10 の t.procedure.query(handler) / .mutation(handler) / .subscription(handler) 相当。 middleware 配列を挟めるようにして、 procedure 単位で auth / logging を宣言する pattern を 再現する。
 
@@ -96,9 +96,9 @@ tRPC v10 の t.procedure.query(handler) / .mutation(handler) / .subscription(han
 export declare function defineProcedure<TInput = unknown, TOutput = unknown>(type: ProcedureType, handler: ProcedureHandler<TInput, TOutput>, middlewares?: Middleware[]): ProcedureDefinition<TInput, TOutput>;
 ```
 
-#### `invokeProcedure`
+#### <code v-pre>invokeProcedure</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L35) `packages/trpc/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L35) <code v-pre>packages/trpc/src/router.ts</code>
 
 router に対して procedure を実行。 middleware chain (global → per-procedure) を順に走らせ、 全 middleware 通過後に handler を呼び出す。 途中 throw で TRPCError を包んで返す。
 
@@ -106,9 +106,9 @@ router に対して procedure を実行。 middleware chain (global → per-proc
 export declare function invokeProcedure(router: Router, path: string, input: unknown, ctx?: ProcedureContext): Promise<unknown>;
 ```
 
-#### `middleware`
+#### <code v-pre>middleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L38) `packages/trpc/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L38) <code v-pre>packages/trpc/src/middleware.ts</code>
 
 middleware wrapper。 実 tRPC の t.middleware(async ({ ctx, next }) =&gt; ...) と同じ形。 内部で next() を呼ぶことで chain 継続、 呼ばずに throw で早期 abort を表現する。
 
@@ -116,9 +116,9 @@ middleware wrapper。 実 tRPC の t.middleware(async ({ ctx, next }) =&gt; ...)
 export declare function middleware(fn: Middleware): Middleware;
 ```
 
-#### `TRPCError`
+#### <code v-pre>TRPCError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L25) `packages/trpc/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L25) <code v-pre>packages/trpc/src/middleware.ts</code>
 
 ```ts
 export declare class TRPCError extends Error {
@@ -130,9 +130,9 @@ export declare class TRPCError extends Error {
 }
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L103) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L103) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 withCircuitBreaker — 連続失敗が failureThreshold 超で「open」 状態に切替、 resetMs 経過で half-open で 1 attempt allow、 成功で closed 復帰。
 
@@ -140,9 +140,9 @@ withCircuitBreaker — 連続失敗が failureThreshold 超で「open」 状態�
 export declare function withCircuitBreaker<T>(handler: ProcedureHandler<unknown, T>, options: CircuitBreakerOptions): ProcedureHandler<unknown, T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L171) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L171) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 withIdempotencyKey — 同一 key の重複 invoke で cached result を返す。 downstream への 副作用を防ぐ (payment / charge / booking 系で重要)。
 
@@ -150,9 +150,9 @@ withIdempotencyKey — 同一 key の重複 invoke で cached result を返す�
 export declare function withIdempotencyKey<T>(handler: ProcedureHandler<unknown, T>): ProcedureHandler<unknown, T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L132) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L132) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 withObservability — handler の start / success / error / duration を hook 通知。 tracing / metrics / logging の統合を統一 interface で実現。
 
@@ -160,9 +160,9 @@ withObservability — handler の start / success / error / duration を hook �
 export declare function withObservability<T>(name: string, handler: ProcedureHandler<unknown, T>, hook: ObservabilityHook): ProcedureHandler<unknown, T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L85) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L85) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 withRateLimit — sliding window rate limiter。 window 内 request 数が maxRequests 超で throw。
 
@@ -170,9 +170,9 @@ withRateLimit — sliding window rate limiter。 window 内 request 数が maxRe
 export declare function withRateLimit<T>(handler: ProcedureHandler<unknown, T>, options: RateLimitOptions): ProcedureHandler<unknown, T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L46) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L46) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 withRetry — procedure handler を retry policy でラップ。 exponential backoff (backoffMs * 2^(attempt-1)) を default で適用、 retryOn callback で条件付き retry も可能。
 
@@ -180,9 +180,9 @@ withRetry — procedure handler を retry policy でラップ。 exponential bac
 export declare function withRetry<T>(handler: ProcedureHandler<unknown, T>, options: RetryOptions): ProcedureHandler<unknown, T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L70) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L70) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 withTimeout — handler を timeout でラップ。 ms 経過で Promise.race で timeout error throw。
 
@@ -192,9 +192,9 @@ export declare function withTimeout<T>(handler: ProcedureHandler<unknown, T>, op
 
 ### 型
 
-#### `BatchInvokeItem`
+#### <code v-pre>BatchInvokeItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L31) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L31) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface BatchInvokeItem<TInput = unknown> {
@@ -203,9 +203,9 @@ export interface BatchInvokeItem<TInput = unknown> {
 }
 ```
 
-#### `BatchInvokeResult`
+#### <code v-pre>BatchInvokeResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L36) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L36) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface BatchInvokeResult {
@@ -218,9 +218,9 @@ export interface BatchInvokeResult {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L20) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L20) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -229,9 +229,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CreateContextOptions`
+#### <code v-pre>CreateContextOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/context.ts#L3) `packages/trpc/src/context.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/context.ts#L3) <code v-pre>packages/trpc/src/context.ts</code>
 
 ```ts
 export interface CreateContextOptions {
@@ -241,9 +241,9 @@ export interface CreateContextOptions {
 }
 ```
 
-#### `CreateRouterOptions`
+#### <code v-pre>CreateRouterOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L15) `packages/trpc/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L15) <code v-pre>packages/trpc/src/router.ts</code>
 
 ```ts
 export interface CreateRouterOptions {
@@ -252,17 +252,17 @@ export interface CreateRouterOptions {
 }
 ```
 
-#### `Middleware`
+#### <code v-pre>Middleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L16) `packages/trpc/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L16) <code v-pre>packages/trpc/src/middleware.ts</code>
 
 ```ts
 export type Middleware = (params: MiddlewareParams) => Promise<MiddlewareResult>;
 ```
 
-#### `MiddlewareParams`
+#### <code v-pre>MiddlewareParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L3) `packages/trpc/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L3) <code v-pre>packages/trpc/src/middleware.ts</code>
 
 ```ts
 export interface MiddlewareParams {
@@ -275,9 +275,9 @@ export interface MiddlewareParams {
 }
 ```
 
-#### `MiddlewareResult`
+#### <code v-pre>MiddlewareResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L10) `packages/trpc/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L10) <code v-pre>packages/trpc/src/middleware.ts</code>
 
 ```ts
 export interface MiddlewareResult {
@@ -287,9 +287,9 @@ export interface MiddlewareResult {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L25) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L25) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -299,17 +299,17 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `ProcedureContext`
+#### <code v-pre>ProcedureContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/context.ts#L1) `packages/trpc/src/context.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/context.ts#L1) <code v-pre>packages/trpc/src/context.ts</code>
 
 ```ts
 export type ProcedureContext = Record<string, unknown>;
 ```
 
-#### `ProcedureDefinition`
+#### <code v-pre>ProcedureDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L11) `packages/trpc/src/procedure.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L11) <code v-pre>packages/trpc/src/procedure.ts</code>
 
 ```ts
 export interface ProcedureDefinition<TInput = unknown, TOutput = unknown> {
@@ -319,9 +319,9 @@ export interface ProcedureDefinition<TInput = unknown, TOutput = unknown> {
 }
 ```
 
-#### `ProcedureHandler`
+#### <code v-pre>ProcedureHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L6) `packages/trpc/src/procedure.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L6) <code v-pre>packages/trpc/src/procedure.ts</code>
 
 ```ts
 export type ProcedureHandler<TInput = unknown, TOutput = unknown> = (params: {
@@ -330,17 +330,17 @@ export type ProcedureHandler<TInput = unknown, TOutput = unknown> = (params: {
 }) => Promise<TOutput> | TOutput;
 ```
 
-#### `ProcedureType`
+#### <code v-pre>ProcedureType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L4) `packages/trpc/src/procedure.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/procedure.ts#L4) <code v-pre>packages/trpc/src/procedure.ts</code>
 
 ```ts
 export type ProcedureType = 'query' | 'mutation' | 'subscription';
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L15) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L15) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -349,9 +349,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L5) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L5) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -361,9 +361,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `Router`
+#### <code v-pre>Router</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L10) `packages/trpc/src/router.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/router.ts#L10) <code v-pre>packages/trpc/src/router.ts</code>
 
 ```ts
 export interface Router {
@@ -372,9 +372,9 @@ export interface Router {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L11) `packages/trpc/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/resilience.ts#L11) <code v-pre>packages/trpc/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {
@@ -382,17 +382,17 @@ export interface TimeoutOptions {
 }
 ```
 
-#### `TRPCErrorCode`
+#### <code v-pre>TRPCErrorCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L18) `packages/trpc/src/middleware.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/middleware.ts#L18) <code v-pre>packages/trpc/src/middleware.ts</code>
 
 ```ts
 export type TRPCErrorCode = 'BAD_REQUEST' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'INTERNAL_SERVER_ERROR';
 ```
 
-#### `TypedClient`
+#### <code v-pre>TypedClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/client.ts#L4) `packages/trpc/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/trpc/src/client.ts#L4) <code v-pre>packages/trpc/src/client.ts</code>
 
 ```ts
 export interface TypedClient {

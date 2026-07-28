@@ -23,73 +23,73 @@ load と form action は data、fail、redirect、error を区別します。`re
 
 ### 値
 
-#### `error`
+#### <code v-pre>error</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L116) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L116) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export declare function error(status: number, message: string): SvelteKitErrorSignal;
 ```
 
-#### `fail`
+#### <code v-pre>fail</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L104) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L104) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export declare function fail(status: number, data: unknown): SvelteKitFailSignal;
 ```
 
-#### `invokeAction`
+#### <code v-pre>invokeAction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L59) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L59) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export declare function invokeAction<TResult = unknown>(opts: InvokeActionOptions<TResult>): Promise<InvokeActionResult<TResult>>;
 ```
 
-#### `invokeHandle`
+#### <code v-pre>invokeHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L116) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L116) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export declare function invokeHandle<TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: InvokeHandleOptions<TLocals>): Promise<InvokeHandleResult<TLocals>>;
 ```
 
-#### `invokeHandleError`
+#### <code v-pre>invokeHandleError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L218) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L218) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export declare function invokeHandleError<TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: InvokeHandleErrorOptions<TLocals>): Promise<InvokeHandleErrorResult>;
 ```
 
-#### `invokeHandleFetch`
+#### <code v-pre>invokeHandleFetch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L169) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L169) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export declare function invokeHandleFetch<TLocals extends Record<string, unknown> = Record<string, unknown>>(opts: InvokeHandleFetchOptions<TLocals>): Promise<InvokeHandleFetchResult>;
 ```
 
-#### `invokeLoad`
+#### <code v-pre>invokeLoad</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L65) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L65) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export declare function invokeLoad<TResult = unknown>(opts: InvokeLoadOptions<TResult>): Promise<InvokeLoadResult<TResult>>;
 ```
 
-#### `redirect`
+#### <code v-pre>redirect</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L112) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L112) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export declare function redirect(status: number, location: string): SvelteKitRedirectSignal;
 ```
 
-#### `sequence`
+#### <code v-pre>sequence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L201) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L201) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 sequence — SvelteKit 公式 `sequence(...handlers)` 相当の handle chain composer。 sequence(h1, h2) は h1 の resolve として h2 を渡し、 h2 の resolve として 最終の resolve を渡す。 結果として h1-before → h2-before → resolve → h2-after → h1-after の順で実行される。 引数なし時は no-op (resolve(event) を直接呼ぶ)。
 
@@ -97,33 +97,33 @@ sequence — SvelteKit 公式 `sequence(...handlers)` 相当の handle chain com
 export declare function sequence<TLocals extends Record<string, unknown> = Record<string, unknown>>(...handles: HandleFunction<TLocals>[]): HandleFunction<TLocals>;
 ```
 
-#### `setupSvelteKitHooksEnv`
+#### <code v-pre>setupSvelteKitHooksEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L83) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L83) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export declare function setupSvelteKitHooksEnv<TLocals extends Record<string, unknown> = Record<string, unknown>>(options: SetupSvelteKitHooksEnvOptions<TLocals>): SvelteKitHooksEnv<TLocals>;
 ```
 
-#### `SK_ERROR_SYMBOL`
+#### <code v-pre>SK&#95;ERROR&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L9) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L9) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export declare const SK_ERROR_SYMBOL: unique symbol;
 ```
 
-#### `SK_FAIL_SYMBOL`
+#### <code v-pre>SK&#95;FAIL&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L12) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L12) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export declare const SK_FAIL_SYMBOL: unique symbol;
 ```
 
-#### `SK_REDIRECT_SYMBOL`
+#### <code v-pre>SK&#95;REDIRECT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L8) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L8) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export declare const SK_REDIRECT_SYMBOL: unique symbol;
@@ -131,17 +131,17 @@ export declare const SK_REDIRECT_SYMBOL: unique symbol;
 
 ### 型
 
-#### `ActionFunction`
+#### <code v-pre>ActionFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L31) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L31) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export type ActionFunction<TResult = unknown> = (event: SimulatedActionEvent) => Promise<TResult> | TResult;
 ```
 
-#### `HandleArgs`
+#### <code v-pre>HandleArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L25) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L25) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export type HandleArgs<TLocals extends Record<string, unknown> = Record<string, unknown>> = {
@@ -150,9 +150,9 @@ export type HandleArgs<TLocals extends Record<string, unknown> = Record<string, 
 };
 ```
 
-#### `HandleErrorArgs`
+#### <code v-pre>HandleErrorArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L44) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L44) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export type HandleErrorArgs<TLocals extends Record<string, unknown> = Record<string, unknown>> = {
@@ -163,9 +163,9 @@ export type HandleErrorArgs<TLocals extends Record<string, unknown> = Record<str
 };
 ```
 
-#### `HandleErrorFunction`
+#### <code v-pre>HandleErrorFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L51) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L51) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export type HandleErrorFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (args: HandleErrorArgs<TLocals>) => Promise<{
@@ -175,9 +175,9 @@ export type HandleErrorFunction<TLocals extends Record<string, unknown> = Record
 } | void;
 ```
 
-#### `HandleFetchArgs`
+#### <code v-pre>HandleFetchArgs</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L34) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L34) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export type HandleFetchArgs<TLocals extends Record<string, unknown> = Record<string, unknown>> = {
@@ -187,25 +187,25 @@ export type HandleFetchArgs<TLocals extends Record<string, unknown> = Record<str
 };
 ```
 
-#### `HandleFetchFunction`
+#### <code v-pre>HandleFetchFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L40) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L40) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export type HandleFetchFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (args: HandleFetchArgs<TLocals>) => Promise<Response> | Response;
 ```
 
-#### `HandleFunction`
+#### <code v-pre>HandleFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L30) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L30) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export type HandleFunction<TLocals extends Record<string, unknown> = Record<string, unknown>> = (args: HandleArgs<TLocals>) => Promise<Response> | Response;
 ```
 
-#### `InvokeActionOptions`
+#### <code v-pre>InvokeActionOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L33) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L33) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export interface InvokeActionOptions<TResult = unknown> {
@@ -218,9 +218,9 @@ export interface InvokeActionOptions<TResult = unknown> {
 }
 ```
 
-#### `InvokeActionResult`
+#### <code v-pre>InvokeActionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L42) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L42) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export interface InvokeActionResult<TResult = unknown> {
@@ -234,9 +234,9 @@ export interface InvokeActionResult<TResult = unknown> {
 }
 ```
 
-#### `InvokeHandleErrorOptions`
+#### <code v-pre>InvokeHandleErrorOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L202) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L202) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface InvokeHandleErrorOptions<TLocals extends Record<string, unknown>> {
@@ -251,9 +251,9 @@ export interface InvokeHandleErrorOptions<TLocals extends Record<string, unknown
 }
 ```
 
-#### `InvokeHandleErrorResult`
+#### <code v-pre>InvokeHandleErrorResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L213) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L213) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface InvokeHandleErrorResult {
@@ -264,9 +264,9 @@ export interface InvokeHandleErrorResult {
 }
 ```
 
-#### `InvokeHandleFetchOptions`
+#### <code v-pre>InvokeHandleFetchOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L147) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L147) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface InvokeHandleFetchOptions<TLocals extends Record<string, unknown>> {
@@ -285,9 +285,9 @@ export interface InvokeHandleFetchOptions<TLocals extends Record<string, unknown
 }
 ```
 
-#### `InvokeHandleFetchResult`
+#### <code v-pre>InvokeHandleFetchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L162) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L162) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface InvokeHandleFetchResult {
@@ -298,9 +298,9 @@ export interface InvokeHandleFetchResult {
 }
 ```
 
-#### `InvokeHandleOptions`
+#### <code v-pre>InvokeHandleOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L55) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L55) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface InvokeHandleOptions<TLocals extends Record<string, unknown>> {
@@ -321,9 +321,9 @@ export interface InvokeHandleOptions<TLocals extends Record<string, unknown>> {
 }
 ```
 
-#### `InvokeHandleResult`
+#### <code v-pre>InvokeHandleResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L72) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L72) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface InvokeHandleResult<TLocals extends Record<string, unknown>> {
@@ -337,9 +337,9 @@ export interface InvokeHandleResult<TLocals extends Record<string, unknown>> {
 }
 ```
 
-#### `InvokeLoadOptions`
+#### <code v-pre>InvokeLoadOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L39) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L39) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export interface InvokeLoadOptions<TResult = unknown> {
@@ -352,9 +352,9 @@ export interface InvokeLoadOptions<TResult = unknown> {
 }
 ```
 
-#### `InvokeLoadResult`
+#### <code v-pre>InvokeLoadResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L48) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L48) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export interface InvokeLoadResult<TResult = unknown> {
@@ -368,17 +368,17 @@ export interface InvokeLoadResult<TResult = unknown> {
 }
 ```
 
-#### `LoadFunction`
+#### <code v-pre>LoadFunction</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L37) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L37) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export type LoadFunction<TResult = unknown> = (event: SimulatedLoadEvent) => Promise<TResult> | TResult;
 ```
 
-#### `RunHandleErrorOptions`
+#### <code v-pre>RunHandleErrorOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L55) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L55) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface RunHandleErrorOptions {
@@ -388,9 +388,9 @@ export interface RunHandleErrorOptions {
 }
 ```
 
-#### `RunHandleErrorResult`
+#### <code v-pre>RunHandleErrorResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L61) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L61) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface RunHandleErrorResult {
@@ -401,9 +401,9 @@ export interface RunHandleErrorResult {
 }
 ```
 
-#### `RunHandleFetchOptions`
+#### <code v-pre>RunHandleFetchOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L41) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L41) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface RunHandleFetchOptions {
@@ -414,9 +414,9 @@ export interface RunHandleFetchOptions {
 }
 ```
 
-#### `RunHandleFetchResult`
+#### <code v-pre>RunHandleFetchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L48) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L48) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface RunHandleFetchResult {
@@ -427,9 +427,9 @@ export interface RunHandleFetchResult {
 }
 ```
 
-#### `RunHandleResult`
+#### <code v-pre>RunHandleResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L34) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L34) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface RunHandleResult<TLocals extends Record<string, unknown>> {
@@ -440,9 +440,9 @@ export interface RunHandleResult<TLocals extends Record<string, unknown>> {
 }
 ```
 
-#### `SetupSvelteKitHooksEnvOptions`
+#### <code v-pre>SetupSvelteKitHooksEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L23) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L23) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface SetupSvelteKitHooksEnvOptions<TLocals extends Record<string, unknown>> {
@@ -457,9 +457,9 @@ export interface SetupSvelteKitHooksEnvOptions<TLocals extends Record<string, un
 }
 ```
 
-#### `SimulatedActionEvent`
+#### <code v-pre>SimulatedActionEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L20) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L20) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export interface SimulatedActionEvent {
@@ -474,9 +474,9 @@ export interface SimulatedActionEvent {
 }
 ```
 
-#### `SimulatedHookRequestEvent`
+#### <code v-pre>SimulatedHookRequestEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L11) `packages/sveltekit/src/invoke-hooks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-hooks.ts#L11) <code v-pre>packages/sveltekit/src/invoke-hooks.ts</code>
 
 ```ts
 export interface SimulatedHookRequestEvent<TLocals extends Record<string, unknown> = Record<string, unknown>> {
@@ -496,9 +496,9 @@ export interface SimulatedHookRequestEvent<TLocals extends Record<string, unknow
 }
 ```
 
-#### `SimulatedLoadEvent`
+#### <code v-pre>SimulatedLoadEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L23) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L23) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export interface SimulatedLoadEvent {
@@ -516,9 +516,9 @@ export interface SimulatedLoadEvent {
 }
 ```
 
-#### `SvelteKitErrorSignal`
+#### <code v-pre>SvelteKitErrorSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L17) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L17) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export interface SvelteKitErrorSignal {
@@ -530,9 +530,9 @@ export interface SvelteKitErrorSignal {
 }
 ```
 
-#### `SvelteKitFailSignal`
+#### <code v-pre>SvelteKitFailSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L14) `packages/sveltekit/src/invoke-action.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-action.ts#L14) <code v-pre>packages/sveltekit/src/invoke-action.ts</code>
 
 ```ts
 export interface SvelteKitFailSignal {
@@ -542,9 +542,9 @@ export interface SvelteKitFailSignal {
 }
 ```
 
-#### `SvelteKitHooksEnv`
+#### <code v-pre>SvelteKitHooksEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L66) `packages/sveltekit/src/setup-hooks-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/setup-hooks-env.ts#L66) <code v-pre>packages/sveltekit/src/setup-hooks-env.ts</code>
 
 ```ts
 export interface SvelteKitHooksEnv<TLocals extends Record<string, unknown>> {
@@ -560,9 +560,9 @@ export interface SvelteKitHooksEnv<TLocals extends Record<string, unknown>> {
 }
 ```
 
-#### `SvelteKitRedirectSignal`
+#### <code v-pre>SvelteKitRedirectSignal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L11) `packages/sveltekit/src/invoke-load.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/sveltekit/src/invoke-load.ts#L11) <code v-pre>packages/sveltekit/src/invoke-load.ts</code>
 
 ```ts
 export interface SvelteKitRedirectSignal {

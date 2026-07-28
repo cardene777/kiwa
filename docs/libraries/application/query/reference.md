@@ -33,9 +33,9 @@
 
 ### 値
 
-#### `createInfiniteQuery`
+#### <code v-pre>createInfiniteQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L21) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L21) <code v-pre>packages/query/src/extensions.ts</code>
 
 infinite query — TanStack useInfiniteQuery 相当
 
@@ -43,17 +43,17 @@ infinite query — TanStack useInfiniteQuery 相当
 export declare function createInfiniteQuery<TData, TCursor>(options: InfiniteQueryOptions<TData, TCursor>): InfiniteQueryState<TData, TCursor>;
 ```
 
-#### `createObservabilityHook`
+#### <code v-pre>createObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L134) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L134) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export declare function createObservabilityHook(): ObservabilityHook;
 ```
 
-#### `createOptimisticUpdate`
+#### <code v-pre>createOptimisticUpdate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L50) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L50) <code v-pre>packages/query/src/extensions.ts</code>
 
 optimistic update — server response 前に UI を更新、 失敗時 rollback
 
@@ -61,9 +61,9 @@ optimistic update — server response 前に UI を更新、 失敗時 rollback
 export declare function createOptimisticUpdate<T>(initial: T): OptimisticUpdate<T>;
 ```
 
-#### `createQueryClient`
+#### <code v-pre>createQueryClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L36) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L36) <code v-pre>packages/query/src/client.ts</code>
 
 provider 差 (tanstack = infinite scroll / swr = revalidateOnFocus / urql = exchange chain / apollo = normalized cache) は abstract、 4 provider 共通の cache + fetchCount 挙動を mock する。
 
@@ -71,9 +71,9 @@ provider 差 (tanstack = infinite scroll / swr = revalidateOnFocus / urql = exch
 export declare function createQueryClient(options?: CreateQueryClientOptions): QueryClient;
 ```
 
-#### `fetchQuery`
+#### <code v-pre>fetchQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L21) `packages/query/src/fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L21) <code v-pre>packages/query/src/fetch.ts</code>
 
 cache-first fetch。 staleMs 内なら cache hit で queryFn を呼ばず、 force=true or stale なら queryFn 実行 + cache 更新。
 
@@ -81,9 +81,9 @@ cache-first fetch。 staleMs 内なら cache hit で queryFn を呼ばず、 for
 export declare function fetchQuery<T>(client: QueryClient, key: QueryKey, queryFn: QueryFn<T>, options?: FetchQueryOptions): Promise<FetchQueryResult<T>>;
 ```
 
-#### `invalidateQuery`
+#### <code v-pre>invalidateQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/invalidate.ts#L12) `packages/query/src/invalidate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/invalidate.ts#L12) <code v-pre>packages/query/src/invalidate.ts</code>
 
 cache から key を削除、 listener に invalidation を通知。 TanStack Query の queryClient.invalidateQueries 相当。
 
@@ -91,9 +91,9 @@ cache から key を削除、 listener に invalidation を通知。 TanStack Qu
 export declare function invalidateQuery(client: QueryClient, key: QueryKey): InvalidateResult;
 ```
 
-#### `mutate`
+#### <code v-pre>mutate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L21) `packages/query/src/mutation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L21) <code v-pre>packages/query/src/mutation.ts</code>
 
 mutationFn 実行 + 成功時に invalidateKeys を全 invalidate、 失敗時は onError 発火。 TanStack Query の useMutation.mutateAsync 相当。
 
@@ -101,9 +101,9 @@ mutationFn 実行 + 成功時に invalidateKeys を全 invalidate、 失敗時�
 export declare function mutate<TArgs, TResult>(client: QueryClient, mutationFn: MutationFn<TArgs, TResult>, args: TArgs, options?: MutateOptions<TResult>): Promise<MutateResult<TResult>>;
 ```
 
-#### `prefetchQueries`
+#### <code v-pre>prefetchQueries</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L75) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L75) <code v-pre>packages/query/src/extensions.ts</code>
 
 prefetch — 複数 queryKey を並列 fetch して cache に格納
 
@@ -111,17 +111,17 @@ prefetch — 複数 queryKey を並列 fetch して cache に格納
 export declare function prefetchQueries(keys: string[], fetcher: (key: string) => Promise<unknown>, options?: PrefetchOptions): Promise<PrefetchResult>;
 ```
 
-#### `retryWithBackoff`
+#### <code v-pre>retryWithBackoff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L102) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L102) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export declare function retryWithBackoff<T>(fn: () => Promise<T>, options?: RetryOptions): Promise<RetryResult<T>>;
 ```
 
-#### `subscribeToQuery`
+#### <code v-pre>subscribeToQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/subscription.ts#L14) `packages/query/src/subscription.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/subscription.ts#L14) <code v-pre>packages/query/src/subscription.ts</code>
 
 key に state 変更を subscribe。 fetchQuery / invalidateQuery が触ると listener に通知。 SWR の subscribe / TanStack Query の queryClient.getQueryCache().subscribe 相当。
 
@@ -129,9 +129,9 @@ key に state 変更を subscribe。 fetchQuery / invalidateQuery が触ると l
 export declare function subscribeToQuery(client: QueryClient, key: QueryKey, listener: QueryListener): Subscription;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L120) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L120) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T>;
@@ -139,9 +139,9 @@ export declare function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number):
 
 ### 型
 
-#### `CreateQueryClientOptions`
+#### <code v-pre>CreateQueryClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L16) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L16) <code v-pre>packages/query/src/client.ts</code>
 
 ```ts
 export interface CreateQueryClientOptions {
@@ -151,9 +151,9 @@ export interface CreateQueryClientOptions {
 }
 ```
 
-#### `FetchQueryOptions`
+#### <code v-pre>FetchQueryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L5) `packages/query/src/fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L5) <code v-pre>packages/query/src/fetch.ts</code>
 
 ```ts
 export interface FetchQueryOptions {
@@ -162,9 +162,9 @@ export interface FetchQueryOptions {
 }
 ```
 
-#### `FetchQueryResult`
+#### <code v-pre>FetchQueryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L10) `packages/query/src/fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L10) <code v-pre>packages/query/src/fetch.ts</code>
 
 ```ts
 export interface FetchQueryResult<T> {
@@ -175,9 +175,9 @@ export interface FetchQueryResult<T> {
 }
 ```
 
-#### `InfiniteQueryOptions`
+#### <code v-pre>InfiniteQueryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L7) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L7) <code v-pre>packages/query/src/extensions.ts</code>
 
 v2.1 extensions — infinite query, optimistic update, prefetch, plus retry/batch/observability/timeout generics. TanStack Query v5.60+ / SWR v2.3 追随。
 
@@ -192,9 +192,9 @@ export interface InfiniteQueryOptions<TData, TCursor> {
 }
 ```
 
-#### `InfiniteQueryState`
+#### <code v-pre>InfiniteQueryState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L13) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L13) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface InfiniteQueryState<TData, TCursor> {
@@ -208,9 +208,9 @@ export interface InfiniteQueryState<TData, TCursor> {
 }
 ```
 
-#### `InvalidateResult`
+#### <code v-pre>InvalidateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/invalidate.ts#L3) `packages/query/src/invalidate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/invalidate.ts#L3) <code v-pre>packages/query/src/invalidate.ts</code>
 
 ```ts
 export interface InvalidateResult {
@@ -219,9 +219,9 @@ export interface InvalidateResult {
 }
 ```
 
-#### `MutateOptions`
+#### <code v-pre>MutateOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L6) `packages/query/src/mutation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L6) <code v-pre>packages/query/src/mutation.ts</code>
 
 ```ts
 export interface MutateOptions<TResult> {
@@ -231,9 +231,9 @@ export interface MutateOptions<TResult> {
 }
 ```
 
-#### `MutateResult`
+#### <code v-pre>MutateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L12) `packages/query/src/mutation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L12) <code v-pre>packages/query/src/mutation.ts</code>
 
 ```ts
 export interface MutateResult<TResult> {
@@ -242,17 +242,17 @@ export interface MutateResult<TResult> {
 }
 ```
 
-#### `MutationFn`
+#### <code v-pre>MutationFn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L4) `packages/query/src/mutation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/mutation.ts#L4) <code v-pre>packages/query/src/mutation.ts</code>
 
 ```ts
 export type MutationFn<TArgs, TResult> = (args: TArgs) => Promise<TResult>;
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L128) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L128) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -268,9 +268,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `OptimisticUpdate`
+#### <code v-pre>OptimisticUpdate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L41) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L41) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface OptimisticUpdate<T> {
@@ -282,9 +282,9 @@ export interface OptimisticUpdate<T> {
 }
 ```
 
-#### `PrefetchOptions`
+#### <code v-pre>PrefetchOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L62) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L62) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface PrefetchOptions {
@@ -293,9 +293,9 @@ export interface PrefetchOptions {
 }
 ```
 
-#### `PrefetchResult`
+#### <code v-pre>PrefetchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L67) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L67) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface PrefetchResult {
@@ -309,9 +309,9 @@ export interface PrefetchResult {
 }
 ```
 
-#### `QueryClient`
+#### <code v-pre>QueryClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L22) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L22) <code v-pre>packages/query/src/client.ts</code>
 
 ```ts
 export interface QueryClient {
@@ -325,41 +325,41 @@ export interface QueryClient {
 }
 ```
 
-#### `QueryFn`
+#### <code v-pre>QueryFn</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L3) `packages/query/src/fetch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/fetch.ts#L3) <code v-pre>packages/query/src/fetch.ts</code>
 
 ```ts
 export type QueryFn<T> = () => Promise<T>;
 ```
 
-#### `QueryKey`
+#### <code v-pre>QueryKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L3) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L3) <code v-pre>packages/query/src/client.ts</code>
 
 ```ts
 export type QueryKey = string | readonly (string | number)[];
 ```
 
-#### `QueryListener`
+#### <code v-pre>QueryListener</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/subscription.ts#L3) `packages/query/src/subscription.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/subscription.ts#L3) <code v-pre>packages/query/src/subscription.ts</code>
 
 ```ts
 export type QueryListener = (state: QueryState) => void;
 ```
 
-#### `QueryProvider`
+#### <code v-pre>QueryProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L1) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L1) <code v-pre>packages/query/src/client.ts</code>
 
 ```ts
 export type QueryProvider = 'tanstack' | 'swr' | 'urql' | 'apollo';
 ```
 
-#### `QueryState`
+#### <code v-pre>QueryState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L7) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L7) <code v-pre>packages/query/src/client.ts</code>
 
 ```ts
 export interface QueryState<T = unknown> {
@@ -372,17 +372,17 @@ export interface QueryState<T = unknown> {
 }
 ```
 
-#### `QueryStatus`
+#### <code v-pre>QueryStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L5) `packages/query/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/client.ts#L5) <code v-pre>packages/query/src/client.ts</code>
 
 ```ts
 export type QueryStatus = 'idle' | 'loading' | 'success' | 'error';
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L99) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L99) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -392,9 +392,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RetryResult`
+#### <code v-pre>RetryResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L100) `packages/query/src/extensions.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/extensions.ts#L100) <code v-pre>packages/query/src/extensions.ts</code>
 
 ```ts
 export interface RetryResult<T> {
@@ -405,9 +405,9 @@ export interface RetryResult<T> {
 }
 ```
 
-#### `Subscription`
+#### <code v-pre>Subscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/subscription.ts#L5) `packages/query/src/subscription.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/query/src/subscription.ts#L5) <code v-pre>packages/query/src/subscription.ts</code>
 
 ```ts
 export interface Subscription {

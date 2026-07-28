@@ -8,10 +8,25 @@
 // 宣言として成立しないものが並ぶ。emitter を通せば ambient declaration として
 // 正しい形が得られる。
 
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
+
+import {
+  DocsSyncError,
+  codeBlock,
+  escapeMarkdownText,
+  inlineCode,
+  insideRoot,
+  linkPath,
+  neutralizeLeadingFence,
+  prepareWritePath,
+  replaceManagedBlock,
+  resolveReadPath,
+  tableCodeCell,
+  writeFileAtomic,
+} from './docs-sync-safety.mjs';
 
 const repositoryRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const librariesRoot = join(repositoryRoot, 'docs', 'libraries');
@@ -20,17 +35,25 @@ const scope = '@kiwa-lab';
 const start = '<!-- kiwa-public-api:start -->';
 const end = '<!-- kiwa-public-api:end -->';
 
+function repoRelativePosix(path) {
+  // Windows の separator は 1 文字。2 文字を探していたので、生成される link が
+  // その環境でだけ壊れていた。
+  return relative(repositoryRoot, path).replaceAll('\\', '/');
+}
+
 function sourceUrl(path, line) {
-  return `https://github.com/cardene777/kiwa/blob/main/${relative(repositoryRoot, path).replaceAll('\\\\', '/')}#L${line}`;
+  // path 片だけを encode する。行番号の `#L` は URL の構造なので残す。
+  return `https://github.com/cardene777/kiwa/blob/main/${linkPath(repoRelativePosix(path))}#L${line}`;
 }
 
 function sourceLine(sourceFile, node) {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
 }
 
+// separator を文字列で連結すると、separator が `\` の環境で子 source を 1 件も
+// 拾えず、診断表が空のまま reference を上書きする。path の包含判定は insideRoot に任せる。
 function isProjectSource(path, library) {
-  const root = join(packagesRoot, library, 'src');
-  return path === root || path.startsWith(`${root}/`);
+  return insideRoot(join(packagesRoot, library, 'src'), path);
 }
 
 function publicSymbol(checker, exported) {
@@ -67,7 +90,10 @@ function workspacePaths() {
     if (!entry.isDirectory()) continue;
     const manifest = join(packagesRoot, entry.name, 'package.json');
     if (!existsSync(manifest)) continue;
-    const name = JSON.parse(readFileSync(manifest, 'utf8')).name;
+    // manifest も link を追って読まれる。名前空間の判定に外の file を使わせない。
+    const name = JSON.parse(
+      readFileSync(resolveReadPath(manifest, repositoryRoot, `${entry.name} package.json`), 'utf8'),
+    ).name;
     if (typeof name !== 'string' || !name.startsWith(`${scope}/`)) continue;
     paths[name] = [join(packagesRoot, entry.name, 'src', 'index.ts')];
     paths[`${name}/*`] = [join(packagesRoot, entry.name, 'src', '*')];
@@ -200,9 +226,11 @@ function displayContract(checker, exported, symbol, library, emitted) {
     const statement = reExportStatement(exported);
     if (statement) {
       // namespace 公開は名前が付け替わったわけではないので注記しない。
+      // 元の名前も公開名も宣言から来る。backtick で囲んだだけでは Vue の補間が
+      // 式として実行されるので、公開名の見出しと同じく `<code v-pre>` に入れる。
       const note =
         aliased && !namespaceExport
-          ? `\`${symbol.getName()}\` を \`${name}\` として公開しています。`
+          ? `${inlineCode(symbol.getName())} を ${inlineCode(name)} として公開しています。`
           : null;
       return { code: statement, source: null, note };
     }
@@ -214,7 +242,7 @@ function displayContract(checker, exported, symbol, library, emitted) {
   const sourceFileName = node.getSourceFile().fileName;
   const code = emittedDeclaration(emitted, sourceFileName, symbol.getName()) ?? fallbackDeclaration(node);
 
-  const declarationPath = relative(repositoryRoot, sourceFileName).replaceAll('\\\\', '/');
+  const declarationPath = repoRelativePosix(sourceFileName);
   if (declarationPath.includes('/dist/') || declarationPath.startsWith('..')) {
     return { code, source: null, note: null };
   }
@@ -230,8 +258,19 @@ function displayContract(checker, exported, symbol, library, emitted) {
   };
 }
 
+/**
+ * JSDoc の説明文を Markdown へ埋める形にする。
+ *
+ * 実装が書いた prose なので backtick は markdown として活かす。生 HTML と Vue の
+ * 補間だけを止める。改行は空白へ畳む。畳まないと、複数行の説明が表や見出しの
+ * 途中で改行して以降の構造を壊す。
+ *
+ * 畳んだ結果は 1 行になり、その行は `contractEntry` で行頭に置かれる。行頭の
+ * backtick 3 連は fence として開き、直後に続く宣言の code block を丸ごと取り込む。
+ * 先頭の backtick 列だけ実体参照へ写して、fence にならないようにする。
+ */
 function documentation(checker, symbol) {
-  return ts
+  const folded = ts
     .displayPartsToString(symbol.getDocumentationComment(checker))
     .replaceAll(/\s+/g, ' ')
     .replaceAll('<', '&lt;')
@@ -239,15 +278,28 @@ function documentation(checker, symbol) {
     .replaceAll('{{', '&#123;&#123;')
     .replaceAll('}}', '&#125;&#125;')
     .trim();
+  return neutralizeLeadingFence(folded);
 }
 
-// 表のセルに入れる値は 1 行に畳む。複数行の文字列連結や条件式をそのまま
-// 入れると、改行のところで表が途切れて以降が本文として描画される。
-function tableCell(text) {
-  return text
-    .replaceAll(/\s+/g, ' ')
-    .replaceAll('|', '\\|')
-    .trim();
+// 表のセルに入れる値の畳み込みと escape は docs-sync-safety の tableCell に集約した。
+// 以前は縦棒だけを escape していたので、throw の引数に書かれた raw HTML や Vue の
+// 波括弧が、HTML を有効にした VitePress でそのまま active markup として働いた。
+
+/**
+ * throw の第 1 引数を表に載せる形にする。
+ *
+ * 文字列 literal と template literal は、囲みの引用符を外した中身だけを見せる。
+ * 引用符ごと載せると、表示が「引用符に囲まれた文字列」になって message そのものより
+ * 読みにくい。substitution を持つ template literal は `${...}` を残す。実行時に何が
+ * 埋まるかは source を見ないと分からないので、source の形のまま示す。
+ */
+function diagnosticMessage(argument, sourceFile) {
+  if (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) {
+    return argument.text;
+  }
+  const text = argument.getText(sourceFile);
+  if (ts.isTemplateExpression(argument)) return text.replace(/^`/, '').replace(/`$/, '');
+  return text;
 }
 
 function errorDiagnostics(program, library) {
@@ -264,8 +316,8 @@ function errorDiagnostics(program, library) {
         node.expression.arguments?.[0]
       ) {
         errors.push({
-          message: tableCell(node.expression.arguments[0].getText(sourceFile)),
-          path: relative(repositoryRoot, sourceFile.fileName).replaceAll('\\\\', '/'),
+          message: tableCodeCell(diagnosticMessage(node.expression.arguments[0], sourceFile)),
+          path: repoRelativePosix(sourceFile.fileName),
           url: sourceUrl(sourceFile.fileName, sourceLine(sourceFile, node)),
         });
       }
@@ -275,7 +327,9 @@ function errorDiagnostics(program, library) {
   }
   if (errors.length === 0) return '';
   errors.sort((a, b) => a.path.localeCompare(b.path) || a.url.localeCompare(b.url));
-  const rows = errors.map((error) => `| ${error.message} | [${error.path}](${error.url}) |`);
+  const rows = errors.map(
+    (error) => `| ${error.message} | [${escapeMarkdownText(error.path)}](${error.url}) |`,
+  );
   return [
     '## エラー診断',
     '',
@@ -308,12 +362,17 @@ function contractsFrom(program, emitted, library, entry) {
 }
 
 function contractEntry(contract) {
+  // 公開名と source path は TypeScript の宣言から来る。TypeScript は文字列の
+  // export 名を許すので、backtick で囲んだだけでは Vue の補間が式として実行される。
+  // inlineCode は escape 済み text を `<code v-pre>` に入れて両方を止める。
   const source = contract.source
-    ? `[ソース宣言](${contract.source.url}) \`${contract.source.path}\``
+    ? `[ソース宣言](${contract.source.url}) ${inlineCode(contract.source.path)}`
     : '公開 entry point から解決しています。';
   const note = contract.note ? `\n\n${contract.note}` : '';
   const description = contract.description ? `\n\n${contract.description}` : '';
-  return `#### \`${contract.name}\`\n\n${source}${note}${description}\n\n\`\`\`ts\n${contract.code}\n\`\`\``;
+  // 固定長の fence は、閉じ fence を含む文字列 literal を持つ宣言で block を途中で
+  // 閉じ、以降の宣言を本文として描画させる。codeBlock は中身より長い fence で開く。
+  return `#### ${inlineCode(contract.name)}\n\n${source}${note}${description}\n\n${codeBlock(contract.code, 'ts')}`;
 }
 
 function group(title, contracts) {
@@ -324,17 +383,25 @@ function group(title, contracts) {
 function section(library, contracts, diagnostics) {
   const values = contracts.filter((contract) => contract.kind === 'value');
   const types = contracts.filter((contract) => contract.kind === 'type');
-  const source = `https://github.com/cardene777/kiwa/blob/main/packages/${library}/src/index.ts`;
+  // library は directory 名から来る。encode しないと、名前に `)` や改行を含む
+  // checkout で link を閉じて後続を本文として描画させられる。
+  const source = `https://github.com/cardene777/kiwa/blob/main/packages/${linkPath(library)}/src/index.ts`;
   return `${start}\n${diagnostics ? `${diagnostics}\n\n` : ''}## API 契約\n\nこの section は [公開 entry point](${source}) から同期しています。各項目は公開名、TypeScript の宣言、宣言元のソース位置を示します。実装に JSDoc がある場合は、その説明も表示します。\n\n${group('値', values)}\n\n${group('型', types)}\n${end}`;
 }
 
-function replace(content, replacement) {
-  const from = content.indexOf(start);
-  const to = content.indexOf(end);
-  if (from !== -1 && to !== -1 && to > from) {
-    return `${content.slice(0, from)}${replacement}${content.slice(to + end.length)}`;
-  }
-  return `${content.replace(/\s*$/, '')}\n\n${replacement}\n`;
+/**
+ * 管理ブロックを 1 回だけ差し替える。marker が 1 組そろっていない reference.md は
+ * DocsSyncError で止める。以前は最初の start marker と最初の end marker を無条件に
+ * 置換していたので、正規 marker より前に stray marker があるとその間の手書き本文が消えた。
+ */
+function replace(content, replacement, label) {
+  return replaceManagedBlock(content, {
+    startMarker: start,
+    endMarker: end,
+    block: replacement,
+    insert: (body, block) => `${body.replace(/\s*$/, '')}\n\n${block}\n`,
+    label,
+  });
 }
 
 const targets = collectTargets();
@@ -357,12 +424,97 @@ if (unresolved.length > 0) {
   process.exit(1);
 }
 
-let updated = 0;
-for (const target of targets) {
-  const contracts = contractsFrom(program, emitted, target.library, target.entry);
-  const diagnostics = errorDiagnostics(program, target.library);
-  const content = readFileSync(target.reference, 'utf8');
-  writeFileSync(target.reference, replace(content, section(target.library, contracts, diagnostics)));
-  updated += 1;
+/**
+ * 依存の型定義を置いてよい場所。実体で持つ。
+ *
+ * `node_modules` が repo の外の store を指す構成があるため、repo の内側判定だけでは
+ * 正当な依存まで弾いてしまう。許可するのはここで列挙した root の内側だけにする。
+ */
+function dependencyStoreRoots() {
+  const roots = [];
+  for (const candidate of [join(repositoryRoot, 'node_modules')]) {
+    try {
+      roots.push(realpathSync(candidate));
+    } catch {
+      // 無ければ許可対象も無い。
+    }
+  }
+  return roots;
 }
-console.log(`Synchronized detailed API contracts for ${updated} library references.`);
+
+/**
+ * TypeScript が実際に読んだ source が repo の内側に収まっているかを確かめる。
+ *
+ * entry point の path を検証しても、そこから辿る import graph は TypeScript が自分で
+ * 読む。checkout に外を指す link を置くか `../../` で外へ出る import を書けば、repo の
+ * 外にある宣言と JSDoc が生成物へ流れ込む。書き込む前に program 全体を見て止める。
+ *
+ * 依存の型定義は repo の外にある store を指すので対象から外す。ただし除外の判定は
+ * 実体を取ってから行う。名乗りの path に `/node_modules/` を含めるだけで検証を
+ * 迂回できてしまうため、文字列一致で先に除外してはいけない。
+ */
+function assertProgramInsideRepository() {
+  const dependencyRoots = dependencyStoreRoots();
+  const outside = [];
+  for (const sourceFile of program.getSourceFiles()) {
+    let real;
+    try {
+      real = realpathSync(sourceFile.fileName);
+    } catch {
+      // 実体を確かめられない path は判断できないので、内側と見なさない。
+      outside.push(sourceFile.fileName);
+      continue;
+    }
+    if (insideRoot(repositoryRoot, real)) continue;
+    // 実体が許可した dependency store の内側なら、宣言 file に限って通す。
+    if (sourceFile.isDeclarationFile && dependencyRoots.some((root) => insideRoot(root, real))) {
+      continue;
+    }
+    outside.push(`${sourceFile.fileName} -> ${real}`);
+  }
+  if (outside.length === 0) return;
+  throw new DocsSyncError(
+    `the compiler read ${outside.length} file(s) outside ${repositoryRoot}; refusing to generate.\n` +
+      outside.slice(0, 10).map((path) => `  ${path}`).join('\n'),
+  );
+}
+
+function main() {
+  assertProgramInsideRepository();
+
+  // 第 1 段 = 全 target を読んで検証し、書く内容を組み立てるだけ。
+  // 最後の target が壊れていた時に先行 target だけ更新された生成物が残るのを避ける。
+  const plans = [];
+  for (const target of targets) {
+    const label = `${target.library} reference.md`;
+    const contracts = contractsFrom(program, emitted, target.library, target.entry);
+    const diagnostics = errorDiagnostics(program, target.library);
+    // 読み書きとも canonical path で許可 root の内側を確かめる。どちらの API も
+    // symlink を追うので、checkout に link を 1 本置くだけで repo の外を読み書きできる。
+    const content = readFileSync(resolveReadPath(target.reference, repositoryRoot, label), 'utf8');
+    plans.push({
+      // 書き込み先の検証もここで済ませる。write loop に残すと、後ろの target が
+      // repo の外を指す link だった時に先行 target だけ更新された状態で止まる。
+      target: prepareWritePath(target.reference, repositoryRoot, label),
+      content: replace(content, section(target.library, contracts, diagnostics), label),
+    });
+  }
+
+  // 第 2 段 = 全件の検証を通ってから書く。
+  for (const plan of plans) {
+    writeFileAtomic(plan.target, plan.content);
+  }
+  console.log(`Synchronized detailed API contracts for ${plans.length} library references.`);
+}
+
+try {
+  main();
+} catch (error) {
+  // 壊れた marker と repo の外を指す path は、直すまで生成を続けない。
+  if (error instanceof DocsSyncError) {
+    console.error(error.message);
+    process.exitCode = 1;
+  } else {
+    throw error;
+  }
+}

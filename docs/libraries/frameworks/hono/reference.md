@@ -27,7 +27,7 @@ KV は get、put、delete、metadata、expiration、prefix list を in-memory �
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `missing param "${key}" for path segment "${seg}"` | [packages/hono/src/rpc.ts](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L85) |
+| <code v-pre>missing param "$&#123;key&#125;" for path segment "$&#123;seg&#125;"</code> | [packages/hono/src/rpc.ts](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L85) |
 
 ## API 契約
 
@@ -35,9 +35,9 @@ KV は get、put、delete、metadata、expiration、prefix list を in-memory �
 
 ### 値
 
-#### `buildRequest`
+#### <code v-pre>buildRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L223) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L223) <code v-pre>packages/hono/src/app.ts</code>
 
 Build a `HonoRequest` shape from the primitives `invokeRoute` receives. Body handling is deferred (json() / text() re-parse the raw body on demand) so tests can assert on the raw string when needed.
 
@@ -51,9 +51,9 @@ export declare function buildRequest(input: {
 }): HonoRequest;
 ```
 
-#### `compileRoute`
+#### <code v-pre>compileRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L150) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L150) <code v-pre>packages/hono/src/app.ts</code>
 
 Compile a Hono-shaped pattern (`/users/:id`, `/blog/*`, `/*`) into a regex + captured param name list. Kept intentionally small — real Hono uses a trie for prefix sharing; the subset we support is enough to model 90%+ of test targets without duplicating the runtime.
 
@@ -61,9 +61,9 @@ Compile a Hono-shaped pattern (`/users/:id`, `/blog/*`, `/*`) into a regex + cap
 export declare function compileRoute(pattern: string): RouteMatcher;
 ```
 
-#### `createContext`
+#### <code v-pre>createContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L274) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L274) <code v-pre>packages/hono/src/app.ts</code>
 
 Build a `HonoContext` — the `c` object handlers receive. `set` / `get` write to an internal Map; `json` / `text` capture the response into a spec the caller can inspect after the chain resolves.
 
@@ -75,9 +75,9 @@ export declare function createContext<TEnv = Record<string, unknown>, TVars = Re
 }): HonoContext<TEnv, TVars>;
 ```
 
-#### `createExecutionContext`
+#### <code v-pre>createExecutionContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L334) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L334) <code v-pre>packages/hono/src/workers.ts</code>
 
 Build a Workers-shaped `ExecutionContext`. `waitUntil` collects the promises so tests can await them all with `ctx.waitUntilAll()` before asserting on side-effects (KV writes, log flushes, etc).
 
@@ -85,9 +85,9 @@ Build a Workers-shaped `ExecutionContext`. `waitUntil` collects the promises so 
 export declare function createExecutionContext(): ExecutionContextMockLike;
 ```
 
-#### `createHonoApp`
+#### <code v-pre>createHonoApp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L335) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L335) <code v-pre>packages/hono/src/app.ts</code>
 
 Create a Hono-shaped app builder. Routes registered via `.get()` etc. get matched by `compileRoute`; middleware registered via `.use()` runs in registration order for every matching request.
 
@@ -95,9 +95,9 @@ Create a Hono-shaped app builder. Routes registered via `.get()` etc. get matche
 export declare function createHonoApp<TEnv = Record<string, unknown>, TVars = Record<string, unknown>>(): HonoAppLike<TEnv, TVars>;
 ```
 
-#### `createRpcClient`
+#### <code v-pre>createRpcClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L75) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L75) <code v-pre>packages/hono/src/rpc.ts</code>
 
 Build a hc-shaped RPC client for an app. Property access walks a route string (bracketed segments = `:name` params), terminals `$get` / `$post` / ... fire a request through `invokeRoute` and wrap the resulting response spec into an `HcResponse` object. The client is intentionally schemaless at runtime — TS `AppType` inference lives in the caller's app types; kiwa doesn't parse or enforce them. That keeps the runtime tiny (a Proxy tree) and matches real Hono `hc` behavior.
 
@@ -107,9 +107,9 @@ export declare function createRpcClient<TEnv = Record<string, unknown>>(app: Hon
 }): HcClient;
 ```
 
-#### `createWorkersEnv`
+#### <code v-pre>createWorkersEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L380) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L380) <code v-pre>packages/hono/src/workers.ts</code>
 
 Assemble a Workers-shaped `env` object. KV / D1 / R2 stubs get spread onto the env under their binding names + `vars` / `secrets` become plain string properties. Callers can pass the result directly to `HonoAppLike.request(url, init, env, ctx)` or attach it to `createContext({ env })`.
 
@@ -117,17 +117,17 @@ Assemble a Workers-shaped `env` object. KV / D1 / R2 stubs get spread onto the e
 export declare function createWorkersEnv(spec?: WorkersEnvSpec): WorkersEnvLike;
 ```
 
-#### `D1_DATABASE_SYMBOL`
+#### <code v-pre>D1&#95;DATABASE&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L29) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L29) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export declare const D1_DATABASE_SYMBOL: unique symbol;
 ```
 
-#### `defineRpcApp`
+#### <code v-pre>defineRpcApp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L194) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L194) <code v-pre>packages/hono/src/rpc.ts</code>
 
 Convenience: build an app + client pair in one call. Useful for tests that want to declare the app + immediately drive it through the client without a separate `createHonoApp()` line.
 
@@ -138,57 +138,57 @@ export declare function defineRpcApp<TEnv = Record<string, unknown>>(opts: Defin
 };
 ```
 
-#### `EXECUTION_CTX_SYMBOL`
+#### <code v-pre>EXECUTION&#95;CTX&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L27) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L27) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export declare const EXECUTION_CTX_SYMBOL: unique symbol;
 ```
 
-#### `HC_CLIENT_SYMBOL`
+#### <code v-pre>HC&#95;CLIENT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L32) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L32) <code v-pre>packages/hono/src/rpc.ts</code>
 
 ```ts
 export declare const HC_CLIENT_SYMBOL: unique symbol;
 ```
 
-#### `HC_REQUEST_SYMBOL`
+#### <code v-pre>HC&#95;REQUEST&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L33) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L33) <code v-pre>packages/hono/src/rpc.ts</code>
 
 ```ts
 export declare const HC_REQUEST_SYMBOL: unique symbol;
 ```
 
-#### `HONO_APP_SYMBOL`
+#### <code v-pre>HONO&#95;APP&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L25) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L25) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export declare const HONO_APP_SYMBOL: unique symbol;
 ```
 
-#### `HONO_CONTEXT_SYMBOL`
+#### <code v-pre>HONO&#95;CONTEXT&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L26) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L26) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export declare const HONO_CONTEXT_SYMBOL: unique symbol;
 ```
 
-#### `HONO_ROUTE_SYMBOL`
+#### <code v-pre>HONO&#95;ROUTE&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L27) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L27) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export declare const HONO_ROUTE_SYMBOL: unique symbol;
 ```
 
-#### `invokeRoute`
+#### <code v-pre>invokeRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L482) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L482) <code v-pre>packages/hono/src/app.ts</code>
 
 Invoke a single request against an app: build request, walk registered middleware chain, dispatch to the first matching route handler, capture trace + response + error. Returns a `matched: false` result when nothing matches (so callers can assert the 404 fallback path).
 
@@ -196,9 +196,9 @@ Invoke a single request against an app: build request, walk registered middlewar
 export declare function invokeRoute<TEnv, TVars>(opts: InvokeRouteOptions<TEnv, TVars>): Promise<InvokeRouteResult>;
 ```
 
-#### `isD1DatabaseMock`
+#### <code v-pre>isD1DatabaseMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L420) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L420) <code v-pre>packages/hono/src/workers.ts</code>
 
 Type guard: recognize a D1 database mock.
 
@@ -206,9 +206,9 @@ Type guard: recognize a D1 database mock.
 export declare function isD1DatabaseMock(value: unknown): value is D1DatabaseLike;
 ```
 
-#### `isExecutionContextMock`
+#### <code v-pre>isExecutionContextMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L402) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L402) <code v-pre>packages/hono/src/workers.ts</code>
 
 Type guard: recognize an ExecutionContext mock.
 
@@ -216,9 +216,9 @@ Type guard: recognize an ExecutionContext mock.
 export declare function isExecutionContextMock(value: unknown): value is ExecutionContextMockLike;
 ```
 
-#### `isHcResponse`
+#### <code v-pre>isHcResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L204) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L204) <code v-pre>packages/hono/src/rpc.ts</code>
 
 Type guard: recognize an HcResponse.
 
@@ -226,9 +226,9 @@ Type guard: recognize an HcResponse.
 export declare function isHcResponse(value: unknown): value is HcResponse;
 ```
 
-#### `isHonoApp`
+#### <code v-pre>isHonoApp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L595) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L595) <code v-pre>packages/hono/src/app.ts</code>
 
 Type guard: recognize a HonoAppLike.
 
@@ -236,9 +236,9 @@ Type guard: recognize a HonoAppLike.
 export declare function isHonoApp(value: unknown): value is HonoAppLike;
 ```
 
-#### `isHonoContext`
+#### <code v-pre>isHonoContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L604) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L604) <code v-pre>packages/hono/src/app.ts</code>
 
 Type guard: recognize a HonoContext.
 
@@ -246,9 +246,9 @@ Type guard: recognize a HonoContext.
 export declare function isHonoContext(value: unknown): value is HonoContext;
 ```
 
-#### `isKVNamespaceMock`
+#### <code v-pre>isKVNamespaceMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L411) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L411) <code v-pre>packages/hono/src/workers.ts</code>
 
 Type guard: recognize a KV namespace mock.
 
@@ -256,9 +256,9 @@ Type guard: recognize a KV namespace mock.
 export declare function isKVNamespaceMock(value: unknown): value is KVNamespaceLike;
 ```
 
-#### `isR2BucketMock`
+#### <code v-pre>isR2BucketMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L429) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L429) <code v-pre>packages/hono/src/workers.ts</code>
 
 Type guard: recognize an R2 bucket mock.
 
@@ -266,9 +266,9 @@ Type guard: recognize an R2 bucket mock.
 export declare function isR2BucketMock(value: unknown): value is R2BucketLike;
 ```
 
-#### `isWorkersEnv`
+#### <code v-pre>isWorkersEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L393) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L393) <code v-pre>packages/hono/src/workers.ts</code>
 
 Type guard: recognize a WorkersEnvLike.
 
@@ -276,17 +276,17 @@ Type guard: recognize a WorkersEnvLike.
 export declare function isWorkersEnv(value: unknown): value is WorkersEnvLike;
 ```
 
-#### `KV_NAMESPACE_SYMBOL`
+#### <code v-pre>KV&#95;NAMESPACE&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L28) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L28) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export declare const KV_NAMESPACE_SYMBOL: unique symbol;
 ```
 
-#### `matchRoute`
+#### <code v-pre>matchRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L174) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L174) <code v-pre>packages/hono/src/app.ts</code>
 
 Match a request `path` against a matcher and return `{params}` when it hits, `null` when it doesn't. Callers use this for both route dispatch + middleware scope checks (`app.use('/api/*', ...)`).
 
@@ -294,9 +294,9 @@ Match a request `path` against a matcher and return `{params}` when it hits, `nu
 export declare function matchRoute(matcher: RouteMatcher, path: string): RouteParams | null;
 ```
 
-#### `mockD1Database`
+#### <code v-pre>mockD1Database</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L174) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L174) <code v-pre>packages/hono/src/workers.ts</code>
 
 Build an in-memory D1 database stub. Tests register canned responses per query text with `__setResponse` and inspect executed queries + bindings via `__log()`. Real D1 uses SQLite; the mock is intentionally query-string matched (no SQL parsing) so the behavior tests observe is deterministic.
 
@@ -304,9 +304,9 @@ Build an in-memory D1 database stub. Tests register canned responses per query t
 export declare function mockD1Database(): D1DatabaseLike;
 ```
 
-#### `mockKVNamespace`
+#### <code v-pre>mockKVNamespace</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L68) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L68) <code v-pre>packages/hono/src/workers.ts</code>
 
 Build an in-memory KV namespace stub with the Cloudflare Workers surface (`get` / `put` / `delete` / `list` / `getWithMetadata`). Expiration is evaluated against `Date.now()` on read, matching Workers behavior.
 
@@ -314,9 +314,9 @@ Build an in-memory KV namespace stub with the Cloudflare Workers surface (`get` 
 export declare function mockKVNamespace<TMetadata = unknown>(): KVNamespaceLike<TMetadata>;
 ```
 
-#### `mockR2Bucket`
+#### <code v-pre>mockR2Bucket</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L277) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L277) <code v-pre>packages/hono/src/workers.ts</code>
 
 Build an in-memory R2 bucket stub. Values may be strings or ArrayBuffers; the mock does not parse content type or compute checksums — those are the caller's responsibility if a test asserts on them.
 
@@ -324,17 +324,17 @@ Build an in-memory R2 bucket stub. Values may be strings or ArrayBuffers; the mo
 export declare function mockR2Bucket(): R2BucketLike;
 ```
 
-#### `R2_BUCKET_SYMBOL`
+#### <code v-pre>R2&#95;BUCKET&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L30) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L30) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export declare const R2_BUCKET_SYMBOL: unique symbol;
 ```
 
-#### `WORKERS_ENV_SYMBOL`
+#### <code v-pre>WORKERS&#95;ENV&#95;SYMBOL</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L26) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L26) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export declare const WORKERS_ENV_SYMBOL: unique symbol;
@@ -342,9 +342,9 @@ export declare const WORKERS_ENV_SYMBOL: unique symbol;
 
 ### 型
 
-#### `D1DatabaseLike`
+#### <code v-pre>D1DatabaseLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L158) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L158) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface D1DatabaseLike {
@@ -361,9 +361,9 @@ export interface D1DatabaseLike {
 }
 ```
 
-#### `D1PreparedStatementLike`
+#### <code v-pre>D1PreparedStatementLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L151) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L151) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface D1PreparedStatementLike {
@@ -374,9 +374,9 @@ export interface D1PreparedStatementLike {
 }
 ```
 
-#### `D1Result`
+#### <code v-pre>D1Result</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L145) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L145) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface D1Result<T = D1Row> {
@@ -390,9 +390,9 @@ export interface D1Result<T = D1Row> {
 }
 ```
 
-#### `D1Row`
+#### <code v-pre>D1Row</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L143) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L143) <code v-pre>packages/hono/src/workers.ts</code>
 
 D1 result row — dictionary of column → value.
 
@@ -400,9 +400,9 @@ D1 result row — dictionary of column → value.
 export type D1Row = Record<string, unknown>;
 ```
 
-#### `DefineRpcAppOptions`
+#### <code v-pre>DefineRpcAppOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L185) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L185) <code v-pre>packages/hono/src/rpc.ts</code>
 
 ```ts
 export interface DefineRpcAppOptions<TEnv = Record<string, unknown>> {
@@ -410,9 +410,9 @@ export interface DefineRpcAppOptions<TEnv = Record<string, unknown>> {
 }
 ```
 
-#### `ExecutionContextMockLike`
+#### <code v-pre>ExecutionContextMockLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L319) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L319) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface ExecutionContextMockLike extends ExecutionCtxLike {
@@ -426,9 +426,9 @@ export interface ExecutionContextMockLike extends ExecutionCtxLike {
 }
 ```
 
-#### `ExecutionCtxLike`
+#### <code v-pre>ExecutionCtxLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L80) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L80) <code v-pre>packages/hono/src/app.ts</code>
 
 Shape of `ExecutionContext` from workers.ts (avoid circular import).
 
@@ -439,9 +439,9 @@ export interface ExecutionCtxLike {
 }
 ```
 
-#### `Handler`
+#### <code v-pre>Handler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L86) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L86) <code v-pre>packages/hono/src/app.ts</code>
 
 Handler = `(c) =&gt; c.json(...) | Response spec | Promise&lt;...&gt;`.
 
@@ -449,9 +449,9 @@ Handler = `(c) =&gt; c.json(...) | Response spec | Promise&lt;...&gt;`.
 export type Handler<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> = (c: HonoContext<TEnv, TVars>) => HonoResponseSpec | Promise<HonoResponseSpec> | void | Promise<void>;
 ```
 
-#### `HcClient`
+#### <code v-pre>HcClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L183) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L183) <code v-pre>packages/hono/src/rpc.ts</code>
 
 Runtime shape of a hc client — an untyped Proxy for JS callers. TS callers typically re-cast the return value into their app-specific typed client (`const client = createRpcClient&lt;AppType&gt;(app) as ClientType`).
 
@@ -459,9 +459,9 @@ Runtime shape of a hc client — an untyped Proxy for JS callers. TS callers typ
 export type HcClient = unknown;
 ```
 
-#### `HcRequestOptions`
+#### <code v-pre>HcRequestOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L36) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L36) <code v-pre>packages/hono/src/rpc.ts</code>
 
 Options passed at every `$get` / `$post` / ... call.
 
@@ -477,9 +477,9 @@ export interface HcRequestOptions<TEnv = Record<string, unknown>> {
 }
 ```
 
-#### `HcResponse`
+#### <code v-pre>HcResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L51) `packages/hono/src/rpc.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/rpc.ts#L51) <code v-pre>packages/hono/src/rpc.ts</code>
 
 Response returned to hc callers. Mirrors the parts of the Fetch `Response` shape tests need (`ok` / `status` / `json()` / `text()` / `headers`), plus a `trace` array for asserting on the middleware chain a route went through.
 
@@ -497,9 +497,9 @@ export interface HcResponse<T = unknown> {
 }
 ```
 
-#### `HonoAppLike`
+#### <code v-pre>HonoAppLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L119) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L119) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export interface HonoAppLike<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> {
@@ -518,9 +518,9 @@ export interface HonoAppLike<TEnv = Record<string, unknown>, TVars = Record<stri
 }
 ```
 
-#### `HonoContext`
+#### <code v-pre>HonoContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L65) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L65) <code v-pre>packages/hono/src/app.ts</code>
 
 Handler context — `c` in Hono.
 
@@ -540,9 +540,9 @@ export interface HonoContext<TEnv = Record<string, unknown>, TVars = Record<stri
 }
 ```
 
-#### `HonoRequest`
+#### <code v-pre>HonoRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L42) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L42) <code v-pre>packages/hono/src/app.ts</code>
 
 Request contract exposed to handlers as `c.req`.
 
@@ -562,9 +562,9 @@ export interface HonoRequest {
 }
 ```
 
-#### `HonoResponseSpec`
+#### <code v-pre>HonoResponseSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L57) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L57) <code v-pre>packages/hono/src/app.ts</code>
 
 Buffered response captured by `c.json()` / `c.text()` / `c.header()`.
 
@@ -577,17 +577,17 @@ export interface HonoResponseSpec {
 }
 ```
 
-#### `HttpMethod`
+#### <code v-pre>HttpMethod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L29) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L29) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD';
 ```
 
-#### `InvokeRouteOptions`
+#### <code v-pre>InvokeRouteOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L459) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L459) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export interface InvokeRouteOptions<TEnv, TVars> {
@@ -601,9 +601,9 @@ export interface InvokeRouteOptions<TEnv, TVars> {
 }
 ```
 
-#### `InvokeRouteResult`
+#### <code v-pre>InvokeRouteResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L469) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L469) <code v-pre>packages/hono/src/app.ts</code>
 
 ```ts
 export interface InvokeRouteResult {
@@ -614,9 +614,9 @@ export interface InvokeRouteResult {
 }
 ```
 
-#### `KVEntry`
+#### <code v-pre>KVEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L33) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L33) <code v-pre>packages/hono/src/workers.ts</code>
 
 KV entry — value + optional metadata + expiration timestamp.
 
@@ -628,9 +628,9 @@ export interface KVEntry<TMetadata = unknown> {
 }
 ```
 
-#### `KVListResult`
+#### <code v-pre>KVListResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L39) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L39) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface KVListResult<TMetadata = unknown> {
@@ -644,9 +644,9 @@ export interface KVListResult<TMetadata = unknown> {
 }
 ```
 
-#### `KVNamespaceLike`
+#### <code v-pre>KVNamespaceLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L52) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L52) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface KVNamespaceLike<TMetadata = unknown> {
@@ -667,9 +667,9 @@ export interface KVNamespaceLike<TMetadata = unknown> {
 }
 ```
 
-#### `KVPutOptions`
+#### <code v-pre>KVPutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L46) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L46) <code v-pre>packages/hono/src/workers.ts</code>
 
 Options passed to `KVNamespace.put()`.
 
@@ -681,9 +681,9 @@ export interface KVPutOptions<TMetadata = unknown> {
 }
 ```
 
-#### `Middleware`
+#### <code v-pre>Middleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L91) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L91) <code v-pre>packages/hono/src/app.ts</code>
 
 Middleware = `(c, next) =&gt; await next()` shape.
 
@@ -691,9 +691,9 @@ Middleware = `(c, next) =&gt; await next()` shape.
 export type Middleware<TEnv = Record<string, unknown>, TVars = Record<string, unknown>> = (c: HonoContext<TEnv, TVars>, next: () => Promise<void>) => void | Promise<void>;
 ```
 
-#### `MiddlewareTraceEntry`
+#### <code v-pre>MiddlewareTraceEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L111) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L111) <code v-pre>packages/hono/src/app.ts</code>
 
 Trace entry produced by `invokeRoute` for the middleware chain.
 
@@ -707,9 +707,9 @@ export interface MiddlewareTraceEntry {
 }
 ```
 
-#### `QueryParams`
+#### <code v-pre>QueryParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L37) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L37) <code v-pre>packages/hono/src/app.ts</code>
 
 Parsed query object from a URL search string.
 
@@ -719,9 +719,9 @@ export interface QueryParams {
 }
 ```
 
-#### `R2BucketLike`
+#### <code v-pre>R2BucketLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L259) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L259) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface R2BucketLike {
@@ -740,9 +740,9 @@ export interface R2BucketLike {
 }
 ```
 
-#### `R2ListResult`
+#### <code v-pre>R2ListResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L253) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L253) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface R2ListResult {
@@ -752,9 +752,9 @@ export interface R2ListResult {
 }
 ```
 
-#### `R2Object`
+#### <code v-pre>R2Object</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L244) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L244) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface R2Object {
@@ -769,9 +769,9 @@ export interface R2Object {
 }
 ```
 
-#### `RouteParams`
+#### <code v-pre>RouteParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L32) `packages/hono/src/app.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/app.ts#L32) <code v-pre>packages/hono/src/app.ts</code>
 
 Params captured from a `:name` segment.
 
@@ -781,9 +781,9 @@ export interface RouteParams {
 }
 ```
 
-#### `WorkersEnvLike`
+#### <code v-pre>WorkersEnvLike</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L370) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L370) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface WorkersEnvLike extends Record<string, unknown> {
@@ -791,9 +791,9 @@ export interface WorkersEnvLike extends Record<string, unknown> {
 }
 ```
 
-#### `WorkersEnvSpec`
+#### <code v-pre>WorkersEnvSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L362) `packages/hono/src/workers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/hono/src/workers.ts#L362) <code v-pre>packages/hono/src/workers.ts</code>
 
 ```ts
 export interface WorkersEnvSpec {

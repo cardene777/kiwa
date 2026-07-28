@@ -47,10 +47,10 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'comparePngBuffers requires "pixelmatch". Run `pnpm add -D pixelmatch`.' | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L28) |
-| 'comparePngBuffers requires "pngjs". Run `pnpm add -D pngjs`.' | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L37) |
-| `comparePngBuffers: size mismatch ${a.width}x${a.height} vs ${b.width}x${b.height}. Resize before comparing.` | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L50) |
-| `Visual diff exceeded threshold: ${result.diffPixels} pixels (${(result.diffRatio * 100).toFixed(2)}%).` | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L81) |
+| <code v-pre>comparePngBuffers requires "pixelmatch". Run &#96;pnpm add -D pixelmatch&#96;.</code> | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L28) |
+| <code v-pre>comparePngBuffers requires "pngjs". Run &#96;pnpm add -D pngjs&#96;.</code> | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L37) |
+| <code v-pre>comparePngBuffers: size mismatch $&#123;a.width&#125;x$&#123;a.height&#125; vs $&#123;b.width&#125;x$&#123;b.height&#125;. Resize before comparing.</code> | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L50) |
+| <code v-pre>Visual diff exceeded threshold: $&#123;result.diffPixels&#125; pixels ($&#123;(result.diffRatio &#42; 100).toFixed(2)&#125;%).</code> | [packages/visual/src/compare.ts](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L81) |
 
 ## API 契約
 
@@ -58,17 +58,17 @@
 
 ### 値
 
-#### `comparePngBuffers`
+#### <code v-pre>comparePngBuffers</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L41) `packages/visual/src/compare.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L41) <code v-pre>packages/visual/src/compare.ts</code>
 
 ```ts
 export declare function comparePngBuffers(baseline: Buffer, actual: Buffer, opts?: CompareOptions): Promise<CompareResult>;
 ```
 
-#### `expectNoVisualDiff`
+#### <code v-pre>expectNoVisualDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L76) `packages/visual/src/compare.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/compare.ts#L76) <code v-pre>packages/visual/src/compare.ts</code>
 
 ```ts
 export declare function expectNoVisualDiff(result: CompareResult, expect: {
@@ -80,9 +80,9 @@ export declare function expectNoVisualDiff(result: CompareResult, expect: {
 
 ### 型
 
-#### `CompareOptions`
+#### <code v-pre>CompareOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/types.ts#L14) `packages/visual/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/types.ts#L14) <code v-pre>packages/visual/src/types.ts</code>
 
 ```ts
 export interface CompareOptions {
@@ -97,9 +97,9 @@ export interface CompareOptions {
 }
 ```
 
-#### `CompareResult`
+#### <code v-pre>CompareResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/types.ts#L6) `packages/visual/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/types.ts#L6) <code v-pre>packages/visual/src/types.ts</code>
 
 ```ts
 export interface CompareResult {
@@ -111,9 +111,9 @@ export interface CompareResult {
 }
 ```
 
-#### `PixelSize`
+#### <code v-pre>PixelSize</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/types.ts#L1) `packages/visual/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/visual/src/types.ts#L1) <code v-pre>packages/visual/src/types.ts</code>
 
 ```ts
 export interface PixelSize {

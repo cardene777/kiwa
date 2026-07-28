@@ -21,17 +21,17 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `unknown assistant id: ${assistantId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L101) |
-| `unknown thread id: ${threadId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L141) |
-| `unknown thread id: ${params.threadId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L167) |
-| `unknown assistant id: ${params.assistantId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L170) |
-| `assistant ${params.assistantId} has no handler registered — call registerHandler() first` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L173) |
-| `unknown run id: ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L205) |
-| `pollUntilFinal exceeded ${maxAttempts} attempts for run ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L227) |
-| `unknown run id: ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L242) |
-| `run ${runId} is not requires_action (current: ${run.status}), cannot submit tool outputs` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L245) |
-| `unknown run id: ${runId}` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L271) |
-| `run ${run.id} references missing thread or handler` | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L303) |
+| <code v-pre>unknown assistant id: $&#123;assistantId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L101) |
+| <code v-pre>unknown thread id: $&#123;threadId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L141) |
+| <code v-pre>unknown thread id: $&#123;params.threadId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L167) |
+| <code v-pre>unknown assistant id: $&#123;params.assistantId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L170) |
+| <code v-pre>assistant $&#123;params.assistantId&#125; has no handler registered — call registerHandler() first</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L173) |
+| <code v-pre>unknown run id: $&#123;runId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L205) |
+| <code v-pre>pollUntilFinal exceeded $&#123;maxAttempts&#125; attempts for run $&#123;runId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L227) |
+| <code v-pre>unknown run id: $&#123;runId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L242) |
+| <code v-pre>run $&#123;runId&#125; is not requires&#95;action (current: $&#123;run.status&#125;), cannot submit tool outputs</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L245) |
+| <code v-pre>unknown run id: $&#123;runId&#125;</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L271) |
+| <code v-pre>run $&#123;run.id&#125; references missing thread or handler</code> | [packages/agent/src/openai-assistants.ts](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L303) |
 
 ## API 契約
 
@@ -39,9 +39,9 @@
 
 ### 値
 
-#### `AssistantsClient`
+#### <code v-pre>AssistantsClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L62) `packages/agent/src/openai-assistants.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L62) <code v-pre>packages/agent/src/openai-assistants.ts</code>
 
 Assistants v2 client mock — real openai.beta.assistants の thin wrapper API。 assistant / thread / run resource を in-memory Map で保持、 id は seed 付き incrementing で generate する。
 
@@ -142,9 +142,9 @@ export declare class AssistantsClient {
 }
 ```
 
-#### `CompiledGraph`
+#### <code v-pre>CompiledGraph</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/langgraph.ts#L85) `packages/agent/src/langgraph.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/langgraph.ts#L85) <code v-pre>packages/agent/src/langgraph.ts</code>
 
 CompiledGraph — StateGraph.compile() 後の実行可能 graph。 real LangGraph の compiled graph に対応、 invoke + stream の 2 実行モード。
 
@@ -169,9 +169,9 @@ export declare class CompiledGraph<TState extends AgentState = AgentState> {
 }
 ```
 
-#### `DEFAULT_MAX_STEPS`
+#### <code v-pre>DEFAULT&#95;MAX&#95;STEPS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L35) `packages/agent/src/state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L35) <code v-pre>packages/agent/src/state-machine.ts</code>
 
 runtime cycle 検出 — 同一 node が 2 回以上 visit されたら循環と判定する。 real LangGraph は cycle 許容だが (agent loop の中核)、 v0.1 mock は simplicity 優先で 「visit 上限を突破したら halt + throw」 に倒す。 default 上限は 100 step。
 
@@ -179,9 +179,9 @@ runtime cycle 検出 — 同一 node が 2 回以上 visit されたら循環と
 export declare const DEFAULT_MAX_STEPS = 100;
 ```
 
-#### `END`
+#### <code v-pre>END</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L40) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L40) <code v-pre>packages/agent/src/types.ts</code>
 
 END sentinel — graph の終端を示す reserved node name。 real LangGraph の `END` に対応。
 
@@ -189,9 +189,9 @@ END sentinel — graph の終端を示す reserved node name。 real LangGraph �
 export declare const END: "__end__";
 ```
 
-#### `GraphCompileError`
+#### <code v-pre>GraphCompileError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L44) `packages/agent/src/state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L44) <code v-pre>packages/agent/src/state-machine.ts</code>
 
 compile 失敗 error — validate 時に投げる。
 
@@ -201,9 +201,9 @@ export declare class GraphCompileError extends Error {
 }
 ```
 
-#### `MaxStepsExceededError`
+#### <code v-pre>MaxStepsExceededError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L52) `packages/agent/src/state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L52) <code v-pre>packages/agent/src/state-machine.ts</code>
 
 runtime 最大 step 突破 error。
 
@@ -214,9 +214,9 @@ export declare class MaxStepsExceededError extends Error {
 }
 ```
 
-#### `START`
+#### <code v-pre>START</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L44) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L44) <code v-pre>packages/agent/src/types.ts</code>
 
 START sentinel — graph の起点を示す reserved node name。 real LangGraph の `START` に対応。
 
@@ -224,9 +224,9 @@ START sentinel — graph の起点を示す reserved node name。 real LangGraph
 export declare const START: "__start__";
 ```
 
-#### `StateGraph`
+#### <code v-pre>StateGraph</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/langgraph.ts#L46) `packages/agent/src/langgraph.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/langgraph.ts#L46) <code v-pre>packages/agent/src/langgraph.ts</code>
 
 StateGraph builder — node / edge を組んで compile() で `CompiledGraph` を得る。 real LangGraph の `StateGraph` に対応。
 
@@ -252,9 +252,9 @@ export declare class StateGraph<TState extends AgentState = AgentState> {
 }
 ```
 
-#### `StateMachine`
+#### <code v-pre>StateMachine</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L65) `packages/agent/src/state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L65) <code v-pre>packages/agent/src/state-machine.ts</code>
 
 StateMachine — pure state graph 実行 engine。 langgraph.ts の StateGraph が 内部で使う。 直接叩くのも可 (低水準 API として export)。
 
@@ -296,9 +296,9 @@ export declare class StateMachine<TState extends AgentState = AgentState> {
 }
 ```
 
-#### `toolCall`
+#### <code v-pre>toolCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L367) `packages/agent/src/openai-assistants.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L367) <code v-pre>packages/agent/src/openai-assistants.ts</code>
 
 ToolCall builder shortcut — test で `{ id, type: 'function', function: { name, arguments: JSON } }` を書くのは冗長なので helper を出す。
 
@@ -312,9 +312,9 @@ export declare function toolCall(params: {
 
 ### 型
 
-#### `AgentState`
+#### <code v-pre>AgentState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L32) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L32) <code v-pre>packages/agent/src/types.ts</code>
 
 状態を持つ graph node の generic state 型。 実 test では project 側で narrow する。 shape は `object` に緩めて index signature 要求を避ける (real LangGraph も any-typed TypedDict を許容する)。 handler / stream の内部で `{ ...state, ...patch }` で shallow merge するため、 実質的な shape 制約は各 project 側の TState で narrow される。
 
@@ -322,9 +322,9 @@ export declare function toolCall(params: {
 export type AgentState = object;
 ```
 
-#### `Assistant`
+#### <code v-pre>Assistant</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L171) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L171) <code v-pre>packages/agent/src/types.ts</code>
 
 Assistant resource — real API と同じく id + name + instructions を保持。
 
@@ -337,9 +337,9 @@ export interface Assistant {
 }
 ```
 
-#### `AssistantHandler`
+#### <code v-pre>AssistantHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L105) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L105) <code v-pre>packages/agent/src/types.ts</code>
 
 Assistant handler — 1 run で assistant が「thread 履歴を見て次の action を決める」 1 step 分の logic。 return が string なら completed で assistant message として append、 return が `{ toolCalls }` なら requires_action に遷移して pending tool_calls を保持。
 
@@ -347,9 +347,9 @@ Assistant handler — 1 run で assistant が「thread 履歴を見て次の act
 export type AssistantHandler = (ctx: AssistantHandlerContext) => Promise<AssistantHandlerResult> | AssistantHandlerResult;
 ```
 
-#### `AssistantHandlerContext`
+#### <code v-pre>AssistantHandlerContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L110) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L110) <code v-pre>packages/agent/src/types.ts</code>
 
 handler に渡す context — thread 履歴 + 現在の run。
 
@@ -366,9 +366,9 @@ export interface AssistantHandlerContext {
 }
 ```
 
-#### `AssistantHandlerResult`
+#### <code v-pre>AssistantHandlerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L122) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L122) <code v-pre>packages/agent/src/types.ts</code>
 
 handler が返す result — completed か requires_action の 2 種。
 
@@ -382,9 +382,9 @@ export type AssistantHandlerResult = {
 };
 ```
 
-#### `AssistantsClientConfig`
+#### <code v-pre>AssistantsClientConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L52) `packages/agent/src/openai-assistants.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/openai-assistants.ts#L52) <code v-pre>packages/agent/src/openai-assistants.ts</code>
 
 AssistantsClient config。 handler は必須 (registerHandler で後付けも可)。
 
@@ -395,17 +395,17 @@ export interface AssistantsClientConfig {
 }
 ```
 
-#### `EndNode`
+#### <code v-pre>EndNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L41) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L41) <code v-pre>packages/agent/src/types.ts</code>
 
 ```ts
 export type EndNode = typeof END;
 ```
 
-#### `GraphEdge`
+#### <code v-pre>GraphEdge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L51) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L51) <code v-pre>packages/agent/src/types.ts</code>
 
 Graph edge — `from` node の実行後に `to` node を実行する矢印。 `to === END` で graph 終了。 v0.1 は unconditional edge のみ、 `conditional_edges` は v0.2 以降。
 
@@ -416,9 +416,9 @@ export interface GraphEdge {
 }
 ```
 
-#### `GraphStep`
+#### <code v-pre>GraphStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L57) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L57) <code v-pre>packages/agent/src/types.ts</code>
 
 1 step の実行 trace — stream / debug 用。
 
@@ -433,9 +433,9 @@ export interface GraphStep<TState extends AgentState = AgentState> {
 }
 ```
 
-#### `NodeHandler`
+#### <code v-pre>NodeHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L35) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L35) <code v-pre>packages/agent/src/types.ts</code>
 
 Node handler — 現 state を受け取り、 更新分 (partial state) を返す。 同期 or 非同期。
 
@@ -443,9 +443,9 @@ Node handler — 現 state を受け取り、 更新分 (partial state) を返�
 export type NodeHandler<TState extends AgentState = AgentState> = (state: TState) => Partial<TState> | Promise<Partial<TState>>;
 ```
 
-#### `Run`
+#### <code v-pre>Run</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L150) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L150) <code v-pre>packages/agent/src/types.ts</code>
 
 Run entity — real Assistants v2 の Run resource に対応。 v0.1 は mock なので `created_at` / `expires_at` 等の unix ts は number epoch ms で近似する。
 
@@ -471,9 +471,9 @@ export interface Run {
 }
 ```
 
-#### `RunOptions`
+#### <code v-pre>RunOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L38) `packages/agent/src/state-machine.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/state-machine.ts#L38) <code v-pre>packages/agent/src/state-machine.ts</code>
 
 invoke / stream 実行時 config。
 
@@ -484,9 +484,9 @@ export interface RunOptions {
 }
 ```
 
-#### `RunStatus`
+#### <code v-pre>RunStatus</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L93) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L93) <code v-pre>packages/agent/src/types.ts</code>
 
 Assistants v2 の Run status SSOT — real API と同じ 5 状態。 v0.1 mock は queued → in_progress → completed / failed / requires_action の deterministic transition を model する。 | status | 意味 | |---|---| | queued | createRun 直後、 まだ polling で 1 回も進んでいない | | in_progress | polling 1 回で queued から遷移、 assistant が work 中 | | completed | assistant が response 生成完了、 final message が thread に append 済 | | failed | handler が throw、 final error は run.lastError に格納 | | requires_action | tool_calls が pending、 submit_tool_outputs で解除 |
 
@@ -494,17 +494,17 @@ Assistants v2 の Run status SSOT — real API と同じ 5 状態。 v0.1 mock �
 export type RunStatus = 'queued' | 'in_progress' | 'completed' | 'failed' | 'requires_action';
 ```
 
-#### `StartNode`
+#### <code v-pre>StartNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L45) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L45) <code v-pre>packages/agent/src/types.ts</code>
 
 ```ts
 export type StartNode = typeof START;
 ```
 
-#### `Thread`
+#### <code v-pre>Thread</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L179) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L179) <code v-pre>packages/agent/src/types.ts</code>
 
 Thread resource — id + createdAt + messages 配列。
 
@@ -516,9 +516,9 @@ export interface Thread {
 }
 ```
 
-#### `ThreadMessage`
+#### <code v-pre>ThreadMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L73) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L73) <code v-pre>packages/agent/src/types.ts</code>
 
 Thread message — real Assistants v2 の Message resource に対応。
 
@@ -531,9 +531,9 @@ export interface ThreadMessage {
 }
 ```
 
-#### `ThreadMessageRole`
+#### <code v-pre>ThreadMessageRole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L70) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L70) <code v-pre>packages/agent/src/types.ts</code>
 
 OpenAI Assistants v2 の Message role — real API に整合。 v0.1 は user + assistant の 2 種、 tool_message は v0.2 以降。
 
@@ -541,9 +541,9 @@ OpenAI Assistants v2 の Message role — real API に整合。 v0.1 は user + 
 export type ThreadMessageRole = 'user' | 'assistant';
 ```
 
-#### `ToolCall`
+#### <code v-pre>ToolCall</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L130) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L130) <code v-pre>packages/agent/src/types.ts</code>
 
 Assistants v2 の tool_call — real API と同じ shape (function only)。 v0.1 は `type: 'function'` の 1 種のみ、 code_interpreter / file_search は v0.2 以降。
 
@@ -559,9 +559,9 @@ export interface ToolCall {
 }
 ```
 
-#### `ToolOutput`
+#### <code v-pre>ToolOutput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L141) `packages/agent/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/agent/src/types.ts#L141) <code v-pre>packages/agent/src/types.ts</code>
 
 submit_tool_outputs で client が返す 1 tool 実行結果。
 

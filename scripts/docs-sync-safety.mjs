@@ -1,0 +1,373 @@
+// 生成 script が壊れた入力と細工された checkout に耐えるための共有 guard。
+//
+// 管理ブロックの marker は、個数と順序を検証してから置換する。検証しないと、
+// end marker だけ残った README は実行のたびにブロックが 1 個ずつ増え、start
+// marker だけの README は 2 回目の実行で既存の本文を失う。
+//
+// 読み書きする path は realpath へ直してから許可 root の内側かを確かめる。
+// readFileSync も writeFileSync も symlink を追うので、checkout に link を 1 本
+// 置くだけで repo の外の file を読み込み、あるいは上書きできる。
+//
+// 生成した Markdown へ埋め込む source text は、置き場所に合わせて escape する。
+// docs site は HTML を有効にした VitePress なので、escape しない table cell は
+// そのまま active markup として働く。
+
+import { lstatSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { basename, dirname, isAbsolute, join, relative, sep } from 'node:path';
+import { randomBytes } from 'node:crypto';
+
+/** 生成を続けてはいけない、入力または checkout の異常。 */
+export class DocsSyncError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'DocsSyncError';
+  }
+}
+
+/** haystack に現れる needle の個数。重なりは数えない。 */
+export function countOccurrences(haystack, needle) {
+  let count = 0;
+  let from = 0;
+  for (;;) {
+    const at = haystack.indexOf(needle, from);
+    if (at === -1) return count;
+    count += 1;
+    from = at + needle.length;
+  }
+}
+
+/**
+ * fenced code block の外にある行だけを、絶対 offset 付きで返す。
+ *
+ * 生成する code block には公開宣言のソーステキストが入る。宣言が管理 marker と
+ * 同じ文字列を literal として持つと、file 全体を数える実装では 1 回目の生成で
+ * block の中へ marker が保存され、2 回目の生成が「marker が 2 個ある」と判定して
+ * 止まる。細工した checkout も競合する process も要らず、公開 API にその文字列を
+ * 書くだけで冪等性が壊れる。marker は fence の外だけで数える。
+ */
+function linesOutsideFences(content) {
+  const lines = [];
+  let offset = 0;
+  let fence = null;
+  for (const line of content.split('\n')) {
+    const opened = line.match(/^ {0,3}(`{3,}|~{3,})/);
+    if (opened) {
+      const run = opened[1];
+      // 開いている fence と同じ記号で、同じ長さ以上なら閉じる。
+      if (fence === null) fence = run;
+      else if (run[0] === fence[0] && run.length >= fence.length) fence = null;
+    } else if (fence === null) {
+      lines.push({ line, offset });
+    }
+    offset += line.length + 1;
+  }
+  return lines;
+}
+
+/** fence の外に現れる needle の絶対 offset を順に返す。 */
+function offsetsOutsideFences(content, needle) {
+  const found = [];
+  for (const { line, offset } of linesOutsideFences(content)) {
+    let from = 0;
+    for (;;) {
+      const at = line.indexOf(needle, from);
+      if (at === -1) break;
+      found.push(offset + at);
+      from = at + needle.length;
+    }
+  }
+  return found;
+}
+
+/**
+ * 管理ブロックの span を返す。marker が 1 つずつ正しい順序で並んでいれば
+ * { start, end } を、どちらの marker も無ければ null を返す。それ以外は
+ * DocsSyncError を投げ、壊れた file への書き込みを止める。
+ *
+ * 数えるのは fenced code block の外に現れる marker だけ。block の中の marker は
+ * 生成した宣言のソーステキストの一部であって、管理ブロックの境界ではない。
+ */
+export function findManagedBlock(content, { startMarker, endMarker, label }) {
+  const startOffsets = offsetsOutsideFences(content, startMarker);
+  const endOffsets = offsetsOutsideFences(content, endMarker);
+  if (startOffsets.length === 0 && endOffsets.length === 0) return null;
+  if (startOffsets.length !== 1 || endOffsets.length !== 1) {
+    throw new DocsSyncError(
+      `${label}: found ${startOffsets.length} start marker and ${endOffsets.length} end marker; ` +
+        `expected either none or exactly one of each. ` +
+        `Repair the managed block by hand before generating again.`,
+    );
+  }
+  const [start] = startOffsets;
+  const [end] = endOffsets;
+  if (end < start + startMarker.length) {
+    throw new DocsSyncError(`${label}: the end marker appears before the start marker.`);
+  }
+  return { start, end: end + endMarker.length };
+}
+
+/**
+ * 管理ブロックを 1 回だけ差し替える。ブロックが無い file は insert に委ねる。
+ * 以前の実装は自分を再帰呼び出しして見つかった分だけブロックを剥がしていたので、
+ * 壊れた file を黙って作り直し、その過程で手書きの本文を巻き込んでいた。
+ */
+export function replaceManagedBlock(content, { startMarker, endMarker, block, insert, label }) {
+  const found = findManagedBlock(content, { startMarker, endMarker, label });
+  if (!found) return insert(content, block);
+  return `${content.slice(0, found.start)}${block}${content.slice(found.end)}`;
+}
+
+/** target が root そのものか、root の下にあるか。 */
+export function insideRoot(root, target) {
+  const rel = relative(root, target);
+  if (rel === '') return true;
+  if (isAbsolute(rel)) return false;
+  // ..hidden のような、2 文字目までが偶然一致するだけの名前を弾かない。
+  return rel !== '..' && !rel.startsWith(`..${sep}`);
+}
+
+function canonical(path, label) {
+  try {
+    return realpathSync(path);
+  } catch (error) {
+    throw new DocsSyncError(`${label}: cannot resolve ${path}: ${error.message}`);
+  }
+}
+
+/** 読み込み元の canonical path。root の外へ出る symlink は拒否する。 */
+export function resolveReadPath(path, root, label) {
+  const real = canonical(path, label);
+  if (!insideRoot(root, real)) {
+    throw new DocsSyncError(`${label}: ${path} resolves to ${real}, which is outside ${root}.`);
+  }
+  return real;
+}
+
+/**
+ * 書き込み先の canonical path。親 directory を realpath で確かめたうえで、
+ * 許可 root の内側にあり、かつ target 自体が symlink でないことを要求する。
+ * symlink を許すと、atomic rename は root の外の file を置き換えるか、link を
+ * 黙って壊すかのどちらかになる。
+ */
+export function prepareWritePath(path, root, label) {
+  const directory = canonical(dirname(path), label);
+  if (!insideRoot(root, directory)) {
+    throw new DocsSyncError(
+      `${label}: the directory of ${path} resolves to ${directory}, which is outside ${root}.`,
+    );
+  }
+  const target = join(directory, basename(path));
+  let stats = null;
+  try {
+    stats = lstatSync(target);
+  } catch {
+    stats = null;
+  }
+  if (stats?.isSymbolicLink()) {
+    throw new DocsSyncError(
+      `${label}: ${target} is a symlink; refusing to write through it.`,
+    );
+  }
+  if (stats && !stats.isFile()) {
+    throw new DocsSyncError(`${label}: ${target} is not a regular file.`);
+  }
+  // 検証した時点の親 directory の実体を控える。検証と書き込みの間に別の
+  // directory へ差し替えられたら、書き込み側がこれと突き合わせて気付ける。
+  writeTargetIdentity.set(target, directoryIdentity(directory, label));
+  return target;
+}
+
+/**
+ * 検証済みの書き込み先と、その時点の親 directory の実体の対応。
+ *
+ * 検証を第 1 段に集めて書き込みを第 2 段へ回した結果、両者の間隔が広がった。
+ * 検証時の実体をここに残し、書き込み直前に突き合わせる。
+ */
+const writeTargetIdentity = new Map();
+
+/** directory の同一性。名前ではなく実体で比べるために dev と inode を見る。 */
+function directoryIdentity(path, label) {
+  const stats = statSync(path, { throwIfNoEntry: false });
+  if (!stats || !stats.isDirectory()) {
+    throw new DocsSyncError(`${label}: ${path} is not a directory.`);
+  }
+  return `${stats.dev}:${stats.ino}`;
+}
+
+/**
+ * 同じ directory へ一時 file を書いてから rename する。途中で落ちても、
+ * 半分だけ書かれた file が次の実行で documentation として読み戻されない。
+ *
+ * 一時 file は `wx` で作る。link を張られていても作成の時点で失敗するので、
+ * 書き込みが link の先へ抜けない。加えて親 directory の実体を見比べ、途中で別の
+ * directory へ差し替えられていたら書き込みを無効にする。
+ *
+ * 比べる基準は `prepareWritePath` が検証した時点の実体にする。書き込み直前の値を
+ * 基準にすると、検証から書き込みまでの間に差し替えられた directory をそのまま
+ * 基準として受け入れてしまう。検証を第 1 段へ集めた分だけこの間隔は広い。
+ *
+ * これで窓は狭まるが閉じ切ってはいない。path を渡す API は「解決してから開く」
+ * ので、解決と open の間は原理的に残る。閉じるには directory の file descriptor を
+ * 基準に開く API が要るが、Node はそれを公開していない。checkout を他の process が
+ * 書き換えられない前提が別途要る。
+ */
+export function writeFileAtomic(target, content) {
+  const directory = dirname(target);
+  const label = `atomic write to ${basename(target)}`;
+  // 検証を通っていない path は、書き込み直前の実体を基準にするしかない。
+  const before = writeTargetIdentity.get(target) ?? directoryIdentity(directory, label);
+  const temporary = join(
+    directory,
+    `.${basename(target)}.${process.pid}.${randomBytes(6).toString('hex')}.tmp`,
+  );
+  try {
+    writeFileSync(temporary, content, { flag: 'wx', mode: 0o600 });
+    if (directoryIdentity(directory, label) !== before) {
+      throw new DocsSyncError(`${label}: ${directory} was replaced while writing.`);
+    }
+    renameSync(temporary, target);
+  } catch (error) {
+    rmSync(temporary, { force: true });
+    throw error;
+  }
+}
+
+// table cell に入る text で意味を持つ文字。実体参照にすると、描画は元の文字の
+// ままで、Markdown parser にも Vue compiler にも構文として見えなくなる。
+//
+// & は自分が書き出す実体参照と混ざらないよう最初に写す。HTML の山括弧、cell の
+// 区切りである縦棒、inline Markdown の記号、Vue の波括弧をまとめて写す。
+const MARKDOWN_ESCAPES = new Map([
+  ['&', '&amp;'],
+  ['<', '&lt;'],
+  ['>', '&gt;'],
+  ['|', '&#124;'],
+  ['`', '&#96;'],
+  ['{', '&#123;'],
+  ['}', '&#125;'],
+  ['[', '&#91;'],
+  [']', '&#93;'],
+  ['*', '&#42;'],
+  ['_', '&#95;'],
+  ['\\', '&#92;'],
+]);
+
+/** text を Markdown 本文へそのまま置ける形に写す。1 文字ずつ見るので順序の罠がない。 */
+export function escapeMarkdownText(text) {
+  let escaped = '';
+  for (const character of text) escaped += MARKDOWN_ESCAPES.get(character) ?? character;
+  return escaped;
+}
+
+/**
+ * 表のセルに入れる値。空白を畳んでから escape する。畳まないと、複数行の
+ * 文字列連結や条件式が改行のところで表を切り、以降が本文として描画される。
+ */
+export function tableCell(text) {
+  return escapeMarkdownText(text.replace(/\s+/g, ' ').trim());
+}
+
+/**
+ * inline code。Markdown の backtick ではなく `<code v-pre>` で書き出す。
+ *
+ * VitePress は fenced code block にだけ `v-pre` を付ける (lang を見て判断している)。
+ * inline code には付かないので、backtick で囲んだだけの text は Vue の template として
+ * compile され、`{{ }}` が式として実行される。属性を自分で付けて補間を止める。
+ *
+ * 中身は escape 済みにする。`v-pre` は Vue の補間を止めるだけで、HTML の解釈は止めない。
+ */
+export function inlineCode(text) {
+  return `<code v-pre>${escapeMarkdownText(text)}</code>`;
+}
+
+/** 表のセルに入れる inline code。空白を畳んでから `<code v-pre>` に入れる。 */
+export function tableCodeCell(text) {
+  return inlineCode(text.replace(/\s+/g, ' ').trim());
+}
+
+/**
+ * code block を開く backtick 列。中身に現れる最長の backtick 列より 1 つ長くする。
+ * 固定長の fence は、閉じ fence を含む文字列 literal を書いた source で block を
+ * 途中で閉じ、以降の宣言を本文として描画させる。
+ */
+export function fenceFor(code) {
+  let longest = 0;
+  for (const run of code.match(/`+/g) ?? []) longest = Math.max(longest, run.length);
+  return '`'.repeat(Math.max(3, longest + 1));
+}
+
+/**
+ * 行頭に置く text から fence の開始を取り除く。
+ *
+ * 1 行に畳んだ説明文をそのまま行頭へ置くと、先頭の backtick 3 連が fence として開き、
+ * 直後に続く code block を丸ごと取り込んで以降の構造を壊す。先頭の backtick 列だけを
+ * 実体参照へ写す。行中の backtick は inline code として意味を持つので触らない。
+ */
+export function neutralizeLeadingFence(text) {
+  return text.replace(/^`{3,}/, (run) => '&#96;'.repeat(run.length));
+}
+
+/**
+ * fenced code block。開き fence を中身より長く取るので、閉じ fence を含む宣言でも
+ * block が途中で閉じない。末尾の改行は呼び出し側が足す。
+ */
+export function codeBlock(code, language = '') {
+  const fence = fenceFor(code);
+  return `${fence}${language}\n${code}\n${fence}`;
+}
+
+// link の丸括弧は destination を途中で閉じる。空白と山括弧も同じく destination を
+// 壊すので、percent encode して link の中に閉じ込める。
+const URL_ESCAPES = new Map([
+  ['(', '%28'],
+  [')', '%29'],
+  [' ', '%20'],
+  ['<', '%3C'],
+  ['>', '%3E'],
+  ['"', '%22'],
+]);
+
+/**
+ * 組み立て済みの URL を Markdown link の destination に置ける形へ写す。
+ *
+ * `#` と `?` と `/` は URL の構造として意味を持つので触らない。構造を持たない
+ * 部品 (path 片) を埋める場合は linkPath を使う。
+ */
+export function linkUrl(url) {
+  let encoded = '';
+  for (const character of url) encoded += URL_ESCAPES.get(character) ?? character;
+  return encoded;
+}
+
+// path 片に現れると URL の構造を変える文字。`/` は区切りとして残す。
+//
+// 改行と復帰と tab は行そのものを終わらせるので、後続の文字列が本文として描画される。
+// backslash は Markdown の escape 記号、`#` は fragment の開始、`?` は query の開始、
+// `%` は percent encode 自体の開始で、いずれも destination の意味を変える。
+const PATH_ESCAPES = new Map([
+  ...URL_ESCAPES,
+  ['\n', '%0A'],
+  ['\r', '%0D'],
+  ['\t', '%09'],
+  ['\\', '%5C'],
+  ['#', '%23'],
+  ['?', '%3F'],
+  ['%', '%25'],
+  ['[', '%5B'],
+  [']', '%5D'],
+]);
+
+/**
+ * URL の path 部分に埋める片を写す。
+ *
+ * 片は directory 名と file 名から来る。`#` を含む名前は fragment の始まりに見え、
+ * 改行を含む名前は link を途中で終わらせて後続を本文として描画させる。区切りの `/`
+ * だけ残して、それ以外の構造文字を percent encode する。
+ */
+export function linkPath(path) {
+  let encoded = '';
+  for (const character of path) {
+    encoded += character === '/' ? '/' : PATH_ESCAPES.get(character) ?? character;
+  }
+  return encoded;
+}

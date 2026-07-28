@@ -56,106 +56,106 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'setupCloudflareQueuesEnv: cannot use env after stop()' | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L108) |
-| `dispatch: maxBatchSize must be >= 1 for queue "${queueName}", got ${size}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L252) |
-| 'send: queueName must be a non-empty string' | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L284) |
-| 'send: delaySeconds must be non-negative' | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L288) |
-| `waitForMessage: timeout waiting for queue "${queueName}" after ${timeoutMs}ms` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L330) |
-| `assertAcknowledged: expected message on "${queueName}" to be acked, got state=${snap.state} reason=${snap.failedReason ?? 'unknown'}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L347) |
-| `assertAcknowledged: expected ${expected.attempts} attempt(s), observed ${snap.attempts}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L352) |
-| `assertDeadLettered: expected message on "${queueName}" to be dead-lettered, got state=${snap.state}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L368) |
-| `assertDeadLettered: expected ${expected.attempts} attempt(s), observed ${snap.attempts}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L373) |
-| `assertDeadLettered: failedReason "${snap.failedReason ?? ''}" did not match ${expected.reasonMatch}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L378) |
-| `assertDeadLettered: message "${snap.id}" was not routed to DLQ "${expected.dlq}" (observed queues: ${JSON.stringify(Array.from(dlqMessages.keys()))})` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L386) |
-| `assertRetried: expected ${expectedRetries} attempt(s) for "${queueName}", observed ${snap.attempts}` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L399) |
-| `assertQueueDrained: queue${queueName ? ` "${queueName}"` : 's'} still have pending / delivered / retrying messages after 250ms` | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L426) |
-| 'registerConsumer: `queue` must be a non-empty string identifying the source queue' | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L74) |
-| `setupCloudflareQueuesEnv: unknown mode "${String(mode)}" — expected "miniflare" or "wrangler"` | [packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts#L25) |
-| `@kiwa-lab/queue: wrangler dev did not respond at ${probeUrl} within ${timeoutMs}ms` | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L42) |
-| "@kiwa-lab/queue: wrangler mode requires node:child_process (Node >= 20). Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L55) |
-| `@kiwa-lab/queue: dev-server rejected event "${event.name}" (HTTP ${response.status}): ${body}` | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L136) |
-| `@kiwa-lab/queue: Inngest dev-server did not respond at ${probeUrl} within ${timeoutMs}ms` | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L42) |
-| "@kiwa-lab/queue: dev-server mode requires node:child_process (Node >= 20). Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L55) |
-| `setupInngestEnv: unknown mode "${String(mode)}" — expected "stub" or "dev-server"` | [packages/queue/src/inngest/setup-inngest-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/setup-inngest-env.ts#L24) |
-| `waitForRun: timeout waiting for function "${functionId}" after ${timeoutMs}ms` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L213) |
-| `assertFunctionRan: expected function "${functionId}" to complete, got state=${snap.state} reason=${snap.failedReason ?? 'unknown'}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L230) |
-| `assertFunctionRan: return value mismatch for "${functionId}". expected=${wanted} actual=${actual}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L238) |
-| `assertFunctionFailed: expected function "${functionId}" to fail, got state=${snap.state}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L253) |
-| `assertFunctionFailed: expected ${expected.attempts} attempt(s), observed ${snap.attemptsMade}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L258) |
-| `assertFunctionFailed: failedReason "${snap.failedReason ?? ''}" did not match ${expected.reasonMatch}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L263) |
-| `assertRetried: expected ${expectedAttempts} attempt(s) for "${functionId}", observed ${snap.attemptsMade}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L275) |
-| `assertStepRan: expected step "${stepId}" to run in function "${functionId}", observed steps=${JSON.stringify(snap.stepsRun)}` | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L287) |
-| 'assertQueueDrained: env still has queued / running runs after 250ms' | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L309) |
-| 'setupInngestEnv: cannot use env after stop()' | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L69) |
-| `assertDeadLettered: no dead-letter observed for queue ${queue}` + (expected ? ` matching ${JSON.stringify(expected)}` : '') | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L212) |
-| `publishDelayed: exchange ${input.exchange} is not a delayed exchange` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L235) |
-| 'publishDelayed: delayMs must be non-negative' | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L240) |
-| `waitForDelivery: no delayed message delivered to ${exchange} within ${timeoutMs}ms` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L280) |
-| `stopNode: node ${id} not registered` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L318) |
-| `startNode: node ${id} not registered` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L324) |
-| `assertQuorumHealthy: queue ${queueName} not declared` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L338) |
-| `assertQuorumHealthy: queue ${queueName} is not a quorum queue` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L341) |
-| `assertQuorumHealthy: queue ${queueName} requires ${min} active nodes, only ${activeCount} available` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L346) |
-| `ingestFromUpstream: upstream ${input.upstreamName} not registered` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L367) |
-| `ingestFromUpstream: no federation link for upstream ${input.upstreamName} → ${input.exchange}` | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L376) |
-| `setupRabbitMQEnv: unknown mode "${String(mode)}" — expected "stub" or "testcontainers"` | [packages/queue/src/rabbitmq/setup-rabbitmq-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/setup-rabbitmq-env.ts#L24) |
-| `stub-rabbitmq: exchange ${spec.name} already declared with type ${existing.type}, cannot redeclare as ${spec.type}` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L133) |
-| `stub-rabbitmq: queue ${queueName} not declared` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L169) |
-| `stub-rabbitmq: exchange ${exchangeName} not declared` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L185) |
-| `bindQueue: exchange ${spec.exchange} not declared` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L337) |
-| `bindQueue: queue ${spec.queue} not declared` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L340) |
-| `get: queue ${input.queue} not declared` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L413) |
-| `consume: queue ${input.queue} not declared` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L427) |
-| `consume: queue ${input.queue} has exclusive consumer` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L431) |
-| `consume: cannot register exclusive consumer, others already exist` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L434) |
-| `waitForMessage: timeout waiting for message on ${queueName}` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L481) |
-| `assertAcknowledged: expected deliveryCount ${expected.deliveryCount} but got ${snap.deliveryCount}` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L492) |
-| `assertRequeued: timeout waiting for requeued delivery on ${queueName}` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L511) |
-| `assertQueueDrained: queue ${queueName} still has ${pending.length} pending messages` | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L518) |
-| 'setupRabbitMQEnv: mode="testcontainers" requires testcontainers.amqpUrl (v0.3 scope). Provide the URL of a running RabbitMQ broker, or use mode="stub" for zero-infra tests.' | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L22) |
-| `setupRabbitMQEnv: RabbitMQ broker at ${amqpUrl} did not respond within ${timeoutMs}ms: ${ lastError instanceof Error ? lastError.message : String(lastError) }` | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L97) |
-| 'setupBullMQEnv: cannot addJob after stop()' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L147) |
-| 'addJob: attempts must be at least 1' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L153) |
-| 'addJob: delay must be non-negative' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L156) |
-| `waitForJob: timeout waiting for job "${name}" after ${timeoutMs}ms` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L201) |
-| `assertProcessed: expected job "${name}" to complete, got state=${snap.state} reason=${snap.failedReason ?? 'unknown'}` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L218) |
-| `assertProcessed: return value mismatch for "${name}". expected=${wanted} actual=${actual}` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L227) |
-| `assertFailed: expected job "${name}" to fail, got state=${snap.state}` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L240) |
-| `assertFailed: expected ${expected.retry} attempt(s), observed ${snap.attemptsMade}` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L245) |
-| `assertFailed: failedReason "${snap.failedReason ?? ''}" did not match ${expected.reasonMatch}` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L250) |
-| `assertRetried: expected ${expectedRetry} attempt(s) for "${name}", observed ${snap.attemptsMade}` | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L262) |
-| 'assertQueueDrained: queue still has waiting / active jobs after 250ms' | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L279) |
-| `setupBullMQEnv: unknown mode "${String(mode)}" — expected "sandbox" or "testcontainers"` | [packages/queue/src/setup-bullmq-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/setup-bullmq-env.ts#L24) |
-| `setupSQSEnv: LocalStack at "${endpoint}" did not respond within ${timeoutMs}ms — ${reason}` | [packages/queue/src/sqs/localstack-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/localstack-sqs.ts#L105) |
-| 'setupSQSEnv: mode="localstack" requires localstack.endpoint (v0.2 scope). Provide the URL of a running LocalStack instance, or use mode="stub" for zero-infra tests.' | [packages/queue/src/sqs/localstack-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/localstack-sqs.ts#L31) |
-| `setupSQSEnv: unknown mode "${String(mode)}" — expected "stub" or "localstack"` | [packages/queue/src/sqs/setup-sqs-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/setup-sqs-env.ts#L25) |
-| `createQueue: FIFO queue name "${spec.name}" must end with ".fifo" (AWS SQS constraint)` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L101) |
-| 'send: queueName must be a non-empty string' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L149) |
-| 'send: delaySeconds must be non-negative' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L153) |
-| 'send: delaySeconds cannot exceed 900 (AWS SQS constraint mirrored by the stub)' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L155) |
-| `send: FIFO queue "${queueName}" requires messageGroupId — pass it via send options` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L161) |
-| 'sendBatch: SQS SendMessageBatch caps at 10 entries per call' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L217) |
-| 'deleteBatch: SQS DeleteMessageBatch caps at 10 entries per call' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L293) |
-| `waitForMessage: timeout waiting for queue "${queueName}" after ${timeoutMs}ms` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L320) |
-| `assertDeleted: expected message on "${queueName}" to be deleted, got state=${snap.state} reason=${snap.failedReason ?? 'unknown'}` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L337) |
-| `assertDeleted: expected ${expected.receiveCount} receive(s), observed ${snap.receiveCount}` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L342) |
-| `assertDeadLettered: expected message on "${queueName}" to be dead-lettered, got state=${snap.state}` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L354) |
-| `assertDeadLettered: expected ${expected.receiveCount} receive(s), observed ${snap.receiveCount}` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L359) |
-| `assertDeadLettered: message "${snap.messageId}" was not routed to DLQ "${expected.dlq}"` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L367) |
-| `assertQueueDrained: queue${queueName ? ` "${queueName}"` : 's'} still have pending / inflight messages after 250ms` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L388) |
-| 'setupSQSEnv: cannot use env after stop()' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L82) |
-| `setupSQSEnv: queue "${name}" does not exist — call createQueue() or pass it via setupSQSEnv({ queues })` | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L88) |
-| 'createQueue: `name` must be a non-empty string' | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L97) |
-| `waitForJob: timeout waiting for job "${name}" after ${timeoutMs}ms` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L275) |
-| `assertProcessed: expected job "${name}" to complete, got state=${snap.state}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L291) |
-| `assertProcessed: return value mismatch for "${name}". expected=${wanted} actual=${actual}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L299) |
-| `assertFailed: expected job "${name}" to fail, got state=${snap.state}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L312) |
-| `assertFailed: expected ${expected.retry} attempt(s), observed ${snap.attemptsMade}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L317) |
-| `assertFailed: failedReason "${snap.failedReason ?? ''}" did not match ${expected.reasonMatch}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L322) |
-| `assertRetried: expected ${expectedRetry} attempt(s) for "${name}", observed ${snap.attemptsMade}` | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L334) |
-| 'assertQueueDrained: queue still has waiting / active / delayed jobs after 1s' | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L353) |
-| "@kiwa-lab/queue: testcontainers mode requires 'bullmq' + 'ioredis' peer dependencies. Install with `pnpm add -D bullmq ioredis`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L73) |
-| "@kiwa-lab/queue: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L92) |
+| <code v-pre>setupCloudflareQueuesEnv: cannot use env after stop()</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L108) |
+| <code v-pre>dispatch: maxBatchSize must be &gt;= 1 for queue "$&#123;queueName&#125;", got $&#123;size&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L252) |
+| <code v-pre>send: queueName must be a non-empty string</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L284) |
+| <code v-pre>send: delaySeconds must be non-negative</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L288) |
+| <code v-pre>waitForMessage: timeout waiting for queue "$&#123;queueName&#125;" after $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L330) |
+| <code v-pre>assertAcknowledged: expected message on "$&#123;queueName&#125;" to be acked, got state=$&#123;snap.state&#125; reason=$&#123;snap.failedReason ?? 'unknown'&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L347) |
+| <code v-pre>assertAcknowledged: expected $&#123;expected.attempts&#125; attempt(s), observed $&#123;snap.attempts&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L352) |
+| <code v-pre>assertDeadLettered: expected message on "$&#123;queueName&#125;" to be dead-lettered, got state=$&#123;snap.state&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L368) |
+| <code v-pre>assertDeadLettered: expected $&#123;expected.attempts&#125; attempt(s), observed $&#123;snap.attempts&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L373) |
+| <code v-pre>assertDeadLettered: failedReason "$&#123;snap.failedReason ?? ''&#125;" did not match $&#123;expected.reasonMatch&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L378) |
+| <code v-pre>assertDeadLettered: message "$&#123;snap.id&#125;" was not routed to DLQ "$&#123;expected.dlq&#125;" (observed queues: $&#123;JSON.stringify(Array.from(dlqMessages.keys()))&#125;)</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L386) |
+| <code v-pre>assertRetried: expected $&#123;expectedRetries&#125; attempt(s) for "$&#123;queueName&#125;", observed $&#123;snap.attempts&#125;</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L399) |
+| <code v-pre>assertQueueDrained: queue$&#123;queueName ? &#96; "$&#123;queueName&#125;"&#96; : 's'&#125; still have pending / delivered / retrying messages after 250ms</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L426) |
+| <code v-pre>registerConsumer: &#96;queue&#96; must be a non-empty string identifying the source queue</code> | [packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L74) |
+| <code v-pre>setupCloudflareQueuesEnv: unknown mode "$&#123;String(mode)&#125;" — expected "miniflare" or "wrangler"</code> | [packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts#L25) |
+| <code v-pre>@kiwa-lab/queue: wrangler dev did not respond at $&#123;probeUrl&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L42) |
+| <code v-pre>"@kiwa-lab/queue: wrangler mode requires node:child&#95;process (Node &gt;= 20). Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L55) |
+| <code v-pre>@kiwa-lab/queue: dev-server rejected event "$&#123;event.name&#125;" (HTTP $&#123;response.status&#125;): $&#123;body&#125;</code> | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L136) |
+| <code v-pre>@kiwa-lab/queue: Inngest dev-server did not respond at $&#123;probeUrl&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L42) |
+| <code v-pre>"@kiwa-lab/queue: dev-server mode requires node:child&#95;process (Node &gt;= 20). Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/queue/src/inngest/dev-server-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L55) |
+| <code v-pre>setupInngestEnv: unknown mode "$&#123;String(mode)&#125;" — expected "stub" or "dev-server"</code> | [packages/queue/src/inngest/setup-inngest-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/setup-inngest-env.ts#L24) |
+| <code v-pre>waitForRun: timeout waiting for function "$&#123;functionId&#125;" after $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L213) |
+| <code v-pre>assertFunctionRan: expected function "$&#123;functionId&#125;" to complete, got state=$&#123;snap.state&#125; reason=$&#123;snap.failedReason ?? 'unknown'&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L230) |
+| <code v-pre>assertFunctionRan: return value mismatch for "$&#123;functionId&#125;". expected=$&#123;wanted&#125; actual=$&#123;actual&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L238) |
+| <code v-pre>assertFunctionFailed: expected function "$&#123;functionId&#125;" to fail, got state=$&#123;snap.state&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L253) |
+| <code v-pre>assertFunctionFailed: expected $&#123;expected.attempts&#125; attempt(s), observed $&#123;snap.attemptsMade&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L258) |
+| <code v-pre>assertFunctionFailed: failedReason "$&#123;snap.failedReason ?? ''&#125;" did not match $&#123;expected.reasonMatch&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L263) |
+| <code v-pre>assertRetried: expected $&#123;expectedAttempts&#125; attempt(s) for "$&#123;functionId&#125;", observed $&#123;snap.attemptsMade&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L275) |
+| <code v-pre>assertStepRan: expected step "$&#123;stepId&#125;" to run in function "$&#123;functionId&#125;", observed steps=$&#123;JSON.stringify(snap.stepsRun)&#125;</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L287) |
+| <code v-pre>assertQueueDrained: env still has queued / running runs after 250ms</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L309) |
+| <code v-pre>setupInngestEnv: cannot use env after stop()</code> | [packages/queue/src/inngest/stub-inngest.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L69) |
+| <code v-pre>&#96;assertDeadLettered: no dead-letter observed for queue $&#123;queue&#125;&#96; + (expected ? &#96; matching $&#123;JSON.stringify(expected)&#125;&#96; : '')</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L212) |
+| <code v-pre>publishDelayed: exchange $&#123;input.exchange&#125; is not a delayed exchange</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L235) |
+| <code v-pre>publishDelayed: delayMs must be non-negative</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L240) |
+| <code v-pre>waitForDelivery: no delayed message delivered to $&#123;exchange&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L280) |
+| <code v-pre>stopNode: node $&#123;id&#125; not registered</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L318) |
+| <code v-pre>startNode: node $&#123;id&#125; not registered</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L324) |
+| <code v-pre>assertQuorumHealthy: queue $&#123;queueName&#125; not declared</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L338) |
+| <code v-pre>assertQuorumHealthy: queue $&#123;queueName&#125; is not a quorum queue</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L341) |
+| <code v-pre>assertQuorumHealthy: queue $&#123;queueName&#125; requires $&#123;min&#125; active nodes, only $&#123;activeCount&#125; available</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L346) |
+| <code v-pre>ingestFromUpstream: upstream $&#123;input.upstreamName&#125; not registered</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L367) |
+| <code v-pre>ingestFromUpstream: no federation link for upstream $&#123;input.upstreamName&#125; → $&#123;input.exchange&#125;</code> | [packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L376) |
+| <code v-pre>setupRabbitMQEnv: unknown mode "$&#123;String(mode)&#125;" — expected "stub" or "testcontainers"</code> | [packages/queue/src/rabbitmq/setup-rabbitmq-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/setup-rabbitmq-env.ts#L24) |
+| <code v-pre>stub-rabbitmq: exchange $&#123;spec.name&#125; already declared with type $&#123;existing.type&#125;, cannot redeclare as $&#123;spec.type&#125;</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L133) |
+| <code v-pre>stub-rabbitmq: queue $&#123;queueName&#125; not declared</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L169) |
+| <code v-pre>stub-rabbitmq: exchange $&#123;exchangeName&#125; not declared</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L185) |
+| <code v-pre>bindQueue: exchange $&#123;spec.exchange&#125; not declared</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L337) |
+| <code v-pre>bindQueue: queue $&#123;spec.queue&#125; not declared</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L340) |
+| <code v-pre>get: queue $&#123;input.queue&#125; not declared</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L413) |
+| <code v-pre>consume: queue $&#123;input.queue&#125; not declared</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L427) |
+| <code v-pre>consume: queue $&#123;input.queue&#125; has exclusive consumer</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L431) |
+| <code v-pre>consume: cannot register exclusive consumer, others already exist</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L434) |
+| <code v-pre>waitForMessage: timeout waiting for message on $&#123;queueName&#125;</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L481) |
+| <code v-pre>assertAcknowledged: expected deliveryCount $&#123;expected.deliveryCount&#125; but got $&#123;snap.deliveryCount&#125;</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L492) |
+| <code v-pre>assertRequeued: timeout waiting for requeued delivery on $&#123;queueName&#125;</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L511) |
+| <code v-pre>assertQueueDrained: queue $&#123;queueName&#125; still has $&#123;pending.length&#125; pending messages</code> | [packages/queue/src/rabbitmq/stub-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L518) |
+| <code v-pre>setupRabbitMQEnv: mode="testcontainers" requires testcontainers.amqpUrl (v0.3 scope). Provide the URL of a running RabbitMQ broker, or use mode="stub" for zero-infra tests.</code> | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L22) |
+| <code v-pre>setupRabbitMQEnv: RabbitMQ broker at $&#123;amqpUrl&#125; did not respond within $&#123;timeoutMs&#125;ms: $&#123; lastError instanceof Error ? lastError.message : String(lastError) &#125;</code> | [packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L97) |
+| <code v-pre>setupBullMQEnv: cannot addJob after stop()</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L147) |
+| <code v-pre>addJob: attempts must be at least 1</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L153) |
+| <code v-pre>addJob: delay must be non-negative</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L156) |
+| <code v-pre>waitForJob: timeout waiting for job "$&#123;name&#125;" after $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L201) |
+| <code v-pre>assertProcessed: expected job "$&#123;name&#125;" to complete, got state=$&#123;snap.state&#125; reason=$&#123;snap.failedReason ?? 'unknown'&#125;</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L218) |
+| <code v-pre>assertProcessed: return value mismatch for "$&#123;name&#125;". expected=$&#123;wanted&#125; actual=$&#123;actual&#125;</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L227) |
+| <code v-pre>assertFailed: expected job "$&#123;name&#125;" to fail, got state=$&#123;snap.state&#125;</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L240) |
+| <code v-pre>assertFailed: expected $&#123;expected.retry&#125; attempt(s), observed $&#123;snap.attemptsMade&#125;</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L245) |
+| <code v-pre>assertFailed: failedReason "$&#123;snap.failedReason ?? ''&#125;" did not match $&#123;expected.reasonMatch&#125;</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L250) |
+| <code v-pre>assertRetried: expected $&#123;expectedRetry&#125; attempt(s) for "$&#123;name&#125;", observed $&#123;snap.attemptsMade&#125;</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L262) |
+| <code v-pre>assertQueueDrained: queue still has waiting / active jobs after 250ms</code> | [packages/queue/src/sandbox-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L279) |
+| <code v-pre>setupBullMQEnv: unknown mode "$&#123;String(mode)&#125;" — expected "sandbox" or "testcontainers"</code> | [packages/queue/src/setup-bullmq-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/setup-bullmq-env.ts#L24) |
+| <code v-pre>setupSQSEnv: LocalStack at "$&#123;endpoint&#125;" did not respond within $&#123;timeoutMs&#125;ms — $&#123;reason&#125;</code> | [packages/queue/src/sqs/localstack-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/localstack-sqs.ts#L105) |
+| <code v-pre>setupSQSEnv: mode="localstack" requires localstack.endpoint (v0.2 scope). Provide the URL of a running LocalStack instance, or use mode="stub" for zero-infra tests.</code> | [packages/queue/src/sqs/localstack-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/localstack-sqs.ts#L31) |
+| <code v-pre>setupSQSEnv: unknown mode "$&#123;String(mode)&#125;" — expected "stub" or "localstack"</code> | [packages/queue/src/sqs/setup-sqs-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/setup-sqs-env.ts#L25) |
+| <code v-pre>createQueue: FIFO queue name "$&#123;spec.name&#125;" must end with ".fifo" (AWS SQS constraint)</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L101) |
+| <code v-pre>send: queueName must be a non-empty string</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L149) |
+| <code v-pre>send: delaySeconds must be non-negative</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L153) |
+| <code v-pre>send: delaySeconds cannot exceed 900 (AWS SQS constraint mirrored by the stub)</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L155) |
+| <code v-pre>send: FIFO queue "$&#123;queueName&#125;" requires messageGroupId — pass it via send options</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L161) |
+| <code v-pre>sendBatch: SQS SendMessageBatch caps at 10 entries per call</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L217) |
+| <code v-pre>deleteBatch: SQS DeleteMessageBatch caps at 10 entries per call</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L293) |
+| <code v-pre>waitForMessage: timeout waiting for queue "$&#123;queueName&#125;" after $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L320) |
+| <code v-pre>assertDeleted: expected message on "$&#123;queueName&#125;" to be deleted, got state=$&#123;snap.state&#125; reason=$&#123;snap.failedReason ?? 'unknown'&#125;</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L337) |
+| <code v-pre>assertDeleted: expected $&#123;expected.receiveCount&#125; receive(s), observed $&#123;snap.receiveCount&#125;</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L342) |
+| <code v-pre>assertDeadLettered: expected message on "$&#123;queueName&#125;" to be dead-lettered, got state=$&#123;snap.state&#125;</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L354) |
+| <code v-pre>assertDeadLettered: expected $&#123;expected.receiveCount&#125; receive(s), observed $&#123;snap.receiveCount&#125;</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L359) |
+| <code v-pre>assertDeadLettered: message "$&#123;snap.messageId&#125;" was not routed to DLQ "$&#123;expected.dlq&#125;"</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L367) |
+| <code v-pre>assertQueueDrained: queue$&#123;queueName ? &#96; "$&#123;queueName&#125;"&#96; : 's'&#125; still have pending / inflight messages after 250ms</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L388) |
+| <code v-pre>setupSQSEnv: cannot use env after stop()</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L82) |
+| <code v-pre>setupSQSEnv: queue "$&#123;name&#125;" does not exist — call createQueue() or pass it via setupSQSEnv(&#123; queues &#125;)</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L88) |
+| <code v-pre>createQueue: &#96;name&#96; must be a non-empty string</code> | [packages/queue/src/sqs/stub-sqs.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L97) |
+| <code v-pre>waitForJob: timeout waiting for job "$&#123;name&#125;" after $&#123;timeoutMs&#125;ms</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L275) |
+| <code v-pre>assertProcessed: expected job "$&#123;name&#125;" to complete, got state=$&#123;snap.state&#125;</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L291) |
+| <code v-pre>assertProcessed: return value mismatch for "$&#123;name&#125;". expected=$&#123;wanted&#125; actual=$&#123;actual&#125;</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L299) |
+| <code v-pre>assertFailed: expected job "$&#123;name&#125;" to fail, got state=$&#123;snap.state&#125;</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L312) |
+| <code v-pre>assertFailed: expected $&#123;expected.retry&#125; attempt(s), observed $&#123;snap.attemptsMade&#125;</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L317) |
+| <code v-pre>assertFailed: failedReason "$&#123;snap.failedReason ?? ''&#125;" did not match $&#123;expected.reasonMatch&#125;</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L322) |
+| <code v-pre>assertRetried: expected $&#123;expectedRetry&#125; attempt(s) for "$&#123;name&#125;", observed $&#123;snap.attemptsMade&#125;</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L334) |
+| <code v-pre>assertQueueDrained: queue still has waiting / active / delayed jobs after 1s</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L353) |
+| <code v-pre>"@kiwa-lab/queue: testcontainers mode requires 'bullmq' + 'ioredis' peer dependencies. Install with &#96;pnpm add -D bullmq ioredis&#96;. Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L73) |
+| <code v-pre>"@kiwa-lab/queue: testcontainers mode requires the 'testcontainers' peer dependency. Install with &#96;pnpm add -D testcontainers&#96;. Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/queue/src/testcontainers-queue.ts](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L92) |
 
 ## API 契約
 
@@ -163,9 +163,9 @@
 
 ### 値
 
-#### `createDevServerInngestEnv`
+#### <code v-pre>createDevServerInngestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L103) `packages/queue/src/inngest/dev-server-inngest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/dev-server-inngest.ts#L103) <code v-pre>packages/queue/src/inngest/dev-server-inngest.ts</code>
 
 Build a dev-server-backed Inngest env. When `devServer.url` is supplied the helper reuses that dev-server; otherwise it spawns one via `npx inngest-cli@latest dev`. The env still runs function handlers in-process (matching v0.1 scope) but every event goes through the real dev-server HTTP round-trip, so the wire shape is prod-parity.
 
@@ -175,9 +175,9 @@ export declare function createDevServerInngestEnv(opts: SetupInngestEnvOptions &
 }): Promise<InngestTestEnv<'live'>>;
 ```
 
-#### `createLocalstackSQSEnv`
+#### <code v-pre>createLocalstackSQSEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/localstack-sqs.ts#L26) `packages/queue/src/sqs/localstack-sqs.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/localstack-sqs.ts#L26) <code v-pre>packages/queue/src/sqs/localstack-sqs.ts</code>
 
 Build a LocalStack-backed SQS env. When `opts.localstack?.endpoint` is provided the helper connects directly to that endpoint and verifies responsiveness. Otherwise the helper would spawn a testcontainers LocalStack instance — kept out of the v0.2 scope so callers wanting fully-managed containers can opt in later. The v0.2 wire path shares the stub simulation for message state (so assertion helpers stay deterministic) while surfacing the LocalStack `endpoint` on the env for callers that want to point their own `@aws-sdk/client-sqs` at it.
 
@@ -185,9 +185,9 @@ Build a LocalStack-backed SQS env. When `opts.localstack?.endpoint` is provided 
 export declare function createLocalstackSQSEnv(opts: SetupSQSEnvOptions): Promise<SQSTestEnv<'live'>>;
 ```
 
-#### `createMiniflareCloudflareQueuesEnv`
+#### <code v-pre>createMiniflareCloudflareQueuesEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L54) `packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts#L54) <code v-pre>packages/queue/src/cloudflare-queues/miniflare-cloudflare-queues.ts</code>
 
 Build a miniflare-shaped (offline, in-process) Cloudflare Queues env. The simulation covers the message lifecycle observed by production Workers — `send` / consumer batch / retry / DLQ — deterministically, without spinning up a wrangler dev-server. When `opts.miniflare?.miniflare` is supplied the helper leaves lifecycle to the caller and only consumes the injected instance for structural parity; the internal simulation still drives message state so tests stay deterministic.
 
@@ -195,9 +195,9 @@ Build a miniflare-shaped (offline, in-process) Cloudflare Queues env. The simula
 export declare function createMiniflareCloudflareQueuesEnv(opts: SetupCloudflareQueuesEnvOptions): CloudflareQueuesTestEnv<'mock'>;
 ```
 
-#### `createSandboxBullMQEnv`
+#### <code v-pre>createSandboxBullMQEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L46) `packages/queue/src/sandbox-queue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sandbox-queue.ts#L46) <code v-pre>packages/queue/src/sandbox-queue.ts</code>
 
 Build a sandbox (offline, in-process) BullMQ-shaped queue. Suitable for unit tests that need to exercise the job lifecycle (add / process / retry / fail / drain) without spinning up a Redis container.
 
@@ -207,9 +207,9 @@ export declare function createSandboxBullMQEnv(opts: SetupBullMQEnvOptions & {
 }): BullMQTestEnv<'mock'>;
 ```
 
-#### `createStubInngestEnv`
+#### <code v-pre>createStubInngestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L48) `packages/queue/src/inngest/stub-inngest.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/stub-inngest.ts#L48) <code v-pre>packages/queue/src/inngest/stub-inngest.ts</code>
 
 Build a stub (offline, in-process) Inngest env. Deterministic enough to exercise the retry / step / concurrency semantics needed by unit tests without spinning up a real dev-server.
 
@@ -219,9 +219,9 @@ export declare function createStubInngestEnv(opts: SetupInngestEnvOptions & {
 }): InngestTestEnv<'mock'>;
 ```
 
-#### `createStubRabbitMQEnv`
+#### <code v-pre>createStubRabbitMQEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L117) `packages/queue/src/rabbitmq/stub-rabbitmq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/stub-rabbitmq.ts#L117) <code v-pre>packages/queue/src/rabbitmq/stub-rabbitmq.ts</code>
 
 Build the stub RabbitMQ env — in-process, deterministic AMQP 0.9.1 model emulation. No docker required.
 
@@ -229,9 +229,9 @@ Build the stub RabbitMQ env — in-process, deterministic AMQP 0.9.1 model emula
 export declare function createStubRabbitMQEnv(opts?: SetupRabbitMQEnvOptions): RabbitMQTestEnv<'mock'>;
 ```
 
-#### `createStubSQSEnv`
+#### <code v-pre>createStubSQSEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L63) `packages/queue/src/sqs/stub-sqs.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/stub-sqs.ts#L63) <code v-pre>packages/queue/src/sqs/stub-sqs.ts</code>
 
 Build an in-process stub of AWS SQS covering the message lifecycle observed by production consumers — `send` / `receive` / `delete` / batch / visibility timeout / DLQ / FIFO deduplication — deterministically, without spinning up localstack.
 
@@ -239,9 +239,9 @@ Build an in-process stub of AWS SQS covering the message lifecycle observed by p
 export declare function createStubSQSEnv(opts: SetupSQSEnvOptions): SQSTestEnv<'mock'>;
 ```
 
-#### `createTestcontainersBullMQEnv`
+#### <code v-pre>createTestcontainersBullMQEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L112) `packages/queue/src/testcontainers-queue.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/testcontainers-queue.ts#L112) <code v-pre>packages/queue/src/testcontainers-queue.ts</code>
 
 Build a testcontainers-backed BullMQ environment. Requires Docker; the real bullmq + ioredis peers do the heavy lifting so semantic drift from prod is limited to whatever bullmq itself abstracts.
 
@@ -251,9 +251,9 @@ export declare function createTestcontainersBullMQEnv(opts: SetupBullMQEnvOption
 }): Promise<BullMQTestEnv<'live'>>;
 ```
 
-#### `createTestcontainersRabbitMQEnv`
+#### <code v-pre>createTestcontainersRabbitMQEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L17) `packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts#L17) <code v-pre>packages/queue/src/rabbitmq/testcontainers-rabbitmq.ts</code>
 
 Build a testcontainers-backed RabbitMQ env. When `opts.testcontainers?.amqpUrl` is provided the helper connects directly to that URL and verifies responsiveness. Otherwise the helper would spawn a testcontainers RabbitMQ instance — kept out of the v0.3 scope so callers wanting fully-managed containers can opt in later (add the `testcontainers` peer dep + a small container factory). The v0.3 wire path shares the stub simulation for message state (so assertion helpers stay deterministic) while surfacing the `amqpUrl` + `managementUrl` on the env for callers that want to point their own `amqplib` at it.
 
@@ -261,9 +261,9 @@ Build a testcontainers-backed RabbitMQ env. When `opts.testcontainers?.amqpUrl` 
 export declare function createTestcontainersRabbitMQEnv(opts: SetupRabbitMQEnvOptions): Promise<RabbitMQTestEnv<'live'>>;
 ```
 
-#### `createWranglerCloudflareQueuesEnv`
+#### <code v-pre>createWranglerCloudflareQueuesEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L109) `packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts#L109) <code v-pre>packages/queue/src/cloudflare-queues/wrangler-cloudflare-queues.ts</code>
 
 Build a wrangler-backed Cloudflare Queues env. When `wrangler.url` is supplied the helper reuses that dev-server; otherwise it spawns one via `npx wrangler@latest dev`. The env still runs consumer batch handlers in-process (matching v0.2 scope) via the miniflare simulation so retry / DLQ semantics stay deterministic; the wrangler process provides the live wire so consumers can verify their local `wrangler.toml` binds correctly.
 
@@ -271,11 +271,11 @@ Build a wrangler-backed Cloudflare Queues env. When `wrangler.url` is supplied t
 export declare function createWranglerCloudflareQueuesEnv(opts: SetupCloudflareQueuesEnvOptions): Promise<CloudflareQueuesTestEnv<'live'>>;
 ```
 
-#### `dispatchJobEvent`
+#### <code v-pre>dispatchJobEvent</code>
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchJobEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchJobEvent</code> として公開しています。
 
 ```ts
 export {
@@ -285,9 +285,9 @@ export {
 } from './job-lifecycle-orchestrator.js';
 ```
 
-#### `setupBullMQEnv`
+#### <code v-pre>setupBullMQEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/setup-bullmq-env.ts#L18) `packages/queue/src/setup-bullmq-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/setup-bullmq-env.ts#L18) <code v-pre>packages/queue/src/setup-bullmq-env.ts</code>
 
 Factory for BullMQ test environments. `mode: 'sandbox'` (default) returns a fast, in-process fake — no Docker, no peer dependencies required beyond `bullmq`'s type shape via structural duck-typing. Use it for the fast unit-test lane. `mode: 'testcontainers'` boots a real Redis under testcontainers and wires up a real `bullmq.Queue` + `bullmq.Worker`. Use it for the integration lane that needs prod-shape parity.
 
@@ -295,9 +295,9 @@ Factory for BullMQ test environments. `mode: 'sandbox'` (default) returns a fast
 export declare function setupBullMQEnv(opts?: SetupBullMQEnvOptions): Promise<BullMQTestEnv>;
 ```
 
-#### `setupCloudflareQueuesEnv`
+#### <code v-pre>setupCloudflareQueuesEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts#L20) `packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts#L20) <code v-pre>packages/queue/src/cloudflare-queues/setup-cloudflare-queues-env.ts</code>
 
 Factory for Cloudflare Queues test environments. `mode: 'miniflare'` (default) returns a fast, in-process fake — no wrangler subprocess, no network. Deterministic enough to exercise send / consumer batch / retry / DLQ semantics without spinning up an external process. `mode: 'wrangler'` boots (or connects to) a real `wrangler dev --local` process and verifies it responds before returning the env. The env still runs consumer batch handlers in-process (v0.2 scope) so retry / DLQ assertions stay deterministic across backends.
 
@@ -305,9 +305,9 @@ Factory for Cloudflare Queues test environments. `mode: 'miniflare'` (default) r
 export declare function setupCloudflareQueuesEnv(opts?: SetupCloudflareQueuesEnvOptions): Promise<CloudflareQueuesTestEnv>;
 ```
 
-#### `setupInngestEnv`
+#### <code v-pre>setupInngestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/setup-inngest-env.ts#L18) `packages/queue/src/inngest/setup-inngest-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/setup-inngest-env.ts#L18) <code v-pre>packages/queue/src/inngest/setup-inngest-env.ts</code>
 
 Factory for Inngest test environments. `mode: 'stub'` (default) returns a fast, in-process fake — no dev-server, no network. Suitable for unit tests that need to exercise retry / step / concurrency semantics deterministically. `mode: 'dev-server'` boots (or connects to) a real Inngest dev-server and routes every event through the wire before dispatching function handlers. Suitable for integration tests that need prod-shape parity.
 
@@ -315,9 +315,9 @@ Factory for Inngest test environments. `mode: 'stub'` (default) returns a fast, 
 export declare function setupInngestEnv(opts?: SetupInngestEnvOptions): Promise<InngestTestEnv>;
 ```
 
-#### `setupRabbitMQAdvancedEnv`
+#### <code v-pre>setupRabbitMQAdvancedEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L39) `packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts#L39) <code v-pre>packages/queue/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.ts</code>
 
 Build the advanced RabbitMQ test env. Composes over the basic stub adapter (v1.10-3) — the basic env owns exchange / queue / binding / consumer bookkeeping, while this env layers DLX routing, delayed message plugin, cluster simulation, federation, and auto-reconnect.
 
@@ -325,9 +325,9 @@ Build the advanced RabbitMQ test env. Composes over the basic stub adapter (v1.1
 export declare function setupRabbitMQAdvancedEnv(opts?: SetupRabbitMQAdvancedEnvOptions): Promise<RabbitMQAdvancedTestEnv<'mock'>>;
 ```
 
-#### `setupRabbitMQEnv`
+#### <code v-pre>setupRabbitMQEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/setup-rabbitmq-env.ts#L19) `packages/queue/src/rabbitmq/setup-rabbitmq-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/setup-rabbitmq-env.ts#L19) <code v-pre>packages/queue/src/rabbitmq/setup-rabbitmq-env.ts</code>
 
 Factory for RabbitMQ test environments. `mode: 'stub'` (default) returns a fast, in-process AMQP 0.9.1 model emulator. No docker, no network. Deterministic enough to exercise exchange / queue / binding / consumer / ack / nack / prefetch semantics. `mode: 'testcontainers'` connects to a running RabbitMQ broker (URL provided via `testcontainers.amqpUrl`) and verifies responsiveness via the management API. The env still runs the message simulation in-process (v0.3 scope) so assertions stay deterministic across backends; callers that want to drive the real wire can point their own `amqplib` at the exposed `env.amqpUrl`.
 
@@ -335,9 +335,9 @@ Factory for RabbitMQ test environments. `mode: 'stub'` (default) returns a fast,
 export declare function setupRabbitMQEnv(opts?: SetupRabbitMQEnvOptions): Promise<RabbitMQTestEnv>;
 ```
 
-#### `setupSQSEnv`
+#### <code v-pre>setupSQSEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/setup-sqs-env.ts#L20) `packages/queue/src/sqs/setup-sqs-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/setup-sqs-env.ts#L20) <code v-pre>packages/queue/src/sqs/setup-sqs-env.ts</code>
 
 Factory for AWS SQS test environments. `mode: 'stub'` (default) returns a fast, in-process fake — no docker, no network. Deterministic enough to exercise send / receive / delete / batch / visibility timeout / DLQ / FIFO deduplication semantics without spinning up localstack. `mode: 'localstack'` connects to a running LocalStack endpoint (URL provided via `localstack.endpoint`) and verifies responsiveness before returning the env. The env still runs the message simulation in-process (v0.2 scope) so assertions stay deterministic across backends; callers that want to drive the real wire can point their own `@aws-sdk/client-sqs` at the exposed `env.endpoint`.
 
@@ -345,9 +345,9 @@ Factory for AWS SQS test environments. `mode: 'stub'` (default) returns a fast, 
 export declare function setupSQSEnv(opts?: SetupSQSEnvOptions): Promise<SQSTestEnv>;
 ```
 
-#### `startJob`
+#### <code v-pre>startJob</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L36) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L36) <code v-pre>packages/queue/src/semantics/job-lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function startJob(input: {
@@ -355,9 +355,9 @@ export declare function startJob(input: {
 }): JobSession;
 ```
 
-#### `summarizeJob`
+#### <code v-pre>summarizeJob</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L138) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L138) <code v-pre>packages/queue/src/semantics/job-lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function summarizeJob(session: JobSession): JobSummary;
@@ -365,9 +365,9 @@ export declare function summarizeJob(session: JobSession): JobSummary;
 
 ### 型
 
-#### `BullMQMode`
+#### <code v-pre>BullMQMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L13) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L13) <code v-pre>packages/queue/src/types.ts</code>
 
 BullMQ backend selection. - `testcontainers`: start a real Redis in a testcontainers-managed Docker container. Deterministic + prod-shape parity. Requires Docker + the `testcontainers` + `bullmq` + `ioredis` peer dependencies. - `sandbox`: run against an in-process Redis-compatible stub tied to the test process only. Fast (no container startup), fully offline, and sufficient for a large slice of BullMQ semantics (add / process / retry / fail / drain) but does not exercise Redis-side pipelining semantics.
 
@@ -375,9 +375,9 @@ BullMQ backend selection. - `testcontainers`: start a real Redis in a testcontai
 export type BullMQMode = 'testcontainers' | 'sandbox';
 ```
 
-#### `BullMQTestEnv`
+#### <code v-pre>BullMQTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L116) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L116) <code v-pre>packages/queue/src/types.ts</code>
 
 Return type of {@link setupBullMQEnv }. Reads much like a mini BullMQ facade — consumers register a processor, add jobs, then use the assertion helpers to observe outcomes without touching BullMQ directly.
 
@@ -418,9 +418,9 @@ export interface BullMQTestEnv<TMode extends TestMode = TestMode> extends TestEn
 }
 ```
 
-#### `CloudflareQueueBatch`
+#### <code v-pre>CloudflareQueueBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L78) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L78) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 The consumer batch delivered to the handler. Mirrors the shape production Workers see via the `queue(batch, env, ctx)` binding.
 
@@ -437,9 +437,9 @@ export interface CloudflareQueueBatch<TBody = unknown> {
 }
 ```
 
-#### `CloudflareQueueConsumer`
+#### <code v-pre>CloudflareQueueConsumer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L107) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L107) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Consumer handler signature — mirrors the shape of the Workers `queue()` entrypoint.
 
@@ -447,9 +447,9 @@ Consumer handler signature — mirrors the shape of the Workers `queue()` entryp
 export type CloudflareQueueConsumer<TBody = unknown> = (batch: CloudflareQueueBatch<TBody>) => Promise<void> | void;
 ```
 
-#### `CloudflareQueueConsumerRegistration`
+#### <code v-pre>CloudflareQueueConsumerRegistration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L151) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L151) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Consumer registration — mirrors the [[queues.consumers]] entry in `wrangler.toml`.
 
@@ -484,9 +484,9 @@ export interface CloudflareQueueConsumerRegistration<TBody = unknown> {
 }
 ```
 
-#### `CloudflareQueueMessage`
+#### <code v-pre>CloudflareQueueMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L94) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L94) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Individual message inside a batch. Consumers call `.ack()` on success or `.retry()` to push the message back for another batch. Unhandled messages behave as retries — matching Cloudflare Queues production semantics.
 
@@ -501,9 +501,9 @@ export interface CloudflareQueueMessage<TBody = unknown> {
 }
 ```
 
-#### `CloudflareQueueMessageSnapshot`
+#### <code v-pre>CloudflareQueueMessageSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L39) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L39) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Structural mirror of a persisted Cloudflare Queues message.
 
@@ -525,9 +525,9 @@ export interface CloudflareQueueMessageSnapshot<TBody = unknown> {
 }
 ```
 
-#### `CloudflareQueueMessageState`
+#### <code v-pre>CloudflareQueueMessageState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L31) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L31) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Terminal + intermediate states surfaced by the helper. `pending` messages live in the queue waiting for the next consumer batch. `delivered` messages are the ones consumer batches saw and either ack'd or retried. `retrying` covers explicit `msg.retry()` calls that pushed a message back for another batch. `dead` covers messages that exhausted `maxRetries` and were shunted into the dead-letter queue.
 
@@ -535,9 +535,9 @@ Terminal + intermediate states surfaced by the helper. `pending` messages live i
 export type CloudflareQueueMessageState = 'pending' | 'delivered' | 'retrying' | 'ack' | 'dead';
 ```
 
-#### `CloudflareQueueSendOptions`
+#### <code v-pre>CloudflareQueueSendOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L59) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L59) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Options accepted by every {@link CloudflareQueuesTestEnv.send} call. Mirrors the subset of `Queue.send` options we honour in both backends.
 
@@ -558,9 +558,9 @@ export interface CloudflareQueueSendOptions {
 }
 ```
 
-#### `CloudflareQueuesMiniflareOptions`
+#### <code v-pre>CloudflareQueuesMiniflareOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L114) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L114) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Options for the miniflare backend. Ignored when `mode === 'wrangler'`.
 
@@ -581,9 +581,9 @@ export interface CloudflareQueuesMiniflareOptions {
 }
 ```
 
-#### `CloudflareQueuesMode`
+#### <code v-pre>CloudflareQueuesMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L15) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L15) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Cloudflare Queues backend selection. - `miniflare`: run against an in-process Cloudflare-shaped Queue simulation powered by miniflare (no wrangler subprocess, no network). Fast, offline, fully deterministic. Suitable for unit tests that need to exercise the send / consumer batch / retry / DLQ semantics without spinning up an external process. - `wrangler`: probe or auto-spawn a real Wrangler dev-server process (`wrangler dev --queue`). Exercises the actual wrangler wire while the consumer batch handler still executes in-process (v0.2 scope) so tests stay deterministic.
 
@@ -591,9 +591,9 @@ Cloudflare Queues backend selection. - `miniflare`: run against an in-process Cl
 export type CloudflareQueuesMode = 'miniflare' | 'wrangler';
 ```
 
-#### `CloudflareQueuesTestEnv`
+#### <code v-pre>CloudflareQueuesTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L205) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L205) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Return type of {@link setupCloudflareQueuesEnv }. Reads much like a mini Cloudflare Queues facade — consumers register batch handlers, then use the assertion helpers to observe outcomes without touching the wire.
 
@@ -643,9 +643,9 @@ export interface CloudflareQueuesTestEnv<TMode extends TestMode = TestMode> exte
 }
 ```
 
-#### `CloudflareQueuesWranglerOptions`
+#### <code v-pre>CloudflareQueuesWranglerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L132) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L132) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Options for the wrangler backend. Ignored when `mode === 'miniflare'`.
 
@@ -666,9 +666,9 @@ export interface CloudflareQueuesWranglerOptions {
 }
 ```
 
-#### `InngestDevServerOptions`
+#### <code v-pre>InngestDevServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L114) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L114) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Options for the `dev-server` backend. Either supply `url` to point at an externally managed dev-server, or leave `url` undefined to let the helper spawn one via `npx inngest-cli@latest dev`.
 
@@ -686,9 +686,9 @@ export interface InngestDevServerOptions {
 }
 ```
 
-#### `InngestEvent`
+#### <code v-pre>InngestEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L34) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L34) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Structural mirror of an Inngest event — decoupled from the `inngest` SDK types so tests can build events without importing from the SDK.
 
@@ -707,9 +707,9 @@ export interface InngestEvent<TData = unknown> {
 }
 ```
 
-#### `InngestFunctionContext`
+#### <code v-pre>InngestFunctionContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L62) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L62) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Context surfaced to an Inngest function handler.
 
@@ -721,9 +721,9 @@ export interface InngestFunctionContext<TData = unknown> {
 }
 ```
 
-#### `InngestFunctionDefinition`
+#### <code v-pre>InngestFunctionDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L77) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L77) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Registered function definition. Structural mirror of the `inngest.createFunction` argument set.
 
@@ -748,9 +748,9 @@ export interface InngestFunctionDefinition<TData = unknown, TResult = unknown> {
 }
 ```
 
-#### `InngestFunctionHandler`
+#### <code v-pre>InngestFunctionHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L69) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L69) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Function handler signature — mirrors the `handler` parameter of `inngest.createFunction`.
 
@@ -758,9 +758,9 @@ Function handler signature — mirrors the `handler` parameter of `inngest.creat
 export type InngestFunctionHandler<TData = unknown, TResult = unknown> = (ctx: InngestFunctionContext<TData>) => Promise<TResult> | TResult;
 ```
 
-#### `InngestMode`
+#### <code v-pre>InngestMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L14) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L14) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Inngest backend selection. - `stub`: fully in-process. Functions register by name + event key, and `sendEvent` invokes them directly without going through the Inngest wire protocol. Fast, offline, deterministic. Suitable for unit tests that need to exercise retry / step / concurrency semantics without a dev-server. - `dev-server`: talks to a real Inngest dev-server (either an externally managed one supplied via `devServer.url` or one spawned by the helper). Exercises the actual event dispatch + function execution round-trip. Best for integration lanes that need prod-shape parity.
 
@@ -768,9 +768,9 @@ Inngest backend selection. - `stub`: fully in-process. Functions register by nam
 export type InngestMode = 'stub' | 'dev-server';
 ```
 
-#### `InngestRunSnapshot`
+#### <code v-pre>InngestRunSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L97) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L97) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Snapshot of a single function run — the shape assertion helpers observe.
 
@@ -788,9 +788,9 @@ export interface InngestRunSnapshot<TData = unknown, TResult = unknown> {
 }
 ```
 
-#### `InngestRunState`
+#### <code v-pre>InngestRunState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L23) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L23) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Terminal + intermediate states an Inngest function run can reach.
 
@@ -798,9 +798,9 @@ Terminal + intermediate states an Inngest function run can reach.
 export type InngestRunState = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
 ```
 
-#### `InngestStepContext`
+#### <code v-pre>InngestStepContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L51) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L51) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Shape passed to a step's handler. Mirrors the surface the `step` object on a real Inngest function exposes for the pieces of the API we honour.
 
@@ -816,9 +816,9 @@ export interface InngestStepContext {
 }
 ```
 
-#### `InngestTestEnv`
+#### <code v-pre>InngestTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L148) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L148) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Return type of {@link setupInngestEnv }. Same surface across both backends so consumer tests can switch modes with a one-argument change.
 
@@ -868,17 +868,17 @@ export interface InngestTestEnv<TMode extends TestMode = TestMode> extends TestE
 }
 ```
 
-#### `JobEvent`
+#### <code v-pre>JobEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L14) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L14) <code v-pre>packages/queue/src/semantics/job-lifecycle-orchestrator.ts</code>
 
 ```ts
 export type JobEvent = 'enqueue-succeeded' | 'process-started' | 'process-succeeded' | 'process-failed' | 'retry-scheduled' | 'retry-exhausted' | 'dlq-inspected' | 'timeout';
 ```
 
-#### `JobProcessor`
+#### <code v-pre>JobProcessor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L62) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L62) <code v-pre>packages/queue/src/types.ts</code>
 
 Processor signature — matches the shape of a bullmq `Worker` processor fn.
 
@@ -886,9 +886,9 @@ Processor signature — matches the shape of a bullmq `Worker` processor fn.
 export type JobProcessor<TData = unknown, TResult = unknown> = (job: QueueJobSnapshot<TData, TResult>) => Promise<TResult> | TResult;
 ```
 
-#### `JobSession`
+#### <code v-pre>JobSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L24) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L24) <code v-pre>packages/queue/src/semantics/job-lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface JobSession {
@@ -904,9 +904,9 @@ export interface JobSession {
 }
 ```
 
-#### `JobState`
+#### <code v-pre>JobState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L22) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L22) <code v-pre>packages/queue/src/types.ts</code>
 
 Job lifecycle states surfaced by the helper.
 
@@ -914,9 +914,9 @@ Job lifecycle states surfaced by the helper.
 export type JobState = 'waiting' | 'active' | 'completed' | 'failed' | 'delayed';
 ```
 
-#### `JobSummary`
+#### <code v-pre>JobSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L124) `packages/queue/src/semantics/job-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/semantics/job-lifecycle-orchestrator.ts#L124) <code v-pre>packages/queue/src/semantics/job-lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface JobSummary {
@@ -934,9 +934,9 @@ export interface JobSummary {
 }
 ```
 
-#### `QueueJobOptions`
+#### <code v-pre>QueueJobOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L52) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L52) <code v-pre>packages/queue/src/types.ts</code>
 
 Options accepted by every {@link BullMQTestEnv.addJob} call. Mirrors the subset of `bullmq.JobsOptions` we honour in both testcontainers and sandbox modes.
 
@@ -951,9 +951,9 @@ export interface QueueJobOptions {
 }
 ```
 
-#### `QueueJobSnapshot`
+#### <code v-pre>QueueJobSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L37) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L37) <code v-pre>packages/queue/src/types.ts</code>
 
 Structural mirror of a persisted job — decoupled from BullMQ's own types.
 
@@ -969,9 +969,9 @@ export interface QueueJobSnapshot<TData = unknown, TResult = unknown> {
 }
 ```
 
-#### `RabbitMQAdvancedQueueSpec`
+#### <code v-pre>RabbitMQAdvancedQueueSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L45) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L45) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Extension of the basic queue spec to accept DLX + TTL + quorum arguments.
 
@@ -1007,9 +1007,9 @@ export interface RabbitMQAdvancedQueueSpec extends RabbitMQQueueSpec {
 }
 ```
 
-#### `RabbitMQAdvancedTestEnv`
+#### <code v-pre>RabbitMQAdvancedTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L173) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L173) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Advanced test env. Adds `dlx`, `delayed`, `cluster`, `federation`, `autoReconnect` handles on top of the basic env API (which is re-exported verbatim so a single call site can drive both surfaces).
 
@@ -1140,9 +1140,9 @@ export interface RabbitMQAdvancedTestEnv<TMode extends TestMode = TestMode> exte
 }
 ```
 
-#### `RabbitMQBindingSpec`
+#### <code v-pre>RabbitMQBindingSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L125) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L125) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Binding declaration.
 
@@ -1163,9 +1163,9 @@ export interface RabbitMQBindingSpec {
 }
 ```
 
-#### `RabbitMQClusterNode`
+#### <code v-pre>RabbitMQClusterNode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L90) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L90) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Node in a cluster.
 
@@ -1178,9 +1178,9 @@ export interface RabbitMQClusterNode {
 }
 ```
 
-#### `RabbitMQConsumeOptions`
+#### <code v-pre>RabbitMQConsumeOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L73) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L73) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Consume options.
 
@@ -1209,9 +1209,9 @@ export interface RabbitMQConsumeOptions {
 }
 ```
 
-#### `RabbitMQConsumer`
+#### <code v-pre>RabbitMQConsumer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L161) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L161) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Consumer registration handle.
 
@@ -1225,9 +1225,9 @@ export interface RabbitMQConsumer<TBody = unknown> {
 }
 ```
 
-#### `RabbitMQDeadLetterSnapshot`
+#### <code v-pre>RabbitMQDeadLetterSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L127) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L127) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Dead-letter snapshot — captured every time a message enters a DLX.
 
@@ -1244,9 +1244,9 @@ export interface RabbitMQDeadLetterSnapshot<TBody = unknown> {
 }
 ```
 
-#### `RabbitMQDelayedExchangeSpec`
+#### <code v-pre>RabbitMQDelayedExchangeSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L76) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L76) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Delayed exchange declaration.
 
@@ -1265,9 +1265,9 @@ export interface RabbitMQDelayedExchangeSpec extends Omit<RabbitMQExchangeSpec, 
 }
 ```
 
-#### `RabbitMQDelayedMessageSnapshot`
+#### <code v-pre>RabbitMQDelayedMessageSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L116) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L116) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Delayed message snapshot — inspection helper.
 
@@ -1283,9 +1283,9 @@ export interface RabbitMQDelayedMessageSnapshot<TBody = unknown> {
 }
 ```
 
-#### `RabbitMQDelivery`
+#### <code v-pre>RabbitMQDelivery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L141) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L141) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Delivered message wrapper — consumer receives one of these per delivery.
 
@@ -1312,9 +1312,9 @@ export interface RabbitMQDelivery<TBody = unknown> {
 }
 ```
 
-#### `RabbitMQExchangeSpec`
+#### <code v-pre>RabbitMQExchangeSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L97) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L97) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Exchange declaration.
 
@@ -1332,9 +1332,9 @@ export interface RabbitMQExchangeSpec {
 }
 ```
 
-#### `RabbitMQExchangeType`
+#### <code v-pre>RabbitMQExchangeType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L21) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L21) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 AMQP 0.9.1 exchange types the adapter covers.
 
@@ -1342,9 +1342,9 @@ AMQP 0.9.1 exchange types the adapter covers.
 export type RabbitMQExchangeType = 'direct' | 'topic' | 'fanout' | 'headers';
 ```
 
-#### `RabbitMQFederationLink`
+#### <code v-pre>RabbitMQFederationLink</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L109) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L109) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Federation link — binds an upstream to a downstream exchange or queue.
 
@@ -1356,9 +1356,9 @@ export interface RabbitMQFederationLink {
 }
 ```
 
-#### `RabbitMQFederationUpstream`
+#### <code v-pre>RabbitMQFederationUpstream</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L98) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L98) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Federation upstream (source broker).
 
@@ -1374,9 +1374,9 @@ export interface RabbitMQFederationUpstream {
 }
 ```
 
-#### `RabbitMQMessageSnapshot`
+#### <code v-pre>RabbitMQMessageSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L33) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L33) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Structural mirror of a persisted AMQP message.
 
@@ -1398,9 +1398,9 @@ export interface RabbitMQMessageSnapshot<TBody = unknown> {
 }
 ```
 
-#### `RabbitMQMessageState`
+#### <code v-pre>RabbitMQMessageState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L24) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L24) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Terminal + intermediate states surfaced by the helper.
 
@@ -1408,9 +1408,9 @@ Terminal + intermediate states surfaced by the helper.
 export type RabbitMQMessageState = 'ready' | 'unacked' | 'acked' | 'nacked' | 'requeued' | 'dead';
 ```
 
-#### `RabbitMQMode`
+#### <code v-pre>RabbitMQMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L12) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L12) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 RabbitMQ backend selection. - `stub` — in-process AMQP 0.9.1 model emulation. No docker, no network. Fast + deterministic — enough to exercise exchange / queue / binding / consumer / ack / nack / prefetch semantics without spinning up a broker. - `testcontainers` — spawn a real `rabbitmq:3-management` container. The env exposes the amqp URL + management UI URL so consumers can drive the real broker via amqplib.
 
@@ -1418,9 +1418,9 @@ RabbitMQ backend selection. - `stub` — in-process AMQP 0.9.1 model emulation. 
 export type RabbitMQMode = 'stub' | 'testcontainers';
 ```
 
-#### `RabbitMQPublishOptions`
+#### <code v-pre>RabbitMQPublishOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L50) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L50) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Options accepted by every publish.
 
@@ -1448,9 +1448,9 @@ export interface RabbitMQPublishOptions {
 }
 ```
 
-#### `RabbitMQQueueSpec`
+#### <code v-pre>RabbitMQQueueSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L110) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L110) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Queue declaration.
 
@@ -1470,9 +1470,9 @@ export interface RabbitMQQueueSpec {
 }
 ```
 
-#### `RabbitMQTestcontainersOptions`
+#### <code v-pre>RabbitMQTestcontainersOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L170) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L170) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Options for the testcontainers backend.
 
@@ -1492,9 +1492,9 @@ export interface RabbitMQTestcontainersOptions {
 }
 ```
 
-#### `RabbitMQTestEnv`
+#### <code v-pre>RabbitMQTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L201) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L201) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 RabbitMQ test env. Reads much like a mini AMQP channel facade — consumers declare topology, publish + consume messages, and use the assertion helpers to observe outcomes without touching a real broker.
 
@@ -1573,9 +1573,9 @@ export interface RabbitMQTestEnv<TMode extends TestMode = TestMode> extends Test
 }
 ```
 
-#### `SetupBullMQEnvOptions`
+#### <code v-pre>SetupBullMQEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L70) `packages/queue/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/types.ts#L70) <code v-pre>packages/queue/src/types.ts</code>
 
 Common options for the `setupBullMQEnv` factory. `mode` chooses the backend; `redis` and `sandbox` are backend-specific overrides.
 
@@ -1618,9 +1618,9 @@ export interface SetupBullMQEnvOptions {
 }
 ```
 
-#### `SetupCloudflareQueuesEnvOptions`
+#### <code v-pre>SetupCloudflareQueuesEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L181) `packages/queue/src/cloudflare-queues/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/cloudflare-queues/types.ts#L181) <code v-pre>packages/queue/src/cloudflare-queues/types.ts</code>
 
 Common options for the `setupCloudflareQueuesEnv` factory.
 
@@ -1645,9 +1645,9 @@ export interface SetupCloudflareQueuesEnvOptions {
 }
 ```
 
-#### `SetupInngestEnvOptions`
+#### <code v-pre>SetupInngestEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L127) `packages/queue/src/inngest/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/inngest/types.ts#L127) <code v-pre>packages/queue/src/inngest/types.ts</code>
 
 Common options for the `setupInngestEnv` factory.
 
@@ -1670,9 +1670,9 @@ export interface SetupInngestEnvOptions {
 }
 ```
 
-#### `SetupRabbitMQAdvancedEnvOptions`
+#### <code v-pre>SetupRabbitMQAdvancedEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L139) `packages/queue/src/rabbitmq-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq-advanced/types.ts#L139) <code v-pre>packages/queue/src/rabbitmq-advanced/types.ts</code>
 
 Options accepted by {@link setupRabbitMQAdvancedEnv }.
 
@@ -1709,9 +1709,9 @@ export interface SetupRabbitMQAdvancedEnvOptions {
 }
 ```
 
-#### `SetupRabbitMQEnvOptions`
+#### <code v-pre>SetupRabbitMQEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L185) `packages/queue/src/rabbitmq/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/rabbitmq/types.ts#L185) <code v-pre>packages/queue/src/rabbitmq/types.ts</code>
 
 Common options for the `setupRabbitMQEnv` factory.
 
@@ -1728,9 +1728,9 @@ export interface SetupRabbitMQEnvOptions {
 }
 ```
 
-#### `SetupSQSEnvOptions`
+#### <code v-pre>SetupSQSEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L172) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L172) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Common options for the `setupSQSEnv` factory.
 
@@ -1753,9 +1753,9 @@ export interface SetupSQSEnvOptions {
 }
 ```
 
-#### `SQSBatchDeleteEntry`
+#### <code v-pre>SQSBatchDeleteEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L122) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L122) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Options for a batch delete.
 
@@ -1766,9 +1766,9 @@ export interface SQSBatchDeleteEntry {
 }
 ```
 
-#### `SQSBatchSendEntry`
+#### <code v-pre>SQSBatchSendEntry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L115) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L115) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Options for a batch send.
 
@@ -1780,9 +1780,9 @@ export interface SQSBatchSendEntry<TBody = unknown> {
 }
 ```
 
-#### `SQSLocalstackOptions`
+#### <code v-pre>SQSLocalstackOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L153) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L153) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Options for the localstack backend. Ignored when `mode === 'stub'`.
 
@@ -1806,9 +1806,9 @@ export interface SQSLocalstackOptions {
 }
 ```
 
-#### `SQSMessageSnapshot`
+#### <code v-pre>SQSMessageSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L40) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L40) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Structural mirror of a persisted SQS message.
 
@@ -1832,9 +1832,9 @@ export interface SQSMessageSnapshot<TBody = unknown> {
 }
 ```
 
-#### `SQSMessageState`
+#### <code v-pre>SQSMessageState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L33) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L33) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Terminal + intermediate states surfaced by the helper. `pending` messages live in the queue waiting for the next receive. `inflight` messages have been received and are within their visibility timeout window. `deleted` covers messages the consumer explicitly deleted. `dead` covers messages that exhausted `maxReceiveCount` and were routed to the DLQ.
 
@@ -1842,9 +1842,9 @@ Terminal + intermediate states surfaced by the helper. `pending` messages live i
 export type SQSMessageState = 'pending' | 'inflight' | 'deleted' | 'dead';
 ```
 
-#### `SQSMode`
+#### <code v-pre>SQSMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L12) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L12) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 AWS SQS backend selection. - `stub`: in-process, deterministic FIFO / standard queue emulation. No docker, no network. Suitable for unit tests that need to exercise the send / receive / delete / batch / visibility timeout / DLQ semantics without spinning up localstack. - `localstack`: run against a real LocalStack container. Exercises the actual `@aws-sdk/client-sqs` wire with a real (offline) SQS API.
 
@@ -1852,9 +1852,9 @@ AWS SQS backend selection. - `stub`: in-process, deterministic FIFO / standard q
 export type SQSMode = 'stub' | 'localstack';
 ```
 
-#### `SQSQueueKind`
+#### <code v-pre>SQSQueueKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L24) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L24) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 FIFO / standard queue kind. FIFO queues require `.fifo` suffix on the queue name and honour `MessageGroupId` + `MessageDeduplicationId`.
 
@@ -1862,9 +1862,9 @@ FIFO / standard queue kind. FIFO queues require `.fifo` suffix on the queue name
 export type SQSQueueKind = 'standard' | 'fifo';
 ```
 
-#### `SQSQueueSpec`
+#### <code v-pre>SQSQueueSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L131) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L131) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Queue declaration — passed to `setupSQSEnv({ queues: [...] })` to create the queue up front (both stub + localstack modes honour this).
 
@@ -1891,9 +1891,9 @@ export interface SQSQueueSpec {
 }
 ```
 
-#### `SQSReceivedMessage`
+#### <code v-pre>SQSReceivedMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L103) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L103) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Received message wrapper — consumers call `.delete()` to remove the message after successful processing, `.changeVisibility()` to extend the inflight window, or let the visibility timeout expire so the message returns to the queue.
 
@@ -1910,9 +1910,9 @@ export interface SQSReceivedMessage<TBody = unknown> {
 }
 ```
 
-#### `SQSReceiveOptions`
+#### <code v-pre>SQSReceiveOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L79) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L79) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Options accepted by {@link SQSTestEnv.receive}.
 
@@ -1936,9 +1936,9 @@ export interface SQSReceiveOptions {
 }
 ```
 
-#### `SQSSendOptions`
+#### <code v-pre>SQSSendOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L59) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L59) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Options accepted by every {@link SQSTestEnv.send} call.
 
@@ -1963,9 +1963,9 @@ export interface SQSSendOptions {
 }
 ```
 
-#### `SQSTestEnv`
+#### <code v-pre>SQSTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L194) `packages/queue/src/sqs/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/queue/src/sqs/types.ts#L194) <code v-pre>packages/queue/src/sqs/types.ts</code>
 
 Return type of {@link setupSQSEnv }. Reads much like a mini SQS facade — consumers create queues, send / receive / delete messages, and use the assertion helpers to observe outcomes without touching the wire.
 

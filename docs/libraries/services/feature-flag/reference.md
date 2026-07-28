@@ -39,17 +39,17 @@ targeting rule は user id、percentage rule は再現可能な hash bucket、at
 
 ### 値
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L20) `packages/feature-flag/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L20) <code v-pre>packages/feature-flag/src/circuit-breaker.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createFlagClient`
+#### <code v-pre>createFlagClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L56) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L56) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 provider 別 mock 差 (id prefix / evaluation stream 名) を持たせつつ、 全 API 共通 interface。 実 provider (GrowthBook / LaunchDarkly / PostHog / Unleash) の SDK を差し替えても同じ signature で呼べる想定。
 
@@ -57,25 +57,25 @@ provider 別 mock 差 (id prefix / evaluation stream 名) を持たせつつ、 
 export declare function createFlagClient(options?: CreateFlagClientOptions): FlagClient;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L22) `packages/feature-flag/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L22) <code v-pre>packages/feature-flag/src/observability.ts</code>
 
 ```ts
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L11) `packages/feature-flag/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L11) <code v-pre>packages/feature-flag/src/idempotency.ts</code>
 
 ```ts
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `evaluateAllFlags`
+#### <code v-pre>evaluateAllFlags</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L60) `packages/feature-flag/src/evaluator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L60) <code v-pre>packages/feature-flag/src/evaluator.ts</code>
 
 全登録 flag を user 1 人に対して bulk evaluate。 SPA/mobile client の起動時に 1 回だけ 全 flag を pre-fetch する pattern を再現。
 
@@ -83,9 +83,9 @@ export declare function createIdempotencyCache(): IdempotencyCache;
 export declare function evaluateAllFlags(client: FlagClient, user: FlagUser): EvaluateAllFlagsResult;
 ```
 
-#### `evaluateBatch`
+#### <code v-pre>evaluateBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/batch.ts#L11) `packages/feature-flag/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/batch.ts#L11) <code v-pre>packages/feature-flag/src/batch.ts</code>
 
 batch evaluate: 複数 (key, user) pair を一括評価。
 
@@ -96,9 +96,9 @@ export declare function evaluateBatch(client: FlagClient, entries: readonly {
 }[]): BatchEvaluateResult;
 ```
 
-#### `evaluateFlag`
+#### <code v-pre>evaluateFlag</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L20) `packages/feature-flag/src/evaluator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L20) <code v-pre>packages/feature-flag/src/evaluator.ts</code>
 
 flag key + user から value を決定。 rule chain を順次評価し、 最初に matched した rule の value を採用。 全 rule miss / 未登録 flag は defaultValue に fallback。
 
@@ -106,9 +106,9 @@ flag key + user から value を決定。 rule chain を順次評価し、 最�
 export declare function evaluateFlag(client: FlagClient, key: string, user: FlagUser): EvaluateFlagResult;
 ```
 
-#### `evaluateIdempotent`
+#### <code v-pre>evaluateIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L22) `packages/feature-flag/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L22) <code v-pre>packages/feature-flag/src/idempotency.ts</code>
 
 cached evaluate: 同 (flagKey, user.id) で cached result を返却。
 
@@ -118,17 +118,17 @@ export declare function evaluateIdempotent(client: FlagClient, key: string, user
 };
 ```
 
-#### `evaluateObservable`
+#### <code v-pre>evaluateObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L36) `packages/feature-flag/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L36) <code v-pre>packages/feature-flag/src/observability.ts</code>
 
 ```ts
 export declare function evaluateObservable(client: FlagClient, key: string, user: FlagUser, hooks: HookRegistry): EvaluateFlagResult;
 ```
 
-#### `evaluateWithRetry`
+#### <code v-pre>evaluateWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/retry.ts#L11) `packages/feature-flag/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/retry.ts#L11) <code v-pre>packages/feature-flag/src/retry.ts</code>
 
 ```ts
 export declare function evaluateWithRetry(client: FlagClient, key: string, user: FlagUser, options?: RetryOptions): Promise<EvaluateFlagResult & {
@@ -136,9 +136,9 @@ export declare function evaluateWithRetry(client: FlagClient, key: string, user:
 }>;
 ```
 
-#### `matchRule`
+#### <code v-pre>matchRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L46) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L46) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 user + rule 評価 = 最初にヒットした rule の value を返す。 全 rule miss で fallback / defaultValue。 percentage は hash(userId + key) % 100 で決定 (再現性)。
 
@@ -146,9 +146,9 @@ user + rule 評価 = 最初にヒットした rule の value を返す。 全 ru
 export declare function matchRule(rule: FlagRule, user: FlagUser, key: string): RuleMatchResult;
 ```
 
-#### `normalizeProviderConfig`
+#### <code v-pre>normalizeProviderConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/provider.ts#L25) `packages/feature-flag/src/provider.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/provider.ts#L25) <code v-pre>packages/feature-flag/src/provider.ts</code>
 
 provider config を統一 shape に正規化。 実 provider の SDK config 差 (LaunchDarkly = sdkKey, PostHog = apiKey + host, GrowthBook = clientKey, Unleash = url + appName) を吸収。
 
@@ -158,9 +158,9 @@ export declare function normalizeProviderConfig(config: Partial<ProviderConfig> 
 }): ProviderConfig;
 ```
 
-#### `providerIdPrefix`
+#### <code v-pre>providerIdPrefix</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/provider.ts#L14) `packages/feature-flag/src/provider.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/provider.ts#L14) <code v-pre>packages/feature-flag/src/provider.ts</code>
 
 provider 別の evaluation record id prefix。 実 provider の event stream / analytics で 使われる prefix を再現し、 mock でも同じ format で id を発行する。
 
@@ -168,9 +168,9 @@ provider 別の evaluation record id prefix。 実 provider の event stream / a
 export declare const providerIdPrefix: Record<FlagProvider, string>;
 ```
 
-#### `registerRule`
+#### <code v-pre>registerRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L36) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L36) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 rule を registry に登録するための builder。 client 側の rule Map に push される想定。
 
@@ -180,9 +180,9 @@ export declare function registerRule(rules: Map<string, FlagRule[]>, key: string
 
 ### 型
 
-#### `AttributeMatchRule`
+#### <code v-pre>AttributeMatchRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L16) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L16) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 ```ts
 export interface AttributeMatchRule {
@@ -195,9 +195,9 @@ export interface AttributeMatchRule {
 }
 ```
 
-#### `BatchEvaluateResult`
+#### <code v-pre>BatchEvaluateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/batch.ts#L4) `packages/feature-flag/src/batch.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/batch.ts#L4) <code v-pre>packages/feature-flag/src/batch.ts</code>
 
 ```ts
 export interface BatchEvaluateResult {
@@ -207,9 +207,9 @@ export interface BatchEvaluateResult {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L13) `packages/feature-flag/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L13) <code v-pre>packages/feature-flag/src/circuit-breaker.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -222,9 +222,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L6) `packages/feature-flag/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L6) <code v-pre>packages/feature-flag/src/circuit-breaker.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -235,17 +235,17 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L4) `packages/feature-flag/src/circuit-breaker.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/circuit-breaker.ts#L4) <code v-pre>packages/feature-flag/src/circuit-breaker.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `CreateFlagClientOptions`
+#### <code v-pre>CreateFlagClientOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L44) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L44) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export interface CreateFlagClientOptions {
@@ -256,17 +256,17 @@ export interface CreateFlagClientOptions {
 }
 ```
 
-#### `EvalHookEvent`
+#### <code v-pre>EvalHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L4) `packages/feature-flag/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L4) <code v-pre>packages/feature-flag/src/observability.ts</code>
 
 ```ts
 export type EvalHookEvent = 'before-eval' | 'after-eval' | 'error';
 ```
 
-#### `EvaluateAllFlagsResult`
+#### <code v-pre>EvaluateAllFlagsResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L11) `packages/feature-flag/src/evaluator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L11) <code v-pre>packages/feature-flag/src/evaluator.ts</code>
 
 ```ts
 export interface EvaluateAllFlagsResult {
@@ -275,9 +275,9 @@ export interface EvaluateAllFlagsResult {
 }
 ```
 
-#### `EvaluatedFlagRecord`
+#### <code v-pre>EvaluatedFlagRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L22) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L22) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export interface EvaluatedFlagRecord {
@@ -292,9 +292,9 @@ export interface EvaluatedFlagRecord {
 }
 ```
 
-#### `EvaluateFlagResult`
+#### <code v-pre>EvaluateFlagResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L4) `packages/feature-flag/src/evaluator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/evaluator.ts#L4) <code v-pre>packages/feature-flag/src/evaluator.ts</code>
 
 ```ts
 export interface EvaluateFlagResult {
@@ -305,9 +305,9 @@ export interface EvaluateFlagResult {
 }
 ```
 
-#### `FlagClient`
+#### <code v-pre>FlagClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L33) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L33) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export interface FlagClient {
@@ -322,9 +322,9 @@ export interface FlagClient {
 }
 ```
 
-#### `FlagDefinition`
+#### <code v-pre>FlagDefinition</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L10) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L10) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export interface FlagDefinition {
@@ -335,25 +335,25 @@ export interface FlagDefinition {
 }
 ```
 
-#### `FlagProvider`
+#### <code v-pre>FlagProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L4) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L4) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export type FlagProvider = 'growthbook' | 'launchdarkly' | 'posthog' | 'unleash';
 ```
 
-#### `FlagRule`
+#### <code v-pre>FlagRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L25) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L25) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 ```ts
 export type FlagRule = TargetingRule | PercentageRolloutRule | AttributeMatchRule;
 ```
 
-#### `FlagUser`
+#### <code v-pre>FlagUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L17) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L17) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export interface FlagUser {
@@ -362,33 +362,33 @@ export interface FlagUser {
 }
 ```
 
-#### `FlagValue`
+#### <code v-pre>FlagValue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L6) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L6) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export type FlagValue = boolean | string | number;
 ```
 
-#### `FlagVariant`
+#### <code v-pre>FlagVariant</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L8) `packages/feature-flag/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/client.ts#L8) <code v-pre>packages/feature-flag/src/client.ts</code>
 
 ```ts
 export type FlagVariant = 'boolean' | 'string' | 'number';
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L14) `packages/feature-flag/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L14) <code v-pre>packages/feature-flag/src/observability.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L6) `packages/feature-flag/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L6) <code v-pre>packages/feature-flag/src/observability.ts</code>
 
 ```ts
 export interface HookContext {
@@ -400,9 +400,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L16) `packages/feature-flag/src/observability.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/observability.ts#L16) <code v-pre>packages/feature-flag/src/observability.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -412,9 +412,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L4) `packages/feature-flag/src/idempotency.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/idempotency.ts#L4) <code v-pre>packages/feature-flag/src/idempotency.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -425,9 +425,9 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `PercentageRolloutRule`
+#### <code v-pre>PercentageRolloutRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L9) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L9) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 ```ts
 export interface PercentageRolloutRule {
@@ -438,9 +438,9 @@ export interface PercentageRolloutRule {
 }
 ```
 
-#### `ProviderConfig`
+#### <code v-pre>ProviderConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/provider.ts#L3) `packages/feature-flag/src/provider.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/provider.ts#L3) <code v-pre>packages/feature-flag/src/provider.ts</code>
 
 ```ts
 export interface ProviderConfig {
@@ -451,9 +451,9 @@ export interface ProviderConfig {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/retry.ts#L4) `packages/feature-flag/src/retry.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/retry.ts#L4) <code v-pre>packages/feature-flag/src/retry.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -464,9 +464,9 @@ export interface RetryOptions {
 }
 ```
 
-#### `RuleMatchResult`
+#### <code v-pre>RuleMatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L27) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L27) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 ```ts
 export interface RuleMatchResult {
@@ -476,9 +476,9 @@ export interface RuleMatchResult {
 }
 ```
 
-#### `TargetingRule`
+#### <code v-pre>TargetingRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L3) `packages/feature-flag/src/rules.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/feature-flag/src/rules.ts#L3) <code v-pre>packages/feature-flag/src/rules.ts</code>
 
 ```ts
 export interface TargetingRule {

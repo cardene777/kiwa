@@ -31,8 +31,8 @@ Tower traceはenteredとexitedを返します。handlerを省略した場合は 
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `rate limit ${options.maxRequests}/${options.windowMs}ms exceeded` | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L57) |
-| 'circuit breaker open' | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L72) |
+| <code v-pre>rate limit $&#123;options.maxRequests&#125;/$&#123;options.windowMs&#125;ms exceeded</code> | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L57) |
+| <code v-pre>circuit breaker open</code> | [packages/rust-lib/src/resilience.ts](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L72) |
 
 ## API 契約
 
@@ -40,17 +40,17 @@ Tower traceはenteredとexitedを返します。handlerを省略した場合は 
 
 ### 値
 
-#### `batchOperate`
+#### <code v-pre>batchOperate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L111) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L111) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function batchOperate<TIn, TOut>(items: readonly BatchItem<TIn>[], runner: (item: BatchItem<TIn>) => Promise<TOut>): Promise<BatchResult[]>;
 ```
 
-#### `captureTowerMiddleware`
+#### <code v-pre>captureTowerMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L27) `packages/rust-lib/src/tower.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L27) <code v-pre>packages/rust-lib/src/tower.ts</code>
 
 tower-http middleware layer trace capture。 real tower の Service::call を chain させ、 entered / exited を record して middleware 実行順序を verify できる。
 
@@ -58,9 +58,9 @@ tower-http middleware layer trace capture。 real tower の Service::call を ch
 export declare function captureTowerMiddleware(options: CaptureTowerOptions): Promise<TowerTrace>;
 ```
 
-#### `createRustAppEnv`
+#### <code v-pre>createRustAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L33) `packages/rust-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L33) <code v-pre>packages/rust-lib/src/env.ts</code>
 
 framework 別 route registry を持つ mock env。 real axum / actix / tower / rocket の router 相当を in-process で保持し、 method + path match で handler を dispatch する。
 
@@ -68,9 +68,9 @@ framework 別 route registry を持つ mock env。 real axum / actix / tower / r
 export declare function createRustAppEnv(options?: CreateRustAppEnvOptions): RustAppEnv;
 ```
 
-#### `invokeActixHandler`
+#### <code v-pre>invokeActixHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L25) `packages/rust-lib/src/actix.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L25) <code v-pre>packages/rust-lib/src/actix.ts</code>
 
 actix-web handler mock invoke。 real actix の `async fn handler(...) -&gt; impl Responder` を TypeScript 側で模倣、 extractor 群 (web::Path / web::Json / web::Data) を Record として保持。
 
@@ -78,9 +78,9 @@ actix-web handler mock invoke。 real actix の `async fn handler(...) -&gt; imp
 export declare function invokeActixHandler<TReq = unknown>(options: InvokeActixOptions<TReq>): Promise<InvokeActixResult>;
 ```
 
-#### `invokeAxumHandler`
+#### <code v-pre>invokeAxumHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L25) `packages/rust-lib/src/axum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L25) <code v-pre>packages/rust-lib/src/axum.ts</code>
 
 axum handler mock invoke。 real axum の `async fn handler(...) -&gt; impl IntoResponse` を TypeScript 側で模倣、 body / headers / method / path を snapshot して結果を wrap。
 
@@ -88,9 +88,9 @@ axum handler mock invoke。 real axum の `async fn handler(...) -&gt; impl Into
 export declare function invokeAxumHandler<TReq = unknown>(options: InvokeAxumOptions<TReq>): Promise<InvokeAxumResult>;
 ```
 
-#### `invokeRocketRoute`
+#### <code v-pre>invokeRocketRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L25) `packages/rust-lib/src/rocket.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L25) <code v-pre>packages/rust-lib/src/rocket.ts</code>
 
 rocket route mock invoke。 real rocket の `#[get("/x")] fn route(...) -&gt; impl Responder` を TypeScript 側で模倣、 request guard 群を name 配列で保持して guard 通過を record。
 
@@ -98,49 +98,49 @@ rocket route mock invoke。 real rocket の `#[get("/x")] fn route(...) -&gt; im
 export declare function invokeRocketRoute<TReq = unknown>(options: InvokeRocketOptions<TReq>): Promise<InvokeRocketResult>;
 ```
 
-#### `withCircuitBreaker`
+#### <code v-pre>withCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L64) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L64) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function withCircuitBreaker<T>(fn: () => Promise<T>, options: CircuitBreakerOptions): () => Promise<T>;
 ```
 
-#### `withIdempotencyKey`
+#### <code v-pre>withIdempotencyKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L101) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L101) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function withIdempotencyKey<T>(fn: (key: string) => Promise<T>): (key: string) => Promise<T>;
 ```
 
-#### `withObservability`
+#### <code v-pre>withObservability</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L86) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L86) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function withObservability<T>(name: string, fn: () => Promise<T>, hook: ObservabilityHook): () => Promise<T>;
 ```
 
-#### `withRateLimit`
+#### <code v-pre>withRateLimit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L50) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L50) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function withRateLimit<T>(fn: () => Promise<T>, options: RateLimitOptions): () => Promise<T>;
 ```
 
-#### `withRetry`
+#### <code v-pre>withRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L20) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L20) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): () => Promise<T>;
 ```
 
-#### `withTimeout`
+#### <code v-pre>withTimeout</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L40) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L40) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOptions): () => Promise<T>;
@@ -148,25 +148,25 @@ export declare function withTimeout<T>(fn: () => Promise<T>, options: TimeoutOpt
 
 ### 型
 
-#### `ActixHandler`
+#### <code v-pre>ActixHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L1) `packages/rust-lib/src/actix.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L1) <code v-pre>packages/rust-lib/src/actix.ts</code>
 
 ```ts
 export type ActixHandler<TReq = unknown, TRes = unknown> = (req: TReq) => Promise<TRes> | TRes;
 ```
 
-#### `AxumHandler`
+#### <code v-pre>AxumHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L1) `packages/rust-lib/src/axum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L1) <code v-pre>packages/rust-lib/src/axum.ts</code>
 
 ```ts
 export type AxumHandler<TReq = unknown, TRes = unknown> = (req: TReq) => Promise<TRes> | TRes;
 ```
 
-#### `BatchItem`
+#### <code v-pre>BatchItem</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L17) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L17) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface BatchItem<TIn = unknown> {
@@ -175,9 +175,9 @@ export interface BatchItem<TIn = unknown> {
 }
 ```
 
-#### `BatchResult`
+#### <code v-pre>BatchResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L18) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L18) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface BatchResult {
@@ -190,9 +190,9 @@ export interface BatchResult {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L11) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L11) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -201,9 +201,9 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `InvokeActixOptions`
+#### <code v-pre>InvokeActixOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L3) `packages/rust-lib/src/actix.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L3) <code v-pre>packages/rust-lib/src/actix.ts</code>
 
 ```ts
 export interface InvokeActixOptions<TReq = unknown> {
@@ -215,9 +215,9 @@ export interface InvokeActixOptions<TReq = unknown> {
 }
 ```
 
-#### `InvokeActixResult`
+#### <code v-pre>InvokeActixResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L11) `packages/rust-lib/src/actix.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/actix.ts#L11) <code v-pre>packages/rust-lib/src/actix.ts</code>
 
 ```ts
 export interface InvokeActixResult {
@@ -231,9 +231,9 @@ export interface InvokeActixResult {
 }
 ```
 
-#### `InvokeAxumOptions`
+#### <code v-pre>InvokeAxumOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L3) `packages/rust-lib/src/axum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L3) <code v-pre>packages/rust-lib/src/axum.ts</code>
 
 ```ts
 export interface InvokeAxumOptions<TReq = unknown> {
@@ -245,9 +245,9 @@ export interface InvokeAxumOptions<TReq = unknown> {
 }
 ```
 
-#### `InvokeAxumResult`
+#### <code v-pre>InvokeAxumResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L11) `packages/rust-lib/src/axum.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/axum.ts#L11) <code v-pre>packages/rust-lib/src/axum.ts</code>
 
 ```ts
 export interface InvokeAxumResult {
@@ -261,9 +261,9 @@ export interface InvokeAxumResult {
 }
 ```
 
-#### `InvokeRocketOptions`
+#### <code v-pre>InvokeRocketOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L3) `packages/rust-lib/src/rocket.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L3) <code v-pre>packages/rust-lib/src/rocket.ts</code>
 
 ```ts
 export interface InvokeRocketOptions<TReq = unknown> {
@@ -275,9 +275,9 @@ export interface InvokeRocketOptions<TReq = unknown> {
 }
 ```
 
-#### `InvokeRocketResult`
+#### <code v-pre>InvokeRocketResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L11) `packages/rust-lib/src/rocket.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L11) <code v-pre>packages/rust-lib/src/rocket.ts</code>
 
 ```ts
 export interface InvokeRocketResult {
@@ -291,9 +291,9 @@ export interface InvokeRocketResult {
 }
 ```
 
-#### `ObservabilityHook`
+#### <code v-pre>ObservabilityHook</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L12) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L12) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface ObservabilityHook {
@@ -303,9 +303,9 @@ export interface ObservabilityHook {
 }
 ```
 
-#### `RateLimitOptions`
+#### <code v-pre>RateLimitOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L10) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L10) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface RateLimitOptions {
@@ -314,9 +314,9 @@ export interface RateLimitOptions {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L4) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L4) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -326,17 +326,17 @@ export interface RetryOptions {
 }
 ```
 
-#### `RocketRoute`
+#### <code v-pre>RocketRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L1) `packages/rust-lib/src/rocket.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/rocket.ts#L1) <code v-pre>packages/rust-lib/src/rocket.ts</code>
 
 ```ts
 export type RocketRoute<TReq = unknown, TRes = unknown> = (req: TReq) => Promise<TRes> | TRes;
 ```
 
-#### `RustAppEnv`
+#### <code v-pre>RustAppEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L15) `packages/rust-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L15) <code v-pre>packages/rust-lib/src/env.ts</code>
 
 ```ts
 export interface RustAppEnv {
@@ -349,17 +349,17 @@ export interface RustAppEnv {
 }
 ```
 
-#### `RustFramework`
+#### <code v-pre>RustFramework</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L1) `packages/rust-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L1) <code v-pre>packages/rust-lib/src/env.ts</code>
 
 ```ts
 export type RustFramework = 'axum' | 'actix-web' | 'tower-http' | 'rocket';
 ```
 
-#### `RustResponse`
+#### <code v-pre>RustResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L9) `packages/rust-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L9) <code v-pre>packages/rust-lib/src/env.ts</code>
 
 ```ts
 export interface RustResponse {
@@ -369,9 +369,9 @@ export interface RustResponse {
 }
 ```
 
-#### `RustRoute`
+#### <code v-pre>RustRoute</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L3) `packages/rust-lib/src/env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/env.ts#L3) <code v-pre>packages/rust-lib/src/env.ts</code>
 
 ```ts
 export interface RustRoute {
@@ -381,9 +381,9 @@ export interface RustRoute {
 }
 ```
 
-#### `TimeoutOptions`
+#### <code v-pre>TimeoutOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L9) `packages/rust-lib/src/resilience.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/resilience.ts#L9) <code v-pre>packages/rust-lib/src/resilience.ts</code>
 
 ```ts
 export interface TimeoutOptions {
@@ -391,9 +391,9 @@ export interface TimeoutOptions {
 }
 ```
 
-#### `TowerMiddleware`
+#### <code v-pre>TowerMiddleware</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L15) `packages/rust-lib/src/tower.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L15) <code v-pre>packages/rust-lib/src/tower.ts</code>
 
 ```ts
 export type TowerMiddleware = (req: TowerRequest, next: (req: TowerRequest) => Promise<{
@@ -405,9 +405,9 @@ export type TowerMiddleware = (req: TowerRequest, next: (req: TowerRequest) => P
 }>;
 ```
 
-#### `TowerRequest`
+#### <code v-pre>TowerRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L1) `packages/rust-lib/src/tower.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L1) <code v-pre>packages/rust-lib/src/tower.ts</code>
 
 ```ts
 export interface TowerRequest {
@@ -418,9 +418,9 @@ export interface TowerRequest {
 }
 ```
 
-#### `TowerTrace`
+#### <code v-pre>TowerTrace</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L8) `packages/rust-lib/src/tower.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/rust-lib/src/tower.ts#L8) <code v-pre>packages/rust-lib/src/tower.ts</code>
 
 ```ts
 export interface TowerTrace {

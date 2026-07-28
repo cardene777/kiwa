@@ -23,50 +23,50 @@ Memcached と KeyDB の mode は `stub` と `testcontainers` です。Memcached 
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'set: ttlSeconds must be positive' | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L111) |
-| 'expire: ttlSeconds must be positive' | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L127) |
-| `subscribe: channel "${channel}" is closed` | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L172) |
-| `assertPublished: no message on "${channel}" matched ${describeMatch(expected.match)} within ${timeoutMs}ms` | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L240) |
-| `assertTTL: expected TTL=${expected.seconds}s on "${key}", observed ${observed}` | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L301) |
-| `assertTTL: expected TTL>=${expected.atLeast}s on "${key}", observed ${observed}` | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L308) |
-| `assertTTL: expected TTL<=${expected.atMost}s on "${key}", observed ${observed}` | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L313) |
-| 'assertTTL: at least one of { seconds, atLeast, atMost } must be provided' | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L322) |
-| `setupCacheEnv: cannot ${op} after stop()` | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L78) |
-| `setupKeyDBEnv: unknown mode "${String(mode)}" — expected "stub" or "testcontainers"` | [packages/cache/src/keydb/setup-keydb-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/setup-keydb-env.ts#L23) |
-| 'set: ttlSeconds must be > 0 (omit for no expiry)' | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L148) |
-| 'expire: ttlSeconds must be > 0' | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L164) |
-| `assertTTL: key "${key}" expected TTL ${expected.seconds}s, observed ${observed}s` | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L184) |
-| `assertTTL: key "${key}" expected TTL >= ${expected.atLeast}s, observed ${observed}s` | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L189) |
-| `assertTTL: key "${key}" expected TTL <= ${expected.atMost}s, observed ${observed}s` | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L194) |
-| `assertPublished: no message on "${channel}" matched ${String(expected.match)} within ${timeoutMs}ms` | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L281) |
-| 'setupKeyDBEnv: cannot use env after stop()' | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L45) |
-| `KeyDBEnv: master "${preferred}" is not part of the cluster (known: ${JSON.stringify(cluster)})` | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L51) |
-| 'KeyDBEnv: cluster has no masters — cannot resolve a target master' | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L58) |
-| 'setupKeyDBEnv: mode="testcontainers" requires testcontainers.url (v0.2 scope). Provide the URL of a running KeyDB instance, or use mode="stub" for zero-infra tests.' | [packages/cache/src/keydb/testcontainers-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/testcontainers-keydb.ts#L20) |
-| `setupKeyDBEnv: KeyDB URL "${url}" — port "${portStr}" is not a valid integer` | [packages/cache/src/keydb/testcontainers-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/testcontainers-keydb.ts#L83) |
-| `setupMemcachedEnv: unknown mode "${String(mode)}" — expected "stub" or "testcontainers"` | [packages/cache/src/memcached/setup-memcached-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/setup-memcached-env.ts#L25) |
-| `assertTTL: key "${key}" expected TTL ${expected.seconds}s, observed ${observed}s` | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L193) |
-| `assertTTL: key "${key}" expected TTL >= ${expected.atLeast}s, observed ${observed}s` | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L198) |
-| `assertTTL: key "${key}" expected TTL <= ${expected.atMost}s, observed ${observed}s` | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L203) |
-| 'MemcachedEnv: no servers configured — cannot resolve a server for the key' | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L48) |
-| 'setupMemcachedEnv: cannot use env after stop()' | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L77) |
-| 'set: ttlSeconds must be non-negative (0 = no expiry)' | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L96) |
-| 'setupMemcachedEnv: mode="testcontainers" requires testcontainers.url (v0.2 scope). Provide the URL of a running Memcached instance, or use mode="stub" for zero-infra tests.' | [packages/cache/src/memcached/testcontainers-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/testcontainers-memcached.ts#L26) |
-| `setupMemcachedEnv: Memcached URL "${url}" — port "${portStr}" is not a valid integer` | [packages/cache/src/memcached/testcontainers-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/testcontainers-memcached.ts#L97) |
-| `setupCacheEnv: unknown mode "${String(mode)}" — expected "in-memory" or "testcontainers"` | [packages/cache/src/setup-cache-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/setup-cache-env.ts#L21) |
-| `setupCacheEnv: unknown client "${String(client)}" — expected "ioredis" or "node-redis"` | [packages/cache/src/setup-cache-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/setup-cache-env.ts#L27) |
-| "@kiwa-lab/cache: testcontainers + client='ioredis' requires the 'ioredis' peer dependency. Install with `pnpm add -D ioredis`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L130) |
-| "@kiwa-lab/cache: testcontainers + client='node-redis' requires the 'redis' peer dependency. Install with `pnpm add -D redis`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L202) |
-| `setupCacheEnv: cannot ${op} after stop()` | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L309) |
-| 'set: ttlSeconds must be positive' | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L326) |
-| 'expire: ttlSeconds must be positive' | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L337) |
-| `subscribe: channel "${channel}" is closed` | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L369) |
-| `assertPublished: no message on "${channel}" matched ${describeMatch(expected.match)} within ${timeoutMs}ms` | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L418) |
-| `assertTTL: expected TTL=${expected.seconds}s on "${key}", observed ${observed}` | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L469) |
-| `assertTTL: expected TTL>=${expected.atLeast}s on "${key}", observed ${observed}` | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L476) |
-| `assertTTL: expected TTL<=${expected.atMost}s on "${key}", observed ${observed}` | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L481) |
-| 'assertTTL: at least one of { seconds, atLeast, atMost } must be provided' | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L490) |
-| "@kiwa-lab/cache: testcontainers mode requires the 'testcontainers' peer dependency. Install with `pnpm add -D testcontainers`. Original error: " + (caught instanceof Error ? caught.message : String(caught)) | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L89) |
+| <code v-pre>set: ttlSeconds must be positive</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L111) |
+| <code v-pre>expire: ttlSeconds must be positive</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L127) |
+| <code v-pre>subscribe: channel "$&#123;channel&#125;" is closed</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L172) |
+| <code v-pre>assertPublished: no message on "$&#123;channel&#125;" matched $&#123;describeMatch(expected.match)&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L240) |
+| <code v-pre>assertTTL: expected TTL=$&#123;expected.seconds&#125;s on "$&#123;key&#125;", observed $&#123;observed&#125;</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L301) |
+| <code v-pre>assertTTL: expected TTL&gt;=$&#123;expected.atLeast&#125;s on "$&#123;key&#125;", observed $&#123;observed&#125;</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L308) |
+| <code v-pre>assertTTL: expected TTL&lt;=$&#123;expected.atMost&#125;s on "$&#123;key&#125;", observed $&#123;observed&#125;</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L313) |
+| <code v-pre>assertTTL: at least one of &#123; seconds, atLeast, atMost &#125; must be provided</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L322) |
+| <code v-pre>setupCacheEnv: cannot $&#123;op&#125; after stop()</code> | [packages/cache/src/in-memory-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L78) |
+| <code v-pre>setupKeyDBEnv: unknown mode "$&#123;String(mode)&#125;" — expected "stub" or "testcontainers"</code> | [packages/cache/src/keydb/setup-keydb-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/setup-keydb-env.ts#L23) |
+| <code v-pre>set: ttlSeconds must be &gt; 0 (omit for no expiry)</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L148) |
+| <code v-pre>expire: ttlSeconds must be &gt; 0</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L164) |
+| <code v-pre>assertTTL: key "$&#123;key&#125;" expected TTL $&#123;expected.seconds&#125;s, observed $&#123;observed&#125;s</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L184) |
+| <code v-pre>assertTTL: key "$&#123;key&#125;" expected TTL &gt;= $&#123;expected.atLeast&#125;s, observed $&#123;observed&#125;s</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L189) |
+| <code v-pre>assertTTL: key "$&#123;key&#125;" expected TTL &lt;= $&#123;expected.atMost&#125;s, observed $&#123;observed&#125;s</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L194) |
+| <code v-pre>assertPublished: no message on "$&#123;channel&#125;" matched $&#123;String(expected.match)&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L281) |
+| <code v-pre>setupKeyDBEnv: cannot use env after stop()</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L45) |
+| <code v-pre>KeyDBEnv: master "$&#123;preferred&#125;" is not part of the cluster (known: $&#123;JSON.stringify(cluster)&#125;)</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L51) |
+| <code v-pre>KeyDBEnv: cluster has no masters — cannot resolve a target master</code> | [packages/cache/src/keydb/stub-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L58) |
+| <code v-pre>setupKeyDBEnv: mode="testcontainers" requires testcontainers.url (v0.2 scope). Provide the URL of a running KeyDB instance, or use mode="stub" for zero-infra tests.</code> | [packages/cache/src/keydb/testcontainers-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/testcontainers-keydb.ts#L20) |
+| <code v-pre>setupKeyDBEnv: KeyDB URL "$&#123;url&#125;" — port "$&#123;portStr&#125;" is not a valid integer</code> | [packages/cache/src/keydb/testcontainers-keydb.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/testcontainers-keydb.ts#L83) |
+| <code v-pre>setupMemcachedEnv: unknown mode "$&#123;String(mode)&#125;" — expected "stub" or "testcontainers"</code> | [packages/cache/src/memcached/setup-memcached-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/setup-memcached-env.ts#L25) |
+| <code v-pre>assertTTL: key "$&#123;key&#125;" expected TTL $&#123;expected.seconds&#125;s, observed $&#123;observed&#125;s</code> | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L193) |
+| <code v-pre>assertTTL: key "$&#123;key&#125;" expected TTL &gt;= $&#123;expected.atLeast&#125;s, observed $&#123;observed&#125;s</code> | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L198) |
+| <code v-pre>assertTTL: key "$&#123;key&#125;" expected TTL &lt;= $&#123;expected.atMost&#125;s, observed $&#123;observed&#125;s</code> | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L203) |
+| <code v-pre>MemcachedEnv: no servers configured — cannot resolve a server for the key</code> | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L48) |
+| <code v-pre>setupMemcachedEnv: cannot use env after stop()</code> | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L77) |
+| <code v-pre>set: ttlSeconds must be non-negative (0 = no expiry)</code> | [packages/cache/src/memcached/stub-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L96) |
+| <code v-pre>setupMemcachedEnv: mode="testcontainers" requires testcontainers.url (v0.2 scope). Provide the URL of a running Memcached instance, or use mode="stub" for zero-infra tests.</code> | [packages/cache/src/memcached/testcontainers-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/testcontainers-memcached.ts#L26) |
+| <code v-pre>setupMemcachedEnv: Memcached URL "$&#123;url&#125;" — port "$&#123;portStr&#125;" is not a valid integer</code> | [packages/cache/src/memcached/testcontainers-memcached.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/testcontainers-memcached.ts#L97) |
+| <code v-pre>setupCacheEnv: unknown mode "$&#123;String(mode)&#125;" — expected "in-memory" or "testcontainers"</code> | [packages/cache/src/setup-cache-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/setup-cache-env.ts#L21) |
+| <code v-pre>setupCacheEnv: unknown client "$&#123;String(client)&#125;" — expected "ioredis" or "node-redis"</code> | [packages/cache/src/setup-cache-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/setup-cache-env.ts#L27) |
+| <code v-pre>"@kiwa-lab/cache: testcontainers + client='ioredis' requires the 'ioredis' peer dependency. Install with &#96;pnpm add -D ioredis&#96;. Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L130) |
+| <code v-pre>"@kiwa-lab/cache: testcontainers + client='node-redis' requires the 'redis' peer dependency. Install with &#96;pnpm add -D redis&#96;. Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L202) |
+| <code v-pre>setupCacheEnv: cannot $&#123;op&#125; after stop()</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L309) |
+| <code v-pre>set: ttlSeconds must be positive</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L326) |
+| <code v-pre>expire: ttlSeconds must be positive</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L337) |
+| <code v-pre>subscribe: channel "$&#123;channel&#125;" is closed</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L369) |
+| <code v-pre>assertPublished: no message on "$&#123;channel&#125;" matched $&#123;describeMatch(expected.match)&#125; within $&#123;timeoutMs&#125;ms</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L418) |
+| <code v-pre>assertTTL: expected TTL=$&#123;expected.seconds&#125;s on "$&#123;key&#125;", observed $&#123;observed&#125;</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L469) |
+| <code v-pre>assertTTL: expected TTL&gt;=$&#123;expected.atLeast&#125;s on "$&#123;key&#125;", observed $&#123;observed&#125;</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L476) |
+| <code v-pre>assertTTL: expected TTL&lt;=$&#123;expected.atMost&#125;s on "$&#123;key&#125;", observed $&#123;observed&#125;</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L481) |
+| <code v-pre>assertTTL: at least one of &#123; seconds, atLeast, atMost &#125; must be provided</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L490) |
+| <code v-pre>"@kiwa-lab/cache: testcontainers mode requires the 'testcontainers' peer dependency. Install with &#96;pnpm add -D testcontainers&#96;. Original error: " + (caught instanceof Error ? caught.message : String(caught))</code> | [packages/cache/src/testcontainers-cache.ts](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L89) |
 
 ## API 契約
 
@@ -74,9 +74,9 @@ Memcached と KeyDB の mode は `stub` と `testcontainers` です。Memcached 
 
 ### 値
 
-#### `createInMemoryCacheEnv`
+#### <code v-pre>createInMemoryCacheEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L34) `packages/cache/src/in-memory-cache.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/in-memory-cache.ts#L34) <code v-pre>packages/cache/src/in-memory-cache.ts</code>
 
 Build an in-memory (offline, in-process) Redis-shaped cache environment. Suitable for unit tests that need to exercise the get / set / delete / TTL / Pub/Sub loop without spinning up a Redis container.
 
@@ -84,9 +84,9 @@ Build an in-memory (offline, in-process) Redis-shaped cache environment. Suitabl
 export declare function createInMemoryCacheEnv(opts: SetupCacheEnvOptions): CacheTestEnv<'mock'>;
 ```
 
-#### `createStubKeyDBEnv`
+#### <code v-pre>createStubKeyDBEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L29) `packages/cache/src/keydb/stub-keydb.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/stub-keydb.ts#L29) <code v-pre>packages/cache/src/keydb/stub-keydb.ts</code>
 
 Build an in-process stub of KeyDB covering the Redis-compatible surface (get / set / delete / TTL / Pub/Sub) plus KeyDB-specific multi-master replication — writes on one master replicate to every other master after an optional simulated lag.
 
@@ -94,9 +94,9 @@ Build an in-process stub of KeyDB covering the Redis-compatible surface (get / s
 export declare function createStubKeyDBEnv(opts: SetupKeyDBEnvOptions): KeyDBTestEnv<'mock'>;
 ```
 
-#### `createStubMemcachedEnv`
+#### <code v-pre>createStubMemcachedEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L66) `packages/cache/src/memcached/stub-memcached.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/stub-memcached.ts#L66) <code v-pre>packages/cache/src/memcached/stub-memcached.ts</code>
 
 Build an in-process stub of Memcached covering the 8 core commands (get / set / delete / add / replace / increment / decrement / flush) + TTL + multi-server consistent hashing — deterministically, without spinning up a container.
 
@@ -104,9 +104,9 @@ Build an in-process stub of Memcached covering the 8 core commands (get / set / 
 export declare function createStubMemcachedEnv(opts: SetupMemcachedEnvOptions): MemcachedTestEnv<'mock'>;
 ```
 
-#### `createTestcontainersCacheEnv`
+#### <code v-pre>createTestcontainersCacheEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L270) `packages/cache/src/testcontainers-cache.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/testcontainers-cache.ts#L270) <code v-pre>packages/cache/src/testcontainers-cache.ts</code>
 
 Build a testcontainers-backed Redis cache environment. Requires Docker; the chosen real client (`ioredis` or `redis`) does the heavy lifting so semantic drift from prod is limited to whatever that client abstracts.
 
@@ -114,9 +114,9 @@ Build a testcontainers-backed Redis cache environment. Requires Docker; the chos
 export declare function createTestcontainersCacheEnv(opts: SetupCacheEnvOptions): Promise<CacheTestEnv<'live'>>;
 ```
 
-#### `createTestcontainersKeyDBEnv`
+#### <code v-pre>createTestcontainersKeyDBEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/testcontainers-keydb.ts#L15) `packages/cache/src/keydb/testcontainers-keydb.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/testcontainers-keydb.ts#L15) <code v-pre>packages/cache/src/keydb/testcontainers-keydb.ts</code>
 
 Build a testcontainers-backed KeyDB env. When `opts.testcontainers?.url` is provided the helper connects directly to that URL and verifies TCP responsiveness. Otherwise the helper would spawn a real KeyDB container — kept behind an explicit `url` opt-in for the v0.2 scope so callers wanting fully-managed containers can layer their own testcontainers wrapper. KeyDB is Redis-compatible on the wire so callers can point their own `ioredis` / `redis` client at `env.keydbUrl`; assertion helpers stay deterministic by reusing the stub's replication simulation.
 
@@ -124,9 +124,9 @@ Build a testcontainers-backed KeyDB env. When `opts.testcontainers?.url` is prov
 export declare function createTestcontainersKeyDBEnv(opts: SetupKeyDBEnvOptions): Promise<KeyDBTestEnv<'live'>>;
 ```
 
-#### `createTestcontainersMemcachedEnv`
+#### <code v-pre>createTestcontainersMemcachedEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/testcontainers-memcached.ts#L21) `packages/cache/src/memcached/testcontainers-memcached.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/testcontainers-memcached.ts#L21) <code v-pre>packages/cache/src/memcached/testcontainers-memcached.ts</code>
 
 Build a testcontainers-backed Memcached env. When `opts.testcontainers?.url` is provided the helper connects directly to that URL and verifies responsiveness. Otherwise the helper would spawn a real container — kept behind an explicit `url` opt-in for the v0.2 scope so callers wanting fully-managed containers can layer their own testcontainers wrapper on top. The wire path shares the stub simulation for entry state (so assertion helpers stay deterministic) while surfacing the Memcached endpoint URL on the env for callers that want to point their own `memjs` / `memcached` client at it.
 
@@ -134,11 +134,11 @@ Build a testcontainers-backed Memcached env. When `opts.testcontainers?.url` is 
 export declare function createTestcontainersMemcachedEnv(opts: SetupMemcachedEnvOptions): Promise<MemcachedTestEnv<'live'>>;
 ```
 
-#### `dispatchCacheEvent`
+#### <code v-pre>dispatchCacheEvent</code>
 
 公開 entry point から解決しています。
 
-`dispatchEvent` を `dispatchCacheEvent` として公開しています。
+<code v-pre>dispatchEvent</code> を <code v-pre>dispatchCacheEvent</code> として公開しています。
 
 ```ts
 export {
@@ -148,9 +148,9 @@ export {
 } from './cache-lifecycle-orchestrator.js';
 ```
 
-#### `setupCacheEnv`
+#### <code v-pre>setupCacheEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/setup-cache-env.ts#L16) `packages/cache/src/setup-cache-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/setup-cache-env.ts#L16) <code v-pre>packages/cache/src/setup-cache-env.ts</code>
 
 Factory for Redis cache test environments. `mode: 'in-memory'` (default) returns a fast, in-process Redis-shaped fake — no Docker, no peer dependencies required beyond the fixture package itself. Use it for the fast unit-test lane. `mode: 'testcontainers'` boots a real Redis under testcontainers and wires up either `ioredis` or `redis` (node-redis v4) as the client. Use it for the integration lane that needs prod-shape parity.
 
@@ -158,9 +158,9 @@ Factory for Redis cache test environments. `mode: 'in-memory'` (default) returns
 export declare function setupCacheEnv(opts?: SetupCacheEnvOptions): Promise<CacheTestEnv>;
 ```
 
-#### `setupKeyDBEnv`
+#### <code v-pre>setupKeyDBEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/setup-keydb-env.ts#L18) `packages/cache/src/keydb/setup-keydb-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/setup-keydb-env.ts#L18) <code v-pre>packages/cache/src/keydb/setup-keydb-env.ts</code>
 
 Factory for KeyDB test environments. `mode: 'stub'` (default) returns a fast, in-process fake — no docker, no network. Deterministic enough to exercise Redis-compatible GET / SET / DELETE / TTL / Pub/Sub plus KeyDB-specific multi-master replication semantics. `mode: 'testcontainers'` connects to a running KeyDB endpoint (URL provided via `testcontainers.url`) and verifies TCP responsiveness. The env still drives entry state in-process (v0.2 scope) so assertions stay deterministic across backends.
 
@@ -168,9 +168,9 @@ Factory for KeyDB test environments. `mode: 'stub'` (default) returns a fast, in
 export declare function setupKeyDBEnv(opts?: SetupKeyDBEnvOptions): Promise<KeyDBTestEnv>;
 ```
 
-#### `setupMemcachedEnv`
+#### <code v-pre>setupMemcachedEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/setup-memcached-env.ts#L20) `packages/cache/src/memcached/setup-memcached-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/setup-memcached-env.ts#L20) <code v-pre>packages/cache/src/memcached/setup-memcached-env.ts</code>
 
 Factory for Memcached test environments. `mode: 'stub'` (default) returns a fast, in-process fake — no docker, no network. Deterministic enough to exercise the 8 core Memcached commands (get / set / delete / add / replace / increment / decrement / flush) plus TTL and multi-server consistent hashing. `mode: 'testcontainers'` connects to a running Memcached endpoint (URL provided via `testcontainers.url`) and verifies TCP responsiveness before returning the env. The env still drives entry state in-process (v0.2 scope) so assertions stay deterministic across backends; callers that want to exercise the real wire can point their own `memjs` / `memcached` client at the exposed `env.memcachedUrl`.
 
@@ -178,9 +178,9 @@ Factory for Memcached test environments. `mode: 'stub'` (default) returns a fast
 export declare function setupMemcachedEnv(opts?: SetupMemcachedEnvOptions): Promise<MemcachedTestEnv>;
 ```
 
-#### `startCache`
+#### <code v-pre>startCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L35) `packages/cache/src/semantics/cache-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L35) <code v-pre>packages/cache/src/semantics/cache-lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function startCache(input: {
@@ -188,9 +188,9 @@ export declare function startCache(input: {
 }): CacheSession;
 ```
 
-#### `summarizeCache`
+#### <code v-pre>summarizeCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L146) `packages/cache/src/semantics/cache-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L146) <code v-pre>packages/cache/src/semantics/cache-lifecycle-orchestrator.ts</code>
 
 ```ts
 export declare function summarizeCache(session: CacheSession): CacheSummary;
@@ -198,9 +198,9 @@ export declare function summarizeCache(session: CacheSession): CacheSummary;
 
 ### 型
 
-#### `AssertTTLExpected`
+#### <code v-pre>AssertTTLExpected</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L73) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L73) <code v-pre>packages/cache/src/types.ts</code>
 
 Assertion contract for TTL / expiry checks.
 
@@ -217,9 +217,9 @@ export interface AssertTTLExpected {
 }
 ```
 
-#### `CacheClient`
+#### <code v-pre>CacheClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L31) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L31) <code v-pre>packages/cache/src/types.ts</code>
 
 Wire-shape client selector for `testcontainers` mode. Mirrors the two dominant Redis client libraries so consumers can align the fixture with whichever they already depend on in prod. - `ioredis`: the callback / Promise-style Redis client (peer `ioredis@^5`). - `node-redis`: the official Redis client (peer `redis@^4`, v4 unified API).
 
@@ -227,17 +227,17 @@ Wire-shape client selector for `testcontainers` mode. Mirrors the two dominant R
 export type CacheClient = 'ioredis' | 'node-redis';
 ```
 
-#### `CacheEvent`
+#### <code v-pre>CacheEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L14) `packages/cache/src/semantics/cache-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L14) <code v-pre>packages/cache/src/semantics/cache-lifecycle-orchestrator.ts</code>
 
 ```ts
 export type CacheEvent = 'write-committed' | 'read-hit' | 'read-miss' | 'ttl-warning' | 'ttl-expired' | 'invalidate-requested' | 'evict-requested' | 'timeout';
 ```
 
-#### `CacheMode`
+#### <code v-pre>CacheMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L13) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L13) <code v-pre>packages/cache/src/types.ts</code>
 
 Redis backend selection. - `testcontainers`: start a real Redis in a testcontainers-managed Docker container. Deterministic + prod-shape parity. Requires Docker + the `testcontainers` + one of `ioredis` / `redis` peer dependencies. - `in-memory`: run against an in-process Redis-compatible fake tied to the test process only. Fast (no container startup), fully offline, and sufficient for the majority of key/value + TTL + Pub/Sub semantics. Redis- side data structures (lists / sorted sets / streams) are out of v0.1 scope.
 
@@ -245,9 +245,9 @@ Redis backend selection. - `testcontainers`: start a real Redis in a testcontain
 export type CacheMode = 'testcontainers' | 'in-memory';
 ```
 
-#### `CacheSession`
+#### <code v-pre>CacheSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L24) `packages/cache/src/semantics/cache-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L24) <code v-pre>packages/cache/src/semantics/cache-lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface CacheSession {
@@ -262,9 +262,9 @@ export interface CacheSession {
 }
 ```
 
-#### `CacheState`
+#### <code v-pre>CacheState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L7) `packages/cache/src/semantics/cache-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L7) <code v-pre>packages/cache/src/semantics/cache-lifecycle-orchestrator.ts</code>
 
 v0.6 cache-lifecycle-orchestrator = 3 provider (Redis + Memcached + KeyDB) の 継続合成 layer。 depth-5 pattern 11 例目 candidate、 backend systems layer 第 3 例、 systematic pattern 53 度目。
 
@@ -272,9 +272,9 @@ v0.6 cache-lifecycle-orchestrator = 3 provider (Redis + Memcached + KeyDB) の �
 export type CacheState = 'filling' | 'hot' | 'expiring' | 'stale' | 'evicted';
 ```
 
-#### `CacheSubscription`
+#### <code v-pre>CacheSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L61) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L61) <code v-pre>packages/cache/src/types.ts</code>
 
 Return type of {@link CacheTestEnv.subscribe}. Behaves like an async iterable of {@link PubSubMessage} while also exposing a `.close()` method for deterministic cleanup inside `afterEach`.
 
@@ -293,9 +293,9 @@ export interface CacheSubscription {
 }
 ```
 
-#### `CacheSummary`
+#### <code v-pre>CacheSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L133) `packages/cache/src/semantics/cache-lifecycle-orchestrator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/semantics/cache-lifecycle-orchestrator.ts#L133) <code v-pre>packages/cache/src/semantics/cache-lifecycle-orchestrator.ts</code>
 
 ```ts
 export interface CacheSummary {
@@ -312,9 +312,9 @@ export interface CacheSummary {
 }
 ```
 
-#### `CacheTestEnv`
+#### <code v-pre>CacheTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L134) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L134) <code v-pre>packages/cache/src/types.ts</code>
 
 Return type of {@link setupCacheEnv }. Reads much like a tiny Redis facade — consumers get / set / delete keys, then use the assertion helpers to observe TTL and Pub/Sub outcomes without touching Redis client APIs directly.
 
@@ -373,9 +373,9 @@ export interface CacheTestEnv<TMode extends TestMode = TestMode> extends TestEnv
 }
 ```
 
-#### `KeyDBAssertTTLExpected`
+#### <code v-pre>KeyDBAssertTTLExpected</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L75) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L75) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Assertion contract for TTL / expiry checks.
 
@@ -387,9 +387,9 @@ export interface KeyDBAssertTTLExpected {
 }
 ```
 
-#### `KeyDBClient`
+#### <code v-pre>KeyDBClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L26) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L26) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Wire-shape client selector. KeyDB is Redis-compatible so both dominant Redis clients (`ioredis` + `redis` / node-redis v4) work with the same URL.
 
@@ -397,9 +397,9 @@ Wire-shape client selector. KeyDB is Redis-compatible so both dominant Redis cli
 export type KeyDBClient = 'ioredis' | 'node-redis';
 ```
 
-#### `KeyDBEntrySnapshot`
+#### <code v-pre>KeyDBEntrySnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L41) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L41) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Snapshot of a persisted KeyDB entry. Values are stored as raw strings — the fixture never JSON-parses on the consumer's behalf so binary-shaped payloads survive the roundtrip.
 
@@ -414,9 +414,9 @@ export interface KeyDBEntrySnapshot {
 }
 ```
 
-#### `KeyDBMode`
+#### <code v-pre>KeyDBMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L12) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L12) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 KeyDB backend selection. - `stub`: in-process, deterministic KeyDB protocol emulation (Redis-compatible API surface). No docker, no network. Suitable for unit tests that need to exercise the multi-master replication + Pub/Sub semantics without spinning up a container. - `testcontainers`: connect to a running KeyDB endpoint (Redis-compatible wire, so ioredis / redis clients work unchanged).
 
@@ -424,9 +424,9 @@ KeyDB backend selection. - `stub`: in-process, deterministic KeyDB protocol emul
 export type KeyDBMode = 'stub' | 'testcontainers';
 ```
 
-#### `KeyDBPubSubMessage`
+#### <code v-pre>KeyDBPubSubMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L53) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L53) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Snapshot of a captured Pub/Sub delivery.
 
@@ -441,9 +441,9 @@ export interface KeyDBPubSubMessage {
 }
 ```
 
-#### `KeyDBSubscription`
+#### <code v-pre>KeyDBSubscription</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L67) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L67) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Return type of {@link KeyDBTestEnv.subscribe}. Behaves like an async iterable of {@link KeyDBPubSubMessage} while also exposing a `.close()` method for deterministic cleanup.
 
@@ -458,9 +458,9 @@ export interface KeyDBSubscription {
 }
 ```
 
-#### `KeyDBTestEnv`
+#### <code v-pre>KeyDBTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L124) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L124) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Return type of {@link setupKeyDBEnv }. Reads much like a mini KeyDB facade — consumers get / set / delete keys, publish / subscribe, and use the assertion helpers to observe TTL / Pub/Sub outcomes without touching a real client.
 
@@ -523,9 +523,9 @@ export interface KeyDBTestEnv<TMode extends TestMode = TestMode> extends TestEnv
 }
 ```
 
-#### `MemcachedAssertTTLExpected`
+#### <code v-pre>MemcachedAssertTTLExpected</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L93) `packages/cache/src/memcached/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L93) <code v-pre>packages/cache/src/memcached/types.ts</code>
 
 Assertion contract for TTL / expiry checks.
 
@@ -539,9 +539,9 @@ export interface MemcachedAssertTTLExpected {
 }
 ```
 
-#### `MemcachedClient`
+#### <code v-pre>MemcachedClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L29) `packages/cache/src/memcached/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L29) <code v-pre>packages/cache/src/memcached/types.ts</code>
 
 Wire-shape client selector. Mirrors the two dominant Memcached client libraries so consumers can align the fixture with whichever they already depend on in prod. - `memjs`: the modern Node.js Memcached client (peer `memjs@^1`). - `memcached`: the classic Node.js Memcached client (peer `memcached@^2`).
 
@@ -549,9 +549,9 @@ Wire-shape client selector. Mirrors the two dominant Memcached client libraries 
 export type MemcachedClient = 'memjs' | 'memcached';
 ```
 
-#### `MemcachedEntrySnapshot`
+#### <code v-pre>MemcachedEntrySnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L44) `packages/cache/src/memcached/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L44) <code v-pre>packages/cache/src/memcached/types.ts</code>
 
 Snapshot of a stored Memcached entry. Values are stored as raw strings — the fixture never JSON-parses on the consumer's behalf so binary-shaped payloads survive the roundtrip.
 
@@ -566,9 +566,9 @@ export interface MemcachedEntrySnapshot {
 }
 ```
 
-#### `MemcachedMode`
+#### <code v-pre>MemcachedMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L12) `packages/cache/src/memcached/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L12) <code v-pre>packages/cache/src/memcached/types.ts</code>
 
 Memcached backend selection. - `stub`: in-process, deterministic Memcached protocol emulation. No docker, no network. Suitable for unit tests that need to exercise the 8 core Memcached commands + TTL + multi-server consistent hashing without spinning up a container. - `testcontainers`: start a real Memcached in a testcontainers-managed Docker container. Deterministic + prod-shape parity. Requires Docker.
 
@@ -576,9 +576,9 @@ Memcached backend selection. - `stub`: in-process, deterministic Memcached proto
 export type MemcachedMode = 'stub' | 'testcontainers';
 ```
 
-#### `MemcachedTestEnv`
+#### <code v-pre>MemcachedTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L107) `packages/cache/src/memcached/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L107) <code v-pre>packages/cache/src/memcached/types.ts</code>
 
 Return type of {@link setupMemcachedEnv }. Reads much like a tiny Memcached facade — consumers exercise the 8 core commands (get / set / delete / add / replace / increment / decrement / flush) + TTL + multi-server consistent hashing without touching a real client.
 
@@ -651,9 +651,9 @@ export interface MemcachedTestEnv<TMode extends TestMode = TestMode> extends Tes
 }
 ```
 
-#### `PubSubMessage`
+#### <code v-pre>PubSubMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L49) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L49) <code v-pre>packages/cache/src/types.ts</code>
 
 Snapshot of a captured Pub/Sub delivery. Emitted to subscribers of a channel via {@link CacheTestEnv.subscribe}. Values are stored as raw strings — the fixture never JSON-parses on the consumer's behalf so binary-shaped payloads survive the roundtrip.
 
@@ -666,9 +666,9 @@ export interface PubSubMessage {
 }
 ```
 
-#### `SetupCacheEnvOptions`
+#### <code v-pre>SetupCacheEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L88) `packages/cache/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/types.ts#L88) <code v-pre>packages/cache/src/types.ts</code>
 
 Common options for the `setupCacheEnv` factory. `mode` chooses the backend; `redis` is a testcontainers-only override.
 
@@ -711,9 +711,9 @@ export interface SetupCacheEnvOptions {
 }
 ```
 
-#### `SetupKeyDBEnvOptions`
+#### <code v-pre>SetupKeyDBEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L82) `packages/cache/src/keydb/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/keydb/types.ts#L82) <code v-pre>packages/cache/src/keydb/types.ts</code>
 
 Common options for the `setupKeyDBEnv` factory.
 
@@ -751,9 +751,9 @@ export interface SetupKeyDBEnvOptions {
 }
 ```
 
-#### `SetupMemcachedEnvOptions`
+#### <code v-pre>SetupMemcachedEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L54) `packages/cache/src/memcached/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cache/src/memcached/types.ts#L54) <code v-pre>packages/cache/src/memcached/types.ts</code>
 
 Common options for the `setupMemcachedEnv` factory.
 

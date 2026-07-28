@@ -27,27 +27,27 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `mutationFromCounts: killed (${input.killed}) exceeds mutations (${input.mutations})` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L115) |
-| `costFromSamples: invalid sample ${s} (must be non-negative number)` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L140) |
-| `tokenFromSamples: promptTokens.length (${input.promptTokens.length}) !== completionTokens.length (${input.completionTokens.length})` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L175) |
-| 'accuracyFromSamples: method is required' | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L204) |
-| `accuracyFromSamples: invalid sample ${s} (must be number in [0, 1])` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L210) |
-| `a11yFromBaseline: invalid ${field} count ${raw} (must be non-negative finite number)` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L248) |
-| 'assembleReport: provider is required' | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L285) |
-| 'assembleReport: version is required' | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L286) |
-| `normalizePercentage: invalid input ${pct}` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L308) |
-| `${label}: expected finite number, got ${v}` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L317) |
-| `${label}: expected non-negative integer, got ${v}` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L320) |
-| `percentilesFromSamples: invalid sample ${s} (must be non-negative number)` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L339) |
-| `nearestRank: invalid percentile ${percentile}` | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L353) |
-| `diffReports: provider mismatch — ${previous.provider} vs ${current.provider}` | [packages/quality-metrics/src/emit.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L157) |
-| `resolveA11yTier: unknown a11y tier label "${label}" (expected Core / Framework / SaaS / Test type)` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L124) |
-| `assertA11yTier: critical impact ${critical} > ${threshold.critical} — "${input.tier}" tier does not allow critical > 0 (SSOT: docs/quality/a11y-thresholds.md)` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L152) |
-| `assertA11yTier: serious impact ${serious} > ${threshold.serious} — "${input.tier}" tier ceiling breached` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L157) |
-| `assertA11yTier: moderate impact ${moderate} > ${threshold.moderate} — "${input.tier}" tier ceiling breached` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L162) |
-| `resolveMutationTier: unknown mutation tier label "${label}" (expected Core / Framework / SaaS / Test type)` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L50) |
-| `assertMutationTier: no mutation signal (0 mutations) for tier "${input.tier}" — empty suite would slip past a 0/0 = 0% gate` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L71) |
-| `assertMutationTier: mutation kill rate ${actual.toFixed(2)}% below "${input.tier}" tier threshold ${threshold}%` | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L77) |
+| <code v-pre>mutationFromCounts: killed ($&#123;input.killed&#125;) exceeds mutations ($&#123;input.mutations&#125;)</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L115) |
+| <code v-pre>costFromSamples: invalid sample $&#123;s&#125; (must be non-negative number)</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L140) |
+| <code v-pre>tokenFromSamples: promptTokens.length ($&#123;input.promptTokens.length&#125;) !== completionTokens.length ($&#123;input.completionTokens.length&#125;)</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L175) |
+| <code v-pre>accuracyFromSamples: method is required</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L204) |
+| <code v-pre>accuracyFromSamples: invalid sample $&#123;s&#125; (must be number in &#91;0, 1&#93;)</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L210) |
+| <code v-pre>a11yFromBaseline: invalid $&#123;field&#125; count $&#123;raw&#125; (must be non-negative finite number)</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L248) |
+| <code v-pre>assembleReport: provider is required</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L285) |
+| <code v-pre>assembleReport: version is required</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L286) |
+| <code v-pre>normalizePercentage: invalid input $&#123;pct&#125;</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L308) |
+| <code v-pre>$&#123;label&#125;: expected finite number, got $&#123;v&#125;</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L317) |
+| <code v-pre>$&#123;label&#125;: expected non-negative integer, got $&#123;v&#125;</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L320) |
+| <code v-pre>percentilesFromSamples: invalid sample $&#123;s&#125; (must be non-negative number)</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L339) |
+| <code v-pre>nearestRank: invalid percentile $&#123;percentile&#125;</code> | [packages/quality-metrics/src/collect.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L353) |
+| <code v-pre>diffReports: provider mismatch — $&#123;previous.provider&#125; vs $&#123;current.provider&#125;</code> | [packages/quality-metrics/src/emit.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L157) |
+| <code v-pre>resolveA11yTier: unknown a11y tier label "$&#123;label&#125;" (expected Core / Framework / SaaS / Test type)</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L124) |
+| <code v-pre>assertA11yTier: critical impact $&#123;critical&#125; &gt; $&#123;threshold.critical&#125; — "$&#123;input.tier&#125;" tier does not allow critical &gt; 0 (SSOT: docs/quality/a11y-thresholds.md)</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L152) |
+| <code v-pre>assertA11yTier: serious impact $&#123;serious&#125; &gt; $&#123;threshold.serious&#125; — "$&#123;input.tier&#125;" tier ceiling breached</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L157) |
+| <code v-pre>assertA11yTier: moderate impact $&#123;moderate&#125; &gt; $&#123;threshold.moderate&#125; — "$&#123;input.tier&#125;" tier ceiling breached</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L162) |
+| <code v-pre>resolveMutationTier: unknown mutation tier label "$&#123;label&#125;" (expected Core / Framework / SaaS / Test type)</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L50) |
+| <code v-pre>assertMutationTier: no mutation signal (0 mutations) for tier "$&#123;input.tier&#125;" — empty suite would slip past a 0/0 = 0% gate</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L71) |
+| <code v-pre>assertMutationTier: mutation kill rate $&#123;actual.toFixed(2)&#125;% below "$&#123;input.tier&#125;" tier threshold $&#123;threshold&#125;%</code> | [packages/quality-metrics/src/gate.ts](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L77) |
 
 ## API 契約
 
@@ -55,9 +55,9 @@
 
 ### 値
 
-#### `a11yFromBaseline`
+#### <code v-pre>a11yFromBaseline</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L236) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L236) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build an {@link A11yMetric} from a `.a11y-baseline/{pkg}.json` `totals` block (v1.30-4)。 baseline JSON は `{ package, generatedAt, layers, totals: { critical, serious, moderate, minor }, ok }` shape、 このヘルパは totals を A11yMetric 型に coerce する pure function。 層が全部 layers-absent (Core / Framework の no-DOM adapter) の baseline は 全 impact が 0 になる、 その場合も metric は shape 通り返す (release gate が 0/0/0 を pass 判定する SSOT)。 部分欠損 (`totals: { critical: 0 }` のみ等) は 0 default で埋める、 silent NaN / undefined を防ぐ (負値 / NaN は throw で拒否)。
 
@@ -72,9 +72,9 @@ export declare function a11yFromBaseline(input: {
 }): A11yMetric;
 ```
 
-#### `accuracyFromSamples`
+#### <code v-pre>accuracyFromSamples</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L200) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L200) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build an {@link AccuracyMetric} from an array of 0.0-1.0 similarity samples。 `method` field で「どの計測方法か」 を明示 (cosine / bleu / exact-match / custom)、 score は平均。
 
@@ -85,9 +85,9 @@ export declare function accuracyFromSamples(input: {
 }): AccuracyMetric;
 ```
 
-#### `assembleReport`
+#### <code v-pre>assembleReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L270) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L270) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Assemble a full {@link QualityReport} from pre-computed axes. Fills the `reportedAt` timestamp with the current UTC ISO string. AI-LLM 4 軸 (cost / latency / token / accuracy) は provider が `@kiwa-lab/ai-*` のときのみ意味を持つ (それ以外は undefined でも通る)。 a11y 軸 (v1.30-4) は tier-aware release gate が有効な package のみ渡す、 未渡しは release gate 判定外 (context.a11yTier 指定時に critical Infinity fallback で fail-safe)。
 
@@ -109,9 +109,9 @@ export declare function assembleReport(input: {
 }): QualityReport;
 ```
 
-#### `assertA11yTier`
+#### <code v-pre>assertA11yTier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L144) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L144) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 単一 {@link A11yMetric} を tier default threshold (または override) と 突合して pass / fail を判定する helper。 3 impact (critical / serious / moderate) を独立にチェック、 fail 時は impact + actual + threshold + tier を error message に含めて actionable にする (rules/quality.md AC 具体表現)。 mutation tier と異なり、 zero-violation metric (0/0/0) は pass 扱い — a11y は「違反 0 が理想状態」 なので silent success で良い (SSOT: docs/quality/a11y-thresholds.md § 13-axis release gate integration "Empty-violation metrics do not throw")。 `critical` は SSOT invariant で常に 0、 override で 0 以外にできない 型契約は {@link A11yThreshold} の `critical: 0` literal で保証済み。
 
@@ -123,9 +123,9 @@ export declare function assertA11yTier(input: {
 }): void;
 ```
 
-#### `assertFidelity`
+#### <code v-pre>assertFidelity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L54) `packages/quality-metrics/src/fidelity-assert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L54) <code v-pre>packages/quality-metrics/src/fidelity-assert.ts</code>
 
 mock と real を全 case で並走させて結果一致を検証する。 caller は vitest の assertion で `expect(result.divergences).toEqual([])` / `expect(result.ratio).toBe(100)` を書く。 mock or real が throw した case は failed 扱いにする (両方 throw で「両方 fail」 は fidelity 一致とみなさない、 例外の shape が違う可能性があるため)。
 
@@ -133,9 +133,9 @@ mock と real を全 case で並走させて結果一致を検証する。 calle
 export declare function assertFidelity<Args extends unknown[], Result>(input: FidelityAssertInput<Args, Result>): Promise<FidelityAssertResult>;
 ```
 
-#### `assertMutationTier`
+#### <code v-pre>assertMutationTier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L64) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L64) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 単一 {@link MutationMetric} を tier default threshold (または override) と 突合して pass / fail を判定する helper。 fail 時は actual + threshold + tier を error message に含めて actionable にする (rules/quality.md AC 具体表現)。 `metric.mutations === 0` は「no signal」 として fail 扱い。 空 test suite の 0/0 = 0% が silent pass するのを防ぐ。
 
@@ -147,9 +147,9 @@ export declare function assertMutationTier(input: {
 }): void;
 ```
 
-#### `captureSnapshot`
+#### <code v-pre>captureSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L70) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L70) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Capture a point-in-time snapshot. Caller passes ISO timestamp + optional label. v0.5 = additive (既存 report 構造は変更しない)。
 
@@ -161,9 +161,9 @@ export declare function captureSnapshot(input: {
 }): MetricSnapshot;
 ```
 
-#### `compareToBaseline`
+#### <code v-pre>compareToBaseline</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L132) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L132) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Compare current snapshot to baseline. Per-axis delta + delta%. 両方 snapshot に共通する axis のみ compare、 片方 のみの axis は skip。
 
@@ -174,9 +174,9 @@ export declare function compareToBaseline(input: {
 }): BaselineComparison;
 ```
 
-#### `costFromSamples`
+#### <code v-pre>costFromSamples</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L134) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L134) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link CostMetric} from an array of per-request US$ samples. Returns the arithmetic mean as `perRequestUsd`, sum as `totalUsd`, and the sample count. Empty input yields all-zero.
 
@@ -184,9 +184,9 @@ Build a {@link CostMetric} from an array of per-request US$ samples. Returns the
 export declare function costFromSamples(samplesUsd: number[]): CostMetric;
 ```
 
-#### `coverageFromV8Summary`
+#### <code v-pre>coverageFromV8Summary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L27) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L27) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link CoverageMetric} from a c8 / v8 JSON summary. The input shape mirrors `coverage-summary.json` under c8's default output — the consumer can pass just the `total` block.
 
@@ -204,9 +204,9 @@ export declare function coverageFromV8Summary(input: {
 }): CoverageMetric;
 ```
 
-#### `DEFAULT_A11Y_TIER_THRESHOLDS`
+#### <code v-pre>DEFAULT&#95;A11Y&#95;TIER&#95;THRESHOLDS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L95) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L95) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 4-tier a11y (axe-core WCAG 2.1 AA) threshold SSOT — v1.30-4。 各 tier の 3 impact ceiling (critical / serious / moderate) は `docs/quality/a11y-thresholds.md` § Tier table SSOT を写しである。 `critical` は常に 0 (SSOT invariant, "No override may ever raise the critical bar")、 `minor` は release gate 判定外なので閾値表に入れない (team review 用)。 per-package looser override は {@link ReleaseGateContext.a11yTierThreshold} または {@link assertA11yTier} 引数で個別指定する。 stricter override (floor を上げる) は承認不要、 looser override は PR body に one-line justification を残す運用 (SSOT § Overrides)。
 
@@ -214,9 +214,9 @@ export declare function coverageFromV8Summary(input: {
 export declare const DEFAULT_A11Y_TIER_THRESHOLDS: Readonly<Record<A11yTier, A11yThreshold>>;
 ```
 
-#### `DEFAULT_MUTATION_TIER_THRESHOLDS`
+#### <code v-pre>DEFAULT&#95;MUTATION&#95;TIER&#95;THRESHOLDS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L22) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L22) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 4-tier mutation kill-rate SSOT — v1.27-4。 各 tier の値は `docs/quality/mutation-thresholds.md` の `high` 列 (green threshold)。 per-package looser override は {@link ReleaseGateContext.mutationTierThreshold} または {@link assertMutationTier} 引数で個別指定する。
 
@@ -224,9 +224,9 @@ export declare const DEFAULT_A11Y_TIER_THRESHOLDS: Readonly<Record<A11yTier, A11
 export declare const DEFAULT_MUTATION_TIER_THRESHOLDS: Readonly<Record<MutationTier, number>>;
 ```
 
-#### `DEFAULT_RELEASE_GATE_THRESHOLDS`
+#### <code v-pre>DEFAULT&#95;RELEASE&#95;GATE&#95;THRESHOLDS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L185) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L185) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 Default release-gate thresholds (11 軸)。 共通 7 軸は v1.11 milestone の 業界標準基準、 AI-LLM 4 軸は v1.12 milestone (Issue #695) で新設。 共通 7 軸 (全 provider) ... - coverage 85% line / 80% branch / 90% function - fidelity 70% ratio - perf p95 100ms (unit-scope adapter) - mutation 60% kill rate - behavior test 10 件以上 AI-LLM 4 軸 (`@kiwa-lab/ai-*` provider のみ強制) ... - cost ≤ $0.10 / request (Anthropic / OpenAI 実勢価格帯の bar) - latency p95 ≤ 3000ms (streaming LLM の user-facing bar) - token ≤ 4000 / request (context bloat 検出、 4k model 前提) - accuracy ≥ 0.80 (embedding cosine 0.80 = 意味的に近い bar)
 
@@ -234,9 +234,9 @@ Default release-gate thresholds (11 軸)。 共通 7 軸は v1.11 milestone の 
 export declare const DEFAULT_RELEASE_GATE_THRESHOLDS: ReleaseGateThresholds;
 ```
 
-#### `detectDrift`
+#### <code v-pre>detectDrift</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L180) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L180) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Detect drift from a BaselineComparison. threshold = drift 判定 の 絶対値 delta%、 default 5.0 (5% 以上変動で drift 判定)。 category = axis 別 regression / improvement / stable 集計、 全体 category は regression &gt; 0 なら 'regression'、 improvement &gt; 0 && regression == 0 なら 'improvement'、 他は 'stable'。
 
@@ -247,9 +247,9 @@ export declare function detectDrift(input: {
 }): DriftDetection;
 ```
 
-#### `diffReports`
+#### <code v-pre>diffReports</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L155) `packages/quality-metrics/src/emit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L155) <code v-pre>packages/quality-metrics/src/emit.ts</code>
 
 Compute a diff between two reports for the same provider. Values are (`current - previous`) so callers can render "improved" / "regressed" labels next to each axis. AI-LLM 4 軸は両 report が該当 field を持つ場合 のみ diff を計算する。
 
@@ -257,9 +257,9 @@ Compute a diff between two reports for the same provider. Values are (`current -
 export declare function diffReports(previous: QualityReport, current: QualityReport): QualityReportDiff;
 ```
 
-#### `emitJson`
+#### <code v-pre>emitJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L145) `packages/quality-metrics/src/emit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L145) <code v-pre>packages/quality-metrics/src/emit.ts</code>
 
 Emit the report as JSON — the machine-readable counterpart consumers use to persist raw metrics under `docs/quality-reports/`. Pretty-printed with 2-space indentation.
 
@@ -267,9 +267,9 @@ Emit the report as JSON — the machine-readable counterpart consumers use to pe
 export declare function emitJson(report: QualityReport): string;
 ```
 
-#### `emitMarkdown`
+#### <code v-pre>emitMarkdown</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L11) `packages/quality-metrics/src/emit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/emit.ts#L11) <code v-pre>packages/quality-metrics/src/emit.ts</code>
 
 Emit a human-readable markdown report from a {@link QualityReport}. The output shape mirrors what `docs/quality-reports/{package}-{version}.md` consumers expect. When `verdict` is supplied, an additional release-gate section is appended. AI-LLM provider の場合は 4 軸行が追加される。
 
@@ -281,9 +281,9 @@ export declare function emitMarkdown(input: {
 }): string;
 ```
 
-#### `evaluateReleaseGate`
+#### <code v-pre>evaluateReleaseGate</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L235) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L235) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 Evaluate a report against the release gate. Returns the verdict + a complete list of blockers so callers can render actionable messages. The verdict is `passed = true` when every axis clears its threshold. A partial pass (some axes clear, some fail) still returns `passed = false` because release gate is all-or-nothing. AI-LLM provider (`@kiwa-lab/ai-*`) は共通 7 軸に加えて 4 軸 (cost / latency / token / accuracy) を追加検査、 4 軸のうち report にない field は blocker として扱う (欠損 = 未計測 = 未満)。 それ以外の provider は 7 軸のまま (breaking change なし)。 v1.27-4 で 12 番目 axis `mutation.tier` を optional 追加。 `context.mutationTier` が指定された場合のみ 4-tier threshold (Core 80 / Framework 70 / SaaS 65 / Test type 60) と kill rate を突合、 これは既存 `mutation.killRate` axis と **並存** する (置換ではない)、 legacy overrides もそのまま機能する。 v1.30-4 で 13 番目 axis `a11y.tier` を optional 追加。 `context.a11yTier` が指定された場合のみ 4-tier threshold (Core 0/0/3 / Framework 0/3/10 / SaaS 0/0/0 / Test type 0/3/10) と report.a11y の 3 impact (critical / serious / moderate) を突合、 fail 時は impact 毎に個別 blocker を積む。 report.a11y が undefined の場合は critical Infinity fallback で必ず fail (silent "no data" pass を防止)。 v1.66 で drift 統合 axis 群 `drift.*` を optional 追加。 `context.driftEnabled === true` かつ `context.driftBaseline` 存在時のみ v0.5 の `captureSnapshot` + `compareToBaseline` + `detectDrift` を chain 実行、 regression 検知 axis を `drift.{axis名}` の {@link ReleaseGateBlocker} として 1:1 格上げする。 driftEnabled が false / 省略で default off、 v0.5 までの 11 / 13 axis 動作を 厳密に 維持 (backward compat 絶対維持)。 regressions 数 = drift blocker 数、 axesEvaluated は drift lane を +1 の 単一 lane として 加算 (mutation.tier / a11y.tier と 同一 設計)。
 
@@ -291,9 +291,9 @@ Evaluate a report against the release gate. Returns the verdict + a complete lis
 export declare function evaluateReleaseGate(report: QualityReport, overrides?: Partial<ReleaseGateThresholds>, context?: ReleaseGateContext): ReleaseGateVerdict;
 ```
 
-#### `fidelityFromMethodCounts`
+#### <code v-pre>fidelityFromMethodCounts</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L64) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L64) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link FidelityMetric} from the mock-covered method count and the real provider's method count. When `realTotalMethods === 0` the ratio is defined as 100 — a provider with no public methods is trivially covered.
 
@@ -305,9 +305,9 @@ export declare function fidelityFromMethodCounts(input: {
 }): FidelityMetric;
 ```
 
-#### `generateTrendReport`
+#### <code v-pre>generateTrendReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L213) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L213) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Multi-snapshot trend report. snapshots は timeline 昇順で渡す前提。 各 axis の first / last / delta / trend を集計。
 
@@ -315,9 +315,9 @@ Multi-snapshot trend report. snapshots は timeline 昇順で渡す前提。 各
 export declare function generateTrendReport(snapshots: MetricSnapshot[]): TrendReport;
 ```
 
-#### `isAiLlmProvider`
+#### <code v-pre>isAiLlmProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L462) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L462) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 `@kiwa-lab/ai-*` provider か判定する helper。 release gate と emit が AI-LLM 4 軸の有無を分岐する SSOT。
 
@@ -325,9 +325,9 @@ export declare function generateTrendReport(snapshots: MetricSnapshot[]): TrendR
 export declare function isAiLlmProvider(provider: string): boolean;
 ```
 
-#### `latencyFromSamples`
+#### <code v-pre>latencyFromSamples</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L156) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L156) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link LatencyMetric} from an array of raw end-to-end LLM latency samples (ms)。 shape は {@link perfFromSamples} と同一だが、 対象は user-facing LLM response 全体 (streaming 込)。
 
@@ -335,9 +335,9 @@ Build a {@link LatencyMetric} from an array of raw end-to-end LLM latency sample
 export declare function latencyFromSamples(samplesMs: number[]): LatencyMetric;
 ```
 
-#### `learnAdaptiveThreshold`
+#### <code v-pre>learnAdaptiveThreshold</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L132) `packages/quality-metrics/src/threshold-learning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L132) <code v-pre>packages/quality-metrics/src/threshold-learning.ts</code>
 
 v2.1 メイン API = 過去 N snapshot から axis 別 の adaptive threshold を 学習する。 snapshots は timeline 昇順で渡す、 内部で consecutive delta の 分布を計算、 axis 別 mean + stdev から k*stdev 幅 の 推奨 threshold を出力。
 
@@ -349,9 +349,9 @@ export declare function learnAdaptiveThreshold(input: {
 }): AdaptiveThresholdReport;
 ```
 
-#### `mutationFromCounts`
+#### <code v-pre>mutationFromCounts</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L108) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L108) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link MutationMetric} from a mutation total and killed count. Derives `survived` and `killRate` deterministically.
 
@@ -362,9 +362,9 @@ export declare function mutationFromCounts(input: {
 }): MutationMetric;
 ```
 
-#### `perfFromSamples`
+#### <code v-pre>perfFromSamples</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L94) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L94) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link PerfMetric} from an array of raw latency samples in ms. Returns the p50 / p95 / p99 percentiles using nearest-rank on a sorted copy of the samples.
 
@@ -372,9 +372,9 @@ Build a {@link PerfMetric} from an array of raw latency samples in ms. Returns t
 export declare function perfFromSamples(samplesMs: number[]): PerfMetric;
 ```
 
-#### `pickThresholdForAxis`
+#### <code v-pre>pickThresholdForAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L180) `packages/quality-metrics/src/threshold-learning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L180) <code v-pre>packages/quality-metrics/src/threshold-learning.ts</code>
 
 axis 名 が AdaptiveThresholdReport の perAxis に存在すれば 個別 threshold、 存在しなければ aggregate fallback を返す SSOT helper。 evaluateReleaseGate の driftThresholdPct 決定経路 と consumer の per-axis fallback lookup を 統一する。 axis 名 未指定 (undefined) の場合 は aggregate を返す (全体 fallback 用途)。
 
@@ -382,9 +382,9 @@ axis 名 が AdaptiveThresholdReport の perAxis に存在すれば 個別 thres
 export declare function pickThresholdForAxis(report: AdaptiveThresholdReport, axis?: string): number;
 ```
 
-#### `resolveA11yTier`
+#### <code v-pre>resolveA11yTier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L111) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L111) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 baseline JSON の verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`) を machine-friendly {@link A11yTier} enum に正規化する。 baseline (`docs/quality/a11y-thresholds.md`) と runtime gate 経路を 1 経路に集約する SSOT helper。 shape / 動作は {@link resolveMutationTier} と統一 (1 pattern review)。 case-insensitive + trim 対応。 未知 label は throw して silent drift を防ぐ。
 
@@ -392,9 +392,9 @@ baseline JSON の verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`
 export declare function resolveA11yTier(label: string): A11yTier;
 ```
 
-#### `resolveMutationTier`
+#### <code v-pre>resolveMutationTier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L37) `packages/quality-metrics/src/gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/gate.ts#L37) <code v-pre>packages/quality-metrics/src/gate.ts</code>
 
 baseline JSON の verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`) を machine-friendly {@link MutationTier} enum に正規化する。 baseline (`docs/quality/mutation-thresholds.md`) と runtime gate 経路を 1 経路に集約する SSOT helper。 case-insensitive + trim 対応。 未知 label は throw して silent drift を防ぐ。
 
@@ -402,9 +402,9 @@ baseline JSON の verbal tier label (`Core` / `Framework` / `SaaS` / `Test type`
 export declare function resolveMutationTier(label: string): MutationTier;
 ```
 
-#### `resolveRealFidelityMode`
+#### <code v-pre>resolveRealFidelityMode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L64) `packages/quality-metrics/src/real-fidelity-gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L64) <code v-pre>packages/quality-metrics/src/real-fidelity-gate.ts</code>
 
 KIWA_MODE=real env + 必須 env keys 存在の 2 条件を確認、 real driver 経路の 有効化判定を返す。 test file 冒頭で `resolveRealFidelityMode(...).enabled` を `describe.skipIf` / `it.skipIf` に渡して条件付き skip する用途。 default (KIWA_MODE 未設定 or "mock") = disabled + skipReason='kiwa-mode-not-real:mock'。 KIWA_MODE=real + 必須 env 全 set = enabled=true。 KIWA_MODE=real + 必須 env 1 件以上 missing = disabled + skipReason='env-missing:...'。
 
@@ -412,9 +412,9 @@ KIWA_MODE=real env + 必須 env keys 存在の 2 条件を確認、 real driver 
 export declare function resolveRealFidelityMode(input: RealFidelityGateInput): RealFidelityGateResult;
 ```
 
-#### `testCountFromCategories`
+#### <code v-pre>testCountFromCategories</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L43) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L43) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link TestCountMetric} from three counts, computing the sum. Callers usually pull these numbers from the vitest reporter output.
 
@@ -426,9 +426,9 @@ export declare function testCountFromCategories(input: {
 }): TestCountMetric;
 ```
 
-#### `tokenFromSamples`
+#### <code v-pre>tokenFromSamples</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L170) `packages/quality-metrics/src/collect.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/collect.ts#L170) <code v-pre>packages/quality-metrics/src/collect.ts</code>
 
 Build a {@link TokenMetric} from parallel arrays of prompt / completion token samples。 両 array の長さは一致必須、 request 数 = 配列長。
 
@@ -441,9 +441,9 @@ export declare function tokenFromSamples(input: {
 
 ### 型
 
-#### `A11yMetric`
+#### <code v-pre>A11yMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L156) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L156) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 A11y (axe-core WCAG 2.1 AA) violation counts per impact — v1.30-4 SSOT。 shape は axe-core の `impact` field (`critical` / `serious` / `moderate` / `minor`) をそのまま持ち、 `.a11y-baseline/{pkg}.json` の `totals` block から {@link a11yFromBaseline } で構築する。 `critical` は SSOT 不変で どの tier でも 0 が bar (docs/quality/a11y-thresholds.md § Overrides)。 `minor` は release gate では判定しないが shape 一貫性のため保持する (team review 用)。
 
@@ -460,9 +460,9 @@ export interface A11yMetric {
 }
 ```
 
-#### `A11yThreshold`
+#### <code v-pre>A11yThreshold</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L189) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L189) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 A11y threshold per tier — 3 impact ceiling (critical / serious / moderate)。 `minor` は release gate 判定外なので閾値表にも入れない。 SSOT invariant: `critical` は常に 0 (docs/quality/a11y-thresholds.md § Overrides "No override may ever raise the critical bar")。
 
@@ -477,9 +477,9 @@ export interface A11yThreshold {
 }
 ```
 
-#### `A11yTier`
+#### <code v-pre>A11yTier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L180) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L180) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 4-tier a11y threshold classification — v1.30-4 SSOT。 shape / 意味は {@link MutationTier} と統一 (SSOT: docs/quality/a11y-thresholds.md § Tier table)。 - `core` = pure logic packages with no DOM output (bar 0/0/3) - `framework` = SSR / hydration / adapter wrapper (bar 0/3/10) - `saas` = provider-specific adapter (bar 0/0/0, strict) - `test-type` = test harness with DOM measurement noise (bar 0/3/10) baseline JSON (`docs/quality/a11y-thresholds.md` に verbal `Core` / `Framework` / `SaaS` / `Test type` で書かれる) は {@link resolveA11yTier } で本 enum に正規化する。
 
@@ -487,9 +487,9 @@ export interface A11yThreshold {
 export type A11yTier = 'core' | 'framework' | 'saas' | 'test-type';
 ```
 
-#### `AccuracyMetric`
+#### <code v-pre>AccuracyMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L255) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L255) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Accuracy metric for AI-LLM providers — golden 出力に対する 0.0-1.0 similarity score。 embedding cosine similarity, BLEU, exact match など 計測 method は provider adapter が選択、 shape のみ SSOT。
 
@@ -508,9 +508,9 @@ export interface AccuracyMetric {
 }
 ```
 
-#### `AdaptiveThreshold`
+#### <code v-pre>AdaptiveThreshold</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L27) `packages/quality-metrics/src/threshold-learning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L27) <code v-pre>packages/quality-metrics/src/threshold-learning.ts</code>
 
 axis 別 の adaptive threshold 学習結果。 mean + stdev + sampleCount で 学習 の 統計的信頼性 を verify 可能、 recommendedThresholdPct が最終出力。
 
@@ -525,9 +525,9 @@ export interface AdaptiveThreshold {
 }
 ```
 
-#### `AdaptiveThresholdReport`
+#### <code v-pre>AdaptiveThresholdReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L37) `packages/quality-metrics/src/threshold-learning.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/threshold-learning.ts#L37) <code v-pre>packages/quality-metrics/src/threshold-learning.ts</code>
 
 全 axis 分 の 学習結果集計。 axis 名 → AdaptiveThreshold の map と 平均値。
 
@@ -540,9 +540,9 @@ export interface AdaptiveThresholdReport {
 }
 ```
 
-#### `AxisDelta`
+#### <code v-pre>AxisDelta</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L25) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L25) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Per-axis delta between current and baseline.
 
@@ -556,9 +556,9 @@ export interface AxisDelta {
 }
 ```
 
-#### `BaselineComparison`
+#### <code v-pre>BaselineComparison</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L34) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L34) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Comparison between current snapshot and baseline snapshot.
 
@@ -570,9 +570,9 @@ export interface BaselineComparison {
 }
 ```
 
-#### `CostMetric`
+#### <code v-pre>CostMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L205) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L205) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Cost metric for AI-LLM providers — 1 request 当たりの US$ 実測。 `perRequestUsd` は「1 request 当たり単価の観測値」、 `totalUsd` は ベンチ全体の合算。 release gate は `perRequestUsd` の平均で判定 (bulk 呼出時のコスト暴騰を検出する用途)。
 
@@ -587,9 +587,9 @@ export interface CostMetric {
 }
 ```
 
-#### `CoverageMetric`
+#### <code v-pre>CoverageMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L41) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L41) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Line / branch / function coverage percentages, all 0–100.
 
@@ -604,9 +604,9 @@ export interface CoverageMetric {
 }
 ```
 
-#### `DriftCategory`
+#### <code v-pre>DriftCategory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L41) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L41) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Drift detection verdict category.
 
@@ -614,9 +614,9 @@ Drift detection verdict category.
 export type DriftCategory = 'regression' | 'improvement' | 'stable';
 ```
 
-#### `DriftDetection`
+#### <code v-pre>DriftDetection</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L44) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L44) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Drift detection result for a single comparison.
 
@@ -630,9 +630,9 @@ export interface DriftDetection {
 }
 ```
 
-#### `EnvSource`
+#### <code v-pre>EnvSource</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L19) `packages/quality-metrics/src/real-fidelity-gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L19) <code v-pre>packages/quality-metrics/src/real-fidelity-gate.ts</code>
 
 env 参照 source (test 経路で override 可能)。 default = process.env。
 
@@ -642,9 +642,9 @@ export interface EnvSource {
 }
 ```
 
-#### `FidelityAssertInput`
+#### <code v-pre>FidelityAssertInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L41) `packages/quality-metrics/src/fidelity-assert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L41) <code v-pre>packages/quality-metrics/src/fidelity-assert.ts</code>
 
 ```ts
 export interface FidelityAssertInput<Args extends unknown[] = unknown[], Result = unknown> {
@@ -654,9 +654,9 @@ export interface FidelityAssertInput<Args extends unknown[] = unknown[], Result 
 }
 ```
 
-#### `FidelityAssertResult`
+#### <code v-pre>FidelityAssertResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L33) `packages/quality-metrics/src/fidelity-assert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L33) <code v-pre>packages/quality-metrics/src/fidelity-assert.ts</code>
 
 ```ts
 export interface FidelityAssertResult {
@@ -668,9 +668,9 @@ export interface FidelityAssertResult {
 }
 ```
 
-#### `FidelityCase`
+#### <code v-pre>FidelityCase</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L16) `packages/quality-metrics/src/fidelity-assert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L16) <code v-pre>packages/quality-metrics/src/fidelity-assert.ts</code>
 
 1 fidelity case = 1 引数 tuple + 期待される mock ↔ real 一致挙動。
 
@@ -686,9 +686,9 @@ export interface FidelityCase<Args extends unknown[] = unknown[], Result = unkno
 }
 ```
 
-#### `FidelityDivergence`
+#### <code v-pre>FidelityDivergence</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L26) `packages/quality-metrics/src/fidelity-assert.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/fidelity-assert.ts#L26) <code v-pre>packages/quality-metrics/src/fidelity-assert.ts</code>
 
 ```ts
 export interface FidelityDivergence {
@@ -699,9 +699,9 @@ export interface FidelityDivergence {
 }
 ```
 
-#### `FidelityMetric`
+#### <code v-pre>FidelityMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L80) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L80) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Fidelity score — how faithfully the mock adapter matches the real provider. `mockCoveredMethods` = number of API methods the kiwa mock implements. `realTotalMethods` = number of public methods on the real provider's SDK. The score is the ratio expressed as a percentage (0–100). A high fidelity score does not guarantee semantic equivalence — a v1.11 dogfood app run against both modes is the definitive source of truth for behavioral fidelity. This shape captures surface fidelity as the objective proxy.
 
@@ -722,9 +722,9 @@ export interface FidelityMetric {
 }
 ```
 
-#### `LatencyMetric`
+#### <code v-pre>LatencyMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L221) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L221) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Latency metric for AI-LLM providers — non-deterministic 前提の end-to-end response time (ms)。 {@link PerfMetric} と shape は同じだが、 PerfMetric は unit-scope adapter setup + call の bar (100ms 上限)、 LatencyMetric は user-facing LLM response 全体の bar (3000ms 上限) と 役割が異なる。
 
@@ -741,9 +741,9 @@ export interface LatencyMetric {
 }
 ```
 
-#### `MetricSnapshot`
+#### <code v-pre>MetricSnapshot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L15) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L15) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Time-point snapshot of QualityReport with fixed timestamp label.
 
@@ -758,9 +758,9 @@ export interface MetricSnapshot {
 }
 ```
 
-#### `MutationMetric`
+#### <code v-pre>MutationMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L121) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L121) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Mutation testing kill rate.
 
@@ -777,9 +777,9 @@ export interface MutationMetric {
 }
 ```
 
-#### `MutationTier`
+#### <code v-pre>MutationTier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L144) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L144) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 4-tier mutation threshold classification — v1.27-4 SSOT。 `core` = pure logic (deterministic tests、 no framework noise)、 `framework` = SSR / hydration / adapter drift、 `saas` = provider-specific adapter (external API drift 前提)、 `test-type` = DOM / browser noise を含む harness package。 baseline JSON (`docs/quality/mutation-thresholds.md` に verbal `Core` / `Framework` / `SaaS` / `Test type` で書かれる) は {@link resolveMutationTier } で本 enum に正規化する。
 
@@ -787,9 +787,9 @@ export interface MutationMetric {
 export type MutationTier = 'core' | 'framework' | 'saas' | 'test-type';
 ```
 
-#### `PerfMetric`
+#### <code v-pre>PerfMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L96) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L96) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Performance percentiles in milliseconds.
 
@@ -819,9 +819,9 @@ export interface PerfMetric {
 }
 ```
 
-#### `QualityReport`
+#### <code v-pre>QualityReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L273) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L273) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Full quality report for a single provider (or subject under test). 共通 5 軸 + AI-LLM 4 軸 (optional) を同一 shape で保持、 downstream consumer が provider prefix で軸を選別する。
 
@@ -854,9 +854,9 @@ export interface QualityReport {
 }
 ```
 
-#### `QualityReportDiff`
+#### <code v-pre>QualityReportDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L440) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L440) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Trend delta between two reports for the same provider — used by {@link diffReports }. Values are (`current - previous`) so positive numbers mean improvement for `coverage` / `test count` / `fidelity` / `mutation` / `accuracy`, and negative numbers mean improvement for `perf` / `latency` / `cost` / `token`.
 
@@ -880,9 +880,9 @@ export interface QualityReportDiff {
 }
 ```
 
-#### `RealFidelityGateInput`
+#### <code v-pre>RealFidelityGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L24) `packages/quality-metrics/src/real-fidelity-gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L24) <code v-pre>packages/quality-metrics/src/real-fidelity-gate.ts</code>
 
 1 real fidelity gate 判定 input。
 
@@ -905,9 +905,9 @@ export interface RealFidelityGateInput {
 }
 ```
 
-#### `RealFidelityGateResult`
+#### <code v-pre>RealFidelityGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L42) `packages/quality-metrics/src/real-fidelity-gate.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/real-fidelity-gate.ts#L42) <code v-pre>packages/quality-metrics/src/real-fidelity-gate.ts</code>
 
 gate 判定結果。
 
@@ -926,9 +926,9 @@ export interface RealFidelityGateResult {
 }
 ```
 
-#### `ReleaseGateBlocker`
+#### <code v-pre>ReleaseGateBlocker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L343) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L343) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Reason a report failed the release gate. Each blocker names the axis.
 
@@ -948,9 +948,9 @@ export interface ReleaseGateBlocker {
 }
 ```
 
-#### `ReleaseGateContext`
+#### <code v-pre>ReleaseGateContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L379) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L379) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Optional context that opts a report into the tier-aware axes (mutation.tier v1.27-4 + a11y.tier v1.30-4 + drift.* v1.66). Passed as the third argument of {@link evaluateReleaseGate }. Absent fields = legacy 7 / 11 axis behaviour (backward compatible).
 
@@ -1010,9 +1010,9 @@ export interface ReleaseGateContext {
 }
 ```
 
-#### `ReleaseGateThresholds`
+#### <code v-pre>ReleaseGateThresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L305) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L305) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Release gate thresholds — 11 軸 SSOT。 共通 7 軸 (全 provider) + AI-LLM 4 軸 (`@kiwa-lab/ai-*` provider のみ強制) の閾値。 provider は overrides で 個別調整可能。
 
@@ -1055,9 +1055,9 @@ export interface ReleaseGateThresholds {
 }
 ```
 
-#### `ReleaseGateVerdict`
+#### <code v-pre>ReleaseGateVerdict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L358) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L358) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Verdict of {@link evaluateReleaseGate }.
 
@@ -1078,9 +1078,9 @@ export interface ReleaseGateVerdict {
 }
 ```
 
-#### `TestCountMetric`
+#### <code v-pre>TestCountMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L51) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L51) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Test count broken down by kind. Sum = `total`.
 
@@ -1104,9 +1104,9 @@ export interface TestCountMetric {
 }
 ```
 
-#### `TokenMetric`
+#### <code v-pre>TokenMetric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L239) `packages/quality-metrics/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L239) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Token metric for AI-LLM providers — 1 request 当たりの token 使用量。 `promptTokens` は input side、 `completionTokens` は output side、 `totalTokens` は `promptTokens + completionTokens`。 release gate は `totalTokens` の平均で判定 (context bloat 検出)。
 
@@ -1123,9 +1123,9 @@ export interface TokenMetric {
 }
 ```
 
-#### `TrendReport`
+#### <code v-pre>TrendReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L53) `packages/quality-metrics/src/history.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/history.ts#L53) <code v-pre>packages/quality-metrics/src/history.ts</code>
 
 Trend statistics across multiple snapshots.
 

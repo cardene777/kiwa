@@ -36,11 +36,11 @@ fixture toolはtest専用です。weatherは固定都市、searchは小さなwor
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `mock db supports SELECT only, got: ${sql.slice(0, 20)}...` | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L221) |
-| 'echo: message must be a string' | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L40) |
-| 'division by zero' | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L83) |
-| `unknown op: ${String(op)}` | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L88) |
-| 'tool.name must be a non-empty string' | [packages/mcp/src/tools.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L30) |
+| <code v-pre>mock db supports SELECT only, got: $&#123;sql.slice(0, 20)&#125;...</code> | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L221) |
+| <code v-pre>echo: message must be a string</code> | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L40) |
+| <code v-pre>division by zero</code> | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L83) |
+| <code v-pre>unknown op: $&#123;String(op)&#125;</code> | [packages/mcp/src/fixture.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L88) |
+| <code v-pre>tool.name must be a non-empty string</code> | [packages/mcp/src/tools.ts](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L30) |
 
 ## API 契約
 
@@ -48,25 +48,25 @@ fixture toolはtest専用です。weatherは固定都市、searchは小さなwor
 
 ### 値
 
-#### `buildCalcTool`
+#### <code v-pre>buildCalcTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L53) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L53) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const buildCalcTool: () => McpTool;
 ```
 
-#### `buildDbQueryTool`
+#### <code v-pre>buildDbQueryTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L204) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L204) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const buildDbQueryTool: () => McpTool;
 ```
 
-#### `buildEchoTool`
+#### <code v-pre>buildEchoTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L26) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L26) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 5 tool builder — kiwa test で頻出する MCP tool の shape を SSOT 化。 各 builder は `(server) =&gt; tool + handler` を返す形ではなく `(server) =&gt; void` で直接 register する。 test は `registerEcho(server)` 1 行で使い始められる。 ### 5 tool の役割分担 | tool | 想定シナリオ | |---|---| | echo | JSON-RPC handshake + tools/call chain の smoke test | | calc | 数値 arg + validation error path | | weather | enum arg + mock data 分岐 | | search | array return + relevance ranking (word overlap 近似) | | db-query | multi-arg + isError=true path (SQL parse error mock) | 各 builder は tool definition だけを取り出す helper (`buildXTool`) も提供し、 schema 検証 test 用に直接 return する。
 
@@ -74,33 +74,33 @@ export declare const buildDbQueryTool: () => McpTool;
 export declare const buildEchoTool: () => McpTool;
 ```
 
-#### `buildSearchTool`
+#### <code v-pre>buildSearchTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L153) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L153) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const buildSearchTool: () => McpTool;
 ```
 
-#### `buildWeatherTool`
+#### <code v-pre>buildWeatherTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L110) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L110) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const buildWeatherTool: () => McpTool;
 ```
 
-#### `calcHandler`
+#### <code v-pre>calcHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L67) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L67) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const calcHandler: ToolHandler;
 ```
 
-#### `connectClientToServer`
+#### <code v-pre>connectClientToServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L172) `packages/mcp/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L172) <code v-pre>packages/mcp/src/client.ts</code>
 
 shortcut — server + client + transport を 1 発で組み立てて handshake まで完了する factory。 test の 8 割はこれで足りる想定。
 
@@ -111,25 +111,25 @@ export declare function connectClientToServer(server: McpServer, clientConfig?: 
 }>;
 ```
 
-#### `dbQueryHandler`
+#### <code v-pre>dbQueryHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L217) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L217) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const dbQueryHandler: ToolHandler;
 ```
 
-#### `echoHandler`
+#### <code v-pre>echoHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L38) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L38) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const echoHandler: ToolHandler;
 ```
 
-#### `InMemoryTransport`
+#### <code v-pre>InMemoryTransport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L150) `packages/mcp/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L150) <code v-pre>packages/mcp/src/client.ts</code>
 
 In-process transport — client の request を直接 server の `handle` に渡す。 real MCP は stdio / SSE / websocket 等を挟むが、 mock test の 9 割はこの transport で足りる。 notification (response なし) には null-response を 合成して JsonRpcResponse 型を満たす。
 
@@ -146,9 +146,9 @@ export declare class InMemoryTransport implements McpTransport {
 }
 ```
 
-#### `JsonRpcErrorCode`
+#### <code v-pre>JsonRpcErrorCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L66) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L66) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 error code SSOT — spec 4 種 + MCP server-defined 4 種。
 
@@ -170,9 +170,9 @@ export declare const JsonRpcErrorCode: {
 };
 ```
 
-#### `MCP_PROTOCOL_VERSION`
+#### <code v-pre>MCP&#95;PROTOCOL&#95;VERSION</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/server.ts#L18) `packages/mcp/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/server.ts#L18) <code v-pre>packages/mcp/src/server.ts</code>
 
 kiwa mock が話す MCP protocol version。 real MCP は "2024-11-05" 系。
 
@@ -180,9 +180,9 @@ kiwa mock が話す MCP protocol version。 real MCP は "2024-11-05" 系。
 export declare const MCP_PROTOCOL_VERSION = "2024-11-05";
 ```
 
-#### `McpClient`
+#### <code v-pre>McpClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L45) `packages/mcp/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L45) <code v-pre>packages/mcp/src/client.ts</code>
 
 MCP client mock — real MCP client と同じく initialize → tools/list → tools/call の 3 op を wrap する。 in-process McpServer と直結する `InMemoryTransport` を default で使うが、 real MCP client と mock server の 突合 test 用に任意 `McpTransport` を注入可能。
 
@@ -224,9 +224,9 @@ export declare class McpClient {
 }
 ```
 
-#### `McpRpcError`
+#### <code v-pre>McpRpcError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L27) `packages/mcp/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L27) <code v-pre>packages/mcp/src/client.ts</code>
 
 client → server 呼出で error response を受け取った場合の JS 例外。 `code` / `message` / `data` は JSON-RPC error object のまま。
 
@@ -238,9 +238,9 @@ export declare class McpRpcError extends Error {
 }
 ```
 
-#### `McpServer`
+#### <code v-pre>McpServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/server.ts#L50) `packages/mcp/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/server.ts#L50) <code v-pre>packages/mcp/src/server.ts</code>
 
 MCP server mock — JSON-RPC 2.0 の request 1 件を受け取り response 1 件を返す 純粋関数的 dispatch。 register / unregister で tool 登録、 `handle(request)` で 呼出処理する。 ### handshake 強制 (default) `initialize` op を先に呼び出さないと `tools/list` / `tools/call` は `NotInitialized` (-32002) error を返す。 real MCP protocol spec でも initialize が最初の必須 op と規定されている。 ### method dispatch table | method | handler | |---|---| | `initialize` | handshake、 protocol version + capabilities + serverInfo を返す | | `notifications/initialized` | client からの initialize 完了通知 (notification、 response なし) | | `tools/list` | 登録 tool 一覧を返す | | `tools/call` | 1 tool を invoke、 schema validate → handler → result | | (other) | MethodNotFound (-32601) を返す |
 
@@ -289,9 +289,9 @@ export declare class McpServer {
 }
 ```
 
-#### `registerAllFixtureTools`
+#### <code v-pre>registerAllFixtureTools</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L234) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L234) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 5 tool を一括 register。 tutorial / dogfood 起動用の 1 行 setup。
 
@@ -299,57 +299,57 @@ export declare class McpServer {
 export declare function registerAllFixtureTools(server: McpServer): void;
 ```
 
-#### `registerCalc`
+#### <code v-pre>registerCalc</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L93) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L93) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare function registerCalc(server: McpServer): void;
 ```
 
-#### `registerDbQuery`
+#### <code v-pre>registerDbQuery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L227) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L227) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare function registerDbQuery(server: McpServer): void;
 ```
 
-#### `registerEcho`
+#### <code v-pre>registerEcho</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L44) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L44) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare function registerEcho(server: McpServer): void;
 ```
 
-#### `registerSearch`
+#### <code v-pre>registerSearch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L187) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L187) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare function registerSearch(server: McpServer): void;
 ```
 
-#### `registerWeather`
+#### <code v-pre>registerWeather</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L135) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L135) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare function registerWeather(server: McpServer): void;
 ```
 
-#### `searchHandler`
+#### <code v-pre>searchHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L166) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L166) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const searchHandler: ToolHandler;
 ```
 
-#### `textContent`
+#### <code v-pre>textContent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L128) `packages/mcp/src/tools.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L128) <code v-pre>packages/mcp/src/tools.ts</code>
 
 shortcut — text content 1 block だけの result を組み立てる。 handler 実装補助。
 
@@ -357,9 +357,9 @@ shortcut — text content 1 block だけの result を組み立てる。 handler
 export declare function textContent(text: string): ToolCallContent;
 ```
 
-#### `ToolRegistry`
+#### <code v-pre>ToolRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L21) `packages/mcp/src/tools.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L21) <code v-pre>packages/mcp/src/tools.ts</code>
 
 Tool registry — MCP server が保持する tool 一覧の SSOT。 register / unregister / list / get / validateInput の 5 op を提供する。 順序保持は Map の insertion order で担保、 real MCP と同じく tools/list の順序は register 順。
 
@@ -386,9 +386,9 @@ export declare class ToolRegistry {
 }
 ```
 
-#### `validateSchema`
+#### <code v-pre>validateSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L64) `packages/mcp/src/tools.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L64) <code v-pre>packages/mcp/src/tools.ts</code>
 
 ToolInputSchema に対して input value を validate する。 real MCP は Draft 7 の full JSONSchema を許容するが、 kiwa mock は type + properties + required + items + enum + description の 5 種のみ検証する (types.ts のコメント SSOT)。 それ以外の schema keyword は「always valid」 扱い。 返り値 = validation error list。 empty なら valid。
 
@@ -396,9 +396,9 @@ ToolInputSchema に対して input value を validate する。 real MCP は Dra
 export declare function validateSchema(schema: ToolInputSchema, value: unknown, path?: string): string[];
 ```
 
-#### `weatherHandler`
+#### <code v-pre>weatherHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L123) `packages/mcp/src/fixture.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/fixture.ts#L123) <code v-pre>packages/mcp/src/fixture.ts</code>
 
 ```ts
 export declare const weatherHandler: ToolHandler;
@@ -406,9 +406,9 @@ export declare const weatherHandler: ToolHandler;
 
 ### 型
 
-#### `InitializeParams`
+#### <code v-pre>InitializeParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L126) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L126) <code v-pre>packages/mcp/src/types.ts</code>
 
 initialize request params (client → server)。
 
@@ -427,9 +427,9 @@ export interface InitializeParams {
 }
 ```
 
-#### `InitializeResult`
+#### <code v-pre>InitializeResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L140) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L140) <code v-pre>packages/mcp/src/types.ts</code>
 
 initialize response result (server → client)。
 
@@ -450,9 +450,9 @@ export interface InitializeResult {
 }
 ```
 
-#### `JsonRpcError`
+#### <code v-pre>JsonRpcError</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L56) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L56) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 error response envelope。
 
@@ -464,9 +464,9 @@ export interface JsonRpcError {
 }
 ```
 
-#### `JsonRpcErrorObject`
+#### <code v-pre>JsonRpcErrorObject</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L49) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L49) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 error object。
 
@@ -478,9 +478,9 @@ export interface JsonRpcErrorObject {
 }
 ```
 
-#### `JsonRpcId`
+#### <code v-pre>JsonRpcId</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L31) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L31) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 request id — real spec は string / number / null (notification)。
 
@@ -488,9 +488,9 @@ JSON-RPC 2.0 request id — real spec は string / number / null (notification)�
 export type JsonRpcId = string | number | null;
 ```
 
-#### `JsonRpcRequest`
+#### <code v-pre>JsonRpcRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L34) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L34) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 request envelope。
 
@@ -503,9 +503,9 @@ export interface JsonRpcRequest {
 }
 ```
 
-#### `JsonRpcResponse`
+#### <code v-pre>JsonRpcResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L63) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L63) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 response union。
 
@@ -513,9 +513,9 @@ JSON-RPC 2.0 response union。
 export type JsonRpcResponse<T = unknown> = JsonRpcSuccess<T> | JsonRpcError;
 ```
 
-#### `JsonRpcSuccess`
+#### <code v-pre>JsonRpcSuccess</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L42) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L42) <code v-pre>packages/mcp/src/types.ts</code>
 
 JSON-RPC 2.0 successful response envelope。
 
@@ -527,9 +527,9 @@ export interface JsonRpcSuccess<T = unknown> {
 }
 ```
 
-#### `McpClientConfig`
+#### <code v-pre>McpClientConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L15) `packages/mcp/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/client.ts#L15) <code v-pre>packages/mcp/src/client.ts</code>
 
 MCP client 起動時 config。
 
@@ -543,9 +543,9 @@ export interface McpClientConfig {
 }
 ```
 
-#### `McpServerConfig`
+#### <code v-pre>McpServerConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/server.ts#L21) `packages/mcp/src/server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/server.ts#L21) <code v-pre>packages/mcp/src/server.ts</code>
 
 server 起動時 config。
 
@@ -559,9 +559,9 @@ export interface McpServerConfig {
 }
 ```
 
-#### `McpTool`
+#### <code v-pre>McpTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L100) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L100) <code v-pre>packages/mcp/src/types.ts</code>
 
 MCP tool definition — server 側に register する 1 tool の shape。 tools/list response で client に返される。
 
@@ -573,9 +573,9 @@ export interface McpTool {
 }
 ```
 
-#### `McpTransport`
+#### <code v-pre>McpTransport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L169) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L169) <code v-pre>packages/mcp/src/types.ts</code>
 
 MCP transport — server と client を直接繋ぐ in-process channel の抽象。 real MCP は stdio / SSE / websocket 等を使うが、 mock は関数呼出 1 段の bidirectional channel だけあれば test を書ける。
 
@@ -586,9 +586,9 @@ export interface McpTransport {
 }
 ```
 
-#### `RegisteredTool`
+#### <code v-pre>RegisteredTool</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L11) `packages/mcp/src/tools.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/tools.ts#L11) <code v-pre>packages/mcp/src/tools.ts</code>
 
 Registered tool = definition + handler。 server 内で name をキーに保持する。
 
@@ -599,9 +599,9 @@ export interface RegisteredTool {
 }
 ```
 
-#### `ToolCallContent`
+#### <code v-pre>ToolCallContent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L114) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L114) <code v-pre>packages/mcp/src/types.ts</code>
 
 tools/call response の content block (real MCP shape に整合)。
 
@@ -623,9 +623,9 @@ export type ToolCallContent = {
 };
 ```
 
-#### `ToolCallResult`
+#### <code v-pre>ToolCallResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L120) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L120) <code v-pre>packages/mcp/src/types.ts</code>
 
 tools/call result — content 配列 + `isError` flag。 real MCP と同 shape。
 
@@ -636,9 +636,9 @@ export interface ToolCallResult {
 }
 ```
 
-#### `ToolHandler`
+#### <code v-pre>ToolHandler</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L111) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L111) <code v-pre>packages/mcp/src/types.ts</code>
 
 1 tool の実 handler。 tools/call で呼び出される。 input は inputSchema で validate 済、 handler は同期 or 非同期どちらでも可。 return value は MCP tools/call の `content` block 相当。
 
@@ -646,9 +646,9 @@ export interface ToolCallResult {
 export type ToolHandler = (input: Record<string, unknown>) => ToolCallContent[] | Promise<ToolCallContent[]>;
 ```
 
-#### `ToolInputSchema`
+#### <code v-pre>ToolInputSchema</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L87) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L87) <code v-pre>packages/mcp/src/types.ts</code>
 
 Tool の JSONSchema (subset)。 real MCP は Draft 7 の full JSONSchema を許容 するが、 kiwa mock は type + properties + required + items + enum の 5 種 のみを検証、 それ以外は「always valid」 と扱う。 v0.2 以降で拡張予定。
 
@@ -663,9 +663,9 @@ export interface ToolInputSchema {
 }
 ```
 
-#### `ToolsCallParams`
+#### <code v-pre>ToolsCallParams</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L159) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L159) <code v-pre>packages/mcp/src/types.ts</code>
 
 tools/call request params。
 
@@ -676,9 +676,9 @@ export interface ToolsCallParams {
 }
 ```
 
-#### `ToolsListResult`
+#### <code v-pre>ToolsListResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L154) `packages/mcp/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/mcp/src/types.ts#L154) <code v-pre>packages/mcp/src/types.ts</code>
 
 tools/list response result。
 

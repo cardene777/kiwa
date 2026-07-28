@@ -42,282 +42,282 @@ provider が空の場合、または setup 時に登録していない provider 
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| `updateUser: unknown id ${patch.id}` | [packages/auth/src/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/adapter.ts#L56) |
-| `verifyAuth0AccessToken: audience mismatch (expected ${expected.audience}, got ${JSON.stringify(claims.aud)})` | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L103) |
-| 'verifyAuth0Jwt: malformed token (expected 3 segments)' | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L113) |
-| 'verifyAuth0Jwt: unexpected JWT header (expected HS256/JWT)' | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L117) |
-| 'verifyAuth0Jwt: signature mismatch' | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L123) |
-| 'verifyAuth0Jwt: payload is not valid JSON' | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L129) |
-| 'verifyAuth0Jwt: token expired' | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L133) |
-| `verifyAuth0IdToken: issuer mismatch (expected ${expected.issuer}, got ${claims.iss})` | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L71) |
-| `verifyAuth0IdToken: audience mismatch (expected ${expected.audience}, got ${String(claims.aud)})` | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L76) |
-| `verifyAuth0AccessToken: issuer mismatch (expected ${expected.issuer}, got ${claims.iss})` | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L95) |
-| `Auth0 users.get: not found ${userId}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L320) |
-| `Auth0 authenticate.signIn: unknown user email ${input.email}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L349) |
-| `Auth0 authenticate.signIn: user ${user.user_id} is blocked` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L352) |
-| `Auth0 authenticate.signIn: no password on file for ${user.user_id}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L361) |
-| `Auth0 authenticate.signIn: incorrect password for ${input.email}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L366) |
-| `Auth0 authenticate.signIn: access denied — ${acted.deniedReason}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L393) |
-| `Auth0 authenticate.signUp: user with email ${input.email} already exists` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L420) |
-| `Auth0 authenticate.signUp: registration denied — ${preActed.deniedReason}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L451) |
-| 'setupAuth0Env: tokenExpiration must be a positive number of seconds' | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L56) |
-| `Auth0 setAppMetadata: unknown user id ${userId}` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L563) |
-| `setupAuth0Env: email must be a valid email (got ${input.email})` | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L84) |
-| `Auth0 store: user with email ${user.email} already exists` | [packages/auth/src/auth0/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/store.ts#L43) |
-| `Auth0 store: unknown user id ${userId}` | [packages/auth/src/auth0/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/store.ts#L59) |
-| `createUser: email already registered (${input.email})` | [packages/auth/src/better-auth/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/adapter.ts#L54) |
-| `updateUser: unknown id ${patch.id}` | [packages/auth/src/better-auth/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/adapter.ts#L80) |
-| 'hashPassword: password must not be empty' | [packages/auth/src/better-auth/password.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/password.ts#L29) |
-| `Unknown Better Auth provider kind: ${String(kind)}` | [packages/auth/src/better-auth/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L48) |
-| `setupBetterAuthEnv: provider "${provider}" was not configured` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L103) |
-| 'sendMagicLink: email is required' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L133) |
-| 'consumeMagicLink: invalid or expired token' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L147) |
-| `enrollTwoFactor: unknown user id ${input.userId}` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L169) |
-| 'verifyTwoFactorCode: user is not enrolled in 2FA' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L179) |
-| `createOrganization: unknown user id ${input.userId}` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L205) |
-| `inviteToOrganization: unknown organization id ${input.organizationId}` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L228) |
-| `inviteToOrganization: unknown user id ${input.userId}` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L234) |
-| `registerPasskey: unknown user id ${input.userId}` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L250) |
-| 'setupBetterAuthEnv: providers must contain at least one entry' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L42) |
-| 'setupBetterAuthEnv: sessionExpiration must be a positive number of seconds' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L46) |
-| 'setupBetterAuthEnv: verificationExpiration must be a positive number of seconds' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L53) |
-| `setupBetterAuthEnv: ${method} requires the "${kind}" plugin to be enabled` | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L66) |
-| 'signUpWithPassword: email is required' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L74) |
-| 'signInWithPassword: invalid email or password' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L89) |
-| 'signInWithPassword: invalid email or password' | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L92) |
-| 'verifyClerkJwt: malformed token (expected 3 segments)' | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L52) |
-| 'verifyClerkJwt: unexpected JWT header (expected HS256/JWT)' | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L56) |
-| 'verifyClerkJwt: signature mismatch' | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L62) |
-| 'verifyClerkJwt: payload is not valid JSON' | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L68) |
-| 'verifyClerkJwt: token expired' | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L72) |
-| `setupClerkEnv: unknown user id ${input.userId}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L140) |
-| `setupClerkEnv: unknown organization slug ${input.organizationSlug}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L146) |
-| `setupClerkEnv: cannot seed organization, unknown user email ${seed.createdByEmail}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L183) |
-| `setupClerkEnv: cannot seed token, unknown user email ${seed.userEmail}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L210) |
-| `Clerk users.getUser: not found ${id}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L232) |
-| `Clerk sessions.getSession: not found ${id}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L267) |
-| `Clerk sessions.revokeSession: not found ${id}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L274) |
-| `Clerk organizations.createOrganization: unknown creator id ${input.createdBy}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L287) |
-| `Clerk organizations.getOrganization: not found ${id}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L314) |
-| `Clerk organizations.createMembership: unknown organization ${input.organizationId}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L324) |
-| `Clerk organizations.createMembership: unknown user ${input.userId}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L330) |
-| 'setupClerkEnv: sessionExpiration must be a positive number of seconds' | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L35) |
-| `Clerk organizations.updateMembership: not found ${input.organizationId}/${input.userId}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L355) |
-| `verifyToken: session ${claims.sid} not found` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L375) |
-| `verifyToken: session ${claims.sid} status is ${session.status}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L380) |
-| `verifyToken: session ${claims.sid} expired` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L385) |
-| `verifyToken: user ${claims.sub} not found` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L389) |
-| `setupClerkEnv.signIn: unknown user email ${input.email}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L400) |
-| `setupClerkEnv: cannot issue token, organization slug not found: ${input.organizationSlug}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L58) |
-| `setupClerkEnv: cannot issue token, user ${input.user.id} is not a member of org ${org.id}` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L64) |
-| `setupClerkEnv: primaryEmailAddress must be a valid email (got ${input.primaryEmailAddress})` | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L98) |
-| `Clerk store: unknown session id ${id}` | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L132) |
-| `Clerk store: organization with slug ${org.slug} already exists` | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L142) |
-| `Clerk store: user ${membership.userId} already a member of org ${membership.organizationId}` | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L157) |
-| `Clerk store: membership ${orgId}/${userId} not found` | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L171) |
-| `Clerk store: user with email ${user.primaryEmailAddress} already exists` | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L79) |
-| `Clerk store: unknown user id ${id}` | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L95) |
-| `createUser: email already registered (${input.email})` | [packages/auth/src/lucia/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/adapter.ts#L34) |
-| `updateUser: unknown id ${patch.id}` | [packages/auth/src/lucia/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/adapter.ts#L55) |
-| 'hashPassword: password must not be empty' | [packages/auth/src/lucia/password.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/password.ts#L40) |
-| `Unknown Lucia provider kind: ${String(kind)}` | [packages/auth/src/lucia/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L48) |
-| 'setupLuciaEnv: providers must contain at least one entry' | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L35) |
-| 'setupLuciaEnv: sessionExpiration must be a positive number of seconds' | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L39) |
-| 'signUpWithPassword: email is required' | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L47) |
-| 'signInWithPassword: invalid email or password' | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L57) |
-| 'signInWithPassword: invalid email or password' | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L60) |
-| `setupLuciaEnv: provider "${provider}" was not configured` | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L71) |
-| `authorization-server: redirect_uri "${redirectUri}" not registered for client "${client.clientId}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L105) |
-| `authorization-server: user "${user.subject}" not entitled to scope "${scope}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L131) |
-| `authorization-server: client "${client.clientId}" not registered for scope "${scope}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L136) |
-| `authorize: response_type "${request.responseType}" refused — OAuth 2.1 requires "code" (implicit + hybrid dropped by RFC 9700)` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L149) |
-| 'authorize: code_challenge_method "plain" refused — RFC 9700 §2.1.1 requires S256' | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L154) |
-| `authorize: unknown code_challenge_method "${request.codeChallengeMethod}" — expected S256` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L159) |
-| 'authorize: code_challenge missing — PKCE always mandatory in OAuth 2.1' | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L164) |
-| 'authorize: state parameter missing — required for CSRF defence' | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L169) |
-| `token: grant_type "${grantType}" refused — dropped by OAuth 2.1 / RFC 9700` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L203) |
-| `token: unknown grant_type "${grantType}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L208) |
-| `token: unknown authorization code "${request.code}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L222) |
-| `token: authorization code "${request.code}" already exchanged — replay refused` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L225) |
-| `token: client_id mismatch — code issued to "${record.clientId}", exchanged by "${request.clientId}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L230) |
-| `token: redirect_uri mismatch — code recorded "${record.redirectUri}", exchanged with "${request.redirectUri}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L235) |
-| 'token: PKCE code_verifier does not match recorded code_challenge' | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L246) |
-| `token: refresh_token "${request.refreshToken}" has been rotated — reuse refused (RFC 9700 §2.2 rotation family compromise)` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L285) |
-| `token: unknown refresh_token "${request.refreshToken}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L289) |
-| `token: refresh_token "${request.refreshToken}" is revoked — refresh refused` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L292) |
-| `token: client_id mismatch — refresh_token issued to "${existing.clientId}", used by "${request.clientId}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L297) |
-| `token: refresh_token "${request.refreshToken}" is expired` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L302) |
-| 'token: refresh_token is DPoP-bound but no DPoP proof was supplied' | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L309) |
-| 'token: DPoP JWK thumbprint mismatch — refresh_token bound to a different key' | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L314) |
-| `token: refresh scope "${scope}" not in original grant "${existing.scope}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L328) |
-| `revoke: token belongs to client "${access.clientId}", revocation attempted by "${clientId}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L393) |
-| `revoke: refresh_token belongs to client "${refresh.clientId}", revocation attempted by "${clientId}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L403) |
-| `registerClient: client "${client.clientId}" already registered` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L67) |
-| `registerUser: user "${user.subject}" already registered` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L76) |
-| `authorization-server: unknown client_id "${clientId}"` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L86) |
-| `authorization-server: unknown subject "${subject}" — preseed via options.users or call registerUser` | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L96) |
-| `parseDpopProof: expected compact JWT with 3 segments, got ${parts.length}` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L112) |
-| `parseDpopProof: expected typ=dpop+jwt, got typ="${headerRaw?.typ}"` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L120) |
-| `parseDpopProof: expected alg=ES256, got alg="${headerRaw?.alg}"` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L125) |
-| `parseDpopProof: expected EC P-256 jwk in header, got kty="${headerRaw?.jwk?.kty}"` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L130) |
-| `verifyDpopProof: htm mismatch — expected "${options.expectedHtm.toUpperCase()}", got "${parsed.payload.htm}"` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L174) |
-| `verifyDpopProof: htu mismatch — expected "${options.expectedHtu}", got "${parsed.payload.htu}"` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L179) |
-| `verifyDpopProof: iat outside allowed skew (delta=${iatDelta}s, allowed=${options.iatSkewSec}s)` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L186) |
-| 'verifyDpopProof: proof missing jti' | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L191) |
-| `verifyDpopProof: jti "${parsed.payload.jti}" replay detected` | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L194) |
-| 'deriveCodeChallenge: PKCE method "plain" is forbidden by RFC 9700 — use S256' | [packages/auth/src/oauth21/pkce.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L63) |
-| `deriveCodeChallenge: unknown PKCE method "${method}" — expected S256` | [packages/auth/src/oauth21/pkce.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L68) |
-| `deriveCodeChallenge: code verifier must be 43-128 chars (got ${verifier.length})` | [packages/auth/src/oauth21/pkce.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L73) |
-| `rotateRefreshToken: refresh token "${previous.token}" is already revoked — rotation not permitted (RFC 9700 §2.2 replay defence)` | [packages/auth/src/oauth21/refresh-rotation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L101) |
-| 'dynamicClientRegistration: `redirect_uris` must be a non-empty array (RFC 7591 §2)' | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L182) |
-| `dynamicClientRegistration: every redirect_uri must be a non-empty string (got "${uri}")` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L188) |
-| `dynamicClientRegistration: redirect_uri "${uri}" is not a valid URL` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L197) |
-| `dynamicClientRegistration: grant_type "${grant}" refused — OAuth 2.1 allowlist is ${[...ALLOWED_GRANT_TYPES].join(', ')}` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L206) |
-| `dynamicClientRegistration: response_type "${responseType}" refused — OIDC Discovery advertises "code" only` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L215) |
-| `dynamicClientRegistration: token_endpoint_auth_method "${authMethod}" refused — advertised methods are ${[...ALLOWED_AUTH_METHODS].join(', ')}` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L223) |
-| 'dynamicClientRegistration: software_statement supplied but no trust anchor configured on the AS' | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L246) |
-| `dynamicClientRegistration: software_statement parse failed — ${(err as Error).message}` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L254) |
-| 'dynamicClientRegistration: software_statement signature verification failed' | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L269) |
-| `software_statement: expected 3 dot-separated segments, got ${parts.length}` | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L92) |
-| `createDiscoveryEndpoint: metadata.issuer "${metadata.issuer}" must match endpoint issuer "${issuer}" (OIDC Discovery §4.3)` | [packages/auth/src/oidc/discovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/discovery.ts#L82) |
-| 'performBLEHandshake: sessionId is empty — cannot correlate BLE advertisement with QR payload' | [packages/auth/src/passkey/caBLE/ble-handshake.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/ble-handshake.ts#L47) |
-| `migrateCredential: cannot migrate credential over unestablished tunnel "${tunnel.sessionId}"` | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L35) |
-| `migrateCredential: cannot migrate credential over closed tunnel "${tunnel.sessionId}"` | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L40) |
-| `performSignatureRoundtrip: cannot sign over unestablished tunnel "${tunnel.sessionId}"` | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L72) |
-| `performSignatureRoundtrip: cannot sign over closed tunnel "${tunnel.sessionId}"` | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L77) |
-| 'performSignatureRoundtrip: challenge is empty — cannot produce a WebAuthn L3 §7.2 assertion signature over an empty challenge' | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L82) |
-| 'generateCaBLEQRCode: tunnelServerHint is empty — cannot advertise a hybrid transport ceremony without a tunnel endpoint' | [packages/auth/src/passkey/caBLE/qr-code.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L32) |
-| 'generateCaBLEQRCode: nonce is empty — cannot derive a replay-safe handshake without a nonce' | [packages/auth/src/passkey/caBLE/qr-code.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L37) |
-| 'establishWebSocketTunnel: BLE handshake not verified — real caBLE refuses to open the tunnel when the shared secret cannot be derived by both sides' | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L30) |
-| `establishWebSocketTunnel: session id mismatch — QR "${qr.sessionId}" vs handshake "${handshake.sessionId}"` | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L35) |
-| `establishWebSocketTunnel: cannot send on closed tunnel "${qr.sessionId}"` | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L47) |
-| `establishWebSocketTunnel: cannot drain closed tunnel "${qr.sessionId}"` | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L55) |
-| `requireFabric: sync fabric vendor "${vendor}" is not registered on this env` | [packages/auth/src/passkey/credential-sync.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/credential-sync.ts#L113) |
-| `backupCredential: credential "${credential.credentialId}" is not backup-eligible — non-discoverable credentials cannot enter a sync fabric` | [packages/auth/src/passkey/credential-sync.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/credential-sync.ts#L26) |
-| 'createPlatformAuthenticator: passkeys require hasResidentKey=true — a non-discoverable platform credential is not a passkey' | [packages/auth/src/passkey/platform.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/platform.ts#L21) |
-| `createPlatformAuthenticator: unknown biometric "${biometric}" — expected touch-id / face-id / windows-hello / android-biometric` | [packages/auth/src/passkey/platform.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/platform.ts#L32) |
-| `createRoamingAuthenticator: unknown roaming kind "${kind}" — expected security-key or phone` | [packages/auth/src/passkey/roaming.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/roaming.ts#L22) |
-| `setupPasskeyEnv: unknown deviceId "${deviceId}" — call addDevice first or preseed via options.devices` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L112) |
-| `setupPasskeyEnv: credential "${credentialId}" is not registered on any device` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L134) |
-| `setupPasskeyEnv: passkey metadata missing for credential "${credentialId}" — was it minted through createPasskey?` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L140) |
-| `setupPasskeyEnv: device "${deviceId}" is already registered` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L156) |
-| `setupPasskeyEnv: device "${device.deviceId}" has no authenticator — call addPlatformAuthenticator or addRoamingAuthenticator first` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L194) |
-| `setupPasskeyEnv: authenticator "${authenticatorId}" is not registered on device "${device.deviceId}"` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L203) |
-| `restoreCredential: fabric "${vendor}" does not hold credential "${credentialId}" — call backupCredential first` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L327) |
-| `restoreCredential: credential "${credentialId}" belongs to user "${blob.userId}" — user "${userId}" cannot restore it` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L332) |
-| `restoreCredential: device "${targetDeviceId}" has no authenticator to host the restored credential` | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L337) |
-| `createSyncFabric: unknown vendor "${vendor}" — expected icloud-keychain or google-password-manager` | [packages/auth/src/passkey/sync-fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/sync-fabric.ts#L16) |
-| 'Email provider requires an email address for the magic link' | [packages/auth/src/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L52) |
-| `Unknown provider kind: ${String(kind)}` | [packages/auth/src/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L67) |
-| 'extendSession: session in revocation window, cannot extend' | [packages/auth/src/semantics/auth-continuity.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-continuity.ts#L102) |
-| 'seamlessReauth: session in revocation window, cannot reauth' | [packages/auth/src/semantics/auth-continuity.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-continuity.ts#L52) |
-| 'rotateRefresh: session in revocation window, cannot rotate' | [packages/auth/src/semantics/auth-continuity.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-continuity.ts#L75) |
-| 'detectAbuse: no attempts recorded' | [packages/auth/src/semantics/auth-telemetry.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-telemetry.ts#L117) |
-| 'updateSuccessRate: no attempts recorded' | [packages/auth/src/semantics/auth-telemetry.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-telemetry.ts#L67) |
-| `markTimeout: session is ${session.state}, expected hint-shown` | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L109) |
-| `markTimeout: nowMs ${input.nowMs} < timeoutMs ${session.timeoutMs}` | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L112) |
-| `showHint: session is ${session.state}, expected idle` | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L42) |
-| `selectAutofill: session is ${session.state}, expected hint-shown` | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L61) |
-| `triggerFallback: session is ${session.state}, expected hint-shown` | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L85) |
-| `continuous-auth: cannot complete step-up from state "${input.session.state}" (must be step-up-required)` | [packages/auth/src/semantics/continuous-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/continuous-auth.ts#L115) |
-| `completeHandshake: session is ${session.state}, expected tunnel-opened` | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L110) |
-| `generateQr: session is ${session.state}, expected idle` | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L44) |
-| `pairBle: session is ${session.state}, expected qr-generated` | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L64) |
-| `openTunnel: session is ${session.state}, expected ble-paired` | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L88) |
-| 'confirmCredProps: session is idle, bind first' | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L111) |
-| `bindToDevice: session is ${session.state}, expected idle` | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L44) |
-| `verifySyncFabric: session is ${session.state}, expected device-bound` | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L64) |
-| 'verifySyncFabric: no sync fabric configured' | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L67) |
-| `migrateCredential: session is ${session.state}, cannot migrate` | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L89) |
-| `applyPolicy: session is ${session.state}, cannot apply policy` | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L106) |
-| `evaluateScore: session is ${session.state}, expected idle` | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L52) |
-| `injectChallenge: session is ${session.state}, expected evaluated` | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L81) |
-| `injectChallenge: score ${session.score} not in challenge range [${session.allowThreshold}, ${session.blockThreshold})` | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L84) |
-| `reportConcurrentSession: count ${input.concurrentSessionCount} must be > 1` | [packages/auth/src/semantics/session-hijack-detect.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/session-hijack-detect.ts#L88) |
-| `satisfyAal3: session is ${session.state}, expected escalation-requested` | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L100) |
-| `requestEscalation: requiredAal ${input.requiredAal} not higher than currentAal ${session.currentAal}` | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L46) |
-| `satisfyAal2: session is ${session.state}, expected escalation-requested` | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L72) |
-| 'satisfyAal2: requiredAal is AAL3, cannot satisfy with AAL2' | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L75) |
-| `setupNextAuthEnv: unknown session strategy "${String(strategy)}"` | [packages/auth/src/setup-nextauth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L23) |
-| 'setupNextAuthEnv: providers must contain at least one entry' | [packages/auth/src/setup-nextauth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L28) |
-| `setupNextAuthEnv: provider "${providerKind}" was not configured` | [packages/auth/src/setup-nextauth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L43) |
-| `base32Decode: invalid character ${ch}` | [packages/auth/src/supabase-advanced/mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/mfa.ts#L110) |
-| `mapAttributes: missing or non-string email attribute (mapped from '${input.idp.attributeMap.email}')` | [packages/auth/src/supabase-advanced/saml.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/saml.ts#L89) |
-| `createUser: email ${input.email} already exists` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L151) |
-| `enrollTotp: user ${input.userId} not found` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L256) |
-| `enrollPhone: user ${input.userId} not found` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L280) |
-| `issueBackupCodes: user ${input.userId} not found` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L297) |
-| `challenge: factor ${input.factorId} not found` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L322) |
-| `verifyChallenge: challenge ${input.challengeId} not found` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L340) |
-| 'verifyChallenge: challenge already verified' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L342) |
-| 'verifyChallenge: challenge expired' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L345) |
-| 'verifyChallenge: factor no longer exists' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L348) |
-| 'verifyChallenge: cannot verify challenge for backup factor' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L355) |
-| 'verifyChallenge: invalid code' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L357) |
-| 'consumeBackupCode: code invalid or already consumed' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L366) |
-| 'initiateSsoLogin: invalid email' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L386) |
-| `initiateSsoLogin: no SAML IdP registered for domain ${domain}` | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L391) |
-| 'mintAssertion: authn request not found' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L404) |
-| 'mintAssertion: idp no longer registered' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L406) |
-| 'exchangeAssertion: signature mismatch' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L421) |
-| 'exchangeAssertion: assertion expired' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L424) |
-| 'exchangeAssertion: no matching AuthnRequest for RelayState' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L430) |
-| 'exchangeAssertion: IdP no longer registered' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L432) |
-| 'verifySiweMessage: challenge not found' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L498) |
-| 'verifySiweMessage: nonce already consumed' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L499) |
-| 'verifySiweMessage: nonce expired' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L501) |
-| 'verifySiweMessage: signature does not match message address' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L505) |
-| 'verifySiweMessage: signature verification failed' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L514) |
-| 'setupSupabaseAdvancedEnv: sessionExpiration must be positive' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L81) |
-| 'setupSupabaseAdvancedEnv: mfaChallengeExpiration must be positive' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L85) |
-| 'setupSupabaseAdvancedEnv: siweNonceExpiration must be positive' | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L89) |
-| 'verifySupabaseAccessToken: malformed token (expected 3 segments)' | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L53) |
-| 'verifySupabaseAccessToken: unexpected JWT header (expected HS256/JWT)' | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L57) |
-| 'verifySupabaseAccessToken: signature mismatch' | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L65) |
-| 'verifySupabaseAccessToken: payload is not valid JSON' | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L71) |
-| 'verifySupabaseAccessToken: token expired' | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L75) |
-| 'setupSupabaseAuthEnv: either email or phone is required' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L113) |
-| `setupSupabaseAuthEnv: cannot seed token, user with email ${seed.userEmail} not found` | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L200) |
-| 'signInWithPassword: invalid login credentials' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L239) |
-| 'signInWithPassword: invalid login credentials' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L242) |
-| 'signInWithOtp: user not found and shouldCreateUser is false' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L257) |
-| 'exchangeCodeForSession: invalid or expired authorization code' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L300) |
-| 'verifyOtp: invalid or expired OTP' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L328) |
-| 'verifyOtp: OTP has expired' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L331) |
-| 'verifyOtp: user not found after OTP consumption' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L338) |
-| 'refreshSession: invalid refresh token' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L355) |
-| 'refreshSession: user backing session no longer exists' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L359) |
-| 'getUser: user backing session no longer exists' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L388) |
-| 'getUser: session revoked' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L391) |
-| 'admin.createUser: either email or phone is required' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L399) |
-| 'setupSupabaseAuthEnv: sessionExpiration must be a positive number of seconds' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L41) |
-| `admin.getUserById: user ${id} not found` | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L415) |
-| 'setupSupabaseAuthEnv: otpExpiration must be a positive number of seconds' | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L47) |
-| `Supabase store: user with email ${patch.email} already exists` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L100) |
-| `Supabase store: user with phone ${patch.phone} already exists` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L107) |
-| `Supabase store: user ${id} not found` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L118) |
-| `Supabase store: session ${id} not found` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L159) |
-| `Supabase store: user with email ${user.email} already exists` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L73) |
-| `Supabase store: user with phone ${user.phone} already exists` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L76) |
-| `Supabase store: user ${id} not found` | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L95) |
-| 'credentialAssertion: no user-present authenticator can serve the requested credentials' | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L102) |
-| 'credentialAssertion: userVerification=required but authenticator does not support user verification' | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L109) |
-| 'credentialAssertion: rpId is required' | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L68) |
-| 'credentialAssertion: challenge is required' | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L71) |
-| allowList.length ? 'credentialAssertion: allowCredentials matched no stored credential' : 'credentialAssertion: no credentials are registered — call credentialCreation first' | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L80) |
-| `createVirtualAuthenticator: unknown attachment "${attachment}" — expected "platform" or "cross-platform"` | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L35) |
-| `createVirtualAuthenticator: unknown transport "${transport}" — expected one of internal / usb / nfc / ble / hybrid` | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L47) |
-| `createVirtualAuthenticator: platform attachment requires internal transport, got "${transport}"` | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L54) |
-| 'createVirtualAuthenticator: cross-platform attachment cannot use internal transport' | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L59) |
-| 'credentialCreation: rp.id is required' | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L49) |
-| 'credentialCreation: user.id is required' | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L52) |
-| 'credentialCreation: challenge is required' | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L55) |
-| `credentialCreation: authenticatorAttachment "${selection.authenticatorAttachment}" does not match authenticator "${authenticator.attachment}"` | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L62) |
-| 'credentialCreation: userVerification=required but authenticator does not support user verification' | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L67) |
-| 'credentialCreation: residentKey=required but authenticator does not have resident key storage' | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L73) |
-| `credentialCreation: excludeCredentials matched existing credential "${excluded.id}"` | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L81) |
-| 'setupWebAuthnEnv: no authenticator available — call addAuthenticator first or preseed via options.authenticators' | [packages/auth/src/webauthn/setup-webauthn-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L69) |
-| `setupWebAuthnEnv: unknown authenticatorId "${authenticatorId}"` | [packages/auth/src/webauthn/setup-webauthn-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L76) |
+| <code v-pre>updateUser: unknown id $&#123;patch.id&#125;</code> | [packages/auth/src/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/adapter.ts#L56) |
+| <code v-pre>verifyAuth0AccessToken: audience mismatch (expected $&#123;expected.audience&#125;, got $&#123;JSON.stringify(claims.aud)&#125;)</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L103) |
+| <code v-pre>verifyAuth0Jwt: malformed token (expected 3 segments)</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L113) |
+| <code v-pre>verifyAuth0Jwt: unexpected JWT header (expected HS256/JWT)</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L117) |
+| <code v-pre>verifyAuth0Jwt: signature mismatch</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L123) |
+| <code v-pre>verifyAuth0Jwt: payload is not valid JSON</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L129) |
+| <code v-pre>verifyAuth0Jwt: token expired</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L133) |
+| <code v-pre>verifyAuth0IdToken: issuer mismatch (expected $&#123;expected.issuer&#125;, got $&#123;claims.iss&#125;)</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L71) |
+| <code v-pre>verifyAuth0IdToken: audience mismatch (expected $&#123;expected.audience&#125;, got $&#123;String(claims.aud)&#125;)</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L76) |
+| <code v-pre>verifyAuth0AccessToken: issuer mismatch (expected $&#123;expected.issuer&#125;, got $&#123;claims.iss&#125;)</code> | [packages/auth/src/auth0/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L95) |
+| <code v-pre>Auth0 users.get: not found $&#123;userId&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L320) |
+| <code v-pre>Auth0 authenticate.signIn: unknown user email $&#123;input.email&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L349) |
+| <code v-pre>Auth0 authenticate.signIn: user $&#123;user.user&#95;id&#125; is blocked</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L352) |
+| <code v-pre>Auth0 authenticate.signIn: no password on file for $&#123;user.user&#95;id&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L361) |
+| <code v-pre>Auth0 authenticate.signIn: incorrect password for $&#123;input.email&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L366) |
+| <code v-pre>Auth0 authenticate.signIn: access denied — $&#123;acted.deniedReason&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L393) |
+| <code v-pre>Auth0 authenticate.signUp: user with email $&#123;input.email&#125; already exists</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L420) |
+| <code v-pre>Auth0 authenticate.signUp: registration denied — $&#123;preActed.deniedReason&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L451) |
+| <code v-pre>setupAuth0Env: tokenExpiration must be a positive number of seconds</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L56) |
+| <code v-pre>Auth0 setAppMetadata: unknown user id $&#123;userId&#125;</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L563) |
+| <code v-pre>setupAuth0Env: email must be a valid email (got $&#123;input.email&#125;)</code> | [packages/auth/src/auth0/setup-auth0-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L84) |
+| <code v-pre>Auth0 store: user with email $&#123;user.email&#125; already exists</code> | [packages/auth/src/auth0/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/store.ts#L43) |
+| <code v-pre>Auth0 store: unknown user id $&#123;userId&#125;</code> | [packages/auth/src/auth0/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/store.ts#L59) |
+| <code v-pre>createUser: email already registered ($&#123;input.email&#125;)</code> | [packages/auth/src/better-auth/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/adapter.ts#L54) |
+| <code v-pre>updateUser: unknown id $&#123;patch.id&#125;</code> | [packages/auth/src/better-auth/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/adapter.ts#L80) |
+| <code v-pre>hashPassword: password must not be empty</code> | [packages/auth/src/better-auth/password.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/password.ts#L29) |
+| <code v-pre>Unknown Better Auth provider kind: $&#123;String(kind)&#125;</code> | [packages/auth/src/better-auth/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L48) |
+| <code v-pre>setupBetterAuthEnv: provider "$&#123;provider&#125;" was not configured</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L103) |
+| <code v-pre>sendMagicLink: email is required</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L133) |
+| <code v-pre>consumeMagicLink: invalid or expired token</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L147) |
+| <code v-pre>enrollTwoFactor: unknown user id $&#123;input.userId&#125;</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L169) |
+| <code v-pre>verifyTwoFactorCode: user is not enrolled in 2FA</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L179) |
+| <code v-pre>createOrganization: unknown user id $&#123;input.userId&#125;</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L205) |
+| <code v-pre>inviteToOrganization: unknown organization id $&#123;input.organizationId&#125;</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L228) |
+| <code v-pre>inviteToOrganization: unknown user id $&#123;input.userId&#125;</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L234) |
+| <code v-pre>registerPasskey: unknown user id $&#123;input.userId&#125;</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L250) |
+| <code v-pre>setupBetterAuthEnv: providers must contain at least one entry</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L42) |
+| <code v-pre>setupBetterAuthEnv: sessionExpiration must be a positive number of seconds</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L46) |
+| <code v-pre>setupBetterAuthEnv: verificationExpiration must be a positive number of seconds</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L53) |
+| <code v-pre>setupBetterAuthEnv: $&#123;method&#125; requires the "$&#123;kind&#125;" plugin to be enabled</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L66) |
+| <code v-pre>signUpWithPassword: email is required</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L74) |
+| <code v-pre>signInWithPassword: invalid email or password</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L89) |
+| <code v-pre>signInWithPassword: invalid email or password</code> | [packages/auth/src/better-auth/setup-better-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L92) |
+| <code v-pre>verifyClerkJwt: malformed token (expected 3 segments)</code> | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L52) |
+| <code v-pre>verifyClerkJwt: unexpected JWT header (expected HS256/JWT)</code> | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L56) |
+| <code v-pre>verifyClerkJwt: signature mismatch</code> | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L62) |
+| <code v-pre>verifyClerkJwt: payload is not valid JSON</code> | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L68) |
+| <code v-pre>verifyClerkJwt: token expired</code> | [packages/auth/src/clerk/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L72) |
+| <code v-pre>setupClerkEnv: unknown user id $&#123;input.userId&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L140) |
+| <code v-pre>setupClerkEnv: unknown organization slug $&#123;input.organizationSlug&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L146) |
+| <code v-pre>setupClerkEnv: cannot seed organization, unknown user email $&#123;seed.createdByEmail&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L183) |
+| <code v-pre>setupClerkEnv: cannot seed token, unknown user email $&#123;seed.userEmail&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L210) |
+| <code v-pre>Clerk users.getUser: not found $&#123;id&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L232) |
+| <code v-pre>Clerk sessions.getSession: not found $&#123;id&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L267) |
+| <code v-pre>Clerk sessions.revokeSession: not found $&#123;id&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L274) |
+| <code v-pre>Clerk organizations.createOrganization: unknown creator id $&#123;input.createdBy&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L287) |
+| <code v-pre>Clerk organizations.getOrganization: not found $&#123;id&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L314) |
+| <code v-pre>Clerk organizations.createMembership: unknown organization $&#123;input.organizationId&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L324) |
+| <code v-pre>Clerk organizations.createMembership: unknown user $&#123;input.userId&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L330) |
+| <code v-pre>setupClerkEnv: sessionExpiration must be a positive number of seconds</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L35) |
+| <code v-pre>Clerk organizations.updateMembership: not found $&#123;input.organizationId&#125;/$&#123;input.userId&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L355) |
+| <code v-pre>verifyToken: session $&#123;claims.sid&#125; not found</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L375) |
+| <code v-pre>verifyToken: session $&#123;claims.sid&#125; status is $&#123;session.status&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L380) |
+| <code v-pre>verifyToken: session $&#123;claims.sid&#125; expired</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L385) |
+| <code v-pre>verifyToken: user $&#123;claims.sub&#125; not found</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L389) |
+| <code v-pre>setupClerkEnv.signIn: unknown user email $&#123;input.email&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L400) |
+| <code v-pre>setupClerkEnv: cannot issue token, organization slug not found: $&#123;input.organizationSlug&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L58) |
+| <code v-pre>setupClerkEnv: cannot issue token, user $&#123;input.user.id&#125; is not a member of org $&#123;org.id&#125;</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L64) |
+| <code v-pre>setupClerkEnv: primaryEmailAddress must be a valid email (got $&#123;input.primaryEmailAddress&#125;)</code> | [packages/auth/src/clerk/setup-clerk-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L98) |
+| <code v-pre>Clerk store: unknown session id $&#123;id&#125;</code> | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L132) |
+| <code v-pre>Clerk store: organization with slug $&#123;org.slug&#125; already exists</code> | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L142) |
+| <code v-pre>Clerk store: user $&#123;membership.userId&#125; already a member of org $&#123;membership.organizationId&#125;</code> | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L157) |
+| <code v-pre>Clerk store: membership $&#123;orgId&#125;/$&#123;userId&#125; not found</code> | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L171) |
+| <code v-pre>Clerk store: user with email $&#123;user.primaryEmailAddress&#125; already exists</code> | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L79) |
+| <code v-pre>Clerk store: unknown user id $&#123;id&#125;</code> | [packages/auth/src/clerk/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/store.ts#L95) |
+| <code v-pre>createUser: email already registered ($&#123;input.email&#125;)</code> | [packages/auth/src/lucia/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/adapter.ts#L34) |
+| <code v-pre>updateUser: unknown id $&#123;patch.id&#125;</code> | [packages/auth/src/lucia/adapter.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/adapter.ts#L55) |
+| <code v-pre>hashPassword: password must not be empty</code> | [packages/auth/src/lucia/password.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/password.ts#L40) |
+| <code v-pre>Unknown Lucia provider kind: $&#123;String(kind)&#125;</code> | [packages/auth/src/lucia/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L48) |
+| <code v-pre>setupLuciaEnv: providers must contain at least one entry</code> | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L35) |
+| <code v-pre>setupLuciaEnv: sessionExpiration must be a positive number of seconds</code> | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L39) |
+| <code v-pre>signUpWithPassword: email is required</code> | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L47) |
+| <code v-pre>signInWithPassword: invalid email or password</code> | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L57) |
+| <code v-pre>signInWithPassword: invalid email or password</code> | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L60) |
+| <code v-pre>setupLuciaEnv: provider "$&#123;provider&#125;" was not configured</code> | [packages/auth/src/lucia/setup-lucia-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L71) |
+| <code v-pre>authorization-server: redirect&#95;uri "$&#123;redirectUri&#125;" not registered for client "$&#123;client.clientId&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L105) |
+| <code v-pre>authorization-server: user "$&#123;user.subject&#125;" not entitled to scope "$&#123;scope&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L131) |
+| <code v-pre>authorization-server: client "$&#123;client.clientId&#125;" not registered for scope "$&#123;scope&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L136) |
+| <code v-pre>authorize: response&#95;type "$&#123;request.responseType&#125;" refused — OAuth 2.1 requires "code" (implicit + hybrid dropped by RFC 9700)</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L149) |
+| <code v-pre>authorize: code&#95;challenge&#95;method "plain" refused — RFC 9700 §2.1.1 requires S256</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L154) |
+| <code v-pre>authorize: unknown code&#95;challenge&#95;method "$&#123;request.codeChallengeMethod&#125;" — expected S256</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L159) |
+| <code v-pre>authorize: code&#95;challenge missing — PKCE always mandatory in OAuth 2.1</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L164) |
+| <code v-pre>authorize: state parameter missing — required for CSRF defence</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L169) |
+| <code v-pre>token: grant&#95;type "$&#123;grantType&#125;" refused — dropped by OAuth 2.1 / RFC 9700</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L203) |
+| <code v-pre>token: unknown grant&#95;type "$&#123;grantType&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L208) |
+| <code v-pre>token: unknown authorization code "$&#123;request.code&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L222) |
+| <code v-pre>token: authorization code "$&#123;request.code&#125;" already exchanged — replay refused</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L225) |
+| <code v-pre>token: client&#95;id mismatch — code issued to "$&#123;record.clientId&#125;", exchanged by "$&#123;request.clientId&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L230) |
+| <code v-pre>token: redirect&#95;uri mismatch — code recorded "$&#123;record.redirectUri&#125;", exchanged with "$&#123;request.redirectUri&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L235) |
+| <code v-pre>token: PKCE code&#95;verifier does not match recorded code&#95;challenge</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L246) |
+| <code v-pre>token: refresh&#95;token "$&#123;request.refreshToken&#125;" has been rotated — reuse refused (RFC 9700 §2.2 rotation family compromise)</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L285) |
+| <code v-pre>token: unknown refresh&#95;token "$&#123;request.refreshToken&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L289) |
+| <code v-pre>token: refresh&#95;token "$&#123;request.refreshToken&#125;" is revoked — refresh refused</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L292) |
+| <code v-pre>token: client&#95;id mismatch — refresh&#95;token issued to "$&#123;existing.clientId&#125;", used by "$&#123;request.clientId&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L297) |
+| <code v-pre>token: refresh&#95;token "$&#123;request.refreshToken&#125;" is expired</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L302) |
+| <code v-pre>token: refresh&#95;token is DPoP-bound but no DPoP proof was supplied</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L309) |
+| <code v-pre>token: DPoP JWK thumbprint mismatch — refresh&#95;token bound to a different key</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L314) |
+| <code v-pre>token: refresh scope "$&#123;scope&#125;" not in original grant "$&#123;existing.scope&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L328) |
+| <code v-pre>revoke: token belongs to client "$&#123;access.clientId&#125;", revocation attempted by "$&#123;clientId&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L393) |
+| <code v-pre>revoke: refresh&#95;token belongs to client "$&#123;refresh.clientId&#125;", revocation attempted by "$&#123;clientId&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L403) |
+| <code v-pre>registerClient: client "$&#123;client.clientId&#125;" already registered</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L67) |
+| <code v-pre>registerUser: user "$&#123;user.subject&#125;" already registered</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L76) |
+| <code v-pre>authorization-server: unknown client&#95;id "$&#123;clientId&#125;"</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L86) |
+| <code v-pre>authorization-server: unknown subject "$&#123;subject&#125;" — preseed via options.users or call registerUser</code> | [packages/auth/src/oauth21/authorization-server.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L96) |
+| <code v-pre>parseDpopProof: expected compact JWT with 3 segments, got $&#123;parts.length&#125;</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L112) |
+| <code v-pre>parseDpopProof: expected typ=dpop+jwt, got typ="$&#123;headerRaw?.typ&#125;"</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L120) |
+| <code v-pre>parseDpopProof: expected alg=ES256, got alg="$&#123;headerRaw?.alg&#125;"</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L125) |
+| <code v-pre>parseDpopProof: expected EC P-256 jwk in header, got kty="$&#123;headerRaw?.jwk?.kty&#125;"</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L130) |
+| <code v-pre>verifyDpopProof: htm mismatch — expected "$&#123;options.expectedHtm.toUpperCase()&#125;", got "$&#123;parsed.payload.htm&#125;"</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L174) |
+| <code v-pre>verifyDpopProof: htu mismatch — expected "$&#123;options.expectedHtu&#125;", got "$&#123;parsed.payload.htu&#125;"</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L179) |
+| <code v-pre>verifyDpopProof: iat outside allowed skew (delta=$&#123;iatDelta&#125;s, allowed=$&#123;options.iatSkewSec&#125;s)</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L186) |
+| <code v-pre>verifyDpopProof: proof missing jti</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L191) |
+| <code v-pre>verifyDpopProof: jti "$&#123;parsed.payload.jti&#125;" replay detected</code> | [packages/auth/src/oauth21/dpop.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L194) |
+| <code v-pre>deriveCodeChallenge: PKCE method "plain" is forbidden by RFC 9700 — use S256</code> | [packages/auth/src/oauth21/pkce.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L63) |
+| <code v-pre>deriveCodeChallenge: unknown PKCE method "$&#123;method&#125;" — expected S256</code> | [packages/auth/src/oauth21/pkce.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L68) |
+| <code v-pre>deriveCodeChallenge: code verifier must be 43-128 chars (got $&#123;verifier.length&#125;)</code> | [packages/auth/src/oauth21/pkce.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L73) |
+| <code v-pre>rotateRefreshToken: refresh token "$&#123;previous.token&#125;" is already revoked — rotation not permitted (RFC 9700 §2.2 replay defence)</code> | [packages/auth/src/oauth21/refresh-rotation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L101) |
+| <code v-pre>dynamicClientRegistration: &#96;redirect&#95;uris&#96; must be a non-empty array (RFC 7591 §2)</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L182) |
+| <code v-pre>dynamicClientRegistration: every redirect&#95;uri must be a non-empty string (got "$&#123;uri&#125;")</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L188) |
+| <code v-pre>dynamicClientRegistration: redirect&#95;uri "$&#123;uri&#125;" is not a valid URL</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L197) |
+| <code v-pre>dynamicClientRegistration: grant&#95;type "$&#123;grant&#125;" refused — OAuth 2.1 allowlist is $&#123;&#91;...ALLOWED&#95;GRANT&#95;TYPES&#93;.join(', ')&#125;</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L206) |
+| <code v-pre>dynamicClientRegistration: response&#95;type "$&#123;responseType&#125;" refused — OIDC Discovery advertises "code" only</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L215) |
+| <code v-pre>dynamicClientRegistration: token&#95;endpoint&#95;auth&#95;method "$&#123;authMethod&#125;" refused — advertised methods are $&#123;&#91;...ALLOWED&#95;AUTH&#95;METHODS&#93;.join(', ')&#125;</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L223) |
+| <code v-pre>dynamicClientRegistration: software&#95;statement supplied but no trust anchor configured on the AS</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L246) |
+| <code v-pre>dynamicClientRegistration: software&#95;statement parse failed — $&#123;(err as Error).message&#125;</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L254) |
+| <code v-pre>dynamicClientRegistration: software&#95;statement signature verification failed</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L269) |
+| <code v-pre>software&#95;statement: expected 3 dot-separated segments, got $&#123;parts.length&#125;</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L92) |
+| <code v-pre>createDiscoveryEndpoint: metadata.issuer "$&#123;metadata.issuer&#125;" must match endpoint issuer "$&#123;issuer&#125;" (OIDC Discovery §4.3)</code> | [packages/auth/src/oidc/discovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/discovery.ts#L82) |
+| <code v-pre>performBLEHandshake: sessionId is empty — cannot correlate BLE advertisement with QR payload</code> | [packages/auth/src/passkey/caBLE/ble-handshake.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/ble-handshake.ts#L47) |
+| <code v-pre>migrateCredential: cannot migrate credential over unestablished tunnel "$&#123;tunnel.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L35) |
+| <code v-pre>migrateCredential: cannot migrate credential over closed tunnel "$&#123;tunnel.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L40) |
+| <code v-pre>performSignatureRoundtrip: cannot sign over unestablished tunnel "$&#123;tunnel.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L72) |
+| <code v-pre>performSignatureRoundtrip: cannot sign over closed tunnel "$&#123;tunnel.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L77) |
+| <code v-pre>performSignatureRoundtrip: challenge is empty — cannot produce a WebAuthn L3 §7.2 assertion signature over an empty challenge</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L82) |
+| <code v-pre>generateCaBLEQRCode: tunnelServerHint is empty — cannot advertise a hybrid transport ceremony without a tunnel endpoint</code> | [packages/auth/src/passkey/caBLE/qr-code.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L32) |
+| <code v-pre>generateCaBLEQRCode: nonce is empty — cannot derive a replay-safe handshake without a nonce</code> | [packages/auth/src/passkey/caBLE/qr-code.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L37) |
+| <code v-pre>establishWebSocketTunnel: BLE handshake not verified — real caBLE refuses to open the tunnel when the shared secret cannot be derived by both sides</code> | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L30) |
+| <code v-pre>establishWebSocketTunnel: session id mismatch — QR "$&#123;qr.sessionId&#125;" vs handshake "$&#123;handshake.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L35) |
+| <code v-pre>establishWebSocketTunnel: cannot send on closed tunnel "$&#123;qr.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L47) |
+| <code v-pre>establishWebSocketTunnel: cannot drain closed tunnel "$&#123;qr.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/websocket-tunnel.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L55) |
+| <code v-pre>requireFabric: sync fabric vendor "$&#123;vendor&#125;" is not registered on this env</code> | [packages/auth/src/passkey/credential-sync.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/credential-sync.ts#L113) |
+| <code v-pre>backupCredential: credential "$&#123;credential.credentialId&#125;" is not backup-eligible — non-discoverable credentials cannot enter a sync fabric</code> | [packages/auth/src/passkey/credential-sync.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/credential-sync.ts#L26) |
+| <code v-pre>createPlatformAuthenticator: passkeys require hasResidentKey=true — a non-discoverable platform credential is not a passkey</code> | [packages/auth/src/passkey/platform.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/platform.ts#L21) |
+| <code v-pre>createPlatformAuthenticator: unknown biometric "$&#123;biometric&#125;" — expected touch-id / face-id / windows-hello / android-biometric</code> | [packages/auth/src/passkey/platform.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/platform.ts#L32) |
+| <code v-pre>createRoamingAuthenticator: unknown roaming kind "$&#123;kind&#125;" — expected security-key or phone</code> | [packages/auth/src/passkey/roaming.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/roaming.ts#L22) |
+| <code v-pre>setupPasskeyEnv: unknown deviceId "$&#123;deviceId&#125;" — call addDevice first or preseed via options.devices</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L112) |
+| <code v-pre>setupPasskeyEnv: credential "$&#123;credentialId&#125;" is not registered on any device</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L134) |
+| <code v-pre>setupPasskeyEnv: passkey metadata missing for credential "$&#123;credentialId&#125;" — was it minted through createPasskey?</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L140) |
+| <code v-pre>setupPasskeyEnv: device "$&#123;deviceId&#125;" is already registered</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L156) |
+| <code v-pre>setupPasskeyEnv: device "$&#123;device.deviceId&#125;" has no authenticator — call addPlatformAuthenticator or addRoamingAuthenticator first</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L194) |
+| <code v-pre>setupPasskeyEnv: authenticator "$&#123;authenticatorId&#125;" is not registered on device "$&#123;device.deviceId&#125;"</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L203) |
+| <code v-pre>restoreCredential: fabric "$&#123;vendor&#125;" does not hold credential "$&#123;credentialId&#125;" — call backupCredential first</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L327) |
+| <code v-pre>restoreCredential: credential "$&#123;credentialId&#125;" belongs to user "$&#123;blob.userId&#125;" — user "$&#123;userId&#125;" cannot restore it</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L332) |
+| <code v-pre>restoreCredential: device "$&#123;targetDeviceId&#125;" has no authenticator to host the restored credential</code> | [packages/auth/src/passkey/setup-passkey-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L337) |
+| <code v-pre>createSyncFabric: unknown vendor "$&#123;vendor&#125;" — expected icloud-keychain or google-password-manager</code> | [packages/auth/src/passkey/sync-fabric.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/sync-fabric.ts#L16) |
+| <code v-pre>Email provider requires an email address for the magic link</code> | [packages/auth/src/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L52) |
+| <code v-pre>Unknown provider kind: $&#123;String(kind)&#125;</code> | [packages/auth/src/providers.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L67) |
+| <code v-pre>extendSession: session in revocation window, cannot extend</code> | [packages/auth/src/semantics/auth-continuity.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-continuity.ts#L102) |
+| <code v-pre>seamlessReauth: session in revocation window, cannot reauth</code> | [packages/auth/src/semantics/auth-continuity.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-continuity.ts#L52) |
+| <code v-pre>rotateRefresh: session in revocation window, cannot rotate</code> | [packages/auth/src/semantics/auth-continuity.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-continuity.ts#L75) |
+| <code v-pre>detectAbuse: no attempts recorded</code> | [packages/auth/src/semantics/auth-telemetry.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-telemetry.ts#L117) |
+| <code v-pre>updateSuccessRate: no attempts recorded</code> | [packages/auth/src/semantics/auth-telemetry.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/auth-telemetry.ts#L67) |
+| <code v-pre>markTimeout: session is $&#123;session.state&#125;, expected hint-shown</code> | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L109) |
+| <code v-pre>markTimeout: nowMs $&#123;input.nowMs&#125; &lt; timeoutMs $&#123;session.timeoutMs&#125;</code> | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L112) |
+| <code v-pre>showHint: session is $&#123;session.state&#125;, expected idle</code> | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L42) |
+| <code v-pre>selectAutofill: session is $&#123;session.state&#125;, expected hint-shown</code> | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L61) |
+| <code v-pre>triggerFallback: session is $&#123;session.state&#125;, expected hint-shown</code> | [packages/auth/src/semantics/conditional-ui.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/conditional-ui.ts#L85) |
+| <code v-pre>continuous-auth: cannot complete step-up from state "$&#123;input.session.state&#125;" (must be step-up-required)</code> | [packages/auth/src/semantics/continuous-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/continuous-auth.ts#L115) |
+| <code v-pre>completeHandshake: session is $&#123;session.state&#125;, expected tunnel-opened</code> | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L110) |
+| <code v-pre>generateQr: session is $&#123;session.state&#125;, expected idle</code> | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L44) |
+| <code v-pre>pairBle: session is $&#123;session.state&#125;, expected qr-generated</code> | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L64) |
+| <code v-pre>openTunnel: session is $&#123;session.state&#125;, expected ble-paired</code> | [packages/auth/src/semantics/cross-device-flow.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/cross-device-flow.ts#L88) |
+| <code v-pre>confirmCredProps: session is idle, bind first</code> | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L111) |
+| <code v-pre>bindToDevice: session is $&#123;session.state&#125;, expected idle</code> | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L44) |
+| <code v-pre>verifySyncFabric: session is $&#123;session.state&#125;, expected device-bound</code> | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L64) |
+| <code v-pre>verifySyncFabric: no sync fabric configured</code> | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L67) |
+| <code v-pre>migrateCredential: session is $&#123;session.state&#125;, cannot migrate</code> | [packages/auth/src/semantics/device-bound-passkey.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/device-bound-passkey.ts#L89) |
+| <code v-pre>applyPolicy: session is $&#123;session.state&#125;, cannot apply policy</code> | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L106) |
+| <code v-pre>evaluateScore: session is $&#123;session.state&#125;, expected idle</code> | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L52) |
+| <code v-pre>injectChallenge: session is $&#123;session.state&#125;, expected evaluated</code> | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L81) |
+| <code v-pre>injectChallenge: score $&#123;session.score&#125; not in challenge range &#91;$&#123;session.allowThreshold&#125;, $&#123;session.blockThreshold&#125;)</code> | [packages/auth/src/semantics/risk-based-auth.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/risk-based-auth.ts#L84) |
+| <code v-pre>reportConcurrentSession: count $&#123;input.concurrentSessionCount&#125; must be &gt; 1</code> | [packages/auth/src/semantics/session-hijack-detect.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/session-hijack-detect.ts#L88) |
+| <code v-pre>satisfyAal3: session is $&#123;session.state&#125;, expected escalation-requested</code> | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L100) |
+| <code v-pre>requestEscalation: requiredAal $&#123;input.requiredAal&#125; not higher than currentAal $&#123;session.currentAal&#125;</code> | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L46) |
+| <code v-pre>satisfyAal2: session is $&#123;session.state&#125;, expected escalation-requested</code> | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L72) |
+| <code v-pre>satisfyAal2: requiredAal is AAL3, cannot satisfy with AAL2</code> | [packages/auth/src/semantics/step-up-mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/step-up-mfa.ts#L75) |
+| <code v-pre>setupNextAuthEnv: unknown session strategy "$&#123;String(strategy)&#125;"</code> | [packages/auth/src/setup-nextauth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L23) |
+| <code v-pre>setupNextAuthEnv: providers must contain at least one entry</code> | [packages/auth/src/setup-nextauth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L28) |
+| <code v-pre>setupNextAuthEnv: provider "$&#123;providerKind&#125;" was not configured</code> | [packages/auth/src/setup-nextauth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L43) |
+| <code v-pre>base32Decode: invalid character $&#123;ch&#125;</code> | [packages/auth/src/supabase-advanced/mfa.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/mfa.ts#L110) |
+| <code v-pre>mapAttributes: missing or non-string email attribute (mapped from '$&#123;input.idp.attributeMap.email&#125;')</code> | [packages/auth/src/supabase-advanced/saml.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/saml.ts#L89) |
+| <code v-pre>createUser: email $&#123;input.email&#125; already exists</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L151) |
+| <code v-pre>enrollTotp: user $&#123;input.userId&#125; not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L256) |
+| <code v-pre>enrollPhone: user $&#123;input.userId&#125; not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L280) |
+| <code v-pre>issueBackupCodes: user $&#123;input.userId&#125; not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L297) |
+| <code v-pre>challenge: factor $&#123;input.factorId&#125; not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L322) |
+| <code v-pre>verifyChallenge: challenge $&#123;input.challengeId&#125; not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L340) |
+| <code v-pre>verifyChallenge: challenge already verified</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L342) |
+| <code v-pre>verifyChallenge: challenge expired</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L345) |
+| <code v-pre>verifyChallenge: factor no longer exists</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L348) |
+| <code v-pre>verifyChallenge: cannot verify challenge for backup factor</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L355) |
+| <code v-pre>verifyChallenge: invalid code</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L357) |
+| <code v-pre>consumeBackupCode: code invalid or already consumed</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L366) |
+| <code v-pre>initiateSsoLogin: invalid email</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L386) |
+| <code v-pre>initiateSsoLogin: no SAML IdP registered for domain $&#123;domain&#125;</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L391) |
+| <code v-pre>mintAssertion: authn request not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L404) |
+| <code v-pre>mintAssertion: idp no longer registered</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L406) |
+| <code v-pre>exchangeAssertion: signature mismatch</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L421) |
+| <code v-pre>exchangeAssertion: assertion expired</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L424) |
+| <code v-pre>exchangeAssertion: no matching AuthnRequest for RelayState</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L430) |
+| <code v-pre>exchangeAssertion: IdP no longer registered</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L432) |
+| <code v-pre>verifySiweMessage: challenge not found</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L498) |
+| <code v-pre>verifySiweMessage: nonce already consumed</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L499) |
+| <code v-pre>verifySiweMessage: nonce expired</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L501) |
+| <code v-pre>verifySiweMessage: signature does not match message address</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L505) |
+| <code v-pre>verifySiweMessage: signature verification failed</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L514) |
+| <code v-pre>setupSupabaseAdvancedEnv: sessionExpiration must be positive</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L81) |
+| <code v-pre>setupSupabaseAdvancedEnv: mfaChallengeExpiration must be positive</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L85) |
+| <code v-pre>setupSupabaseAdvancedEnv: siweNonceExpiration must be positive</code> | [packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L89) |
+| <code v-pre>verifySupabaseAccessToken: malformed token (expected 3 segments)</code> | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L53) |
+| <code v-pre>verifySupabaseAccessToken: unexpected JWT header (expected HS256/JWT)</code> | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L57) |
+| <code v-pre>verifySupabaseAccessToken: signature mismatch</code> | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L65) |
+| <code v-pre>verifySupabaseAccessToken: payload is not valid JSON</code> | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L71) |
+| <code v-pre>verifySupabaseAccessToken: token expired</code> | [packages/auth/src/supabase/jwt.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L75) |
+| <code v-pre>setupSupabaseAuthEnv: either email or phone is required</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L113) |
+| <code v-pre>setupSupabaseAuthEnv: cannot seed token, user with email $&#123;seed.userEmail&#125; not found</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L200) |
+| <code v-pre>signInWithPassword: invalid login credentials</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L239) |
+| <code v-pre>signInWithPassword: invalid login credentials</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L242) |
+| <code v-pre>signInWithOtp: user not found and shouldCreateUser is false</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L257) |
+| <code v-pre>exchangeCodeForSession: invalid or expired authorization code</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L300) |
+| <code v-pre>verifyOtp: invalid or expired OTP</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L328) |
+| <code v-pre>verifyOtp: OTP has expired</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L331) |
+| <code v-pre>verifyOtp: user not found after OTP consumption</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L338) |
+| <code v-pre>refreshSession: invalid refresh token</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L355) |
+| <code v-pre>refreshSession: user backing session no longer exists</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L359) |
+| <code v-pre>getUser: user backing session no longer exists</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L388) |
+| <code v-pre>getUser: session revoked</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L391) |
+| <code v-pre>admin.createUser: either email or phone is required</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L399) |
+| <code v-pre>setupSupabaseAuthEnv: sessionExpiration must be a positive number of seconds</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L41) |
+| <code v-pre>admin.getUserById: user $&#123;id&#125; not found</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L415) |
+| <code v-pre>setupSupabaseAuthEnv: otpExpiration must be a positive number of seconds</code> | [packages/auth/src/supabase/setup-supabase-auth-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L47) |
+| <code v-pre>Supabase store: user with email $&#123;patch.email&#125; already exists</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L100) |
+| <code v-pre>Supabase store: user with phone $&#123;patch.phone&#125; already exists</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L107) |
+| <code v-pre>Supabase store: user $&#123;id&#125; not found</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L118) |
+| <code v-pre>Supabase store: session $&#123;id&#125; not found</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L159) |
+| <code v-pre>Supabase store: user with email $&#123;user.email&#125; already exists</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L73) |
+| <code v-pre>Supabase store: user with phone $&#123;user.phone&#125; already exists</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L76) |
+| <code v-pre>Supabase store: user $&#123;id&#125; not found</code> | [packages/auth/src/supabase/store.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/store.ts#L95) |
+| <code v-pre>credentialAssertion: no user-present authenticator can serve the requested credentials</code> | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L102) |
+| <code v-pre>credentialAssertion: userVerification=required but authenticator does not support user verification</code> | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L109) |
+| <code v-pre>credentialAssertion: rpId is required</code> | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L68) |
+| <code v-pre>credentialAssertion: challenge is required</code> | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L71) |
+| <code v-pre>allowList.length ? 'credentialAssertion: allowCredentials matched no stored credential' : 'credentialAssertion: no credentials are registered — call credentialCreation first'</code> | [packages/auth/src/webauthn/assertion.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/assertion.ts#L80) |
+| <code v-pre>createVirtualAuthenticator: unknown attachment "$&#123;attachment&#125;" — expected "platform" or "cross-platform"</code> | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L35) |
+| <code v-pre>createVirtualAuthenticator: unknown transport "$&#123;transport&#125;" — expected one of internal / usb / nfc / ble / hybrid</code> | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L47) |
+| <code v-pre>createVirtualAuthenticator: platform attachment requires internal transport, got "$&#123;transport&#125;"</code> | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L54) |
+| <code v-pre>createVirtualAuthenticator: cross-platform attachment cannot use internal transport</code> | [packages/auth/src/webauthn/authenticator.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L59) |
+| <code v-pre>credentialCreation: rp.id is required</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L49) |
+| <code v-pre>credentialCreation: user.id is required</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L52) |
+| <code v-pre>credentialCreation: challenge is required</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L55) |
+| <code v-pre>credentialCreation: authenticatorAttachment "$&#123;selection.authenticatorAttachment&#125;" does not match authenticator "$&#123;authenticator.attachment&#125;"</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L62) |
+| <code v-pre>credentialCreation: userVerification=required but authenticator does not support user verification</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L67) |
+| <code v-pre>credentialCreation: residentKey=required but authenticator does not have resident key storage</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L73) |
+| <code v-pre>credentialCreation: excludeCredentials matched existing credential "$&#123;excluded.id&#125;"</code> | [packages/auth/src/webauthn/creation.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/creation.ts#L81) |
+| <code v-pre>setupWebAuthnEnv: no authenticator available — call addAuthenticator first or preseed via options.authenticators</code> | [packages/auth/src/webauthn/setup-webauthn-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L69) |
+| <code v-pre>setupWebAuthnEnv: unknown authenticatorId "$&#123;authenticatorId&#125;"</code> | [packages/auth/src/webauthn/setup-webauthn-env.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L76) |
 
 ## API 契約
 
@@ -325,9 +325,9 @@ provider が空の場合、または setup 時に登録していない provider 
 
 ### 値
 
-#### `__resetDcrCounter`
+#### <code v-pre>&#95;&#95;resetDcrCounter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L19) `packages/auth/src/oidc/dcr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L19) <code v-pre>packages/auth/src/oidc/dcr.ts</code>
 
 Reset the client_id counter. Called by `setupOidcEnv` when preparing a fresh env so repeated env constructions produce identical output.
 
@@ -335,17 +335,17 @@ Reset the client_id counter. Called by `setupOidcEnv` when preparing a fresh env
 export declare function __resetDcrCounter(): void;
 ```
 
-#### `__resetDpopCounters`
+#### <code v-pre>&#95;&#95;resetDpopCounters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L12) `packages/auth/src/oauth21/dpop.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L12) <code v-pre>packages/auth/src/oauth21/dpop.ts</code>
 
 ```ts
 export declare function __resetDpopCounters(): void;
 ```
 
-#### `__resetIdTokenCounter`
+#### <code v-pre>&#95;&#95;resetIdTokenCounter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L18) `packages/auth/src/oidc/id-token.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L18) <code v-pre>packages/auth/src/oidc/id-token.ts</code>
 
 Reset any module-scope state carried by the signer. Called by `setupOidcEnv` when preparing a fresh env so repeated env constructions produce identical output. Kept as a no-op today (the mock signature is deterministic from `header.payload.kid` without stateful entropy) so future additions have a stable reset seam.
 
@@ -353,9 +353,9 @@ Reset any module-scope state carried by the signer. Called by `setupOidcEnv` whe
 export declare function __resetIdTokenCounter(): void;
 ```
 
-#### `__resetJwksCounter`
+#### <code v-pre>&#95;&#95;resetJwksCounter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/jwks.ts#L15) `packages/auth/src/oidc/jwks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/jwks.ts#L15) <code v-pre>packages/auth/src/oidc/jwks.ts</code>
 
 Reset the kid counter. Called by `setupOidcEnv` when preparing a fresh env so repeated env constructions produce identical output.
 
@@ -363,9 +363,9 @@ Reset the kid counter. Called by `setupOidcEnv` when preparing a fresh env so re
 export declare function __resetJwksCounter(): void;
 ```
 
-#### `__resetOAuth21Counters`
+#### <code v-pre>&#95;&#95;resetOAuth21Counters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/setup-oauth21-env.ts#L24) `packages/auth/src/oauth21/setup-oauth21-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/setup-oauth21-env.ts#L24) <code v-pre>packages/auth/src/oauth21/setup-oauth21-env.ts</code>
 
 Reset every module-scope counter used by the OAuth 2.1 adapter so consecutive `setupOAuth21Env` calls produce stable, deterministic ids.
 
@@ -373,9 +373,9 @@ Reset every module-scope counter used by the OAuth 2.1 adapter so consecutive `s
 export declare function __resetOAuth21Counters(): void;
 ```
 
-#### `__resetOidcCounters`
+#### <code v-pre>&#95;&#95;resetOidcCounters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/setup-oidc-env.ts#L27) `packages/auth/src/oidc/setup-oidc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/setup-oidc-env.ts#L27) <code v-pre>packages/auth/src/oidc/setup-oidc-env.ts</code>
 
 Reset every module-scope counter used by the OIDC adapter so consecutive `setupOidcEnv` calls produce stable, deterministic ids.
 
@@ -383,9 +383,9 @@ Reset every module-scope counter used by the OIDC adapter so consecutive `setupO
 export declare function __resetOidcCounters(): void;
 ```
 
-#### `__resetPasskeyCounters`
+#### <code v-pre>&#95;&#95;resetPasskeyCounters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L42) `packages/auth/src/passkey/setup-passkey-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L42) <code v-pre>packages/auth/src/passkey/setup-passkey-env.ts</code>
 
 Reset the module-scoped counters imported from the WebAuthn base module so consecutive `setupPasskeyEnv` calls hand out stable, deterministic ids.
 
@@ -393,9 +393,9 @@ Reset the module-scoped counters imported from the WebAuthn base module so conse
 export declare function __resetPasskeyCounters(): void;
 ```
 
-#### `__resetPkceCounter`
+#### <code v-pre>&#95;&#95;resetPkceCounter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L18) `packages/auth/src/oauth21/pkce.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L18) <code v-pre>packages/auth/src/oauth21/pkce.ts</code>
 
 Reset the verifier counter. Called by `setupOAuth21Env` when preparing a fresh env so repeated env constructions produce identical output.
 
@@ -403,17 +403,17 @@ Reset the verifier counter. Called by `setupOAuth21Env` when preparing a fresh e
 export declare function __resetPkceCounter(): void;
 ```
 
-#### `__resetTokenCounters`
+#### <code v-pre>&#95;&#95;resetTokenCounters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L11) `packages/auth/src/oauth21/refresh-rotation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L11) <code v-pre>packages/auth/src/oauth21/refresh-rotation.ts</code>
 
 ```ts
 export declare function __resetTokenCounters(): void;
 ```
 
-#### `__resetWebAuthnCounters`
+#### <code v-pre>&#95;&#95;resetWebAuthnCounters</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L25) `packages/auth/src/webauthn/setup-webauthn-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L25) <code v-pre>packages/auth/src/webauthn/setup-webauthn-env.ts</code>
 
 Full test-env reset — restarts credential IDs and authenticator IDs from 1 so consecutive `setupWebAuthnEnv` calls produce stable, deterministic IDs. Exposed for tests that want to reset counters without tearing down the env object itself.
 
@@ -421,11 +421,11 @@ Full test-env reset — restarts credential IDs and authenticator IDs from 1 so 
 export declare function __resetWebAuthnCounters(): void;
 ```
 
-#### `backupPasskeyCredential`
+#### <code v-pre>backupPasskeyCredential</code>
 
 公開 entry point から解決しています。
 
-`backupCredential` を `backupPasskeyCredential` として公開しています。
+<code v-pre>backupCredential</code> を <code v-pre>backupPasskeyCredential</code> として公開しています。
 
 Push a credential blob into a sync fabric. Bumps the credential's sync epoch (real fabrics use this to detect concurrent updates across devices) and appends the vendor to `syncedFabrics` if it is not already present. Returns the updated credential — callers should replace their in-memory copy with the return value so subsequent backup / restore see the new epoch. Throws when the credential is not backup-eligible. Non-discoverable credentials minted on a bare U2F-style security key cannot participate in the fabric — the FIDO Alliance Passkey Provider spec requires the credential live on a device that can round-trip the private key material through the vendor's E2EE blob.
 
@@ -444,11 +444,11 @@ export {
 } from './passkey/index.js';
 ```
 
-#### `base64UrlDecodeWebAuthn`
+#### <code v-pre>base64UrlDecodeWebAuthn</code>
 
 公開 entry point から解決しています。
 
-`base64UrlDecode` を `base64UrlDecodeWebAuthn` として公開しています。
+<code v-pre>base64UrlDecode</code> を <code v-pre>base64UrlDecodeWebAuthn</code> として公開しています。
 
 ```ts
 export {
@@ -465,11 +465,11 @@ export {
 } from './webauthn/index.js';
 ```
 
-#### `base64UrlEncodeWebAuthn`
+#### <code v-pre>base64UrlEncodeWebAuthn</code>
 
 公開 entry point から解決しています。
 
-`base64UrlEncode` を `base64UrlEncodeWebAuthn` として公開しています。
+<code v-pre>base64UrlEncode</code> を <code v-pre>base64UrlEncodeWebAuthn</code> として公開しています。
 
 ```ts
 export {
@@ -486,35 +486,35 @@ export {
 } from './webauthn/index.js';
 ```
 
-#### `buildBetterAuthProviderRegistry`
+#### <code v-pre>buildBetterAuthProviderRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L41) `packages/auth/src/better-auth/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L41) <code v-pre>packages/auth/src/better-auth/providers.ts</code>
 
 ```ts
 export declare function buildBetterAuthProviderRegistry(kinds: BetterAuthProviderKind[]): Record<BetterAuthProviderKind, BetterAuthProviderMock>;
 ```
 
-#### `buildLuciaProviderRegistry`
+#### <code v-pre>buildLuciaProviderRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L41) `packages/auth/src/lucia/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L41) <code v-pre>packages/auth/src/lucia/providers.ts</code>
 
 ```ts
 export declare function buildLuciaProviderRegistry(kinds: LuciaProviderKind[]): Record<LuciaProviderKind, LuciaProviderMock>;
 ```
 
-#### `buildProviderRegistry`
+#### <code v-pre>buildProviderRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L59) `packages/auth/src/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L59) <code v-pre>packages/auth/src/providers.ts</code>
 
 ```ts
 export declare function buildProviderRegistry(kinds: ProviderKind[]): Record<ProviderKind, ProviderMock>;
 ```
 
-#### `buildSupabaseOtpAuthUri`
+#### <code v-pre>buildSupabaseOtpAuthUri</code>
 
 公開 entry point から解決しています。
 
-`buildOtpAuthUri` を `buildSupabaseOtpAuthUri` として公開しています。
+<code v-pre>buildOtpAuthUri</code> を <code v-pre>buildSupabaseOtpAuthUri</code> として公開しています。
 
 Build the standard `otpauth://` URI clients scan into an authenticator app.
 
@@ -532,11 +532,11 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `computeDpopJkt`
+#### <code v-pre>computeDpopJkt</code>
 
 公開 entry point から解決しています。
 
-`computeJkt` を `computeDpopJkt` として公開しています。
+<code v-pre>computeJkt</code> を <code v-pre>computeDpopJkt</code> として公開しています。
 
 Compute the JWK thumbprint (RFC 7638) for a DPoP JWK. Sender-constrained access tokens embed this thumbprint as `cnf.jkt` — the mock keeps the canonical member ordering (`crv`, `kty`, `x`, `y`) so identical JWKs always produce identical thumbprints.
 
@@ -563,9 +563,9 @@ export {
 } from './oauth21/index.js';
 ```
 
-#### `computeTokenHash`
+#### <code v-pre>computeTokenHash</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L49) `packages/auth/src/oidc/id-token.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L49) <code v-pre>packages/auth/src/oidc/id-token.ts</code>
 
 Compute the OIDC Core §3.1.3.6 hash (at_hash / c_hash). Left half of the SHA-256 of the ASCII string, base64url-encoded. For RS256 / ES256 the spec says "left half" — for a SHA-256 digest that's 16 bytes.
 
@@ -573,9 +573,9 @@ Compute the OIDC Core §3.1.3.6 hash (at_hash / c_hash). Left half of the SHA-25
 export declare function computeTokenHash(input: string): string;
 ```
 
-#### `createAuthorizationServer`
+#### <code v-pre>createAuthorizationServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L38) `packages/auth/src/oauth21/authorization-server.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/authorization-server.ts#L38) <code v-pre>packages/auth/src/oauth21/authorization-server.ts</code>
 
 Mock Authorization Server implementing the RFC 9700 (OAuth 2.1) endpoint surface: `/authorize`, `/token`, `/revoke`, `/introspect`. The mock keeps every piece of state in-memory so a test can drive the AS through method calls without HTTP plumbing. Notable enforcement (matches OAuth 2.1 hardening): - `response_type=code` only. `token` (implicit) is refused. - PKCE always mandatory. `code_challenge_method=plain` refused. - `grant_type=password` and `grant_type=client_credentials` refused. - Refresh tokens rotate on every use per RFC 9700 §2.2. - Revoked / expired / re-used refresh tokens are rejected. - DPoP-bound tokens verify the JWK thumbprint on `/token`. - `jti` replay defence guards the DPoP proof registry.
 
@@ -583,27 +583,27 @@ Mock Authorization Server implementing the RFC 9700 (OAuth 2.1) endpoint surface
 export declare function createAuthorizationServer(options?: AuthorizationServerOptions): AuthorizationServer;
 ```
 
-#### `createBetterAuthGithubProviderMock`
+#### <code v-pre>createBetterAuthGithubProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L32) `packages/auth/src/better-auth/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L32) <code v-pre>packages/auth/src/better-auth/providers.ts</code>
 
 ```ts
 export declare function createBetterAuthGithubProviderMock(): BetterAuthProviderMock;
 ```
 
-#### `createBetterAuthGoogleProviderMock`
+#### <code v-pre>createBetterAuthGoogleProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L23) `packages/auth/src/better-auth/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/providers.ts#L23) <code v-pre>packages/auth/src/better-auth/providers.ts</code>
 
 ```ts
 export declare function createBetterAuthGoogleProviderMock(): BetterAuthProviderMock;
 ```
 
-#### `createBetterAuthSessionFor`
+#### <code v-pre>createBetterAuthSessionFor</code>
 
 公開 entry point から解決しています。
 
-`createSessionFor` を `createBetterAuthSessionFor` として公開しています。
+<code v-pre>createSessionFor</code> を <code v-pre>createBetterAuthSessionFor</code> として公開しています。
 
 ```ts
 export {
@@ -615,9 +615,9 @@ export {
 } from './better-auth/session.js';
 ```
 
-#### `createDcrEndpoint`
+#### <code v-pre>createDcrEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L310) `packages/auth/src/oidc/dcr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L310) <code v-pre>packages/auth/src/oidc/dcr.ts</code>
 
 Build a DCR endpoint handle. Tests use this when they want to inspect the advertised URL alongside the registration side effects.
 
@@ -625,9 +625,9 @@ Build a DCR endpoint handle. Tests use this when they want to inspect the advert
 export declare function createDcrEndpoint(options: CreateDcrEndpointOptions): DcrEndpoint;
 ```
 
-#### `createDiscoveryEndpoint`
+#### <code v-pre>createDiscoveryEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/discovery.ts#L66) `packages/auth/src/oidc/discovery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/discovery.ts#L66) <code v-pre>packages/auth/src/oidc/discovery.ts</code>
 
 Build the OIDC discovery endpoint. The mock keeps every field in-memory; `fetch()` returns a fresh object so callers cannot mutate the underlying metadata by reference. The document is intentionally read-only. Tests that need to simulate an OP changing metadata should rebuild the discovery endpoint rather than reach into the returned object.
 
@@ -635,9 +635,9 @@ Build the OIDC discovery endpoint. The mock keeps every field in-memory; `fetch(
 export declare function createDiscoveryEndpoint(options: CreateDiscoveryEndpointOptions): DiscoveryEndpoint;
 ```
 
-#### `createDpopProof`
+#### <code v-pre>createDpopProof</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L71) `packages/auth/src/oauth21/dpop.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L71) <code v-pre>packages/auth/src/oauth21/dpop.ts</code>
 
 Fabricate a DPoP proof JWT. The mock builds the compact `header.payload.signature` form but keeps the signature as a deterministic placeholder — verification is done by re-parsing the JWT and matching fields against the recorded JWK / htm / htu / iat / jti, not by running a real ECDSA verification. Callers wanting to test signature failure paths mangle the returned `jwt` string before handing it back.
 
@@ -645,33 +645,33 @@ Fabricate a DPoP proof JWT. The mock builds the compact `header.payload.signatur
 export declare function createDpopProof(input: DpopProofInput): DpopProof;
 ```
 
-#### `createEmailProviderMock`
+#### <code v-pre>createEmailProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L45) `packages/auth/src/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L45) <code v-pre>packages/auth/src/providers.ts</code>
 
 ```ts
 export declare function createEmailProviderMock(): ProviderMock;
 ```
 
-#### `createGithubProviderMock`
+#### <code v-pre>createGithubProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L36) `packages/auth/src/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L36) <code v-pre>packages/auth/src/providers.ts</code>
 
 ```ts
 export declare function createGithubProviderMock(): ProviderMock;
 ```
 
-#### `createGoogleProviderMock`
+#### <code v-pre>createGoogleProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L27) `packages/auth/src/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/providers.ts#L27) <code v-pre>packages/auth/src/providers.ts</code>
 
 ```ts
 export declare function createGoogleProviderMock(): ProviderMock;
 ```
 
-#### `createIdTokenSigner`
+#### <code v-pre>createIdTokenSigner</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L88) `packages/auth/src/oidc/id-token.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L88) <code v-pre>packages/auth/src/oidc/id-token.ts</code>
 
 Build the id_token signer + verifier. Owns the JWKS endpoint reference so signing always uses the currently-active key + verification looks up the kid across the full JWKS (active + retained-retired keys, within the retention window).
 
@@ -679,9 +679,9 @@ Build the id_token signer + verifier. Owns the JWKS endpoint reference so signin
 export declare function createIdTokenSigner(options: CreateIdTokenSignerOptions): IdTokenSigner;
 ```
 
-#### `createInMemoryAdapter`
+#### <code v-pre>createInMemoryAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/adapter.ts#L21) `packages/auth/src/adapter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/adapter.ts#L21) <code v-pre>packages/auth/src/adapter.ts</code>
 
 In-memory database adapter compatible with the Auth.js adapter contract. `@auth/prisma-adapter` and `@auth/drizzle-adapter` both expose the same method names, so this mock is a drop-in for either surface during tests.
 
@@ -689,9 +689,9 @@ In-memory database adapter compatible with the Auth.js adapter contract. `@auth/
 export declare function createInMemoryAdapter(): AuthDatabaseAdapter;
 ```
 
-#### `createInMemoryBetterAuthAdapter`
+#### <code v-pre>createInMemoryBetterAuthAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/adapter.ts#L32) `packages/auth/src/better-auth/adapter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/adapter.ts#L32) <code v-pre>packages/auth/src/better-auth/adapter.ts</code>
 
 In-memory adapter that mirrors Better Auth's Prisma / Drizzle / Kysely adapter surface. All three official adapters expose the same operation set at the Better Auth layer (create / find / update / delete + a small verification + account surface), so this single implementation stands in for any of them — the `kind` tag is the only observable difference.
 
@@ -699,9 +699,9 @@ In-memory adapter that mirrors Better Auth's Prisma / Drizzle / Kysely adapter s
 export declare function createInMemoryBetterAuthAdapter(kind?: BetterAuthDatabaseKind): BetterAuthDatabaseAdapter;
 ```
 
-#### `createInMemoryLuciaAdapter`
+#### <code v-pre>createInMemoryLuciaAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/adapter.ts#L21) `packages/auth/src/lucia/adapter.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/adapter.ts#L21) <code v-pre>packages/auth/src/lucia/adapter.ts</code>
 
 In-memory adapter that mirrors the shape of `@lucia-auth/adapter-sqlite` and `@lucia-auth/adapter-postgresql`. Both expose the same method names, so this single implementation stands in for either at test time — the `kind` tag is the only observable difference.
 
@@ -709,9 +709,9 @@ In-memory adapter that mirrors the shape of `@lucia-auth/adapter-sqlite` and `@l
 export declare function createInMemoryLuciaAdapter(kind?: LuciaDatabaseKind): LuciaDatabaseAdapter;
 ```
 
-#### `createJwksEndpoint`
+#### <code v-pre>createJwksEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/jwks.ts#L92) `packages/auth/src/oidc/jwks.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/jwks.ts#L92) <code v-pre>packages/auth/src/oidc/jwks.ts</code>
 
 Build the JWKS endpoint. Owns the current active signing key + the retired key registry with retention windows. Rotation semantics matches Auth0 / Google-style OPs: on `rotate()` the current key is retired with a retention deadline (`retentionSec` from now), a fresh key becomes active, and `fetch()` returns both until the retired key's deadline passes. Tokens signed by the retired key verify until the deadline — after that, `activeKey()` still resolves but the retired kid is dropped from the JWKS document.
 
@@ -719,25 +719,25 @@ Build the JWKS endpoint. Owns the current active signing key + the retired key r
 export declare function createJwksEndpoint(options: CreateJwksEndpointOptions): JwksEndpoint;
 ```
 
-#### `createLuciaGithubProviderMock`
+#### <code v-pre>createLuciaGithubProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L32) `packages/auth/src/lucia/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L32) <code v-pre>packages/auth/src/lucia/providers.ts</code>
 
 ```ts
 export declare function createLuciaGithubProviderMock(): LuciaProviderMock;
 ```
 
-#### `createLuciaGoogleProviderMock`
+#### <code v-pre>createLuciaGoogleProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L23) `packages/auth/src/lucia/providers.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/providers.ts#L23) <code v-pre>packages/auth/src/lucia/providers.ts</code>
 
 ```ts
 export declare function createLuciaGoogleProviderMock(): LuciaProviderMock;
 ```
 
-#### `createMockDpopJwk`
+#### <code v-pre>createMockDpopJwk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L42) `packages/auth/src/oauth21/dpop.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L42) <code v-pre>packages/auth/src/oauth21/dpop.ts</code>
 
 Produce a mock ES256 JWK. Real deployments generate a P-256 key pair; the mock returns a distinctly-shaped placeholder so tests can assert the `x`/`y` fields without pulling in a full crypto stack.
 
@@ -745,11 +745,11 @@ Produce a mock ES256 JWK. Real deployments generate a P-256 key pair; the mock r
 export declare function createMockDpopJwk(): DpopJwk;
 ```
 
-#### `createOidcEntityStatement`
+#### <code v-pre>createOidcEntityStatement</code>
 
 公開 entry point から解決しています。
 
-`createEntityStatement` を `createOidcEntityStatement` として公開しています。
+<code v-pre>createEntityStatement</code> を <code v-pre>createOidcEntityStatement</code> として公開しています。
 
 Build a plain entity statement for tests. Sets sensible defaults for `iat` / `exp` so tests only override the fields they care about.
 
@@ -773,11 +773,11 @@ export {
 } from './oidc/index.js';
 ```
 
-#### `createOidcTrustAnchor`
+#### <code v-pre>createOidcTrustAnchor</code>
 
 公開 entry point から解決しています。
 
-`createTrustAnchor` を `createOidcTrustAnchor` として公開しています。
+<code v-pre>createTrustAnchor</code> を <code v-pre>createOidcTrustAnchor</code> として公開しています。
 
 Build a plain trust-anchor fixture for tests. Wraps the manual object construction so tests import a single helper.
 
@@ -801,9 +801,9 @@ export {
 } from './oidc/index.js';
 ```
 
-#### `createPkceChallenge`
+#### <code v-pre>createPkceChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L85) `packages/auth/src/oauth21/pkce.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L85) <code v-pre>packages/auth/src/oauth21/pkce.ts</code>
 
 Build a complete PKCE challenge (verifier + challenge). Convenience wrapper that always uses S256.
 
@@ -811,9 +811,9 @@ Build a complete PKCE challenge (verifier + challenge). Convenience wrapper that
 export declare function createPkceChallenge(): PkceChallenge;
 ```
 
-#### `createPlatformAuthenticator`
+#### <code v-pre>createPlatformAuthenticator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/platform.ts#L17) `packages/auth/src/passkey/platform.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/platform.ts#L17) <code v-pre>packages/auth/src/passkey/platform.ts</code>
 
 Build a platform authenticator (Touch ID / Face ID / Windows Hello / Android biometric). A platform authenticator is bound to the device — the factory pins `attachment: platform` and `transport: internal`, matching the WebAuthn L3 §5.4.5 pairing constraint. Passkeys minted here are always discoverable credentials (`hasResidentKey: true`) — the factory rejects any attempt to disable resident-key storage because a non-discoverable platform credential is not a passkey.
 
@@ -824,9 +824,9 @@ export declare function createPlatformAuthenticator(options: PlatformAuthenticat
 };
 ```
 
-#### `createRoamingAuthenticator`
+#### <code v-pre>createRoamingAuthenticator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/roaming.ts#L34) `packages/auth/src/passkey/roaming.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/roaming.ts#L34) <code v-pre>packages/auth/src/passkey/roaming.ts</code>
 
 Build a roaming authenticator (security key / phone via caBLE). Roaming authenticators are portable — the factory pins `attachment: cross-platform` and picks the wire transport from `kind`. Unlike platform authenticators, roaming authenticators can be non-discoverable (a bare U2F-style token) — the caller decides via `hasResidentKey`.
 
@@ -837,17 +837,17 @@ export declare function createRoamingAuthenticator(options: RoamingAuthenticator
 };
 ```
 
-#### `createSessionFor`
+#### <code v-pre>createSessionFor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L22) `packages/auth/src/lucia/session.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L22) <code v-pre>packages/auth/src/lucia/session.ts</code>
 
 ```ts
 export declare function createSessionFor(database: LuciaDatabaseAdapter, user: LuciaUser, expirationSeconds: number): Promise<LuciaSession>;
 ```
 
-#### `createSyncFabric`
+#### <code v-pre>createSyncFabric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/sync-fabric.ts#L11) `packages/auth/src/passkey/sync-fabric.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/sync-fabric.ts#L11) <code v-pre>packages/auth/src/passkey/sync-fabric.ts</code>
 
 Build a sync fabric — the in-memory analogue of iCloud Keychain or Google Password Manager. Real fabrics wrap end-to-end-encrypted blobs indexed by credential id; the mock keeps a plain `Map&lt;credentialId, PasskeyCredential&gt;` so tests can inspect the blob shape at will. Every backup produces a shallow clone — mutating the returned credential must not race with a concurrent backup of the same credential on a sibling device.
 
@@ -855,9 +855,9 @@ Build a sync fabric — the in-memory analogue of iCloud Keychain or Google Pass
 export declare function createSyncFabric(vendor: SyncFabricVendor): SyncFabric;
 ```
 
-#### `createVirtualAuthenticator`
+#### <code v-pre>createVirtualAuthenticator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L27) `packages/auth/src/webauthn/authenticator.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/authenticator.ts#L27) <code v-pre>packages/auth/src/webauthn/authenticator.ts</code>
 
 Build a Chrome Virtual Authenticator API compatible mock. Mirrors the shape of `WebAuthn.addVirtualAuthenticator` in the Chrome DevTools protocol which Playwright and Puppeteer surface as `page.context().addInitScript(...)` / `CDPSession.send('WebAuthn.addVirtualAuthenticator', ...)`. The mock keeps credentials in a `Map&lt;credentialId, WebAuthnCredential&gt;` and hands out an internal view — the RP-facing surface goes through `WebAuthnTestEnv` instead.
 
@@ -868,9 +868,9 @@ export declare function createVirtualAuthenticator(options: VirtualAuthenticator
 };
 ```
 
-#### `deriveCodeChallenge`
+#### <code v-pre>deriveCodeChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L58) `packages/auth/src/oauth21/pkce.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L58) <code v-pre>packages/auth/src/oauth21/pkce.ts</code>
 
 Derive the code challenge for a verifier. RFC 9700 §2.1.1 forbids the `plain` method — the function rejects it explicitly rather than silently downgrading. Only `S256` is accepted.
 
@@ -878,11 +878,11 @@ Derive the code challenge for a verifier. RFC 9700 §2.1.1 forbids the `plain` m
 export declare function deriveCodeChallenge(verifier: string, method?: PkceChallengeMethod): string;
 ```
 
-#### `deriveSupabaseMockAddress`
+#### <code v-pre>deriveSupabaseMockAddress</code>
 
 公開 entry point から解決しています。
 
-`deriveMockAddress` を `deriveSupabaseMockAddress` として公開しています。
+<code v-pre>deriveMockAddress</code> を <code v-pre>deriveSupabaseMockAddress</code> として公開しています。
 
 Derive a deterministic pseudo-Ethereum address from a private key. Real addresses come from keccak256(pubkey)[-20:]; the mock uses a deterministic HMAC → 20 bytes → 0x-prefixed hex string. Good enough for tests that need uniqueness + a consistent address per key.
 
@@ -900,9 +900,9 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `dynamicClientRegistration`
+#### <code v-pre>dynamicClientRegistration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L235) `packages/auth/src/oidc/dcr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L235) <code v-pre>packages/auth/src/oidc/dcr.ts</code>
 
 Register a client with the underlying mock AS. Returns the RFC 7591 §3 response. `client_id` is assigned deterministically; `client_secret` is omitted when `token_endpoint_auth_method` is `none` (matches how a real AS treats public clients).
 
@@ -910,9 +910,9 @@ Register a client with the underlying mock AS. Returns the RFC 7591 §3 response
 export declare function dynamicClientRegistration(options: DynamicClientRegistrationOptions, request: ClientRegistrationRequest): ClientRegistrationResponse;
 ```
 
-#### `encodeCaBLEQRURI`
+#### <code v-pre>encodeCaBLEQRURI</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L61) `packages/auth/src/passkey/caBLE/qr-code.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L61) <code v-pre>packages/auth/src/passkey/caBLE/qr-code.ts</code>
 
 Encode a QR code payload as the `FIDO:/` URI a real caBLE QR image would carry. The mock returns a stable string built from the four payload fields so tests can assert the URI shape without invoking a QR image library.
 
@@ -920,9 +920,9 @@ Encode a QR code payload as the `FIDO:/` URI a real caBLE QR image would carry. 
 export declare function encodeCaBLEQRURI(payload: CaBLEQRCodePayload): string;
 ```
 
-#### `establishWebSocketTunnel`
+#### <code v-pre>establishWebSocketTunnel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L25) `packages/auth/src/passkey/caBLE/websocket-tunnel.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/websocket-tunnel.ts#L25) <code v-pre>packages/auth/src/passkey/caBLE/websocket-tunnel.ts</code>
 
 Establish the WebSocket tunnel the initiator (laptop) opens against the tunnel server hint advertised in the QR payload. Real caBLE step 3 — both sides send frames over a duplex WebSocket protected by the BLE handshake shared secret. The mock keeps an in-memory FIFO of messages the initiator sent so downstream credential migration + signature roundtrip can inspect the wire log without spinning up a real WebSocket server. `close()` flips the tunnel into a rejected state — subsequent `send()` / `drain()` throws so tests can assert lifecycle correctness. Throws when the handshake was not verified — real caBLE refuses to establish the tunnel if the BLE handshake shared secrets diverged. Callers that want to exercise the "handshake failed but tunnel opened" negative path can mint a synthetic handshake with `verified: true` before calling this function.
 
@@ -930,11 +930,11 @@ Establish the WebSocket tunnel the initiator (laptop) opens against the tunnel s
 export declare function establishWebSocketTunnel(qr: CaBLEQRCodePayload, handshake: CaBLEBLEHandshake): CaBLEWebSocketTunnel;
 ```
 
-#### `findPasskeyFabricHolding`
+#### <code v-pre>findPasskeyFabricHolding</code>
 
 公開 entry point から解決しています。
 
-`findFabricHolding` を `findPasskeyFabricHolding` として公開しています。
+<code v-pre>findFabricHolding</code> を <code v-pre>findPasskeyFabricHolding</code> として公開しています。
 
 Locate every vendor that holds a given credential across a list of fabrics. Convenience helper used by `restoreCredential` in the env when the caller did not name a specific vendor.
 
@@ -953,9 +953,9 @@ export {
 } from './passkey/index.js';
 ```
 
-#### `generateAuth0SigningSecret`
+#### <code v-pre>generateAuth0SigningSecret</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L143) `packages/auth/src/auth0/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L143) <code v-pre>packages/auth/src/auth0/jwt.ts</code>
 
 Generate a random signing secret. Called once per {@link setupAuth0Env } invocation so each env has its own signing key — mirrors Auth0's per-tenant key isolation.
 
@@ -963,11 +963,11 @@ Generate a random signing secret. Called once per {@link setupAuth0Env } invocat
 export declare function generateAuth0SigningSecret(): string;
 ```
 
-#### `generateBetterAuthSessionId`
+#### <code v-pre>generateBetterAuthSessionId</code>
 
 公開 entry point から解決しています。
 
-`generateSessionId` を `generateBetterAuthSessionId` として公開しています。
+<code v-pre>generateSessionId</code> を <code v-pre>generateBetterAuthSessionId</code> として公開しています。
 
 ```ts
 export {
@@ -979,11 +979,11 @@ export {
 } from './better-auth/session.js';
 ```
 
-#### `generateBetterAuthSessionToken`
+#### <code v-pre>generateBetterAuthSessionToken</code>
 
 公開 entry point から解決しています。
 
-`generateSessionToken` を `generateBetterAuthSessionToken` として公開しています。
+<code v-pre>generateSessionToken</code> を <code v-pre>generateBetterAuthSessionToken</code> として公開しています。
 
 ```ts
 export {
@@ -995,9 +995,9 @@ export {
 } from './better-auth/session.js';
 ```
 
-#### `generateCaBLEQRCode`
+#### <code v-pre>generateCaBLEQRCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L28) `packages/auth/src/passkey/caBLE/qr-code.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/qr-code.ts#L28) <code v-pre>packages/auth/src/passkey/caBLE/qr-code.ts</code>
 
 Build the QR code payload the initiator (laptop) prints for the phone to scan. Real caBLE encodes an ephemeral EC P-256 public key + tunnel server hint + random nonce as a `FIDO:/` URI base32-encoded into a QR image. The mock keeps the same three fields as literal strings so tests can assert the payload survives the ceremony without running through a QR image decoder. The `sessionId` is a monotonic id — the WebSocket tunnel + BLE handshake use it as the correlation key so every step of the ceremony refers to the same session. Throws when the tunnel server hint or nonce is empty — real caBLE refuses to advertise a QR that would produce a degenerate handshake.
 
@@ -1005,11 +1005,11 @@ Build the QR code payload the initiator (laptop) prints for the phone to scan. R
 export declare function generateCaBLEQRCode(options: CaBLESessionOptions): CaBLEQRCodePayload;
 ```
 
-#### `generateClerkSigningSecret`
+#### <code v-pre>generateClerkSigningSecret</code>
 
 公開 entry point から解決しています。
 
-`generateSigningSecret` を `generateClerkSigningSecret` として公開しています。
+<code v-pre>generateSigningSecret</code> を <code v-pre>generateClerkSigningSecret</code> として公開しています。
 
 Generate a random secret for signing. Called once per {@link setupClerkEnv } invocation so each env has its own signing key.
 
@@ -1021,9 +1021,9 @@ export {
 } from './clerk/jwt.js';
 ```
 
-#### `generateCodeVerifier`
+#### <code v-pre>generateCodeVerifier</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L38) `packages/auth/src/oauth21/pkce.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L38) <code v-pre>packages/auth/src/oauth21/pkce.ts</code>
 
 Generate a fresh code verifier. RFC 7636 §4.1 requires 43-128 characters from the unreserved URL set. The mock produces 43-char base64url strings.
 
@@ -1031,19 +1031,19 @@ Generate a fresh code verifier. RFC 7636 §4.1 requires 43-128 characters from t
 export declare function generateCodeVerifier(): string;
 ```
 
-#### `generateSessionId`
+#### <code v-pre>generateSessionId</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L12) `packages/auth/src/lucia/session.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L12) <code v-pre>packages/auth/src/lucia/session.ts</code>
 
 ```ts
 export declare function generateSessionId(): string;
 ```
 
-#### `generateSupabaseBackupCodes`
+#### <code v-pre>generateSupabaseBackupCodes</code>
 
 公開 entry point から解決しています。
 
-`generateBackupCodes` を `generateSupabaseBackupCodes` として公開しています。
+<code v-pre>generateBackupCodes</code> を <code v-pre>generateSupabaseBackupCodes</code> として公開しています。
 
 Generate a set of one-time backup codes. Each code is 10 hex characters, matching a common Supabase-adjacent pattern.
 
@@ -1061,9 +1061,9 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `generateSupabaseRefreshToken`
+#### <code v-pre>generateSupabaseRefreshToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L92) `packages/auth/src/supabase/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L92) <code v-pre>packages/auth/src/supabase/jwt.ts</code>
 
 Generate a random opaque refresh token. Supabase's real refresh tokens are opaque strings (not JWTs) rotated on each `refreshSession` call.
 
@@ -1071,9 +1071,9 @@ Generate a random opaque refresh token. Supabase's real refresh tokens are opaqu
 export declare function generateSupabaseRefreshToken(): string;
 ```
 
-#### `generateSupabaseSigningSecret`
+#### <code v-pre>generateSupabaseSigningSecret</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L84) `packages/auth/src/supabase/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L84) <code v-pre>packages/auth/src/supabase/jwt.ts</code>
 
 Generate a random 32-byte secret for signing. Called once per {@link setupSupabaseAuthEnv } invocation so each env has its own signing key.
 
@@ -1081,11 +1081,11 @@ Generate a random 32-byte secret for signing. Called once per {@link setupSupaba
 export declare function generateSupabaseSigningSecret(): string;
 ```
 
-#### `generateSupabaseSiweNonce`
+#### <code v-pre>generateSupabaseSiweNonce</code>
 
 公開 entry point から解決しています。
 
-`generateSiweNonce` を `generateSupabaseSiweNonce` として公開しています。
+<code v-pre>generateSiweNonce</code> を <code v-pre>generateSupabaseSiweNonce</code> として公開しています。
 
 EIP-4361 (Sign-In with Ethereum) helpers. Real SIWE relies on secp256k1 message signing + ecrecover to derive the address from a signature — the mock replaces the signature primitive with an HMAC over the canonical message + address, which is enough to model happy-path + tamper-detection behaviors without pulling in a full crypto library.
 
@@ -1103,11 +1103,11 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `generateSupabaseTotpCode`
+#### <code v-pre>generateSupabaseTotpCode</code>
 
 公開 entry point から解決しています。
 
-`generateTotpCode` を `generateSupabaseTotpCode` として公開しています。
+<code v-pre>generateTotpCode</code> を <code v-pre>generateSupabaseTotpCode</code> として公開しています。
 
 Generate the TOTP code for the given moment. `nowSeconds` is exposed so tests can advance time deterministically.
 
@@ -1125,11 +1125,11 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `generateSupabaseTotpSecret`
+#### <code v-pre>generateSupabaseTotpSecret</code>
 
 公開 entry point から解決しています。
 
-`generateTotpSecret` を `generateSupabaseTotpSecret` として公開しています。
+<code v-pre>generateTotpSecret</code> を <code v-pre>generateSupabaseTotpSecret</code> として公開しています。
 
 ```ts
 export {
@@ -1145,27 +1145,27 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `generateTotpCode`
+#### <code v-pre>generateTotpCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/totp.ts#L22) `packages/auth/src/better-auth/totp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/totp.ts#L22) <code v-pre>packages/auth/src/better-auth/totp.ts</code>
 
 ```ts
 export declare function generateTotpCode(secret: string, nowMs?: number): string;
 ```
 
-#### `generateTotpSecret`
+#### <code v-pre>generateTotpSecret</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/totp.ts#L16) `packages/auth/src/better-auth/totp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/totp.ts#L16) <code v-pre>packages/auth/src/better-auth/totp.ts</code>
 
 ```ts
 export declare function generateTotpSecret(): string;
 ```
 
-#### `hashBetterAuthPassword`
+#### <code v-pre>hashBetterAuthPassword</code>
 
 公開 entry point から解決しています。
 
-`hashPassword` を `hashBetterAuthPassword` として公開しています。
+<code v-pre>hashPassword</code> を <code v-pre>hashBetterAuthPassword</code> として公開しています。
 
 ```ts
 export {
@@ -1174,9 +1174,9 @@ export {
 } from './better-auth/password.js';
 ```
 
-#### `hashPassword`
+#### <code v-pre>hashPassword</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/password.ts#L38) `packages/auth/src/lucia/password.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/password.ts#L38) <code v-pre>packages/auth/src/lucia/password.ts</code>
 
 Hash a password. The returned string is opaque to callers and safe to store in the mock user record. Empty passwords are rejected — same policy the real argon2 adapters recommend, and the earliest place we can flag a bug.
 
@@ -1184,11 +1184,11 @@ Hash a password. The returned string is opaque to callers and safe to store in t
 export declare function hashPassword(password: string): Promise<string>;
 ```
 
-#### `invalidateBetterAuthSessionsForUser`
+#### <code v-pre>invalidateBetterAuthSessionsForUser</code>
 
 公開 entry point から解決しています。
 
-`invalidateSessionsForUser` を `invalidateBetterAuthSessionsForUser` として公開しています。
+<code v-pre>invalidateSessionsForUser</code> を <code v-pre>invalidateBetterAuthSessionsForUser</code> として公開しています。
 
 ```ts
 export {
@@ -1200,17 +1200,17 @@ export {
 } from './better-auth/session.js';
 ```
 
-#### `invalidateSessionsForUser`
+#### <code v-pre>invalidateSessionsForUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L73) `packages/auth/src/lucia/session.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L73) <code v-pre>packages/auth/src/lucia/session.ts</code>
 
 ```ts
 export declare function invalidateSessionsForUser(database: LuciaDatabaseAdapter, userId: string): Promise<void>;
 ```
 
-#### `issueSession`
+#### <code v-pre>issueSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/session.ts#L61) `packages/auth/src/session.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/session.ts#L61) <code v-pre>packages/auth/src/session.ts</code>
 
 Issue a session token for a signed-in user. The JWT strategy short-circuits database writes; the database strategy persists the session row.
 
@@ -1221,9 +1221,9 @@ export declare function issueSession(database: AuthDatabaseAdapter, user: AuthUs
 }>;
 ```
 
-#### `migrateCredential`
+#### <code v-pre>migrateCredential</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L30) `packages/auth/src/passkey/caBLE/hybrid-transport.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L30) <code v-pre>packages/auth/src/passkey/caBLE/hybrid-transport.ts</code>
 
 Ship the passkey credential from responder (phone) to initiator (laptop) over the established WebSocket tunnel. Real caBLE encrypts the payload with the BLE handshake shared secret; the mock keeps the raw {@link PasskeyCredential} plus a deterministic "encrypted" tag so tests can assert the migration went through the tunnel without leaking the credential material outside.
 
@@ -1231,9 +1231,9 @@ Ship the passkey credential from responder (phone) to initiator (laptop) over th
 export declare function migrateCredential(tunnel: CaBLEWebSocketTunnel, credential: PasskeyCredential): CaBLECredentialMigration;
 ```
 
-#### `mintAccessToken`
+#### <code v-pre>mintAccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L30) `packages/auth/src/oauth21/refresh-rotation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L30) <code v-pre>packages/auth/src/oauth21/refresh-rotation.ts</code>
 
 Mint a fresh access token. Access tokens carry state (`clientId`, `subject`, `scope`, expiration) so the introspection endpoint can echo them without a separate lookup. Real deployments encode this as a signed JWT; the mock hands the state back to the caller who stores it in the AS registry.
 
@@ -1249,9 +1249,9 @@ export declare function mintAccessToken(params: {
 }): AccessToken;
 ```
 
-#### `mintRefreshToken`
+#### <code v-pre>mintRefreshToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L59) `packages/auth/src/oauth21/refresh-rotation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L59) <code v-pre>packages/auth/src/oauth21/refresh-rotation.ts</code>
 
 Mint a fresh refresh token. Refresh tokens are opaque strings the AS binds to a client + subject + scope. The mock keeps them separate from access tokens so the rotation registry is easy to inspect.
 
@@ -1268,9 +1268,9 @@ export declare function mintRefreshToken(params: {
 }): RefreshToken;
 ```
 
-#### `mintSoftwareStatement`
+#### <code v-pre>mintSoftwareStatement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L127) `packages/auth/src/oidc/dcr.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L127) <code v-pre>packages/auth/src/oidc/dcr.ts</code>
 
 Mint a software_statement JWT for testing. Tests use this to build valid / invalid software statements without cracking real JWS crypto.
 
@@ -1278,9 +1278,9 @@ Mint a software_statement JWT for testing. Tests use this to build valid / inval
 export declare function mintSoftwareStatement(claims: Record<string, unknown>, trustAnchor: string, headerOverrides?: Record<string, unknown>): string;
 ```
 
-#### `parseDpopProof`
+#### <code v-pre>parseDpopProof</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L109) `packages/auth/src/oauth21/dpop.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L109) <code v-pre>packages/auth/src/oauth21/dpop.ts</code>
 
 Parse a compact DPoP JWT string back into its header/payload shape. Used by the AS to inspect a proof carried on the wire (`DPoP` header). Throws on malformed input so a caller mangling the JWT for a fuzz test gets a predictable error.
 
@@ -1288,9 +1288,9 @@ Parse a compact DPoP JWT string back into its header/payload shape. Used by the 
 export declare function parseDpopProof(jwt: string): DpopProof;
 ```
 
-#### `performBLEHandshake`
+#### <code v-pre>performBLEHandshake</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/ble-handshake.ts#L43) `packages/auth/src/passkey/caBLE/ble-handshake.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/ble-handshake.ts#L43) <code v-pre>packages/auth/src/passkey/caBLE/ble-handshake.ts</code>
 
 Run the BLE advertisement handshake. Real caBLE step 2 — the responder broadcasts a 20-byte BLE advertisement, the initiator picks it up over a scan, and both sides derive a shared secret from the QR nonce + responder's ephemeral key + session id. The mock computes the shared secret deterministically on both sides and flags the handshake as `verified: true` when they match. Tests can introduce a divergent shared secret by mutating the return value — the ceremony downstream (WebSocket tunnel, credential migration) does not gate on `verified`, so the caller keeps the check where it makes the fidelity axis most legible. Throws when the QR payload session id is empty — real caBLE refuses to derive a shared secret without a session correlation key.
 
@@ -1298,9 +1298,9 @@ Run the BLE advertisement handshake. Real caBLE step 2 — the responder broadca
 export declare function performBLEHandshake(payload: CaBLEQRCodePayload): CaBLEBLEHandshake;
 ```
 
-#### `performSignatureRoundtrip`
+#### <code v-pre>performSignatureRoundtrip</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L66) `packages/auth/src/passkey/caBLE/hybrid-transport.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L66) <code v-pre>packages/auth/src/passkey/caBLE/hybrid-transport.ts</code>
 
 Sign the challenge with the migrated credential + verify the signature on the initiator side. Real caBLE terminates the hybrid transport ceremony in a WebAuthn L3 §7.2 assertion signature check; the mock builds a deterministic signature string from the credential id + challenge + session id so tests can assert the roundtrip without running through a real signature verifier. Throws when the tunnel is not established / has been closed / the challenge is empty — real caBLE cannot produce a WebAuthn L3 §7.2 assertion over any of those conditions.
 
@@ -1308,11 +1308,11 @@ Sign the challenge with the migrated credential + verify the signature on the in
 export declare function performSignatureRoundtrip(tunnel: CaBLEWebSocketTunnel, credential: PasskeyCredential, challenge: string): CaBLESignatureRoundtrip;
 ```
 
-#### `requirePasskeyFabric`
+#### <code v-pre>requirePasskeyFabric</code>
 
 公開 entry point から解決しています。
 
-`requireFabric` を `requirePasskeyFabric` として公開しています。
+<code v-pre>requireFabric</code> を <code v-pre>requirePasskeyFabric</code> として公開しています。
 
 Guarded lookup for a fabric by vendor. Throws when the vendor is not registered — the alternative (silent `undefined`) would let a caller silently drop backups on the floor.
 
@@ -1331,11 +1331,11 @@ export {
 } from './passkey/index.js';
 ```
 
-#### `resolveOidcTrustChain`
+#### <code v-pre>resolveOidcTrustChain</code>
 
 公開 entry point から解決しています。
 
-`resolveTrustChain` を `resolveOidcTrustChain` として公開しています。
+<code v-pre>resolveTrustChain</code> を <code v-pre>resolveOidcTrustChain</code> として公開しています。
 
 Resolve a trust chain per OpenID Federation 1.0 §7. The chain walks from the leaf entity (typically the RP or a subordinate OP) through zero-or-more intermediates up to a trust anchor. Chain-walk rules (matches OIDF §7.2): - Every statement in the chain must have `iss` equal to the previous step's subject (the anchor is a virtual step past the last statement's iss). - Every statement must have `exp &gt; now`. - The final statement's `iss` must equal the trust anchor's entity_id. The mock does not verify JWS signatures on the statements — the point is to prove the chain-walk logic. Callers wanting to test signature verification build the statements with dedicated fixtures.
 
@@ -1359,11 +1359,11 @@ export {
 } from './oidc/index.js';
 ```
 
-#### `restorePasskeyCredential`
+#### <code v-pre>restorePasskeyCredential</code>
 
 公開 entry point から解決しています。
 
-`restoreCredential` を `restorePasskeyCredential` として公開しています。
+<code v-pre>restoreCredential</code> を <code v-pre>restorePasskeyCredential</code> として公開しています。
 
 Pull a credential blob out of a sync fabric. Returns `null` when the fabric does not hold the credential — the caller decides whether to treat that as a hard error (no such passkey) or a soft one (fabric not yet synced). The returned credential is a fresh copy — restoring twice will produce two independent snapshots and the caller is responsible for merging them on the device side.
 
@@ -1382,9 +1382,9 @@ export {
 } from './passkey/index.js';
 ```
 
-#### `rotateRefreshToken`
+#### <code v-pre>rotateRefreshToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L94) `packages/auth/src/oauth21/refresh-rotation.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/refresh-rotation.ts#L94) <code v-pre>packages/auth/src/oauth21/refresh-rotation.ts</code>
 
 Rotate a refresh token — invalidate the previous token and mint a fresh one that inherits the client + subject + scope. RFC 9700 §2.2 mandates this on every `/token` refresh call to defeat replay of an exfiltrated refresh token. Returns the newly-minted refresh token; the caller replaces the old token in the AS registry with the returned value.
 
@@ -1396,9 +1396,9 @@ export declare function rotateRefreshToken(previous: RefreshToken, lifetimeSec: 
 }): RefreshToken;
 ```
 
-#### `runCaBLESession`
+#### <code v-pre>runCaBLESession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L112) `packages/auth/src/passkey/caBLE/hybrid-transport.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L112) <code v-pre>packages/auth/src/passkey/caBLE/hybrid-transport.ts</code>
 
 Run the full caBLE hybrid transport ceremony end-to-end. Chains the 3 FIDO caBLE steps (QR code → BLE handshake → WebSocket tunnel) followed by credential migration + signature roundtrip so a single call produces the {@link CaBLESession} artifact the fidelity harness inspects. The `challenge` picks the value the responder (phone) signs at the assertion step. Real caBLE surfaces this from the RP; the mock lets the caller supply it directly so tests can assert per-ceremony signature stability.
 
@@ -1406,7 +1406,7 @@ Run the full caBLE hybrid transport ceremony end-to-end. Chains the 3 FIDO caBLE
 export declare function runCaBLESession(options: CaBLESessionOptions, challenge: string): CaBLESession;
 ```
 
-#### `semantics`
+#### <code v-pre>semantics</code>
 
 公開 entry point から解決しています。
 
@@ -1414,11 +1414,11 @@ export declare function runCaBLESession(options: CaBLESessionOptions, challenge:
 export * as semantics from './semantics/index.js';
 ```
 
-#### `serializeSupabaseSiweMessage`
+#### <code v-pre>serializeSupabaseSiweMessage</code>
 
 公開 entry point から解決しています。
 
-`serializeSiweMessage` を `serializeSupabaseSiweMessage` として公開しています。
+<code v-pre>serializeSiweMessage</code> を <code v-pre>serializeSupabaseSiweMessage</code> として公開しています。
 
 Build the canonical EIP-4361 message string. Consumers can hash + sign this verbatim with a real client library, and the mock will verify it back.
 
@@ -1436,9 +1436,9 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `setupAuth0Env`
+#### <code v-pre>setupAuth0Env</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L48) `packages/auth/src/auth0/setup-auth0-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/setup-auth0-env.ts#L48) <code v-pre>packages/auth/src/auth0/setup-auth0-env.ts</code>
 
 Build an Auth0 test env. The returned handle exposes `users` (Management API surface), `authenticate` (Authentication API surface), `rules` (legacy rules registry), and `actions` (post-login / pre-user-registration / post-user-registration / post-change-password triggers) plus `verifyIdToken` / `verifyAccessToken` helpers that validate JWTs issued by the same env. Consumers wire the env into their code by either (a) swapping the real `ManagementClient` / `AuthenticationClient` for `env.users` / `env.authenticate` in test setup, or (b) driving the token flow directly with `env.authenticate.signIn` + `env.verifyIdToken`.
 
@@ -1446,17 +1446,17 @@ Build an Auth0 test env. The returned handle exposes `users` (Management API sur
 export declare function setupAuth0Env(opts?: SetupAuth0EnvOptions): Promise<Auth0TestEnv>;
 ```
 
-#### `setupBetterAuthEnv`
+#### <code v-pre>setupBetterAuthEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L37) `packages/auth/src/better-auth/setup-better-auth-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/setup-better-auth-env.ts#L37) <code v-pre>packages/auth/src/better-auth/setup-better-auth-env.ts</code>
 
 ```ts
 export declare function setupBetterAuthEnv(opts?: SetupBetterAuthEnvOptions): Promise<BetterAuthTestEnv>;
 ```
 
-#### `setupClerkEnv`
+#### <code v-pre>setupClerkEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L30) `packages/auth/src/clerk/setup-clerk-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/setup-clerk-env.ts#L30) <code v-pre>packages/auth/src/clerk/setup-clerk-env.ts</code>
 
 Build a Clerk test env. The returned handle exposes a `users` / `sessions` / `organizations` surface that mirrors `@clerk/backend`'s SDK, plus a `verifyToken` helper that validates JWTs issued by the same env. Consumers wire the env into their code by either (a) swapping the real `@clerk/backend` client for `env` in the test setup, or (b) driving the handlers directly with `env.signIn` + `env.verifyToken`.
 
@@ -1464,25 +1464,25 @@ Build a Clerk test env. The returned handle exposes a `users` / `sessions` / `or
 export declare function setupClerkEnv(opts?: SetupClerkEnvOptions): Promise<ClerkTestEnv>;
 ```
 
-#### `setupLuciaEnv`
+#### <code v-pre>setupLuciaEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L30) `packages/auth/src/lucia/setup-lucia-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/setup-lucia-env.ts#L30) <code v-pre>packages/auth/src/lucia/setup-lucia-env.ts</code>
 
 ```ts
 export declare function setupLuciaEnv(opts?: SetupLuciaEnvOptions): Promise<LuciaTestEnv>;
 ```
 
-#### `setupNextAuthEnv`
+#### <code v-pre>setupNextAuthEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L18) `packages/auth/src/setup-nextauth-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/setup-nextauth-env.ts#L18) <code v-pre>packages/auth/src/setup-nextauth-env.ts</code>
 
 ```ts
 export declare function setupNextAuthEnv(opts?: SetupNextAuthEnvOptions): Promise<NextAuthTestEnv>;
 ```
 
-#### `setupOAuth21Env`
+#### <code v-pre>setupOAuth21Env</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/setup-oauth21-env.ts#L40) `packages/auth/src/oauth21/setup-oauth21-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/setup-oauth21-env.ts#L40) <code v-pre>packages/auth/src/oauth21/setup-oauth21-env.ts</code>
 
 Set up the OAuth 2.1 test environment. Composes a mock Authorization Server with PKCE + DPoP helpers so a test can drive the full RFC 9700 flow through a single handle. The env is hermetic — every mutation goes through the returned surface, and a single `stop()` disposes the AS state. Consecutive `setupOAuth21Env` calls in the same process should be preceded by `__resetOAuth21Counters()` when reproducibility of ids matters.
 
@@ -1490,9 +1490,9 @@ Set up the OAuth 2.1 test environment. Composes a mock Authorization Server with
 export declare function setupOAuth21Env(options?: SetupOAuth21EnvOptions): Promise<OAuth21TestEnv>;
 ```
 
-#### `setupOidcEnv`
+#### <code v-pre>setupOidcEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/setup-oidc-env.ts#L46) `packages/auth/src/oidc/setup-oidc-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/setup-oidc-env.ts#L46) <code v-pre>packages/auth/src/oidc/setup-oidc-env.ts</code>
 
 Set up the OIDC test environment. Composes: - the OAuth 2.1 mock AS (OIDC layers on top of it), - the Discovery endpoint (`/.well-known/openid-configuration`), - the JWKS endpoint (RS256 / ES256 + kid rotation + retention), - the DCR endpoint (RFC 7591), - the id_token signer + verifier (OIDC Core §2 + §3.1.3.6-7), - the Federation trust-chain resolver (OIDF 1.0 §7). The env is hermetic — every mutation goes through the returned surface, and a single `stop()` disposes the underlying OAuth 2.1 AS + resets the OIDC state.
 
@@ -1500,9 +1500,9 @@ Set up the OIDC test environment. Composes: - the OAuth 2.1 mock AS (OIDC layers
 export declare function setupOidcEnv(options?: SetupOidcEnvOptions): Promise<OidcTestEnv>;
 ```
 
-#### `setupPasskeyEnv`
+#### <code v-pre>setupPasskeyEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L75) `packages/auth/src/passkey/setup-passkey-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/setup-passkey-env.ts#L75) <code v-pre>packages/auth/src/passkey/setup-passkey-env.ts</code>
 
 Set up the passkey test environment. Composes WebAuthn primitives with per-device grouping and sync fabric wiring — every device has its own set of authenticators and credential stores, and every credential lives on exactly one device unless it has been synced through a fabric. The env owns the WebAuthn base-module state (global registry, ownership map) so a single `stop()` disposes the whole graph and consecutive `setupPasskeyEnv` calls are hermetic when preceded by `__resetPasskeyCounters()`.
 
@@ -1510,9 +1510,9 @@ Set up the passkey test environment. Composes WebAuthn primitives with per-devic
 export declare function setupPasskeyEnv(opts?: SetupPasskeyEnvOptions): Promise<PasskeyTestEnv>;
 ```
 
-#### `setupSupabaseAdvancedEnv`
+#### <code v-pre>setupSupabaseAdvancedEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L76) `packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts#L76) <code v-pre>packages/auth/src/supabase-advanced/setup-supabase-advanced-env.ts</code>
 
 Build a Supabase Auth advanced test env. Layers RLS / MFA / SSO SAML / SIWE on top of the same JWT + session shape the core adapter uses. The advanced env owns its own user + session store — consumers who need core-adapter flows too should keep both envs side by side, or wire the core env's `verifyToken` to a subset of the advanced env's users.
 
@@ -1520,9 +1520,9 @@ Build a Supabase Auth advanced test env. Layers RLS / MFA / SSO SAML / SIWE on t
 export declare function setupSupabaseAdvancedEnv(opts?: SetupSupabaseAdvancedEnvOptions): Promise<SupabaseAdvancedTestEnv>;
 ```
 
-#### `setupSupabaseAuthEnv`
+#### <code v-pre>setupSupabaseAuthEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L36) `packages/auth/src/supabase/setup-supabase-auth-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/setup-supabase-auth-env.ts#L36) <code v-pre>packages/auth/src/supabase/setup-supabase-auth-env.ts</code>
 
 Build a Supabase Auth test env. The returned handle exposes an `auth` (client) + `admin` (service-role) surface that mirrors `@supabase/supabase-js`'s `client.auth.*` + `client.auth.admin.*` API, plus a `verifyToken` helper that validates access tokens issued by the same env. v0.3 scope covers Supabase Auth core semantics — email/password + OAuth (Google/GitHub/Apple) + magic link + JWT session mock. RLS policy mock / MFA / SSO SAML / Web3 wallet auth are covered by the advanced adapter (v1.10-2).
 
@@ -1530,9 +1530,9 @@ Build a Supabase Auth test env. The returned handle exposes an `auth` (client) +
 export declare function setupSupabaseAuthEnv(opts?: SetupSupabaseAuthEnvOptions): Promise<SupabaseAuthTestEnv>;
 ```
 
-#### `setupWebAuthnEnv`
+#### <code v-pre>setupWebAuthnEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L41) `packages/auth/src/webauthn/setup-webauthn-env.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/setup-webauthn-env.ts#L41) <code v-pre>packages/auth/src/webauthn/setup-webauthn-env.ts</code>
 
 Set up the WebAuthn test environment. Creates zero or more virtual authenticators (as configured), a shared credential registry, and returns a `WebAuthnTestEnv` handle. Follow-on calls (`credentialCreation` / `credentialAssertion`) go through the returned env. When no authenticator is passed the env is empty — the caller adds authenticators lazily with `addAuthenticator`. Most tests preseed one platform authenticator to mirror the Chrome DevTools "add virtual authenticator" workflow.
 
@@ -1540,9 +1540,9 @@ Set up the WebAuthn test environment. Creates zero or more virtual authenticator
 export declare function setupWebAuthnEnv(opts?: SetupWebAuthnEnvOptions): Promise<WebAuthnTestEnv>;
 ```
 
-#### `signAuth0AccessToken`
+#### <code v-pre>signAuth0AccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L46) `packages/auth/src/auth0/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L46) <code v-pre>packages/auth/src/auth0/jwt.ts</code>
 
 Sign a set of Auth0 access_token claims. Same signature shape as id_token — Auth0's real access tokens are separately signed with the tenant's key pair, but for the mock they share the per-env secret to keep the verify path uniform.
 
@@ -1550,9 +1550,9 @@ Sign a set of Auth0 access_token claims. Same signature shape as id_token — Au
 export declare function signAuth0AccessToken(claims: Auth0AccessTokenClaims, secret: string): string;
 ```
 
-#### `signAuth0IdToken`
+#### <code v-pre>signAuth0IdToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L36) `packages/auth/src/auth0/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L36) <code v-pre>packages/auth/src/auth0/jwt.ts</code>
 
 Sign a set of Auth0 id_token claims into a `&lt;header&gt;.&lt;payload&gt;.&lt;signature&gt;` JWT. The secret is unique per test env — tokens issued by one env cannot be verified by another, which mirrors Auth0's per-tenant signing keys.
 
@@ -1560,9 +1560,9 @@ Sign a set of Auth0 id_token claims into a `&lt;header&gt;.&lt;payload&gt;.&lt;s
 export declare function signAuth0IdToken(claims: Auth0IdTokenClaims, secret: string): string;
 ```
 
-#### `signClerkJwt`
+#### <code v-pre>signClerkJwt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L35) `packages/auth/src/clerk/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L35) <code v-pre>packages/auth/src/clerk/jwt.ts</code>
 
 Sign a set of Clerk session claims into a `&lt;header&gt;.&lt;payload&gt;.&lt;signature&gt;` JWT. The secret is unique per test env (generated at setup) — tokens issued by one env cannot be verified by another, which mirrors Clerk's per-instance signing keys.
 
@@ -1570,9 +1570,9 @@ Sign a set of Clerk session claims into a `&lt;header&gt;.&lt;payload&gt;.&lt;si
 export declare function signClerkJwt(claims: ClerkSessionClaims, secret: string): string;
 ```
 
-#### `signSupabaseAccessToken`
+#### <code v-pre>signSupabaseAccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L30) `packages/auth/src/supabase/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L30) <code v-pre>packages/auth/src/supabase/jwt.ts</code>
 
 Sign a set of Supabase access-token claims into a `&lt;header&gt;.&lt;payload&gt;.&lt;signature&gt;` JWT. The secret is unique per test env — tokens issued by one env cannot be verified by another, mirroring per-project JWT_SECRET separation in production.
 
@@ -1580,11 +1580,11 @@ Sign a set of Supabase access-token claims into a `&lt;header&gt;.&lt;payload&gt
 export declare function signSupabaseAccessToken(claims: SupabaseAccessTokenClaims, secret: string): string;
 ```
 
-#### `syncPasskeyCredentials`
+#### <code v-pre>syncPasskeyCredentials</code>
 
 公開 entry point から解決しています。
 
-`syncCredentials` を `syncPasskeyCredentials` として公開しています。
+<code v-pre>syncCredentials</code> を <code v-pre>syncPasskeyCredentials</code> として公開しています。
 
 Copy every backup-eligible credential owned by `userId` from `source` into `target` via the shared fabric. Mirrors the "sign in on a new device" ceremony — the new device is the target, the fabric is the shared vendor, and every credential is backed up on the source side then restored on the target side. Returns the list of credentials that landed on the target. Skips credentials owned by other users (per-user isolation) and non-backup- eligible credentials (bare security key credentials cannot ride the fabric).
 
@@ -1603,9 +1603,9 @@ export {
 } from './passkey/index.js';
 ```
 
-#### `upsertUserFromProfile`
+#### <code v-pre>upsertUserFromProfile</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/session.ts#L29) `packages/auth/src/session.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/session.ts#L29) <code v-pre>packages/auth/src/session.ts</code>
 
 Materialise a profile into a persisted user / account pair, mirroring the flow that NextAuth's `signIn` callback runs when a real provider returns.
 
@@ -1613,11 +1613,11 @@ Materialise a profile into a persisted user / account pair, mirroring the flow t
 export declare function upsertUserFromProfile(database: AuthDatabaseAdapter, profile: AuthProfile): Promise<AuthUser>;
 ```
 
-#### `validateBetterAuthSessionByToken`
+#### <code v-pre>validateBetterAuthSessionByToken</code>
 
 公開 entry point から解決しています。
 
-`validateSessionByToken` を `validateBetterAuthSessionByToken` として公開しています。
+<code v-pre>validateSessionByToken</code> を <code v-pre>validateBetterAuthSessionByToken</code> として公開しています。
 
 ```ts
 export {
@@ -1629,9 +1629,9 @@ export {
 } from './better-auth/session.js';
 ```
 
-#### `validateSessionId`
+#### <code v-pre>validateSessionId</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L43) `packages/auth/src/lucia/session.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/session.ts#L43) <code v-pre>packages/auth/src/lucia/session.ts</code>
 
 Validate a session id. Mirrors Lucia's rolling-expiration behaviour: - expired session → delete and return null - session in the refresh window (less than half the lifetime remaining) → extend `expiresAt` and mark the returned session `fresh: true` - session comfortably valid → return as-is with `fresh: false`
 
@@ -1642,9 +1642,9 @@ export declare function validateSessionId(database: LuciaDatabaseAdapter, sessio
 } | null>;
 ```
 
-#### `verifyAuth0AccessToken`
+#### <code v-pre>verifyAuth0AccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L88) `packages/auth/src/auth0/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L88) <code v-pre>packages/auth/src/auth0/jwt.ts</code>
 
 Verify an access_token. Auth0's access tokens can have `aud` as string or string[] — the mock accepts both and matches the expected audience against every entry.
 
@@ -1655,9 +1655,9 @@ export declare function verifyAuth0AccessToken(token: string, secret: string, ex
 }): Auth0AccessTokenClaims;
 ```
 
-#### `verifyAuth0IdToken`
+#### <code v-pre>verifyAuth0IdToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L64) `packages/auth/src/auth0/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/jwt.ts#L64) <code v-pre>packages/auth/src/auth0/jwt.ts</code>
 
 Verify an id_token and return its decoded claims. Throws on shape mismatch, signature mismatch, expired token, or issuer mismatch. Mirrors what `express-jwt` + JWKS verification does in a real Auth0 backend.
 
@@ -1668,11 +1668,11 @@ export declare function verifyAuth0IdToken(token: string, secret: string, expect
 }): Auth0IdTokenClaims;
 ```
 
-#### `verifyBetterAuthPassword`
+#### <code v-pre>verifyBetterAuthPassword</code>
 
 公開 entry point から解決しています。
 
-`verifyPassword` を `verifyBetterAuthPassword` として公開しています。
+<code v-pre>verifyPassword</code> を <code v-pre>verifyBetterAuthPassword</code> として公開しています。
 
 ```ts
 export {
@@ -1681,9 +1681,9 @@ export {
 } from './better-auth/password.js';
 ```
 
-#### `verifyClerkJwt`
+#### <code v-pre>verifyClerkJwt</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L49) `packages/auth/src/clerk/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/jwt.ts#L49) <code v-pre>packages/auth/src/clerk/jwt.ts</code>
 
 Verify a JWT and return its decoded claims. Throws on shape mismatch, signature mismatch, or expired token. Mirrors `verifyToken` from `@clerk/backend` — the error messages surface which failure mode hit.
 
@@ -1691,9 +1691,9 @@ Verify a JWT and return its decoded claims. Throws on shape mismatch, signature 
 export declare function verifyClerkJwt(token: string, secret: string): ClerkSessionClaims;
 ```
 
-#### `verifyCodeChallenge`
+#### <code v-pre>verifyCodeChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L99) `packages/auth/src/oauth21/pkce.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/pkce.ts#L99) <code v-pre>packages/auth/src/oauth21/pkce.ts</code>
 
 Verify that a supplied `codeVerifier` hashes to the stored `codeChallenge`. Used by the token endpoint on `authorization_code` exchange.
 
@@ -1701,9 +1701,9 @@ Verify that a supplied `codeVerifier` hashes to the stored `codeChallenge`. Used
 export declare function verifyCodeChallenge(codeVerifier: string, codeChallenge: string, method: PkceChallengeMethod): boolean;
 ```
 
-#### `verifyDpopProof`
+#### <code v-pre>verifyDpopProof</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L168) `packages/auth/src/oauth21/dpop.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/dpop.ts#L168) <code v-pre>packages/auth/src/oauth21/dpop.ts</code>
 
 Verify a DPoP proof per RFC 9449 §4.3. Checks the header shape (`typ`, `alg`, `jwk`), the payload fields (`htm`, `htu`, `iat`, `jti`), and the replay registry. Returns the parsed proof on success so the caller can pluck the JWK thumbprint. Throws on failure with a specific reason.
 
@@ -1711,9 +1711,9 @@ Verify a DPoP proof per RFC 9449 §4.3. Checks the header shape (`typ`, `alg`, `
 export declare function verifyDpopProof(proof: DpopProof, options: VerifyDpopProofOptions): DpopProof;
 ```
 
-#### `verifyPassword`
+#### <code v-pre>verifyPassword</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/password.ts#L56) `packages/auth/src/lucia/password.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/password.ts#L56) <code v-pre>packages/auth/src/lucia/password.ts</code>
 
 Verify a password against a previously issued hash. Returns false for any malformed hash rather than throwing — matches the real argon2 verifier and lets sign-in flows treat the outcome as a boolean at the call site.
 
@@ -1721,9 +1721,9 @@ Verify a password against a previously issued hash. Returns false for any malfor
 export declare function verifyPassword(hash: string, password: string): Promise<boolean>;
 ```
 
-#### `verifySupabaseAccessToken`
+#### <code v-pre>verifySupabaseAccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L47) `packages/auth/src/supabase/jwt.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/jwt.ts#L47) <code v-pre>packages/auth/src/supabase/jwt.ts</code>
 
 Verify a Supabase access token JWT and return its decoded claims. Throws on shape mismatch, signature mismatch, or expired token. Mirrors GoTrue's own verification path.
 
@@ -1731,11 +1731,11 @@ Verify a Supabase access token JWT and return its decoded claims. Throws on shap
 export declare function verifySupabaseAccessToken(token: string, secret: string): SupabaseAccessTokenClaims;
 ```
 
-#### `verifySupabaseTotpCode`
+#### <code v-pre>verifySupabaseTotpCode</code>
 
 公開 entry point から解決しています。
 
-`verifyTotpCode` を `verifySupabaseTotpCode` として公開しています。
+<code v-pre>verifyTotpCode</code> を <code v-pre>verifySupabaseTotpCode</code> として公開しています。
 
 ```ts
 export {
@@ -1751,19 +1751,19 @@ export {
 } from './supabase-advanced/setup-supabase-advanced-env.js';
 ```
 
-#### `verifyTotpCode`
+#### <code v-pre>verifyTotpCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/totp.ts#L39) `packages/auth/src/better-auth/totp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/totp.ts#L39) <code v-pre>packages/auth/src/better-auth/totp.ts</code>
 
 ```ts
 export declare function verifyTotpCode(secret: string, code: string, nowMs?: number): boolean;
 ```
 
-#### `webAuthnClientDataHash`
+#### <code v-pre>webAuthnClientDataHash</code>
 
 公開 entry point から解決しています。
 
-`clientDataHash` を `webAuthnClientDataHash` として公開しています。
+<code v-pre>clientDataHash</code> を <code v-pre>webAuthnClientDataHash</code> として公開しています。
 
 SHA-256-like deterministic digest for clientDataJSON. WebAuthn L3 §7.1 uses SHA-256; the mock uses fnv-1a widened to 32 bytes for a deterministic short digest that fits the same byte width as SHA-256.
 
@@ -1782,11 +1782,11 @@ export {
 } from './webauthn/index.js';
 ```
 
-#### `webAuthnCredentialAssertion`
+#### <code v-pre>webAuthnCredentialAssertion</code>
 
 公開 entry point から解決しています。
 
-`credentialAssertion` を `webAuthnCredentialAssertion` として公開しています。
+<code v-pre>credentialAssertion</code> を <code v-pre>webAuthnCredentialAssertion</code> として公開しています。
 
 Simulate `navigator.credentials.get({ publicKey })`. Produces an `AuthenticatorAssertionResponse` shaped like WebAuthn L3 §5.2.2. Enforces the RP-facing checks that a real RP library performs on the response — clientData.type must be `webauthn.get`, challenge must match, user verification bit must be set when requested, and signCount must increase monotonically (§7.2 step 21). `credentialOwnership` maps `credentialId -&gt; authenticatorId` so the mock routes each assertion through the authenticator that actually holds the credential. Real WebAuthn enforces this at the client-side discovery step (§5.5) — the mock mirrors it so a bug that assumes credentials float between authenticators surfaces at test time.
 
@@ -1805,11 +1805,11 @@ export {
 } from './webauthn/index.js';
 ```
 
-#### `webAuthnCredentialCreation`
+#### <code v-pre>webAuthnCredentialCreation</code>
 
 公開 entry point から解決しています。
 
-`credentialCreation` を `webAuthnCredentialCreation` として公開しています。
+<code v-pre>credentialCreation</code> を <code v-pre>webAuthnCredentialCreation</code> として公開しています。
 
 Simulate `navigator.credentials.create({ publicKey })`. Produces an `AuthenticatorAttestationResponse` shaped like WebAuthn L3 §5.2.1 and writes the resulting credential into the authenticator's in-memory store. Called from `WebAuthnTestEnv.credentialCreation` — the env passes the authenticator selected by the caller (or its default).
 
@@ -1828,11 +1828,11 @@ export {
 } from './webauthn/index.js';
 ```
 
-#### `webAuthnMockSignature`
+#### <code v-pre>webAuthnMockSignature</code>
 
 公開 entry point から解決しています。
 
-`mockSignature` を `webAuthnMockSignature` として公開しています。
+<code v-pre>mockSignature</code> を <code v-pre>webAuthnMockSignature</code> として公開しています。
 
 Deterministic mock signature over `(publicKey || authenticatorData || clientDataJSONHash)`. Real WebAuthn signatures are ES256 / RS256 / EdDSA over that concatenation (WebAuthn L3 §6.5.4). The mock uses a fnv-1a hash for stability across runs so fixture comparisons stay deterministic.
 
@@ -1851,11 +1851,11 @@ export {
 } from './webauthn/index.js';
 ```
 
-#### `webAuthnNormalizeChallenge`
+#### <code v-pre>webAuthnNormalizeChallenge</code>
 
 公開 entry point から解決しています。
 
-`normalizeChallenge` を `webAuthnNormalizeChallenge` として公開しています。
+<code v-pre>normalizeChallenge</code> を <code v-pre>webAuthnNormalizeChallenge</code> として公開しています。
 
 Normalize a challenge or credential.id that a caller may hand in as either `string` (base64url or plain UTF-8) or `Uint8Array`.
 
@@ -1876,9 +1876,9 @@ export {
 
 ### 型
 
-#### `AccessToken`
+#### <code v-pre>AccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L182) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L182) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Access token minted by `/token`. Contains just enough state for the mock to answer `/introspect` and `/revoke` — a real JWT would encode this into claims, the mock keeps a plain record for test ergonomics.
 
@@ -1900,9 +1900,9 @@ export interface AccessToken {
 }
 ```
 
-#### `Auth0AccessTokenClaims`
+#### <code v-pre>Auth0AccessTokenClaims</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L120) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L120) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 Access token claims — Auth0 issues these when an API audience is configured. Tokens are consumed by backend APIs and verified with the tenant's JWKS.
 
@@ -1928,9 +1928,9 @@ export interface Auth0AccessTokenClaims {
 }
 ```
 
-#### `Auth0Action`
+#### <code v-pre>Auth0Action</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L238) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L238) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 An action's callback shape — signature mirrors Auth0's real Actions runtime, `async (event, api) =&gt; void`. The mock invokes actions sequentially with shared idToken/accessToken/user mutations across the pipeline.
 
@@ -1938,9 +1938,9 @@ An action's callback shape — signature mirrors Auth0's real Actions runtime, `
 export type Auth0Action = (event: Auth0ActionEvent, api: Auth0ActionApi) => Promise<void> | void;
 ```
 
-#### `Auth0ActionApi`
+#### <code v-pre>Auth0ActionApi</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L210) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L210) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 ```ts
 export interface Auth0ActionApi {
@@ -1967,9 +1967,9 @@ export interface Auth0ActionApi {
 }
 ```
 
-#### `Auth0ActionEvent`
+#### <code v-pre>Auth0ActionEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L190) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L190) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 ```ts
 export interface Auth0ActionEvent {
@@ -1993,9 +1993,9 @@ export interface Auth0ActionEvent {
 }
 ```
 
-#### `Auth0ActionTrigger`
+#### <code v-pre>Auth0ActionTrigger</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L184) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L184) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 Actions — Auth0's current extensibility model. An action targets a trigger (post-login / pre-user-registration / etc) and receives an `event` object + an `api` object with helpers for mutation (idToken.setCustomClaim / accessToken.setCustomClaim / redirect.sendUserTo / user.setAppMetadata). The mock covers the two most common triggers.
 
@@ -2003,9 +2003,9 @@ Actions — Auth0's current extensibility model. An action targets a trigger (po
 export type Auth0ActionTrigger = 'post-login' | 'pre-user-registration' | 'post-user-registration' | 'post-change-password';
 ```
 
-#### `Auth0Connection`
+#### <code v-pre>Auth0Connection</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L23) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L23) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 Auth0's user identity — the real profile carries dozens of fields; the mock covers what tests assert against (email + email_verified + connection + identities + app_metadata + user_metadata + Auth0's opaque `user_id` and the `sub` claim shape `&lt;connection&gt;|&lt;connection_user_id&gt;`).
 
@@ -2013,9 +2013,9 @@ Auth0's user identity — the real profile carries dozens of fields; the mock co
 export type Auth0Connection = 'Username-Password-Authentication' | 'google-oauth2' | 'github' | 'auth0' | 'sms' | 'email';
 ```
 
-#### `Auth0Identity`
+#### <code v-pre>Auth0Identity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L44) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L44) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 ```ts
 export interface Auth0Identity {
@@ -2028,9 +2028,9 @@ export interface Auth0Identity {
 }
 ```
 
-#### `Auth0IdTokenClaims`
+#### <code v-pre>Auth0IdTokenClaims</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L88) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L88) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 OIDC id_token claims Auth0 issues. Standard OIDC (sub / aud / iss / iat / exp) plus Auth0-specific extras (nickname / email / email_verified) and namespaced custom claims injected by rules / actions.
 
@@ -2064,17 +2064,17 @@ export interface Auth0IdTokenClaims {
 }
 ```
 
-#### `Auth0Rule`
+#### <code v-pre>Auth0Rule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L171) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L171) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 ```ts
 export type Auth0Rule = (user: Auth0User, context: Auth0RuleContext, callback: (err: Error | null, user?: Auth0User, context?: Auth0RuleContext) => void) => void;
 ```
 
-#### `Auth0RuleContext`
+#### <code v-pre>Auth0RuleContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L147) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L147) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 Rules — Auth0's legacy pipeline (still supported for tenants pre-Actions). A rule is a `(user, context, callback) =&gt; void` in prod; the mock exposes the same signature so consumers can drop existing rules straight in. Rules run in order during login and can mutate `context.idToken` / `context.accessToken` (namespaced claim injection) and `user.app_metadata`.
 
@@ -2104,9 +2104,9 @@ export interface Auth0RuleContext {
 }
 ```
 
-#### `Auth0TestEnv`
+#### <code v-pre>Auth0TestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L300) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L300) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 Test env returned by {@link setupAuth0Env }. Consumers hold this handle for the lifetime of a test and call `stop()` in `afterEach` to reset all in-memory state. The `users` / `authenticate` / `rules` / `actions` handles mirror the shape of the real `auth0` node SDK.
 
@@ -2212,9 +2212,9 @@ export interface Auth0TestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `Auth0User`
+#### <code v-pre>Auth0User</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L53) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L53) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 ```ts
 export interface Auth0User {
@@ -2248,9 +2248,9 @@ export interface Auth0User {
 }
 ```
 
-#### `AuthAccount`
+#### <code v-pre>AuthAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L35) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L35) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface AuthAccount {
@@ -2261,17 +2261,17 @@ export interface AuthAccount {
 }
 ```
 
-#### `AuthAxis`
+#### <code v-pre>AuthAxis</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/types.ts#L24) `packages/auth/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/types.ts#L24) <code v-pre>packages/auth/src/semantics/types.ts</code>
 
 ```ts
 export type AuthAxis = 'device-bound-passkey' | 'conditional-ui' | 'step-up-mfa' | 'risk-based-auth' | 'auth-continuity' | 'cross-device-flow' | 'session-hijack-detect' | 'auth-telemetry';
 ```
 
-#### `AuthDatabaseAdapter`
+#### <code v-pre>AuthDatabaseAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L60) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L60) <code v-pre>packages/auth/src/types.ts</code>
 
 Minimal, Auth.js-compatible database adapter surface. Both Prisma (`@auth/prisma-adapter`) and Drizzle (`@auth/drizzle-adapter`) expose the same method names, so the mock can stand in for either.
 
@@ -2312,9 +2312,9 @@ export interface AuthDatabaseAdapter {
 }
 ```
 
-#### `AuthenticatorAssertionResponse`
+#### <code v-pre>AuthenticatorAssertionResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L149) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L149) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Authenticator assertion response — the client returns this to the RP after `navigator.credentials.get()`. The mock produces a shape compatible with WebAuthn L3 §5.2.2. `signCount` is returned so the RP can update its stored counter and detect cloned authenticators.
 
@@ -2329,9 +2329,9 @@ export interface AuthenticatorAssertionResponse {
 }
 ```
 
-#### `AuthenticatorAttestationResponse`
+#### <code v-pre>AuthenticatorAttestationResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L133) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L133) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Authenticator attestation response — the client returns this to the RP after `navigator.credentials.create()`. The mock produces a shape compatible with WebAuthn L3 §5.2.1; `attestationObject` and `clientDataJSON` are the two fields real RPs decode.
 
@@ -2347,9 +2347,9 @@ export interface AuthenticatorAttestationResponse {
 }
 ```
 
-#### `AuthenticatorSelectionCriteria`
+#### <code v-pre>AuthenticatorSelectionCriteria</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L71) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L71) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Authenticator selection criteria (WebAuthn L3 §5.4.4). Combines the fields an RP passes to `navigator.credentials.create({ publicKey: { authenticatorSelection } })`.
 
@@ -2363,9 +2363,9 @@ export interface AuthenticatorSelectionCriteria {
 }
 ```
 
-#### `AuthorizationRequest`
+#### <code v-pre>AuthorizationRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L121) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L121) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Authorization request submitted to `/authorize`. RFC 9700 §2.1 requires PKCE parameters on every request — `code_challenge` + `code_challenge_method` are mandatory even for confidential clients.
 
@@ -2387,9 +2387,9 @@ export interface AuthorizationRequest {
 }
 ```
 
-#### `AuthorizationResponse`
+#### <code v-pre>AuthorizationResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L143) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L143) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Response to a successful `/authorize` call. Real deployments 302-redirect the browser to `redirectUri?code=...&state=...`; the mock returns the parsed shape directly so tests can assert `code` and `state` without HTTP plumbing.
 
@@ -2401,9 +2401,9 @@ export interface AuthorizationResponse {
 }
 ```
 
-#### `AuthorizationServer`
+#### <code v-pre>AuthorizationServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L272) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L272) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `AuthorizationServer` return shape from `createAuthorizationServer`. Exposes the RFC 6749 / 9700 / 7662 endpoint surface as plain methods.
 
@@ -2436,9 +2436,9 @@ export interface AuthorizationServer {
 }
 ```
 
-#### `AuthorizationServerOptions`
+#### <code v-pre>AuthorizationServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L302) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L302) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `createAuthorizationServer`.
 
@@ -2468,9 +2468,9 @@ export interface AuthorizationServerOptions {
 }
 ```
 
-#### `AuthorizationUser`
+#### <code v-pre>AuthorizationUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L263) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L263) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 User account preseeded on the mock AS. Every user has a subject id and a canonical set of scopes the AS is allowed to grant.
 
@@ -2481,9 +2481,9 @@ export interface AuthorizationUser {
 }
 ```
 
-#### `AuthPlatform`
+#### <code v-pre>AuthPlatform</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/types.ts#L22) `packages/auth/src/semantics/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/semantics/types.ts#L22) <code v-pre>packages/auth/src/semantics/types.ts</code>
 
 Advanced auth semantics — platform-neutral axis SSOT (v0.6 Passwordless UX III). v0.4 auth (v1.21) landed 4 protocol adapter (WebAuthn L3 / Passkey / OAuth 2.1 / OIDC). v0.5 (v1.22) added real driver env-gate + Federation JWKS rotation e2e + a11y gate. v0.6 (v1.44) adds 8 advanced Passwordless UX axes on top of the existing 4 protocol adapter — device-bound-passkey (device bind + credProps.rk + sync fabric verification), conditional-ui (autofill hint + mediation="conditional" + fallback ladder), step-up-mfa (AAL escalation ladder + biometric prompt + trust duration cache), risk-based-auth (risk score + adaptive challenge + policy chain), auth-continuity (seamless re-auth + refresh + session extension + revocation window), cross-device-flow (QR handshake + BLE proximity + hybrid transport + tunnel state machine), session-hijack-detect (fingerprint drift + geo anomaly + concurrent session + logout cascade), and auth-telemetry (attempt log + success rate histogram + latency histogram + abuse detection). Each axis is expressed as a small pure state-machine helper that returns a neutral envelope, so downstream tests can drive the axis without knowing the browser vendor's payload dialect (chromium / webkit / firefox each ship different WebAuthn conditional UI + sync fabric ergonomics).
 
@@ -2491,9 +2491,9 @@ Advanced auth semantics — platform-neutral axis SSOT (v0.6 Passwordless UX III
 export type AuthPlatform = 'chromium' | 'webkit' | 'firefox';
 ```
 
-#### `AuthProfile`
+#### <code v-pre>AuthProfile</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L21) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L21) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface AuthProfile {
@@ -2504,9 +2504,9 @@ export interface AuthProfile {
 }
 ```
 
-#### `AuthSession`
+#### <code v-pre>AuthSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L42) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L42) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface AuthSession {
@@ -2516,9 +2516,9 @@ export interface AuthSession {
 }
 ```
 
-#### `AuthUser`
+#### <code v-pre>AuthUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L28) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L28) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface AuthUser {
@@ -2529,9 +2529,9 @@ export interface AuthUser {
 }
 ```
 
-#### `BetterAuthAccount`
+#### <code v-pre>BetterAuthAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L66) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L66) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthAccount {
@@ -2541,9 +2541,9 @@ export interface BetterAuthAccount {
 }
 ```
 
-#### `BetterAuthDatabaseAdapter`
+#### <code v-pre>BetterAuthDatabaseAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L125) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L125) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Minimal, Better-Auth-compatible database adapter surface. `betterAuth/adapters/prisma`, `betterAuth/adapters/drizzle`, and `betterAuth/adapters/kysely` all funnel through the same operation set at the Better Auth layer.
 
@@ -2582,9 +2582,9 @@ export interface BetterAuthDatabaseAdapter {
 }
 ```
 
-#### `BetterAuthDatabaseKind`
+#### <code v-pre>BetterAuthDatabaseKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L10) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L10) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Better Auth ships three official database adapter shapes — `betterAuth/adapters/prisma`, `betterAuth/adapters/drizzle`, and `betterAuth/adapters/kysely`. All three expose the same operation surface at the Better Auth layer (create / findOne / findMany / update / delete / count), so the mock is a drop-in for any of them. The `kind` tag surfaces the dialect for tests that assert against it without changing behaviour.
 
@@ -2592,9 +2592,9 @@ Better Auth ships three official database adapter shapes — `betterAuth/adapter
 export type BetterAuthDatabaseKind = 'prisma' | 'drizzle' | 'kysely';
 ```
 
-#### `BetterAuthMembership`
+#### <code v-pre>BetterAuthMembership</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L103) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L103) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthMembership {
@@ -2604,9 +2604,9 @@ export interface BetterAuthMembership {
 }
 ```
 
-#### `BetterAuthOAuthProfile`
+#### <code v-pre>BetterAuthOAuthProfile</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L72) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L72) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthOAuthProfile {
@@ -2616,9 +2616,9 @@ export interface BetterAuthOAuthProfile {
 }
 ```
 
-#### `BetterAuthOrganization`
+#### <code v-pre>BetterAuthOrganization</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L96) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L96) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Organization + membership records. Better Auth's `organization` plugin persists these two tables and exposes create / invite / accept / list helpers on the auth client. The mock keeps the same shape so a suite can assert against membership state after invitation flows.
 
@@ -2631,9 +2631,9 @@ export interface BetterAuthOrganization {
 }
 ```
 
-#### `BetterAuthPasskey`
+#### <code v-pre>BetterAuthPasskey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L113) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L113) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Passkey credential — Better Auth's `passkey` plugin stores a WebAuthn credential per user. The mock skips the WebAuthn ceremony and only records the shape.
 
@@ -2646,9 +2646,9 @@ export interface BetterAuthPasskey {
 }
 ```
 
-#### `BetterAuthPluginKind`
+#### <code v-pre>BetterAuthPluginKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L40) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L40) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Plugin registry keys the mock understands. Better Auth's real plugin system is open-ended, but the ones covered by the AC (organizations + passkey + magic link + 2FA/TOTP) are the ones consumers actually mock in tests today. `emailAndPassword` and `magicLink` and `twoFactor` land here even though Better Auth distinguishes between core config and plugins — the mock treats them as opt-in capabilities the caller flips on for a specific suite, which is closer to how they are used in practice.
 
@@ -2656,9 +2656,9 @@ Plugin registry keys the mock understands. Better Auth's real plugin system is o
 export type BetterAuthPluginKind = 'emailAndPassword' | 'magicLink' | 'twoFactor' | 'organizations' | 'passkey';
 ```
 
-#### `BetterAuthProviderKind`
+#### <code v-pre>BetterAuthProviderKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L28) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L28) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Built-in social provider mocks. Better Auth's real `socialProviders` config accepts an open map, but for tests we only mock the two shapes documented in the quick-start (Google + GitHub). Extra providers can be added without breaking the surface — the mock builder rejects unknown kinds explicitly.
 
@@ -2666,9 +2666,9 @@ Built-in social provider mocks. Better Auth's real `socialProviders` config acce
 export type BetterAuthProviderKind = 'google' | 'github';
 ```
 
-#### `BetterAuthProviderMock`
+#### <code v-pre>BetterAuthProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L171) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L171) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthProviderMock {
@@ -2682,9 +2682,9 @@ export interface BetterAuthProviderMock {
 }
 ```
 
-#### `BetterAuthSession`
+#### <code v-pre>BetterAuthSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L58) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L58) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthSession {
@@ -2696,9 +2696,9 @@ export interface BetterAuthSession {
 }
 ```
 
-#### `BetterAuthTestEnv`
+#### <code v-pre>BetterAuthTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L208) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L208) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthTestEnv extends TestEnvBase<'mock'> {
@@ -2804,9 +2804,9 @@ export interface BetterAuthTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `BetterAuthUser`
+#### <code v-pre>BetterAuthUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L47) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L47) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface BetterAuthUser {
@@ -2821,9 +2821,9 @@ export interface BetterAuthUser {
 }
 ```
 
-#### `BetterAuthVerification`
+#### <code v-pre>BetterAuthVerification</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L84) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L84) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 Verification token issued for magic-link sign-in. Mirrors Better Auth's internal `verification` table (identifier + value + expiresAt). Consuming the token deletes it, so re-using a magic link rejects the second attempt — the same policy Better Auth enforces at runtime.
 
@@ -2835,9 +2835,9 @@ export interface BetterAuthVerification {
 }
 ```
 
-#### `CaBLEBLEHandshake`
+#### <code v-pre>CaBLEBLEHandshake</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L55) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L55) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 BLE advertisement handshake artifact. Real caBLE uses a 20-byte advertisement carrying an encrypted session identifier. The mock keeps the same shape as a plain object so tests can assert the initiator + responder derived the same shared secret without decoding raw BLE bytes.
 
@@ -2853,9 +2853,9 @@ export interface CaBLEBLEHandshake {
 }
 ```
 
-#### `CaBLECredentialMigration`
+#### <code v-pre>CaBLECredentialMigration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L93) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L93) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 Credential migration payload — the responder (phone) ships the passkey credential over the WebSocket tunnel. Real caBLE encrypts this with the shared secret; the mock keeps the raw {@link PasskeyCredential} plus a deterministic "encrypted" tag so tests can assert the migration went through the tunnel without leaking the credential material outside.
 
@@ -2868,9 +2868,9 @@ export interface CaBLECredentialMigration {
 }
 ```
 
-#### `CaBLEQRCodePayload`
+#### <code v-pre>CaBLEQRCodePayload</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L38) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L38) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 QR code payload the initiator (laptop) prints for the phone to scan. Real caBLE uses a base32-encoded EC public key + tunnel server hint + random nonce. The mock keeps the same three fields as literal strings so tests can assert the payload survives round-trip encoding without running through a QR image decoder.
 
@@ -2887,9 +2887,9 @@ export interface CaBLEQRCodePayload {
 }
 ```
 
-#### `CaBLESession`
+#### <code v-pre>CaBLESession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L141) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L141) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 caBLE hybrid transport session — collects every artifact produced by the 3 steps + migration + signature roundtrip. `complete()` runs the whole chain and returns this shape so a single assertion can inspect every fidelity axis in one place.
 
@@ -2906,9 +2906,9 @@ export interface CaBLESession {
 }
 ```
 
-#### `CaBLESessionOptions`
+#### <code v-pre>CaBLESessionOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L122) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L122) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 Options accepted by `startCaBLESession`. The initiator picks the tunnel server hint (a hostname string in real caBLE, a made-up literal in the mock) and the passkey to migrate. Every field is required — real caBLE refuses to start a hybrid transport ceremony with any of these missing.
 
@@ -2927,9 +2927,9 @@ export interface CaBLESessionOptions {
 }
 ```
 
-#### `CaBLESignatureRoundtrip`
+#### <code v-pre>CaBLESignatureRoundtrip</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L107) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L107) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 Signature roundtrip artifact — the responder (phone) signs a challenge with the passkey private key and streams the signature back through the tunnel. Verified by the initiator against the stored credential public key. Mirrors the WebAuthn L3 §7.2 assertion signature check the cross-device flow terminates in.
 
@@ -2944,9 +2944,9 @@ export interface CaBLESignatureRoundtrip {
 }
 ```
 
-#### `CaBLEStep`
+#### <code v-pre>CaBLEStep</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L12) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L12) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 caBLE 3 step SSOT vocabulary. Modeled after the FIDO Alliance CTAP 2.2 hybrid transport spec — phone → laptop credential handoff runs QR code generation → BLE advertisement handshake → WebSocket tunnel establishment → credential migration → signature roundtrip. Each step surfaces its own artifact so the fidelity harness can assert on the wire format without driving a real Bluetooth stack.
 
@@ -2954,9 +2954,9 @@ caBLE 3 step SSOT vocabulary. Modeled after the FIDO Alliance CTAP 2.2 hybrid tr
 export type CaBLEStep = 'qr-code' | 'ble-handshake' | 'websocket-tunnel' | 'credential-migration' | 'signature-roundtrip';
 ```
 
-#### `CaBLEWebSocketTunnel`
+#### <code v-pre>CaBLEWebSocketTunnel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L72) `packages/auth/src/passkey/caBLE/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/types.ts#L72) <code v-pre>packages/auth/src/passkey/caBLE/types.ts</code>
 
 WebSocket tunnel handle. Real caBLE runs a duplex WebSocket over the tunnel server. The mock keeps an in-memory message queue keyed by session id — both sides `send()` / `receive()` through the same object so tests can assert the ordering + payload without spinning up a real WebSocket server.
 
@@ -2976,9 +2976,9 @@ export interface CaBLEWebSocketTunnel {
 }
 ```
 
-#### `ClerkEmailAddress`
+#### <code v-pre>ClerkEmailAddress</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L23) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L23) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 ```ts
 export interface ClerkEmailAddress {
@@ -2988,9 +2988,9 @@ export interface ClerkEmailAddress {
 }
 ```
 
-#### `ClerkExternalAccount`
+#### <code v-pre>ClerkExternalAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L17) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L17) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 Clerk's real user record carries dozens of fields — the mock covers the ones that consumers actually assert against in tests (id + primary email + phone + external accounts + org memberships). Additional fields can be added later without breaking the surface.
 
@@ -3002,9 +3002,9 @@ export interface ClerkExternalAccount {
 }
 ```
 
-#### `ClerkOrganization`
+#### <code v-pre>ClerkOrganization</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L110) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L110) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 ```ts
 export interface ClerkOrganization {
@@ -3017,9 +3017,9 @@ export interface ClerkOrganization {
 }
 ```
 
-#### `ClerkOrganizationMembership`
+#### <code v-pre>ClerkOrganizationMembership</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L119) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L119) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 ```ts
 export interface ClerkOrganizationMembership {
@@ -3031,9 +3031,9 @@ export interface ClerkOrganizationMembership {
 }
 ```
 
-#### `ClerkOrganizationRole`
+#### <code v-pre>ClerkOrganizationRole</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L102) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L102) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 Organization + memberships. Clerk's real organization plugin exposes `organizations.getOrganization`, `memberships.getOrganizationMembership`, and a role model that includes org-scoped roles (`org:admin` / `org:member` in prod). The mock uses the shorter role names for readability but keeps the same relational shape.
 
@@ -3041,9 +3041,9 @@ Organization + memberships. Clerk's real organization plugin exposes `organizati
 export type ClerkOrganizationRole = 'owner' | 'admin' | 'member';
 ```
 
-#### `ClerkPhoneNumber`
+#### <code v-pre>ClerkPhoneNumber</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L29) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L29) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 ```ts
 export interface ClerkPhoneNumber {
@@ -3053,9 +3053,9 @@ export interface ClerkPhoneNumber {
 }
 ```
 
-#### `ClerkSession`
+#### <code v-pre>ClerkSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L56) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L56) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 Clerk session. Sessions are keyed by opaque id (`sess_...` in prod), the mock keeps the same shape. The `token` is the raw JWT surfaced to the client through `getToken()` — the mock generates a base64-encoded stub JWT.
 
@@ -3073,9 +3073,9 @@ export interface ClerkSession {
 }
 ```
 
-#### `ClerkSessionClaims`
+#### <code v-pre>ClerkSessionClaims</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L74) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L74) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 JWT claims Clerk embeds in the session token. `sub` = user id, `sid` = session id, `org_id` + `org_role` = active org context, `iat` / `exp` = standard JWT timestamps. The mock encodes these in a base64 stub the `verifyToken` helper decodes back.
 
@@ -3102,9 +3102,9 @@ export interface ClerkSessionClaims {
 }
 ```
 
-#### `ClerkTestEnv`
+#### <code v-pre>ClerkTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L187) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L187) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 The test env returned by {@link setupClerkEnv }. Consumers hold this handle for the lifetime of a test and call `stop()` in `afterEach` to reset all in-memory state. The `users` / `sessions` / `organizations` handles mirror the shape of Clerk's real `@clerk/backend` SDK — call sites that use the mock are drop-in-compatible with the real client after swap.
 
@@ -3204,9 +3204,9 @@ export interface ClerkTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `ClerkUser`
+#### <code v-pre>ClerkUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L35) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L35) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 ```ts
 export interface ClerkUser {
@@ -3226,9 +3226,9 @@ export interface ClerkUser {
 }
 ```
 
-#### `ClientRegistration`
+#### <code v-pre>ClientRegistration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L251) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L251) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Client registration accepted by the mock AS. Real deployments manage clients through a Dynamic Client Registration endpoint (RFC 7591); the mock accepts the client shape at env construction to keep tests hermetic.
 
@@ -3242,9 +3242,9 @@ export interface ClientRegistration {
 }
 ```
 
-#### `ClientRegistrationRequest`
+#### <code v-pre>ClientRegistrationRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L61) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L61) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 OpenID Connect Dynamic Client Registration request per RFC 7591 §2. Fields the mock validates: `redirect_uris` (mandatory, non-empty), `grant_types` (must be OAuth 2.1 allowlist), `token_endpoint_auth_method` (must be an advertised method). `client_name` is treated as opaque metadata.
 
@@ -3266,9 +3266,9 @@ export interface ClientRegistrationRequest {
 }
 ```
 
-#### `ClientRegistrationResponse`
+#### <code v-pre>ClientRegistrationResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L83) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L83) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Response body from `/register` (RFC 7591 §3). Real deployments assign a random `client_id` and (for confidential clients) a `client_secret`; the mock returns deterministic ids from a monotonic counter for reproducible tests.
 
@@ -3285,9 +3285,9 @@ export interface ClientRegistrationResponse {
 }
 ```
 
-#### `DiscoveryEndpoint`
+#### <code v-pre>DiscoveryEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L48) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L48) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Discovery endpoint handle. `fetch()` returns the OP metadata as a plain object — a real HTTP client would parse the JSON body but the mock skips the encoding trip so tests can assert on the fields directly.
 
@@ -3299,9 +3299,9 @@ export interface DiscoveryEndpoint {
 }
 ```
 
-#### `DpopJwk`
+#### <code v-pre>DpopJwk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L81) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L81) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Public JWK embedded in the DPoP proof header. The mock represents the P-256 key as an opaque thumbprint so tests can compare identity without cracking the JWK fields.
 
@@ -3318,9 +3318,9 @@ export interface DpopJwk {
 }
 ```
 
-#### `DpopProof`
+#### <code v-pre>DpopProof</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L97) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L97) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 DPoP proof JWT structure. The mock represents the JWT as a compact `header.payload.signature` string but exposes the parsed header + payload for assertions.
 
@@ -3345,9 +3345,9 @@ export interface DpopProof {
 }
 ```
 
-#### `DpopProofInput`
+#### <code v-pre>DpopProofInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L52) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L52) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 DPoP proof JWT parameters. RFC 9449 defines a Demonstration of Proof of Possession JWT that binds an access token to the client's asymmetric key, defeating bearer-token exfiltration. The mock uses ES256 (P-256 ECDSA) as the only supported alg — matching the alg advertised in the DPoP spec's default deployment.
 
@@ -3377,9 +3377,9 @@ export interface DpopProofInput {
 }
 ```
 
-#### `IdToken`
+#### <code v-pre>IdToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L184) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L184) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Compact-serialized id_token JWT (`header.payload.signature`). The mock exposes the parsed claims so tests can assert without decoding the JWT.
 
@@ -3395,9 +3395,9 @@ export interface IdToken {
 }
 ```
 
-#### `IdTokenClaims`
+#### <code v-pre>IdTokenClaims</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L154) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L154) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 id_token claim shape per OpenID Connect Core 1.0 §2. `iss` / `sub` / `aud` / `exp` / `iat` are mandatory. The optional claims are the ones the mock validates on `verifyIdToken` — extending this shape requires teaching the verifier about new claims.
 
@@ -3429,9 +3429,9 @@ export interface IdTokenClaims {
 }
 ```
 
-#### `IntrospectionResponse`
+#### <code v-pre>IntrospectionResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L236) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L236) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Introspection response per RFC 7662. The mock returns the minimal shape a resource server needs to authorize a request.
 
@@ -3447,9 +3447,9 @@ export interface IntrospectionResponse {
 }
 ```
 
-#### `JwksDocument`
+#### <code v-pre>JwksDocument</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L127) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L127) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 JWKS document returned by `/jwks`. Real deployments return `{keys: [...]}` per RFC 7517 §5; the mock mirrors that shape verbatim.
 
@@ -3459,9 +3459,9 @@ export interface JwksDocument {
 }
 ```
 
-#### `JwksEndpoint`
+#### <code v-pre>JwksEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L136) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L136) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 JWKS endpoint handle. Exposes `fetch()` (returns the current key set), `rotate()` (mint a new active key, retire the old one with a retention window), and `activeKey()` (peek the current signing key).
 
@@ -3479,9 +3479,9 @@ export interface JwksEndpoint {
 }
 ```
 
-#### `JwksKey`
+#### <code v-pre>JwksKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L100) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L100) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 JWKS entry. Keys are opaque records — the mock signs id_tokens with an HMAC-style signature keyed by `kid`, so `n` / `e` / `x` / `y` are placeholders that let a real client parse the JWK without cracking the cryptographic invariants.
 
@@ -3510,9 +3510,9 @@ export interface JwksKey {
 }
 ```
 
-#### `LuciaDatabaseAdapter`
+#### <code v-pre>LuciaDatabaseAdapter</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L54) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L54) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 Minimal, Lucia-v3-compatible database adapter surface. `@lucia-auth/adapter-sqlite` and `@lucia-auth/adapter-postgresql` both expose the same method names, so the mock is a drop-in for either at test time.
 
@@ -3545,9 +3545,9 @@ export interface LuciaDatabaseAdapter {
 }
 ```
 
-#### `LuciaDatabaseKind`
+#### <code v-pre>LuciaDatabaseKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L9) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L9) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 Lucia v3 supports two database dialects out of the box through the official adapter packages (`@lucia-auth/adapter-sqlite`, `@lucia-auth/adapter-postgresql`). The kind tag lets the mock adapter behave the same as either at the API level while still surfacing the dialect for tests that care about it.
 
@@ -3555,9 +3555,9 @@ Lucia v3 supports two database dialects out of the box through the official adap
 export type LuciaDatabaseKind = 'sqlite' | 'postgresql';
 ```
 
-#### `LuciaOAuthAccount`
+#### <code v-pre>LuciaOAuthAccount</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L37) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L37) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface LuciaOAuthAccount {
@@ -3567,9 +3567,9 @@ export interface LuciaOAuthAccount {
 }
 ```
 
-#### `LuciaOAuthProfile`
+#### <code v-pre>LuciaOAuthProfile</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L43) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L43) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface LuciaOAuthProfile {
@@ -3579,17 +3579,17 @@ export interface LuciaOAuthProfile {
 }
 ```
 
-#### `LuciaProviderKind`
+#### <code v-pre>LuciaProviderKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L17) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L17) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export type LuciaProviderKind = 'google' | 'github';
 ```
 
-#### `LuciaProviderMock`
+#### <code v-pre>LuciaProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L79) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L79) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface LuciaProviderMock {
@@ -3603,9 +3603,9 @@ export interface LuciaProviderMock {
 }
 ```
 
-#### `LuciaSession`
+#### <code v-pre>LuciaSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L26) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L26) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface LuciaSession {
@@ -3620,9 +3620,9 @@ export interface LuciaSession {
 }
 ```
 
-#### `LuciaTestEnv`
+#### <code v-pre>LuciaTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L101) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L101) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface LuciaTestEnv extends TestEnvBase<'mock'> {
@@ -3669,9 +3669,9 @@ export interface LuciaTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `LuciaUser`
+#### <code v-pre>LuciaUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L19) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L19) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface LuciaUser {
@@ -3682,9 +3682,9 @@ export interface LuciaUser {
 }
 ```
 
-#### `MfaAal`
+#### <code v-pre>MfaAal</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L119) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L119) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 Authenticator Assurance Level, exactly matching Supabase's terminology.
 
@@ -3692,9 +3692,9 @@ Authenticator Assurance Level, exactly matching Supabase's terminology.
 export type MfaAal = 'aal1' | 'aal2';
 ```
 
-#### `MfaBackupCode`
+#### <code v-pre>MfaBackupCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L102) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L102) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface MfaBackupCode {
@@ -3704,9 +3704,9 @@ export interface MfaBackupCode {
 }
 ```
 
-#### `MfaChallenge`
+#### <code v-pre>MfaChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L108) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L108) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface MfaChallenge {
@@ -3720,9 +3720,9 @@ export interface MfaChallenge {
 }
 ```
 
-#### `MfaFactor`
+#### <code v-pre>MfaFactor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L89) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L89) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface MfaFactor {
@@ -3739,9 +3739,9 @@ export interface MfaFactor {
 }
 ```
 
-#### `MfaFactorKind`
+#### <code v-pre>MfaFactorKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L87) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L87) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 MFA factor — Supabase's `auth.mfa` surface exposes TOTP + phone as first class factors plus 10 backup codes per user. The mock mirrors these three factor kinds.
 
@@ -3749,9 +3749,9 @@ MFA factor — Supabase's `auth.mfa` surface exposes TOTP + phone as first class
 export type MfaFactorKind = 'totp' | 'phone' | 'backup';
 ```
 
-#### `NextAuthTestEnv`
+#### <code v-pre>NextAuthTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L85) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L85) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface NextAuthTestEnv extends TestEnvBase<'mock'> {
@@ -3787,9 +3787,9 @@ export interface NextAuthTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `OAuth21GrantType`
+#### <code v-pre>OAuth21GrantType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L10) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L10) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 OAuth 2.1 grant type. The mock intentionally exposes only the RFC 9700 "OAuth 2.1" allowlisted grants — `authorization_code` (with PKCE always required) + `refresh_token`. The historical `implicit` and `password` grants that OAuth 2.0 permitted were dropped by 2.1 and the mock rejects them at parse time so tests catch a downgrade attack immediately.
 
@@ -3797,9 +3797,9 @@ OAuth 2.1 grant type. The mock intentionally exposes only the RFC 9700 "OAuth 2.
 export type OAuth21GrantType = 'authorization_code' | 'refresh_token';
 ```
 
-#### `OAuth21TestEnv`
+#### <code v-pre>OAuth21TestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L336) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L336) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `setupOAuth21Env` return shape. Exposes the AS plus the standalone helpers so a test can drive PKCE + DPoP without importing the module leaves.
 
@@ -3839,11 +3839,11 @@ export interface OAuth21TestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `OidcEntityStatement`
+#### <code v-pre>OidcEntityStatement</code>
 
 公開 entry point から解決しています。
 
-`EntityStatement` を `OidcEntityStatement` として公開しています。
+<code v-pre>EntityStatement</code> を <code v-pre>OidcEntityStatement</code> として公開しています。
 
 Entity Statement per OpenID Federation 1.0 §3.1. The mock represents it as a plain object (skipping the JWS signature) with the subject / issuer pair that the chain walker follows. Real deployments would serialize this as a JWT signed by the issuer's JWKS.
 
@@ -3871,9 +3871,9 @@ export type {
 } from './oidc/types.js';
 ```
 
-#### `OidcTestEnv`
+#### <code v-pre>OidcTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L353) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L353) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 `setupOidcEnv` return shape. Composes the OAuth 2.1 mock AS with OIDC discovery / DCR / JWKS / id_token / federation helpers.
 
@@ -3920,9 +3920,9 @@ export interface OidcTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `OpenIdProviderMetadata`
+#### <code v-pre>OpenIdProviderMetadata</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L20) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L20) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 OpenID Provider metadata returned by the Discovery endpoint (`.well-known/openid-configuration`). Fields follow OpenID Connect Discovery 1.0 §3. The mock returns the minimum set that a Relying Party (RP) needs to complete the Authorization Code + PKCE flow that OIDC layers on top of OAuth 2.1. `issuer` MUST match the URL used to fetch the document (spec §4.3). The mock derives every other URL from it so a test can compare with a single string mismatch check.
 
@@ -3951,9 +3951,9 @@ export interface OpenIdProviderMetadata {
 }
 ```
 
-#### `PasskeyCredential`
+#### <code v-pre>PasskeyCredential</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L133) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L133) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Passkey credential record. A passkey extends `WebAuthnCredential` with sync fabric metadata — which vendor blob store the credential is backed up into, the device that minted the credential, and the sync epoch used to detect fabric conflicts. `syncedFabrics` tracks every vendor the credential has ever been backed up into so a restore on a fresh device knows every vendor to consult.
 
@@ -3986,9 +3986,9 @@ export interface PasskeyCredential extends WebAuthnCredential {
 }
 ```
 
-#### `PasskeyTestEnv`
+#### <code v-pre>PasskeyTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L223) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L223) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 `setupPasskeyEnv` return shape. Extends `TestEnvBase` with the passkey- specific device model and sync fabric surface. Every mutation goes through the env so a single `stop()` call disposes the entire graph.
 
@@ -4046,9 +4046,9 @@ export interface PasskeyTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `PkceChallenge`
+#### <code v-pre>PkceChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L32) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L32) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 PKCE challenge produced by `generateCodeVerifier` + `deriveCodeChallenge`. The verifier is the high-entropy secret the client keeps; the challenge is the SHA-256 hash the client sends to the Authorization Server on `/authorize`, and later proves possession of by sending the verifier on `/token`.
 
@@ -4067,9 +4067,9 @@ export interface PkceChallenge {
 }
 ```
 
-#### `PkceChallengeMethod`
+#### <code v-pre>PkceChallengeMethod</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L23) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L23) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 PKCE code challenge method. RFC 9700 §2.1.1 mandates `S256` for OAuth 2.1 and forbids `plain` — every parse path in the mock rejects `plain` explicitly rather than silently downgrading.
 
@@ -4077,9 +4077,9 @@ PKCE code challenge method. RFC 9700 §2.1.1 mandates `S256` for OAuth 2.1 and f
 export type PkceChallengeMethod = 'S256';
 ```
 
-#### `PlatformAuthenticator`
+#### <code v-pre>PlatformAuthenticator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L109) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L109) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Passkey handle returned by `createPlatformAuthenticator` — extends the raw `VirtualAuthenticator` with the biometric modality recorded for assertion.
 
@@ -4091,9 +4091,9 @@ export interface PlatformAuthenticator extends VirtualAuthenticator {
 }
 ```
 
-#### `PlatformAuthenticatorOptions`
+#### <code v-pre>PlatformAuthenticatorOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L64) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L64) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Configuration for `createPlatformAuthenticator`. A platform authenticator is bound to the device — `attachment` is always `platform`, `transport` is always `internal`. The caller only supplies the biometric modality plus the usual UV / user-presence toggles the WebAuthn layer accepts.
 
@@ -4122,9 +4122,9 @@ export interface PlatformAuthenticatorOptions {
 }
 ```
 
-#### `PlatformBiometricModality`
+#### <code v-pre>PlatformBiometricModality</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L43) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L43) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Platform authenticator biometric modality. The mock does not distinguish the biometric backend at the wire level — every modality resolves to UV=true — but tests want to assert that the correct modality was requested so the factory records it on the returned handle. Touch ID / Face ID are the two Apple platform modalities; Windows Hello covers both fingerprint and IR face; Android biometric covers fingerprint / face / iris depending on the OEM.
 
@@ -4132,17 +4132,17 @@ Platform authenticator biometric modality. The mock does not distinguish the bio
 export type PlatformBiometricModality = 'touch-id' | 'face-id' | 'windows-hello' | 'android-biometric';
 ```
 
-#### `ProviderKind`
+#### <code v-pre>ProviderKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L11) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L11) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export type ProviderKind = 'google' | 'github' | 'email';
 ```
 
-#### `ProviderMock`
+#### <code v-pre>ProviderMock</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L13) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L13) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface ProviderMock {
@@ -4158,9 +4158,9 @@ export interface ProviderMock {
 }
 ```
 
-#### `PublicKeyCredentialCreationOptionsInit`
+#### <code v-pre>PublicKeyCredentialCreationOptionsInit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L84) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L84) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Simplified `PublicKeyCredentialCreationOptions` (WebAuthn L3 §5.4). The real spec surfaces `Uint8Array` challenge / user.id — the mock accepts either the spec shape or plain strings and normalizes internally.
 
@@ -4190,9 +4190,9 @@ export interface PublicKeyCredentialCreationOptionsInit {
 }
 ```
 
-#### `PublicKeyCredentialRequestOptionsInit`
+#### <code v-pre>PublicKeyCredentialRequestOptionsInit</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L99) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L99) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Simplified `PublicKeyCredentialRequestOptions` (WebAuthn L3 §5.5). Used by `credentialAssertion` when the RP asks the client to prove possession.
 
@@ -4209,9 +4209,9 @@ export interface PublicKeyCredentialRequestOptionsInit {
 }
 ```
 
-#### `RefreshToken`
+#### <code v-pre>RefreshToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L204) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L204) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Refresh token minted alongside every access token. RFC 9700 §2.2 mandates refresh token rotation — every use of a refresh token invalidates the previous token and issues a fresh one. The mock records a monotonic `rotationCount` so tests can assert the rotation happened.
 
@@ -4232,9 +4232,9 @@ export interface RefreshToken {
 }
 ```
 
-#### `ResolveTrustChainInput`
+#### <code v-pre>ResolveTrustChainInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L434) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L434) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Input to `resolveTrustChain`. The caller supplies the leaf entity's statement + a set of intermediate statements + the trusted anchor. The mock walks from leaf to anchor following the `iss` / `sub` linkage.
 
@@ -4248,9 +4248,9 @@ export interface ResolveTrustChainInput {
 }
 ```
 
-#### `RlsCheckInput`
+#### <code v-pre>RlsCheckInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L61) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L61) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface RlsCheckInput {
@@ -4267,9 +4267,9 @@ export interface RlsCheckInput {
 }
 ```
 
-#### `RlsCheckOutcome`
+#### <code v-pre>RlsCheckOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L74) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L74) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface RlsCheckOutcome {
@@ -4281,9 +4281,9 @@ export interface RlsCheckOutcome {
 }
 ```
 
-#### `RlsCommand`
+#### <code v-pre>RlsCommand</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L20) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L20) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 RLS (Row Level Security) policy — mirrors a subset of PostgreSQL RLS with a `USING` predicate evaluated against a subject's JWT claims. Callers register a policy against a table + command + role, then invoke `checkAccess` to see whether the subject can execute the command on a candidate row. The mock covers `SELECT` / `INSERT` / `UPDATE` / `DELETE` and evaluates the predicate as a pure JS function so tests can express arbitrary conditions without a real Postgres round-trip.
 
@@ -4291,9 +4291,9 @@ RLS (Row Level Security) policy — mirrors a subset of PostgreSQL RLS with a `U
 export type RlsCommand = 'select' | 'insert' | 'update' | 'delete' | 'all';
 ```
 
-#### `RlsPolicy`
+#### <code v-pre>RlsPolicy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L40) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L40) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface RlsPolicy {
@@ -4318,9 +4318,9 @@ export interface RlsPolicy {
 }
 ```
 
-#### `RlsPolicyContext`
+#### <code v-pre>RlsPolicyContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L28) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L28) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface RlsPolicyContext {
@@ -4336,9 +4336,9 @@ export interface RlsPolicyContext {
 }
 ```
 
-#### `RoamingAuthenticator`
+#### <code v-pre>RoamingAuthenticator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L120) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L120) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Passkey handle returned by `createRoamingAuthenticator` — extends the raw `VirtualAuthenticator` with the roaming kind and transport recorded so caBLE-specific tests can assert the hybrid path was taken.
 
@@ -4349,9 +4349,9 @@ export interface RoamingAuthenticator extends VirtualAuthenticator {
 }
 ```
 
-#### `RoamingAuthenticatorKind`
+#### <code v-pre>RoamingAuthenticatorKind</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L56) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L56) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Roaming authenticator kind. Security key = physical FIDO2 token (YubiKey, Titan). Phone = hybrid transport (caBLE / QR-code-initiated cross-device flow) surfaced through a BLE advertisement handshake. Both resolve to `attachment: cross-platform`, but the mock keeps the kind so tests can assert the correct roaming path was exercised.
 
@@ -4359,9 +4359,9 @@ Roaming authenticator kind. Security key = physical FIDO2 token (YubiKey, Titan)
 export type RoamingAuthenticatorKind = 'security-key' | 'phone';
 ```
 
-#### `RoamingAuthenticatorOptions`
+#### <code v-pre>RoamingAuthenticatorOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L93) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L93) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Configuration for `createRoamingAuthenticator`. A roaming authenticator is portable — `attachment` is `cross-platform`. The `kind` chooses whether the mock uses a USB security-key transport or the hybrid (caBLE) transport that mirrors phone-based cross-device sign-in.
 
@@ -4379,9 +4379,9 @@ export interface RoamingAuthenticatorOptions {
 }
 ```
 
-#### `SamlAssertion`
+#### <code v-pre>SamlAssertion</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L159) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L159) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface SamlAssertion {
@@ -4402,9 +4402,9 @@ export interface SamlAssertion {
 }
 ```
 
-#### `SamlAuthnRequest`
+#### <code v-pre>SamlAuthnRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L148) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L148) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface SamlAuthnRequest {
@@ -4419,9 +4419,9 @@ export interface SamlAuthnRequest {
 }
 ```
 
-#### `SamlIdentityProvider`
+#### <code v-pre>SamlIdentityProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L127) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L127) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 SAML SSO IdP mock. Real Supabase supports SAML 2.0 IdP-initiated + SP-initiated SSO. The mock simulates SP-initiated flow — the app requests a SAML AuthnRequest URL, the IdP responds with an assertion, and the mock validates + exchanges it for a session.
 
@@ -4448,11 +4448,11 @@ export interface SamlIdentityProvider {
 }
 ```
 
-#### `SemanticsAxisStep`
+#### <code v-pre>SemanticsAxisStep</code>
 
 公開 entry point から解決しています。
 
-`AxisStep` を `SemanticsAxisStep` として公開しています。
+<code v-pre>AxisStep</code> を <code v-pre>SemanticsAxisStep</code> として公開しています。
 
 ```ts
 export type {
@@ -4463,11 +4463,11 @@ export type {
 } from './semantics/types.js';
 ```
 
-#### `SemanticsNeutralEventName`
+#### <code v-pre>SemanticsNeutralEventName</code>
 
 公開 entry point から解決しています。
 
-`NeutralEventName` を `SemanticsNeutralEventName` として公開しています。
+<code v-pre>NeutralEventName</code> を <code v-pre>SemanticsNeutralEventName</code> として公開しています。
 
 Platform-neutral event names emitted by the axis helpers. Browsers expose different string ids for the same semantic — the {@link platformEventName} map handles the translation. Tests can assert on the neutral name via `step.neutralEvent` or on the browser dialect via `step.platformEvent`.
 
@@ -4480,17 +4480,17 @@ export type {
 } from './semantics/types.js';
 ```
 
-#### `SessionStrategy`
+#### <code v-pre>SessionStrategy</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L3) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L3) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export type SessionStrategy = 'jwt' | 'database';
 ```
 
-#### `SetupAuth0EnvOptions`
+#### <code v-pre>SetupAuth0EnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L248) `packages/auth/src/auth0/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/auth0/types.ts#L248) <code v-pre>packages/auth/src/auth0/types.ts</code>
 
 Options accepted by {@link setupAuth0Env }. Every field is optional — the defaults exercise a single-tenant single-user shape that matches Auth0's hosted quick-start after tenant creation.
 
@@ -4542,9 +4542,9 @@ export interface SetupAuth0EnvOptions {
 }
 ```
 
-#### `SetupBetterAuthEnvOptions`
+#### <code v-pre>SetupBetterAuthEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L181) `packages/auth/src/better-auth/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/better-auth/types.ts#L181) <code v-pre>packages/auth/src/better-auth/types.ts</code>
 
 ```ts
 export interface SetupBetterAuthEnvOptions {
@@ -4574,9 +4574,9 @@ export interface SetupBetterAuthEnvOptions {
 }
 ```
 
-#### `SetupClerkEnvOptions`
+#### <code v-pre>SetupClerkEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L132) `packages/auth/src/clerk/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/clerk/types.ts#L132) <code v-pre>packages/auth/src/clerk/types.ts</code>
 
 Options accepted by {@link setupClerkEnv }. Every field is optional — the defaults exercise a single-org / single-user shape that matches Clerk's hosted quick-start.
 
@@ -4630,9 +4630,9 @@ export interface SetupClerkEnvOptions {
 }
 ```
 
-#### `SetupLuciaEnvOptions`
+#### <code v-pre>SetupLuciaEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L86) `packages/auth/src/lucia/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/lucia/types.ts#L86) <code v-pre>packages/auth/src/lucia/types.ts</code>
 
 ```ts
 export interface SetupLuciaEnvOptions {
@@ -4653,9 +4653,9 @@ export interface SetupLuciaEnvOptions {
 }
 ```
 
-#### `SetupNextAuthEnvOptions`
+#### <code v-pre>SetupNextAuthEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L79) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L79) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface SetupNextAuthEnvOptions {
@@ -4668,9 +4668,9 @@ export interface SetupNextAuthEnvOptions {
 }
 ```
 
-#### `SetupOAuth21EnvOptions`
+#### <code v-pre>SetupOAuth21EnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L330) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L330) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `setupOAuth21Env`. Composes the AS options with helpers for PKCE + DPoP.
 
@@ -4679,9 +4679,9 @@ export interface SetupOAuth21EnvOptions extends AuthorizationServerOptions {
 }
 ```
 
-#### `SetupOidcEnvOptions`
+#### <code v-pre>SetupOidcEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L398) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L398) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Options accepted by `setupOidcEnv`. Extends the OAuth 2.1 options with OIDC-specific settings.
 
@@ -4718,9 +4718,9 @@ export interface SetupOidcEnvOptions {
 }
 ```
 
-#### `SetupPasskeyEnvDeviceOptions`
+#### <code v-pre>SetupPasskeyEnvDeviceOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L212) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L212) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Per-device authenticator preseed. Mirrors the shape a real deployment picks per device (a MacBook has a Touch ID platform authenticator; a Yubikey user carries a security-key roaming authenticator).
 
@@ -4732,9 +4732,9 @@ export interface SetupPasskeyEnvDeviceOptions {
 }
 ```
 
-#### `SetupPasskeyEnvOptions`
+#### <code v-pre>SetupPasskeyEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L191) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L191) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Options accepted by `setupPasskeyEnv`.
 
@@ -4756,9 +4756,9 @@ export interface SetupPasskeyEnvOptions {
 }
 ```
 
-#### `SetupSupabaseAdvancedEnvOptions`
+#### <code v-pre>SetupSupabaseAdvancedEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L211) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L211) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 Options accepted by {@link setupSupabaseAdvancedEnv }. Every field is optional — defaults produce a usable env with no policies, no factors, and no SAML IdPs.
 
@@ -4789,9 +4789,9 @@ export interface SetupSupabaseAdvancedEnvOptions {
 }
 ```
 
-#### `SetupSupabaseAuthEnvOptions`
+#### <code v-pre>SetupSupabaseAuthEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L157) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L157) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 Options accepted by {@link setupSupabaseAuthEnv }. Every field is optional — the defaults exercise a single anonymous project shape.
 
@@ -4842,9 +4842,9 @@ export interface SetupSupabaseAuthEnvOptions {
 }
 ```
 
-#### `SetupWebAuthnEnvOptions`
+#### <code v-pre>SetupWebAuthnEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L225) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L225) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Options accepted by `setupWebAuthnEnv`. Callers can preseed the environment with authenticators or leave it empty and add them lazily.
 
@@ -4854,9 +4854,9 @@ export interface SetupWebAuthnEnvOptions {
 }
 ```
 
-#### `SignIdTokenInput`
+#### <code v-pre>SignIdTokenInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L198) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L198) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Input to `signIdToken`. The signer builds a full JWT from these fields plus the currently-active JWKS key.
 
@@ -4881,9 +4881,9 @@ export interface SignIdTokenInput {
 }
 ```
 
-#### `SiweChallenge`
+#### <code v-pre>SiweChallenge</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L198) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L198) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 ```ts
 export interface SiweChallenge {
@@ -4896,9 +4896,9 @@ export interface SiweChallenge {
 }
 ```
 
-#### `SiweMessage`
+#### <code v-pre>SiweMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L183) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L183) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 EIP-4361 Sign-In with Ethereum message. Real SIWE messages are constructed from a fixed set of fields — domain, address, statement, uri, version, chainId, nonce, issuedAt + optional expirationTime / notBefore / requestId / resources. The mock stores each field so consumers can craft messages the same way the real client does.
 
@@ -4919,9 +4919,9 @@ export interface SiweMessage {
 }
 ```
 
-#### `SupabaseAccessTokenClaims`
+#### <code v-pre>SupabaseAccessTokenClaims</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L95) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L95) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 JWT claims Supabase Auth embeds in the access_token. The mock encodes these in an HS256-signed JWT the `verifyToken` helper decodes back.
 
@@ -4955,9 +4955,9 @@ export interface SupabaseAccessTokenClaims {
 }
 ```
 
-#### `SupabaseAdvancedTestEnv`
+#### <code v-pre>SupabaseAdvancedTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L240) `packages/auth/src/supabase-advanced/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase-advanced/types.ts#L240) <code v-pre>packages/auth/src/supabase-advanced/types.ts</code>
 
 The advanced test env returned by {@link setupSupabaseAdvancedEnv }. Adds `rls`, `mfa`, `saml`, and `web3` handles on top of the core `auth` + `admin` API.
 
@@ -5119,9 +5119,9 @@ export interface SupabaseAdvancedTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `SupabaseAuthTestEnv`
+#### <code v-pre>SupabaseAuthTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L209) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L209) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 The test env returned by {@link setupSupabaseAuthEnv }. Consumers hold this handle for the lifetime of a test and call `stop()` in `afterEach` to reset all in-memory state. The `auth` handle mirrors `@supabase/supabase-js`'s `client.auth.*` client surface so call sites are drop-in-compatible after swap. The `admin` handle mirrors `client.auth.admin.*` — the service-role-only API.
 
@@ -5247,9 +5247,9 @@ export interface SupabaseAuthTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `SupabaseIdentity`
+#### <code v-pre>SupabaseIdentity</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L43) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L43) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 ```ts
 export interface SupabaseIdentity {
@@ -5263,9 +5263,9 @@ export interface SupabaseIdentity {
 }
 ```
 
-#### `SupabaseIdentityProvider`
+#### <code v-pre>SupabaseIdentityProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L20) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L20) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 Supabase identity — one per external provider (email or OAuth) linked to a user. Real Supabase surfaces `identities: Identity[]` on every user record.
 
@@ -5273,9 +5273,9 @@ Supabase identity — one per external provider (email or OAuth) linked to a use
 export type SupabaseIdentityProvider = 'email' | 'google' | 'github' | 'apple' | 'azure' | 'facebook' | 'twitter';
 ```
 
-#### `SupabaseOAuthAuthorizationUrl`
+#### <code v-pre>SupabaseOAuthAuthorizationUrl</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L144) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L144) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 OAuth authorization URL response — mimicking `signInWithOAuth`. The mock captures the URL for the test to assert against, then a follow-up `exchangeCodeForSession` completes the PKCE flow.
 
@@ -5290,9 +5290,9 @@ export interface SupabaseOAuthAuthorizationUrl {
 }
 ```
 
-#### `SupabaseOtpDelivery`
+#### <code v-pre>SupabaseOtpDelivery</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L124) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L124) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 OTP delivery record — captured whenever the mock issues a magic link or an SMS OTP. Tests can inspect this to assert the delivery channel + one-time code.
 
@@ -5313,9 +5313,9 @@ export interface SupabaseOtpDelivery {
 }
 ```
 
-#### `SupabaseSession`
+#### <code v-pre>SupabaseSession</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L80) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L80) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 Supabase session — a pair of tokens (access_token + refresh_token) plus the user they authenticate. Real Supabase returns this shape from `signInWithPassword` / `signUp` / `signInWithOtp` / `exchangeCodeForSession`.
 
@@ -5332,9 +5332,9 @@ export interface SupabaseSession {
 }
 ```
 
-#### `SupabaseUser`
+#### <code v-pre>SupabaseUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L59) `packages/auth/src/supabase/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/supabase/types.ts#L59) <code v-pre>packages/auth/src/supabase/types.ts</code>
 
 Supabase user record. The mock covers the fields that consumers assert against in tests — id + email + phone + identities + app_metadata + user_metadata + timestamps. Real Supabase carries additional fields (banned_until / is_sso_user / confirmation_sent_at etc) that are added lazily as needed.
 
@@ -5356,9 +5356,9 @@ export interface SupabaseUser {
 }
 ```
 
-#### `SyncFabric`
+#### <code v-pre>SyncFabric</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L166) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L166) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Sync fabric handle. Real iCloud Keychain / Google Password Manager expose a cloud endpoint; the mock keeps every backup in an in-memory blob store keyed by `credentialId`. The blob shape is opaque to the caller — restore just hands back the original `PasskeyCredential`.
 
@@ -5386,9 +5386,9 @@ export interface SyncFabric {
 }
 ```
 
-#### `SyncFabricVendor`
+#### <code v-pre>SyncFabricVendor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L23) `packages/auth/src/passkey/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/types.ts#L23) <code v-pre>packages/auth/src/passkey/types.ts</code>
 
 Sync fabric vendors modeled by the mock. Real-world Passkey deployments synchronize discoverable credentials across a user's devices through one of two commercial fabrics — Apple's iCloud Keychain (FIDO Alliance CTAP 2.2 Passkey Provider spec) and Google Password Manager (FIDO2 credential sync for Android + Chrome). The mock represents each as an independent, in-memory blob store that survives device removal — matching the "credential outlives the authenticator that minted it" property that separates passkeys from plain WebAuthn credentials.
 
@@ -5396,9 +5396,9 @@ Sync fabric vendors modeled by the mock. Real-world Passkey deployments synchron
 export type SyncFabricVendor = 'icloud-keychain' | 'google-password-manager';
 ```
 
-#### `TokenRequest`
+#### <code v-pre>TokenRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L154) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L154) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Token request submitted to `/token`. RFC 6749 §4.1.3 dictates the shape; OAuth 2.1 adds mandatory PKCE (`code_verifier`) and RFC 9449 optionally adds `DPoP` header for sender-constrained tokens.
 
@@ -5425,9 +5425,9 @@ export type TokenRequest = {
 };
 ```
 
-#### `TokenResponse`
+#### <code v-pre>TokenResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L224) `packages/auth/src/oauth21/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L224) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Response to a successful `/token` call. Mirrors the RFC 6749 token response body verbatim so a caller wiring the mock behind a real HTTP client can treat it as-is.
 
@@ -5441,9 +5441,9 @@ export interface TokenResponse {
 }
 ```
 
-#### `TrustAnchor`
+#### <code v-pre>TrustAnchor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L259) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L259) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Trust chain node in an OpenID Federation 1.0 trust chain. The mock represents each node as a plain object rather than a signed Entity Configuration JWT — the point is to prove the chain-walk logic, not the signature cryptography.
 
@@ -5464,9 +5464,9 @@ export interface TrustAnchor {
 }
 ```
 
-#### `TrustChainReasonCode`
+#### <code v-pre>TrustChainReasonCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L311) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L311) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Structured discriminator for `TrustChainResult.reason`. Downstream wrappers (dogfood-oidc-federation の `classifyFederationReason` 等) が reason string の substring match で failure axis を判定する fragile 依存を除去するため、 underlying resolver 側で 5 種の failure axis を tag 付けする。 `broken_link` — chain step が previous step の `iss` を describe しない (walker が該当 intermediate を見つけられず exhausted、 または cycle 検出前に exhaust)、 `cycle` — walker が既訪 entity を再訪、 `expired_intermediate` — intermediate statement の `exp &lt;= now`、 `expired_leaf` — leaf statement の `exp &lt;= now`、 `anchor_mismatch` — chain 到達点の `iss` が指定 trust anchor と一致しない。
 
@@ -5474,9 +5474,9 @@ Structured discriminator for `TrustChainResult.reason`. Downstream wrappers (dog
 export type TrustChainReasonCode = 'broken_link' | 'cycle' | 'expired_intermediate' | 'expired_leaf' | 'anchor_mismatch';
 ```
 
-#### `TrustChainResult`
+#### <code v-pre>TrustChainResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L336) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L336) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Trust chain returned by `resolveTrustChain`. The chain is ordered from the leaf (index 0) to the trust anchor (last index). `valid` false always carries a `reason` + `reason_code` — the `reason_code` は failure axis を pin する structured tag、 `reason` は human-readable diagnostic string。
 
@@ -5495,9 +5495,9 @@ export interface TrustChainResult {
 }
 ```
 
-#### `VerificationToken`
+#### <code v-pre>VerificationToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L48) `packages/auth/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/types.ts#L48) <code v-pre>packages/auth/src/types.ts</code>
 
 ```ts
 export interface VerificationToken {
@@ -5507,9 +5507,9 @@ export interface VerificationToken {
 }
 ```
 
-#### `VerifyIdTokenOptions`
+#### <code v-pre>VerifyIdTokenOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L225) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L225) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Options accepted by `verifyIdToken`. The verifier refuses on any mismatch — `expectedIssuer` / `expectedAudience` are mandatory in practice (the mock types them as required to remind callers). `expectedNonce` / `expectedAccessToken` / `expectedCode` are optional because not every flow carries them, but if the token has the corresponding claim the verifier checks it against the expectation.
 
@@ -5533,9 +5533,9 @@ export interface VerifyIdTokenOptions {
 }
 ```
 
-#### `VerifyIdTokenResult`
+#### <code v-pre>VerifyIdTokenResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L247) `packages/auth/src/oidc/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L247) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Verify result. `valid` false always carries a `reason` so tests can pin failure modes without regexing the exception message.
 
@@ -5547,9 +5547,9 @@ export interface VerifyIdTokenResult {
 }
 ```
 
-#### `VirtualAuthenticator`
+#### <code v-pre>VirtualAuthenticator</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L189) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L189) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Virtual authenticator handle. Callers do not construct this directly — use `createVirtualAuthenticator({ ... })`.
 
@@ -5566,9 +5566,9 @@ export interface VirtualAuthenticator {
 }
 ```
 
-#### `VirtualAuthenticatorOptions`
+#### <code v-pre>VirtualAuthenticatorOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L163) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L163) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Configuration for `createVirtualAuthenticator`. Mirrors the Chrome Virtual Authenticator Protocol (`WebAuthn.addVirtualAuthenticator` in the DevTools protocol, used by Playwright / Puppeteer).
 
@@ -5596,9 +5596,9 @@ export interface VirtualAuthenticatorOptions {
 }
 ```
 
-#### `WebAuthnAttestationConveyancePreference`
+#### <code v-pre>WebAuthnAttestationConveyancePreference</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L40) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L40) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Attestation conveyance preference (WebAuthn L3 §5.4.7). `none` — RP does not want attestation, authenticator returns a self-signed empty attestation. `indirect` — client may substitute an anonymized attestation CA. `direct` — RP wants the raw attestation statement. `enterprise` — RP is allowed to receive uniquely-identifying attestation (enterprise deployments only). The mock returns matching attestation object shapes for each.
 
@@ -5606,9 +5606,9 @@ Attestation conveyance preference (WebAuthn L3 §5.4.7). `none` — RP does not 
 export type WebAuthnAttestationConveyancePreference = 'none' | 'indirect' | 'direct' | 'enterprise';
 ```
 
-#### `WebAuthnAuthenticatorAttachment`
+#### <code v-pre>WebAuthnAuthenticatorAttachment</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L29) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L29) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 `platform` — authenticator is bound to the device (Touch ID, Windows Hello). `cross-platform` — authenticator is a roaming key (YubiKey, phone via caBLE). Mirrors the `authenticatorAttachment` field from WebAuthn L3 §5.4.5.
 
@@ -5616,9 +5616,9 @@ export type WebAuthnAttestationConveyancePreference = 'none' | 'indirect' | 'dir
 export type WebAuthnAuthenticatorAttachment = 'platform' | 'cross-platform';
 ```
 
-#### `WebAuthnCredential`
+#### <code v-pre>WebAuthnCredential</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L113) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L113) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Stored credential record. WebAuthn L3 §6.1 defines the authenticator-side storage — the mock keeps the shape the RP would round-trip through its own database. `signCount` is the monotonic counter used to detect cloned authenticators (§6.1.1).
 
@@ -5638,9 +5638,9 @@ export interface WebAuthnCredential {
 }
 ```
 
-#### `WebAuthnResidentKeyRequirement`
+#### <code v-pre>WebAuthnResidentKeyRequirement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L62) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L62) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 `required` — credential must be stored on the authenticator (discoverable / resident credential, enables usernameless login). `preferred` — store if possible. `discouraged` — do not store (server-side credential, WebAuthn L3 §5.4.6).
 
@@ -5648,9 +5648,9 @@ export interface WebAuthnCredential {
 export type WebAuthnResidentKeyRequirement = 'required' | 'preferred' | 'discouraged';
 ```
 
-#### `WebAuthnTestEnv`
+#### <code v-pre>WebAuthnTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L204) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L204) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 `setupWebAuthnEnv` return shape. Follows the kiwa factory convention — one `stop()` disposes the environment and clears all in-memory state.
 
@@ -5668,9 +5668,9 @@ export interface WebAuthnTestEnv extends TestEnvBase<'mock'> {
 }
 ```
 
-#### `WebAuthnTransport`
+#### <code v-pre>WebAuthnTransport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L10) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L10) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 Chrome Virtual Authenticator API mirrors WebAuthn L3 spec §6.2. Transport defines how the client speaks to the authenticator — `internal` for platform authenticators (Touch ID / Windows Hello), `usb` / `nfc` / `ble` for roaming security keys. The `hybrid` transport was rebranded to `caBLE` in later drafts and is covered by the passkey adapter (v1.21-1b), not here.
 
@@ -5678,9 +5678,9 @@ Chrome Virtual Authenticator API mirrors WebAuthn L3 spec §6.2. Transport defin
 export type WebAuthnTransport = 'internal' | 'usb' | 'nfc' | 'ble' | 'hybrid';
 ```
 
-#### `WebAuthnUserVerificationRequirement`
+#### <code v-pre>WebAuthnUserVerificationRequirement</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L51) `packages/auth/src/webauthn/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/webauthn/types.ts#L51) <code v-pre>packages/auth/src/webauthn/types.ts</code>
 
 `required` — user verification (biometric / PIN) is mandatory. `preferred` — request but do not require UV. `discouraged` — do not perform UV (WebAuthn L3 §5.4.6).
 

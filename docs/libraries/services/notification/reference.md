@@ -35,33 +35,33 @@
 
 ### 値
 
-#### `createCircuitBreaker`
+#### <code v-pre>createCircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L150) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L150) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function createCircuitBreaker(client: NotificationClient, options?: CircuitBreakerOptions): CircuitBreaker;
 ```
 
-#### `createHookRegistry`
+#### <code v-pre>createHookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L104) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L104) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function createHookRegistry(): HookRegistry;
 ```
 
-#### `createIdempotencyCache`
+#### <code v-pre>createIdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L63) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L63) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function createIdempotencyCache(): IdempotencyCache;
 ```
 
-#### `createNotificationClient`
+#### <code v-pre>createNotificationClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L70) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L70) <code v-pre>packages/notification/src/client.ts</code>
 
 provider 別のみ id prefix + status label に mock 差を出しつつ、 全 channel を共通 interface で 叩ける。 実 SDK (Firebase Admin / apns2 / twilio /
 
@@ -69,9 +69,9 @@ provider 別のみ id prefix + status label に mock 差を出しつつ、 全 c
 export declare function createNotificationClient(options?: CreateNotificationClientOptions): NotificationClient;
 ```
 
-#### `parseNotificationEvent`
+#### <code v-pre>parseNotificationEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L24) `packages/notification/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L24) <code v-pre>packages/notification/src/delivery.ts</code>
 
 provider 別 event payload を統一 shape に正規化。 fcm=notification_id / apns=apns-id / twilio=MessageSid / sns=MessageId / in-app=id の field 差を吸収。
 
@@ -79,17 +79,17 @@ provider 別 event payload を統一 shape に正規化。 fcm=notification_id /
 export declare function parseNotificationEvent(rawEvent: RawNotificationEvent): NormalizedNotificationEvent;
 ```
 
-#### `sendInApp`
+#### <code v-pre>sendInApp</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/inapp.ts#L8) `packages/notification/src/inapp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/inapp.ts#L8) <code v-pre>packages/notification/src/inapp.ts</code>
 
 ```ts
 export declare function sendInApp(client: NotificationClient, msg: InAppMessage, _config?: InAppDispatchConfig): Promise<NotificationSendResult>;
 ```
 
-#### `sendPush`
+#### <code v-pre>sendPush</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/push.ts#L12) `packages/notification/src/push.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/push.ts#L12) <code v-pre>packages/notification/src/push.ts</code>
 
 top-level helper — client.sendPush() の 1-shot 呼出 shim。 実 code base が `sendPush(client, msg)` の function-style を好む場合の代替 API。
 
@@ -97,17 +97,17 @@ top-level helper — client.sendPush() の 1-shot 呼出 shim。 実 code base �
 export declare function sendPush(client: NotificationClient, msg: PushMessage, _config?: PushDeliveryConfig): Promise<NotificationSendResult>;
 ```
 
-#### `sendPushBatch`
+#### <code v-pre>sendPushBatch</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L41) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L41) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function sendPushBatch(client: NotificationClient, messages: readonly PushMessage[], concurrency?: number): Promise<BatchSendResult>;
 ```
 
-#### `sendPushIdempotent`
+#### <code v-pre>sendPushIdempotent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L73) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L73) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function sendPushIdempotent(client: NotificationClient, msg: PushMessage, idempotencyKey: string, cache: IdempotencyCache): Promise<NotificationSendResult & {
@@ -115,17 +115,17 @@ export declare function sendPushIdempotent(client: NotificationClient, msg: Push
 }>;
 ```
 
-#### `sendPushObservable`
+#### <code v-pre>sendPushObservable</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L118) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L118) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function sendPushObservable(client: NotificationClient, msg: PushMessage, hooks: HookRegistry): Promise<NotificationSendResult>;
 ```
 
-#### `sendPushWithRetry`
+#### <code v-pre>sendPushWithRetry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L14) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L14) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export declare function sendPushWithRetry(client: NotificationClient, msg: PushMessage, options?: RetryOptions): Promise<NotificationSendResult & {
@@ -133,9 +133,9 @@ export declare function sendPushWithRetry(client: NotificationClient, msg: PushM
 }>;
 ```
 
-#### `sendSMS`
+#### <code v-pre>sendSMS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/sms.ts#L8) `packages/notification/src/sms.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/sms.ts#L8) <code v-pre>packages/notification/src/sms.ts</code>
 
 ```ts
 export declare function sendSMS(client: NotificationClient, msg: SmsMessage, _config?: SmsDeliveryConfig): Promise<NotificationSendResult>;
@@ -143,9 +143,9 @@ export declare function sendSMS(client: NotificationClient, msg: SmsMessage, _co
 
 ### 型
 
-#### `BatchSendResult`
+#### <code v-pre>BatchSendResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L34) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L34) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface BatchSendResult {
@@ -156,9 +156,9 @@ export interface BatchSendResult {
 }
 ```
 
-#### `CircuitBreaker`
+#### <code v-pre>CircuitBreaker</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L143) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L143) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreaker {
@@ -171,9 +171,9 @@ export interface CircuitBreaker {
 }
 ```
 
-#### `CircuitBreakerOptions`
+#### <code v-pre>CircuitBreakerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L137) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L137) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface CircuitBreakerOptions {
@@ -183,25 +183,25 @@ export interface CircuitBreakerOptions {
 }
 ```
 
-#### `CircuitState`
+#### <code v-pre>CircuitState</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L135) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L135) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export type CircuitState = 'closed' | 'open' | 'half-open';
 ```
 
-#### `HookCallback`
+#### <code v-pre>HookCallback</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L96) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L96) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export type HookCallback = (ctx: HookContext) => void;
 ```
 
-#### `HookContext`
+#### <code v-pre>HookContext</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L89) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L89) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface HookContext {
@@ -212,9 +212,9 @@ export interface HookContext {
 }
 ```
 
-#### `HookRegistry`
+#### <code v-pre>HookRegistry</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L98) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L98) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface HookRegistry {
@@ -224,9 +224,9 @@ export interface HookRegistry {
 }
 ```
 
-#### `IdempotencyCache`
+#### <code v-pre>IdempotencyCache</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L56) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L56) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface IdempotencyCache {
@@ -237,9 +237,9 @@ export interface IdempotencyCache {
 }
 ```
 
-#### `InAppDispatchConfig`
+#### <code v-pre>InAppDispatchConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/inapp.ts#L3) `packages/notification/src/inapp.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/inapp.ts#L3) <code v-pre>packages/notification/src/inapp.ts</code>
 
 ```ts
 export interface InAppDispatchConfig {
@@ -248,9 +248,9 @@ export interface InAppDispatchConfig {
 }
 ```
 
-#### `InAppMessage`
+#### <code v-pre>InAppMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L22) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L22) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export interface InAppMessage {
@@ -262,9 +262,9 @@ export interface InAppMessage {
 }
 ```
 
-#### `NormalizedNotificationEvent`
+#### <code v-pre>NormalizedNotificationEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L10) `packages/notification/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L10) <code v-pre>packages/notification/src/delivery.ts</code>
 
 ```ts
 export interface NormalizedNotificationEvent {
@@ -278,17 +278,17 @@ export interface NormalizedNotificationEvent {
 }
 ```
 
-#### `NotificationChannel`
+#### <code v-pre>NotificationChannel</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L4) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L4) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export type NotificationChannel = 'push' | 'sms' | 'in-app';
 ```
 
-#### `NotificationClient`
+#### <code v-pre>NotificationClient</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L43) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L43) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export interface NotificationClient {
@@ -307,25 +307,25 @@ export interface NotificationClient {
 }
 ```
 
-#### `NotificationEventType`
+#### <code v-pre>NotificationEventType</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L3) `packages/notification/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L3) <code v-pre>packages/notification/src/delivery.ts</code>
 
 ```ts
 export type NotificationEventType = 'delivered' | 'opened' | 'clicked' | 'failed' | 'unknown';
 ```
 
-#### `NotificationProvider`
+#### <code v-pre>NotificationProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L3) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L3) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export type NotificationProvider = PushProvider | SmsProvider | 'in-app';
 ```
 
-#### `NotificationSendResult`
+#### <code v-pre>NotificationSendResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L30) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L30) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export interface NotificationSendResult {
@@ -338,9 +338,9 @@ export interface NotificationSendResult {
 }
 ```
 
-#### `PushDeliveryConfig`
+#### <code v-pre>PushDeliveryConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/push.ts#L3) `packages/notification/src/push.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/push.ts#L3) <code v-pre>packages/notification/src/push.ts</code>
 
 ```ts
 export interface PushDeliveryConfig {
@@ -349,9 +349,9 @@ export interface PushDeliveryConfig {
 }
 ```
 
-#### `PushMessage`
+#### <code v-pre>PushMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L6) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L6) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export interface PushMessage {
@@ -364,17 +364,17 @@ export interface PushMessage {
 }
 ```
 
-#### `PushProvider`
+#### <code v-pre>PushProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L1) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L1) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export type PushProvider = 'fcm' | 'apns';
 ```
 
-#### `RawNotificationEvent`
+#### <code v-pre>RawNotificationEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L5) `packages/notification/src/delivery.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/delivery.ts#L5) <code v-pre>packages/notification/src/delivery.ts</code>
 
 ```ts
 export interface RawNotificationEvent {
@@ -383,9 +383,9 @@ export interface RawNotificationEvent {
 }
 ```
 
-#### `RetryOptions`
+#### <code v-pre>RetryOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L8) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L8) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export interface RetryOptions {
@@ -395,17 +395,17 @@ export interface RetryOptions {
 }
 ```
 
-#### `SendHookEvent`
+#### <code v-pre>SendHookEvent</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L87) `packages/notification/src/enhancements.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/enhancements.ts#L87) <code v-pre>packages/notification/src/enhancements.ts</code>
 
 ```ts
 export type SendHookEvent = 'before-send' | 'after-send' | 'error';
 ```
 
-#### `SentNotificationRecord`
+#### <code v-pre>SentNotificationRecord</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L39) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L39) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export interface SentNotificationRecord extends NotificationSendResult {
@@ -413,9 +413,9 @@ export interface SentNotificationRecord extends NotificationSendResult {
 }
 ```
 
-#### `SmsDeliveryConfig`
+#### <code v-pre>SmsDeliveryConfig</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/sms.ts#L3) `packages/notification/src/sms.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/sms.ts#L3) <code v-pre>packages/notification/src/sms.ts</code>
 
 ```ts
 export interface SmsDeliveryConfig {
@@ -424,9 +424,9 @@ export interface SmsDeliveryConfig {
 }
 ```
 
-#### `SmsMessage`
+#### <code v-pre>SmsMessage</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L15) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L15) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export interface SmsMessage {
@@ -437,9 +437,9 @@ export interface SmsMessage {
 }
 ```
 
-#### `SmsProvider`
+#### <code v-pre>SmsProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L2) `packages/notification/src/client.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/notification/src/client.ts#L2) <code v-pre>packages/notification/src/client.ts</code>
 
 ```ts
 export type SmsProvider = 'twilio' | 'sns';

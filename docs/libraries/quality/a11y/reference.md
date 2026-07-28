@@ -38,11 +38,11 @@
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| 'runAxe requires "axe-core" to be installed. Run `pnpm add -D axe-core`.' | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L20) |
-| 'runAxe: no context and no global document (jsdom env required).' | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L29) |
-| report.summary | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L64) |
-| 'ssrHydration layer requires a jsdom-like global document (vitest env=jsdom).' | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L312) |
-| 'ssrHydration layer requires a string ssrHtml fixture — got ' + typeof fixture.ssrHtml + '.' | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L320) |
+| <code v-pre>runAxe requires "axe-core" to be installed. Run &#96;pnpm add -D axe-core&#96;.</code> | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L20) |
+| <code v-pre>runAxe: no context and no global document (jsdom env required).</code> | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L29) |
+| <code v-pre>report.summary</code> | [packages/a11y/src/audit.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L64) |
+| <code v-pre>ssrHydration layer requires a jsdom-like global document (vitest env=jsdom).</code> | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L312) |
+| <code v-pre>'ssrHydration layer requires a string ssrHtml fixture — got ' + typeof fixture.ssrHtml + '.'</code> | [packages/a11y/src/layer-harness.ts](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L320) |
 
 ## API 契約
 
@@ -50,9 +50,9 @@
 
 ### 値
 
-#### `bucketViolations`
+#### <code v-pre>bucketViolations</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L120) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L120) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Bucket a set of axe violations by impact, returning the same shape as `LayerReport.violations`. Exported so tests can call it without hitting axe-core. `Object.hasOwn` gates the `counts` write to protect against prototype chain contamination — a violation whose `impact` accidentally names `toString` or `constructor` cannot corrupt the counts record.
 
@@ -63,9 +63,9 @@ export declare function bucketViolations(violations: AxeViolation[]): {
 };
 ```
 
-#### `computeTotals`
+#### <code v-pre>computeTotals</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L340) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L340) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Compute the totals (sum by impact across every applicable layer) — a layer marked `absent` contributes zero.
 
@@ -73,9 +73,9 @@ Compute the totals (sum by impact across every applicable layer) — a layer mar
 export declare function computeTotals(layers: HarnessReport['layers']): Record<Impact, number>;
 ```
 
-#### `expectNoViolations`
+#### <code v-pre>expectNoViolations</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L57) `packages/a11y/src/audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L57) <code v-pre>packages/a11y/src/audit.ts</code>
 
 ```ts
 export declare function expectNoViolations(results: AxeResults, expect: {
@@ -87,9 +87,9 @@ export declare function expectNoViolations(results: AxeResults, expect: {
 }): void;
 ```
 
-#### `IMPACTS`
+#### <code v-pre>IMPACTS</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L30) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L30) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Impact buckets in the order axe-core emits them.
 
@@ -97,9 +97,9 @@ Impact buckets in the order axe-core emits them.
 export declare const IMPACTS: readonly ["critical", "serious", "moderate", "minor"];
 ```
 
-#### `isHarnessOk`
+#### <code v-pre>isHarnessOk</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L362) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L362) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 True iff every applicable layer has zero critical + zero serious + zero moderate violations. `minor` never gates `ok`. Absent layers pass. Critical, serious, and moderate all block because a downstream tier threshold breach at any of the three levels should never flip `report.ok` to true. `minor` is excluded because it is unbounded on every current tier (SSOT: docs/quality/a11y-thresholds.md).
 
@@ -107,9 +107,9 @@ True iff every applicable layer has zero critical + zero serious + zero moderate
 export declare function isHarnessOk(layers: HarnessReport['layers']): boolean;
 ```
 
-#### `reportViolations`
+#### <code v-pre>reportViolations</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L40) `packages/a11y/src/audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L40) <code v-pre>packages/a11y/src/audit.ts</code>
 
 ```ts
 export declare function reportViolations(results: AxeResults, opts?: {
@@ -117,17 +117,17 @@ export declare function reportViolations(results: AxeResults, opts?: {
 }): ViolationReport;
 ```
 
-#### `runAxe`
+#### <code v-pre>runAxe</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L24) `packages/a11y/src/audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L24) <code v-pre>packages/a11y/src/audit.ts</code>
 
 ```ts
 export declare function runAxe(opts?: AuditOptions): Promise<AxeResults>;
 ```
 
-#### `runLayerHarness`
+#### <code v-pre>runLayerHarness</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L380) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L380) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Run the 3-layer harness against a set of fixtures. Missing layers are recorded as `absent`. Returns the whole baseline payload.
 
@@ -135,9 +135,9 @@ Run the 3-layer harness against a set of fixtures. Missing layers are recorded a
 export declare function runLayerHarness(pkgName: string, fixtures?: HarnessFixtures, now?: Date): Promise<HarnessReport>;
 ```
 
-#### `summariseHarness`
+#### <code v-pre>summariseHarness</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L405) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L405) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Turn a `HarnessReport` into a `reportViolations`-style summary string, unioned across every applicable layer with cross-layer dedup by rule id. A rule that fires in both `jsdom` and `ssrHydration` surfaces once with node counts summed and the most severe impact preserved.
 
@@ -145,9 +145,9 @@ Turn a `HarnessReport` into a `reportViolations`-style summary string, unioned a
 export declare function summariseHarness(report: HarnessReport): string;
 ```
 
-#### `unionByRule`
+#### <code v-pre>unionByRule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L149) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L149) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Merge the SSR-parsed violation set with the hydrated violation set, deduplicated by rule id. Node arrays are concatenated across sides so a rule that fires against 3 nodes in SSR and 5 nodes in the hydrated tree is recorded with 8 nodes rather than dropped to whichever side landed first. Impact is taken from whichever side reports a non-null value first, so hydration-only impact metadata surfaces even when the SSR side reports null. Exposed for tests.
 
@@ -155,9 +155,9 @@ Merge the SSR-parsed violation set with the hydrated violation set, deduplicated
 export declare function unionByRule(a: AxeViolation[], b: AxeViolation[]): AxeViolation[];
 ```
 
-#### `zeroImpacts`
+#### <code v-pre>zeroImpacts</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L107) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L107) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Empty impact bucket used both as the zero baseline and as a reset target.
 
@@ -167,9 +167,9 @@ export declare function zeroImpacts(): Record<Impact, number>;
 
 ### 型
 
-#### `AuditOptions`
+#### <code v-pre>AuditOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L17) `packages/a11y/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L17) <code v-pre>packages/a11y/src/types.ts</code>
 
 ```ts
 export interface AuditOptions {
@@ -182,9 +182,9 @@ export interface AuditOptions {
 }
 ```
 
-#### `AxeResults`
+#### <code v-pre>AxeResults</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L10) `packages/a11y/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L10) <code v-pre>packages/a11y/src/types.ts</code>
 
 ```ts
 export interface AxeResults {
@@ -201,9 +201,9 @@ export interface AxeResults {
 }
 ```
 
-#### `AxeRunModule`
+#### <code v-pre>AxeRunModule</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L26) `packages/a11y/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L26) <code v-pre>packages/a11y/src/types.ts</code>
 
 ```ts
 export interface AxeRunModule {
@@ -211,9 +211,9 @@ export interface AxeRunModule {
 }
 ```
 
-#### `AxeViolation`
+#### <code v-pre>AxeViolation</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L1) `packages/a11y/src/types.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/types.ts#L1) <code v-pre>packages/a11y/src/types.ts</code>
 
 ```ts
 export interface AxeViolation {
@@ -230,9 +230,9 @@ export interface AxeViolation {
 }
 ```
 
-#### `HarnessFixtures`
+#### <code v-pre>HarnessFixtures</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L75) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L75) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Fixture surface a `.axe-config.mjs` can hand to the harness. A missing field means the layer is `absent` — the harness records that verdict without spinning up axe (the corresponding cost — jsdom construction, Playwright browser boot, SSR string render — is skipped).
 
@@ -269,9 +269,9 @@ export interface HarnessFixtures {
 }
 ```
 
-#### `HarnessReport`
+#### <code v-pre>HarnessReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L51) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L51) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Aggregated 3-layer report — the whole baseline payload for one package.
 
@@ -295,17 +295,17 @@ export interface HarnessReport {
 }
 ```
 
-#### `Impact`
+#### <code v-pre>Impact</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L31) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L31) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 ```ts
 export type Impact = (typeof IMPACTS)[number];
 ```
 
-#### `LayerReport`
+#### <code v-pre>LayerReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L40) `packages/a11y/src/layer-harness.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/layer-harness.ts#L40) <code v-pre>packages/a11y/src/layer-harness.ts</code>
 
 Per-layer violation summary — the shape that lands in `.a11y-baseline/{pkg}.json`. `applicable: false` means the package intentionally does not participate in the layer (e.g. Core-tier no-DOM package skipping the Playwright layer). `applicable: true` records axe's verdict.
 
@@ -326,9 +326,9 @@ export interface LayerReport {
 }
 ```
 
-#### `ViolationReport`
+#### <code v-pre>ViolationReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L34) `packages/a11y/src/audit.ts`
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/a11y/src/audit.ts#L34) <code v-pre>packages/a11y/src/audit.ts</code>
 
 ```ts
 export interface ViolationReport {
