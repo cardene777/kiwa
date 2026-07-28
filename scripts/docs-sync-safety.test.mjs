@@ -27,6 +27,7 @@ import {
   findManagedBlock,
   inlineCode,
   insideRoot,
+  neutralizeLeadingFence,
   linkUrl,
   prepareWritePath,
   replaceManagedBlock,
@@ -409,6 +410,19 @@ test('codeBlock encloses a declaration that contains a closing fence', () => {
 test('codeBlock uses three backticks for ordinary code and keeps the language tag', () => {
   assert.equal(codeBlock('declare const a: number;', 'ts'), '```ts\ndeclare const a: number;\n```');
   assert.equal(codeBlock('plain'), '```\nplain\n```');
+});
+
+// The description sits on its own line just above the generated code block. A
+// leading fence there opens a block that swallows the declaration below it.
+test('neutralizeLeadingFence stops a leading fence from opening a block', () => {
+  assert.equal(neutralizeLeadingFence('```ts is the language'), '&#96;&#96;&#96;ts is the language');
+  assert.equal(neutralizeLeadingFence('````lean'), '&#96;&#96;&#96;&#96;lean');
+});
+
+test('neutralizeLeadingFence leaves inline code alone', () => {
+  assert.equal(neutralizeLeadingFence('use `foo` here'), 'use `foo` here');
+  assert.equal(neutralizeLeadingFence('`foo` at the start'), '`foo` at the start');
+  assert.equal(neutralizeLeadingFence('a ``` in the middle'), 'a ``` in the middle');
 });
 
 test('linkUrl encodes the characters that would end the link early', () => {

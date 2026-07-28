@@ -20,6 +20,7 @@ import {
   inlineCode,
   insideRoot,
   linkUrl,
+  neutralizeLeadingFence,
   prepareWritePath,
   replaceManagedBlock,
   resolveReadPath,
@@ -256,8 +257,19 @@ function displayContract(checker, exported, symbol, library, emitted) {
   };
 }
 
+/**
+ * JSDoc の説明文を Markdown へ埋める形にする。
+ *
+ * 実装が書いた prose なので backtick は markdown として活かす。生 HTML と Vue の
+ * 補間だけを止める。改行は空白へ畳む。畳まないと、複数行の説明が表や見出しの
+ * 途中で改行して以降の構造を壊す。
+ *
+ * 畳んだ結果は 1 行になり、その行は `contractEntry` で行頭に置かれる。行頭の
+ * backtick 3 連は fence として開き、直後に続く宣言の code block を丸ごと取り込む。
+ * 先頭の backtick 列だけ実体参照へ写して、fence にならないようにする。
+ */
 function documentation(checker, symbol) {
-  return ts
+  const folded = ts
     .displayPartsToString(symbol.getDocumentationComment(checker))
     .replaceAll(/\s+/g, ' ')
     .replaceAll('<', '&lt;')
@@ -265,6 +277,7 @@ function documentation(checker, symbol) {
     .replaceAll('{{', '&#123;&#123;')
     .replaceAll('}}', '&#125;&#125;')
     .trim();
+  return neutralizeLeadingFence(folded);
 }
 
 // 表のセルに入れる値の畳み込みと escape は docs-sync-safety の tableCell に集約した。

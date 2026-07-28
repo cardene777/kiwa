@@ -234,6 +234,17 @@ export function fenceFor(code) {
 }
 
 /**
+ * 行頭に置く text から fence の開始を取り除く。
+ *
+ * 1 行に畳んだ説明文をそのまま行頭へ置くと、先頭の backtick 3 連が fence として開き、
+ * 直後に続く code block を丸ごと取り込んで以降の構造を壊す。先頭の backtick 列だけを
+ * 実体参照へ写す。行中の backtick は inline code として意味を持つので触らない。
+ */
+export function neutralizeLeadingFence(text) {
+  return text.replace(/^`{3,}/, (run) => '&#96;'.repeat(run.length));
+}
+
+/**
  * fenced code block。開き fence を中身より長く取るので、閉じ fence を含む宣言でも
  * block が途中で閉じない。末尾の改行は呼び出し側が足す。
  */
