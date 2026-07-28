@@ -2,7 +2,7 @@
 
 `@kiwa-lab/queue` は、非同期ジョブとメッセージ処理をテストするためのアダプターです。アプリケーションが登録する処理と投入するイベントを同じテスト内で動かし、完了、失敗、再試行、デッドレター、停止までを結果として検証します。
 
-![キューを投入して処理し、失敗時には再試行して停止する流れ](/images/kiwa-docs/services/queue-overview.png)
+<img src="/images/kiwa-docs/services/queue-overview.webp" alt="キューを投入して処理し、失敗時には再試行して停止する流れ" width="1693" height="929" loading="lazy" decoding="async">
 
 ## 対象にする実行基盤
 

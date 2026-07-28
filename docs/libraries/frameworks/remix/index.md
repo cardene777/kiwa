@@ -2,7 +2,7 @@
 
 `@kiwa-lab/remix` は、Remix と React Router の loader、action、Resource Route、nested route を直接実行する test adapter です。route function に request 相当の入力を渡し、通常 data、`Response`、redirect、error を別の結果として取り出します。Remix server を起動しなくても、route がどの HTTP contract を返すかを Vitest で固定できます。
 
-![Remixのloaderとactionが返す結果の分岐](/images/kiwa-docs/frameworks/remix-overview.png)
+<img src="/images/kiwa-docs/frameworks/remix-overview.webp" alt="Remixのloaderとactionが返す結果の分岐" width="1200" height="675" loading="lazy" decoding="async">
 
 loader は URL、params、headers、context を受け取ります。plain object や `null` は `result`、通常の `Response` は `response`、3xx response は redirect information として返ります。loader が `undefined` を返す場合は実装漏れとして `error` になります。一方 action の `undefined` は許可されるため、loader と action を同じ戻り値規則で扱いません。
 

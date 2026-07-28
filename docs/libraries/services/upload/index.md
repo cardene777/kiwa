@@ -2,7 +2,7 @@
 
 `@kiwa-lab/upload` は、S3、GCS、Cloudflare R2、Cloudinary に送る upload request の契約を、外部ストレージへ接続せずに test する harness です。object を保存した後に get で取得できること、サイズ上限を超えた object が残らないこと、multipart の part が順に結合されることを確認できます。
 
-![ファイルを検証して保存しURLを発行する流れ](/images/kiwa-docs/services/upload-overview.png)
+<img src="/images/kiwa-docs/services/upload-overview.webp" alt="ファイルを検証して保存しURLを発行する流れ" width="1693" height="929" loading="lazy" decoding="async">
 
 ## 保存前の validation と保存後の状態を確認する
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/feature-flag` は、GrowthBook、LaunchDarkly、PostHog、Unleash で表す flag の評価を in-process で test する harness です。provider 名は evaluation record の id prefix に使われますが、実 provider SDK、remote config、network へは接続しません。
 
-![フラグと利用者をルールで評価し一致時は有効値それ以外は既定値を返す流れ](/images/kiwa-docs/services/feature-flag-overview.png)
+<img src="/images/kiwa-docs/services/feature-flag-overview.webp" alt="フラグと利用者をルールで評価し一致時は有効値それ以外は既定値を返す流れ" width="1693" height="929" loading="lazy" decoding="async">
 
 ## 利用者と rule から値を選ぶ
 

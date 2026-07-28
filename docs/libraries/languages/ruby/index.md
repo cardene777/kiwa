@@ -2,7 +2,7 @@
 
 `@kiwa-lab/ruby` は、Rails、Sinatra、Roda、Hanami を想定した application contract を TypeScript の test process で検証する in-memory harness です。Rails 風 action、generic route、最小 ERB 展開、ActiveRecord 風の操作記録を environment に集め、実 Ruby process を起動せずに status、body、before action、route match、記録した query を assertion できます。
 
-![Ruby controllerとActiveRecord操作記録を観測する構造](/images/kiwa-docs/languages/ruby-overview.png)
+<img src="/images/kiwa-docs/languages/ruby-overview.webp" alt="Ruby controllerとActiveRecord操作記録を観測する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 Rails dispatch では before action を登録順に await してから action を呼びます。before action が例外を投げれば action は実行されず、例外が caller に伝わります。action が返す cookie と session は response の値であり、environment へ自動反映されません。generic route は追加順に調べ、method と path が合う最初の handler だけを呼びます。
 

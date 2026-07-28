@@ -2,7 +2,7 @@
 
 `@kiwa-lab/state` は、state object、reducer、subscription、selector をプロセス内で検証する harness です。Zustand、Redux、Jotai、Valtio、MobX のprovider名を受け取りますが、各providerのruntimeを読み込むadapterではありません。
 
-![状態更新と購読解除のライフサイクル](/images/kiwa-docs/application/state-overview.png)
+<img src="/images/kiwa-docs/application/state-overview.webp" alt="状態更新と購読解除のライフサイクル" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

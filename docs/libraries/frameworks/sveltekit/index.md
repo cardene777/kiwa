@@ -2,7 +2,7 @@
 
 `@kiwa-lab/sveltekit` は、SvelteKit の `load`、form action、`hooks.server` を synthetic event で検証する test adapter です。SvelteKit server や browser navigation を起動せずに、route parameter、cookie、`locals`、response header、redirect、error を入力と結果として扱います。
 
-![SvelteKitの共有状態をresetするライフサイクル](/images/kiwa-docs/frameworks/sveltekit-overview.png)
+<img src="/images/kiwa-docs/frameworks/sveltekit-overview.webp" alt="SvelteKitの共有状態をresetするライフサイクル" width="1200" height="675" loading="lazy" decoding="async">
 
 `invokeLoad` は URL、params、cookies、locals を持つ load event を作り、通常の data、redirect signal、error signal、response header を分けて返します。`invokeAction` は form data を action に渡し、`fail` が return された validation failure と、throw された redirect や error を別々に記録します。これにより、失敗を通常の data として誤って扱う test を避けられます。
 

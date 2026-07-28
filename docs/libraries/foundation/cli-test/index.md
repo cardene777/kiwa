@@ -2,7 +2,7 @@
 
 `@kiwa-lab/cli-test` は、temporary directory で child process を起動し、CLI の入力、出力、終了状態、ファイル副作用を test する adapter です。shell command を文字列として評価せず、Node の `spawn` へ command と arguments を分けて渡します。設定 file を読む CLI、stdin を受ける subcommand、失敗時の exit code を、実 process の contract として確認できます。
 
-![CLIテスト環境の隔離と停止](/images/kiwa-docs/foundation/cli-test-overview.png)
+<img src="/images/kiwa-docs/foundation/cli-test-overview.webp" alt="CLIテスト環境の隔離と停止" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 何を検証する library か
 

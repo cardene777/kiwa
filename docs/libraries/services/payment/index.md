@@ -2,7 +2,7 @@
 
 `@kiwa-lab/payment` は、Stripe、Paddle、Lemon Squeezy の決済 Webhook と請求ライフサイクルをテストする mock harness です。プロバイダーごとの raw payload と HMAC 署名を作成し、検証、handler 呼び出し、請求状態の遷移を外部接続なしで確認できます。
 
-![決済 Webhook を作成し、署名を検証してアプリケーションへ配送する流れ](/images/kiwa-docs/services/payment-overview.png)
+<img src="/images/kiwa-docs/services/payment-overview.webp" alt="決済 Webhook を作成し、署名を検証してアプリケーションへ配送する流れ" width="1717" height="916" loading="lazy" decoding="async">
 
 ## 対象にする契約
 

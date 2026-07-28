@@ -2,7 +2,7 @@
 
 `@kiwa-lab/workflow` は、複数 step から成る業務フローをインプロセスで検証するためのテスト用 harness です。Temporal、Inngest、Trigger.dev、AWS Step Functions のような durable workflow を呼び出すアプリケーションで、step の順序、前の出力の受け渡し、失敗、イベント起動をテストできます。
 
-![ワークフローを登録し、順番に step を実行して結果を記録する流れ](/images/kiwa-docs/services/workflow-overview.png)
+<img src="/images/kiwa-docs/services/workflow-overview.webp" alt="ワークフローを登録し、順番に step を実行して結果を記録する流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 対象とする契約
 

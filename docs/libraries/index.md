@@ -7,7 +7,7 @@ description: テスト対象の境界から kiwa のライブラリを選ぶ。
 
 kiwa は、アプリケーションが外部と接する場所ごとに選べる 74 のテストライブラリ群です。TypeScript package に加え、Go、Python、Rust のネイティブライブラリがあります。各ページは README、public export、代表 test を根拠にしています。まずテストしたい境界を決め、そこで必要な最小のライブラリだけを選んでください。
 
-![テスト対象から八つのライブラリカテゴリを選ぶ流れ](/images/kiwa-docs/library-catalog.png)
+<img src="/images/kiwa-docs/library-catalog.webp" alt="テスト対象から八つのライブラリカテゴリを選ぶ流れ" width="1693" height="929" loading="lazy" decoding="async">
 
 ## テスト対象から選ぶ
 

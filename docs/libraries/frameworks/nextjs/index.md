@@ -2,7 +2,7 @@
 
 `@kiwa-lab/nextjs` は Next.js App Router の Server Action、middleware、Server Component、RSC stream を、開発サーバーや実ブラウザを起動せずに検証する test adapter です。関数の戻り値、kiwa の redirect signal、middleware が返す action、軽量な RSC tree を分けて確認します。
 
-![Next.jsの直接入力から副作用を確認する構造](/images/kiwa-docs/frameworks/nextjs-overview.png)
+<img src="/images/kiwa-docs/frameworks/nextjs-overview.webp" alt="Next.jsの直接入力から副作用を確認する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 対象にする境界
 

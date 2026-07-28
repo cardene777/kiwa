@@ -2,7 +2,7 @@
 
 `@kiwa-lab/realtime` は、Supabase Realtime、Ably、Pusher、Socket.IO を使うアプリケーションのイベント処理を、プロセス内で test するための adapter 群です。チャット、共同編集、通知のような画面では、接続できたことだけでは不十分です。どの channel または room に、どの event が、どの順番で届いたかを確認しないと、別の利用者へ誤配信する問題や event filter の取り違えを見逃します。
 
-![channel と room の購読後に scenario の event が届く流れ](/images/kiwa-docs/ai-realtime/realtime-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/realtime-overview.webp" alt="channel と room の購読後に scenario の event が届く流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 この package は外部 socket を開きません。scenario と publish 操作から in-memory engine に event を入れ、各 provider の client 形状で handler まで届けます。したがって、アプリケーション側の購読、room 参加、event filter、payload の扱いを高速に固定できます。一方、実ネットワーク、provider authentication、server 側の presence 整合性、acknowledgement、server restart は対象外です。
 

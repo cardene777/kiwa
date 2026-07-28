@@ -4,7 +4,7 @@
 
 ## 検証する流れ
 
-![MCP clientがserverを初期化しschemaを通してtoolを呼び出す流れ](/images/kiwa-docs/ai-realtime/mcp-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/mcp-overview.webp" alt="MCP clientがserverを初期化しschemaを通してtoolを呼び出す流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 in-memory transport で client と server をつなぎ、initialize、tools list、tools call を同じプロセスで進めます。schema を通った input だけが handler へ届きます。不正な input では handler が呼ばれず、JSON-RPC error が client に返るため、validation と実行を分けて確認できます。
 

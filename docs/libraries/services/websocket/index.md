@@ -2,7 +2,7 @@
 
 `@kiwa-lab/websocket` は、WebSocket の client、server、message、room、frame を process 内で検証する harness です。ws、uWebSockets、Socket.IO、Colyseus の provider 名を保持しますが、実 socket、network 遅延、provider 固有 protocol は起動しません。
 
-![WebSocketの個別送信とbroadcastが各clientのinboxへ届く流れ](/images/kiwa-docs/services/websocket-overview.png)
+<img src="/images/kiwa-docs/services/websocket-overview.webp" alt="WebSocketの個別送信とbroadcastが各clientのinboxへ届く流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 配送先と接続状態を分けて確認する
 

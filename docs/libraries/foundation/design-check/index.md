@@ -2,7 +2,7 @@
 
 `@kiwa-lab/design-check` は、承認済みの design spec と実装から採取した値を比較し、token の逸脱と layout の回帰を判定する library です。値を採取する browser automation や DOM library とは分離されているため、Playwright、jsdom、独自の design token exporter が出す値を、同じ `DesignActual` と `LayoutSnapshot` の形で検証できます。
 
-![仕様値と実測値を照合する流れ](/images/kiwa-docs/foundation/design-check-overview.png)
+<img src="/images/kiwa-docs/foundation/design-check-overview.webp" alt="仕様値と実測値を照合する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 設計値と実装値の違いをレビュー可能にする
 

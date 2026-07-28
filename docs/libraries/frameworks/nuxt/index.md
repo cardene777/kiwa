@@ -2,7 +2,7 @@
 
 `@kiwa-lab/nuxt` は、Nuxt の server route、route middleware、Nitro plugin を Nitro server なしで検証するための test adapter です。handler へ H3 event 相当の入力を渡し、通常の戻り値だけでなく、redirect、response status、header、cookie を結果として取り出します。これにより、HTTP server を起動する前に route の認可や response contract を小さな test で固定できます。
 
-![NuxtのH3 eventから副作用を確認する流れ](/images/kiwa-docs/frameworks/nuxt-overview.png)
+<img src="/images/kiwa-docs/frameworks/nuxt-overview.webp" alt="NuxtのH3 eventから副作用を確認する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 server route を test する場合、`invokeEventHandler` に URL、request header、cookie、body を渡します。URL に同じ query key が複数あると値は配列になり、options の `query` は URL の同じ key を置き換えます。handler が `setHeader`、`setCookie`、`sendRedirect` を呼ぶと、通常の return value とは別に `env` と redirect result へ記録されます。戻り値だけでなく、この副作用まで assert することで、認証や cache policy の取りこぼしを防げます。
 

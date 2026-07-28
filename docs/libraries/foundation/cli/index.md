@@ -2,7 +2,7 @@
 
 `@kiwa-lab/cli` は、kiwa の dApp テストをプロジェクトへ導入し、仕様から test の下書きを作り、再利用できる Anvil state を用意する command-line tool です。実行 command は `kiwa` です。Playwright と `@kiwa-lab/dapp` を手で配線する前に、必要な config と最初の test の形をそろえたい場合に使います。
 
-![CLI がテスト基盤を準備する流れ](/images/kiwa-docs/foundation/cli-overview.png)
+<img src="/images/kiwa-docs/foundation/cli-overview.webp" alt="CLI がテスト基盤を準備する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 CLI の各 command は目的と副作用が異なります。`doctor` は `anvil` が command として見つかるかを確認するだけで、環境を変更しません。`init` は Playwright config、dApp fixture を使う test、必要なら `package.json` の不足項目を書き込みます。`spec-to-test` は Layer 1 の Markdown 仕様から Vitest の下書きを作ります。`anvil seed` は一時 Anvil と指定 script を起動し、初期化済み chain state を file に保存します。`run --watch` は layer ごとに Vitest child process を起動します。
 

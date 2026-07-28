@@ -2,7 +2,7 @@
 
 `@kiwa-lab/query` は、データ取得 cache を React の render なしで検証する in-memory harness です。TanStack Query、SWR、urql、Apollo を provider 名で選び、query key、stale 判定、mutation 後の invalidation、listener 通知をテストできます。
 
-![取得結果を cache し、更新後に対象 key を無効化する流れ](/images/kiwa-docs/application/query-overview.png)
+<img src="/images/kiwa-docs/application/query-overview.webp" alt="取得結果を cache し、更新後に対象 key を無効化する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

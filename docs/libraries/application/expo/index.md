@@ -2,7 +2,7 @@
 
 `@kiwa-lab/expo` は、Expo Router、SecureStore、Notifications、FileSystem、Camera を一つの in-memory テスト環境へまとめる harness です。Expo Go、実端末、EAS build を起動せずに、端末 API に依存するアプリケーションフローを検証できます。
 
-![Expo の router、端末 storage、通知、camera を一つの環境で検証する流れ](/images/kiwa-docs/application/expo-overview.png)
+<img src="/images/kiwa-docs/application/expo-overview.webp" alt="Expo の router、端末 storage、通知、camera を一つの環境で検証する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 ## 検証する流れ
 

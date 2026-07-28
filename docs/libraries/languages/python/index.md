@@ -2,7 +2,7 @@
 
 `@kiwa-lab/python` は、Django、Flask、FastAPI、Starlette を想定した application contract を TypeScript の test process で確認する in-memory harness です。route、middleware、template を一つの environment に登録し、request を dispatch して status、header、body、middleware の呼び出し履歴を観察します。Python interpreter、WSGI server、ASGI server、実 framework は起動しません。
 
-![Pythonアプリ環境のrouteとtemplateを観測する構造](/images/kiwa-docs/languages/python-overview.png)
+<img src="/images/kiwa-docs/languages/python-overview.webp" alt="Pythonアプリ環境のrouteとtemplateを観測する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 environment の route は HTTP method と path が完全一致したときだけ実行されます。`GET /items` と `POST /items`、`/items` と `/items/` は別の route です。middleware は登録順に `next` を囲み、呼び出し履歴に記録されます。`next` を呼ばずに response を返せば後続 middleware と route は実行されません。middleware の例外は response に変換されず、dispatch の promise が reject します。
 

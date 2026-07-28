@@ -2,7 +2,7 @@
 
 `@kiwa-lab/auth` は、認証サービスの SDK を呼ばずに、サインイン、セッション、プロバイダー、データベースアダプターの境界を Vitest で検証するためのテストアダプターです。NextAuth、Lucia、Better Auth、Clerk、Auth0、Supabase Auth をそれぞれ独立した環境として扱います。
 
-![認証環境を作成してサインインとセッション取得を検証し停止する流れ](/images/kiwa-docs/services/auth-overview.png)
+<img src="/images/kiwa-docs/services/auth-overview.webp" alt="認証環境を作成してサインインとセッション取得を検証し停止する流れ" width="1774" height="887" loading="lazy" decoding="async">
 
 ## 対象にする境界
 

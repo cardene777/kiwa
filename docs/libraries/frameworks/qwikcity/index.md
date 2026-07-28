@@ -2,7 +2,7 @@
 
 `@kiwa-lab/qwikcity` は、Qwik City の route action、route loader、endpoint が application code と交わす契約を synthetic `RequestEvent` で検証する test adapter です。form の validation、session を持つ画面への redirect、endpoint の response のように、route ごとに必要な入力と結果を route manifest や Qwik optimizer を起動せず確かめます。
 
-![Qwik City の実行結果を分けて扱う構造](/images/kiwa-docs/frameworks/qwikcity-overview.png)
+<img src="/images/kiwa-docs/frameworks/qwikcity-overview.webp" alt="Qwik City の実行結果を分けて扱う構造" width="1200" height="675" loading="lazy" decoding="async">
 
 ## form action の成功と失敗を分ける
 

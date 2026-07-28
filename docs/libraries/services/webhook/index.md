@@ -2,7 +2,7 @@
 
 `@kiwa-lab/webhook` は、Webhook の受信処理をアプリケーションの外へ出さずに検証する test harness です。外部サービスの request を受けたコードでは、最初に署名を確かめ、次に payload を共通のイベントに読み替え、最後に業務 handler へ渡します。この三段階のどこかが曖昧だと、改変された request を受理したり、同じ配送を二度処理したりします。この library は、その境界をテストで明示します。
 
-![Webhook の署名を検証し、受理した payload をイベントへ変換する流れ](/images/kiwa-docs/services/webhook-overview.png)
+<img src="/images/kiwa-docs/services/webhook-overview.webp" alt="Webhook の署名を検証し、受理した payload をイベントへ変換する流れ" width="1717" height="916" loading="lazy" decoding="async">
 
 ## 受信から業務処理までを分けて確かめる
 

@@ -4,7 +4,7 @@
 
 そのため、このライブラリが検証するのは「dApp の UI と provider の契約」です。接続ボタンの後にアカウントが表示されること、ユーザー拒否をエラー表示に変換すること、chain 変更後に正しいネットワークを表示することを、同じブラウザ操作で確認できます。wallet 拡張そのもの、WalletConnect の relay、実ユーザーの秘密鍵を扱うものではありません。実 wallet との互換性は、ここで provider 契約を固めた後に別の手動または staging 検証で確かめます。
 
-![ページとウォレットと Anvil の連携](/images/kiwa-docs/foundation/dapp-overview.png)
+<img src="/images/kiwa-docs/foundation/dapp-overview.webp" alt="ページとウォレットと Anvil の連携" width="1200" height="640" loading="lazy" decoding="async">
 
 page は注入済み provider に request を送り、fixture は主要な EIP-1193 method を直接処理します。読み取り RPC の多くは Anvil に転送されます。test が `dappE2e` helper を呼ぶと provider の応答や event を変えられ、page は本番の wallet 応答と同じ経路で再描画します。fixture が起動した Anvil は test の終了時に停止します。
 

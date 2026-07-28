@@ -2,7 +2,7 @@
 
 `@kiwa-lab/rust-lib` は、axum、actix-web、tower-http、Rocket の handler contract を TypeScript の test process から検証する mock harness です。Rust compiler、Tokio、実 server、framework crate は起動しません。handler に body を渡し、method、path、headers、extractor、guard 名を結果の記録として返すことで、アプリがどの入力と応答を約束するかを素早く固定します。
 
-![Rust handlerの応答と失敗理由を分けて観測する構造](/images/kiwa-docs/languages/rust-lib-overview.png)
+<img src="/images/kiwa-docs/languages/rust-lib-overview.webp" alt="Rust handlerの応答と失敗理由を分けて観測する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 axum、actix、Rocket の adapter は、handler の成功を status `200` と body に包み、例外を status `500`、body `null`、`reason` に変換します。これは framework が実際に作る `IntoResponse` や `Responder` を再現するものではなく、アプリの成功と失敗の分岐を同じ assertion 形式にそろえるための契約です。headers、extractors、guards は handler に注入されず、結果に記録される metadata です。
 

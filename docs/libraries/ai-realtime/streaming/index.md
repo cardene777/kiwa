@@ -2,7 +2,7 @@
 
 `@kiwa-lab/streaming` は、Kafka、Redpanda、NATS、JetStream を使うイベント処理の contract を、broker なしで test する in-memory adapter です。producer が topic へ書いた値を consumer group がどの partition と offset から読むか、handler が失敗したときにどこで処理を止めるかを、一つの Node.js process で確認できます。
 
-![producerがtopicへ送信しconsumerが処理後にcommitまたはDLQへ進む流れ](/images/kiwa-docs/ai-realtime/streaming-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/streaming-overview.webp" alt="producerがtopicへ送信しconsumerが処理後にcommitまたはDLQへ進む流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 何を検証する library か
 

@@ -2,7 +2,7 @@
 
 `kiwa-test-go` は、Go の `testing` を置き換えずに、テストごとの fixture と HTTP 境界を扱いやすくするライブラリです。unit test では同じ seed と mode から毎回同じ fixture を作り、integration test では一時的な HTTP server を起動して、アプリケーションが送った request と返した response の両方を確かめます。
 
-![Go の mock server を cleanup する流れ](/images/kiwa-docs/native-languages/go-overview.png)
+<img src="/images/kiwa-docs/native-languages/go-overview.webp" alt="Go の mock server を cleanup する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 テスト対象が関数や domain object だけなら、まず `SetupUnitEnv` を使います。これは test が終わると `t.Cleanup` で停止する fixture を返すため、seed、mode、ラベルを test ごとに閉じ込められます。外部 API を呼ぶ code を検証したい場合は、`NewMockServer` が OS に選ばせた一時 port で server を起動します。production code にはその URL を渡し、test では response と記録済み request を確認します。
 

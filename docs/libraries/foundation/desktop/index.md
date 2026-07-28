@@ -2,7 +2,7 @@
 
 `@kiwa-lab/desktop` は、Electron、Tauri、Webview と OS 固有機能のアプリケーション側の契約を、小さな状態遷移として検証する library です。実アプリを起動せず、window 作成、IPC、Tauri command、preload と context bridge、通知や clipboard の操作順を session の履歴に記録します。実装がどの順序を許可し、どの入力を拒否するかを速く固定するための harness です。
 
-![デスクトップテストの実行経路](/images/kiwa-docs/foundation/desktop-overview.png)
+<img src="/images/kiwa-docs/foundation/desktop-overview.webp" alt="デスクトップテストの実行経路" width="1200" height="658" loading="lazy" decoding="async">
 
 ## runtime ではなく操作の契約を test する
 

@@ -2,7 +2,7 @@
 
 `@kiwa-lab/edge` は、Edge handler の入力、応答、非同期の副作用を Node.js 上で直接検証する test adapter です。handler には Request、環境 binding、ExecutionContext を渡し、返された Response、`waitUntil` に登録された promise、`passThroughOnException` の呼び出しを test から観察できます。実 workerd、Miniflare、Cloudflare Workers、Vercel Edge Runtime は起動しません。
 
-![Edge handlerの入力と非同期処理を観測する流れ](/images/kiwa-docs/frameworks/edge-overview.png)
+<img src="/images/kiwa-docs/frameworks/edge-overview.webp" alt="Edge handlerの入力と非同期処理を観測する流れ" width="1200" height="675" loading="lazy" decoding="async">
 
 `invokeEdgeHandler` は handler を直接呼び、例外を helper 自体の reject ではなく status `500` の Response と `error` に変換します。handler が background work を `waitUntil` へ渡した場合、promise は記録されますが helper は完了を待ちません。test は `waitedPromises` を明示的に await して、その成功または失敗を assertion します。この設計により、レスポンスを返す処理と終了後の処理を同じ test 内で分けて確認できます。
 

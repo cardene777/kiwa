@@ -2,7 +2,7 @@
 
 `@kiwa-lab/email` は Resend、SendGrid、Postmark、AWS SES の送信、テンプレート、Webhook、配信イベントを in-process で検証するライブラリです。実 provider を呼ばずに、アプリケーションが queued result、送信履歴、delivery event をどう扱うかを test します。
 
-![メール送信が記録と配信イベントへ進み失敗時だけ再試行する流れ](/images/kiwa-docs/services/email-overview.png)
+<img src="/images/kiwa-docs/services/email-overview.webp" alt="メール送信が記録と配信イベントへ進み失敗時だけ再試行する流れ" width="1774" height="887" loading="lazy" decoding="async">
 
 ## 対象にする境界
 

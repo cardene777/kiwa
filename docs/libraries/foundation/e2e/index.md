@@ -2,7 +2,7 @@
 
 `@kiwa-lab/e2e` は、ローカル HTTP server と Playwright browser を同じ test environment として起動する、Web アプリケーション向けの E2E adapter です。フォーム送信、画面遷移、client-side script のように、実際の HTTP 経路と browser engine を通さなければ確認できない振る舞いを test します。wallet や chain が必要な dApp は [dapp](../dapp/)、browser を起動しない component test は [ui](../ui/) を使います。
 
-![ブラウザとサーバーをまとめる流れ](/images/kiwa-docs/foundation/e2e-overview.png)
+<img src="/images/kiwa-docs/foundation/e2e-overview.webp" alt="ブラウザとサーバーをまとめる流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## server と browser を一つの寿命で扱う
 

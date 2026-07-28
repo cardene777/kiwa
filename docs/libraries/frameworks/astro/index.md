@@ -2,7 +2,7 @@
 
 `@kiwa-lab/astro` は、Astro の route handler、ページ関数、View Transitions の分岐を dev server なしで検証する test adapter です。route を実際に build したり browser を起動したりせず、handler が受け取る context と navigation lifecycle だけを小さく組み立てます。HTTP の入力に対する response、ページの redirect、遷移 listener の順序を速く隔離して確認したいときに使います。
 
-![Astro の endpoint とページと遷移を分けて実行する構造](/images/kiwa-docs/frameworks/astro-overview.png)
+<img src="/images/kiwa-docs/frameworks/astro-overview.webp" alt="Astro の endpoint とページと遷移を分けて実行する構造" width="1200" height="675" loading="lazy" decoding="async">
 
 ## route の契約を server なしで確認する
 

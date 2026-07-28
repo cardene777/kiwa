@@ -4,7 +4,7 @@
 
 ## 検証する流れ
 
-![状態グラフを実行してtool outputの後に完了するagentの流れ](/images/kiwa-docs/ai-realtime/agent-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/agent-overview.webp" alt="状態グラフを実行してtool outputの後に完了するagentの流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 状態グラフは node と edge を compile してから実行します。`invoke` は最後の state を、`stream` は途中の更新を返します。node が返す部分 state は shallow merge されるため、どの node がどの値を変えたかをテストできます。
 

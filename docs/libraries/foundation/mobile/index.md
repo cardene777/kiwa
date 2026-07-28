@@ -2,7 +2,7 @@
 
 `@kiwa-lab/mobile` は、React Native と Expo のアプリケーションコードが期待するモバイル固有の操作を、OS に依存しない状態遷移として検証する library です。対象 platform は `ios`、`android`、`web` です。component の mount と unmount、native module、gesture、navigation、storage、New Architecture の操作履歴を memory 上に残し、実機を起動しなくてもアプリの分岐を確認できます。
 
-![モバイル操作のセッション境界](/images/kiwa-docs/foundation/mobile-overview.png)
+<img src="/images/kiwa-docs/foundation/mobile-overview.webp" alt="モバイル操作のセッション境界" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 実装が期待する操作順を固定する
 

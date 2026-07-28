@@ -4,7 +4,7 @@
 
 このライブラリは agent をモック化したり、ツールを実行したりしません。対象アプリケーションがツールを呼ぶ地点に `spy.record(name, argumentsJson)` を接続し、テストではその記録を assertion します。つまりテストの価値は、手で `record` を並べることではなく、実装の callback から spy まで到達させることにあります。
 
-![ツール呼出を記録して検証する流れ](/images/kiwa-docs/foundation/skill-test-overview.png)
+<img src="/images/kiwa-docs/foundation/skill-test-overview.webp" alt="ツール呼出を記録して検証する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 何を保証するか
 

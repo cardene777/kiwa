@@ -2,7 +2,7 @@
 
 `@kiwa-lab/ui` は、React component と framework ごとの test utility を扱う UI test adapter です。React では JSDOM の render、user-event を使う interaction、初期 markup を固定する snapshot を同じ lifecycle で扱えます。実 browser が必要な場合は、React component を静的 HTML にして Playwright page へ渡す専用 helper を使います。
 
-![コンポーネント操作を検証する流れ](/images/kiwa-docs/foundation/ui-overview.png)
+<img src="/images/kiwa-docs/foundation/ui-overview.webp" alt="コンポーネント操作を検証する流れ" width="1200" height="658" loading="lazy" decoding="async">
 
 ## 何を検証する library か
 

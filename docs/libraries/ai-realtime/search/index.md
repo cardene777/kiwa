@@ -4,7 +4,7 @@
 
 ## 検証する流れ
 
-![文書をindexへ追加してqueryとfilterからranking済みのhitsを返す流れ](/images/kiwa-docs/ai-realtime/search-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/search-overview.webp" alt="文書をindexへ追加してqueryとfilterからranking済みのhitsを返す流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 index operation と search option を分けて渡します。文書を追加、更新、削除した後、offset、limit、filter、facet、sort を指定して検索します。hits だけではなく、filter 後の facet、sort を優先した順位、factory ごとの typo tolerance を確認できるため、検索 UI に渡す結果を安定させられます。
 

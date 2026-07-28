@@ -2,7 +2,7 @@
 
 `@kiwa-lab/ai-llm` は、Anthropic、OpenAI、Vercel AI SDK、LangChain を使うコードを、実プロバイダーへ接続せずに検証するための LLM mock です。固定応答だけでなく stream、tool call、system prompt、画像と音声の入力、利用量を SDK ごとの操作面に合わせて返します。
 
-![fixtureを使うprovider mockがcompletionまたはstreamを返し指標を記録する流れ](/images/kiwa-docs/ai-realtime/ai-llm-overview.png)
+<img src="/images/kiwa-docs/ai-realtime/ai-llm-overview.webp" alt="fixtureを使うprovider mockがcompletionまたはstreamを返し指標を記録する流れ" width="1672" height="941" loading="lazy" decoding="async">
 
 ## 対象にする境界
 
