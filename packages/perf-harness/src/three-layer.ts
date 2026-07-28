@@ -346,8 +346,14 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 一方で保存しないままだと、Node 更新や CPU 変更のように前提が恒久的に変わった
   // 場合に手動削除まで比較できない。測定が成立している実行なら作り直す。
   const shouldReseed = envMismatched && premiseValid && hardGatePassed;
+  // 追記にも作り直しと同じ条件を課す。 上限を割った実行や GC を呼べない実行の値を
+  // 基準として採ると、 壊れた状態が次回以降の比較対象になる。 新しい op だけを
+  // 足す経路でも、 その値が成立していなければ意味は同じ。
   const shouldAppend =
-    !envMismatched && (Object.keys(unseededOps).length > 0 || staleDropped);
+    !envMismatched &&
+    premiseValid &&
+    hardGatePassed &&
+    (Object.keys(unseededOps).length > 0 || staleDropped);
 
   let baselineSeeded = false;
   if (shouldReseed) {
@@ -395,6 +401,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     iterationsPerWorker,
     memoryIterations,
     memoryCapDefault,
+    regressionGate,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -412,11 +419,18 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
   return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
 }
 
-/** report の regression 列。 判定結果と、 gate から外している場合はその理由を並べる。 */
-function regressionCell(op: PerfOpSpec, outcome: OpOutcome): string {
+/**
+ * report の regression 列。 判定結果と、 gate に効いていない場合はその理由を並べる。
+ *
+ * 判定だけを書くと、 `regressed` の行があるのに suite が通っている report が
+ * できる。 読み手には gate が効いているのか外れているのか区別できないので、
+ * 外れている理由 (呼出全体で無効 / この op だけ除外) を同じ列に出す。
+ */
+function regressionCell(op: PerfOpSpec, outcome: OpOutcome, regressionGate: boolean): string {
   const verdict = outcome.regressionNote
     ? `${outcome.regressionVerdict} (${outcome.regressionNote})`
     : outcome.regressionVerdict;
+  if (!regressionGate) return `${verdict} — gate 無効 (regressionGate=false)`;
   const waiver = op.regressionGateWaived?.trim();
   if (waiver === undefined || waiver.length === 0) return verdict;
   return `${verdict} — gate 対象外 (${waiver})`;
@@ -469,6 +483,8 @@ interface WriteReportInput {
   iterationsPerWorker: number;
   memoryIterations: number;
   memoryCapDefault: number;
+  /** 回帰判定を `allPassed` に反映したか。 report 上で判定と gate を区別するために要る。 */
+  regressionGate: boolean;
 }
 
 function writeReport(input: WriteReportInput): void {
@@ -488,7 +504,7 @@ function writeReport(input: WriteReportInput): void {
       // 判定を gate から外した op は、判定結果と外した理由の両方を書く。
       // 結果だけ書くと gate に効いているように読め、理由だけ書くと
       // 何が測れたのかが残らない。
-      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out)} |`,
+      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
     );
   });
 

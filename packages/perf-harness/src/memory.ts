@@ -41,9 +41,11 @@ export async function measureMemory(input: MemoryInput): Promise<MemorySample> {
   if (input.iterations < 1) {
     throw new Error(`measureMemory: iterations must be >= 1, got ${input.iterations}`);
   }
+  // `Infinity` は空回しが終わらず、`NaN` は 0 回に潰れ、少数は暗黙に切り上がる。
+  // published API の入口なので、解釈が分かれる値は受け取らずに落とす。
   const warmup = input.warmup ?? 0;
-  if (warmup < 0) {
-    throw new Error(`measureMemory: warmup must be >= 0, got ${warmup}`);
+  if (!Number.isSafeInteger(warmup) || warmup < 0) {
+    throw new Error(`measureMemory: warmup must be a non-negative integer, got ${warmup}`);
   }
 
   const gcRef = (globalThis as { gc?: () => void }).gc;

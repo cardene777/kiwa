@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
 import { pruneStaleOps, runPerf3LayerStrict } from '../src/index.js';
@@ -382,7 +382,11 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     // 判定と根拠は残す。gate に載せるかどうかだけを呼出側が決める。
     expect(slowed.outcomes[0]!.regressionVerdict, '判定は出す').toBe('regressed');
     expect(slowed.allPassed, '既定では gate を落とさない').toBe(true);
-    expect(readFileSync(join(tmpDir, 'd2.md'), 'utf8')).toMatch(/\| regressed \|/);
+    // 判定だけを書くと、regressed の行があるのに suite が通る report になり、
+    // 読み手が gate の有無を区別できない。無効であることも同じ列に出す。
+    expect(readFileSync(join(tmpDir, 'd2.md'), 'utf8')).toMatch(
+      /regressed — gate 無効 \(regressionGate=false\)/,
+    );
   });
 
   it('理由を書いた op だけ回帰判定を gate から外す (#1708)', async () => {
@@ -471,6 +475,37 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
 
     expect(result.outcomes[0]!.serialGatePassed).toBe(false);
     expect(result.allPassed).toBe(false);
+  });
+
+  it('成立していない実行は baseline を作らない (#1708)', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'invalid.json');
+    const settings = { serialIterations: 10, concurrency: 2, memoryIterations: 10 };
+
+    // 上限を割る op。 追記の経路 (baseline file が無い初回) でも、
+    // 成立していない値を基準に採ると壊れた状態が次回以降の比較対象になる。
+    const overCap = {
+      name: 'over-cap',
+      fn: () => {
+        const until = performance.now() + 2;
+        while (performance.now() < until) {
+          /* burn */
+        }
+      },
+      serialP95CapMs: 0.1,
+    };
+
+    const result = await runPerf3LayerStrict({
+      moduleName: 'invalid-seed',
+      ops: [overCap],
+      reportPath: join(tmpDir, 'invalid.md'),
+      baselinePath,
+      ...settings,
+    });
+
+    expect(result.outcomes[0]!.serialGatePassed).toBe(false);
+    expect(result.baselineSeeded, '上限を割った実行は基準にしない').toBe(false);
+    expect(existsSync(baselinePath), 'baseline file 自体を作らない').toBe(false);
   });
 
   it('理由を書いた op だけ memory 軸の判定を外す (#1708)', async () => {

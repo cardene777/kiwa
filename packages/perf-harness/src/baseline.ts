@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { hostname, arch, platform as osPlatform, cpus } from 'node:os';
+import { arch, platform as osPlatform, cpus } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import type {
   BaselineEnv,
@@ -108,8 +108,10 @@ export function resolveBaselineRoot(start: string): string {
  * - 版 1 = workspace も vitest の file も並列で測っていた頃 (この field 自体が無い)
  * - 版 2 = workspace を `--workspace-concurrency=1`、 vitest を
  *   `fileParallelism: false` にして 1 件ずつ測る (#1708)
- * - 版 3 = 判定対象になり得る op の標本数を増やした (#1708)。 15-30 標本では
- *   p95 が実質最大値になり、 実装を変えずに測り直すだけで 100% 以上動いていた
+ * - 版 3 = memory 測定に空回しを入れた (#1708)。 それまでは初回の 1 回きりの
+ *   確保が反復数で割られて「1 回あたりの保持」 に載っており、 同じ実装でも
+ *   arrayBuffers の増分が変わる。 serial / concurrent の測り方は版 2 と同じ
+ *   (標本数の引き上げは試したが効果が確認できず戻した)
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
@@ -121,7 +123,6 @@ export function captureEnv(): BaselineEnv {
   return {
     nodeVersion: process.version,
     platform: `${osPlatform()}-${arch()}`,
-    hostname: hostname(),
     cpuModel: cpus()[0]?.model ?? 'unknown',
     cpuCount: cpus().length,
     gitSha: captureGitSha(),
@@ -174,7 +175,6 @@ function diffEnv(baseline: BaselineEnv, current: BaselineEnv): BaselineLoadResul
   const fields: Array<keyof BaselineEnv> = [
     'nodeVersion',
     'platform',
-    'hostname',
     'cpuModel',
     'cpuCount',
     'gitSha',
@@ -233,7 +233,6 @@ function isBaselineEnv(value: unknown): value is BaselineEnv {
   return (
     typeof candidate.nodeVersion === 'string' &&
     typeof candidate.platform === 'string' &&
-    typeof candidate.hostname === 'string' &&
     typeof candidate.cpuModel === 'string' &&
     typeof candidate.cpuCount === 'number' &&
     typeof candidate.gitSha === 'string' &&
@@ -250,7 +249,6 @@ function isResultMap(value: unknown): value is Record<string, MeasureResult> {
 const UNKNOWN_ENV: BaselineEnv = {
   nodeVersion: 'unknown',
   platform: 'unknown',
-  hostname: 'unknown',
   cpuModel: 'unknown',
   cpuCount: 0,
   gitSha: 'unknown',

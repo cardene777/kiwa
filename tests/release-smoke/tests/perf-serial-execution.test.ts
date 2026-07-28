@@ -27,10 +27,17 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = repo root (`tests/release-smoke/.vitest-dist/tests/` 配下)
 const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
 
-// `pnpm-workspace.yaml` の glob と対応する。 単一 package を直接指す entry
-// (`tests/release-smoke` / `promo` / `examples/dogfood-oidc-federation/rp`) は
-// 子 dir を持たないため走査対象から外し、 `*` glob の親 dir だけを列挙する。
+// `pnpm-workspace.yaml` の `*` glob に対応する親 dir。
 const WORKSPACE_PARENTS = ['packages', 'examples', 'tests/fixtures'] as const;
+
+// glob ではなく単一 package を直接指す entry。 子 dir を持たないので
+// `WORKSPACE_PARENTS` の走査では拾えない。 ここへ perf config や
+// `test:perf` が足された場合も検査の対象にする。
+const WORKSPACE_LITERALS = [
+  'examples/dogfood-oidc-federation/rp',
+  'tests/release-smoke',
+  'promo',
+] as const;
 
 interface PackageJson {
   name?: string;
@@ -59,40 +66,45 @@ interface PerfConfigFile {
 
 function collectPerfConfigs(): PerfConfigFile[] {
   const found: PerfConfigFile[] = [];
-  for (const parent of WORKSPACE_PARENTS) {
-    const parentDir = resolve(REPO_ROOT, parent);
-    if (!existsSync(parentDir)) continue;
-    for (const entry of readdirSync(parentDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const rel = join(parent, entry.name, 'vitest.perf.config.ts');
-      const absolute = resolve(REPO_ROOT, rel);
-      if (!existsSync(absolute)) continue;
-      found.push({ file: rel, source: readFileSync(absolute, 'utf-8') });
-    }
+  for (const dir of workspaceDirs()) {
+    const rel = join(dir, 'vitest.perf.config.ts');
+    const absolute = resolve(REPO_ROOT, rel);
+    if (!existsSync(absolute)) continue;
+    found.push({ file: rel, source: readFileSync(absolute, 'utf-8') });
   }
   return found;
 }
 
-function collectWorkspacePerfScripts(): WorkspacePerfScript[] {
-  const found: WorkspacePerfScript[] = [];
+/** `pnpm-workspace.yaml` が指す package dir を repo 相対で全て返す。 */
+function workspaceDirs(): string[] {
+  const dirs: string[] = [];
   for (const parent of WORKSPACE_PARENTS) {
     const parentDir = resolve(REPO_ROOT, parent);
     if (!existsSync(parentDir)) continue;
     for (const entry of readdirSync(parentDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const rel = join(parent, entry.name);
-      const manifest = resolve(REPO_ROOT, rel, 'package.json');
-      if (!existsSync(manifest)) continue;
-      let pkg: PackageJson;
-      try {
-        pkg = JSON.parse(readFileSync(manifest, 'utf-8')) as PackageJson;
-      } catch {
-        // package.json が壊れている件は本 axis の対象外 (別 axis が検出する)
-        continue;
-      }
-      const script = pkg.scripts?.['test:perf'];
-      if (typeof script === 'string') found.push({ dir: rel, script });
+      if (entry.isDirectory()) dirs.push(join(parent, entry.name));
     }
+  }
+  for (const literal of WORKSPACE_LITERALS) {
+    if (existsSync(resolve(REPO_ROOT, literal))) dirs.push(literal);
+  }
+  return dirs;
+}
+
+function collectWorkspacePerfScripts(): WorkspacePerfScript[] {
+  const found: WorkspacePerfScript[] = [];
+  for (const rel of workspaceDirs()) {
+    const manifest = resolve(REPO_ROOT, rel, 'package.json');
+    if (!existsSync(manifest)) continue;
+    let pkg: PackageJson;
+    try {
+      pkg = JSON.parse(readFileSync(manifest, 'utf-8')) as PackageJson;
+    } catch {
+      // package.json が壊れている件は本 axis の対象外 (別 axis が検出する)
+      continue;
+    }
+    const script = pkg.scripts?.['test:perf'];
+    if (typeof script === 'string') found.push({ dir: rel, script });
   }
   return found;
 }

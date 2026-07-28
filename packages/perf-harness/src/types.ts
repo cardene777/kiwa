@@ -140,7 +140,12 @@ export interface BaselineEnv {
   nodeVersion: string;
   /** os.platform() + os.arch()。 例 `darwin-arm64`。 */
   platform: string;
-  hostname: string;
+  /**
+   * 記録しない。 比較には使わず、 baseline を追跡対象にした今は
+   * 測定した機械の名前が git に残るだけになる。 過去の baseline には
+   * 入っているので、 読める形は残す。
+   */
+  hostname?: string;
   cpuModel: string;
   /** cpu core 数 (物理 + 論理まとめて os.cpus().length)。 */
   cpuCount: number;

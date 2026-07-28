@@ -95,6 +95,10 @@ The path used to be derived from `process.cwd()`, so the same module wrote to `p
 
 They are tracked because an untracked baseline means the first run on any checkout has nothing to compare against. "Whoever measures first cannot detect a regression" is not a property worth keeping.
 
+That help is limited to machines matching the one that recorded them. `isComparableEnv` requires the same Node version, platform, CPU model and core count, so a different machine gets no comparison on its first run and reseeds locally. **Do not commit that reseed** — it replaces the reference for everyone else with your machine's numbers. The committed set was recorded on a single machine; treat it as that machine's reference, not a portable one. Making the tracked set portable needs per-environment baseline files, which is a separate change.
+
+The machine's hostname is not recorded. It plays no part in the comparison, and a tracked file is the wrong place for it.
+
 ### When measurements stop being comparable
 
 `BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different.

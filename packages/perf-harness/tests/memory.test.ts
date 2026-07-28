@@ -76,10 +76,14 @@ describe('measureMemory', () => {
     expect(retained.length).toBe(1);
   });
 
-  it('rejects warmup < 0', async () => {
-    await expect(measureMemory({ fn: () => {}, iterations: 1, warmup: -1 })).rejects.toThrow(
-      /warmup must be >= 0/,
-    );
+  it('rejects a warmup that is not a non-negative integer', async () => {
+    // Infinity は空回しが終わらず、NaN は 0 回に潰れ、少数は暗黙に切り上がる。
+    // published API の入口なので、解釈が分かれる値は受け取らない。
+    for (const warmup of [-1, Number.NaN, Number.POSITIVE_INFINITY, 1.5]) {
+      await expect(measureMemory({ fn: () => {}, iterations: 1, warmup })).rejects.toThrow(
+        /warmup must be a non-negative integer/,
+      );
+    }
   });
 
   it('invokes globalThis.gc when it is exposed (before + after)', async () => {
