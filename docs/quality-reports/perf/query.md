@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| fetchQuery | 0.00046ms | 0.0015ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| mutate | 0.00071ms | 0.0012ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| invalidateQuery | 0.00029ms | 0.00038ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| fetchQuery | 0.00042ms | 0.0021ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| mutate | 0.00067ms | 0.00096ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| invalidateQuery | 0.00029ms | 0.00046ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -18,15 +18,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|
 | fetchQuery | 0.02ms | 10ms | PASS |
 | mutate | 0.02ms | 10ms | PASS |
-| invalidateQuery | 0.01ms | 10ms | PASS |
+| invalidateQuery | 0.00ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| fetchQuery | -9968 B | 0 B | 102400 B | yes | PASS |
-| mutate | -15192 B | 0 B | 102400 B | yes | PASS |
-| invalidateQuery | 688 B | 0 B | 102400 B | yes | PASS |
+| fetchQuery | -12976 B | 0 B | 102400 B | yes | PASS |
+| mutate | -15080 B | 0 B | 102400 B | yes | PASS |
+| invalidateQuery | 592 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00046ms |
-| p50 | 0.00058ms |
-| p95 | 0.0015ms |
-| p99 | 0.0045ms |
-| mean | 0.00076ms |
-| stdev | 0.00074ms |
+| p10 | 0.00042ms |
+| p50 | 0.00050ms |
+| p95 | 0.0021ms |
+| p99 | 0.0059ms |
+| mean | 0.00084ms |
+| stdev | 0.0010ms |
 | min | 0.00042ms |
-| max | 0.0065ms |
-| total | 0.15ms |
+| max | 0.0083ms |
+| total | 0.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00046ms | 0.00050ms | -0.000042ms | -8.40% |
-| p50 | 0.00058ms | 0.00063ms | -0.000042ms | -6.72% |
-| p95 | 0.0015ms | 0.0021ms | -0.00060ms | -28.91% |
-| p99 | 0.0045ms | 0.0051ms | -0.00056ms | -10.92% |
-| mean | 0.00076ms | 0.00086ms | -0.000098ms | -11.46% |
-| min | 0.00042ms | 0.00046ms | -0.000041ms | -8.95% |
-| max | 0.0065ms | 0.0097ms | -0.0033ms | -33.33% |
-| total | 0.15ms | 0.17ms | -0.02ms | -11.46% |
+| p10 | 0.00042ms | 0.00050ms | -0.000083ms | -16.60% |
+| p50 | 0.00050ms | 0.00063ms | -0.00013ms | -20.00% |
+| p95 | 0.0021ms | 0.0021ms | +0.000021ms | +1.03% |
+| p99 | 0.0059ms | 0.0051ms | +0.00082ms | +16.16% |
+| mean | 0.00084ms | 0.00086ms | -0.000020ms | -2.38% |
+| min | 0.00042ms | 0.00046ms | -0.000042ms | -9.17% |
+| max | 0.0083ms | 0.0097ms | -0.0015ms | -15.38% |
+| total | 0.17ms | 0.17ms | -0.0041ms | -2.38% |
 
 ### mutate
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00071ms |
-| p50 | 0.00075ms |
-| p95 | 0.0012ms |
-| p99 | 0.0071ms |
-| mean | 0.00094ms |
+| p10 | 0.00067ms |
+| p50 | 0.00071ms |
+| p95 | 0.00096ms |
+| p99 | 0.0062ms |
+| mean | 0.00088ms |
 | stdev | 0.0010ms |
-| min | 0.00067ms |
-| max | 0.0096ms |
-| total | 0.19ms |
+| min | 0.00063ms |
+| max | 0.01ms |
+| total | 0.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00071ms | 0.00075ms | -0.000042ms | -5.60% |
-| p50 | 0.00075ms | 0.00079ms | -0.000042ms | -5.30% |
-| p95 | 0.0012ms | 0.0013ms | -0.00012ms | -9.47% |
-| p99 | 0.0071ms | 0.0092ms | -0.0021ms | -22.57% |
-| mean | 0.00094ms | 0.0010ms | -0.000076ms | -7.42% |
-| min | 0.00067ms | 0.00071ms | -0.000041ms | -5.79% |
-| max | 0.0096ms | 0.01ms | -0.00079ms | -7.60% |
-| total | 0.19ms | 0.20ms | -0.02ms | -7.42% |
+| p10 | 0.00067ms | 0.00075ms | -0.000084ms | -11.20% |
+| p50 | 0.00071ms | 0.00079ms | -0.000084ms | -10.61% |
+| p95 | 0.00096ms | 0.0013ms | -0.00034ms | -26.21% |
+| p99 | 0.0062ms | 0.0092ms | -0.0030ms | -32.56% |
+| mean | 0.00088ms | 0.0010ms | -0.00014ms | -13.33% |
+| min | 0.00063ms | 0.00071ms | -0.000083ms | -11.72% |
+| max | 0.01ms | 0.01ms | -0.00025ms | -2.41% |
+| total | 0.18ms | 0.20ms | -0.03ms | -13.33% |
 
 ### invalidateQuery
 
@@ -101,25 +101,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.00029ms |
-| p50 | 0.00033ms |
-| p95 | 0.00038ms |
-| p99 | 0.0021ms |
-| mean | 0.00043ms |
-| stdev | 0.0011ms |
+| p50 | 0.00029ms |
+| p95 | 0.00046ms |
+| p99 | 0.0020ms |
+| mean | 0.00040ms |
+| stdev | 0.00061ms |
 | min | 0.00029ms |
-| max | 0.02ms |
-| total | 0.09ms |
+| max | 0.0067ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p10 | 0.00029ms | 0.00033ms | -0.000042ms | -12.61% |
-| p50 | 0.00033ms | 0.00033ms | -0.0000010ms | -0.30% |
-| p95 | 0.00038ms | 0.00046ms | -0.000084ms | -18.30% |
-| p99 | 0.0021ms | 0.0014ms | +0.00066ms | +47.38% |
-| mean | 0.00043ms | 0.00045ms | -0.000018ms | -4.10% |
+| p50 | 0.00029ms | 0.00033ms | -0.000042ms | -12.57% |
+| p95 | 0.00046ms | 0.00046ms | -0.0000010ms | -0.22% |
+| p99 | 0.0020ms | 0.0014ms | +0.00060ms | +43.29% |
+| mean | 0.00040ms | 0.00045ms | -0.000047ms | -10.49% |
 | min | 0.00029ms | 0.00029ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.0027ms | +21.06% |
-| total | 0.09ms | 0.09ms | -0.0037ms | -4.10% |
+| max | 0.0067ms | 0.01ms | -0.0060ms | -47.36% |
+| total | 0.08ms | 0.09ms | -0.0094ms | -10.49% |
 

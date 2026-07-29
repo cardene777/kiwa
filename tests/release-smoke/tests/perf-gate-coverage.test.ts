@@ -24,7 +24,7 @@
 // ## What this test is for, and where it stops
 //
 // It catches omissions. That is the failure mode that actually happened: twelve
-// suites that simply never assigned the return value, and 116 configs that
+// suites that simply never assigned the return value, and 117 configs that
 // simply never set the flag. Nobody was working around anything — the lines were
 // missing and the files still looked complete.
 //
@@ -213,7 +213,18 @@ function declaresName(binding: ts.BindingName, name: string): boolean {
 }
 
 /** 測定関数の名前。 これを import しているか否かが検査の入口になる。 */
+/**
+ * mock 経路の測定関数。 `allPassed` の検証を要求する対象。
+ *
+ * live (`runPerf3LayerLive`) は含めない。 live は env が無ければ全 op が skip され、
+ * その状態を `anySkipped` で確かめるのが正しい形なので、`allPassed` を無条件に
+ * 要求すると env のある環境でしか通らない test になる。 GC の要求だけは
+ * 経路によらず要るので、そちらは `MEASURE_FNS_ALL` を見る。
+ */
 const MEASURE_FNS = new Set(['runPerf3Layer', 'runPerf3LayerStrict']);
+
+/** GC 要求の検査対象。 mock / live どちらも memory を測るため両方を含む。 */
+const MEASURE_FNS_ALL = new Set([...MEASURE_FNS, 'runPerf3LayerLive']);
 
 /**
  * source 内で測定関数を指す識別子を集める。
@@ -221,7 +232,10 @@ const MEASURE_FNS = new Set(['runPerf3Layer', 'runPerf3LayerStrict']);
  * `import { runPerf3Layer as run }` の `run` や `import * as perf` の `perf.runPerf3Layer`
  * も対象にする。 別名にすれば検査を通せる、では guard にならない。
  */
-function measureAliases(sf: ts.SourceFile): { direct: Set<string>; namespaces: Set<string> } {
+function measureAliases(
+  sf: ts.SourceFile,
+  names: Set<string> = MEASURE_FNS,
+): { direct: Set<string>; namespaces: Set<string> } {
   const direct = new Set<string>();
   const namespaces = new Set<string>();
   eachNode(sf, (node) => {
@@ -234,7 +248,7 @@ function measureAliases(sf: ts.SourceFile): { direct: Set<string>; namespaces: S
     }
     for (const el of clause.namedBindings.elements) {
       const original = (el.propertyName ?? el.name).text;
-      if (MEASURE_FNS.has(original)) direct.add(el.name.text);
+      if (names.has(original)) direct.add(el.name.text);
     }
   });
   return { direct, namespaces };
@@ -244,12 +258,13 @@ function measureAliases(sf: ts.SourceFile): { direct: Set<string>; namespaces: S
 function isMeasureCall(
   node: ts.CallExpression,
   aliases: { direct: Set<string>; namespaces: Set<string> },
+  names: Set<string> = MEASURE_FNS,
 ): boolean {
   const path = accessPath(node.expression);
   if (path === null) return false;
   const parts = path.split('.');
   if (parts.length === 1) return aliases.direct.has(parts[0]!);
-  if (parts.length === 2) return aliases.namespaces.has(parts[0]!) && MEASURE_FNS.has(parts[1]!);
+  if (parts.length === 2) return aliases.namespaces.has(parts[0]!) && names.has(parts[1]!);
   return false;
 }
 
@@ -301,19 +316,56 @@ function assertedDeclarations(sf: ts.SourceFile): Map<ts.VariableDeclaration, ts
 }
 
 /**
- * 宣言と assertion が同じ statement list に並んでいるかを返す。
+ * 宣言のあと assertion に必ず到達するかを返す。
  *
- * 「書いてある」 と「実行される」 は別で、`if (false)` の中や呼ばれない closure の
- * 中にある assertion は判定しない。 到達可能性そのものは静的には決まらないので、
- * 分岐や関数境界を挟まない位置にあることを求める。 挟む形は落とす (fail-close)。
+ * 「書いてある」 と「実行される」 は別。 `if (false)` の中、呼ばれない closure、
+ * 途中の `return` より後ろにある assertion は判定しない。 到達可能性そのものは
+ * 静的には決まらないので、通す形を絞る = 同じ statement list に並んでいて、
+ * かつ その間に制御を逸らす statement が無いことを求める。
  */
-function inSameStatementList(decl: ts.VariableDeclaration, assertion: ts.Node): boolean {
+function alwaysReaches(decl: ts.VariableDeclaration, assertion: ts.Node): boolean {
   const declStatement = enclosingStatement(decl);
   const assertStatement = enclosingStatement(assertion);
   if (!declStatement || !assertStatement) return false;
-  if (declStatement.parent !== assertStatement.parent) return false;
-  // 宣言より後に置かれていること。 前にある assertion は別の値を見ている。
-  return assertStatement.getStart() > declStatement.getStart();
+
+  const parent = declStatement.parent;
+  if (assertStatement.parent !== parent) return false;
+  if (!ts.isBlock(parent) && !ts.isSourceFile(parent) && !ts.isCaseClause(parent)) return false;
+
+  const statements: ts.NodeArray<ts.Statement> = parent.statements;
+  const declIndex = statements.indexOf(declStatement);
+  const assertIndex = statements.indexOf(assertStatement);
+  // 宣言より前の assertion は別の値を見ている。
+  if (declIndex < 0 || assertIndex <= declIndex) return false;
+
+  // 間に制御を逸らす statement があれば、assertion に届かない実行経路がある。
+  // `if (skip) return;` は同じ block に並ぶが、skip が真なら assertion は実行されない。
+  for (let index = declIndex + 1; index < assertIndex; index += 1) {
+    if (divertsControl(statements[index]!)) return false;
+  }
+  return true;
+}
+
+/** その statement が実行を先へ進めない可能性を持つか (return / throw / break / continue)。 */
+function divertsControl(statement: ts.Statement): boolean {
+  let diverts = false;
+  const scan = (node: ts.Node): void => {
+    if (diverts) return;
+    // 入れ子の関数の中の return は、この statement list の制御を逸らさない。
+    if (node !== statement && ts.isFunctionLike(node)) return;
+    if (
+      ts.isReturnStatement(node) ||
+      ts.isThrowStatement(node) ||
+      ts.isBreakStatement(node) ||
+      ts.isContinueStatement(node)
+    ) {
+      diverts = true;
+      return;
+    }
+    node.forEachChild(scan);
+  };
+  scan(statement);
+  return diverts;
 }
 
 /** その node を含む最も内側の statement を返す。 */
@@ -365,7 +417,7 @@ export function findDiscardedVerdict(source: string, fileName = 'x.perf.ts'): st
     // 書いてあることと実行されることは別。 `if (false)` の中や、呼ばれない closure、
     // early return の後に置いた assertion は、あっても判定しない。 宣言と同じ
     // statement list に並んでいることを求める (条件分岐を挟んだ形は落とす)。
-    if (!inSameStatementList(parent, verdict)) {
+    if (!alwaysReaches(parent, verdict)) {
       problems.push(`L${line}: ${parent.name.text}.allPassed の検証が同じ実行経路にない`);
     }
   });
@@ -440,25 +492,28 @@ function readObjectProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Ob
 }
 
 function readProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Expression | null {
-  // spread は後続で上書きし得る。 computed key と accessor / method は静的に
-  // 決まらない。 どれも「書いてある property が実際の値」 の前提を壊すので、
-  // 1 つでもあれば読まない。
-  const opaque = obj.properties.some(
-    (p) =>
-      ts.isSpreadAssignment(p) ||
-      ts.isGetAccessorDeclaration(p) ||
-      ts.isSetAccessorDeclaration(p) ||
-      ts.isMethodDeclaration(p) ||
-      (p.name !== undefined && ts.isComputedPropertyName(p.name)),
-  );
-  if (opaque) return null;
-  const matches = obj.properties.filter(
-    (p): p is ts.PropertyAssignment =>
-      ts.isPropertyAssignment(p) &&
-      (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)) &&
-      p.name.text === key,
-  );
+  const isOpaque = (p: ts.ObjectLiteralElementLike): boolean =>
+    ts.isSpreadAssignment(p) ||
+    ts.isGetAccessorDeclaration(p) ||
+    ts.isSetAccessorDeclaration(p) ||
+    ts.isMethodDeclaration(p) ||
+    (p.name !== undefined && ts.isComputedPropertyName(p.name));
+
+  const isTarget = (p: ts.ObjectLiteralElementLike): p is ts.PropertyAssignment =>
+    ts.isPropertyAssignment(p) &&
+    (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)) &&
+    p.name.text === key;
+
+  const matches = obj.properties.filter(isTarget);
   if (matches.length !== 1) return null;
+
+  // object literal は後ろが勝つ。 対象より後ろに spread や computed key があると
+  // 実際の値が変わり得るので読まない。 前にあるぶんには上書きされるだけなので通す
+  // (`{ ...defaults, requireGc: true }` は妥当な書き方)。
+  const at = obj.properties.indexOf(matches[0]!);
+  for (let index = at + 1; index < obj.properties.length; index += 1) {
+    if (isOpaque(obj.properties[index]!)) return null;
+  }
   return matches[0]!.initializer;
 }
 
@@ -471,11 +526,11 @@ function readProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Expressi
  */
 export function findMissingRequireGc(source: string, fileName = 'x.perf.ts'): string | null {
   const sf = parse(source, fileName);
-  const aliases = measureAliases(sf);
+  const aliases = measureAliases(sf, MEASURE_FNS_ALL);
   const problems: string[] = [];
 
   eachNode(sf, (node) => {
-    if (!ts.isCallExpression(node) || !isMeasureCall(node, aliases)) return;
+    if (!ts.isCallExpression(node) || !isMeasureCall(node, aliases, MEASURE_FNS_ALL)) return;
     const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
     const [rawArg] = node.arguments;
     if (!rawArg) {
@@ -673,6 +728,29 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
          expect(r.allPassed).toBe(true);
          const r = await runPerf3Layer({});`,
       ],
+      [
+        '同じ block だが間に early return がある',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         if (skip) return;
+         expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        '間に throw がある',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         if (bad) throw new Error('x');
+         expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        'loop の中で continue を挟む',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         for (const c of cases) {
+           const r = await runPerf3Layer({});
+           if (c.skip) continue;
+           expect(r.allPassed).toBe(true);
+         }`,
+      ],
     ];
     for (const [label, source] of cases) {
       const body = source.includes('import ') ? source : IMPORT + source;
@@ -825,6 +903,15 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
       ['false を渡す', IMP + `const r = await runPerf3Layer({ requireGc: false }); expect(r.allPassed).toBe(true);`],
       ['変数経由で渡す', IMP + `const r = await runPerf3Layer({ requireGc: flag }); expect(r.allPassed).toBe(true);`],
       ['引数が object でない', IMP + `const r = await runPerf3Layer(opts); expect(r.allPassed).toBe(true);`],
+      [
+        '後ろの spread で上書きされ得る',
+        IMP + `const r = await runPerf3Layer({ requireGc: true, ...overrides }); expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        'live 呼出で指定なし',
+        `import { runPerf3LayerLive } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3LayerLive({ moduleName: 'm' });`,
+      ],
     ];
     for (const [label, source] of cases) {
       expect(findMissingRequireGc(source), label).not.toBeNull();
@@ -832,11 +919,42 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
   });
 
   it('requireGc を渡している呼出は通す', () => {
-    const source =
-      `import { runPerf3Layer } from '@kiwa-lab/perf-harness';\n` +
-      `const r = await runPerf3Layer({ moduleName: 'm', requireGc: true });
-       expect(r.allPassed).toBe(true);`;
-    expect(findMissingRequireGc(source)).toBeNull();
+    const cases: Array<[string, string]> = [
+      [
+        '素直な形',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({ moduleName: 'm', requireGc: true });
+         expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        '前の spread は後ろの明示が勝つので通す',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({ ...defaults, requireGc: true });
+         expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        'live 呼出でも指定していれば通す',
+        `import { runPerf3LayerLive } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3LayerLive({ moduleName: 'm', requireGc: true });`,
+      ],
+    ];
+    for (const [label, source] of cases) {
+      expect(findMissingRequireGc(source), label).toBeNull();
+    }
+  });
+
+  it('live 呼出は allPassed の検証を要求しない', () => {
+    // live は env が無ければ全 op が skip される。 その状態を anySkipped で
+    // 確かめるのが正しい形で、allPassed を無条件に要求すると env のある環境で
+    // しか通らない test になる。
+    const source = `import { runPerf3LayerLive } from '@kiwa-lab/perf-harness';
+      const result = await runPerf3LayerLive({ moduleName: 'm', requireGc: true });
+      if (result.outcomes.filter((o) => !o.skipped).length > 0) {
+        expect(result.allPassed).toBe(true);
+      } else {
+        expect(result.anySkipped).toBe(true);
+      }`;
+    expect(findDiscardedVerdict(source)).toBeNull();
   });
 
   it('GC を呼べる config は通す', () => {

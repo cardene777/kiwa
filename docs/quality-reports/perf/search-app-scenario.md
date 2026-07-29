@@ -2,31 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00042ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00049ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| index_build (100 docs addDocuments + 10 search) | 0.29ms | 1.20ms | 100ms | 0.00042ms | PASS | stable (p10 +16% (閾値未満)、 p95 +126% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| search_heavy_workload (50 docs + 50 search) | 0.69ms | 1.00ms | 100ms | 0.00042ms | PASS | stable (p10 +13% (閾値未満)、 p95 +29% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| filter_search_cycle (20 docs + 20 filtered search) | 0.09ms | 0.17ms | 80ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| index_build (100 docs addDocuments + 10 search) | 0.26ms | 0.51ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| search_heavy_workload (50 docs + 50 search) | 0.62ms | 0.72ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| filter_search_cycle (20 docs + 20 filtered search) | 0.18ms | 0.31ms | 80ms | 0.00049ms | PASS | stable (p10 +71% (閾値未満)、 p95 +54% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| index_build (100 docs addDocuments + 10 search) | 1.31ms | 200ms | PASS |
-| search_heavy_workload (50 docs + 50 search) | 7.20ms | 200ms | PASS |
-| filter_search_cycle (20 docs + 20 filtered search) | 0.47ms | 160ms | PASS |
+| index_build (100 docs addDocuments + 10 search) | 1.22ms | 200ms | PASS |
+| search_heavy_workload (50 docs + 50 search) | 2.76ms | 200ms | PASS |
+| filter_search_cycle (20 docs + 20 filtered search) | 0.48ms | 160ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| index_build (100 docs addDocuments + 10 search) | -5728 B | 0 B | 102400 B | yes | PASS |
-| search_heavy_workload (50 docs + 50 search) | -17976 B | 0 B | 102400 B | yes | PASS |
-| filter_search_cycle (20 docs + 20 filtered search) | -7096 B | 0 B | 102400 B | yes | PASS |
+| index_build (100 docs addDocuments + 10 search) | -5360 B | 0 B | 102400 B | yes | PASS |
+| search_heavy_workload (50 docs + 50 search) | -6912 B | 0 B | 102400 B | yes | PASS |
+| filter_search_cycle (20 docs + 20 filtered search) | -17112 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.29ms |
-| p50 | 0.51ms |
-| p95 | 1.20ms |
-| p99 | 1.37ms |
-| mean | 0.57ms |
-| stdev | 0.32ms |
-| min | 0.28ms |
-| max | 1.42ms |
-| total | 11.49ms |
+| p10 | 0.26ms |
+| p50 | 0.34ms |
+| p95 | 0.51ms |
+| p99 | 0.63ms |
+| mean | 0.36ms |
+| stdev | 0.10ms |
+| min | 0.26ms |
+| max | 0.66ms |
+| total | 7.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.29ms | 0.25ms | +0.04ms | +16.35% |
-| p50 | 0.51ms | 0.31ms | +0.20ms | +63.81% |
-| p95 | 1.20ms | 0.53ms | +0.67ms | +126.27% |
-| p99 | 1.37ms | 0.63ms | +0.74ms | +118.48% |
-| mean | 0.57ms | 0.35ms | +0.22ms | +62.39% |
-| min | 0.28ms | 0.25ms | +0.03ms | +12.29% |
-| max | 1.42ms | 0.65ms | +0.76ms | +116.90% |
-| total | 11.49ms | 7.07ms | +4.41ms | +62.39% |
+| p10 | 0.26ms | 0.25ms | +0.0091ms | +3.62% |
+| p50 | 0.34ms | 0.31ms | +0.03ms | +10.46% |
+| p95 | 0.51ms | 0.53ms | -0.01ms | -2.56% |
+| p99 | 0.63ms | 0.63ms | +0.0056ms | +0.88% |
+| mean | 0.36ms | 0.35ms | +0.0033ms | +0.94% |
+| min | 0.26ms | 0.25ms | +0.0044ms | +1.75% |
+| max | 0.66ms | 0.65ms | +0.01ms | +1.58% |
+| total | 7.14ms | 7.07ms | +0.07ms | +0.94% |
 
 ### search_heavy_workload (50 docs + 50 search)
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.69ms |
-| p50 | 0.86ms |
-| p95 | 1.00ms |
-| p99 | 1.03ms |
-| mean | 0.85ms |
-| stdev | 0.13ms |
-| min | 0.68ms |
-| max | 1.03ms |
-| total | 16.96ms |
+| p10 | 0.62ms |
+| p50 | 0.66ms |
+| p95 | 0.72ms |
+| p99 | 0.73ms |
+| mean | 0.66ms |
+| stdev | 0.03ms |
+| min | 0.62ms |
+| max | 0.73ms |
+| total | 13.20ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.69ms | 0.61ms | +0.08ms | +12.82% |
-| p50 | 0.86ms | 0.65ms | +0.20ms | +31.12% |
-| p95 | 1.00ms | 0.77ms | +0.23ms | +29.30% |
-| p99 | 1.03ms | 1.21ms | -0.18ms | -14.81% |
-| mean | 0.85ms | 0.68ms | +0.17ms | +24.43% |
-| min | 0.68ms | 0.61ms | +0.08ms | +12.47% |
-| max | 1.03ms | 1.31ms | -0.28ms | -21.30% |
-| total | 16.96ms | 13.63ms | +3.33ms | +24.43% |
+| p10 | 0.62ms | 0.61ms | +0.0098ms | +1.60% |
+| p50 | 0.66ms | 0.65ms | +0.0028ms | +0.43% |
+| p95 | 0.72ms | 0.77ms | -0.05ms | -6.64% |
+| p99 | 0.73ms | 1.21ms | -0.47ms | -39.26% |
+| mean | 0.66ms | 0.68ms | -0.02ms | -3.17% |
+| min | 0.62ms | 0.61ms | +0.0073ms | +1.20% |
+| max | 0.73ms | 1.31ms | -0.58ms | -44.06% |
+| total | 13.20ms | 13.63ms | -0.43ms | -3.17% |
 
 ### filter_search_cycle (20 docs + 20 filtered search)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.09ms |
-| p50 | 0.10ms |
-| p95 | 0.17ms |
-| p99 | 0.23ms |
-| mean | 0.11ms |
-| stdev | 0.04ms |
-| min | 0.09ms |
-| max | 0.25ms |
-| total | 2.23ms |
+| p10 | 0.18ms |
+| p50 | 0.19ms |
+| p95 | 0.31ms |
+| p99 | 0.69ms |
+| mean | 0.22ms |
+| stdev | 0.14ms |
+| min | 0.11ms |
+| max | 0.79ms |
+| total | 4.39ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.09ms | 0.10ms | -0.01ms | -13.52% |
-| p50 | 0.10ms | 0.18ms | -0.08ms | -42.64% |
-| p95 | 0.17ms | 0.20ms | -0.04ms | -17.61% |
-| p99 | 0.23ms | 0.29ms | -0.05ms | -18.45% |
-| mean | 0.11ms | 0.16ms | -0.05ms | -31.14% |
-| min | 0.09ms | 0.10ms | -0.01ms | -12.53% |
-| max | 0.25ms | 0.31ms | -0.06ms | -18.59% |
-| total | 2.23ms | 3.23ms | -1.01ms | -31.14% |
+| p10 | 0.18ms | 0.10ms | +0.07ms | +70.91% |
+| p50 | 0.19ms | 0.18ms | +0.0089ms | +5.05% |
+| p95 | 0.31ms | 0.20ms | +0.11ms | +53.81% |
+| p99 | 0.69ms | 0.29ms | +0.41ms | +142.06% |
+| mean | 0.22ms | 0.16ms | +0.06ms | +35.89% |
+| min | 0.11ms | 0.10ms | +0.0040ms | +3.98% |
+| max | 0.79ms | 0.31ms | +0.48ms | +156.72% |
+| total | 4.39ms | 3.23ms | +1.16ms | +35.89% |
 
