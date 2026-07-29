@@ -107,7 +107,8 @@ function accessPath(node: ts.Expression): string | null {
     if (ts.isElementAccessExpression(current)) {
       const arg = unwrap(current.argumentExpression);
       // 静的に決まらない添字は追えないので、呼出全体を不明として扱う。
-      if (!ts.isStringLiteral(arg)) return null;
+      // template literal も静的なら同じ (`perf[`runPerf3Layer`]` で抜けさせない)。
+      if (!ts.isStringLiteralLike(arg)) return null;
       parts.unshift(arg.text);
       current = unwrap(current.expression);
       continue;
@@ -124,24 +125,64 @@ function accessPath(node: ts.Expression): string | null {
  *
  * 名前の一致だけで対応付けると、別々の `it()` で同じ `r` を使っている時に、
  * 片方の検証がもう片方を通してしまう。 宣言 node 自体を鍵にする。
+ *
+ * 変数宣言以外の binding (引数 / catch / 関数宣言) も名前として数える。 内側で
+ * 同名の引数に影を作られると、外側の未検証の変数が検証済みに見えるため。
+ * 最も近い binding が変数宣言でなければ null を返す (fail-close)。
  */
 function resolveDeclaration(from: ts.Node, name: string): ts.VariableDeclaration | null {
   for (let scope: ts.Node | undefined = from; scope; scope = scope.parent) {
-    let found: ts.VariableDeclaration | null = null;
+    let hit: ts.Node | null = null;
     const scan = (node: ts.Node): void => {
-      if (found) return;
-      // 別 scope に降りない。 そこの宣言はここからは見えない。
+      if (hit) return;
+      // 別 scope に降りない。 そこの binding はここからは見えない。
       if (node !== scope && (ts.isFunctionLike(node) || ts.isBlock(node))) return;
-      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === name) {
-        found = node;
+      if (bindsName(node, name)) {
+        hit = node;
         return;
       }
       node.forEachChild(scan);
     };
-    scan(scope);
-    if (found) return found;
+    // 関数 scope では引数も同じ scope の binding として見る。
+    if (ts.isFunctionLike(scope)) {
+      for (const param of scope.parameters) {
+        if (bindsName(param, name)) {
+          hit = param;
+          break;
+        }
+      }
+    }
+    if (!hit) scan(scope);
+    if (hit) return ts.isVariableDeclaration(hit) ? hit : null;
   }
   return null;
+}
+
+/** その node が `name` を束縛するかを返す。 分割代入の要素まで見る。 */
+function bindsName(node: ts.Node, name: string): boolean {
+  if (
+    ts.isVariableDeclaration(node) ||
+    ts.isParameter(node) ||
+    ts.isBindingElement(node)
+  ) {
+    return declaresName(node.name, name);
+  }
+  if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {
+    return node.name?.text === name;
+  }
+  if (ts.isCatchClause(node) && node.variableDeclaration) {
+    return declaresName(node.variableDeclaration.name, name);
+  }
+  return false;
+}
+
+function declaresName(binding: ts.BindingName, name: string): boolean {
+  if (ts.isIdentifier(binding)) return binding.text === name;
+  // 分割代入は「束縛はしているが変数宣言として辿れない」 ので、名前が一致すれば
+  // hit させて fail-close に落とす。
+  return binding.elements.some(
+    (el) => ts.isBindingElement(el) && declaresName(el.name, name),
+  );
 }
 
 /** 測定関数の名前。 これを import しているか否かが検査の入口になる。 */
@@ -280,10 +321,16 @@ export function findDiscardedVerdict(source: string, fileName = 'x.perf.ts'): st
  * その中身は追えないまま合格する。 import しているものだけを認める。
  * 別名 import (`defineConfig as define`) は名前を変えただけなので認める。
  */
+const CONFIG_MODULES = new Set(['vitest/config', 'vite', 'vitest/node']);
+
 function defineConfigAliases(sf: ts.SourceFile): Set<string> {
   const names = new Set<string>();
   eachNode(sf, (node) => {
     if (!ts.isImportDeclaration(node)) return;
+    // import 元まで見る。 名前が `defineConfig` の何かを別 module から持ってきて
+    // 設定を書き換える wrapper は、中身を追えないまま合格してしまう。
+    const from = node.moduleSpecifier;
+    if (!ts.isStringLiteral(from) || !CONFIG_MODULES.has(from.text)) return;
     const bindings = node.importClause?.namedBindings;
     if (!bindings || !ts.isNamedImports(bindings)) return;
     for (const el of bindings.elements) {
@@ -478,6 +525,23 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
         `import * as perf from '@kiwa-lab/perf-harness';
          await perf['runPerf3Layer']({});`,
       ],
+      [
+        'namespace を template literal で呼ぶ',
+        'import * as perf from \'@kiwa-lab/perf-harness\';\n' +
+          'await perf[`runPerf3Layer`]({});',
+      ],
+      [
+        '内側の引数で同名の影を作る',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         helper((r) => { expect(r.allPassed).toBe(true); });`,
+      ],
+      [
+        '内側の分割代入で同名の影を作る',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         it('x', () => { const { r } = other; expect(r.allPassed).toBe(true); });`,
+      ],
     ];
     for (const [label, source] of cases) {
       const body = source.includes('import ') ? source : IMPORT + source;
@@ -606,6 +670,14 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
         IMP + `export default defineConfig({ test: {
            pool: 'forks',
            ['pool']: 'threads',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });`,
+      ],
+      [
+        '別 module から同名を import する',
+        `import { defineConfig } from './opaque-wrapper';
+         export default defineConfig({ test: {
+           pool: 'forks',
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
          } });`,
       ],
