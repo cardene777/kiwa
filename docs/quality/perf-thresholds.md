@@ -293,14 +293,16 @@ Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'f
 
 | what is retained | `arrayBuffers` |
 |---|---|
-| nothing | 0 B |
-| a `Buffer` | 153,600 B — caught |
-| an `ArrayBuffer` | 153,600 B — caught |
-| a `Uint8Array` | 153,600 B — caught |
-| a JS array of numbers | 0 B — **passes the gate** |
-| entries in a `Map` | 0 B — **passes the gate** |
+| nothing | ~0 B |
+| a `Buffer` | ~153,600 B — caught |
+| an `ArrayBuffer` | ~153,600 B — caught |
+| a `Uint8Array` | ~153,600 B — caught |
+| a JS array of numbers | ~0 B — **passes the gate** |
+| entries in a `Map` | ~0 B — **passes the gate** |
 
-Those figures are stable: two consecutive runs of the script give the same six values. The script also prints `heapUsed`, and that column is not reproducible in the same way — across the same two runs the `nothing` row moved from -3,392 B to -245,240 B. Only the `arrayBuffers` column is load-bearing here, which is why the table shows it alone.
+The rows are separated by five orders of magnitude, which is what makes the split legible. The values are not exact — across four runs of the script each row varies by up to 36 B (an occasional -36 B where 0 B is expected, 153,564 B where 153,600 B is). Against a 150 KB signal that is noise, and against the 100 KB cap it is irrelevant; it is mentioned so the table is not read as more precise than it is.
+
+The script also prints `heapUsed`. That column does not behave this way at all: across the same runs the `nothing` row ranged from -3,392 B to -254,520 B, and `arraybuffer` from 2,472 B to -244,720 B — swings larger than the cap, on rows that retain nothing or retain something the other axis already catches. Only `arrayBuffers` is load-bearing here, which is why the table shows it alone.
 
 So the gate covers the whole `ArrayBuffer` family and is blind to ordinary JS-heap retention — which is the shape most "unbounded internal Map" bugs actually take. `tests/three-layer-strict.test.ts` pins that blindness with an explicit assertion rather than leaving it implied.
 
