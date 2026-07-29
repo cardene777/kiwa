@@ -8,8 +8,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| invokeEventHandler | 0.00088ms | 0.0030ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| invokeRouteMiddleware | 0.00063ms | 0.0011ms | 5ms | 0.00033ms | PASS | stable (p10 -6% (閾値未満)、 p95 +22% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| invokeEventHandler | 0.00088ms | 0.0027ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| invokeRouteMiddleware | 0.00063ms | 0.00084ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeEventHandler | -23792 B | 0 B | 102400 B | yes | PASS |
-| invokeRouteMiddleware | 344 B | 0 B | 102400 B | yes | PASS |
+| invokeEventHandler | -17456 B | 0 B | 102400 B | yes | PASS |
+| invokeRouteMiddleware | -56 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,13 +37,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00088ms |
 | p50 | 0.00096ms |
-| p95 | 0.0030ms |
+| p95 | 0.0027ms |
 | p99 | 0.01ms |
 | mean | 0.0015ms |
-| stdev | 0.0019ms |
+| stdev | 0.0027ms |
 | min | 0.00083ms |
-| max | 0.02ms |
-| total | 0.30ms |
+| max | 0.03ms |
+| total | 0.31ms |
 
 ## Baseline diff
 
@@ -51,12 +51,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|---|
 | p10 | 0.00088ms | 0.00096ms | -0.000084ms | -8.76% |
 | p50 | 0.00096ms | 0.0013ms | -0.00038ms | -28.13% |
-| p95 | 0.0030ms | 0.0033ms | -0.00033ms | -9.94% |
-| p99 | 0.01ms | 0.01ms | +0.00010ms | +0.89% |
-| mean | 0.0015ms | 0.0017ms | -0.00014ms | -8.65% |
-| min | 0.00083ms | 0.00096ms | -0.00013ms | -13.05% |
-| max | 0.02ms | 0.02ms | -0.00012ms | -0.73% |
-| total | 0.30ms | 0.33ms | -0.03ms | -8.65% |
+| p95 | 0.0027ms | 0.0033ms | -0.00068ms | -20.31% |
+| p99 | 0.01ms | 0.01ms | +0.0014ms | +12.10% |
+| mean | 0.0015ms | 0.0017ms | -0.00010ms | -6.22% |
+| min | 0.00083ms | 0.00096ms | -0.00012ms | -12.94% |
+| max | 0.03ms | 0.02ms | +0.0082ms | +48.28% |
+| total | 0.31ms | 0.33ms | -0.02ms | -6.22% |
 
 ### invokeRouteMiddleware
 
@@ -68,12 +68,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00063ms |
 | p50 | 0.00067ms |
-| p95 | 0.0011ms |
-| p99 | 0.0029ms |
+| p95 | 0.00084ms |
+| p99 | 0.0035ms |
 | mean | 0.00077ms |
-| stdev | 0.00055ms |
+| stdev | 0.00056ms |
 | min | 0.00063ms |
-| max | 0.0056ms |
+| max | 0.0053ms |
 | total | 0.15ms |
 
 ## Baseline diff
@@ -82,10 +82,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|---|
 | p10 | 0.00063ms | 0.00067ms | -0.000042ms | -6.30% |
 | p50 | 0.00067ms | 0.00071ms | -0.000042ms | -5.93% |
-| p95 | 0.0011ms | 0.00092ms | +0.00021ms | +22.41% |
-| p99 | 0.0029ms | 0.0029ms | +0.0000042ms | +0.14% |
-| mean | 0.00077ms | 0.00081ms | -0.000037ms | -4.57% |
+| p95 | 0.00084ms | 0.00092ms | -0.000076ms | -8.23% |
+| p99 | 0.0035ms | 0.0029ms | +0.00058ms | +20.12% |
+| mean | 0.00077ms | 0.00081ms | -0.000043ms | -5.34% |
 | min | 0.00063ms | 0.00063ms | 0.00ms | 0.00% |
-| max | 0.0056ms | 0.0056ms | 0.00ms | 0.00% |
-| total | 0.15ms | 0.16ms | -0.0074ms | -4.57% |
+| max | 0.0053ms | 0.0056ms | -0.00037ms | -6.67% |
+| total | 0.15ms | 0.16ms | -0.0086ms | -5.34% |
 

@@ -2,31 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00049ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| producer_burst (20 addJob + process + drain) | 4.63ms | 5.83ms | 200ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
-| consumer_processing_with_return (5 addJob + assertProcessed) | 26.23ms | 28.61ms | 200ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
-| error_retry_cycle (fail 3 job + assertFailed) | 16.05ms | 17.40ms | 200ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| producer_burst (20 addJob + process + drain) | 4.63ms | 5.84ms | 200ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| consumer_processing_with_return (5 addJob + assertProcessed) | 27.08ms | 28.81ms | 200ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| error_retry_cycle (fail 3 job + assertFailed) | 16.24ms | 29.66ms | 200ms | 0.00050ms | PASS | stable (p10 +2% (閾値未満)、 p95 +65% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| producer_burst (20 addJob + process + drain) | 5.88ms | 400ms | PASS |
-| consumer_processing_with_return (5 addJob + assertProcessed) | 28.58ms | 400ms | PASS |
-| error_retry_cycle (fail 3 job + assertFailed) | 17.85ms | 400ms | PASS |
+| producer_burst (20 addJob + process + drain) | 5.90ms | 400ms | PASS |
+| consumer_processing_with_return (5 addJob + assertProcessed) | 32.00ms | 400ms | PASS |
+| error_retry_cycle (fail 3 job + assertFailed) | 18.00ms | 400ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| producer_burst (20 addJob + process + drain) | -15016 B | 0 B | 102400 B | yes | PASS |
-| consumer_processing_with_return (5 addJob + assertProcessed) | 4000 B | 0 B | 102400 B | yes | PASS |
-| error_retry_cycle (fail 3 job + assertFailed) | -240 B | 0 B | 102400 B | yes | PASS |
+| producer_burst (20 addJob + process + drain) | -14992 B | 0 B | 102400 B | yes | PASS |
+| consumer_processing_with_return (5 addJob + assertProcessed) | 3616 B | 0 B | 102400 B | yes | PASS |
+| error_retry_cycle (fail 3 job + assertFailed) | -320 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -39,27 +39,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p10 | 4.63ms |
-| p50 | 5.73ms |
-| p95 | 5.83ms |
-| p99 | 5.84ms |
-| mean | 5.46ms |
-| stdev | 0.50ms |
-| min | 4.58ms |
-| max | 5.84ms |
-| total | 109.26ms |
+| p50 | 5.78ms |
+| p95 | 5.84ms |
+| p99 | 5.85ms |
+| mean | 5.53ms |
+| stdev | 0.53ms |
+| min | 4.32ms |
+| max | 5.85ms |
+| total | 110.53ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 4.63ms | 5.03ms | -0.40ms | -7.91% |
-| p50 | 5.73ms | 5.82ms | -0.09ms | -1.62% |
-| p95 | 5.83ms | 9.66ms | -3.82ms | -39.60% |
-| p99 | 5.84ms | 9.95ms | -4.11ms | -41.29% |
-| mean | 5.46ms | 6.09ms | -0.62ms | -10.24% |
-| min | 4.58ms | 4.59ms | -0.0096ms | -0.21% |
-| max | 5.84ms | 10.02ms | -4.18ms | -41.69% |
-| total | 109.26ms | 121.73ms | -12.47ms | -10.24% |
+| p10 | 4.63ms | 5.03ms | -0.40ms | -7.86% |
+| p50 | 5.78ms | 5.82ms | -0.04ms | -0.70% |
+| p95 | 5.84ms | 9.66ms | -3.82ms | -39.55% |
+| p99 | 5.85ms | 9.95ms | -4.10ms | -41.23% |
+| mean | 5.53ms | 6.09ms | -0.56ms | -9.20% |
+| min | 4.32ms | 4.59ms | -0.27ms | -5.90% |
+| max | 5.85ms | 10.02ms | -4.17ms | -41.63% |
+| total | 110.53ms | 121.73ms | -11.20ms | -9.20% |
 
 ### consumer_processing_with_return (5 addJob + assertProcessed)
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 26.23ms |
-| p50 | 27.48ms |
-| p95 | 28.61ms |
-| p99 | 28.94ms |
-| mean | 27.35ms |
-| stdev | 0.87ms |
-| min | 25.97ms |
-| max | 29.02ms |
-| total | 546.90ms |
+| p10 | 27.08ms |
+| p50 | 27.70ms |
+| p95 | 28.81ms |
+| p99 | 28.88ms |
+| mean | 27.82ms |
+| stdev | 0.66ms |
+| min | 26.51ms |
+| max | 28.90ms |
+| total | 556.44ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 26.23ms | 26.36ms | -0.13ms | -0.51% |
-| p50 | 27.48ms | 27.80ms | -0.32ms | -1.15% |
-| p95 | 28.61ms | 31.81ms | -3.20ms | -10.07% |
-| p99 | 28.94ms | 33.49ms | -4.56ms | -13.60% |
-| mean | 27.35ms | 28.55ms | -1.20ms | -4.21% |
-| min | 25.97ms | 26.24ms | -0.27ms | -1.05% |
-| max | 29.02ms | 33.91ms | -4.89ms | -14.43% |
-| total | 546.90ms | 570.96ms | -24.06ms | -4.21% |
+| p10 | 27.08ms | 26.36ms | +0.72ms | +2.74% |
+| p50 | 27.70ms | 27.80ms | -0.10ms | -0.37% |
+| p95 | 28.81ms | 31.81ms | -3.01ms | -9.45% |
+| p99 | 28.88ms | 33.49ms | -4.61ms | -13.78% |
+| mean | 27.82ms | 28.55ms | -0.73ms | -2.54% |
+| min | 26.51ms | 26.24ms | +0.27ms | +1.03% |
+| max | 28.90ms | 33.91ms | -5.02ms | -14.79% |
+| total | 556.44ms | 570.96ms | -14.52ms | -2.54% |
 
 ### error_retry_cycle (fail 3 job + assertFailed)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 16.05ms |
-| p50 | 16.56ms |
-| p95 | 17.40ms |
-| p99 | 18.44ms |
-| mean | 16.61ms |
-| stdev | 0.82ms |
-| min | 14.54ms |
-| max | 18.70ms |
-| total | 332.24ms |
+| p10 | 16.24ms |
+| p50 | 18.39ms |
+| p95 | 29.66ms |
+| p99 | 52.15ms |
+| mean | 20.71ms |
+| stdev | 9.16ms |
+| min | 15.12ms |
+| max | 57.77ms |
+| total | 414.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 16.05ms | 15.89ms | +0.16ms | +0.98% |
-| p50 | 16.56ms | 16.40ms | +0.16ms | +0.97% |
-| p95 | 17.40ms | 18.01ms | -0.61ms | -3.37% |
-| p99 | 18.44ms | 18.54ms | -0.10ms | -0.54% |
-| mean | 16.61ms | 16.69ms | -0.08ms | -0.47% |
-| min | 14.54ms | 15.48ms | -0.95ms | -6.12% |
-| max | 18.70ms | 18.67ms | +0.03ms | +0.14% |
-| total | 332.24ms | 333.82ms | -1.58ms | -0.47% |
+| p10 | 16.24ms | 15.89ms | +0.35ms | +2.23% |
+| p50 | 18.39ms | 16.40ms | +1.99ms | +12.13% |
+| p95 | 29.66ms | 18.01ms | +11.66ms | +64.74% |
+| p99 | 52.15ms | 18.54ms | +33.61ms | +181.31% |
+| mean | 20.71ms | 16.69ms | +4.01ms | +24.05% |
+| min | 15.12ms | 15.48ms | -0.36ms | -2.34% |
+| max | 57.77ms | 18.67ms | +39.10ms | +209.41% |
+| total | 414.12ms | 333.82ms | +80.30ms | +24.05% |
 

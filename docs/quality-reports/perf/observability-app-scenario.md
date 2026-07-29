@@ -8,25 +8,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| flaky_detect_burst (50 test × 10 run history detect) | 0.03ms | 0.07ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| large_history_detect (200 test × 5 run) | 0.06ms | 0.08ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| threshold_varying_workload (10 different threshold) | 0.04ms | 0.05ms | 100ms | 0.00042ms | PASS | improved — gate 無効 (regressionGate=false) |
+| flaky_detect_burst (50 test × 10 run history detect) | 0.03ms | 0.08ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| large_history_detect (200 test × 5 run) | 0.07ms | 0.08ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| threshold_varying_workload (10 different threshold) | 0.04ms | 0.06ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| flaky_detect_burst (50 test × 10 run history detect) | 0.16ms | 200ms | PASS |
-| large_history_detect (200 test × 5 run) | 0.37ms | 200ms | PASS |
-| threshold_varying_workload (10 different threshold) | 0.22ms | 200ms | PASS |
+| flaky_detect_burst (50 test × 10 run history detect) | 0.17ms | 200ms | PASS |
+| large_history_detect (200 test × 5 run) | 0.65ms | 200ms | PASS |
+| threshold_varying_workload (10 different threshold) | 0.32ms | 200ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| flaky_detect_burst (50 test × 10 run history detect) | -6368 B | 0 B | 102400 B | yes | PASS |
-| large_history_detect (200 test × 5 run) | 6032 B | 0 B | 102400 B | yes | PASS |
-| threshold_varying_workload (10 different threshold) | 688 B | 0 B | 102400 B | yes | PASS |
+| flaky_detect_burst (50 test × 10 run history detect) | -6992 B | 0 B | 102400 B | yes | PASS |
+| large_history_detect (200 test × 5 run) | 6864 B | 0 B | 102400 B | yes | PASS |
+| threshold_varying_workload (10 different threshold) | 768 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -40,26 +40,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p10 | 0.03ms |
 | p50 | 0.04ms |
-| p95 | 0.07ms |
-| p99 | 0.07ms |
+| p95 | 0.08ms |
+| p99 | 0.09ms |
 | mean | 0.05ms |
-| stdev | 0.01ms |
+| stdev | 0.02ms |
 | min | 0.03ms |
-| max | 0.07ms |
-| total | 1.39ms |
+| max | 0.10ms |
+| total | 1.48ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.03ms | 0.04ms | -0.0077ms | -18.69% |
-| p50 | 0.04ms | 0.06ms | -0.02ms | -38.72% |
-| p95 | 0.07ms | 0.11ms | -0.05ms | -41.11% |
-| p99 | 0.07ms | 0.17ms | -0.09ms | -55.86% |
-| mean | 0.05ms | 0.07ms | -0.02ms | -31.22% |
-| min | 0.03ms | 0.04ms | -0.0081ms | -20.10% |
-| max | 0.07ms | 0.18ms | -0.11ms | -59.44% |
-| total | 1.39ms | 2.02ms | -0.63ms | -31.22% |
+| p10 | 0.03ms | 0.04ms | -0.0064ms | -15.43% |
+| p50 | 0.04ms | 0.06ms | -0.02ms | -33.73% |
+| p95 | 0.08ms | 0.11ms | -0.04ms | -31.96% |
+| p99 | 0.09ms | 0.17ms | -0.07ms | -43.76% |
+| mean | 0.05ms | 0.07ms | -0.02ms | -26.78% |
+| min | 0.03ms | 0.04ms | -0.0060ms | -15.03% |
+| max | 0.10ms | 0.18ms | -0.08ms | -45.84% |
+| total | 1.48ms | 2.02ms | -0.54ms | -26.78% |
 
 ### large_history_detect (200 test × 5 run)
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.06ms |
+| p10 | 0.07ms |
 | p50 | 0.07ms |
 | p95 | 0.08ms |
-| p99 | 0.21ms |
-| mean | 0.07ms |
+| p99 | 0.25ms |
+| mean | 0.08ms |
 | stdev | 0.04ms |
 | min | 0.06ms |
-| max | 0.26ms |
-| total | 2.19ms |
+| max | 0.31ms |
+| total | 2.39ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.06ms | 0.08ms | -0.01ms | -19.27% |
-| p50 | 0.07ms | 0.10ms | -0.03ms | -31.61% |
-| p95 | 0.08ms | 0.31ms | -0.23ms | -74.71% |
-| p99 | 0.21ms | 0.49ms | -0.27ms | -56.50% |
-| mean | 0.07ms | 0.14ms | -0.07ms | -48.88% |
-| min | 0.06ms | 0.07ms | -0.01ms | -16.30% |
-| max | 0.26ms | 0.54ms | -0.27ms | -50.96% |
-| total | 2.19ms | 4.28ms | -2.09ms | -48.88% |
+| p10 | 0.07ms | 0.08ms | -0.01ms | -14.22% |
+| p50 | 0.07ms | 0.10ms | -0.02ms | -24.15% |
+| p95 | 0.08ms | 0.31ms | -0.23ms | -73.89% |
+| p99 | 0.25ms | 0.49ms | -0.24ms | -49.37% |
+| mean | 0.08ms | 0.14ms | -0.06ms | -44.08% |
+| min | 0.06ms | 0.07ms | -0.0093ms | -12.71% |
+| max | 0.31ms | 0.54ms | -0.22ms | -41.82% |
+| total | 2.39ms | 4.28ms | -1.89ms | -44.08% |
 
 ### threshold_varying_workload (10 different threshold)
 
@@ -101,25 +101,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 30 |
 | warmup | 5 |
 | p10 | 0.04ms |
-| p50 | 0.04ms |
-| p95 | 0.05ms |
-| p99 | 0.05ms |
-| mean | 0.04ms |
-| stdev | 0.0022ms |
+| p50 | 0.05ms |
+| p95 | 0.06ms |
+| p99 | 0.07ms |
+| mean | 0.05ms |
+| stdev | 0.0068ms |
 | min | 0.04ms |
-| max | 0.05ms |
-| total | 1.27ms |
+| max | 0.07ms |
+| total | 1.48ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.04ms | 0.05ms | -0.01ms | -20.95% |
-| p50 | 0.04ms | 0.06ms | -0.02ms | -26.89% |
-| p95 | 0.05ms | 0.16ms | -0.11ms | -70.69% |
-| p99 | 0.05ms | 0.28ms | -0.23ms | -82.79% |
-| mean | 0.04ms | 0.08ms | -0.04ms | -47.76% |
-| min | 0.04ms | 0.05ms | -0.01ms | -20.10% |
-| max | 0.05ms | 0.33ms | -0.28ms | -85.14% |
-| total | 1.27ms | 2.43ms | -1.16ms | -47.76% |
+| p10 | 0.04ms | 0.05ms | -0.0078ms | -15.17% |
+| p50 | 0.05ms | 0.06ms | -0.0085ms | -15.05% |
+| p95 | 0.06ms | 0.16ms | -0.10ms | -60.60% |
+| p99 | 0.07ms | 0.28ms | -0.21ms | -75.05% |
+| mean | 0.05ms | 0.08ms | -0.03ms | -39.05% |
+| min | 0.04ms | 0.05ms | -0.0075ms | -14.71% |
+| max | 0.07ms | 0.33ms | -0.25ms | -77.87% |
+| total | 1.48ms | 2.43ms | -0.95ms | -39.05% |
 
