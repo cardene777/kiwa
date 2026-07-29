@@ -158,7 +158,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(merged.results['added.serial']).toBeDefined();
   });
 
-  it('memory gate は Buffer の保持を検知する (#1719)', async () => {
+  it('memory gate は ArrayBuffer 系の保持を検知する (#1719)', async () => {
     const tmpDir = tempDir();
     const held: Buffer[] = [];
     const result = await runPerf3LayerStrict({
@@ -184,15 +184,14 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(result.outcomes[0]!.memory.arrayBuffersDeltaBytes).toBeGreaterThan(100 * 1024);
   });
 
-  it('JS object の保持は arrayBuffers に出ない (#1719 の未解決部分)', async () => {
-    // `arrayBuffers` は Buffer の実体だけを数える。 通常の object を保持しても
-    // 増えないため、この軸では JS heap 側の leak を検知できない。
+  it('JS heap 側の保持は arrayBuffers に出ない (#1719 の未解決部分)', async () => {
+    // `arrayBuffers` は ArrayBuffer の backing store を数える。 Buffer /
+    // ArrayBuffer / TypedArray はいずれも捉えるが、JS heap にだけ載る保持
+    // (配列 / Map / listener list) は増分に出ないため検知できない。
     //
-    // heapUsed を併用する案は実測により却下した。 実装無変更で全 177 package を
-    // 2 回測ると、492 op のうち 43 op で heapUsed の run 間変動が上限 100KB を
-    // 超える (`state::createStore` = -11,936 → 397,576 B 等)。 上限判定に使うと
-    // 実装と無関係に判定が入れ替わる。 詳細は
-    // docs/quality/perf-thresholds.md § Memory delta target。
+    // heapUsed を併用する案は実測により却下した。 数値と根拠は
+    // docs/quality/perf-thresholds.md § Memory delta target に置く
+    // (ここに写すと doc 側を直しても test 側が古いまま残る)。
     //
     // 「検知できない」 ことを test で固定する。 将来この assert が落ちたら、
     // 軸が変わったか V8 の会計が変わったかで、どちらも設計判断が要る。
@@ -218,11 +217,14 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       memoryIterations: 30,
     });
 
-    // heap には出る。
-    expect(result.outcomes[0]!.memory.heapUsedDeltaBytes).toBeGreaterThan(100 * 1024);
-    // arrayBuffers には出ないので、gate は通ってしまう。
+    // arrayBuffers には出ないので、gate は通ってしまう。 これが固定したい事実。
     expect(result.outcomes[0]!.memory.arrayBuffersDeltaBytes).toBeLessThan(100 * 1024);
     expect(result.outcomes[0]!.memoryGatePassed).toBe(true);
+
+    // heapUsed 側は assert しない。 この test で 5 回中 2 回、-4,071,968 B のような
+    // 負値が出た = GC のタイミング次第で測定区間の外の解放を拾う。 それこそが
+    // この軸を gate に載せられない理由なので、ここで依存すると自分の主張と
+    // 矛盾した不安定な test になる。
   });
 
   it('fails the memory gate when GC is required but unavailable', async () => {

@@ -277,7 +277,7 @@ Every mock target has a serial baseline (concurrency = 1) and a concurrent stres
 
 ## Memory delta target
 
-Every mock op is checked for retained-heap growth. Threshold: **< 100 KB retained across 200 iterations** (i.e. < 500 bytes / call on average). Anything higher signals an unbounded internal Map / array / listener list.
+Every mock op is checked for growth in retained `ArrayBuffer` backing stores. Threshold: **< 100 KB retained across 200 iterations** (i.e. < 500 bytes / call on average). Ordinary JS-heap retention — an unbounded Map, array, or listener list — is **not** gated; `heapUsed` is reported alongside it but nothing is compared against it. Why, and at what cost, is below.
 
 The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
 
@@ -287,31 +287,42 @@ Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'f
 
 ### The axis sees only half of what it should, and the other half has no usable channel
 
-`arrayBuffers` counts the bytes behind `Buffer` objects. Retaining an ordinary JS object does not move it at all. Holding 10 KB per iteration over 15 iterations, measured two ways:
+`arrayBuffers` counts `ArrayBuffer` backing stores. Anything backed by one moves it; anything living purely on the JS heap does not.
+
+The figures below come from a standalone script, not from this repo's suites: Node v24.15.0 with `--expose-gc`, 3 warmup iterations then 15 measured, `global.gc()` before and after, retaining 10 KB per iteration into an array that stays reachable. The `arrayBuffers` column is the load-bearing one and is stable across runs; the `heapUsed` column varies (see below) and is shown only to make the split visible.
 
 | what is retained | `heapUsed` | `arrayBuffers` |
 |---|---|---|
 | nothing | 22,080 B | 0 B |
-| a `Buffer` | 32,480 B | 153,600 B — caught |
-| a JS array | 168,032 B | 0 B — **passes the gate** |
+| a `Buffer` | 1,336 B | 153,600 B — caught |
+| an `ArrayBuffer` | 2,440 B | 153,600 B — caught |
+| a `Uint8Array` | 4,048 B | 153,600 B — caught |
+| a JS array of numbers | 156,552 B | 0 B — **passes the gate** |
+| entries in a `Map` | 161,736 B | 0 B — **passes the gate** |
 
-So the memory gate catches `Buffer` leaks and is blind to every other kind. `tests/three-layer-strict.test.ts` pins that blindness with an explicit assertion rather than leaving it implied.
+So the gate covers the whole `ArrayBuffer` family and is blind to ordinary JS-heap retention — which is the shape most "unbounded internal Map" bugs actually take. `tests/three-layer-strict.test.ts` pins that blindness with an explicit assertion rather than leaving it implied.
 
-Adding `heapUsed` as a second axis was the obvious fix and it does not work. Measured across the whole suite twice with no code change, **43 of 492 ops moved by more than the entire 100 KB cap between the two runs** (median movement 1.4 KB, mean 33 KB, max 2.1 MB). Individual examples:
-
-| op | run 1 | run 2 |
-|---|---|---|
-| `state` `createStore` | -11,936 B | 397,576 B |
-| `api-app-scenario` `rest_crud_flow` | 326,136 B | -5,760 B |
-| `edge-app-scenario` `kv_bound_batch` | 396,312 B | -85,680 B |
+Adding `heapUsed` as a second axis was the obvious fix and it does not work. The two sweeps recorded in this repo (the `docs/quality-reports/perf/**` state at `HEAD^` and at `HEAD`, both on unchanged code) differ by more than the entire 100 KB cap on **41 of 492 ops** — median movement 1,632 B, mean 24,901 B, max 474,016 B. More directly: **18 ops sit on opposite sides of the cap in the two sweeps**, so a gate reading `heapUsed` would have produced a different verdict for each of them without a line of code changing.
 
 Gating on that would fail ops at random. It is the same failure the `arrayBuffers` axis already has on fs-heavy work, in a different place.
+
+The instability is not confined to long sweeps. A single unit test that retained 10 KB per iteration and asserted `heapUsedDeltaBytes > 100 KB` failed 2 runs out of 5, reporting **-4,071,968 B** on the failures — a large negative delta, because the forced GC after the measured window collected objects allocated before it. The assertion was removed; a test that depends on `heapUsed` inherits exactly the property that disqualifies it from the gate.
 
 Measured on its own the picture looks fine — eight consecutive standalone runs of an fs workload gave `heapUsed` 22,080 B every time, identical to the byte. That reading is what made the two-axis change look correct at first. It only breaks under the full sweep, which is the condition the gate actually runs in. **Standalone stability is not evidence about a gate that runs inside a 90-minute sweep.**
 
 Two other candidates were rejected without needing a full measurement. Ignoring differences under Node's 8 KB pool granularity would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible. Raising the iteration count until the pool saturates makes every measurement slower without addressing either the blindness or the drift.
 
-Four of the ops that exceeded the cap on both runs are worth recording, because they are stable enough to be real retention rather than drift — `ui-app-scenario` `mount_error_handling` (4.47 MB, both runs), `visual-app-scenario` `burst_compare` (478 KB), `vector-app-scenario` `batch_upsert_1000` (266 KB), `chart` `renderChart` (197 KB). None are gated today. Whether they are leaks or legitimate working sets is unexamined.
+Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `HEAD^` then `HEAD`:
+
+| op | sweep 1 | sweep 2 |
+|---|---|---|
+| `ui-app-scenario` `mount_error_handling` | 4,477,744 B | 4,475,712 B |
+| `visual-app-scenario` `burst_compare` | 478,368 B | 477,352 B |
+| `vector-app-scenario` `batch_upsert_1000` | 267,296 B | 267,392 B |
+| `e2e` `fetchOverLoopback` | 216,368 B | 215,592 B |
+| `chart` `renderChart` | 203,168 B | 199,640 B |
+
+Two observations do not separate retained application state from a repeatable runtime or allocator effect, so this is a list of candidates rather than a finding. None are gated today.
 
 The axis therefore stays as it is: `arrayBuffers` only, with `memoryGateWaived` for the fs-heavy ops where even that is decided by the allocator. What would replace it needs a channel that is both complete and stable under load, and neither of the two Node exposes is.
 
