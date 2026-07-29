@@ -8,28 +8,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| driveProducer | 0.0059ms | 0.01ms | 80ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| driveConsumerGroup | 0.01ms | 0.03ms | 150ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| driveTransaction | 0.0090ms | 0.02ms | 80ms | 0.00033ms | PASS | stable (p10 -7% (閾値未満)、 p95 +27% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| driveDlq | 0.02ms | 0.04ms | 80ms | 0.00033ms | PASS | stable (p10 -7% (閾値未満)、 p95 +25% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| driveProducer | 0.0052ms | 0.01ms | 80ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| driveConsumerGroup | 0.01ms | 0.02ms | 150ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| driveTransaction | 0.0086ms | 0.02ms | 80ms | 0.00033ms | PASS | stable (p10 -10% (閾値未満)、 p95 +25% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| driveDlq | 0.01ms | 0.03ms | 80ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| driveProducer | 0.12ms | 160ms | PASS |
+| driveProducer | 0.10ms | 160ms | PASS |
 | driveConsumerGroup | 0.25ms | 300ms | PASS |
-| driveTransaction | 0.19ms | 160ms | PASS |
-| driveDlq | 0.40ms | 160ms | PASS |
+| driveTransaction | 0.11ms | 160ms | PASS |
+| driveDlq | 0.17ms | 160ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| driveProducer | 1528 B | 0 B | 102400 B | yes | PASS |
-| driveConsumerGroup | -7480 B | 0 B | 102400 B | yes | PASS |
-| driveTransaction | 208 B | 0 B | 102400 B | yes | PASS |
-| driveDlq | -3096 B | 0 B | 102400 B | yes | PASS |
+| driveProducer | 1744 B | 0 B | 102400 B | yes | PASS |
+| driveConsumerGroup | -6280 B | 0 B | 102400 B | yes | PASS |
+| driveTransaction | 8 B | 0 B | 102400 B | yes | PASS |
+| driveDlq | -6752 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -41,28 +41,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0059ms |
-| p50 | 0.0062ms |
+| p10 | 0.0052ms |
+| p50 | 0.0060ms |
 | p95 | 0.01ms |
 | p99 | 0.03ms |
-| mean | 0.0076ms |
-| stdev | 0.0045ms |
-| min | 0.0053ms |
+| mean | 0.0072ms |
+| stdev | 0.0044ms |
+| min | 0.0048ms |
 | max | 0.04ms |
-| total | 1.52ms |
+| total | 1.44ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0059ms | 0.0057ms | +0.00021ms | +3.69% |
-| p50 | 0.0062ms | 0.0063ms | -0.000041ms | -0.66% |
-| p95 | 0.01ms | 0.02ms | -0.0060ms | -30.22% |
-| p99 | 0.03ms | 0.06ms | -0.03ms | -47.76% |
-| mean | 0.0076ms | 0.0090ms | -0.0014ms | -15.66% |
-| min | 0.0053ms | 0.0049ms | +0.00038ms | +7.69% |
-| max | 0.04ms | 0.12ms | -0.08ms | -66.39% |
-| total | 1.52ms | 1.80ms | -0.28ms | -15.66% |
+| p10 | 0.0052ms | 0.0057ms | -0.00046ms | -8.16% |
+| p50 | 0.0060ms | 0.0063ms | -0.00025ms | -4.00% |
+| p95 | 0.01ms | 0.02ms | -0.0052ms | -25.88% |
+| p99 | 0.03ms | 0.06ms | -0.03ms | -52.10% |
+| mean | 0.0072ms | 0.0090ms | -0.0018ms | -20.31% |
+| min | 0.0048ms | 0.0049ms | -0.000083ms | -1.70% |
+| max | 0.04ms | 0.12ms | -0.08ms | -66.56% |
+| total | 1.44ms | 1.80ms | -0.37ms | -20.31% |
 
 ### driveConsumerGroup
 
@@ -74,26 +74,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p10 | 0.01ms |
 | p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.05ms |
+| p95 | 0.02ms |
+| p99 | 0.04ms |
 | mean | 0.02ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.15ms |
-| total | 3.74ms |
+| max | 0.12ms |
+| total | 3.37ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.00043ms | -2.96% |
-| p50 | 0.02ms | 0.02ms | +5.0e-7ms | +0.00% |
-| p95 | 0.03ms | 0.03ms | +0.0035ms | +13.09% |
-| p99 | 0.05ms | 0.05ms | +0.0040ms | +8.57% |
-| mean | 0.02ms | 0.02ms | +0.00029ms | +1.59% |
-| min | 0.01ms | 0.01ms | -0.00042ms | -3.07% |
-| max | 0.15ms | 0.13ms | +0.01ms | +8.63% |
-| total | 3.74ms | 3.68ms | +0.06ms | +1.59% |
+| p10 | 0.01ms | 0.01ms | -0.0013ms | -8.70% |
+| p50 | 0.02ms | 0.02ms | -0.00058ms | -3.68% |
+| p95 | 0.02ms | 0.03ms | -0.0036ms | -13.26% |
+| p99 | 0.04ms | 0.05ms | -0.0017ms | -3.70% |
+| mean | 0.02ms | 0.02ms | -0.0015ms | -8.29% |
+| min | 0.01ms | 0.01ms | -0.0010ms | -7.66% |
+| max | 0.12ms | 0.13ms | -0.01ms | -9.93% |
+| total | 3.37ms | 3.68ms | -0.30ms | -8.29% |
 
 ### driveTransaction
 
@@ -103,28 +103,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0090ms |
-| p50 | 0.0097ms |
+| p10 | 0.0086ms |
+| p50 | 0.0089ms |
 | p95 | 0.02ms |
 | p99 | 0.03ms |
 | mean | 0.01ms |
-| stdev | 0.0080ms |
-| min | 0.0087ms |
+| stdev | 0.0082ms |
+| min | 0.0085ms |
 | max | 0.11ms |
-| total | 2.21ms |
+| total | 2.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0090ms | 0.0096ms | -0.00067ms | -6.93% |
-| p50 | 0.0097ms | 0.0099ms | -0.00017ms | -1.69% |
-| p95 | 0.02ms | 0.01ms | +0.0038ms | +26.54% |
-| p99 | 0.03ms | 0.03ms | +0.0018ms | +6.66% |
-| mean | 0.01ms | 0.01ms | +0.00035ms | +3.25% |
-| min | 0.0087ms | 0.0095ms | -0.00083ms | -8.73% |
-| max | 0.11ms | 0.04ms | +0.08ms | +211.16% |
-| total | 2.21ms | 2.14ms | +0.07ms | +3.25% |
+| p10 | 0.0086ms | 0.0096ms | -0.0010ms | -10.39% |
+| p50 | 0.0089ms | 0.0099ms | -0.00096ms | -9.71% |
+| p95 | 0.02ms | 0.01ms | +0.0036ms | +25.27% |
+| p99 | 0.03ms | 0.03ms | +0.0067ms | +25.22% |
+| mean | 0.01ms | 0.01ms | -0.00018ms | -1.66% |
+| min | 0.0085ms | 0.0095ms | -0.0010ms | -10.91% |
+| max | 0.11ms | 0.04ms | +0.08ms | +212.32% |
+| total | 2.10ms | 2.14ms | -0.04ms | -1.66% |
 
 ### driveDlq
 
@@ -134,26 +134,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.02ms |
-| p50 | 0.02ms |
-| p95 | 0.04ms |
-| p99 | 0.95ms |
-| mean | 0.05ms |
-| stdev | 0.22ms |
+| p10 | 0.01ms |
+| p50 | 0.01ms |
+| p95 | 0.03ms |
+| p99 | 0.04ms |
+| mean | 0.02ms |
+| stdev | 0.0082ms |
 | min | 0.01ms |
-| max | 2.21ms |
-| total | 9.60ms |
+| max | 0.09ms |
+| total | 3.40ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.0013ms | -7.43% |
-| p50 | 0.02ms | 0.02ms | -0.0010ms | -5.85% |
-| p95 | 0.04ms | 0.03ms | +0.0071ms | +25.48% |
-| p99 | 0.95ms | 0.04ms | +0.92ms | +2418.13% |
-| mean | 0.05ms | 0.02ms | +0.03ms | +147.26% |
-| min | 0.01ms | 0.02ms | -0.0016ms | -9.85% |
-| max | 2.21ms | 0.05ms | +2.16ms | +4442.12% |
-| total | 9.60ms | 3.88ms | +5.72ms | +147.26% |
+| p10 | 0.01ms | 0.02ms | -0.0026ms | -15.31% |
+| p50 | 0.01ms | 0.02ms | -0.0030ms | -16.72% |
+| p95 | 0.03ms | 0.03ms | +0.0000030ms | +0.01% |
+| p99 | 0.04ms | 0.04ms | +0.0048ms | +12.73% |
+| mean | 0.02ms | 0.02ms | -0.0024ms | -12.40% |
+| min | 0.01ms | 0.02ms | -0.0025ms | -15.41% |
+| max | 0.09ms | 0.05ms | +0.04ms | +81.27% |
+| total | 3.40ms | 3.88ms | -0.48ms | -12.40% |
 

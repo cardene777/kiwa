@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| bullmqEnvAccessor | 0.00017ms | 0.00059ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +266%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| bullmqEnvAccessor | 0.00017ms | 0.00097ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +266%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 | inngestEnvAccessor | 0.00013ms | 0.00021ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +266%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| cloudflareQueuesEnvAccessor | 0.00017ms | 0.00029ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +160%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| cloudflareQueuesEnvAccessor | 0.00017ms | 0.00025ms | 5ms | 0.00033ms | PASS | stable (差 0.000042ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
 | sqsEnvAccessor | 0.00017ms | 0.00025ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +199%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 | rabbitmqEnvAccessor | 0.00013ms | 0.00017ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +266%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
@@ -20,7 +20,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|
 | bullmqEnvAccessor | 0.01ms | 10ms | PASS |
 | inngestEnvAccessor | 0.01ms | 10ms | PASS |
-| cloudflareQueuesEnvAccessor | 0.01ms | 10ms | PASS |
+| cloudflareQueuesEnvAccessor | 0.00ms | 10ms | PASS |
 | sqsEnvAccessor | 0.00ms | 10ms | PASS |
 | rabbitmqEnvAccessor | 0.00ms | 10ms | PASS |
 
@@ -28,11 +28,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| bullmqEnvAccessor | -15824 B | 0 B | 102400 B | yes | PASS |
-| inngestEnvAccessor | -16432 B | 0 B | 102400 B | yes | PASS |
-| cloudflareQueuesEnvAccessor | 584 B | 0 B | 102400 B | yes | PASS |
-| sqsEnvAccessor | 680 B | 0 B | 102400 B | yes | PASS |
-| rabbitmqEnvAccessor | -192 B | 0 B | 102400 B | yes | PASS |
+| bullmqEnvAccessor | -20656 B | 0 B | 102400 B | yes | PASS |
+| inngestEnvAccessor | -16280 B | 0 B | 102400 B | yes | PASS |
+| cloudflareQueuesEnvAccessor | 7008 B | 0 B | 102400 B | yes | PASS |
+| sqsEnvAccessor | 1600 B | 0 B | 102400 B | yes | PASS |
+| rabbitmqEnvAccessor | 1720 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -46,12 +46,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00017ms |
 | p50 | 0.00017ms |
-| p95 | 0.00059ms |
-| p99 | 0.0015ms |
+| p95 | 0.00097ms |
+| p99 | 0.0013ms |
 | mean | 0.00025ms |
-| stdev | 0.00033ms |
+| stdev | 0.00038ms |
 | min | 0.00013ms |
-| max | 0.0029ms |
+| max | 0.0043ms |
 | total | 0.05ms |
 
 ## Baseline diff
@@ -60,12 +60,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|---|
 | p10 | 0.00017ms | 0.00013ms | +0.000041ms | +32.80% |
 | p50 | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
-| p95 | 0.00059ms | 0.00029ms | +0.00029ms | +99.30% |
-| p99 | 0.0015ms | 0.0078ms | -0.0062ms | -80.11% |
-| mean | 0.00025ms | 0.00060ms | -0.00035ms | -58.05% |
+| p95 | 0.00097ms | 0.00029ms | +0.00067ms | +228.24% |
+| p99 | 0.0013ms | 0.0078ms | -0.0064ms | -82.74% |
+| mean | 0.00025ms | 0.00060ms | -0.00035ms | -57.88% |
 | min | 0.00013ms | 0.00013ms | 0.00ms | 0.00% |
-| max | 0.0029ms | 0.06ms | -0.06ms | -95.32% |
-| total | 0.05ms | 0.12ms | -0.07ms | -58.05% |
+| max | 0.0043ms | 0.06ms | -0.06ms | -93.08% |
+| total | 0.05ms | 0.12ms | -0.07ms | -57.88% |
 
 ### inngestEnvAccessor
 
@@ -78,12 +78,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | p10 | 0.00013ms |
 | p50 | 0.00013ms |
 | p95 | 0.00021ms |
-| p99 | 0.00050ms |
-| mean | 0.00016ms |
-| stdev | 0.000076ms |
+| p99 | 0.00090ms |
+| mean | 0.00025ms |
+| stdev | 0.0013ms |
 | min | 0.00013ms |
-| max | 0.00083ms |
-| total | 0.03ms |
+| max | 0.02ms |
+| total | 0.05ms |
 
 ## Baseline diff
 
@@ -92,11 +92,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | p10 | 0.00013ms | 0.00013ms | 0.00ms | 0.00% |
 | p50 | 0.00013ms | 0.00017ms | -0.000041ms | -24.70% |
 | p95 | 0.00021ms | 0.00017ms | +0.000041ms | +24.55% |
-| p99 | 0.00050ms | 0.00058ms | -0.000082ms | -14.01% |
-| mean | 0.00016ms | 0.00016ms | -0.0000013ms | -0.83% |
+| p99 | 0.00090ms | 0.00058ms | +0.00031ms | +53.32% |
+| mean | 0.00025ms | 0.00016ms | +0.000093ms | +58.28% |
 | min | 0.00013ms | 0.00013ms | 0.00ms | 0.00% |
-| max | 0.00083ms | 0.00092ms | -0.000084ms | -9.16% |
-| total | 0.03ms | 0.03ms | -0.00026ms | -0.83% |
+| max | 0.02ms | 0.00092ms | +0.02ms | +1844.71% |
+| total | 0.05ms | 0.03ms | +0.02ms | +58.28% |
 
 ### cloudflareQueuesEnvAccessor
 
@@ -108,26 +108,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00017ms |
 | p50 | 0.00021ms |
-| p95 | 0.00029ms |
-| p99 | 0.0019ms |
-| mean | 0.00032ms |
+| p95 | 0.00025ms |
+| p99 | 0.0017ms |
+| mean | 0.00031ms |
 | stdev | 0.0011ms |
 | min | 0.00017ms |
-| max | 0.02ms |
+| max | 0.01ms |
 | total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00017ms | 0.00021ms | -0.000041ms | -19.71% |
+| p10 | 0.00017ms | 0.00021ms | -0.000042ms | -20.19% |
 | p50 | 0.00021ms | 0.00021ms | 0.00ms | 0.00% |
-| p95 | 0.00029ms | 0.00029ms | +0.0000010ms | +0.34% |
-| p99 | 0.0019ms | 0.0011ms | +0.00085ms | +78.33% |
-| mean | 0.00032ms | 0.00031ms | +0.0000077ms | +2.45% |
+| p95 | 0.00025ms | 0.00029ms | -0.000041ms | -14.09% |
+| p99 | 0.0017ms | 0.0011ms | +0.00062ms | +57.18% |
+| mean | 0.00031ms | 0.00031ms | -0.0000067ms | -2.14% |
 | min | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.0029ms | +22.05% |
-| total | 0.06ms | 0.06ms | +0.0015ms | +2.45% |
+| max | 0.01ms | 0.01ms | +0.0011ms | +8.63% |
+| total | 0.06ms | 0.06ms | -0.0013ms | -2.14% |
 
 ### sqsEnvAccessor
 
@@ -138,13 +138,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.00017ms |
-| p50 | 0.00021ms |
+| p50 | 0.00017ms |
 | p95 | 0.00025ms |
-| p99 | 0.00063ms |
+| p99 | 0.00067ms |
 | mean | 0.00022ms |
-| stdev | 0.00024ms |
+| stdev | 0.00037ms |
 | min | 0.00017ms |
-| max | 0.0034ms |
+| max | 0.0052ms |
 | total | 0.04ms |
 
 ## Baseline diff
@@ -152,13 +152,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p10 | 0.00017ms | 0.00017ms | -0.0000010ms | -0.60% |
-| p50 | 0.00021ms | 0.00021ms | 0.00ms | 0.00% |
+| p50 | 0.00017ms | 0.00021ms | -0.000041ms | -19.71% |
 | p95 | 0.00025ms | 0.00025ms | 0.00ms | 0.00% |
-| p99 | 0.00063ms | 0.0011ms | -0.00051ms | -44.48% |
-| mean | 0.00022ms | 0.00025ms | -0.000024ms | -9.59% |
+| p99 | 0.00067ms | 0.0011ms | -0.00046ms | -40.79% |
+| mean | 0.00022ms | 0.00025ms | -0.000025ms | -9.96% |
 | min | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
-| max | 0.0034ms | 0.0052ms | -0.0018ms | -35.21% |
-| total | 0.04ms | 0.05ms | -0.0047ms | -9.59% |
+| max | 0.0052ms | 0.0052ms | -0.0000010ms | -0.02% |
+| total | 0.04ms | 0.05ms | -0.0049ms | -9.96% |
 
 ### rabbitmqEnvAccessor
 
@@ -169,25 +169,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.00013ms |
-| p50 | 0.00013ms |
+| p50 | 0.00017ms |
 | p95 | 0.00017ms |
-| p99 | 0.00051ms |
-| mean | 0.00016ms |
-| stdev | 0.00010ms |
+| p99 | 0.00063ms |
+| mean | 0.00018ms |
+| stdev | 0.00017ms |
 | min | 0.00013ms |
-| max | 0.0011ms |
-| total | 0.03ms |
+| max | 0.0024ms |
+| total | 0.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p10 | 0.00013ms | 0.00013ms | 0.00ms | 0.00% |
-| p50 | 0.00013ms | 0.00017ms | -0.000041ms | -24.92% |
-| p95 | 0.00017ms | 0.00021ms | -0.000042ms | -20.10% |
-| p99 | 0.00051ms | 0.0010ms | -0.00049ms | -49.48% |
-| mean | 0.00016ms | 0.00018ms | -0.000019ms | -10.90% |
+| p50 | 0.00017ms | 0.00017ms | +5.0e-7ms | +0.30% |
+| p95 | 0.00017ms | 0.00021ms | -0.000040ms | -19.11% |
+| p99 | 0.00063ms | 0.0010ms | -0.00037ms | -37.07% |
+| mean | 0.00018ms | 0.00018ms | +0.0000046ms | +2.61% |
 | min | 0.00013ms | 0.00013ms | 0.00ms | 0.00% |
-| max | 0.0011ms | 0.0019ms | -0.00079ms | -41.28% |
-| total | 0.03ms | 0.04ms | -0.0038ms | -10.90% |
+| max | 0.0024ms | 0.0019ms | +0.00046ms | +23.96% |
+| total | 0.04ms | 0.04ms | +0.00092ms | +2.61% |
 

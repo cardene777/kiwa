@@ -285,7 +285,35 @@ Measuring memory at all requires `--expose-gc`. Without it `measureMemory` canno
 
 Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'forks'`, and `requireGc: true` on the call. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. And a call that does not ask for GC will accept a run without it — the config only makes GC *available*, `requireGc` is what makes its absence a failure. 34 example suites were passing `runPerf3Layer` without it, so a run under a different config would have reported memory numbers that mean nothing and still passed. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks all three.
 
-The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
+### The axis sees only half of what it should, and the other half has no usable channel
+
+`arrayBuffers` counts the bytes behind `Buffer` objects. Retaining an ordinary JS object does not move it at all. Holding 10 KB per iteration over 15 iterations, measured two ways:
+
+| what is retained | `heapUsed` | `arrayBuffers` |
+|---|---|---|
+| nothing | 22,080 B | 0 B |
+| a `Buffer` | 32,480 B | 153,600 B — caught |
+| a JS array | 168,032 B | 0 B — **passes the gate** |
+
+So the memory gate catches `Buffer` leaks and is blind to every other kind. `tests/three-layer-strict.test.ts` pins that blindness with an explicit assertion rather than leaving it implied.
+
+Adding `heapUsed` as a second axis was the obvious fix and it does not work. Measured across the whole suite twice with no code change, **43 of 492 ops moved by more than the entire 100 KB cap between the two runs** (median movement 1.4 KB, mean 33 KB, max 2.1 MB). Individual examples:
+
+| op | run 1 | run 2 |
+|---|---|---|
+| `state` `createStore` | -11,936 B | 397,576 B |
+| `api-app-scenario` `rest_crud_flow` | 326,136 B | -5,760 B |
+| `edge-app-scenario` `kv_bound_batch` | 396,312 B | -85,680 B |
+
+Gating on that would fail ops at random. It is the same failure the `arrayBuffers` axis already has on fs-heavy work, in a different place.
+
+Measured on its own the picture looks fine — eight consecutive standalone runs of an fs workload gave `heapUsed` 22,080 B every time, identical to the byte. That reading is what made the two-axis change look correct at first. It only breaks under the full sweep, which is the condition the gate actually runs in. **Standalone stability is not evidence about a gate that runs inside a 90-minute sweep.**
+
+Two other candidates were rejected without needing a full measurement. Ignoring differences under Node's 8 KB pool granularity would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible. Raising the iteration count until the pool saturates makes every measurement slower without addressing either the blindness or the drift.
+
+Four of the ops that exceeded the cap on both runs are worth recording, because they are stable enough to be real retention rather than drift — `ui-app-scenario` `mount_error_handling` (4.47 MB, both runs), `visual-app-scenario` `burst_compare` (478 KB), `vector-app-scenario` `batch_upsert_1000` (266 KB), `chart` `renderChart` (197 KB). None are gated today. Whether they are leaks or legitimate working sets is unexamined.
+
+The axis therefore stays as it is: `arrayBuffers` only, with `memoryGateWaived` for the fs-heavy ops where even that is decided by the allocator. What would replace it needs a channel that is both complete and stable under load, and neither of the two Node exposes is.
 
 `crypto`'s `ed25519_batch` shows the same axis reacting to load rather than to code. Run on its own it reports 0 B three times in a row; during one full-suite sweep it reported 168,960 B against a 100 KB cap, and the next sweep put it back at 0 B. It carries no waiver — a single non-reproducing breach is not evidence about the op — but it is worth recording that the axis moves with what else is running, which is the same reason the ops below carry one.
 
