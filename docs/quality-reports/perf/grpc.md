@@ -2,26 +2,28 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00017ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00033ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| invokeUnary | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +23392%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| invokeServerStream | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +10165%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| invokeUnary | 0.00058ms | 0.0017ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| invokeServerStream | 0.0010ms | 0.0024ms | 5ms | 0.00033ms | PASS | stable (差 0.00021ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeUnary | 0.01ms | 10ms | PASS |
+| invokeUnary | 0.02ms | 10ms | PASS |
 | invokeServerStream | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeUnary | -856 B | -34471 B | 102400 B | yes | PASS |
-| invokeServerStream | -22112 B | 0 B | 102400 B | yes | PASS |
+| invokeUnary | -15368 B | 0 B | 102400 B | yes | PASS |
+| invokeServerStream | 312 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -33,26 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.02ms |
-| total | 0.20ms |
+| p10 | 0.00058ms |
+| p50 | 0.00063ms |
+| p95 | 0.0017ms |
+| p99 | 0.0061ms |
+| mean | 0.00090ms |
+| stdev | 0.0010ms |
+| min | 0.00054ms |
+| max | 0.0093ms |
+| total | 0.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -11.07% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -13.17% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +17.25% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -8.16% |
-| min | 0.00ms | 0.00ms | -0.00ms | -12.59% |
-| max | 0.02ms | 0.02ms | -0.00ms | -15.85% |
-| total | 0.20ms | 0.22ms | -0.02ms | -8.16% |
+| p10 | 0.00058ms | 0.00063ms | -0.000042ms | -6.72% |
+| p50 | 0.00063ms | 0.00067ms | -0.000042ms | -6.30% |
+| p95 | 0.0017ms | 0.0020ms | -0.00028ms | -14.12% |
+| p99 | 0.0061ms | 0.0055ms | +0.00057ms | +10.26% |
+| mean | 0.00090ms | 0.00095ms | -0.000047ms | -4.90% |
+| min | 0.00054ms | 0.00058ms | -0.000042ms | -7.20% |
+| max | 0.0093ms | 0.0084ms | +0.00092ms | +10.88% |
+| total | 0.18ms | 0.19ms | -0.0093ms | -4.90% |
 
 ### invokeServerStream
 
@@ -62,24 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
+| p10 | 0.0010ms |
+| p50 | 0.0011ms |
+| p95 | 0.0024ms |
+| p99 | 0.0086ms |
+| mean | 0.0014ms |
+| stdev | 0.0014ms |
+| min | 0.0010ms |
 | max | 0.01ms |
-| total | 0.31ms |
+| total | 0.29ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +19.96% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -59.67% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -25.37% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -19.70% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.01ms | 0.03ms | -0.01ms | -47.51% |
-| total | 0.31ms | 0.39ms | -0.08ms | -19.70% |
+| p10 | 0.0010ms | 0.00083ms | +0.00021ms | +24.94% |
+| p50 | 0.0011ms | 0.00092ms | +0.00017ms | +18.21% |
+| p95 | 0.0024ms | 0.0025ms | -0.00012ms | -4.59% |
+| p99 | 0.0086ms | 0.0071ms | +0.0015ms | +21.60% |
+| mean | 0.0014ms | 0.0012ms | +0.00018ms | +14.26% |
+| min | 0.0010ms | 0.00083ms | +0.00017ms | +20.05% |
+| max | 0.01ms | 0.01ms | -0.00058ms | -4.77% |
+| total | 0.29ms | 0.25ms | +0.04ms | +14.26% |
 

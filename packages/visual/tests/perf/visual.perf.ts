@@ -85,6 +85,12 @@ describe(MODULE, () => {
             regressionGateWaived: 'p10 の実行間の振れ幅が 17-41% で、測る時期によって閾値を跨ぐ (#1718)',
             serialP95CapMs: 200,
             memoryArrayBuffersCapBytes: 16 * 1024 * 1024,
+            // 実装無変更で測り直すと arrayBuffers の増分が -5.9MB から +20.1MB まで動く。
+            // 振れ幅 26MB が上限 16.7MB より大きく、通るか落ちるかが pixelmatch の
+            // 実装ではなく allocator の都合で決まる (全 177 package の 4 周実測で 2 回落ちた)。
+            // 上限を上げると測れているように見えるため、除外して report に残す。
+            // 軸そのものの作り直しは #1719 で扱う。
+            memoryGateWaived: 'arrayBuffers の振れ幅 26MB が上限 16.7MB を上回り判定が成立しない (#1719)',
             fn: async () => {
               await comparePngBuffers(largeA, largeB);
             },

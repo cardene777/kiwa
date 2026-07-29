@@ -181,6 +181,25 @@ So `runPerf3Layer` computes the verdict, writes it into the report, and leaves i
 
 The caps (serial, concurrent, memory) are still gated. A cap is decided inside a single run and does not depend on run-to-run spread — that is how the `vector` breach in this suite was found.
 
+#### Measured across the whole suite, and why the gate still cannot be switched on
+
+The `@kiwa-lab/cache` measurements above cover one package. The full suite was then measured the same way: seven consecutive passes of all 177 workspace packages (17 minutes each, ~2.5 hours of continuous load), recording every op's p10 each time.
+
+An op can only fail the gate on unchanged code if its observed drift satisfies **both** conditions the implementation checks — the absolute difference clears the floor **and** the relative change clears 20 %. Classified that way over 492 ops:
+
+| passes used | ops that could fail the gate | modules with no such op |
+|---|---|---|
+| 4 | 189 | 45 (28 with 2× margin) |
+| 6 | 217 | 35 (21 with 2× margin) |
+
+**The qualifying set shrinks as the observation window grows, with no sign of converging.** Enabling the gate for the 28 modules that looked safe over four passes was tried and reverted: three of them (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on the very next unchanged run. Their p10 had been flat across passes 2-5 and then drifted upward in passes 6-7 — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023.
+
+The cause is not the statistic. A baseline is recorded at one point in the machine's thermal cycle and compared against measurements taken at another, and a suite that runs for 20-40 minutes inside a multi-hour sweep spans that cycle. Every per-run statistic — p95, p10, median, trimmed mean — inherits the offset, because the offset is in the machine and not in the distribution.
+
+That is the same wall the in-run reference normalization was measured against (§ What would make the remaining twelve gateable): comparing an op to a reference measured *in the same run* cancels the shared drift, taking `fsRead` from 141 % to 3 %. It is the one measured approach that addresses the actual cause, and it changes what a baseline stores (a ratio, not a duration).
+
+Until then `regressionGate` stays false everywhere. Turning it on for a subset is not a safe halfway step: the subset is defined by how long you happened to watch.
+
 Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 322 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
 
 `regressionGateWaived: '<reason>'` marks the twelve ops still above the threshold, so the list survives until the gate can be switched on for them. The reason string carries the measured spread. Adding one requires measured evidence; do not add one because a run happened to fail. Every row marked `no` above carries a waiver — a row that is not gateable and not waived would fail the gate the moment `regressionGate` is turned on.
@@ -244,7 +263,13 @@ Every mock op is checked for retained-heap growth. Threshold: **< 100 KB retaine
 
 The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
 
+Measuring memory at all requires `--expose-gc`. Without it `measureMemory` cannot call `global.gc()`, so the delta includes allocations that were about to be released, and the comparison against a cap is not a comparison of retention. 116 of the 180 perf configs were missing it. `dogfood-nats-jetstream`'s `driveObject` reported 215,800 B against a 100 KB cap — reproducibly, to the byte, on every run — and 20,555 B once GC was available. The breach was an artefact of the measurement.
+
+Two things have to be present together: `--expose-gc` in `execArgv`, and `pool: 'forks'`. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks both.
+
 The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
+
+The same shape appears at a larger scale in `visual`'s `comparePngBuffersFullDiff`: measured repeatedly with no code change, its `arrayBuffers` delta ranged from -5,985,795 B to +20,141,339 B against a 16.7 MB cap. A 26 MB spread around a 16.7 MB cap means the verdict is decided by allocator behaviour, and it failed two of four full-suite passes. It carries a waiver rather than a raised cap for the reason above.
 
 ## Change control
 

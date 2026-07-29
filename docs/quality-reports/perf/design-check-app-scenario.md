@@ -2,29 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00042ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| full_design_audit (spec + layout combined 10 iter) | 0.51ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +145%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| large_spec_conformance (spec 80 keys × 5 iter) | 0.03ms | 50ms | PASS | stable (差 0.01ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| regression_scan_burst (50 element layout × 10 iter) | 0.05ms | 50ms | PASS | stable (差 0.17ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| full_design_audit (spec + layout combined 10 iter) | 0.11ms | 0.44ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| large_spec_conformance (spec 80 keys × 5 iter) | 0.03ms | 0.04ms | 50ms | 0.00042ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| regression_scan_burst (50 element layout × 10 iter) | 0.05ms | 0.06ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| full_design_audit (spec + layout combined 10 iter) | 2.28ms | 200ms | PASS |
-| large_spec_conformance (spec 80 keys × 5 iter) | 0.11ms | 100ms | PASS |
-| regression_scan_burst (50 element layout × 10 iter) | 0.23ms | 100ms | PASS |
+| full_design_audit (spec + layout combined 10 iter) | 1.20ms | 200ms | PASS |
+| large_spec_conformance (spec 80 keys × 5 iter) | 0.14ms | 100ms | PASS |
+| regression_scan_burst (50 element layout × 10 iter) | 0.24ms | 100ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| full_design_audit (spec + layout combined 10 iter) | -37912 B | 0 B | 102400 B | yes | PASS |
-| large_spec_conformance (spec 80 keys × 5 iter) | 176 B | 0 B | 102400 B | yes | PASS |
-| regression_scan_burst (50 element layout × 10 iter) | 8760 B | 0 B | 102400 B | yes | PASS |
+| full_design_audit (spec + layout combined 10 iter) | -32480 B | 0 B | 102400 B | yes | PASS |
+| large_spec_conformance (spec 80 keys × 5 iter) | 2368 B | 0 B | 102400 B | yes | PASS |
+| regression_scan_burst (50 element layout × 10 iter) | -5688 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.15ms |
-| p95 | 0.51ms |
-| p99 | 1.29ms |
-| mean | 0.26ms |
-| stdev | 0.28ms |
-| min | 0.12ms |
-| max | 1.58ms |
-| total | 7.90ms |
+| p10 | 0.11ms |
+| p50 | 0.14ms |
+| p95 | 0.44ms |
+| p99 | 0.46ms |
+| mean | 0.20ms |
+| stdev | 0.12ms |
+| min | 0.11ms |
+| max | 0.46ms |
+| total | 6.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.15ms | 0.14ms | +0.02ms | +12.98% |
-| p95 | 0.51ms | 0.34ms | +0.16ms | +46.53% |
-| p99 | 1.29ms | 1.15ms | +0.14ms | +11.79% |
-| mean | 0.26ms | 0.18ms | +0.08ms | +45.59% |
-| min | 0.12ms | 0.10ms | +0.02ms | +17.27% |
-| max | 1.58ms | 2.45ms | -0.86ms | -35.28% |
-| total | 7.90ms | 36.15ms | -28.26ms | -78.16% |
+| p10 | 0.11ms | 0.14ms | -0.02ms | -17.13% |
+| p50 | 0.14ms | 0.15ms | -0.0064ms | -4.32% |
+| p95 | 0.44ms | 0.41ms | +0.02ms | +5.84% |
+| p99 | 0.46ms | 0.44ms | +0.02ms | +3.70% |
+| mean | 0.20ms | 0.20ms | -0.0037ms | -1.79% |
+| min | 0.11ms | 0.11ms | -0.0032ms | -2.97% |
+| max | 0.46ms | 0.45ms | +0.01ms | +2.77% |
+| total | 6.04ms | 6.15ms | -0.11ms | -1.79% |
 
 ### large_spec_conformance (spec 80 keys × 5 iter)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
+| p10 | 0.03ms |
 | p50 | 0.03ms |
-| p95 | 0.03ms |
-| p99 | 0.03ms |
+| p95 | 0.04ms |
+| p99 | 0.08ms |
 | mean | 0.03ms |
-| stdev | 0.00ms |
+| stdev | 0.01ms |
 | min | 0.03ms |
-| max | 0.03ms |
-| total | 0.82ms |
+| max | 0.09ms |
+| total | 0.99ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.03ms | +0.00ms | +4.34% |
-| p95 | 0.03ms | 0.04ms | -0.01ms | -21.51% |
-| p99 | 0.03ms | 0.04ms | -0.01ms | -16.31% |
-| mean | 0.03ms | 0.03ms | -0.00ms | -7.84% |
-| min | 0.03ms | 0.02ms | +0.00ms | +6.42% |
-| max | 0.03ms | 0.07ms | -0.03ms | -49.05% |
-| total | 0.82ms | 5.90ms | -5.08ms | -86.18% |
+| p10 | 0.03ms | 0.02ms | +0.0058ms | +24.84% |
+| p50 | 0.03ms | 0.02ms | +0.0067ms | +28.75% |
+| p95 | 0.04ms | 0.02ms | +0.01ms | +57.06% |
+| p99 | 0.08ms | 0.03ms | +0.05ms | +200.52% |
+| mean | 0.03ms | 0.02ms | +0.0092ms | +38.68% |
+| min | 0.03ms | 0.02ms | +0.0043ms | +18.41% |
+| max | 0.09ms | 0.03ms | +0.07ms | +250.49% |
+| total | 0.99ms | 0.71ms | +0.27ms | +38.68% |
 
 ### regression_scan_burst (50 element layout × 10 iter)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
+| p10 | 0.05ms |
 | p50 | 0.05ms |
-| p95 | 0.05ms |
+| p95 | 0.06ms |
 | p99 | 0.06ms |
 | mean | 0.05ms |
-| stdev | 0.00ms |
+| stdev | 0.0041ms |
 | min | 0.05ms |
 | max | 0.06ms |
-| total | 1.61ms |
+| total | 1.57ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.05ms | 0.05ms | -0.00ms | -1.80% |
-| p95 | 0.05ms | 0.22ms | -0.17ms | -75.39% |
-| p99 | 0.06ms | 0.67ms | -0.61ms | -91.27% |
-| mean | 0.05ms | 0.10ms | -0.04ms | -45.15% |
-| min | 0.05ms | 0.05ms | +0.00ms | +3.91% |
-| max | 0.06ms | 2.54ms | -2.48ms | -97.65% |
-| total | 1.61ms | 19.60ms | -17.98ms | -91.77% |
+| p10 | 0.05ms | 0.05ms | -0.00060ms | -1.24% |
+| p50 | 0.05ms | 0.05ms | +0.0033ms | +6.69% |
+| p95 | 0.06ms | 0.05ms | +0.0096ms | +19.07% |
+| p99 | 0.06ms | 0.05ms | +0.010ms | +19.46% |
+| mean | 0.05ms | 0.05ms | +0.0029ms | +5.93% |
+| min | 0.05ms | 0.05ms | -0.00050ms | -1.04% |
+| max | 0.06ms | 0.05ms | +0.0098ms | +18.93% |
+| total | 1.57ms | 1.48ms | +0.09ms | +5.93% |
 

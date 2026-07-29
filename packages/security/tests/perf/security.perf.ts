@@ -65,7 +65,10 @@ describe(MODULE, () => {
       for (const outcome of result.outcomes) {
         expect.soft(outcome.serialGatePassed, `${outcome.name} serial p95`).toBe(true);
         expect.soft(outcome.concurrentGatePassed, `${outcome.name} concurrent p95`).toBe(true);
+        expect.soft(outcome.memoryGatePassed, `${outcome.name} memory arrayBuffers`).toBe(true);
       }
+      // 個別 assert は soft なので、suite の成否は allPassed で決める。
+      expect(result.allPassed).toBe(true);
     },
     120_000,
   );

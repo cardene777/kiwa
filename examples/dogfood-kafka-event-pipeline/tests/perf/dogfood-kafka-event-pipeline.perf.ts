@@ -1,6 +1,6 @@
 import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import path from 'node:path';
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { makeMockAdapter, sampleOrderEvent } from '../../src/adapters/mock.js';
 import {
   driveConsumerGroupFlow,
@@ -20,7 +20,7 @@ describe(MODULE, () => {
   it(
     '3-layer perf: driveProducer / driveConsumerGroup / driveTransaction / driveDlq',
     async () => {
-      await runPerf3Layer({
+      const result = await runPerf3Layer({
         moduleName: MODULE,
         reportPath: REPORT_PATH,
         ops: [
@@ -62,6 +62,7 @@ describe(MODULE, () => {
           },
         ],
       });
+      expect(result.allPassed).toBe(true);
     },
     120_000,
   );

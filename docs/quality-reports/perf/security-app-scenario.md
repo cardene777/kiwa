@@ -2,19 +2,21 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00042ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| csp_build_burst (50 buildCspHeader) | 0.21ms | 30ms | PASS | stable (検知には +0.5ms (baseline 比 +188%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| security_headers_validate_loop (20 build + validate) | 0.03ms | 50ms | PASS | stable (検知には +0.5ms (baseline 比 +4476%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| production_hardening_flow (csp + security headers combined) | 0.01ms | 30ms | PASS | stable (検知には +0.5ms (baseline 比 +6447%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| csp_build_burst (50 buildCspHeader) | 0.04ms | 0.13ms | 30ms | 0.00042ms | PASS | stable (p10 -1% (閾値未満)、 p95 +34% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| security_headers_validate_loop (20 build + validate) | 0.0063ms | 0.03ms | 50ms | 0.00042ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| production_hardening_flow (csp + security headers combined) | 0.0016ms | 0.0034ms | 30ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| csp_build_burst (50 buildCspHeader) | 0.44ms | 60ms | PASS |
+| csp_build_burst (50 buildCspHeader) | 0.52ms | 60ms | PASS |
 | security_headers_validate_loop (20 build + validate) | 0.02ms | 100ms | PASS |
 | production_hardening_flow (csp + security headers combined) | 0.01ms | 60ms | PASS |
 
@@ -22,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| csp_build_burst (50 buildCspHeader) | -7216 B | 0 B | 102400 B | yes | PASS |
-| security_headers_validate_loop (20 build + validate) | 280 B | 0 B | 102400 B | yes | PASS |
-| production_hardening_flow (csp + security headers combined) | -15136 B | 0 B | 102400 B | yes | PASS |
+| csp_build_burst (50 buildCspHeader) | -7296 B | 0 B | 102400 B | yes | PASS |
+| security_headers_validate_loop (20 build + validate) | 424 B | 0 B | 102400 B | yes | PASS |
+| production_hardening_flow (csp + security headers combined) | 232 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
+| p10 | 0.04ms |
 | p50 | 0.06ms |
-| p95 | 0.21ms |
-| p99 | 0.35ms |
+| p95 | 0.13ms |
+| p99 | 0.28ms |
 | mean | 0.08ms |
-| stdev | 0.07ms |
+| stdev | 0.05ms |
 | min | 0.04ms |
-| max | 0.37ms |
-| total | 2.52ms |
+| max | 0.33ms |
+| total | 2.28ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.06ms | 0.06ms | +0.00ms | +0.31% |
-| p95 | 0.21ms | 0.27ms | -0.06ms | -21.27% |
-| p99 | 0.35ms | 0.34ms | +0.01ms | +4.18% |
-| mean | 0.08ms | 0.11ms | -0.03ms | -26.76% |
-| min | 0.04ms | 0.04ms | +0.00ms | +0.59% |
-| max | 0.37ms | 0.35ms | +0.02ms | +4.66% |
-| total | 2.52ms | 3.44ms | -0.92ms | -26.76% |
+| p10 | 0.04ms | 0.04ms | -0.00041ms | -1.04% |
+| p50 | 0.06ms | 0.05ms | +0.0039ms | +7.21% |
+| p95 | 0.13ms | 0.10ms | +0.03ms | +33.75% |
+| p99 | 0.28ms | 0.19ms | +0.09ms | +47.51% |
+| mean | 0.08ms | 0.07ms | +0.0089ms | +13.33% |
+| min | 0.04ms | 0.04ms | -0.00025ms | -0.65% |
+| max | 0.33ms | 0.23ms | +0.10ms | +45.64% |
+| total | 2.28ms | 2.01ms | +0.27ms | +13.33% |
 
 ### security_headers_validate_loop (20 build + validate)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.01ms |
+| p10 | 0.0063ms |
+| p50 | 0.0072ms |
 | p95 | 0.03ms |
-| p99 | 0.13ms |
+| p99 | 0.08ms |
 | mean | 0.01ms |
-| stdev | 0.03ms |
-| min | 0.00ms |
-| max | 0.17ms |
-| total | 0.44ms |
+| stdev | 0.02ms |
+| min | 0.0059ms |
+| max | 0.10ms |
+| total | 0.37ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -0.30% |
-| p95 | 0.03ms | 0.01ms | +0.02ms | +205.29% |
-| p99 | 0.13ms | 0.02ms | +0.11ms | +506.00% |
-| mean | 0.01ms | 0.01ms | +0.01ms | +87.37% |
-| min | 0.00ms | 0.01ms | -0.00ms | -27.95% |
-| max | 0.17ms | 0.03ms | +0.14ms | +564.19% |
-| total | 0.44ms | 0.24ms | +0.21ms | +87.37% |
+| p10 | 0.0063ms | 0.0046ms | +0.0017ms | +36.79% |
+| p50 | 0.0072ms | 0.0061ms | +0.0011ms | +18.03% |
+| p95 | 0.03ms | 0.02ms | +0.01ms | +68.28% |
+| p99 | 0.08ms | 0.03ms | +0.05ms | +142.66% |
+| mean | 0.01ms | 0.0077ms | +0.0048ms | +62.31% |
+| min | 0.0059ms | 0.0045ms | +0.0013ms | +29.35% |
+| max | 0.10ms | 0.04ms | +0.06ms | +165.38% |
+| total | 0.37ms | 0.23ms | +0.14ms | +62.31% |
 
 ### production_hardening_flow (csp + security headers combined)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
-| total | 0.08ms |
+| p10 | 0.0016ms |
+| p50 | 0.0016ms |
+| p95 | 0.0034ms |
+| p99 | 0.0055ms |
+| mean | 0.0020ms |
+| stdev | 0.00096ms |
+| min | 0.0015ms |
+| max | 0.0063ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -58.17% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -27.23% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -14.90% |
-| mean | 0.00ms | 0.01ms | -0.00ms | -50.37% |
-| min | 0.00ms | 0.00ms | -0.00ms | -59.01% |
-| max | 0.01ms | 0.01ms | -0.00ms | -15.85% |
-| total | 0.08ms | 0.15ms | -0.08ms | -50.37% |
+| p10 | 0.0016ms | 0.0016ms | -0.000038ms | -2.34% |
+| p50 | 0.0016ms | 0.0017ms | -0.000083ms | -4.86% |
+| p95 | 0.0034ms | 0.0034ms | +0.000041ms | +1.22% |
+| p99 | 0.0055ms | 0.0050ms | +0.00048ms | +9.72% |
+| mean | 0.0020ms | 0.0021ms | -0.000053ms | -2.56% |
+| min | 0.0015ms | 0.0016ms | -0.000041ms | -2.59% |
+| max | 0.0063ms | 0.0056ms | +0.00067ms | +11.84% |
+| total | 0.06ms | 0.06ms | -0.0016ms | -2.56% |
 

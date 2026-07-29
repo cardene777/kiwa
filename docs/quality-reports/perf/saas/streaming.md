@@ -2,18 +2,20 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00017ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00033ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| kafkaProducerSend | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +18853%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| redpandaProducerSend | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +70616%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| natsPublish | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +59805%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| idempotentProducerSend | 0.00ms | 10ms | PASS | stable (検知には +0.5ms (baseline 比 +131148%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| readCommittedFilter | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +200000%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| dlqHandleSuccess | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +92251%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| schemaRegistryRegister | 0.01ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +22645%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| transactionalProducerCycle | 0.00ms | 20ms | PASS | stable (検知には +0.5ms (baseline 比 +11288%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| kafkaProducerSend | 0.00046ms | 0.0022ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| redpandaProducerSend | 0.00046ms | 0.00063ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| natsPublish | 0.00042ms | 0.00076ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| idempotentProducerSend | 0.00025ms | 0.00038ms | 10ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +133%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| readCommittedFilter | 0.00017ms | 0.00025ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +199%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| dlqHandleSuccess | 0.00029ms | 0.00055ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +114%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| schemaRegistryRegister | 0.00058ms | 0.0021ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| transactionalProducerCycle | 0.0023ms | 0.0034ms | 20ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -23,23 +25,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | redpandaProducerSend | 0.01ms | 20ms | PASS |
 | natsPublish | 0.01ms | 20ms | PASS |
 | idempotentProducerSend | 0.00ms | 20ms | PASS |
-| readCommittedFilter | 0.00ms | 10ms | PASS |
+| readCommittedFilter | 0.01ms | 10ms | PASS |
 | dlqHandleSuccess | 0.00ms | 10ms | PASS |
-| schemaRegistryRegister | 0.04ms | 10ms | PASS |
-| transactionalProducerCycle | 0.04ms | 40ms | PASS |
+| schemaRegistryRegister | 0.01ms | 10ms | PASS |
+| transactionalProducerCycle | 0.05ms | 40ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| kafkaProducerSend | 10696 B | 0 B | 102400 B | yes | PASS |
-| redpandaProducerSend | 18944 B | 0 B | 102400 B | yes | PASS |
+| kafkaProducerSend | -354184 B | 0 B | 102400 B | yes | PASS |
+| redpandaProducerSend | 18848 B | 0 B | 102400 B | yes | PASS |
 | natsPublish | 40944 B | 0 B | 102400 B | yes | PASS |
-| idempotentProducerSend | 520 B | 0 B | 102400 B | yes | PASS |
+| idempotentProducerSend | 616 B | 0 B | 102400 B | yes | PASS |
 | readCommittedFilter | 944 B | 0 B | 102400 B | yes | PASS |
 | dlqHandleSuccess | 1328 B | 0 B | 102400 B | yes | PASS |
 | schemaRegistryRegister | 68912 B | 0 B | 102400 B | yes | PASS |
-| transactionalProducerCycle | 29136 B | 0 B | 102400 B | yes | PASS |
+| transactionalProducerCycle | 30416 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -51,26 +53,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.02ms |
-| total | 0.24ms |
+| p10 | 0.00046ms |
+| p50 | 0.00054ms |
+| p95 | 0.0022ms |
+| p99 | 0.0075ms |
+| mean | 0.00095ms |
+| stdev | 0.0012ms |
+| min | 0.00046ms |
+| max | 0.0091ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +10.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -6.97% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +40.51% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +10.80% |
-| min | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| max | 0.02ms | 0.02ms | +0.00ms | +15.43% |
-| total | 0.24ms | 0.21ms | +0.02ms | +10.80% |
+| p10 | 0.00046ms | 0.00050ms | -0.000042ms | -8.40% |
+| p50 | 0.00054ms | 0.00054ms | -5.0e-7ms | -0.09% |
+| p95 | 0.0022ms | 0.0021ms | +0.000090ms | +4.28% |
+| p99 | 0.0075ms | 0.0070ms | +0.00041ms | +5.84% |
+| mean | 0.00095ms | 0.00099ms | -0.000041ms | -4.12% |
+| min | 0.00046ms | 0.00046ms | 0.00ms | 0.00% |
+| max | 0.0091ms | 0.02ms | -0.0078ms | -46.19% |
+| total | 0.19ms | 0.20ms | -0.0082ms | -4.12% |
 
 ### redpandaProducerSend
 
@@ -80,26 +84,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
+| p10 | 0.00046ms |
+| p50 | 0.00046ms |
+| p95 | 0.00063ms |
+| p99 | 0.0016ms |
+| mean | 0.00053ms |
+| stdev | 0.00032ms |
+| min | 0.00042ms |
+| max | 0.0037ms |
 | total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +8.20% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -11.44% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -24.50% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.72% |
-| min | 0.00ms | 0.00ms | +0.00ms | +10.07% |
-| max | 0.00ms | 0.00ms | -0.00ms | -25.24% |
-| total | 0.11ms | 0.11ms | +0.00ms | +3.72% |
+| p10 | 0.00046ms | 0.00046ms | 0.00ms | 0.00% |
+| p50 | 0.00046ms | 0.00050ms | -0.000041ms | -8.20% |
+| p95 | 0.00063ms | 0.00059ms | +0.000041ms | +7.00% |
+| p99 | 0.0016ms | 0.0012ms | +0.00043ms | +36.98% |
+| mean | 0.00053ms | 0.00053ms | +2.3e-7ms | +0.04% |
+| min | 0.00042ms | 0.00042ms | -0.0000010ms | -0.24% |
+| max | 0.0037ms | 0.0030ms | +0.00071ms | +23.27% |
+| total | 0.11ms | 0.11ms | +0.000046ms | +0.04% |
 
 ### natsPublish
 
@@ -109,26 +115,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
-| total | 0.13ms |
+| p10 | 0.00042ms |
+| p50 | 0.00042ms |
+| p95 | 0.00076ms |
+| p99 | 0.0033ms |
+| mean | 0.00055ms |
+| stdev | 0.00070ms |
+| min | 0.00038ms |
+| max | 0.0067ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +10.07% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +4.91% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +66.40% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +15.43% |
-| min | 0.00ms | 0.00ms | +0.00ms | +10.93% |
-| max | 0.01ms | 0.01ms | +0.01ms | +96.06% |
-| total | 0.13ms | 0.12ms | +0.02ms | +15.43% |
+| p10 | 0.00042ms | 0.00042ms | -0.0000010ms | -0.24% |
+| p50 | 0.00042ms | 0.00046ms | -0.000041ms | -8.95% |
+| p95 | 0.00076ms | 0.00096ms | -0.00020ms | -20.87% |
+| p99 | 0.0033ms | 0.0029ms | +0.00046ms | +15.99% |
+| mean | 0.00055ms | 0.00059ms | -0.000043ms | -7.22% |
+| min | 0.00038ms | 0.00042ms | -0.000041ms | -9.86% |
+| max | 0.0067ms | 0.0090ms | -0.0023ms | -25.35% |
+| total | 0.11ms | 0.12ms | -0.0086ms | -7.22% |
 
 ### idempotentProducerSend
 
@@ -138,26 +146,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
-| total | 0.07ms |
+| p10 | 0.00025ms |
+| p50 | 0.00025ms |
+| p95 | 0.00038ms |
+| p99 | 0.0010ms |
+| mean | 0.00031ms |
+| stdev | 0.00022ms |
+| min | 0.00025ms |
+| max | 0.0027ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +0.34% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +32.79% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +11.65% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +8.17% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.00ms | 0.00ms | +0.00ms | +18.67% |
-| total | 0.07ms | 0.06ms | +0.01ms | +8.17% |
+| p10 | 0.00025ms | 0.00025ms | 0.00ms | 0.00% |
+| p50 | 0.00025ms | 0.00029ms | -0.000041ms | -14.09% |
+| p95 | 0.00038ms | 0.00046ms | -0.000082ms | -17.76% |
+| p99 | 0.0010ms | 0.0012ms | -0.00017ms | -13.88% |
+| mean | 0.00031ms | 0.00032ms | -0.000018ms | -5.49% |
+| min | 0.00025ms | 0.00025ms | 0.00ms | 0.00% |
+| max | 0.0027ms | 0.0027ms | -0.000041ms | -1.49% |
+| total | 0.06ms | 0.06ms | -0.0036ms | -5.49% |
 
 ### readCommittedFilter
 
@@ -167,26 +177,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
-| total | 0.06ms |
+| p10 | 0.00017ms |
+| p50 | 0.00021ms |
+| p95 | 0.00025ms |
+| p99 | 0.0021ms |
+| mean | 0.00027ms |
+| stdev | 0.00053ms |
+| min | 0.00017ms |
+| max | 0.0070ms |
+| total | 0.05ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +0.48% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +17.62% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +3.46% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +9.14% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +18.91% |
-| total | 0.06ms | 0.05ms | +0.00ms | +9.14% |
+| p10 | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
+| p50 | 0.00021ms | 0.00021ms | 0.00ms | 0.00% |
+| p95 | 0.00025ms | 0.00029ms | -0.000044ms | -14.98% |
+| p99 | 0.0021ms | 0.0023ms | -0.00012ms | -5.50% |
+| mean | 0.00027ms | 0.00027ms | +9.9e-7ms | +0.37% |
+| min | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
+| max | 0.0070ms | 0.0070ms | -0.000042ms | -0.60% |
+| total | 0.05ms | 0.05ms | +0.00020ms | +0.37% |
 
 ### dlqHandleSuccess
 
@@ -196,26 +208,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
-| total | 0.09ms |
+| p10 | 0.00029ms |
+| p50 | 0.00033ms |
+| p95 | 0.00055ms |
+| p99 | 0.0021ms |
+| mean | 0.00042ms |
+| stdev | 0.00037ms |
+| min | 0.00025ms |
+| max | 0.0036ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +12.61% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -6.98% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +81.70% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +21.65% |
-| min | 0.00ms | 0.00ms | +0.00ms | +14.43% |
-| max | 0.00ms | 0.00ms | +0.00ms | +303.23% |
-| total | 0.09ms | 0.07ms | +0.02ms | +21.65% |
+| p10 | 0.00029ms | 0.00029ms | 0.00ms | 0.00% |
+| p50 | 0.00033ms | 0.00033ms | +0.0000010ms | +0.30% |
+| p95 | 0.00055ms | 0.00055ms | 0.00ms | 0.00% |
+| p99 | 0.0021ms | 0.0013ms | +0.00084ms | +64.92% |
+| mean | 0.00042ms | 0.00041ms | +0.000015ms | +3.78% |
+| min | 0.00025ms | 0.00029ms | -0.000041ms | -14.09% |
+| max | 0.0036ms | 0.0078ms | -0.0043ms | -54.26% |
+| total | 0.08ms | 0.08ms | +0.0031ms | +3.78% |
 
 ### schemaRegistryRegister
 
@@ -225,26 +239,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
+| p10 | 0.00058ms |
+| p50 | 0.00063ms |
+| p95 | 0.0021ms |
+| p99 | 0.0093ms |
+| mean | 0.00097ms |
+| stdev | 0.0016ms |
+| min | 0.00054ms |
 | max | 0.02ms |
-| total | 0.32ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +53.28% |
-| p95 | 0.01ms | 0.00ms | +0.00ms | +141.42% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +202.96% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +86.93% |
-| min | 0.00ms | 0.00ms | +0.00ms | +15.53% |
-| max | 0.02ms | 0.01ms | +0.02ms | +151.67% |
-| total | 0.32ms | 0.17ms | +0.15ms | +86.93% |
+| p10 | 0.00058ms | 0.00054ms | +0.000041ms | +7.58% |
+| p50 | 0.00063ms | 0.00063ms | 0.00ms | 0.00% |
+| p95 | 0.0021ms | 0.0023ms | -0.00013ms | -5.63% |
+| p99 | 0.0093ms | 0.0051ms | +0.0041ms | +80.27% |
+| mean | 0.00097ms | 0.00087ms | +0.00010ms | +11.60% |
+| min | 0.00054ms | 0.00046ms | +0.000083ms | +18.12% |
+| max | 0.02ms | 0.01ms | +0.0059ms | +57.96% |
+| total | 0.19ms | 0.17ms | +0.02ms | +11.60% |
 
 ### transactionalProducerCycle
 
@@ -254,24 +270,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.02ms |
-| total | 0.61ms |
+| p10 | 0.0023ms |
+| p50 | 0.0023ms |
+| p95 | 0.0034ms |
+| p99 | 0.0093ms |
+| mean | 0.0027ms |
+| stdev | 0.0014ms |
+| min | 0.0022ms |
+| max | 0.01ms |
+| total | 0.53ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +5.13% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -13.18% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +17.73% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.90% |
-| min | 0.00ms | 0.00ms | +0.00ms | +7.38% |
-| max | 0.02ms | 0.02ms | +0.00ms | +14.32% |
-| total | 0.61ms | 0.58ms | +0.03ms | +4.90% |
+| p10 | 0.0023ms | 0.0023ms | -0.0000051ms | -0.22% |
+| p50 | 0.0023ms | 0.0024ms | -0.000041ms | -1.73% |
+| p95 | 0.0034ms | 0.0035ms | -0.000082ms | -2.36% |
+| p99 | 0.0093ms | 0.01ms | -0.0055ms | -37.21% |
+| mean | 0.0027ms | 0.0028ms | -0.00017ms | -6.02% |
+| min | 0.0022ms | 0.0022ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.03ms | -0.01ms | -43.67% |
+| total | 0.53ms | 0.57ms | -0.03ms | -6.02% |
 
