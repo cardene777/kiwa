@@ -258,7 +258,7 @@ cd /path/to/your-dapp
 pnpm add -D file:$HOME/kiwa/packages/dapp file:$HOME/kiwa/packages/cli
 
 # 3. local install した CLI で scaffold
-pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/index.js init
+pnpm exec kiwa init     # または: node $HOME/kiwa/packages/cli/dist/bin.js init
 ```
 
 通常利用は Option C (`pnpm dlx @kiwa-lab/cli init`) を推奨、 公開済 0.1.0 を直接取得します。

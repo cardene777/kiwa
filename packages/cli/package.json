@@ -23,7 +23,15 @@
   },
   "type": "module",
   "bin": {
-    "kiwa": "./dist/index.js"
+    "kiwa": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "files": [
     "dist",
@@ -38,11 +46,11 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --onSuccess \"node -e \\\"require('node:fs').cpSync('src/templates','dist/templates',{recursive:true})\\\"\"",
+    "build": "tsup src/bin.ts src/index.ts --format esm --dts --clean --onSuccess \"node -e \\\"require('node:fs').cpSync('src/templates','dist/templates',{recursive:true})\\\"\"",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism",
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
-    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/index.js'",
+    "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/bin.js'",
     "test:mutation": "stryker run",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
     "typecheck": "tsc --noEmit"

@@ -1,0 +1,562 @@
+import type { ChildProcess } from 'node:child_process';
+import { EventEmitter } from 'node:events';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import * as publicEntry from '../src/index.js';
+import { createDefaultDeps, runCli, takeFlagValue, USAGE, type RunCliDeps } from '../src/runCli.js';
+import { InitConflictError, runInit, type InitOptions } from '../src/commands/init.js';
+import { runAnvilSeed, type AnvilSeedOptions } from '../src/commands/anvil-seed.js';
+import { runSpecToTest, type SpecToTestOptions } from '../src/commands/spec-to-test.js';
+import { runWatch } from '../src/commands/run-watch.js';
+
+// packages/cli/src/runCli.ts の argv 解析 / command routing / exit code を
+// 依存注入で cover する behavior test。 process.exit を呼ばず subprocess も
+// network も起動しないため、 全 command の分岐を実際に走らせて検証できる。
+
+const CWD = '/kiwa/project';
+
+const dirs: string[] = [];
+
+afterEach(() => {
+  while (dirs.length > 0) {
+    const dir = dirs.pop();
+    if (dir) rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+/** runWatch が要求する package.json を持つ一時 project を作る。 */
+function makeProject(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'kiwa-runcli-'));
+  writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'consumer', version: '0.0.0' }), 'utf8');
+  dirs.push(dir);
+  return dir;
+}
+
+/** 指定 exit code を非同期に 1 度だけ発火する child process の代役。 */
+function fakeChild(code: number | null, signal: NodeJS.Signals | null = null): ChildProcess {
+  const child = new EventEmitter();
+  setImmediate(() => {
+    child.emit('exit', code, signal);
+  });
+  return child as unknown as ChildProcess;
+}
+
+/** spawn 自体が失敗した child。 `exit` は来ず `error` だけが飛ぶ。 */
+function failingChild(message: string): ChildProcess {
+  const child = new EventEmitter();
+  setImmediate(() => {
+    child.emit('error', new Error(message));
+  });
+  return child as unknown as ChildProcess;
+}
+
+interface Harness {
+  deps: RunCliDeps;
+  out: () => string;
+  err: () => string;
+}
+
+/**
+ * stdout / stderr を収集する deps を組み立てる。 stub していない依存は呼ばれた
+ * 時点で throw するので、 routing が想定外の command 実装を呼んだら test が落ちる。
+ */
+function harness(overrides: Partial<RunCliDeps> = {}): Harness {
+  const out: string[] = [];
+  const err: string[] = [];
+  const base: RunCliDeps = {
+    cwd: () => CWD,
+    stdout: (chunk) => {
+      out.push(chunk);
+    },
+    stderr: (chunk) => {
+      err.push(chunk);
+    },
+    execSync: () => {
+      throw new Error('execSync was not stubbed for this case');
+    },
+    runInit: () => {
+      throw new Error('runInit was not stubbed for this case');
+    },
+    runAnvilSeed: () => {
+      throw new Error('runAnvilSeed was not stubbed for this case');
+    },
+    runSpecToTest: () => {
+      throw new Error('runSpecToTest was not stubbed for this case');
+    },
+    runWatch: () => {
+      throw new Error('runWatch was not stubbed for this case');
+    },
+  };
+  return {
+    deps: { ...base, ...overrides },
+    out: () => out.join(''),
+    err: () => err.join(''),
+  };
+}
+
+describe('runCli dispatch', () => {
+  it('T-CLI-001 --help prints the usage text on stdout and exits 0', async () => {
+    const h = harness();
+    await expect(runCli(['--help'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe(USAGE);
+    expect(h.err()).toBe('');
+  });
+
+  it('T-CLI-002 -h is an alias of --help', async () => {
+    const h = harness();
+    await expect(runCli(['-h'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe(USAGE);
+  });
+
+  it('T-CLI-003 an unknown command exits 2 with the name and the usage text on stderr', async () => {
+    const h = harness();
+    await expect(runCli(['bogus'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe(`Unknown command: bogus\n${USAGE}`);
+    expect(h.out()).toBe('');
+  });
+
+  it('T-CLI-004 an empty argv reports "(none)" as the command name', async () => {
+    const h = harness();
+    await expect(runCli([], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe(`Unknown command: (none)\n${USAGE}`);
+  });
+
+  it('T-CLI-005 "anvil" without the seed sub-command falls through to the unknown path', async () => {
+    const h = harness();
+    await expect(runCli(['anvil'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe(`Unknown command: anvil\n${USAGE}`);
+  });
+
+  it('T-CLI-006 a failing output sink is reported as "ERR <message>" and exits 1', async () => {
+    const h = harness({
+      stdout: () => {
+        throw new Error('EPIPE: broken pipe');
+      },
+    });
+    await expect(runCli(['--help'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe('ERR EPIPE: broken pipe\n');
+  });
+});
+
+describe('runCli doctor', () => {
+  it('T-CLI-010 resolves anvil through "which anvil" and prints the trimmed path', async () => {
+    const commands: string[] = [];
+    const h = harness({
+      execSync: (command) => {
+        commands.push(command);
+        return '/opt/homebrew/bin/anvil\n';
+      },
+    });
+    await expect(runCli(['doctor'], h.deps)).resolves.toBe(0);
+    expect(commands).toEqual(['which anvil']);
+    expect(h.out()).toBe('OK anvil at /opt/homebrew/bin/anvil\n');
+  });
+
+  it('T-CLI-011 an empty lookup result exits 1 with the foundry install hint', async () => {
+    const h = harness({ execSync: () => '   \n' });
+    await expect(runCli(['doctor'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe(
+      'ERR anvil not found. Install foundry: curl -L https://foundry.paradigm.xyz | bash && foundryup\n',
+    );
+    expect(h.out()).toBe('');
+  });
+
+  it('T-CLI-012 a failing lookup exits 1 with the same hint', async () => {
+    const h = harness({
+      execSync: () => {
+        throw new Error('Command failed: which anvil');
+      },
+    });
+    await expect(runCli(['doctor'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toContain('curl -L https://foundry.paradigm.xyz | bash && foundryup');
+  });
+});
+
+describe('runCli init', () => {
+  it('T-CLI-020 prints created / updated lines on stdout, warnings on stderr, then the next step', async () => {
+    const h = harness({
+      runInit: () => ({
+        created: ['e2e/connect.spec.ts', 'playwright.config.ts'],
+        updated: ['package.json'],
+        warnings: ['tsconfig strict is off'],
+      }),
+    });
+    await expect(runCli(['init'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe(
+      'created: e2e/connect.spec.ts\ncreated: playwright.config.ts\nupdated: package.json\n\nNext: pnpm install && pnpm exec playwright test\n',
+    );
+    expect(h.err()).toBe('warn: tsconfig strict is off\n');
+  });
+
+  it('T-CLI-021 forwards every flag, accepting both "--flag value" and "--flag=value"', async () => {
+    let seen: InitOptions | undefined;
+    const h = harness({
+      runInit: (options) => {
+        seen = options;
+        return { created: [], updated: [], warnings: [] };
+      },
+    });
+    const argv = [
+      'init',
+      '--force',
+      '--testDir',
+      'tests/e2e',
+      '--config-suffix=ci',
+      '--script-key',
+      'test:web',
+      '--with-deploy',
+      '../foundry',
+    ];
+    await expect(runCli(argv, h.deps)).resolves.toBe(0);
+    expect(seen).toEqual({
+      force: true,
+      cwd: CWD,
+      testDir: 'tests/e2e',
+      configSuffix: 'ci',
+      scriptKey: 'test:web',
+      withDeploy: '../foundry',
+    });
+  });
+
+  it('T-CLI-022 omits the optional keys entirely when no flag is given', async () => {
+    let seen: InitOptions | undefined;
+    const h = harness({
+      runInit: (options) => {
+        seen = options;
+        return { created: [], updated: [], warnings: [] };
+      },
+    });
+    await expect(runCli(['init'], h.deps)).resolves.toBe(0);
+    expect(seen).toEqual({ force: false, cwd: CWD });
+  });
+
+  it('T-CLI-023 a conflict exits 1 listing the files and the --force hint', async () => {
+    const h = harness({
+      runInit: () => {
+        throw new InitConflictError(['e2e/connect.spec.ts', 'playwright.config.ts']);
+      },
+    });
+    await expect(runCli(['init'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe(
+      'ERR conflicting files: e2e/connect.spec.ts, playwright.config.ts\nUse --force to overwrite.\n',
+    );
+  });
+
+  it('T-CLI-024 any other failure exits 1 as "ERR init failed"', async () => {
+    const h = harness({
+      runInit: () => {
+        throw new Error('EACCES: permission denied');
+      },
+    });
+    await expect(runCli(['init'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe('ERR init failed: EACCES: permission denied\n');
+  });
+
+  it('T-CLI-025 a flag without a value exits 1 before runInit is reached', async () => {
+    let called = false;
+    const h = harness({
+      runInit: () => {
+        called = true;
+        return { created: [], updated: [], warnings: [] };
+      },
+    });
+    await expect(runCli(['init', '--testDir', '--force'], h.deps)).resolves.toBe(1);
+    expect(called).toBe(false);
+    expect(h.err()).toBe('ERR init failed: kiwa init: --testDir requires a value\n');
+  });
+});
+
+describe('runCli anvil seed', () => {
+  it('T-CLI-030 exits 2 when no script path is present', async () => {
+    const h = harness();
+    await expect(runCli(['anvil', 'seed'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe('ERR kiwa anvil seed: script path is required\n');
+  });
+
+  it('T-CLI-031 exits 2 when --out is missing', async () => {
+    const h = harness();
+    await expect(runCli(['anvil', 'seed', 'script/Seed.s.sol'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe('ERR kiwa anvil seed: --out <path> is required\n');
+  });
+
+  it('T-CLI-032 passes --chain-id / --port through as numbers and reports the dump path', async () => {
+    let seen: AnvilSeedOptions | undefined;
+    const h = harness({
+      runAnvilSeed: async (options) => {
+        seen = options;
+        return { outPath: '/abs/state.json', port: 8545 };
+      },
+    });
+    const argv = ['anvil', 'seed', 'script/Seed.s.sol', '--out', 'state.json', '--chain-id', '1337', '--port', '8545'];
+    await expect(runCli(argv, h.deps)).resolves.toBe(0);
+    expect(seen).toEqual({
+      scriptPath: 'script/Seed.s.sol',
+      outPath: 'state.json',
+      cwd: CWD,
+      chainId: 1337,
+      port: 8545,
+    });
+    expect(h.out()).toBe('OK seeded state at /abs/state.json (port 8545)\n');
+  });
+
+  it('T-CLI-033 omits chainId / port entirely when the flags are absent', async () => {
+    let seen: AnvilSeedOptions | undefined;
+    const h = harness({
+      runAnvilSeed: async (options) => {
+        seen = options;
+        return { outPath: '/abs/state.json', port: 41000 };
+      },
+    });
+    await expect(runCli(['anvil', 'seed', 'script/Seed.s.sol', '--out=state.json'], h.deps)).resolves.toBe(0);
+    expect(seen).toEqual({ scriptPath: 'script/Seed.s.sol', outPath: 'state.json', cwd: CWD });
+  });
+
+  it('T-CLI-034 a rejected seed run exits 1 as "ERR anvil seed failed"', async () => {
+    const h = harness({
+      runAnvilSeed: async () => {
+        throw new Error('anvil seed: script not found: /abs/script/Seed.s.sol');
+      },
+    });
+    const argv = ['anvil', 'seed', 'script/Seed.s.sol', '--out', 'state.json'];
+    await expect(runCli(argv, h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe('ERR anvil seed failed: anvil seed: script not found: /abs/script/Seed.s.sol\n');
+  });
+});
+
+describe('runCli spec-to-test', () => {
+  it('T-CLI-040 exits 2 when --in or --out is missing', async () => {
+    const missingBoth = harness();
+    await expect(runCli(['spec-to-test'], missingBoth.deps)).resolves.toBe(2);
+    expect(missingBoth.err()).toBe('ERR kiwa spec-to-test: --in <path> and --out <path> are required\n');
+
+    const missingOut = harness();
+    await expect(runCli(['spec-to-test', '--in', 'spec.md'], missingOut.deps)).resolves.toBe(2);
+    expect(missingOut.err()).toBe('ERR kiwa spec-to-test: --in <path> and --out <path> are required\n');
+  });
+
+  it('T-CLI-041 forwards --layer and reports the generated case count', async () => {
+    let seen: SpecToTestOptions | undefined;
+    const h = harness({
+      runSpecToTest: (options) => {
+        seen = options;
+        return { module: 'profile', layer: 'api', count: 3, outPath: '/abs/profile.test.ts' };
+      },
+    });
+    const argv = ['spec-to-test', '--in', 'spec.md', '--out', 'profile.test.ts', '--layer', 'api'];
+    await expect(runCli(argv, h.deps)).resolves.toBe(0);
+    expect(seen).toEqual({ inPath: 'spec.md', outPath: 'profile.test.ts', cwd: CWD, layer: 'api' });
+    expect(h.out()).toBe('OK generated 3 test cases for module "profile" (layer api) at /abs/profile.test.ts\n');
+  });
+
+  it('T-CLI-042 omits the layer key so the spec meta stays authoritative', async () => {
+    let seen: SpecToTestOptions | undefined;
+    const h = harness({
+      runSpecToTest: (options) => {
+        seen = options;
+        return { module: 'profile', layer: 'ui', count: 1, outPath: '/abs/profile.test.ts' };
+      },
+    });
+    await expect(runCli(['spec-to-test', '--in=spec.md', '--out=profile.test.ts'], h.deps)).resolves.toBe(0);
+    expect(seen).toEqual({ inPath: 'spec.md', outPath: 'profile.test.ts', cwd: CWD });
+  });
+
+  it('T-CLI-043 a generator failure exits 1 as "ERR spec-to-test failed"', async () => {
+    const h = harness({
+      runSpecToTest: () => {
+        throw new Error('spec-to-test: input not found: /abs/spec.md');
+      },
+    });
+    const argv = ['spec-to-test', '--in', 'spec.md', '--out', 'profile.test.ts'];
+    await expect(runCli(argv, h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe('ERR spec-to-test failed: spec-to-test: input not found: /abs/spec.md\n');
+  });
+});
+
+describe('runCli run --watch', () => {
+  it('T-CLI-050 exits 2 when --watch is absent', async () => {
+    const h = harness();
+    await expect(runCli(['run'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe('ERR kiwa run: only --watch is supported today\n');
+  });
+
+  it('T-CLI-051 exits 2 when --layer has no value', async () => {
+    const trailing = harness();
+    await expect(runCli(['run', '--watch', '--layer'], trailing.deps)).resolves.toBe(2);
+    expect(trailing.err()).toBe('ERR kiwa run --watch: --layer requires a value\n');
+
+    const followedByFlag = harness();
+    await expect(runCli(['run', '--watch', '--layer', '--dry-run'], followedByFlag.deps)).resolves.toBe(2);
+    expect(followedByFlag.err()).toBe('ERR kiwa run --watch: --layer requires a value\n');
+  });
+
+  it('T-CLI-052 --dry-run prints the unit / api / ui plans without spawning anything', async () => {
+    const dir = makeProject();
+    const h = harness({ cwd: () => dir, runWatch });
+    await expect(runCli(['run', '--watch', '--dry-run'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe(
+      'watch[unit]: pnpm exec vitest --watch --dir tests/unit\n' +
+        'watch[api]: pnpm exec vitest --watch --dir tests/integration\n' +
+        'watch[ui]: pnpm exec vitest --watch --dir tests\n',
+    );
+  });
+
+  it('T-CLI-053 repeated --layer flags replace the default layer set', async () => {
+    const dir = makeProject();
+    const h = harness({ cwd: () => dir, runWatch });
+    await expect(runCli(['run', '--watch', '--layer', 'api', '--layer', 'e2e', '--dry-run'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe(
+      'watch[api]: pnpm exec vitest --watch --dir tests/integration\n' +
+        'watch[e2e]: pnpm exec vitest --watch --dir tests/e2e\n',
+    );
+  });
+
+  it('T-CLI-054 spawns one watcher per layer and exits 0 when all of them exit 0', async () => {
+    const dir = makeProject();
+    const spawned: Array<{ cmd: string; args: string[]; layer: string | undefined }> = [];
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: (cmd, args, opts) => {
+        spawned.push({ cmd, args, layer: opts.env.KIWA_WATCH_LAYER });
+        return fakeChild(0);
+      },
+    });
+    await expect(runCli(['run', '--watch', '--layer', 'unit', '--layer', 'api'], h.deps)).resolves.toBe(0);
+    expect(spawned.map((s) => s.layer)).toEqual(['unit', 'api']);
+    expect(spawned[0]?.cmd).toBe('pnpm');
+    expect(spawned[0]?.args).toEqual(['exec', 'vitest', '--watch', '--dir', 'tests/unit']);
+  });
+
+  it('T-CLI-055 propagates the first non-zero watcher exit code', async () => {
+    const dir = makeProject();
+    const codes = [0, 3, 0];
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => fakeChild(codes.shift() ?? 0),
+    });
+    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
+  });
+
+  it('T-CLI-056 signal で落ちた watcher は成功にしない', async () => {
+    // code が null で signal に名前が入る形。0 に丸めると SIGSEGV で死んだ
+    // watcher が成功になり、呼び出し側は異常終了を検知できない。
+    const dir = makeProject();
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => fakeChild(null, 'SIGSEGV'),
+    });
+    await expect(runCli(['run', '--watch', '--layer', 'unit'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toContain('terminated by SIGSEGV');
+  });
+
+  it('T-CLI-058 spawn に失敗した watcher を error 経由で拾う', async () => {
+    // `error` を購読していないと uncaught になり、exit を待つ promise も残る。
+    const dir = makeProject();
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => failingChild('spawn pnpm ENOENT'),
+    });
+    await expect(runCli(['run', '--watch', '--layer', 'unit'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toContain('spawn pnpm ENOENT');
+  });
+
+  it('T-CLI-059 --layer=value の形も layer 指定として扱う', async () => {
+    // 他の command と takeFlagValue は両形式を扱う。ここだけ空白区切りしか
+    // 見ないと、同じ指定が黙って無視されて既定の 3 layer が起動する。
+    const dir = makeProject();
+    const h = harness({ cwd: () => dir, runWatch });
+    await expect(runCli(['run', '--watch', '--layer=api', '--dry-run'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe('watch[api]: pnpm exec vitest --watch --dir tests/integration\n');
+  });
+
+  it('T-CLI-060b option の値を script path と取り違えない', async () => {
+    // `--out state.mjs` の値を positional とみなすと、その名前の file が
+    // 実在した場合に入力不備のつもりで実行してしまう。
+    const h = harness();
+    await expect(runCli(['anvil', 'seed', '--out', 'state.mjs'], h.deps)).resolves.toBe(2);
+    expect(h.err()).toBe('ERR kiwa anvil seed: script path is required\n');
+  });
+
+  it('T-CLI-057 an unknown layer exits 1 as "ERR run --watch failed"', async () => {
+    const dir = makeProject();
+    const h = harness({ cwd: () => dir, runWatch });
+    await expect(runCli(['run', '--watch', '--layer', 'bogus', '--dry-run'], h.deps)).resolves.toBe(1);
+    expect(h.err()).toBe('ERR run --watch failed: kiwa run --watch: unknown layer "bogus"\n');
+  });
+});
+
+describe('takeFlagValue', () => {
+  it('T-CLI-060 reads "--flag value" and "--flag=value", and returns undefined when absent', () => {
+    expect(takeFlagValue(['--out', 'state.json'], '--out')).toBe('state.json');
+    expect(takeFlagValue(['--out=state.json'], '--out')).toBe('state.json');
+    expect(takeFlagValue(['--force', '--out', 'state.json'], '--out')).toBe('state.json');
+    expect(takeFlagValue(['--force'], '--out')).toBeUndefined();
+    expect(takeFlagValue([], '--out')).toBeUndefined();
+  });
+
+  it('T-CLI-061 throws when the flag is last or is followed by another flag', () => {
+    expect(() => takeFlagValue(['--out'], '--out')).toThrow('kiwa init: --out requires a value');
+    expect(() => takeFlagValue(['--out', '--force'], '--out')).toThrow('kiwa init: --out requires a value');
+  });
+});
+
+describe('createDefaultDeps', () => {
+  it('T-CLI-070 binds the CLI to the current process and to the real command implementations', () => {
+    const deps = createDefaultDeps();
+    expect(deps.cwd()).toBe(process.cwd());
+    expect(deps.execSync('printf kiwa-probe')).toBe('kiwa-probe');
+    expect(deps.runInit).toBe(runInit);
+    expect(deps.runAnvilSeed).toBe(runAnvilSeed);
+    expect(deps.runSpecToTest).toBe(runSpecToTest);
+    expect(deps.runWatch).toBe(runWatch);
+
+    // mockRestore() は呼び出し履歴も消すため、 restore 前に控えを取ってから assert する。
+    const outSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+    const errSpy = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+    let outCalls: unknown[][] = [];
+    let errCalls: unknown[][] = [];
+    try {
+      deps.stdout('to-stdout');
+      deps.stderr('to-stderr');
+      outCalls = [...outSpy.mock.calls];
+      errCalls = [...errSpy.mock.calls];
+    } finally {
+      outSpy.mockRestore();
+      errSpy.mockRestore();
+    }
+    expect(outCalls).toEqual([['to-stdout']]);
+    expect(errCalls).toEqual([['to-stderr']]);
+  });
+
+  it('T-CLI-071 drives a full --help run without terminating the process', async () => {
+    const outSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+    let code: number;
+    let written: unknown[][] = [];
+    try {
+      code = await runCli(['--help'], createDefaultDeps());
+      written = [...outSpy.mock.calls];
+    } finally {
+      outSpy.mockRestore();
+    }
+    expect(code).toBe(0);
+    expect(written).toEqual([[USAGE]]);
+  });
+});
+
+describe('package entry point', () => {
+  it('T-CLI-080 re-exports the CLI so embedders and the docs pipeline see one contract', async () => {
+    expect(publicEntry.runCli).toBe(runCli);
+    expect(publicEntry.createDefaultDeps).toBe(createDefaultDeps);
+    expect(publicEntry.takeFlagValue).toBe(takeFlagValue);
+    expect(publicEntry.USAGE).toBe(USAGE);
+
+    const h = harness();
+    await expect(publicEntry.runCli(['--help'], h.deps)).resolves.toBe(0);
+    expect(h.out()).toBe(USAGE);
+  });
+});
