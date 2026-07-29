@@ -139,6 +139,19 @@ export interface RunPerf3LayerInput {
    */
   regressionGate?: boolean;
   /**
+   * 回帰と判定する相対閾値 (default 0.2 = 20%)。
+   *
+   * `runPerf3LayerStrict` が 0.1 を渡す。 呼出が指定しなければ既定のまま。
+   */
+  regressionThreshold?: number;
+  /**
+   * 回帰判定の信頼区間 (default 0.95)。
+   *
+   * `runPerf3LayerStrict` が 0.99 を渡す。 見逃しが致命的な経路で幅を広げ、
+   * 有意と認める条件を厳しくする。
+   */
+  regressionConfidenceLevel?: number;
+  /**
    * Path (relative to reportPath's directory tree) that the report references
    * as the threshold SSOT. Default: '../../quality/perf-thresholds'.
    */
@@ -220,6 +233,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 上限判定に載っていた (#1708)。
   const memoryWarmup = input.memoryWarmup ?? Math.max(3, Math.ceil(memoryIterations / 10));
   const memoryCapDefault = 100 * 1024;
+  const regressionThreshold = input.regressionThreshold ?? 0.2;
+  const regressionConfidenceLevel = input.regressionConfidenceLevel ?? 0.95;
   const baselinePath = input.baselinePath ?? defaultBaselinePath(input.moduleName);
   // 固定の相対 path だと、report を 1 階層深く置いた瞬間にリンクが外れる。
   // 実際 framework/ と saas/ 配下の 20 件が docs/quality-reports/quality/ を
@@ -300,7 +315,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       ? detectRegression({
           current: serial,
           baseline: priorSerial,
-          threshold: 0.2,
+          threshold: regressionThreshold,
+          confidenceLevel: regressionConfidenceLevel,
           resolutionMs,
           ...(op.regressionMinDeltaMs === undefined
             ? {}
@@ -320,7 +336,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
-      ...(regression === null ? {} : buildRegressionNote(regression, 0.2)),
+      ...(regression === null ? {} : buildRegressionNote(regression, regressionThreshold)),
     });
   }
 
@@ -463,7 +479,7 @@ function regressionCell(op: PerfOpSpec, outcome: OpOutcome, regressionGate: bool
  * は別物で、後者を黙って stable と書くと検知できていないことが伝わらない。
  * 判定そのものは `detectRegression` が持ち、ここでは持ち込まない。
  */
-function buildRegressionNote(
+export function buildRegressionNote(
   regression: RegressionResult,
   threshold: number,
 ): { regressionNote?: string } {
@@ -489,14 +505,26 @@ function buildRegressionNote(
       regressionNote: `検知には +${formatMs(regression.floorMs)} (${requirement}) 以上の悪化が必要`,
     };
   }
-  // 下側が動かないまま裾だけ伸びた変化。 一部の呼出だけが遅くなる実装変更は
-  // ここにしか出ない。 gate には載せられないが、 起きた事実は残す。
+  // 裾だけが閾値を超えた変化。 一部の呼出だけが遅くなる実装変更はここにしか出ない。
+  // gate には載せられないが、 起きた事実は残す。
+  //
+  // 下側も動いている場合があるので「動かず」 とは書かない。 p10 が +19% (閾値未満) で
+  // p95 が +100% という組合せはこの分岐に入るため、 両方の数字を並べて読み手に委ねる。
   if (Number.isFinite(regression.tailDeltaPct) && regression.tailDeltaPct >= threshold) {
+    const judged = Number.isFinite(regression.deltaPct)
+      ? `p10 ${signedPct(regression.deltaPct)} (閾値未満)`
+      : 'p10 は baseline が 0ms のため相対では表せない';
     return {
-      regressionNote: `下側は動かず p95 のみ +${(regression.tailDeltaPct * 100).toFixed(0)}% (実行間の振れ幅と区別できないため判定には使わない)`,
+      regressionNote: `${judged}、 p95 ${signedPct(regression.tailDeltaPct)} (裾は実行間の振れ幅と区別できないため判定には使わない)`,
     };
   }
   return {};
+}
+
+/** 変化率を符号つきの百分率にする。 0 との区別が要るので符号を落とさない。 */
+function signedPct(ratio: number): string {
+  const sign = ratio > 0 ? '+' : '';
+  return `${sign}${(ratio * 100).toFixed(0)}%`;
 }
 
 
@@ -525,20 +553,24 @@ function writeReport(input: WriteReportInput): void {
     '',
     // 上限は p95、 回帰判定は p10 と読む軸が違う。 同じ表に並べて出さないと、
     // 「p95 が動いたのに stable と書いてある」 が矛盾に見える。
-    `測定系の分解能 = ${formatMs(input.resolutionMs)} (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限はこの ${RESOLUTION_FLOOR_MULTIPLE} 倍 = ${formatMs(input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)}。`,
+    `測定系の分解能 = ${formatMs(input.resolutionMs)} (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの ${RESOLUTION_FLOOR_MULTIPLE} 倍 = ${formatMs(input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)}、 op ごとの実効値は下表の「下限」 列。`,
     '',
     '## Serial (concurrency = 1)',
     '',
-    '| op | p10 (回帰判定) | p95 (上限判定) | cap | gate | regression |',
-    '|---|---|---|---|---|---|',
+    '| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |',
+    '|---|---|---|---|---|---|---|',
   ];
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
+    // 既定の下限を op 側が上書きできるため、実際に効いた値を行ごとに書く。
+    // 表頭の既定値だけを書くと、上書きした op で表示と判定条件がずれる。
+    const floorMs =
+      op.regressionMinDeltaMs ?? input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE;
     lines.push(
       // 判定を gate から外した op は、判定結果と外した理由の両方を書く。
       // 結果だけ書くと gate に効いているように読め、理由だけ書くと
       // 何が測れたのかが残らない。
-      `| ${op.name} | ${formatMs(out.serial.p10)} | ${formatMs(out.serial.p95)} | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
+      `| ${op.name} | ${formatMs(out.serial.p10)} | ${formatMs(out.serial.p95)} | ${op.serialP95CapMs}ms | ${formatMs(floorMs)} | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
     );
   });
 
@@ -603,7 +635,7 @@ function writeReport(input: WriteReportInput): void {
 
 /**
  * runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + CI 99% +
- * delta 10%。 test 漏れゼロを狙う fail-fast mode。
+ * delta 10%。 見逃し (退行を stable と判定) が致命的な経路で使う。
  *
  * defaults ...
  * - serialIterations: 400 (v0.2 200)
@@ -611,8 +643,12 @@ function writeReport(input: WriteReportInput): void {
  * - concurrency: 20 (v0.2 10)
  * - iterationsPerWorker: 100 (v0.2 50)
  * - memoryIterations: 400 (v0.2 200)
+ * - regressionThreshold: 0.1 (v0.2 0.2)
+ * - regressionConfidenceLevel: 0.99 (v0.2 0.95)
  *
- * regression 判定は detectRegressionStrict 経由 (|t|>3 + delta 10%)。
+ * 回帰判定の 2 つは、 名前が strict でありながら通常版と同じ設定で動いていた
+ * (`runPerf3Layer` が閾値を内部で固定していた)。 標本数だけ増えて判定は緩いまま
+ * だったので、 呼出から渡せるようにして名前どおりの挙動に揃えた (#1718)。
  */
 export async function runPerf3LayerStrict(
   input: RunPerf3LayerInput,
@@ -624,6 +660,8 @@ export async function runPerf3LayerStrict(
     concurrency: input.concurrency ?? 20,
     iterationsPerWorker: input.iterationsPerWorker ?? 100,
     memoryIterations: input.memoryIterations ?? 400,
+    regressionThreshold: input.regressionThreshold ?? 0.1,
+    regressionConfidenceLevel: input.regressionConfidenceLevel ?? 0.99,
   });
 }
 

@@ -22,11 +22,18 @@ import path from 'node:path';
 import { measure, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
-import { detectRegression } from './regression.js';
-import { captureEnv, defaultBaselinePath, loadBaseline, saveBaselineEnvelope } from './baseline.js';
+import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
+import {
+  captureEnv,
+  defaultBaselinePath,
+  isComparableEnv,
+  loadBaseline,
+  saveBaselineEnvelope,
+} from './baseline.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport } from './report.js';
+import { emitPerfReport, formatMs } from './report.js';
 import type { MeasureResult } from './types.js';
+import { buildRegressionNote } from './three-layer.js';
 import type { OpOutcome, PerfOpSpec } from './three-layer.js';
 
 export interface LivePerfOpSpec extends PerfOpSpec {
@@ -76,7 +83,13 @@ export async function runPerf3LayerLive(
     input.baselinePath ?? defaultBaselinePath(`${input.moduleName}.live`);
   const thresholdDocLink = input.thresholdDocLink ?? '../../quality/perf-thresholds';
 
-  const priorBaselineLoaded = await loadBaseline(baselinePath);
+  const loadedBaseline = await loadBaseline(baselinePath);
+  // 測定の前提が違う baseline とは比べない。 mock 経路 (`runPerf3Layer`) は #1708 から
+  // これを行っていたが live 経路には無く、 版を上げるたびに前提の違う値と比べ続けていた。
+  const priorBaselineLoaded =
+    loadedBaseline && isComparableEnv(loadedBaseline.envelope.env, captureEnv())
+      ? loadedBaseline
+      : null;
   const priorBaseline: Record<string, MeasureResult> | null = priorBaselineLoaded
     ? priorBaselineLoaded.envelope.results
     : null;
@@ -149,6 +162,11 @@ export async function runPerf3LayerLive(
           baseline: priorSerial,
           threshold: 0.2,
           resolutionMs,
+          // `LivePerfOpSpec` は `PerfOpSpec` を継承するので op 側で下限を指定できる。
+          // 渡さないと、 同じ指定が mock 経路でだけ効いて live 経路では黙って無視される。
+          ...(op.regressionMinDeltaMs === undefined
+            ? {}
+            : { minDeltaMs: op.regressionMinDeltaMs }),
         })
       : null;
 
@@ -166,6 +184,7 @@ export async function runPerf3LayerLive(
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
+      ...(regression === null ? {} : buildRegressionNote(regression, 0.2)),
     });
   }
 
@@ -194,6 +213,7 @@ export async function runPerf3LayerLive(
     iterationsPerWorker,
     memoryIterations,
     memoryCapDefault,
+    resolutionMs,
   });
 
   return { outcomes, allPassed, anySkipped, baselineSeeded };
@@ -210,6 +230,8 @@ interface WriteLiveReportInput {
   iterationsPerWorker: number;
   memoryIterations: number;
   memoryCapDefault: number;
+  /** この実行で測った測定系の分解能 (ms)。 回帰判定の絶対下限の素。 */
+  resolutionMs: number;
 }
 
 function writeLiveReport(input: WriteLiveReportInput): void {
@@ -232,14 +254,19 @@ function writeLiveReport(input: WriteLiveReportInput): void {
   if (measuredOps.length === 0) {
     lines.push('_No live ops ran this pass. Set the required env vars to enable._');
   } else {
-    lines.push('## Serial p95 (LIVE)', '');
-    lines.push('| op | p95 | cap | gate | regression |');
-    lines.push('|---|---|---|---|---|');
+    lines.push(
+      `測定系の分解能 = ${formatMs(input.resolutionMs)} (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの ${RESOLUTION_FLOOR_MULTIPLE} 倍 = ${formatMs(input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)}、 op ごとの実効値は下表の「下限」 列。`,
+      '',
+      '## Serial (LIVE, concurrency = 1)',
+      '',
+    );
+    lines.push('| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |');
+    lines.push('|---|---|---|---|---|---|---|');
     input.ops.forEach((op) => {
       const out = input.outcomes.find((o) => o.name === op.name);
       if (!out || out.skipped || !out.serial) return;
       lines.push(
-        `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${out.regressionVerdict} |`,
+        `| ${op.name} | ${formatMs(out.serial.p10)} | ${formatMs(out.serial.p95)} | ${op.serialP95CapMs}ms | ${formatMs(op.regressionMinDeltaMs ?? input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)} | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${out.regressionNote ? `${out.regressionVerdict} (${out.regressionNote})` : out.regressionVerdict} |`,
       );
     });
 

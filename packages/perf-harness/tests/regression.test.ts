@@ -238,6 +238,19 @@ describe('detectRegression (bootstrap CI on p10)', () => {
     expect(result.tailDeltaPct).toBeGreaterThan(1);
   });
 
+  it('T-PH-R-018b 下側が閾値未満で動いていても裾の報告は成立する (#1718)', () => {
+    // p10 が +19% (閾値 20% 未満) で p95 が大きく伸びた分布。 「下側は動かず」 と
+    // 書くと事実に反するため、 呼出側が両方の数字を出せることを担保する。
+    const baseline = makeResult('reply', [10, 10, 10, 10, 10, 10, 10, 10, 10, 12]);
+    const current = makeResult('reply', [11.9, 11.9, 11.9, 11.9, 11.9, 11.9, 11.9, 11.9, 11.9, 60]);
+    const result = detectRegression({ current, baseline, resolutionMs: 0.0001 });
+
+    expect(result.verdict).toBe('stable');
+    expect(result.deltaPct).toBeGreaterThan(0.1);
+    expect(result.deltaPct).toBeLessThan(0.2);
+    expect(result.tailDeltaPct).toBeGreaterThan(0.2);
+  });
+
   it('T-PH-R-019 判定は上側の裾ではなく下側の移動で決まる (#1718)', () => {
     // 分布全体が 30% 遅くなった場合は下側も動くので regressed。
     // T-PH-R-018 と対で「裾だけ / 全体」 の違いが判定に出ることを示す。
@@ -250,9 +263,9 @@ describe('detectRegression (bootstrap CI on p10)', () => {
     expect(result.judged.current).toBeCloseTo(13, 1);
   });
 
-  it('T-PH-R-020 p10 field を持たない世代の baseline も sample から判定できる (#1718)', () => {
-    // 保存済み baseline の JSON は p10 を持たない世代がある。 field を先に読むと
-    // 古い baseline との比較だけが別の軸になり、 気づけないまま判定が狂う。
+  it('T-PH-R-020 p10 field を持たない結果も sample から判定できる (#1718)', () => {
+    // `loadBaseline` は読込時に全 field を作り直すが、 API を直接叩く呼出は
+    // p10 を持たない結果を渡せる。 その場合は sample から計算して判定を成立させる。
     const baseline = makeResult('reply', [10, 10, 10, 10, 10, 10]);
     const legacy = { ...baseline } as Record<string, unknown>;
     delete legacy['p10'];
@@ -265,5 +278,16 @@ describe('detectRegression (bootstrap CI on p10)', () => {
 
     expect(result.judged.baseline).toBe(10);
     expect(result.verdict).toBe('regressed');
+  });
+
+  it('T-PH-R-021 判定に使う値は report が表示する field と同じものになる (#1718)', () => {
+    // 判定が sample を、 report が保存 field を読むと、 同じ行に regressed と
+    // 改善を示す差分が並ぶ。 field があるならそれを判定にも使う。
+    const baseline = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const current = makeResult('reply', [13, 13, 13, 13, 13, 13]);
+    const result = detectRegression({ current, baseline, resolutionMs: 0.0001 });
+
+    expect(result.judged.baseline).toBe(baseline.p10);
+    expect(result.judged.current).toBe(current.p10);
   });
 });

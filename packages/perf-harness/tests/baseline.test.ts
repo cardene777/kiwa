@@ -224,12 +224,40 @@ describe('measurement premise gating (#1708)', () => {
     expect(loaded?.envelope.results['reply']?.samples).toEqual(samples);
   });
 
-  it('T-PH-B-013 sample を持たない baseline でも読み出しは壊さない (#1718)', async () => {
+  it('T-PH-B-013 比較できない件数の記録は読めない記録として扱う (#1718)', async () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
-    const file = path.join(dir, 'no-samples.json');
-    const stored = buildMeasureResult('reply', 3, 1, [1, 2, 3]) as unknown as Record<string, unknown>;
-    delete stored['p10'];
-    stored['samples'] = [];
+    // bootstrap CI は 2 件未満で退化 CI ({0,0}) を返す。有効な記録として返すと
+    // 何倍悪化しても有意にならず永久に stable になり、key が既にあるので
+    // 追記経路でも作り直されない。
+    for (const [label, samples] of [['no-samples', []], ['one-sample', [1]]] as const) {
+      const file = path.join(dir, `${label}.json`);
+      const stored = buildMeasureResult('reply', 3, 1, [1, 2, 3]) as unknown as Record<
+        string,
+        unknown
+      >;
+      stored['samples'] = samples;
+      await saveBaselineEnvelope(file, {
+        schema: 1,
+        env: captureEnv(),
+        results: { reply: stored as never },
+      });
+
+      expect(await loadBaseline(file), label).toBeNull();
+    }
+  });
+
+  it('T-PH-B-014 保存値と sample が食い違う記録は sample 側に揃える (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'inconsistent.json');
+    const samples = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const stored = buildMeasureResult('reply', samples.length, 1, samples) as unknown as Record<
+      string,
+      unknown
+    >;
+    // 判定は sample から、report は保存値から読む状態を作ると、同じ行に
+    // regressed と改善を示す差分が並ぶ。読込時に片方へ揃える。
+    stored['p10'] = 100;
+    stored['p95'] = 999;
     await saveBaselineEnvelope(file, {
       schema: 1,
       env: captureEnv(),
@@ -238,6 +266,6 @@ describe('measurement premise gating (#1708)', () => {
 
     const loaded = await loadBaseline(file);
 
-    expect(loaded?.envelope.results['reply']?.p10).toBe(0);
-  });
-});
+    expect(loaded?.envelope.results['reply']?.p10).toBe(2);
+    expect(loaded?.envelope.results['reply']?.p95).toBe(10.5);
+  });});

@@ -32,7 +32,8 @@ export const RESOLUTION_FLOOR_MULTIPLE = 2;
  * Bootstrap CI on p10 delta で regression を判定する。
  *
  * (1) 信頼区間が 0 を含まない (= 有意な差) かつ (2) delta が threshold を超え、
- * かつ (3) 差が測定系の分解能 (`resolutionMs`) を上回る場合のみ regressed / improved と判定する。
+ * かつ (3) 差が絶対下限 (既定 = `resolutionMs` の `RESOLUTION_FLOOR_MULTIPLE` 倍) 以上の場合のみ
+ * regressed / improved と判定する。
  *
  * p95 の変化率も `tailDeltaPct` として返すが判定には使わない。 実行をまたぐと
  * 実装と無関係に動くため gate に載せられない一方、 一部の呼出だけが遅くなる変化は
@@ -64,8 +65,8 @@ export function detectRegression(input: RegressionInput): RegressionResult {
   // 有意 = CI が 0 を跨がない (両端が同符号)
   const significant = (ci.lower > 0 && ci.upper > 0) || (ci.lower < 0 && ci.upper < 0);
 
-  // 差が測定系の分解能を下回るものは op の変化として読めない。 harness 自身の
-  // 往復を見ているだけなので、 相対比がいくら大きくても判定を保留する。
+  // 差が絶対下限を下回るものは op の変化として読めない。 分解能と同じ帯の差は
+  // harness 自身の往復と区別できないので、 相対比がいくら大きくても判定を保留する。
   const meaningfulDelta = Math.abs(currentStat - baselineStat) >= minDeltaMs;
 
   let verdict: RegressionResult['verdict'] = 'stable';
@@ -112,15 +113,15 @@ export function detectRegressionStrict(input: RegressionInput): RegressionResult
 /**
  * 判定に使う統計量を取り出す。
  *
- * 保存済み baseline の JSON は `p10` field を持たない世代があるので、 sample 配列から
- * 計算し直す。 field を先に読むと、 古い baseline との比較だけが別の軸で行われる。
+ * 保存済み baseline の JSON は `p10` field を持たない世代があるので、 無ければ sample から
+ * 計算する。 ある時はそれを使う = report が表示する値と判定が読む値を必ず一致させる
+ * (`loadBaseline` が読込時に全 field を sample から作り直すので、 両者は同じ計算に由来する)。
  */
 function judgedStatistic(result: MeasureResult): number {
-  if (result.samples.length > 0) {
-    const sorted = [...result.samples].sort((left, right) => left - right);
-    return percentileType7(sorted, REGRESSION_JUDGED_PERCENTILE);
-  }
-  return result.p10 ?? 0;
+  if (typeof result.p10 === 'number') return result.p10;
+  if (result.samples.length === 0) return 0;
+  const sorted = [...result.samples].sort((left, right) => left - right);
+  return percentileType7(sorted, REGRESSION_JUDGED_PERCENTILE);
 }
 
 /** baseline が 0 の時に 0/0 を 0、 0 からの増加を Infinity として扱う変化率。 */

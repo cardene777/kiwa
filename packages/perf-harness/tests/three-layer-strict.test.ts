@@ -2,7 +2,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
-import { pruneStaleOps, runPerf3LayerStrict } from '../src/index.js';
+import {
+  buildMeasureResult,
+  detectRegression,
+  pruneStaleOps,
+  runPerf3LayerStrict,
+} from '../src/index.js';
 
 describe('runPerf3LayerStrict — v0.3 strict variant', () => {
   // 固定 directory を共有すると、各 case 末尾の削除が別 case の書込みと重なり、
@@ -576,10 +581,16 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     const tmpDir = tempDir();
     const baselinePath = join(tmpDir, 'baseline.json');
     const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
-    const op = { name: 'tiny', fn: () => {}, serialP95CapMs: 10_000 };
+    // 下限を明示して、何もしない関数が必ずその下に来る状態を作る。実測した分解能に
+    // 委ねると、測定のたびに 3 通りの理由 (baseline が下限未満 / 差が下限に届かない /
+    // 裾だけ伸びた) を行き来して、どれを期待しても実行ごとに通ったり落ちたりする。
+    const op = {
+      name: 'tiny',
+      fn: () => {},
+      serialP95CapMs: 10_000,
+      regressionMinDeltaMs: 5,
+    };
 
-    // 何もしない関数は、測定系が自分自身を測っている状態そのもの。 判定に使う p10 が
-    // 実行の中で測った分解能と同じ帯に来るため、どちらの理由であれ判定は成立しない。
     await runPerf3LayerStrict({
       moduleName: 'floor-note',
       ops: [op],
@@ -595,17 +606,53 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ...settings,
     });
 
-    expect(second.outcomes[0]!.regressionVerdict).not.toBe('regressed');
+    expect(second.outcomes[0]!.regressionVerdict).toBe('stable');
 
-    // 判定に至らない理由は 3 通りあり、どれになるかは実行ごとに変わる
-    // (baseline 自体が下限未満 / 差が下限に届かない / 下側は動かず裾だけ伸びた)。
-    // いずれも判定できていない状態を指す正しい注記なので、1 つだけを期待すると
-    // 実行のたびに通ったり落ちたりする。 下限の値は実行の中で測るため固定しない。
+    // baseline が下限を下回るので、何をもって退行と扱われるのかを書く。
     const note = second.outcomes[0]!.regressionNote;
-    expect(note, '判定できない理由が注記される').toMatch(
-      /検知には \+\S+ .+以上の悪化が必要|差 \S+ が下限 \S+ 未満で判定を保留|下側は動かず p95 のみ/,
-    );
+    expect(note, '判定できない理由が注記される').toMatch(/検知には \+5\.00ms .+以上の悪化が必要/);
     expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).toContain(note!);
+  });
+
+  it('下限を明示した op は report にその値を出す (#1718)', async () => {
+    const tmpDir = tempDir();
+    // 表頭には既定の下限しか出ないため、op が上書きした場合に表示と判定条件がずれる。
+    await runPerf3LayerStrict({
+      moduleName: 'floor-column',
+      ops: [
+        { name: 'defaulted', fn: () => {}, serialP95CapMs: 10_000 },
+        { name: 'overridden', fn: () => {}, serialP95CapMs: 10_000, regressionMinDeltaMs: 7 },
+      ],
+      reportPath: join(tmpDir, 'r.md'),
+      baselinePath: join(tmpDir, 'baseline.json'),
+      serialIterations: 30,
+      concurrency: 3,
+      memoryIterations: 30,
+    });
+
+    const report = readFileSync(join(tmpDir, 'r.md'), 'utf8');
+    const overridden = report.split('\n').find((line) => line.startsWith('| overridden |'));
+    expect(overridden, 'op ごとの実効下限が行に出る').toContain('| 7.00ms |');
+  });
+
+  it('strict は通常版より厳しい回帰設定で判定する (#1718)', async () => {
+    // 名前が strict でありながら、通常版と同じ閾値 20% / CI 95% で判定していた。
+    // 標本数だけ増えて判定は緩いままだったので、実際に設定が効いているか確かめる。
+    const baseline = buildMeasureResult('op.serial', 40, 5, Array.from({ length: 40 }, () => 10));
+    const current = buildMeasureResult('op.serial', 40, 5, Array.from({ length: 40 }, () => 11.5));
+
+    // 15% 悪化 = 通常版 (20%) では stable、strict (10%) では regressed。
+    const lax = detectRegression({ current, baseline, resolutionMs: 0.0001 });
+    const strict = detectRegression({
+      current,
+      baseline,
+      threshold: 0.1,
+      confidenceLevel: 0.99,
+      resolutionMs: 0.0001,
+    });
+
+    expect(lax.verdict).toBe('stable');
+    expect(strict.verdict).toBe('regressed');
   });
 
   it('drops ops that are no longer measured only when pruning is requested', async () => {

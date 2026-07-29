@@ -14,9 +14,9 @@ title: "@kiwa-lab/perf-harness regression の API 契約"
 
 #### <code v-pre>detectRegression</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L41) <code v-pre>packages/perf-harness/src/regression.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L42) <code v-pre>packages/perf-harness/src/regression.ts</code>
 
-Bootstrap CI on p10 delta で regression を判定する。 (1) 信頼区間が 0 を含まない (= 有意な差) かつ (2) delta が threshold を超え、 かつ (3) 差が測定系の分解能 (`resolutionMs`) を上回る場合のみ regressed / improved と判定する。 p95 の変化率も `tailDeltaPct` として返すが判定には使わない。 実行をまたぐと 実装と無関係に動くため gate に載せられない一方、 一部の呼出だけが遅くなる変化は そこにしか現れないため、 報告には残す。
+Bootstrap CI on p10 delta で regression を判定する。 (1) 信頼区間が 0 を含まない (= 有意な差) かつ (2) delta が threshold を超え、 かつ (3) 差が絶対下限 (既定 = `resolutionMs` の `RESOLUTION_FLOOR_MULTIPLE` 倍) 以上の場合のみ regressed / improved と判定する。 p95 の変化率も `tailDeltaPct` として返すが判定には使わない。 実行をまたぐと 実装と無関係に動くため gate に載せられない一方、 一部の呼出だけが遅くなる変化は そこにしか現れないため、 報告には残す。
 
 ```ts
 export declare function detectRegression(input: RegressionInput): RegressionResult;
@@ -24,7 +24,7 @@ export declare function detectRegression(input: RegressionInput): RegressionResu
 
 #### <code v-pre>detectRegressionStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L104) <code v-pre>packages/perf-harness/src/regression.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L105) <code v-pre>packages/perf-harness/src/regression.ts</code>
 
 strict mode — CI 99% + threshold 10%。 false negative を最小化。 見逃し (regressed を stable と判定) が致命的な release gate 経路で使う。
 

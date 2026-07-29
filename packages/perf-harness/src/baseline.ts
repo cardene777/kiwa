@@ -238,6 +238,11 @@ function isMeasureResult(value: unknown): value is MeasureResult {
   const candidate = value as Record<string, unknown>;
   if (typeof candidate.name !== 'string') return false;
   if (!Array.isArray(candidate.samples)) return false;
+  // 2 件未満の記録は比較対象にならない。 bootstrap CI がこの件数で退化 CI ({0,0}) を
+  // 返すため、 そのまま読むと何倍悪化しても有意にならず永久に stable になる。
+  // key は既にあるので追記経路でも作り直されない。 読めない記録として扱い、
+  // 次の実行で seed し直させる。
+  if (candidate.samples.length < 2) return false;
   if (!candidate.samples.every((sample) => typeof sample === 'number' && Number.isFinite(sample))) {
     return false;
   }
@@ -322,22 +327,21 @@ function backfillResults(
 }
 
 /**
- * 保存済み baseline に無い派生統計を sample から補う。
+ * 保存済み baseline の派生統計を sample から作り直す。
  *
  * 保存されているのは実 sample と、そこから計算した値だけ。 統計量を 1 つ足すたびに
  * 過去の baseline には欠けた field ができ、 読み手が undefined を掴む
- * (`p10` 追加時に report 生成が落ちた)。 補完は `buildMeasureResult` に委ねて、
- * 派生値の定義を 1 箇所に保つ。
+ * (`p10` 追加時に report 生成が落ちた)。
  *
- * sample が無い baseline は再計算できない。 判定側は sample を要求するため比較は
- * どのみち成立せず、 ここでは表示が壊れないことだけを守る。
+ * 「欠けている時だけ補う」 のでは足りない。 保存値と sample が食い違う記録があると、
+ * 判定は sample から計算した値を、 report は保存値を見ることになり、
+ * 同じ行に `regressed` と改善を示す差分が並ぶ。 全 field を sample から作り直して、
+ * 派生値の定義を `buildMeasureResult` 1 箇所に寄せる。
+ *
+ * sample が空の記録は `isMeasureResult` が読めない記録として弾くため、ここには来ない。
  */
 function backfillDerivedStats(result: MeasureResult): MeasureResult {
-  if (typeof result.p10 === 'number') return result;
-  if (!Array.isArray(result.samples) || result.samples.length === 0) {
-    return { ...result, p10: 0 };
-  }
-  const rebuilt = buildMeasureResult(
+  return buildMeasureResult(
     result.name,
     result.iterations,
     result.warmup,
@@ -345,7 +349,6 @@ function backfillDerivedStats(result: MeasureResult): MeasureResult {
     result.trimmed?.percent ?? 0,
     result.warmupConverged ?? true,
   );
-  return rebuilt;
 }
 
 function isMissingFile(error: unknown): error is NodeJS.ErrnoException {

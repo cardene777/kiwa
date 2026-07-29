@@ -149,7 +149,7 @@ The fourth case is the cost of judging on the bottom of the distribution. A chan
 
 ### The regression verdict is reported but not gated
 
-Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. Moving the verdict to p10 brought most ops inside that bound for the first time, but not all of them.
+Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. Under the p95 verdict **no** op in this set qualified — the spreads started at 134 %. Moving the verdict to p10 brought five of the seventeen inside the bound. That is the honest figure: the set below is not a sample of all ops, it is the collection of ops that were already known to be unstable, so five surviving it is a floor on the improvement, not a ceiling.
 
 Measured across two independent rounds of four consecutive unchanged runs (the second round reseeding its baseline on a machine already warmed by the first, so the reference is representative of how the suite actually runs):
 
@@ -183,9 +183,9 @@ The caps (serial, concurrent, memory) are still gated. A cap is decided inside a
 
 Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 322 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
 
-`regressionGateWaived: '<reason>'` marks the eleven ops still above the threshold, so the list survives until the gate can be switched on for them. The reason string carries the measured spread. Adding one requires measured evidence; do not add one because a run happened to fail.
+`regressionGateWaived: '<reason>'` marks the twelve ops still above the threshold, so the list survives until the gate can be switched on for them. The reason string carries the measured spread. Adding one requires measured evidence; do not add one because a run happened to fail. Every row marked `no` above carries a waiver — a row that is not gateable and not waived would fail the gate the moment `regressionGate` is turned on.
 
-### What would make the remaining eleven gateable
+### What would make the remaining twelve gateable
 
 The residual spread is environmental — thermal state, page cache, subprocess spawn cost — and no choice of statistic over a single run's samples removes it. What does remove it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
 

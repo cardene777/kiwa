@@ -1,6 +1,6 @@
 # @kiwa-lab/perf-harness
 
-kiwa package + dogfood app + OSS 向け汎用性能検査 harness。 p50 / p95 / p99 latency 測定、 baseline 永続化、 regression 検知、 memory delta 計測、 3 layer perf gate (serial / concurrent / memory) を提供する。 spec SSOT = 本 README + `src/types.ts`。
+kiwa package + dogfood app + OSS 向け汎用性能検査 harness。 p10 / p50 / p95 / p99 latency 測定、 baseline 永続化、 regression 検知 (判定軸 = p10)、 memory delta 計測、 3 layer perf gate (serial / concurrent / memory) を提供する。 spec SSOT = 本 README + `src/types.ts`。
 
 ## 精度契約 (旧実装からの変更点)
 
