@@ -5,3 +5,66 @@ packages:
   - "tests/fixtures/*"
   - "tests/release-smoke"
   - "promo"
+
+# 公開直後の版を取り込まない待機期間 (分)。
+# 侵害された package の多くは公開から数日以内に発見されて registry から削除される。
+# その間に取り込まないことで、削除される前の版を掴む窓を塞ぐ。
+#
+# 3 日にしているのは実測から。 7 日 (dependabot の cooldown と同値) にすると、
+# 依存の更新のたびに無関係な package が弾かれて install が進まなくなる。
+# 実際 2 回続けて別々の package (postcss / @opentelemetry/core) で止まった。
+# 過去の npm 侵害事例は公開から数時間〜2 日で発見されており、3 日でその窓は覆える。
+#
+# dependabot 側の cooldown は自動 PR を出す間隔の話で、こちらは install 時の
+# 解決を止める設定。役割が違うので値が揃っている必要はない。
+#
+# 効くのは「新しく解決するとき」 だけ。pnpm 10 は lockfile に既に載っている版を
+# install 時に再検証しないため、公開直後の版が入った lockfile を受け取ると
+# frozen install では素通りする。再検証は pnpm 11.1.3 で入った。
+# この経路は lockfile を書き換える PR の review で人が見る前提で残している。
+minimumReleaseAge: 4320
+
+# postinstall を走らせる package を明示したものだけに限る。
+# 列挙外の package の install script は実行しない。
+# better-sqlite3 は native binding の build に postinstall が要る。
+onlyBuiltDependencies:
+  - better-sqlite3
+
+# 名指ししていない間接依存が git repository や直接 tarball から入るのを禁じる。
+# 直接依存 (この repo の package.json が名指ししたもの) は対象外。
+# pnpm 11 では既定値になる。
+blockExoticSubdeps: true
+
+# CVE を避けるために解決版を固定する。
+#
+# ここに置くのは pnpm 11 で `package.json` の `pnpm` field が読まれなくなるため。
+# 他の設定だけを workspace file へ移すと、major 更新のときに override だけが
+# 警告なく無効化され、脆弱な間接依存へ戻る。設定の置き場を 1 つに揃える。
+#
+# 範囲 (`^X.Y.Z`) ではなく固定にしているのは `minimumReleaseAge` との衝突を避けるため。
+# 範囲だと「範囲に合う最新版が若すぎる」 で install が止まる。固定なら判断した版を使い、
+# 新しい CVE が出たときに意識して上げ直す。
+#
+# いずれも自分で宣言していない間接依存で、dependencies に足すと使っていない依存を
+# 宣言することになる。
+overrides:
+  # CRITICAL
+  "@auth/core": 0.41.3
+  next-auth: 5.0.0-beta.32
+  tar: 7.5.19
+  # HIGH (間接依存のみ)
+  adm-zip: 0.6.0
+  axios: 1.18.0
+  fast-uri: 3.1.4
+  form-data: 4.0.6
+  immutable: 4.3.9
+  js-yaml: 4.3.0
+  lodash: 4.18.0
+  postcss: 8.5.18
+  serialize-javascript: 7.0.5
+  tmp: 0.2.7
+  undici: 6.27.0
+  ws: 8.21.0
+  # drizzle-orm との組合せで 0.28 系は型が壊れる。HIGH 3 件が残るが、
+  # 上げるなら drizzle-orm の major 更新とセットにする必要がある。
+  kysely: 0.27.6

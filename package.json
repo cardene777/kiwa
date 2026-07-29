@@ -44,13 +44,5 @@
     "vitepress": "^1.6.4",
     "vitest": "^2.1.0",
     "vue": "3.5.38"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3"
-    ],
-    "overrides": {
-      "kysely": "0.27.6"
-    }
   }
 }
