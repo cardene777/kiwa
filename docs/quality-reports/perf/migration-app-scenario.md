@@ -6,33 +6,45 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 ## Serial (concurrency = 1)
 
-| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| apply_workflow (10 pending migrations + history) | 0.01ms | 0.03ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| diff_batch (5 diffSchema across schemas) | 0.02ms | 0.04ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| down_error_handling (5 rollback of non-applied) | 0.0011ms | 0.0057ms | 100ms | 0.00050ms | PASS | stable (p10 -16% (閾値未満)、 p95 +149% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| lock_acquire_release_batch (10 acquire-release cycle) | 0.0019ms | 0.0035ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| apply_workflow (10 pending migrations + history) | 0.01ms | 0.03ms | 100ms | 0.00050ms | PASS | stable (p10 +2% (閾値未満)、 p95 +42% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| diff_batch (5 diffSchema across schemas) | 0.02ms | 0.04ms | 100ms | 0.00050ms | PASS | stable (p10 +7% (閾値未満)、 p95 +47% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| down_error_handling (5 rollback of non-applied) | 0.00092ms | 0.0016ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| lock_acquire_release_batch (10 acquire-release cycle) | 0.0019ms | 0.0037ms | 100ms | 0.00049ms | PASS | stable (p10 +1% (閾値未満)、 p95 +32% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
 | dryrun_dep_batch (5 plan + resolve) | 0.01ms | 0.02ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+
+## 実行内正規化 (回帰判定はこの比で行う)
+
+回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
+
+| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|
+| apply_workflow (10 pending migrations + history) | cpu | 0.08ms | 0.01ms | 0.129 | 0.127 | 0.01ms | 0.01ms |
+| diff_batch (5 diffSchema across schemas) | cpu | 0.08ms | 0.02ms | 0.222 | 0.207 | 0.02ms | 0.02ms |
+| down_error_handling (5 rollback of non-applied) | cpu | 0.08ms | 0.00092ms | 0.011 | 0.011 | 0.00090ms | 0.00092ms |
+| lock_acquire_release_batch (10 acquire-release cycle) | cpu | 0.08ms | 0.0019ms | 0.023 | 0.023 | 0.0019ms | 0.0018ms |
+| dryrun_dep_batch (5 plan + resolve) | cpu | 0.08ms | 0.01ms | 0.138 | 0.138 | 0.01ms | 0.01ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| apply_workflow (10 pending migrations + history) | 0.05ms | 200ms | PASS |
+| apply_workflow (10 pending migrations + history) | 0.04ms | 200ms | PASS |
 | diff_batch (5 diffSchema across schemas) | 0.09ms | 200ms | PASS |
-| down_error_handling (5 rollback of non-applied) | 0.01ms | 200ms | PASS |
-| lock_acquire_release_batch (10 acquire-release cycle) | 0.02ms | 200ms | PASS |
-| dryrun_dep_batch (5 plan + resolve) | 0.05ms | 200ms | PASS |
+| down_error_handling (5 rollback of non-applied) | 0.00ms | 200ms | PASS |
+| lock_acquire_release_batch (10 acquire-release cycle) | 0.01ms | 200ms | PASS |
+| dryrun_dep_batch (5 plan + resolve) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| apply_workflow (10 pending migrations + history) | -5616 B | 0 B | 102400 B | yes | PASS |
-| diff_batch (5 diffSchema across schemas) | 616 B | 0 B | 102400 B | yes | PASS |
-| down_error_handling (5 rollback of non-applied) | 632 B | 0 B | 102400 B | yes | PASS |
-| lock_acquire_release_batch (10 acquire-release cycle) | 7904 B | 0 B | 102400 B | yes | PASS |
-| dryrun_dep_batch (5 plan + resolve) | 5160 B | 0 B | 102400 B | yes | PASS |
+| apply_workflow (10 pending migrations + history) | -4872 B | 0 B | 102400 B | yes | PASS |
+| diff_batch (5 diffSchema across schemas) | -584 B | 0 B | 102400 B | yes | PASS |
+| down_error_handling (5 rollback of non-applied) | 72 B | 0 B | 102400 B | yes | PASS |
+| lock_acquire_release_batch (10 acquire-release cycle) | 8888 B | 0 B | 102400 B | yes | PASS |
+| dryrun_dep_batch (5 plan + resolve) | -238400 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -45,27 +57,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p10 | 0.01ms |
-| p50 | 0.02ms |
+| p50 | 0.01ms |
 | p95 | 0.03ms |
-| p99 | 0.03ms |
+| p99 | 0.04ms |
 | mean | 0.02ms |
-| stdev | 0.0055ms |
-| min | 0.0098ms |
-| max | 0.03ms |
+| stdev | 0.0083ms |
+| min | 0.01ms |
+| max | 0.04ms |
 | total | 0.33ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.0019ms | -12.73% |
-| p50 | 0.02ms | 0.02ms | -0.0059ms | -27.60% |
-| p95 | 0.03ms | 0.03ms | -0.0049ms | -15.42% |
-| p99 | 0.03ms | 0.04ms | -0.0072ms | -18.70% |
-| mean | 0.02ms | 0.02ms | -0.0055ms | -24.86% |
-| min | 0.0098ms | 0.01ms | -0.0025ms | -20.07% |
-| max | 0.03ms | 0.04ms | -0.0078ms | -19.34% |
-| total | 0.33ms | 0.45ms | -0.11ms | -24.86% |
+| p10 | 0.01ms | 0.01ms | +0.00016ms | +1.57% |
+| p50 | 0.01ms | 0.01ms | -0.00012ms | -0.91% |
+| p95 | 0.03ms | 0.02ms | +0.0095ms | +41.62% |
+| p99 | 0.04ms | 0.03ms | +0.01ms | +38.44% |
+| mean | 0.02ms | 0.02ms | +0.0012ms | +7.98% |
+| min | 0.01ms | 0.01ms | +0.000042ms | +0.41% |
+| max | 0.04ms | 0.03ms | +0.01ms | +37.85% |
+| total | 0.33ms | 0.30ms | +0.02ms | +7.98% |
 
 ### diff_batch (5 diffSchema across schemas)
 
@@ -80,23 +92,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.04ms |
 | p99 | 0.04ms |
 | mean | 0.02ms |
-| stdev | 0.0051ms |
+| stdev | 0.0065ms |
 | min | 0.02ms |
 | max | 0.04ms |
-| total | 0.49ms |
+| total | 0.47ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | +0.0010ms | +5.16% |
-| p50 | 0.02ms | 0.02ms | +0.0028ms | +14.03% |
-| p95 | 0.04ms | 0.03ms | +0.0034ms | +10.37% |
-| p99 | 0.04ms | 0.03ms | +0.0022ms | +6.48% |
-| mean | 0.02ms | 0.02ms | +0.0016ms | +7.07% |
-| min | 0.02ms | 0.02ms | +0.0010ms | +5.28% |
-| max | 0.04ms | 0.03ms | +0.0019ms | +5.56% |
-| total | 0.49ms | 0.46ms | +0.03ms | +7.07% |
+| p10 | 0.02ms | 0.02ms | +0.0012ms | +6.79% |
+| p50 | 0.02ms | 0.02ms | +0.0034ms | +19.02% |
+| p95 | 0.04ms | 0.03ms | +0.01ms | +46.56% |
+| p99 | 0.04ms | 0.04ms | +0.0050ms | +13.82% |
+| mean | 0.02ms | 0.02ms | +0.0038ms | +19.41% |
+| min | 0.02ms | 0.02ms | +0.0020ms | +12.70% |
+| max | 0.04ms | 0.04ms | +0.0033ms | +8.52% |
+| total | 0.47ms | 0.39ms | +0.08ms | +19.41% |
 
 ### down_error_handling (5 rollback of non-applied)
 
@@ -106,28 +118,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.0011ms |
-| p50 | 0.0012ms |
-| p95 | 0.0057ms |
-| p99 | 0.0075ms |
-| mean | 0.0018ms |
-| stdev | 0.0018ms |
-| min | 0.0011ms |
-| max | 0.0080ms |
-| total | 0.04ms |
+| p10 | 0.00092ms |
+| p50 | 0.00092ms |
+| p95 | 0.0016ms |
+| p99 | 0.0046ms |
+| mean | 0.0012ms |
+| stdev | 0.00099ms |
+| min | 0.00088ms |
+| max | 0.0053ms |
+| total | 0.02ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0011ms | 0.0013ms | -0.00021ms | -15.67% |
-| p50 | 0.0012ms | 0.0014ms | -0.00023ms | -16.17% |
-| p95 | 0.0057ms | 0.0023ms | +0.0034ms | +148.69% |
-| p99 | 0.0075ms | 0.0061ms | +0.0014ms | +22.58% |
-| mean | 0.0018ms | 0.0018ms | +0.000062ms | +3.55% |
-| min | 0.0011ms | 0.0013ms | -0.00021ms | -15.60% |
-| max | 0.0080ms | 0.0071ms | +0.00088ms | +12.37% |
-| total | 0.04ms | 0.04ms | +0.0012ms | +3.55% |
+| p10 | 0.00092ms | 0.00092ms | 0.00ms | 0.00% |
+| p50 | 0.00092ms | 0.00096ms | -0.000041ms | -4.28% |
+| p95 | 0.0016ms | 0.0070ms | -0.0054ms | -77.41% |
+| p99 | 0.0046ms | 0.0077ms | -0.0031ms | -40.19% |
+| mean | 0.0012ms | 0.0016ms | -0.00046ms | -28.26% |
+| min | 0.00088ms | 0.00092ms | -0.000041ms | -4.48% |
+| max | 0.0053ms | 0.0078ms | -0.0025ms | -31.92% |
+| total | 0.02ms | 0.03ms | -0.0092ms | -28.26% |
 
 ### lock_acquire_release_batch (10 acquire-release cycle)
 
@@ -138,27 +150,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p10 | 0.0019ms |
-| p50 | 0.0019ms |
-| p95 | 0.0035ms |
-| p99 | 0.0042ms |
+| p50 | 0.0021ms |
+| p95 | 0.0037ms |
+| p99 | 0.0038ms |
 | mean | 0.0023ms |
-| stdev | 0.00067ms |
+| stdev | 0.00060ms |
 | min | 0.0018ms |
-| max | 0.0044ms |
+| max | 0.0038ms |
 | total | 0.05ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0019ms | 0.0021ms | -0.00021ms | -10.19% |
-| p50 | 0.0019ms | 0.0022ms | -0.00023ms | -10.59% |
-| p95 | 0.0035ms | 0.0087ms | -0.0052ms | -59.63% |
-| p99 | 0.0042ms | 0.04ms | -0.03ms | -88.96% |
-| mean | 0.0023ms | 0.0049ms | -0.0026ms | -52.79% |
-| min | 0.0018ms | 0.0020ms | -0.00021ms | -10.19% |
-| max | 0.0044ms | 0.05ms | -0.04ms | -90.36% |
-| total | 0.05ms | 0.10ms | -0.05ms | -52.79% |
+| p10 | 0.0019ms | 0.0018ms | +0.000042ms | +2.29% |
+| p50 | 0.0021ms | 0.0019ms | +0.00019ms | +9.65% |
+| p95 | 0.0037ms | 0.0028ms | +0.00094ms | +33.78% |
+| p99 | 0.0038ms | 0.0032ms | +0.00062ms | +19.51% |
+| mean | 0.0023ms | 0.0021ms | +0.00018ms | +8.37% |
+| min | 0.0018ms | 0.0018ms | 0.00ms | 0.00% |
+| max | 0.0038ms | 0.0033ms | +0.00054ms | +16.50% |
+| total | 0.05ms | 0.04ms | +0.0036ms | +8.37% |
 
 ### dryrun_dep_batch (5 plan + resolve)
 
@@ -171,23 +183,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p10 | 0.01ms |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.02ms |
+| p99 | 0.03ms |
 | mean | 0.01ms |
-| stdev | 0.0038ms |
-| min | 0.01ms |
-| max | 0.02ms |
+| stdev | 0.0061ms |
+| min | 0.0088ms |
+| max | 0.04ms |
 | total | 0.27ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.0026ms | -18.71% |
-| p50 | 0.01ms | 0.01ms | -0.0029ms | -19.72% |
-| p95 | 0.02ms | 0.03ms | -0.0041ms | -16.00% |
-| p99 | 0.02ms | 0.03ms | -0.0084ms | -26.66% |
-| mean | 0.01ms | 0.02ms | -0.0025ms | -15.70% |
-| min | 0.01ms | 0.01ms | -0.00017ms | -1.44% |
-| max | 0.02ms | 0.03ms | -0.0095ms | -28.72% |
-| total | 0.27ms | 0.32ms | -0.05ms | -15.70% |
+| p10 | 0.01ms | 0.01ms | +0.000013ms | +0.11% |
+| p50 | 0.01ms | 0.01ms | +0.00019ms | +1.62% |
+| p95 | 0.02ms | 0.02ms | -0.00074ms | -3.24% |
+| p99 | 0.03ms | 0.02ms | +0.01ms | +49.61% |
+| mean | 0.01ms | 0.01ms | +0.00079ms | +6.20% |
+| min | 0.0088ms | 0.0090ms | -0.00025ms | -2.78% |
+| max | 0.04ms | 0.02ms | +0.01ms | +62.75% |
+| total | 0.27ms | 0.25ms | +0.02ms | +6.20% |
 

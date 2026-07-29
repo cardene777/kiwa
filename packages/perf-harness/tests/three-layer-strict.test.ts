@@ -405,7 +405,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ],
       reportPath: join(tmpDir, 'r2.md'),
       baselinePath,
-      // 回帰判定を gate に載せるかは呼出側が決める (#1708 で既定を false にした)。
+      // 回帰判定を gate に載せるかは呼出側が決める (既定は false)。
       regressionGate: true,
       ...settings,
     });
@@ -423,7 +423,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(report).not.toMatch(/検知には/);
   });
 
-  it('回帰判定は既定では gate に載らない (#1708)', async () => {
+  it('回帰判定は既定では gate に載らない (#1708 / #1737)', async () => {
     const tmpDir = tempDir();
     const baselinePath = join(tmpDir, 'default.json');
     const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
@@ -454,7 +454,9 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ...settings,
     });
 
-    // 判定と根拠は残す。gate に載せるかどうかだけを呼出側が決める。
+    // 実行内正規化で実行全体に乗るずれは消えたが、op 個別のばらつきは残る。
+    // 既定を true にすると実装無変更でも 20-30 package が落ちるため、
+    // 判定と根拠は残したまま gate に載せるかは呼出側が決める (#1737 実測)。
     expect(slowed.outcomes[0]!.regressionVerdict, '判定は出す').toBe('regressed');
     expect(slowed.allPassed, '既定では gate を落とさない').toBe(true);
     // 判定だけを書くと、regressed の行があるのに suite が通る report になり、

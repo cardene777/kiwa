@@ -24,6 +24,7 @@ import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
 import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
 import {
+  BASELINE_SCHEMA,
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
@@ -210,7 +211,7 @@ export async function runPerf3LayerLive(
   const premiseValid = !input.requireGc || measured.every((o) => o.memory?.gcExposed);
   if (anyMeasured && priorBaseline === null && premiseValid && allPassed) {
     await saveBaselineEnvelope(baselinePath, {
-      schema: 1,
+      schema: BASELINE_SCHEMA,
       env: captureEnv(),
       results: combinedForBaseline,
     });

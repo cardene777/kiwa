@@ -30,6 +30,29 @@ export interface WarmupConvergence {
   maxIterations?: number;
 }
 
+/**
+ * 実行内正規化の基準 op の種類。
+ *
+ * 基準は対象と同じ邪魔を受けるものでないと相殺が起きない。 種類の選び方と
+ * 却下した案は `reference.ts` の冒頭と `docs/quality/perf-thresholds.md`
+ * § 実行内正規化 が実測値つきで持つ。
+ */
+export type PerfReferenceKind = 'cpu' | 'fs-read' | 'fs-write';
+
+/**
+ * 同じ実行の中で交互に測った基準 op の記録。 回帰判定はこの値との比で行う。
+ *
+ * 基準の sample そのものは持たない。 判定に要るのは分母となる 1 つの値だけで、
+ * 全 op ぶんの sample を baseline に足すと file が 3 倍になる。
+ */
+export interface MeasureReference {
+  kind: PerfReferenceKind;
+  /** 基準 op の名前 (`harness.reference.cpu` 等)。 */
+  name: string;
+  /** 基準 op の p10 (ms)。 対象と同じ実行 ・ 同じ交互測定で得た値。 */
+  p10: number;
+}
+
 export interface MeasureInput {
   name: string;
   fn: () => void | Promise<void>;
@@ -82,6 +105,14 @@ export interface MeasureResult {
   mad: number;
   /** 外れ値検出 = median ± 3 * MAD の外側にある sample 数。 */
   outlierCount: number;
+
+  /**
+   * 同じ実行の中で交互に測った基準 op。 `measureAlternating` の結果にだけ付く。
+   *
+   * 回帰判定はこの値を分母にした比で行う。 付いていない結果同士の比較は
+   * 従来どおり実測値そのものを比べる (live mode / 単独の `measure`)。
+   */
+  reference?: MeasureReference;
 
   // === trim 後統計 (trimPercent > 0 時のみ非 undefined) ===
   trimmed?: {
@@ -169,6 +200,22 @@ export interface RegressionResult {
    * 悪化が相対では極端に大きくなるという意味。
    */
   belowDetectionFloor: boolean;
+  /**
+   * 実行内正規化が成立したか。
+   *
+   * 双方の結果に同じ種類の基準 op が記録されている時だけ true。 false の場合は
+   * 実測値そのものを比べており、 実行と実行の間の機械の状態の差がそのまま
+   * 判定に乗る。
+   */
+  normalized: boolean;
+  /**
+   * 今回の測定を baseline を測った時の機械の速さへ換算する倍率
+   * (= baseline の基準 p10 ÷ 今回の基準 p10)。 正規化していない場合は 1。
+   *
+   * 比同士を比べるのと数学的には同じだが、 判定に使う量が ms のまま残るので
+   * 絶対下限も report の表記も従来の意味を保てる。
+   */
+  normalizationScale: number;
 }
 
 /** Baseline に記録する環境メタデータ。 machine mismatch 検出用。 */
@@ -207,11 +254,19 @@ export interface BaselineEnv {
 }
 
 /**
- * Baseline JSON envelope。 v1 スキーマ = `{ schema: 1, env, results }`。
- * results は op 名 → MeasureResult。
+ * Baseline JSON envelope。 `{ schema, env, results }`。 results は op 名 → MeasureResult。
+ *
+ * - v1 = 実測値そのものを記録していた頃
+ * - v2 = 結果に基準 op の記録 (`MeasureResult.reference`) が付き得る (#1737)。
+ *   交互測定を経ていない結果 (live mode / 単独の `measure`) には付かないので、
+ *   v2 であることは「全 result が正規化済み」 を意味しない
+ *
+ * v1 も読める形は保つ。 読めなくすると、 保存済みの baseline を持つ実行が
+ * 「file はあるのに読めない」 扱いになり、 gate を有効にした呼出が一斉に落ちる。
+ * 比較対象として使えるかは `isComparableEnv` (測り方の版) が別に判定する。
  */
 export interface BaselineEnvelope {
-  schema: 1;
+  schema: 1 | 2;
   env: BaselineEnv;
   results: Record<string, MeasureResult>;
 }

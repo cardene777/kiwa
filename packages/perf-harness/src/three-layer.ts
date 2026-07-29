@@ -17,11 +17,13 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { measure, measureHarnessResolution } from './measure.js';
+import { measureAlternating, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory, type MemorySample } from './memory.js';
-import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
+import { RESOLUTION_FLOOR_MULTIPLE, detectRegression, resolveNormalization } from './regression.js';
+import { DEFAULT_REFERENCE_KIND, createReferenceOps } from './reference.js';
 import {
+  BASELINE_SCHEMA,
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
@@ -30,7 +32,7 @@ import {
 } from './baseline.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport, formatMs } from './report.js';
-import type { MeasureResult, RegressionResult } from './types.js';
+import type { MeasureResult, PerfReferenceKind, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
   name: string;
@@ -51,6 +53,18 @@ export interface PerfOpSpec {
    * 往復を見ているため判定に使えない。 明示すると既定を上書きする。
    */
   regressionMinDeltaMs?: number;
+  /**
+   * 実行内正規化の基準 op の種類 (default `cpu`)。
+   *
+   * 回帰判定は、 同じ実行の中で交互に測った基準 op との比で行う。 基準は対象と
+   * 同じ邪魔を受けるものでないと相殺が起きないため、 fs を触る op は `fs-read` /
+   * `fs-write` を宣言する。 種類を外すと素の値より悪化する
+   * (fs read の実行間振れ幅 = 素 135% / `fs-read` 基準 17% / `cpu` 基準 171%、
+   * `scripts/reference-op-probe.mjs` 実測)。
+   *
+   * 選び方と却下した案は `docs/quality/perf-thresholds.md` § 実行内正規化。
+   */
+  referenceKind?: PerfReferenceKind;
   /**
    * Optional override for memory arrayBuffers cap.
    * Default = 100 KB across 200 iterations.
@@ -74,8 +88,9 @@ export interface PerfOpSpec {
    *
    * 回帰判定は別々の実行で測った値を比べるため、 その op の実行ごとの振れ幅が
    * 閾値 20% を超えていると、 実装と無関係に判定が入れ替わる。 判定軸を分布の
-   * 下側 (p10) へ移して大半の op はこの条件を満たすようになったが (#1718)、
-   * 下側にも実行ごとの状態が乗る op は残る。
+   * 下側 (p10) へ移し (#1718)、 さらに同じ実行の中で測った基準 op との比で
+   * 判定するようにして (#1737) 大半の op はこの条件を満たすようになったが、
+   * 基準と邪魔を共有しない op (子 process の起動を含むもの 等) は残る。
    *
    * 判定は report に残したまま gate から外す。 閾値を緩めたり下限を実測の
    * 振れ幅まで引き上げたりすると、 測れているように見えてしまう。
@@ -130,9 +145,14 @@ export interface RunPerf3LayerInput {
    * 回帰判定を `allPassed` に反映するか (default false)。
    *
    * 回帰判定は別々の実行で測った値を比べるため、 op の実行ごとの振れ幅が
-   * 閾値 20% を下回っていて初めて成立する。 判定軸を p10 へ移したことで
-   * その条件を満たす op が大半になったが (#1718)、 既定を true に切り替えるのは
-   * 全 package を実測してからにする (#1708)。
+   * 閾値 20% を下回っていて初めて成立する。 実行内正規化で実行全体に乗る
+   * ずれは消えた (全 492 op の比の変化の中央値が 2 回の実測とも 0.0%、 #1737) が、
+   * op 個別のばらつきは残り、 |変化| の p90 が 17-20% と閾値のすぐ下にある。
+   *
+   * 既定を true にすると、 実装を変えていないのに毎回 20-30 package が落ちる
+   * (実測 = 2 回目 22 / 3 回目 29)。 上限の実 breach がその中に埋もれるため、
+   * 既定は false のままにしてある。 詳細と残りの根は
+   * `docs/quality/perf-thresholds.md` § 実行内正規化。
    *
    * 上限 (serial / concurrent / memory) の判定は 1 回の実行の中で完結するので
    * この指定に関わらず従来どおり反映する。
@@ -184,6 +204,8 @@ export interface RunPerf3LayerInput {
 export interface OpOutcome {
   name: string;
   serial: MeasureResult;
+  /** serial と 1 呼出ずつ交互に測った基準 op の実測値。 */
+  serialReference: MeasureResult;
   concurrent: MeasureResult;
   memory: MemorySample;
   serialGatePassed: boolean;
@@ -196,6 +218,13 @@ export interface OpOutcome {
    * 補足が要らない場合は undefined。
    */
   regressionNote?: string;
+  /**
+   * 判定の内訳。 比較対象が無かった実行では undefined。
+   *
+   * verdict だけを返すと、 正規化が効いたのか (normalizationScale) と、
+   * 換算後の値が baseline とどれだけ離れたのかを呼出側から確認できない。
+   */
+  regression?: RegressionResult;
 }
 
 export interface RunPerf3LayerResult {
@@ -267,82 +296,100 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     warmup: serialWarmup,
   });
 
-  for (const op of input.ops) {
-    const serial = await measure({
-      name: `${op.name}.serial`,
-      iterations: serialIterations,
-      warmup: serialWarmup,
-      fn: async () => {
-        await op.fn();
-      },
-    });
-    const concurrent = await measureConcurrent({
-      name: `${op.name}.concurrent`,
-      concurrency,
-      iterationsPerWorker,
-      warmup: 2,
-      fn: async () => {
-        await op.fn();
-      },
-    });
-    const memory = await measureMemory({
-      fn: async () => {
-        await op.fn();
-      },
-      iterations: memoryIterations,
-      warmup: memoryWarmup,
-    });
+  // 基準 op は module 全体で 1 組を使い回す。 fs 系は temp dir を掘るので、
+  // op ごとに作ると dir の数だけ実行が長くなり、 その差が測定に乗る。
+  const references = createReferenceOps();
+  try {
+    for (const op of input.ops) {
+      const referenceKind = op.referenceKind ?? DEFAULT_REFERENCE_KIND;
+      const alternating = await measureAlternating({
+        name: `${op.name}.serial`,
+        iterations: serialIterations,
+        warmup: serialWarmup,
+        reference: references.get(referenceKind),
+        fn: async () => {
+          await op.fn();
+        },
+      });
+      const serial = alternating.target;
+      const concurrent = await measureConcurrent({
+        name: `${op.name}.concurrent`,
+        concurrency,
+        iterationsPerWorker,
+        warmup: 2,
+        fn: async () => {
+          await op.fn();
+        },
+      });
+      const memory = await measureMemory({
+        fn: async () => {
+          await op.fn();
+        },
+        iterations: memoryIterations,
+        warmup: memoryWarmup,
+      });
 
-    const concurrentCap = op.concurrentP95CapMs ?? op.serialP95CapMs * 2;
-    const memoryCap = op.memoryArrayBuffersCapBytes ?? memoryCapDefault;
+      const concurrentCap = op.concurrentP95CapMs ?? op.serialP95CapMs * 2;
+      const memoryCap = op.memoryArrayBuffersCapBytes ?? memoryCapDefault;
 
-    const serialGate = evaluatePerfGate({
-      result: serial,
-      thresholds: { p95Ms: op.serialP95CapMs },
-    });
-    const concurrentGate = evaluatePerfGate({
-      result: concurrent,
-      thresholds: { p95Ms: concurrentCap },
-    });
-    // GC を呼べない測定は解放される一時使用まで拾うため、上限との比較が成立しない。
-    // 前提を固定できる呼出は requireGc で失敗扱いにする。既定を失敗にすると
-    // GC 無しでも動いていた既存の呼出が一斉に落ちるため opt-in にしている。
-    // 理由を明示した op だけは判定から外す。 測れていないものを通すのではなく、
-    // 測れていないことを report に残したうえで gate を落とさない扱いにする。
-    const memoryWaiver = waiverReason(op.memoryGateWaived);
-    const memoryGatePassed =
-      memoryWaiver !== undefined && memoryWaiver.length > 0
-        ? true
-        : (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
+      const serialGate = evaluatePerfGate({
+        result: serial,
+        thresholds: { p95Ms: op.serialP95CapMs },
+      });
+      const concurrentGate = evaluatePerfGate({
+        result: concurrent,
+        thresholds: { p95Ms: concurrentCap },
+      });
+      // GC を呼べない測定は解放される一時使用まで拾うため、上限との比較が成立しない。
+      // 前提を固定できる呼出は requireGc で失敗扱いにする。既定を失敗にすると
+      // GC 無しでも動いていた既存の呼出が一斉に落ちるため opt-in にしている。
+      // 理由を明示した op だけは判定から外す。 測れていないものを通すのではなく、
+      // 測れていないことを report に残したうえで gate を落とさない扱いにする。
+      const memoryWaiver = waiverReason(op.memoryGateWaived);
+      const memoryGatePassed =
+        memoryWaiver !== undefined && memoryWaiver.length > 0
+          ? true
+          : (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
 
-    const priorSerial = priorBaseline?.[`${op.name}.serial`];
-    const regression = priorSerial
-      ? detectRegression({
-          current: serial,
-          baseline: priorSerial,
-          threshold: regressionThreshold,
-          confidenceLevel: regressionConfidenceLevel,
-          resolutionMs,
-          ...(op.regressionMinDeltaMs === undefined
-            ? {}
-            : { minDeltaMs: op.regressionMinDeltaMs }),
-        })
-      : null;
+      const priorSerial = priorBaseline?.[`${op.name}.serial`];
+      // 正規化が成立しない組では比べない。 基準の種類を変えた op や、 基準の記録が
+      // 無い世代の baseline がこれに当たる。 実測値そのものの比較に落とすと、
+      // 実行と実行の間の機械の状態の差がそのまま gate にかかる。
+      const comparable =
+        priorSerial !== undefined && resolveNormalization(serial, priorSerial).normalized;
+      const regression = comparable
+        ? detectRegression({
+            current: serial,
+            baseline: priorSerial,
+            threshold: regressionThreshold,
+            confidenceLevel: regressionConfidenceLevel,
+            resolutionMs,
+            ...(op.regressionMinDeltaMs === undefined
+              ? {}
+              : { minDeltaMs: op.regressionMinDeltaMs }),
+          })
+        : null;
 
-    combinedForBaseline[`${op.name}.serial`] = serial;
-    combinedForBaseline[`${op.name}.concurrent`] = concurrent;
+      combinedForBaseline[`${op.name}.serial`] = serial;
+      combinedForBaseline[`${op.name}.concurrent`] = concurrent;
 
-    outcomes.push({
-      name: op.name,
-      serial,
-      concurrent,
-      memory,
-      serialGatePassed: serialGate.verdict.passed,
-      concurrentGatePassed: concurrentGate.verdict.passed,
-      memoryGatePassed,
-      regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
-      ...(regression === null ? {} : buildRegressionNote(regression, regressionThreshold)),
-    });
+      outcomes.push({
+        name: op.name,
+        serial,
+        serialReference: alternating.reference,
+        concurrent,
+        memory,
+        serialGatePassed: serialGate.verdict.passed,
+        concurrentGatePassed: concurrentGate.verdict.passed,
+        memoryGatePassed,
+        regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
+        ...(regression === null
+          ? {}
+          : { regression, ...buildRegressionNote(regression, regressionThreshold) }),
+      });
+    }
+  } finally {
+    references.dispose();
   }
 
   // 今回測った op のうち、まだ記録の無いものだけ書き足す。
@@ -352,8 +399,21 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const retained = pruneStaleOps(input)
     ? Object.fromEntries(Object.entries(priorResults).filter(([key]) => currentKeys.has(key)))
     : priorResults;
-  const unseededOps = Object.fromEntries(
-    Object.entries(combinedForBaseline).filter(([key]) => !(key in priorResults)),
+  // 記録の無い op に加えて、 基準 op が食い違うようになった op も書き直す。
+  // 書き直さないと、 op の `referenceKind` を変えた瞬間から比較が成立しなく
+  // なり (key は既にあるので追記されない)、 その op だけ永久に n/a に留まる。
+  const staleNormalization = (key: string): boolean => {
+    const prior = priorResults[key];
+    const current = combinedForBaseline[key];
+    if (prior === undefined || current === undefined) return false;
+    // 双方に基準が無いのは正常。 concurrent 軸は正規化の対象ではない。
+    if (prior.reference === undefined && current.reference === undefined) return false;
+    return !resolveNormalization(current, prior).normalized;
+  };
+  const refreshedOps = Object.fromEntries(
+    Object.entries(combinedForBaseline).filter(
+      ([key]) => !(key in priorResults) || staleNormalization(key),
+    ),
   );
   const staleDropped = Object.keys(priorResults).length !== Object.keys(retained).length;
   const envMismatched = loadedBaseline !== null && priorBaselineLoaded === null;
@@ -377,12 +437,12 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     !envMismatched &&
     premiseValid &&
     hardGatePassed &&
-    (Object.keys(unseededOps).length > 0 || staleDropped);
+    (Object.keys(refreshedOps).length > 0 || staleDropped);
 
   let baselineSeeded = false;
   if (shouldReseed) {
     await saveBaselineEnvelope(baselinePath, {
-      schema: 1,
+      schema: BASELINE_SCHEMA,
       env: captureEnv(),
       results: combinedForBaseline,
     });
@@ -391,9 +451,9 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     // 追記は現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
     await saveBaselineEnvelope(baselinePath, {
-      schema: 1,
+      schema: BASELINE_SCHEMA,
       env: captureEnv(),
-      results: { ...retained, ...unseededOps },
+      results: { ...retained, ...refreshedOps },
     });
     baselineSeeded = priorBaseline === null;
   }
@@ -576,20 +636,48 @@ function writeReport(input: WriteReportInput): void {
       : []),
     '## Serial (concurrency = 1)',
     '',
-    '| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |',
+    '| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |',
     '|---|---|---|---|---|---|---|',
   ];
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
-    // 既定の下限を op 側が上書きできるため、実際に効いた値を行ごとに書く。
-    // 表頭の既定値だけを書くと、上書きした op で表示と判定条件がずれる。
+    // 既定の下限を op 側が上書きでき、 さらに正規化の倍率が掛かるため、 実際に
+    // 効いた値を行ごとに書く。 表頭の既定値だけを書くと、 上書きした op や
+    // 機械が遅かった実行で表示と判定条件がずれる。 比較していない行 (初回 seed)
+    // には効いた値が無いので、 既定の計算をそのまま出す。
     const floorMs =
-      op.regressionMinDeltaMs ?? input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE;
+      out.regression?.floorMs ??
+      op.regressionMinDeltaMs ??
+      input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE;
     lines.push(
       // 判定を gate から外した op は、判定結果と外した理由の両方を書く。
       // 結果だけ書くと gate に効いているように読め、理由だけ書くと
       // 何が測れたのかが残らない。
       `| ${op.name} | ${formatMs(out.serial.p10)} | ${formatMs(out.serial.p95)} | ${op.serialP95CapMs}ms | ${formatMs(floorMs)} | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
+    );
+  });
+
+  lines.push(
+    '',
+    '## 実行内正規化 (回帰判定はこの比で行う)',
+    '',
+    '回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。',
+    '',
+    '| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |',
+    '|---|---|---|---|---|---|---|---|',
+  );
+  input.ops.forEach((op, idx) => {
+    const out = input.outcomes[idx]!;
+    const referenceP10 = out.serialReference.p10;
+    const ratio = referenceP10 > 0 ? out.serial.p10 / referenceP10 : Number.NaN;
+    const prior = input.priorBaseline?.[`${op.name}.serial`];
+    const priorReference = prior?.reference;
+    const priorRatio =
+      prior !== undefined && priorReference !== undefined && priorReference.p10 > 0
+        ? (prior.p10 / priorReference.p10).toFixed(3)
+        : 'n/a';
+    lines.push(
+      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
     );
   });
 

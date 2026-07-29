@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  BASELINE_SCHEMA,
   MEASUREMENT_PREMISE,
   buildMeasureResult,
   captureEnv,
@@ -23,7 +24,7 @@ describe('baseline persistence', () => {
     const loaded = await loadBaseline(file);
 
     expect(loaded).not.toBeNull();
-    expect(loaded?.envelope.schema).toBe(1);
+    expect(loaded?.envelope.schema).toBe(BASELINE_SCHEMA);
     expect(loaded?.envelope.results['reply']).toEqual(result);
     // env は現行 machine 情報なので envMismatch は空。
     expect(loaded?.envMismatch).toEqual([]);
@@ -37,7 +38,7 @@ describe('baseline persistence', () => {
 
     const loaded = await loadBaseline(file);
     expect(loaded).not.toBeNull();
-    expect(loaded?.envelope.schema).toBe(1);
+    expect(loaded?.envelope.schema).toBe(BASELINE_SCHEMA);
     expect(loaded?.envelope.env.gitSha).toBe('unknown');
     expect(loaded?.envelope.results['op']?.samples).toEqual([10, 11, 12]);
     // legacy → env 全 field mismatch。
@@ -59,7 +60,7 @@ describe('baseline persistence', () => {
 
     const loaded = await loadBaseline(file);
     expect(loaded).not.toBeNull();
-    expect(loaded?.envelope.schema).toBe(1);
+    expect(loaded?.envelope.schema).toBe(BASELINE_SCHEMA);
     expect(Object.keys(loaded?.envelope.results ?? {}).sort()).toEqual([
       'createPool.serial',
       'parseSpec.concurrent',

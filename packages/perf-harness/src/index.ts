@@ -1,14 +1,30 @@
 export type {
   MeasureInput,
+  MeasureReference,
   MeasureResult,
   PerfGateInput,
   PerfGateResult,
+  PerfReferenceKind,
   RegressionInput,
   RegressionResult,
   Thresholds,
 } from './types.js';
 
-export { buildMeasureResult, measure, measureHarnessResolution } from './measure.js';
+export {
+  buildMeasureResult,
+  measure,
+  measureAlternating,
+  measureHarnessResolution,
+  type AlternatingMeasureResult,
+  type MeasureAlternatingInput,
+} from './measure.js';
+export {
+  DEFAULT_REFERENCE_KIND,
+  createReferenceOps,
+  referenceOpName,
+  type PerfReferenceOp,
+  type PerfReferenceSet,
+} from './reference.js';
 export { measureConcurrent, type ConcurrentInput } from './concurrent.js';
 export { measureMemory, type MemoryInput, type MemorySample } from './memory.js';
 export {
@@ -16,8 +32,10 @@ export {
   RESOLUTION_FLOOR_MULTIPLE,
   detectRegression,
   detectRegressionStrict,
+  resolveNormalization,
 } from './regression.js';
 export {
+  BASELINE_SCHEMA,
   MEASUREMENT_PREMISE,
   captureEnv,
   isComparableEnv,

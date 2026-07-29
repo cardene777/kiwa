@@ -51,6 +51,7 @@ describe(MODULE, () => {
             // renders a test template, writes .ts file. Measures the full
             // parse + render + write pipeline.
             name: 'runSpecToTest',
+            referenceKind: 'fs-write',
             serialP95CapMs: 20,
             fn: () => {
               runSpecToTest({

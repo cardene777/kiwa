@@ -2,31 +2,41 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00029ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00058ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
-| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| init_workflow (3 fresh project scaffold) | 2.85ms | 5.58ms | 500ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| spec_to_test_batch (5 consecutive runSpecToTest) | 0.44ms | 1.29ms | 300ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| init_error_handling (3 InitConflictError catch) | 0.82ms | 1.70ms | 500ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| init_workflow (3 fresh project scaffold) | 2.16ms | 5.03ms | 500ms | 0.00045ms | PASS | stable (p10 -13% (閾値未満)、 p95 +58% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| spec_to_test_batch (5 consecutive runSpecToTest) | 0.50ms | 1.49ms | 300ms | 0.00046ms | PASS | stable (p10 -9% (閾値未満)、 p95 +76% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| init_error_handling (3 InitConflictError catch) | 0.89ms | 2.59ms | 500ms | 0.00021ms | PASS | improved — gate 無効 (regressionGate=false) |
+
+## 実行内正規化 (回帰判定はこの比で行う)
+
+回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
+
+| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|
+| init_workflow (3 fresh project scaffold) | fs-write | 0.16ms | 2.16ms | 13.638 | 15.703 | 1.69ms | 1.95ms |
+| spec_to_test_batch (5 consecutive runSpecToTest) | fs-write | 0.10ms | 0.50ms | 4.872 | 5.354 | 0.40ms | 0.44ms |
+| init_error_handling (3 InitConflictError catch) | fs-write | 0.34ms | 0.89ms | 2.660 | 5.390 | 0.33ms | 0.68ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| init_workflow (3 fresh project scaffold) | 12.84ms | 1000ms | PASS |
-| spec_to_test_batch (5 consecutive runSpecToTest) | 3.59ms | 600ms | PASS |
-| init_error_handling (3 InitConflictError catch) | 5.02ms | 1000ms | PASS |
+| init_workflow (3 fresh project scaffold) | 21.09ms | 1000ms | PASS |
+| spec_to_test_batch (5 consecutive runSpecToTest) | 2.72ms | 600ms | PASS |
+| init_error_handling (3 InitConflictError catch) | 5.84ms | 1000ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| init_workflow (3 fresh project scaffold) | 11304 B | -6528 B | 102400 B | yes | PASS |
-| spec_to_test_batch (5 consecutive runSpecToTest) | -1728 B | 0 B | 102400 B | yes | PASS |
-| init_error_handling (3 InitConflictError catch) | 5384 B | 0 B | 102400 B | yes | PASS |
+| init_workflow (3 fresh project scaffold) | 3912 B | 0 B | 102400 B | yes | PASS |
+| spec_to_test_batch (5 consecutive runSpecToTest) | -1608 B | 0 B | 102400 B | yes | PASS |
+| init_error_handling (3 InitConflictError catch) | 5352 B | -10592 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +48,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 2.85ms |
-| p50 | 3.88ms |
-| p95 | 5.58ms |
-| p99 | 5.66ms |
-| mean | 3.99ms |
-| stdev | 0.99ms |
-| min | 2.52ms |
-| max | 5.68ms |
-| total | 79.77ms |
+| p10 | 2.16ms |
+| p50 | 2.39ms |
+| p95 | 5.03ms |
+| p99 | 5.71ms |
+| mean | 2.69ms |
+| stdev | 0.97ms |
+| min | 1.91ms |
+| max | 5.88ms |
+| total | 53.86ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 2.85ms | 3.53ms | -0.68ms | -19.35% |
-| p50 | 3.88ms | 5.63ms | -1.76ms | -31.17% |
-| p95 | 5.58ms | 12.29ms | -6.71ms | -54.61% |
-| p99 | 5.66ms | 12.47ms | -6.81ms | -54.59% |
-| mean | 3.99ms | 6.73ms | -2.74ms | -40.74% |
-| min | 2.52ms | 3.07ms | -0.54ms | -17.64% |
-| max | 5.68ms | 12.52ms | -6.83ms | -54.59% |
-| total | 79.77ms | 134.62ms | -54.85ms | -40.74% |
+| p10 | 2.16ms | 1.95ms | +0.21ms | +10.95% |
+| p50 | 2.39ms | 2.11ms | +0.28ms | +13.12% |
+| p95 | 5.03ms | 2.49ms | +2.54ms | +101.84% |
+| p99 | 5.71ms | 2.66ms | +3.06ms | +115.12% |
+| mean | 2.69ms | 2.18ms | +0.51ms | +23.56% |
+| min | 1.91ms | 1.79ms | +0.12ms | +6.52% |
+| max | 5.88ms | 2.70ms | +3.19ms | +118.19% |
+| total | 53.86ms | 43.59ms | +10.27ms | +23.56% |
 
 ### spec_to_test_batch (5 consecutive runSpecToTest)
 
@@ -69,28 +79,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.44ms |
-| p50 | 0.59ms |
-| p95 | 1.29ms |
-| p99 | 1.58ms |
-| mean | 0.69ms |
+| p10 | 0.50ms |
+| p50 | 0.69ms |
+| p95 | 1.49ms |
+| p99 | 1.62ms |
+| mean | 0.76ms |
 | stdev | 0.34ms |
-| min | 0.42ms |
-| max | 1.66ms |
-| total | 13.87ms |
+| min | 0.49ms |
+| max | 1.65ms |
+| total | 15.30ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.44ms | 0.51ms | -0.07ms | -13.16% |
-| p50 | 0.59ms | 0.57ms | +0.02ms | +3.34% |
-| p95 | 1.29ms | 1.16ms | +0.13ms | +11.21% |
-| p99 | 1.58ms | 1.27ms | +0.31ms | +24.49% |
-| mean | 0.69ms | 0.63ms | +0.06ms | +10.15% |
-| min | 0.42ms | 0.45ms | -0.04ms | -7.78% |
-| max | 1.66ms | 1.30ms | +0.36ms | +27.45% |
-| total | 13.87ms | 12.59ms | +1.28ms | +10.15% |
+| p10 | 0.50ms | 0.44ms | +0.06ms | +13.53% |
+| p50 | 0.69ms | 0.53ms | +0.16ms | +29.64% |
+| p95 | 1.49ms | 0.68ms | +0.81ms | +120.12% |
+| p99 | 1.62ms | 0.81ms | +0.81ms | +100.53% |
+| mean | 0.76ms | 0.54ms | +0.22ms | +41.12% |
+| min | 0.49ms | 0.44ms | +0.05ms | +11.05% |
+| max | 1.65ms | 0.84ms | +0.81ms | +96.58% |
+| total | 15.30ms | 10.84ms | +4.46ms | +41.12% |
 
 ### init_error_handling (3 InitConflictError catch)
 
@@ -100,26 +110,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.82ms |
-| p50 | 1.15ms |
-| p95 | 1.70ms |
-| p99 | 1.76ms |
-| mean | 1.16ms |
-| stdev | 0.30ms |
-| min | 0.76ms |
-| max | 1.77ms |
-| total | 23.13ms |
+| p10 | 0.89ms |
+| p50 | 1.17ms |
+| p95 | 2.59ms |
+| p99 | 2.97ms |
+| mean | 1.42ms |
+| stdev | 0.61ms |
+| min | 0.86ms |
+| max | 3.06ms |
+| total | 28.34ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.82ms | 0.83ms | -0.02ms | -2.33% |
-| p50 | 1.15ms | 1.06ms | +0.08ms | +7.89% |
-| p95 | 1.70ms | 1.69ms | +0.01ms | +0.88% |
-| p99 | 1.76ms | 1.72ms | +0.04ms | +2.42% |
-| mean | 1.16ms | 1.13ms | +0.03ms | +2.60% |
-| min | 0.76ms | 0.77ms | -0.01ms | -1.35% |
-| max | 1.77ms | 1.72ms | +0.05ms | +2.80% |
-| total | 23.13ms | 22.54ms | +0.59ms | +2.60% |
+| p10 | 0.89ms | 0.68ms | +0.22ms | +32.31% |
+| p50 | 1.17ms | 0.74ms | +0.43ms | +57.98% |
+| p95 | 2.59ms | 0.90ms | +1.70ms | +188.66% |
+| p99 | 2.97ms | 0.93ms | +2.04ms | +219.03% |
+| mean | 1.42ms | 0.76ms | +0.65ms | +85.83% |
+| min | 0.86ms | 0.64ms | +0.23ms | +35.94% |
+| max | 3.06ms | 0.94ms | +2.12ms | +226.30% |
+| total | 28.34ms | 15.25ms | +13.09ms | +85.83% |
 
