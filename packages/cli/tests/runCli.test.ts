@@ -36,16 +36,41 @@ function makeProject(): string {
 
 /** 指定 exit code を非同期に 1 度だけ発火する child process の代役。 */
 function fakeChild(code: number | null, signal: NodeJS.Signals | null = null): ChildProcess {
-  const child = new EventEmitter();
+  const child = new EventEmitter() as EventEmitter & { kill: () => boolean };
+  // 実 `ChildProcess` は必ず `kill` を持つ。 fake が持たないと、呼出側が
+  // 例外で止まる経路を test が素通ししてしまう (#1727 で実際に起きた)。
+  // 既に終了した child への kill は実物でも無害なので、何もせず true を返す。
+  child.kill = () => true;
   setImmediate(() => {
     child.emit('exit', code, signal);
   });
   return child as unknown as ChildProcess;
 }
 
+/**
+ * 終了しない watcher。 実運用の watch process と同じで、`kill()` を受けて初めて
+ * `exit` を出す。 即座に終了する `fakeChild` では「1 件が落ちて残りが生き続ける」
+ * 状態を再現できない。
+ */
+function livingChild(): ChildProcess & { killed: NodeJS.Signals | 'default' | null } {
+  const child = new EventEmitter() as EventEmitter & {
+    killed: NodeJS.Signals | 'default' | null;
+    kill: (signal?: NodeJS.Signals) => boolean;
+  };
+  child.killed = null;
+  child.kill = (signal?: NodeJS.Signals) => {
+    child.killed = signal ?? 'default';
+    // 実 process と同じく、kill は非同期に exit を招く。
+    setImmediate(() => child.emit('exit', null, signal ?? 'SIGTERM'));
+    return true;
+  };
+  return child as unknown as ChildProcess & { killed: NodeJS.Signals | 'default' | null };
+}
+
 /** spawn 自体が失敗した child。 `exit` は来ず `error` だけが飛ぶ。 */
 function failingChild(message: string): ChildProcess {
-  const child = new EventEmitter();
+  const child = new EventEmitter() as EventEmitter & { kill: () => boolean };
+  child.kill = () => true;
   setImmediate(() => {
     child.emit('error', new Error(message));
   });
@@ -437,6 +462,85 @@ describe('runCli run --watch', () => {
       runWatch,
       spawnFn: () => fakeChild(codes.shift() ?? 0),
     });
+    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
+  });
+
+  it('T-CLI-081 1 件が落ちたら残りを終了させて その code で終わる (#1727)', async () => {
+    // 実運用では watch は終了しない。 1 件が非 0 で落ちても残りが生き続けるため、
+    // `Promise.all` で全部の exit を待つ形だと CLI が終わらず code も伝播しない。
+    const dir = makeProject();
+    const living: Array<ReturnType<typeof livingChild>> = [];
+    let spawnCount = 0;
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => {
+        spawnCount += 1;
+        // 2 番目だけが code 3 で落ち、1 / 3 番目は生き続ける。
+        if (spawnCount === 2) return fakeChild(3);
+        const child = livingChild();
+        living.push(child);
+        return child;
+      },
+    });
+
+    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
+
+    // 生きていた 2 件に終了要求が届いている。
+    expect(living).toHaveLength(2);
+    for (const child of living) {
+      expect(child.killed).not.toBeNull();
+    }
+  });
+
+  it('T-CLI-082 こちらが送った SIGTERM は失敗として数えない (#1727)', async () => {
+    // 停止させた child の exit を失敗として数えると、最初に検出した code が
+    // 後続の 1 に上書きされ得る。
+    const dir = makeProject();
+    let spawnCount = 0;
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => {
+        spawnCount += 1;
+        // 1 番目が code 3。 残り 2 件は SIGTERM で終わる。
+        return spawnCount === 1 ? fakeChild(3) : livingChild();
+      },
+    });
+
+    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
+    // SIGTERM の行は出さない (こちらが送ったものなので異常ではない)。
+    expect(h.err()).not.toContain('terminated by SIGTERM');
+  });
+
+  it('T-CLI-083 --layer= に値が無ければ 2 で終わる', async () => {
+    const dir = makeProject();
+    const h = harness({ cwd: () => dir, runWatch });
+    await expect(runCli(['run', '--watch', '--layer='], h.deps)).resolves.toBe(2);
+    expect(h.err()).toContain('--layer requires a value');
+  });
+
+  it('T-CLI-084 kill を持たない child でも exit を待ち続ける (#1727)', async () => {
+    // 停止要求が送れない相手 (kill が throw する) でも、その child の exit を
+    // 待つ promise を残さない。 残すと、失敗を検出したのに CLI が終わらない。
+    const dir = makeProject();
+    let spawnCount = 0;
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => {
+        spawnCount += 1;
+        if (spawnCount === 1) return fakeChild(3);
+        const child = new EventEmitter() as EventEmitter & { kill: () => boolean };
+        child.kill = () => {
+          throw new Error('kill EPERM');
+        };
+        // 停止要求は通らないが、child 自身は後から終了する。
+        setTimeout(() => child.emit('exit', 0, null), 5);
+        return child as unknown as ChildProcess;
+      },
+    });
+
     await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
   });
 
