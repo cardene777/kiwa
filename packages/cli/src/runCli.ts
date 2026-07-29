@@ -188,21 +188,18 @@ async function awaitWatchers(
   if (children.length === 0) return 0;
 
   let firstFailure: number | null = null;
-  // 停止要求を送った child。 `kill()` の失敗は `error` event で届くため、
-  // spawn 失敗の `error` と区別するのに要る (下の handler で使う)。
-  const asked = new Set<number>();
 
   const stopOthers = (except: number): void => {
     children.forEach((child, index) => {
       if (index === except) return;
-      asked.add(index);
       // 既に終了している child への kill は無害 (ESRCH は静かに false を返す)。
       // 生死を先に確かめる術がないので、送ってから exit を待つ。
       //
-      // `kill()` は失敗の伝え方が 2 通りある (Node の実装)。
+      // `kill()` は失敗の伝え方が 3 通りある (Node の実装)。
       //   - EINVAL / ENOSYS = throw
-      //   - EPERM 等        = `error` event を emit して false を返す
-      // throw する方はここで握る。 event の方は下の `error` handler が受ける。
+      //   - EPERM 等        = `error` event を同期に emit して false を返す
+      //   - ESRCH (既に死亡) = 静かに false
+      // throw する方はここで握る。 event の方は下の `error` handler が見分ける。
       try {
         child.kill();
       } catch {
@@ -247,11 +244,15 @@ async function awaitWatchers(
           // spawn 自体が失敗すると `exit` は来ない。 購読していないと
           // uncaught error になり、 この promise も解決されないまま残る。
           //
-          // ただし停止要求を送ったあとの `error` は意味が違う。 `kill()` が
-          // EPERM 等で失敗した通知で、child は生きている。 ここで解決すると
-          // CLI は終了し、その watcher が残る。 報告だけして `exit` を待つ。
+          // 一方 `kill()` の失敗 (EPERM 等) も `error` で届く。 そちらは child が
+          // 生きているので、解決すると CLI が終了して watcher が残る。
+          //
+          // 見分けは `syscall` で行う。 Node は spawn 失敗を `spawn <cmd>`、
+          // kill 失敗を `kill` として立てる。 「停止要求を送ったか」 で分けると、
+          // 停止要求のあとに届いた spawn 失敗まで待ち続けてしまう
+          // (spawn 失敗には `exit` が来ないので、CLI が終わらない)。
           child.on('error', (error) => {
-            if (asked.has(index)) {
+            if ((error as NodeJS.ErrnoException).syscall === 'kill') {
               stderr(
                 `ERR run --watch: failed to stop watcher: ${(error as Error).message}\n`,
               );

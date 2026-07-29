@@ -520,6 +520,19 @@ describe('runCli run --watch', () => {
     expect(h.err()).toContain('--layer requires a value');
   });
 
+  it('T-CLI-086 spawn が全件失敗しても待たずに終わる (#1727)', async () => {
+    // 1 件目の error で残りに停止要求が飛ぶ。 その後に届く spawn 失敗の error を
+    // 「停止要求の失敗」 と誤分類すると、exit が来ない相手を待ち続ける。
+    const dir = makeProject();
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => failingChild('spawn pnpm ENOENT'),
+    });
+
+    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(1);
+  });
+
   it('T-CLI-085 kill が error event で失敗を伝えても exit を待つ (#1727)', async () => {
     // Node の `kill()` は失敗の伝え方が 2 通りある。 EINVAL / ENOSYS は throw、
     // EPERM 等は `error` event を emit して false を返す。 後者を spawn 失敗の
@@ -536,7 +549,10 @@ describe('runCli run --watch', () => {
         const child = new EventEmitter() as EventEmitter & { kill: () => boolean };
         child.kill = () => {
           // 実 Node と同じ形 = 同期に error を emit して false を返す。
-          child.emit('error', new Error('kill EPERM'));
+          // syscall は Node が `ErrnoException(err, 'kill')` で立てる値。
+          const err = new Error('kill EPERM') as NodeJS.ErrnoException;
+          err.syscall = 'kill';
+          child.emit('error', err);
           return false;
         };
         // 停止要求は通らないが、しばらくして自力で終わる。
