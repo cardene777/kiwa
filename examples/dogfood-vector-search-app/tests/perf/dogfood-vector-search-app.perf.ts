@@ -1,6 +1,6 @@
 import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import path from 'node:path';
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { makeMockAdapter } from '../../src/adapters/mock.js';
 import { sampleDocRow } from '../../src/adapters/interface.js';
 import { ivfFlatIndex } from '../../src/index-store/index.js';
@@ -28,8 +28,11 @@ describe(MODULE, () => {
   it(
     '3-layer perf: driveIndexBuild / driveSemanticSearch / driveHybridSearch / driveCacheHitRate',
     async () => {
-      await runPerf3Layer({
+      const result = await runPerf3Layer({
         moduleName: MODULE,
+        // GC を呼べない測定は解放される一時使用まで拾い、memory 上限との
+        // 比較が成立しない。 測れていない実行を pass にしない (#1708)。
+        requireGc: true,
         reportPath: REPORT_PATH,
         ops: [
           {
@@ -84,6 +87,7 @@ describe(MODULE, () => {
           },
         ],
       });
+      expect(result.allPassed).toBe(true);
     },
     120_000,
   );

@@ -2,35 +2,37 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| multi_service_workflow (10 invokeUnary across 4 providers) | 0.02ms | 100ms | PASS | stable (差 0.01ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| streaming_batch (5 server-stream + bidi mix) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +3217%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| error_status_batch (5 fail method returns INTERNAL) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1675%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| interceptor_chain_batch (10 unary through auth+log) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +2926%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| cancel_deadline_batch (5 cancel + 5 deadline expired) | 0.00ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +19342%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| multi_service_workflow (10 invokeUnary across 4 providers) | 0.0040ms | 0.0088ms | 100ms | 0.00050ms | PASS | stable (p10 -1% (閾値未満)、 p95 +24% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| streaming_batch (5 server-stream + bidi mix) | 0.0073ms | 0.02ms | 100ms | 0.00050ms | PASS | stable (p10 +19% (閾値未満)、 p95 +24% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| error_status_batch (5 fail method returns INTERNAL) | 0.01ms | 0.03ms | 100ms | 0.00050ms | PASS | stable (p10 +0% (閾値未満)、 p95 +34% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| interceptor_chain_batch (10 unary through auth+log) | 0.0068ms | 0.01ms | 100ms | 0.00050ms | PASS | improved — gate 無効 (regressionGate=false) |
+| cancel_deadline_batch (5 cancel + 5 deadline expired) | 0.0020ms | 0.0025ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| multi_service_workflow (10 invokeUnary across 4 providers) | 0.07ms | 200ms | PASS |
-| streaming_batch (5 server-stream + bidi mix) | 0.05ms | 200ms | PASS |
-| error_status_batch (5 fail method returns INTERNAL) | 0.08ms | 200ms | PASS |
-| interceptor_chain_batch (10 unary through auth+log) | 0.04ms | 200ms | PASS |
+| multi_service_workflow (10 invokeUnary across 4 providers) | 0.03ms | 200ms | PASS |
+| streaming_batch (5 server-stream + bidi mix) | 0.08ms | 200ms | PASS |
+| error_status_batch (5 fail method returns INTERNAL) | 0.07ms | 200ms | PASS |
+| interceptor_chain_batch (10 unary through auth+log) | 0.05ms | 200ms | PASS |
 | cancel_deadline_batch (5 cancel + 5 deadline expired) | 0.01ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| multi_service_workflow (10 invokeUnary across 4 providers) | 6432 B | 0 B | 102400 B | yes | PASS |
-| streaming_batch (5 server-stream + bidi mix) | 3072 B | 0 B | 102400 B | yes | PASS |
-| error_status_batch (5 fail method returns INTERNAL) | -19816 B | 0 B | 102400 B | yes | PASS |
-| interceptor_chain_batch (10 unary through auth+log) | 12536 B | 0 B | 102400 B | yes | PASS |
-| cancel_deadline_batch (5 cancel + 5 deadline expired) | 7152 B | 0 B | 102400 B | yes | PASS |
+| multi_service_workflow (10 invokeUnary across 4 providers) | 1944 B | 0 B | 102400 B | yes | PASS |
+| streaming_batch (5 server-stream + bidi mix) | 3168 B | 0 B | 102400 B | yes | PASS |
+| error_status_batch (5 fail method returns INTERNAL) | -2208 B | 0 B | 102400 B | yes | PASS |
+| interceptor_chain_batch (10 unary through auth+log) | 19424 B | 0 B | 102400 B | yes | PASS |
+| cancel_deadline_batch (5 cancel + 5 deadline expired) | 1072 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -42,26 +44,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.03ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
-| min | 0.01ms |
-| max | 0.03ms |
-| total | 0.25ms |
+| p10 | 0.0040ms |
+| p50 | 0.0053ms |
+| p95 | 0.0088ms |
+| p99 | 0.01ms |
+| mean | 0.0058ms |
+| stdev | 0.0020ms |
+| min | 0.0040ms |
+| max | 0.01ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.01ms | +100.39% |
-| p95 | 0.02ms | 0.01ms | +0.01ms | +131.44% |
-| p99 | 0.03ms | 0.01ms | +0.01ms | +95.41% |
-| mean | 0.01ms | 0.01ms | +0.01ms | +108.78% |
-| min | 0.01ms | 0.00ms | +0.01ms | +115.06% |
-| max | 0.03ms | 0.01ms | +0.01ms | +90.56% |
-| total | 0.25ms | 0.12ms | +0.13ms | +108.78% |
+| p10 | 0.0040ms | 0.0041ms | -0.000034ms | -0.82% |
+| p50 | 0.0053ms | 0.0053ms | -0.000021ms | -0.39% |
+| p95 | 0.0088ms | 0.0071ms | +0.0017ms | +23.72% |
+| p99 | 0.01ms | 0.01ms | +0.0014ms | +12.90% |
+| mean | 0.0058ms | 0.0055ms | +0.00026ms | +4.70% |
+| min | 0.0040ms | 0.0040ms | +0.000041ms | +1.04% |
+| max | 0.01ms | 0.01ms | +0.0013ms | +11.27% |
+| total | 0.12ms | 0.11ms | +0.0052ms | +4.70% |
 
 ### streaming_batch (5 server-stream + bidi mix)
 
@@ -71,26 +75,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
+| p10 | 0.0073ms |
+| p50 | 0.0085ms |
 | p95 | 0.02ms |
 | p99 | 0.02ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
-| min | 0.01ms |
+| mean | 0.0095ms |
+| stdev | 0.0034ms |
+| min | 0.0067ms |
 | max | 0.02ms |
-| total | 0.24ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +32.23% |
-| p95 | 0.02ms | 0.02ms | +0.00ms | +17.72% |
-| p99 | 0.02ms | 0.02ms | +0.00ms | +13.65% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +20.46% |
-| min | 0.01ms | 0.01ms | +0.00ms | +9.23% |
-| max | 0.02ms | 0.02ms | +0.00ms | +12.93% |
-| total | 0.24ms | 0.20ms | +0.04ms | +20.46% |
+| p10 | 0.0073ms | 0.0061ms | +0.0012ms | +19.39% |
+| p50 | 0.0085ms | 0.0066ms | +0.0019ms | +28.61% |
+| p95 | 0.02ms | 0.01ms | +0.0034ms | +24.14% |
+| p99 | 0.02ms | 0.02ms | +0.0011ms | +6.33% |
+| mean | 0.0095ms | 0.0082ms | +0.0014ms | +16.90% |
+| min | 0.0067ms | 0.0061ms | +0.00067ms | +10.96% |
+| max | 0.02ms | 0.02ms | +0.00058ms | +3.07% |
+| total | 0.19ms | 0.16ms | +0.03ms | +16.90% |
 
 ### error_status_batch (5 fail method returns INTERNAL)
 
@@ -100,26 +106,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
+| p10 | 0.01ms |
 | p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.02ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
+| p95 | 0.03ms |
+| p99 | 0.05ms |
+| mean | 0.02ms |
+| stdev | 0.0092ms |
 | min | 0.01ms |
-| max | 0.03ms |
-| total | 0.30ms |
+| max | 0.05ms |
+| total | 0.32ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +2.41% |
-| p95 | 0.02ms | 0.03ms | -0.01ms | -46.02% |
-| p99 | 0.02ms | 0.07ms | -0.04ms | -62.89% |
-| mean | 0.01ms | 0.02ms | -0.00ms | -16.21% |
-| min | 0.01ms | 0.01ms | +0.00ms | +4.85% |
-| max | 0.03ms | 0.08ms | -0.05ms | -64.54% |
-| total | 0.30ms | 0.36ms | -0.06ms | -16.21% |
+| p10 | 0.01ms | 0.01ms | +1.0e-7ms | +0.00% |
+| p50 | 0.01ms | 0.01ms | +0.00025ms | +2.01% |
+| p95 | 0.03ms | 0.02ms | +0.0076ms | +34.12% |
+| p99 | 0.05ms | 0.02ms | +0.02ms | +103.62% |
+| mean | 0.02ms | 0.01ms | +0.0022ms | +15.71% |
+| min | 0.01ms | 0.01ms | +0.000042ms | +0.35% |
+| max | 0.05ms | 0.02ms | +0.03ms | +120.81% |
+| total | 0.32ms | 0.28ms | +0.04ms | +15.71% |
 
 ### interceptor_chain_batch (10 unary through auth+log)
 
@@ -129,26 +137,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
+| p10 | 0.0068ms |
+| p50 | 0.0071ms |
 | p95 | 0.01ms |
 | p99 | 0.02ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
-| min | 0.01ms |
+| mean | 0.0081ms |
+| stdev | 0.0031ms |
+| min | 0.0067ms |
 | max | 0.02ms |
-| total | 0.18ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -13.61% |
-| p95 | 0.01ms | 0.02ms | -0.00ms | -12.32% |
-| p99 | 0.02ms | 0.03ms | -0.01ms | -30.51% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -13.27% |
-| min | 0.01ms | 0.01ms | -0.00ms | -2.25% |
-| max | 0.02ms | 0.03ms | -0.01ms | -33.19% |
-| total | 0.18ms | 0.21ms | -0.03ms | -13.27% |
+| p10 | 0.0068ms | 0.0085ms | -0.0018ms | -20.51% |
+| p50 | 0.0071ms | 0.0089ms | -0.0018ms | -20.00% |
+| p95 | 0.01ms | 0.01ms | +0.0026ms | +24.68% |
+| p99 | 0.02ms | 0.02ms | -0.0034ms | -15.47% |
+| mean | 0.0081ms | 0.0097ms | -0.0016ms | -16.46% |
+| min | 0.0067ms | 0.0085ms | -0.0018ms | -20.59% |
+| max | 0.02ms | 0.02ms | -0.0048ms | -19.73% |
+| total | 0.16ms | 0.19ms | -0.03ms | -16.46% |
 
 ### cancel_deadline_batch (5 cancel + 5 deadline expired)
 
@@ -158,24 +168,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
+| p10 | 0.0020ms |
+| p50 | 0.0020ms |
+| p95 | 0.0025ms |
+| p99 | 0.0029ms |
+| mean | 0.0021ms |
+| stdev | 0.00024ms |
+| min | 0.0020ms |
+| max | 0.0030ms |
 | total | 0.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -3.76% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -13.50% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +1.15% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -3.50% |
-| min | 0.00ms | 0.00ms | -0.00ms | -1.98% |
-| max | 0.00ms | 0.00ms | +0.00ms | +4.76% |
-| total | 0.04ms | 0.05ms | -0.00ms | -3.50% |
+| p10 | 0.0020ms | 0.0020ms | +0.0000041ms | +0.21% |
+| p50 | 0.0020ms | 0.0020ms | +0.000041ms | +2.09% |
+| p95 | 0.0025ms | 0.0022ms | +0.00035ms | +16.09% |
+| p99 | 0.0029ms | 0.0023ms | +0.00060ms | +26.57% |
+| mean | 0.0021ms | 0.0020ms | +0.000077ms | +3.83% |
+| min | 0.0020ms | 0.0019ms | +0.000041ms | +2.14% |
+| max | 0.0030ms | 0.0023ms | +0.00067ms | +29.06% |
+| total | 0.04ms | 0.04ms | +0.0015ms | +3.83% |
 

@@ -55,6 +55,15 @@ export interface RunPerf3LayerLiveInput {
   iterationsPerWorker?: number;
   memoryIterations?: number;
   thresholdDocLink?: string;
+  /**
+   * GC を呼べない測定を memory gate の失敗として扱う (default false)。
+   *
+   * `--expose-gc` 無しの測定は解放される一時使用まで拾うため上限との比較が
+   * 成立しない。 config 側で GC を可能にしても、呼出が要求しなければ
+   * 「測れていない実行」 が上限内として通る。 mock 経路 (`runPerf3Layer`) と
+   * 同じ契約にする (#1708)。
+   */
+  requireGc?: boolean;
 }
 
 export interface LiveOpOutcome extends Partial<OpOutcome> {
@@ -153,7 +162,8 @@ export async function runPerf3LayerLive(
       result: concurrent,
       thresholds: { p95Ms: concurrentCap },
     });
-    const memoryGatePassed = memory.arrayBuffersDeltaBytes < memoryCap;
+    const memoryGatePassed =
+      (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
 
     const priorSerial = priorBaseline?.[`${op.name}.live.serial`];
     const regression = priorSerial
@@ -188,8 +198,17 @@ export async function runPerf3LayerLive(
     });
   }
 
-  const anyMeasured = outcomes.some((o) => !o.skipped);
-  if (anyMeasured && priorBaseline === null) {
+  const measured = outcomes.filter((o) => !o.skipped);
+  const anyMeasured = measured.length > 0;
+  const allPassed = measured.every(
+    (o) => o.serialGatePassed && o.concurrentGatePassed && o.memoryGatePassed,
+  );
+
+  // 測定そのものが成立している実行の値だけを基準にする。 GC を呼べない実行や
+  // 上限を割った実行を保存すると、壊れた状態が次回以降の比較対象になる。
+  // mock 経路 (`runPerf3Layer`) と同じ条件 (#1708)。
+  const premiseValid = !input.requireGc || measured.every((o) => o.memory?.gcExposed);
+  if (anyMeasured && priorBaseline === null && premiseValid && allPassed) {
     await saveBaselineEnvelope(baselinePath, {
       schema: 1,
       env: captureEnv(),
@@ -197,10 +216,6 @@ export async function runPerf3LayerLive(
     });
     baselineSeeded = true;
   }
-
-  const allPassed = outcomes
-    .filter((o) => !o.skipped)
-    .every((o) => o.serialGatePassed && o.concurrentGatePassed && o.memoryGatePassed);
 
   writeLiveReport({
     reportPath: input.reportPath,
@@ -287,14 +302,16 @@ function writeLiveReport(input: WriteLiveReportInput): void {
     });
 
     lines.push('', '## Memory retention (LIVE)', '');
-    lines.push('| op | heapUsed Δ | arrayBuffers Δ | cap | verdict |');
-    lines.push('|---|---|---|---|---|');
+    // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
+    // 拾うため、no と yes の値を同じ基準で比べられない。
+    lines.push('| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |');
+    lines.push('|---|---|---|---|---|---|');
     input.ops.forEach((op) => {
       const out = input.outcomes.find((o) => o.name === op.name);
       if (!out || out.skipped || !out.memory) return;
       const cap = op.memoryArrayBuffersCapBytes ?? input.memoryCapDefault;
       lines.push(
-        `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
+        `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
       );
     });
 

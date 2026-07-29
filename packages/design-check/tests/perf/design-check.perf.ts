@@ -57,7 +57,7 @@ describe('design-check perf', () => {
         },
       ],
     });
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
   });
 
   it('timing baseline: performance.now() 100 回連続で serial p95 < 1ms (perf harness 環境 sanity)', () => {

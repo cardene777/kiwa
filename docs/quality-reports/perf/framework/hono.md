@@ -2,12 +2,14 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00017ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00033ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| invokeRoute | 0.01ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +9430%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| rpcClient$get | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +13030%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| invokeRoute | 0.0018ms | 0.0045ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| rpcClient$get | 0.0027ms | 0.0053ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -20,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeRoute | -3456 B | 0 B | 102400 B | yes | PASS |
-| rpcClient$get | -16200 B | 0 B | 102400 B | yes | PASS |
+| invokeRoute | -17168 B | 0 B | 102400 B | yes | PASS |
+| rpcClient$get | 280 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -33,26 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.02ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.03ms |
-| total | 0.59ms |
+| p10 | 0.0018ms |
+| p50 | 0.0019ms |
+| p95 | 0.0045ms |
+| p99 | 0.01ms |
+| mean | 0.0025ms |
+| stdev | 0.0021ms |
+| min | 0.0018ms |
+| max | 0.02ms |
+| total | 0.50ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -20.31% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +13.13% |
-| p99 | 0.02ms | 0.04ms | -0.02ms | -47.14% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -30.16% |
-| min | 0.00ms | 0.00ms | -0.00ms | -22.05% |
-| max | 0.03ms | 0.09ms | -0.06ms | -65.06% |
-| total | 0.59ms | 0.85ms | -0.26ms | -30.16% |
+| p10 | 0.0018ms | 0.0020ms | -0.00025ms | -12.24% |
+| p50 | 0.0019ms | 0.0022ms | -0.00025ms | -11.56% |
+| p95 | 0.0045ms | 0.0054ms | -0.00092ms | -16.95% |
+| p99 | 0.01ms | 0.01ms | -0.00096ms | -7.64% |
+| mean | 0.0025ms | 0.0028ms | -0.00037ms | -12.94% |
+| min | 0.0018ms | 0.0020ms | -0.00025ms | -12.50% |
+| max | 0.02ms | 0.03ms | -0.0020ms | -7.51% |
+| total | 0.50ms | 0.57ms | -0.07ms | -12.94% |
 
 ### rpcClient$get
 
@@ -62,24 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.02ms |
-| total | 0.66ms |
+| p10 | 0.0027ms |
+| p50 | 0.0028ms |
+| p95 | 0.0053ms |
+| p99 | 0.02ms |
+| mean | 0.0043ms |
+| stdev | 0.01ms |
+| min | 0.0026ms |
+| max | 0.21ms |
+| total | 0.86ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -6.60% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +16.23% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +45.53% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.69% |
-| min | 0.00ms | 0.00ms | -0.00ms | -8.33% |
-| max | 0.02ms | 0.01ms | +0.01ms | +51.67% |
-| total | 0.66ms | 0.67ms | -0.01ms | -1.69% |
+| p10 | 0.0027ms | 0.0027ms | -0.0000010ms | -0.04% |
+| p50 | 0.0028ms | 0.0029ms | -0.000083ms | -2.89% |
+| p95 | 0.0053ms | 0.0097ms | -0.0044ms | -45.64% |
+| p99 | 0.02ms | 0.07ms | -0.05ms | -76.30% |
+| mean | 0.0043ms | 0.0060ms | -0.0017ms | -28.48% |
+| min | 0.0026ms | 0.0027ms | -0.000041ms | -1.54% |
+| max | 0.21ms | 0.19ms | +0.02ms | +11.88% |
+| total | 0.86ms | 1.20ms | -0.34ms | -28.48% |
 

@@ -2,26 +2,28 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00017ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00033ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| invokeFreshHandler | 0.18ms | 5ms | PASS | stable (差 0.16ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| mountIsland | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +21785%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| invokeFreshHandler | 0.0078ms | 0.02ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| mountIsland | 0.0013ms | 0.0019ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeFreshHandler | 0.35ms | 10ms | PASS |
+| invokeFreshHandler | 0.18ms | 10ms | PASS |
 | mountIsland | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeFreshHandler | 12752 B | -222 B | 102400 B | yes | PASS |
-| mountIsland | -90688 B | 0 B | 102400 B | yes | PASS |
+| invokeFreshHandler | -439456 B | -4 B | 102400 B | yes | PASS |
+| mountIsland | -88 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -33,26 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.01ms |
-| p95 | 0.18ms |
-| p99 | 1.23ms |
-| mean | 0.05ms |
-| stdev | 0.21ms |
-| min | 0.01ms |
-| max | 1.91ms |
-| total | 10.98ms |
+| p10 | 0.0078ms |
+| p50 | 0.0094ms |
+| p95 | 0.02ms |
+| p99 | 0.05ms |
+| mean | 0.01ms |
+| stdev | 0.0090ms |
+| min | 0.0074ms |
+| max | 0.10ms |
+| total | 2.36ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +3.54% |
-| p95 | 0.18ms | 0.03ms | +0.16ms | +574.07% |
-| p99 | 1.23ms | 0.11ms | +1.11ms | +967.59% |
-| mean | 0.05ms | 0.02ms | +0.04ms | +256.08% |
-| min | 0.01ms | 0.01ms | -0.00ms | -0.96% |
-| max | 1.91ms | 0.39ms | +1.52ms | +387.80% |
-| total | 10.98ms | 3.08ms | +7.90ms | +256.08% |
+| p10 | 0.0078ms | 0.0084ms | -0.00054ms | -6.47% |
+| p50 | 0.0094ms | 0.01ms | -0.00085ms | -8.37% |
+| p95 | 0.02ms | 0.02ms | -0.0034ms | -14.74% |
+| p99 | 0.05ms | 0.06ms | -0.0094ms | -14.83% |
+| mean | 0.01ms | 0.01ms | -0.0012ms | -9.28% |
+| min | 0.0074ms | 0.0078ms | -0.00042ms | -5.32% |
+| max | 0.10ms | 0.10ms | -0.0011ms | -1.10% |
+| total | 2.36ms | 2.60ms | -0.24ms | -9.28% |
 
 ### mountIsland
 
@@ -62,24 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
+| p10 | 0.0013ms |
+| p50 | 0.0013ms |
+| p95 | 0.0019ms |
+| p99 | 0.0058ms |
+| mean | 0.0016ms |
+| stdev | 0.0013ms |
+| min | 0.0012ms |
 | max | 0.02ms |
-| total | 0.35ms |
+| total | 0.32ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -14.63% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -10.35% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -3.71% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -8.74% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.01ms | +0.00ms | +20.83% |
-| total | 0.35ms | 0.39ms | -0.03ms | -8.74% |
+| p10 | 0.0013ms | 0.0014ms | -0.000084ms | -6.11% |
+| p50 | 0.0013ms | 0.0014ms | -0.000083ms | -5.86% |
+| p95 | 0.0019ms | 0.0022ms | -0.00026ms | -11.79% |
+| p99 | 0.0058ms | 0.0072ms | -0.0014ms | -18.93% |
+| mean | 0.0016ms | 0.0017ms | -0.00015ms | -8.61% |
+| min | 0.0012ms | 0.0013ms | -0.00012ms | -9.30% |
+| max | 0.02ms | 0.02ms | +0.00092ms | +6.04% |
+| total | 0.32ms | 0.35ms | -0.03ms | -8.61% |
 

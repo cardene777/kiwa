@@ -8,22 +8,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| setupComponentEnvSnapshot | 0.19ms | 0.53ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| setupComponentEnvRender | 0.14ms | 0.39ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| setupComponentEnvSnapshot | 0.21ms | 0.45ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| setupComponentEnvRender | 0.12ms | 0.35ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 10 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| setupComponentEnvSnapshot | 2.57ms | 60ms | PASS |
-| setupComponentEnvRender | 0.73ms | 60ms | PASS |
+| setupComponentEnvSnapshot | 2.35ms | 60ms | PASS |
+| setupComponentEnvRender | 0.63ms | 60ms | PASS |
 
 ## Memory retention (50 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| setupComponentEnvSnapshot | -85256 B | 0 B | 102400 B | yes | PASS |
-| setupComponentEnvRender | -38592 B | 0 B | 102400 B | yes | PASS |
+| setupComponentEnvSnapshot | -71016 B | 0 B | 102400 B | yes | PASS |
+| setupComponentEnvRender | -75040 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,27 +35,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 50 |
 | warmup | 3 |
-| p10 | 0.19ms |
-| p50 | 0.24ms |
-| p95 | 0.53ms |
-| p99 | 0.73ms |
+| p10 | 0.21ms |
+| p50 | 0.25ms |
+| p95 | 0.45ms |
+| p99 | 0.55ms |
 | mean | 0.28ms |
-| stdev | 0.12ms |
-| min | 0.17ms |
-| max | 0.82ms |
+| stdev | 0.08ms |
+| min | 0.19ms |
+| max | 0.55ms |
 | total | 13.78ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.19ms | 0.20ms | -0.01ms | -5.39% |
-| p50 | 0.24ms | 0.23ms | +0.0038ms | +1.61% |
-| p95 | 0.53ms | 3.20ms | -2.67ms | -83.38% |
-| p99 | 0.73ms | 33.00ms | -32.27ms | -97.79% |
+| p10 | 0.21ms | 0.20ms | +0.0046ms | +2.30% |
+| p50 | 0.25ms | 0.23ms | +0.02ms | +8.12% |
+| p95 | 0.45ms | 3.20ms | -2.75ms | -85.94% |
+| p99 | 0.55ms | 33.00ms | -32.46ms | -98.35% |
 | mean | 0.28ms | 1.67ms | -1.40ms | -83.52% |
-| min | 0.17ms | 0.19ms | -0.02ms | -8.22% |
-| max | 0.82ms | 39.97ms | -39.15ms | -97.95% |
+| min | 0.19ms | 0.19ms | +0.0046ms | +2.43% |
+| max | 0.55ms | 39.97ms | -39.42ms | -98.63% |
 | total | 13.78ms | 83.65ms | -69.87ms | -83.52% |
 
 ### setupComponentEnvRender
@@ -66,26 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 50 |
 | warmup | 3 |
-| p10 | 0.14ms |
-| p50 | 0.21ms |
-| p95 | 0.39ms |
-| p99 | 1.13ms |
-| mean | 0.24ms |
-| stdev | 0.24ms |
-| min | 0.13ms |
-| max | 1.80ms |
-| total | 12.17ms |
+| p10 | 0.12ms |
+| p50 | 0.15ms |
+| p95 | 0.35ms |
+| p99 | 0.66ms |
+| mean | 0.19ms |
+| stdev | 0.12ms |
+| min | 0.12ms |
+| max | 0.90ms |
+| total | 9.69ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.14ms | 0.15ms | -0.01ms | -9.49% |
-| p50 | 0.21ms | 0.17ms | +0.04ms | +24.53% |
-| p95 | 0.39ms | 3.10ms | -2.70ms | -87.32% |
-| p99 | 1.13ms | 4.03ms | -2.90ms | -71.88% |
-| mean | 0.24ms | 0.53ms | -0.29ms | -54.00% |
-| min | 0.13ms | 0.14ms | -0.02ms | -10.50% |
-| max | 1.80ms | 4.51ms | -2.71ms | -60.06% |
-| total | 12.17ms | 26.45ms | -14.28ms | -54.00% |
+| p10 | 0.12ms | 0.15ms | -0.03ms | -18.00% |
+| p50 | 0.15ms | 0.17ms | -0.01ms | -8.13% |
+| p95 | 0.35ms | 3.10ms | -2.75ms | -88.68% |
+| p99 | 0.66ms | 4.03ms | -3.37ms | -83.71% |
+| mean | 0.19ms | 0.53ms | -0.34ms | -63.34% |
+| min | 0.12ms | 0.14ms | -0.03ms | -18.72% |
+| max | 0.90ms | 4.51ms | -3.61ms | -80.04% |
+| total | 9.69ms | 26.45ms | -16.75ms | -63.34% |
 

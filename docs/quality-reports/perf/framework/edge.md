@@ -2,26 +2,28 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00017ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00033ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| invokeEdgeHandler | 0.03ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +1055%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| invokeEdgeHandlerWithKv | 0.01ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +6053%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| invokeEdgeHandler | 0.0091ms | 0.02ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| invokeEdgeHandlerWithKv | 0.0084ms | 0.01ms | 5ms | 0.00033ms | PASS | regressed — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| invokeEdgeHandler | 0.15ms | 10ms | PASS |
-| invokeEdgeHandlerWithKv | 0.37ms | 10ms | PASS |
+| invokeEdgeHandler | 0.18ms | 10ms | PASS |
+| invokeEdgeHandlerWithKv | 0.14ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeEdgeHandler | 53000 B | -8368 B | 102400 B | yes | PASS |
-| invokeEdgeHandlerWithKv | -82288 B | -1304 B | 102400 B | yes | PASS |
+| invokeEdgeHandler | 4848 B | -9408 B | 102400 B | yes | PASS |
+| invokeEdgeHandlerWithKv | 152 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -33,26 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
+| p10 | 0.0091ms |
 | p50 | 0.01ms |
-| p95 | 0.03ms |
-| p99 | 0.07ms |
+| p95 | 0.02ms |
+| p99 | 0.06ms |
 | mean | 0.01ms |
-| stdev | 0.01ms |
-| min | 0.01ms |
-| max | 0.11ms |
-| total | 2.91ms |
+| stdev | 0.0096ms |
+| min | 0.0080ms |
+| max | 0.10ms |
+| total | 2.72ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -21.02% |
-| p95 | 0.03ms | 0.05ms | -0.02ms | -46.76% |
-| p99 | 0.07ms | 0.14ms | -0.06ms | -47.45% |
-| mean | 0.01ms | 0.02ms | -0.01ms | -30.85% |
-| min | 0.01ms | 0.01ms | -0.00ms | -3.92% |
-| max | 0.11ms | 0.33ms | -0.22ms | -66.52% |
-| total | 2.91ms | 4.20ms | -1.30ms | -30.85% |
+| p10 | 0.0091ms | 0.0082ms | +0.00087ms | +10.60% |
+| p50 | 0.01ms | 0.0095ms | +0.0012ms | +12.55% |
+| p95 | 0.02ms | 0.03ms | -0.0049ms | -17.96% |
+| p99 | 0.06ms | 0.10ms | -0.04ms | -40.72% |
+| mean | 0.01ms | 0.02ms | -0.0025ms | -15.75% |
+| min | 0.0080ms | 0.0077ms | +0.00029ms | +3.75% |
+| max | 0.10ms | 0.65ms | -0.56ms | -85.24% |
+| total | 2.72ms | 3.23ms | -0.51ms | -15.75% |
 
 ### invokeEdgeHandlerWithKv
 
@@ -62,24 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p50 | 0.00ms |
+| p10 | 0.0084ms |
+| p50 | 0.0086ms |
 | p95 | 0.01ms |
-| p99 | 0.01ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
+| p99 | 0.02ms |
+| mean | 0.0090ms |
+| stdev | 0.0015ms |
+| min | 0.0083ms |
 | max | 0.02ms |
-| total | 1.01ms |
+| total | 1.81ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -4.05% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -14.73% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +7.51% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -1.77% |
-| min | 0.00ms | 0.00ms | -0.00ms | -1.00% |
-| max | 0.02ms | 0.02ms | +0.01ms | +38.61% |
-| total | 1.01ms | 1.03ms | -0.02ms | -1.77% |
+| p10 | 0.0084ms | 0.0070ms | +0.0014ms | +20.23% |
+| p50 | 0.0086ms | 0.0072ms | +0.0014ms | +19.65% |
+| p95 | 0.01ms | 0.0095ms | +0.0025ms | +26.79% |
+| p99 | 0.02ms | 0.01ms | +0.0055ms | +53.39% |
+| mean | 0.0090ms | 0.0079ms | +0.0011ms | +13.91% |
+| min | 0.0083ms | 0.0069ms | +0.0014ms | +20.00% |
+| max | 0.02ms | 0.06ms | -0.04ms | -67.80% |
+| total | 1.81ms | 1.59ms | +0.22ms | +13.91% |
 

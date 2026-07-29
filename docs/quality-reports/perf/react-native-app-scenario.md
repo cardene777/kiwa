@@ -2,29 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00042ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| user_flow_workflow (10 setup + navigate + storage) | 0.06ms | 100ms | PASS | stable (差 0.03ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| multi_platform_batch (5 iOS+Android+web env switch) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +16052%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| linking_error_handling (5 invalid url + listener cleanup) | 1.27ms | 100ms | PASS | regressed — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| user_flow_workflow (10 setup + navigate + storage) | 0.0070ms | 0.01ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| multi_platform_batch (5 iOS+Android+web env switch) | 0.0020ms | 0.0025ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| linking_error_handling (5 invalid url + listener cleanup) | 0.01ms | 0.02ms | 100ms | 0.00042ms | PASS | stable (p10 -7% (閾値未満)、 p95 +23% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| user_flow_workflow (10 setup + navigate + storage) | 0.09ms | 200ms | PASS |
-| multi_platform_batch (5 iOS+Android+web env switch) | 0.02ms | 200ms | PASS |
-| linking_error_handling (5 invalid url + listener cleanup) | 10.52ms | 200ms | PASS |
+| user_flow_workflow (10 setup + navigate + storage) | 0.04ms | 200ms | PASS |
+| multi_platform_batch (5 iOS+Android+web env switch) | 0.01ms | 200ms | PASS |
+| linking_error_handling (5 invalid url + listener cleanup) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| user_flow_workflow (10 setup + navigate + storage) | 19128 B | -11199 B | 102400 B | yes | PASS |
-| multi_platform_batch (5 iOS+Android+web env switch) | 7264 B | 0 B | 102400 B | yes | PASS |
-| linking_error_handling (5 invalid url + listener cleanup) | -16064 B | 0 B | 102400 B | yes | PASS |
+| user_flow_workflow (10 setup + navigate + storage) | 18744 B | 0 B | 102400 B | yes | PASS |
+| multi_platform_batch (5 iOS+Android+web env switch) | 616 B | 0 B | 102400 B | yes | PASS |
+| linking_error_handling (5 invalid url + listener cleanup) | 712 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.03ms |
-| p95 | 0.06ms |
-| p99 | 0.08ms |
-| mean | 0.03ms |
-| stdev | 0.01ms |
-| min | 0.02ms |
-| max | 0.08ms |
-| total | 0.65ms |
+| p10 | 0.0070ms |
+| p50 | 0.0076ms |
+| p95 | 0.01ms |
+| p99 | 0.02ms |
+| mean | 0.0089ms |
+| stdev | 0.0031ms |
+| min | 0.0070ms |
+| max | 0.02ms |
+| total | 0.18ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.01ms | +0.02ms | +203.32% |
-| p95 | 0.06ms | 0.02ms | +0.03ms | +141.13% |
-| p99 | 0.08ms | 0.02ms | +0.05ms | +218.04% |
-| mean | 0.03ms | 0.01ms | +0.02ms | +195.50% |
-| min | 0.02ms | 0.01ms | +0.02ms | +214.13% |
-| max | 0.08ms | 0.02ms | +0.06ms | +236.55% |
-| total | 0.65ms | 0.22ms | +0.43ms | +195.50% |
+| p10 | 0.0070ms | 0.0076ms | -0.00055ms | -7.21% |
+| p50 | 0.0076ms | 0.02ms | -0.0078ms | -50.61% |
+| p95 | 0.01ms | 0.04ms | -0.03ms | -67.37% |
+| p99 | 0.02ms | 0.14ms | -0.13ms | -87.20% |
+| mean | 0.0089ms | 0.02ms | -0.02ms | -63.32% |
+| min | 0.0070ms | 0.0075ms | -0.00054ms | -7.23% |
+| max | 0.02ms | 0.17ms | -0.15ms | -88.43% |
+| total | 0.18ms | 0.48ms | -0.31ms | -63.32% |
 
 ### multi_platform_batch (5 iOS+Android+web env switch)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.00ms |
-| p95 | 0.01ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
-| total | 0.07ms |
+| p10 | 0.0020ms |
+| p50 | 0.0021ms |
+| p95 | 0.0025ms |
+| p99 | 0.0027ms |
+| mean | 0.0022ms |
+| stdev | 0.00017ms |
+| min | 0.0020ms |
+| max | 0.0027ms |
+| total | 0.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +53.85% |
-| p95 | 0.01ms | 0.00ms | +0.00ms | +88.74% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +130.70% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +56.07% |
-| min | 0.00ms | 0.00ms | +0.00ms | +12.00% |
-| max | 0.01ms | 0.00ms | +0.01ms | +137.96% |
-| total | 0.07ms | 0.05ms | +0.03ms | +56.07% |
+| p10 | 0.0020ms | 0.0022ms | -0.00017ms | -7.52% |
+| p50 | 0.0021ms | 0.0023ms | -0.00021ms | -9.08% |
+| p95 | 0.0025ms | 0.0039ms | -0.0014ms | -36.21% |
+| p99 | 0.0027ms | 0.0052ms | -0.0025ms | -47.93% |
+| mean | 0.0022ms | 0.0025ms | -0.00040ms | -15.55% |
+| min | 0.0020ms | 0.0021ms | -0.000084ms | -3.95% |
+| max | 0.0027ms | 0.0055ms | -0.0027ms | -50.00% |
+| total | 0.04ms | 0.05ms | -0.0079ms | -15.55% |
 
 ### linking_error_handling (5 invalid url + listener cleanup)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.04ms |
-| p95 | 1.27ms |
-| p99 | 2.62ms |
-| mean | 0.25ms |
-| stdev | 0.69ms |
-| min | 0.02ms |
-| max | 2.96ms |
-| total | 5.07ms |
+| p10 | 0.01ms |
+| p50 | 0.01ms |
+| p95 | 0.02ms |
+| p99 | 0.02ms |
+| mean | 0.01ms |
+| stdev | 0.0030ms |
+| min | 0.01ms |
+| max | 0.02ms |
+| total | 0.26ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.01ms | +0.02ms | +160.76% |
-| p95 | 1.27ms | 0.03ms | +1.24ms | +3589.23% |
-| p99 | 2.62ms | 0.04ms | +2.58ms | +6649.72% |
-| mean | 0.25ms | 0.02ms | +0.24ms | +1394.37% |
-| min | 0.02ms | 0.01ms | +0.00ms | +31.42% |
-| max | 2.96ms | 0.04ms | +2.92ms | +7311.01% |
-| total | 5.07ms | 0.34ms | +4.73ms | +1394.37% |
+| p10 | 0.01ms | 0.01ms | -0.00092ms | -7.39% |
+| p50 | 0.01ms | 0.01ms | -0.00069ms | -5.42% |
+| p95 | 0.02ms | 0.01ms | +0.0034ms | +22.97% |
+| p99 | 0.02ms | 0.02ms | +0.0026ms | +12.82% |
+| mean | 0.01ms | 0.01ms | -0.00023ms | -1.72% |
+| min | 0.01ms | 0.01ms | -0.0010ms | -8.05% |
+| max | 0.02ms | 0.02ms | +0.0024ms | +11.09% |
+| total | 0.26ms | 0.27ms | -0.0046ms | -1.72% |
 

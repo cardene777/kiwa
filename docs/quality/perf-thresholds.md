@@ -75,7 +75,7 @@ Root `package.json > scripts.test:perf` runs the workspace pass with `--workspac
 
 Dropping `--parallel` alone is not enough. Without it pnpm still defaults to one worker per CPU core, so the numeric limit is written explicitly.
 
-The trade-off is wall-clock time: a serial pass takes roughly 20-40 minutes instead of a few minutes. That is accepted deliberately — the suite exists to produce comparable numbers, not to finish quickly. `tests/release-smoke/tests/perf-serial-execution.test.ts` fails the release smoke suite if the flag comes back.
+The trade-off is wall-clock time: a serial pass over all 177 packages took 8-22 minutes across the seven passes measured in #1708, against a few minutes when they ran concurrently. That is accepted deliberately — the suite exists to produce comparable numbers, not to finish quickly. `tests/release-smoke/tests/perf-serial-execution.test.ts` fails the release smoke suite if the flag comes back.
 
 ## Regression detection defaults
 
@@ -173,7 +173,7 @@ Measured across two independent rounds of four consecutive unchanged runs (the s
 | `cli-test-app-scenario` `setup_cleanup_cycle` | 65-244 % | no |
 | `cli-test` `writeFile` | 100-322 % | no |
 
-Two ranges are reported per op because the two rounds disagreed, sometimes widely: `audit_workflow` measured 11 % in one and 44 % in the other. **Four runs is not enough to certify an op.** An op qualifies only if it stayed under the threshold in both rounds, which is why `audit_workflow` keeps its waiver despite a passing round. The disagreement itself has a physical cause — the machine runs slower when hot, and a suite that takes 20-40 minutes spends most of that time hot — so a baseline recorded on a cold machine reports systematic regressions afterwards. That is what made the first round's numbers unusable and forced the reseed described above.
+Two ranges are reported per op because the two rounds disagreed, sometimes widely: `audit_workflow` measured 11 % in one and 44 % in the other. **Four runs is not enough to certify an op.** An op qualifies only if it stayed under the threshold in both rounds, which is why `audit_workflow` keeps its waiver despite a passing round. The disagreement tracks when in the sweep a measurement was taken: the first round's baseline was recorded on a machine that had been idle, and everything measured afterwards read systematically slower against it. That is what made the first round's numbers unusable and forced the reseed described above. What in the machine changes over a sweep was not measured here — see the note under § The regression verdict is reported but not gated.
 
 Sample count is not the cause of the residual spread. Raising `serialIterations` from 15-30 to 60-200 across the fourteen affected files changed which packages failed rather than how many, and at the higher counts it exposed ops whose cost grows with iteration count — `a11y`'s `audit_workflow` went from 23 ms to 216 ms, breaching a cap it had passed. That change was reverted.
 
@@ -181,13 +181,34 @@ So `runPerf3Layer` computes the verdict, writes it into the report, and leaves i
 
 The caps (serial, concurrent, memory) are still gated. A cap is decided inside a single run and does not depend on run-to-run spread — that is how the `vector` breach in this suite was found.
 
+#### Measured across the whole suite, and why the gate still cannot be switched on
+
+The `@kiwa-lab/cache` measurements above cover one package. The full suite was then measured the same way: one reseeding pass plus six analysis passes over all 177 workspace packages, recording every op's p10 each time. Individual passes ran 8m21s to 19m07s, 79 minutes of measurement inside a 94-minute window — the variation in pass duration is itself part of what the numbers below describe.
+
+`detectRegression` requires three things: the absolute difference clears the floor, the relative change clears 20 %, and the bootstrap CI excludes zero. The counts below apply the first two and assume the third — a deliberate upper bound, since CI significance depends on the sample and cannot be recovered from stored p10 alone. Classified that way over 492 ops:
+
+| passes used | ops that could fail the gate | modules with no such op |
+|---|---|---|
+| 4 | 190 | 45 (28 with 2× margin) |
+| 6 | 217 | 35 (21 with 2× margin) |
+
+The qualifying set shrank as passes were added. That direction is partly mechanical — the classification uses each op's observed extrema, so more passes can only widen them — and on its own it does not establish that the set never settles.
+
+What does carry weight is what happened when the set was used. The gate was enabled for the 28 modules that looked safe over four passes; two verification passes followed, and on the second one three of them (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on unchanged code. Their p10 had been flat across passes 2-5 and then drifted upward — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023. A selection made from four passes was falsified by the next two. Whether a longer window would produce a stable set is not something these measurements answer either way.
+
+What was recorded is narrow: p10 per op per pass, and nothing else. No temperature, clock, or background-load telemetry, so thermal state, page cache, and scheduler pressure cannot be separated. What the numbers do show is that an op reads flat for four passes and then shifts, and that switching statistic (p95 → p10) moved the spread without removing it — the earlier `cache` experiment ruled out median, trimmed mean, and batching the same way. That is consistent with a drift the whole run inherits rather than something in the shape of the sample, but a drift shared by *every* statistic is an inference from three of them, not a measurement.
+
+That is the same wall the in-run reference normalization was measured against (§ What would make the remaining twelve gateable): comparing an op to a reference measured *in the same run* cancelled the shared drift in that experiment, taking `fsRead` from 141 % to 3 %. It is the only approach measured so far that reduced the drift rather than reframing it, and it changes what a baseline stores (a ratio, not a duration).
+
+Until then `regressionGate` stays false everywhere. Turning it on for a subset is not a safe halfway step: the subset is defined by how long you happened to watch.
+
 Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 322 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
 
 `regressionGateWaived: '<reason>'` marks the twelve ops still above the threshold, so the list survives until the gate can be switched on for them. The reason string carries the measured spread. Adding one requires measured evidence; do not add one because a run happened to fail. Every row marked `no` above carries a waiver — a row that is not gateable and not waived would fail the gate the moment `regressionGate` is turned on.
 
 ### What would make the remaining twelve gateable
 
-The residual spread is environmental — thermal state, page cache, subprocess spawn cost — and no choice of statistic over a single run's samples removes it. What does remove it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
+Four statistics were tried over a single run's samples — p95, p10, median, trimmed mean — and none of them removed the spread; it tracks when the measurement was taken. What did reduce it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
 
 | op | raw p10 spread | ratio to a CPU-only reference | ratio to an fs reference |
 |---|---|---|---|
@@ -244,7 +265,15 @@ Every mock op is checked for retained-heap growth. Threshold: **< 100 KB retaine
 
 The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
 
+Measuring memory at all requires `--expose-gc`. Without it `measureMemory` cannot call `global.gc()`, so the delta includes allocations that were about to be released, and the comparison against a cap is not a comparison of retention. 117 of the 180 perf configs were missing it. `dogfood-nats-jetstream`'s `driveObject` reported 215,800 B against a 100 KB cap — reproducibly, to the byte, on every run — and 20,555 B once GC was available. The breach was an artefact of the measurement.
+
+Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'forks'`, and `requireGc: true` on the call. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. And a call that does not ask for GC will accept a run without it — the config only makes GC *available*, `requireGc` is what makes its absence a failure. 34 example suites were passing `runPerf3Layer` without it, so a run under a different config would have reported memory numbers that mean nothing and still passed. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks all three.
+
 The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
+
+`crypto`'s `ed25519_batch` shows the same axis reacting to load rather than to code. Run on its own it reports 0 B three times in a row; during one full-suite sweep it reported 168,960 B against a 100 KB cap, and the next sweep put it back at 0 B. It carries no waiver — a single non-reproducing breach is not evidence about the op — but it is worth recording that the axis moves with what else is running, which is the same reason the ops below carry one.
+
+The same shape appears at a larger scale in `visual`'s `comparePngBuffersFullDiff`. Running `pnpm --filter @kiwa-lab/visual test:perf` four times with no code change and reading the `arrayBuffers` column of `docs/quality-reports/perf/visual.md` after each gives roughly +10.5 MB / -6.0 MB / +13.7 MB / +0.8 MB, and a separate full-suite pass recorded +20.1 MB. A spread wider than the 16.7 MB cap means the verdict is decided by allocator behaviour rather than by the library, and it failed at least one full-suite pass on unchanged code. It carries a waiver rather than a raised cap for the reason above. (The per-pass memory numbers are not in the stored sweep artifacts — those hold p10 only — so the figures above are reproduced by re-running the command, not read back from a log.)
 
 ## Change control
 

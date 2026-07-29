@@ -2,19 +2,21 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00049ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| multi_channel_workflow (10 dispatch push+sms+in-app across providers) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +521%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| push_batch (5 sendPush with high-priority payload) | 0.00ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +19404%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| sms_error_handling (5 failOn callback path) | 0.00ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +25486%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| multi_channel_workflow (10 dispatch push+sms+in-app across providers) | 0.0074ms | 0.02ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| push_batch (5 sendPush with high-priority payload) | 0.0016ms | 0.0029ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| sms_error_handling (5 failOn callback path) | 0.0015ms | 0.0021ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| multi_channel_workflow (10 dispatch push+sms+in-app across providers) | 0.04ms | 200ms | PASS |
+| multi_channel_workflow (10 dispatch push+sms+in-app across providers) | 0.15ms | 200ms | PASS |
 | push_batch (5 sendPush with high-priority payload) | 0.01ms | 200ms | PASS |
 | sms_error_handling (5 failOn callback path) | 0.02ms | 200ms | PASS |
 
@@ -22,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| multi_channel_workflow (10 dispatch push+sms+in-app across providers) | -6168 B | 0 B | 102400 B | yes | PASS |
-| push_batch (5 sendPush with high-priority payload) | 6784 B | 0 B | 102400 B | yes | PASS |
-| sms_error_handling (5 failOn callback path) | -728 B | 0 B | 102400 B | yes | PASS |
+| multi_channel_workflow (10 dispatch push+sms+in-app across providers) | -4632 B | 0 B | 102400 B | yes | PASS |
+| push_batch (5 sendPush with high-priority payload) | -168 B | 0 B | 102400 B | yes | PASS |
+| sms_error_handling (5 failOn callback path) | 584 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
+| p10 | 0.0074ms |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.03ms |
+| p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.01ms |
-| min | 0.01ms |
-| max | 0.03ms |
-| total | 0.24ms |
+| stdev | 0.0036ms |
+| min | 0.0073ms |
+| max | 0.02ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -1.67% |
-| p95 | 0.02ms | 0.10ms | -0.08ms | -78.55% |
-| p99 | 0.03ms | 1.04ms | -1.01ms | -97.20% |
-| mean | 0.01ms | 0.08ms | -0.06ms | -83.89% |
-| min | 0.01ms | 0.01ms | -0.00ms | -1.02% |
-| max | 0.03ms | 1.27ms | -1.24ms | -97.56% |
-| total | 0.24ms | 1.51ms | -1.27ms | -83.89% |
+| p10 | 0.0074ms | 0.0079ms | -0.00057ms | -7.23% |
+| p50 | 0.01ms | 0.0081ms | +0.0022ms | +26.92% |
+| p95 | 0.02ms | 0.02ms | +0.0011ms | +6.69% |
+| p99 | 0.02ms | 0.02ms | +0.0016ms | +9.34% |
+| mean | 0.01ms | 0.0097ms | +0.0013ms | +13.35% |
+| min | 0.0073ms | 0.0079ms | -0.00058ms | -7.40% |
+| max | 0.02ms | 0.02ms | +0.0018ms | +9.98% |
+| total | 0.22ms | 0.19ms | +0.03ms | +13.35% |
 
 ### push_batch (5 sendPush with high-priority payload)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.01ms |
+| p10 | 0.0016ms |
+| p50 | 0.0018ms |
+| p95 | 0.0029ms |
+| p99 | 0.0040ms |
+| mean | 0.0022ms |
+| stdev | 0.00069ms |
+| min | 0.0016ms |
+| max | 0.0042ms |
 | total | 0.04ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +2.40% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +4.15% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +10.38% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.04% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.00ms | +0.00ms | +11.21% |
-| total | 0.04ms | 0.04ms | +0.00ms | +4.04% |
+| p10 | 0.0016ms | 0.0018ms | -0.00013ms | -7.14% |
+| p50 | 0.0018ms | 0.0018ms | -0.000042ms | -2.32% |
+| p95 | 0.0029ms | 0.0027ms | +0.00022ms | +8.21% |
+| p99 | 0.0040ms | 0.0029ms | +0.0011ms | +37.51% |
+| mean | 0.0022ms | 0.0019ms | +0.00024ms | +12.64% |
+| min | 0.0016ms | 0.0018ms | -0.00017ms | -9.49% |
+| max | 0.0042ms | 0.0029ms | +0.0013ms | +44.34% |
+| total | 0.04ms | 0.04ms | +0.0049ms | +12.64% |
 
 ### sms_error_handling (5 failOn callback path)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.00ms |
-| p95 | 0.00ms |
-| p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.00ms |
+| p10 | 0.0015ms |
+| p50 | 0.0015ms |
+| p95 | 0.0021ms |
+| p99 | 0.0030ms |
+| mean | 0.0017ms |
+| stdev | 0.00040ms |
+| min | 0.0015ms |
+| max | 0.0032ms |
 | total | 0.03ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +2.58% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +4.49% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +5.69% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +2.74% |
-| min | 0.00ms | 0.00ms | +0.00ms | +0.06% |
-| max | 0.00ms | 0.00ms | +0.00ms | +5.89% |
-| total | 0.03ms | 0.03ms | +0.00ms | +2.74% |
+| p10 | 0.0015ms | 0.0016ms | -0.00012ms | -7.69% |
+| p50 | 0.0015ms | 0.0017ms | -0.00019ms | -10.98% |
+| p95 | 0.0021ms | 0.0079ms | -0.0058ms | -73.46% |
+| p99 | 0.0030ms | 0.05ms | -0.05ms | -94.30% |
+| mean | 0.0017ms | 0.0053ms | -0.0036ms | -68.38% |
+| min | 0.0015ms | 0.0016ms | -0.00017ms | -10.28% |
+| max | 0.0032ms | 0.06ms | -0.06ms | -94.94% |
+| total | 0.03ms | 0.11ms | -0.07ms | -68.38% |
 

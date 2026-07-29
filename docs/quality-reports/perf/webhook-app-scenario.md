@@ -2,29 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 3.21ms | 100ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| dispatch_retry_batch (5 handler retry with backoff) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +672%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| signature_reject_error (5 invalid signature detect) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +4057%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| verify_workflow (10 verify across 4 providers) | 0.06ms | 0.09ms | 100ms | 0.00050ms | PASS | stable (p10 +11% (閾値未満)、 p95 +21% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| dispatch_retry_batch (5 handler retry with backoff) | 0.02ms | 0.04ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| signature_reject_error (5 invalid signature detect) | 0.0057ms | 0.01ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 0.24ms | 200ms | PASS |
-| dispatch_retry_batch (5 handler retry with backoff) | 0.08ms | 200ms | PASS |
+| verify_workflow (10 verify across 4 providers) | 0.25ms | 200ms | PASS |
+| dispatch_retry_batch (5 handler retry with backoff) | 0.11ms | 200ms | PASS |
 | signature_reject_error (5 invalid signature detect) | 0.03ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | -2328 B | 0 B | 102400 B | yes | PASS |
-| dispatch_retry_batch (5 handler retry with backoff) | 7336 B | 0 B | 102400 B | yes | PASS |
-| signature_reject_error (5 invalid signature detect) | 6416 B | 0 B | 102400 B | yes | PASS |
+| verify_workflow (10 verify across 4 providers) | 1208 B | -54036 B | 102400 B | yes | PASS |
+| dispatch_retry_batch (5 handler retry with backoff) | 448 B | 0 B | 102400 B | yes | PASS |
+| signature_reject_error (5 invalid signature detect) | -7216 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
+| p10 | 0.06ms |
 | p50 | 0.07ms |
-| p95 | 3.21ms |
-| p99 | 5.58ms |
-| mean | 0.53ms |
-| stdev | 1.49ms |
+| p95 | 0.09ms |
+| p99 | 0.11ms |
+| mean | 0.07ms |
+| stdev | 0.01ms |
 | min | 0.06ms |
-| max | 6.18ms |
-| total | 10.53ms |
+| max | 0.12ms |
+| total | 1.48ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.07ms | 0.07ms | +0.00ms | +4.13% |
-| p95 | 3.21ms | 0.08ms | +3.13ms | +3801.67% |
-| p99 | 5.58ms | 0.08ms | +5.50ms | +6605.36% |
-| mean | 0.53ms | 0.07ms | +0.46ms | +683.30% |
-| min | 0.06ms | 0.06ms | +0.00ms | +4.72% |
-| max | 6.18ms | 0.08ms | +6.09ms | +7295.66% |
-| total | 10.53ms | 1.34ms | +9.18ms | +683.30% |
+| p10 | 0.06ms | 0.05ms | +0.0057ms | +11.04% |
+| p50 | 0.07ms | 0.06ms | +0.0065ms | +9.97% |
+| p95 | 0.09ms | 0.08ms | +0.02ms | +20.83% |
+| p99 | 0.11ms | 0.09ms | +0.02ms | +20.87% |
+| mean | 0.07ms | 0.07ms | +0.0085ms | +13.04% |
+| min | 0.06ms | 0.05ms | +0.0069ms | +13.75% |
+| max | 0.12ms | 0.10ms | +0.02ms | +20.87% |
+| total | 1.48ms | 1.31ms | +0.17ms | +13.04% |
 
 ### dispatch_retry_batch (5 handler retry with backoff)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
+| p10 | 0.02ms |
 | p50 | 0.02ms |
-| p95 | 0.02ms |
-| p99 | 0.03ms |
+| p95 | 0.04ms |
+| p99 | 0.05ms |
 | mean | 0.02ms |
-| stdev | 0.00ms |
-| min | 0.02ms |
-| max | 0.03ms |
-| total | 0.35ms |
+| stdev | 0.01ms |
+| min | 0.01ms |
+| max | 0.06ms |
+| total | 0.43ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | -0.00ms | -13.39% |
-| p95 | 0.02ms | 0.07ms | -0.05ms | -73.27% |
-| p99 | 0.03ms | 0.08ms | -0.05ms | -60.30% |
-| mean | 0.02ms | 0.03ms | -0.01ms | -34.29% |
-| min | 0.02ms | 0.02ms | -0.00ms | -12.20% |
-| max | 0.03ms | 0.08ms | -0.05ms | -57.26% |
-| total | 0.35ms | 0.53ms | -0.18ms | -34.29% |
+| p10 | 0.02ms | 0.02ms | -0.0014ms | -8.04% |
+| p50 | 0.02ms | 0.02ms | +0.00027ms | +1.55% |
+| p95 | 0.04ms | 0.05ms | -0.0092ms | -18.59% |
+| p99 | 0.05ms | 0.16ms | -0.11ms | -66.94% |
+| mean | 0.02ms | 0.03ms | -0.0060ms | -21.77% |
+| min | 0.01ms | 0.02ms | -0.0024ms | -14.15% |
+| max | 0.06ms | 0.19ms | -0.13ms | -70.08% |
+| total | 0.43ms | 0.56ms | -0.12ms | -21.77% |
 
 ### signature_reject_error (5 invalid signature detect)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
+| p10 | 0.0057ms |
+| p50 | 0.0059ms |
 | p95 | 0.01ms |
 | p99 | 0.01ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
-| min | 0.01ms |
-| max | 0.01ms |
-| total | 0.13ms |
+| mean | 0.0069ms |
+| stdev | 0.0022ms |
+| min | 0.0057ms |
+| max | 0.02ms |
+| total | 0.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -3.84% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -4.84% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -9.66% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -8.72% |
-| min | 0.01ms | 0.01ms | -0.00ms | -3.81% |
-| max | 0.01ms | 0.02ms | -0.00ms | -10.63% |
-| total | 0.13ms | 0.14ms | -0.01ms | -8.72% |
+| p10 | 0.0057ms | 0.0050ms | +0.00071ms | +14.15% |
+| p50 | 0.0059ms | 0.0059ms | +5.0e-7ms | +0.01% |
+| p95 | 0.01ms | 0.08ms | -0.07ms | -87.45% |
+| p99 | 0.01ms | 0.12ms | -0.11ms | -88.37% |
+| mean | 0.0069ms | 0.02ms | -0.01ms | -62.80% |
+| min | 0.0057ms | 0.0050ms | +0.00075ms | +15.13% |
+| max | 0.02ms | 0.13ms | -0.12ms | -88.51% |
+| total | 0.14ms | 0.37ms | -0.23ms | -62.80% |
 
