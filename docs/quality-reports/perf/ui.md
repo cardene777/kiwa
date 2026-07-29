@@ -8,22 +8,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| setupComponentEnvSnapshot | 0.20ms | 0.63ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| setupComponentEnvRender | 0.13ms | 0.33ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| setupComponentEnvSnapshot | 0.19ms | 0.53ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| setupComponentEnvRender | 0.14ms | 0.39ms | 30ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 10 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| setupComponentEnvSnapshot | 0.72ms | 60ms | PASS |
-| setupComponentEnvRender | 0.58ms | 60ms | PASS |
+| setupComponentEnvSnapshot | 2.57ms | 60ms | PASS |
+| setupComponentEnvRender | 0.73ms | 60ms | PASS |
 
 ## Memory retention (50 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| setupComponentEnvSnapshot | 158352 B | 0 B | 102400 B | yes | PASS |
-| setupComponentEnvRender | -72416 B | 0 B | 102400 B | yes | PASS |
+| setupComponentEnvSnapshot | -85256 B | 0 B | 102400 B | yes | PASS |
+| setupComponentEnvRender | -38592 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,28 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 50 |
 | warmup | 3 |
-| p10 | 0.20ms |
-| p50 | 0.25ms |
-| p95 | 0.63ms |
-| p99 | 1.92ms |
-| mean | 0.35ms |
-| stdev | 0.39ms |
-| min | 0.19ms |
-| max | 2.84ms |
-| total | 17.51ms |
+| p10 | 0.19ms |
+| p50 | 0.24ms |
+| p95 | 0.53ms |
+| p99 | 0.73ms |
+| mean | 0.28ms |
+| stdev | 0.12ms |
+| min | 0.17ms |
+| max | 0.82ms |
+| total | 13.78ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.20ms | 0.20ms | -0.0051ms | -2.50% |
-| p50 | 0.25ms | 0.23ms | +0.01ms | +5.79% |
-| p95 | 0.63ms | 3.20ms | -2.57ms | -80.27% |
-| p99 | 1.92ms | 33.00ms | -31.08ms | -94.18% |
-| mean | 0.35ms | 1.67ms | -1.32ms | -79.07% |
-| min | 0.19ms | 0.19ms | -0.0017ms | -0.88% |
-| max | 2.84ms | 39.97ms | -37.13ms | -92.90% |
-| total | 17.51ms | 83.65ms | -66.14ms | -79.07% |
+| p10 | 0.19ms | 0.20ms | -0.01ms | -5.39% |
+| p50 | 0.24ms | 0.23ms | +0.0038ms | +1.61% |
+| p95 | 0.53ms | 3.20ms | -2.67ms | -83.38% |
+| p99 | 0.73ms | 33.00ms | -32.27ms | -97.79% |
+| mean | 0.28ms | 1.67ms | -1.40ms | -83.52% |
+| min | 0.17ms | 0.19ms | -0.02ms | -8.22% |
+| max | 0.82ms | 39.97ms | -39.15ms | -97.95% |
+| total | 13.78ms | 83.65ms | -69.87ms | -83.52% |
 
 ### setupComponentEnvRender
 
@@ -66,26 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 50 |
 | warmup | 3 |
-| p10 | 0.13ms |
-| p50 | 0.16ms |
-| p95 | 0.33ms |
-| p99 | 1.65ms |
-| mean | 0.23ms |
-| stdev | 0.34ms |
-| min | 0.12ms |
-| max | 2.49ms |
-| total | 11.62ms |
+| p10 | 0.14ms |
+| p50 | 0.21ms |
+| p95 | 0.39ms |
+| p99 | 1.13ms |
+| mean | 0.24ms |
+| stdev | 0.24ms |
+| min | 0.13ms |
+| max | 1.80ms |
+| total | 12.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.13ms | 0.15ms | -0.02ms | -13.27% |
-| p50 | 0.16ms | 0.17ms | -0.0072ms | -4.31% |
-| p95 | 0.33ms | 3.10ms | -2.77ms | -89.31% |
-| p99 | 1.65ms | 4.03ms | -2.38ms | -58.97% |
-| mean | 0.23ms | 0.53ms | -0.30ms | -56.08% |
-| min | 0.12ms | 0.14ms | -0.03ms | -18.52% |
-| max | 2.49ms | 4.51ms | -2.03ms | -44.89% |
-| total | 11.62ms | 26.45ms | -14.83ms | -56.08% |
+| p10 | 0.14ms | 0.15ms | -0.01ms | -9.49% |
+| p50 | 0.21ms | 0.17ms | +0.04ms | +24.53% |
+| p95 | 0.39ms | 3.10ms | -2.70ms | -87.32% |
+| p99 | 1.13ms | 4.03ms | -2.90ms | -71.88% |
+| mean | 0.24ms | 0.53ms | -0.29ms | -54.00% |
+| min | 0.13ms | 0.14ms | -0.02ms | -10.50% |
+| max | 1.80ms | 4.51ms | -2.71ms | -60.06% |
+| total | 12.17ms | 26.45ms | -14.28ms | -54.00% |
 

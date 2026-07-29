@@ -242,6 +242,11 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const thresholdDocLink = input.thresholdDocLink ?? resolveThresholdDocLink(input.reportPath);
 
   const loadedBaseline = await loadBaseline(baselinePath);
+  // file が無いのと、file はあるのに読めないのは別物。 前者は初回なので比較が
+  // 無いのが正しく、後者は「比較するはずだったのに壊れていた」 状態。 どちらも
+  // 読み込みは null を返して作り直す (誤った比較対象を掴むより安全) が、
+  // 後者を黙って通すと、gate を有効にした実行が回帰を一度も見ずに成功する。
+  const baselineUnreadable = loadedBaseline === null && existsSync(baselinePath);
   // 測定の前提が違う baseline とは比べない。とくに GC を呼べるかどうかで
   // memory 測定の意味が変わるため、実装が同じでも回帰と判定されてしまう。
   const priorBaselineLoaded =
@@ -397,7 +402,11 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // § Regression detection defaults)。cap だけを見ると、20% 超の悪化が
   // 上限に収まっている限り素通りしてしまう。
   const regressionGate = input.regressionGate ?? false;
-  const allPassed = outcomes.every((outcome, index) => {
+  // 壊れた baseline を掴んだ実行は、回帰を一度も判定していない。 gate を有効にした
+  // 呼出にとってそれは通過ではないので落とす。 gate が無効なら判定は元から
+  // `allPassed` に載らないため、ここでも落とさない。
+  const gatePassedOnBaseline = !(regressionGate && baselineUnreadable);
+  const allPassed = gatePassedOnBaseline && outcomes.every((outcome, index) => {
     const waiver = waiverReason(input.ops[index]?.regressionGateWaived);
     const regressionGated =
       regressionGate && (waiver === undefined || waiver.length === 0);
@@ -422,6 +431,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     memoryCapDefault,
     regressionGate,
     resolutionMs,
+    baselineUnreadable,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -541,8 +551,10 @@ interface WriteReportInput {
   memoryCapDefault: number;
   /** 回帰判定を `allPassed` に反映したか。 report 上で判定と gate を区別するために要る。 */
   regressionGate: boolean;
-  /** この実行で測った測定系の分解能 (ms)。 回帰判定の絶対下限そのもの。 */
+  /** この実行で測った測定系の分解能 (ms)。 回帰判定の絶対下限の素。 */
   resolutionMs: number;
+  /** baseline file はあるのに読めなかったか。 判定が 1 件も成立していないことを表す。 */
+  baselineUnreadable: boolean;
 }
 
 function writeReport(input: WriteReportInput): void {
@@ -555,6 +567,13 @@ function writeReport(input: WriteReportInput): void {
     // 「p95 が動いたのに stable と書いてある」 が矛盾に見える。
     `測定系の分解能 = ${formatMs(input.resolutionMs)} (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの ${RESOLUTION_FLOOR_MULTIPLE} 倍 = ${formatMs(input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)}、 op ごとの実効値は下表の「下限」 列。`,
     '',
+    // 判定が 1 件も成立していない実行を、通常の初回 seed と同じ見た目で出さない。
+    ...(input.baselineUnreadable
+      ? [
+          '**保存済みの baseline を読めなかった** ため、この実行では回帰を 1 件も判定していない。 下表の regression 列はすべて `n/a`。 測定が成立していれば baseline は作り直されている。',
+          '',
+        ]
+      : []),
     '## Serial (concurrency = 1)',
     '',
     '| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |',

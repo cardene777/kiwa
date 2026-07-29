@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness three-layer の API 契約"
 
 #### <code v-pre>pruneStaleOps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L437) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L447) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 今回測っていない op を baseline から落とすかを決める。 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
 
@@ -26,7 +26,7 @@ export declare function pruneStaleOps(input: {
 
 #### <code v-pre>resolveKiwaRepoRoot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L673) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L692) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 resolveKiwaRepoRoot — walk upward from `start` until finding a package.json whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to resolve the report path regardless of vitest cwd.
 
@@ -44,7 +44,7 @@ export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPer
 
 #### <code v-pre>runPerf3LayerStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L653) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L672) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + CI 99% + delta 10%。 見逃し (退行を stable と判定) が致命的な経路で使う。 defaults ... - serialIterations: 400 (v0.2 200) - serialWarmup: 10 (v0.2 5) - concurrency: 20 (v0.2 10) - iterationsPerWorker: 100 (v0.2 50) - memoryIterations: 400 (v0.2 200) - regressionThreshold: 0.1 (v0.2 0.2) - regressionConfidenceLevel: 0.99 (v0.2 0.95) 回帰判定の 2 つは、 名前が strict でありながら通常版と同じ設定で動いていた (`runPerf3Layer` が閾値を内部で固定していた)。 標本数だけ増えて判定は緩いまま だったので、 呼出から渡せるようにして名前どおりの挙動に揃えた (#1718)。
 

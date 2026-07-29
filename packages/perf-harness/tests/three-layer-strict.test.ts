@@ -8,6 +8,7 @@ import {
   pruneStaleOps,
   runPerf3LayerStrict,
 } from '../src/index.js';
+import { buildRegressionNote } from '../src/three-layer.js';
 
 describe('runPerf3LayerStrict — v0.3 strict variant', () => {
   // 固定 directory を共有すると、各 case 末尾の削除が別 case の書込みと重なり、
@@ -581,9 +582,10 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     const tmpDir = tempDir();
     const baselinePath = join(tmpDir, 'baseline.json');
     const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
-    // 下限を明示して、何もしない関数が必ずその下に来る状態を作る。実測した分解能に
-    // 委ねると、測定のたびに 3 通りの理由 (baseline が下限未満 / 差が下限に届かない /
-    // 裾だけ伸びた) を行き来して、どれを期待しても実行ごとに通ったり落ちたりする。
+    // 下限を明示して、何もしない関数が必ずその下に来る状態を作る。判定に至らない
+    // 理由が「baseline が下限未満」 か「差が下限に届かない」 かは測定ごとに変わるが、
+    // どちらも「判定できていない」 を指す正しい注記なので、ここでは注記が付いて
+    // report にも出ることだけを見る。分岐ごとの文面は下の 3 test が固定値で確かめる。
     const op = {
       name: 'tiny',
       fn: () => {},
@@ -607,11 +609,46 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     });
 
     expect(second.outcomes[0]!.regressionVerdict).toBe('stable');
-
-    // baseline が下限を下回るので、何をもって退行と扱われるのかを書く。
     const note = second.outcomes[0]!.regressionNote;
-    expect(note, '判定できない理由が注記される').toMatch(/検知には \+5\.00ms .+以上の悪化が必要/);
+    expect(note, '判定できない理由が注記される').toBeTruthy();
     expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).toContain(note!);
+  });
+
+  it('注記は baseline が下限未満の行に必要な悪化量を書く (#1718)', () => {
+    // baseline 0.03ms、下限 0.1ms。何倍悪化しても差が下限に届かない状態。
+    const baseline = buildMeasureResult('op', 20, 0, Array.from({ length: 20 }, () => 0.03));
+    const current = buildMeasureResult('op', 20, 0, Array.from({ length: 20 }, () => 0.03));
+    const regression = detectRegression({ current, baseline, minDeltaMs: 0.1 });
+
+    expect(regression.belowDetectionFloor).toBe(true);
+    expect(buildRegressionNote(regression, 0.2).regressionNote).toMatch(
+      /検知には \+0\.10ms \(baseline 比 \+333%\) 以上の悪化が必要/,
+    );
+  });
+
+  it('注記は下限が抑えた行に差と下限を書く (#1718)', () => {
+    // 相対 33% 悪化だが差は 0.01ms で下限 0.1ms に届かない。
+    const baseline = buildMeasureResult('op', 20, 0, Array.from({ length: 20 }, () => 0.03));
+    const current = buildMeasureResult('op', 20, 0, Array.from({ length: 20 }, () => 0.04));
+    const regression = detectRegression({ current, baseline, minDeltaMs: 0.1 });
+
+    expect(regression.suppressedByFloor).toBe(true);
+    expect(buildRegressionNote(regression, 0.2).regressionNote).toMatch(
+      /差 0\.01ms が下限 0\.10ms 未満で判定を保留/,
+    );
+  });
+
+  it('注記は裾だけ伸びた行に p10 と p95 の両方を書く (#1718)', () => {
+    // 下側は同じで上位だけ 5 倍。「下側は動かず」 と書くと、p10 が閾値未満で
+    // 動いている場合に事実と食い違うため、両方の数字を並べる。
+    const baseline = buildMeasureResult('op', 10, 0, [10, 10, 10, 10, 10, 10, 10, 10, 10, 12]);
+    const current = buildMeasureResult('op', 10, 0, [10, 10, 10, 10, 10, 10, 10, 10, 10, 60]);
+    const regression = detectRegression({ current, baseline, minDeltaMs: 0 });
+
+    const note = buildRegressionNote(regression, 0.2).regressionNote;
+    expect(note).toMatch(/p10 0% \(閾値未満\)/);
+    expect(note).toMatch(/p95 \+\d+%/);
+    expect(note).not.toContain('下側は動かず');
   });
 
   it('下限を明示した op は report にその値を出す (#1718)', async () => {

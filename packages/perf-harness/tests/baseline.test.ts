@@ -226,6 +226,7 @@ describe('measurement premise gating (#1708)', () => {
 
   it('T-PH-B-013 比較できない件数の記録は読めない記録として扱う (#1718)', async () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    // 書く側は拒むので、外から壊れた file が置かれた状況を直接作る。
     // bootstrap CI は 2 件未満で退化 CI ({0,0}) を返す。有効な記録として返すと
     // 何倍悪化しても有意にならず永久に stable になり、key が既にあるので
     // 追記経路でも作り直されない。
@@ -236,14 +237,34 @@ describe('measurement premise gating (#1708)', () => {
         unknown
       >;
       stored['samples'] = samples;
-      await saveBaselineEnvelope(file, {
-        schema: 1,
-        env: captureEnv(),
-        results: { reply: stored as never },
-      });
+      writeFileSync(
+        file,
+        JSON.stringify({ schema: 1, env: captureEnv(), results: { reply: stored } }),
+        'utf8',
+      );
 
       expect(await loadBaseline(file), label).toBeNull();
     }
+  });
+
+  it('T-PH-B-015 読み戻せない envelope は保存を拒む (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'one-sample.json');
+    const stored = buildMeasureResult('reply', 1, 0, [1]);
+
+    // 保存できてしまうと、次の実行が読めない記録として弾いてまた作り直す、を
+    // 繰り返して比較が永久に成立しない。しかもその事実は report の n/a からしか
+    // 読めない。書く側で止める。
+    await expect(
+      saveBaselineEnvelope(file, {
+        schema: 1,
+        env: captureEnv(),
+        results: { reply: stored },
+      }),
+    ).rejects.toThrow(/標本が 2 件未満/);
+
+    // 拒んだ以上、file も残さない。
+    expect(readdirSync(dir)).toEqual([]);
   });
 
   it('T-PH-B-014 保存値と sample が食い違う記録は sample 側に揃える (#1718)', async () => {

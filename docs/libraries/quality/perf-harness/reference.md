@@ -31,6 +31,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
+| <code v-pre>&#96;saveBaselineEnvelope: 標本が 2 件未満の記録は baseline にできない ($&#123;names&#125;)。&#96; + ' 比較には最低 2 件が要る (bootstrap CI がそれ未満で退化する)。 iterations を増やす。'</code> | [packages/perf-harness/src/baseline.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L71) |
 | <code v-pre>measureConcurrent: concurrency must be &gt;= 1, got $&#123;input.concurrency&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L37) |
 | <code v-pre>measureConcurrent: iterationsPerWorker must be &gt;= 1, got $&#123;input.iterationsPerWorker&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L40) |
 | <code v-pre>measureConcurrent: warmup must be &gt;= 0, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L46) |
@@ -38,7 +39,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 | <code v-pre>measure: warmup must be &gt;= 0, got $&#123;warmupCount&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L24) |
 | <code v-pre>measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L42) |
 | <code v-pre>measureMemory: warmup must be a non-negative integer, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L48) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L682) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L701) |
 
 ## API 契約
 

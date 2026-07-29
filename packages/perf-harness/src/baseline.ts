@@ -51,11 +51,28 @@ export async function saveBaseline(
   await saveBaselineEnvelope(path, envelope);
 }
 
-/** Envelope を直接保存する経路。 three-layer 等で複数 op を集約する場合に使う。 */
+/**
+ * Envelope を直接保存する経路。 three-layer 等で複数 op を集約する場合に使う。
+ *
+ * 読み戻せない envelope は書かない。 `loadBaseline` は 2 件未満の標本を持つ記録を
+ * 読めない記録として弾くため、 そのまま保存すると次の実行がまた弾いて作り直す、を
+ * 繰り返して比較が永久に成立しない。 しかも「比較していない」 ことは report の
+ * `n/a (baseline seeded)` からしか読めない。 書く側で止めて理由を伝える。
+ */
 export async function saveBaselineEnvelope(
   path: string,
   envelope: BaselineEnvelope,
 ): Promise<void> {
+  const uncomparable = Object.entries(envelope.results).filter(
+    ([, result]) => result.samples.length < 2,
+  );
+  if (uncomparable.length > 0) {
+    const names = uncomparable.map(([key]) => key).join(', ');
+    throw new Error(
+      `saveBaselineEnvelope: 標本が 2 件未満の記録は baseline にできない (${names})。` +
+        ' 比較には最低 2 件が要る (bootstrap CI がそれ未満で退化する)。 iterations を増やす。',
+    );
+  }
   await mkdir(dirname(path), { recursive: true });
   // 直接書くと truncate 後の空ファイルを別 worker が読み、JSON.parse が
   // "Unexpected end of JSON input" で落ちる。同一 directory の一時 file へ
