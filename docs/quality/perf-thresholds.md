@@ -183,7 +183,7 @@ The caps (serial, concurrent, memory) are still gated. A cap is decided inside a
 
 #### Measured across the whole suite, and why the gate still cannot be switched on
 
-The `@kiwa-lab/cache` measurements above cover one package. The full suite was then measured the same way: seven consecutive passes of all 177 workspace packages (17 minutes each, ~2.5 hours of continuous load), recording every op's p10 each time.
+The `@kiwa-lab/cache` measurements above cover one package. The full suite was then measured the same way: one reseeding pass plus six analysis passes over all 177 workspace packages, recording every op's p10 each time. Individual passes took 8-22 minutes and the whole sweep ran 94 minutes — the variation in pass duration is itself part of what the numbers below describe.
 
 An op can only fail the gate on unchanged code if its observed drift satisfies **both** conditions the implementation checks — the absolute difference clears the floor **and** the relative change clears 20 %. Classified that way over 492 ops:
 
@@ -192,11 +192,11 @@ An op can only fail the gate on unchanged code if its observed drift satisfies *
 | 4 | 189 | 45 (28 with 2× margin) |
 | 6 | 217 | 35 (21 with 2× margin) |
 
-**The qualifying set shrinks as the observation window grows, with no sign of converging.** Enabling the gate for the 28 modules that looked safe over four passes was tried and reverted: three of them (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on the very next unchanged run. Their p10 had been flat across passes 2-5 and then drifted upward in passes 6-7 — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023.
+**The qualifying set shrinks as the observation window grows, with no sign of converging.** Enabling the gate for the 28 modules that looked safe over four passes was tried and reverted: two verification passes followed, and on the second one three of those modules (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on unchanged code. Their p10 had been flat across passes 2-5 and then drifted upward — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023.
 
-The cause is not the statistic. A baseline is recorded at one point in the machine's thermal cycle and compared against measurements taken at another, and a suite that runs for 20-40 minutes inside a multi-hour sweep spans that cycle. Every per-run statistic — p95, p10, median, trimmed mean — inherits the offset, because the offset is in the machine and not in the distribution.
+The cause is not the statistic. What the data shows is a drift that tracks position in the sweep rather than position in the distribution: the same op reads flat for four passes and then shifts, and the shift applies to the whole run at once. Only p10 timings were recorded — no temperature, clock, or background-load telemetry — so thermal state, page cache, and scheduler pressure are not separated here; "machine state that changes over the sweep" is as far as the evidence goes. What matters for the gate is that the offset is shared by every per-run statistic (p95, p10, median, trimmed mean), because it is not a property of the sample.
 
-That is the same wall the in-run reference normalization was measured against (§ What would make the remaining twelve gateable): comparing an op to a reference measured *in the same run* cancels the shared drift, taking `fsRead` from 141 % to 3 %. It is the one measured approach that addresses the actual cause, and it changes what a baseline stores (a ratio, not a duration).
+That is the same wall the in-run reference normalization was measured against (§ What would make the remaining twelve gateable): comparing an op to a reference measured *in the same run* cancelled the shared drift in that experiment, taking `fsRead` from 141 % to 3 %. It is the only approach measured so far that reduced the drift rather than reframing it, and it changes what a baseline stores (a ratio, not a duration).
 
 Until then `regressionGate` stays false everywhere. Turning it on for a subset is not a safe halfway step: the subset is defined by how long you happened to watch.
 
@@ -269,7 +269,7 @@ Two things have to be present together: `--expose-gc` in `execArgv`, and `pool: 
 
 The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
 
-The same shape appears at a larger scale in `visual`'s `comparePngBuffersFullDiff`: measured repeatedly with no code change, its `arrayBuffers` delta ranged from -5,985,795 B to +20,141,339 B against a 16.7 MB cap. A 26 MB spread around a 16.7 MB cap means the verdict is decided by allocator behaviour, and it failed two of four full-suite passes. It carries a waiver rather than a raised cap for the reason above.
+The same shape appears at a larger scale in `visual`'s `comparePngBuffersFullDiff`. Running `pnpm --filter @kiwa-lab/visual test:perf` four times with no code change and reading the `arrayBuffers` column of `docs/quality-reports/perf/visual.md` after each gives roughly +10.5 MB / -6.0 MB / +13.7 MB / +0.8 MB, and a separate full-suite pass recorded +20.1 MB. A spread wider than the 16.7 MB cap means the verdict is decided by allocator behaviour rather than by the library, and it failed at least one full-suite pass on unchanged code. It carries a waiver rather than a raised cap for the reason above. (The per-pass memory numbers are not in the stored sweep artifacts — those hold p10 only — so the figures above are reproduced by re-running the command, not read back from a log.)
 
 ## Change control
 
