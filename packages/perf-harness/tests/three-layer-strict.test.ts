@@ -221,10 +221,10 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(result.outcomes[0]!.memory.arrayBuffersDeltaBytes).toBeLessThan(100 * 1024);
     expect(result.outcomes[0]!.memoryGatePassed).toBe(true);
 
-    // heapUsed 側は assert しない。 この test で 5 回中 2 回、-4,071,968 B のような
-    // 負値が出た = GC のタイミング次第で測定区間の外の解放を拾う。 それこそが
-    // この軸を gate に載せられない理由なので、ここで依存すると自分の主張と
-    // 矛盾した不安定な test になる。
+    // heapUsed 側は assert しない。 この軸は測定区間の外の解放を拾って負値になり、
+    // 実行ごとに動く。 gate に載せられない理由がそれなので、ここで依存すると
+    // 不安定な test になる。 実測値は docs/quality/perf-thresholds.md
+    // § Memory delta target に置く。
   });
 
   it('fails the memory gate when GC is required but unavailable', async () => {

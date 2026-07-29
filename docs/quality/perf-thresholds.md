@@ -289,20 +289,22 @@ Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'f
 
 `arrayBuffers` counts `ArrayBuffer` backing stores. Anything backed by one moves it; anything living purely on the JS heap does not.
 
-The figures below come from a standalone script, not from this repo's suites: Node v24.15.0 with `--expose-gc`, 3 warmup iterations then 15 measured, `global.gc()` before and after, retaining 10 KB per iteration into an array that stays reachable. The `arrayBuffers` column is the load-bearing one and is stable across runs; the `heapUsed` column varies (see below) and is shown only to make the split visible.
+`packages/perf-harness/scripts/memory-axis-probe.mjs` reproduces the split — retain 10 KB per iteration, 15 iterations after 3 warmup, each kind in its own process:
 
-| what is retained | `heapUsed` | `arrayBuffers` |
-|---|---|---|
-| nothing | 22,080 B | 0 B |
-| a `Buffer` | 1,336 B | 153,600 B — caught |
-| an `ArrayBuffer` | 2,440 B | 153,600 B — caught |
-| a `Uint8Array` | 4,048 B | 153,600 B — caught |
-| a JS array of numbers | 156,552 B | 0 B — **passes the gate** |
-| entries in a `Map` | 161,736 B | 0 B — **passes the gate** |
+| what is retained | `arrayBuffers` |
+|---|---|
+| nothing | 0 B |
+| a `Buffer` | 153,600 B — caught |
+| an `ArrayBuffer` | 153,600 B — caught |
+| a `Uint8Array` | 153,600 B — caught |
+| a JS array of numbers | 0 B — **passes the gate** |
+| entries in a `Map` | 0 B — **passes the gate** |
+
+Those figures are stable: two consecutive runs of the script give the same six values. The script also prints `heapUsed`, and that column is not reproducible in the same way — across the same two runs the `nothing` row moved from -3,392 B to -245,240 B. Only the `arrayBuffers` column is load-bearing here, which is why the table shows it alone.
 
 So the gate covers the whole `ArrayBuffer` family and is blind to ordinary JS-heap retention — which is the shape most "unbounded internal Map" bugs actually take. `tests/three-layer-strict.test.ts` pins that blindness with an explicit assertion rather than leaving it implied.
 
-Adding `heapUsed` as a second axis was the obvious fix and it does not work. The two sweeps recorded in this repo (the `docs/quality-reports/perf/**` state at `HEAD^` and at `HEAD`, both on unchanged code) differ by more than the entire 100 KB cap on **41 of 492 ops** — median movement 1,632 B, mean 24,901 B, max 474,016 B. More directly: **18 ops sit on opposite sides of the cap in the two sweeps**, so a gate reading `heapUsed` would have produced a different verdict for each of them without a line of code changing.
+Adding `heapUsed` as a second axis was the obvious fix and it does not work. The two sweeps recorded in this repo (the `docs/quality-reports/perf/**` state at `ea99caa0a` and at `a1a77cf9c`, both on unchanged code) differ by more than the entire 100 KB cap on **41 of 492 ops** — median movement 1,632 B, mean 24,901 B, max 474,016 B. More directly: **18 ops sit on opposite sides of the cap in the two sweeps**, so a gate reading `heapUsed` would have produced a different verdict for each of them without a line of code changing.
 
 Gating on that would fail ops at random. It is the same failure the `arrayBuffers` axis already has on fs-heavy work, in a different place.
 
@@ -312,7 +314,7 @@ Measured on its own the picture looks fine — eight consecutive standalone runs
 
 Two other candidates were rejected without needing a full measurement. Ignoring differences under Node's 8 KB pool granularity would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible. Raising the iteration count until the pool saturates makes every measurement slower without addressing either the blindness or the drift.
 
-Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `HEAD^` then `HEAD`:
+Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `ea99caa0a` then `a1a77cf9c`:
 
 | op | sweep 1 | sweep 2 |
 |---|---|---|
