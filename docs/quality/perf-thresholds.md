@@ -75,7 +75,7 @@ Root `package.json > scripts.test:perf` runs the workspace pass with `--workspac
 
 Dropping `--parallel` alone is not enough. Without it pnpm still defaults to one worker per CPU core, so the numeric limit is written explicitly.
 
-The trade-off is wall-clock time: a serial pass takes roughly 20-40 minutes instead of a few minutes. That is accepted deliberately — the suite exists to produce comparable numbers, not to finish quickly. `tests/release-smoke/tests/perf-serial-execution.test.ts` fails the release smoke suite if the flag comes back.
+The trade-off is wall-clock time: a serial pass over all 177 packages took 8-22 minutes across the seven passes measured in #1708, against a few minutes when they ran concurrently. That is accepted deliberately — the suite exists to produce comparable numbers, not to finish quickly. `tests/release-smoke/tests/perf-serial-execution.test.ts` fails the release smoke suite if the flag comes back.
 
 ## Regression detection defaults
 
@@ -173,7 +173,7 @@ Measured across two independent rounds of four consecutive unchanged runs (the s
 | `cli-test-app-scenario` `setup_cleanup_cycle` | 65-244 % | no |
 | `cli-test` `writeFile` | 100-322 % | no |
 
-Two ranges are reported per op because the two rounds disagreed, sometimes widely: `audit_workflow` measured 11 % in one and 44 % in the other. **Four runs is not enough to certify an op.** An op qualifies only if it stayed under the threshold in both rounds, which is why `audit_workflow` keeps its waiver despite a passing round. The disagreement itself has a physical cause — the machine runs slower when hot, and a suite that takes 20-40 minutes spends most of that time hot — so a baseline recorded on a cold machine reports systematic regressions afterwards. That is what made the first round's numbers unusable and forced the reseed described above.
+Two ranges are reported per op because the two rounds disagreed, sometimes widely: `audit_workflow` measured 11 % in one and 44 % in the other. **Four runs is not enough to certify an op.** An op qualifies only if it stayed under the threshold in both rounds, which is why `audit_workflow` keeps its waiver despite a passing round. The disagreement tracks when in the sweep a measurement was taken: the first round's baseline was recorded on a machine that had been idle, and everything measured afterwards read systematically slower against it. That is what made the first round's numbers unusable and forced the reseed described above. What in the machine changes over a sweep was not measured here — see the note under § The regression verdict is reported but not gated.
 
 Sample count is not the cause of the residual spread. Raising `serialIterations` from 15-30 to 60-200 across the fourteen affected files changed which packages failed rather than how many, and at the higher counts it exposed ops whose cost grows with iteration count — `a11y`'s `audit_workflow` went from 23 ms to 216 ms, breaching a cap it had passed. That change was reverted.
 
@@ -194,7 +194,7 @@ An op can only fail the gate on unchanged code if its observed drift satisfies *
 
 **The qualifying set shrinks as the observation window grows, with no sign of converging.** Enabling the gate for the 28 modules that looked safe over four passes was tried and reverted: two verification passes followed, and on the second one three of those modules (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on unchanged code. Their p10 had been flat across passes 2-5 and then drifted upward — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023.
 
-The cause is not the statistic. What the data shows is a drift that tracks position in the sweep rather than position in the distribution: the same op reads flat for four passes and then shifts, and the shift applies to the whole run at once. Only p10 timings were recorded — no temperature, clock, or background-load telemetry — so thermal state, page cache, and scheduler pressure are not separated here; "machine state that changes over the sweep" is as far as the evidence goes. What matters for the gate is that the offset is shared by every per-run statistic (p95, p10, median, trimmed mean), because it is not a property of the sample.
+What was recorded is narrow: p10 per op per pass, and nothing else. No temperature, clock, or background-load telemetry, so thermal state, page cache, and scheduler pressure cannot be separated. What the numbers do show is that an op reads flat for four passes and then shifts, and that switching statistic (p95 → p10) moved the spread without removing it — the earlier `cache` experiment ruled out median, trimmed mean, and batching the same way. That is consistent with a drift the whole run inherits rather than something in the shape of the sample, but a drift shared by *every* statistic is an inference from three of them, not a measurement.
 
 That is the same wall the in-run reference normalization was measured against (§ What would make the remaining twelve gateable): comparing an op to a reference measured *in the same run* cancelled the shared drift in that experiment, taking `fsRead` from 141 % to 3 %. It is the only approach measured so far that reduced the drift rather than reframing it, and it changes what a baseline stores (a ratio, not a duration).
 
@@ -206,7 +206,7 @@ Two alternatives were rejected. Relaxing the relative threshold to 50 % hides re
 
 ### What would make the remaining twelve gateable
 
-The residual spread is environmental — thermal state, page cache, subprocess spawn cost — and no choice of statistic over a single run's samples removes it. What does remove it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
+The residual spread is not a property of the sample: it moves with when the measurement was taken, and no choice of statistic over a single run's samples removes it. What did reduce it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
 
 | op | raw p10 spread | ratio to a CPU-only reference | ratio to an fs reference |
 |---|---|---|---|

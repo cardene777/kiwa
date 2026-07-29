@@ -91,34 +91,54 @@ function accessPath(node: ts.Expression): string | null {
   return parts.join('.');
 }
 
-/**
- * `runPerf3Layer` の戻り値を受けた binding 名を集める。
- *
- * `const result = await runPerf3Layer({...})` の `result` が対象。 戻り値を
- * 束縛していない呼出 (= 判定を捨てている) は空集合として返り、検査で落ちる。
- */
-function measuredBindings(sf: ts.SourceFile): { calls: number; bindings: Set<string> } {
-  const bindings = new Set<string>();
-  let calls = 0;
-  eachNode(sf, (node) => {
-    if (!ts.isCallExpression(node)) return;
-    const callee = accessPath(node.expression);
-    if (callee !== 'runPerf3Layer' && callee !== 'runPerf3LayerStrict') return;
-    calls += 1;
+/** 測定関数の名前。 これを import しているか否かが検査の入口になる。 */
+const MEASURE_FNS = new Set(['runPerf3Layer', 'runPerf3LayerStrict']);
 
-    // `await` を挟んで代入されるので 2 段まで親を辿る。
-    let target: ts.Node = node;
-    if (ts.isAwaitExpression(target.parent)) target = target.parent;
-    const parent = target.parent;
-    if (ts.isVariableDeclaration(parent) && ts.isIdentifier(parent.name)) {
-      bindings.add(parent.name.text);
+/**
+ * source 内で測定関数を指す識別子を集める。
+ *
+ * `import { runPerf3Layer as run }` の `run` や `import * as perf` の `perf.runPerf3Layer`
+ * も対象にする。 別名にすれば検査を通せる、では guard にならない。
+ */
+function measureAliases(sf: ts.SourceFile): { direct: Set<string>; namespaces: Set<string> } {
+  const direct = new Set<string>();
+  const namespaces = new Set<string>();
+  eachNode(sf, (node) => {
+    if (!ts.isImportDeclaration(node)) return;
+    const clause = node.importClause;
+    if (!clause?.namedBindings) return;
+    if (ts.isNamespaceImport(clause.namedBindings)) {
+      namespaces.add(clause.namedBindings.name.text);
+      return;
+    }
+    for (const el of clause.namedBindings.elements) {
+      const original = (el.propertyName ?? el.name).text;
+      if (MEASURE_FNS.has(original)) direct.add(el.name.text);
     }
   });
-  return { calls, bindings };
+  return { direct, namespaces };
 }
 
-/** `expect(<binding>.allPassed)` の形で検証されている binding 名を集める。 */
-function assertedBindings(sf: ts.SourceFile): Set<string> {
+/** その呼出が測定関数の呼出かを返す。 */
+function isMeasureCall(
+  node: ts.CallExpression,
+  aliases: { direct: Set<string>; namespaces: Set<string> },
+): boolean {
+  const path = accessPath(node.expression);
+  if (path === null) return false;
+  const parts = path.split('.');
+  if (parts.length === 1) return aliases.direct.has(parts[0]!);
+  if (parts.length === 2) return aliases.namespaces.has(parts[0]!) && MEASURE_FNS.has(parts[1]!);
+  return false;
+}
+
+/**
+ * `expect(<name>.allPassed).toBe(true)` の形で肯定的に検証されている名前を集める。
+ *
+ * matcher まで見る。 `expect(r.allPassed).toBe(false)` や `.not.toBe(true)` は
+ * 「判定した」 ことにならないため通さない。
+ */
+function assertedNames(sf: ts.SourceFile): Set<string> {
   const asserted = new Set<string>();
   eachNode(sf, (node) => {
     if (!ts.isCallExpression(node)) return;
@@ -127,58 +147,119 @@ function assertedBindings(sf: ts.SourceFile): Set<string> {
     if (!arg || !ts.isPropertyAccessExpression(arg)) return;
     if (arg.name.text !== 'allPassed') return;
     if (!ts.isIdentifier(arg.expression)) return;
-    asserted.add(arg.expression.text);
+
+    // `expect(x.allPassed)` の外側に付く matcher chain を辿る。
+    let cursor: ts.Node = node;
+    let negated = false;
+    let positive = false;
+    while (ts.isPropertyAccessExpression(cursor.parent)) {
+      const access = cursor.parent;
+      const member = access.name.text;
+      if (member === 'not') negated = true;
+      const call = access.parent;
+      if (ts.isCallExpression(call) && call.expression === access) {
+        if (member === 'toBe' || member === 'toStrictEqual' || member === 'toEqual') {
+          const [expected] = call.arguments;
+          positive = expected !== undefined && expected.kind === ts.SyntaxKind.TrueKeyword;
+        } else if (member === 'toBeTruthy') {
+          positive = true;
+        }
+        cursor = call;
+      } else {
+        cursor = access;
+      }
+    }
+    if (positive && !negated) asserted.add(arg.expression.text);
   });
   return asserted;
 }
 
-/** perf test source が「判定を捨てている」 かを返す。 捨てていなければ null。 */
+/**
+ * perf test source が「判定を捨てている」 かを返す。 捨てていなければ null。
+ *
+ * 呼出ごとに独立して見る。 file 内に 1 件でも正しい呼出があれば残りを通す、では
+ * 「判定を捨てる呼出を後から足す」 経路が開いたままになる。 受け取り方を静的に
+ * 追えない形 (分割代入 / 再代入 / return 直結 / `.then` 経由) はすべて不合格にする。
+ * 通す形を絞るほうが、通してしまう形を数え上げるより安全に閉じられる。
+ */
 export function findDiscardedVerdict(source: string, fileName = 'x.perf.ts'): string | null {
   const sf = parse(source, fileName);
-  const { calls, bindings } = measuredBindings(sf);
-  if (calls === 0) return null;
-  if (bindings.size === 0) return '戻り値を束縛していない';
-  const asserted = assertedBindings(sf);
-  const unchecked = [...bindings].filter((name) => !asserted.has(name));
-  if (unchecked.length > 0) return `allPassed を検証していない binding: ${unchecked.join(', ')}`;
-  return null;
+  const aliases = measureAliases(sf);
+  const asserted = assertedNames(sf);
+  const problems: string[] = [];
+
+  eachNode(sf, (node) => {
+    if (!ts.isCallExpression(node) || !isMeasureCall(node, aliases)) return;
+
+    const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
+    // `await` を挟む形だけを許す。 測定は非同期なので、await しない受け取りは
+    // Promise を検証していることになり判定が成立しない。
+    const awaited = ts.isAwaitExpression(node.parent) ? node.parent : null;
+    if (awaited === null) {
+      problems.push(`L${line}: await していない`);
+      return;
+    }
+    const parent = awaited.parent;
+    if (!ts.isVariableDeclaration(parent) || !ts.isIdentifier(parent.name)) {
+      problems.push(`L${line}: 戻り値を変数に束縛していない`);
+      return;
+    }
+    const name = parent.name.text;
+    if (!asserted.has(name)) {
+      problems.push(`L${line}: ${name}.allPassed を検証していない`);
+    }
+  });
+
+  return problems.length > 0 ? problems.join(' / ') : null;
 }
 
 /**
- * vitest config の `test` object から、指定した property path の値を探す。
+ * `export default` が指す vitest config の `test` object を返す。
  *
- * `defineConfig({ test: { pool: 'forks' } })` の `test.pool` を引く。 object
- * literal だけを辿るので、コメントや無関係な同名 identifier は拾わない。
+ * file 内の任意の `defineConfig` を拾うと、使われていない decoy の設定や、
+ * 2 つの config から property を寄せ集めた形が合格する。 実際に export される
+ * 1 つだけを起点にする。 静的に辿れない形 (変数経由 / wrapper 関数 / spread) は
+ * null を返して不合格にする。
  */
-function readConfigValue(sf: ts.SourceFile, path: string[]): ts.Expression | null {
-  let found: ts.Expression | null = null;
+function exportedTestObject(sf: ts.SourceFile): ts.ObjectLiteralExpression | null {
+  let exported: ts.Expression | null = null;
   eachNode(sf, (node) => {
-    if (found) return;
-    if (!ts.isCallExpression(node)) return;
-    if (!ts.isIdentifier(node.expression) || node.expression.text !== 'defineConfig') return;
-    const [arg] = node.arguments;
-    if (!arg || !ts.isObjectLiteralExpression(arg)) return;
-
-    let cursor: ts.ObjectLiteralExpression | null = arg;
-    for (let index = 0; index < path.length; index += 1) {
-      if (!cursor) return;
-      const key: string = path[index]!;
-      const props: ts.NodeArray<ts.ObjectLiteralElementLike> = cursor.properties;
-      const prop: ts.PropertyAssignment | undefined = props.find(
-        (p): p is ts.PropertyAssignment =>
-          ts.isPropertyAssignment(p) &&
-          (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)) &&
-          p.name.text === key,
-      );
-      if (!prop) return;
-      if (index === path.length - 1) {
-        found = prop.initializer;
-        return;
-      }
-      cursor = ts.isObjectLiteralExpression(prop.initializer) ? prop.initializer : null;
-    }
+    if (ts.isExportAssignment(node) && !node.isExportEquals) exported = node.expression;
   });
-  return found;
+  if (exported === null) return null;
+
+  let expr: ts.Expression = exported;
+  if (ts.isSatisfiesExpression(expr) || ts.isAsExpression(expr)) expr = expr.expression;
+  if (!ts.isCallExpression(expr)) return null;
+  if (!ts.isIdentifier(expr.expression) || expr.expression.text !== 'defineConfig') return null;
+
+  const [arg] = expr.arguments;
+  if (!arg || !ts.isObjectLiteralExpression(arg)) return null;
+  return readObjectProperty(arg, 'test');
+}
+
+/**
+ * object literal から property を読む。 spread を含む object は null を返す。
+ *
+ * spread は後続で上書きし得るので、直接書かれた property だけを見ると
+ * 実際の値と食い違う。 同名 property の重複も同じ理由で不合格にする。
+ */
+function readObjectProperty(obj: ts.ObjectLiteralExpression, key: string): ts.ObjectLiteralExpression | null {
+  const value = readProperty(obj, key);
+  if (value === null || !ts.isObjectLiteralExpression(value)) return null;
+  return value;
+}
+
+function readProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Expression | null {
+  if (obj.properties.some((p) => ts.isSpreadAssignment(p))) return null;
+  const matches = obj.properties.filter(
+    (p): p is ts.PropertyAssignment =>
+      ts.isPropertyAssignment(p) &&
+      (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)) &&
+      p.name.text === key,
+  );
+  if (matches.length !== 1) return null;
+  return matches[0]!.initializer;
 }
 
 /** config が GC を呼べる形かを返す。 問題なければ null。 */
@@ -187,17 +268,24 @@ export function findMissingGcSetup(
   fileName = 'vitest.perf.config.ts',
 ): string | null {
   const sf = parse(source, fileName);
-  const execArgv = readConfigValue(sf, ['test', 'poolOptions', 'forks', 'execArgv']);
+  const test = exportedTestObject(sf);
+  if (test === null) {
+    return 'export default の defineConfig({ test: {...} }) を静的に辿れない';
+  }
+
+  const pool = readProperty(test, 'pool');
+  const isForks = pool !== null && ts.isStringLiteral(pool) && pool.text === 'forks';
+  // worker_threads は execArgv を無視するため、pool を固定しないと GC 無しに戻る。
+  if (!isForks) return "test.pool が 'forks' でない (execArgv が無視される)";
+
+  const poolOptions = readObjectProperty(test, 'poolOptions');
+  const forks = poolOptions === null ? null : readObjectProperty(poolOptions, 'forks');
+  const execArgv = forks === null ? null : readProperty(forks, 'execArgv');
   const hasExposeGc =
     execArgv !== null &&
     ts.isArrayLiteralExpression(execArgv) &&
     execArgv.elements.some((el) => ts.isStringLiteral(el) && el.text === '--expose-gc');
   if (!hasExposeGc) return 'test.poolOptions.forks.execArgv に --expose-gc がない';
-
-  const pool = readConfigValue(sf, ['test', 'pool']);
-  const isForks = pool !== null && ts.isStringLiteral(pool) && pool.text === 'forks';
-  // worker_threads は execArgv を無視するため、pool を固定しないと GC 無しに戻る。
-  if (!isForks) return "test.pool が 'forks' でない (execArgv が無視される)";
   return null;
 }
 
@@ -231,48 +319,81 @@ describe('perf gate coverage (#1708)', () => {
 });
 
 describe('perf gate coverage の検査自体 (#1708)', () => {
-  // 文字列検索で書くと、以下の 5 例が全て「合格」 になる。 検査が意味を持つのは
-  // これらを落とせる時だけなので、fixture で固定する。
+  // 文字列検索で書くと以下がすべて「合格」 になる。 呼出単位で見ないと、
+  // 正しい呼出を 1 件置いて隣に判定を捨てる呼出を足す経路も開く。
+  // 検査が意味を持つのはこれらを落とせる時だけなので fixture で固定する。
+  const IMPORT = `import { runPerf3Layer, runPerf3LayerStrict } from '@kiwa-lab/perf-harness';\n`;
+
   it('判定を捨てている形を検出する', () => {
     const cases: Array<[string, string]> = [
+      ['戻り値を束縛しない', `await runPerf3Layer({});`],
+      ['コメントに allPassed と書いただけ', `const r = await runPerf3Layer({}); // r.allPassed`],
+      ['文字列に allPassed を含むだけ', `const r = await runPerf3Layer({}); console.log('allPassed?');`],
+      ['allPassed 以外を見ている', `const r = await runPerf3Layer({}); expect(r.outcomes.length).toBeGreaterThan(0);`],
       [
-        '戻り値を束縛しない',
-        `await runPerf3Layer({ moduleName: 'm', ops: [], reportPath: 'r' });`,
-      ],
-      [
-        'コメントに allPassed と書いただけ',
-        `const r = await runPerf3Layer({}); // r.allPassed は後で見る`,
-      ],
-      [
-        '別 binding だけ検証している',
+        '正常な呼出の隣に捨てる呼出がある',
         `const a = await runPerf3Layer({});
-         const b = await runPerf3Layer({});
-         expect(a.allPassed).toBe(true);`,
+         expect(a.allPassed).toBe(true);
+         await runPerf3Layer({});`,
       ],
       [
-        'allPassed 以外を見ている',
-        `const r = await runPerf3Layer({}); expect(r.outcomes.length).toBeGreaterThan(0);`,
+        '正常な呼出の隣に未検証の binding がある',
+        `const a = await runPerf3Layer({});
+         expect(a.allPassed).toBe(true);
+         const b = await runPerf3LayerStrict({});`,
+      ],
+      ['分割代入で受ける', `const { outcomes } = await runPerf3Layer({}); expect(outcomes).toBeDefined();`],
+      [
+        '再代入で受ける',
+        `let r; r = await runPerf3Layer({}); expect(r.allPassed).toBe(true);`,
+      ],
+      ['return に直結', `return await runPerf3Layer({});`],
+      ['.then で受ける', `runPerf3Layer({}).then((r) => expect(r.allPassed).toBe(true));`],
+      ['await していない', `const r = runPerf3Layer({}); expect(r.allPassed).toBe(true);`],
+      ['matcher が false', `const r = await runPerf3Layer({}); expect(r.allPassed).toBe(false);`],
+      ['matcher が not 経由', `const r = await runPerf3Layer({}); expect(r.allPassed).not.toBe(true);`],
+      ['matcher がない', `const r = await runPerf3Layer({}); expect(r.allPassed);`],
+      [
+        'alias 経由で呼ぶ',
+        `import { runPerf3Layer as run } from '@kiwa-lab/perf-harness';
+         await run({});`,
       ],
       [
-        '文字列に allPassed を含むだけ',
-        `const r = await runPerf3Layer({}); console.log('allPassed?');`,
+        'namespace 経由で呼ぶ',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         await perf.runPerf3Layer({});`,
       ],
     ];
     for (const [label, source] of cases) {
-      expect(findDiscardedVerdict(source), label).not.toBeNull();
+      const body = source.includes('import ') ? source : IMPORT + source;
+      expect(findDiscardedVerdict(body), label).not.toBeNull();
     }
   });
 
   it('判定している形は通す', () => {
     const cases: Array<[string, string]> = [
-      ['素直な形', `const r = await runPerf3Layer({}); expect(r.allPassed).toBe(true);`],
+      ['素直な形', IMPORT + `const r = await runPerf3Layer({}); expect(r.allPassed).toBe(true);`],
       [
         '複数呼出を各々検証',
-        `const a = await runPerf3Layer({});
-         expect(a.allPassed).toBe(true);
-         const b = await runPerf3LayerStrict({});
-         expect(b.allPassed).toBe(true);`,
+        IMPORT +
+          `const a = await runPerf3Layer({});
+           expect(a.allPassed).toBe(true);
+           const b = await runPerf3LayerStrict({});
+           expect(b.allPassed).toBe(true);`,
       ],
+      [
+        'alias 経由でも検証していれば通す',
+        `import { runPerf3Layer as run } from '@kiwa-lab/perf-harness';
+         const r = await run({});
+         expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        'namespace 経由でも検証していれば通す',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         const r = await perf.runPerf3Layer({});
+         expect(r.allPassed).toBe(true);`,
+      ],
+      ['toBeTruthy でも通す', IMPORT + `const r = await runPerf3Layer({}); expect(r.allPassed).toBeTruthy();`],
       ['そもそも呼んでいない', `expect(1).toBe(1);`],
     ];
     for (const [label, source] of cases) {
@@ -285,7 +406,7 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
       ['何も設定していない', `export default defineConfig({ test: { include: ['x'] } });`],
       [
         'コメントに書いただけ',
-        `export default defineConfig({ test: { /* --expose-gc を渡す */ include: ['x'] } });`,
+        `export default defineConfig({ test: { /* --expose-gc */ include: ['x'] } });`,
       ],
       [
         'execArgv はあるが pool が threads',
@@ -314,6 +435,48 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
            poolOptions: { threads: { execArgv: ['--expose-gc'] } },
          } });`,
       ],
+      [
+        'export していない decoy から寄せ集める',
+        `const decoy = defineConfig({ test: { pool: 'forks' } });
+         export default defineConfig({ test: {
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });`,
+      ],
+      [
+        '2 つの config に property を分散させる',
+        `export const other = defineConfig({ test: {
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });
+         export default defineConfig({ test: { pool: 'forks' } });`,
+      ],
+      [
+        'spread で上書きされ得る',
+        `export default defineConfig({ test: {
+           pool: 'forks',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+           ...overrides,
+         } });`,
+      ],
+      [
+        '同名 property が重複する',
+        `export default defineConfig({ test: {
+           pool: 'forks',
+           pool: 'threads',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });`,
+      ],
+      [
+        '変数経由で静的に辿れない',
+        `const config = { pool: 'forks', poolOptions: { forks: { execArgv: ['--expose-gc'] } } };
+         export default defineConfig({ test: config });`,
+      ],
+      [
+        'wrapper 関数の返り値',
+        `export default withDefaults(defineConfig({ test: {
+           pool: 'forks',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } }));`,
+      ],
     ];
     for (const [label, source] of cases) {
       expect(findMissingGcSetup(source), label).not.toBeNull();
@@ -321,10 +484,24 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
   });
 
   it('GC を呼べる config は通す', () => {
-    const source = `export default defineConfig({ test: {
-      pool: 'forks',
-      poolOptions: { forks: { execArgv: ['--expose-gc'] } },
-    } });`;
-    expect(findMissingGcSetup(source)).toBeNull();
+    const cases: Array<[string, string]> = [
+      [
+        '素直な形',
+        `export default defineConfig({ test: {
+           pool: 'forks',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });`,
+      ],
+      [
+        'satisfies 付き',
+        `export default defineConfig({ test: {
+           pool: 'forks',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } }) satisfies UserConfig;`,
+      ],
+    ];
+    for (const [label, source] of cases) {
+      expect(findMissingGcSetup(source), label).toBeNull();
+    }
   });
 });
