@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| signAndVerifyJWT | 0.0058ms | 0.01ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| hashSha256 | 0.0026ms | 0.0051ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| aesGcmRoundtrip | 0.0058ms | 0.01ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| signAndVerifyJWT | 0.0059ms | 0.01ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| hashSha256 | 0.0022ms | 0.0050ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| aesGcmRoundtrip | 0.0060ms | 0.01ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -24,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| signAndVerifyJWT | -36248 B | 0 B | 102400 B | yes | PASS |
-| hashSha256 | -27984 B | 0 B | 102400 B | yes | PASS |
-| aesGcmRoundtrip | -17256 B | -28458 B | 102400 B | yes | PASS |
+| signAndVerifyJWT | -37064 B | 0 B | 102400 B | yes | PASS |
+| hashSha256 | -28024 B | 0 B | 102400 B | yes | PASS |
+| aesGcmRoundtrip | -17144 B | -15061 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0058ms |
-| p50 | 0.0069ms |
+| p10 | 0.0059ms |
+| p50 | 0.0068ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
-| mean | 0.0078ms |
-| stdev | 0.0025ms |
-| min | 0.0055ms |
-| max | 0.02ms |
-| total | 1.55ms |
+| p99 | 0.05ms |
+| mean | 0.0085ms |
+| stdev | 0.0065ms |
+| min | 0.0057ms |
+| max | 0.06ms |
+| total | 1.71ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0058ms | 0.0063ms | -0.00050ms | -7.90% |
-| p50 | 0.0069ms | 0.0074ms | -0.00048ms | -6.46% |
-| p95 | 0.01ms | 0.03ms | -0.01ms | -52.10% |
-| p99 | 0.02ms | 0.10ms | -0.08ms | -81.93% |
-| mean | 0.0078ms | 0.02ms | -0.0076ms | -49.31% |
-| min | 0.0055ms | 0.0060ms | -0.00050ms | -8.33% |
-| max | 0.02ms | 0.42ms | -0.40ms | -95.26% |
-| total | 1.55ms | 3.07ms | -1.51ms | -49.31% |
+| p10 | 0.0059ms | 0.0063ms | -0.00042ms | -6.57% |
+| p50 | 0.0068ms | 0.0074ms | -0.00058ms | -7.87% |
+| p95 | 0.01ms | 0.03ms | -0.01ms | -47.28% |
+| p99 | 0.05ms | 0.10ms | -0.05ms | -52.24% |
+| mean | 0.0085ms | 0.02ms | -0.0068ms | -44.36% |
+| min | 0.0057ms | 0.0060ms | -0.00025ms | -4.17% |
+| max | 0.06ms | 0.42ms | -0.36ms | -85.64% |
+| total | 1.71ms | 3.07ms | -1.36ms | -44.36% |
 
 ### hashSha256
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0026ms |
-| p50 | 0.0027ms |
-| p95 | 0.0051ms |
-| p99 | 0.01ms |
-| mean | 0.0032ms |
-| stdev | 0.0015ms |
-| min | 0.0025ms |
+| p10 | 0.0022ms |
+| p50 | 0.0024ms |
+| p95 | 0.0050ms |
+| p99 | 0.0098ms |
+| mean | 0.0028ms |
+| stdev | 0.0014ms |
+| min | 0.0022ms |
 | max | 0.01ms |
-| total | 0.63ms |
+| total | 0.56ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0026ms | 0.0025ms | +0.000041ms | +1.61% |
-| p50 | 0.0027ms | 0.0027ms | +0.0000010ms | +0.04% |
-| p95 | 0.0051ms | 0.0048ms | +0.00026ms | +5.33% |
-| p99 | 0.01ms | 0.0094ms | +0.0019ms | +20.17% |
-| mean | 0.0032ms | 0.0030ms | +0.00015ms | +4.86% |
-| min | 0.0025ms | 0.0025ms | +0.0000010ms | +0.04% |
-| max | 0.01ms | 0.01ms | -0.00038ms | -2.97% |
-| total | 0.63ms | 0.61ms | +0.03ms | +4.86% |
+| p10 | 0.0022ms | 0.0025ms | -0.00029ms | -11.49% |
+| p50 | 0.0024ms | 0.0027ms | -0.00033ms | -12.30% |
+| p95 | 0.0050ms | 0.0048ms | +0.00016ms | +3.22% |
+| p99 | 0.0098ms | 0.0094ms | +0.00040ms | +4.21% |
+| mean | 0.0028ms | 0.0030ms | -0.00025ms | -8.26% |
+| min | 0.0022ms | 0.0025ms | -0.00029ms | -11.88% |
+| max | 0.01ms | 0.01ms | -0.0024ms | -18.81% |
+| total | 0.56ms | 0.61ms | -0.05ms | -8.26% |
 
 ### aesGcmRoundtrip
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0058ms |
-| p50 | 0.0062ms |
+| p10 | 0.0060ms |
+| p50 | 0.0063ms |
 | p95 | 0.01ms |
-| p99 | 0.02ms |
-| mean | 0.0071ms |
-| stdev | 0.0027ms |
-| min | 0.0056ms |
-| max | 0.03ms |
-| total | 1.43ms |
+| p99 | 0.03ms |
+| mean | 0.0084ms |
+| stdev | 0.01ms |
+| min | 0.0058ms |
+| max | 0.14ms |
+| total | 1.67ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0058ms | 0.0063ms | -0.00050ms | -7.95% |
-| p50 | 0.0062ms | 0.0068ms | -0.00060ms | -8.87% |
-| p95 | 0.01ms | 0.01ms | +0.0018ms | +15.35% |
-| p99 | 0.02ms | 0.02ms | +0.00086ms | +4.92% |
-| mean | 0.0071ms | 0.0076ms | -0.00045ms | -5.88% |
-| min | 0.0056ms | 0.0060ms | -0.00033ms | -5.59% |
-| max | 0.03ms | 0.02ms | +0.0015ms | +6.07% |
-| total | 1.43ms | 1.51ms | -0.09ms | -5.88% |
+| p10 | 0.0060ms | 0.0063ms | -0.00030ms | -4.71% |
+| p50 | 0.0063ms | 0.0068ms | -0.00050ms | -7.34% |
+| p95 | 0.01ms | 0.01ms | +0.0019ms | +15.53% |
+| p99 | 0.03ms | 0.02ms | +0.0093ms | +53.22% |
+| mean | 0.0084ms | 0.0076ms | +0.00080ms | +10.54% |
+| min | 0.0058ms | 0.0060ms | -0.00017ms | -2.79% |
+| max | 0.14ms | 0.02ms | +0.11ms | +451.08% |
+| total | 1.67ms | 1.51ms | +0.16ms | +10.54% |
 

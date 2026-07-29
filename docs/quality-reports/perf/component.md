@@ -8,15 +8,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| buildButtonDriveCanvas | 0.00050ms | 0.0069ms | 5ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| buildFormDriveCanvas | 0.0049ms | 0.02ms | 10ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| renderAndHashMarkup | 0.0031ms | 0.01ms | 5ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| buildButtonDriveCanvas | 0.00050ms | 0.0079ms | 5ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| buildFormDriveCanvas | 0.0053ms | 0.01ms | 10ms | 0.00042ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| renderAndHashMarkup | 0.0028ms | 0.01ms | 5ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 10 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| buildButtonDriveCanvas | 0.02ms | 10ms | PASS |
+| buildButtonDriveCanvas | 0.03ms | 10ms | PASS |
 | buildFormDriveCanvas | 0.03ms | 20ms | PASS |
 | renderAndHashMarkup | 0.02ms | 10ms | PASS |
 
@@ -24,8 +24,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| buildButtonDriveCanvas | -10104 B | 0 B | 102400 B | yes | PASS |
-| buildFormDriveCanvas | 19624 B | 0 B | 102400 B | yes | PASS |
+| buildButtonDriveCanvas | -13600 B | 0 B | 102400 B | yes | PASS |
+| buildFormDriveCanvas | 26704 B | 0 B | 102400 B | yes | PASS |
 | renderAndHashMarkup | -1056 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -40,12 +40,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p10 | 0.00050ms |
 | p50 | 0.00054ms |
-| p95 | 0.0069ms |
-| p99 | 0.0097ms |
-| mean | 0.0016ms |
-| stdev | 0.0023ms |
-| min | 0.00046ms |
-| max | 0.010ms |
+| p95 | 0.0079ms |
+| p99 | 0.01ms |
+| mean | 0.0017ms |
+| stdev | 0.0027ms |
+| min | 0.00050ms |
+| max | 0.01ms |
 | total | 0.05ms |
 
 ## Baseline diff
@@ -53,13 +53,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p10 | 0.00050ms | 0.00050ms | 0.00ms | 0.00% |
-| p50 | 0.00054ms | 0.00054ms | +5.0e-7ms | +0.09% |
-| p95 | 0.0069ms | 0.0069ms | -0.000040ms | -0.58% |
-| p99 | 0.0097ms | 0.01ms | -0.0014ms | -12.74% |
-| mean | 0.0016ms | 0.0016ms | -0.000069ms | -4.23% |
-| min | 0.00046ms | 0.00050ms | -0.000042ms | -8.40% |
-| max | 0.010ms | 0.01ms | -0.0017ms | -14.94% |
-| total | 0.05ms | 0.05ms | -0.0021ms | -4.23% |
+| p50 | 0.00054ms | 0.00054ms | +0.0000010ms | +0.18% |
+| p95 | 0.0079ms | 0.0069ms | +0.00094ms | +13.64% |
+| p99 | 0.01ms | 0.01ms | -0.000064ms | -0.58% |
+| mean | 0.0017ms | 0.0016ms | +0.000057ms | +3.48% |
+| min | 0.00050ms | 0.00050ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00050ms | -4.26% |
+| total | 0.05ms | 0.05ms | +0.0017ms | +3.48% |
 
 ### buildFormDriveCanvas
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p10 | 0.0049ms |
-| p50 | 0.0057ms |
-| p95 | 0.02ms |
+| p10 | 0.0053ms |
+| p50 | 0.0061ms |
+| p95 | 0.01ms |
 | p99 | 0.03ms |
-| mean | 0.0082ms |
-| stdev | 0.0056ms |
-| min | 0.0046ms |
-| max | 0.03ms |
-| total | 0.25ms |
+| mean | 0.0085ms |
+| stdev | 0.0058ms |
+| min | 0.0051ms |
+| max | 0.04ms |
+| total | 0.26ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0049ms | 0.0042ms | +0.00070ms | +16.65% |
-| p50 | 0.0057ms | 0.0049ms | +0.00077ms | +15.63% |
-| p95 | 0.02ms | 0.01ms | +0.000096ms | +0.64% |
-| p99 | 0.03ms | 0.03ms | +0.0024ms | +9.40% |
-| mean | 0.0082ms | 0.0073ms | +0.00088ms | +11.98% |
-| min | 0.0046ms | 0.0041ms | +0.00054ms | +13.27% |
-| max | 0.03ms | 0.03ms | +0.0036ms | +12.15% |
-| total | 0.25ms | 0.22ms | +0.03ms | +11.98% |
+| p10 | 0.0053ms | 0.0042ms | +0.0011ms | +25.76% |
+| p50 | 0.0061ms | 0.0049ms | +0.0012ms | +23.64% |
+| p95 | 0.01ms | 0.01ms | -0.00047ms | -3.16% |
+| p99 | 0.03ms | 0.03ms | +0.0042ms | +16.25% |
+| mean | 0.0085ms | 0.0073ms | +0.0012ms | +15.92% |
+| min | 0.0051ms | 0.0041ms | +0.0010ms | +24.49% |
+| max | 0.04ms | 0.03ms | +0.0057ms | +19.27% |
+| total | 0.26ms | 0.22ms | +0.04ms | +15.92% |
 
 ### renderAndHashMarkup
 
@@ -100,13 +100,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p10 | 0.0031ms |
-| p50 | 0.0034ms |
+| p10 | 0.0028ms |
+| p50 | 0.0036ms |
 | p95 | 0.01ms |
 | p99 | 0.02ms |
-| mean | 0.0049ms |
-| stdev | 0.0037ms |
-| min | 0.0030ms |
+| mean | 0.0051ms |
+| stdev | 0.0035ms |
+| min | 0.0027ms |
 | max | 0.02ms |
 | total | 0.15ms |
 
@@ -114,12 +114,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0031ms | 0.0034ms | -0.00030ms | -8.67% |
-| p50 | 0.0034ms | 0.0037ms | -0.00027ms | -7.36% |
-| p95 | 0.01ms | 0.01ms | -0.00034ms | -2.49% |
-| p99 | 0.02ms | 0.02ms | -0.0014ms | -7.61% |
-| mean | 0.0049ms | 0.0053ms | -0.00040ms | -7.56% |
-| min | 0.0030ms | 0.0033ms | -0.00025ms | -7.62% |
-| max | 0.02ms | 0.02ms | -0.0022ms | -11.06% |
-| total | 0.15ms | 0.16ms | -0.01ms | -7.56% |
+| p10 | 0.0028ms | 0.0034ms | -0.00058ms | -17.09% |
+| p50 | 0.0036ms | 0.0037ms | -0.000042ms | -1.14% |
+| p95 | 0.01ms | 0.01ms | -0.0011ms | -7.82% |
+| p99 | 0.02ms | 0.02ms | -0.0026ms | -13.86% |
+| mean | 0.0051ms | 0.0053ms | -0.00023ms | -4.28% |
+| min | 0.0027ms | 0.0033ms | -0.00058ms | -17.74% |
+| max | 0.02ms | 0.02ms | -0.0032ms | -15.58% |
+| total | 0.15ms | 0.16ms | -0.0068ms | -4.28% |
 
