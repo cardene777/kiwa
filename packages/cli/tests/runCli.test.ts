@@ -520,6 +520,40 @@ describe('runCli run --watch', () => {
     expect(h.err()).toContain('--layer requires a value');
   });
 
+  it('T-CLI-085 kill が error event で失敗を伝えても exit を待つ (#1727)', async () => {
+    // Node の `kill()` は失敗の伝え方が 2 通りある。 EINVAL / ENOSYS は throw、
+    // EPERM 等は `error` event を emit して false を返す。 後者を spawn 失敗の
+    // `error` と同じに扱うと、child が生きたまま CLI が終了して watcher が残る。
+    const dir = makeProject();
+    let spawnCount = 0;
+    let stuckExited = false;
+    const h = harness({
+      cwd: () => dir,
+      runWatch,
+      spawnFn: () => {
+        spawnCount += 1;
+        if (spawnCount === 1) return fakeChild(3);
+        const child = new EventEmitter() as EventEmitter & { kill: () => boolean };
+        child.kill = () => {
+          // 実 Node と同じ形 = 同期に error を emit して false を返す。
+          child.emit('error', new Error('kill EPERM'));
+          return false;
+        };
+        // 停止要求は通らないが、しばらくして自力で終わる。
+        setTimeout(() => {
+          stuckExited = true;
+          child.emit('exit', 0, null);
+        }, 10);
+        return child as unknown as ChildProcess;
+      },
+    });
+
+    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(3);
+    // exit を待たずに返っていたら false のまま。
+    expect(stuckExited).toBe(true);
+    expect(h.err()).toContain('failed to stop watcher');
+  });
+
   it('T-CLI-084 kill を持たない child でも exit を待ち続ける (#1727)', async () => {
     // 停止要求が送れない相手 (kill が throw する) でも、その child の exit を
     // 待つ promise を残さない。 残すと、失敗を検出したのに CLI が終わらない。
