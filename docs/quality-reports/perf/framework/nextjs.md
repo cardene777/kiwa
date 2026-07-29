@@ -8,25 +8,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| invokeServerAction | 0.00066ms | 0.0026ms | 5ms | 0.00033ms | PASS | stable (差 0.00021ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| invokeMiddleware | 0.0046ms | 0.0062ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| renderServerComponent | 0.00038ms | 0.00084ms | 5ms | 0.00033ms | PASS | stable (p10 -10% (閾値未満)、 p95 +21% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| invokeServerAction | 0.00058ms | 0.0031ms | 5ms | 0.00033ms | PASS | stable (差 0.00029ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| invokeMiddleware | 0.0045ms | 0.0067ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| renderServerComponent | 0.00038ms | 0.00071ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
 | invokeServerAction | 0.02ms | 10ms | PASS |
-| invokeMiddleware | 0.15ms | 10ms | PASS |
+| invokeMiddleware | 0.07ms | 10ms | PASS |
 | renderServerComponent | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeServerAction | -3704 B | 0 B | 102400 B | yes | PASS |
-| invokeMiddleware | -12416 B | 0 B | 102400 B | yes | PASS |
-| renderServerComponent | -15464 B | 0 B | 102400 B | yes | PASS |
+| invokeServerAction | -298384 B | 0 B | 102400 B | yes | PASS |
+| invokeMiddleware | -28512 B | 0 B | 102400 B | yes | PASS |
+| renderServerComponent | 600 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00066ms |
-| p50 | 0.00083ms |
-| p95 | 0.0026ms |
-| p99 | 0.0081ms |
-| mean | 0.0013ms |
-| stdev | 0.0020ms |
-| min | 0.00063ms |
+| p10 | 0.00058ms |
+| p50 | 0.00071ms |
+| p95 | 0.0031ms |
+| p99 | 0.0084ms |
+| mean | 0.0012ms |
+| stdev | 0.0018ms |
+| min | 0.00054ms |
 | max | 0.02ms |
-| total | 0.26ms |
+| total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00066ms | 0.00087ms | -0.00021ms | -24.00% |
-| p50 | 0.00083ms | 0.00088ms | -0.000041ms | -4.74% |
-| p95 | 0.0026ms | 0.0025ms | +0.00011ms | +4.33% |
-| p99 | 0.0081ms | 0.0070ms | +0.0011ms | +16.01% |
-| mean | 0.0013ms | 0.0013ms | +0.000029ms | +2.34% |
-| min | 0.00063ms | 0.00083ms | -0.00021ms | -24.97% |
-| max | 0.02ms | 0.02ms | +0.00079ms | +3.46% |
-| total | 0.26ms | 0.25ms | +0.0059ms | +2.34% |
+| p10 | 0.00058ms | 0.00087ms | -0.00029ms | -33.06% |
+| p50 | 0.00071ms | 0.00088ms | -0.00017ms | -18.97% |
+| p95 | 0.0031ms | 0.0025ms | +0.00063ms | +25.51% |
+| p99 | 0.0084ms | 0.0070ms | +0.0014ms | +19.52% |
+| mean | 0.0012ms | 0.0013ms | -0.000045ms | -3.56% |
+| min | 0.00054ms | 0.00083ms | -0.00029ms | -35.05% |
+| max | 0.02ms | 0.02ms | -0.0035ms | -15.30% |
+| total | 0.24ms | 0.25ms | -0.0089ms | -3.56% |
 
 ### invokeMiddleware
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0046ms |
-| p50 | 0.0047ms |
-| p95 | 0.0062ms |
-| p99 | 0.02ms |
-| mean | 0.0052ms |
-| stdev | 0.0023ms |
-| min | 0.0045ms |
-| max | 0.02ms |
-| total | 1.04ms |
+| p10 | 0.0045ms |
+| p50 | 0.0045ms |
+| p95 | 0.0067ms |
+| p99 | 0.01ms |
+| mean | 0.0051ms |
+| stdev | 0.0024ms |
+| min | 0.0044ms |
+| max | 0.03ms |
+| total | 1.01ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0046ms | 0.0052ms | -0.00058ms | -11.30% |
-| p50 | 0.0047ms | 0.0054ms | -0.00067ms | -12.41% |
-| p95 | 0.0062ms | 0.0087ms | -0.0025ms | -28.71% |
-| p99 | 0.02ms | 0.02ms | +0.0029ms | +17.46% |
-| mean | 0.0052ms | 0.0059ms | -0.00070ms | -11.87% |
-| min | 0.0045ms | 0.0051ms | -0.00062ms | -12.30% |
-| max | 0.02ms | 0.02ms | -0.00075ms | -3.10% |
-| total | 1.04ms | 1.19ms | -0.14ms | -11.87% |
+| p10 | 0.0045ms | 0.0052ms | -0.00071ms | -13.72% |
+| p50 | 0.0045ms | 0.0054ms | -0.00083ms | -15.50% |
+| p95 | 0.0067ms | 0.0087ms | -0.0020ms | -23.12% |
+| p99 | 0.01ms | 0.02ms | -0.0018ms | -10.90% |
+| mean | 0.0051ms | 0.0059ms | -0.00086ms | -14.48% |
+| min | 0.0044ms | 0.0051ms | -0.00071ms | -13.93% |
+| max | 0.03ms | 0.02ms | +0.0028ms | +11.56% |
+| total | 1.01ms | 1.19ms | -0.17ms | -14.48% |
 
 ### renderServerComponent
 
@@ -102,24 +102,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00038ms |
 | p50 | 0.00042ms |
-| p95 | 0.00084ms |
-| p99 | 0.0036ms |
-| mean | 0.00055ms |
-| stdev | 0.00079ms |
+| p95 | 0.00071ms |
+| p99 | 0.0034ms |
+| mean | 0.00052ms |
+| stdev | 0.00068ms |
 | min | 0.00038ms |
-| max | 0.0089ms |
-| total | 0.11ms |
+| max | 0.0066ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p10 | 0.00038ms | 0.00042ms | -0.000042ms | -10.07% |
-| p50 | 0.00042ms | 0.00046ms | -0.000042ms | -9.15% |
-| p95 | 0.00084ms | 0.00069ms | +0.00015ms | +21.05% |
-| p99 | 0.0036ms | 0.0031ms | +0.00050ms | +15.93% |
-| mean | 0.00055ms | 0.00061ms | -0.000065ms | -10.61% |
+| p50 | 0.00042ms | 0.00046ms | -0.000043ms | -9.37% |
+| p95 | 0.00071ms | 0.00069ms | +0.000020ms | +2.93% |
+| p99 | 0.0034ms | 0.0031ms | +0.00025ms | +8.15% |
+| mean | 0.00052ms | 0.00061ms | -0.000092ms | -14.92% |
 | min | 0.00038ms | 0.00042ms | -0.000041ms | -9.86% |
-| max | 0.0089ms | 0.01ms | -0.0035ms | -28.20% |
-| total | 0.11ms | 0.12ms | -0.01ms | -10.61% |
+| max | 0.0066ms | 0.01ms | -0.0058ms | -46.98% |
+| total | 0.10ms | 0.12ms | -0.02ms | -14.92% |
 

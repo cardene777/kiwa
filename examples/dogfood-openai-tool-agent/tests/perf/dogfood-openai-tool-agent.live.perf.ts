@@ -19,6 +19,9 @@ describe(`${MODULE} — live`, () => {
 
       const result = await runPerf3LayerLive({
         moduleName: MODULE,
+        // GC を呼べない測定は解放される一時使用まで拾い、memory 上限との
+        // 比較が成立しない。 測れていない実行を pass にしない (#1708)。
+        requireGc: true,
         reportPath: REPORT_PATH,
         ops: [
           {

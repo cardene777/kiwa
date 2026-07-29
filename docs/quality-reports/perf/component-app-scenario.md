@@ -2,31 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00058ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.0012ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00042ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| storybook_registry_burst (create registry x 30) | 0.0062ms | 0.02ms | 50ms | 0.0012ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| playwright_ct_mock_lifecycle (create mock x 30) | 0.0027ms | 0.0097ms | 50ms | 0.0012ms | PASS | stable — gate 無効 (regressionGate=false) |
-| chromatic_visual_snapshot (create mock x 30) | 0.01ms | 0.04ms | 50ms | 0.0012ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| storybook_registry_burst (create registry x 30) | 0.0024ms | 0.01ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| playwright_ct_mock_lifecycle (create mock x 30) | 0.0026ms | 0.0085ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| chromatic_visual_snapshot (create mock x 30) | 0.0054ms | 0.01ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| storybook_registry_burst (create registry x 30) | 0.04ms | 100ms | PASS |
-| playwright_ct_mock_lifecycle (create mock x 30) | 0.08ms | 100ms | PASS |
-| chromatic_visual_snapshot (create mock x 30) | 0.06ms | 100ms | PASS |
+| storybook_registry_burst (create registry x 30) | 0.01ms | 100ms | PASS |
+| playwright_ct_mock_lifecycle (create mock x 30) | 0.01ms | 100ms | PASS |
+| chromatic_visual_snapshot (create mock x 30) | 0.01ms | 100ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| storybook_registry_burst (create registry x 30) | -5976 B | 0 B | 102400 B | yes | PASS |
-| playwright_ct_mock_lifecycle (create mock x 30) | 5776 B | 0 B | 102400 B | yes | PASS |
-| chromatic_visual_snapshot (create mock x 30) | 136 B | 0 B | 102400 B | yes | PASS |
+| storybook_registry_burst (create registry x 30) | -12536 B | 0 B | 102400 B | yes | PASS |
+| playwright_ct_mock_lifecycle (create mock x 30) | 200 B | 0 B | 102400 B | yes | PASS |
+| chromatic_visual_snapshot (create mock x 30) | 616 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.0062ms |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
+| p10 | 0.0024ms |
+| p50 | 0.0038ms |
+| p95 | 0.01ms |
 | p99 | 0.02ms |
-| mean | 0.01ms |
-| stdev | 0.0037ms |
-| min | 0.0060ms |
+| mean | 0.0051ms |
+| stdev | 0.0044ms |
+| min | 0.0023ms |
 | max | 0.02ms |
-| total | 0.21ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0062ms | 0.0037ms | +0.0025ms | +68.55% |
-| p50 | 0.01ms | 0.0040ms | +0.0066ms | +166.99% |
-| p95 | 0.02ms | 0.01ms | +0.0051ms | +43.96% |
-| p99 | 0.02ms | 0.02ms | +0.0021ms | +13.26% |
-| mean | 0.01ms | 0.0053ms | +0.0053ms | +99.77% |
-| min | 0.0060ms | 0.0030ms | +0.0030ms | +98.63% |
-| max | 0.02ms | 0.02ms | +0.0013ms | +7.83% |
-| total | 0.21ms | 0.11ms | +0.11ms | +99.77% |
+| p10 | 0.0024ms | 0.0037ms | -0.0012ms | -32.95% |
+| p50 | 0.0038ms | 0.0040ms | -0.00019ms | -4.71% |
+| p95 | 0.01ms | 0.01ms | -0.00096ms | -8.21% |
+| p99 | 0.02ms | 0.02ms | +0.0041ms | +26.45% |
+| mean | 0.0051ms | 0.0053ms | -0.00017ms | -3.31% |
+| min | 0.0023ms | 0.0030ms | -0.00067ms | -22.20% |
+| max | 0.02ms | 0.02ms | +0.0054ms | +32.58% |
+| total | 0.10ms | 0.11ms | -0.0035ms | -3.31% |
 
 ### playwright_ct_mock_lifecycle (create mock x 30)
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.0027ms |
-| p50 | 0.0036ms |
-| p95 | 0.0097ms |
-| p99 | 0.01ms |
-| mean | 0.0043ms |
-| stdev | 0.0022ms |
-| min | 0.0027ms |
+| p10 | 0.0026ms |
+| p50 | 0.0027ms |
+| p95 | 0.0085ms |
+| p99 | 0.010ms |
+| mean | 0.0038ms |
+| stdev | 0.0023ms |
+| min | 0.0024ms |
 | max | 0.01ms |
-| total | 0.09ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0027ms | 0.0025ms | +0.00020ms | +8.16% |
-| p50 | 0.0036ms | 0.0026ms | +0.0011ms | +41.08% |
-| p95 | 0.0097ms | 0.01ms | -0.00048ms | -4.72% |
-| p99 | 0.01ms | 0.01ms | -0.0033ms | -24.12% |
-| mean | 0.0043ms | 0.0039ms | +0.00043ms | +11.15% |
-| min | 0.0027ms | 0.0025ms | +0.00017ms | +6.68% |
-| max | 0.01ms | 0.01ms | -0.0040ms | -27.47% |
-| total | 0.09ms | 0.08ms | +0.0087ms | +11.15% |
+| p10 | 0.0026ms | 0.0025ms | +0.000066ms | +2.65% |
+| p50 | 0.0027ms | 0.0026ms | +0.00015ms | +5.63% |
+| p95 | 0.0085ms | 0.01ms | -0.0017ms | -16.56% |
+| p99 | 0.010ms | 0.01ms | -0.0038ms | -27.56% |
+| mean | 0.0038ms | 0.0039ms | -0.00011ms | -2.84% |
+| min | 0.0024ms | 0.0025ms | -0.00013ms | -5.00% |
+| max | 0.01ms | 0.01ms | -0.0043ms | -29.46% |
+| total | 0.08ms | 0.08ms | -0.0022ms | -2.84% |
 
 ### chromatic_visual_snapshot (create mock x 30)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.01ms |
-| p50 | 0.02ms |
-| p95 | 0.04ms |
-| p99 | 0.08ms |
-| mean | 0.02ms |
-| stdev | 0.02ms |
-| min | 0.0088ms |
-| max | 0.09ms |
-| total | 0.43ms |
+| p10 | 0.0054ms |
+| p50 | 0.0059ms |
+| p95 | 0.01ms |
+| p99 | 0.02ms |
+| mean | 0.0070ms |
+| stdev | 0.0027ms |
+| min | 0.0054ms |
+| max | 0.02ms |
+| total | 0.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.0058ms | +0.0060ms | +103.56% |
-| p50 | 0.02ms | 0.0060ms | +0.01ms | +205.52% |
-| p95 | 0.04ms | 0.01ms | +0.03ms | +247.92% |
-| p99 | 0.08ms | 0.02ms | +0.06ms | +426.19% |
-| mean | 0.02ms | 0.0071ms | +0.01ms | +206.74% |
-| min | 0.0088ms | 0.0058ms | +0.0030ms | +51.45% |
-| max | 0.09ms | 0.02ms | +0.07ms | +461.55% |
-| total | 0.43ms | 0.14ms | +0.29ms | +206.74% |
+| p10 | 0.0054ms | 0.0058ms | -0.00042ms | -7.15% |
+| p50 | 0.0059ms | 0.0060ms | -0.00010ms | -1.74% |
+| p95 | 0.01ms | 0.01ms | -0.00037ms | -2.98% |
+| p99 | 0.02ms | 0.02ms | +0.00033ms | +2.17% |
+| mean | 0.0070ms | 0.0071ms | -0.000069ms | -0.97% |
+| min | 0.0054ms | 0.0058ms | -0.00046ms | -7.85% |
+| max | 0.02ms | 0.02ms | +0.00050ms | +3.19% |
+| total | 0.14ms | 0.14ms | -0.0014ms | -0.97% |
 

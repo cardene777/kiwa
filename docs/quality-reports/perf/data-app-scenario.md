@@ -8,25 +8,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| queue_burst (setup + 50 send + 50 receive) | 0.01ms | 0.02ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| cron_scheduling (10 schedule + advanceMs 5 turn) | 0.03ms | 0.19ms | 50ms | 0.00042ms | PASS | improved — gate 無効 (regressionGate=false) |
-| integrated_workflow (queue + clock combined) | 0.0029ms | 0.01ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| queue_burst (setup + 50 send + 50 receive) | 0.0063ms | 0.02ms | 50ms | 0.00042ms | PASS | improved — gate 無効 (regressionGate=false) |
+| cron_scheduling (10 schedule + advanceMs 5 turn) | 0.03ms | 0.07ms | 50ms | 0.00042ms | PASS | improved — gate 無効 (regressionGate=false) |
+| integrated_workflow (queue + clock combined) | 0.0027ms | 0.0076ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| queue_burst (setup + 50 send + 50 receive) | 0.04ms | 100ms | PASS |
-| cron_scheduling (10 schedule + advanceMs 5 turn) | 0.54ms | 100ms | PASS |
-| integrated_workflow (queue + clock combined) | 1.54ms | 100ms | PASS |
+| queue_burst (setup + 50 send + 50 receive) | 0.03ms | 100ms | PASS |
+| cron_scheduling (10 schedule + advanceMs 5 turn) | 0.24ms | 100ms | PASS |
+| integrated_workflow (queue + clock combined) | 0.02ms | 100ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| queue_burst (setup + 50 send + 50 receive) | -576 B | -10019 B | 102400 B | yes | PASS |
-| cron_scheduling (10 schedule + advanceMs 5 turn) | 13216 B | 0 B | 102400 B | yes | PASS |
-| integrated_workflow (queue + clock combined) | 536 B | 0 B | 102400 B | yes | PASS |
+| queue_burst (setup + 50 send + 50 receive) | -16552 B | 0 B | 102400 B | yes | PASS |
+| cron_scheduling (10 schedule + advanceMs 5 turn) | -16232 B | 0 B | 102400 B | yes | PASS |
+| integrated_workflow (queue + clock combined) | 616 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.01ms |
-| p50 | 0.01ms |
+| p10 | 0.0063ms |
+| p50 | 0.0091ms |
 | p95 | 0.02ms |
 | p99 | 0.03ms |
 | mean | 0.01ms |
-| stdev | 0.0050ms |
-| min | 0.01ms |
+| stdev | 0.0059ms |
+| min | 0.0061ms |
 | max | 0.04ms |
-| total | 0.44ms |
+| total | 0.33ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.0021ms | -16.47% |
-| p50 | 0.01ms | 0.01ms | +0.00063ms | +4.78% |
-| p95 | 0.02ms | 0.02ms | -0.0015ms | -6.74% |
-| p99 | 0.03ms | 0.04ms | -0.0040ms | -10.88% |
-| mean | 0.01ms | 0.01ms | -0.00026ms | -1.72% |
-| min | 0.01ms | 0.0099ms | +0.00025ms | +2.53% |
-| max | 0.04ms | 0.04ms | -0.0053ms | -12.44% |
-| total | 0.44ms | 0.45ms | -0.0077ms | -1.72% |
+| p10 | 0.0063ms | 0.01ms | -0.0062ms | -49.68% |
+| p50 | 0.0091ms | 0.01ms | -0.0040ms | -30.26% |
+| p95 | 0.02ms | 0.02ms | -0.0049ms | -22.23% |
+| p99 | 0.03ms | 0.04ms | -0.0054ms | -14.52% |
+| mean | 0.01ms | 0.01ms | -0.0041ms | -27.19% |
+| min | 0.0061ms | 0.0099ms | -0.0038ms | -38.40% |
+| max | 0.04ms | 0.04ms | -0.0055ms | -12.93% |
+| total | 0.33ms | 0.45ms | -0.12ms | -27.19% |
 
 ### cron_scheduling (10 schedule + advanceMs 5 turn)
 
@@ -70,27 +70,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 30 |
 | warmup | 5 |
 | p10 | 0.03ms |
-| p50 | 0.05ms |
-| p95 | 0.19ms |
-| p99 | 0.26ms |
-| mean | 0.07ms |
-| stdev | 0.06ms |
+| p50 | 0.04ms |
+| p95 | 0.07ms |
+| p99 | 0.07ms |
+| mean | 0.04ms |
+| stdev | 0.01ms |
 | min | 0.03ms |
-| max | 0.28ms |
-| total | 2.25ms |
+| max | 0.07ms |
+| total | 1.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.03ms | 0.04ms | -0.01ms | -25.35% |
-| p50 | 0.05ms | 0.04ms | +0.0013ms | +2.86% |
-| p95 | 0.19ms | 0.08ms | +0.12ms | +152.80% |
-| p99 | 0.26ms | 0.09ms | +0.17ms | +191.21% |
-| mean | 0.07ms | 0.05ms | +0.02ms | +41.74% |
-| min | 0.03ms | 0.03ms | -0.0015ms | -5.07% |
-| max | 0.28ms | 0.09ms | +0.19ms | +206.93% |
-| total | 2.25ms | 1.58ms | +0.66ms | +41.74% |
+| p10 | 0.03ms | 0.04ms | -0.01ms | -26.25% |
+| p50 | 0.04ms | 0.04ms | -0.0080ms | -17.93% |
+| p95 | 0.07ms | 0.08ms | -0.01ms | -13.50% |
+| p99 | 0.07ms | 0.09ms | -0.02ms | -23.67% |
+| mean | 0.04ms | 0.05ms | -0.01ms | -26.10% |
+| min | 0.03ms | 0.03ms | -0.0017ms | -5.62% |
+| max | 0.07ms | 0.09ms | -0.02ms | -25.59% |
+| total | 1.17ms | 1.58ms | -0.41ms | -26.10% |
 
 ### integrated_workflow (queue + clock combined)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.0029ms |
-| p50 | 0.0032ms |
-| p95 | 0.01ms |
-| p99 | 0.48ms |
-| mean | 0.03ms |
-| stdev | 0.12ms |
-| min | 0.0027ms |
-| max | 0.68ms |
-| total | 0.80ms |
+| p10 | 0.0027ms |
+| p50 | 0.0027ms |
+| p95 | 0.0076ms |
+| p99 | 0.08ms |
+| mean | 0.0069ms |
+| stdev | 0.02ms |
+| min | 0.0026ms |
+| max | 0.11ms |
+| total | 0.21ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0029ms | 0.0028ms | +0.000075ms | +2.68% |
-| p50 | 0.0032ms | 0.0029ms | +0.00033ms | +11.52% |
-| p95 | 0.01ms | 0.01ms | -0.0011ms | -9.27% |
-| p99 | 0.48ms | 0.26ms | +0.23ms | +88.83% |
-| mean | 0.03ms | 0.02ms | +0.01ms | +73.53% |
-| min | 0.0027ms | 0.0027ms | 0.00ms | 0.00% |
-| max | 0.68ms | 0.35ms | +0.32ms | +90.89% |
-| total | 0.80ms | 0.46ms | +0.34ms | +73.53% |
+| p10 | 0.0027ms | 0.0028ms | -0.00013ms | -4.51% |
+| p50 | 0.0027ms | 0.0029ms | -0.00015ms | -5.04% |
+| p95 | 0.0076ms | 0.01ms | -0.0041ms | -35.09% |
+| p99 | 0.08ms | 0.26ms | -0.18ms | -69.33% |
+| mean | 0.0069ms | 0.02ms | -0.0084ms | -54.82% |
+| min | 0.0026ms | 0.0027ms | -0.00012ms | -4.55% |
+| max | 0.11ms | 0.35ms | -0.25ms | -69.70% |
+| total | 0.21ms | 0.46ms | -0.25ms | -54.82% |
 

@@ -8,34 +8,34 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| meiliSearchQuery | 0.01ms | 0.04ms | 10ms | 0.00033ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| algoliaSearchQuery | 0.0080ms | 0.0092ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| typesenseSearchQuery | 0.0068ms | 0.0079ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| meiliAddDocuments | 0.00042ms | 0.00084ms | 10ms | 0.00033ms | PASS | stable (p10 0% (閾値未満)、 p95 +34% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| algoliaAddDocuments | 0.00033ms | 0.00063ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| typesenseAddDocuments | 0.00033ms | 0.00063ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| meiliSearchQuery | 0.0099ms | 0.03ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| algoliaSearchQuery | 0.0068ms | 0.01ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| typesenseSearchQuery | 0.0064ms | 0.0077ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| meiliAddDocuments | 0.00038ms | 0.00079ms | 10ms | 0.00033ms | PASS | stable (p10 -10% (閾値未満)、 p95 +27% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| algoliaAddDocuments | 0.00033ms | 0.00071ms | 10ms | 0.00033ms | PASS | stable (p10 0% (閾値未満)、 p95 +22% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| typesenseAddDocuments | 0.00029ms | 0.00063ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| meiliSearchQuery | 0.22ms | 20ms | PASS |
+| meiliSearchQuery | 0.19ms | 20ms | PASS |
 | algoliaSearchQuery | 0.17ms | 20ms | PASS |
-| typesenseSearchQuery | 0.14ms | 20ms | PASS |
-| meiliAddDocuments | 0.02ms | 20ms | PASS |
+| typesenseSearchQuery | 0.12ms | 20ms | PASS |
+| meiliAddDocuments | 0.01ms | 20ms | PASS |
 | algoliaAddDocuments | 0.01ms | 20ms | PASS |
-| typesenseAddDocuments | 0.01ms | 20ms | PASS |
+| typesenseAddDocuments | 0.02ms | 20ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| meiliSearchQuery | 1168 B | 0 B | 102400 B | yes | PASS |
-| algoliaSearchQuery | -15232 B | 0 B | 102400 B | yes | PASS |
+| meiliSearchQuery | 1104 B | 0 B | 102400 B | yes | PASS |
+| algoliaSearchQuery | -16336 B | 0 B | 102400 B | yes | PASS |
 | typesenseSearchQuery | 4280 B | 0 B | 102400 B | yes | PASS |
-| meiliAddDocuments | 22120 B | 0 B | 102400 B | yes | PASS |
-| algoliaAddDocuments | 19128 B | 0 B | 102400 B | yes | PASS |
-| typesenseAddDocuments | 19072 B | 0 B | 102400 B | yes | PASS |
+| meiliAddDocuments | 14088 B | 0 B | 102400 B | yes | PASS |
+| algoliaAddDocuments | 14992 B | 0 B | 102400 B | yes | PASS |
+| typesenseAddDocuments | 14608 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -47,28 +47,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.01ms |
-| p50 | 0.02ms |
-| p95 | 0.04ms |
-| p99 | 0.11ms |
+| p10 | 0.0099ms |
+| p50 | 0.01ms |
+| p95 | 0.03ms |
+| p99 | 0.09ms |
 | mean | 0.02ms |
-| stdev | 0.05ms |
-| min | 0.01ms |
-| max | 0.52ms |
-| total | 4.77ms |
+| stdev | 0.03ms |
+| min | 0.0096ms |
+| max | 0.30ms |
+| total | 3.75ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | +0.0030ms | +28.72% |
-| p50 | 0.02ms | 0.02ms | +0.00050ms | +3.15% |
-| p95 | 0.04ms | 0.03ms | +0.0096ms | +31.36% |
-| p99 | 0.11ms | 0.06ms | +0.06ms | +97.03% |
-| mean | 0.02ms | 0.02ms | +0.0040ms | +19.83% |
-| min | 0.01ms | 0.01ms | +0.00038ms | +3.75% |
-| max | 0.52ms | 0.36ms | +0.16ms | +43.59% |
-| total | 4.77ms | 3.98ms | +0.79ms | +19.83% |
+| p10 | 0.0099ms | 0.01ms | -0.00050ms | -4.80% |
+| p50 | 0.01ms | 0.02ms | -0.00090ms | -5.64% |
+| p95 | 0.03ms | 0.03ms | +0.000068ms | +0.22% |
+| p99 | 0.09ms | 0.06ms | +0.03ms | +53.76% |
+| mean | 0.02ms | 0.02ms | -0.0012ms | -5.90% |
+| min | 0.0096ms | 0.01ms | -0.00042ms | -4.16% |
+| max | 0.30ms | 0.36ms | -0.06ms | -15.43% |
+| total | 3.75ms | 3.98ms | -0.24ms | -5.90% |
 
 ### algoliaSearchQuery
 
@@ -78,28 +78,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0080ms |
-| p50 | 0.0083ms |
-| p95 | 0.0092ms |
-| p99 | 0.02ms |
-| mean | 0.0090ms |
-| stdev | 0.0073ms |
-| min | 0.0079ms |
-| max | 0.11ms |
-| total | 1.81ms |
+| p10 | 0.0068ms |
+| p50 | 0.0072ms |
+| p95 | 0.01ms |
+| p99 | 0.03ms |
+| mean | 0.0085ms |
+| stdev | 0.01ms |
+| min | 0.0067ms |
+| max | 0.15ms |
+| total | 1.70ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0080ms | 0.0070ms | +0.0011ms | +15.58% |
-| p50 | 0.0083ms | 0.0072ms | +0.0011ms | +15.61% |
-| p95 | 0.0092ms | 0.0088ms | +0.00050ms | +5.66% |
-| p99 | 0.02ms | 0.02ms | -0.0038ms | -17.63% |
-| mean | 0.0090ms | 0.0085ms | +0.00059ms | +6.93% |
-| min | 0.0079ms | 0.0069ms | +0.0010ms | +15.16% |
-| max | 0.11ms | 0.18ms | -0.07ms | -39.73% |
-| total | 1.81ms | 1.69ms | +0.12ms | +6.93% |
+| p10 | 0.0068ms | 0.0070ms | -0.00013ms | -1.80% |
+| p50 | 0.0072ms | 0.0072ms | -0.000041ms | -0.57% |
+| p95 | 0.01ms | 0.0088ms | +0.0016ms | +18.63% |
+| p99 | 0.03ms | 0.02ms | +0.0058ms | +26.95% |
+| mean | 0.0085ms | 0.0085ms | +0.000052ms | +0.62% |
+| min | 0.0067ms | 0.0069ms | -0.00017ms | -2.43% |
+| max | 0.15ms | 0.18ms | -0.04ms | -19.68% |
+| total | 1.70ms | 1.69ms | +0.01ms | +0.62% |
 
 ### typesenseSearchQuery
 
@@ -109,28 +109,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0068ms |
-| p50 | 0.0070ms |
-| p95 | 0.0079ms |
+| p10 | 0.0064ms |
+| p50 | 0.0067ms |
+| p95 | 0.0077ms |
 | p99 | 0.02ms |
-| mean | 0.0077ms |
-| stdev | 0.0062ms |
-| min | 0.0067ms |
-| max | 0.09ms |
-| total | 1.54ms |
+| mean | 0.0073ms |
+| stdev | 0.0052ms |
+| min | 0.0063ms |
+| max | 0.08ms |
+| total | 1.45ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0068ms | 0.0067ms | +0.00012ms | +1.86% |
-| p50 | 0.0070ms | 0.0068ms | +0.00013ms | +1.83% |
-| p95 | 0.0079ms | 0.0075ms | +0.00043ms | +5.72% |
-| p99 | 0.02ms | 0.02ms | -0.00056ms | -3.14% |
-| mean | 0.0077ms | 0.0075ms | +0.00023ms | +3.14% |
-| min | 0.0067ms | 0.0065ms | +0.00017ms | +2.57% |
-| max | 0.09ms | 0.09ms | +0.0025ms | +2.83% |
-| total | 1.54ms | 1.49ms | +0.05ms | +3.14% |
+| p10 | 0.0064ms | 0.0067ms | -0.00030ms | -4.41% |
+| p50 | 0.0067ms | 0.0068ms | -0.00017ms | -2.46% |
+| p95 | 0.0077ms | 0.0075ms | +0.00025ms | +3.37% |
+| p99 | 0.02ms | 0.02ms | -0.0012ms | -6.75% |
+| mean | 0.0073ms | 0.0075ms | -0.00020ms | -2.70% |
+| min | 0.0063ms | 0.0065ms | -0.00029ms | -4.45% |
+| max | 0.08ms | 0.09ms | -0.01ms | -14.57% |
+| total | 1.45ms | 1.49ms | -0.04ms | -2.70% |
 
 ### meiliAddDocuments
 
@@ -140,28 +140,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00042ms |
+| p10 | 0.00038ms |
 | p50 | 0.00042ms |
-| p95 | 0.00084ms |
-| p99 | 0.0030ms |
-| mean | 0.00057ms |
-| stdev | 0.00079ms |
-| min | 0.00038ms |
-| max | 0.0090ms |
-| total | 0.11ms |
+| p95 | 0.00079ms |
+| p99 | 0.0056ms |
+| mean | 0.0011ms |
+| stdev | 0.0077ms |
+| min | 0.00033ms |
+| max | 0.11ms |
+| total | 0.21ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00042ms | 0.00042ms | 0.00ms | 0.00% |
-| p50 | 0.00042ms | 0.00046ms | -0.000041ms | -8.95% |
-| p95 | 0.00084ms | 0.00063ms | +0.00021ms | +33.62% |
-| p99 | 0.0030ms | 0.0031ms | -0.000065ms | -2.09% |
-| mean | 0.00057ms | 0.00055ms | +0.000028ms | +5.19% |
-| min | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
-| max | 0.0090ms | 0.0083ms | +0.00075ms | +9.09% |
-| total | 0.11ms | 0.11ms | +0.0057ms | +5.19% |
+| p10 | 0.00038ms | 0.00042ms | -0.000041ms | -9.86% |
+| p50 | 0.00042ms | 0.00046ms | -0.000042ms | -9.17% |
+| p95 | 0.00079ms | 0.00063ms | +0.00017ms | +26.57% |
+| p99 | 0.0056ms | 0.0031ms | +0.0025ms | +82.41% |
+| mean | 0.0011ms | 0.00055ms | +0.00051ms | +92.46% |
+| min | 0.00033ms | 0.00038ms | -0.000042ms | -11.20% |
+| max | 0.11ms | 0.0083ms | +0.10ms | +1220.70% |
+| total | 0.21ms | 0.11ms | +0.10ms | +92.46% |
 
 ### algoliaAddDocuments
 
@@ -172,27 +172,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.00033ms |
-| p50 | 0.00038ms |
-| p95 | 0.00063ms |
-| p99 | 0.0021ms |
-| mean | 0.00048ms |
-| stdev | 0.00056ms |
-| min | 0.00033ms |
-| max | 0.0074ms |
-| total | 0.10ms |
+| p50 | 0.00033ms |
+| p95 | 0.00071ms |
+| p99 | 0.0025ms |
+| mean | 0.00044ms |
+| stdev | 0.00055ms |
+| min | 0.00029ms |
+| max | 0.0069ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00033ms | 0.00033ms | +0.0000010ms | +0.30% |
-| p50 | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
-| p95 | 0.00063ms | 0.00058ms | +0.000046ms | +7.92% |
-| p99 | 0.0021ms | 0.0021ms | -0.0000096ms | -0.45% |
-| mean | 0.00048ms | 0.00045ms | +0.000033ms | +7.32% |
-| min | 0.00033ms | 0.00025ms | +0.000083ms | +33.20% |
-| max | 0.0074ms | 0.0068ms | +0.00058ms | +8.53% |
-| total | 0.10ms | 0.09ms | +0.0066ms | +7.32% |
+| p10 | 0.00033ms | 0.00033ms | 0.00ms | 0.00% |
+| p50 | 0.00033ms | 0.00038ms | -0.000041ms | -10.93% |
+| p95 | 0.00071ms | 0.00058ms | +0.00013ms | +22.32% |
+| p99 | 0.0025ms | 0.0021ms | +0.00040ms | +18.92% |
+| mean | 0.00044ms | 0.00045ms | -0.0000056ms | -1.25% |
+| min | 0.00029ms | 0.00025ms | +0.000041ms | +16.40% |
+| max | 0.0069ms | 0.0068ms | +0.000041ms | +0.60% |
+| total | 0.09ms | 0.09ms | -0.0011ms | -1.25% |
 
 ### typesenseAddDocuments
 
@@ -202,26 +202,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00033ms |
-| p50 | 0.00038ms |
+| p10 | 0.00029ms |
+| p50 | 0.00033ms |
 | p95 | 0.00063ms |
-| p99 | 0.0072ms |
-| mean | 0.00097ms |
-| stdev | 0.0064ms |
-| min | 0.00033ms |
-| max | 0.09ms |
-| total | 0.19ms |
+| p99 | 0.0018ms |
+| mean | 0.00041ms |
+| stdev | 0.00051ms |
+| min | 0.00029ms |
+| max | 0.0067ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00033ms | 0.00033ms | 0.00ms | 0.00% |
-| p50 | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
+| p10 | 0.00029ms | 0.00033ms | -0.000041ms | -12.31% |
+| p50 | 0.00033ms | 0.00038ms | -0.000042ms | -11.20% |
 | p95 | 0.00063ms | 0.0016ms | -0.00096ms | -60.49% |
-| p99 | 0.0072ms | 0.0078ms | -0.00058ms | -7.44% |
-| mean | 0.00097ms | 0.00066ms | +0.00031ms | +47.48% |
-| min | 0.00033ms | 0.00033ms | 0.00ms | 0.00% |
-| max | 0.09ms | 0.01ms | +0.08ms | +527.73% |
-| total | 0.19ms | 0.13ms | +0.06ms | +47.48% |
+| p99 | 0.0018ms | 0.0078ms | -0.0060ms | -77.48% |
+| mean | 0.00041ms | 0.00066ms | -0.00025ms | -37.79% |
+| min | 0.00029ms | 0.00033ms | -0.000042ms | -12.61% |
+| max | 0.0067ms | 0.01ms | -0.0077ms | -53.47% |
+| total | 0.08ms | 0.13ms | -0.05ms | -37.79% |
 

@@ -259,8 +259,8 @@ function isMeasureCall(
  * matcher まで見る。 `toBe(false)` や `.not.toBe(true)` は「判定した」 ことに
  * ならない。 対象は名前ではなく宣言 node で持つ (同名の別変数を巻き込まない)。
  */
-function assertedDeclarations(sf: ts.SourceFile): Set<ts.VariableDeclaration> {
-  const asserted = new Set<ts.VariableDeclaration>();
+function assertedDeclarations(sf: ts.SourceFile): Map<ts.VariableDeclaration, ts.Node> {
+  const asserted = new Map<ts.VariableDeclaration, ts.Node>();
   eachNode(sf, (node) => {
     if (!ts.isCallExpression(node)) return;
     const callee = unwrap(node.expression);
@@ -295,9 +295,33 @@ function assertedDeclarations(sf: ts.SourceFile): Set<ts.VariableDeclaration> {
     }
     if (!positive || negated) return;
     const decl = resolveDeclaration(target, target.text);
-    if (decl) asserted.add(decl);
+    if (decl && !asserted.has(decl)) asserted.set(decl, node);
   });
   return asserted;
+}
+
+/**
+ * 宣言と assertion が同じ statement list に並んでいるかを返す。
+ *
+ * 「書いてある」 と「実行される」 は別で、`if (false)` の中や呼ばれない closure の
+ * 中にある assertion は判定しない。 到達可能性そのものは静的には決まらないので、
+ * 分岐や関数境界を挟まない位置にあることを求める。 挟む形は落とす (fail-close)。
+ */
+function inSameStatementList(decl: ts.VariableDeclaration, assertion: ts.Node): boolean {
+  const declStatement = enclosingStatement(decl);
+  const assertStatement = enclosingStatement(assertion);
+  if (!declStatement || !assertStatement) return false;
+  if (declStatement.parent !== assertStatement.parent) return false;
+  // 宣言より後に置かれていること。 前にある assertion は別の値を見ている。
+  return assertStatement.getStart() > declStatement.getStart();
+}
+
+/** その node を含む最も内側の statement を返す。 */
+function enclosingStatement(node: ts.Node): ts.Statement | null {
+  for (let current: ts.Node | undefined = node; current; current = current.parent) {
+    if (ts.isStatement(current)) return current;
+  }
+  return null;
 }
 
 /**
@@ -333,8 +357,16 @@ export function findDiscardedVerdict(source: string, fileName = 'x.perf.ts'): st
       problems.push(`L${line}: 戻り値を変数に束縛していない`);
       return;
     }
-    if (!asserted.has(parent)) {
+    const verdict = asserted.get(parent);
+    if (!verdict) {
       problems.push(`L${line}: ${parent.name.text}.allPassed を検証していない`);
+      return;
+    }
+    // 書いてあることと実行されることは別。 `if (false)` の中や、呼ばれない closure、
+    // early return の後に置いた assertion は、あっても判定しない。 宣言と同じ
+    // statement list に並んでいることを求める (条件分岐を挟んだ形は落とす)。
+    if (!inSameStatementList(parent, verdict)) {
+      problems.push(`L${line}: ${parent.name.text}.allPassed の検証が同じ実行経路にない`);
     }
   });
 
@@ -430,6 +462,40 @@ function readProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Expressi
   return matches[0]!.initializer;
 }
 
+/**
+ * 測定呼出が GC を要求しているかを返す。 要求していなければ理由を返す。
+ *
+ * config に `--expose-gc` があっても、呼出が `requireGc: true` を渡していなければ
+ * GC を呼べない実行が「memory 上限内」 として通る。 config を差し替えた実行や、
+ * 別経路から起動した実行で、測れていないことが検知されない。
+ */
+export function findMissingRequireGc(source: string, fileName = 'x.perf.ts'): string | null {
+  const sf = parse(source, fileName);
+  const aliases = measureAliases(sf);
+  const problems: string[] = [];
+
+  eachNode(sf, (node) => {
+    if (!ts.isCallExpression(node) || !isMeasureCall(node, aliases)) return;
+    const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
+    const [rawArg] = node.arguments;
+    if (!rawArg) {
+      problems.push(`L${line}: 引数がない`);
+      return;
+    }
+    const arg = unwrap(rawArg);
+    if (!ts.isObjectLiteralExpression(arg)) {
+      problems.push(`L${line}: 引数が object literal でない`);
+      return;
+    }
+    const value = readProperty(arg, 'requireGc');
+    if (value === null || value.kind !== ts.SyntaxKind.TrueKeyword) {
+      problems.push(`L${line}: requireGc: true がない`);
+    }
+  });
+
+  return problems.length > 0 ? problems.join(' / ') : null;
+}
+
 /** config が GC を呼べる形かを返す。 問題なければ null。 */
 export function findMissingGcSetup(
   source: string,
@@ -469,6 +535,19 @@ describe('perf gate coverage (#1708)', () => {
     expect(
       offenders,
       '戻り値を捨てると上限超過が assertion に届かない。`expect(result.allPassed).toBe(true)` を足す',
+    ).toEqual([]);
+  });
+
+  it('測定呼出は GC を要求する', () => {
+    const offenders = perfTestFiles()
+      .map((file) => ({ file, reason: findMissingRequireGc(readFileSync(file, 'utf8'), file) }))
+      .filter((r) => r.reason !== null)
+      .map((r) => `${rel(r.file)} (${r.reason})`);
+
+    expect(
+      offenders,
+      'config に --expose-gc があっても、呼出が要求していないと GC 無しの実行が ' +
+        '「上限内」 として通る。`requireGc: true` を渡す',
     ).toEqual([]);
   });
 
@@ -568,6 +647,31 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
         `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
          const r = await runPerf3Layer({});
          it('x', () => { const { r } = other; expect(r.allPassed).toBe(true); });`,
+      ],
+      [
+        '到達しない分岐に置く',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         if (process.env.STRICT) { expect(r.allPassed).toBe(true); }`,
+      ],
+      [
+        '呼ばれない closure に置く',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         const check = () => { expect(r.allPassed).toBe(true); };`,
+      ],
+      [
+        'early return の後に置く',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         const r = await runPerf3Layer({});
+         if (skip) return;
+         if (other) { expect(r.allPassed).toBe(true); }`,
+      ],
+      [
+        '宣言より前に置く',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         expect(r.allPassed).toBe(true);
+         const r = await runPerf3Layer({});`,
       ],
     ];
     for (const [label, source] of cases) {
@@ -712,6 +816,27 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
     for (const [label, source] of cases) {
       expect(findMissingGcSetup(source), label).not.toBeNull();
     }
+  });
+
+  it('requireGc を渡していない呼出を検出する', () => {
+    const IMP = `import { runPerf3Layer } from '@kiwa-lab/perf-harness';\n`;
+    const cases: Array<[string, string]> = [
+      ['指定なし', IMP + `const r = await runPerf3Layer({ moduleName: 'm' }); expect(r.allPassed).toBe(true);`],
+      ['false を渡す', IMP + `const r = await runPerf3Layer({ requireGc: false }); expect(r.allPassed).toBe(true);`],
+      ['変数経由で渡す', IMP + `const r = await runPerf3Layer({ requireGc: flag }); expect(r.allPassed).toBe(true);`],
+      ['引数が object でない', IMP + `const r = await runPerf3Layer(opts); expect(r.allPassed).toBe(true);`],
+    ];
+    for (const [label, source] of cases) {
+      expect(findMissingRequireGc(source), label).not.toBeNull();
+    }
+  });
+
+  it('requireGc を渡している呼出は通す', () => {
+    const source =
+      `import { runPerf3Layer } from '@kiwa-lab/perf-harness';\n` +
+      `const r = await runPerf3Layer({ moduleName: 'm', requireGc: true });
+       expect(r.allPassed).toBe(true);`;
+    expect(findMissingRequireGc(source)).toBeNull();
   });
 
   it('GC を呼べる config は通す', () => {

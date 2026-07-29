@@ -8,25 +8,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| event_pipeline (producer + 20 send + admin listTopics) | 0.0095ms | 0.02ms | 100ms | 0.00050ms | PASS | stable (p10 -2% (閾値未満)、 p95 +39% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| high_throughput_producer (50 sendBatch record) | 0.02ms | 0.04ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| consumer_subscribe_multi_topic (5 topic subscribe) | 0.0071ms | 0.01ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| event_pipeline (producer + 20 send + admin listTopics) | 0.0095ms | 0.02ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| high_throughput_producer (50 sendBatch record) | 0.02ms | 0.04ms | 100ms | 0.00050ms | PASS | stable (p10 +13% (閾値未満)、 p95 +26% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| consumer_subscribe_multi_topic (5 topic subscribe) | 0.0077ms | 0.01ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 3 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| event_pipeline (producer + 20 send + admin listTopics) | 0.07ms | 200ms | PASS |
-| high_throughput_producer (50 sendBatch record) | 0.09ms | 200ms | PASS |
+| event_pipeline (producer + 20 send + admin listTopics) | 0.06ms | 200ms | PASS |
+| high_throughput_producer (50 sendBatch record) | 0.11ms | 200ms | PASS |
 | consumer_subscribe_multi_topic (5 topic subscribe) | 0.02ms | 200ms | PASS |
 
 ## Memory retention (15 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| event_pipeline (producer + 20 send + admin listTopics) | -17616 B | 0 B | 102400 B | yes | PASS |
-| high_throughput_producer (50 sendBatch record) | -712 B | 0 B | 102400 B | yes | PASS |
-| consumer_subscribe_multi_topic (5 topic subscribe) | 1000 B | 0 B | 102400 B | yes | PASS |
+| event_pipeline (producer + 20 send + admin listTopics) | -26320 B | 0 B | 102400 B | yes | PASS |
+| high_throughput_producer (50 sendBatch record) | 888 B | 0 B | 102400 B | yes | PASS |
+| consumer_subscribe_multi_topic (5 topic subscribe) | 920 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,23 +43,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.02ms |
 | p99 | 0.02ms |
 | mean | 0.01ms |
-| stdev | 0.0036ms |
-| min | 0.0095ms |
+| stdev | 0.0024ms |
+| min | 0.0092ms |
 | max | 0.02ms |
-| total | 0.18ms |
+| total | 0.17ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0095ms | 0.0097ms | -0.00022ms | -2.31% |
-| p50 | 0.01ms | 0.01ms | +0.00029ms | +2.75% |
-| p95 | 0.02ms | 0.01ms | +0.0052ms | +39.34% |
-| p99 | 0.02ms | 0.01ms | +0.0085ms | +63.03% |
-| mean | 0.01ms | 0.01ms | +0.00080ms | +7.26% |
-| min | 0.0095ms | 0.0095ms | -0.000042ms | -0.44% |
-| max | 0.02ms | 0.01ms | +0.0094ms | +68.81% |
-| total | 0.18ms | 0.16ms | +0.01ms | +7.26% |
+| p10 | 0.0095ms | 0.0097ms | -0.00027ms | -2.74% |
+| p50 | 0.01ms | 0.01ms | +0.00054ms | +5.11% |
+| p95 | 0.02ms | 0.01ms | +0.0023ms | +17.48% |
+| p99 | 0.02ms | 0.01ms | +0.0043ms | +31.94% |
+| mean | 0.01ms | 0.01ms | +0.00055ms | +4.98% |
+| min | 0.0092ms | 0.0095ms | -0.00033ms | -3.52% |
+| max | 0.02ms | 0.01ms | +0.0048ms | +35.47% |
+| total | 0.17ms | 0.16ms | +0.0082ms | +4.98% |
 
 ### high_throughput_producer (50 sendBatch record)
 
@@ -74,23 +74,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.04ms |
 | p99 | 0.04ms |
 | mean | 0.03ms |
-| stdev | 0.0041ms |
+| stdev | 0.0071ms |
 | min | 0.02ms |
 | max | 0.04ms |
-| total | 0.43ms |
+| total | 0.45ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | +0.0035ms | +16.81% |
-| p50 | 0.03ms | 0.02ms | +0.0027ms | +10.90% |
-| p95 | 0.04ms | 0.03ms | +0.0031ms | +9.36% |
-| p99 | 0.04ms | 0.04ms | -0.0030ms | -7.49% |
-| mean | 0.03ms | 0.03ms | +0.0030ms | +11.86% |
-| min | 0.02ms | 0.02ms | +0.0039ms | +19.21% |
-| max | 0.04ms | 0.04ms | -0.0045ms | -10.83% |
-| total | 0.43ms | 0.38ms | +0.05ms | +11.86% |
+| p10 | 0.02ms | 0.02ms | +0.0028ms | +13.06% |
+| p50 | 0.03ms | 0.02ms | +0.0041ms | +16.69% |
+| p95 | 0.04ms | 0.03ms | +0.0086ms | +26.05% |
+| p99 | 0.04ms | 0.04ms | +0.0028ms | +7.07% |
+| mean | 0.03ms | 0.03ms | +0.0049ms | +19.20% |
+| min | 0.02ms | 0.02ms | +0.0035ms | +17.56% |
+| max | 0.04ms | 0.04ms | +0.0014ms | +3.31% |
+| total | 0.45ms | 0.38ms | +0.07ms | +19.20% |
 
 ### consumer_subscribe_multi_topic (5 topic subscribe)
 
@@ -100,13 +100,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 0.0071ms |
-| p50 | 0.0095ms |
+| p10 | 0.0077ms |
+| p50 | 0.0099ms |
 | p95 | 0.01ms |
 | p99 | 0.02ms |
-| mean | 0.010ms |
-| stdev | 0.0027ms |
-| min | 0.0069ms |
+| mean | 0.01ms |
+| stdev | 0.0024ms |
+| min | 0.0065ms |
 | max | 0.02ms |
 | total | 0.15ms |
 
@@ -114,12 +114,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0071ms | 0.0068ms | +0.00031ms | +4.53% |
-| p50 | 0.0095ms | 0.01ms | -0.00054ms | -5.37% |
-| p95 | 0.01ms | 0.02ms | -0.0027ms | -15.77% |
-| p99 | 0.02ms | 0.02ms | -0.0018ms | -9.97% |
-| mean | 0.010ms | 0.01ms | -0.00047ms | -4.51% |
-| min | 0.0069ms | 0.0058ms | +0.0011ms | +19.42% |
-| max | 0.02ms | 0.02ms | -0.0015ms | -8.61% |
-| total | 0.15ms | 0.16ms | -0.0071ms | -4.51% |
+| p10 | 0.0077ms | 0.0068ms | +0.00092ms | +13.47% |
+| p50 | 0.0099ms | 0.01ms | -0.00021ms | -2.06% |
+| p95 | 0.01ms | 0.02ms | -0.0027ms | -16.14% |
+| p99 | 0.02ms | 0.02ms | -0.0022ms | -12.30% |
+| mean | 0.01ms | 0.01ms | -0.00020ms | -1.94% |
+| min | 0.0065ms | 0.0058ms | +0.00067ms | +11.52% |
+| max | 0.02ms | 0.02ms | -0.0020ms | -11.40% |
+| total | 0.15ms | 0.16ms | -0.0030ms | -1.94% |
 

@@ -189,10 +189,12 @@ An op can only fail the gate on unchanged code if its observed drift satisfies *
 
 | passes used | ops that could fail the gate | modules with no such op |
 |---|---|---|
-| 4 | 189 | 45 (28 with 2× margin) |
+| 4 | 190 | 45 (28 with 2× margin) |
 | 6 | 217 | 35 (21 with 2× margin) |
 
-**The qualifying set shrinks as the observation window grows, with no sign of converging.** Enabling the gate for the 28 modules that looked safe over four passes was tried and reverted: two verification passes followed, and on the second one three of those modules (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on unchanged code. Their p10 had been flat across passes 2-5 and then drifted upward — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023.
+The qualifying set shrank as passes were added. That direction is partly mechanical — the classification uses each op's observed extrema, so more passes can only widen them — and on its own it does not establish that the set never settles.
+
+What does carry weight is what happened when the set was used. The gate was enabled for the 28 modules that looked safe over four passes; two verification passes followed, and on the second one three of them (`qwikcity`, `dogfood-postgres-cdc-outbox-app`, `dogfood-vector-search-app`) failed on unchanged code. Their p10 had been flat across passes 2-5 and then drifted upward — `driveIndexBuild` went 0.0015 / 0.0014 / 0.0015 / 0.0015 and then 0.0015 / 0.0023. A selection made from four passes was falsified by the next two. Whether a longer window would produce a stable set is not something these measurements answer either way.
 
 What was recorded is narrow: p10 per op per pass, and nothing else. No temperature, clock, or background-load telemetry, so thermal state, page cache, and scheduler pressure cannot be separated. What the numbers do show is that an op reads flat for four passes and then shifts, and that switching statistic (p95 → p10) moved the spread without removing it — the earlier `cache` experiment ruled out median, trimmed mean, and batching the same way. That is consistent with a drift the whole run inherits rather than something in the shape of the sample, but a drift shared by *every* statistic is an inference from three of them, not a measurement.
 
@@ -263,9 +265,9 @@ Every mock op is checked for retained-heap growth. Threshold: **< 100 KB retaine
 
 The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
 
-Measuring memory at all requires `--expose-gc`. Without it `measureMemory` cannot call `global.gc()`, so the delta includes allocations that were about to be released, and the comparison against a cap is not a comparison of retention. 116 of the 180 perf configs were missing it. `dogfood-nats-jetstream`'s `driveObject` reported 215,800 B against a 100 KB cap — reproducibly, to the byte, on every run — and 20,555 B once GC was available. The breach was an artefact of the measurement.
+Measuring memory at all requires `--expose-gc`. Without it `measureMemory` cannot call `global.gc()`, so the delta includes allocations that were about to be released, and the comparison against a cap is not a comparison of retention. 117 of the 180 perf configs were missing it. `dogfood-nats-jetstream`'s `driveObject` reported 215,800 B against a 100 KB cap — reproducibly, to the byte, on every run — and 20,555 B once GC was available. The breach was an artefact of the measurement.
 
-Two things have to be present together: `--expose-gc` in `execArgv`, and `pool: 'forks'`. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks both.
+Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'forks'`, and `requireGc: true` on the call. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. And a call that does not ask for GC will accept a run without it — the config only makes GC *available*, `requireGc` is what makes its absence a failure. 34 example suites were passing `runPerf3Layer` without it, so a run under a different config would have reported memory numbers that mean nothing and still passed. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks all three.
 
 The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
 

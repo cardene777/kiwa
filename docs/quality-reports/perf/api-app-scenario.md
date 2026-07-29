@@ -8,25 +8,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| rest_crud_flow (POST create + GET fetch + PUT update + DELETE) | 0.01ms | 0.02ms | 30ms | 0.00042ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| batch_api_call (10 GET rapid) | 0.02ms | 0.04ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| auth_header_workflow (10 request with x-api-key) | 0.01ms | 0.02ms | 50ms | 0.00042ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| rest_crud_flow (POST create + GET fetch + PUT update + DELETE) | 0.0071ms | 0.03ms | 30ms | 0.00042ms | PASS | stable (p10 -1% (閾値未満)、 p95 +45% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| batch_api_call (10 GET rapid) | 0.01ms | 0.03ms | 50ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| auth_header_workflow (10 request with x-api-key) | 0.0097ms | 0.02ms | 50ms | 0.00042ms | PASS | stable (p10 -6% (閾値未満)、 p95 +32% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| rest_crud_flow (POST create + GET fetch + PUT update + DELETE) | 0.06ms | 60ms | PASS |
-| batch_api_call (10 GET rapid) | 7.08ms | 100ms | PASS |
-| auth_header_workflow (10 request with x-api-key) | 0.06ms | 100ms | PASS |
+| rest_crud_flow (POST create + GET fetch + PUT update + DELETE) | 0.04ms | 60ms | PASS |
+| batch_api_call (10 GET rapid) | 0.09ms | 100ms | PASS |
+| auth_header_workflow (10 request with x-api-key) | 0.04ms | 100ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| rest_crud_flow (POST create + GET fetch + PUT update + DELETE) | 20584 B | -10879 B | 102400 B | yes | PASS |
-| batch_api_call (10 GET rapid) | -21672 B | 0 B | 102400 B | yes | PASS |
-| auth_header_workflow (10 request with x-api-key) | 4712 B | 0 B | 102400 B | yes | PASS |
+| rest_crud_flow (POST create + GET fetch + PUT update + DELETE) | -8432 B | 0 B | 102400 B | yes | PASS |
+| batch_api_call (10 GET rapid) | 2120 B | 0 B | 102400 B | yes | PASS |
+| auth_header_workflow (10 request with x-api-key) | -17544 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.01ms |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
+| p10 | 0.0071ms |
+| p50 | 0.0076ms |
+| p95 | 0.03ms |
 | p99 | 0.03ms |
-| mean | 0.02ms |
-| stdev | 0.0037ms |
-| min | 0.01ms |
+| mean | 0.01ms |
+| stdev | 0.0069ms |
+| min | 0.0070ms |
 | max | 0.03ms |
-| total | 0.47ms |
+| total | 0.33ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.0071ms | +0.0068ms | +95.84% |
-| p50 | 0.01ms | 0.0076ms | +0.0066ms | +85.83% |
-| p95 | 0.02ms | 0.02ms | +0.0013ms | +7.06% |
-| p99 | 0.03ms | 0.04ms | -0.0084ms | -22.46% |
-| mean | 0.02ms | 0.01ms | +0.0046ms | +41.65% |
-| min | 0.01ms | 0.0071ms | +0.0068ms | +95.89% |
-| max | 0.03ms | 0.05ms | -0.01ms | -27.42% |
-| total | 0.47ms | 0.33ms | +0.14ms | +41.65% |
+| p10 | 0.0071ms | 0.0071ms | -0.000042ms | -0.59% |
+| p50 | 0.0076ms | 0.0076ms | -0.000084ms | -1.09% |
+| p95 | 0.03ms | 0.02ms | +0.0083ms | +45.21% |
+| p99 | 0.03ms | 0.04ms | -0.0049ms | -13.15% |
+| mean | 0.01ms | 0.01ms | +0.000069ms | +0.63% |
+| min | 0.0070ms | 0.0071ms | -0.000083ms | -1.17% |
+| max | 0.03ms | 0.05ms | -0.01ms | -27.79% |
+| total | 0.33ms | 0.33ms | +0.0021ms | +0.63% |
 
 ### batch_api_call (10 GET rapid)
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.02ms |
+| p10 | 0.01ms |
 | p50 | 0.02ms |
-| p95 | 0.04ms |
-| p99 | 0.10ms |
+| p95 | 0.03ms |
+| p99 | 0.13ms |
 | mean | 0.02ms |
-| stdev | 0.02ms |
-| min | 0.02ms |
-| max | 0.13ms |
-| total | 0.69ms |
+| stdev | 0.03ms |
+| min | 0.01ms |
+| max | 0.17ms |
+| total | 0.73ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.01ms | +0.0016ms | +11.43% |
-| p50 | 0.02ms | 0.02ms | +0.00035ms | +2.13% |
-| p95 | 0.04ms | 0.03ms | +0.0040ms | +11.77% |
-| p99 | 0.10ms | 0.04ms | +0.07ms | +189.24% |
-| mean | 0.02ms | 0.02ms | +0.0036ms | +18.67% |
-| min | 0.02ms | 0.01ms | +0.0021ms | +15.39% |
-| max | 0.13ms | 0.04ms | +0.09ms | +252.64% |
-| total | 0.69ms | 0.58ms | +0.11ms | +18.67% |
+| p10 | 0.01ms | 0.01ms | +0.000037ms | +0.26% |
+| p50 | 0.02ms | 0.02ms | +0.0019ms | +11.56% |
+| p95 | 0.03ms | 0.03ms | -0.0020ms | -5.94% |
+| p99 | 0.13ms | 0.04ms | +0.09ms | +263.98% |
+| mean | 0.02ms | 0.02ms | +0.0049ms | +25.54% |
+| min | 0.01ms | 0.01ms | -0.000041ms | -0.30% |
+| max | 0.17ms | 0.04ms | +0.13ms | +365.65% |
+| total | 0.73ms | 0.58ms | +0.15ms | +25.54% |
 
 ### auth_header_workflow (10 request with x-api-key)
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.01ms |
+| p10 | 0.0097ms |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.09ms |
+| p99 | 0.11ms |
 | mean | 0.02ms |
-| stdev | 0.02ms |
-| min | 0.01ms |
-| max | 0.12ms |
-| total | 0.50ms |
+| stdev | 0.03ms |
+| min | 0.0097ms |
+| max | 0.15ms |
+| total | 0.47ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | +0.0023ms | +22.13% |
-| p50 | 0.01ms | 0.01ms | +0.0023ms | +21.13% |
-| p95 | 0.02ms | 0.02ms | -0.00057ms | -3.23% |
-| p99 | 0.09ms | 0.02ms | +0.07ms | +341.35% |
-| mean | 0.02ms | 0.01ms | +0.0052ms | +44.66% |
-| min | 0.01ms | 0.01ms | +0.0022ms | +21.86% |
-| max | 0.12ms | 0.02ms | +0.10ms | +468.11% |
-| total | 0.50ms | 0.35ms | +0.16ms | +44.66% |
+| p10 | 0.0097ms | 0.01ms | -0.00059ms | -5.69% |
+| p50 | 0.01ms | 0.01ms | -0.00050ms | -4.65% |
+| p95 | 0.02ms | 0.02ms | +0.0057ms | +32.36% |
+| p99 | 0.11ms | 0.02ms | +0.09ms | +449.57% |
+| mean | 0.02ms | 0.01ms | +0.0040ms | +34.76% |
+| min | 0.0097ms | 0.01ms | -0.00063ms | -6.07% |
+| max | 0.15ms | 0.02ms | +0.13ms | +603.16% |
+| total | 0.47ms | 0.35ms | +0.12ms | +34.76% |
 

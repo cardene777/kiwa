@@ -2,31 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00017ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00033ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00042ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00083ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| drizzleInsert | 0.01ms | 0.03ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| drizzleSelectAll | 0.23ms | 0.31ms | 20ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| drizzleSelectWhere | 0.02ms | 0.03ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| drizzleInsert | 0.01ms | 0.03ms | 10ms | 0.00083ms | PASS | stable (p10 +6% (閾値未満)、 p95 +27% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| drizzleSelectAll | 0.26ms | 0.69ms | 20ms | 0.00083ms | PASS | stable (p10 -2% (閾値未満)、 p95 +91% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| drizzleSelectWhere | 0.02ms | 0.02ms | 10ms | 0.00083ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| drizzleInsert | 0.15ms | 20ms | PASS |
-| drizzleSelectAll | 2.80ms | 40ms | PASS |
-| drizzleSelectWhere | 0.19ms | 20ms | PASS |
+| drizzleInsert | 0.18ms | 20ms | PASS |
+| drizzleSelectAll | 3.15ms | 40ms | PASS |
+| drizzleSelectWhere | 0.22ms | 20ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| drizzleInsert | -106200 B | 0 B | 102400 B | yes | PASS |
-| drizzleSelectAll | -31672 B | 0 B | 102400 B | yes | PASS |
-| drizzleSelectWhere | 8968 B | 0 B | 102400 B | yes | PASS |
+| drizzleInsert | -125328 B | -187547 B | 102400 B | yes | PASS |
+| drizzleSelectAll | -30616 B | 0 B | 102400 B | yes | PASS |
+| drizzleSelectWhere | -7144 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -41,25 +41,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | p10 | 0.01ms |
 | p50 | 0.01ms |
 | p95 | 0.03ms |
-| p99 | 0.05ms |
+| p99 | 0.12ms |
 | mean | 0.02ms |
-| stdev | 0.0054ms |
+| stdev | 0.02ms |
 | min | 0.01ms |
-| max | 0.05ms |
-| total | 3.24ms |
+| max | 0.18ms |
+| total | 3.72ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | +0.00063ms | +4.98% |
-| p50 | 0.01ms | 0.01ms | +0.00077ms | +5.71% |
-| p95 | 0.03ms | 0.02ms | +0.00049ms | +1.98% |
-| p99 | 0.05ms | 0.04ms | +0.0030ms | +7.12% |
-| mean | 0.02ms | 0.02ms | +0.00024ms | +1.52% |
-| min | 0.01ms | 0.01ms | +0.00058ms | +4.80% |
-| max | 0.05ms | 0.13ms | -0.07ms | -57.57% |
-| total | 3.24ms | 3.19ms | +0.05ms | +1.52% |
+| p10 | 0.01ms | 0.01ms | +0.00071ms | +5.65% |
+| p50 | 0.01ms | 0.01ms | +0.0013ms | +9.57% |
+| p95 | 0.03ms | 0.02ms | +0.0068ms | +27.46% |
+| p99 | 0.12ms | 0.04ms | +0.08ms | +195.57% |
+| mean | 0.02ms | 0.02ms | +0.0027ms | +16.83% |
+| min | 0.01ms | 0.01ms | +0.00046ms | +3.77% |
+| max | 0.18ms | 0.13ms | +0.05ms | +40.38% |
+| total | 3.72ms | 3.19ms | +0.54ms | +16.83% |
 
 ### drizzleSelectAll
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.23ms |
-| p50 | 0.24ms |
-| p95 | 0.31ms |
-| p99 | 0.36ms |
-| mean | 0.25ms |
-| stdev | 0.04ms |
-| min | 0.23ms |
-| max | 0.54ms |
-| total | 50.41ms |
+| p10 | 0.26ms |
+| p50 | 0.28ms |
+| p95 | 0.69ms |
+| p99 | 1.02ms |
+| mean | 0.34ms |
+| stdev | 0.16ms |
+| min | 0.25ms |
+| max | 1.24ms |
+| total | 67.49ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.23ms | 0.27ms | -0.03ms | -11.98% |
-| p50 | 0.24ms | 0.30ms | -0.06ms | -19.93% |
-| p95 | 0.31ms | 0.36ms | -0.05ms | -13.62% |
-| p99 | 0.36ms | 0.65ms | -0.29ms | -44.12% |
-| mean | 0.25ms | 0.31ms | -0.06ms | -18.72% |
-| min | 0.23ms | 0.26ms | -0.03ms | -11.78% |
-| max | 0.54ms | 0.68ms | -0.14ms | -20.57% |
-| total | 50.41ms | 62.02ms | -11.61ms | -18.72% |
+| p10 | 0.26ms | 0.27ms | -0.0053ms | -1.98% |
+| p50 | 0.28ms | 0.30ms | -0.02ms | -7.70% |
+| p95 | 0.69ms | 0.36ms | +0.33ms | +90.52% |
+| p99 | 1.02ms | 0.65ms | +0.37ms | +56.58% |
+| mean | 0.34ms | 0.31ms | +0.03ms | +8.82% |
+| min | 0.25ms | 0.26ms | -0.0097ms | -3.68% |
+| max | 1.24ms | 0.68ms | +0.56ms | +83.38% |
+| total | 67.49ms | 62.02ms | +5.47ms | +8.82% |
 
 ### drizzleSelectWhere
 
@@ -102,24 +102,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.02ms |
 | p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.04ms |
+| p95 | 0.02ms |
+| p99 | 0.09ms |
 | mean | 0.02ms |
-| stdev | 0.0066ms |
+| stdev | 0.01ms |
 | min | 0.02ms |
-| max | 0.10ms |
-| total | 3.87ms |
+| max | 0.14ms |
+| total | 3.77ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.000083ms | -0.48% |
-| p50 | 0.02ms | 0.02ms | -0.000041ms | -0.23% |
-| p95 | 0.03ms | 0.08ms | -0.06ms | -69.35% |
-| p99 | 0.04ms | 0.35ms | -0.32ms | -89.97% |
-| mean | 0.02ms | 0.05ms | -0.03ms | -58.04% |
-| min | 0.02ms | 0.02ms | +0.00013ms | +0.75% |
-| max | 0.10ms | 3.13ms | -3.03ms | -96.92% |
-| total | 3.87ms | 9.21ms | -5.35ms | -58.04% |
+| p10 | 0.02ms | 0.02ms | -0.0013ms | -7.47% |
+| p50 | 0.02ms | 0.02ms | -0.0017ms | -9.21% |
+| p95 | 0.02ms | 0.08ms | -0.06ms | -70.42% |
+| p99 | 0.09ms | 0.35ms | -0.26ms | -74.90% |
+| mean | 0.02ms | 0.05ms | -0.03ms | -59.13% |
+| min | 0.02ms | 0.02ms | -0.00096ms | -5.71% |
+| max | 0.14ms | 3.13ms | -2.99ms | -95.49% |
+| total | 3.77ms | 9.21ms | -5.45ms | -59.13% |
 
