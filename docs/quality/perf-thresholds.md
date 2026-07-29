@@ -217,15 +217,21 @@ Four statistics were tried over a single run's samples — p95, p10, median, tri
 
 The reference has to share the disturbance: a CPU-bound reference does not help an fs-bound op, and its own measurement moved 2406 % across runs, making it useless as a denominator for anything. So each op would have to declare a reference of the right kind, and every stored baseline would become a ratio rather than a duration. That is a change to what a baseline *is*, not to which statistic is read from it, and is left to a follow-up.
 
-### A cap breach that was the parallelism, not the code
+### An `a11y` cap breach that no longer reproduces
 
-`a11y`'s `audit_error_handling` was recorded breaching its 100 ms cap intermittently — 195 / 163 / 145 / 17.6 / 17.3 ms across five runs, a tail ten times the usual value — and `audit_workflow` moved between 23 ms and 394 ms. Three explanations were proposed: jsdom accumulating across iterations, axe-core taking a slow path on invalid input, or a GC pause landing inside the measured window (#1728).
+`a11y`'s `audit_error_handling` was recorded breaching its 100 ms cap intermittently — 195 / 163 / 145 / 17.6 / 17.3 ms across five runs, a tail ten times the usual value — and `audit_workflow` was recorded between 23 ms and 394 ms (#1728). Three explanations were proposed: jsdom accumulating across iterations, axe-core taking a slow path on invalid input, or a GC pause landing inside the measured window.
 
-All three were wrong. The measurements predate #1720, when the root script still ran `pnpm -r --parallel` (177 suites at once) and each package's vitest still ran its perf files concurrently. Under those conditions `a11y` had two perf files both driving jsdom and axe-core while 176 other packages competed for the same cores.
+None of that reproduces now. Five consecutive runs on the current configuration give `audit_error_handling` a p95 of 14.4-26.2 ms against its 100 ms cap, and `audit_workflow` 23.8-42.0 ms, with the same gate verdict every time.
 
-Measured on the current serial configuration, five consecutive runs give `audit_error_handling` a p95 of 14.4-26.2 ms against its 100 ms cap and `audit_workflow` 23.8-42.0 ms — a 1.77x spread, with the same gate verdict every time. Re-enabling `fileParallelism` for `a11y` alone reproduces the instability in miniature: `audit_workflow` moves between 23 ms and 44 ms instead of holding near 28 ms.
+What the investigation did establish is narrow, and worth stating precisely because the gap between it and "we found the cause" is where the temptation lies.
 
-Nothing about the ops needed to change. This is recorded because the shape is easy to misread: a tail that appears only under load looks exactly like a tail intrinsic to the code, and the samples give no way to tell them apart. Before attributing a breach to an op, check what else was running.
+Sample positions do not support accumulation across iterations: the slowest iterations land at 10 / 8 / 0 / 1 / 11 out of 20, scattered rather than weighted toward the end. That is evidence against the first candidate.
+
+The other two were not tested. Axe-core's path selection and GC activity were never instrumented, so "the slow path" and "a GC pause" remain open — and neither is exclusive with load, so a breach under contention could still have been either of them.
+
+Parallelism was the initial hypothesis and it did not hold up. The runs that recorded the outliers sit downstream of the serialization commits, so the tree at that point already had `--workspace-concurrency=1` and `fileParallelism: false`; the older 177-suite configuration cannot have been in effect unless the runner was overridden, and no record of that survives. Re-enabling `fileParallelism` for `a11y` alone was then tried as a controlled comparison and produced 23 / 44 / 42 ms for `audit_workflow` — inside the 23.8-42.0 ms the serial configuration produces anyway. The ranges overlap, so the experiment separates nothing.
+
+So the honest position is that a breach was observed, is not reproducible today, and has no identified cause. It is recorded rather than closed as fixed, because a tail that appears only under some condition looks identical in the samples to a tail intrinsic to the code — and an unreproducible breach is the case where that ambiguity is hardest to resolve. If it returns, instrument axe-core's path and GC before reaching for an explanation.
 
 ### The first run after a rebuild can breach a cap
 
