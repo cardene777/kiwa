@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| addDays | 0.00025ms | 0.00055ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +114%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| formatDate | 0.00088ms | 0.0016ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| createDateClient | 0.00033ms | 0.00059ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| addDays | 0.00029ms | 0.0015ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +114%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| formatDate | 0.00096ms | 0.0016ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| createDateClient | 0.00038ms | 0.00056ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -24,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| addDays | -9856 B | 0 B | 102400 B | yes | PASS |
-| formatDate | -19576 B | 0 B | 102400 B | yes | PASS |
-| createDateClient | 2656 B | 0 B | 102400 B | yes | PASS |
+| addDays | 5112 B | -46745 B | 102400 B | yes | PASS |
+| formatDate | -3584 B | 0 B | 102400 B | yes | PASS |
+| createDateClient | 8496 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00025ms |
+| p10 | 0.00029ms |
 | p50 | 0.00029ms |
-| p95 | 0.00055ms |
-| p99 | 0.0025ms |
-| mean | 0.00037ms |
-| stdev | 0.00050ms |
-| min | 0.00021ms |
+| p95 | 0.0015ms |
+| p99 | 0.0049ms |
+| mean | 0.00049ms |
+| stdev | 0.00069ms |
+| min | 0.00025ms |
 | max | 0.0054ms |
-| total | 0.07ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00025ms | 0.00029ms | -0.000041ms | -14.09% |
+| p10 | 0.00029ms | 0.00029ms | 0.00ms | 0.00% |
 | p50 | 0.00029ms | 0.00033ms | -0.000041ms | -12.31% |
-| p95 | 0.00055ms | 0.00042ms | +0.00013ms | +31.32% |
-| p99 | 0.0025ms | 0.0035ms | -0.00095ms | -27.44% |
-| mean | 0.00037ms | 0.00040ms | -0.000026ms | -6.42% |
-| min | 0.00021ms | 0.00029ms | -0.000083ms | -28.52% |
-| max | 0.0054ms | 0.0053ms | +0.00013ms | +2.38% |
-| total | 0.07ms | 0.08ms | -0.0051ms | -6.42% |
+| p95 | 0.0015ms | 0.00042ms | +0.0011ms | +267.98% |
+| p99 | 0.0049ms | 0.0035ms | +0.0014ms | +40.68% |
+| mean | 0.00049ms | 0.00040ms | +0.000092ms | +23.03% |
+| min | 0.00025ms | 0.00029ms | -0.000041ms | -14.09% |
+| max | 0.0054ms | 0.0053ms | +0.00013ms | +2.36% |
+| total | 0.10ms | 0.08ms | +0.02ms | +23.03% |
 
 ### formatDate
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00088ms |
-| p50 | 0.0010ms |
+| p10 | 0.00096ms |
+| p50 | 0.0011ms |
 | p95 | 0.0016ms |
-| p99 | 0.01ms |
-| mean | 0.0015ms |
-| stdev | 0.0032ms |
-| min | 0.00083ms |
-| max | 0.04ms |
-| total | 0.29ms |
+| p99 | 0.0071ms |
+| mean | 0.0012ms |
+| stdev | 0.0010ms |
+| min | 0.00088ms |
+| max | 0.01ms |
+| total | 0.25ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00088ms | 0.0010ms | -0.00012ms | -12.14% |
-| p50 | 0.0010ms | 0.0010ms | 0.00ms | 0.00% |
-| p95 | 0.0016ms | 0.0015ms | +0.00013ms | +9.18% |
-| p99 | 0.01ms | 0.0039ms | +0.0080ms | +205.97% |
-| mean | 0.0015ms | 0.0012ms | +0.00030ms | +25.74% |
-| min | 0.00083ms | 0.00092ms | -0.000084ms | -9.16% |
-| max | 0.04ms | 0.01ms | +0.03ms | +195.37% |
-| total | 0.29ms | 0.23ms | +0.06ms | +25.74% |
+| p10 | 0.00096ms | 0.0010ms | -0.000038ms | -3.81% |
+| p50 | 0.0011ms | 0.0010ms | +0.000084ms | +8.40% |
+| p95 | 0.0016ms | 0.0015ms | +0.00013ms | +8.69% |
+| p99 | 0.0071ms | 0.0039ms | +0.0033ms | +83.48% |
+| mean | 0.0012ms | 0.0012ms | +0.000091ms | +7.85% |
+| min | 0.00088ms | 0.00092ms | -0.000042ms | -4.58% |
+| max | 0.01ms | 0.01ms | -0.0040ms | -27.45% |
+| total | 0.25ms | 0.23ms | +0.02ms | +7.85% |
 
 ### createDateClient
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00033ms |
+| p10 | 0.00038ms |
 | p50 | 0.00038ms |
-| p95 | 0.00059ms |
-| p99 | 0.0029ms |
-| mean | 0.00047ms |
-| stdev | 0.00063ms |
+| p95 | 0.00056ms |
+| p99 | 0.0030ms |
+| mean | 0.00050ms |
+| stdev | 0.00080ms |
 | min | 0.00033ms |
-| max | 0.0074ms |
-| total | 0.09ms |
+| max | 0.01ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00033ms | 0.00038ms | -0.000041ms | -10.93% |
+| p10 | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
 | p50 | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
-| p95 | 0.00059ms | 0.00056ms | +0.000027ms | +4.87% |
-| p99 | 0.0029ms | 0.0023ms | +0.00061ms | +26.48% |
-| mean | 0.00047ms | 0.00051ms | -0.000039ms | -7.58% |
+| p95 | 0.00056ms | 0.00056ms | -0.0000041ms | -0.74% |
+| p99 | 0.0030ms | 0.0023ms | +0.00069ms | +30.30% |
+| mean | 0.00050ms | 0.00051ms | -0.000014ms | -2.75% |
 | min | 0.00033ms | 0.00033ms | 0.00ms | 0.00% |
-| max | 0.0074ms | 0.01ms | -0.0040ms | -35.16% |
-| total | 0.09ms | 0.10ms | -0.0078ms | -7.58% |
+| max | 0.01ms | 0.01ms | -0.0014ms | -12.09% |
+| total | 0.10ms | 0.10ms | -0.0028ms | -2.75% |
 

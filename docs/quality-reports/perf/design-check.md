@@ -8,8 +8,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| checkSpecConformance | 0.0025ms | 0.0046ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| checkLayoutRegression | 0.0068ms | 0.03ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| checkSpecConformance | 0.0030ms | 0.0054ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| checkLayoutRegression | 0.0059ms | 0.03ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 10 iter each)
 
@@ -22,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| checkSpecConformance | -42416 B | 0 B | 102400 B | yes | PASS |
-| checkLayoutRegression | -1896 B | 0 B | 102400 B | yes | PASS |
+| checkSpecConformance | 193520 B | 0 B | 102400 B | yes | PASS |
+| checkLayoutRegression | -1736 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,28 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 50 |
 | warmup | 5 |
-| p10 | 0.0025ms |
-| p50 | 0.0034ms |
-| p95 | 0.0046ms |
-| p99 | 0.0067ms |
-| mean | 0.0034ms |
-| stdev | 0.00094ms |
-| min | 0.0024ms |
-| max | 0.0087ms |
-| total | 0.17ms |
+| p10 | 0.0030ms |
+| p50 | 0.0032ms |
+| p95 | 0.0054ms |
+| p99 | 0.0086ms |
+| mean | 0.0037ms |
+| stdev | 0.0013ms |
+| min | 0.0029ms |
+| max | 0.01ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0025ms | 0.0030ms | -0.00054ms | -17.82% |
-| p50 | 0.0034ms | 0.0032ms | +0.00025ms | +7.90% |
-| p95 | 0.0046ms | 0.0055ms | -0.00090ms | -16.38% |
-| p99 | 0.0067ms | 0.0095ms | -0.0028ms | -29.28% |
-| mean | 0.0034ms | 0.0036ms | -0.00020ms | -5.44% |
-| min | 0.0024ms | 0.0021ms | +0.00029ms | +13.74% |
-| max | 0.0087ms | 0.01ms | -0.0025ms | -22.38% |
-| total | 0.17ms | 0.18ms | -0.0099ms | -5.44% |
+| p10 | 0.0030ms | 0.0030ms | -0.000084ms | -2.76% |
+| p50 | 0.0032ms | 0.0032ms | +0.0000010ms | +0.03% |
+| p95 | 0.0054ms | 0.0055ms | -0.000072ms | -1.32% |
+| p99 | 0.0086ms | 0.0095ms | -0.00086ms | -9.07% |
+| mean | 0.0037ms | 0.0036ms | +0.000065ms | +1.79% |
+| min | 0.0029ms | 0.0021ms | +0.00075ms | +35.29% |
+| max | 0.01ms | 0.01ms | -0.00029ms | -2.61% |
+| total | 0.19ms | 0.18ms | +0.0033ms | +1.79% |
 
 ### checkLayoutRegression
 
@@ -66,26 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 50 |
 | warmup | 5 |
-| p10 | 0.0068ms |
-| p50 | 0.02ms |
+| p10 | 0.0059ms |
+| p50 | 0.01ms |
 | p95 | 0.03ms |
-| p99 | 0.04ms |
-| mean | 0.02ms |
-| stdev | 0.0098ms |
-| min | 0.0067ms |
-| max | 0.04ms |
-| total | 0.91ms |
+| p99 | 0.03ms |
+| mean | 0.01ms |
+| stdev | 0.0087ms |
+| min | 0.0058ms |
+| max | 0.03ms |
+| total | 0.74ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0068ms | 0.0061ms | +0.00071ms | +11.56% |
-| p50 | 0.02ms | 0.02ms | +0.0025ms | +11.53% |
-| p95 | 0.03ms | 0.03ms | +0.0019ms | +6.11% |
-| p99 | 0.04ms | 0.20ms | -0.17ms | -81.69% |
-| mean | 0.02ms | 0.03ms | -0.0082ms | -30.84% |
-| min | 0.0067ms | 0.0060ms | +0.00071ms | +11.72% |
-| max | 0.04ms | 0.36ms | -0.32ms | -89.27% |
-| total | 0.91ms | 1.32ms | -0.41ms | -30.84% |
+| p10 | 0.0059ms | 0.0061ms | -0.00025ms | -4.08% |
+| p50 | 0.01ms | 0.02ms | -0.0071ms | -33.04% |
+| p95 | 0.03ms | 0.03ms | -0.0038ms | -12.09% |
+| p99 | 0.03ms | 0.20ms | -0.17ms | -84.81% |
+| mean | 0.01ms | 0.03ms | -0.01ms | -44.24% |
+| min | 0.0058ms | 0.0060ms | -0.00025ms | -4.14% |
+| max | 0.03ms | 0.36ms | -0.33ms | -90.78% |
+| total | 0.74ms | 1.32ms | -0.58ms | -44.24% |
 

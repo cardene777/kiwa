@@ -183,9 +183,9 @@ The caps (serial, concurrent, memory) are still gated. A cap is decided inside a
 
 #### Measured across the whole suite, and why the gate still cannot be switched on
 
-The `@kiwa-lab/cache` measurements above cover one package. The full suite was then measured the same way: one reseeding pass plus six analysis passes over all 177 workspace packages, recording every op's p10 each time. Individual passes took 8-22 minutes and the whole sweep ran 94 minutes — the variation in pass duration is itself part of what the numbers below describe.
+The `@kiwa-lab/cache` measurements above cover one package. The full suite was then measured the same way: one reseeding pass plus six analysis passes over all 177 workspace packages, recording every op's p10 each time. Individual passes ran 8m21s to 19m07s, 79 minutes of measurement inside a 94-minute window — the variation in pass duration is itself part of what the numbers below describe.
 
-An op can only fail the gate on unchanged code if its observed drift satisfies **both** conditions the implementation checks — the absolute difference clears the floor **and** the relative change clears 20 %. Classified that way over 492 ops:
+`detectRegression` requires three things: the absolute difference clears the floor, the relative change clears 20 %, and the bootstrap CI excludes zero. The counts below apply the first two and assume the third — a deliberate upper bound, since CI significance depends on the sample and cannot be recovered from stored p10 alone. Classified that way over 492 ops:
 
 | passes used | ops that could fail the gate | modules with no such op |
 |---|---|---|

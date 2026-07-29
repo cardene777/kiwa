@@ -198,8 +198,17 @@ export async function runPerf3LayerLive(
     });
   }
 
-  const anyMeasured = outcomes.some((o) => !o.skipped);
-  if (anyMeasured && priorBaseline === null) {
+  const measured = outcomes.filter((o) => !o.skipped);
+  const anyMeasured = measured.length > 0;
+  const allPassed = measured.every(
+    (o) => o.serialGatePassed && o.concurrentGatePassed && o.memoryGatePassed,
+  );
+
+  // 測定そのものが成立している実行の値だけを基準にする。 GC を呼べない実行や
+  // 上限を割った実行を保存すると、壊れた状態が次回以降の比較対象になる。
+  // mock 経路 (`runPerf3Layer`) と同じ条件 (#1708)。
+  const premiseValid = !input.requireGc || measured.every((o) => o.memory?.gcExposed);
+  if (anyMeasured && priorBaseline === null && premiseValid && allPassed) {
     await saveBaselineEnvelope(baselinePath, {
       schema: 1,
       env: captureEnv(),
@@ -207,10 +216,6 @@ export async function runPerf3LayerLive(
     });
     baselineSeeded = true;
   }
-
-  const allPassed = outcomes
-    .filter((o) => !o.skipped)
-    .every((o) => o.serialGatePassed && o.concurrentGatePassed && o.memoryGatePassed);
 
   writeLiveReport({
     reportPath: input.reportPath,

@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| sendPush | 0.00054ms | 0.00090ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| sendSMS | 0.00038ms | 0.00063ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| parseNotificationEvent | 0.00037ms | 0.0015ms | 5ms | 0.00033ms | PASS | stable (p10 -19% (閾値未満)、 p95 +24% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| sendPush | 0.00046ms | 0.0012ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| sendSMS | 0.00042ms | 0.00054ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| parseNotificationEvent | 0.00042ms | 0.00080ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -24,9 +24,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| sendPush | -195280 B | 0 B | 102400 B | yes | PASS |
-| sendSMS | 22800 B | 0 B | 102400 B | yes | PASS |
-| parseNotificationEvent | 632 B | 0 B | 102400 B | yes | PASS |
+| sendPush | -107688 B | 0 B | 102400 B | yes | PASS |
+| sendSMS | 21936 B | 0 B | 102400 B | yes | PASS |
+| parseNotificationEvent | 97168 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,28 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00054ms |
-| p50 | 0.00054ms |
-| p95 | 0.00090ms |
-| p99 | 0.0097ms |
-| mean | 0.00079ms |
-| stdev | 0.0015ms |
-| min | 0.00050ms |
-| max | 0.01ms |
-| total | 0.16ms |
+| p10 | 0.00046ms |
+| p50 | 0.00050ms |
+| p95 | 0.0012ms |
+| p99 | 0.0054ms |
+| mean | 0.00066ms |
+| stdev | 0.00073ms |
+| min | 0.00042ms |
+| max | 0.0065ms |
+| total | 0.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00054ms | 0.00050ms | +0.000041ms | +8.20% |
-| p50 | 0.00054ms | 0.00063ms | -0.000083ms | -13.28% |
-| p95 | 0.00090ms | 0.0013ms | -0.00035ms | -28.12% |
-| p99 | 0.0097ms | 0.0058ms | +0.0039ms | +68.31% |
-| mean | 0.00079ms | 0.00077ms | +0.000016ms | +2.13% |
-| min | 0.00050ms | 0.00050ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.0077ms | +0.0072ms | +92.46% |
-| total | 0.16ms | 0.15ms | +0.0033ms | +2.13% |
+| p10 | 0.00046ms | 0.00050ms | -0.000042ms | -8.40% |
+| p50 | 0.00050ms | 0.00063ms | -0.00013ms | -20.00% |
+| p95 | 0.0012ms | 0.0013ms | -0.000038ms | -3.02% |
+| p99 | 0.0054ms | 0.0058ms | -0.00038ms | -6.57% |
+| mean | 0.00066ms | 0.00077ms | -0.00012ms | -15.30% |
+| min | 0.00042ms | 0.00050ms | -0.000084ms | -16.80% |
+| max | 0.0065ms | 0.0077ms | -0.0012ms | -15.60% |
+| total | 0.13ms | 0.15ms | -0.02ms | -15.30% |
 
 ### sendSMS
 
@@ -69,28 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00038ms |
-| p50 | 0.00042ms |
-| p95 | 0.00063ms |
-| p99 | 0.0024ms |
-| mean | 0.00049ms |
-| stdev | 0.00046ms |
-| min | 0.00038ms |
-| max | 0.0058ms |
+| p10 | 0.00042ms |
+| p50 | 0.00046ms |
+| p95 | 0.00054ms |
+| p99 | 0.0021ms |
+| mean | 0.00051ms |
+| stdev | 0.00049ms |
+| min | 0.00042ms |
+| max | 0.0068ms |
 | total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00038ms | 0.00042ms | -0.000042ms | -10.07% |
-| p50 | 0.00042ms | 0.00046ms | -0.000042ms | -9.15% |
-| p95 | 0.00063ms | 0.00071ms | -0.000087ms | -12.24% |
-| p99 | 0.0024ms | 0.0023ms | +0.00012ms | +5.43% |
-| mean | 0.00049ms | 0.00055ms | -0.000057ms | -10.38% |
-| min | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
-| max | 0.0058ms | 0.0064ms | -0.00063ms | -9.76% |
-| total | 0.10ms | 0.11ms | -0.01ms | -10.38% |
+| p10 | 0.00042ms | 0.00042ms | 0.00ms | 0.00% |
+| p50 | 0.00046ms | 0.00046ms | -0.0000010ms | -0.22% |
+| p95 | 0.00054ms | 0.00071ms | -0.00017ms | -23.90% |
+| p99 | 0.0021ms | 0.0023ms | -0.00021ms | -9.13% |
+| mean | 0.00051ms | 0.00055ms | -0.000037ms | -6.71% |
+| min | 0.00042ms | 0.00038ms | +0.000041ms | +10.93% |
+| max | 0.0068ms | 0.0064ms | +0.00038ms | +5.84% |
+| total | 0.10ms | 0.11ms | -0.0074ms | -6.71% |
 
 ### parseNotificationEvent
 
@@ -100,26 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00037ms |
+| p10 | 0.00042ms |
 | p50 | 0.00042ms |
-| p95 | 0.0015ms |
-| p99 | 0.0048ms |
-| mean | 0.00060ms |
-| stdev | 0.00093ms |
-| min | 0.00033ms |
-| max | 0.0095ms |
+| p95 | 0.00080ms |
+| p99 | 0.0056ms |
+| mean | 0.00062ms |
+| stdev | 0.00099ms |
+| min | 0.00038ms |
+| max | 0.0097ms |
 | total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00037ms | 0.00046ms | -0.000087ms | -19.02% |
+| p10 | 0.00042ms | 0.00046ms | -0.000042ms | -9.17% |
 | p50 | 0.00042ms | 0.00046ms | -0.000042ms | -9.15% |
-| p95 | 0.0015ms | 0.0012ms | +0.00030ms | +24.36% |
-| p99 | 0.0048ms | 0.0046ms | +0.00029ms | +6.44% |
-| mean | 0.00060ms | 0.00067ms | -0.000065ms | -9.74% |
-| min | 0.00033ms | 0.00042ms | -0.000083ms | -19.95% |
-| max | 0.0095ms | 0.01ms | -0.0024ms | -20.35% |
-| total | 0.12ms | 0.13ms | -0.01ms | -9.74% |
+| p95 | 0.00080ms | 0.0012ms | -0.00042ms | -34.31% |
+| p99 | 0.0056ms | 0.0046ms | +0.0010ms | +22.84% |
+| mean | 0.00062ms | 0.00067ms | -0.000046ms | -6.96% |
+| min | 0.00038ms | 0.00042ms | -0.000041ms | -9.86% |
+| max | 0.0097ms | 0.01ms | -0.0022ms | -18.25% |
+| total | 0.12ms | 0.13ms | -0.0093ms | -6.96% |
 

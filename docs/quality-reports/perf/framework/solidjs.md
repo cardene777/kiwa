@@ -9,7 +9,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
 | renderSolid | 0.00063ms | 0.0013ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| mockSignalEffect | 0.00088ms | 0.0016ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| mockSignalEffect | 0.00092ms | 0.0015ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| renderSolid | -28744 B | 0 B | 102400 B | yes | PASS |
-| mockSignalEffect | -824 B | 0 B | 102400 B | yes | PASS |
+| renderSolid | -12488 B | 0 B | 102400 B | yes | PASS |
+| mockSignalEffect | 5192 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,12 +38,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | p10 | 0.00063ms |
 | p50 | 0.00067ms |
 | p95 | 0.0013ms |
-| p99 | 0.0062ms |
-| mean | 0.00084ms |
-| stdev | 0.00084ms |
+| p99 | 0.0046ms |
+| mean | 0.00082ms |
+| stdev | 0.00064ms |
 | min | 0.00063ms |
-| max | 0.0073ms |
-| total | 0.17ms |
+| max | 0.0060ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
@@ -51,12 +51,12 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|---|---|---|
 | p10 | 0.00063ms | 0.00063ms | 0.00ms | 0.00% |
 | p50 | 0.00067ms | 0.00067ms | 0.00ms | 0.00% |
-| p95 | 0.0013ms | 0.0015ms | -0.00020ms | -13.20% |
-| p99 | 0.0062ms | 0.0048ms | +0.0014ms | +28.35% |
-| mean | 0.00084ms | 0.00083ms | +0.0000054ms | +0.65% |
+| p95 | 0.0013ms | 0.0015ms | -0.00020ms | -12.99% |
+| p99 | 0.0046ms | 0.0048ms | -0.00025ms | -5.08% |
+| mean | 0.00082ms | 0.00083ms | -0.000015ms | -1.75% |
 | min | 0.00063ms | 0.00058ms | +0.000042ms | +7.20% |
-| max | 0.0073ms | 0.0066ms | +0.00075ms | +11.38% |
-| total | 0.17ms | 0.17ms | +0.0011ms | +0.65% |
+| max | 0.0060ms | 0.0066ms | -0.00063ms | -9.51% |
+| total | 0.16ms | 0.17ms | -0.0029ms | -1.75% |
 
 ### mockSignalEffect
 
@@ -66,26 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00088ms |
-| p50 | 0.00092ms |
-| p95 | 0.0016ms |
-| p99 | 0.0070ms |
+| p10 | 0.00092ms |
+| p50 | 0.00096ms |
+| p95 | 0.0015ms |
+| p99 | 0.0053ms |
 | mean | 0.0012ms |
-| stdev | 0.0010ms |
-| min | 0.00083ms |
-| max | 0.0098ms |
+| stdev | 0.00091ms |
+| min | 0.00088ms |
+| max | 0.0091ms |
 | total | 0.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00088ms | 0.00096ms | -0.000083ms | -8.66% |
-| p50 | 0.00092ms | 0.0010ms | -0.000083ms | -8.30% |
-| p95 | 0.0016ms | 0.0018ms | -0.00020ms | -11.26% |
-| p99 | 0.0070ms | 0.0057ms | +0.0013ms | +23.60% |
-| mean | 0.0012ms | 0.0013ms | -0.000056ms | -4.36% |
-| min | 0.00083ms | 0.00092ms | -0.000083ms | -9.06% |
-| max | 0.0098ms | 0.01ms | -0.0027ms | -21.67% |
-| total | 0.24ms | 0.26ms | -0.01ms | -4.36% |
+| p10 | 0.00092ms | 0.00096ms | -0.000042ms | -4.38% |
+| p50 | 0.00096ms | 0.0010ms | -0.000042ms | -4.20% |
+| p95 | 0.0015ms | 0.0018ms | -0.00028ms | -15.60% |
+| p99 | 0.0053ms | 0.0057ms | -0.00040ms | -7.02% |
+| mean | 0.0012ms | 0.0013ms | -0.000072ms | -5.61% |
+| min | 0.00088ms | 0.00092ms | -0.000041ms | -4.48% |
+| max | 0.0091ms | 0.01ms | -0.0034ms | -27.34% |
+| total | 0.24ms | 0.26ms | -0.01ms | -5.61% |
 

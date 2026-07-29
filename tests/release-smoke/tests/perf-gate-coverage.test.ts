@@ -251,6 +251,45 @@ function measureAliases(
       if (names.has(original)) direct.add(el.name.text);
     }
   });
+  // namespace object から取り出した alias を追う。 `const { runPerf3Layer } = perf` や
+  // `const run = perf.runPerf3Layer` は普通の refactor で書かれる形で、追えないと
+  // その先の呼出が検査対象から外れる。
+  let grew = true;
+  while (grew) {
+    grew = false;
+    eachNode(sf, (node) => {
+      if (!ts.isVariableDeclaration(node) || !node.initializer) return;
+      const init = unwrap(node.initializer);
+
+      // `const run = perf.runPerf3Layer` / `const run = runPerf3Layer`
+      if (ts.isIdentifier(node.name)) {
+        if (direct.has(node.name.text)) return;
+        const path = accessPath(init);
+        if (path === null) return;
+        const parts = path.split('.');
+        const resolved =
+          (parts.length === 1 && direct.has(parts[0]!)) ||
+          (parts.length === 2 && namespaces.has(parts[0]!) && names.has(parts[1]!));
+        if (resolved) {
+          direct.add(node.name.text);
+          grew = true;
+        }
+        return;
+      }
+
+      // `const { runPerf3Layer } = perf` / `const { runPerf3Layer: run } = perf`
+      if (!ts.isObjectBindingPattern(node.name)) return;
+      if (!ts.isIdentifier(init) || !namespaces.has(init.text)) return;
+      for (const el of node.name.elements) {
+        const original = el.propertyName ?? el.name;
+        if (!ts.isIdentifier(original) || !names.has(original.text)) continue;
+        if (!ts.isIdentifier(el.name) || direct.has(el.name.text)) continue;
+        direct.add(el.name.text);
+        grew = true;
+      }
+    });
+  }
+
   return { direct, namespaces };
 }
 
@@ -743,6 +782,24 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
          expect(r.allPassed).toBe(true);`,
       ],
       [
+        'namespace から分割代入で取り出す',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         const { runPerf3Layer } = perf;
+         await runPerf3Layer({});`,
+      ],
+      [
+        'namespace から変数に代入する',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         const run = perf.runPerf3Layer;
+         await run({});`,
+      ],
+      [
+        '分割代入で別名にする',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         const { runPerf3Layer: run } = perf;
+         await run({});`,
+      ],
+      [
         'loop の中で continue を挟む',
         `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
          for (const c of cases) {
@@ -906,6 +963,13 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
       [
         '後ろの spread で上書きされ得る',
         IMP + `const r = await runPerf3Layer({ requireGc: true, ...overrides }); expect(r.allPassed).toBe(true);`,
+      ],
+      [
+        'namespace alias 経由で requireGc なし',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         const { runPerf3Layer } = perf;
+         const r = await runPerf3Layer({ moduleName: 'm' });
+         expect(r.allPassed).toBe(true);`,
       ],
       [
         'live 呼出で指定なし',
