@@ -40,6 +40,52 @@ describe('measureMemory', () => {
     expect(leak.length).toBe(200);
   });
 
+  it('空回しの分は計測区間に入れない (#1708)', async () => {
+    // 1 回目だけ確保する対象。暖機で計測区間の外に出れば増分は 0 になる。
+    // 実際の perf 測定では Node の Buffer pool がこの形で伸び、
+    // 1 回きりの確保が反復数で割られて「1 回あたりの保持」 になっていた。
+    const retained: Buffer[] = [];
+    let calls = 0;
+    const fn = async () => {
+      calls += 1;
+      if (calls === 1) retained.push(Buffer.alloc(64 * 1024));
+    };
+
+    const measured = await measureMemory({ fn, iterations: 10, warmup: 1 });
+
+    expect(calls, '暖機 1 回 + 計測 10 回').toBe(11);
+    expect(measured.iterationCount, '反復数は計測区間の回数だけを指す').toBe(10);
+    expect(measured.arrayBuffersDeltaBytes).toBeLessThan(64 * 1024);
+    expect(retained.length).toBe(1);
+  });
+
+  it('暖機なしだと 1 回きりの確保が保持として載る (#1708)', async () => {
+    // 上の case の対照。既定 (warmup 0) では従来どおりの値になり、
+    // published API の直接の呼出で挙動が変わらないことを押さえる。
+    const retained: Buffer[] = [];
+    let calls = 0;
+    const fn = async () => {
+      calls += 1;
+      if (calls === 1) retained.push(Buffer.alloc(64 * 1024));
+    };
+
+    const measured = await measureMemory({ fn, iterations: 10 });
+
+    expect(calls).toBe(10);
+    expect(measured.arrayBuffersDeltaBytes).toBeGreaterThanOrEqual(64 * 1024);
+    expect(retained.length).toBe(1);
+  });
+
+  it('rejects a warmup that is not a non-negative integer', async () => {
+    // Infinity は空回しが終わらず、NaN は 0 回に潰れ、少数は暗黙に切り上がる。
+    // published API の入口なので、解釈が分かれる値は受け取らない。
+    for (const warmup of [-1, Number.NaN, Number.POSITIVE_INFINITY, 1.5]) {
+      await expect(measureMemory({ fn: () => {}, iterations: 1, warmup })).rejects.toThrow(
+        /warmup must be a non-negative integer/,
+      );
+    }
+  });
+
   it('invokes globalThis.gc when it is exposed (before + after)', async () => {
     // Node is normally started without --expose-gc, so `globalThis.gc` is
     // undefined and the `gcExposed ? gcRef() : nothing` branches never fire.

@@ -116,6 +116,54 @@ describe('detectRegression (bootstrap CI on p95)', () => {
     expect(result.verdict).toBe('regressed');
   });
 
+  it('T-PH-R-013 下限で抑えた stable は「変化が無い」 stable と区別できる (#1708)', () => {
+    // 相対では 33% 悪化だが差は 0.01ms。従来はこれも素の stable と同じ表現だった。
+    const baseline = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
+    const current = makeResult('reply', [0.04, 0.04, 0.04, 0.04, 0.04, 0.04]);
+    const result = detectRegression({ current, baseline });
+
+    expect(result.verdict).toBe('stable');
+    expect(result.suppressedByFloor).toBe(true);
+    expect(result.floorMs).toBe(0.5);
+  });
+
+  it('T-PH-R-014 変化が無い stable は下限で抑えた扱いにしない (#1708)', () => {
+    const baseline = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const current = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const result = detectRegression({ current, baseline });
+
+    expect(result.verdict).toBe('stable');
+    expect(result.suppressedByFloor).toBe(false);
+  });
+
+  it('T-PH-R-015 baseline が下限未満の op は感度が落ちていると分かる (#1708)', () => {
+    // baseline 0.03ms では +0.5ms = +1667% でようやく判定対象になる。
+    const baseline = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
+    const current = makeResult('reply', [0.03, 0.03, 0.03, 0.03, 0.03, 0.03]);
+    const result = detectRegression({ current, baseline });
+
+    expect(result.belowDetectionFloor).toBe(true);
+  });
+
+  it('T-PH-R-017 baseline が下限未満でも下限を超える悪化は検知する (#1708)', () => {
+    // 感度が落ちることと検知できないことは違う。0.29ms → 3.24ms は
+    // 差が 2.95ms なので下限を超え、regressed と判定されなければならない。
+    const baseline = makeResult('reply', [0.29, 0.29, 0.29, 0.29, 0.29, 0.29]);
+    const current = makeResult('reply', [3.24, 3.24, 3.24, 3.24, 3.24, 3.24]);
+    const result = detectRegression({ current, baseline });
+
+    expect(result.belowDetectionFloor).toBe(true);
+    expect(result.verdict).toBe('regressed');
+  });
+
+  it('T-PH-R-016 baseline が下限以上の op は検知不能扱いにしない (#1708)', () => {
+    const baseline = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const current = makeResult('reply', [10, 10, 10, 10, 10, 10]);
+    const result = detectRegression({ current, baseline });
+
+    expect(result.belowDetectionFloor).toBe(false);
+  });
+
   it('T-PH-R-009 baseline.p95 = 0 かつ current.p95 > 0 = Infinity delta', () => {
     // Bootstrap CI は current 側 sample から p95 > 0 を復元、 baseline は 0 になるため
     // CI 下限は正の値、 deltaPct は Infinity。 verdict は significant + threshold 超過。

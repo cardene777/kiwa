@@ -6,9 +6,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| addDays | 0.00ms | 5ms | PASS | stable |
-| formatDate | 0.00ms | 5ms | PASS | stable |
-| createDateClient | 0.00ms | 5ms | PASS | stable |
+| addDays | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +80000%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| formatDate | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +38148%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| createDateClient | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +90326%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| addDays | -4272 B | -45358 B | 102400 B | yes | PASS |
-| formatDate | -2200 B | 0 B | 102400 B | yes | PASS |
-| createDateClient | -14936 B | 0 B | 102400 B | yes | PASS |
+| addDays | -4760 B | 0 B | 102400 B | yes | PASS |
+| formatDate | -2672 B | 0 B | 102400 B | yes | PASS |
+| createDateClient | 7528 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.05ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.08ms |
+| max | 0.70ms |
+| total | 0.84ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -12.31% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -9.57% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -7.37% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -3.67% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -16.58% |
-| total | 0.08ms | 0.09ms | -0.00ms | -3.67% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -12.46% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +260.00% |
+| p99 | 0.01ms | 0.00ms | +0.01ms | +343.63% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +848.68% |
+| min | 0.00ms | 0.00ms | -0.00ms | -28.52% |
+| max | 0.70ms | 0.01ms | +0.69ms | +7889.05% |
+| total | 0.84ms | 0.09ms | +0.75ms | +848.68% |
 
 ### formatDate
 
@@ -67,7 +67,7 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
@@ -78,13 +78,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +3.88% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +5.70% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +94.07% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.14% |
-| min | 0.00ms | 0.00ms | -0.00ms | -12.01% |
-| max | 0.01ms | 0.01ms | +0.00ms | +7.82% |
-| total | 0.25ms | 0.24ms | +0.01ms | +4.14% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -0.09% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +5.54% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +17.80% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +2.66% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +21.34% |
+| total | 0.25ms | 0.25ms | +0.01ms | +2.66% |
 
 ### createDateClient
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -11.20% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +42.71% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +212.28% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +21.42% |
-| min | 0.00ms | 0.00ms | -0.00ms | -0.34% |
-| max | 0.01ms | 0.01ms | +0.00ms | +34.94% |
-| total | 0.12ms | 0.10ms | +0.02ms | +21.42% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +12.28% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +5.70% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +63.97% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +7.09% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00ms | -0.59% |
+| total | 0.10ms | 0.09ms | +0.01ms | +7.09% |
 

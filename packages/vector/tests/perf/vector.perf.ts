@@ -24,6 +24,17 @@ describe(MODULE, () => {
       }
       const query = makeVec(5, 64);
 
+      // upsert の id を使い回して store の件数を一定に保つ。
+      //
+      // 乱数 id を毎回足すと、 3 層 (serial 200 + concurrent 500 + memory 200) の
+      // ぶんだけ件数が増え続ける。 `queryNearest` は全件走査 + sort なので
+      // 1 回あたりの費用が「それまでに何回測ったか」 に比例し、 測定対象が
+      // 実装ではなく実行回数になる。 同期処理は event loop を手放さないため、
+      // concurrent 層ではその費用が後続の呼出の待ち時間として積み上がり、
+      // p95 が serial の 300 倍 (23ms、 上限 10ms) に達していた。
+      let upsertRound = 0;
+      const upsertSlots = 20;
+
       const result = await runPerf3Layer({
         moduleName: MODULE,
         requireGc: true,
@@ -34,7 +45,10 @@ describe(MODULE, () => {
             name: 'upsertOne',
             serialP95CapMs: 5,
             fn: async () => {
-              await client.upsert([{ id: `x-${Math.random()}`, values: makeVec(1, 64) }]);
+              upsertRound += 1;
+              await client.upsert([
+                { id: `x-${upsertRound % upsertSlots}`, values: makeVec(1, 64) },
+              ]);
             },
           },
           {

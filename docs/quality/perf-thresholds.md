@@ -67,6 +67,16 @@ This doc pins **every** perf threshold in kiwa to one of three grounded rational
 | `@kiwa-lab/e2e` | `fetchOverLoopback` | 20 ms | node http server dispatch + fetch-handler adapter over loopback (no network) |
 | `@kiwa-lab/cli` | `runSpecToTest` | 20 ms | md read + parseSpec + template render + file write |
 
+## Measurement isolation — the suite runs one package at a time
+
+Root `package.json > scripts.test:perf` runs the workspace pass with `--workspace-concurrency=1`. It must never use `--parallel`.
+
+`--parallel` means "no concurrency limit", so the root script used to start the perf suites of every workspace package that has a `test:perf` script at once — 177 packages (63 under `packages/`, 114 under `examples/`), not the 63 the name suggests. Every measurement then competes for the same cores, and p95 moves with the load of whatever else happened to be running rather than with the code under test. That is the reason the same commit produced different verdicts on consecutive runs, and it makes every downstream mechanism in this file dishonest: the 20 % regression rule compares against a baseline recorded under a different amount of contention, and the concurrent-load target below stops measuring the mock's own shared state.
+
+Dropping `--parallel` alone is not enough. Without it pnpm still defaults to one worker per CPU core, so the numeric limit is written explicitly.
+
+The trade-off is wall-clock time: a serial pass takes roughly 20-40 minutes instead of a few minutes. That is accepted deliberately — the suite exists to produce comparable numbers, not to finish quickly. `tests/release-smoke/tests/perf-serial-execution.test.ts` fails the release smoke suite if the flag comes back.
+
 ## Regression detection defaults
 
 Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`), with Welch t-test for significance (t > 2 ⇒ significant).
@@ -76,6 +86,73 @@ Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`
 - the p95 difference must also be at least **0.5 ms** in absolute terms (`minDeltaMs`). A relative-only rule gets stricter as the measured value shrinks: 0.03 ms → 0.04 ms is a "significant 33 % regression" on stable samples, yet nothing is actually slower. Ops measured in microseconds would fail on jitter alone.
 - baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
 - to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
+
+### Where baselines live
+
+All baselines sit in `.perf-baseline/` **at the repo root**, and they are tracked in git.
+
+The path used to be derived from `process.cwd()`, so the same module wrote to `packages/{name}/.perf-baseline/` when invoked through `pnpm --filter`, and to `<root>/.perf-baseline/` when invoked from the repo root. Each invocation only ever read one of the two, decided there was no baseline, and reseeded — so a comparison never happened. The path is now anchored to the nearest ancestor holding `pnpm-workspace.yaml` or `.git`. A standalone consumer of the package outside a repo still falls back to the working directory.
+
+They are tracked because an untracked baseline means the first run on any checkout has nothing to compare against. "Whoever measures first cannot detect a regression" is not a property worth keeping.
+
+That help is limited to machines matching the one that recorded them. `isComparableEnv` requires the same Node version, platform, CPU model and core count, so a different machine gets no comparison on its first run and reseeds locally. **Do not commit that reseed** — it replaces the reference for everyone else with your machine's numbers. The committed set was recorded on a single machine; treat it as that machine's reference, not a portable one. Making the tracked set portable needs per-environment baseline files, which is a separate change.
+
+The machine's hostname is not recorded. It plays no part in the comparison, and a tracked file is the wrong place for it.
+
+### When measurements stop being comparable
+
+`BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different.
+
+Bump it only when the same implementation would measure differently. Threshold and verdict changes are not measurement changes.
+
+### What the absolute floor hides
+
+The 0.5 ms `minDeltaMs` floor is load-bearing, and it also has a cost worth stating plainly: an op whose baseline p95 is under 0.5 ms can never be reported as regressed, because no realistic slowdown produces a large enough absolute delta. `cache`'s three ops sit at 0.02-0.06 ms, so they would need a 1000 %+ change to register.
+
+Lowering the floor proportionally to the baseline was tried and rejected on measurement evidence. Re-running an unchanged implementation four times moves sub-millisecond p95 by 50-1100 %, in absolute terms 0.03-0.22 ms. A proportional floor turns that jitter into a regression verdict on every run. Raising `serialIterations` from 30 to 200 widened the spread rather than narrowing it — p95 is an upper order statistic, so more samples means more chances to catch a scheduler or GC outlier.
+
+The report no longer papers over this. The regression column distinguishes three cases that used to render identically as `stable`:
+
+| what happened | how it renders |
+|---|---|
+| measured, no meaningful change | `stable` |
+| relative rule fired, absolute delta below the floor | `stable (差 …ms が下限 0.5ms 未満で判定を保留)` |
+| baseline is under the floor, so detection needs an outsized change | `stable (検知には +0.5ms (baseline 比 +…%) 以上の悪化が必要)` |
+
+The third case says what it would take, not that detection is impossible — a sub-millisecond op that slows by more than 0.5 ms is still reported as regressed. The note is therefore only attached to rows that did *not* reach a verdict; a `regressed` row carries no sensitivity note, because pairing the two reads as a contradiction.
+
+Making sub-millisecond ops genuinely gateable needs a different statistic (trimmed mean or median) or a higher-resolution clock. That is a change to the measurement method, not to a threshold, and is tracked separately.
+
+### The regression verdict is reported but not gated
+
+Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. On the machines this suite runs on, almost nothing qualifies.
+
+Measured four times with no code change:
+
+| op | p50 spread | p95 spread |
+|---|---|---|
+| `@kiwa-lab/cli-test` `readFile` | 243 % | 974 % |
+| `@kiwa-lab/cli-test` `writeFile` | 200 % | 313 % |
+| `@kiwa-lab/cli` `init_workflow` (200 samples) | 41 % | 143 % |
+| `@kiwa-lab/cli` `spec_to_test_batch` (200 samples) | 62 % | 514 % |
+
+Sample count is not the cause. Raising `serialIterations` from 15-30 to 60-200 across the fourteen affected files changed which packages failed rather than how many, and at the higher counts it exposed ops whose cost grows with iteration count — `a11y`'s `audit_workflow` went from 23 ms to 216 ms, breaching a cap it had passed. That change was reverted.
+
+So `runPerf3Layer` computes the verdict, writes it into the report, and leaves it out of `allPassed` unless the caller passes `regressionGate: true`. Keeping a verdict in the gate while it flips on unchanged code is worse than not gating: a real regression becomes indistinguishable from the noise around it.
+
+The caps (serial, concurrent, memory) are still gated. A cap is decided inside a single run and does not depend on run-to-run spread — that is how the `vector` breach in this suite was found.
+
+Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 974 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
+
+`regressionGateWaived: '<reason>'` marks the ops already known to exceed the threshold, so the list survives until the gate can be switched back on. Adding one requires measured evidence in the reason string. Do not add one because a run happened to fail.
+
+Restoring the gate means making the verdict reproducible — a different statistic or a quieter measurement environment. Until then `regressionGate` stays false by default.
+
+### The first run after a rebuild can breach a cap
+
+The suite rebuilds `@kiwa-lab/perf-harness` before each package's perf run, so the first pass after a code change starts cold. On jsdom-heavy ops that shows up in the concurrent axis: `a11y`'s `runAxeDirtyReport` breached its 800 ms cap on a first pass and measured 117 ms on the next one, unchanged. The two warmup rounds the concurrent layer performs do not cover the JIT and jsdom setup cost at that scale.
+
+Treat a cap breach on a first pass as unconfirmed. Re-run the package before acting on it; a real breach reproduces. The `vector` breach fixed in #1708 reproduced on every pass, which is how it was distinguished from this.
 
 ## Real-API measurement mode
 
@@ -94,7 +171,7 @@ export ANTHROPIC_API_KEY=sk-ant-... OPENAI_API_KEY=sk-... \
   SUPABASE_URL=https://... SUPABASE_ANON_KEY=... \
   ABLY_API_KEY=... SOCKETIO_URL=https://... \
   RAG_VECTOR_STORE_URL=https://... RAG_VECTOR_STORE_API_KEY=...
-pnpm -r --parallel run test:perf --if-present
+pnpm -r --workspace-concurrency=1 run test:perf --if-present
 ```
 
 Live iteration count defaults to 10 (vs 200 for mock) — live calls cost money and are slow, so a full pass fits in a coffee break. Concurrency defaults to 3 to avoid rate-limiting.
@@ -116,6 +193,10 @@ Every mock target has a serial baseline (concurrency = 1) and a concurrent stres
 ## Memory delta target
 
 Every mock op is checked for retained-heap growth. Threshold: **< 100 KB retained across 200 iterations** (i.e. < 500 bytes / call on average). Anything higher signals an unbounded internal Map / array / listener list.
+
+The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
+
+The `arrayBuffers` axis is not trustworthy for fs-heavy ops even with the warmup. Measured repeatedly with no code change, one such op reported 118-199 KB against a 100 KB cap while its two neighbours swung between +49 KB and -19 KB. The spread is the same size as the cap, so the verdict is decided by allocator behaviour rather than by the library. Those ops carry `memoryGateWaived: '<reason>'`, which prints `WAIVED (reason)` instead of `PASS` so the row cannot be mistaken for a measurement that passed. Rebuilding the axis is tracked separately.
 
 ## Change control
 

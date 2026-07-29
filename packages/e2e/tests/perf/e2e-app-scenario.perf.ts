@@ -95,6 +95,6 @@ describe('e2e app scenario perf (real workload)', () => {
       ],
     });
     await server.close();
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
   });
 });

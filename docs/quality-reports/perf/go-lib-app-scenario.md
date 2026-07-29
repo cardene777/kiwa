@@ -6,31 +6,31 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| 4_framework_workflow (10 dispatch across gin/echo/fiber/chi) | 0.03ms | 100ms | PASS | stable |
-| rest_batch (5 POST + GET + DELETE via chi router) | 0.03ms | 100ms | PASS | stable |
-| route_error_handling (5 unmatched 404 + echo handler error) | 0.02ms | 100ms | PASS | stable |
-| v2.1 retry_workflow (5 flaky handler、 3 attempt で成功) | 5.98ms | 200ms | PASS | stable |
-| v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch) | 0.01ms | 100ms | PASS | stable |
+| 4_framework_workflow (10 dispatch across gin/echo/fiber/chi) | 0.07ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +3386%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| rest_batch (5 POST + GET + DELETE via chi router) | 0.08ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +2141%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| route_error_handling (5 unmatched 404 + echo handler error) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +3559%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| v2.1 retry_workflow (5 flaky handler、 3 attempt で成功) | 47.48ms | 200ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +5909%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| 4_framework_workflow (10 dispatch across gin/echo/fiber/chi) | 0.03ms | 200ms | PASS |
-| rest_batch (5 POST + GET + DELETE via chi router) | 0.11ms | 200ms | PASS |
-| route_error_handling (5 unmatched 404 + echo handler error) | 0.05ms | 200ms | PASS |
-| v2.1 retry_workflow (5 flaky handler、 3 attempt で成功) | 6.01ms | 400ms | PASS |
-| v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch) | 0.05ms | 200ms | PASS |
+| 4_framework_workflow (10 dispatch across gin/echo/fiber/chi) | 0.06ms | 200ms | PASS |
+| rest_batch (5 POST + GET + DELETE via chi router) | 0.08ms | 200ms | PASS |
+| route_error_handling (5 unmatched 404 + echo handler error) | 0.06ms | 200ms | PASS |
+| v2.1 retry_workflow (5 flaky handler、 3 attempt で成功) | 49.95ms | 400ms | PASS |
+| v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| 4_framework_workflow (10 dispatch across gin/echo/fiber/chi) | 7864 B | 0 B | 102400 B | yes | PASS |
-| rest_batch (5 POST + GET + DELETE via chi router) | 1320 B | 0 B | 102400 B | yes | PASS |
-| route_error_handling (5 unmatched 404 + echo handler error) | 1536 B | 0 B | 102400 B | yes | PASS |
-| v2.1 retry_workflow (5 flaky handler、 3 attempt で成功) | 5960 B | 0 B | 102400 B | yes | PASS |
-| v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch) | -600 B | 0 B | 102400 B | yes | PASS |
+| 4_framework_workflow (10 dispatch across gin/echo/fiber/chi) | 8248 B | 0 B | 102400 B | yes | PASS |
+| rest_batch (5 POST + GET + DELETE via chi router) | -440 B | 0 B | 102400 B | yes | PASS |
+| route_error_handling (5 unmatched 404 + echo handler error) | 10592 B | 0 B | 102400 B | yes | PASS |
+| v2.1 retry_workflow (5 flaky handler、 3 attempt で成功) | 13272 B | -172 B | 102400 B | yes | PASS |
+| v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch) | -14792 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -43,25 +43,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.01ms |
-| p95 | 0.03ms |
-| p99 | 0.03ms |
-| mean | 0.01ms |
-| stdev | 0.01ms |
+| p95 | 0.07ms |
+| p99 | 0.49ms |
+| mean | 0.04ms |
+| stdev | 0.13ms |
 | min | 0.01ms |
-| max | 0.03ms |
-| total | 0.19ms |
+| max | 0.59ms |
+| total | 0.76ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -33.67% |
-| p95 | 0.03ms | 0.03ms | -0.00ms | -11.64% |
-| p99 | 0.03ms | 0.04ms | -0.00ms | -11.13% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -16.63% |
-| min | 0.01ms | 0.01ms | -0.00ms | -34.92% |
-| max | 0.03ms | 0.04ms | -0.00ms | -11.01% |
-| total | 0.19ms | 0.23ms | -0.04ms | -16.63% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -15.84% |
+| p95 | 0.07ms | 0.01ms | +0.05ms | +365.14% |
+| p99 | 0.49ms | 0.03ms | +0.46ms | +1737.07% |
+| mean | 0.04ms | 0.01ms | +0.03ms | +343.50% |
+| min | 0.01ms | 0.01ms | +0.00ms | +17.87% |
+| max | 0.59ms | 0.11ms | +0.49ms | +452.91% |
+| total | 0.76ms | 1.71ms | -0.95ms | -55.65% |
 
 ### rest_batch (5 POST + GET + DELETE via chi router)
 
@@ -72,25 +72,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.03ms |
-| mean | 0.02ms |
-| stdev | 0.00ms |
+| p95 | 0.08ms |
+| p99 | 0.84ms |
+| mean | 0.07ms |
+| stdev | 0.23ms |
 | min | 0.02ms |
-| max | 0.03ms |
-| total | 0.48ms |
+| max | 1.03ms |
+| total | 1.42ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | +0.00ms | +20.17% |
-| p95 | 0.03ms | 0.03ms | -0.00ms | -6.06% |
-| p99 | 0.03ms | 0.04ms | -0.00ms | -11.58% |
-| mean | 0.02ms | 0.02ms | +0.00ms | +8.34% |
-| min | 0.02ms | 0.02ms | 0.00ms | 0.00% |
-| max | 0.03ms | 0.04ms | -0.00ms | -12.74% |
-| total | 0.48ms | 0.44ms | +0.04ms | +8.34% |
+| p50 | 0.02ms | 0.02ms | +0.00ms | +9.66% |
+| p95 | 0.08ms | 0.02ms | +0.06ms | +247.45% |
+| p99 | 0.84ms | 0.03ms | +0.81ms | +2572.28% |
+| mean | 0.07ms | 0.02ms | +0.05ms | +297.77% |
+| min | 0.02ms | 0.01ms | +0.01ms | +43.25% |
+| max | 1.03ms | 0.15ms | +0.88ms | +589.44% |
+| total | 1.42ms | 3.57ms | -2.15ms | -60.22% |
 
 ### route_error_handling (5 unmatched 404 + echo handler error)
 
@@ -101,25 +101,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.01ms |
-| p95 | 0.02ms |
+| p95 | 0.01ms |
 | p99 | 0.02ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
 | max | 0.02ms |
-| total | 0.26ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +12.78% |
-| p95 | 0.02ms | 0.01ms | +0.01ms | +60.68% |
-| p99 | 0.02ms | 0.01ms | +0.01ms | +89.21% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +24.93% |
-| min | 0.01ms | 0.01ms | -0.00ms | -5.32% |
-| max | 0.02ms | 0.01ms | +0.01ms | +96.29% |
-| total | 0.26ms | 0.21ms | +0.05ms | +24.93% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -7.40% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -12.11% |
+| p99 | 0.02ms | 0.03ms | -0.01ms | -41.05% |
+| mean | 0.01ms | 0.05ms | -0.04ms | -78.13% |
+| min | 0.01ms | 0.01ms | -0.00ms | -1.99% |
+| max | 0.02ms | 7.74ms | -7.73ms | -99.80% |
+| total | 0.22ms | 10.11ms | -9.89ms | -97.81% |
 
 ### v2.1 retry_workflow (5 flaky handler、 3 attempt で成功)
 
@@ -129,26 +129,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 5.84ms |
-| p95 | 5.98ms |
-| p99 | 6.01ms |
-| mean | 5.80ms |
-| stdev | 0.28ms |
-| min | 4.67ms |
-| max | 6.01ms |
-| total | 115.94ms |
+| p50 | 14.21ms |
+| p95 | 47.48ms |
+| p99 | 79.31ms |
+| mean | 20.43ms |
+| stdev | 17.97ms |
+| min | 7.27ms |
+| max | 87.26ms |
+| total | 408.57ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 5.84ms | 6.09ms | -0.25ms | -4.07% |
-| p95 | 5.98ms | 6.70ms | -0.72ms | -10.70% |
-| p99 | 6.01ms | 7.35ms | -1.35ms | -18.33% |
-| mean | 5.80ms | 6.20ms | -0.41ms | -6.54% |
-| min | 4.67ms | 5.63ms | -0.96ms | -17.11% |
-| max | 6.01ms | 7.52ms | -1.51ms | -20.04% |
-| total | 115.94ms | 124.06ms | -8.12ms | -6.54% |
+| p50 | 14.21ms | 7.11ms | +7.10ms | +99.75% |
+| p95 | 47.48ms | 14.81ms | +32.67ms | +220.64% |
+| p99 | 79.31ms | 30.08ms | +49.23ms | +163.68% |
+| mean | 20.43ms | 8.60ms | +11.83ms | +137.46% |
+| min | 7.27ms | 4.26ms | +3.01ms | +70.71% |
+| max | 87.26ms | 47.81ms | +39.45ms | +82.52% |
+| total | 408.57ms | 1720.55ms | -1311.98ms | -76.25% |
 
 ### v2.1 batch_dispatch (10 handler concurrent=4 で並列 dispatch)
 
@@ -164,18 +164,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.01ms |
 | stdev | 0.00ms |
 | min | 0.01ms |
-| max | 0.01ms |
+| max | 0.02ms |
 | total | 0.15ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +1.23% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +23.36% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -34.26% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -6.37% |
-| min | 0.01ms | 0.01ms | -0.00ms | -3.62% |
-| max | 0.01ms | 0.02ms | -0.01ms | -40.03% |
-| total | 0.15ms | 0.16ms | -0.01ms | -6.37% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +27.22% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +15.73% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -3.56% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +23.45% |
+| min | 0.01ms | 0.00ms | +0.00ms | +36.14% |
+| max | 0.02ms | 0.02ms | -0.01ms | -32.84% |
+| total | 0.15ms | 1.25ms | -1.10ms | -87.66% |
 

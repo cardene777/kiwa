@@ -6,22 +6,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| queueSend | 0.00ms | 5ms | PASS | stable |
-| fakeClockAdvance | 0.00ms | 5ms | PASS | stable |
+| queueSend | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +54401%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| fakeClockAdvance | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +63207%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| queueSend | 0.02ms | 10ms | PASS |
+| queueSend | 0.01ms | 10ms | PASS |
 | fakeClockAdvance | 0.01ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| queueSend | 29064 B | 0 B | 102400 B | yes | PASS |
-| fakeClockAdvance | -5168 B | 0 B | 102400 B | yes | PASS |
+| queueSend | 31288 B | 0 B | 102400 B | yes | PASS |
+| fakeClockAdvance | 18440 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.19ms |
+| max | 0.01ms |
+| total | 0.12ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +22.13% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +210.61% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -6.68% |
-| mean | 0.00ms | 0.01ms | -0.01ms | -87.82% |
-| min | 0.00ms | 0.00ms | +0.00ms | +12.61% |
-| max | 0.02ms | 1.47ms | -1.44ms | -98.31% |
-| total | 0.19ms | 1.59ms | -1.40ms | -87.82% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -7.55% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -42.22% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.31% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00ms | -6.99% |
+| total | 0.12ms | 0.12ms | -0.00ms | -0.31% |
 
 ### fakeClockAdvance
 
@@ -69,17 +69,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.09ms |
+| total | 0.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -14.49% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -28.23% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -22.88% |
-| min | 0.00ms | 0.00ms | -0.00ms | -0.34% |
-| max | 0.01ms | 0.02ms | -0.02ms | -70.64% |
-| total | 0.09ms | 0.12ms | -0.03ms | -22.88% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +5.31% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +11.39% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.91% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | +0.00ms | +31.27% |
+| total | 0.10ms | 0.09ms | +0.01ms | +5.91% |
 

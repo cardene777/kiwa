@@ -6,9 +6,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| sendMessage | 0.00ms | 5ms | PASS | stable |
-| broadcastMessage | 0.00ms | 5ms | PASS | stable |
-| captureBinaryFrame | 0.00ms | 5ms | PASS | stable |
+| sendMessage | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +52192%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| broadcastMessage | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +91358%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| captureBinaryFrame | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +119589%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| sendMessage | 1912 B | -46988 B | 102400 B | yes | PASS |
-| broadcastMessage | 6376 B | 0 B | 102400 B | yes | PASS |
-| captureBinaryFrame | 10784 B | 0 B | 102400 B | yes | PASS |
+| sendMessage | -8984 B | 0 B | 102400 B | yes | PASS |
+| broadcastMessage | 25992 B | 0 B | 102400 B | yes | PASS |
+| captureBinaryFrame | 2656 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -5.04% |
-| p99 | 0.00ms | 0.01ms | -0.00ms | -38.73% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +0.49% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +4.49% |
-| total | 0.12ms | 0.12ms | +0.00ms | +0.49% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -8.40% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -17.11% |
+| p99 | 0.00ms | 0.01ms | -0.00ms | -66.03% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -17.91% |
+| min | 0.00ms | 0.00ms | -0.00ms | -9.17% |
+| max | 0.01ms | 0.01ms | -0.00ms | -31.27% |
+| total | 0.12ms | 0.14ms | -0.03ms | -17.91% |
 
 ### broadcastMessage
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.00ms |
-| total | 0.08ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +33.82% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +50.34% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +5.83% |
-| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
-| max | 0.00ms | 0.00ms | +0.00ms | +11.69% |
-| total | 0.08ms | 0.08ms | +0.00ms | +5.83% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -8.26% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +37.19% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +0.64% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.00ms | 0.00ms | +0.00ms | +8.78% |
+| total | 0.09ms | 0.09ms | +0.00ms | +0.64% |
 
 ### captureBinaryFrame
 
@@ -97,21 +97,21 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p50 | 0.00ms |
 | p95 | 0.00ms |
 | p99 | 0.00ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
+| mean | 0.01ms |
+| stdev | 0.08ms |
 | min | 0.00ms |
-| max | 0.01ms |
-| total | 0.09ms |
+| max | 1.07ms |
+| total | 1.15ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +22.86% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +41.59% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +6.82% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00ms | +18.98% |
-| total | 0.09ms | 0.08ms | +0.01ms | +6.82% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +22.09% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +40.88% |
+| mean | 0.01ms | 0.00ms | +0.01ms | +1142.87% |
+| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
+| max | 1.07ms | 0.01ms | +1.05ms | +8402.77% |
+| total | 1.15ms | 0.09ms | +1.06ms | +1142.87% |
 

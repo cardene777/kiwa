@@ -115,6 +115,24 @@ export interface RegressionResult {
   /** CI が 0 を含まないかつ delta > threshold なら true。 */
   significant: boolean;
   verdict: 'improved' | 'stable' | 'regressed';
+  /** 判定に使った絶対下限 (ms)。 */
+  floorMs: number;
+  /**
+   * 相対閾値を超えた有意な差だったが、 絶対下限に満たないため stable に落とした場合 true。
+   *
+   * 「変化が無い」 と「差が下限未満で判定できない」 は同じ stable でも意味が違う。
+   * 区別しないと、 検知できていない状態が安定していると読めてしまう。
+   */
+  suppressedByFloor: boolean;
+  /**
+   * baseline の p95 自体が絶対下限を下回る場合 true。
+   *
+   * 相対閾値を何倍超えても、 差が絶対下限に届くまでは stable のままになる。
+   * 例 baseline 0.03ms では +0.5ms (baseline 比 +1667%) でようやく判定対象。
+   * 検知が不可能という意味ではなく、 検知に要する悪化が相対では極端に
+   * 大きくなるという意味。
+   */
+  belowDetectionFloor: boolean;
 }
 
 /** Baseline に記録する環境メタデータ。 machine mismatch 検出用。 */
@@ -122,7 +140,12 @@ export interface BaselineEnv {
   nodeVersion: string;
   /** os.platform() + os.arch()。 例 `darwin-arm64`。 */
   platform: string;
-  hostname: string;
+  /**
+   * 記録しない。 比較には使わず、 baseline を追跡対象にした今は
+   * 測定した機械の名前が git に残るだけになる。 過去の baseline には
+   * 入っているので、 読める形は残す。
+   */
+  hostname?: string;
   cpuModel: string;
   /** cpu core 数 (物理 + 論理まとめて os.cpus().length)。 */
   cpuCount: number;
@@ -134,6 +157,15 @@ export interface BaselineEnv {
    * baseline とは比較せず作り直す。 v1 baseline には無いので optional。
    */
   gcExposed?: boolean;
+  /**
+   * 測定の取り方そのものの版。 機械も Node も同じなのに測り方を変えた場合、
+   * 保存済みの値は比較対象として使えない。 その切り替えを 1 箇所で表す。
+   *
+   * 版が違う baseline とは比較せず、 測定が成立している次の実行で作り直す。
+   * 記録の無い baseline (この field 導入より前のもの) も同じ扱いにする。
+   * 値の意味は `MEASUREMENT_PREMISE` (baseline.ts) が持つ。
+   */
+  measurementPremise?: number;
   /** ISO8601 UTC。 */
   savedAt: string;
 }

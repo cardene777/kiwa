@@ -6,9 +6,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| sendPush | 0.00ms | 5ms | PASS | stable |
-| sendSMS | 0.00ms | 5ms | PASS | stable |
-| parseNotificationEvent | 0.00ms | 5ms | PASS | stable |
+| sendPush | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +22529%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| sendSMS | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +79732%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| parseNotificationEvent | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +45903%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,9 +22,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| sendPush | 34552 B | 0 B | 102400 B | yes | PASS |
-| sendSMS | 23480 B | 0 B | 102400 B | yes | PASS |
-| parseNotificationEvent | 848 B | 0 B | 102400 B | yes | PASS |
+| sendPush | 39944 B | 0 B | 102400 B | yes | PASS |
+| sendSMS | 38840 B | 0 B | 102400 B | yes | PASS |
+| parseNotificationEvent | 12280 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,13 +49,13 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +5.89% |
-| p99 | 0.00ms | 0.01ms | -0.00ms | -38.56% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -1.56% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | -0.00ms | -1.28% |
-| total | 0.15ms | 0.15ms | -0.00ms | -1.56% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +36.17% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -45.38% |
+| p99 | 0.00ms | 0.01ms | -0.01ms | -56.57% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -52.31% |
+| min | 0.00ms | 0.00ms | +0.00ms | +30.05% |
+| max | 0.01ms | 0.17ms | -0.16ms | -94.03% |
+| total | 0.15ms | 0.32ms | -0.17ms | -52.31% |
 
 ### sendSMS
 
@@ -69,22 +69,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.00ms |
 | p99 | 0.00ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.11ms |
-| total | 0.23ms |
+| max | 0.00ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +9.17% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +5.62% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +33.74% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +127.52% |
-| min | 0.00ms | 0.00ms | +0.00ms | +10.10% |
-| max | 0.11ms | 0.00ms | +0.11ms | +6696.16% |
-| total | 0.23ms | 0.10ms | +0.13ms | +127.52% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +6.21% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +2.46% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +2.33% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.00ms | 0.00ms | +0.00ms | +52.94% |
+| total | 0.11ms | 0.11ms | +0.00ms | +2.33% |
 
 ### parseNotificationEvent
 
@@ -101,17 +101,17 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.15ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +18.91% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +75.87% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +4.53% |
-| min | 0.00ms | 0.00ms | -0.00ms | -22.40% |
-| max | 0.01ms | 0.01ms | +0.00ms | +41.84% |
-| total | 0.12ms | 0.12ms | +0.01ms | +4.53% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +9.17% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +33.95% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +90.98% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +12.52% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00ms | -1.51% |
+| total | 0.15ms | 0.13ms | +0.02ms | +12.52% |
 

@@ -42,6 +42,7 @@ describe('cli app scenario perf (real workload)', () => {
       ops: [
         {
           name: 'init_workflow (3 fresh project scaffold)',
+          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
           fn: () => {
             for (let i = 0; i < 3; i++) {
               const projDir = mkdtempSync(path.join(os.tmpdir(), `kiwa-cli-init-${++projectCounter}-`));
@@ -56,6 +57,7 @@ describe('cli app scenario perf (real workload)', () => {
         },
         {
           name: 'spec_to_test_batch (5 consecutive runSpecToTest)',
+          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
           fn: () => {
             for (let i = 0; i < 5; i++) {
               runSpecToTest({
@@ -69,6 +71,7 @@ describe('cli app scenario perf (real workload)', () => {
         },
         {
           name: 'init_error_handling (3 InitConflictError catch)',
+          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
           fn: () => {
             const projDir = mkdtempSync(path.join(os.tmpdir(), 'kiwa-cli-conflict-'));
             try {
@@ -90,6 +93,6 @@ describe('cli app scenario perf (real workload)', () => {
     });
 
     rmSync(specDir, { recursive: true, force: true });
-    expect(result).toBeDefined();
+    expect(result.allPassed).toBe(true);
   });
 });

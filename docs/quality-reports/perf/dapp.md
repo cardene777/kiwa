@@ -6,8 +6,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| eventEmitterEmit | 0.00ms | 5ms | PASS | stable |
-| anvilKeyLookup | 0.00ms | 5ms | PASS | stable |
+| eventEmitterEmit | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +109170%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| anvilKeyLookup | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +200000%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -20,8 +20,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| eventEmitterEmit | -44920 B | 0 B | 102400 B | yes | PASS |
-| anvilKeyLookup | -5552 B | 0 B | 102400 B | yes | PASS |
+| eventEmitterEmit | -31048 B | -44396 B | 102400 B | yes | PASS |
+| anvilKeyLookup | -776 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -39,20 +39,20 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.00ms |
-| total | 0.07ms |
+| max | 0.01ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -12.31% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -8.39% |
-| p99 | 0.00ms | 0.00ms | -0.00ms | -22.05% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -17.25% |
-| min | 0.00ms | 0.00ms | -0.00ms | -14.09% |
-| max | 0.00ms | 0.01ms | -0.00ms | -36.43% |
-| total | 0.07ms | 0.08ms | -0.01ms | -17.25% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +14.04% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -8.95% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +24.32% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +5.18% |
+| min | 0.00ms | 0.00ms | +0.00ms | +16.40% |
+| max | 0.01ms | 0.01ms | -0.00ms | -27.47% |
+| total | 0.08ms | 0.08ms | +0.00ms | +5.18% |
 
 ### anvilKeyLookup
 
@@ -68,18 +68,18 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.00ms |
-| total | 0.04ms |
+| max | 0.01ms |
+| total | 0.06ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -19.71% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -28.42% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +0.32% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -18.03% |
-| min | 0.00ms | 0.00ms | -0.00ms | -24.70% |
-| max | 0.00ms | 0.00ms | -0.00ms | -25.00% |
-| total | 0.04ms | 0.05ms | -0.01ms | -18.03% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +24.55% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +284.04% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +194.96% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +53.51% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.00ms | +0.01ms | +159.73% |
+| total | 0.06ms | 0.04ms | +0.02ms | +53.51% |
 

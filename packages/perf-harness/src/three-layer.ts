@@ -30,7 +30,7 @@ import {
 } from './baseline.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport } from './report.js';
-import type { MeasureResult } from './types.js';
+import type { MeasureResult, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
   name: string;
@@ -56,6 +56,34 @@ export interface PerfOpSpec {
    * Default = 100 KB across 200 iterations.
    */
   memoryArrayBuffersCapBytes?: number;
+  /**
+   * memory 軸の判定を外す理由。 空でない文字列を渡した op だけが対象。
+   *
+   * `arrayBuffers` は Node の Buffer pool の伸びをそのまま拾うため、 fs を
+   * 多く触る対象では実行ごとの振れ幅が上限と同規模になり、 実装の保持量を
+   * 表さなくなる (#1708 で fs 系 op の振れ幅が ±70KB、 上限が 100KB と実測)。
+   * その状態で判定を続けても、 通るか落ちるかが実装と無関係に決まる。
+   *
+   * 上限値の引き上げではなく除外にしているのは、 「この op は測れていない」 を
+   * report に残すため。 上限を上げると測れているように見えてしまう。
+   * 軸そのものの作り直しは別 Issue で扱う。
+   */
+  memoryGateWaived?: string;
+  /**
+   * 回帰判定を gate から外す理由。 空でない文字列を渡した op だけが対象。
+   *
+   * 回帰判定は別々の実行で測った値を比べるため、 その op の実行ごとの振れ幅が
+   * 閾値 20% を超えていると、 実装と無関係に判定が入れ替わる。 fs や jsdom を
+   * 触る op は #1708 の実測で p50 でも 200-243%、 p95 で 313-974% 動いた。
+   *
+   * 判定は report に残したまま gate から外す。 閾値を緩めたり下限を実測の
+   * 振れ幅まで引き上げたりすると、 測れているように見えてしまう。
+   * 測り方そのものの作り直しは #1718 で扱う。
+   *
+   * 上限 (serial / concurrent) の判定はこの指定でも外れない。 上限は 1 回の
+   * 実行の中で完結する判定で、 実行間の振れ幅の影響を受けないため。
+   */
+  regressionGateWaived?: string;
 }
 
 export interface RunPerf3LayerInput {
@@ -90,17 +118,47 @@ export interface RunPerf3LayerInput {
    */
   memoryIterations?: number;
   /**
+   * 計測区間の前に空回しする回数。 既定は `memoryIterations` の 1 割 (最低 3)。
+   *
+   * 初回の呼出に混ざる 1 回きりの確保を計測区間の外へ出すためのもの。
+   * fs を触る対象では Node の Buffer pool が最初の数回で 8KB 単位に伸び、
+   * その分が反復数で割られて「1 回あたりの保持」 として上限判定に載る。
+   */
+  memoryWarmup?: number;
+  /**
+   * 回帰判定を `allPassed` に反映するか (default false)。
+   *
+   * 回帰判定は別々の実行で測った値を比べるため、 op の実行ごとの振れ幅が
+   * 閾値 20% を下回っていて初めて成立する。 #1708 の実測では kiwa の測定環境で
+   * それを満たす op がほとんど無く、 実装を変えずに 2 回測るだけで
+   * 落ちる package が入れ替わった。 標本数を 15-30 から 60-200 へ増やしても
+   * 改善せず、 p95 でも p50 でも mean でも収まらない。
+   *
+   * その状態で gate に載せると、 本当の退行が起きた時に揺らぎと区別できない。
+   * 判定と根拠は report に出したまま、 gate から外す。
+   * 上限 (serial / concurrent / memory) の判定は 1 回の実行の中で完結するので
+   * 従来どおり反映する。
+   *
+   * 測定手法を作り直して振れ幅が閾値を下回ったら、 既定を true に戻す (#1718)。
+   */
+  regressionGate?: boolean;
+  /**
    * Path (relative to reportPath's directory tree) that the report references
    * as the threshold SSOT. Default: '../../quality/perf-thresholds'.
    */
   thresholdDocLink?: string;
   /**
-   * 今回測っていない op を baseline から削除する (default false)。
+   * 今回測っていない op を baseline から削除する。
    *
    * op 名を別処理へ付け替えたときに無関係な過去値と比較しないための掃除だが、
    * 常に有効だと絞り込み実行で op が一度欠けるだけで過去値が消える。
    * 次の完全実行では再 seed されて直前の退行を見逃すので、suite 全体を
    * 回す呼出だけが明示的に有効化する。
+   *
+   * 明示しない場合は環境変数 `KIWA_PERF_PRUNE_STALE=1` の有無で決まる。
+   * kiwa の root `test:perf` はこれを立てる = 全 package を絞り込みなしで
+   * 回す唯一の経路で、 そこでだけ掃除が働く。 個別 package の実行や
+   * `-t` での絞り込みでは立たないため、 過去値を巻き添えにしない。
    */
   pruneStaleBaselineOps?: boolean;
   /**
@@ -123,6 +181,12 @@ export interface OpOutcome {
   concurrentGatePassed: boolean;
   memoryGatePassed: boolean;
   regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)';
+  /**
+   * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
+   * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
+   * 補足が要らない場合は undefined。
+   */
+  regressionNote?: string;
 }
 
 export interface RunPerf3LayerResult {
@@ -155,6 +219,10 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const concurrency = input.concurrency ?? 10;
   const iterationsPerWorker = input.iterationsPerWorker ?? 50;
   const memoryIterations = input.memoryIterations ?? 200;
+  // 1 回きりの確保を計測区間の外へ出す。 serial 側には warmup があるのに
+  // memory 側には無く、 Node の Buffer pool の初期確保が「1 回あたりの保持」 として
+  // 上限判定に載っていた (#1708)。
+  const memoryWarmup = input.memoryWarmup ?? Math.max(3, Math.ceil(memoryIterations / 10));
   const memoryCapDefault = 100 * 1024;
   const baselinePath = input.baselinePath ?? defaultBaselinePath(input.moduleName);
   // 固定の相対 path だと、report を 1 階層深く置いた瞬間にリンクが外れる。
@@ -198,6 +266,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         await op.fn();
       },
       iterations: memoryIterations,
+      warmup: memoryWarmup,
     });
 
     const concurrentCap = op.concurrentP95CapMs ?? op.serialP95CapMs * 2;
@@ -214,8 +283,13 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     // GC を呼べない測定は解放される一時使用まで拾うため、上限との比較が成立しない。
     // 前提を固定できる呼出は requireGc で失敗扱いにする。既定を失敗にすると
     // GC 無しでも動いていた既存の呼出が一斉に落ちるため opt-in にしている。
+    // 理由を明示した op だけは判定から外す。 測れていないものを通すのではなく、
+    // 測れていないことを report に残したうえで gate を落とさない扱いにする。
+    const memoryWaiver = waiverReason(op.memoryGateWaived);
     const memoryGatePassed =
-      (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
+      memoryWaiver !== undefined && memoryWaiver.length > 0
+        ? true
+        : (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
 
     const priorSerial = priorBaseline?.[`${op.name}.serial`];
     const regression = priorSerial
@@ -241,6 +315,9 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
+      ...(regression === null || priorSerial === undefined
+        ? {}
+        : buildRegressionNote(regression, serial.p95, priorSerial.p95)),
     });
   }
 
@@ -248,7 +325,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 既存 op の値は保持しないと比較対象が毎回入れ替わって回帰を検出できない。
   const priorResults = priorBaseline ?? {};
   const currentKeys = new Set(Object.keys(combinedForBaseline));
-  const retained = input.pruneStaleBaselineOps
+  const retained = pruneStaleOps(input)
     ? Object.fromEntries(Object.entries(priorResults).filter(([key]) => currentKeys.has(key)))
     : priorResults;
   const unseededOps = Object.fromEntries(
@@ -269,8 +346,14 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 一方で保存しないままだと、Node 更新や CPU 変更のように前提が恒久的に変わった
   // 場合に手動削除まで比較できない。測定が成立している実行なら作り直す。
   const shouldReseed = envMismatched && premiseValid && hardGatePassed;
+  // 追記にも作り直しと同じ条件を課す。 上限を割った実行や GC を呼べない実行の値を
+  // 基準として採ると、 壊れた状態が次回以降の比較対象になる。 新しい op だけを
+  // 足す経路でも、 その値が成立していなければ意味は同じ。
   const shouldAppend =
-    !envMismatched && (Object.keys(unseededOps).length > 0 || staleDropped);
+    !envMismatched &&
+    premiseValid &&
+    hardGatePassed &&
+    (Object.keys(unseededOps).length > 0 || staleDropped);
 
   let baselineSeeded = false;
   if (shouldReseed) {
@@ -294,13 +377,18 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md
   // § Regression detection defaults)。cap だけを見ると、20% 超の悪化が
   // 上限に収まっている限り素通りしてしまう。
-  const allPassed = outcomes.every(
-    (o) =>
-      o.serialGatePassed &&
-      o.concurrentGatePassed &&
-      o.memoryGatePassed &&
-      o.regressionVerdict !== 'regressed',
-  );
+  const regressionGate = input.regressionGate ?? false;
+  const allPassed = outcomes.every((outcome, index) => {
+    const waiver = waiverReason(input.ops[index]?.regressionGateWaived);
+    const regressionGated =
+      regressionGate && (waiver === undefined || waiver.length === 0);
+    return (
+      outcome.serialGatePassed &&
+      outcome.concurrentGatePassed &&
+      outcome.memoryGatePassed &&
+      (!regressionGated || outcome.regressionVerdict !== 'regressed')
+    );
+  });
 
   writeReport({
     reportPath: input.reportPath,
@@ -313,9 +401,91 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     iterationsPerWorker,
     memoryIterations,
     memoryCapDefault,
+    regressionGate,
   });
 
   return { outcomes, allPassed, baselineSeeded };
+}
+
+/**
+ * 今回測っていない op を baseline から落とすかを決める。
+ *
+ * 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が
+ * 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、
+ * 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
+ */
+export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boolean {
+  if (input.pruneStaleBaselineOps !== undefined) return input.pruneStaleBaselineOps;
+  return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
+}
+
+/**
+ * waiver の理由が実体を持つか。
+ *
+ * `trim()` だけだと U+200B (zero width space) のような不可視文字が「理由あり」 に
+ * なり、 report では空に見えるまま gate だけ外れる。 正規化してから、
+ * 可視の文字が 1 つ以上あることを要求する。
+ */
+function waiverReason(raw: string | undefined): string | undefined {
+  if (raw === undefined) return undefined;
+  const normalized = raw.normalize('NFKC');
+  // 制御文字と空白 (zero width 系を含む) を落として残りを見る。
+  const visible = normalized.replace(/[\p{C}\p{Z}]/gu, '');
+  if (visible.length === 0) return undefined;
+  return normalized.trim();
+}
+
+/**
+ * report の regression 列。 判定結果と、 gate に効いていない場合はその理由を並べる。
+ *
+ * 判定だけを書くと、 `regressed` の行があるのに suite が通っている report が
+ * できる。 読み手には gate が効いているのか外れているのか区別できないので、
+ * 外れている理由 (呼出全体で無効 / この op だけ除外) を同じ列に出す。
+ */
+function regressionCell(op: PerfOpSpec, outcome: OpOutcome, regressionGate: boolean): string {
+  const verdict = outcome.regressionNote
+    ? `${outcome.regressionVerdict} (${outcome.regressionNote})`
+    : outcome.regressionVerdict;
+  if (!regressionGate) return `${verdict} — gate 無効 (regressionGate=false)`;
+  const waiver = waiverReason(op.regressionGateWaived);
+  if (waiver === undefined || waiver.length === 0) return verdict;
+  return `${verdict} — gate 対象外 (${waiver})`;
+}
+
+/**
+ * 判定の状態を report 用の 1 行に言い換える。
+ *
+ * verdict が同じ `stable` でも「変化が無い」 と「差が絶対下限に届かず判定できない」
+ * は別物で、後者を黙って stable と書くと検知できていないことが伝わらない。
+ * 判定そのものは `detectRegression` が持ち、ここでは持ち込まない。
+ */
+function buildRegressionNote(
+  regression: RegressionResult,
+  currentP95: number,
+  baselineP95: number,
+): { regressionNote?: string } {
+  // 検知できた実績がある行に感度の補足を足すと、判定と矛盾して読める。
+  // 補足は「まだ検知に至っていない」 行にだけ付ける。
+  if (regression.verdict === 'regressed' || regression.verdict === 'improved') return {};
+
+  if (regression.suppressedByFloor) {
+    const deltaMs = Math.abs(currentP95 - baselineP95);
+    return {
+      regressionNote: `差 ${deltaMs.toFixed(2)}ms が下限 ${regression.floorMs}ms 未満で判定を保留`,
+    };
+  }
+  if (regression.belowDetectionFloor) {
+    // baseline が下限より小さい op は、相対閾値をどれだけ超えても差が下限に
+    // 届かない限り stable のままになる。 何をもって退行と扱われるのかを書く。
+    const requiredPct = baselineP95 === 0 ? Infinity : (regression.floorMs / baselineP95) * 100;
+    const requirement = Number.isFinite(requiredPct)
+      ? `baseline 比 +${requiredPct.toFixed(0)}%`
+      : 'baseline が 0ms のため相対では表せない';
+    return {
+      regressionNote: `検知には +${regression.floorMs}ms (${requirement}) 以上の悪化が必要`,
+    };
+  }
+  return {};
 }
 
 interface WriteReportInput {
@@ -329,6 +499,8 @@ interface WriteReportInput {
   iterationsPerWorker: number;
   memoryIterations: number;
   memoryCapDefault: number;
+  /** 回帰判定を `allPassed` に反映したか。 report 上で判定と gate を区別するために要る。 */
+  regressionGate: boolean;
 }
 
 function writeReport(input: WriteReportInput): void {
@@ -345,7 +517,10 @@ function writeReport(input: WriteReportInput): void {
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
     lines.push(
-      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${out.regressionVerdict} |`,
+      // 判定を gate から外した op は、判定結果と外した理由の両方を書く。
+      // 結果だけ書くと gate に効いているように読め、理由だけ書くと
+      // 何が測れたのかが残らない。
+      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
     );
   });
 
@@ -376,8 +551,17 @@ function writeReport(input: WriteReportInput): void {
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
     const cap = op.memoryArrayBuffersCapBytes ?? input.memoryCapDefault;
+    // 判定を外した op は PASS と書かない。 測れていないことが読み取れないと、
+    // 上限を上げて通したのと区別がつかなくなる。
+    const waiver = waiverReason(op.memoryGateWaived);
+    const verdict =
+      waiver !== undefined && waiver.length > 0
+        ? `WAIVED (${waiver})`
+        : out.memoryGatePassed
+          ? 'PASS'
+          : 'FAIL';
     lines.push(
-      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
+      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${verdict} |`,
     );
   });
 

@@ -13,9 +13,11 @@ export { measureConcurrent, type ConcurrentInput } from './concurrent.js';
 export { measureMemory, type MemoryInput, type MemorySample } from './memory.js';
 export { detectRegression, detectRegressionStrict } from './regression.js';
 export {
+  MEASUREMENT_PREMISE,
   captureEnv,
   isComparableEnv,
   defaultBaselinePath,
+  resolveBaselineRoot,
   loadBaseline,
   saveBaseline,
   saveBaselineEnvelope,
@@ -26,6 +28,7 @@ export {
   runPerf3Layer,
   runPerf3LayerStrict,
   resolveKiwaRepoRoot,
+  pruneStaleOps,
   type PerfOpSpec,
   type RunPerf3LayerInput,
   type RunPerf3LayerResult,

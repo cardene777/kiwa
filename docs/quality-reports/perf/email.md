@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| sendEmail | 0.00ms | 5ms | PASS | stable |
-| verifyWebhookSignature | 0.01ms | 5ms | PASS | stable |
-| parseDeliveryEvent | 0.00ms | 5ms | PASS | stable |
+| sendEmail | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +41389%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| verifyWebhookSignature | 0.01ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +7306%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| parseDeliveryEvent | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +10195%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| sendEmail | 0.03ms | 10ms | PASS |
-| verifyWebhookSignature | 0.18ms | 10ms | PASS |
-| parseDeliveryEvent | 0.01ms | 10ms | PASS |
+| sendEmail | 0.01ms | 10ms | PASS |
+| verifyWebhookSignature | 0.04ms | 10ms | PASS |
+| parseDeliveryEvent | 0.19ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| sendEmail | 36088 B | -48041 B | 102400 B | yes | PASS |
-| verifyWebhookSignature | -28008 B | 0 B | 102400 B | yes | PASS |
-| parseDeliveryEvent | 816 B | 0 B | 102400 B | yes | PASS |
+| sendEmail | 29960 B | -48597 B | 102400 B | yes | PASS |
+| verifyWebhookSignature | 616 B | 8192 B | 102400 B | yes | PASS |
+| parseDeliveryEvent | -8976 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.00ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.03ms |
-| total | 0.30ms |
+| max | 0.02ms |
+| total | 0.15ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +154.80% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +65.51% |
-| p99 | 0.01ms | 0.00ms | +0.01ms | +174.07% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +139.58% |
-| min | 0.00ms | 0.00ms | +0.00ms | +44.53% |
-| max | 0.03ms | 0.01ms | +0.01ms | +74.72% |
-| total | 0.30ms | 0.13ms | +0.18ms | +139.58% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -8.80% |
+| p99 | 0.00ms | 0.00ms | +0.00ms | +7.83% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +12.41% |
+| min | 0.00ms | 0.00ms | -0.00ms | -8.95% |
+| max | 0.02ms | 0.01ms | +0.00ms | +19.38% |
+| total | 0.15ms | 0.13ms | +0.02ms | +12.41% |
 
 ### verifyWebhookSignature
 
@@ -67,24 +67,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.01ms |
-| p99 | 0.03ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.00ms |
-| max | 0.13ms |
-| total | 0.89ms |
+| max | 0.02ms |
+| total | 0.73ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +1.60% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +34.84% |
-| p99 | 0.03ms | 0.01ms | +0.02ms | +152.61% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +34.73% |
-| min | 0.00ms | 0.00ms | -0.00ms | -5.17% |
-| max | 0.13ms | 0.01ms | +0.12ms | +772.16% |
-| total | 0.89ms | 0.66ms | +0.23ms | +34.73% |
+| p50 | 0.00ms | 0.00ms | +0.00ms | +2.69% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +7.92% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -20.22% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -0.17% |
+| min | 0.00ms | 0.00ms | -0.00ms | -0.03% |
+| max | 0.02ms | 0.02ms | -0.00ms | -21.66% |
+| total | 0.73ms | 0.73ms | -0.00ms | -0.17% |
 
 ### parseDeliveryEvent
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.00ms |
+| p99 | 0.01ms |
 | mean | 0.00ms |
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.11ms |
+| total | 0.14ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -10.07% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +5.10% |
-| p99 | 0.00ms | 0.00ms | +0.00ms | +16.84% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +3.13% |
-| min | 0.00ms | 0.00ms | -0.00ms | -24.92% |
-| max | 0.01ms | 0.01ms | +0.00ms | +52.17% |
-| total | 0.11ms | 0.11ms | +0.00ms | +3.13% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -74.69% |
+| p99 | 0.01ms | 0.02ms | -0.01ms | -48.18% |
+| mean | 0.00ms | 0.00ms | -0.00ms | -77.02% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.40ms | -0.38ms | -96.26% |
+| total | 0.14ms | 0.60ms | -0.46ms | -77.02% |
 

@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| render_workflow (10 renderSolid) | 0.02ms | 100ms | PASS | stable |
-| signal_reactive_batch (5 signal+effect update chains) | 0.01ms | 100ms | PASS | stable |
-| render_error_handling (5 throw + catch in component) | 0.02ms | 100ms | PASS | stable |
+| render_workflow (10 renderSolid) | 0.07ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +1415%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| signal_reactive_batch (5 signal+effect update chains) | 0.01ms | 100ms | PASS | stable (差 0.00ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| render_error_handling (5 throw + catch in component) | 0.03ms | 100ms | PASS | stable (差 0.02ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| render_workflow (10 renderSolid) | 0.05ms | 200ms | PASS |
-| signal_reactive_batch (5 signal+effect update chains) | 0.04ms | 200ms | PASS |
-| render_error_handling (5 throw + catch in component) | 0.03ms | 200ms | PASS |
+| render_workflow (10 renderSolid) | 0.10ms | 200ms | PASS |
+| signal_reactive_batch (5 signal+effect update chains) | 0.03ms | 200ms | PASS |
+| render_error_handling (5 throw + catch in component) | 0.24ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| render_workflow (10 renderSolid) | -1424 B | 0 B | 102400 B | yes | PASS |
-| signal_reactive_batch (5 signal+effect update chains) | 2616 B | 0 B | 102400 B | yes | PASS |
-| render_error_handling (5 throw + catch in component) | 4840 B | 0 B | 102400 B | yes | PASS |
+| render_workflow (10 renderSolid) | 20384 B | 0 B | 102400 B | yes | PASS |
+| signal_reactive_batch (5 signal+effect update chains) | 18448 B | 0 B | 102400 B | yes | PASS |
+| render_error_handling (5 throw + catch in component) | 22128 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.03ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
+| p50 | 0.03ms |
+| p95 | 0.07ms |
+| p99 | 0.26ms |
+| mean | 0.04ms |
+| stdev | 0.06ms |
 | min | 0.01ms |
-| max | 0.03ms |
-| total | 0.26ms |
+| max | 0.30ms |
+| total | 0.89ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -2.57% |
-| p95 | 0.02ms | 0.02ms | -0.00ms | -22.40% |
-| p99 | 0.03ms | 0.03ms | +0.00ms | +4.41% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -5.33% |
-| min | 0.01ms | 0.01ms | -0.00ms | -5.67% |
-| max | 0.03ms | 0.03ms | +0.00ms | +9.98% |
-| total | 0.26ms | 0.27ms | -0.01ms | -5.33% |
+| p50 | 0.03ms | 0.01ms | +0.02ms | +127.47% |
+| p95 | 0.07ms | 0.04ms | +0.04ms | +107.69% |
+| p99 | 0.26ms | 0.05ms | +0.21ms | +436.73% |
+| mean | 0.04ms | 0.02ms | +0.03ms | +153.89% |
+| min | 0.01ms | 0.01ms | -0.00ms | -2.02% |
+| max | 0.30ms | 0.05ms | +0.25ms | +493.71% |
+| total | 0.89ms | 0.35ms | +0.54ms | +153.89% |
 
 ### signal_reactive_batch (5 signal+effect update chains)
 
@@ -70,21 +70,21 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p99 | 0.01ms |
 | mean | 0.01ms |
 | stdev | 0.00ms |
-| min | 0.00ms |
-| max | 0.02ms |
-| total | 0.14ms |
+| min | 0.01ms |
+| max | 0.01ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +4.56% |
-| p95 | 0.01ms | 0.01ms | +0.00ms | +14.71% |
-| p99 | 0.01ms | 0.01ms | +0.00ms | +15.12% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +20.34% |
-| min | 0.00ms | 0.00ms | +0.00ms | +2.01% |
-| max | 0.02ms | 0.01ms | +0.00ms | +15.18% |
-| total | 0.14ms | 0.12ms | +0.02ms | +20.34% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +19.48% |
+| p95 | 0.01ms | 0.01ms | +0.00ms | +30.46% |
+| p99 | 0.01ms | 0.01ms | +0.00ms | +24.57% |
+| mean | 0.01ms | 0.01ms | +0.00ms | +17.91% |
+| min | 0.01ms | 0.01ms | -0.00ms | -1.34% |
+| max | 0.01ms | 0.01ms | +0.00ms | +23.29% |
+| total | 0.16ms | 0.13ms | +0.02ms | +17.91% |
 
 ### render_error_handling (5 throw + catch in component)
 
@@ -95,23 +95,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.07ms |
-| mean | 0.01ms |
+| p95 | 0.03ms |
+| p99 | 0.09ms |
+| mean | 0.02ms |
 | stdev | 0.02ms |
 | min | 0.01ms |
-| max | 0.09ms |
-| total | 0.25ms |
+| max | 0.10ms |
+| total | 0.34ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +1.05% |
-| p95 | 0.02ms | 0.01ms | +0.01ms | +162.94% |
-| p99 | 0.07ms | 0.01ms | +0.06ms | +432.56% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +50.66% |
-| min | 0.01ms | 0.01ms | -0.00ms | -1.08% |
-| max | 0.09ms | 0.01ms | +0.07ms | +473.95% |
-| total | 0.25ms | 0.17ms | +0.08ms | +50.66% |
+| p50 | 0.01ms | 0.01ms | +0.00ms | +5.20% |
+| p95 | 0.03ms | 0.01ms | +0.02ms | +178.24% |
+| p99 | 0.09ms | 0.01ms | +0.08ms | +768.90% |
+| mean | 0.02ms | 0.01ms | +0.01ms | +96.89% |
+| min | 0.01ms | 0.01ms | +0.00ms | +2.55% |
+| max | 0.10ms | 0.01ms | +0.09ms | +911.94% |
+| total | 0.34ms | 0.17ms | +0.17ms | +96.89% |
 

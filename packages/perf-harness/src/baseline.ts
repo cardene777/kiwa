@@ -1,8 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
+import { existsSync, realpathSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { hostname, arch, platform as osPlatform, cpus } from 'node:os';
-import { dirname } from 'node:path';
+import { arch, platform as osPlatform, cpus } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import type {
   BaselineEnv,
   BaselineEnvelope,
@@ -68,20 +69,79 @@ export async function saveBaselineEnvelope(
   }
 }
 
+/**
+ * baseline の既定の置き場を決める。
+ *
+ * `process.cwd()` をそのまま使うと、 同じ module の baseline が起動場所ごとに
+ * 別 file に分かれる。 kiwa では `pnpm --filter <pkg> test:perf` (cwd = package) と
+ * repo root からの起動が混在し、 `<root>/.perf-baseline/` と
+ * `packages/<name>/.perf-baseline/` の 2 箇所に同じ module の値が溜まっていた。
+ * 片方だけを読む実行は毎回「baseline が無い」 と判断して作り直すため、
+ * 回帰判定がいつまでも成立しない。
+ *
+ * workspace の目印 (`pnpm-workspace.yaml` / `.git`) を cwd から上に辿って
+ * 見つかった場所を基準にする。 目印が無い単体 package からの利用では
+ * 従来どおり cwd を使うので、 repo の外の呼出には影響しない。
+ */
 export function defaultBaselinePath(moduleName: string): string {
-  return `${process.cwd()}/.perf-baseline/${moduleName}.json`;
+  return `${resolveBaselineRoot(process.cwd())}/.perf-baseline/${moduleName}.json`;
 }
+
+/**
+ * workspace の目印を cwd から上に辿る。 見つからなければ起点をそのまま返す。
+ *
+ * 起点は symlink を解いてから辿る。 解かないと、 同じ package を実体経由と
+ * link 経由で起動した時に別の root を掴み、 baseline が分裂する。
+ */
+export function resolveBaselineRoot(start: string): string {
+  let current = canonical(start);
+  while (true) {
+    for (const marker of ['pnpm-workspace.yaml', '.git']) {
+      if (existsSync(join(current, marker))) return current;
+    }
+    const parent = dirname(current);
+    if (parent === current) return canonical(start);
+    current = parent;
+  }
+}
+
+/** symlink を解いた絶対 path。 解けない (未作成 等) 場合は resolve だけで返す。 */
+function canonical(target: string): string {
+  try {
+    return realpathSync(resolve(target));
+  } catch {
+    return resolve(target);
+  }
+}
+
+/**
+ * 測定の取り方の版。 機械も Node も同じでも測り方が変われば、 保存済みの値は
+ * 比較対象にならない。 そのとき baseline を手で消して回るのではなく、 ここを
+ * 1 上げて「前提が違う」 と宣言し、 測定が成立している次の実行で作り直させる。
+ *
+ * - 版 1 = workspace も vitest の file も並列で測っていた頃 (この field 自体が無い)
+ * - 版 2 = workspace を `--workspace-concurrency=1`、 vitest を
+ *   `fileParallelism: false` にして 1 件ずつ測る (#1708)
+ * - 版 3 = memory 測定に空回しを入れた (#1708)。 それまでは初回の 1 回きりの
+ *   確保が反復数で割られて「1 回あたりの保持」 に載っており、 同じ実装でも
+ *   arrayBuffers の増分が変わる。 serial / concurrent の測り方は版 2 と同じ
+ *   (標本数の引き上げは試したが効果が確認できず戻した)
+ *
+ * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
+ * 測り方ではないので上げない。
+ */
+export const MEASUREMENT_PREMISE = 3;
 
 /** 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。 */
 export function captureEnv(): BaselineEnv {
   return {
     nodeVersion: process.version,
     platform: `${osPlatform()}-${arch()}`,
-    hostname: hostname(),
     cpuModel: cpus()[0]?.model ?? 'unknown',
     cpuCount: cpus().length,
     gitSha: captureGitSha(),
     gcExposed: typeof (globalThis as { gc?: () => void }).gc === 'function',
+    measurementPremise: MEASUREMENT_PREMISE,
     savedAt: new Date().toISOString(),
   };
 }
@@ -97,7 +157,11 @@ export function isComparableEnv(baseline: BaselineEnv, current: BaselineEnv): bo
   // GC の有無が記録されていない baseline は、どちらの条件で測ったか判別できない。
   // 不明なまま比較すると、実装が変わっていなくても回帰と判定され得る。
   if (baseline.gcExposed === undefined) return false;
+  // 測り方の版も同じ理由で必須にする。 記録が無いものは版 1 以前で、
+  // 並列実行の負荷を含んだ値のため現在の測定とは比較できない。
+  if (baseline.measurementPremise === undefined) return false;
   return (
+    baseline.measurementPremise === current.measurementPremise &&
     baseline.gcExposed === current.gcExposed &&
     baseline.nodeVersion === current.nodeVersion &&
     baseline.platform === current.platform &&
@@ -125,11 +189,11 @@ function diffEnv(baseline: BaselineEnv, current: BaselineEnv): BaselineLoadResul
   const fields: Array<keyof BaselineEnv> = [
     'nodeVersion',
     'platform',
-    'hostname',
     'cpuModel',
     'cpuCount',
     'gitSha',
     'gcExposed',
+    'measurementPremise',
   ];
   const mismatch: BaselineLoadResult['envMismatch'] = [];
   for (const field of fields) {
@@ -183,7 +247,6 @@ function isBaselineEnv(value: unknown): value is BaselineEnv {
   return (
     typeof candidate.nodeVersion === 'string' &&
     typeof candidate.platform === 'string' &&
-    typeof candidate.hostname === 'string' &&
     typeof candidate.cpuModel === 'string' &&
     typeof candidate.cpuCount === 'number' &&
     typeof candidate.gitSha === 'string' &&
@@ -200,7 +263,6 @@ function isResultMap(value: unknown): value is Record<string, MeasureResult> {
 const UNKNOWN_ENV: BaselineEnv = {
   nodeVersion: 'unknown',
   platform: 'unknown',
-  hostname: 'unknown',
   cpuModel: 'unknown',
   cpuCount: 0,
   gitSha: 'unknown',
