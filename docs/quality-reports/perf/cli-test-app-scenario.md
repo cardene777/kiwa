@@ -2,29 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 149.08ms | 500ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| batch_cli_run (5x echo test) | 176.49ms | 1000ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| setup_cleanup_cycle (5 sequential setup+stop) | 25.63ms | 500ms | PASS | regressed — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+|---|---|---|---|---|---|---|
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 3.06ms | 4.53ms | 500ms | 0.00050ms | PASS | improved — gate 無効 (regressionGate=false) |
+| batch_cli_run (5x echo test) | 11.41ms | 13.33ms | 1000ms | 0.00050ms | PASS | improved — gate 無効 (regressionGate=false) |
+| setup_cleanup_cycle (5 sequential setup+stop) | 2.48ms | 3.29ms | 500ms | 0.00050ms | PASS | improved — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 2, 3 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 26.60ms | 1000ms | PASS |
-| batch_cli_run (5x echo test) | 245.02ms | 2000ms | PASS |
-| setup_cleanup_cycle (5 sequential setup+stop) | 24.62ms | 1000ms | PASS |
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 6.06ms | 1000ms | PASS |
+| batch_cli_run (5x echo test) | 14.98ms | 2000ms | PASS |
+| setup_cleanup_cycle (5 sequential setup+stop) | 4.68ms | 1000ms | PASS |
 
 ## Memory retention (15 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | -31128 B | 0 B | 102400 B | yes | WAIVED (fs の Buffer pool の伸びを拾うため実装の保持量を表さない (#1719)) |
-| batch_cli_run (5x echo test) | 25512 B | 0 B | 102400 B | yes | PASS |
-| setup_cleanup_cycle (5 sequential setup+stop) | -24096 B | 0 B | 102400 B | yes | PASS |
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | -34352 B | 0 B | 102400 B | yes | WAIVED (fs の Buffer pool の伸びを拾うため実装の保持量を表さない (#1719)) |
+| batch_cli_run (5x echo test) | 23408 B | 0 B | 102400 B | yes | PASS |
+| setup_cleanup_cycle (5 sequential setup+stop) | -23640 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p50 | 32.74ms |
-| p95 | 149.08ms |
-| p99 | 155.01ms |
-| mean | 47.45ms |
-| stdev | 43.48ms |
-| min | 13.52ms |
-| max | 156.50ms |
-| total | 711.79ms |
+| p10 | 3.06ms |
+| p50 | 3.85ms |
+| p95 | 4.53ms |
+| p99 | 4.64ms |
+| mean | 3.76ms |
+| stdev | 0.53ms |
+| min | 2.97ms |
+| max | 4.67ms |
+| total | 56.33ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 32.74ms | 7.33ms | +25.41ms | +346.55% |
-| p95 | 149.08ms | 23.16ms | +125.92ms | +543.79% |
-| p99 | 155.01ms | 36.67ms | +118.34ms | +322.66% |
-| mean | 47.45ms | 9.67ms | +37.78ms | +390.53% |
-| min | 13.52ms | 3.22ms | +10.30ms | +320.41% |
-| max | 156.50ms | 50.35ms | +106.14ms | +210.80% |
-| total | 711.79ms | 1673.56ms | -961.77ms | -57.47% |
+| p10 | 3.06ms | 4.67ms | -1.61ms | -34.54% |
+| p50 | 3.85ms | 6.16ms | -2.31ms | -37.55% |
+| p95 | 4.53ms | 8.98ms | -4.45ms | -49.51% |
+| p99 | 4.64ms | 9.49ms | -4.85ms | -51.11% |
+| mean | 3.76ms | 6.54ms | -2.78ms | -42.58% |
+| min | 2.97ms | 4.43ms | -1.46ms | -32.85% |
+| max | 4.67ms | 9.62ms | -4.95ms | -51.48% |
+| total | 56.33ms | 98.09ms | -41.76ms | -42.58% |
 
 ### batch_cli_run (5x echo test)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p50 | 122.43ms |
-| p95 | 176.49ms |
-| p99 | 177.55ms |
-| mean | 117.83ms |
-| stdev | 40.69ms |
-| min | 52.03ms |
-| max | 177.82ms |
-| total | 1767.51ms |
+| p10 | 11.41ms |
+| p50 | 12.01ms |
+| p95 | 13.33ms |
+| p99 | 13.84ms |
+| mean | 12.16ms |
+| stdev | 0.84ms |
+| min | 10.88ms |
+| max | 13.97ms |
+| total | 182.43ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 122.43ms | 17.14ms | +105.30ms | +614.44% |
-| p95 | 176.49ms | 59.48ms | +117.00ms | +196.71% |
-| p99 | 177.55ms | 78.64ms | +98.91ms | +125.77% |
-| mean | 117.83ms | 23.88ms | +93.96ms | +393.50% |
-| min | 52.03ms | 12.66ms | +39.37ms | +310.97% |
-| max | 177.82ms | 167.87ms | +9.95ms | +5.93% |
-| total | 1767.51ms | 4130.76ms | -2363.25ms | -57.21% |
+| p10 | 11.41ms | 14.41ms | -3.00ms | -20.84% |
+| p50 | 12.01ms | 18.71ms | -6.70ms | -35.79% |
+| p95 | 13.33ms | 27.98ms | -14.65ms | -52.35% |
+| p99 | 13.84ms | 28.59ms | -14.75ms | -51.59% |
+| mean | 12.16ms | 20.54ms | -8.38ms | -40.80% |
+| min | 10.88ms | 14.06ms | -3.18ms | -22.59% |
+| max | 13.97ms | 28.74ms | -14.78ms | -51.41% |
+| total | 182.43ms | 308.17ms | -125.75ms | -40.80% |
 
 ### setup_cleanup_cycle (5 sequential setup+stop)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p50 | 20.21ms |
-| p95 | 25.63ms |
-| p99 | 26.10ms |
-| mean | 19.81ms |
-| stdev | 4.06ms |
-| min | 11.39ms |
-| max | 26.22ms |
-| total | 297.12ms |
+| p10 | 2.48ms |
+| p50 | 2.86ms |
+| p95 | 3.29ms |
+| p99 | 3.34ms |
+| mean | 2.86ms |
+| stdev | 0.31ms |
+| min | 2.34ms |
+| max | 3.35ms |
+| total | 42.94ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 20.21ms | 4.84ms | +15.37ms | +317.68% |
-| p95 | 25.63ms | 17.32ms | +8.30ms | +47.93% |
-| p99 | 26.10ms | 31.57ms | -5.47ms | -17.34% |
-| mean | 19.81ms | 6.96ms | +12.84ms | +184.47% |
-| min | 11.39ms | 2.47ms | +8.92ms | +361.87% |
-| max | 26.22ms | 39.82ms | -13.60ms | -34.16% |
-| total | 297.12ms | 1204.59ms | -907.48ms | -75.33% |
+| p10 | 2.48ms | 4.21ms | -1.73ms | -41.04% |
+| p50 | 2.86ms | 5.76ms | -2.91ms | -50.40% |
+| p95 | 3.29ms | 9.97ms | -6.67ms | -66.96% |
+| p99 | 3.34ms | 14.01ms | -10.67ms | -76.17% |
+| mean | 2.86ms | 6.43ms | -3.56ms | -55.45% |
+| min | 2.34ms | 3.59ms | -1.25ms | -34.90% |
+| max | 3.35ms | 15.02ms | -11.67ms | -77.70% |
+| total | 42.94ms | 96.39ms | -53.45ms | -55.45% |
 

@@ -201,4 +201,92 @@ describe('measurement premise gating (#1708)', () => {
 
     expect(loaded?.envMismatch.map((entry) => entry.field)).toContain('measurementPremise');
   });
-});
+
+  it('T-PH-B-012 統計量を足す前に保存した baseline は sample から補完して読む (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'without-p10.json');
+    const samples = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const stored = buildMeasureResult('reply', samples.length, 1, samples) as unknown as Record<string, unknown>;
+    // p10 導入より前に保存された baseline を再現する。
+    delete stored['p10'];
+    await saveBaselineEnvelope(file, {
+      schema: 1,
+      env: captureEnv(),
+      results: { reply: stored as never },
+    });
+
+    const loaded = await loadBaseline(file);
+
+    // 補完しないと report 生成が undefined を掴んで落ちる。
+    expect(loaded?.envelope.results['reply']?.p10).toBe(2);
+    // 派生値はすべて sample から決まるので、補完後も他の統計量は元と一致する。
+    expect(loaded?.envelope.results['reply']?.p95).toBe(10.5);
+    expect(loaded?.envelope.results['reply']?.samples).toEqual(samples);
+  });
+
+  it('T-PH-B-013 比較できない件数の記録は読めない記録として扱う (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    // 書く側は拒むので、外から壊れた file が置かれた状況を直接作る。
+    // bootstrap CI は 2 件未満で退化 CI ({0,0}) を返す。有効な記録として返すと
+    // 何倍悪化しても有意にならず永久に stable になり、key が既にあるので
+    // 追記経路でも作り直されない。
+    for (const [label, samples] of [['no-samples', []], ['one-sample', [1]]] as const) {
+      const file = path.join(dir, `${label}.json`);
+      const stored = buildMeasureResult('reply', 3, 1, [1, 2, 3]) as unknown as Record<
+        string,
+        unknown
+      >;
+      stored['samples'] = samples;
+      writeFileSync(
+        file,
+        JSON.stringify({ schema: 1, env: captureEnv(), results: { reply: stored } }),
+        'utf8',
+      );
+
+      expect(await loadBaseline(file), label).toBeNull();
+    }
+  });
+
+  it('T-PH-B-015 読み戻せない envelope は保存を拒む (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'one-sample.json');
+    const stored = buildMeasureResult('reply', 1, 0, [1]);
+
+    // 保存できてしまうと、次の実行が読めない記録として弾いてまた作り直す、を
+    // 繰り返して比較が永久に成立しない。しかもその事実は report の n/a からしか
+    // 読めない。書く側で止める。
+    await expect(
+      saveBaselineEnvelope(file, {
+        schema: 1,
+        env: captureEnv(),
+        results: { reply: stored },
+      }),
+    ).rejects.toThrow(/標本が 2 件未満/);
+
+    // 拒んだ以上、file も残さない。
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  it('T-PH-B-014 保存値と sample が食い違う記録は sample 側に揃える (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'inconsistent.json');
+    const samples = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const stored = buildMeasureResult('reply', samples.length, 1, samples) as unknown as Record<
+      string,
+      unknown
+    >;
+    // 判定は sample から、report は保存値から読む状態を作ると、同じ行に
+    // regressed と改善を示す差分が並ぶ。読込時に片方へ揃える。
+    stored['p10'] = 100;
+    stored['p95'] = 999;
+    await saveBaselineEnvelope(file, {
+      schema: 1,
+      env: captureEnv(),
+      results: { reply: stored as never },
+    });
+
+    const loaded = await loadBaseline(file);
+
+    expect(loaded?.envelope.results['reply']?.p10).toBe(2);
+    expect(loaded?.envelope.results['reply']?.p95).toBe(10.5);
+  });});

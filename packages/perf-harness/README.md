@@ -1,6 +1,6 @@
 # @kiwa-lab/perf-harness
 
-kiwa package + dogfood app + OSS 向け汎用性能検査 harness。 p50 / p95 / p99 latency 測定、 baseline 永続化、 regression 検知、 memory delta 計測、 3 layer perf gate (serial / concurrent / memory) を提供する。 spec SSOT = 本 README + `src/types.ts`。
+kiwa package + dogfood app + OSS 向け汎用性能検査 harness。 p10 / p50 / p95 / p99 latency 測定、 baseline 永続化、 regression 検知 (判定軸 = p10)、 memory delta 計測、 3 layer perf gate (serial / concurrent / memory) を提供する。 spec SSOT = 本 README + `src/types.ts`。
 
 ## 精度契約 (旧実装からの変更点)
 
@@ -10,11 +10,17 @@ kiwa package + dogfood app + OSS 向け汎用性能検査 harness。 p50 / p95 /
 
 旧実装は nearest-rank (`ceil(n * ratio) - 1`)。 n < 100 で 5-10pt ずれる。 現在は Type 7 (NumPy / R default) 経路で adjacent rank を線形補間する。 `percentileType7` が SSOT で、 report / regression / gate 全て同経路を使う。
 
-### 2. Regression = bootstrap CI on p95 delta
+### 2. Regression = bootstrap CI on p10 delta
 
 旧実装は Welch t-test を **mean** に対して、 magnitude 判定を **p95** に対して回していた。 統計軸が矛盾していたため、 「mean で有意差なし + p95 が 20% 悪化 = stable」 という致命的誤判定が起き得た。
 
-現在は p95 delta 分布に対して bootstrap CI (default 2000 iter / 95% CI) を計算し、 CI が 0 を跨がないかつ delta が threshold を超えた時のみ regressed / improved を判定する。 統計軸が一貫。
+現在は分布の下側 (p10) の delta に対して bootstrap CI (default 2000 iter / 95% CI) を計算し、 CI が 0 を跨がないかつ delta が threshold を超えた時のみ regressed / improved を判定する。
+
+上側ではなく下側を読むのは、 測定を乱す要因 (scheduler の横取り / GC / page cache miss / 他 process) がどれも実行時間を伸ばす方向にしか働かないため。 上側の裾はその日の機械の状態を、 下側は邪魔が入らなかった時の実費を表す。 実行をまたいで比べられるのは後者だけで、 実測では同じ実装の p95 が 134-289% 動く条件下で p10 は 6-12% に収まる (#1718)。
+
+上限 (cap) の判定は従来どおり p95 を読む。 1 回の実行の中で完結する判定なので、 実行間の振れ幅の影響を受けない。 一部の呼出だけが遅くなる変化は下側に出ないため、 p95 の変化率を `RegressionResult.tailDeltaPct` に載せて報告に残す (gate には使わない)。
+
+絶対下限は固定値ではなく、 実行の中で測る。 `measureHarnessResolution` が空の関数を op と同じ経路で呼んで p10 を取り、 その 2 倍を下限にする。 それより小さい差は op ではなく harness 自身の往復を見ている。 詳細と却下した案は `docs/quality/perf-thresholds.md` § Regression detection defaults が SSOT。
 
 ### 3. Warmup = fixed | convergent の 2 strategy
 
@@ -114,9 +120,10 @@ await runPerf3Layer({
 | 経路 | 説明 |
 |---|---|
 | `measure(input)` | 単一 op 測定。 percentile Type 7 / warmup convergent / trim percent 対応。 |
+| `measureHarnessResolution(opts?)` | 空の関数を同じ経路で呼んだ費用 (p10) を返す。 回帰判定の絶対下限の素になる。 |
 | `buildMeasureResult(name, iter, warmup, samples, trimPct?, converged?)` | 既存 samples から MeasureResult 再構築。 test 用途。 |
 | `percentileType7(sorted, ratio)` | Type 7 linear interpolation percentile。 SSOT 経路。 |
-| `detectRegression(input)` | bootstrap CI on p95 delta で regression 判定。 default 95% CI + threshold 20%。 |
+| `detectRegression(input)` | bootstrap CI on p10 delta で regression 判定。 default 95% CI + threshold 20%。 |
 | `detectRegressionStrict(input)` | Strict mode = 99% CI + threshold 10%。 release gate 用。 |
 | `loadBaseline(path)` | Envelope 読込 + 現行 env との mismatch 列挙。 legacy schema 自動 upgrade。 |
 | `saveBaseline(path, result, opts?)` | 単一 result 保存 (envelope wrap)。 |
@@ -127,7 +134,7 @@ await runPerf3Layer({
 
 ## 制約 (制約を明示することで正しく使わせる)
 
-- **wall-clock 測定** ... `process.hrtime.bigint()` を使うが、 sub-ms 測定は OS scheduler の解像度 (~1ms on macOS) に制約される。 sub-ms op は batch 化して測る。
+- **wall-clock 測定** ... `process.hrtime.bigint()` を使う。 sub-ms op を batch 化して測る案は #1718 で実測により却下した (1 sample を 1ms 相当にまとめても fs 系の振れ幅は 136-971% で、 batch 前より改善しない)。 sub-ms は下側の分位 (p10) と実測した分解能で扱う。
 - **shared machine ノイズ** ... CI / laptop で他 process が動いている環境の絶対値は信用しない。 regression 検知は同一 machine 内 delta のみ意味がある。 `loadBaseline` の envMismatch を必ず確認する。
 - **memory 計測** ... `measureMemory` は `--expose-gc` flag が必要。 flag なしでも動くが数値がノイジー。
 - **bootstrap 乱数** ... `Math.random()` を使うため実行毎に CI がわずかに揺れる。 決定的な結果が必要なら `bootstrapIterations` を上げる (default 2000 → 10000)。

@@ -11,6 +11,7 @@ describe('emitPerfReport', () => {
       |---|---|
       | iterations | 5 |
       | warmup | 1 |
+      | p10 | 1.40ms |
       | p50 | 3.00ms |
       | p95 | 4.80ms |
       | p99 | 4.96ms |
@@ -35,6 +36,7 @@ describe('emitPerfReport', () => {
       |---|---|
       | iterations | 5 |
       | warmup | 1 |
+      | p10 | 2.40ms |
       | p50 | 4.00ms |
       | p95 | 5.80ms |
       | p99 | 5.96ms |
@@ -48,6 +50,7 @@ describe('emitPerfReport', () => {
 
       | metric | current | baseline | delta ms | delta % |
       |---|---|---|---|---|
+      | p10 | 2.40ms | 1.40ms | +1.00ms | +71.43% |
       | p50 | 4.00ms | 3.00ms | +1.00ms | +33.33% |
       | p95 | 5.80ms | 4.80ms | +1.00ms | +20.83% |
       | p99 | 5.96ms | 4.96ms | +1.00ms | +20.16% |

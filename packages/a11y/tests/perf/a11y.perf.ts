@@ -98,6 +98,7 @@ describe(MODULE, () => {
           {
             // violation path = axe walk + report build + impact ranking
             name: 'runAxeDirtyReport',
+            regressionGateWaived: 'p10 の実行間の振れ幅が 22-24% で閾値 20% を超える (#1718)',
             serialP95CapMs: 400,
             fn: () =>
               serializeAxe(async () => {

@@ -21,7 +21,7 @@ describe('cli-test app scenario perf (real workload)', () => {
       ops: [
         {
           name: 'file_scaffold_workflow (setup + 20 writeFile + listFiles)',
-          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
+          regressionGateWaived: 'p10 の実行間の振れ幅が 35-110% で閾値 20% を大きく超える (#1718)',
           fn: async () => {
             const env = await setupCliEnv();
             for (let i = 0; i < 20; i++) await env.writeFile(`f-${i}.txt`, `c-${i}`);
@@ -38,7 +38,7 @@ describe('cli-test app scenario perf (real workload)', () => {
         },
         {
           name: 'batch_cli_run (5x echo test)',
-          regressionGateWaived: '子 process の起動時間が実行ごとに大きく動く (#1718)',
+          regressionGateWaived: '子 process の起動時間で p10 が 42-108% 動く (#1718)',
           fn: async () => {
             const env = await setupCliEnv();
             for (let i = 0; i < 5; i++) {
@@ -51,7 +51,7 @@ describe('cli-test app scenario perf (real workload)', () => {
         },
         {
           name: 'setup_cleanup_cycle (5 sequential setup+stop)',
-          regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
+          regressionGateWaived: 'p10 の実行間の振れ幅が 65-244% で閾値 20% を大きく超える (#1718)',
           fn: async () => {
             for (let i = 0; i < 5; i++) {
               const env = await setupCliEnv();

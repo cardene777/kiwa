@@ -79,11 +79,38 @@ The trade-off is wall-clock time: a serial pass takes roughly 20-40 minutes inst
 
 ## Regression detection defaults
 
-Threshold: **20 % p95 delta** vs stored baseline (`.perf-baseline/{module}.json`), with Welch t-test for significance (t > 2 ⇒ significant).
+Threshold: **20 % p10 delta** vs stored baseline (`.perf-baseline/{module}.json`), with a bootstrap confidence interval on the p10 difference for significance (CI excluding 0 ⇒ significant).
 
 - baseline is created automatically on the first run (no `--baseline` flag needed since v1.14-post)
-- subsequent runs compare against baseline; a > 20 % p95 increase with significant t-value fails the gate
-- the p95 difference must also be at least **0.5 ms** in absolute terms (`minDeltaMs`). A relative-only rule gets stricter as the measured value shrinks: 0.03 ms → 0.04 ms is a "significant 33 % regression" on stable samples, yet nothing is actually slower. Ops measured in microseconds would fail on jitter alone.
+- subsequent runs compare against baseline; a > 20 % p10 increase with a significant CI fails the gate
+- the p10 difference must also clear an absolute floor derived from the measurement system itself (see below). A relative-only rule gets stricter as the measured value shrinks: 0.03 ms → 0.04 ms is a "significant 33 % regression" on stable samples, yet nothing is actually slower. Ops measured in microseconds would fail on jitter alone.
+
+### Why the verdict reads the bottom of the distribution
+
+Every source of measurement noise — a scheduler preemption, a GC pause, a page-cache miss, another process on the machine — makes a call take **longer**. None make it shorter. So the top of the distribution measures the machine's state on the day, and the bottom measures what the work costs when nothing interferes. Only the second one can be compared across runs.
+
+That is why the p95-based verdict flipped on unchanged code. Measuring the same implementation repeatedly and comparing the two ends:
+
+| op | p95 spread | p10 spread |
+|---|---|---|
+| `@kiwa-lab/cli-test` `readFile` | 134 % | 6 % |
+| `@kiwa-lab/cli-test` `writeFile` | 289 % | 12 % |
+| a trivial property read | 18 % | 51 %¹ |
+| `JSON.parse(JSON.stringify(…))` | 101 % | 8 % |
+
+¹ The trivial op sits below the harness's own call cost, so both figures are noise around the timer quantum. That case is handled by the floor, not by the statistic.
+
+`min` was rejected in favour of `p10`: a minimum is decided by a single sample, so it is exposed to the timer quantum and to one lucky call. At n = 200, p10 has twenty samples of depth behind it.
+
+Three alternatives from the same measurement round were rejected. **Batching** (making one sample the mean of B calls, with B calibrated so a sample lands near 1 ms) did not converge — `fsWrite` still moved 136 % at the p50 of batched samples, because the per-call cost itself differs between processes. **Median / trimmed mean** of raw samples moved 115-200 % and 147-256 % on the same ops. **Measurement of measurements** (median of five sub-run p95s) moved 210-517 %.
+
+### The absolute floor is measured, not fixed
+
+The floor is no longer the fixed 0.5 ms. Before the ops run, `measureHarnessResolution` times an empty function through the same call path (`async () => { await empty(); }`) and takes its p10. A difference smaller than that is not attributable to the op — it is the harness's own round trip. The floor is set at **twice** that value (`RESOLUTION_FLOOR_MULTIPLE`).
+
+The multiplier is load-bearing. `@kiwa-lab/cache`'s env accessors measure 0.00013 ms, which is *faster* than the empty call's 0.00017 ms. With the floor at exactly the resolution, one of four unchanged runs moved p10 to 0.00033 ms and the 0.0002 ms difference cleared the floor, producing `regressed`. At twice the resolution it does not. The deliberate-slowdown check still passes: injecting three times the baseline p95 into one op produces a 0.0034 ms shift, ten times the floor.
+
+The fixed floor was doing real damage. It made every op with a baseline under 0.5 ms permanently unjudgeable, which was the whole of `cache`, `dapp`, `api`, and `data`. On this machine the measured floor lands near 0.0003 ms, roughly three orders of magnitude lower, so those ops became judgeable for the first time.
 - baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
 - to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
 
@@ -101,52 +128,73 @@ The machine's hostname is not recorded. It plays no part in the comparison, and 
 
 ### When measurements stop being comparable
 
-`BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different.
+`BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different. Version 4 adds the resolution measurement that now precedes every suite, which warms the call path before the first op reaches it.
 
-Bump it only when the same implementation would measure differently. Threshold and verdict changes are not measurement changes.
+Bump it only when the same implementation would measure differently. Threshold and verdict changes are not measurement changes — the move from p95 to p10 did not by itself require a bump, since it reads the same stored samples.
 
-### What the absolute floor hides
+### What the report shows when no verdict is reached
 
-The 0.5 ms `minDeltaMs` floor is load-bearing, and it also has a cost worth stating plainly: an op whose baseline p95 is under 0.5 ms can never be reported as regressed, because no realistic slowdown produces a large enough absolute delta. `cache`'s three ops sit at 0.02-0.06 ms, so they would need a 1000 %+ change to register.
-
-Lowering the floor proportionally to the baseline was tried and rejected on measurement evidence. Re-running an unchanged implementation four times moves sub-millisecond p95 by 50-1100 %, in absolute terms 0.03-0.22 ms. A proportional floor turns that jitter into a regression verdict on every run. Raising `serialIterations` from 30 to 200 widened the spread rather than narrowing it — p95 is an upper order statistic, so more samples means more chances to catch a scheduler or GC outlier.
-
-The report no longer papers over this. The regression column distinguishes three cases that used to render identically as `stable`:
+The regression column distinguishes four cases that would otherwise all render as `stable`:
 
 | what happened | how it renders |
 |---|---|
 | measured, no meaningful change | `stable` |
-| relative rule fired, absolute delta below the floor | `stable (差 …ms が下限 0.5ms 未満で判定を保留)` |
-| baseline is under the floor, so detection needs an outsized change | `stable (検知には +0.5ms (baseline 比 +…%) 以上の悪化が必要)` |
+| relative rule fired, absolute delta below the floor | `stable (差 …ms が下限 …ms 未満で判定を保留)` |
+| baseline is under the floor, so detection needs an outsized change | `stable (検知には +…ms (baseline 比 +…%) 以上の悪化が必要)` |
+| the bottom held still and only the tail grew | `stable (下側は動かず p95 のみ +…%)` |
 
-The third case says what it would take, not that detection is impossible — a sub-millisecond op that slows by more than 0.5 ms is still reported as regressed. The note is therefore only attached to rows that did *not* reach a verdict; a `regressed` row carries no sensitivity note, because pairing the two reads as a contradiction.
+The third case says what it would take, not that detection is impossible — an op that slows by more than the floor is still reported as regressed. Notes are attached only to rows that did *not* reach a verdict; a `regressed` row carries no sensitivity note, because pairing the two reads as a contradiction.
 
-Making sub-millisecond ops genuinely gateable needs a different statistic (trimmed mean or median) or a higher-resolution clock. That is a change to the measurement method, not to a threshold, and is tracked separately.
+The fourth case is the cost of judging on the bottom of the distribution. A change that makes only *some* calls slower — a rarely-taken branch, an occasional cache miss — does not move p10. `RegressionResult.tailDeltaPct` carries the p95 change so the fact is not lost, but it cannot be gated: on unchanged code that same axis moves by hundreds of percent between runs, so a real tail regression and a busy machine are indistinguishable there.
 
 ### The regression verdict is reported but not gated
 
-Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. On the machines this suite runs on, almost nothing qualifies.
+Regression detection compares two separate runs, so it only works when an op's own run-to-run spread is smaller than the 20 % threshold. Under the p95 verdict **no** op in this set qualified — the spreads started at 134 %. Moving the verdict to p10 brought five of the seventeen inside the bound. That is the honest figure: the set below is not a sample of all ops, it is the collection of ops that were already known to be unstable, so five surviving it is a floor on the improvement, not a ceiling.
 
-Measured four times with no code change:
+Measured across two independent rounds of four consecutive unchanged runs (the second round reseeding its baseline on a machine already warmed by the first, so the reference is representative of how the suite actually runs):
 
-| op | p50 spread | p95 spread |
+| op | p10 spread | gateable |
 |---|---|---|
-| `@kiwa-lab/cli-test` `readFile` | 243 % | 974 % |
-| `@kiwa-lab/cli-test` `writeFile` | 200 % | 313 % |
-| `@kiwa-lab/cli` `init_workflow` (200 samples) | 41 % | 143 % |
-| `@kiwa-lab/cli` `spec_to_test_batch` (200 samples) | 62 % | 514 % |
+| `visual-app-scenario` `baseline_compare` | 2-6 % | yes |
+| `a11y-app-scenario` `audit_error_handling` | 8-14 % | yes |
+| `@kiwa-lab/cli` `runSpecToTest` | 12 % | yes |
+| `cli-app-scenario` `spec_to_test_batch` | 16-17 % | yes |
+| `visual-app-scenario` `large_image_diff` | 3-18 % | yes |
+| `cli-app-scenario` `init_error_handling` | 18-32 % | no |
+| `a11y` `runAxeDirtyReport` | 22-24 % | no |
+| `cli-app-scenario` `init_workflow` | 21-24 % | no |
+| `a11y-app-scenario` `violation_report_batch` | 21-29 % | no |
+| `visual` `comparePngBuffersFullDiff` | 17-41 % | no |
+| `a11y-app-scenario` `audit_workflow` | 11-44 % | no |
+| `cli-test` `readFile` | 60-100 % | no |
+| `cli-test-app-scenario` `batch_cli_run` | 42-108 % | no |
+| `cli-test-app-scenario` `file_scaffold_workflow` | 35-110 % | no |
+| `visual` `comparePngBuffersIdentical` | 49-169 % | no |
+| `cli-test-app-scenario` `setup_cleanup_cycle` | 65-244 % | no |
+| `cli-test` `writeFile` | 100-322 % | no |
 
-Sample count is not the cause. Raising `serialIterations` from 15-30 to 60-200 across the fourteen affected files changed which packages failed rather than how many, and at the higher counts it exposed ops whose cost grows with iteration count — `a11y`'s `audit_workflow` went from 23 ms to 216 ms, breaching a cap it had passed. That change was reverted.
+Two ranges are reported per op because the two rounds disagreed, sometimes widely: `audit_workflow` measured 11 % in one and 44 % in the other. **Four runs is not enough to certify an op.** An op qualifies only if it stayed under the threshold in both rounds, which is why `audit_workflow` keeps its waiver despite a passing round. The disagreement itself has a physical cause — the machine runs slower when hot, and a suite that takes 20-40 minutes spends most of that time hot — so a baseline recorded on a cold machine reports systematic regressions afterwards. That is what made the first round's numbers unusable and forced the reseed described above.
 
-So `runPerf3Layer` computes the verdict, writes it into the report, and leaves it out of `allPassed` unless the caller passes `regressionGate: true`. Keeping a verdict in the gate while it flips on unchanged code is worse than not gating: a real regression becomes indistinguishable from the noise around it.
+Sample count is not the cause of the residual spread. Raising `serialIterations` from 15-30 to 60-200 across the fourteen affected files changed which packages failed rather than how many, and at the higher counts it exposed ops whose cost grows with iteration count — `a11y`'s `audit_workflow` went from 23 ms to 216 ms, breaching a cap it had passed. That change was reverted.
+
+So `runPerf3Layer` computes the verdict, writes it into the report, and leaves it out of `allPassed` unless the caller passes `regressionGate: true`. Turning the default on requires measuring the remaining packages the same way, which is tracked in #1708.
 
 The caps (serial, concurrent, memory) are still gated. A cap is decided inside a single run and does not depend on run-to-run spread — that is how the `vector` breach in this suite was found.
 
-Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 974 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
+Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 322 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
 
-`regressionGateWaived: '<reason>'` marks the ops already known to exceed the threshold, so the list survives until the gate can be switched back on. Adding one requires measured evidence in the reason string. Do not add one because a run happened to fail.
+`regressionGateWaived: '<reason>'` marks the twelve ops still above the threshold, so the list survives until the gate can be switched on for them. The reason string carries the measured spread. Adding one requires measured evidence; do not add one because a run happened to fail. Every row marked `no` above carries a waiver — a row that is not gateable and not waived would fail the gate the moment `regressionGate` is turned on.
 
-Restoring the gate means making the verdict reproducible — a different statistic or a quieter measurement environment. Until then `regressionGate` stays false by default.
+### What would make the remaining twelve gateable
+
+The residual spread is environmental — thermal state, page cache, subprocess spawn cost — and no choice of statistic over a single run's samples removes it. What does remove it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
+
+| op | raw p10 spread | ratio to a CPU-only reference | ratio to an fs reference |
+|---|---|---|---|
+| `fsRead` | 141 % | 88 % | **3 %** |
+| `fsWrite` | 43 % | 34 % | **13 %** |
+
+The reference has to share the disturbance: a CPU-bound reference does not help an fs-bound op, and its own measurement moved 2406 % across runs, making it useless as a denominator for anything. So each op would have to declare a reference of the right kind, and every stored baseline would become a ratio rather than a duration. That is a change to what a baseline *is*, not to which statistic is read from it, and is left to a follow-up.
 
 ### The first run after a rebuild can breach a cap
 

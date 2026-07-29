@@ -8,10 +8,15 @@ export type {
   Thresholds,
 } from './types.js';
 
-export { buildMeasureResult, measure } from './measure.js';
+export { buildMeasureResult, measure, measureHarnessResolution } from './measure.js';
 export { measureConcurrent, type ConcurrentInput } from './concurrent.js';
 export { measureMemory, type MemoryInput, type MemorySample } from './memory.js';
-export { detectRegression, detectRegressionStrict } from './regression.js';
+export {
+  REGRESSION_JUDGED_PERCENTILE,
+  RESOLUTION_FLOOR_MULTIPLE,
+  detectRegression,
+  detectRegressionStrict,
+} from './regression.js';
 export {
   MEASUREMENT_PREMISE,
   captureEnv,

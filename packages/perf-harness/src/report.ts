@@ -14,6 +14,7 @@ export function emitPerfReport(
   lines.push('|---|---|');
   lines.push(`| iterations | ${result.iterations} |`);
   lines.push(`| warmup | ${result.warmup} |`);
+  lines.push(`| p10 | ${formatMs(result.p10)} |`);
   lines.push(`| p50 | ${formatMs(result.p50)} |`);
   lines.push(`| p95 | ${formatMs(result.p95)} |`);
   lines.push(`| p99 | ${formatMs(result.p99)} |`);
@@ -26,6 +27,7 @@ export function emitPerfReport(
 
   if (opts.baseline) {
     const metrics = [
+      { label: 'p10', current: result.p10, baseline: opts.baseline.p10 },
       { label: 'p50', current: result.p50, baseline: opts.baseline.p50 },
       { label: 'p95', current: result.p95, baseline: opts.baseline.p95 },
       { label: 'p99', current: result.p99, baseline: opts.baseline.p99 },
@@ -96,13 +98,21 @@ function histogramRows(samples: number[], bins: number): Array<{
   });
 }
 
-function formatMs(value: number): string {
-  return `${value.toFixed(2)}ms`;
+/**
+ * 1ms を大きく下回る値も読める形に整える。
+ *
+ * 小数 2 桁の固定だと、 sub-ms の op は p10 も p95 も差も全部 `0.00ms` になる。
+ * 回帰判定が読む軸が p10 に移って、 その帯の値が報告の主役になった。
+ */
+export function formatMs(value: number): string {
+  if (value === 0) return '0.00ms';
+  if (Math.abs(value) >= 0.01) return `${value.toFixed(2)}ms`;
+  return `${value.toPrecision(2)}ms`;
 }
 
 function formatSignedMs(value: number): string {
   const sign = value > 0 ? '+' : '';
-  return `${sign}${value.toFixed(2)}ms`;
+  return `${sign}${formatMs(value)}`;
 }
 
 function formatSignedPct(value: number): string {

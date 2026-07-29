@@ -38,7 +38,7 @@ describe(MODULE, () => {
             // writeFile creates a new file each iteration. Measures fs write
             // syscall + relative path resolution overhead.
             name: 'writeFile',
-            regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
+            regressionGateWaived: 'p10 の実行間の振れ幅が 100-322% で、判定が regressed へ入れ替わる (#1718)',
             serialP95CapMs: 20,
             fn: async () => {
               await env.writeFile(`f-${++counter}.txt`, `content-${counter}`);
@@ -48,7 +48,7 @@ describe(MODULE, () => {
             // readFile pulls the seed file; seed persists across iterations
             // so this is a pure read syscall p95 measurement.
             name: 'readFile',
-            regressionGateWaived: 'fs syscall の揺らぎが実行ごとに p50 で 200% 超動く (#1718)',
+            regressionGateWaived: 'p10 の実行間の振れ幅が 60-100% で、判定が regressed へ入れ替わる (#1718)',
             serialP95CapMs: 10,
             fn: async () => {
               await env.readFile('seed.txt');
