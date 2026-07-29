@@ -6,22 +6,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| invokeServerFunction | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +29734%) 以上の悪化が必要) |
-| invokeApiRoute | 0.03ms | 5ms | PASS | stable (差 0.04ms が下限 0.5ms 未満で判定を保留) |
+| invokeServerFunction | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +29734%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| invokeApiRoute | 0.03ms | 5ms | PASS | stable (差 0.04ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
 | invokeServerFunction | 0.01ms | 10ms | PASS |
-| invokeApiRoute | 0.31ms | 10ms | PASS |
+| invokeApiRoute | 0.14ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeServerFunction | -4528 B | -31515 B | 102400 B | yes | PASS |
-| invokeApiRoute | 57840 B | -990 B | 102400 B | yes | PASS |
+| invokeServerFunction | -12888 B | 0 B | 102400 B | yes | PASS |
+| invokeApiRoute | -125320 B | 2200 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,24 +35,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.00ms |
+| p99 | 0.02ms |
+| mean | 0.03ms |
+| stdev | 0.37ms |
 | min | 0.00ms |
-| max | 0.02ms |
-| total | 0.17ms |
+| max | 5.22ms |
+| total | 5.42ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -6.72% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -19.98% |
-| p99 | 0.01ms | 0.04ms | -0.03ms | -74.55% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -58.37% |
-| min | 0.00ms | 0.00ms | -0.00ms | -14.24% |
-| max | 0.02ms | 0.15ms | -0.13ms | -88.82% |
-| total | 0.17ms | 0.41ms | -0.24ms | -58.37% |
+| p50 | 0.00ms | 0.00ms | -0.00ms | -13.36% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +68.85% |
+| p99 | 0.02ms | 0.04ms | -0.02ms | -59.50% |
+| mean | 0.03ms | 0.00ms | +0.03ms | +1209.42% |
+| min | 0.00ms | 0.00ms | -0.00ms | -28.47% |
+| max | 5.22ms | 0.15ms | +5.07ms | +3470.49% |
+| total | 5.42ms | 0.41ms | +5.01ms | +1209.42% |
 
 ### invokeApiRoute
 
@@ -64,22 +64,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p50 | 0.01ms |
 | p95 | 0.03ms |
-| p99 | 0.06ms |
+| p99 | 0.09ms |
 | mean | 0.02ms |
 | stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.10ms |
-| total | 3.01ms |
+| max | 0.13ms |
+| total | 3.52ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -17.82% |
-| p95 | 0.03ms | 0.07ms | -0.04ms | -60.89% |
-| p99 | 0.06ms | 0.53ms | -0.47ms | -88.18% |
-| mean | 0.02ms | 0.03ms | -0.02ms | -50.93% |
-| min | 0.01ms | 0.01ms | +0.00ms | +5.55% |
-| max | 0.10ms | 0.97ms | -0.86ms | -89.32% |
-| total | 3.01ms | 6.14ms | -3.13ms | -50.93% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -6.19% |
+| p95 | 0.03ms | 0.07ms | -0.04ms | -53.54% |
+| p99 | 0.09ms | 0.53ms | -0.44ms | -83.37% |
+| mean | 0.02ms | 0.03ms | -0.01ms | -42.74% |
+| min | 0.01ms | 0.01ms | +0.00ms | +1.28% |
+| max | 0.13ms | 0.97ms | -0.83ms | -86.34% |
+| total | 3.52ms | 6.14ms | -2.63ms | -42.74% |
 

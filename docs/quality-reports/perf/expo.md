@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| createExpoTestEnv | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +15782%) 以上の悪化が必要) |
-| routerPushCycle | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +60020%) 以上の悪化が必要) |
-| notificationDispatch | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +49895%) 以上の悪化が必要) |
+| createExpoTestEnv | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +15782%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| routerPushCycle | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +60020%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| notificationDispatch | 0.00ms | 5ms | PASS | stable (検知には +0.5ms (baseline 比 +49895%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| createExpoTestEnv | 0.04ms | 10ms | PASS |
-| routerPushCycle | 0.01ms | 10ms | PASS |
+| createExpoTestEnv | 0.07ms | 10ms | PASS |
+| routerPushCycle | 0.04ms | 10ms | PASS |
 | notificationDispatch | 0.02ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| createExpoTestEnv | -10456 B | 0 B | 102400 B | yes | PASS |
-| routerPushCycle | -16352 B | 0 B | 102400 B | yes | PASS |
-| notificationDispatch | 592 B | 0 B | 102400 B | yes | PASS |
+| createExpoTestEnv | -8408 B | 0 B | 102400 B | yes | PASS |
+| routerPushCycle | -744 B | 0 B | 102400 B | yes | PASS |
+| notificationDispatch | 2832 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -38,24 +38,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p50 | 0.00ms |
 | p95 | 0.00ms |
-| p99 | 0.01ms |
+| p99 | 0.02ms |
 | mean | 0.00ms |
-| stdev | 0.00ms |
+| stdev | 0.04ms |
 | min | 0.00ms |
-| max | 0.03ms |
-| total | 0.33ms |
+| max | 0.54ms |
+| total | 0.94ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | +0.00ms | +1.99% |
-| p95 | 0.00ms | 0.00ms | -0.00ms | -10.31% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -47.83% |
-| mean | 0.00ms | 0.00ms | -0.00ms | -23.72% |
-| min | 0.00ms | 0.00ms | -0.00ms | -13.54% |
-| max | 0.03ms | 0.08ms | -0.05ms | -62.69% |
-| total | 0.33ms | 0.43ms | -0.10ms | -23.72% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -1.30% |
+| p99 | 0.02ms | 0.02ms | +0.00ms | +2.23% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +118.36% |
+| min | 0.00ms | 0.00ms | +0.00ms | +0.11% |
+| max | 0.54ms | 0.08ms | +0.46ms | +594.18% |
+| total | 0.94ms | 0.43ms | +0.51ms | +118.36% |
 
 ### routerPushCycle
 
@@ -68,23 +68,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p50 | 0.00ms |
 | p95 | 0.00ms |
 | p99 | 0.01ms |
-| mean | 0.00ms |
-| stdev | 0.01ms |
+| mean | 0.02ms |
+| stdev | 0.23ms |
 | min | 0.00ms |
-| max | 0.10ms |
-| total | 0.23ms |
+| max | 3.29ms |
+| total | 3.44ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.20% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +7.54% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +140.37% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +69.64% |
-| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
-| max | 0.10ms | 0.01ms | +0.10ms | +1719.27% |
-| total | 0.23ms | 0.13ms | +0.09ms | +69.64% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | +0.00ms | +51.30% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +172.61% |
+| mean | 0.02ms | 0.00ms | +0.02ms | +2476.06% |
+| min | 0.00ms | 0.00ms | +0.00ms | +8.20% |
+| max | 3.29ms | 0.01ms | +3.29ms | +58425.19% |
+| total | 3.44ms | 0.13ms | +3.31ms | +2476.06% |
 
 ### notificationDispatch
 
@@ -107,11 +107,11 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.00ms | 0.00ms | -0.00ms | -7.75% |
-| p95 | 0.00ms | 0.00ms | +0.00ms | +29.34% |
-| p99 | 0.01ms | 0.00ms | +0.00ms | +121.85% |
-| mean | 0.00ms | 0.00ms | +0.00ms | +0.25% |
-| min | 0.00ms | 0.00ms | -0.00ms | -16.60% |
-| max | 0.01ms | 0.01ms | -0.00ms | -25.81% |
-| total | 0.14ms | 0.14ms | +0.00ms | +0.25% |
+| p50 | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| p95 | 0.00ms | 0.00ms | -0.00ms | -15.95% |
+| p99 | 0.01ms | 0.00ms | +0.00ms | +104.64% |
+| mean | 0.00ms | 0.00ms | +0.00ms | +1.75% |
+| min | 0.00ms | 0.00ms | 0.00ms | 0.00% |
+| max | 0.01ms | 0.01ms | -0.00ms | -17.20% |
+| total | 0.14ms | 0.14ms | +0.00ms | +1.75% |
 

@@ -6,24 +6,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| onboarding_workflow (router + secureStore + notification x10 cycle) | 0.02ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +2656%) 以上の悪化が必要) |
-| file_capture_batch (camera picture + fileSystem write x5) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +4807%) 以上の悪化が必要) |
-| permission_error_handling (5 denied camera + secureStore fail) | 0.03ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +944%) 以上の悪化が必要) |
+| onboarding_workflow (router + secureStore + notification x10 cycle) | 0.29ms | 100ms | PASS | stable (差 0.27ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| file_capture_batch (camera picture + fileSystem write x5) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +4807%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| permission_error_handling (5 denied camera + secureStore fail) | 0.03ms | 100ms | PASS | stable (差 0.03ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| onboarding_workflow (router + secureStore + notification x10 cycle) | 0.08ms | 200ms | PASS |
-| file_capture_batch (camera picture + fileSystem write x5) | 0.02ms | 200ms | PASS |
-| permission_error_handling (5 denied camera + secureStore fail) | 0.11ms | 200ms | PASS |
+| onboarding_workflow (router + secureStore + notification x10 cycle) | 0.10ms | 200ms | PASS |
+| file_capture_batch (camera picture + fileSystem write x5) | 0.03ms | 200ms | PASS |
+| permission_error_handling (5 denied camera + secureStore fail) | 0.09ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| onboarding_workflow (router + secureStore + notification x10 cycle) | 19912 B | 0 B | 102400 B | yes | PASS |
-| file_capture_batch (camera picture + fileSystem write x5) | -328 B | 0 B | 102400 B | yes | PASS |
+| onboarding_workflow (router + secureStore + notification x10 cycle) | 14728 B | -11316 B | 102400 B | yes | PASS |
+| file_capture_batch (camera picture + fileSystem write x5) | 5424 B | 8192 B | 102400 B | yes | PASS |
 | permission_error_handling (5 denied camera + secureStore fail) | 3600 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.02ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
+| p50 | 0.03ms |
+| p95 | 0.29ms |
+| p99 | 0.32ms |
+| mean | 0.05ms |
+| stdev | 0.09ms |
 | min | 0.01ms |
-| max | 0.02ms |
-| total | 0.24ms |
+| max | 0.32ms |
+| total | 0.99ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | -0.00ms | -28.47% |
-| p95 | 0.02ms | 0.02ms | -0.00ms | -13.47% |
-| p99 | 0.02ms | 0.02ms | -0.00ms | -7.41% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -18.18% |
-| min | 0.01ms | 0.01ms | -0.00ms | -8.78% |
-| max | 0.02ms | 0.03ms | -0.00ms | -6.30% |
-| total | 0.24ms | 0.29ms | -0.05ms | -18.18% |
+| p50 | 0.03ms | 0.01ms | +0.01ms | +90.21% |
+| p95 | 0.29ms | 0.02ms | +0.27ms | +1417.10% |
+| p99 | 0.32ms | 0.02ms | +0.29ms | +1196.46% |
+| mean | 0.05ms | 0.01ms | +0.04ms | +238.22% |
+| min | 0.01ms | 0.01ms | +0.00ms | +3.44% |
+| max | 0.32ms | 0.03ms | +0.30ms | +1156.20% |
+| total | 0.99ms | 0.29ms | +0.70ms | +238.22% |
 
 ### file_capture_batch (camera picture + fileSystem write x5)
 
@@ -72,19 +72,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | stdev | 0.00ms |
 | min | 0.00ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +11.99% |
-| p95 | 0.01ms | 0.01ms | -0.00ms | -11.03% |
-| p99 | 0.01ms | 0.01ms | -0.00ms | -1.73% |
-| mean | 0.01ms | 0.01ms | +0.00ms | +0.20% |
-| min | 0.00ms | 0.00ms | -0.00ms | -16.92% |
-| max | 0.01ms | 0.01ms | -0.00ms | -0.01% |
-| total | 0.12ms | 0.12ms | +0.00ms | +0.20% |
+| p50 | 0.01ms | 0.01ms | -0.00ms | -4.00% |
+| p95 | 0.01ms | 0.01ms | -0.00ms | -40.54% |
+| p99 | 0.01ms | 0.01ms | -0.00ms | -37.29% |
+| mean | 0.01ms | 0.01ms | -0.00ms | -14.91% |
+| min | 0.00ms | 0.00ms | -0.00ms | -0.83% |
+| max | 0.01ms | 0.01ms | -0.01ms | -36.69% |
+| total | 0.11ms | 0.12ms | -0.02ms | -14.91% |
 
 ### permission_error_handling (5 denied camera + secureStore fail)
 
@@ -96,22 +96,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p50 | 0.02ms |
 | p95 | 0.03ms |
-| p99 | 0.04ms |
+| p99 | 0.03ms |
 | mean | 0.02ms |
-| stdev | 0.01ms |
+| stdev | 0.00ms |
 | min | 0.02ms |
-| max | 0.04ms |
-| total | 0.47ms |
+| max | 0.03ms |
+| total | 0.40ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.02ms | 0.02ms | -0.00ms | -1.46% |
-| p95 | 0.03ms | 0.05ms | -0.02ms | -34.00% |
-| p99 | 0.04ms | 0.09ms | -0.05ms | -59.33% |
-| mean | 0.02ms | 0.03ms | -0.01ms | -17.63% |
-| min | 0.02ms | 0.02ms | -0.00ms | -4.56% |
-| max | 0.04ms | 0.10ms | -0.06ms | -62.83% |
-| total | 0.47ms | 0.57ms | -0.10ms | -17.63% |
+| p50 | 0.02ms | 0.02ms | -0.00ms | -9.58% |
+| p95 | 0.03ms | 0.05ms | -0.03ms | -50.82% |
+| p99 | 0.03ms | 0.09ms | -0.06ms | -69.37% |
+| mean | 0.02ms | 0.03ms | -0.01ms | -30.05% |
+| min | 0.02ms | 0.02ms | -0.00ms | -2.82% |
+| max | 0.03ms | 0.10ms | -0.07ms | -71.94% |
+| total | 0.40ms | 0.57ms | -0.17ms | -30.05% |
 

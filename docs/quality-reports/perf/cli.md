@@ -6,19 +6,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| runSpecToTest | 0.12ms | 20ms | PASS | improved |
+| runSpecToTest | 0.39ms | 20ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 25 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| runSpecToTest | 0.44ms | 40ms | PASS |
+| runSpecToTest | 1.65ms | 40ms | PASS |
 
 ## Memory retention (100 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| runSpecToTest | 13880 B | 0 B | 102400 B | yes | PASS |
+| runSpecToTest | 15240 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -30,24 +30,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 100 |
 | warmup | 3 |
-| p50 | 0.09ms |
-| p95 | 0.12ms |
-| p99 | 0.15ms |
-| mean | 0.09ms |
-| stdev | 0.02ms |
-| min | 0.08ms |
-| max | 0.29ms |
-| total | 9.46ms |
+| p50 | 0.12ms |
+| p95 | 0.39ms |
+| p99 | 0.61ms |
+| mean | 0.17ms |
+| stdev | 0.12ms |
+| min | 0.09ms |
+| max | 0.87ms |
+| total | 16.66ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.09ms | 0.12ms | -0.03ms | -26.00% |
-| p95 | 0.12ms | 0.65ms | -0.53ms | -81.55% |
-| p99 | 0.15ms | 0.98ms | -0.83ms | -84.83% |
-| mean | 0.09ms | 0.20ms | -0.11ms | -53.45% |
-| min | 0.08ms | 0.09ms | -0.01ms | -11.35% |
-| max | 0.29ms | 1.85ms | -1.56ms | -84.52% |
-| total | 9.46ms | 20.33ms | -10.87ms | -53.45% |
+| p50 | 0.12ms | 0.12ms | +0.00ms | +1.21% |
+| p95 | 0.39ms | 0.65ms | -0.26ms | -40.06% |
+| p99 | 0.61ms | 0.98ms | -0.37ms | -37.57% |
+| mean | 0.17ms | 0.20ms | -0.04ms | -18.03% |
+| min | 0.09ms | 0.09ms | +0.01ms | +5.94% |
+| max | 0.87ms | 1.85ms | -0.97ms | -52.65% |
+| total | 16.66ms | 20.33ms | -3.67ms | -18.03% |
 

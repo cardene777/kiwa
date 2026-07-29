@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| rag_workflow (upsert 10 + query 3 across 4 providers) | 0.86ms | 200ms | PASS | regressed |
-| batch_upsert_1000 (chunked upsertVectors) | 0.27ms | 200ms | PASS | stable (検知には +0.5ms (baseline 比 +184%) 以上の悪化が必要) |
-| query_error_handling (5 dimension mismatch throw + catch) | 0.04ms | 200ms | PASS | stable (検知には +0.5ms (baseline 比 +1245%) 以上の悪化が必要) |
+| rag_workflow (upsert 10 + query 3 across 4 providers) | 0.13ms | 200ms | PASS | stable (差 0.08ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| batch_upsert_1000 (chunked upsertVectors) | 7.75ms | 200ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| query_error_handling (5 dimension mismatch throw + catch) | 0.05ms | 200ms | PASS | stable (検知には +0.5ms (baseline 比 +1245%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| rag_workflow (upsert 10 + query 3 across 4 providers) | 0.27ms | 400ms | PASS |
-| batch_upsert_1000 (chunked upsertVectors) | 1.69ms | 400ms | PASS |
-| query_error_handling (5 dimension mismatch throw + catch) | 0.16ms | 400ms | PASS |
+| rag_workflow (upsert 10 + query 3 across 4 providers) | 0.20ms | 400ms | PASS |
+| batch_upsert_1000 (chunked upsertVectors) | 4.54ms | 400ms | PASS |
+| query_error_handling (5 dimension mismatch throw + catch) | 0.17ms | 400ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| rag_workflow (upsert 10 + query 3 across 4 providers) | 2808 B | -583 B | 102400 B | yes | PASS |
-| batch_upsert_1000 (chunked upsertVectors) | 277488 B | 0 B | 102400 B | yes | PASS |
-| query_error_handling (5 dimension mismatch throw + catch) | 1088 B | 0 B | 102400 B | yes | PASS |
+| rag_workflow (upsert 10 + query 3 across 4 providers) | -9656 B | 0 B | 102400 B | yes | PASS |
+| batch_upsert_1000 (chunked upsertVectors) | 688 B | 0 B | 102400 B | yes | PASS |
+| query_error_handling (5 dimension mismatch throw + catch) | -7736 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +36,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.27ms |
-| p95 | 0.86ms |
-| p99 | 0.87ms |
-| mean | 0.33ms |
+| p50 | 0.05ms |
+| p95 | 0.13ms |
+| p99 | 1.09ms |
+| mean | 0.11ms |
 | stdev | 0.29ms |
 | min | 0.04ms |
-| max | 0.87ms |
-| total | 6.66ms |
+| max | 1.33ms |
+| total | 2.28ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.27ms | 0.04ms | +0.23ms | +536.35% |
-| p95 | 0.86ms | 0.05ms | +0.80ms | +1474.31% |
-| p99 | 0.87ms | 0.06ms | +0.81ms | +1475.44% |
-| mean | 0.33ms | 0.04ms | +0.29ms | +654.08% |
-| min | 0.04ms | 0.03ms | +0.01ms | +24.45% |
-| max | 0.87ms | 0.06ms | +0.82ms | +1475.72% |
-| total | 6.66ms | 0.88ms | +5.78ms | +654.08% |
+| p50 | 0.05ms | 0.04ms | +0.01ms | +19.73% |
+| p95 | 0.13ms | 0.05ms | +0.08ms | +143.31% |
+| p99 | 1.09ms | 0.06ms | +1.03ms | +1873.49% |
+| mean | 0.11ms | 0.04ms | +0.07ms | +157.74% |
+| min | 0.04ms | 0.03ms | +0.01ms | +17.03% |
+| max | 1.33ms | 0.06ms | +1.27ms | +2300.45% |
+| total | 2.28ms | 0.88ms | +1.39ms | +157.74% |
 
 ### batch_upsert_1000 (chunked upsertVectors)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.23ms |
-| p95 | 0.27ms |
-| p99 | 0.40ms |
-| mean | 0.24ms |
-| stdev | 0.05ms |
-| min | 0.20ms |
-| max | 0.43ms |
-| total | 4.81ms |
+| p50 | 0.27ms |
+| p95 | 7.75ms |
+| p99 | 18.98ms |
+| mean | 1.86ms |
+| stdev | 4.97ms |
+| min | 0.21ms |
+| max | 21.79ms |
+| total | 37.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.23ms | 0.23ms | +0.00ms | +0.95% |
-| p95 | 0.27ms | 0.27ms | -0.00ms | -1.06% |
-| p99 | 0.40ms | 0.34ms | +0.06ms | +16.35% |
-| mean | 0.24ms | 0.24ms | -0.00ms | -0.20% |
-| min | 0.20ms | 0.22ms | -0.03ms | -12.07% |
-| max | 0.43ms | 0.36ms | +0.07ms | +19.64% |
-| total | 4.81ms | 4.82ms | -0.01ms | -0.20% |
+| p50 | 0.27ms | 0.23ms | +0.04ms | +16.79% |
+| p95 | 7.75ms | 0.27ms | +7.48ms | +2752.48% |
+| p99 | 18.98ms | 0.34ms | +18.64ms | +5446.94% |
+| mean | 1.86ms | 0.24ms | +1.62ms | +669.90% |
+| min | 0.21ms | 0.22ms | -0.01ms | -4.39% |
+| max | 21.79ms | 0.36ms | +21.43ms | +5955.79% |
+| total | 37.13ms | 4.82ms | +32.31ms | +669.90% |
 
 ### query_error_handling (5 dimension mismatch throw + catch)
 
@@ -95,23 +95,23 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p50 | 0.04ms |
-| p95 | 0.04ms |
-| p99 | 0.04ms |
+| p95 | 0.05ms |
+| p99 | 0.05ms |
 | mean | 0.04ms |
 | stdev | 0.00ms |
 | min | 0.03ms |
-| max | 0.04ms |
-| total | 0.72ms |
+| max | 0.05ms |
+| total | 0.79ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.04ms | +0.00ms | +0.59% |
-| p95 | 0.04ms | 0.04ms | -0.00ms | -0.89% |
-| p99 | 0.04ms | 0.04ms | -0.00ms | -1.81% |
-| mean | 0.04ms | 0.04ms | -0.00ms | -0.17% |
-| min | 0.03ms | 0.03ms | +0.00ms | +3.94% |
-| max | 0.04ms | 0.04ms | -0.00ms | -2.03% |
-| total | 0.72ms | 0.72ms | -0.00ms | -0.17% |
+| p50 | 0.04ms | 0.04ms | +0.00ms | +13.51% |
+| p95 | 0.05ms | 0.04ms | +0.00ms | +12.28% |
+| p99 | 0.05ms | 0.04ms | +0.01ms | +18.90% |
+| mean | 0.04ms | 0.04ms | +0.00ms | +10.16% |
+| min | 0.03ms | 0.03ms | +0.00ms | +7.87% |
+| max | 0.05ms | 0.04ms | +0.01ms | +20.53% |
+| total | 0.79ms | 0.72ms | +0.07ms | +10.16% |
 

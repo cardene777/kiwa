@@ -6,25 +6,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p95 | cap | gate | regression |
 |---|---|---|---|---|
-| dapp_spec_parse (10 parseSpec of wallet spec) | 0.08ms | 30ms | PASS | stable (検知には +0.5ms (baseline 比 +634%) 以上の悪化が必要) |
-| bulk_dapp_spec_parse (50 parseSpec rapid) | 0.13ms | 50ms | PASS | stable (検知には +0.5ms (baseline 比 +339%) 以上の悪化が必要) |
-| dapp_spec_with_module_override (10 parseSpec with opts.module) | 0.05ms | 30ms | PASS | stable (検知には +0.5ms (baseline 比 +1257%) 以上の悪化が必要) |
+| dapp_spec_parse (10 parseSpec of wallet spec) | 0.05ms | 30ms | PASS | stable (差 0.03ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| bulk_dapp_spec_parse (50 parseSpec rapid) | 0.39ms | 50ms | PASS | stable (差 0.24ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| dapp_spec_with_module_override (10 parseSpec with opts.module) | 0.05ms | 30ms | PASS | stable (差 0.01ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| dapp_spec_parse (10 parseSpec of wallet spec) | 0.19ms | 60ms | PASS |
-| bulk_dapp_spec_parse (50 parseSpec rapid) | 0.64ms | 100ms | PASS |
-| dapp_spec_with_module_override (10 parseSpec with opts.module) | 0.16ms | 60ms | PASS |
+| dapp_spec_parse (10 parseSpec of wallet spec) | 0.18ms | 60ms | PASS |
+| bulk_dapp_spec_parse (50 parseSpec rapid) | 0.71ms | 100ms | PASS |
+| dapp_spec_with_module_override (10 parseSpec with opts.module) | 0.18ms | 60ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| dapp_spec_parse (10 parseSpec of wallet spec) | -52512 B | 0 B | 102400 B | yes | PASS |
-| bulk_dapp_spec_parse (50 parseSpec rapid) | -33848 B | 0 B | 102400 B | yes | PASS |
-| dapp_spec_with_module_override (10 parseSpec with opts.module) | 3336 B | 0 B | 102400 B | yes | PASS |
+| dapp_spec_parse (10 parseSpec of wallet spec) | -10624 B | 0 B | 102400 B | yes | PASS |
+| bulk_dapp_spec_parse (50 parseSpec rapid) | -4168 B | 0 B | 102400 B | yes | PASS |
+| dapp_spec_with_module_override (10 parseSpec with opts.module) | 5208 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -37,25 +37,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 30 |
 | warmup | 5 |
 | p50 | 0.04ms |
-| p95 | 0.08ms |
-| p99 | 0.10ms |
+| p95 | 0.05ms |
+| p99 | 0.06ms |
 | mean | 0.04ms |
-| stdev | 0.02ms |
+| stdev | 0.01ms |
 | min | 0.03ms |
-| max | 0.10ms |
-| total | 1.29ms |
+| max | 0.06ms |
+| total | 1.23ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.04ms | 0.04ms | -0.00ms | -6.30% |
-| p95 | 0.08ms | 0.08ms | +0.01ms | +6.91% |
-| p99 | 0.10ms | 0.17ms | -0.07ms | -41.53% |
-| mean | 0.04ms | 0.05ms | -0.01ms | -17.72% |
-| min | 0.03ms | 0.03ms | -0.00ms | -8.41% |
-| max | 0.10ms | 0.20ms | -0.10ms | -48.97% |
-| total | 1.29ms | 1.57ms | -0.28ms | -17.72% |
+| p50 | 0.04ms | 0.04ms | -0.00ms | -7.31% |
+| p95 | 0.05ms | 0.08ms | -0.03ms | -33.39% |
+| p99 | 0.06ms | 0.17ms | -0.11ms | -66.59% |
+| mean | 0.04ms | 0.05ms | -0.01ms | -21.40% |
+| min | 0.03ms | 0.03ms | +0.00ms | +4.77% |
+| max | 0.06ms | 0.20ms | -0.14ms | -71.63% |
+| total | 1.23ms | 1.57ms | -0.34ms | -21.40% |
 
 ### bulk_dapp_spec_parse (50 parseSpec rapid)
 
@@ -65,26 +65,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.11ms |
-| p95 | 0.13ms |
-| p99 | 0.15ms |
-| mean | 0.11ms |
-| stdev | 0.01ms |
-| min | 0.11ms |
-| max | 0.15ms |
-| total | 3.41ms |
+| p50 | 0.14ms |
+| p95 | 0.39ms |
+| p99 | 0.44ms |
+| mean | 0.21ms |
+| stdev | 0.11ms |
+| min | 0.12ms |
+| max | 0.46ms |
+| total | 6.42ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.11ms | 0.12ms | -0.01ms | -11.64% |
-| p95 | 0.13ms | 0.15ms | -0.02ms | -12.41% |
-| p99 | 0.15ms | 0.16ms | -0.02ms | -11.43% |
-| mean | 0.11ms | 0.13ms | -0.01ms | -10.80% |
-| min | 0.11ms | 0.12ms | -0.01ms | -8.13% |
-| max | 0.15ms | 0.17ms | -0.02ms | -11.74% |
-| total | 3.41ms | 3.82ms | -0.41ms | -10.80% |
+| p50 | 0.14ms | 0.12ms | +0.01ms | +10.85% |
+| p95 | 0.39ms | 0.15ms | +0.24ms | +161.42% |
+| p99 | 0.44ms | 0.16ms | +0.28ms | +167.34% |
+| mean | 0.21ms | 0.13ms | +0.09ms | +68.10% |
+| min | 0.12ms | 0.12ms | +0.01ms | +4.66% |
+| max | 0.46ms | 0.17ms | +0.28ms | +166.46% |
+| total | 6.42ms | 3.82ms | +2.60ms | +68.10% |
 
 ### dapp_spec_with_module_override (10 parseSpec with opts.module)
 
@@ -94,24 +94,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p50 | 0.03ms |
+| p50 | 0.04ms |
 | p95 | 0.05ms |
-| p99 | 0.05ms |
+| p99 | 0.06ms |
 | mean | 0.04ms |
 | stdev | 0.00ms |
-| min | 0.03ms |
-| max | 0.05ms |
-| total | 1.09ms |
+| min | 0.04ms |
+| max | 0.06ms |
+| total | 1.24ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.04ms | -0.00ms | -5.32% |
-| p95 | 0.05ms | 0.04ms | +0.01ms | +17.60% |
-| p99 | 0.05ms | 0.04ms | +0.01ms | +14.85% |
-| mean | 0.04ms | 0.04ms | -0.00ms | -1.57% |
-| min | 0.03ms | 0.04ms | -0.00ms | -8.97% |
-| max | 0.05ms | 0.04ms | +0.01ms | +12.83% |
-| total | 1.09ms | 1.11ms | -0.02ms | -1.57% |
+| p50 | 0.04ms | 0.04ms | +0.00ms | +9.44% |
+| p95 | 0.05ms | 0.04ms | +0.01ms | +23.83% |
+| p99 | 0.06ms | 0.04ms | +0.01ms | +28.36% |
+| mean | 0.04ms | 0.04ms | +0.00ms | +11.74% |
+| min | 0.04ms | 0.04ms | +0.00ms | +5.36% |
+| max | 0.06ms | 0.04ms | +0.01ms | +29.21% |
+| total | 1.24ms | 1.11ms | +0.13ms | +11.74% |
 
