@@ -8,8 +8,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| eventEmitterEmit | 0.00025ms | 0.00038ms | 5ms | 0.00033ms | PASS | stable (差 0.00029ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| anvilKeyLookup | 0.00017ms | 0.00084ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +200%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| eventEmitterEmit | 0.00029ms | 0.00038ms | 5ms | 0.00033ms | PASS | stable (差 0.00025ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| anvilKeyLookup | 0.00017ms | 0.00076ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +200%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -22,8 +22,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| eventEmitterEmit | -37216 B | 0 B | 102400 B | yes | PASS |
-| anvilKeyLookup | -468504 B | 0 B | 102400 B | yes | PASS |
+| eventEmitterEmit | -41112 B | 0 B | 102400 B | yes | PASS |
+| anvilKeyLookup | 5512 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -35,28 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00025ms |
+| p10 | 0.00029ms |
 | p50 | 0.00029ms |
 | p95 | 0.00038ms |
-| p99 | 0.0023ms |
-| mean | 0.00036ms |
-| stdev | 0.00062ms |
-| min | 0.00021ms |
-| max | 0.0068ms |
+| p99 | 0.00086ms |
+| mean | 0.00035ms |
+| stdev | 0.00058ms |
+| min | 0.00025ms |
+| max | 0.0079ms |
 | total | 0.07ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00025ms | 0.00054ms | -0.00029ms | -53.79% |
-| p50 | 0.00029ms | 0.00063ms | -0.00033ms | -53.44% |
-| p95 | 0.00038ms | 0.00084ms | -0.00046ms | -54.90% |
-| p99 | 0.0023ms | 0.0054ms | -0.0031ms | -57.65% |
-| mean | 0.00036ms | 0.00078ms | -0.00042ms | -53.32% |
-| min | 0.00021ms | 0.00025ms | -0.000042ms | -16.80% |
-| max | 0.0068ms | 0.01ms | -0.0052ms | -43.24% |
-| total | 0.07ms | 0.16ms | -0.08ms | -53.32% |
+| p10 | 0.00029ms | 0.00054ms | -0.00025ms | -46.21% |
+| p50 | 0.00029ms | 0.00063ms | -0.00033ms | -53.28% |
+| p95 | 0.00038ms | 0.00084ms | -0.00046ms | -55.15% |
+| p99 | 0.00086ms | 0.0054ms | -0.0045ms | -84.10% |
+| mean | 0.00035ms | 0.00078ms | -0.00043ms | -54.57% |
+| min | 0.00025ms | 0.00025ms | 0.00ms | 0.00% |
+| max | 0.0079ms | 0.01ms | -0.0041ms | -34.25% |
+| total | 0.07ms | 0.16ms | -0.09ms | -54.57% |
 
 ### anvilKeyLookup
 
@@ -68,10 +68,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p10 | 0.00017ms |
 | p50 | 0.00017ms |
-| p95 | 0.00084ms |
-| p99 | 0.0011ms |
-| mean | 0.00025ms |
-| stdev | 0.00044ms |
+| p95 | 0.00076ms |
+| p99 | 0.0015ms |
+| mean | 0.00026ms |
+| stdev | 0.00038ms |
 | min | 0.00013ms |
 | max | 0.0044ms |
 | total | 0.05ms |
@@ -82,10 +82,10 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|---|---|---|
 | p10 | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
 | p50 | 0.00017ms | 0.00021ms | -0.000041ms | -19.71% |
-| p95 | 0.00084ms | 0.00025ms | +0.00059ms | +232.07% |
-| p99 | 0.0011ms | 0.00075ms | +0.00032ms | +42.73% |
-| mean | 0.00025ms | 0.00022ms | +0.000032ms | +14.97% |
+| p95 | 0.00076ms | 0.00025ms | +0.00051ms | +203.29% |
+| p99 | 0.0015ms | 0.00075ms | +0.00075ms | +99.83% |
+| mean | 0.00026ms | 0.00022ms | +0.000043ms | +19.80% |
 | min | 0.00013ms | 0.00017ms | -0.000041ms | -24.70% |
-| max | 0.0044ms | 0.0035ms | +0.00092ms | +26.20% |
-| total | 0.05ms | 0.04ms | +0.0065ms | +14.97% |
+| max | 0.0044ms | 0.0035ms | +0.00092ms | +26.17% |
+| total | 0.05ms | 0.04ms | +0.0085ms | +19.80% |
 

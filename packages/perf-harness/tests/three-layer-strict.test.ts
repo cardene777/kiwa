@@ -158,6 +158,75 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(merged.results['added.serial']).toBeDefined();
   });
 
+  it('memory gate は ArrayBuffer 系の保持を検知する (#1719)', async () => {
+    const tmpDir = tempDir();
+    const held: Buffer[] = [];
+    const result = await runPerf3LayerStrict({
+      moduleName: 'mem-buffer-leak',
+      ops: [
+        {
+          name: 'leaky',
+          // 1 反復ごとに 10KB。 30 反復で 300KB となり上限 100KB を超える。
+          fn: () => {
+            held.push(Buffer.allocUnsafe(10 * 1024));
+          },
+          serialP95CapMs: 1000,
+        },
+      ],
+      reportPath: join(tmpDir, 'r.md'),
+      baselinePath: join(tmpDir, 'baseline.json'),
+      serialIterations: 30,
+      concurrency: 3,
+      memoryIterations: 30,
+    });
+
+    expect(result.outcomes[0]!.memoryGatePassed).toBe(false);
+    expect(result.outcomes[0]!.memory.arrayBuffersDeltaBytes).toBeGreaterThan(100 * 1024);
+  });
+
+  it('JS heap 側の保持は arrayBuffers に出ない (#1719 の未解決部分)', async () => {
+    // `arrayBuffers` は ArrayBuffer の backing store を数える。 Buffer /
+    // ArrayBuffer / TypedArray はいずれも捉えるが、JS heap にだけ載る保持
+    // (配列 / Map / listener list) は増分に出ないため検知できない。
+    //
+    // heapUsed を併用する案は実測により却下した。 数値と根拠は
+    // docs/quality/perf-thresholds.md § Memory delta target に置く
+    // (ここに写すと doc 側を直しても test 側が古いまま残る)。
+    //
+    // 「検知できない」 ことを test で固定する。 将来この assert が落ちたら、
+    // 軸が変わったか V8 の会計が変わったかで、どちらも設計判断が要る。
+    const tmpDir = tempDir();
+    const held: unknown[] = [];
+    const result = await runPerf3LayerStrict({
+      moduleName: 'mem-heap-leak',
+      ops: [
+        {
+          name: 'leaky',
+          fn: () => {
+            const arr = new Array(1280);
+            for (let i = 0; i < arr.length; i += 1) arr[i] = held.length + i;
+            held.push(arr);
+          },
+          serialP95CapMs: 1000,
+        },
+      ],
+      reportPath: join(tmpDir, 'r.md'),
+      baselinePath: join(tmpDir, 'baseline.json'),
+      serialIterations: 30,
+      concurrency: 3,
+      memoryIterations: 30,
+    });
+
+    // arrayBuffers には出ないので、gate は通ってしまう。 これが固定したい事実。
+    expect(result.outcomes[0]!.memory.arrayBuffersDeltaBytes).toBeLessThan(100 * 1024);
+    expect(result.outcomes[0]!.memoryGatePassed).toBe(true);
+
+    // heapUsed 側は assert しない。 この軸は測定区間の外の解放を拾って負値になり、
+    // 実行ごとに動く。 gate に載せられない理由がそれなので、ここで依存すると
+    // 不安定な test になる。 実測値は docs/quality/perf-thresholds.md
+    // § Memory delta target に置く。
+  });
+
   it('fails the memory gate when GC is required but unavailable', async () => {
     const tmpDir = tempDir();
     // GC を呼べない測定は解放される一時使用まで拾うため、上限との比較が成立しない。
