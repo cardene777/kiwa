@@ -8,22 +8,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| writeFile | 0.10ms | 0.16ms | 20ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| readFile | 0.05ms | 0.08ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| writeFile | 0.10ms | 0.28ms | 20ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| readFile | 0.05ms | 0.10ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 25 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| writeFile | 0.34ms | 40ms | PASS |
-| readFile | 0.15ms | 20ms | PASS |
+| writeFile | 0.52ms | 40ms | PASS |
+| readFile | 0.14ms | 20ms | PASS |
 
 ## Memory retention (100 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| writeFile | 5512 B | -40612 B | 102400 B | yes | PASS |
-| readFile | 5112 B | -47195 B | 102400 B | yes | PASS |
+| writeFile | 2120 B | -14448 B | 102400 B | yes | PASS |
+| readFile | 6328 B | -71595 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,27 +36,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 100 |
 | warmup | 3 |
 | p10 | 0.10ms |
-| p50 | 0.11ms |
-| p95 | 0.16ms |
-| p99 | 0.19ms |
-| mean | 0.12ms |
-| stdev | 0.03ms |
-| min | 0.09ms |
-| max | 0.26ms |
-| total | 12.12ms |
+| p50 | 0.13ms |
+| p95 | 0.28ms |
+| p99 | 0.48ms |
+| mean | 0.16ms |
+| stdev | 0.08ms |
+| min | 0.10ms |
+| max | 0.52ms |
+| total | 16.10ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.10ms | 0.11ms | -0.01ms | -12.65% |
-| p50 | 0.11ms | 0.16ms | -0.05ms | -29.71% |
-| p95 | 0.16ms | 0.26ms | -0.09ms | -36.16% |
-| p99 | 0.19ms | 0.29ms | -0.11ms | -36.70% |
-| mean | 0.12ms | 0.17ms | -0.04ms | -26.91% |
-| min | 0.09ms | 0.10ms | -0.01ms | -10.49% |
-| max | 0.26ms | 0.32ms | -0.05ms | -16.70% |
-| total | 12.12ms | 16.58ms | -4.46ms | -26.91% |
+| p10 | 0.10ms | 0.11ms | -0.0052ms | -4.75% |
+| p50 | 0.13ms | 0.16ms | -0.03ms | -18.11% |
+| p95 | 0.28ms | 0.26ms | +0.02ms | +8.13% |
+| p99 | 0.48ms | 0.29ms | +0.18ms | +61.77% |
+| mean | 0.16ms | 0.17ms | -0.0048ms | -2.91% |
+| min | 0.10ms | 0.10ms | -0.0042ms | -4.20% |
+| max | 0.52ms | 0.32ms | +0.21ms | +65.34% |
+| total | 16.10ms | 16.58ms | -0.48ms | -2.91% |
 
 ### readFile
 
@@ -67,25 +67,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 100 |
 | warmup | 3 |
 | p10 | 0.05ms |
-| p50 | 0.05ms |
-| p95 | 0.08ms |
-| p99 | 0.10ms |
-| mean | 0.06ms |
-| stdev | 0.01ms |
-| min | 0.04ms |
-| max | 0.11ms |
-| total | 5.74ms |
+| p50 | 0.06ms |
+| p95 | 0.10ms |
+| p99 | 0.13ms |
+| mean | 0.07ms |
+| stdev | 0.03ms |
+| min | 0.05ms |
+| max | 0.27ms |
+| total | 6.77ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.05ms | 0.05ms | -0.0040ms | -7.90% |
-| p50 | 0.05ms | 0.07ms | -0.02ms | -28.37% |
-| p95 | 0.08ms | 0.50ms | -0.41ms | -82.91% |
-| p99 | 0.10ms | 2.30ms | -2.20ms | -95.73% |
-| mean | 0.06ms | 0.26ms | -0.20ms | -78.05% |
-| min | 0.04ms | 0.04ms | +0.00013ms | +0.28% |
-| max | 0.11ms | 10.04ms | -9.93ms | -98.86% |
-| total | 5.74ms | 26.13ms | -20.40ms | -78.05% |
+| p10 | 0.05ms | 0.05ms | -0.0022ms | -4.45% |
+| p50 | 0.06ms | 0.07ms | -0.0083ms | -11.80% |
+| p95 | 0.10ms | 0.50ms | -0.40ms | -79.80% |
+| p99 | 0.13ms | 2.30ms | -2.16ms | -94.31% |
+| mean | 0.07ms | 0.26ms | -0.19ms | -74.10% |
+| min | 0.05ms | 0.04ms | +0.0016ms | +3.66% |
+| max | 0.27ms | 10.04ms | -9.77ms | -97.31% |
+| total | 6.77ms | 26.13ms | -19.36ms | -74.10% |
 

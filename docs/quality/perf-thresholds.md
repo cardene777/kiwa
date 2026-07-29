@@ -217,6 +217,16 @@ Four statistics were tried over a single run's samples — p95, p10, median, tri
 
 The reference has to share the disturbance: a CPU-bound reference does not help an fs-bound op, and its own measurement moved 2406 % across runs, making it useless as a denominator for anything. So each op would have to declare a reference of the right kind, and every stored baseline would become a ratio rather than a duration. That is a change to what a baseline *is*, not to which statistic is read from it, and is left to a follow-up.
 
+### A cap breach that was the parallelism, not the code
+
+`a11y`'s `audit_error_handling` was recorded breaching its 100 ms cap intermittently — 195 / 163 / 145 / 17.6 / 17.3 ms across five runs, a tail ten times the usual value — and `audit_workflow` moved between 23 ms and 394 ms. Three explanations were proposed: jsdom accumulating across iterations, axe-core taking a slow path on invalid input, or a GC pause landing inside the measured window (#1728).
+
+All three were wrong. The measurements predate #1720, when the root script still ran `pnpm -r --parallel` (177 suites at once) and each package's vitest still ran its perf files concurrently. Under those conditions `a11y` had two perf files both driving jsdom and axe-core while 176 other packages competed for the same cores.
+
+Measured on the current serial configuration, five consecutive runs give `audit_error_handling` a p95 of 14.4-26.2 ms against its 100 ms cap and `audit_workflow` 23.8-42.0 ms — a 1.77x spread, with the same gate verdict every time. Re-enabling `fileParallelism` for `a11y` alone reproduces the instability in miniature: `audit_workflow` moves between 23 ms and 44 ms instead of holding near 28 ms.
+
+Nothing about the ops needed to change. This is recorded because the shape is easy to misread: a tail that appears only under load looks exactly like a tail intrinsic to the code, and the samples give no way to tell them apart. Before attributing a breach to an op, check what else was running.
+
 ### The first run after a rebuild can breach a cap
 
 The suite rebuilds `@kiwa-lab/perf-harness` before each package's perf run, so the first pass after a code change starts cold. On jsdom-heavy ops that shows up in the concurrent axis: `a11y`'s `runAxeDirtyReport` breached its 800 ms cap on a first pass and measured 117 ms on the next one, unchanged. The two warmup rounds the concurrent layer performs do not cover the JIT and jsdom setup cost at that scale.
