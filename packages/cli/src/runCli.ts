@@ -1,4 +1,4 @@
-import { execSync as nodeExecSync } from 'node:child_process';
+import { execSync as nodeExecSync, type ChildProcess } from 'node:child_process';
 import { InitConflictError, runInit, type InitOptions, type InitResult } from './commands/init.js';
 import { runAnvilSeed, type AnvilSeedOptions, type AnvilSeedResult } from './commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from './commands/spec-to-test.js';
@@ -167,6 +167,107 @@ async function anvilSeedCommand(argv: string[], deps: RunCliDeps): Promise<numbe
   }
 }
 
+/**
+ * watcher 全体の終了を待ち、最初の失敗を CLI の exit code にする。
+ *
+ * `Promise.all` で全部の `exit` を待つ形だと終わらない。 watch は本来終了しない
+ * process なので、1 件が落ちても残りは動き続け、CLI は待ち続ける。 落ちた watcher の
+ * code も呼出側に届かない。
+ *
+ * 最初の失敗を見た時点で、残りに終了を要求する。 `SIGTERM` を送るのは、watch process が
+ * 片付けを持つ実装 (open file / socket / 子 process) だから。 `SIGKILL` は片付けを
+ * 飛ばすので、応答しない相手にだけ使う。
+ *
+ * 送ったあとも全 child の `exit` を待つ。 待たずに返すと、CLI が終わったあとに
+ * watcher が生き残る。
+ */
+async function awaitWatchers(
+  children: readonly ChildProcess[],
+  stderr: (text: string) => void,
+): Promise<number> {
+  if (children.length === 0) return 0;
+
+  let firstFailure: number | null = null;
+
+  const stopOthers = (except: number): void => {
+    children.forEach((child, index) => {
+      if (index === except) return;
+      // 既に終了している child への kill は無害 (ESRCH は静かに false を返す)。
+      // 生死を先に確かめる術がないので、送ってから exit を待つ。
+      //
+      // `kill()` は失敗の伝え方が 3 通りある (Node の実装)。
+      //   - EINVAL / ENOSYS = throw
+      //   - EPERM 等        = `error` event を同期に emit して false を返す
+      //   - ESRCH (既に死亡) = 静かに false
+      // throw する方はここで握る。 event の方は下の `error` handler が見分ける。
+      try {
+        child.kill();
+      } catch {
+        // 送れない相手は、こちらから終わらせる手段がない。 exit を待つ。
+      }
+    });
+  };
+
+  await Promise.all(
+    children.map(
+      (child, index) =>
+        new Promise<void>((resolveFn) => {
+          const fail = (code: number): void => {
+            if (firstFailure === null) {
+              firstFailure = code;
+              stopOthers(index);
+            }
+            resolveFn();
+          };
+
+          // signal で落ちた watcher は `code` が null で `signal` に名前が入る。
+          // null を 0 に丸めると、SIGSEGV で死んだ watcher が成功になり、
+          // 呼び出し側は異常終了を検知できない。
+          child.on('exit', (code, signal) => {
+            if (code !== null && code !== undefined) {
+              if (code === 0) {
+                resolveFn();
+                return;
+              }
+              fail(code);
+              return;
+            }
+            // こちらが送った SIGTERM で終わった child は、失敗として数えない。
+            // 数えると、最初の失敗の code が後続の 1 に上書きされ得る。
+            if (firstFailure !== null && signal === 'SIGTERM') {
+              resolveFn();
+              return;
+            }
+            stderr(`ERR run --watch: watcher terminated by ${signal ?? 'unknown signal'}\n`);
+            fail(1);
+          });
+          // spawn 自体が失敗すると `exit` は来ない。 購読していないと
+          // uncaught error になり、 この promise も解決されないまま残る。
+          //
+          // 一方 `kill()` の失敗 (EPERM 等) も `error` で届く。 そちらは child が
+          // 生きているので、解決すると CLI が終了して watcher が残る。
+          //
+          // 見分けは `syscall` で行う。 Node は spawn 失敗を `spawn <cmd>`、
+          // kill 失敗を `kill` として立てる。 「停止要求を送ったか」 で分けると、
+          // 停止要求のあとに届いた spawn 失敗まで待ち続けてしまう
+          // (spawn 失敗には `exit` が来ないので、CLI が終わらない)。
+          child.on('error', (error) => {
+            if ((error as NodeJS.ErrnoException).syscall === 'kill') {
+              stderr(
+                `ERR run --watch: failed to stop watcher: ${(error as Error).message}\n`,
+              );
+              return;
+            }
+            stderr(`ERR run --watch failed: ${(error as Error).message}\n`);
+            fail(1);
+          });
+        }),
+    ),
+  );
+
+  return firstFailure ?? 0;
+}
+
 async function runWatchCommand(argv: string[], deps: RunCliDeps): Promise<number> {
   if (!argv.includes('--watch')) {
     deps.stderr('ERR kiwa run: only --watch is supported today\n');
@@ -214,31 +315,7 @@ async function runWatchCommand(argv: string[], deps: RunCliDeps): Promise<number
     if (dryRun) {
       return 0;
     }
-    const codes = await Promise.all(
-      result.children.map(
-        (child) =>
-          new Promise<number>((resolveFn) => {
-            // signal で落ちた watcher は `code` が null で `signal` に名前が入る。
-            // null を 0 に丸めると、SIGSEGV で死んだ watcher が成功になり、
-            // 呼び出し側は異常終了を検知できない。
-            child.on('exit', (code, signal) => {
-              if (code !== null && code !== undefined) {
-                resolveFn(code);
-                return;
-              }
-              deps.stderr(`ERR run --watch: watcher terminated by ${signal ?? 'unknown signal'}\n`);
-              resolveFn(1);
-            });
-            // spawn 自体が失敗すると `exit` は来ない。 購読していないと
-            // uncaught error になり、 この promise も解決されないまま残る。
-            child.on('error', (error) => {
-              deps.stderr(`ERR run --watch failed: ${(error as Error).message}\n`);
-              resolveFn(1);
-            });
-          }),
-      ),
-    );
-    return codes.find((c) => c !== 0) ?? 0;
+    return await awaitWatchers(result.children, deps.stderr);
   } catch (error) {
     deps.stderr(`ERR run --watch failed: ${(error as Error).message}\n`);
     return 1;
