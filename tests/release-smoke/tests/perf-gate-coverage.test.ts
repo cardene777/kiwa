@@ -20,6 +20,33 @@
 // variable spelled `pool`, and on a `--expose-gc` mentioned in prose — i.e. it
 // accepts exactly the files it exists to reject. The fixtures at the bottom
 // pin that distinction.
+//
+// ## What this test is for, and where it stops
+//
+// It catches omissions. That is the failure mode that actually happened: twelve
+// suites that simply never assigned the return value, and 116 configs that
+// simply never set the flag. Nobody was working around anything — the lines were
+// missing and the files still looked complete.
+//
+// It does not resist deliberate evasion, and it is not built to. Four rounds of
+// adversarial review each surfaced a new way to write the same call so the
+// parser would not recognise it: an element access, then a scope-shadowed
+// binding, then a template-literal key, then an import from elsewhere. Each was
+// real and each is now closed, but the sequence did not converge — a source-level
+// parser is chasing an open set of ways to spell the same program, and closing it
+// would take full type-checker symbol resolution, which still leaves `eval`.
+//
+// So the boundary is drawn here deliberately. Every form that could plausibly be
+// written *by accident* fails the check: destructuring, reassignment, a bare
+// `return`, a `.then`, a missing `await`, a negated matcher, a helper that
+// shadows the binding, a config wrapper imported from another module. Anything
+// the parser cannot follow is treated as a failure, not waved through — so the
+// way to break this test is to write something unusual on purpose, and at that
+// point the person doing it is disabling their own safety net, which no check
+// downstream of them can prevent.
+//
+// If a real omission ever slips past, the fix is a fixture below plus whatever
+// the parser needs to see it — not a broader rewrite.
 import { readFileSync, readdirSync, lstatSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
