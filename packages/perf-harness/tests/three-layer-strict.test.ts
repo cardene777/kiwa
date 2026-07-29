@@ -558,7 +558,8 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
           },
           serialP95CapMs: 10_000,
           // 理由を書かずに外せると、記録の無い除外が増える。
-          memoryGateWaived: '   ',
+          // 空白のほか、zero width space のような不可視文字でも外せてはいけない。
+          memoryGateWaived: '  \u200b\u2060 ',
         },
       ],
       reportPath: join(tmpDir, 'blank.md'),
@@ -594,8 +595,14 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     });
 
     expect(second.outcomes[0]!.regressionVerdict).not.toBe('regressed');
-    expect(second.outcomes[0]!.regressionNote).toMatch(/検知には \+0\.5ms/);
-    expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).toMatch(/検知には \+0\.5ms/);
+
+    // 何もしない関数の p95 は測定のたびに 0 付近で揺れる。 下限に阻まれた理由が
+    // 「baseline 自体が下限未満」 か「差が下限に届かない」 かは実行ごとに変わり、
+    // どちらも判定できていない状態を指す正しい注記。 片方だけを期待すると
+    // 実行のたびに通ったり落ちたりする。
+    const note = second.outcomes[0]!.regressionNote;
+    expect(note, '判定できない理由が注記される').toMatch(/検知には \+0\.5ms|下限 0\.5ms 未満/);
+    expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).toContain(note!);
   });
 
   it('drops ops that are no longer measured only when pruning is requested', async () => {

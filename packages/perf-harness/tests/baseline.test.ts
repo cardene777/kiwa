@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -125,7 +125,8 @@ describe('baseline persistence', () => {
 
 describe('baseline root resolution (#1708)', () => {
   it('T-PH-B-009 workspace の目印まで上に辿った場所を基準にする', () => {
-    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-'));
+    // /tmp は macOS で /private/tmp への symlink なので、期待値も実体で持つ。
+    const dir = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-')));
     const root = path.join(dir, 'repo');
     const nested = path.join(root, 'packages', 'thing');
     mkdirSync(nested, { recursive: true });
@@ -137,7 +138,7 @@ describe('baseline root resolution (#1708)', () => {
   });
 
   it('T-PH-B-010 .git だけがある repo でも基準にできる', () => {
-    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-'));
+    const dir = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-')));
     const root = path.join(dir, 'repo');
     const nested = path.join(root, 'src', 'deep');
     mkdirSync(nested, { recursive: true });
@@ -148,7 +149,7 @@ describe('baseline root resolution (#1708)', () => {
 
   it('T-PH-B-011 目印が無い場所では起点をそのまま使う', () => {
     // repo の外から使う単体 package の呼出を壊さない。
-    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-'));
+    const dir = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'perf-harness-root-')));
     const standalone = path.join(dir, 'standalone');
     mkdirSync(standalone, { recursive: true });
 

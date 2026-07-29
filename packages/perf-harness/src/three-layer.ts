@@ -285,7 +285,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     // GC 無しでも動いていた既存の呼出が一斉に落ちるため opt-in にしている。
     // 理由を明示した op だけは判定から外す。 測れていないものを通すのではなく、
     // 測れていないことを report に残したうえで gate を落とさない扱いにする。
-    const memoryWaiver = op.memoryGateWaived?.trim();
+    const memoryWaiver = waiverReason(op.memoryGateWaived);
     const memoryGatePassed =
       memoryWaiver !== undefined && memoryWaiver.length > 0
         ? true
@@ -379,7 +379,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 上限に収まっている限り素通りしてしまう。
   const regressionGate = input.regressionGate ?? false;
   const allPassed = outcomes.every((outcome, index) => {
-    const waiver = input.ops[index]?.regressionGateWaived?.trim();
+    const waiver = waiverReason(input.ops[index]?.regressionGateWaived);
     const regressionGated =
       regressionGate && (waiver === undefined || waiver.length === 0);
     return (
@@ -420,6 +420,22 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
 }
 
 /**
+ * waiver の理由が実体を持つか。
+ *
+ * `trim()` だけだと U+200B (zero width space) のような不可視文字が「理由あり」 に
+ * なり、 report では空に見えるまま gate だけ外れる。 正規化してから、
+ * 可視の文字が 1 つ以上あることを要求する。
+ */
+function waiverReason(raw: string | undefined): string | undefined {
+  if (raw === undefined) return undefined;
+  const normalized = raw.normalize('NFKC');
+  // 制御文字と空白 (zero width 系を含む) を落として残りを見る。
+  const visible = normalized.replace(/[\p{C}\p{Z}]/gu, '');
+  if (visible.length === 0) return undefined;
+  return normalized.trim();
+}
+
+/**
  * report の regression 列。 判定結果と、 gate に効いていない場合はその理由を並べる。
  *
  * 判定だけを書くと、 `regressed` の行があるのに suite が通っている report が
@@ -431,7 +447,7 @@ function regressionCell(op: PerfOpSpec, outcome: OpOutcome, regressionGate: bool
     ? `${outcome.regressionVerdict} (${outcome.regressionNote})`
     : outcome.regressionVerdict;
   if (!regressionGate) return `${verdict} — gate 無効 (regressionGate=false)`;
-  const waiver = op.regressionGateWaived?.trim();
+  const waiver = waiverReason(op.regressionGateWaived);
   if (waiver === undefined || waiver.length === 0) return verdict;
   return `${verdict} — gate 対象外 (${waiver})`;
 }
@@ -537,7 +553,7 @@ function writeReport(input: WriteReportInput): void {
     const cap = op.memoryArrayBuffersCapBytes ?? input.memoryCapDefault;
     // 判定を外した op は PASS と書かない。 測れていないことが読み取れないと、
     // 上限を上げて通したのと区別がつかなくなる。
-    const waiver = op.memoryGateWaived?.trim();
+    const waiver = waiverReason(op.memoryGateWaived);
     const verdict =
       waiver !== undefined && waiver.length > 0
         ? `WAIVED (${waiver})`

@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { arch, platform as osPlatform, cpus } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -87,16 +87,30 @@ export function defaultBaselinePath(moduleName: string): string {
   return `${resolveBaselineRoot(process.cwd())}/.perf-baseline/${moduleName}.json`;
 }
 
-/** workspace の目印を cwd から上に辿る。 見つからなければ起点をそのまま返す。 */
+/**
+ * workspace の目印を cwd から上に辿る。 見つからなければ起点をそのまま返す。
+ *
+ * 起点は symlink を解いてから辿る。 解かないと、 同じ package を実体経由と
+ * link 経由で起動した時に別の root を掴み、 baseline が分裂する。
+ */
 export function resolveBaselineRoot(start: string): string {
-  let current = resolve(start);
+  let current = canonical(start);
   while (true) {
     for (const marker of ['pnpm-workspace.yaml', '.git']) {
       if (existsSync(join(current, marker))) return current;
     }
     const parent = dirname(current);
-    if (parent === current) return resolve(start);
+    if (parent === current) return canonical(start);
     current = parent;
+  }
+}
+
+/** symlink を解いた絶対 path。 解けない (未作成 等) 場合は resolve だけで返す。 */
+function canonical(target: string): string {
+  try {
+    return realpathSync(resolve(target));
+  } catch {
+    return resolve(target);
   }
 }
 
