@@ -206,7 +206,7 @@ Two alternatives were rejected. Relaxing the relative threshold to 50 % hides re
 
 ### What would make the remaining twelve gateable
 
-The residual spread is not a property of the sample: it moves with when the measurement was taken, and no choice of statistic over a single run's samples removes it. What did reduce it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
+Four statistics were tried over a single run's samples — p95, p10, median, trimmed mean — and none of them removed the spread; it tracks when the measurement was taken. What did reduce it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
 
 | op | raw p10 spread | ratio to a CPU-only reference | ratio to an fs reference |
 |---|---|---|---|

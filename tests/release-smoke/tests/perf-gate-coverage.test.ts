@@ -78,17 +78,70 @@ function eachNode(node: ts.Node, visit: (n: ts.Node) => void): void {
   node.forEachChild((child) => eachNode(child, visit));
 }
 
-/** `a.b.c` 形式の property access を文字列にする。 それ以外は null。 */
+/** 括弧と型表明を剥がす。 `(f)()` や `(f as X)()` で検査を抜けられないようにする。 */
+function unwrap(node: ts.Expression): ts.Expression {
+  let current = node;
+  for (;;) {
+    if (ts.isParenthesizedExpression(current)) current = current.expression;
+    else if (ts.isAsExpression(current) || ts.isSatisfiesExpression(current)) current = current.expression;
+    else if (ts.isNonNullExpression(current)) current = current.expression;
+    else return current;
+  }
+}
+
+/**
+ * `a.b.c` / `a['b']` 形式の access を文字列にする。 それ以外は null。
+ *
+ * element access も辿る。 `perf['runPerf3Layer']` は `perf.runPerf3Layer` と
+ * 同じ呼出で、書き分けで検査を抜けられては意味がない。
+ */
 function accessPath(node: ts.Expression): string | null {
   const parts: string[] = [];
-  let current: ts.Expression = node;
-  while (ts.isPropertyAccessExpression(current)) {
-    parts.unshift(current.name.text);
-    current = current.expression;
+  let current: ts.Expression = unwrap(node);
+  for (;;) {
+    if (ts.isPropertyAccessExpression(current)) {
+      parts.unshift(current.name.text);
+      current = unwrap(current.expression);
+      continue;
+    }
+    if (ts.isElementAccessExpression(current)) {
+      const arg = unwrap(current.argumentExpression);
+      // 静的に決まらない添字は追えないので、呼出全体を不明として扱う。
+      if (!ts.isStringLiteral(arg)) return null;
+      parts.unshift(arg.text);
+      current = unwrap(current.expression);
+      continue;
+    }
+    break;
   }
   if (!ts.isIdentifier(current)) return null;
   parts.unshift(current.text);
   return parts.join('.');
+}
+
+/**
+ * その識別子が指す変数宣言を、字句 scope を上に辿って探す。
+ *
+ * 名前の一致だけで対応付けると、別々の `it()` で同じ `r` を使っている時に、
+ * 片方の検証がもう片方を通してしまう。 宣言 node 自体を鍵にする。
+ */
+function resolveDeclaration(from: ts.Node, name: string): ts.VariableDeclaration | null {
+  for (let scope: ts.Node | undefined = from; scope; scope = scope.parent) {
+    let found: ts.VariableDeclaration | null = null;
+    const scan = (node: ts.Node): void => {
+      if (found) return;
+      // 別 scope に降りない。 そこの宣言はここからは見えない。
+      if (node !== scope && (ts.isFunctionLike(node) || ts.isBlock(node))) return;
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === name) {
+        found = node;
+        return;
+      }
+      node.forEachChild(scan);
+    };
+    scan(scope);
+    if (found) return found;
+  }
+  return null;
 }
 
 /** 測定関数の名前。 これを import しているか否かが検査の入口になる。 */
@@ -133,20 +186,23 @@ function isMeasureCall(
 }
 
 /**
- * `expect(<name>.allPassed).toBe(true)` の形で肯定的に検証されている名前を集める。
+ * `expect(<x>.allPassed).toBe(true)` の形で肯定的に検証されている変数宣言を集める。
  *
- * matcher まで見る。 `expect(r.allPassed).toBe(false)` や `.not.toBe(true)` は
- * 「判定した」 ことにならないため通さない。
+ * matcher まで見る。 `toBe(false)` や `.not.toBe(true)` は「判定した」 ことに
+ * ならない。 対象は名前ではなく宣言 node で持つ (同名の別変数を巻き込まない)。
  */
-function assertedNames(sf: ts.SourceFile): Set<string> {
-  const asserted = new Set<string>();
+function assertedDeclarations(sf: ts.SourceFile): Set<ts.VariableDeclaration> {
+  const asserted = new Set<ts.VariableDeclaration>();
   eachNode(sf, (node) => {
     if (!ts.isCallExpression(node)) return;
-    if (!ts.isIdentifier(node.expression) || node.expression.text !== 'expect') return;
-    const [arg] = node.arguments;
-    if (!arg || !ts.isPropertyAccessExpression(arg)) return;
-    if (arg.name.text !== 'allPassed') return;
-    if (!ts.isIdentifier(arg.expression)) return;
+    const callee = unwrap(node.expression);
+    if (!ts.isIdentifier(callee) || callee.text !== 'expect') return;
+    const [rawArg] = node.arguments;
+    if (!rawArg) return;
+    const arg = unwrap(rawArg);
+    if (!ts.isPropertyAccessExpression(arg) || arg.name.text !== 'allPassed') return;
+    const target = unwrap(arg.expression);
+    if (!ts.isIdentifier(target)) return;
 
     // `expect(x.allPassed)` の外側に付く matcher chain を辿る。
     let cursor: ts.Node = node;
@@ -169,7 +225,9 @@ function assertedNames(sf: ts.SourceFile): Set<string> {
         cursor = access;
       }
     }
-    if (positive && !negated) asserted.add(arg.expression.text);
+    if (!positive || negated) return;
+    const decl = resolveDeclaration(target, target.text);
+    if (decl) asserted.add(decl);
   });
   return asserted;
 }
@@ -185,7 +243,7 @@ function assertedNames(sf: ts.SourceFile): Set<string> {
 export function findDiscardedVerdict(source: string, fileName = 'x.perf.ts'): string | null {
   const sf = parse(source, fileName);
   const aliases = measureAliases(sf);
-  const asserted = assertedNames(sf);
+  const asserted = assertedDeclarations(sf);
   const problems: string[] = [];
 
   eachNode(sf, (node) => {
@@ -194,23 +252,46 @@ export function findDiscardedVerdict(source: string, fileName = 'x.perf.ts'): st
     const line = sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
     // `await` を挟む形だけを許す。 測定は非同期なので、await しない受け取りは
     // Promise を検証していることになり判定が成立しない。
-    const awaited = ts.isAwaitExpression(node.parent) ? node.parent : null;
-    if (awaited === null) {
+    let cursor: ts.Node = node;
+    while (ts.isParenthesizedExpression(cursor.parent)) cursor = cursor.parent;
+    if (!ts.isAwaitExpression(cursor.parent)) {
       problems.push(`L${line}: await していない`);
       return;
     }
-    const parent = awaited.parent;
+    cursor = cursor.parent;
+    while (ts.isParenthesizedExpression(cursor.parent)) cursor = cursor.parent;
+    const parent = cursor.parent;
     if (!ts.isVariableDeclaration(parent) || !ts.isIdentifier(parent.name)) {
       problems.push(`L${line}: 戻り値を変数に束縛していない`);
       return;
     }
-    const name = parent.name.text;
-    if (!asserted.has(name)) {
-      problems.push(`L${line}: ${name}.allPassed を検証していない`);
+    if (!asserted.has(parent)) {
+      problems.push(`L${line}: ${parent.name.text}.allPassed を検証していない`);
     }
   });
 
   return problems.length > 0 ? problems.join(' / ') : null;
+}
+
+/**
+ * import 由来の `defineConfig` を指す名前を集める。
+ *
+ * 名前が `defineConfig` であることだけを見ると、同名の局所 wrapper が起点になり、
+ * その中身は追えないまま合格する。 import しているものだけを認める。
+ * 別名 import (`defineConfig as define`) は名前を変えただけなので認める。
+ */
+function defineConfigAliases(sf: ts.SourceFile): Set<string> {
+  const names = new Set<string>();
+  eachNode(sf, (node) => {
+    if (!ts.isImportDeclaration(node)) return;
+    const bindings = node.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) return;
+    for (const el of bindings.elements) {
+      const original = (el.propertyName ?? el.name).text;
+      if (original === 'defineConfig') names.add(el.name.text);
+    }
+  });
+  return names;
 }
 
 /**
@@ -228,10 +309,12 @@ function exportedTestObject(sf: ts.SourceFile): ts.ObjectLiteralExpression | nul
   });
   if (exported === null) return null;
 
-  let expr: ts.Expression = exported;
-  if (ts.isSatisfiesExpression(expr) || ts.isAsExpression(expr)) expr = expr.expression;
+  const expr = unwrap(exported);
   if (!ts.isCallExpression(expr)) return null;
-  if (!ts.isIdentifier(expr.expression) || expr.expression.text !== 'defineConfig') return null;
+  const callee = unwrap(expr.expression);
+  // 名前が `defineConfig` なだけの局所関数を起点にしない。 import したものである
+  // ことまで確かめる (局所定義の wrapper は中身を追えない)。
+  if (!ts.isIdentifier(callee) || !defineConfigAliases(sf).has(callee.text)) return null;
 
   const [arg] = expr.arguments;
   if (!arg || !ts.isObjectLiteralExpression(arg)) return null;
@@ -251,7 +334,18 @@ function readObjectProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Ob
 }
 
 function readProperty(obj: ts.ObjectLiteralExpression, key: string): ts.Expression | null {
-  if (obj.properties.some((p) => ts.isSpreadAssignment(p))) return null;
+  // spread は後続で上書きし得る。 computed key と accessor / method は静的に
+  // 決まらない。 どれも「書いてある property が実際の値」 の前提を壊すので、
+  // 1 つでもあれば読まない。
+  const opaque = obj.properties.some(
+    (p) =>
+      ts.isSpreadAssignment(p) ||
+      ts.isGetAccessorDeclaration(p) ||
+      ts.isSetAccessorDeclaration(p) ||
+      ts.isMethodDeclaration(p) ||
+      (p.name !== undefined && ts.isComputedPropertyName(p.name)),
+  );
+  if (opaque) return null;
   const matches = obj.properties.filter(
     (p): p is ts.PropertyAssignment =>
       ts.isPropertyAssignment(p) &&
@@ -363,6 +457,27 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
         `import * as perf from '@kiwa-lab/perf-harness';
          await perf.runPerf3Layer({});`,
       ],
+      [
+        '別 scope の同名変数で通す',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         it('a', async () => {
+           const r = await runPerf3Layer({});
+           expect(r.allPassed).toBe(true);
+         });
+         it('b', async () => {
+           const r = await runPerf3Layer({});
+         });`,
+      ],
+      [
+        '括弧で包んで呼ぶ',
+        `import { runPerf3Layer } from '@kiwa-lab/perf-harness';
+         await (runPerf3Layer)({});`,
+      ],
+      [
+        'namespace を element access で呼ぶ',
+        `import * as perf from '@kiwa-lab/perf-harness';
+         await perf['runPerf3Layer']({});`,
+      ],
     ];
     for (const [label, source] of cases) {
       const body = source.includes('import ') ? source : IMPORT + source;
@@ -402,56 +517,57 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
   });
 
   it('GC を呼べない config を検出する', () => {
+    const IMP = `import { defineConfig } from 'vitest/config';\n`;
     const cases: Array<[string, string]> = [
-      ['何も設定していない', `export default defineConfig({ test: { include: ['x'] } });`],
+      ['何も設定していない', IMP + `export default defineConfig({ test: { include: ['x'] } });`],
       [
         'コメントに書いただけ',
-        `export default defineConfig({ test: { /* --expose-gc */ include: ['x'] } });`,
+        IMP + `export default defineConfig({ test: { /* --expose-gc */ include: ['x'] } });`,
       ],
       [
         'execArgv はあるが pool が threads',
-        `export default defineConfig({ test: {
+        IMP + `export default defineConfig({ test: {
            pool: 'threads',
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
          } });`,
       ],
       [
         'execArgv はあるが pool 未指定',
-        `export default defineConfig({ test: {
+        IMP + `export default defineConfig({ test: {
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
          } });`,
       ],
       [
         'execArgv に別 flag だけ',
-        `export default defineConfig({ test: {
+        IMP + `export default defineConfig({ test: {
            pool: 'forks',
            poolOptions: { forks: { execArgv: ['--max-old-space-size=4096'] } },
          } });`,
       ],
       [
         'threads 側に置いている',
-        `export default defineConfig({ test: {
+        IMP + `export default defineConfig({ test: {
            pool: 'forks',
            poolOptions: { threads: { execArgv: ['--expose-gc'] } },
          } });`,
       ],
       [
         'export していない decoy から寄せ集める',
-        `const decoy = defineConfig({ test: { pool: 'forks' } });
+        IMP + `const decoy = defineConfig({ test: { pool: 'forks' } });
          export default defineConfig({ test: {
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
          } });`,
       ],
       [
         '2 つの config に property を分散させる',
-        `export const other = defineConfig({ test: {
+        IMP + `export const other = defineConfig({ test: {
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
          } });
          export default defineConfig({ test: { pool: 'forks' } });`,
       ],
       [
         'spread で上書きされ得る',
-        `export default defineConfig({ test: {
+        IMP + `export default defineConfig({ test: {
            pool: 'forks',
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
            ...overrides,
@@ -459,7 +575,7 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
       ],
       [
         '同名 property が重複する',
-        `export default defineConfig({ test: {
+        IMP + `export default defineConfig({ test: {
            pool: 'forks',
            pool: 'threads',
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
@@ -467,15 +583,31 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
       ],
       [
         '変数経由で静的に辿れない',
-        `const config = { pool: 'forks', poolOptions: { forks: { execArgv: ['--expose-gc'] } } };
+        IMP + `const config = { pool: 'forks', poolOptions: { forks: { execArgv: ['--expose-gc'] } } };
          export default defineConfig({ test: config });`,
       ],
       [
         'wrapper 関数の返り値',
-        `export default withDefaults(defineConfig({ test: {
+        IMP + `export default withDefaults(defineConfig({ test: {
            pool: 'forks',
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
          } }));`,
+      ],
+      [
+        'ローカル関数を defineConfig と命名する',
+        `const defineConfig = (c) => withDefaults(c);
+         export default defineConfig({ test: {
+           pool: 'forks',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });`,
+      ],
+      [
+        'computed property で pool を上書きする',
+        IMP + `export default defineConfig({ test: {
+           pool: 'forks',
+           ['pool']: 'threads',
+           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+         } });`,
       ],
     ];
     for (const [label, source] of cases) {
@@ -484,20 +616,31 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
   });
 
   it('GC を呼べる config は通す', () => {
+    const CONFIG_IMPORT = `import { defineConfig } from 'vitest/config';\n`;
     const cases: Array<[string, string]> = [
       [
         '素直な形',
-        `export default defineConfig({ test: {
-           pool: 'forks',
-           poolOptions: { forks: { execArgv: ['--expose-gc'] } },
-         } });`,
+        CONFIG_IMPORT +
+          `export default defineConfig({ test: {
+             pool: 'forks',
+             poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+           } });`,
       ],
       [
         'satisfies 付き',
-        `export default defineConfig({ test: {
+        CONFIG_IMPORT +
+          `export default defineConfig({ test: {
+             pool: 'forks',
+             poolOptions: { forks: { execArgv: ['--expose-gc'] } },
+           } }) satisfies UserConfig;`,
+      ],
+      [
+        '別名 import',
+        `import { defineConfig as define } from 'vitest/config';
+         export default define({ test: {
            pool: 'forks',
            poolOptions: { forks: { execArgv: ['--expose-gc'] } },
-         } }) satisfies UserConfig;`,
+         } });`,
       ],
     ];
     for (const [label, source] of cases) {
