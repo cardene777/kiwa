@@ -36,8 +36,9 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 | <code v-pre>measureConcurrent: warmup must be &gt;= 0, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L46) |
 | <code v-pre>measure: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L15) |
 | <code v-pre>measure: warmup must be &gt;= 0, got $&#123;warmupCount&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L24) |
-| <code v-pre>measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L30) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L442) |
+| <code v-pre>measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L42) |
+| <code v-pre>measureMemory: warmup must be a non-negative integer, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L48) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L644) |
 
 ## API 契約
 
@@ -45,15 +46,15 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 宣言元 | 値 | 型 |
 | --- | --- | --- |
-| [baseline.ts](./api/baseline) | 6 | 0 |
+| [baseline.ts](./api/baseline) | 8 | 0 |
 | [concurrent.ts](./api/concurrent) | 1 | 1 |
 | [gate.ts](./api/gate) | 1 | 0 |
 | [live.ts](./api/live) | 1 | 4 |
-| [measure.ts](./api/measure) | 2 | 0 |
+| [measure.ts](./api/measure) | 3 | 0 |
 | [memory.ts](./api/memory) | 1 | 2 |
-| [regression.ts](./api/regression) | 2 | 0 |
+| [regression.ts](./api/regression) | 4 | 0 |
 | [report.ts](./api/report) | 1 | 0 |
-| [three-layer.ts](./api/three-layer) | 3 | 4 |
+| [three-layer.ts](./api/three-layer) | 4 | 4 |
 | [types.ts](./api/types) | 0 | 7 |
 
 <!-- kiwa-public-api:end -->

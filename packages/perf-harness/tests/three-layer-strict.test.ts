@@ -578,7 +578,8 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     const settings = { serialIterations: 30, concurrency: 3, memoryIterations: 30 };
     const op = { name: 'tiny', fn: () => {}, serialP95CapMs: 10_000 };
 
-    // 何もしない関数は p95 が下限 0.5ms を大きく下回る。
+    // 何もしない関数は、測定系が自分自身を測っている状態そのもの。 判定に使う p10 が
+    // 実行の中で測った分解能と同じ帯に来るため、どちらの理由であれ判定は成立しない。
     await runPerf3LayerStrict({
       moduleName: 'floor-note',
       ops: [op],
@@ -596,12 +597,14 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
 
     expect(second.outcomes[0]!.regressionVerdict).not.toBe('regressed');
 
-    // 何もしない関数の p95 は測定のたびに 0 付近で揺れる。 下限に阻まれた理由が
-    // 「baseline 自体が下限未満」 か「差が下限に届かない」 かは実行ごとに変わり、
-    // どちらも判定できていない状態を指す正しい注記。 片方だけを期待すると
-    // 実行のたびに通ったり落ちたりする。
+    // 判定に至らない理由は 3 通りあり、どれになるかは実行ごとに変わる
+    // (baseline 自体が下限未満 / 差が下限に届かない / 下側は動かず裾だけ伸びた)。
+    // いずれも判定できていない状態を指す正しい注記なので、1 つだけを期待すると
+    // 実行のたびに通ったり落ちたりする。 下限の値は実行の中で測るため固定しない。
     const note = second.outcomes[0]!.regressionNote;
-    expect(note, '判定できない理由が注記される').toMatch(/検知には \+0\.5ms|下限 0\.5ms 未満/);
+    expect(note, '判定できない理由が注記される').toMatch(
+      /検知には \+\S+ .+以上の悪化が必要|差 \S+ が下限 \S+ 未満で判定を保留|下側は動かず p95 のみ/,
+    );
     expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).toContain(note!);
   });
 

@@ -2,29 +2,31 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限はこの 2 倍 = 0.00050ms。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| baseline_compare (identical 10x10 png) | 0.08ms | 30ms | PASS | stable (差 0.05ms が下限 0.5ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
-| burst_compare (5 different 10x10 diff) | 0.08ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +636%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| large_image_diff (100x100 png) | 0.01ms | 100ms | PASS | stable (検知には +0.5ms (baseline 比 +2733%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | gate | regression |
+|---|---|---|---|---|---|
+| baseline_compare (identical 10x10 png) | 0.0084ms | 0.03ms | 30ms | PASS | stable (下側は動かず p95 のみ +39% (実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| burst_compare (5 different 10x10 diff) | 0.05ms | 0.07ms | 100ms | PASS | stable — gate 無効 (regressionGate=false) |
+| large_image_diff (100x100 png) | 0.0086ms | 0.01ms | 100ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 2, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| baseline_compare (identical 10x10 png) | 0.06ms | 60ms | PASS |
-| burst_compare (5 different 10x10 diff) | 0.71ms | 200ms | PASS |
+| baseline_compare (identical 10x10 png) | 0.05ms | 60ms | PASS |
+| burst_compare (5 different 10x10 diff) | 0.15ms | 200ms | PASS |
 | large_image_diff (100x100 png) | 0.04ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| baseline_compare (identical 10x10 png) | 89784 B | 0 B | 102400 B | yes | PASS |
-| burst_compare (5 different 10x10 diff) | 481480 B | 0 B | 102400 B | yes | PASS |
-| large_image_diff (100x100 png) | 84576 B | 0 B | 102400 B | yes | PASS |
+| baseline_compare (identical 10x10 png) | 88256 B | -280206 B | 102400 B | yes | PASS |
+| burst_compare (5 different 10x10 diff) | 477304 B | 0 B | 102400 B | yes | PASS |
+| large_image_diff (100x100 png) | 96008 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -36,26 +38,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.03ms |
-| p95 | 0.08ms |
-| p99 | 0.17ms |
-| mean | 0.04ms |
-| stdev | 0.04ms |
-| min | 0.02ms |
-| max | 0.19ms |
-| total | 0.77ms |
+| p10 | 0.0084ms |
+| p50 | 0.01ms |
+| p95 | 0.03ms |
+| p99 | 0.04ms |
+| mean | 0.01ms |
+| stdev | 0.0074ms |
+| min | 0.0082ms |
+| max | 0.04ms |
+| total | 0.26ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.03ms | 0.01ms | +0.01ms | +119.58% |
-| p95 | 0.08ms | 0.03ms | +0.05ms | +195.14% |
-| p99 | 0.17ms | 0.03ms | +0.14ms | +466.82% |
-| mean | 0.04ms | 0.01ms | +0.02ms | +178.52% |
-| min | 0.02ms | 0.01ms | +0.01ms | +144.23% |
-| max | 0.19ms | 0.03ms | +0.16ms | +523.27% |
-| total | 0.77ms | 0.28ms | +0.49ms | +178.52% |
+| p10 | 0.0084ms | 0.0088ms | -0.00038ms | -4.27% |
+| p50 | 0.01ms | 0.01ms | -0.00046ms | -4.32% |
+| p95 | 0.03ms | 0.02ms | +0.0075ms | +38.67% |
+| p99 | 0.04ms | 0.02ms | +0.01ms | +57.16% |
+| mean | 0.01ms | 0.01ms | +0.0012ms | +10.06% |
+| min | 0.0082ms | 0.0087ms | -0.00050ms | -5.78% |
+| max | 0.04ms | 0.02ms | +0.01ms | +60.99% |
+| total | 0.26ms | 0.24ms | +0.02ms | +10.06% |
 
 ### burst_compare (5 different 10x10 diff)
 
@@ -65,26 +69,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
+| p10 | 0.05ms |
 | p50 | 0.05ms |
-| p95 | 0.08ms |
-| p99 | 0.11ms |
+| p95 | 0.07ms |
+| p99 | 0.10ms |
 | mean | 0.06ms |
 | stdev | 0.01ms |
 | min | 0.05ms |
-| max | 0.11ms |
-| total | 1.18ms |
+| max | 0.10ms |
+| total | 1.13ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.05ms | 0.05ms | -0.00ms | -1.48% |
-| p95 | 0.08ms | 0.08ms | +0.01ms | +7.82% |
-| p99 | 0.11ms | 0.14ms | -0.04ms | -25.37% |
-| mean | 0.06ms | 0.06ms | -0.00ms | -2.98% |
-| min | 0.05ms | 0.05ms | +0.00ms | +5.07% |
-| max | 0.11ms | 0.16ms | -0.05ms | -29.50% |
-| total | 1.18ms | 1.22ms | -0.04ms | -2.98% |
+| p10 | 0.05ms | 0.05ms | -0.0033ms | -6.66% |
+| p50 | 0.05ms | 0.05ms | -0.0018ms | -3.25% |
+| p95 | 0.07ms | 0.13ms | -0.06ms | -45.23% |
+| p99 | 0.10ms | 0.35ms | -0.26ms | -72.71% |
+| mean | 0.06ms | 0.08ms | -0.02ms | -27.09% |
+| min | 0.05ms | 0.05ms | -0.0030ms | -5.98% |
+| max | 0.10ms | 0.41ms | -0.30ms | -74.95% |
+| total | 1.13ms | 1.55ms | -0.42ms | -27.09% |
 
 ### large_image_diff (100x100 png)
 
@@ -94,24 +100,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p50 | 0.01ms |
+| p10 | 0.0086ms |
+| p50 | 0.0093ms |
 | p95 | 0.01ms |
 | p99 | 0.01ms |
-| mean | 0.01ms |
-| stdev | 0.00ms |
-| min | 0.01ms |
+| mean | 0.0094ms |
+| stdev | 0.00089ms |
+| min | 0.0084ms |
 | max | 0.01ms |
-| total | 0.22ms |
+| total | 0.19ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.01ms | 0.01ms | +0.00ms | +13.47% |
-| p95 | 0.01ms | 0.02ms | -0.00ms | -26.19% |
-| p99 | 0.01ms | 0.03ms | -0.02ms | -58.41% |
-| mean | 0.01ms | 0.01ms | -0.00ms | -6.25% |
-| min | 0.01ms | 0.01ms | +0.00ms | +11.23% |
-| max | 0.01ms | 0.04ms | -0.02ms | -62.27% |
-| total | 0.22ms | 0.23ms | -0.01ms | -6.25% |
+| p10 | 0.0086ms | 0.0095ms | -0.00085ms | -8.94% |
+| p50 | 0.0093ms | 0.01ms | -0.00090ms | -8.76% |
+| p95 | 0.01ms | 0.01ms | -0.0015ms | -11.43% |
+| p99 | 0.01ms | 0.01ms | -0.0020ms | -14.92% |
+| mean | 0.0094ms | 0.01ms | -0.0011ms | -10.41% |
+| min | 0.0084ms | 0.0093ms | -0.00092ms | -9.83% |
+| max | 0.01ms | 0.01ms | -0.0021ms | -15.74% |
+| total | 0.19ms | 0.21ms | -0.02ms | -10.41% |
 

@@ -201,4 +201,43 @@ describe('measurement premise gating (#1708)', () => {
 
     expect(loaded?.envMismatch.map((entry) => entry.field)).toContain('measurementPremise');
   });
+
+  it('T-PH-B-012 統計量を足す前に保存した baseline は sample から補完して読む (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'without-p10.json');
+    const samples = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const stored = buildMeasureResult('reply', samples.length, 1, samples) as unknown as Record<string, unknown>;
+    // p10 導入より前に保存された baseline を再現する。
+    delete stored['p10'];
+    await saveBaselineEnvelope(file, {
+      schema: 1,
+      env: captureEnv(),
+      results: { reply: stored as never },
+    });
+
+    const loaded = await loadBaseline(file);
+
+    // 補完しないと report 生成が undefined を掴んで落ちる。
+    expect(loaded?.envelope.results['reply']?.p10).toBe(2);
+    // 派生値はすべて sample から決まるので、補完後も他の統計量は元と一致する。
+    expect(loaded?.envelope.results['reply']?.p95).toBe(10.5);
+    expect(loaded?.envelope.results['reply']?.samples).toEqual(samples);
+  });
+
+  it('T-PH-B-013 sample を持たない baseline でも読み出しは壊さない (#1718)', async () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'perf-harness-'));
+    const file = path.join(dir, 'no-samples.json');
+    const stored = buildMeasureResult('reply', 3, 1, [1, 2, 3]) as unknown as Record<string, unknown>;
+    delete stored['p10'];
+    stored['samples'] = [];
+    await saveBaselineEnvelope(file, {
+      schema: 1,
+      env: captureEnv(),
+      results: { reply: stored as never },
+    });
+
+    const loaded = await loadBaseline(file);
+
+    expect(loaded?.envelope.results['reply']?.p10).toBe(0);
+  });
 });

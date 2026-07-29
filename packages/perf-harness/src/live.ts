@@ -19,7 +19,7 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { measure } from './measure.js';
+import { measure, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
 import { detectRegression } from './regression.js';
@@ -85,6 +85,14 @@ export async function runPerf3LayerLive(
   let baselineSeeded = false;
   let anySkipped = false;
 
+  // mock 経路と同じく、 回帰判定の絶対下限をこの実行の中で測って決める。
+  // live の op は network 越しで ms 規模なので下限が効く場面はまずないが、
+  // 判定の前提を経路ごとに変えると report の読み方が経路ごとに変わる。
+  const resolutionMs = await measureHarnessResolution({
+    iterations: serialIterations,
+    warmup: serialWarmup,
+  });
+
   for (const op of input.ops) {
     const missing = op.requiredEnv.filter((key) => !process.env[key]);
     if (missing.length > 0) {
@@ -136,7 +144,12 @@ export async function runPerf3LayerLive(
 
     const priorSerial = priorBaseline?.[`${op.name}.live.serial`];
     const regression = priorSerial
-      ? detectRegression({ current: serial, baseline: priorSerial, threshold: 0.2 })
+      ? detectRegression({
+          current: serial,
+          baseline: priorSerial,
+          threshold: 0.2,
+          resolutionMs,
+        })
       : null;
 
     combinedForBaseline[`${op.name}.live.serial`] = serial;

@@ -50,6 +50,34 @@ export async function measure(input: MeasureInput): Promise<MeasureResult> {
   );
 }
 
+/**
+ * この測定系が op に帰属できる最小の差 (ms) を実測する。
+ *
+ * 何もしない関数を `measure` と同じ経路 (async 関数を await する) で呼び、 その p10 を返す。
+ * 得られる値は op の中身と無関係な往復の費用そのもので、 これより小さい差を
+ * 実装の変化として読むことはできない。
+ *
+ * 回帰判定の絶対下限に固定値を置かないのはこのため。 妥当な値は機械と Node の版で
+ * 変わるので、 比較する実行の中で測って渡す。
+ */
+export async function measureHarnessResolution(input: {
+  iterations?: number;
+  warmup?: number;
+} = {}): Promise<number> {
+  const empty = (): void => {};
+  const result = await measure({
+    name: 'harness.resolution',
+    iterations: input.iterations ?? 200,
+    warmup: input.warmup ?? 5,
+    // op 側の包み方 (`async () => { await op.fn(); }`) と同じ深さで呼ぶ。
+    // 深さが違うと往復の回数が変わり、 下限が実際より小さく出る。
+    fn: async () => {
+      await empty();
+    },
+  });
+  return result.p10;
+}
+
 /** Convergent warmup — 直近 window の p95 が toleranceRatio 以内で安定するまで回す。 */
 async function runConvergentWarmup(
   input: MeasureInput,
@@ -105,6 +133,7 @@ export function buildMeasureResult(
     warmup,
     warmupConverged,
     samples,
+    p10: percentileType7(sorted, 0.1),
     p50: median,
     p95: percentileType7(sorted, 0.95),
     p99: percentileType7(sorted, 0.99),

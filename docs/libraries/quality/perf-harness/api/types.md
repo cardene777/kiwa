@@ -50,6 +50,15 @@ export interface MeasureResult {
     warmupConverged: boolean;
     /** 実測 sample 配列 (単位 = ms、 trim 前)。 */
     samples: number[];
+    /**
+     * 下側 10 パーセンタイル。 回帰判定が読む軸。
+     *
+     * 測定を乱す要因 (scheduler 横取り / GC / page cache miss / 他 process) は
+     * どれも実行時間を伸ばす方向にしか働かない。 上側の裾はその日の機械の状態を、
+     * 下側は邪魔が入らなかった時の実費を表す。 実装の変化を実行をまたいで
+     * 比べられるのは後者だけ。
+     */
+    p10: number;
     p50: number;
     p95: number;
     p99: number;
@@ -79,7 +88,7 @@ export interface MeasureResult {
 
 #### <code v-pre>PerfGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L174) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L242) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateInput {
@@ -96,7 +105,7 @@ export interface PerfGateInput {
 
 #### <code v-pre>PerfGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L185) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L253) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateResult {
@@ -108,7 +117,7 @@ export interface PerfGateResult {
 
 #### <code v-pre>RegressionInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L91) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L100) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 Regression 判定 input。 bootstrap CI 経路。
 
@@ -116,17 +125,29 @@ Regression 判定 input。 bootstrap CI 経路。
 export interface RegressionInput {
     current: MeasureResult;
     baseline: MeasureResult;
-    /** p95 delta の判定 threshold (default 0.2 = 20%)。 */
+    /** p10 delta の判定 threshold (default 0.2 = 20%)。 */
     threshold?: number;
     /** bootstrap 反復回数 (default 2000)。 少ないと CI が広くなり検出感度が下がる。 */
     bootstrapIterations?: number;
     /** 信頼区間 (default 0.95)。 */
     confidenceLevel?: number;
     /**
-     * p95 の差がこの ms 未満なら回帰と判定しない (default 0.5)。
+     * この測定系が op に帰属できる最小の差 (ms)。 これに `RESOLUTION_FLOOR_MULTIPLE` を
+     * 掛けた値が既定の絶対下限になる。
      *
-     * 相対比だけで判定すると値が小さいほど厳しくなる。 0.03ms から 0.04ms への
-     * 変化はサンプルが安定していれば「有意な 33% 悪化」になるが、 実害はない。
+     * 何もしない関数を同じ経路で呼んだ時の費用を測って渡す
+     * (`measureHarnessResolution`)。 それより小さい差は op ではなく harness 自身の
+     * 往復を見ているので、 実装の変化として扱えない。
+     *
+     * 渡さない場合は下限なし = 相対 threshold と bootstrap CI だけで判定する。
+     * 固定値を既定に置かないのは、 妥当な値が機械と呼出経路で変わるため。
+     */
+    resolutionMs?: number;
+    /**
+     * 絶対下限の明示指定 (ms)。 指定すると `resolutionMs` 由来の既定を上書きする。
+     *
+     * op 固有の事情で下限を動かす経路。 実測の振れ幅まで引き上げる使い方はしない
+     * (gate が有効に見えて一度も発火しない状態になり、 report からそれが読めなくなる)。
      */
     minDeltaMs?: number;
 }
@@ -134,14 +155,32 @@ export interface RegressionInput {
 
 #### <code v-pre>RegressionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L109) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L130) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface RegressionResult {
     regressed: boolean;
-    /** p95 の変化率。 例 0.15 = 15% 悪化。 */
+    /** p10 の変化率。 例 0.15 = 15% 悪化。 verdict はこの値で決まる。 */
     deltaPct: number;
-    /** bootstrap で推定した p95 delta の 95% CI (lower / upper、 単位 = ms)。 */
+    /**
+     * 判定に使った統計量そのもの (ms)。
+     *
+     * 保存済み baseline の世代によっては `p10` field が無く sample から計算し直すため、
+     * 呼出側が同じ値を再現しようとすると計算が二重になる。 報告に出す値はここから取る。
+     */
+    judged: {
+        current: number;
+        baseline: number;
+    };
+    /**
+     * p95 の変化率。 判定には使わない。
+     *
+     * 一部の呼出だけが遅くなる変化 (条件分岐が増えた / 稀に遅い経路に入る) は
+     * 下側に出ない。 p10 が動かないまま裾だけ伸びた事実を報告に残すために持つ。
+     * この軸は実行をまたぐと実装と無関係に数百 % 動くため gate には載せられない。
+     */
+    tailDeltaPct: number;
+    /** bootstrap で推定した p10 delta の 95% CI (lower / upper、 単位 = ms)。 */
     ci: {
         lower: number;
         upper: number;
@@ -149,12 +188,30 @@ export interface RegressionResult {
     /** CI が 0 を含まないかつ delta > threshold なら true。 */
     significant: boolean;
     verdict: 'improved' | 'stable' | 'regressed';
+    /** 判定に使った絶対下限 (ms)。 */
+    floorMs: number;
+    /**
+     * 相対閾値を超えた有意な差だったが、 絶対下限に満たないため stable に落とした場合 true。
+     *
+     * 「変化が無い」 と「差が下限未満で判定できない」 は同じ stable でも意味が違う。
+     * 区別しないと、 検知できていない状態が安定していると読めてしまう。
+     */
+    suppressedByFloor: boolean;
+    /**
+     * baseline の p10 自体が絶対下限を下回る場合 true。
+     *
+     * 相対閾値を何倍超えても、 差が絶対下限に届くまでは stable のままになる。
+     * 下限が測定系の分解能なので、 これが立つ op は「harness の往復より速い処理を
+     * 測ろうとしている」 状態を指す。 検知が不可能という意味ではなく、 検知に要する
+     * 悪化が相対では極端に大きくなるという意味。
+     */
+    belowDetectionFloor: boolean;
 }
 ```
 
 #### <code v-pre>Thresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L167) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L235) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface Thresholds {

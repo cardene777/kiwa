@@ -4,6 +4,7 @@ import { existsSync, realpathSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { arch, platform as osPlatform, cpus } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { buildMeasureResult } from './measure.js';
 import type {
   BaselineEnv,
   BaselineEnvelope,
@@ -126,11 +127,15 @@ function canonical(target: string): string {
  *   確保が反復数で割られて「1 回あたりの保持」 に載っており、 同じ実装でも
  *   arrayBuffers の増分が変わる。 serial / concurrent の測り方は版 2 と同じ
  *   (標本数の引き上げは試したが効果が確認できず戻した)
+ * - 版 4 = op を測る前に測定系の分解能を測るようになった (#1718)。 空の関数を
+ *   200 回まわしてから 1 つ目の op に入るため、 版 3 までは冷えたまま測られていた
+ *   最初の op が暖まった状態で測られる。 判定軸を p95 から p10 へ移した変更自体は
+ *   保存する値の意味を変えないが、 この空回しは同じ実装の測定値を動かす
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
  */
-export const MEASUREMENT_PREMISE = 3;
+export const MEASUREMENT_PREMISE = 4;
 
 /** 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。 */
 export function captureEnv(): BaselineEnv {
@@ -287,20 +292,60 @@ function normalizeToEnvelope(parsed: unknown): BaselineEnvelope | null {
     const candidate = parsed as { env?: unknown; results?: unknown };
     // schema field だけを信じると、env 欠落で diffEnv が例外を投げる。
     if (!isBaselineEnv(candidate.env) || !isResultMap(candidate.results)) return null;
-    return parsed as BaselineEnvelope;
+    const envelope = parsed as BaselineEnvelope;
+    return { ...envelope, results: backfillResults(envelope.results) };
   }
 
   if (isMeasureResult(parsed)) {
-    return { schema: 1, env: UNKNOWN_ENV, results: { [parsed.name]: parsed } };
+    return {
+      schema: 1,
+      env: UNKNOWN_ENV,
+      results: backfillResults({ [parsed.name]: parsed }),
+    };
   }
 
   if (isResultMap(parsed)) {
-    return { schema: 1, env: UNKNOWN_ENV, results: parsed };
+    return { schema: 1, env: UNKNOWN_ENV, results: backfillResults(parsed) };
   }
 
   // baseline として解釈できない中身は、無いものとして扱う。誤った比較対象を
   // 掴むより seed し直すほうが安全である。
   return null;
+}
+
+function backfillResults(
+  results: Record<string, MeasureResult>,
+): Record<string, MeasureResult> {
+  return Object.fromEntries(
+    Object.entries(results).map(([key, value]) => [key, backfillDerivedStats(value)]),
+  );
+}
+
+/**
+ * 保存済み baseline に無い派生統計を sample から補う。
+ *
+ * 保存されているのは実 sample と、そこから計算した値だけ。 統計量を 1 つ足すたびに
+ * 過去の baseline には欠けた field ができ、 読み手が undefined を掴む
+ * (`p10` 追加時に report 生成が落ちた)。 補完は `buildMeasureResult` に委ねて、
+ * 派生値の定義を 1 箇所に保つ。
+ *
+ * sample が無い baseline は再計算できない。 判定側は sample を要求するため比較は
+ * どのみち成立せず、 ここでは表示が壊れないことだけを守る。
+ */
+function backfillDerivedStats(result: MeasureResult): MeasureResult {
+  if (typeof result.p10 === 'number') return result;
+  if (!Array.isArray(result.samples) || result.samples.length === 0) {
+    return { ...result, p10: 0 };
+  }
+  const rebuilt = buildMeasureResult(
+    result.name,
+    result.iterations,
+    result.warmup,
+    result.samples,
+    result.trimmed?.percent ?? 0,
+    result.warmupConverged ?? true,
+  );
+  return rebuilt;
 }
 
 function isMissingFile(error: unknown): error is NodeJS.ErrnoException {

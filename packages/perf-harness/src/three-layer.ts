@@ -8,7 +8,7 @@
  * - **concurrent** — `measureConcurrent` at N workers (contention / bottleneck)
  * - **memory** — `measureMemory` (arrayBuffers axis, GC-independent)
  *
- * Plus baseline auto-seed + regression detection (20 % delta + Welch t-test)
+ * Plus baseline auto-seed + regression detection (20 % p10 delta + bootstrap CI)
  * + a markdown report with SSOT threshold references.
  *
  * Callers declare their target ops + thresholds and this helper drives the
@@ -17,10 +17,10 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { measure } from './measure.js';
+import { measure, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory, type MemorySample } from './memory.js';
-import { detectRegression } from './regression.js';
+import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
 import {
   captureEnv,
   defaultBaselinePath,
@@ -29,7 +29,7 @@ import {
   saveBaselineEnvelope,
 } from './baseline.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport } from './report.js';
+import { emitPerfReport, formatMs } from './report.js';
 import type { MeasureResult, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
@@ -44,11 +44,11 @@ export interface PerfOpSpec {
    */
   concurrentP95CapMs?: number;
   /**
-   * 回帰と判定する p95 差の下限 (ms、default 0.5)。
+   * 回帰と判定する p10 差の下限 (ms)。
    *
-   * 既定値は測定の揺らぎを除くためのものだが、高頻度 op には緩すぎる。
-   * 0.10ms → 0.59ms は 490% の悪化でも差が 0.49ms なので既定では stable になる。
-   * そうした op は実測の noise floor に合わせて小さくする。
+   * 既定はこの実行で測った測定系の分解能 (何もしない関数を同じ経路で呼んだ費用) の
+   * `RESOLUTION_FLOOR_MULTIPLE` 倍。 分解能より小さい差は op ではなく harness 自身の
+   * 往復を見ているため判定に使えない。 明示すると既定を上書きする。
    */
   regressionMinDeltaMs?: number;
   /**
@@ -73,12 +73,13 @@ export interface PerfOpSpec {
    * 回帰判定を gate から外す理由。 空でない文字列を渡した op だけが対象。
    *
    * 回帰判定は別々の実行で測った値を比べるため、 その op の実行ごとの振れ幅が
-   * 閾値 20% を超えていると、 実装と無関係に判定が入れ替わる。 fs や jsdom を
-   * 触る op は #1708 の実測で p50 でも 200-243%、 p95 で 313-974% 動いた。
+   * 閾値 20% を超えていると、 実装と無関係に判定が入れ替わる。 判定軸を分布の
+   * 下側 (p10) へ移して大半の op はこの条件を満たすようになったが (#1718)、
+   * 下側にも実行ごとの状態が乗る op は残る。
    *
    * 判定は report に残したまま gate から外す。 閾値を緩めたり下限を実測の
    * 振れ幅まで引き上げたりすると、 測れているように見えてしまう。
-   * 測り方そのものの作り直しは #1718 で扱う。
+   * 指定する時は理由に実測の根拠を書く。 落ちたから付ける、 はしない。
    *
    * 上限 (serial / concurrent) の判定はこの指定でも外れない。 上限は 1 回の
    * 実行の中で完結する判定で、 実行間の振れ幅の影響を受けないため。
@@ -129,17 +130,12 @@ export interface RunPerf3LayerInput {
    * 回帰判定を `allPassed` に反映するか (default false)。
    *
    * 回帰判定は別々の実行で測った値を比べるため、 op の実行ごとの振れ幅が
-   * 閾値 20% を下回っていて初めて成立する。 #1708 の実測では kiwa の測定環境で
-   * それを満たす op がほとんど無く、 実装を変えずに 2 回測るだけで
-   * 落ちる package が入れ替わった。 標本数を 15-30 から 60-200 へ増やしても
-   * 改善せず、 p95 でも p50 でも mean でも収まらない。
+   * 閾値 20% を下回っていて初めて成立する。 判定軸を p10 へ移したことで
+   * その条件を満たす op が大半になったが (#1718)、 既定を true に切り替えるのは
+   * 全 package を実測してからにする (#1708)。
    *
-   * その状態で gate に載せると、 本当の退行が起きた時に揺らぎと区別できない。
-   * 判定と根拠は report に出したまま、 gate から外す。
    * 上限 (serial / concurrent / memory) の判定は 1 回の実行の中で完結するので
-   * 従来どおり反映する。
-   *
-   * 測定手法を作り直して振れ幅が閾値を下回ったら、 既定を true に戻す (#1718)。
+   * この指定に関わらず従来どおり反映する。
    */
   regressionGate?: boolean;
   /**
@@ -243,6 +239,14 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const combinedForBaseline: Record<string, MeasureResult> = {};
   const outcomes: OpOutcome[] = [];
 
+  // 回帰判定の絶対下限を、この実行の中で測って決める。 固定値だと機械と Node の版で
+  // 意味が変わり、 速い op では「差が下限に届かないので永久に stable」 になる。
+  // op の測定と同じ条件で取るため、 op を回す前に 1 度だけ測る。
+  const resolutionMs = await measureHarnessResolution({
+    iterations: serialIterations,
+    warmup: serialWarmup,
+  });
+
   for (const op of input.ops) {
     const serial = await measure({
       name: `${op.name}.serial`,
@@ -297,6 +301,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
           current: serial,
           baseline: priorSerial,
           threshold: 0.2,
+          resolutionMs,
           ...(op.regressionMinDeltaMs === undefined
             ? {}
             : { minDeltaMs: op.regressionMinDeltaMs }),
@@ -315,9 +320,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
-      ...(regression === null || priorSerial === undefined
-        ? {}
-        : buildRegressionNote(regression, serial.p95, priorSerial.p95)),
+      ...(regression === null ? {} : buildRegressionNote(regression, 0.2)),
     });
   }
 
@@ -402,6 +405,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     memoryIterations,
     memoryCapDefault,
     regressionGate,
+    resolutionMs,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -461,32 +465,40 @@ function regressionCell(op: PerfOpSpec, outcome: OpOutcome, regressionGate: bool
  */
 function buildRegressionNote(
   regression: RegressionResult,
-  currentP95: number,
-  baselineP95: number,
+  threshold: number,
 ): { regressionNote?: string } {
   // 検知できた実績がある行に感度の補足を足すと、判定と矛盾して読める。
   // 補足は「まだ検知に至っていない」 行にだけ付ける。
   if (regression.verdict === 'regressed' || regression.verdict === 'improved') return {};
 
   if (regression.suppressedByFloor) {
-    const deltaMs = Math.abs(currentP95 - baselineP95);
+    const deltaMs = Math.abs(regression.judged.current - regression.judged.baseline);
     return {
-      regressionNote: `差 ${deltaMs.toFixed(2)}ms が下限 ${regression.floorMs}ms 未満で判定を保留`,
+      regressionNote: `差 ${formatMs(deltaMs)} が下限 ${formatMs(regression.floorMs)} 未満で判定を保留`,
     };
   }
   if (regression.belowDetectionFloor) {
     // baseline が下限より小さい op は、相対閾値をどれだけ超えても差が下限に
     // 届かない限り stable のままになる。 何をもって退行と扱われるのかを書く。
-    const requiredPct = baselineP95 === 0 ? Infinity : (regression.floorMs / baselineP95) * 100;
+    const baseline = regression.judged.baseline;
+    const requiredPct = baseline === 0 ? Infinity : (regression.floorMs / baseline) * 100;
     const requirement = Number.isFinite(requiredPct)
       ? `baseline 比 +${requiredPct.toFixed(0)}%`
       : 'baseline が 0ms のため相対では表せない';
     return {
-      regressionNote: `検知には +${regression.floorMs}ms (${requirement}) 以上の悪化が必要`,
+      regressionNote: `検知には +${formatMs(regression.floorMs)} (${requirement}) 以上の悪化が必要`,
+    };
+  }
+  // 下側が動かないまま裾だけ伸びた変化。 一部の呼出だけが遅くなる実装変更は
+  // ここにしか出ない。 gate には載せられないが、 起きた事実は残す。
+  if (Number.isFinite(regression.tailDeltaPct) && regression.tailDeltaPct >= threshold) {
+    return {
+      regressionNote: `下側は動かず p95 のみ +${(regression.tailDeltaPct * 100).toFixed(0)}% (実行間の振れ幅と区別できないため判定には使わない)`,
     };
   }
   return {};
 }
+
 
 interface WriteReportInput {
   reportPath: string;
@@ -501,6 +513,8 @@ interface WriteReportInput {
   memoryCapDefault: number;
   /** 回帰判定を `allPassed` に反映したか。 report 上で判定と gate を区別するために要る。 */
   regressionGate: boolean;
+  /** この実行で測った測定系の分解能 (ms)。 回帰判定の絶対下限そのもの。 */
+  resolutionMs: number;
 }
 
 function writeReport(input: WriteReportInput): void {
@@ -509,10 +523,14 @@ function writeReport(input: WriteReportInput): void {
     '',
     `Threshold source: [docs/quality/perf-thresholds.md](${input.thresholdDocLink})`,
     '',
-    '## Serial p95 (concurrency = 1)',
+    // 上限は p95、 回帰判定は p10 と読む軸が違う。 同じ表に並べて出さないと、
+    // 「p95 が動いたのに stable と書いてある」 が矛盾に見える。
+    `測定系の分解能 = ${formatMs(input.resolutionMs)} (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限はこの ${RESOLUTION_FLOOR_MULTIPLE} 倍 = ${formatMs(input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)}。`,
     '',
-    '| op | p95 | cap | gate | regression |',
-    '|---|---|---|---|---|',
+    '## Serial (concurrency = 1)',
+    '',
+    '| op | p10 (回帰判定) | p95 (上限判定) | cap | gate | regression |',
+    '|---|---|---|---|---|---|',
   ];
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -520,7 +538,7 @@ function writeReport(input: WriteReportInput): void {
       // 判定を gate から外した op は、判定結果と外した理由の両方を書く。
       // 結果だけ書くと gate に効いているように読め、理由だけ書くと
       // 何が測れたのかが残らない。
-      `| ${op.name} | ${out.serial.p95.toFixed(2)}ms | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
+      `| ${op.name} | ${formatMs(out.serial.p10)} | ${formatMs(out.serial.p95)} | ${op.serialP95CapMs}ms | ${out.serialGatePassed ? 'PASS' : 'FAIL'} | ${regressionCell(op, out, input.regressionGate)} |`,
     );
   });
 
@@ -584,7 +602,7 @@ function writeReport(input: WriteReportInput): void {
 }
 
 /**
- * runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + Welch |t|>3 +
+ * runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + CI 99% +
  * delta 10%。 test 漏れゼロを狙う fail-fast mode。
  *
  * defaults ...

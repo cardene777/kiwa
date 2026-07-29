@@ -2,26 +2,28 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-## Serial p95 (concurrency = 1)
+測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限はこの 2 倍 = 0.00042ms。
 
-| op | p95 | cap | gate | regression |
-|---|---|---|---|---|
-| comparePngBuffersIdentical | 2.76ms | 50ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| comparePngBuffersFullDiff | 11.13ms | 200ms | PASS | regressed — gate 無効 (regressionGate=false) |
+## Serial (concurrency = 1)
+
+| op | p10 (回帰判定) | p95 (上限判定) | cap | gate | regression |
+|---|---|---|---|---|---|
+| comparePngBuffersIdentical | 0.40ms | 1.28ms | 50ms | PASS | improved — gate 無効 (regressionGate=false) |
+| comparePngBuffersFullDiff | 6.32ms | 10.33ms | 200ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| comparePngBuffersIdentical | 3.04ms | 100ms | PASS |
-| comparePngBuffersFullDiff | 33.34ms | 400ms | PASS |
+| comparePngBuffersIdentical | 2.18ms | 100ms | PASS |
+| comparePngBuffersFullDiff | 31.10ms | 400ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| comparePngBuffersIdentical | 17248 B | 811644 B | 8388608 B | yes | PASS |
-| comparePngBuffersFullDiff | 34448 B | 2042162 B | 16777216 B | yes | PASS |
+| comparePngBuffersIdentical | 19488 B | 1310943 B | 8388608 B | yes | PASS |
+| comparePngBuffersFullDiff | 38032 B | 8926783 B | 16777216 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -33,26 +35,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 0.89ms |
-| p95 | 2.76ms |
-| p99 | 3.05ms |
-| mean | 1.24ms |
-| stdev | 0.76ms |
-| min | 0.47ms |
-| max | 3.15ms |
-| total | 37.16ms |
+| p10 | 0.40ms |
+| p50 | 0.59ms |
+| p95 | 1.28ms |
+| p99 | 1.87ms |
+| mean | 0.73ms |
+| stdev | 0.36ms |
+| min | 0.36ms |
+| max | 2.08ms |
+| total | 21.76ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 0.89ms | 0.67ms | +0.23ms | +33.86% |
-| p95 | 2.76ms | 1.61ms | +1.15ms | +71.46% |
-| p99 | 3.05ms | 1.96ms | +1.09ms | +55.43% |
-| mean | 1.24ms | 0.79ms | +0.45ms | +56.16% |
-| min | 0.47ms | 0.30ms | +0.18ms | +60.54% |
-| max | 3.15ms | 2.00ms | +1.15ms | +57.59% |
-| total | 37.16ms | 58.70ms | -21.54ms | -36.69% |
+| p10 | 0.40ms | 0.90ms | -0.51ms | -56.20% |
+| p50 | 0.59ms | 2.04ms | -1.45ms | -70.89% |
+| p95 | 1.28ms | 6.22ms | -4.94ms | -79.38% |
+| p99 | 1.87ms | 12.97ms | -11.10ms | -85.56% |
+| mean | 0.73ms | 2.69ms | -1.96ms | -73.03% |
+| min | 0.36ms | 0.76ms | -0.39ms | -51.78% |
+| max | 2.08ms | 14.92ms | -12.84ms | -86.04% |
+| total | 21.76ms | 80.68ms | -58.92ms | -73.03% |
 
 ### comparePngBuffersFullDiff
 
@@ -62,24 +66,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 3 |
-| p50 | 8.76ms |
-| p95 | 11.13ms |
-| p99 | 12.83ms |
-| mean | 9.07ms |
-| stdev | 1.43ms |
-| min | 6.89ms |
-| max | 13.42ms |
-| total | 272.04ms |
+| p10 | 6.32ms |
+| p50 | 7.49ms |
+| p95 | 10.33ms |
+| p99 | 12.58ms |
+| mean | 7.92ms |
+| stdev | 1.64ms |
+| min | 5.90ms |
+| max | 13.41ms |
+| total | 237.69ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p50 | 8.76ms | 6.16ms | +2.60ms | +42.28% |
-| p95 | 11.13ms | 7.75ms | +3.38ms | +43.58% |
-| p99 | 12.83ms | 8.10ms | +4.73ms | +58.32% |
-| mean | 9.07ms | 6.22ms | +2.84ms | +45.68% |
-| min | 6.89ms | 5.05ms | +1.84ms | +36.37% |
-| max | 13.42ms | 8.12ms | +5.30ms | +65.23% |
-| total | 272.04ms | 460.62ms | -188.58ms | -40.94% |
+| p10 | 6.32ms | 6.89ms | -0.57ms | -8.27% |
+| p50 | 7.49ms | 8.40ms | -0.91ms | -10.83% |
+| p95 | 10.33ms | 13.12ms | -2.79ms | -21.29% |
+| p99 | 12.58ms | 14.40ms | -1.82ms | -12.62% |
+| mean | 7.92ms | 9.02ms | -1.10ms | -12.17% |
+| min | 5.90ms | 6.10ms | -0.20ms | -3.29% |
+| max | 13.41ms | 14.83ms | -1.42ms | -9.60% |
+| total | 237.69ms | 270.61ms | -32.92ms | -12.17% |
 
