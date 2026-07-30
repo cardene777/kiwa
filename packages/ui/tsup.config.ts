@@ -11,8 +11,15 @@ import { defineConfig } from 'tsup';
  *
  * entry が 1 つで出力 file の集合が固定 (index.{js,cjs,d.ts,d.cts} + map) のため、
  * 毎回すべて上書きされる = clean が無くても古い生成物は残らない。
- * entry を増やして chunk が出る構成に変えるなら、 この前提が崩れるので
- * `tests/release-smoke/tests/tsup-clean-race.test.ts` の一覧から外して clean を戻す。
+ * clean を外しても窓が完全に消えるわけではない。 tsup は temp file + rename では
+ * なく最終 path へ直接書くため、 上書き中の部分的な内容を読む窓は残る。 消えるのは
+ * 「file が存在しない」 窓 (build 全体の長さ = 数百 ms) で、 残るのは 1 file の write が
+ * 完了するまでの窓。 完全に無くすには書込側を atomic にする必要がある。
+ *
+ * 出力の顔ぶれが変わる変更 (entry 追加 / format 削減 / outExtension 変更 / 相対
+ * dynamic import 追加) をしたら前提が崩れる。 その時は
+ * `tests/release-smoke/tests/tsup-clean-race.test.ts` の FIXED_OUTPUT_TARGETS から
+ * この package を外し、 CLEAN_REQUIRED_TARGETS に移して clean を戻す。
  */
 export default defineConfig({
   entry: ['src/index.ts'],

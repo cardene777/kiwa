@@ -140,7 +140,9 @@ function collectSharedBuildTargets(): Set<string> {
       for (const key of ['pretest', 'test']) {
         const script = scripts[key];
         if (script === undefined) continue;
-        for (const match of script.matchAll(/(?:-F|--filter) @kiwa-lab\/([a-z0-9-]+)/g)) {
+        // pnpm は `-F <pkg>` / `--filter <pkg>` / `--filter=<pkg>` を受ける。
+        // 区切りを空白 1 つに決め打つと、 `=` 形式や空白 2 つの記述を取り落とす。
+        for (const match of script.matchAll(/(?:-F|--filter)[=\s]+@kiwa-lab\/([a-z0-9-]+)/g)) {
           targets.add(match[1]!);
         }
       }
