@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| component_workflow (3 different components mount+stop) | 0.73ms | 1.37ms | 200ms | 0.00044ms | PASS | stable — gate 無効 (regressionGate=false) |
-| snapshot_batch (3 snapshot mode consecutive) | 0.42ms | 0.87ms | 200ms | 0.00045ms | PASS | stable (換算後 p10 +6% (閾値未満)、 p95 +32% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| mount_error_handling (3 throw + catch during render) | 0.86ms | 1.41ms | 200ms | 0.00046ms | PASS | stable — gate 無効 (regressionGate=false) |
+| component_workflow (3 different components mount+stop) | 0.66ms | 1.28ms | 200ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| snapshot_batch (3 snapshot mode consecutive) | 0.38ms | 0.50ms | 200ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
+| mount_error_handling (3 throw + catch during render) | 0.81ms | 1.10ms | 200ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
@@ -18,25 +18,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
 |---|---|---|---|---|---|---|---|---|
-| component_workflow (3 different components mount+stop) | cpu | 0.09ms | 0.11ms | 0.73ms | 7.910 | 8.519 | 0.64ms | 0.69ms |
-| snapshot_batch (3 snapshot mode consecutive) | cpu | 0.09ms | 0.10ms | 0.42ms | 4.625 | 4.346 | 0.38ms | 0.35ms |
-| mount_error_handling (3 throw + catch during render) | cpu | 0.09ms | 0.10ms | 0.86ms | 9.754 | 9.890 | 0.79ms | 0.80ms |
+| component_workflow (3 different components mount+stop) | cpu | 0.08ms | 0.10ms | 0.66ms | 7.986 | 8.519 | 0.65ms | 0.69ms |
+| snapshot_batch (3 snapshot mode consecutive) | cpu | 0.08ms | 0.09ms | 0.38ms | 4.547 | 4.346 | 0.37ms | 0.35ms |
+| mount_error_handling (3 throw + catch during render) | cpu | 0.08ms | 0.11ms | 0.81ms | 9.742 | 9.890 | 0.79ms | 0.80ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| component_workflow (3 different components mount+stop) | 2.76ms | 400ms | PASS |
-| snapshot_batch (3 snapshot mode consecutive) | 2.56ms | 400ms | PASS |
-| mount_error_handling (3 throw + catch during render) | 5.16ms | 400ms | PASS |
+| component_workflow (3 different components mount+stop) | 3.73ms | 400ms | PASS |
+| snapshot_batch (3 snapshot mode consecutive) | 1.91ms | 400ms | PASS |
+| mount_error_handling (3 throw + catch during render) | 4.27ms | 400ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| component_workflow (3 different components mount+stop) | -114992 B | 0 B | 102400 B | yes | PASS |
-| snapshot_batch (3 snapshot mode consecutive) | 6568 B | 0 B | 102400 B | yes | PASS |
-| mount_error_handling (3 throw + catch during render) | 4477920 B | 0 B | 102400 B | yes | PASS |
+| component_workflow (3 different components mount+stop) | -125064 B | 0 B | 102400 B | yes | PASS |
+| snapshot_batch (3 snapshot mode consecutive) | -7824 B | 0 B | 102400 B | yes | PASS |
+| mount_error_handling (3 throw + catch during render) | 4475088 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -48,30 +48,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.73ms |
-| p50 | 0.99ms |
-| p95 | 1.37ms |
-| p99 | 1.57ms |
-| mean | 1.01ms |
-| stdev | 0.25ms |
-| min | 0.68ms |
-| max | 1.62ms |
-| total | 20.20ms |
+| p10 | 0.66ms |
+| p50 | 0.80ms |
+| p95 | 1.28ms |
+| p99 | 1.82ms |
+| mean | 0.89ms |
+| stdev | 0.30ms |
+| min | 0.64ms |
+| max | 1.95ms |
+| total | 17.79ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.874)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.974)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.64ms | 0.69ms | -0.05ms | -7.15% |
-| p50 | 0.86ms | 0.81ms | +0.06ms | +6.94% |
-| p95 | 1.20ms | 1.20ms | -0.0026ms | -0.22% |
-| p99 | 1.37ms | 2.02ms | -0.65ms | -32.16% |
-| mean | 0.88ms | 0.91ms | -0.02ms | -2.72% |
-| min | 0.60ms | 0.62ms | -0.02ms | -3.03% |
-| max | 1.41ms | 2.22ms | -0.81ms | -36.49% |
-| total | 17.67ms | 18.16ms | -0.49ms | -2.72% |
+| p10 | 0.65ms | 0.69ms | -0.04ms | -6.26% |
+| p50 | 0.78ms | 0.81ms | -0.03ms | -3.81% |
+| p95 | 1.25ms | 1.20ms | +0.05ms | +3.89% |
+| p99 | 1.77ms | 2.02ms | -0.25ms | -12.29% |
+| mean | 0.87ms | 0.91ms | -0.04ms | -4.59% |
+| min | 0.63ms | 0.62ms | +0.01ms | +1.72% |
+| max | 1.90ms | 2.22ms | -0.32ms | -14.49% |
+| total | 17.33ms | 18.16ms | -0.83ms | -4.59% |
 
 ### snapshot_batch (3 snapshot mode consecutive)
 
@@ -81,30 +81,30 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.42ms |
-| p50 | 0.47ms |
-| p95 | 0.87ms |
-| p99 | 0.88ms |
-| mean | 0.53ms |
-| stdev | 0.15ms |
-| min | 0.40ms |
-| max | 0.88ms |
-| total | 10.57ms |
+| p10 | 0.38ms |
+| p50 | 0.40ms |
+| p95 | 0.50ms |
+| p99 | 0.90ms |
+| mean | 0.44ms |
+| stdev | 0.14ms |
+| min | 0.37ms |
+| max | 1.00ms |
+| total | 8.84ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.904)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.985)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.38ms | 0.35ms | +0.02ms | +6.42% |
-| p50 | 0.42ms | 0.38ms | +0.04ms | +11.62% |
-| p95 | 0.79ms | 0.59ms | +0.19ms | +32.47% |
-| p99 | 0.79ms | 0.71ms | +0.09ms | +12.16% |
-| mean | 0.48ms | 0.42ms | +0.06ms | +14.28% |
-| min | 0.37ms | 0.35ms | +0.01ms | +3.61% |
-| max | 0.79ms | 0.73ms | +0.06ms | +8.06% |
-| total | 9.56ms | 8.36ms | +1.19ms | +14.28% |
+| p10 | 0.37ms | 0.35ms | +0.02ms | +4.62% |
+| p50 | 0.40ms | 0.38ms | +0.02ms | +4.98% |
+| p95 | 0.50ms | 0.59ms | -0.10ms | -16.11% |
+| p99 | 0.89ms | 0.71ms | +0.18ms | +25.89% |
+| mean | 0.44ms | 0.42ms | +0.02ms | +4.15% |
+| min | 0.36ms | 0.35ms | +0.0083ms | +2.36% |
+| max | 0.99ms | 0.73ms | +0.25ms | +34.36% |
+| total | 8.71ms | 8.36ms | +0.35ms | +4.15% |
 
 ### mount_error_handling (3 throw + catch during render)
 
@@ -114,28 +114,28 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.86ms |
-| p50 | 1.06ms |
-| p95 | 1.41ms |
-| p99 | 2.57ms |
-| mean | 1.14ms |
-| stdev | 0.44ms |
-| min | 0.82ms |
-| max | 2.86ms |
-| total | 22.89ms |
+| p10 | 0.81ms |
+| p50 | 0.87ms |
+| p95 | 1.10ms |
+| p99 | 3.02ms |
+| mean | 1.01ms |
+| stdev | 0.59ms |
+| min | 0.77ms |
+| max | 3.50ms |
+| total | 20.19ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.916)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.975)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.79ms | 0.80ms | -0.01ms | -1.38% |
-| p50 | 0.97ms | 0.87ms | +0.10ms | +11.99% |
-| p95 | 1.29ms | 1.55ms | -0.26ms | -16.63% |
-| p99 | 2.35ms | 4.24ms | -1.89ms | -44.58% |
-| mean | 1.05ms | 1.11ms | -0.06ms | -5.18% |
-| min | 0.75ms | 0.76ms | -0.0081ms | -1.07% |
-| max | 2.62ms | 4.92ms | -2.30ms | -46.78% |
-| total | 20.98ms | 22.12ms | -1.15ms | -5.18% |
+| p10 | 0.79ms | 0.80ms | -0.01ms | -1.49% |
+| p50 | 0.85ms | 0.87ms | -0.02ms | -2.34% |
+| p95 | 1.07ms | 1.55ms | -0.48ms | -30.97% |
+| p99 | 2.94ms | 4.24ms | -1.30ms | -30.72% |
+| mean | 0.98ms | 1.11ms | -0.12ms | -11.03% |
+| min | 0.75ms | 0.76ms | -0.0036ms | -0.48% |
+| max | 3.41ms | 4.92ms | -1.51ms | -30.70% |
+| total | 19.68ms | 22.12ms | -2.44ms | -11.03% |
 
