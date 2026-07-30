@@ -26,6 +26,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
+  splitting: false,
   external: ['pixelmatch', 'pngjs', 'vitest'],
   outExtension({ format }) {
     return { js: format === 'cjs' ? '.cjs' : '.js' };

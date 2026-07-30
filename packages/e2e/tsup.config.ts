@@ -26,6 +26,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
+  splitting: false,
   external: ['@playwright/test', 'playwright', 'vitest'],
   outExtension({ format }) {
     return {

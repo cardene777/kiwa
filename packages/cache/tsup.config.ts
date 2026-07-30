@@ -26,6 +26,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
+  splitting: false,
   external: ['ioredis', 'redis', 'testcontainers', 'memjs', 'memcached', 'vitest'],
   outExtension({ format }) {
     return {

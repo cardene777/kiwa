@@ -26,6 +26,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
+  splitting: false,
   external: ['next-auth', 'lucia', 'better-auth', '@clerk/backend', 'auth0', 'vitest'],
   outExtension({ format }) {
     return {

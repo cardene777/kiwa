@@ -26,6 +26,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
+  splitting: false,
   external: ['axe-core', 'vitest', 'jsdom'],
   outExtension({ format }) {
     return { js: format === 'cjs' ? '.cjs' : '.js' };

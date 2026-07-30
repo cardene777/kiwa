@@ -26,6 +26,7 @@ export default defineConfig({
   format: ['esm', 'cjs'],
   dts: true,
   sourcemap: true,
+  splitting: false,
   external: ['bullmq', 'ioredis', 'testcontainers', 'inngest', 'miniflare', 'wrangler', 'vitest'],
   outExtension({ format }) {
     return {
