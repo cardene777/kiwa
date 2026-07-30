@@ -119,6 +119,8 @@ const FIXED_OUTPUT_TARGETS = [
   'quality-metrics', 'queue', 'qwikcity', 'realtime', 'remix', 'search',
   'security', 'security-devsecops', 'solidjs', 'solidstart', 'streaming',
   'sveltekit', 'ui', 'visual',
+  // release-smoke 自身の事前 build が並列に走らせるため、 同じ race 源になる。
+  'perf-harness', 'skill-test',
 ] as const;
 
 /**
@@ -168,12 +170,18 @@ function readBuildScript(name: string): string | null {
  * 変えてしまう。 build script の引数を取り出す必要も無くなる (引用符の中の `||` で
  * 壊れる形があった)。
  *
- * 本物の `dist/` に目印を置いて build し、 残るか消えるかを見る。 build は冪等なので
+ * 本物の `dist/` を空にしてから目印を置いて build し、 残るか消えるかを見る。 空に
+ * するのは、 前の build の残りを「この実行の出力」 と読まないため。 build は冪等なので
  * 走らせた後の `dist/` は通常の状態に戻る。 他の test と重ならないよう、 この file は
  * `package.json` の `test` で単独の vitest 実行に分けてある。
  */
 function probeBuild(name: string): BuildProbe {
   const dist = join(PACKAGES_DIR, name, 'dist');
+  // 前の build の残りを消してから測る。 残したまま測ると、 出力先を `dist` 以外に
+  // 変えた設定や、 filter が 1 件も一致せず何も build しなかった実行でも、 前回の
+  // 6 file がそのまま「正しい出力」 として読めてしまう (どちらも実測ですり抜けた)。
+  // 空にしてから build すれば、 見えるのはこの実行が書いたものだけになる。
+  rmSync(dist, { recursive: true, force: true });
   mkdirSync(dist, { recursive: true });
   writeFileSync(join(dist, PROBE), 'probe', 'utf8');
   try {
