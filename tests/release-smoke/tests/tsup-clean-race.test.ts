@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import {
-  existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync,
+  existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, statSync,
+  writeFileSync,
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -137,6 +138,8 @@ interface BuildProbe {
   probeSurvived: boolean;
   /** 出力した実 file (目印を除く)。 */
   files: string[];
+  /** この実行より前の更新時刻を持つ file。 空でなければ今回の build が書いていない。 */
+  stale: string[];
   /** build が落ちた場合の理由。 */
   error: string | null;
 }
@@ -172,27 +175,34 @@ function readBuildScript(name: string): string | null {
  * 変えてしまう。 build script の引数を取り出す必要も無くなる (引用符の中の `||` で
  * 壊れる形があった)。
  *
- * 本物の `dist/` を退避してから目印を置いて build し、 残るか消えるかを見る。 退避
- * するのは、 前の build の残りを「この実行の出力」 と読まないため。 build が落ちた
- * 時は退避した状態に戻すので、 空の `dist/` が残らない。 他の test と重ならないよう、 この file は
+ * 本物の `dist/` に目印を 1 つ足して build し、 残るか消えるかを見る。 既にある
+ * file には触らない。 空にすると、 この検査が防ごうとしている race を検査自身が
+ * 作ってしまう (`pnpm -r test` は 169 package を並列に走らせる)。 前の build の
+ * 残りを「この実行の出力」 と読まないための判定は、 出力 file の更新時刻で行う。 他の test と重ならないよう、 この file は
  * `package.json` の `test` で単独の vitest 実行に分けてある。
  */
 function probeBuild(name: string): BuildProbe {
   const dist = join(PACKAGES_DIR, name, 'dist');
-  const backup = `${dist}.probe-backup`;
-
-  // 前の build の残りを退避してから測る。 残したまま測ると、 出力先を `dist` 以外に
-  // 変えた設定や、 filter が 1 件も一致せず何も build しなかった実行でも、 前回の
-  // 6 file がそのまま「この実行の出力」 として読めてしまう (どちらも実測ですり抜けた)。
-  //
-  // 消さずに退避するのは、 build が落ちた時に空の `dist/` を残さないため。 空のまま
-  // 残すと後続の `tsc` が型定義を解決できず、 この検査と無関係な package まで落ちる
-  // (実測 = `data` / `e2e` / `observability` / `ui` が TS7016)。
-  rmSync(backup, { recursive: true, force: true });
-  if (existsSync(dist)) renameSync(dist, backup);
+  const probe = join(dist, PROBE);
   mkdirSync(dist, { recursive: true });
-  writeFileSync(join(dist, PROBE), 'probe', 'utf8');
 
+  // 目印を 1 つ足すだけで、 既にある file には触らない。
+  //
+  // 以前は「この実行の出力だけを見る」 ために `dist/` を空にしていた。 だがこの
+  // 検査が防ごうとしている race を、 検査自身が作ってしまう。 `pnpm -r test` は
+  // 169 package を並列に走らせるので、 空にしている間に別 package の `tsc` が
+  // 型定義を読みに来る。 release-smoke の中で実行を分けても、 外の 168 package
+  // からは見えない。
+  //
+  // 代わりに、 出力 file の更新時刻がこの実行より後かどうかで「この実行が書いたか」
+  // を見る。 出力先を `dist` 以外に変えた設定も、 filter が 1 件も一致しなかった
+  // 実行も、 `dist/` の file は前のままなので更新時刻で判る。
+  writeFileSync(probe, 'probe', 'utf8');
+  // 目印自身の更新時刻を基準にする。 別に時刻を採ると、 file system の分解能や
+  // 時計のずれで前後が入れ替わり得る。
+  const startedAt = statSync(probe).mtimeMs;
+
+  let error: string | null = null;
   try {
     // `--fail-if-no-match` が無いと、 名前が 1 件も一致しない filter でも exit 0 に
     // なる。 何も build していない実行を成功として読むことになる。
@@ -201,22 +211,25 @@ function probeBuild(name: string): BuildProbe {
       stdio: 'pipe',
       encoding: 'utf8',
     });
-  } catch (error) {
-    // 落ちた build の出力を残さない。 退避した前回の状態に戻す。
-    rmSync(dist, { recursive: true, force: true });
-    if (existsSync(backup)) renameSync(backup, dist);
-    const stderr = (error as { stderr?: string }).stderr ?? '';
-    return { probeSurvived: false, files: [], error: `${(error as Error).message}\n${stderr}` };
+  } catch (thrown) {
+    const stderr = (thrown as { stderr?: string }).stderr ?? '';
+    error = `${(thrown as Error).message}\n${stderr}`;
   }
 
-  const probe: BuildProbe = {
-    probeSurvived: existsSync(join(dist, PROBE)),
-    files: listFiles(dist).filter((file) => file !== PROBE).sort(),
+  // 目印を消す前に見る。 消した後では clean が消したのかこちらが消したのか判らない。
+  const probeSurvived = existsSync(probe);
+  rmSync(probe, { force: true });
+  if (error !== null) return { probeSurvived: false, files: [], stale: [], error };
+
+  const files = listFiles(dist).filter((file) => file !== PROBE).sort();
+  return {
+    probeSurvived,
+    files,
+    // この実行より前の更新時刻を持つ file。 1 件でもあれば、 その file は今回の
+    // build が書いたものではない。
+    stale: files.filter((file) => statSync(join(dist, file)).mtimeMs < startedAt),
     error: null,
   };
-  rmSync(join(dist, PROBE), { force: true });
-  rmSync(backup, { recursive: true, force: true });
-  return probe;
 }
 
 /**
@@ -224,50 +237,97 @@ function probeBuild(name: string): BuildProbe {
  *
  * 判定は TypeScript に解決させる。 生の JSON を読むと `extends` を辿らないため、
  * base 側で `noEmit` を立てた設定を誤って違反にし、 逆に base 側で `outDir` を
- * 与える設定を見落とす。 `outDir` は解決後の絶対 path になるので、 文字列比較では
- * なく package の `dist/` と同じ場所を指すかで見る。
+ * 与える設定を見落とす。 `outDir` は解決後の絶対 path を symlink まで解いて、
+ * package の `dist/` と同じ場所を指すかで見る (`dist-link -> dist` のような別名で
+ * 抜けられないように)。
+ *
+ * package 内の `tsconfig*.json` を全件見る。 `tsconfig.json` だけだと、 それを
+ * 継承して `noEmit` を戻す別 config を足すだけで抜けられる。
  */
 function emitViolations(name: string): string[] {
-  const dir = join(PACKAGES_DIR, name);
-  const tsconfig = join(dir, 'tsconfig.json');
-  if (!existsSync(tsconfig)) return [`${name}: tsconfig.json が無い`];
+  const dir = join(PACKAGES_DIR, name, 'dist');
+  const pkg = join(PACKAGES_DIR, name);
+  // 同 dir の `tsconfig*.json` を全件見る。 `tsconfig.json` だけを見ると、
+  // それを継承して `noEmit: false` と `outDir: dist` を上書きする別 config を
+  // 足すだけで抜けられる。
+  const configs = readdirSync(pkg)
+    .filter((file) => file.startsWith('tsconfig') && file.endsWith('.json'))
+    .sort();
+  if (configs.length === 0) return [`${name}: tsconfig.json が無い`];
 
-  const read = ts.readConfigFile(tsconfig, (path) => readFileSync(path, 'utf8'));
-  if (read.error !== undefined) {
-    return [`${name}: tsconfig.json を読めない (${ts.flattenDiagnosticMessageText(read.error.messageText, ' ')})`];
+  const out: string[] = [];
+  for (const config of configs) {
+    const path = join(pkg, config);
+    const read = ts.readConfigFile(path, (target) => readFileSync(target, 'utf8'));
+    if (read.error !== undefined) {
+      out.push(`${name}/${config}: 読めない (${ts.flattenDiagnosticMessageText(read.error.messageText, ' ')})`);
+      continue;
+    }
+    const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, pkg);
+    const { outDir, noEmit } = parsed.options;
+    if (outDir === undefined || noEmit === true) continue;
+    // symlink を解いてから比べる。 `dist` を指す別名 (`dist-link -> dist`) を
+    // `outDir` にすると、 文字列の比較では別の場所に見える。
+    if (physical(outDir) !== physical(dir)) continue;
+    out.push(`${name}/${config}: dist へ emit する (noEmit が要る)`);
   }
-  const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, dir);
-  const { outDir, noEmit } = parsed.options;
-  if (outDir === undefined) return [];
-  if (resolve(outDir) !== resolve(dir, 'dist')) return [];
-  return noEmit === true ? [] : [`${name}: tsconfig.json が dist へ emit する (noEmit が要る)`];
+  return out;
 }
 
-/** 他 package の `test` / `pretest` から build される package 名。 */
+/** symlink を解いた path。 解けない (まだ無い) 場合は正規化だけする。 */
+function physical(path: string): string {
+  try {
+    return realpathSync(resolve(path));
+  } catch {
+    return resolve(path);
+  }
+}
+
+/**
+ * 他 package の script から build される package 名。
+ *
+ * workspace の全 `package.json` を辿る。 以前は `packages` / `examples` / `tests` の
+ * 直下だけを見ていたため、 `tests/fixtures/basic-connect` のような入れ子の
+ * workspace member が漏れていた。
+ *
+ * `test` / `pretest` だけでなく全 script を見る。 `test: "pnpm run build-shared"` の
+ * ように別 script を挟むと、 その先の filter が読めないため。
+ */
 function collectSharedBuildTargets(): Set<string> {
   const targets = new Set<string>();
-  for (const root of ['packages', 'examples', 'tests']) {
-    const dir = join(REPO_ROOT, root);
-    if (!existsSync(dir)) continue;
-    for (const entry of readdirSync(dir)) {
-      const manifest = join(dir, entry, 'package.json');
-      if (!existsSync(manifest)) continue;
-      const scripts = (JSON.parse(readFileSync(manifest, 'utf8')) as {
-        scripts?: Record<string, string>;
-      }).scripts;
-      if (scripts === undefined) continue;
-      for (const key of ['pretest', 'test']) {
-        const script = scripts[key];
-        if (script === undefined) continue;
-        // pnpm は `-F <pkg>` / `--filter <pkg>` / `--filter=<pkg>` を受ける。
-        // 区切りを空白 1 つに決め打つと、 `=` 形式や空白 2 つの記述を取り落とす。
-        for (const match of script.matchAll(/(?:-F|--filter)[=\s]+@kiwa-lab\/([a-z0-9-]+)/g)) {
-          targets.add(match[1]!);
-        }
+  for (const manifest of findManifests(REPO_ROOT)) {
+    const scripts = (JSON.parse(readFileSync(manifest, 'utf8')) as {
+      scripts?: Record<string, string>;
+    }).scripts;
+    if (scripts === undefined) continue;
+    // release 経路は publish 前に 1 度だけ走る単独 step で、 並列の race を作らない。
+    // 全 package を列挙するため、 これを数えると分類の一覧が意味を失う。
+    for (const [key, script] of Object.entries(scripts)) {
+      if (key === 'release' || key === 'prerelease' || key === 'release-check') continue;
+      // pnpm は `-F <pkg>` / `--filter <pkg>` / `--filter=<pkg>` を受ける。
+      // 区切りを空白 1 つに決め打つと、 `=` 形式や空白 2 つの記述を取り落とす。
+      for (const match of script.matchAll(/(?:-F|--filter)[=\s]+@kiwa-lab\/([a-z0-9-]+)/g)) {
+        targets.add(match[1]!);
       }
     }
   }
   return targets;
+}
+
+/** workspace 内の `package.json` を辿る。 `node_modules` と build 生成物は降りない。 */
+function findManifests(root: string, depth = 0): string[] {
+  if (depth > 4) return [];
+  const out: string[] = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      if (entry.name === 'package.json' && depth > 0) out.push(join(root, entry.name));
+      continue;
+    }
+    if (['node_modules', 'dist', '.git', '.vitest-dist', 'coverage'].includes(entry.name)) continue;
+    if (entry.name.startsWith('.')) continue;
+    out.push(...findManifests(join(root, entry.name), depth + 1));
+  }
+  return out;
 }
 
 describe('tsup clean と並列 test の race (#1741)', () => {
@@ -305,6 +365,19 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     expect(
       missing,
       `chunk を出す package で clean を外すと古い chunk が残る。 該当: ${missing.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('出力が全件この実行の build で書かれている', () => {
+    // 出力先を `dist` 以外に変えた設定や、 filter が 1 件も一致しなかった実行は、
+    // `dist/` の file が前のまま残る。 顔ぶれだけを見ると素通りするので、
+    // 更新時刻でこの実行が書いたことを確かめる。
+    const stale = [...probes.entries()]
+      .filter(([, probe]) => probe.error === null && probe.stale.length > 0)
+      .map(([name, probe]) => `${name} (${probe.stale.join(', ')})`);
+    expect(
+      stale,
+      `build が別の場所へ書いたか、 何も build していない。 該当: ${stale.join(' / ')}`,
     ).toEqual([]);
   });
 
