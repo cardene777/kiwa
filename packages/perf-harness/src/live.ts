@@ -39,6 +39,7 @@ import {
   loadBaseline,
   saveBaselineEnvelope,
 } from './baseline.js';
+import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport, formatMs } from './report.js';
 import type { MeasureResult } from './types.js';
@@ -113,6 +114,11 @@ export async function runPerf3LayerLive(
     : null;
   const combinedForBaseline: Record<string, MeasureResult> = {};
   const outcomes: LiveOpOutcome[] = [];
+  // 比較が成立しなかった op。 mock 経路と同じく、 verdict は書込の可否が
+  // 決まってから確定する。 この経路で記録がある op は必ず比較まで進む
+  // (実行内正規化を使わないので、 記録さえあれば比較は成立する) ため、
+  // 値は常に false になる。 mock 経路と同じ helper を通すために形を揃える。
+  const uncompared = new Map<string, boolean>();
   let baselineSeeded = false;
   let anySkipped = false;
 
@@ -189,6 +195,8 @@ export async function runPerf3LayerLive(
         })
       : null;
 
+    if (regression === null) uncompared.set(op.name, priorSerial !== undefined);
+
     combinedForBaseline[`${op.name}.live.serial`] = serial;
     combinedForBaseline[`${op.name}.live.concurrent`] = concurrent;
 
@@ -202,13 +210,9 @@ export async function runPerf3LayerLive(
       serialGatePassed: serialGate.verdict.passed,
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
-      // この経路の n/a は「seed が起きた」 を保証しない。 保存条件は
-      // `priorBaseline === null` かつ測定が成立していることで、 既存 baseline が
-      // ある実行では 1 byte も書かない (新しい op を足しても追記されない)。
-      // mock 経路は理由を分けて出すが、 live 側は保存経路そのものが足りていない
-      // ため、 文言だけ直すと「追記されるはず」 という別の誤解を生む。
-      // 保存経路と併せて別 Issue で扱う。
-      regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
+      regressionVerdict: regression
+        ? regression.verdict
+        : uncomparableVerdict(priorSerial !== undefined, false),
       ...(regression === null ? {} : buildRegressionNote(regression, 0.2)),
     });
   }
@@ -223,16 +227,40 @@ export async function runPerf3LayerLive(
   // 上限を割った実行を保存すると、壊れた状態が次回以降の比較対象になる。
   // mock 経路 (`runPerf3Layer`) と同じ条件 (#1708)。
   const premiseValid = !input.requireGc || measured.every((o) => o.memory?.gcExposed);
-  if (anyMeasured && priorBaseline === null && premiseValid && allPassed) {
+  // 書込の可否は mock 経路と同じ helper が決める。 経路ごとに条件を持つと、
+  // 片方を直した時にもう片方が古い前提を残す (#1740)。
+  //
+  // env を跨いだ実行では op ごとに測れたり測れなかったりする。 環境変数が欠けて
+  // 飛ばした op を「今回測っていない」 として掃除すると、 credential を 1 つ外した
+  // 実行が他の op の baseline を消してしまう。 掃除は行わない。
+  const plan = anyMeasured
+    ? planBaselineWrite({
+        prior: priorBaseline,
+        current: combinedForBaseline,
+        premiseValid,
+        hardGatePassed: allPassed,
+        prune: false,
+      })
+    : { results: {}, written: false };
+
+  if (plan.written) {
     await saveBaselineEnvelope(baselinePath, {
       schema: BASELINE_SCHEMA,
       env: captureEnv(),
-      results: combinedForBaseline,
+      results: plan.results,
     });
-    baselineSeeded = true;
+    baselineSeeded = priorBaseline === null;
+  }
+
+  // 記録が無かった op の verdict を、 実際に書けたかで確定する。
+  for (const outcome of outcomes) {
+    const hadPrior = uncompared.get(outcome.name);
+    if (hadPrior === undefined) continue;
+    outcome.regressionVerdict = uncomparableVerdict(hadPrior, plan.written);
   }
 
   writeLiveReport({
+    baselineWritten: plan.written,
     reportPath: input.reportPath,
     moduleName: input.moduleName,
     outcomes,
@@ -262,6 +290,14 @@ interface WriteLiveReportInput {
   memoryCapDefault: number;
   /** この実行で測った測定系の分解能 (ms)。 回帰判定の絶対下限の素。 */
   resolutionMs: number;
+  /**
+   * この実行で baseline を書いたか。
+   *
+   * 書込には測定の成立 (GC / 上限) が要る。 同 module の別 op が上限を割ると
+   * 1 byte も書かれないので、 比較できなかった op の行に「作り直した」 と読める
+   * 表記だけを出すと、 上限違反が直るまで同じ状態が繰り返されることが伝わらない。
+   */
+  baselineWritten: boolean;
 }
 
 function writeLiveReport(input: WriteLiveReportInput): void {
@@ -284,6 +320,14 @@ function writeLiveReport(input: WriteLiveReportInput): void {
   if (measuredOps.length === 0) {
     lines.push('_No live ops ran this pass. Set the required env vars to enable._');
   } else {
+    // 比較できなかった行があるのに書込も起きていない実行は、 次の実行でも同じ状態に
+    // なる。 「作り直した」 と読める表記だけを出すと、 それが伝わらない。
+    if (!input.baselineWritten && measuredOps.some((o) => o.regressionVerdict?.startsWith('n/a'))) {
+      lines.push(
+        '**この実行では baseline を書いていない** (測定が成立していない = GC を呼べない、 または上限を割った op がある)。 比較できなかった op は次の実行でも比較できない。',
+        '',
+      );
+    }
     lines.push(
       `測定系の分解能 = ${formatMs(input.resolutionMs)} (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの ${RESOLUTION_FLOOR_MULTIPLE} 倍 = ${formatMs(input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE)}、 op ごとの実効値は下表の「下限」 列。`,
       '',

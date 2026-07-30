@@ -54,6 +54,28 @@ export declare function runPerf3LayerStrict(input: RunPerf3LayerInput): Promise<
 
 ### 型
 
+#### <code v-pre>UncomparableVerdict</code>
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline-write.ts#L85) <code v-pre>packages/perf-harness/src/baseline-write.ts</code>
+
+```ts
+/** 比較が成立しなかった op の verdict。 */
+export type UncomparableVerdict =
+    | 'n/a (比較せず)'
+    | 'n/a (baseline seeded)'
+    | 'n/a (baseline 未保存)';
+```
+
+3 通りの意味。
+
+| 値 | 状態 | 次の実行で比較されるか |
+|---|---|---|
+| <code v-pre>n/a (比較せず)</code> | 記録はあるが基準が揃わず比較できない | 記録を入れ替えれば比較される |
+| <code v-pre>n/a (baseline seeded)</code> | 記録が無く、この実行で書けた | される |
+| <code v-pre>n/a (baseline 未保存)</code> | 記録が無く、書けなかった | されない。測定が成立するまで同じ状態が続く |
+
+書込には測定の成立 (GC を呼べる / 上限を通る) が要る。 同じ module の別 op が上限を割ると 1 byte も書かれないため、 自分の測定が通っていても書けないことがある。
+
 #### <code v-pre>OpOutcome</code>
 
 [ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L209) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
@@ -70,11 +92,10 @@ export interface OpOutcome {
     concurrentGatePassed: boolean;
     memoryGatePassed: boolean;
     /**
-     * `n/a` は 2 種を分ける。 `baseline seeded` = 記録が無い実行 (初回)、
-     * `比較せず` = 記録はあるが基準が揃わず比較できない実行。 後者を seeded と
-     * 書くと、 書込が起きていない実行でも seed したと読める。
+     * `n/a` の 3 種の意味は `uncomparableVerdict` が SSOT。 記録の有無と、
+     * この実行で baseline を書けたかで分かれる。
      */
-    regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)' | 'n/a (比較せず)';
+    regressionVerdict: 'stable' | 'improved' | 'regressed' | UncomparableVerdict;
     /**
      * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
      * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
