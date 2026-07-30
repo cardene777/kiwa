@@ -70,6 +70,14 @@ export interface PerfReferenceOp {
  */
 export interface PerfReferenceSet {
   get(kind: PerfReferenceKind): PerfReferenceOp;
+  /**
+   * fs 系の基準が使う temp dir。 掘る前と `dispose` 後は null。
+   *
+   * 掘った場所を外から確かめられないと、 後片付けを検証する側が
+   * 「`kiwa-perf-reference-` で始まる dir の数」 を数えるしかない。 それは
+   * 並列に走る別の測定が同じ prefix で dir を掘るため成立しない。
+   */
+  dir(): string | null;
   dispose(): void;
 }
 
@@ -164,6 +172,9 @@ export function createReferenceOps(): PerfReferenceSet {
       const built = build(kind);
       cache.set(kind, built);
       return built;
+    },
+    dir(): string | null {
+      return dir;
     },
     dispose(): void {
       if (dir !== null) {

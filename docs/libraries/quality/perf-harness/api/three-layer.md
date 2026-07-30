@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness three-layer の API 契約"
 
 #### <code v-pre>pruneStaleOps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L447) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L531) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 今回測っていない op を baseline から落とすかを決める。 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
 
@@ -26,7 +26,7 @@ export declare function pruneStaleOps(input: {
 
 #### <code v-pre>resolveKiwaRepoRoot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L692) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L878) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 resolveKiwaRepoRoot — walk upward from `start` until finding a package.json whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to resolve the report path regardless of vitest cwd.
 
@@ -36,7 +36,7 @@ export declare function resolveKiwaRepoRoot(start: string): string;
 
 #### <code v-pre>runPerf3Layer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L225) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L269) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
@@ -44,7 +44,7 @@ export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPer
 
 #### <code v-pre>runPerf3LayerStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L672) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L858) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + CI 99% + delta 10%。 見逃し (退行を stable と判定) が致命的な経路で使う。 defaults ... - serialIterations: 400 (v0.2 200) - serialWarmup: 10 (v0.2 5) - concurrency: 20 (v0.2 10) - iterationsPerWorker: 100 (v0.2 50) - memoryIterations: 400 (v0.2 200) - regressionThreshold: 0.1 (v0.2 0.2) - regressionConfidenceLevel: 0.99 (v0.2 0.95) 回帰判定の 2 つは、 名前が strict でありながら通常版と同じ設定で動いていた (`runPerf3Layer` が閾値を内部で固定していた)。 標本数だけ増えて判定は緩いまま だったので、 呼出から渡せるようにして名前どおりの挙動に揃えた (#1718)。
 
@@ -56,30 +56,44 @@ export declare function runPerf3LayerStrict(input: RunPerf3LayerInput): Promise<
 
 #### <code v-pre>OpOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L184) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L209) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface OpOutcome {
     name: string;
     serial: MeasureResult;
+    /** serial と 1 呼出ずつ交互に測った基準 op の実測値。 */
+    serialReference: MeasureResult;
     concurrent: MeasureResult;
     memory: MemorySample;
     serialGatePassed: boolean;
     concurrentGatePassed: boolean;
     memoryGatePassed: boolean;
-    regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)';
+    /**
+     * `n/a` は 2 種を分ける。 `baseline seeded` = 記録が無い実行 (初回)、
+     * `比較せず` = 記録はあるが基準が揃わず比較できない実行。 後者を seeded と
+     * 書くと、 書込が起きていない実行でも seed したと読める。
+     */
+    regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)' | 'n/a (比較せず)';
     /**
      * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
      * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
      * 補足が要らない場合は undefined。
      */
     regressionNote?: string;
+    /**
+     * 判定の内訳。 比較対象が無かった実行では undefined。
+     *
+     * verdict だけを返すと、 正規化が効いたのか (normalizationScale) と、
+     * 換算後の値が baseline とどれだけ離れたのかを呼出側から確認できない。
+     */
+    regression?: RegressionResult;
 }
 ```
 
 #### <code v-pre>PerfOpSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L35) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L37) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface PerfOpSpec {
@@ -97,10 +111,27 @@ export interface PerfOpSpec {
      * 回帰と判定する p10 差の下限 (ms)。
      *
      * 既定はこの実行で測った測定系の分解能 (何もしない関数を同じ経路で呼んだ費用) の
-     * `RESOLUTION_FLOOR_MULTIPLE` 倍。 分解能より小さい差は op ではなく harness 自身の
-     * 往復を見ているため判定に使えない。 明示すると既定を上書きする。
+     * `RESOLUTION_FLOOR_MULTIPLE` 倍に、 実行内正規化の倍率を掛けた値。 分解能も今回の
+     * 実行で測った値なので、 差と同じ単位 (baseline を測った時の機械の ms) へ揃える。
+     * 分解能より小さい差は op ではなく harness 自身の往復を見ているため判定に使えない。
+     *
+     * 明示すると既定を上書きする。 その値には倍率を掛けない (どの実行の測定値でもない
+     * 定数のため、 掛けると gate の感度がその日の機械で変わる)。 実際に効いた値は
+     * report の「下限」 列に出る。
      */
     regressionMinDeltaMs?: number;
+    /**
+     * 実行内正規化の基準 op の種類 (default `cpu`)。
+     *
+     * 回帰判定は、 同じ実行の中で交互に測った基準 op との比で行う。 基準は対象と
+     * 同じ邪魔を受けるものでないと相殺が起きないため、 fs を触る op は `fs-read` /
+     * `fs-write` を宣言する。 種類を外すと素の値より悪化する
+     * (fs read の実行間振れ幅 = 素 135% / `fs-read` 基準 17% / `cpu` 基準 171%、
+     * `scripts/reference-op-probe.mjs` 実測)。
+     *
+     * 選び方と却下した案は `docs/quality/perf-thresholds.md` § In-run normalization。
+     */
+    referenceKind?: PerfReferenceKind;
     /**
      * Optional override for memory arrayBuffers cap.
      * Default = 100 KB across 200 iterations.
@@ -124,8 +155,9 @@ export interface PerfOpSpec {
      *
      * 回帰判定は別々の実行で測った値を比べるため、 その op の実行ごとの振れ幅が
      * 閾値 20% を超えていると、 実装と無関係に判定が入れ替わる。 判定軸を分布の
-     * 下側 (p10) へ移して大半の op はこの条件を満たすようになったが (#1718)、
-     * 下側にも実行ごとの状態が乗る op は残る。
+     * 下側 (p10) へ移し (#1718)、 さらに同じ実行の中で測った基準 op との比で
+     * 判定するようにして (#1737) 大半の op はこの条件を満たすようになったが、
+     * 基準と邪魔を共有しない op (子 process の起動を含むもの 等) は残る。
      *
      * 判定は report に残したまま gate から外す。 閾値を緩めたり下限を実測の
      * 振れ幅まで引き上げたりすると、 測れているように見えてしまう。
@@ -140,7 +172,7 @@ export interface PerfOpSpec {
 
 #### <code v-pre>RunPerf3LayerInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L90) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L110) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface RunPerf3LayerInput {
@@ -186,9 +218,14 @@ export interface RunPerf3LayerInput {
      * 回帰判定を `allPassed` に反映するか (default false)。
      *
      * 回帰判定は別々の実行で測った値を比べるため、 op の実行ごとの振れ幅が
-     * 閾値 20% を下回っていて初めて成立する。 判定軸を p10 へ移したことで
-     * その条件を満たす op が大半になったが (#1718)、 既定を true に切り替えるのは
-     * 全 package を実測してからにする (#1708)。
+     * 閾値 20% を下回っていて初めて成立する。 実行内正規化で実行全体に乗る
+     * ずれは消えた (全 492 op の比の変化の中央値が 2 回の実測とも 0.0%、 #1737) が、
+     * op 個別のばらつきは残り、 |変化| の p90 が 17-20% と閾値のすぐ下にある。
+     *
+     * 既定を true にすると、 実装を変えていないのに毎回 20-30 package が落ちる
+     * (実測 = 2 回目 22 / 3 回目 29)。 上限の実 breach がその中に埋もれるため、
+     * 既定は false のままにしてある。 詳細と残りの根は
+     * `docs/quality/perf-thresholds.md` § In-run normalization。
      *
      * 上限 (serial / concurrent / memory) の判定は 1 回の実行の中で完結するので
      * この指定に関わらず従来どおり反映する。
@@ -240,7 +277,7 @@ export interface RunPerf3LayerInput {
 
 #### <code v-pre>RunPerf3LayerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L201) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L245) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface RunPerf3LayerResult {

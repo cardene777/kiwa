@@ -113,11 +113,11 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       baselinePath,
       ...settings,
     });
-    expect(third.outcomes.find((o) => o.name === 'added')?.regressionVerdict).not.toBe(
-      'n/a (baseline seeded)',
+    expect(third.outcomes.find((o) => o.name === 'added')?.regressionVerdict).toMatch(
+      /^(stable|improved|regressed)$/,
     );
-    expect(third.outcomes.find((o) => o.name === 'existing')?.regressionVerdict).not.toBe(
-      'n/a (baseline seeded)',
+    expect(third.outcomes.find((o) => o.name === 'existing')?.regressionVerdict).toMatch(
+      /^(stable|improved|regressed)$/,
     );
   });
 
@@ -350,7 +350,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ...settings,
     });
     expect(compared.baselineSeeded).toBe(false);
-    expect(compared.outcomes[0]!.regressionVerdict).not.toBe('n/a (baseline seeded)');
+    expect(compared.outcomes[0]!.regressionVerdict, '比較が成立していること').toMatch(/^(stable|improved|regressed)$/);
   });
 
   it('links to the threshold SSOT from nested report paths', async () => {

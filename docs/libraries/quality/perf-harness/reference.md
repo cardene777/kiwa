@@ -31,15 +31,20 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| <code v-pre>&#96;saveBaselineEnvelope: 標本が 2 件未満の記録は baseline にできない ($&#123;names&#125;)。&#96; + ' 比較には最低 2 件が要る (bootstrap CI がそれ未満で退化する)。 iterations を増やす。'</code> | [packages/perf-harness/src/baseline.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L71) |
+| <code v-pre>&#96;saveBaselineEnvelope: 標本が 2 件未満の記録は baseline にできない ($&#123;names&#125;)。&#96; + ' 比較には最低 2 件が要る (bootstrap CI がそれ未満で退化する)。 iterations を増やす。'</code> | [packages/perf-harness/src/baseline.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L72) |
 | <code v-pre>measureConcurrent: concurrency must be &gt;= 1, got $&#123;input.concurrency&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L37) |
 | <code v-pre>measureConcurrent: iterationsPerWorker must be &gt;= 1, got $&#123;input.iterationsPerWorker&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L40) |
 | <code v-pre>measureConcurrent: warmup must be &gt;= 0, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L46) |
-| <code v-pre>measure: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L15) |
-| <code v-pre>measure: warmup must be &gt;= 0, got $&#123;warmupCount&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L24) |
+| <code v-pre>measureAlternating: warmup must be &gt;= 0, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L103) |
+| <code v-pre>&#96;measureAlternating: 基準 op $&#123;input.reference.name&#125; の p10 が $&#123;reference.p10&#125;ms で分母にできない。&#96; + ' 計時が機能していないか、 基準 op が最適化で消えている。'</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L134) |
+| <code v-pre>measure: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L16) |
+| <code v-pre>measure: warmup must be &gt;= 0, got $&#123;warmupCount&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L25) |
+| <code v-pre>measureAlternating: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L99) |
 | <code v-pre>measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L42) |
 | <code v-pre>measureMemory: warmup must be a non-negative integer, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L48) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L701) |
+| <code v-pre>unreachable</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L134) |
+| <code v-pre>&#96;createReferenceOps: 未知の基準 op の種類 $&#123;JSON.stringify(kind)&#125;。&#96; + &#96; 使える値は $&#123;REFERENCE&#95;KINDS.join(' / ')&#125;。&#96;</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L160) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L887) |
 
 ## API 契約
 
@@ -47,15 +52,16 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 宣言元 | 値 | 型 |
 | --- | --- | --- |
-| [baseline.ts](./api/baseline) | 8 | 0 |
+| [baseline.ts](./api/baseline) | 9 | 0 |
 | [concurrent.ts](./api/concurrent) | 1 | 1 |
 | [gate.ts](./api/gate) | 1 | 0 |
 | [live.ts](./api/live) | 1 | 4 |
-| [measure.ts](./api/measure) | 3 | 0 |
+| [measure.ts](./api/measure) | 4 | 2 |
 | [memory.ts](./api/memory) | 1 | 2 |
-| [regression.ts](./api/regression) | 4 | 0 |
+| [reference.ts](./api/reference) | 5 | 2 |
+| [regression.ts](./api/regression) | 5 | 0 |
 | [report.ts](./api/report) | 1 | 0 |
 | [three-layer.ts](./api/three-layer) | 4 | 4 |
-| [types.ts](./api/types) | 0 | 7 |
+| [types.ts](./api/types) | 0 | 9 |
 
 <!-- kiwa-public-api:end -->

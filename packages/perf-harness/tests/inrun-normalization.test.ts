@@ -11,7 +11,7 @@
  * 成立しない組は比較せず作り直しに回すこと。
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
 import {
@@ -352,7 +352,7 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
       baselinePath,
       ...settings,
     });
-    expect(second.outcomes[0]!.regressionVerdict).not.toBe('n/a (baseline seeded)');
+    expect(second.outcomes[0]!.regressionVerdict, '比較が成立していること').toMatch(/^(stable|improved|regressed)$/);
     expect(second.outcomes[0]!.regression?.normalized).toBe(true);
   });
 
@@ -397,7 +397,7 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
       baselinePath,
       ...settings,
     });
-    expect(third.outcomes[0]!.regressionVerdict).not.toBe('n/a (baseline seeded)');
+    expect(third.outcomes[0]!.regressionVerdict, '比較が成立していること').toMatch(/^(stable|improved|regressed)$/);
   });
 
   it('基準の記録が無い世代の baseline は比較に使わない', async () => {
@@ -634,18 +634,20 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
 });
 
 describe('createReferenceOps — 基準 op の一式', () => {
-  it('fs 系を要求した時だけ temp dir を掘り、 dispose で消す', () => {
+  it('fs 系を要求した時だけ temp dir を掘る', () => {
     const references = createReferenceOps();
     try {
       // cpu だけなら fs に触れないので dir を掘らない。
       const cpu = references.get('cpu');
       expect(cpu.kind).toBe('cpu');
       expect(cpu.implVersion).toBe(REFERENCE_IMPL_VERSION);
+      expect(references.dir()).toBeNull();
 
       const read = references.get('fs-read');
       const write = references.get('fs-write');
       expect(read.name).toBe('harness.reference.fs-read');
       expect(write.name).toBe('harness.reference.fs-write');
+      expect(references.dir()).not.toBeNull();
 
       // 同じ種類を 2 度要求しても同じ op を返す (dir を増やさない)。
       expect(references.get('fs-read')).toBe(read);
@@ -658,16 +660,16 @@ describe('createReferenceOps — 基準 op の一式', () => {
     const references = createReferenceOps();
     const reference = references.get('fs-write');
     await reference.fn();
-    // 基準が書いた file の親 dir を掴む。 dispose 後に消えていることを見る。
-    const dirs = readdirSync(os.tmpdir()).filter((entry) =>
-      entry.startsWith('kiwa-perf-reference-'),
-    );
-    expect(dirs.length).toBeGreaterThan(0);
+    // 掘った場所を直接見る。 prefix で数えると、 並列に走る別 test file の測定が
+    // 同じ prefix で dir を掘るため成立しない (実測で 1/5 の頻度で落ちた)。
+    const dir = references.dir();
+    expect(dir).not.toBeNull();
+    expect(existsSync(dir!)).toBe(true);
+    expect(readdirSync(dir!)).toContain('reference-write.txt');
+
     references.dispose();
-    const after = readdirSync(os.tmpdir()).filter((entry) =>
-      entry.startsWith('kiwa-perf-reference-'),
-    );
-    expect(after.length).toBeLessThan(dirs.length);
+    expect(existsSync(dir!)).toBe(false);
+    expect(references.dir()).toBeNull();
   });
 
   it('未知の種類は既知の基準に落とさず落とす', () => {

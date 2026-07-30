@@ -78,7 +78,7 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 | <code v-pre>spec-to-test: input not found: $&#123;inPath&#125;</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L307) |
 | <code v-pre>spec-to-test: unsupported layer "$&#123;layer&#125;". Supported: api, ui, data, cli.</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L319) |
 | <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L104) |
-| <code v-pre>not found</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L276) |
+| <code v-pre>not found</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L353) |
 
 ## API 契約
 

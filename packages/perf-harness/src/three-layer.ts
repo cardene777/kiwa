@@ -563,7 +563,17 @@ function uncomparableReason(current: MeasureResult, baseline: MeasureResult): st
   ) {
     return `基準 op の実装の版が baseline と違うため比較せず (baseline ${baselineReference.implVersion ?? '記録なし'} / 今回 ${currentReference.implVersion ?? '記録なし'})`;
   }
-  return '基準 op の p10 が分母にならないため比較せず';
+  // 残るのは 2 つ。 どちらかの p10 が分母にならない場合と、 双方が有限正なのに
+  // 商が非有限や 0 に落ちる場合 (桁が離れている)。 後者を前者と同じ文言で出すと、
+  // 正常な側を原因として名指してしまう。 どちらでも両側の値を出す。
+  const values = `baseline ${baselineReference.p10} / 今回 ${currentReference.p10}`;
+  if (!(baselineReference.p10 > 0) || !Number.isFinite(baselineReference.p10)) {
+    return `baseline 側の基準 p10 が分母にならないため比較せず (${values})`;
+  }
+  if (!(currentReference.p10 > 0) || !Number.isFinite(currentReference.p10)) {
+    return `今回の基準 p10 が分母にならないため比較せず (${values})`;
+  }
+  return `基準 p10 の桁が離れていて換算倍率が求まらないため比較せず (${values})`;
 }
 
 /**
@@ -743,7 +753,10 @@ function writeReport(input: WriteReportInput): void {
     const out = input.outcomes[idx]!;
     const referenceP10 = out.serialReference.p10;
     const ratio = referenceP10 > 0 ? out.serial.p10 / referenceP10 : Number.NaN;
-    const prior = input.priorBaseline?.[`${op.name}.serial`];
+    // 比較していない行では baseline の比を出さない。 別の分母で割った量が今回の比の
+    // 真横に並ぶと、 読み手は 2 列を引き算して「改善した」 と読めてしまう。
+    // その 2 値は比較できる量ではない (換算後 p10 / baseline p10 も n/a になる)。
+    const prior = out.regression === undefined ? undefined : input.priorBaseline?.[`${op.name}.serial`];
     const priorReference = prior?.reference;
     const priorRatio =
       prior !== undefined && priorReference !== undefined && priorReference.p10 > 0
