@@ -8,35 +8,35 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| validateSchema | 0.00046ms | 0.0026ms | 5ms | 0.00032ms | PASS | stable (p10 -3% (閾値未満)、 p95 +47% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| registerFieldAndSubmit | 0.0060ms | 0.05ms | 5ms | 0.00032ms | PASS | stable (p10 +2% (閾値未満)、 p95 +179% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| getFieldErrorAfterFailure | 0.0077ms | 0.03ms | 5ms | 0.00032ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| validateSchema | 0.00046ms | 0.0035ms | 5ms | 0.00034ms | PASS | stable (換算後 p10 +1% (閾値未満)、 p95 +72% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| registerFieldAndSubmit | 0.0057ms | 0.02ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| getFieldErrorAfterFailure | 0.0044ms | 0.01ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|
-| validateSchema | cpu | 0.08ms | 0.00046ms | 0.006 | 0.006 | 0.00044ms | 0.00046ms |
-| registerFieldAndSubmit | cpu | 0.08ms | 0.0060ms | 0.072 | 0.071 | 0.0058ms | 0.0057ms |
-| getFieldErrorAfterFailure | cpu | 0.08ms | 0.0077ms | 0.093 | 0.055 | 0.0075ms | 0.0044ms |
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| validateSchema | cpu | 0.08ms | 0.09ms | 0.00046ms | 0.006 | 0.006 | 0.00046ms | 0.00046ms |
+| registerFieldAndSubmit | cpu | 0.08ms | 0.09ms | 0.0057ms | 0.070 | 0.069 | 0.0056ms | 0.0055ms |
+| getFieldErrorAfterFailure | cpu | 0.08ms | 0.09ms | 0.0044ms | 0.054 | 0.055 | 0.0043ms | 0.0044ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
 | validateSchema | 0.01ms | 10ms | PASS |
-| registerFieldAndSubmit | 0.10ms | 10ms | PASS |
-| getFieldErrorAfterFailure | 0.42ms | 10ms | PASS |
+| registerFieldAndSubmit | 0.11ms | 10ms | PASS |
+| getFieldErrorAfterFailure | 0.06ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| validateSchema | -7592 B | 0 B | 102400 B | yes | PASS |
-| registerFieldAndSubmit | 55592 B | 0 B | 102400 B | yes | PASS |
-| getFieldErrorAfterFailure | -704 B | 0 B | 102400 B | yes | PASS |
+| validateSchema | -11056 B | 0 B | 102400 B | yes | PASS |
+| registerFieldAndSubmit | -10400 B | 0 B | 102400 B | yes | PASS |
+| getFieldErrorAfterFailure | 1632 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,27 +49,29 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.00046ms |
-| p50 | 0.00054ms |
-| p95 | 0.0026ms |
-| p99 | 0.01ms |
+| p50 | 0.00050ms |
+| p95 | 0.0035ms |
+| p99 | 0.02ms |
 | mean | 0.0011ms |
-| stdev | 0.0024ms |
-| min | 0.00033ms |
+| stdev | 0.0025ms |
+| min | 0.00029ms |
 | max | 0.02ms |
-| total | 0.22ms |
+| total | 0.21ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.013)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00046ms | 0.00046ms | 0.00ms | 0.00% |
-| p50 | 0.00054ms | 0.00050ms | +0.000041ms | +8.20% |
-| p95 | 0.0026ms | 0.0017ms | +0.00089ms | +52.18% |
-| p99 | 0.01ms | 0.0061ms | +0.0079ms | +129.61% |
-| mean | 0.0011ms | 0.00079ms | +0.00033ms | +41.34% |
-| min | 0.00033ms | 0.00029ms | +0.000043ms | +14.78% |
-| max | 0.02ms | 0.01ms | +0.0038ms | +27.30% |
-| total | 0.22ms | 0.16ms | +0.07ms | +41.34% |
+| p10 | 0.00046ms | 0.00046ms | +0.0000052ms | +1.13% |
+| p50 | 0.00051ms | 0.00050ms | +0.0000067ms | +1.35% |
+| p95 | 0.0035ms | 0.0020ms | +0.0015ms | +72.34% |
+| p99 | 0.02ms | 0.01ms | +0.0060ms | +57.89% |
+| mean | 0.0011ms | 0.00094ms | +0.00015ms | +15.75% |
+| min | 0.00029ms | 0.00033ms | -0.000038ms | -11.43% |
+| max | 0.02ms | 0.01ms | +0.01ms | +91.40% |
+| total | 0.22ms | 0.19ms | +0.03ms | +15.75% |
 
 ### registerFieldAndSubmit
 
@@ -79,28 +81,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0060ms |
-| p50 | 0.0092ms |
-| p95 | 0.05ms |
-| p99 | 11.82ms |
-| mean | 0.34ms |
-| stdev | 2.43ms |
-| min | 0.0057ms |
-| max | 23.05ms |
-| total | 68.01ms |
+| p10 | 0.0057ms |
+| p50 | 0.0062ms |
+| p95 | 0.02ms |
+| p99 | 0.05ms |
+| mean | 0.0085ms |
+| stdev | 0.0093ms |
+| min | 0.0054ms |
+| max | 0.10ms |
+| total | 1.71ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.989)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0060ms | 0.0057ms | +0.00033ms | +5.89% |
-| p50 | 0.0092ms | 0.0060ms | +0.0031ms | +51.72% |
-| p95 | 0.05ms | 0.02ms | +0.03ms | +187.86% |
-| p99 | 11.82ms | 0.04ms | +11.78ms | +33502.32% |
-| mean | 0.34ms | 0.0081ms | +0.33ms | +4108.93% |
-| min | 0.0057ms | 0.0055ms | +0.00013ms | +2.27% |
-| max | 23.05ms | 0.09ms | +22.96ms | +24653.69% |
-| total | 68.01ms | 1.62ms | +66.40ms | +4108.93% |
+| p10 | 0.0056ms | 0.0055ms | +0.000070ms | +1.26% |
+| p50 | 0.0061ms | 0.0059ms | +0.00018ms | +3.11% |
+| p95 | 0.02ms | 0.02ms | -0.0039ms | -18.67% |
+| p99 | 0.05ms | 0.04ms | +0.01ms | +38.64% |
+| mean | 0.0085ms | 0.0085ms | -0.000084ms | -0.99% |
+| min | 0.0054ms | 0.0053ms | +0.000067ms | +1.27% |
+| max | 0.10ms | 0.10ms | -0.0032ms | -3.06% |
+| total | 1.69ms | 1.71ms | -0.02ms | -0.99% |
 
 ### getFieldErrorAfterFailure
 
@@ -110,26 +114,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0077ms |
-| p50 | 0.01ms |
-| p95 | 0.03ms |
-| p99 | 3.30ms |
-| mean | 0.20ms |
-| stdev | 1.69ms |
-| min | 0.0046ms |
-| max | 18.97ms |
-| total | 39.43ms |
+| p10 | 0.0044ms |
+| p50 | 0.0047ms |
+| p95 | 0.01ms |
+| p99 | 0.06ms |
+| mean | 0.0066ms |
+| stdev | 0.0097ms |
+| min | 0.0042ms |
+| max | 0.11ms |
+| total | 1.33ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.989)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0077ms | 0.0044ms | +0.0033ms | +75.46% |
-| p50 | 0.01ms | 0.0051ms | +0.0050ms | +99.18% |
-| p95 | 0.03ms | 0.0094ms | +0.02ms | +239.22% |
-| p99 | 3.30ms | 0.01ms | +3.28ms | +25710.64% |
-| mean | 0.20ms | 0.0056ms | +0.19ms | +3405.77% |
-| min | 0.0046ms | 0.0043ms | +0.00037ms | +8.82% |
-| max | 18.97ms | 0.02ms | +18.95ms | +96773.35% |
-| total | 39.43ms | 1.12ms | +38.30ms | +3405.77% |
+| p10 | 0.0043ms | 0.0044ms | -0.000048ms | -1.09% |
+| p50 | 0.0047ms | 0.0054ms | -0.00070ms | -12.92% |
+| p95 | 0.010ms | 0.02ms | -0.0080ms | -44.47% |
+| p99 | 0.06ms | 0.04ms | +0.03ms | +73.12% |
+| mean | 0.0066ms | 0.0073ms | -0.00076ms | -10.31% |
+| min | 0.0042ms | 0.0042ms | -0.000046ms | -1.09% |
+| max | 0.11ms | 0.06ms | +0.05ms | +81.52% |
+| total | 1.31ms | 1.47ms | -0.15ms | -10.31% |
 

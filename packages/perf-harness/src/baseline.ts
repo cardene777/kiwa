@@ -151,7 +151,10 @@ function canonical(target: string): string {
  *   保存する値の意味を変えないが、 この空回しは同じ実装の測定値を動かす
  * - 版 5 = op を基準 op と 1 呼出ずつ交互に測るようになった (#1737)。 対象の各
  *   呼出の直前に基準 op が挟まるため、 cache と分岐予測の状態が版 4 までと違う。
- *   比較に要る基準 p10 が版 4 以前の記録には無い、 という理由でも作り直しになる
+ *   比較に要る基準 p10 が版 4 以前の記録には無い、 という理由でも作り直しになる。
+ *   実 API 経路 (`runPerf3LayerLive`) は交互測定を使わないため、 この版でも
+ *   `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。
+ *   正規化が成立するかは `reference` の有無が決める
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
@@ -275,6 +278,13 @@ function hasValidReference(candidate: Record<string, unknown>): boolean {
   const fields = reference as Record<string, unknown>;
   if (!REFERENCE_KINDS.includes(fields.kind as PerfReferenceKind)) return false;
   if (typeof fields.name !== 'string') return false;
+  // 版の記録が無いのは旧世代として通す。 比較の可否は `resolveNormalization` が
+  // 版不明として弾く。 値が入っているのに数値でない記録は壊れているので落とす。
+  if (fields.implVersion !== undefined) {
+    if (typeof fields.implVersion !== 'number' || !Number.isInteger(fields.implVersion)) {
+      return false;
+    }
+  }
   return typeof fields.p10 === 'number' && Number.isFinite(fields.p10) && fields.p10 > 0;
 }
 
@@ -289,7 +299,13 @@ function isMeasureResult(value: unknown): value is MeasureResult {
   // key は既にあるので追記経路でも作り直されない。 読めない記録として扱い、
   // 次の実行で seed し直させる。
   if (candidate.samples.length < 2) return false;
-  if (!candidate.samples.every((sample) => typeof sample === 'number' && Number.isFinite(sample))) {
+  // 負の標本は経過時間として成立しない。 通すと p10 が負になり、 変化率の分母が
+  // 負の値になって「悪化したのに improved」 が出る。
+  if (
+    !candidate.samples.every(
+      (sample) => typeof sample === 'number' && Number.isFinite(sample) && sample >= 0,
+    )
+  ) {
     return false;
   }
   return MEASURE_NUMERIC_FIELDS.every(

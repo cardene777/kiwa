@@ -8,35 +8,35 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| multi_provider_workflow (10 arithmetic across 4 providers) | 0.0030ms | 0.0090ms | 100ms | 0.00051ms | PASS | stable (p10 +6% (閾値未満)、 p95 +28% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| format_parse_batch (5 format + parse round-trip) | 0.0058ms | 0.01ms | 100ms | 0.00049ms | PASS | stable — gate 無効 (regressionGate=false) |
-| parse_error_handling (5 invalid string throw + catch) | 0.02ms | 0.03ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| multi_provider_workflow (10 arithmetic across 4 providers) | 0.0030ms | 0.0086ms | 100ms | 0.00051ms | PASS | stable — gate 無効 (regressionGate=false) |
+| format_parse_batch (5 format + parse round-trip) | 0.0058ms | 0.0076ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| parse_error_handling (5 invalid string throw + catch) | 0.01ms | 0.02ms | 100ms | 0.00052ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|
-| multi_provider_workflow (10 arithmetic across 4 providers) | cpu | 0.08ms | 0.0030ms | 0.037 | 0.034 | 0.0031ms | 0.0029ms |
-| format_parse_batch (5 format + parse round-trip) | cpu | 0.08ms | 0.0058ms | 0.070 | 0.073 | 0.0057ms | 0.0060ms |
-| parse_error_handling (5 invalid string throw + catch) | cpu | 0.08ms | 0.02ms | 0.185 | 0.185 | 0.02ms | 0.02ms |
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| multi_provider_workflow (10 arithmetic across 4 providers) | cpu | 0.08ms | 0.10ms | 0.0030ms | 0.037 | 0.037 | 0.0031ms | 0.0031ms |
+| format_parse_batch (5 format + parse round-trip) | cpu | 0.08ms | 0.09ms | 0.0058ms | 0.072 | 0.072 | 0.0059ms | 0.0059ms |
+| parse_error_handling (5 invalid string throw + catch) | cpu | 0.08ms | 0.08ms | 0.01ms | 0.183 | 0.181 | 0.02ms | 0.02ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| multi_provider_workflow (10 arithmetic across 4 providers) | 0.04ms | 200ms | PASS |
+| multi_provider_workflow (10 arithmetic across 4 providers) | 0.03ms | 200ms | PASS |
 | format_parse_batch (5 format + parse round-trip) | 0.03ms | 200ms | PASS |
-| parse_error_handling (5 invalid string throw + catch) | 0.07ms | 200ms | PASS |
+| parse_error_handling (5 invalid string throw + catch) | 0.06ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| multi_provider_workflow (10 arithmetic across 4 providers) | 13024 B | 0 B | 102400 B | yes | PASS |
-| format_parse_batch (5 format + parse round-trip) | -2496 B | 0 B | 102400 B | yes | PASS |
-| parse_error_handling (5 invalid string throw + catch) | -760 B | 0 B | 102400 B | yes | PASS |
+| multi_provider_workflow (10 arithmetic across 4 providers) | 16256 B | 0 B | 102400 B | yes | PASS |
+| format_parse_batch (5 format + parse round-trip) | -3392 B | 0 B | 102400 B | yes | PASS |
+| parse_error_handling (5 invalid string throw + catch) | -776 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -49,27 +49,29 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p10 | 0.0030ms |
-| p50 | 0.0047ms |
-| p95 | 0.0090ms |
-| p99 | 0.0096ms |
-| mean | 0.0048ms |
-| stdev | 0.0020ms |
+| p50 | 0.0032ms |
+| p95 | 0.0086ms |
+| p99 | 0.0088ms |
+| mean | 0.0044ms |
+| stdev | 0.0018ms |
 | min | 0.0030ms |
-| max | 0.0098ms |
-| total | 0.10ms |
+| max | 0.0088ms |
+| total | 0.09ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.026)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0030ms | 0.0029ms | +0.00013ms | +4.44% |
-| p50 | 0.0047ms | 0.0031ms | +0.0016ms | +51.65% |
-| p95 | 0.0090ms | 0.0071ms | +0.0019ms | +26.13% |
-| p99 | 0.0096ms | 0.0081ms | +0.0016ms | +19.51% |
-| mean | 0.0048ms | 0.0042ms | +0.00060ms | +14.35% |
-| min | 0.0030ms | 0.0029ms | +0.00013ms | +4.35% |
-| max | 0.0098ms | 0.0083ms | +0.0015ms | +18.09% |
-| total | 0.10ms | 0.08ms | +0.01ms | +14.35% |
+| p10 | 0.0031ms | 0.0031ms | -0.0000053ms | -0.17% |
+| p50 | 0.0033ms | 0.0032ms | +0.00013ms | +3.90% |
+| p95 | 0.0089ms | 0.0087ms | +0.00011ms | +1.23% |
+| p99 | 0.0090ms | 0.0094ms | -0.00040ms | -4.22% |
+| mean | 0.0045ms | 0.0044ms | +0.000089ms | +2.01% |
+| min | 0.0031ms | 0.0030ms | +0.000078ms | +2.59% |
+| max | 0.0090ms | 0.0095ms | -0.00052ms | -5.46% |
+| total | 0.09ms | 0.09ms | +0.0018ms | +2.01% |
 
 ### format_parse_batch (5 format + parse round-trip)
 
@@ -80,27 +82,29 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 20 |
 | warmup | 3 |
 | p10 | 0.0058ms |
-| p50 | 0.0071ms |
-| p95 | 0.01ms |
+| p50 | 0.0060ms |
+| p95 | 0.0076ms |
 | p99 | 0.01ms |
-| mean | 0.0077ms |
-| stdev | 0.0020ms |
-| min | 0.0057ms |
+| mean | 0.0064ms |
+| stdev | 0.0013ms |
+| min | 0.0056ms |
 | max | 0.01ms |
-| total | 0.15ms |
+| total | 0.13ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.005)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0058ms | 0.0060ms | -0.00016ms | -2.72% |
-| p50 | 0.0071ms | 0.0062ms | +0.00090ms | +14.47% |
-| p95 | 0.01ms | 0.02ms | -0.0069ms | -37.37% |
-| p99 | 0.01ms | 0.02ms | -0.01ms | -46.30% |
-| mean | 0.0077ms | 0.0084ms | -0.00064ms | -7.60% |
-| min | 0.0057ms | 0.0058ms | -0.000042ms | -0.73% |
-| max | 0.01ms | 0.02ms | -0.01ms | -48.14% |
-| total | 0.15ms | 0.17ms | -0.01ms | -7.60% |
+| p10 | 0.0059ms | 0.0059ms | -0.000015ms | -0.25% |
+| p50 | 0.0060ms | 0.0061ms | -0.000093ms | -1.51% |
+| p95 | 0.0077ms | 0.0077ms | +0.0000097ms | +0.13% |
+| p99 | 0.01ms | 0.01ms | -0.00045ms | -3.95% |
+| mean | 0.0065ms | 0.0065ms | -0.000063ms | -0.97% |
+| min | 0.0057ms | 0.0057ms | -0.000095ms | -1.65% |
+| max | 0.01ms | 0.01ms | -0.00056ms | -4.59% |
+| total | 0.13ms | 0.13ms | -0.0013ms | -0.97% |
 
 ### parse_error_handling (5 invalid string throw + catch)
 
@@ -110,26 +114,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.02ms |
-| p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.04ms |
+| p10 | 0.01ms |
+| p50 | 0.01ms |
+| p95 | 0.02ms |
+| p99 | 0.02ms |
 | mean | 0.02ms |
-| stdev | 0.0058ms |
-| min | 0.02ms |
-| max | 0.04ms |
-| total | 0.36ms |
+| stdev | 0.0015ms |
+| min | 0.01ms |
+| max | 0.02ms |
+| total | 0.31ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.034)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.000041ms | -0.27% |
-| p50 | 0.02ms | 0.02ms | -0.00042ms | -2.59% |
-| p95 | 0.03ms | 0.03ms | -0.0024ms | -8.10% |
-| p99 | 0.04ms | 0.03ms | +0.0067ms | +22.12% |
-| mean | 0.02ms | 0.02ms | -0.00041ms | -2.26% |
-| min | 0.02ms | 0.02ms | -0.000083ms | -0.55% |
-| max | 0.04ms | 0.03ms | +0.0089ms | +29.56% |
-| total | 0.36ms | 0.36ms | -0.0082ms | -2.26% |
+| p10 | 0.02ms | 0.02ms | +0.00012ms | +0.80% |
+| p50 | 0.02ms | 0.02ms | +0.00010ms | +0.68% |
+| p95 | 0.02ms | 0.02ms | +0.00015ms | +0.82% |
+| p99 | 0.02ms | 0.02ms | -0.0021ms | -9.00% |
+| mean | 0.02ms | 0.02ms | -0.000037ms | -0.23% |
+| min | 0.02ms | 0.01ms | +0.000073ms | +0.49% |
+| max | 0.02ms | 0.02ms | -0.0027ms | -10.81% |
+| total | 0.32ms | 0.32ms | -0.00073ms | -0.23% |
 

@@ -144,6 +144,7 @@ async function measureAlternating(targetFn, referenceFn) {
   const targetSamples = [];
   const referenceSamples = [];
   const pairRatios = [];
+  let droppedPairs = 0;
   for (let i = 0; i < WARMUP; i += 1) {
     await referenceFn();
     await targetFn();
@@ -158,7 +159,10 @@ async function measureAlternating(targetFn, referenceFn) {
     const target = Number(targetEnd - refEnd) / 1_000_000;
     referenceSamples.push(reference);
     targetSamples.push(target);
-    pairRatios.push(reference > 0 ? target / reference : 0);
+    // 分母 0 の呼出は「比なし」。 0 を積むと配列の最小値になり、 その p10 を読む
+    // `p10OfRatios` を必ず下側へ引っ張る (= 対ごとの比が実際より安定に見える)。
+    if (reference > 0) pairRatios.push(target / reference);
+    else droppedPairs += 1;
   }
   const targetP10 = percentileType7([...targetSamples].sort((a, b) => a - b), 0.1);
   const referenceP10 = percentileType7([...referenceSamples].sort((a, b) => a - b), 0.1);
@@ -167,6 +171,7 @@ async function measureAlternating(targetFn, referenceFn) {
     referenceP10,
     ratioOfP10: referenceP10 > 0 ? targetP10 / referenceP10 : 0,
     p10OfRatios: percentileType7([...pairRatios].sort((a, b) => a - b), 0.1),
+    droppedPairs,
   };
 }
 
@@ -206,12 +211,20 @@ if (mode === 'load') {
   // signal handler は登録しない。 同期の無限 loop は event loop に戻らないため
   // handler が動かず、 SIGTERM を握り潰して loader が永久に残る。
   const file = join(process.argv[3], `churn-${process.pid}.txt`);
+  const parentPid = Number(process.argv[4]);
   const body = 'y'.repeat(4096);
   for (;;) {
     let acc = 0;
     for (let i = 0; i < 2_000_000; i += 1) acc = (acc * 31 + i) % 1_000_003;
     if (acc === -1) break;
     writeFileSync(file, body, 'utf8');
+    // 親が死んだら自分も止める。 親が SIGKILL された場合 kill は届かず、 CPU を
+    // 回し続ける process が残って以降の測定を全て汚す (実測で 24 process 残留)。
+    try {
+      process.kill(parentPid, 0);
+    } catch {
+      break;
+    }
   }
 } else if (mode === 'pass') {
   const dir = mkdtempSync(join(tmpdir(), 'kiwa-refprobe-'));
@@ -231,7 +244,9 @@ if (mode === 'load') {
       const loaded = pass % 2 === 1;
       const loaders = loaded
         ? Array.from({ length: loaderCount }, () =>
-            spawn(process.execPath, [scriptPath, 'load', loadDir], { stdio: 'ignore' }),
+            spawn(process.execPath, [scriptPath, 'load', loadDir, String(process.pid)], {
+              stdio: 'ignore',
+            }),
           )
         : [];
       try {

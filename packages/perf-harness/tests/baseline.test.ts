@@ -24,7 +24,10 @@ describe('baseline persistence', () => {
     const loaded = await loadBaseline(file);
 
     expect(loaded).not.toBeNull();
-    expect(loaded?.envelope.schema).toBe(BASELINE_SCHEMA);
+    // 実装と同じ定数で照合すると恒真になる。 現行の schema 版を literal で固定して、
+    // 上げる時に test 側の更新を強制する。
+    expect(loaded?.envelope.schema).toBe(2);
+    expect(BASELINE_SCHEMA).toBe(2);
     expect(loaded?.envelope.results['reply']).toEqual(result);
     // env は現行 machine 情報なので envMismatch は空。
     expect(loaded?.envMismatch).toEqual([]);
@@ -38,7 +41,7 @@ describe('baseline persistence', () => {
 
     const loaded = await loadBaseline(file);
     expect(loaded).not.toBeNull();
-    expect(loaded?.envelope.schema).toBe(BASELINE_SCHEMA);
+    expect(loaded?.envelope.schema).toBe(2);
     expect(loaded?.envelope.env.gitSha).toBe('unknown');
     expect(loaded?.envelope.results['op']?.samples).toEqual([10, 11, 12]);
     // legacy → env 全 field mismatch。
@@ -60,7 +63,7 @@ describe('baseline persistence', () => {
 
     const loaded = await loadBaseline(file);
     expect(loaded).not.toBeNull();
-    expect(loaded?.envelope.schema).toBe(BASELINE_SCHEMA);
+    expect(loaded?.envelope.schema).toBe(2);
     expect(Object.keys(loaded?.envelope.results ?? {}).sort()).toEqual([
       'createPool.serial',
       'parseSpec.concurrent',

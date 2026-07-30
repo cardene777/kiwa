@@ -131,10 +131,33 @@ export function resolveNormalization(
     return { scale: 1, normalized: false };
   }
   if (currentReference.kind !== baselineReference.kind) return { scale: 1, normalized: false };
-  if (!(currentReference.p10 > 0) || !(baselineReference.p10 > 0)) {
+  // 種類が同じでも実装が違えば分母の大きさが違う。 版の記録が無い世代も版不明として
+  // 扱う。 掛けても相殺は起きず、 分母の差を実装の差として報告してしまう。
+  if (
+    currentReference.implVersion === undefined ||
+    baselineReference.implVersion === undefined ||
+    currentReference.implVersion !== baselineReference.implVersion
+  ) {
     return { scale: 1, normalized: false };
   }
-  return { scale: baselineReference.p10 / currentReference.p10, normalized: true };
+  // 有限で正の値だけを分母にする。 `> 0` だけでは Infinity が通り、 倍率が 0 になって
+  // 全 sample が 0 に潰れる (下限も 0 になるので必ず有意判定を通り improved が出る)。
+  // 逆に極小値を分母にすると倍率が Infinity になり、 判定量が NaN になって 3 倍の
+  // 悪化でも stable で通る。 どちらも正規化「成立」 と報告されるため baseline も
+  // 書き直されず、 その op は永久に gate に掛からない。
+  if (!isUsableDenominator(currentReference.p10) || !isUsableDenominator(baselineReference.p10)) {
+    return { scale: 1, normalized: false };
+  }
+  const scale = baselineReference.p10 / currentReference.p10;
+  // 両端が有限でも、 桁が離れていれば商が非有限や 0 に落ちる。 判定に使えない倍率で
+  // 「正規化した」 と報告しない。
+  if (!Number.isFinite(scale) || scale <= 0) return { scale: 1, normalized: false };
+  return { scale, normalized: true };
+}
+
+/** 分母に使える値か。 `hasValidReference` (baseline.ts) と同じ強さに揃える。 */
+function isUsableDenominator(value: number): boolean {
+  return Number.isFinite(value) && value > 0;
 }
 
 /**

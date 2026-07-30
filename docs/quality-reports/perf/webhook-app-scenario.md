@@ -2,41 +2,41 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00049ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 0.05ms | 0.07ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| dispatch_retry_batch (5 handler retry with backoff) | 0.02ms | 0.02ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
-| signature_reject_error (5 invalid signature detect) | 0.0047ms | 0.01ms | 100ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| verify_workflow (10 verify across 4 providers) | 0.06ms | 0.11ms | 100ms | 0.00046ms | PASS | stable (換算後 p10 +3% (閾値未満)、 p95 +45% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| dispatch_retry_batch (5 handler retry with backoff) | 0.02ms | 0.02ms | 100ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| signature_reject_error (5 invalid signature detect) | 0.0051ms | 0.01ms | 100ms | 0.00043ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | cpu | 0.08ms | 0.05ms | 0.625 | 0.672 | 0.05ms | 0.06ms |
-| dispatch_retry_batch (5 handler retry with backoff) | cpu | 0.08ms | 0.02ms | 0.192 | 0.192 | 0.02ms | 0.02ms |
-| signature_reject_error (5 invalid signature detect) | cpu | 0.08ms | 0.0047ms | 0.057 | 0.055 | 0.0047ms | 0.0046ms |
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| verify_workflow (10 verify across 4 providers) | cpu | 0.09ms | 0.10ms | 0.06ms | 0.650 | 0.630 | 0.05ms | 0.05ms |
+| dispatch_retry_batch (5 handler retry with backoff) | cpu | 0.09ms | 0.10ms | 0.02ms | 0.196 | 0.193 | 0.02ms | 0.02ms |
+| signature_reject_error (5 invalid signature detect) | cpu | 0.09ms | 0.09ms | 0.0051ms | 0.054 | 0.055 | 0.0044ms | 0.0045ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | 0.21ms | 200ms | PASS |
-| dispatch_retry_batch (5 handler retry with backoff) | 0.08ms | 200ms | PASS |
-| signature_reject_error (5 invalid signature detect) | 0.02ms | 200ms | PASS |
+| verify_workflow (10 verify across 4 providers) | 0.22ms | 200ms | PASS |
+| dispatch_retry_batch (5 handler retry with backoff) | 0.09ms | 200ms | PASS |
+| signature_reject_error (5 invalid signature detect) | 0.03ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| verify_workflow (10 verify across 4 providers) | -10136 B | 0 B | 102400 B | yes | PASS |
-| dispatch_retry_batch (5 handler retry with backoff) | 1240 B | 0 B | 102400 B | yes | PASS |
-| signature_reject_error (5 invalid signature detect) | 808 B | 0 B | 102400 B | yes | PASS |
+| verify_workflow (10 verify across 4 providers) | -2472 B | 0 B | 102400 B | yes | PASS |
+| dispatch_retry_batch (5 handler retry with backoff) | 464 B | 0 B | 102400 B | yes | PASS |
+| signature_reject_error (5 invalid signature detect) | 424 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -48,28 +48,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.05ms |
+| p10 | 0.06ms |
 | p50 | 0.06ms |
-| p95 | 0.07ms |
-| p99 | 0.09ms |
-| mean | 0.06ms |
-| stdev | 0.0092ms |
-| min | 0.05ms |
-| max | 0.09ms |
-| total | 1.22ms |
+| p95 | 0.11ms |
+| p99 | 0.18ms |
+| mean | 0.07ms |
+| stdev | 0.03ms |
+| min | 0.06ms |
+| max | 0.20ms |
+| total | 1.45ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.918)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.05ms | 0.06ms | -0.0049ms | -8.69% |
-| p50 | 0.06ms | 0.06ms | -0.0017ms | -2.86% |
-| p95 | 0.07ms | 0.09ms | -0.01ms | -13.74% |
-| p99 | 0.09ms | 0.14ms | -0.05ms | -37.66% |
-| mean | 0.06ms | 0.07ms | -0.0063ms | -9.40% |
-| min | 0.05ms | 0.05ms | -0.0018ms | -3.45% |
-| max | 0.09ms | 0.16ms | -0.06ms | -40.99% |
-| total | 1.22ms | 1.35ms | -0.13ms | -9.40% |
+| p10 | 0.05ms | 0.05ms | +0.0016ms | +3.13% |
+| p50 | 0.06ms | 0.06ms | -0.00084ms | -1.44% |
+| p95 | 0.10ms | 0.07ms | +0.03ms | +44.51% |
+| p99 | 0.17ms | 0.08ms | +0.09ms | +115.92% |
+| mean | 0.07ms | 0.06ms | +0.0070ms | +11.75% |
+| min | 0.05ms | 0.05ms | -7.9e-7ms | -0.00% |
+| max | 0.19ms | 0.08ms | +0.11ms | +131.00% |
+| total | 1.33ms | 1.19ms | +0.14ms | +11.75% |
 
 ### dispatch_retry_batch (5 handler retry with backoff)
 
@@ -84,23 +86,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | p95 | 0.02ms |
 | p99 | 0.03ms |
 | mean | 0.02ms |
-| stdev | 0.0038ms |
+| stdev | 0.0034ms |
 | min | 0.02ms |
 | max | 0.03ms |
-| total | 0.34ms |
+| total | 0.40ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.849)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.00036ms | -2.32% |
-| p50 | 0.02ms | 0.02ms | -0.0012ms | -7.19% |
-| p95 | 0.02ms | 0.03ms | -0.0076ms | -26.10% |
-| p99 | 0.03ms | 0.03ms | -0.0022ms | -6.67% |
-| mean | 0.02ms | 0.02ms | -0.0015ms | -8.26% |
-| min | 0.02ms | 0.02ms | -0.00021ms | -1.36% |
-| max | 0.03ms | 0.03ms | -0.00079ms | -2.39% |
-| total | 0.34ms | 0.37ms | -0.03ms | -8.26% |
+| p10 | 0.02ms | 0.02ms | +0.00022ms | +1.42% |
+| p50 | 0.02ms | 0.02ms | +0.000067ms | +0.42% |
+| p95 | 0.02ms | 0.02ms | -0.0043ms | -18.91% |
+| p99 | 0.03ms | 0.03ms | -0.0052ms | -16.36% |
+| mean | 0.02ms | 0.02ms | -0.00050ms | -2.85% |
+| min | 0.02ms | 0.02ms | +0.000057ms | +0.37% |
+| max | 0.03ms | 0.03ms | -0.0055ms | -15.94% |
+| total | 0.34ms | 0.35ms | -0.0099ms | -2.85% |
 
 ### signature_reject_error (5 invalid signature detect)
 
@@ -110,26 +114,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.0047ms |
-| p50 | 0.0052ms |
+| p10 | 0.0051ms |
+| p50 | 0.0060ms |
 | p95 | 0.01ms |
 | p99 | 0.01ms |
-| mean | 0.0061ms |
+| mean | 0.0069ms |
 | stdev | 0.0023ms |
-| min | 0.0045ms |
+| min | 0.0050ms |
 | max | 0.01ms |
-| total | 0.12ms |
+| total | 0.14ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.869)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0047ms | 0.0046ms | +0.000086ms | +1.89% |
-| p50 | 0.0052ms | 0.0065ms | -0.0012ms | -18.97% |
-| p95 | 0.01ms | 0.02ms | -0.01ms | -53.42% |
-| p99 | 0.01ms | 0.03ms | -0.01ms | -48.37% |
-| mean | 0.0061ms | 0.0085ms | -0.0024ms | -28.44% |
-| min | 0.0045ms | 0.0044ms | +0.000084ms | +1.90% |
-| max | 0.01ms | 0.03ms | -0.01ms | -47.32% |
-| total | 0.12ms | 0.17ms | -0.05ms | -28.44% |
+| p10 | 0.0044ms | 0.0045ms | -0.000072ms | -1.61% |
+| p50 | 0.0053ms | 0.0058ms | -0.00056ms | -9.63% |
+| p95 | 0.01ms | 0.02ms | -0.0052ms | -33.82% |
+| p99 | 0.01ms | 0.02ms | -0.0077ms | -41.98% |
+| mean | 0.0060ms | 0.0070ms | -0.00094ms | -13.53% |
+| min | 0.0044ms | 0.0044ms | +0.0000077ms | +0.18% |
+| max | 0.01ms | 0.02ms | -0.0083ms | -43.63% |
+| total | 0.12ms | 0.14ms | -0.02ms | -13.53% |
 

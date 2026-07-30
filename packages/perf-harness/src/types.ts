@@ -35,7 +35,7 @@ export interface WarmupConvergence {
  *
  * 基準は対象と同じ邪魔を受けるものでないと相殺が起きない。 種類の選び方と
  * 却下した案は `reference.ts` の冒頭と `docs/quality/perf-thresholds.md`
- * § 実行内正規化 が実測値つきで持つ。
+ * § In-run normalization が実測値つきで持つ。
  */
 export type PerfReferenceKind = 'cpu' | 'fs-read' | 'fs-write';
 
@@ -51,6 +51,16 @@ export interface MeasureReference {
   name: string;
   /** 基準 op の p10 (ms)。 対象と同じ実行 ・ 同じ交互測定で得た値。 */
   p10: number;
+  /**
+   * 基準 op の実装の版 (`REFERENCE_IMPL_VERSION`)。
+   *
+   * 種類が同じままでも実装を変えれば分母の大きさが変わる。 版が違う記録との比較は
+   * 実装の差ではなく分母の差を報告するため、 比較せず記録を入れ替える。
+   *
+   * この field を持たない世代の記録があり得るので optional。 無い記録は版が不明なので
+   * 比較せず入れ替える扱いにする。
+   */
+  implVersion?: number;
 }
 
 export interface MeasureInput {
@@ -160,29 +170,46 @@ export interface RegressionInput {
 
 export interface RegressionResult {
   regressed: boolean;
-  /** p10 の変化率。 例 0.15 = 15% 悪化。 verdict はこの値で決まる。 */
+  /**
+   * 判定量の変化率。 例 0.15 = 15% 悪化。 verdict はこの値で決まる。
+   *
+   * 正規化が成立した場合は「今回の p10 に `normalizationScale` を掛けた値」 と
+   * baseline の p10 を比べた率。 成立しなかった場合は実測 p10 どうしの率。
+   */
   deltaPct: number;
   /**
-   * 判定に使った統計量そのもの (ms)。
+   * 判定に使った統計量そのもの (ms)。 `current` は換算後の値。
    *
    * 保存済み baseline の世代によっては `p10` field が無く sample から計算し直すため、
    * 呼出側が同じ値を再現しようとすると計算が二重になる。 報告に出す値はここから取る。
+   * 実測値そのものは `MeasureResult.p10` で、 両者は `normalizationScale` 倍だけ違う。
    */
   judged: { current: number; baseline: number };
   /**
-   * p95 の変化率。 判定には使わない。
+   * p95 の変化率 (今回側は換算後)。 判定には使わない。
    *
    * 一部の呼出だけが遅くなる変化 (条件分岐が増えた / 稀に遅い経路に入る) は
    * 下側に出ない。 p10 が動かないまま裾だけ伸びた事実を報告に残すために持つ。
    * この軸は実行をまたぐと実装と無関係に数百 % 動くため gate には載せられない。
    */
   tailDeltaPct: number;
-  /** bootstrap で推定した p10 delta の 95% CI (lower / upper、 単位 = ms)。 */
+  /**
+   * bootstrap で推定した判定量 delta の 95% CI (lower / upper、 単位 = ms)。
+   *
+   * 換算後の今回の sample と baseline の sample から取る。 倍率は定数として扱うため、
+   * 分母 (基準 op の p10) の推定誤差はこの区間に入っていない。
+   */
   ci: { lower: number; upper: number };
   /** CI が 0 を含まないかつ delta > threshold なら true。 */
   significant: boolean;
   verdict: 'improved' | 'stable' | 'regressed';
-  /** 判定に使った絶対下限 (ms)。 */
+  /**
+   * 判定に使った絶対下限 (ms)。
+   *
+   * `resolutionMs` 由来の既定には `normalizationScale` が掛かっており (分解能も今回の
+   * 実行で測った値なので、 差と同じ単位へ揃える)、 呼出が置いた `minDeltaMs` には
+   * 掛からない (どの実行の測定値でもない定数のため)。
+   */
   floorMs: number;
   /**
    * 相対閾値を超えた有意な差だったが、 絶対下限に満たないため stable に落とした場合 true。

@@ -2,41 +2,41 @@
 
 Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-thresholds)
 
-測定系の分解能 = 0.00021ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00042ms、 op ごとの実効値は下表の「下限」 列。
+測定系の分解能 = 0.00025ms (何もしない関数を同じ経路で呼んだ時の p10)。 回帰判定の絶対下限は既定でこの 2 倍 = 0.00050ms、 op ごとの実効値は下表の「下限」 列。
 
 ## Serial (concurrency = 1)
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| bulk_insert (setup + 100 insert) | 0.28ms | 0.47ms | 200ms | 0.00042ms | PASS | improved — gate 無効 (regressionGate=false) |
-| query_workload (100 insert + 100 select) | 0.30ms | 0.46ms | 200ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| crud_cycle (10 rows × insert+update+delete) | 0.27ms | 0.40ms | 200ms | 0.00043ms | PASS | stable — gate 無効 (regressionGate=false) |
+| bulk_insert (setup + 100 insert) | 0.42ms | 0.62ms | 200ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| query_workload (100 insert + 100 select) | 0.43ms | 1.20ms | 200ms | 0.00049ms | PASS | stable (換算後 p10 +17% (閾値未満)、 p95 +165% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| crud_cycle (10 rows × insert+update+delete) | 0.34ms | 0.83ms | 200ms | 0.00049ms | PASS | regressed — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|
-| bulk_insert (setup + 100 insert) | cpu | 0.08ms | 0.28ms | 3.507 | 4.947 | 0.29ms | 0.41ms |
-| query_workload (100 insert + 100 select) | cpu | 0.08ms | 0.30ms | 3.727 | 4.544 | 0.31ms | 0.38ms |
-| crud_cycle (10 rows × insert+update+delete) | cpu | 0.08ms | 0.27ms | 3.271 | 3.595 | 0.27ms | 0.30ms |
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| bulk_insert (setup + 100 insert) | cpu | 0.08ms | 0.10ms | 0.42ms | 5.101 | 4.606 | 0.42ms | 0.38ms |
+| query_workload (100 insert + 100 select) | cpu | 0.08ms | 0.09ms | 0.43ms | 5.248 | 4.482 | 0.43ms | 0.36ms |
+| crud_cycle (10 rows × insert+update+delete) | cpu | 0.08ms | 0.09ms | 0.34ms | 4.100 | 3.388 | 0.33ms | 0.27ms |
 
 ## Concurrent p95 (concurrency = 4, 3 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| bulk_insert (setup + 100 insert) | 0.98ms | 400ms | PASS |
-| query_workload (100 insert + 100 select) | 1.08ms | 400ms | PASS |
-| crud_cycle (10 rows × insert+update+delete) | 0.83ms | 400ms | PASS |
+| bulk_insert (setup + 100 insert) | 1.35ms | 400ms | PASS |
+| query_workload (100 insert + 100 select) | 2.26ms | 400ms | PASS |
+| crud_cycle (10 rows × insert+update+delete) | 1.28ms | 400ms | PASS |
 
 ## Memory retention (15 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| bulk_insert (setup + 100 insert) | -54144 B | 3 B | 102400 B | yes | PASS |
-| query_workload (100 insert + 100 select) | -7936 B | -3 B | 102400 B | yes | PASS |
-| crud_cycle (10 rows × insert+update+delete) | -35240 B | -1 B | 102400 B | yes | PASS |
+| bulk_insert (setup + 100 insert) | -53752 B | 4 B | 102400 B | yes | PASS |
+| query_workload (100 insert + 100 select) | -9160 B | 0 B | 102400 B | yes | PASS |
+| crud_cycle (10 rows × insert+update+delete) | -34760 B | -2 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -48,28 +48,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 0.28ms |
-| p50 | 0.34ms |
-| p95 | 0.47ms |
-| p99 | 0.48ms |
-| mean | 0.35ms |
-| stdev | 0.07ms |
-| min | 0.28ms |
-| max | 0.48ms |
-| total | 5.27ms |
+| p10 | 0.42ms |
+| p50 | 0.54ms |
+| p95 | 0.62ms |
+| p99 | 0.65ms |
+| mean | 0.52ms |
+| stdev | 0.09ms |
+| min | 0.31ms |
+| max | 0.66ms |
+| total | 7.74ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.995)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.28ms | 0.41ms | -0.12ms | -30.11% |
-| p50 | 0.34ms | 0.48ms | -0.14ms | -28.57% |
-| p95 | 0.47ms | 0.77ms | -0.31ms | -39.71% |
-| p99 | 0.48ms | 0.78ms | -0.30ms | -38.19% |
-| mean | 0.35ms | 0.52ms | -0.17ms | -32.64% |
-| min | 0.28ms | 0.37ms | -0.09ms | -24.39% |
-| max | 0.48ms | 0.78ms | -0.29ms | -37.81% |
-| total | 5.27ms | 7.82ms | -2.55ms | -32.64% |
+| p10 | 0.42ms | 0.38ms | +0.04ms | +10.74% |
+| p50 | 0.53ms | 0.45ms | +0.09ms | +19.24% |
+| p95 | 0.61ms | 0.61ms | +0.0011ms | +0.17% |
+| p99 | 0.65ms | 0.62ms | +0.03ms | +5.45% |
+| mean | 0.51ms | 0.48ms | +0.04ms | +7.51% |
+| min | 0.31ms | 0.35ms | -0.04ms | -12.39% |
+| max | 0.66ms | 0.62ms | +0.04ms | +6.75% |
+| total | 7.70ms | 7.16ms | +0.54ms | +7.51% |
 
 ### query_workload (100 insert + 100 select)
 
@@ -79,28 +81,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 0.30ms |
-| p50 | 0.33ms |
-| p95 | 0.46ms |
-| p99 | 0.47ms |
-| mean | 0.35ms |
-| stdev | 0.06ms |
-| min | 0.29ms |
-| max | 0.48ms |
-| total | 5.29ms |
+| p10 | 0.43ms |
+| p50 | 0.78ms |
+| p95 | 1.20ms |
+| p99 | 1.31ms |
+| mean | 0.80ms |
+| stdev | 0.27ms |
+| min | 0.42ms |
+| max | 1.34ms |
+| total | 11.93ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.982)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.30ms | 0.38ms | -0.07ms | -19.38% |
-| p50 | 0.33ms | 0.44ms | -0.10ms | -23.56% |
-| p95 | 0.46ms | 0.65ms | -0.19ms | -29.13% |
-| p99 | 0.47ms | 0.66ms | -0.18ms | -27.98% |
-| mean | 0.35ms | 0.46ms | -0.11ms | -23.75% |
-| min | 0.29ms | 0.33ms | -0.03ms | -10.30% |
-| max | 0.48ms | 0.66ms | -0.18ms | -27.69% |
-| total | 5.29ms | 6.93ms | -1.65ms | -23.75% |
+| p10 | 0.43ms | 0.36ms | +0.06ms | +17.11% |
+| p50 | 0.77ms | 0.38ms | +0.39ms | +104.27% |
+| p95 | 1.17ms | 0.44ms | +0.73ms | +165.27% |
+| p99 | 1.29ms | 0.46ms | +0.83ms | +182.04% |
+| mean | 0.78ms | 0.39ms | +0.39ms | +100.67% |
+| min | 0.41ms | 0.33ms | +0.08ms | +24.27% |
+| max | 1.32ms | 0.46ms | +0.86ms | +186.08% |
+| total | 11.72ms | 5.84ms | +5.88ms | +100.67% |
 
 ### crud_cycle (10 rows × insert+update+delete)
 
@@ -110,26 +114,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 0.27ms |
-| p50 | 0.33ms |
-| p95 | 0.40ms |
-| p99 | 0.42ms |
-| mean | 0.32ms |
-| stdev | 0.05ms |
-| min | 0.25ms |
-| max | 0.42ms |
-| total | 4.79ms |
+| p10 | 0.34ms |
+| p50 | 0.45ms |
+| p95 | 0.83ms |
+| p99 | 0.88ms |
+| mean | 0.49ms |
+| stdev | 0.18ms |
+| min | 0.30ms |
+| max | 0.89ms |
+| total | 7.42ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.982)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.27ms | 0.30ms | -0.03ms | -11.22% |
-| p50 | 0.33ms | 0.40ms | -0.06ms | -15.94% |
-| p95 | 0.40ms | 0.48ms | -0.09ms | -17.73% |
-| p99 | 0.42ms | 0.49ms | -0.07ms | -15.13% |
-| mean | 0.32ms | 0.38ms | -0.06ms | -16.86% |
-| min | 0.25ms | 0.23ms | +0.02ms | +10.59% |
-| max | 0.42ms | 0.49ms | -0.07ms | -14.50% |
-| total | 4.79ms | 5.77ms | -0.97ms | -16.86% |
+| p10 | 0.33ms | 0.27ms | +0.06ms | +21.01% |
+| p50 | 0.44ms | 0.31ms | +0.12ms | +39.21% |
+| p95 | 0.82ms | 0.38ms | +0.43ms | +112.87% |
+| p99 | 0.86ms | 0.40ms | +0.46ms | +115.03% |
+| mean | 0.49ms | 0.32ms | +0.17ms | +52.00% |
+| min | 0.29ms | 0.26ms | +0.03ms | +10.67% |
+| max | 0.87ms | 0.41ms | +0.47ms | +115.54% |
+| total | 7.28ms | 4.79ms | +2.49ms | +52.00% |
 

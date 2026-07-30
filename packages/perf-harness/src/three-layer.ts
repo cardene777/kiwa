@@ -49,8 +49,13 @@ export interface PerfOpSpec {
    * 回帰と判定する p10 差の下限 (ms)。
    *
    * 既定はこの実行で測った測定系の分解能 (何もしない関数を同じ経路で呼んだ費用) の
-   * `RESOLUTION_FLOOR_MULTIPLE` 倍。 分解能より小さい差は op ではなく harness 自身の
-   * 往復を見ているため判定に使えない。 明示すると既定を上書きする。
+   * `RESOLUTION_FLOOR_MULTIPLE` 倍に、 実行内正規化の倍率を掛けた値。 分解能も今回の
+   * 実行で測った値なので、 差と同じ単位 (baseline を測った時の機械の ms) へ揃える。
+   * 分解能より小さい差は op ではなく harness 自身の往復を見ているため判定に使えない。
+   *
+   * 明示すると既定を上書きする。 その値には倍率を掛けない (どの実行の測定値でもない
+   * 定数のため、 掛けると gate の感度がその日の機械で変わる)。 実際に効いた値は
+   * report の「下限」 列に出る。
    */
   regressionMinDeltaMs?: number;
   /**
@@ -62,7 +67,7 @@ export interface PerfOpSpec {
    * (fs read の実行間振れ幅 = 素 135% / `fs-read` 基準 17% / `cpu` 基準 171%、
    * `scripts/reference-op-probe.mjs` 実測)。
    *
-   * 選び方と却下した案は `docs/quality/perf-thresholds.md` § 実行内正規化。
+   * 選び方と却下した案は `docs/quality/perf-thresholds.md` § In-run normalization。
    */
   referenceKind?: PerfReferenceKind;
   /**
@@ -152,7 +157,7 @@ export interface RunPerf3LayerInput {
    * 既定を true にすると、 実装を変えていないのに毎回 20-30 package が落ちる
    * (実測 = 2 回目 22 / 3 回目 29)。 上限の実 breach がその中に埋もれるため、
    * 既定は false のままにしてある。 詳細と残りの根は
-   * `docs/quality/perf-thresholds.md` § 実行内正規化。
+   * `docs/quality/perf-thresholds.md` § In-run normalization。
    *
    * 上限 (serial / concurrent / memory) の判定は 1 回の実行の中で完結するので
    * この指定に関わらず従来どおり反映する。
@@ -384,7 +389,11 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         memoryGatePassed,
         regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
         ...(regression === null
-          ? {}
+          ? // 記録はあるのに比較しなかった場合は理由を残す。 「seeded」 だけだと
+            // 初回と区別できず、 基準の種類を変えた op が黙って n/a に留まる。
+            priorSerial === undefined
+            ? {}
+            : { regressionNote: '基準 op の種類が baseline と食い違うため比較せず記録を入れ替える' }
           : { regression, ...buildRegressionNote(regression, regressionThreshold) }),
       });
     }
@@ -492,6 +501,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     regressionGate,
     resolutionMs,
     baselineUnreadable,
+    baselineWritten: shouldReseed || shouldAppend,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -582,8 +592,8 @@ export function buildRegressionNote(
   // p95 が +100% という組合せはこの分岐に入るため、 両方の数字を並べて読み手に委ねる。
   if (Number.isFinite(regression.tailDeltaPct) && regression.tailDeltaPct >= threshold) {
     const judged = Number.isFinite(regression.deltaPct)
-      ? `p10 ${signedPct(regression.deltaPct)} (閾値未満)`
-      : 'p10 は baseline が 0ms のため相対では表せない';
+      ? `換算後 p10 ${signedPct(regression.deltaPct)} (閾値未満)`
+      : '換算後 p10 は baseline が 0ms のため相対では表せない';
     return {
       regressionNote: `${judged}、 p95 ${signedPct(regression.tailDeltaPct)} (裾は実行間の振れ幅と区別できないため判定には使わない)`,
     };
@@ -615,6 +625,14 @@ interface WriteReportInput {
   resolutionMs: number;
   /** baseline file はあるのに読めなかったか。 判定が 1 件も成立していないことを表す。 */
   baselineUnreadable: boolean;
+  /**
+   * この実行で baseline を書いたか。
+   *
+   * 書込には測定の成立 (GC / 上限) が要る。 同 module の別 op が上限を割ると
+   * 1 byte も書かれないので、 比較できなかった op の行に「作り直した」 と読める
+   * 表記だけを出すと、 上限違反が直るまで同じ状態が繰り返されることが伝わらない。
+   */
+  baselineWritten: boolean;
 }
 
 function writeReport(input: WriteReportInput): void {
@@ -631,6 +649,14 @@ function writeReport(input: WriteReportInput): void {
     ...(input.baselineUnreadable
       ? [
           '**保存済みの baseline を読めなかった** ため、この実行では回帰を 1 件も判定していない。 下表の regression 列はすべて `n/a`。 測定が成立していれば baseline は作り直されている。',
+          '',
+        ]
+      : []),
+    // 比較できなかった行があるのに書込も起きていない実行は、 次の実行でも同じ状態に
+    // なる。 「作り直した」 と読める表記だけを出すと、 それが伝わらない。
+    ...(!input.baselineWritten && input.outcomes.some((out) => out.regression === undefined)
+      ? [
+          '**この実行では baseline を書いていない** (測定が成立していない = GC を呼べない、 または上限を割った op がある)。 比較できなかった op は次の実行でも比較できない。',
           '',
         ]
       : []),
@@ -663,8 +689,8 @@ function writeReport(input: WriteReportInput): void {
     '',
     '回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。',
     '',
-    '| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |',
-    '|---|---|---|---|---|---|---|---|',
+    '| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |',
+    '|---|---|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -677,7 +703,9 @@ function writeReport(input: WriteReportInput): void {
         ? (prior.p10 / priorReference.p10).toFixed(3)
         : 'n/a';
     lines.push(
-      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
+      // 基準の p95 も出す。 分母が同じ実行の中で暴れていれば比も暴れるので、
+      // 比だけを見て「op が動いた」 と読まないための材料。
+      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serialReference.p95)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
     );
   });
 
@@ -732,6 +760,11 @@ function writeReport(input: WriteReportInput): void {
       emitPerfReport(out.serial, {
         includeSamples: false,
         ...(priorSerial !== undefined ? { baseline: priorSerial } : {}),
+        // 判定に使った倍率をそのまま渡す。 渡さないとこの表だけ実測値どうしの
+        // 比較になり、 同じ行の verdict と符号が食い違う。
+        ...(out.regression === undefined
+          ? {}
+          : { normalizationScale: out.regression.normalizationScale }),
       }),
     );
   });

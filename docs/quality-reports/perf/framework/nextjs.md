@@ -8,19 +8,19 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| invokeServerAction | 0.00054ms | 0.0030ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| invokeMiddleware | 0.0046ms | 0.01ms | 5ms | 0.00035ms | PASS | stable — gate 無効 (regressionGate=false) |
-| renderServerComponent | 0.00038ms | 0.0015ms | 5ms | 0.00034ms | PASS | stable — gate 無効 (regressionGate=false) |
+| invokeServerAction | 0.00058ms | 0.0022ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| invokeMiddleware | 0.0047ms | 0.01ms | 5ms | 0.00033ms | PASS | stable (換算後 p10 +1% (閾値未満)、 p95 +42% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| renderServerComponent | 0.00038ms | 0.0016ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|
-| invokeServerAction | cpu | 0.08ms | 0.00054ms | 0.007 | 0.007 | 0.00054ms | 0.00058ms |
-| invokeMiddleware | cpu | 0.08ms | 0.0046ms | 0.057 | 0.057 | 0.0048ms | 0.0047ms |
-| renderServerComponent | cpu | 0.08ms | 0.00038ms | 0.005 | 0.005 | 0.00038ms | 0.00038ms |
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| invokeServerAction | cpu | 0.08ms | 0.09ms | 0.00058ms | 0.007 | 0.007 | 0.00059ms | 0.00054ms |
+| invokeMiddleware | cpu | 0.08ms | 0.11ms | 0.0047ms | 0.057 | 0.056 | 0.0047ms | 0.0046ms |
+| renderServerComponent | cpu | 0.08ms | 0.09ms | 0.00038ms | 0.005 | 0.005 | 0.00038ms | 0.00038ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -34,9 +34,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| invokeServerAction | -15288 B | 0 B | 102400 B | yes | PASS |
-| invokeMiddleware | -27184 B | 0 B | 102400 B | yes | PASS |
-| renderServerComponent | 507248 B | 0 B | 102400 B | yes | PASS |
+| invokeServerAction | 327480 B | -53568 B | 102400 B | yes | PASS |
+| invokeMiddleware | -12048 B | 0 B | 102400 B | yes | PASS |
+| renderServerComponent | -10728 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -48,28 +48,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00054ms |
-| p50 | 0.00058ms |
-| p95 | 0.0030ms |
+| p10 | 0.00058ms |
+| p50 | 0.00063ms |
+| p95 | 0.0022ms |
 | p99 | 0.0090ms |
-| mean | 0.0012ms |
-| stdev | 0.0020ms |
-| min | 0.00050ms |
-| max | 0.02ms |
-| total | 0.24ms |
+| mean | 0.0011ms |
+| stdev | 0.0024ms |
+| min | 0.00054ms |
+| max | 0.03ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.004)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00054ms | 0.00058ms | -0.000042ms | -7.20% |
-| p50 | 0.00058ms | 0.00063ms | -0.000041ms | -6.56% |
-| p95 | 0.0030ms | 0.0046ms | -0.0016ms | -34.93% |
-| p99 | 0.0090ms | 0.02ms | -0.0074ms | -45.08% |
-| mean | 0.0012ms | 0.0015ms | -0.00026ms | -17.82% |
-| min | 0.00050ms | 0.00054ms | -0.000041ms | -7.58% |
-| max | 0.02ms | 0.03ms | -0.0054ms | -20.09% |
-| total | 0.24ms | 0.29ms | -0.05ms | -17.82% |
+| p10 | 0.00059ms | 0.00054ms | +0.000043ms | +8.00% |
+| p50 | 0.00063ms | 0.00063ms | +0.0000026ms | +0.41% |
+| p95 | 0.0022ms | 0.0031ms | -0.00093ms | -30.02% |
+| p99 | 0.0090ms | 0.0085ms | +0.00054ms | +6.43% |
+| mean | 0.0011ms | 0.0012ms | -0.000066ms | -5.52% |
+| min | 0.00054ms | 0.00054ms | +0.0000022ms | +0.41% |
+| max | 0.03ms | 0.03ms | +0.0037ms | +14.24% |
+| total | 0.23ms | 0.24ms | -0.01ms | -5.52% |
 
 ### invokeMiddleware
 
@@ -79,28 +81,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0046ms |
-| p50 | 0.0047ms |
+| p10 | 0.0047ms |
+| p50 | 0.0053ms |
 | p95 | 0.01ms |
-| p99 | 0.03ms |
-| mean | 0.0060ms |
-| stdev | 0.0056ms |
-| min | 0.0044ms |
-| max | 0.06ms |
-| total | 1.20ms |
+| p99 | 0.08ms |
+| mean | 0.0085ms |
+| stdev | 0.02ms |
+| min | 0.0045ms |
+| max | 0.17ms |
+| total | 1.71ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.990)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0046ms | 0.0047ms | -0.00017ms | -3.52% |
-| p50 | 0.0047ms | 0.0053ms | -0.00050ms | -9.52% |
-| p95 | 0.01ms | 0.04ms | -0.03ms | -69.94% |
-| p99 | 0.03ms | 0.11ms | -0.08ms | -75.78% |
-| mean | 0.0060ms | 0.01ms | -0.0048ms | -44.73% |
-| min | 0.0044ms | 0.0046ms | -0.00017ms | -3.66% |
-| max | 0.06ms | 0.16ms | -0.11ms | -64.72% |
-| total | 1.20ms | 2.16ms | -0.97ms | -44.73% |
+| p10 | 0.0047ms | 0.0046ms | +0.000038ms | +0.83% |
+| p50 | 0.0052ms | 0.0050ms | +0.00016ms | +3.13% |
+| p95 | 0.01ms | 0.01ms | +0.0043ms | +41.60% |
+| p99 | 0.08ms | 0.03ms | +0.06ms | +204.15% |
+| mean | 0.0085ms | 0.0061ms | +0.0024ms | +39.71% |
+| min | 0.0044ms | 0.0044ms | -4.1e-7ms | -0.01% |
+| max | 0.17ms | 0.06ms | +0.10ms | +167.79% |
+| total | 1.69ms | 1.21ms | +0.48ms | +39.71% |
 
 ### renderServerComponent
 
@@ -112,24 +116,24 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00038ms |
 | p50 | 0.00042ms |
-| p95 | 0.0015ms |
-| p99 | 0.0066ms |
-| mean | 0.00068ms |
-| stdev | 0.0015ms |
+| p95 | 0.0016ms |
+| p99 | 0.0070ms |
+| mean | 0.00078ms |
+| stdev | 0.0020ms |
 | min | 0.00038ms |
 | max | 0.02ms |
-| total | 0.14ms |
+| total | 0.16ms |
 
 ## Baseline diff
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
 | p10 | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
-| p50 | 0.00042ms | 0.00042ms | 0.00ms | 0.00% |
-| p95 | 0.0015ms | 0.0030ms | -0.0016ms | -52.03% |
-| p99 | 0.0066ms | 0.0066ms | +0.000047ms | +0.72% |
-| mean | 0.00068ms | 0.00081ms | -0.00013ms | -16.03% |
+| p50 | 0.00042ms | 0.00046ms | -0.000041ms | -8.95% |
+| p95 | 0.0016ms | 0.0018ms | -0.00012ms | -7.11% |
+| p99 | 0.0070ms | 0.0092ms | -0.0023ms | -24.49% |
+| mean | 0.00078ms | 0.00084ms | -0.000061ms | -7.25% |
 | min | 0.00038ms | 0.00038ms | 0.00ms | 0.00% |
-| max | 0.02ms | 0.02ms | -0.0017ms | -8.74% |
-| total | 0.14ms | 0.16ms | -0.03ms | -16.03% |
+| max | 0.02ms | 0.02ms | +0.0032ms | +18.96% |
+| total | 0.16ms | 0.17ms | -0.01ms | -7.25% |
 

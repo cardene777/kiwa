@@ -13,13 +13,16 @@
  * 実測 (`scripts/reference-op-probe.mjs`、 8 pass の半数を背景負荷下で測定) では
  * 種類を外すと素の値より悪化する。
  *
- * | 対象 op | 素の振れ幅 | ÷ cpu | ÷ fs-read | ÷ fs-write |
- * |---|---|---|---|---|
- * | fs read (`cli-test` `readFile` 相当) | 135% | 171% | **17%** | 51% |
- * | fs write (`cli-test` `writeFile` 相当) | 123% | 313% | 75% | **32%** |
- * | 20 連続 write (`file_scaffold_workflow` 相当) | 63% | 379% | 62% | **15%** |
- * | 2ms の演算 | 16% | **8%** | 175% | 172% |
- * | `JSON.parse(JSON.stringify(…))` | 20% | **10%** | 124% | 67% |
+ * 各欄は `素の振れ幅 → 比の振れ幅`。 素の値が列ごとに違うのは、 対象を候補ごとに
+ * 測り直すため pass の中の測定時点がずれるから。 同じ組の 2 値で読む。
+ *
+ * | 対象 op | ÷ cpu | ÷ fs-read | ÷ fs-write |
+ * |---|---|---|---|
+ * | fs read (`cli-test` `readFile` 相当) | 170 → 171% | 135 → **17%** | 306 → 51% |
+ * | fs write (`cli-test` `writeFile` 相当) | 270 → 313% | 127 → 75% | 123 → **32%** |
+ * | 20 連続 write (`file_scaffold_workflow` 相当) | 332 → 379% | 322 → 62% | 63 → **15%** |
+ * | 2ms の演算 | 16 → **8%** | 12 → 175% | 4 → 172% |
+ * | `JSON.parse(JSON.stringify(…))` | 20 → **10%** | 200 → 124% | 61 → 67% |
  */
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -37,6 +40,18 @@ import type { PerfReferenceKind } from './types.js';
  */
 const CPU_ROUNDS = 20_000;
 
+/**
+ * 基準 op の実装の版。 **この file の op の中身 ・ `CPU_ROUNDS` ・ `FS_PAYLOAD` を
+ * 変えたら 1 上げる。 同時に `baseline.ts` の `MEASUREMENT_PREMISE` も上げる。**
+ *
+ * 版を記録しないと、 種類 (`cpu` 等) が同じままで分母の大きさだけが変わる。 例えば
+ * `CPU_ROUNDS` を 2 倍にすると、 保存済み baseline との比較で倍率が約 0.5 になり、
+ * 全 op が 50% の改善として報告される。 実在する 2 倍の悪化がその中に埋もれる。
+ *
+ * 版が違う記録とは比較せず、 その実行で入れ替える (`resolveNormalization`)。
+ */
+export const REFERENCE_IMPL_VERSION = 1;
+
 /** fs 基準が読み書きする内容。 syscall の往復が費用の主になる大きさにする。 */
 const FS_PAYLOAD = 'x'.repeat(64);
 
@@ -45,6 +60,8 @@ export interface PerfReferenceOp {
   kind: PerfReferenceKind;
   /** report と baseline に残る名前。 */
   name: string;
+  /** 実装の版。 `REFERENCE_IMPL_VERSION` をそのまま持つ。 */
+  implVersion: number;
   fn: () => Promise<void>;
 }
 
@@ -58,6 +75,9 @@ export interface PerfReferenceSet {
 
 /** 既定の基準の種類。 kiwa の op の大半は in-memory の mock で fs に触れない。 */
 export const DEFAULT_REFERENCE_KIND: PerfReferenceKind = 'cpu';
+
+/** 使える種類の一覧。 `types.ts` の `PerfReferenceKind` と 1:1 で対応させる。 */
+export const REFERENCE_KINDS: readonly PerfReferenceKind[] = ['cpu', 'fs-read', 'fs-write'];
 
 export function referenceOpName(kind: PerfReferenceKind): string {
   return `harness.reference.${kind}`;
@@ -95,6 +115,7 @@ export function createReferenceOps(): PerfReferenceSet {
       return {
         kind,
         name,
+        implVersion: REFERENCE_IMPL_VERSION,
         // 純粋な演算。 fs にも allocator にも触れない。 結果を捨てると V8 が
         // loop ごと消せるため、 消せない形で参照する。
         fn: async () => {
@@ -108,12 +129,30 @@ export function createReferenceOps(): PerfReferenceSet {
     }
     if (kind === 'fs-read') {
       const path = ensureReadPath();
-      return { kind, name, fn: async () => { await readFile(path, 'utf8'); } };
+      return {
+        kind,
+        name,
+        implVersion: REFERENCE_IMPL_VERSION,
+        fn: async () => { await readFile(path, 'utf8'); },
+      };
     }
-    // 同じ file を上書きする。 file を増やすと dir の entry 数が実行のたびに
-    // 変わり、 基準自身の費用が実行の長さに依存する。
-    const path = ensureWritePath();
-    return { kind, name, fn: async () => { await writeFile(path, FS_PAYLOAD, 'utf8'); } };
+    if (kind === 'fs-write') {
+      // 同じ file を上書きする。 file を増やすと dir の entry 数が実行のたびに
+      // 変わり、 基準自身の費用が実行の長さに依存する。
+      const path = ensureWritePath();
+      return {
+        kind,
+        name,
+        implVersion: REFERENCE_IMPL_VERSION,
+        fn: async () => { await writeFile(path, FS_PAYLOAD, 'utf8'); },
+      };
+    }
+    // 未知の種類を既知の基準に落とさない。 落とすと、 その名前で baseline に記録され、
+    // 次の実行が「同じ種類」 と判定して別物どうしの比を比べる。
+    throw new Error(
+      `createReferenceOps: 未知の基準 op の種類 ${JSON.stringify(kind)}。` +
+        ` 使える値は ${REFERENCE_KINDS.join(' / ')}。`,
+    );
   };
 
   const cache = new Map<PerfReferenceKind, PerfReferenceOp>();

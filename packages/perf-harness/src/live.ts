@@ -2,7 +2,7 @@
  * runPerf3LayerLive — 3-layer perf against a live third-party API.
  *
  * Companion to {@link runPerf3Layer}. Same shape, same reporting, same
- * baseline / regression semantics. Two behavioural differences:
+ * baseline semantics. Three behavioural differences:
  *
  * 1. **env-skip contract** — the caller declares which env vars are required
  *    to reach the live API. When any required var is unset, the helper skips
@@ -12,6 +12,14 @@
  * 2. **live thresholds** — the default cap is the provider's public SLA
  *    (see docs/quality/perf-thresholds.md § Real-API measurement mode).
  *    Concurrent multiplier stays 2×.
+ * 3. **no in-run normalization** — the mock path measures each op alternating
+ *    with a harness-owned reference op and judges on the ratio (#1737). Neither
+ *    reference kind shares the disturbance of a network round trip, so this path
+ *    keeps measuring the op alone. `MeasureResult.reference` is therefore absent
+ *    here, `resolveNormalization` reports `normalized: false`, and the verdict
+ *    compares raw durations — carrying the run-to-run drift the mock path now
+ *    cancels. The stored `measurementPremise` is shared with the mock path, so
+ *    it does not distinguish the two; the presence of `reference` does.
  *
  * Live runs cost money and are slow. Iterations default to 10 (vs 200 for
  * mock) so a full pass fits inside a coffee break. Concurrency defaults to

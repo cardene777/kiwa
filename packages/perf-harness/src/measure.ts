@@ -58,6 +58,11 @@ export interface MeasureAlternatingInput {
   reference: {
     kind: PerfReferenceKind;
     name: string;
+    /**
+     * 基準 op の実装の版 (`REFERENCE_IMPL_VERSION`)。 種類が同じままでも実装を
+     * 変えれば分母の大きさが変わるため、 記録して比較の可否に使う。
+     */
+    implVersion: number;
     fn: () => void | Promise<void>;
   };
   iterations: number;
@@ -137,6 +142,7 @@ export async function measureAlternating(
     kind: input.reference.kind,
     name: input.reference.name,
     p10: reference.p10,
+    implVersion: input.reference.implVersion,
   };
 
   return { target, reference, ratio: target.p10 / reference.p10 };

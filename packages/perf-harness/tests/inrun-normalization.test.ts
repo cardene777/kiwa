@@ -11,15 +11,18 @@
  * 成立しない組は比較せず作り直しに回すこと。
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
 import {
   BASELINE_SCHEMA,
+  RESOLUTION_FLOOR_MULTIPLE,
+  REFERENCE_IMPL_VERSION,
   buildMeasureResult,
   captureEnv,
   createReferenceOps,
   detectRegression,
+  loadBaseline,
   measureAlternating,
   resolveNormalization,
   runPerf3Layer,
@@ -33,7 +36,12 @@ function withReference(
   kind: PerfReferenceKind = 'cpu',
 ): MeasureResult {
   const result = buildMeasureResult('op.serial', samples.length, 0, samples);
-  result.reference = { kind, name: `harness.reference.${kind}`, p10: referenceP10 };
+  result.reference = {
+    kind,
+    name: `harness.reference.${kind}`,
+    p10: referenceP10,
+    implVersion: REFERENCE_IMPL_VERSION,
+  };
   return result;
 }
 
@@ -58,6 +66,7 @@ describe('measureAlternating — 対象と基準を 1 呼出ずつ交互に測�
         kind: 'cpu',
         name: 'harness.reference.cpu',
         p10: result.reference.p10,
+        implVersion: REFERENCE_IMPL_VERSION,
       });
       expect(result.ratio).toBeCloseTo(result.target.p10 / result.reference.p10, 10);
     } finally {
@@ -75,6 +84,7 @@ describe('measureAlternating — 対象と基準を 1 呼出ずつ交互に測�
       reference: {
         kind: 'cpu',
         name: 'stub.reference',
+        implVersion: REFERENCE_IMPL_VERSION,
         fn: () => {
           referenceCalls += 1;
           // 分母が 0 だと判定に使えないので、 計時できる程度の仕事をさせる。
@@ -103,7 +113,12 @@ describe('measureAlternating — 対象と基準を 1 呼出ずつ交互に測�
         measureAlternating({
           name: 'op.serial',
           iterations: 5,
-          reference: { kind: 'cpu', name: 'stub.zero', fn: () => {} },
+          reference: {
+            kind: 'cpu',
+            name: 'stub.zero',
+            implVersion: REFERENCE_IMPL_VERSION,
+            fn: () => {},
+          },
           fn: () => {},
         }),
       ).rejects.toThrow(/分母にできない/);
@@ -194,6 +209,72 @@ describe('detectRegression — 比で判定する', () => {
 
     expect(result.verdict).toBe('stable');
     expect(result.suppressedByFloor).toBe(true);
+  });
+
+  it('分解能由来の下限には倍率が掛かり、 呼出が置いた下限には掛からない', () => {
+    const samples = Array.from({ length: 100 }, () => 1);
+    // 機械が 4 倍遅い実行。 倍率は 0.1/0.4 = 0.25。
+    const slow = {
+      current: withReference(samples, 0.4),
+      baseline: withReference(samples, 0.1),
+    };
+
+    // 分解能も今回の実行で測った値なので、 差と同じ単位へ揃える = 倍率を掛ける。
+    // 掛けないと機械が遅い実行だけ下限が 4 倍厳しくなり、 検知できる悪化の
+    // 大きさがその日の機械で変わる。
+    const fromResolution = detectRegression({ ...slow, resolutionMs: 0.02 });
+    expect(fromResolution.normalizationScale).toBeCloseTo(0.25, 10);
+    expect(fromResolution.floorMs).toBeCloseTo(0.02 * RESOLUTION_FLOOR_MULTIPLE * 0.25, 10);
+
+    // 呼出が置いた定数はどの実行の測定値でもないので換算しない。
+    const explicit = detectRegression({ ...slow, resolutionMs: 0.02, minDeltaMs: 0.5 });
+    expect(explicit.floorMs).toBe(0.5);
+
+    // 正規化が成立しない組では倍率 1 = 従来どおり。
+    const raw = detectRegression({
+      current: buildMeasureResult('op.serial', 100, 0, samples),
+      baseline: buildMeasureResult('op.serial', 100, 0, samples),
+      resolutionMs: 0.02,
+    });
+    expect(raw.normalized).toBe(false);
+    expect(raw.floorMs).toBeCloseTo(0.02 * RESOLUTION_FLOOR_MULTIPLE, 10);
+  });
+
+  it('分母が非有限や 0 になる組は正規化せず、 判定を実測値に戻す', () => {
+    const samples = Array.from({ length: 100 }, () => 1);
+    // どちらも `> 0` は満たすが分母にできない。 通すと倍率が 0 や Infinity になり、
+    // 判定量が 0 や NaN に落ちて 3 倍の悪化でも stable / improved が出る。
+    for (const p10 of [Number.POSITIVE_INFINITY, Number.NaN]) {
+      expect(resolveNormalization(withReference(samples, p10), withReference(samples, 0.1))).toEqual(
+        { scale: 1, normalized: false },
+      );
+      expect(resolveNormalization(withReference(samples, 0.1), withReference(samples, p10))).toEqual(
+        { scale: 1, normalized: false },
+      );
+    }
+
+    // 桁が離れて商が非有限になる場合も正規化しない。
+    const overflow = resolveNormalization(
+      withReference(samples, 5e-324),
+      withReference(samples, 1e308),
+    );
+    expect(overflow.normalized).toBe(false);
+  });
+
+  it('基準 op の実装の版が違う組は比較しない', () => {
+    const samples = Array.from({ length: 100 }, () => 1);
+    const current = withReference(samples, 0.1);
+    const baseline = withReference(samples, 0.1);
+    baseline.reference = { ...baseline.reference!, implVersion: 999 };
+
+    // 種類が同じでも実装を変えれば分母の大きさが変わる。 掛けると分母の差が
+    // 実装の差として報告される (反復数を 2 倍にすれば全 op が 50% 改善に見える)。
+    expect(resolveNormalization(current, baseline)).toEqual({ scale: 1, normalized: false });
+
+    // 版の記録が無い世代も版不明として扱う。
+    const legacy = withReference(samples, 0.1);
+    delete legacy.reference!.implVersion;
+    expect(resolveNormalization(current, legacy)).toEqual({ scale: 1, normalized: false });
   });
 });
 
@@ -387,30 +468,173 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
     expect(slowed.allPassed).toBe(false);
   });
 
-  it('上限の判定は実測値のまま (正規化は回帰判定にしか効かない)', async () => {
-    const tmpDir = tempDir();
-    // 1ms 級の op を 0.1ms の上限にかける。 比で見れば基準より速い実行でも、
-    // 上限は 1 回の実行の中で完結する判定なので実測値で落ちる。
-    const run = await runPerf3Layer({
-      moduleName: 'inrun-cap',
-      ops: [
-        {
-          name: 'slow',
-          fn: () => {
-            const until = performance.now() + 1;
-            while (performance.now() < until) {
-              /* burn */
-            }
-          },
-          serialP95CapMs: 0.1,
-        },
-      ],
-      reportPath: join(tmpDir, 'r1.md'),
-      baselinePath: join(tmpDir, 'baseline.json'),
+  it('上限の判定は 3 軸すべて実測値のまま (正規化は回帰判定にしか効かない)', async () => {
+    const burn = () => {
+      const until = performance.now() + 1;
+      while (performance.now() < until) {
+        /* burn */
+      }
+    };
+    const held: Buffer[] = [];
+
+    // serial 上限。 比で見れば基準の何倍かに換算されるが、 上限は 1 回の実行の中で
+    // 完結する判定なので実測値で落ちる。
+    const serialRun = await runPerf3Layer({
+      moduleName: 'inrun-cap-serial',
+      ops: [{ name: 'slow', fn: burn, serialP95CapMs: 0.1, concurrentP95CapMs: 10_000 }],
+      reportPath: join(tempDir(), 'serial.md'),
+      baselinePath: join(tempDir(), 'serial.json'),
       ...settings,
     });
+    expect(serialRun.outcomes[0]!.serialGatePassed).toBe(false);
+    expect(serialRun.allPassed).toBe(false);
 
-    expect(run.outcomes[0]!.serialGatePassed).toBe(false);
-    expect(run.allPassed).toBe(false);
+    // concurrent 上限。 serial 側は通す上限を置いて、 落ちる軸を 1 つに絞る。
+    const concurrentRun = await runPerf3Layer({
+      moduleName: 'inrun-cap-concurrent',
+      ops: [{ name: 'slow', fn: burn, serialP95CapMs: 10_000, concurrentP95CapMs: 0.1 }],
+      reportPath: join(tempDir(), 'concurrent.md'),
+      baselinePath: join(tempDir(), 'concurrent.json'),
+      ...settings,
+    });
+    expect(concurrentRun.outcomes[0]!.serialGatePassed).toBe(true);
+    expect(concurrentRun.outcomes[0]!.concurrentGatePassed).toBe(false);
+    expect(concurrentRun.allPassed).toBe(false);
+
+    // memory 上限。 反復ごとに到達可能なまま Buffer を積む。
+    const memoryRun = await runPerf3Layer({
+      moduleName: 'inrun-cap-memory',
+      ops: [
+        {
+          name: 'retain',
+          fn: () => {
+            held.push(Buffer.allocUnsafe(10 * 1024));
+          },
+          serialP95CapMs: 10_000,
+          memoryArrayBuffersCapBytes: 1024,
+        },
+      ],
+      reportPath: join(tempDir(), 'memory.md'),
+      baselinePath: join(tempDir(), 'memory.json'),
+      ...settings,
+    });
+    expect(memoryRun.outcomes[0]!.serialGatePassed).toBe(true);
+    expect(memoryRun.outcomes[0]!.memoryGatePassed).toBe(false);
+    expect(memoryRun.allPassed).toBe(false);
+  });
+
+  it('壊れた基準の記録を持つ baseline は読めない記録として扱う', async () => {
+    const samples = Array.from({ length: 20 }, () => 1);
+    const cases: Array<[string, unknown]> = [
+      ['kind が未知', { kind: 'gpu', name: 'x', p10: 0.1, implVersion: 1 }],
+      ['p10 が 0', { kind: 'cpu', name: 'x', p10: 0, implVersion: 1 }],
+      ['p10 が非有限', { kind: 'cpu', name: 'x', p10: Number.MAX_VALUE * 2, implVersion: 1 }],
+      ['name が数値', { kind: 'cpu', name: 1, p10: 0.1, implVersion: 1 }],
+      ['implVersion が小数', { kind: 'cpu', name: 'x', p10: 0.1, implVersion: 1.5 }],
+      ['reference が配列', []],
+    ];
+
+    for (const [label, reference] of cases) {
+      const tmpDir = tempDir();
+      const baselinePath = join(tmpDir, 'baseline.json');
+      const stored = buildMeasureResult('op.serial', 20, 0, samples) as unknown as Record<
+        string,
+        unknown
+      >;
+      stored.reference = reference;
+      writeFileSync(
+        baselinePath,
+        JSON.stringify({ schema: 2, env: captureEnv(), results: { 'op.serial': stored } }),
+        'utf8',
+      );
+      // 1 件でも読めない記録があれば envelope 全体を無しとして扱う。 field だけ
+      // 落として通すと、 正規化なしの比較へ黙って落ちる。
+      expect(await loadBaseline(baselinePath), label).toBeNull();
+    }
+
+    // p10 が非有限でも JSON では null になるため、 素の JSON 文字列でも確かめる。
+    const tmpDir = tempDir();
+    const rawPath = join(tmpDir, 'raw.json');
+    writeFileSync(
+      rawPath,
+      JSON.stringify({
+        schema: 2,
+        env: captureEnv(),
+        results: {
+          'op.serial': {
+            ...buildMeasureResult('op.serial', 20, 0, samples),
+            reference: { kind: 'cpu', name: 'x', p10: null, implVersion: 1 },
+          },
+        },
+      }),
+      'utf8',
+    );
+    expect(await loadBaseline(rawPath)).toBeNull();
+  });
+
+  it('負の標本を持つ baseline は読まない', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'baseline.json');
+    // 経過時間として成立しない。 通すと p10 が負になり、 変化率の分母が負になって
+    // 悪化が improved として報告される。
+    writeFileSync(
+      baselinePath,
+      JSON.stringify({
+        schema: 2,
+        env: captureEnv(),
+        results: { 'op.serial': buildMeasureResult('op.serial', 3, 0, [-1, 1, 1]) },
+      }),
+      'utf8',
+    );
+    expect(await loadBaseline(baselinePath)).toBeNull();
+  });
+});
+
+describe('createReferenceOps — 基準 op の一式', () => {
+  it('fs 系を要求した時だけ temp dir を掘り、 dispose で消す', () => {
+    const references = createReferenceOps();
+    try {
+      // cpu だけなら fs に触れないので dir を掘らない。
+      const cpu = references.get('cpu');
+      expect(cpu.kind).toBe('cpu');
+      expect(cpu.implVersion).toBe(REFERENCE_IMPL_VERSION);
+
+      const read = references.get('fs-read');
+      const write = references.get('fs-write');
+      expect(read.name).toBe('harness.reference.fs-read');
+      expect(write.name).toBe('harness.reference.fs-write');
+
+      // 同じ種類を 2 度要求しても同じ op を返す (dir を増やさない)。
+      expect(references.get('fs-read')).toBe(read);
+    } finally {
+      references.dispose();
+    }
+  });
+
+  it('dispose が temp dir を実際に削除する', async () => {
+    const references = createReferenceOps();
+    const reference = references.get('fs-write');
+    await reference.fn();
+    // 基準が書いた file の親 dir を掴む。 dispose 後に消えていることを見る。
+    const dirs = readdirSync(os.tmpdir()).filter((entry) =>
+      entry.startsWith('kiwa-perf-reference-'),
+    );
+    expect(dirs.length).toBeGreaterThan(0);
+    references.dispose();
+    const after = readdirSync(os.tmpdir()).filter((entry) =>
+      entry.startsWith('kiwa-perf-reference-'),
+    );
+    expect(after.length).toBeLessThan(dirs.length);
+  });
+
+  it('未知の種類は既知の基準に落とさず落とす', () => {
+    const references = createReferenceOps();
+    try {
+      // 落とすと、 その名前で baseline に記録され、 次の実行が「同じ種類」 と
+      // 判定して別物どうしの比を比べる。
+      expect(() => references.get('gpu' as PerfReferenceKind)).toThrow(/未知の基準 op の種類/);
+    } finally {
+      references.dispose();
+    }
   });
 });

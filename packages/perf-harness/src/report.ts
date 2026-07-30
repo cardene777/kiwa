@@ -5,6 +5,15 @@ export function emitPerfReport(
   opts: {
     baseline?: MeasureResult;
     includeSamples?: boolean;
+    /**
+     * 今回の値を baseline を測った時の機械の速さへ換算する倍率
+     * (`RegressionResult.normalizationScale`)。 既定 1 = 換算しない。
+     *
+     * 渡さないと、 この表だけが実測値どうしを比べることになる。 回帰判定は換算後の
+     * 値を読むため、 同じ report の中で verdict が `regressed` の行に改善を示す
+     * 差分が並ぶ (実測 +15.6% / 換算後 +23% のように符号ごと食い違う場合がある)。
+     */
+    normalizationScale?: number;
   } = {},
 ): string {
   const lines: string[] = [];
@@ -26,18 +35,31 @@ export function emitPerfReport(
   lines.push('');
 
   if (opts.baseline) {
+    // 換算を掛けないと、 この表だけが実測値どうしを比べることになり、 回帰判定が
+    // 読む量と食い違う。 倍率は全 metric に同じだけ掛かる (今回の測定を baseline を
+    // 測った時の機械の速さへ置き換える操作なので、 分位ごとに変わらない)。
+    const scale =
+      opts.normalizationScale !== undefined && Number.isFinite(opts.normalizationScale)
+        ? opts.normalizationScale
+        : 1;
     const metrics = [
-      { label: 'p10', current: result.p10, baseline: opts.baseline.p10 },
-      { label: 'p50', current: result.p50, baseline: opts.baseline.p50 },
-      { label: 'p95', current: result.p95, baseline: opts.baseline.p95 },
-      { label: 'p99', current: result.p99, baseline: opts.baseline.p99 },
-      { label: 'mean', current: result.mean, baseline: opts.baseline.mean },
-      { label: 'min', current: result.minMs, baseline: opts.baseline.minMs },
-      { label: 'max', current: result.maxMs, baseline: opts.baseline.maxMs },
-      { label: 'total', current: result.totalMs, baseline: opts.baseline.totalMs },
+      { label: 'p10', current: result.p10 * scale, baseline: opts.baseline.p10 },
+      { label: 'p50', current: result.p50 * scale, baseline: opts.baseline.p50 },
+      { label: 'p95', current: result.p95 * scale, baseline: opts.baseline.p95 },
+      { label: 'p99', current: result.p99 * scale, baseline: opts.baseline.p99 },
+      { label: 'mean', current: result.mean * scale, baseline: opts.baseline.mean },
+      { label: 'min', current: result.minMs * scale, baseline: opts.baseline.minMs },
+      { label: 'max', current: result.maxMs * scale, baseline: opts.baseline.maxMs },
+      { label: 'total', current: result.totalMs * scale, baseline: opts.baseline.totalMs },
     ];
     lines.push('## Baseline diff');
     lines.push('');
+    if (scale !== 1) {
+      lines.push(
+        `current は baseline を測った時の機械の速さへ換算済み (倍率 ${scale.toFixed(3)})。 回帰判定が読む量と同じ。 実測値は上表。`,
+      );
+      lines.push('');
+    }
     lines.push('| metric | current | baseline | delta ms | delta % |');
     lines.push('|---|---|---|---|---|');
     for (const metric of metrics) {

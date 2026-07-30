@@ -20,6 +20,8 @@ export {
 } from './measure.js';
 export {
   DEFAULT_REFERENCE_KIND,
+  REFERENCE_IMPL_VERSION,
+  REFERENCE_KINDS,
   createReferenceOps,
   referenceOpName,
   type PerfReferenceOp,

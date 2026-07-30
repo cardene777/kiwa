@@ -8,39 +8,39 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| mountAllForms | 0.05ms | 0.17ms | 50ms | 0.00041ms | PASS | stable (p10 -17% (閾値未満)、 p95 +36% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| validateAllForms | 0.04ms | 0.08ms | 80ms | 0.00041ms | PASS | stable (p10 -1% (閾値未満)、 p95 +29% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| submitAllForms | 0.03ms | 0.05ms | 80ms | 0.00041ms | PASS | stable — gate 無効 (regressionGate=false) |
-| a11yAllForms | 0.06ms | 0.11ms | 80ms | 0.00040ms | PASS | stable — gate 無効 (regressionGate=false) |
+| mountAllForms | 0.05ms | 0.14ms | 50ms | 0.00041ms | PASS | stable — gate 無効 (regressionGate=false) |
+| validateAllForms | 0.04ms | 0.07ms | 80ms | 0.00038ms | PASS | stable — gate 無効 (regressionGate=false) |
+| submitAllForms | 0.03ms | 0.13ms | 80ms | 0.00038ms | PASS | improved — gate 無効 (regressionGate=false) |
+| a11yAllForms | 0.06ms | 0.32ms | 80ms | 0.00041ms | PASS | stable (換算後 p10 +7% (閾値未満)、 p95 +180% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|
-| mountAllForms | cpu | 0.08ms | 0.05ms | 0.604 | 0.732 | 0.05ms | 0.06ms |
-| validateAllForms | cpu | 0.08ms | 0.04ms | 0.439 | 0.443 | 0.04ms | 0.04ms |
-| submitAllForms | cpu | 0.08ms | 0.03ms | 0.331 | 0.341 | 0.03ms | 0.03ms |
-| a11yAllForms | cpu | 0.08ms | 0.06ms | 0.698 | 0.713 | 0.06ms | 0.06ms |
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| mountAllForms | cpu | 0.09ms | 0.10ms | 0.05ms | 0.577 | 0.578 | 0.05ms | 0.05ms |
+| validateAllForms | cpu | 0.09ms | 0.10ms | 0.04ms | 0.431 | 0.442 | 0.04ms | 0.04ms |
+| submitAllForms | cpu | 0.09ms | 0.12ms | 0.03ms | 0.336 | 0.633 | 0.03ms | 0.05ms |
+| a11yAllForms | cpu | 0.08ms | 0.13ms | 0.06ms | 0.746 | 0.700 | 0.06ms | 0.06ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| mountAllForms | 0.92ms | 100ms | PASS |
-| validateAllForms | 0.61ms | 160ms | PASS |
-| submitAllForms | 0.44ms | 160ms | PASS |
-| a11yAllForms | 1.11ms | 160ms | PASS |
+| mountAllForms | 0.97ms | 100ms | PASS |
+| validateAllForms | 0.93ms | 160ms | PASS |
+| submitAllForms | 0.95ms | 160ms | PASS |
+| a11yAllForms | 1.37ms | 160ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| mountAllForms | 7912 B | 0 B | 102400 B | yes | PASS |
-| validateAllForms | -57792 B | 0 B | 102400 B | yes | PASS |
-| submitAllForms | -24192 B | 0 B | 102400 B | yes | PASS |
-| a11yAllForms | -4032 B | 0 B | 102400 B | yes | PASS |
+| mountAllForms | 7464 B | 0 B | 102400 B | yes | PASS |
+| validateAllForms | -60368 B | 0 B | 102400 B | yes | PASS |
+| submitAllForms | -7736 B | 0 B | 102400 B | yes | PASS |
+| a11yAllForms | -4280 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -53,27 +53,29 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 40 |
 | warmup | 5 |
 | p10 | 0.05ms |
-| p50 | 0.06ms |
-| p95 | 0.17ms |
-| p99 | 0.25ms |
+| p50 | 0.07ms |
+| p95 | 0.14ms |
+| p99 | 0.29ms |
 | mean | 0.08ms |
 | stdev | 0.05ms |
 | min | 0.05ms |
-| max | 0.28ms |
-| total | 3.25ms |
+| max | 0.38ms |
+| total | 3.35ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.979)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.05ms | 0.06ms | -0.0096ms | -16.14% |
-| p50 | 0.06ms | 0.07ms | -0.0015ms | -2.27% |
-| p95 | 0.17ms | 0.12ms | +0.05ms | +37.99% |
-| p99 | 0.25ms | 0.21ms | +0.04ms | +18.89% |
-| mean | 0.08ms | 0.08ms | +0.0026ms | +3.29% |
-| min | 0.05ms | 0.05ms | -0.00071ms | -1.53% |
-| max | 0.28ms | 0.26ms | +0.02ms | +7.32% |
-| total | 3.25ms | 3.15ms | +0.10ms | +3.29% |
+| p10 | 0.05ms | 0.05ms | -0.000094ms | -0.19% |
+| p50 | 0.07ms | 0.07ms | +0.0022ms | +3.31% |
+| p95 | 0.14ms | 0.13ms | +0.01ms | +9.37% |
+| p99 | 0.29ms | 0.26ms | +0.03ms | +11.88% |
+| mean | 0.08ms | 0.08ms | +0.0032ms | +4.09% |
+| min | 0.05ms | 0.05ms | -0.0014ms | -2.90% |
+| max | 0.38ms | 0.32ms | +0.05ms | +15.87% |
+| total | 3.27ms | 3.15ms | +0.13ms | +4.09% |
 
 ### validateAllForms
 
@@ -85,26 +87,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p10 | 0.04ms |
 | p50 | 0.04ms |
-| p95 | 0.08ms |
-| p99 | 0.15ms |
+| p95 | 0.07ms |
+| p99 | 0.13ms |
 | mean | 0.05ms |
-| stdev | 0.03ms |
+| stdev | 0.02ms |
 | min | 0.04ms |
-| max | 0.19ms |
+| max | 0.16ms |
 | total | 1.90ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.924)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.04ms | 0.04ms | +0.00055ms | +1.55% |
-| p50 | 0.04ms | 0.04ms | +0.00023ms | +0.61% |
-| p95 | 0.08ms | 0.06ms | +0.02ms | +32.03% |
-| p99 | 0.15ms | 0.17ms | -0.02ms | -11.77% |
-| mean | 0.05ms | 0.05ms | +0.0016ms | +3.54% |
-| min | 0.04ms | 0.03ms | +0.00087ms | +2.50% |
-| max | 0.19ms | 0.23ms | -0.03ms | -15.18% |
-| total | 1.90ms | 1.83ms | +0.06ms | +3.54% |
+| p10 | 0.04ms | 0.04ms | -0.00086ms | -2.34% |
+| p50 | 0.04ms | 0.04ms | -0.00091ms | -2.40% |
+| p95 | 0.06ms | 0.06ms | -0.00026ms | -0.43% |
+| p99 | 0.12ms | 2.25ms | -2.13ms | -94.85% |
+| mean | 0.04ms | 0.13ms | -0.09ms | -66.78% |
+| min | 0.04ms | 0.04ms | -0.00057ms | -1.58% |
+| max | 0.15ms | 3.65ms | -3.50ms | -95.87% |
+| total | 1.75ms | 5.28ms | -3.53ms | -66.78% |
 
 ### submitAllForms
 
@@ -115,27 +119,29 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 40 |
 | warmup | 5 |
 | p10 | 0.03ms |
-| p50 | 0.03ms |
-| p95 | 0.05ms |
-| p99 | 0.09ms |
-| mean | 0.03ms |
-| stdev | 0.01ms |
+| p50 | 0.04ms |
+| p95 | 0.13ms |
+| p99 | 0.24ms |
+| mean | 0.05ms |
+| stdev | 0.05ms |
 | min | 0.03ms |
-| max | 0.10ms |
-| total | 1.33ms |
+| max | 0.28ms |
+| total | 1.95ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.923)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.03ms | 0.03ms | -0.00070ms | -2.50% |
-| p50 | 0.03ms | 0.03ms | -0.0056ms | -16.45% |
-| p95 | 0.05ms | 0.05ms | -0.000046ms | -0.10% |
-| p99 | 0.09ms | 0.05ms | +0.04ms | +76.96% |
-| mean | 0.03ms | 0.03ms | -0.0010ms | -3.05% |
-| min | 0.03ms | 0.03ms | -0.00058ms | -2.09% |
-| max | 0.10ms | 0.05ms | +0.05ms | +105.07% |
-| total | 1.33ms | 1.37ms | -0.04ms | -3.05% |
+| p10 | 0.03ms | 0.05ms | -0.02ms | -46.92% |
+| p50 | 0.03ms | 0.06ms | -0.03ms | -46.10% |
+| p95 | 0.12ms | 0.38ms | -0.26ms | -69.24% |
+| p99 | 0.22ms | 0.50ms | -0.28ms | -55.38% |
+| mean | 0.04ms | 0.11ms | -0.06ms | -58.42% |
+| min | 0.03ms | 0.05ms | -0.02ms | -46.46% |
+| max | 0.26ms | 0.56ms | -0.30ms | -53.38% |
+| total | 1.80ms | 4.32ms | -2.53ms | -58.42% |
 
 ### a11yAllForms
 
@@ -146,25 +152,27 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | iterations | 40 |
 | warmup | 5 |
 | p10 | 0.06ms |
-| p50 | 0.06ms |
-| p95 | 0.11ms |
-| p99 | 0.21ms |
-| mean | 0.08ms |
-| stdev | 0.03ms |
+| p50 | 0.08ms |
+| p95 | 0.32ms |
+| p99 | 0.54ms |
+| mean | 0.12ms |
+| stdev | 0.11ms |
 | min | 0.06ms |
-| max | 0.25ms |
-| total | 3.02ms |
+| max | 0.61ms |
+| total | 4.95ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.975)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.06ms | 0.06ms | +0.00069ms | +1.20% |
-| p50 | 0.06ms | 0.06ms | -0.0035ms | -5.46% |
-| p95 | 0.11ms | 0.11ms | +0.0063ms | +5.91% |
-| p99 | 0.21ms | 0.20ms | +0.0084ms | +4.17% |
-| mean | 0.08ms | 0.08ms | +0.00039ms | +0.52% |
-| min | 0.06ms | 0.06ms | +0.00092ms | +1.63% |
-| max | 0.25ms | 0.26ms | -0.0083ms | -3.26% |
-| total | 3.02ms | 3.00ms | +0.02ms | +0.52% |
+| p10 | 0.06ms | 0.06ms | +0.0038ms | +6.60% |
+| p50 | 0.08ms | 0.06ms | +0.01ms | +23.18% |
+| p95 | 0.32ms | 0.11ms | +0.20ms | +180.08% |
+| p99 | 0.52ms | 0.21ms | +0.31ms | +151.90% |
+| mean | 0.12ms | 0.07ms | +0.05ms | +67.35% |
+| min | 0.06ms | 0.06ms | +0.0044ms | +7.84% |
+| max | 0.60ms | 0.22ms | +0.38ms | +168.27% |
+| total | 4.82ms | 2.88ms | +1.94ms | +67.35% |
 
