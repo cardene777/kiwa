@@ -377,7 +377,13 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
       baselinePath,
       ...settings,
     });
-    expect(switched.outcomes[0]!.regressionVerdict).toBe('n/a (baseline seeded)');
+    // 記録はあるので「seeded」 ではない。 比較しなかった理由を note に出す。
+    expect(switched.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
+    expect(switched.outcomes[0]!.regressionNote).toMatch(/基準 op の種類が baseline と違う/);
+    expect(switched.outcomes[0]!.regressionNote).toContain('baseline cpu / 今回 fs-write');
+    // 比較していない行に baseline 差分表を出さない (判定に使っていない差が
+    // 判定結果と同じ重みで並ぶため)。
+    expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).not.toContain('## Baseline diff');
 
     const stored = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
       results: Record<string, MeasureResult>;
@@ -425,11 +431,48 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
       ...settings,
     });
 
-    expect(run.outcomes[0]!.regressionVerdict).toBe('n/a (baseline seeded)');
+    // 記録はあるので seeded ではない。 理由は「基準 op の記録が無い世代」。
+    expect(run.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
+    expect(run.outcomes[0]!.regressionNote).toMatch(/基準 op の記録が無い世代/);
     const stored = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
       results: Record<string, MeasureResult>;
     };
     expect(stored.results['op.serial']?.reference?.kind).toBe('cpu');
+  });
+
+  it('実装の版だけが違う組は、 種類ではなく版を理由として報告する', async () => {
+    const tmpDir = tempDir();
+    const baselinePath = join(tmpDir, 'baseline.json');
+    const op = { name: 'op', fn: () => {}, serialP95CapMs: 10_000 };
+
+    await runPerf3Layer({
+      moduleName: 'inrun',
+      ops: [op],
+      reportPath: join(tmpDir, 'r1.md'),
+      baselinePath,
+      ...settings,
+    });
+
+    // 版だけを書き換える。 種類は両方 cpu のままなので、 原因を種類に固定して
+    // 書くと読み手は見つからない原因を探すことになる。
+    const stored = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
+      env: unknown;
+      results: Record<string, MeasureResult>;
+    };
+    stored.results['op.serial']!.reference!.implVersion = 999;
+    writeFileSync(baselinePath, JSON.stringify({ schema: 2, ...stored }), 'utf8');
+
+    const run = await runPerf3Layer({
+      moduleName: 'inrun',
+      ops: [op],
+      reportPath: join(tmpDir, 'r2.md'),
+      baselinePath,
+      ...settings,
+    });
+
+    expect(run.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
+    expect(run.outcomes[0]!.regressionNote).toMatch(/実装の版が baseline と違う/);
+    expect(run.outcomes[0]!.regressionNote).toContain('baseline 999');
   });
 
   it('baseline の 3 倍の遅延を入れた op は比の判定で regressed になる', async () => {

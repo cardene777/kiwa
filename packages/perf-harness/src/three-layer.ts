@@ -216,7 +216,17 @@ export interface OpOutcome {
   serialGatePassed: boolean;
   concurrentGatePassed: boolean;
   memoryGatePassed: boolean;
-  regressionVerdict: 'stable' | 'improved' | 'regressed' | 'n/a (baseline seeded)';
+  /**
+   * `n/a` は 2 種を分ける。 `baseline seeded` = 記録が無い実行 (初回)、
+   * `比較せず` = 記録はあるが基準が揃わず比較できない実行。 後者を seeded と
+   * 書くと、 書込が起きていない実行でも seed したと読める。
+   */
+  regressionVerdict:
+    | 'stable'
+    | 'improved'
+    | 'regressed'
+    | 'n/a (baseline seeded)'
+    | 'n/a (比較せず)';
   /**
    * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
    * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
@@ -387,13 +397,17 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         serialGatePassed: serialGate.verdict.passed,
         concurrentGatePassed: concurrentGate.verdict.passed,
         memoryGatePassed,
-        regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
+        // 記録が無い実行 (初回) と、 記録はあるのに比較できない実行を分ける。
+        // 後者を「seeded」 と書くと、 書込が起きていない実行でも seed したと読める。
+        regressionVerdict: regression
+          ? regression.verdict
+          : priorSerial === undefined
+            ? 'n/a (baseline seeded)'
+            : 'n/a (比較せず)',
         ...(regression === null
-          ? // 記録はあるのに比較しなかった場合は理由を残す。 「seeded」 だけだと
-            // 初回と区別できず、 基準の種類を変えた op が黙って n/a に留まる。
-            priorSerial === undefined
+          ? priorSerial === undefined
             ? {}
-            : { regressionNote: '基準 op の種類が baseline と食い違うため比較せず記録を入れ替える' }
+            : { regressionNote: uncomparableReason(serial, priorSerial) }
           : { regression, ...buildRegressionNote(regression, regressionThreshold) }),
       });
     }
@@ -517,6 +531,39 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
 export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boolean {
   if (input.pruneStaleBaselineOps !== undefined) return input.pruneStaleBaselineOps;
   return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
+}
+
+/**
+ * 記録はあるのに比較できない理由を 1 行にする。
+ *
+ * 原因を 1 つに固定して書くと嘘になる。 `resolveNormalization` が不成立を返す道は
+ * 4 つあり (基準の記録が無い / 種類が違う / 実装の版が違う / 分母が分母にならない)、
+ * 例えば版だけが違う組で「種類が食い違う」 と書くと、 読み手は種類を疑って
+ * 見つからない原因を探すことになる。
+ *
+ * 記録を入れ替えたかどうかはここでは書かない。 書込には測定の成立が要り、 この時点で
+ * 判っていない (report 冒頭が実行全体として書けたかを出す)。
+ */
+function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
+  const currentReference = current.reference;
+  const baselineReference = baseline.reference;
+  if (baselineReference === undefined) {
+    return '基準 op の記録が無い世代の baseline のため比較せず';
+  }
+  if (currentReference === undefined) {
+    return '今回の測定に基準 op の記録が無いため比較せず (交互測定を経ていない)';
+  }
+  if (currentReference.kind !== baselineReference.kind) {
+    return `基準 op の種類が baseline と違うため比較せず (baseline ${baselineReference.kind} / 今回 ${currentReference.kind})`;
+  }
+  if (
+    currentReference.implVersion === undefined ||
+    baselineReference.implVersion === undefined ||
+    currentReference.implVersion !== baselineReference.implVersion
+  ) {
+    return `基準 op の実装の版が baseline と違うため比較せず (baseline ${baselineReference.implVersion ?? '記録なし'} / 今回 ${currentReference.implVersion ?? '記録なし'})`;
+  }
+  return '基準 op の p10 が分母にならないため比較せず';
 }
 
 /**
@@ -755,7 +802,12 @@ function writeReport(input: WriteReportInput): void {
     const out = input.outcomes[idx]!;
     lines.push(`### ${op.name}`);
     lines.push('');
-    const priorSerial = input.priorBaseline?.[`${op.name}.serial`];
+    // 比較が成立した行だけ baseline との差分表を出す。 比較していない行に出すと、
+    // 判定に使っていない実測値どうしの差が、 判定結果と同じ重みで並ぶ (倍率が
+    // 無いので注記も出ず、 読み手には区別が付かない)。 比較しなかった理由は
+    // Serial 表の regression 列に出る。
+    const priorSerial =
+      out.regression === undefined ? undefined : input.priorBaseline?.[`${op.name}.serial`];
     lines.push(
       emitPerfReport(out.serial, {
         includeSamples: false,
