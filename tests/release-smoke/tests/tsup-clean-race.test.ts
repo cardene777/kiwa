@@ -91,6 +91,9 @@ function listFiles(dir: string, base = ''): string[] {
 function cleanState(name: string): 'enabled' | 'disabled' | 'unknown' {
   const script = readBuildScript(name);
   if (script !== null && /(^|\s)--clean(\s|$|=)/.test(script)) return 'enabled';
+  // 別 config を指す build script は、 その file を読まないと判定できない。
+  // 読める形に限定するより「判定不能」 に倒して呼出側で fail させる。
+  if (script !== null && /(^|\s)(--config|-c)(\s|=)/.test(script)) return 'unknown';
 
   const config = join(PACKAGES_DIR, name, 'tsup.config.ts');
   if (!existsSync(config)) return script === null ? 'unknown' : 'disabled';
@@ -98,10 +101,17 @@ function cleanState(name: string): 'enabled' | 'disabled' | 'unknown' {
   // block comment を落としてから見る。 外した理由を comment に書くと、 その本文に
   // `clean: true` の字面が入って設定と区別が付かなくなる (実際に誤検知した)。
   const source = readFileSync(config, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-  const match = source.match(/^\s*clean:\s*(.+?),?\s*$/m);
-  if (match === undefined || match === null) return 'disabled';
-  const value = match[1]!.trim();
-  if (value === 'false') return 'disabled';
+
+  // spread は展開元の値が見えない。 中に clean があれば有効になり得る。
+  if (/\.\.\./.test(source)) return 'unknown';
+  // `defineConfig([...])` の配列形は entry ごとに別の clean を持てる。
+  // 1 つ目だけを見る形にすると 2 つ目の clean を取り落とす。
+  if (/defineConfig\(\s*\[/.test(source)) return 'unknown';
+
+  // 同 file 内の clean 指定を全件見る。 1 つでも false 以外があれば有効扱い。
+  const values = [...source.matchAll(/^\s*clean:\s*(.+?),?\s*$/gm)].map((m) => m[1]!.trim());
+  if (values.length === 0) return 'disabled';
+  if (values.every((value) => value === 'false')) return 'disabled';
   // `true` / 配列 / 変数 / 式 はいずれも clean が走り得る。
   return 'enabled';
 }
@@ -115,13 +125,89 @@ function readBuildScript(name: string): string | null {
   return scripts?.build ?? null;
 }
 
-/** dist の実 file が固定 6 件か。 未 build は判定不能で null。 */
+/**
+ * dist の実 file が固定 6 件と**完全一致**するか。 未 build は判定不能で null。
+ *
+ * `every` だけだと「余分が無い」 しか見ず、 6 件のうち 1 件が欠けても通る。
+ * format を減らして `index.cjs` が消えた状態は、 clean を外した前提
+ * (毎回すべて上書きされる) が崩れているので検知したい。
+ */
 function hasFixedOutput(name: string): boolean | null {
   const dist = join(PACKAGES_DIR, name, 'dist');
   if (!existsSync(dist)) return null;
   const files = listFiles(dist);
   if (files.length === 0) return null;
+  if (files.length !== FIXED_OUTPUT.size) return false;
   return files.every((file) => FIXED_OUTPUT.has(file));
+}
+
+/**
+ * 「出力が固定 6 file になる」 前提が config から読み取れるかを静的に判定する。
+ * 成り立たない理由を返す (空配列 = 成立)。
+ *
+ * dist を見る判定は build 済のものしか検査できず、 clean clone では 37 件中 16 件が
+ * 素通りする。 出力の顔ぶれを決めるのは設定値なので、 build しなくても判定できる。
+ *
+ * 6 file は `entry` 1 件 × (`format` 2 種 + `dts` 2 種 + `sourcemap` 2 種) の内訳。
+ * どれか 1 つでも変われば件数が変わる。
+ */
+function fixedOutputViolations(name: string): string[] {
+  const script = readBuildScript(name);
+  // entry / format を CLI 引数で渡す形は config だけでは決まらない。
+  if (script !== null && script.trim() !== 'tsup') {
+    return [`${name}: build script が素の \`tsup\` でない (${script})`];
+  }
+
+  const config = join(PACKAGES_DIR, name, 'tsup.config.ts');
+  if (!existsSync(config)) return [`${name}: tsup.config.ts が無い`];
+  const source = readFileSync(config, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const out: string[] = [];
+  const entry = source.match(/entry:\s*\[([^\]]*)\]/);
+  if (entry === null) out.push(`${name}: entry を読めない`);
+  else {
+    const count = entry[1]!.split(',').filter((part) => part.trim() !== '').length;
+    if (count !== 1) out.push(`${name}: entry が ${count} 件 (1 件でないと出力が増える)`);
+  }
+
+  const format = source.match(/format:\s*\[([^\]]*)\]/);
+  if (format === null) out.push(`${name}: format を読めない`);
+  else {
+    const kinds = [...format[1]!.matchAll(/['"]([a-z]+)['"]/g)].map((m) => m[1]!).sort();
+    if (kinds.join(',') !== 'cjs,esm') out.push(`${name}: format が ${kinds.join(',')}`);
+  }
+
+  if (!/dts:\s*true/.test(source)) out.push(`${name}: dts が true でない`);
+  if (!/sourcemap:\s*true/.test(source)) out.push(`${name}: sourcemap が true でない`);
+
+  out.push(...runtimeDynamicImports(name).map((rel) => `${name}: 実行時の相対 dynamic import (${rel})`));
+  return out;
+}
+
+/**
+ * src 配下の**実行時**の相対 dynamic import を集める。 chunk file を生む。
+ *
+ * `import('./x.js').Type` の型位置の形は compile 時に消えるので chunk を生まない
+ * (37 件中 5 package に計 7 箇所ある)。 `.` + 識別子が続く形を型位置とみなし、
+ * `await` 付き / `.then` 等が続く形は実行時として拾う。
+ */
+function runtimeDynamicImports(name: string): string[] {
+  const src = join(PACKAGES_DIR, name, 'src');
+  if (!existsSync(src)) return [];
+  const out: string[] = [];
+  for (const rel of listFiles(src)) {
+    if (!rel.endsWith('.ts') && !rel.endsWith('.tsx')) continue;
+    const text = readFileSync(join(src, rel), 'utf8');
+    const pattern = /(await\s+)?\bimport\(\s*['"](\.[^'"]*)['"]\s*\)(\s*\.\s*(\w+))?/g;
+    for (const match of text.matchAll(pattern)) {
+      const awaited = match[1] !== undefined;
+      const suffix = match[4];
+      const isTypePosition = !awaited && suffix !== undefined
+        && !['then', 'catch', 'finally'].includes(suffix);
+      if (!isTypePosition) out.push(rel);
+    }
+  }
+  return out;
 }
 
 /** 他 package の `test` / `pretest` から build される package 名。 */
@@ -171,12 +257,33 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     ).toEqual([]);
   });
 
+  it('固定出力の前提が全件で設定から成り立つ (build 不要)', () => {
+    // build 済かどうかに依らず全 37 件を検査する。 出力の顔ぶれを決めるのは設定値
+    // なので、 clean clone でも一覧が古くなったことを検知できる。
+    const violations = FIXED_OUTPUT_TARGETS.flatMap((name) => fixedOutputViolations(name));
+    expect(
+      violations,
+      '出力が固定 6 file でなくなると、 clean を外したままでは古い生成物が残る。' +
+        ` CLEAN_REQUIRED_TARGETS へ移して clean を戻す: ${violations.join(' / ')}`,
+    ).toEqual([]);
+  });
+
+  it('除外側は固定出力の前提を満たさない', () => {
+    // `cli` / `dapp` を惰性で除外し続けないための逆向きの検査。 前提を満たすように
+    // なったら固定側へ移して clean を外せる。
+    const nowFixed = CLEAN_REQUIRED_TARGETS.filter((name) => fixedOutputViolations(name).length === 0);
+    expect(
+      nowFixed,
+      `固定出力になったので FIXED_OUTPUT_TARGETS へ移して clean を外せる: ${nowFixed.join(', ')}`,
+    ).toEqual([]);
+  });
+
   it('一覧が実際の出力と一致する (build 済のものだけ照合)', () => {
-    // 一覧そのものが古くなる形を検知する。 出力の顔ぶれが変わったのに一覧が
-    // 据え置かれると、 clean を外したまま古い chunk が残る package ができる。
+    // 静的検査を実測で裏打ちする。 設定からの導出が誤っていれば、 build 済のものが
+    // 6 file 完全一致にならない形で表に出る。
     const wrongSide: string[] = [];
     for (const name of FIXED_OUTPUT_TARGETS) {
-      if (hasFixedOutput(name) === false) wrongSide.push(`${name} は chunk を出している`);
+      if (hasFixedOutput(name) === false) wrongSide.push(`${name} は固定 6 file でない`);
     }
     for (const name of CLEAN_REQUIRED_TARGETS) {
       if (hasFixedOutput(name) === true) wrongSide.push(`${name} は固定出力になっている`);
