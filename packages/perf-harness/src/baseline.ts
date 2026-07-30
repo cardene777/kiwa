@@ -10,6 +10,7 @@ import type {
   BaselineEnvelope,
   BaselineLoadResult,
   MeasureResult,
+  PerfReferenceKind,
 } from './types.js';
 
 /**
@@ -44,7 +45,7 @@ export async function saveBaseline(
   opts?: { key?: string },
 ): Promise<void> {
   const envelope: BaselineEnvelope = {
-    schema: 1,
+    schema: BASELINE_SCHEMA,
     env: captureEnv(),
     results: { [opts?.key ?? result.name]: result },
   };
@@ -148,11 +149,23 @@ function canonical(target: string): string {
  *   200 回まわしてから 1 つ目の op に入るため、 版 3 までは冷えたまま測られていた
  *   最初の op が暖まった状態で測られる。 判定軸を p95 から p10 へ移した変更自体は
  *   保存する値の意味を変えないが、 この空回しは同じ実装の測定値を動かす
+ * - 版 5 = op を基準 op と 1 呼出ずつ交互に測るようになった (#1737)。 対象の各
+ *   呼出の直前に基準 op が挟まるため、 cache と分岐予測の状態が版 4 までと違う。
+ *   比較に要る基準 p10 が版 4 以前の記録には無い、 という理由でも作り直しになる。
+ *   実 API 経路 (`runPerf3LayerLive`) は交互測定を使わないため、 この版でも
+ *   `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。
+ *   正規化が成立するかは `reference` の有無が決める
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
  */
-export const MEASUREMENT_PREMISE = 4;
+export const MEASUREMENT_PREMISE = 5;
+
+/**
+ * 保存する baseline の schema 版。 v2 で各 result に基準 op の記録が付く (#1737)。
+ * 読む側は v1 も受け付ける (`normalizeToEnvelope`)。
+ */
+export const BASELINE_SCHEMA = 2;
 
 /** 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。 */
 export function captureEnv(): BaselineEnv {
@@ -250,17 +263,49 @@ const MEASURE_NUMERIC_FIELDS = [
  * 持つ別物や配列の要素を result と誤認し、回帰計算が NaN や誤った stable へ
  * 落ちる。
  */
+const REFERENCE_KINDS: readonly PerfReferenceKind[] = ['cpu', 'fs-read', 'fs-write'];
+
+/**
+ * 基準 op の記録を検査する。 未記録 (v1 baseline) は正常な欠落として通す。
+ *
+ * 記録があるのに壊れている場合は結果ごと読めない扱いにする。 field だけ落として
+ * 通すと、 正規化なしの比較へ黙って落ちて実行間のずれを含んだまま gate にかかる。
+ */
+function hasValidReference(candidate: Record<string, unknown>): boolean {
+  if (candidate.reference === undefined) return true;
+  const reference = candidate.reference;
+  if (reference === null || typeof reference !== 'object' || Array.isArray(reference)) return false;
+  const fields = reference as Record<string, unknown>;
+  if (!REFERENCE_KINDS.includes(fields.kind as PerfReferenceKind)) return false;
+  if (typeof fields.name !== 'string') return false;
+  // 版の記録が無いのは旧世代として通す。 比較の可否は `resolveNormalization` が
+  // 版不明として弾く。 値が入っているのに数値でない記録は壊れているので落とす。
+  if (fields.implVersion !== undefined) {
+    if (typeof fields.implVersion !== 'number' || !Number.isInteger(fields.implVersion)) {
+      return false;
+    }
+  }
+  return typeof fields.p10 === 'number' && Number.isFinite(fields.p10) && fields.p10 > 0;
+}
+
 function isMeasureResult(value: unknown): value is MeasureResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
   if (typeof candidate.name !== 'string') return false;
+  if (!hasValidReference(candidate)) return false;
   if (!Array.isArray(candidate.samples)) return false;
   // 2 件未満の記録は比較対象にならない。 bootstrap CI がこの件数で退化 CI ({0,0}) を
   // 返すため、 そのまま読むと何倍悪化しても有意にならず永久に stable になる。
   // key は既にあるので追記経路でも作り直されない。 読めない記録として扱い、
   // 次の実行で seed し直させる。
   if (candidate.samples.length < 2) return false;
-  if (!candidate.samples.every((sample) => typeof sample === 'number' && Number.isFinite(sample))) {
+  // 負の標本は経過時間として成立しない。 通すと p10 が負になり、 変化率の分母が
+  // 負の値になって「悪化したのに improved」 が出る。
+  if (
+    !candidate.samples.every(
+      (sample) => typeof sample === 'number' && Number.isFinite(sample) && sample >= 0,
+    )
+  ) {
     return false;
   }
   return MEASURE_NUMERIC_FIELDS.every(
@@ -305,11 +350,12 @@ const UNKNOWN_ENV: BaselineEnv = {
  * 回帰判定が毎回 seed 扱いへ落ちる。形式を判別してから展開する。
  */
 function normalizeToEnvelope(parsed: unknown): BaselineEnvelope | null {
+  const schema = (parsed as { schema?: unknown } | null)?.schema;
   if (
     parsed !== null &&
     typeof parsed === 'object' &&
     !Array.isArray(parsed) &&
-    (parsed as { schema?: unknown }).schema === 1
+    (schema === 1 || schema === 2)
   ) {
     const candidate = parsed as { env?: unknown; results?: unknown };
     // schema field だけを信じると、env 欠落で diffEnv が例外を投げる。
@@ -320,14 +366,14 @@ function normalizeToEnvelope(parsed: unknown): BaselineEnvelope | null {
 
   if (isMeasureResult(parsed)) {
     return {
-      schema: 1,
+      schema: BASELINE_SCHEMA,
       env: UNKNOWN_ENV,
       results: backfillResults({ [parsed.name]: parsed }),
     };
   }
 
   if (isResultMap(parsed)) {
-    return { schema: 1, env: UNKNOWN_ENV, results: backfillResults(parsed) };
+    return { schema: BASELINE_SCHEMA, env: UNKNOWN_ENV, results: backfillResults(parsed) };
   }
 
   // baseline として解釈できない中身は、無いものとして扱う。誤った比較対象を
@@ -356,9 +402,12 @@ function backfillResults(
  * 派生値の定義を `buildMeasureResult` 1 箇所に寄せる。
  *
  * sample が空の記録は `isMeasureResult` が読めない記録として弾くため、ここには来ない。
+ *
+ * 基準 op の記録は派生値ではないので作り直さずそのまま引き継ぐ。 落とすと、
+ * 保存済みの baseline が正規化なしの比較へ黙って落ちる。
  */
 function backfillDerivedStats(result: MeasureResult): MeasureResult {
-  return buildMeasureResult(
+  const rebuilt = buildMeasureResult(
     result.name,
     result.iterations,
     result.warmup,
@@ -366,6 +415,8 @@ function backfillDerivedStats(result: MeasureResult): MeasureResult {
     result.trimmed?.percent ?? 0,
     result.warmupConverged ?? true,
   );
+  if (result.reference !== undefined) rebuilt.reference = result.reference;
+  return rebuilt;
 }
 
 function isMissingFile(error: unknown): error is NodeJS.ErrnoException {

@@ -6,30 +6,41 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 ## Serial (concurrency = 1)
 
-| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| driveRegister | 0.0069ms | 0.02ms | 80ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| driveEvolution | 0.0098ms | 0.02ms | 80ms | 0.00033ms | PASS | stable (p10 -2% (閾値未満)、 p95 +22% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| driveCompatibilityModes | 0.0082ms | 0.01ms | 80ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| drivePublish | 0.01ms | 0.01ms | 80ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| driveRegister | 0.0078ms | 0.04ms | 80ms | 0.00031ms | PASS | stable (換算後 p10 +7% (閾値未満)、 p95 +73% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| driveEvolution | 0.01ms | 0.08ms | 80ms | 0.00030ms | PASS | stable (換算後 p10 +2% (閾値未満)、 p95 +331% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| driveCompatibilityModes | 0.0094ms | 0.07ms | 80ms | 0.00030ms | PASS | stable (換算後 p10 +1% (閾値未満)、 p95 +363% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| drivePublish | 0.01ms | 0.02ms | 80ms | 0.00031ms | PASS | stable — gate 無効 (regressionGate=false) |
+
+## 実行内正規化 (回帰判定はこの比で行う)
+
+回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
+
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| driveRegister | cpu | 0.09ms | 0.10ms | 0.0078ms | 0.091 | 0.085 | 0.0073ms | 0.0068ms |
+| driveEvolution | cpu | 0.09ms | 0.13ms | 0.01ms | 0.128 | 0.126 | 0.01ms | 0.01ms |
+| driveCompatibilityModes | cpu | 0.09ms | 0.35ms | 0.0094ms | 0.105 | 0.105 | 0.0086ms | 0.0085ms |
+| drivePublish | cpu | 0.09ms | 0.09ms | 0.01ms | 0.155 | 0.159 | 0.01ms | 0.01ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| driveRegister | 0.10ms | 160ms | PASS |
-| driveEvolution | 0.47ms | 160ms | PASS |
+| driveRegister | 0.52ms | 160ms | PASS |
+| driveEvolution | 0.82ms | 160ms | PASS |
 | driveCompatibilityModes | 0.10ms | 160ms | PASS |
-| drivePublish | 0.18ms | 160ms | PASS |
+| drivePublish | 0.15ms | 160ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| driveRegister | -3256 B | 0 B | 102400 B | yes | PASS |
-| driveEvolution | -10608 B | 0 B | 102400 B | yes | PASS |
-| driveCompatibilityModes | 192 B | 0 B | 102400 B | yes | PASS |
-| drivePublish | -2176 B | 0 B | 102400 B | yes | PASS |
+| driveRegister | 4456 B | 0 B | 102400 B | yes | PASS |
+| driveEvolution | -10512 B | 0 B | 102400 B | yes | PASS |
+| driveCompatibilityModes | 3288 B | 0 B | 102400 B | yes | PASS |
+| drivePublish | 520 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -41,28 +52,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0069ms |
-| p50 | 0.0075ms |
-| p95 | 0.02ms |
-| p99 | 0.02ms |
-| mean | 0.0084ms |
-| stdev | 0.0037ms |
-| min | 0.0060ms |
-| max | 0.04ms |
-| total | 1.68ms |
+| p10 | 0.0078ms |
+| p50 | 0.0083ms |
+| p95 | 0.04ms |
+| p99 | 1.42ms |
+| mean | 0.05ms |
+| stdev | 0.35ms |
+| min | 0.0075ms |
+| max | 4.43ms |
+| total | 10.66ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.926)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0069ms | 0.0066ms | +0.00029ms | +4.35% |
-| p50 | 0.0075ms | 0.0075ms | -0.000061ms | -0.82% |
-| p95 | 0.02ms | 0.01ms | +0.0011ms | +8.06% |
-| p99 | 0.02ms | 0.05ms | -0.03ms | -53.82% |
-| mean | 0.0084ms | 0.0091ms | -0.00073ms | -7.99% |
-| min | 0.0060ms | 0.0063ms | -0.00029ms | -4.59% |
-| max | 0.04ms | 0.07ms | -0.04ms | -49.33% |
-| total | 1.68ms | 1.83ms | -0.15ms | -7.99% |
+| p10 | 0.0073ms | 0.0068ms | +0.00047ms | +6.86% |
+| p50 | 0.0077ms | 0.0075ms | +0.00026ms | +3.50% |
+| p95 | 0.04ms | 0.02ms | +0.02ms | +73.41% |
+| p99 | 1.31ms | 0.04ms | +1.27ms | +2977.54% |
+| mean | 0.05ms | 0.0098ms | +0.04ms | +404.46% |
+| min | 0.0069ms | 0.0064ms | +0.00057ms | +8.98% |
+| max | 4.10ms | 0.05ms | +4.04ms | +7365.66% |
+| total | 9.87ms | 1.96ms | +7.92ms | +404.46% |
 
 ### driveEvolution
 
@@ -72,28 +85,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0098ms |
+| p10 | 0.01ms |
 | p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.03ms |
-| mean | 0.01ms |
-| stdev | 0.01ms |
-| min | 0.0097ms |
-| max | 0.18ms |
-| total | 2.39ms |
+| p95 | 0.08ms |
+| p99 | 0.15ms |
+| mean | 0.02ms |
+| stdev | 0.04ms |
+| min | 0.01ms |
+| max | 0.46ms |
+| total | 4.34ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.911)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0098ms | 0.01ms | -0.00021ms | -2.07% |
-| p50 | 0.01ms | 0.01ms | -0.00033ms | -3.19% |
-| p95 | 0.02ms | 0.01ms | +0.0032ms | +22.28% |
-| p99 | 0.03ms | 0.02ms | +0.0099ms | +48.63% |
-| mean | 0.01ms | 0.01ms | +0.0010ms | +9.24% |
-| min | 0.0097ms | 0.0099ms | -0.00021ms | -2.11% |
-| max | 0.18ms | 0.02ms | +0.15ms | +668.11% |
-| total | 2.39ms | 2.19ms | +0.20ms | +9.24% |
+| p10 | 0.01ms | 0.01ms | +0.00019ms | +1.88% |
+| p50 | 0.01ms | 0.01ms | +0.00014ms | +1.34% |
+| p95 | 0.07ms | 0.02ms | +0.05ms | +330.89% |
+| p99 | 0.14ms | 0.03ms | +0.11ms | +401.57% |
+| mean | 0.02ms | 0.01ms | +0.0079ms | +66.00% |
+| min | 0.010ms | 0.0098ms | +0.00015ms | +1.53% |
+| max | 0.42ms | 0.08ms | +0.34ms | +401.66% |
+| total | 3.95ms | 2.38ms | +1.57ms | +66.00% |
 
 ### driveCompatibilityModes
 
@@ -103,28 +118,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0082ms |
-| p50 | 0.0084ms |
-| p95 | 0.01ms |
-| p99 | 0.03ms |
-| mean | 0.0097ms |
-| stdev | 0.0092ms |
-| min | 0.0082ms |
-| max | 0.13ms |
-| total | 1.94ms |
+| p10 | 0.0094ms |
+| p50 | 0.0098ms |
+| p95 | 0.07ms |
+| p99 | 0.32ms |
+| mean | 0.04ms |
+| stdev | 0.37ms |
+| min | 0.0092ms |
+| max | 5.24ms |
+| total | 9.00ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.914)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0082ms | 0.0093ms | -0.0011ms | -11.66% |
-| p50 | 0.0084ms | 0.0096ms | -0.0012ms | -12.17% |
-| p95 | 0.01ms | 0.01ms | +0.00088ms | +7.18% |
-| p99 | 0.03ms | 0.02ms | +0.01ms | +71.83% |
-| mean | 0.0097ms | 0.01ms | -0.00037ms | -3.64% |
-| min | 0.0082ms | 0.0092ms | -0.0010ms | -10.91% |
-| max | 0.13ms | 0.04ms | +0.10ms | +277.79% |
-| total | 1.94ms | 2.02ms | -0.07ms | -3.64% |
+| p10 | 0.0086ms | 0.0085ms | +0.000062ms | +0.73% |
+| p50 | 0.0090ms | 0.0089ms | +0.000068ms | +0.76% |
+| p95 | 0.06ms | 0.01ms | +0.05ms | +363.47% |
+| p99 | 0.29ms | 0.04ms | +0.25ms | +634.04% |
+| mean | 0.04ms | 0.01ms | +0.03ms | +307.92% |
+| min | 0.0085ms | 0.0083ms | +0.00020ms | +2.45% |
+| max | 4.78ms | 0.06ms | +4.73ms | +8079.37% |
+| total | 8.22ms | 2.02ms | +6.21ms | +307.92% |
 
 ### drivePublish
 
@@ -136,24 +153,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 5 |
 | p10 | 0.01ms |
 | p50 | 0.01ms |
-| p95 | 0.01ms |
-| p99 | 0.03ms |
-| mean | 0.01ms |
-| stdev | 0.0036ms |
+| p95 | 0.02ms |
+| p99 | 0.05ms |
+| mean | 0.02ms |
+| stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.04ms |
-| total | 2.67ms |
+| max | 0.15ms |
+| total | 3.28ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.924)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.00062ms | -4.78% |
-| p50 | 0.01ms | 0.01ms | -0.00067ms | -5.03% |
-| p95 | 0.01ms | 0.02ms | -0.0017ms | -10.30% |
-| p99 | 0.03ms | 0.04ms | -0.0041ms | -10.95% |
-| mean | 0.01ms | 0.01ms | -0.00071ms | -5.02% |
-| min | 0.01ms | 0.01ms | -0.00063ms | -4.87% |
-| max | 0.04ms | 0.05ms | -0.0051ms | -11.29% |
-| total | 2.67ms | 2.82ms | -0.14ms | -5.02% |
+| p10 | 0.01ms | 0.01ms | -0.00034ms | -2.64% |
+| p50 | 0.01ms | 0.01ms | -0.00066ms | -4.83% |
+| p95 | 0.02ms | 0.03ms | -0.01ms | -37.10% |
+| p99 | 0.05ms | 0.06ms | -0.0073ms | -12.85% |
+| mean | 0.02ms | 0.02ms | -0.00072ms | -4.52% |
+| min | 0.01ms | 0.01ms | -0.0015ms | -11.54% |
+| max | 0.14ms | 0.09ms | +0.05ms | +52.17% |
+| total | 3.03ms | 3.17ms | -0.14ms | -4.52% |
 

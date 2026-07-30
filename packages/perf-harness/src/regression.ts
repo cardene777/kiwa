@@ -43,20 +43,30 @@ export function detectRegression(input: RegressionInput): RegressionResult {
   const threshold = input.threshold ?? 0.2;
   const bootstrapIterations = input.bootstrapIterations ?? 2000;
   const confidenceLevel = input.confidenceLevel ?? 0.95;
+
+  const { scale, normalized } = resolveNormalization(input.current, input.baseline);
+
   // 下限の既定は測定系の分解能の定数倍。 固定値を置かないのは、 妥当な値が機械と
   // 呼出経路で変わるため (`measureHarnessResolution` が実行の中で測る)。
+  //
+  // 差は baseline を測った時の機械の速さへ換算してあるので、 分解能にも同じ倍率を
+  // 掛ける。 掛けないと、 機械が遅い実行では分解能だけが伸びて下限が実際より
+  // 厳しくなる。 一方 `minDeltaMs` は呼出が置いた定数で、 どの実行の測定値でも
+  // ないため換算しない (掛けると gate の感度がその日の機械で変わる)。
   const minDeltaMs =
     input.minDeltaMs ??
-    (input.resolutionMs === undefined ? 0 : input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE);
+    (input.resolutionMs === undefined
+      ? 0
+      : input.resolutionMs * RESOLUTION_FLOOR_MULTIPLE * scale);
 
-  const currentStat = judgedStatistic(input.current);
+  const currentStat = judgedStatistic(input.current) * scale;
   const baselineStat = judgedStatistic(input.baseline);
 
   const deltaPct = relativeDelta(currentStat, baselineStat);
-  const tailDeltaPct = relativeDelta(input.current.p95, input.baseline.p95);
+  const tailDeltaPct = relativeDelta(input.current.p95 * scale, input.baseline.p95);
 
   const ci = bootstrapCiOnDelta(
-    input.current.samples,
+    scale === 1 ? input.current.samples : input.current.samples.map((sample) => sample * scale),
     input.baseline.samples,
     bootstrapIterations,
     confidenceLevel,
@@ -95,7 +105,59 @@ export function detectRegression(input: RegressionInput): RegressionResult {
     floorMs: minDeltaMs,
     suppressedByFloor,
     belowDetectionFloor,
+    normalized,
+    normalizationScale: scale,
   };
+}
+
+/**
+ * 実行内正規化の倍率を決める。
+ *
+ * 判定したいのは比 (対象 ÷ 基準) の変化だが、 比のまま比べると判定に使う量が
+ * 無次元になり、 絶対下限 (ms) も report の表記も意味を失う。 代わりに今回の
+ * 測定へ `baseline の基準 p10 ÷ 今回の基準 p10` を掛けて、 baseline を測った時の
+ * 機械の速さに換算する。 比同士を比べるのと数学的には同じで、 単位は ms のまま残る。
+ *
+ * 双方に同じ種類の基準が記録されている時だけ成立する。 種類が違えば分母の意味が
+ * 違うので、 掛けても相殺は起きない。 片方にしか無い場合も同じ。
+ */
+export function resolveNormalization(
+  current: MeasureResult,
+  baseline: MeasureResult,
+): { scale: number; normalized: boolean } {
+  const currentReference = current.reference;
+  const baselineReference = baseline.reference;
+  if (currentReference === undefined || baselineReference === undefined) {
+    return { scale: 1, normalized: false };
+  }
+  if (currentReference.kind !== baselineReference.kind) return { scale: 1, normalized: false };
+  // 種類が同じでも実装が違えば分母の大きさが違う。 版の記録が無い世代も版不明として
+  // 扱う。 掛けても相殺は起きず、 分母の差を実装の差として報告してしまう。
+  if (
+    currentReference.implVersion === undefined ||
+    baselineReference.implVersion === undefined ||
+    currentReference.implVersion !== baselineReference.implVersion
+  ) {
+    return { scale: 1, normalized: false };
+  }
+  // 有限で正の値だけを分母にする。 `> 0` だけでは Infinity が通り、 倍率が 0 になって
+  // 全 sample が 0 に潰れる (下限も 0 になるので必ず有意判定を通り improved が出る)。
+  // 逆に極小値を分母にすると倍率が Infinity になり、 判定量が NaN になって 3 倍の
+  // 悪化でも stable で通る。 どちらも正規化「成立」 と報告されるため baseline も
+  // 書き直されず、 その op は永久に gate に掛からない。
+  if (!isUsableDenominator(currentReference.p10) || !isUsableDenominator(baselineReference.p10)) {
+    return { scale: 1, normalized: false };
+  }
+  const scale = baselineReference.p10 / currentReference.p10;
+  // 両端が有限でも、 桁が離れていれば商が非有限や 0 に落ちる。 判定に使えない倍率で
+  // 「正規化した」 と報告しない。
+  if (!Number.isFinite(scale) || scale <= 0) return { scale: 1, normalized: false };
+  return { scale, normalized: true };
+}
+
+/** 分母に使える値か。 `hasValidReference` (baseline.ts) と同じ強さに揃える。 */
+function isUsableDenominator(value: number): boolean {
+  return Number.isFinite(value) && value > 0;
 }
 
 /**

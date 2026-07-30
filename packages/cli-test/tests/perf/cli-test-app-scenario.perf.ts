@@ -21,6 +21,7 @@ describe('cli-test app scenario perf (real workload)', () => {
       ops: [
         {
           name: 'file_scaffold_workflow (setup + 20 writeFile + listFiles)',
+          referenceKind: 'fs-write',
           regressionGateWaived: 'p10 の実行間の振れ幅が 35-110% で閾値 20% を大きく超える (#1718)',
           fn: async () => {
             const env = await setupCliEnv();
@@ -51,6 +52,7 @@ describe('cli-test app scenario perf (real workload)', () => {
         },
         {
           name: 'setup_cleanup_cycle (5 sequential setup+stop)',
+          referenceKind: 'fs-write',
           regressionGateWaived: 'p10 の実行間の振れ幅が 65-244% で閾値 20% を大きく超える (#1718)',
           fn: async () => {
             for (let i = 0; i < 5; i++) {

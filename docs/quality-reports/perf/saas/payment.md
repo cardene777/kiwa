@@ -6,17 +6,33 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 ## Serial (concurrency = 1)
 
-| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| stripeSignWebhook | 0.0022ms | 0.0064ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| stripeVerifyWebhook | 0.0028ms | 0.0065ms | 10ms | 0.00033ms | PASS | stable (p10 -4% (閾値未満)、 p95 +31% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| paddleSignWebhook | 0.0027ms | 0.0033ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| paddleVerifyWebhook | 0.0029ms | 0.0040ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| lemonSqueezySignWebhook | 0.0022ms | 0.0027ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| lemonSqueezyVerifyWebhook | 0.0028ms | 0.0036ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| dunningStart | 0.00025ms | 0.00038ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +114%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| retryStart | 0.0021ms | 0.0028ms | 5ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| retryBackoffMs | 0.00017ms | 0.00021ms | 5ms | 0.00033ms | PASS | stable (差 0.000042ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| stripeSignWebhook | 0.0024ms | 0.0069ms | 10ms | 0.00032ms | PASS | stable — gate 無効 (regressionGate=false) |
+| stripeVerifyWebhook | 0.0029ms | 0.0061ms | 10ms | 0.00032ms | PASS | stable — gate 無効 (regressionGate=false) |
+| paddleSignWebhook | 0.0029ms | 0.0062ms | 10ms | 0.00032ms | PASS | stable — gate 無効 (regressionGate=false) |
+| paddleVerifyWebhook | 0.0030ms | 0.0069ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| lemonSqueezySignWebhook | 0.0024ms | 0.0068ms | 10ms | 0.00033ms | PASS | stable (換算後 p10 +3% (閾値未満)、 p95 +22% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| lemonSqueezyVerifyWebhook | 0.0030ms | 0.01ms | 10ms | 0.00034ms | PASS | stable (換算後 p10 +1% (閾値未満)、 p95 +39% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| dunningStart | 0.00025ms | 0.0012ms | 5ms | 0.00033ms | PASS | stable (差 0.000043ms が下限 0.00033ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+| retryStart | 0.0022ms | 0.0052ms | 5ms | 0.00034ms | PASS | stable — gate 無効 (regressionGate=false) |
+| retryBackoffMs | 0.00013ms | 0.00038ms | 5ms | 0.00034ms | PASS | stable (差 0.000039ms が下限 0.00034ms 未満で判定を保留) — gate 無効 (regressionGate=false) |
+
+## 実行内正規化 (回帰判定はこの比で行う)
+
+回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
+
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| stripeSignWebhook | cpu | 0.09ms | 0.10ms | 0.0024ms | 0.028 | 0.030 | 0.0023ms | 0.0025ms |
+| stripeVerifyWebhook | cpu | 0.09ms | 0.09ms | 0.0029ms | 0.033 | 0.035 | 0.0027ms | 0.0029ms |
+| paddleSignWebhook | cpu | 0.08ms | 0.09ms | 0.0029ms | 0.035 | 0.036 | 0.0028ms | 0.0029ms |
+| paddleVerifyWebhook | cpu | 0.08ms | 0.09ms | 0.0030ms | 0.037 | 0.037 | 0.0031ms | 0.0030ms |
+| lemonSqueezySignWebhook | cpu | 0.08ms | 0.09ms | 0.0024ms | 0.029 | 0.028 | 0.0024ms | 0.0023ms |
+| lemonSqueezyVerifyWebhook | cpu | 0.08ms | 0.09ms | 0.0030ms | 0.038 | 0.037 | 0.0031ms | 0.0031ms |
+| dunningStart | cpu | 0.08ms | 0.09ms | 0.00025ms | 0.003 | 0.003 | 0.00025ms | 0.00021ms |
+| retryStart | cpu | 0.08ms | 0.09ms | 0.0022ms | 0.027 | 0.027 | 0.0022ms | 0.0022ms |
+| retryBackoffMs | cpu | 0.08ms | 0.09ms | 0.00013ms | 0.002 | 0.002 | 0.00013ms | 0.00017ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
@@ -26,9 +42,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | stripeVerifyWebhook | 0.04ms | 20ms | PASS |
 | paddleSignWebhook | 0.04ms | 20ms | PASS |
 | paddleVerifyWebhook | 0.04ms | 20ms | PASS |
-| lemonSqueezySignWebhook | 0.04ms | 20ms | PASS |
+| lemonSqueezySignWebhook | 0.03ms | 20ms | PASS |
 | lemonSqueezyVerifyWebhook | 0.04ms | 20ms | PASS |
-| dunningStart | 0.00ms | 10ms | PASS |
+| dunningStart | 0.01ms | 10ms | PASS |
 | retryStart | 0.04ms | 10ms | PASS |
 | retryBackoffMs | 0.01ms | 10ms | PASS |
 
@@ -36,15 +52,15 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| stripeSignWebhook | -14272 B | 0 B | 102400 B | yes | PASS |
-| stripeVerifyWebhook | -21624 B | 0 B | 102400 B | yes | PASS |
-| paddleSignWebhook | 2376 B | 0 B | 102400 B | yes | PASS |
-| paddleVerifyWebhook | 616 B | 0 B | 102400 B | yes | PASS |
-| lemonSqueezySignWebhook | 944 B | 0 B | 102400 B | yes | PASS |
-| lemonSqueezyVerifyWebhook | 3784 B | 0 B | 102400 B | yes | PASS |
-| dunningStart | 1352 B | 0 B | 102400 B | yes | PASS |
-| retryStart | 32 B | 0 B | 102400 B | yes | PASS |
-| retryBackoffMs | 6824 B | 0 B | 102400 B | yes | PASS |
+| stripeSignWebhook | -14496 B | 0 B | 102400 B | yes | PASS |
+| stripeVerifyWebhook | -22688 B | 0 B | 102400 B | yes | PASS |
+| paddleSignWebhook | 2312 B | 0 B | 102400 B | yes | PASS |
+| paddleVerifyWebhook | -280 B | 0 B | 102400 B | yes | PASS |
+| lemonSqueezySignWebhook | 432 B | 0 B | 102400 B | yes | PASS |
+| lemonSqueezyVerifyWebhook | 840 B | 0 B | 102400 B | yes | PASS |
+| dunningStart | 64 B | 0 B | 102400 B | yes | PASS |
+| retryStart | -384 B | 0 B | 102400 B | yes | PASS |
+| retryBackoffMs | 48 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -56,28 +72,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0022ms |
-| p50 | 0.0024ms |
-| p95 | 0.0064ms |
-| p99 | 0.01ms |
-| mean | 0.0033ms |
-| stdev | 0.0045ms |
-| min | 0.0022ms |
-| max | 0.06ms |
-| total | 0.67ms |
+| p10 | 0.0024ms |
+| p50 | 0.0028ms |
+| p95 | 0.0069ms |
+| p99 | 0.02ms |
+| mean | 0.0038ms |
+| stdev | 0.0038ms |
+| min | 0.0023ms |
+| max | 0.03ms |
+| total | 0.77ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.958)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0022ms | 0.0025ms | -0.00029ms | -11.53% |
-| p50 | 0.0024ms | 0.0031ms | -0.00071ms | -22.98% |
-| p95 | 0.0064ms | 0.0059ms | +0.00051ms | +8.68% |
-| p99 | 0.01ms | 0.01ms | -0.00015ms | -1.03% |
-| mean | 0.0033ms | 0.0036ms | -0.00026ms | -7.35% |
-| min | 0.0022ms | 0.0024ms | -0.00025ms | -10.38% |
-| max | 0.06ms | 0.03ms | +0.03ms | +93.81% |
-| total | 0.67ms | 0.72ms | -0.05ms | -7.35% |
+| p10 | 0.0023ms | 0.0025ms | -0.00022ms | -8.96% |
+| p50 | 0.0027ms | 0.0029ms | -0.00020ms | -6.93% |
+| p95 | 0.0066ms | 0.02ms | -0.01ms | -67.23% |
+| p99 | 0.02ms | 0.07ms | -0.04ms | -67.21% |
+| mean | 0.0037ms | 0.0065ms | -0.0028ms | -43.26% |
+| min | 0.0022ms | 0.0023ms | -0.00014ms | -5.89% |
+| max | 0.03ms | 0.17ms | -0.13ms | -80.87% |
+| total | 0.74ms | 1.30ms | -0.56ms | -43.26% |
 
 ### stripeVerifyWebhook
 
@@ -87,28 +105,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0028ms |
+| p10 | 0.0029ms |
 | p50 | 0.0030ms |
-| p95 | 0.0065ms |
+| p95 | 0.0061ms |
 | p99 | 0.01ms |
-| mean | 0.0035ms |
-| stdev | 0.0020ms |
+| mean | 0.0036ms |
+| stdev | 0.0021ms |
 | min | 0.0028ms |
 | max | 0.02ms |
-| total | 0.70ms |
+| total | 0.72ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.950)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0028ms | 0.0030ms | -0.00013ms | -4.23% |
-| p50 | 0.0030ms | 0.0030ms | -0.000084ms | -2.76% |
-| p95 | 0.0065ms | 0.0050ms | +0.0015ms | +30.52% |
-| p99 | 0.01ms | 0.01ms | +0.0018ms | +18.13% |
-| mean | 0.0035ms | 0.0034ms | +0.000056ms | +1.62% |
-| min | 0.0028ms | 0.0029ms | -0.000084ms | -2.92% |
-| max | 0.02ms | 0.02ms | +0.0029ms | +15.95% |
-| total | 0.70ms | 0.69ms | +0.01ms | +1.62% |
+| p10 | 0.0027ms | 0.0029ms | -0.00014ms | -4.99% |
+| p50 | 0.0029ms | 0.0031ms | -0.00027ms | -8.79% |
+| p95 | 0.0058ms | 0.0083ms | -0.0025ms | -29.84% |
+| p99 | 0.01ms | 0.02ms | -0.0069ms | -35.88% |
+| mean | 0.0034ms | 0.0048ms | -0.0014ms | -28.67% |
+| min | 0.0027ms | 0.0028ms | -0.00014ms | -4.99% |
+| max | 0.02ms | 0.17ms | -0.15ms | -86.53% |
+| total | 0.68ms | 0.95ms | -0.27ms | -28.67% |
 
 ### paddleSignWebhook
 
@@ -118,28 +138,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0027ms |
-| p50 | 0.0028ms |
-| p95 | 0.0033ms |
-| p99 | 0.0068ms |
-| mean | 0.0030ms |
-| stdev | 0.00098ms |
-| min | 0.0026ms |
-| max | 0.01ms |
-| total | 0.60ms |
+| p10 | 0.0029ms |
+| p50 | 0.0031ms |
+| p95 | 0.0062ms |
+| p99 | 0.02ms |
+| mean | 0.0039ms |
+| stdev | 0.0048ms |
+| min | 0.0028ms |
+| max | 0.06ms |
+| total | 0.79ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.969)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0027ms | 0.0031ms | -0.00037ms | -12.16% |
-| p50 | 0.0028ms | 0.0032ms | -0.00042ms | -12.97% |
-| p95 | 0.0033ms | 0.0051ms | -0.0019ms | -36.62% |
-| p99 | 0.0068ms | 0.02ms | -0.02ms | -69.99% |
-| mean | 0.0030ms | 0.0039ms | -0.00087ms | -22.51% |
-| min | 0.0026ms | 0.0030ms | -0.00037ms | -12.50% |
-| max | 0.01ms | 0.04ms | -0.03ms | -71.97% |
-| total | 0.60ms | 0.77ms | -0.17ms | -22.51% |
+| p10 | 0.0028ms | 0.0029ms | -0.000088ms | -3.03% |
+| p50 | 0.0030ms | 0.0031ms | -0.00014ms | -4.37% |
+| p95 | 0.0061ms | 0.0067ms | -0.00062ms | -9.33% |
+| p99 | 0.02ms | 0.03ms | -0.02ms | -48.91% |
+| mean | 0.0038ms | 0.0042ms | -0.00042ms | -9.94% |
+| min | 0.0027ms | 0.0028ms | -0.000046ms | -1.64% |
+| max | 0.06ms | 0.06ms | +0.0058ms | +10.52% |
+| total | 0.77ms | 0.85ms | -0.08ms | -9.94% |
 
 ### paddleVerifyWebhook
 
@@ -149,28 +171,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0029ms |
-| p50 | 0.0030ms |
-| p95 | 0.0040ms |
-| p99 | 0.0072ms |
-| mean | 0.0032ms |
-| stdev | 0.00085ms |
-| min | 0.0028ms |
-| max | 0.01ms |
-| total | 0.64ms |
+| p10 | 0.0030ms |
+| p50 | 0.0033ms |
+| p95 | 0.0069ms |
+| p99 | 0.02ms |
+| mean | 0.0043ms |
+| stdev | 0.0047ms |
+| min | 0.0029ms |
+| max | 0.05ms |
+| total | 0.86ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.005)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0029ms | 0.0032ms | -0.00033ms | -10.28% |
-| p50 | 0.0030ms | 0.0034ms | -0.00035ms | -10.57% |
-| p95 | 0.0040ms | 0.0041ms | -0.000047ms | -1.16% |
-| p99 | 0.0072ms | 0.0061ms | +0.0011ms | +18.47% |
-| mean | 0.0032ms | 0.0035ms | -0.00033ms | -9.35% |
-| min | 0.0028ms | 0.0031ms | -0.00029ms | -9.34% |
-| max | 0.01ms | 0.01ms | -0.0031ms | -22.09% |
-| total | 0.64ms | 0.71ms | -0.07ms | -9.35% |
+| p10 | 0.0031ms | 0.0030ms | +0.000013ms | +0.42% |
+| p50 | 0.0033ms | 0.0032ms | +0.000057ms | +1.76% |
+| p95 | 0.0069ms | 0.0061ms | +0.00085ms | +14.00% |
+| p99 | 0.02ms | 0.01ms | +0.01ms | +102.16% |
+| mean | 0.0043ms | 0.0037ms | +0.00059ms | +16.02% |
+| min | 0.0029ms | 0.0029ms | +0.000012ms | +0.42% |
+| max | 0.05ms | 0.02ms | +0.03ms | +131.75% |
+| total | 0.86ms | 0.74ms | +0.12ms | +16.02% |
 
 ### lemonSqueezySignWebhook
 
@@ -180,28 +204,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0022ms |
-| p50 | 0.0022ms |
-| p95 | 0.0027ms |
-| p99 | 0.0071ms |
-| mean | 0.0024ms |
-| stdev | 0.00097ms |
-| min | 0.0021ms |
-| max | 0.01ms |
-| total | 0.49ms |
+| p10 | 0.0024ms |
+| p50 | 0.0026ms |
+| p95 | 0.0068ms |
+| p99 | 0.03ms |
+| mean | 0.0038ms |
+| stdev | 0.0051ms |
+| min | 0.0023ms |
+| max | 0.05ms |
+| total | 0.75ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.008)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0022ms | 0.0025ms | -0.00033ms | -13.32% |
-| p50 | 0.0022ms | 0.0026ms | -0.00037ms | -14.51% |
-| p95 | 0.0027ms | 0.0033ms | -0.00054ms | -16.69% |
-| p99 | 0.0071ms | 0.0068ms | +0.00028ms | +4.17% |
-| mean | 0.0024ms | 0.0028ms | -0.00037ms | -13.22% |
-| min | 0.0021ms | 0.0024ms | -0.00029ms | -12.08% |
-| max | 0.01ms | 0.01ms | -0.00042ms | -3.84% |
-| total | 0.49ms | 0.56ms | -0.07ms | -13.22% |
+| p10 | 0.0024ms | 0.0023ms | +0.000061ms | +2.63% |
+| p50 | 0.0026ms | 0.0025ms | +0.00013ms | +5.03% |
+| p95 | 0.0069ms | 0.0056ms | +0.0013ms | +22.43% |
+| p99 | 0.03ms | 0.01ms | +0.02ms | +155.66% |
+| mean | 0.0038ms | 0.0032ms | +0.00061ms | +19.28% |
+| min | 0.0023ms | 0.0022ms | +0.000061ms | +2.70% |
+| max | 0.05ms | 0.05ms | -0.0039ms | -7.51% |
+| total | 0.76ms | 0.64ms | +0.12ms | +19.28% |
 
 ### lemonSqueezyVerifyWebhook
 
@@ -211,28 +237,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0028ms |
-| p50 | 0.0029ms |
-| p95 | 0.0036ms |
-| p99 | 0.0076ms |
-| mean | 0.0031ms |
-| stdev | 0.00083ms |
-| min | 0.0028ms |
-| max | 0.01ms |
-| total | 0.62ms |
+| p10 | 0.0030ms |
+| p50 | 0.0032ms |
+| p95 | 0.01ms |
+| p99 | 0.04ms |
+| mean | 0.0051ms |
+| stdev | 0.0077ms |
+| min | 0.0029ms |
+| max | 0.08ms |
+| total | 1.02ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.036)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0028ms | 0.0034ms | -0.00054ms | -16.03% |
-| p50 | 0.0029ms | 0.0035ms | -0.00058ms | -16.66% |
-| p95 | 0.0036ms | 0.0043ms | -0.00070ms | -16.04% |
-| p99 | 0.0076ms | 0.0062ms | +0.0014ms | +22.45% |
-| mean | 0.0031ms | 0.0036ms | -0.00054ms | -14.92% |
-| min | 0.0028ms | 0.0033ms | -0.00050ms | -15.16% |
-| max | 0.01ms | 0.0093ms | +0.0012ms | +12.50% |
-| total | 0.62ms | 0.73ms | -0.11ms | -14.92% |
+| p10 | 0.0031ms | 0.0031ms | +0.000024ms | +0.76% |
+| p50 | 0.0034ms | 0.0033ms | +0.000073ms | +2.23% |
+| p95 | 0.01ms | 0.0080ms | +0.0031ms | +38.58% |
+| p99 | 0.04ms | 0.04ms | +0.0025ms | +6.39% |
+| mean | 0.0053ms | 0.0046ms | +0.00070ms | +15.25% |
+| min | 0.0030ms | 0.0030ms | +0.000018ms | +0.61% |
+| max | 0.08ms | 0.07ms | +0.01ms | +13.91% |
+| total | 1.06ms | 0.92ms | +0.14ms | +15.25% |
 
 ### dunningStart
 
@@ -244,26 +272,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00025ms |
 | p50 | 0.00029ms |
-| p95 | 0.00038ms |
-| p99 | 0.0030ms |
-| mean | 0.00041ms |
-| stdev | 0.00083ms |
+| p95 | 0.0012ms |
+| p99 | 0.0091ms |
+| mean | 0.00056ms |
+| stdev | 0.0016ms |
 | min | 0.00021ms |
-| max | 0.0090ms |
-| total | 0.08ms |
+| max | 0.02ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.002)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00025ms | 0.00029ms | -0.000042ms | -14.38% |
-| p50 | 0.00029ms | 0.00033ms | -0.000042ms | -12.61% |
-| p95 | 0.00038ms | 0.00042ms | -0.000040ms | -9.53% |
-| p99 | 0.0030ms | 0.0027ms | +0.00030ms | +10.89% |
-| mean | 0.00041ms | 0.00055ms | -0.00014ms | -25.99% |
-| min | 0.00021ms | 0.00025ms | -0.000042ms | -16.80% |
-| max | 0.0090ms | 0.03ms | -0.02ms | -71.10% |
-| total | 0.08ms | 0.11ms | -0.03ms | -25.99% |
+| p10 | 0.00025ms | 0.00021ms | +0.000043ms | +20.44% |
+| p50 | 0.00029ms | 0.00025ms | +0.000042ms | +16.64% |
+| p95 | 0.0012ms | 0.00046ms | +0.00071ms | +154.40% |
+| p99 | 0.0092ms | 0.0037ms | +0.0054ms | +146.38% |
+| mean | 0.00056ms | 0.00040ms | +0.00017ms | +42.53% |
+| min | 0.00021ms | 0.00017ms | +0.000041ms | +24.81% |
+| max | 0.02ms | 0.01ms | +0.0066ms | +63.65% |
+| total | 0.11ms | 0.08ms | +0.03ms | +42.53% |
 
 ### retryStart
 
@@ -273,28 +303,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.0021ms |
-| p50 | 0.0022ms |
-| p95 | 0.0028ms |
-| p99 | 0.0094ms |
-| mean | 0.0025ms |
-| stdev | 0.0013ms |
+| p10 | 0.0022ms |
+| p50 | 0.0024ms |
+| p95 | 0.0052ms |
+| p99 | 0.03ms |
+| mean | 0.0036ms |
+| stdev | 0.0067ms |
 | min | 0.0021ms |
-| max | 0.01ms |
-| total | 0.50ms |
+| max | 0.07ms |
+| total | 0.71ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.011)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0021ms | 0.0025ms | -0.00033ms | -13.55% |
-| p50 | 0.0022ms | 0.0026ms | -0.00037ms | -14.51% |
-| p95 | 0.0028ms | 0.0038ms | -0.00099ms | -25.90% |
-| p99 | 0.0094ms | 0.02ms | -0.0056ms | -37.59% |
-| mean | 0.0025ms | 0.0030ms | -0.00048ms | -16.17% |
-| min | 0.0021ms | 0.0024ms | -0.00029ms | -12.29% |
-| max | 0.01ms | 0.02ms | -0.01ms | -44.22% |
-| total | 0.50ms | 0.59ms | -0.10ms | -16.17% |
+| p10 | 0.0022ms | 0.0022ms | -0.000017ms | -0.79% |
+| p50 | 0.0024ms | 0.0024ms | +0.000026ms | +1.09% |
+| p95 | 0.0052ms | 0.0048ms | +0.00044ms | +9.16% |
+| p99 | 0.03ms | 0.02ms | +0.01ms | +50.38% |
+| mean | 0.0036ms | 0.0032ms | +0.00043ms | +13.55% |
+| min | 0.0021ms | 0.0021ms | +0.000023ms | +1.09% |
+| max | 0.07ms | 0.05ms | +0.02ms | +49.56% |
+| total | 0.72ms | 0.63ms | +0.09ms | +13.55% |
 
 ### retryBackoffMs
 
@@ -304,26 +336,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.00017ms |
-| p50 | 0.00021ms |
-| p95 | 0.00021ms |
-| p99 | 0.0021ms |
-| mean | 0.00028ms |
-| stdev | 0.00082ms |
-| min | 0.00017ms |
+| p10 | 0.00013ms |
+| p50 | 0.00017ms |
+| p95 | 0.00038ms |
+| p99 | 0.0064ms |
+| mean | 0.00036ms |
+| stdev | 0.0013ms |
+| min | 0.00013ms |
 | max | 0.01ms |
-| total | 0.06ms |
+| total | 0.07ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.014)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00017ms | 0.00021ms | -0.000042ms | -20.19% |
-| p50 | 0.00021ms | 0.00021ms | -0.0000010ms | -0.48% |
-| p95 | 0.00021ms | 0.00029ms | -0.000079ms | -27.02% |
-| p99 | 0.0021ms | 0.0021ms | -0.000071ms | -3.31% |
-| mean | 0.00028ms | 0.00031ms | -0.000024ms | -7.79% |
-| min | 0.00017ms | 0.00017ms | 0.00ms | 0.00% |
-| max | 0.01ms | 0.01ms | +0.00058ms | +5.57% |
-| total | 0.06ms | 0.06ms | -0.0048ms | -7.79% |
+| p10 | 0.00013ms | 0.00017ms | -0.000039ms | -23.68% |
+| p50 | 0.00017ms | 0.00017ms | +0.0000023ms | +1.36% |
+| p95 | 0.00038ms | 0.00025ms | +0.00013ms | +52.04% |
+| p99 | 0.0065ms | 0.0018ms | +0.0047ms | +267.77% |
+| mean | 0.00037ms | 0.00028ms | +0.000092ms | +33.18% |
+| min | 0.00013ms | 0.00013ms | +0.0000017ms | +1.36% |
+| max | 0.01ms | 0.01ms | +0.0012ms | +9.28% |
+| total | 0.07ms | 0.06ms | +0.02ms | +33.18% |
 

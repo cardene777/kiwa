@@ -42,6 +42,7 @@ describe('cli app scenario perf (real workload)', () => {
       ops: [
         {
           name: 'init_workflow (3 fresh project scaffold)',
+          referenceKind: 'fs-write',
           regressionGateWaived: 'p10 の実行間の振れ幅が 21-24% で閾値 20% を超える (#1718)',
           fn: () => {
             for (let i = 0; i < 3; i++) {
@@ -57,6 +58,7 @@ describe('cli app scenario perf (real workload)', () => {
         },
         {
           name: 'spec_to_test_batch (5 consecutive runSpecToTest)',
+          referenceKind: 'fs-write',
           fn: () => {
             for (let i = 0; i < 5; i++) {
               runSpecToTest({
@@ -70,6 +72,7 @@ describe('cli app scenario perf (real workload)', () => {
         },
         {
           name: 'init_error_handling (3 InitConflictError catch)',
+          referenceKind: 'fs-write',
           regressionGateWaived: 'p10 の実行間の振れ幅が 18-32% で閾値 20% を跨ぐ (#1718)',
           fn: () => {
             const projDir = mkdtempSync(path.join(os.tmpdir(), 'kiwa-cli-conflict-'));

@@ -6,27 +6,37 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 ## Serial (concurrency = 1)
 
-| op | p10 (回帰判定) | p95 (上限判定) | cap | 下限 | gate | regression |
+| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| drizzleInsert | 0.01ms | 0.02ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| drizzleSelectAll | 0.24ms | 0.33ms | 20ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
-| drizzleSelectWhere | 0.02ms | 0.03ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| drizzleInsert | 0.01ms | 0.05ms | 10ms | 0.00032ms | PASS | stable (換算後 p10 +14% (閾値未満)、 p95 +27% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| drizzleSelectAll | 0.25ms | 0.36ms | 20ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+| drizzleSelectWhere | 0.02ms | 0.04ms | 10ms | 0.00033ms | PASS | stable — gate 無効 (regressionGate=false) |
+
+## 実行内正規化 (回帰判定はこの比で行う)
+
+回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
+
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|
+| drizzleInsert | cpu | 0.08ms | 0.10ms | 0.01ms | 0.151 | 0.133 | 0.01ms | 0.01ms |
+| drizzleSelectAll | cpu | 0.08ms | 0.10ms | 0.25ms | 2.967 | 2.980 | 0.24ms | 0.25ms |
+| drizzleSelectWhere | cpu | 0.08ms | 0.10ms | 0.02ms | 0.210 | 0.205 | 0.02ms | 0.02ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| drizzleInsert | 0.23ms | 20ms | PASS |
-| drizzleSelectAll | 3.04ms | 40ms | PASS |
-| drizzleSelectWhere | 0.23ms | 20ms | PASS |
+| drizzleInsert | 0.24ms | 20ms | PASS |
+| drizzleSelectAll | 3.42ms | 40ms | PASS |
+| drizzleSelectWhere | 0.37ms | 20ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| drizzleInsert | -126416 B | 0 B | 102400 B | yes | PASS |
-| drizzleSelectAll | -31240 B | 0 B | 102400 B | yes | PASS |
-| drizzleSelectWhere | 7024 B | 0 B | 102400 B | yes | PASS |
+| drizzleInsert | -108264 B | 0 B | 102400 B | yes | PASS |
+| drizzleSelectAll | -32104 B | 0 B | 102400 B | yes | PASS |
+| drizzleSelectWhere | 10024 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -39,27 +49,29 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.01ms |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
-| p99 | 0.03ms |
+| p50 | 0.02ms |
+| p95 | 0.05ms |
+| p99 | 0.14ms |
 | mean | 0.02ms |
-| stdev | 0.0047ms |
+| stdev | 0.02ms |
 | min | 0.01ms |
-| max | 0.05ms |
-| total | 3.01ms |
+| max | 0.20ms |
+| total | 4.54ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.952)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.00050ms | -3.99% |
-| p50 | 0.01ms | 0.01ms | +0.00027ms | +2.00% |
-| p95 | 0.02ms | 0.02ms | -0.0010ms | -4.11% |
-| p99 | 0.03ms | 0.04ms | -0.0094ms | -22.38% |
-| mean | 0.02ms | 0.02ms | -0.00090ms | -5.66% |
-| min | 0.01ms | 0.01ms | -0.00071ms | -5.82% |
-| max | 0.05ms | 0.13ms | -0.08ms | -59.89% |
-| total | 3.01ms | 3.19ms | -0.18ms | -5.66% |
+| p10 | 0.01ms | 0.01ms | +0.0015ms | +13.62% |
+| p50 | 0.02ms | 0.01ms | +0.0021ms | +15.63% |
+| p95 | 0.04ms | 0.03ms | +0.0094ms | +27.33% |
+| p99 | 0.13ms | 0.06ms | +0.07ms | +110.60% |
+| mean | 0.02ms | 0.02ms | +0.0052ms | +31.57% |
+| min | 0.01ms | 0.0099ms | +0.0016ms | +15.97% |
+| max | 0.19ms | 0.10ms | +0.09ms | +87.67% |
+| total | 4.32ms | 3.28ms | +1.04ms | +31.57% |
 
 ### drizzleSelectAll
 
@@ -69,28 +81,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 |---|---|
 | iterations | 200 |
 | warmup | 5 |
-| p10 | 0.24ms |
-| p50 | 0.25ms |
-| p95 | 0.33ms |
-| p99 | 0.39ms |
-| mean | 0.27ms |
-| stdev | 0.04ms |
-| min | 0.23ms |
-| max | 0.62ms |
-| total | 53.35ms |
+| p10 | 0.25ms |
+| p50 | 0.26ms |
+| p95 | 0.36ms |
+| p99 | 0.56ms |
+| mean | 0.28ms |
+| stdev | 0.06ms |
+| min | 0.24ms |
+| max | 0.76ms |
+| total | 55.54ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.992)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.24ms | 0.27ms | -0.03ms | -11.18% |
-| p50 | 0.25ms | 0.30ms | -0.05ms | -17.73% |
-| p95 | 0.33ms | 0.36ms | -0.03ms | -9.54% |
-| p99 | 0.39ms | 0.65ms | -0.26ms | -39.54% |
-| mean | 0.27ms | 0.31ms | -0.04ms | -13.99% |
-| min | 0.23ms | 0.26ms | -0.03ms | -11.86% |
-| max | 0.62ms | 0.68ms | -0.05ms | -7.74% |
-| total | 53.35ms | 62.02ms | -8.67ms | -13.99% |
+| p10 | 0.24ms | 0.25ms | -0.0011ms | -0.44% |
+| p50 | 0.26ms | 0.28ms | -0.02ms | -7.06% |
+| p95 | 0.36ms | 0.45ms | -0.09ms | -20.50% |
+| p99 | 0.55ms | 0.87ms | -0.32ms | -36.79% |
+| mean | 0.28ms | 0.31ms | -0.03ms | -10.07% |
+| min | 0.24ms | 0.24ms | -0.0038ms | -1.58% |
+| max | 0.76ms | 1.20ms | -0.45ms | -37.18% |
+| total | 55.12ms | 61.30ms | -6.17ms | -10.07% |
 
 ### drizzleSelectWhere
 
@@ -102,24 +116,26 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.02ms |
 | p50 | 0.02ms |
-| p95 | 0.03ms |
-| p99 | 0.05ms |
-| mean | 0.02ms |
-| stdev | 0.0086ms |
+| p95 | 0.04ms |
+| p99 | 0.16ms |
+| mean | 0.03ms |
+| stdev | 0.03ms |
 | min | 0.02ms |
-| max | 0.11ms |
-| total | 3.95ms |
+| max | 0.34ms |
+| total | 5.08ms |
 
 ## Baseline diff
 
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.992)。 回帰判定が読む量と同じ。 実測値は上表。
+
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.00013ms | -0.77% |
-| p50 | 0.02ms | 0.02ms | +0.000042ms | +0.23% |
-| p95 | 0.03ms | 0.08ms | -0.06ms | -69.77% |
-| p99 | 0.05ms | 0.35ms | -0.30ms | -86.85% |
-| mean | 0.02ms | 0.05ms | -0.03ms | -57.16% |
-| min | 0.02ms | 0.02ms | -0.00042ms | -2.48% |
-| max | 0.11ms | 3.13ms | -3.01ms | -96.34% |
-| total | 3.95ms | 9.21ms | -5.27ms | -57.16% |
+| p10 | 0.02ms | 0.02ms | +0.00041ms | +2.40% |
+| p50 | 0.02ms | 0.02ms | +0.00056ms | +2.98% |
+| p95 | 0.04ms | 0.03ms | +0.0031ms | +9.41% |
+| p99 | 0.16ms | 0.10ms | +0.06ms | +59.24% |
+| mean | 0.03ms | 0.02ms | +0.0036ms | +16.42% |
+| min | 0.02ms | 0.02ms | +0.000083ms | +0.50% |
+| max | 0.33ms | 0.17ms | +0.16ms | +91.93% |
+| total | 5.05ms | 4.33ms | +0.71ms | +16.42% |
 

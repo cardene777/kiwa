@@ -79,11 +79,12 @@ The trade-off is wall-clock time: a serial pass over all 177 packages took 8-22 
 
 ## Regression detection defaults
 
-Threshold: **20 % p10 delta** vs stored baseline (`.perf-baseline/{module}.json`), with a bootstrap confidence interval on the p10 difference for significance (CI excluding 0 ⇒ significant).
+Threshold: **20 % delta in the op's p10 relative to a reference op measured in the same run**, compared against the stored baseline (`.perf-baseline/{module}.json`), with a bootstrap confidence interval on the difference for significance (CI excluding 0 ⇒ significant).
 
 - baseline is created automatically on the first run (no `--baseline` flag needed since v1.14-post)
-- subsequent runs compare against baseline; a > 20 % p10 increase with a significant CI fails the gate
-- the p10 difference must also clear an absolute floor derived from the measurement system itself (see below). A relative-only rule gets stricter as the measured value shrinks: 0.03 ms → 0.04 ms is a "significant 33 % regression" on stable samples, yet nothing is actually slower. Ops measured in microseconds would fail on jitter alone.
+- subsequent runs compare against baseline; a > 20 % increase with a significant CI fails the gate
+- the difference must also clear an absolute floor derived from the measurement system itself (see below). A relative-only rule gets stricter as the measured value shrinks: 0.03 ms → 0.04 ms is a "significant 33 % regression" on stable samples, yet nothing is actually slower. Ops measured in microseconds would fail on jitter alone.
+- what is compared is a ratio, not a duration. Each op is measured alternating call-by-call with a harness-owned reference op, and the baseline records that reference's p10 alongside the op's own. See § In-run normalization.
 
 ### Why the verdict reads the bottom of the distribution
 
@@ -111,6 +112,83 @@ The floor is no longer the fixed 0.5 ms. Before the ops run, `measureHarnessReso
 The multiplier is load-bearing. `@kiwa-lab/cache`'s env accessors measure 0.00013 ms, which is *faster* than the empty call's 0.00017 ms. With the floor at exactly the resolution, one of four unchanged runs moved p10 to 0.00033 ms and the 0.0002 ms difference cleared the floor, producing `regressed`. At twice the resolution it does not. The deliberate-slowdown check still passes: injecting three times the baseline p95 into one op produces a 0.0034 ms shift, ten times the floor.
 
 The fixed floor was doing real damage. It made every op with a baseline under 0.5 ms permanently unjudgeable, which was the whole of `cache`, `dapp`, `api`, and `data`. On this machine the measured floor lands near 0.0003 ms, roughly three orders of magnitude lower, so those ops became judgeable for the first time.
+
+### In-run normalization
+
+The verdict does not read the op's duration. It reads the op's duration **divided by a reference op measured in the same run**, alternating call by call.
+
+Four statistics over a single run's samples — p95, p10, median, trimmed mean — were tried and none removed the run-to-run spread; it tracks *when* the measurement was taken rather than the shape of the sample (§ The regression verdict is gated by default records the sweep that established this). A drift the whole run inherits cancels in a ratio, because the numerator and the denominator inherit it together.
+
+What is stored is still a duration. `MeasureResult.reference` carries the reference's kind and its p10, and the comparison multiplies the current measurement by `baseline reference p10 ÷ current reference p10` before comparing against the stored baseline. That is arithmetically the same as comparing the two ratios, but the judged quantity stays in milliseconds, so the absolute floor and every number in the report keep the meaning they had. The reference's own samples are not stored — only the kind, the implementation version, and the one value that acts as the denominator. That keeps the addition to a few dozen bytes per op rather than another array of samples; the whole tracked set went from 2.9 MB to 3.0 MB. Storing the reference's samples would have tripled it.
+
+The implementation version is load-bearing. `cpu` stays `cpu` if `CPU_ROUNDS` changes, so without a version a retuned reference would silently halve or double every stored denominator and report the difference as a code change. A record whose version differs from the current one is not compared; it is replaced.
+
+Both sides must carry a reference of the same kind or no comparison happens: the op reports `n/a` with the reason, and the stored entry is rewritten in that same run **provided the run is itself valid** — a run that cannot call GC, or in which any op breached a cap, writes nothing at all, so the same op is uncomparable again next time. The report says which of the two happened. Falling back to comparing raw durations would silently reintroduce exactly the drift this exists to remove, and nothing in the report would say so.
+
+#### The reference has to share the disturbance
+
+`scripts/reference-op-probe.mjs` measures each candidate. Eight passes, each in its own process, with background load (six CPU-spinning, fs-churning processes) during half of them — the point is to move the machine's state between passes, since a probe run on an idle machine cannot show whether run-to-run drift cancels.
+
+Each cell is `raw spread → ratio spread` for that pairing. The raw figure differs between columns because the target is re-measured alongside each candidate, at a different point in the pass:
+
+| target op | ÷ empty call | ÷ cpu | ÷ fs-read | ÷ fs-write | ÷ fs read+write |
+|---|---|---|---|---|---|
+| fs read (`cli-test` `readFile` shape) | 84 → 41 % | 170 → 171 % | 135 → **17 %** | 306 → 51 % | 198 → 28 % |
+| fs write (`cli-test` `writeFile` shape) | 183 → 73 % | 270 → 313 % | 127 → 75 % | 123 → **32 %** | 177 → 37 % |
+| 20 consecutive writes (`file_scaffold_workflow` shape) | 365 → 171 % | 332 → 379 % | 322 → 62 % | 63 → **15 %** | 208 → 46 % |
+| 2 ms of arithmetic | 16 → 163 % | 16 → **8 %** | 12 → 175 % | 4 → 172 % | 3 → 242 % |
+| `JSON.parse(JSON.stringify(…))` | 170 → 38 % | 20 → **10 %** | 200 → 124 % | 61 → 67 % | 204 → 69 % |
+| a trivial property read | 98 → 98 % | 2 → 18 % | 248 → 78 % | 196 → 138 % | 296 → 82 % |
+
+Matching the kind is the whole mechanism. A CPU reference against an fs op leaves the spread where it was or worse (`170 → 171 %` on the read-shaped op, `270 → 313 %` on the write-shaped one), and an fs reference against a CPU op makes it far worse (`12 → 175 %`). Read the two numbers in a cell as a pair — comparing the raw figure of one column against the ratio of another is not a comparison, because the target was re-measured for each column. Read and write are worth separating too: the read-shaped op lands at 17 % against `fs-read` and 51 % against `fs-write`.
+
+So each op declares a kind — `referenceKind: 'cpu' | 'fs-read' | 'fs-write'`, default `cpu` — and the harness owns the reference implementations. Callers do not pass a reference function. If they could, each op would pick the denominator that flatters it and the stored ratios would stop being comparable between ops. What the measurement says has to be chosen from is the *kind*, not the code.
+
+The measured effect on the ops this was built for, six consecutive runs of `pnpm --filter @kiwa-lab/cli-test exec vitest run -c vitest.perf.config.ts` after the baseline was reseeded:
+
+| op | reference | raw p10 spread | ratio spread |
+|---|---|---|---|
+| `cli-test` `readFile` | `fs-read` | 25 % | **9 %** |
+| `cli-test` `writeFile` | `fs-write` | 20 % | **11 %** |
+| `cli-test-app-scenario` `file_scaffold_workflow` | `fs-write` | 77 % | **9 %** |
+| `cli-test-app-scenario` `setup_cleanup_cycle` | `fs-write` | 27 % | **17 %** |
+| `cli-test-app-scenario` `batch_cli_run` | `cpu` | 28 % | 41 % |
+
+#### What was rejected, and what it measured
+
+**A reference declared as a function by the caller.** Rejected on the evidence above: what has to match is the kind of disturbance, and a fixed set of kinds delivers that. A per-op function additionally makes the stored ratio meaningless across ops, and there are 492 ops to maintain.
+
+**The empty call already measured for the floor** (`measureHarnessResolution`). Rejected: at ~0.0002 ms it sits at the timer quantum and its own run-to-run spread is 83 %, so the ratio reports the denominator's noise rather than the op's. The `÷ empty call` column above is what that looks like — a 2 ms arithmetic op goes from 16 % to 163 %.
+
+**Per-call ratios** — pairing each call with its adjacent reference call, `p10({tᵢ / refᵢ})`, instead of `p10(t) / p10(ref)`. Rejected: measured worse in every row of the same probe, sometimes catastrophically. Dividing two noisy numbers per call puts the reference's unlucky calls into the *bottom* of the ratio distribution, which is exactly where the verdict reads. The 2 ms arithmetic op measured 14 % against a CPU reference this way but 754-6281 % against the fs references, against 8 % / 172-242 % for the ratio of p10s.
+
+**A combined read+write fs reference.** Rejected: never the best column for any target (28 % where `fs-read` gives 17 %, 37 % where `fs-write` gives 32 %, 46 % where `fs-write` gives 15 %). It costs two syscalls per call to be worse than either half.
+
+**A child-process reference for `batch_cli_run`.** Not added. The op spawns five processes per iteration and no existing kind shares that disturbance — `cpu` measured 28 → 41 % and `fs-write` measured 13 → 20 %, both worse than the raw value. A reference that spawned a process would cost milliseconds per call against an op measured 200 times, adding seconds per op across the suite, and it would serve one op. The op keeps its `regressionGateWaived`; the honest reading is that this mechanism does not cover process-spawn workloads.
+
+#### What it fixed, and what it did not
+
+Measured over the whole suite: one reseeding pass followed by three analysis passes across all 177 packages, every analysis pass comparing against the same reseeded baseline. Each pass ran 7-11 minutes.
+
+The run-level drift is gone. **The median change in ratio across all 492 ops is 0.0 % in every pass** — the thing that made whole runs read systematically slow against their baseline no longer happens. That was the failure this mechanism was built for.
+
+A per-op residual remains, and it is what the distribution looks like after the shared part is removed:
+
+| | pass A | pass B | pass C |
+|---|---|---|---|
+| median ratio change | 0.0 % | 0.0 % | 0.0 % |
+| 10th / 90th percentile | -4.3 % / +16.7 % | -7.9 % / +19.8 % | -7.5 % / +9.6 % |
+| ops moving more than 20 % | 44 | 71 | 30 |
+| ops reported `regressed` on unchanged code | 27 | 38 | 13 |
+| packages that would fail with the gate on | 22 | 29 | 0¹ |
+
+¹ Pass C ran with the gate off, so the count is of `regressed` rows rather than of failures; 13 rows across 12 packages.
+
+112 ops exceeded 20 % in at least one pass. **85 of them did so in exactly one, 21 in two, and 6 in all three.** An op that changes places between passes is showing its own run-to-run variation, not something the machine did to every op at once — which is exactly the part no reference can cancel.
+
+Sample count explains part of it and not the rest — 14 % of ops with more than 150 iterations exceeded 20 %, against 24 % of ops with 20 or fewer. Raising iteration counts was already measured and reverted in #1708, because at higher counts some ops grow in cost and breach caps they had passed.
+
+Verdict agreement between passes is **440, 458 and 444 out of 492** for the three pairings, and **425 / 492** across all three at once. One pairing clears the 450 that #1737 set as its target and the other two do not, which is the same lesson as the four-pass selection above: a number taken from one pairing is a number about that pairing.
 - baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
 - to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
 
@@ -128,9 +206,11 @@ The machine's hostname is not recorded. It plays no part in the comparison, and 
 
 ### When measurements stop being comparable
 
-`BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different. Version 4 adds the resolution measurement that now precedes every suite, which warms the call path before the first op reaches it.
+`BaselineEnv.measurementPremise` records the version of *how* the measurement is taken, separate from the machine it ran on. A baseline recorded under a different version is not compared against; the next run that is itself valid reseeds it. Version 2 is the serial regime described above — values recorded under the older parallel regime carry the load of ~177 concurrent suites and mean something different. Version 4 adds the resolution measurement that now precedes every suite, which warms the call path before the first op reaches it. Version 5 interleaves a reference op with every measured call, so each call runs with a different cache and branch-predictor state than it did under version 4.
 
-Bump it only when the same implementation would measure differently. Threshold and verdict changes are not measurement changes — the move from p95 to p10 did not by itself require a bump, since it reads the same stored samples.
+The stored file also has a schema version, and the two answer different questions. `schema: 2` says the file *can* carry `MeasureResult.reference`; `measurementPremise: 5` says the values inside were produced by the interleaved measurement. Schema 1 files still load — refusing to parse them would make every run with a stored baseline report "the baseline could not be read", which fails the gate — they are simply not comparable.
+
+Bump the premise only when the same implementation would measure differently. Threshold and verdict changes are not measurement changes — the move from p95 to p10 did not by itself require a bump, since it reads the same stored samples.
 
 ### What the report shows when no verdict is reached
 
@@ -198,24 +278,28 @@ What does carry weight is what happened when the set was used. The gate was enab
 
 What was recorded is narrow: p10 per op per pass, and nothing else. No temperature, clock, or background-load telemetry, so thermal state, page cache, and scheduler pressure cannot be separated. What the numbers do show is that an op reads flat for four passes and then shifts, and that switching statistic (p95 → p10) moved the spread without removing it — the earlier `cache` experiment ruled out median, trimmed mean, and batching the same way. That is consistent with a drift the whole run inherits rather than something in the shape of the sample, but a drift shared by *every* statistic is an inference from three of them, not a measurement.
 
-That is the same wall the in-run reference normalization was measured against (§ What would make the remaining twelve gateable): comparing an op to a reference measured *in the same run* cancelled the shared drift in that experiment, taking `fsRead` from 141 % to 3 %. It is the only approach measured so far that reduced the drift rather than reframing it, and it changes what a baseline stores (a ratio, not a duration).
+That drift is what in-run normalization removed (§ In-run normalization): across the whole suite the median change in ratio is now 0.0 % per pass, where before an entire run could read slow against its baseline. What it did not remove is each op's own run-to-run variation, and that is enough to keep the default off — with the gate on, 22 and 29 packages failed on unchanged code in the two passes measured that way.
 
-Until then `regressionGate` stays false everywhere. Turning it on for a subset is not a safe halfway step: the subset is defined by how long you happened to watch.
+So `regressionGate` stays false everywhere. Turning it on for a subset is not a safe halfway step: the subset is defined by how long you happened to watch. That applies to the post-normalization numbers too — of the 112 ops that moved past 20 %, 85 did so in exactly one of three passes, so a waiver list built from any two of them is falsified by the third, exactly as the four-pass selection above was.
 
 Two alternatives were rejected. Relaxing the relative threshold to 50 % hides real regressions on ops with large measured values, and would not be enough anyway (the spreads above reach 322 %). Raising the per-op `minDeltaMs` to the observed spread produces a floor of +12 ms on a 1.4 ms op, which nominally keeps the gate on while guaranteeing it never fires — and unlike an explicit opt-out, nothing in the report says so.
 
 `regressionGateWaived: '<reason>'` marks the twelve ops still above the threshold, so the list survives until the gate can be switched on for them. The reason string carries the measured spread. Adding one requires measured evidence; do not add one because a run happened to fail. Every row marked `no` above carries a waiver — a row that is not gateable and not waived would fail the gate the moment `regressionGate` is turned on.
 
-### What would make the remaining twelve gateable
+Those twelve reasons quote **pre-normalization** spreads, measured on the raw p10 rather than the ratio the verdict now reads. Several of them are inside the threshold under the ratio — `cli-test`'s `readFile` and `writeFile` measure 9 % and 11 % over six runs. The list has not been re-derived, because two analysis passes are not enough to move an op off it and the gate they guard is off in either case. Re-deriving it belongs with whatever turns the gate on.
 
-Four statistics were tried over a single run's samples — p95, p10, median, trimmed mean — and none of them removed the spread; it tracks when the measurement was taken. What did reduce it, measured: comparing the op against a **reference op measured in the same run**, alternating call by call.
+### The experiment that led to in-run normalization
+
+Four statistics were tried over a single run's samples — p95, p10, median, trimmed mean — and none of them removed the spread; it tracks when the measurement was taken. What did reduce it, measured on one package before the mechanism existed:
 
 | op | raw p10 spread | ratio to a CPU-only reference | ratio to an fs reference |
 |---|---|---|---|
 | `fsRead` | 141 % | 88 % | **3 %** |
 | `fsWrite` | 43 % | 34 % | **13 %** |
 
-The reference has to share the disturbance: a CPU-bound reference does not help an fs-bound op, and its own measurement moved 2406 % across runs, making it useless as a denominator for anything. So each op would have to declare a reference of the right kind, and every stored baseline would become a ratio rather than a duration. That is a change to what a baseline *is*, not to which statistic is read from it, and is left to a follow-up.
+The 3 % figure is the best case recorded and should not be read as what the shipped mechanism delivers. The full probe, run afterwards with deliberate background load and across six op shapes, puts the matched-reference figure at 15-32 % rather than 3 % (§ In-run normalization). Both were measured; the difference is that the second one moved the machine's state on purpose.
+
+The CPU reference used in this first experiment measured 2406 % spread across runs, which is why the column above helps nothing. That reference was near the timer quantum. Sizing a CPU reference at ~0.09 ms — several hundred times the quantum — brings its own spread to 10 % and makes it usable for CPU-bound ops, which is what shipped.
 
 ### An `a11y` cap breach that no longer reproduces
 

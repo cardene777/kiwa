@@ -2,7 +2,7 @@
  * runPerf3LayerLive — 3-layer perf against a live third-party API.
  *
  * Companion to {@link runPerf3Layer}. Same shape, same reporting, same
- * baseline / regression semantics. Two behavioural differences:
+ * baseline semantics. Three behavioural differences:
  *
  * 1. **env-skip contract** — the caller declares which env vars are required
  *    to reach the live API. When any required var is unset, the helper skips
@@ -12,6 +12,14 @@
  * 2. **live thresholds** — the default cap is the provider's public SLA
  *    (see docs/quality/perf-thresholds.md § Real-API measurement mode).
  *    Concurrent multiplier stays 2×.
+ * 3. **no in-run normalization** — the mock path measures each op alternating
+ *    with a harness-owned reference op and judges on the ratio (#1737). Neither
+ *    reference kind shares the disturbance of a network round trip, so this path
+ *    keeps measuring the op alone. `MeasureResult.reference` is therefore absent
+ *    here, `resolveNormalization` reports `normalized: false`, and the verdict
+ *    compares raw durations — carrying the run-to-run drift the mock path now
+ *    cancels. The stored `measurementPremise` is shared with the mock path, so
+ *    it does not distinguish the two; the presence of `reference` does.
  *
  * Live runs cost money and are slow. Iterations default to 10 (vs 200 for
  * mock) so a full pass fits inside a coffee break. Concurrency defaults to
@@ -24,6 +32,7 @@ import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
 import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
 import {
+  BASELINE_SCHEMA,
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
@@ -193,6 +202,12 @@ export async function runPerf3LayerLive(
       serialGatePassed: serialGate.verdict.passed,
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
+      // この経路の n/a は「seed が起きた」 を保証しない。 保存条件は
+      // `priorBaseline === null` かつ測定が成立していることで、 既存 baseline が
+      // ある実行では 1 byte も書かない (新しい op を足しても追記されない)。
+      // mock 経路は理由を分けて出すが、 live 側は保存経路そのものが足りていない
+      // ため、 文言だけ直すと「追記されるはず」 という別の誤解を生む。
+      // 保存経路と併せて別 Issue で扱う。
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
       ...(regression === null ? {} : buildRegressionNote(regression, 0.2)),
     });
@@ -210,7 +225,7 @@ export async function runPerf3LayerLive(
   const premiseValid = !input.requireGc || measured.every((o) => o.memory?.gcExposed);
   if (anyMeasured && priorBaseline === null && premiseValid && allPassed) {
     await saveBaselineEnvelope(baselinePath, {
-      schema: 1,
+      schema: BASELINE_SCHEMA,
       env: captureEnv(),
       results: combinedForBaseline,
     });

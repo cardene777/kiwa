@@ -22,6 +22,12 @@ kiwa package + dogfood app + OSS 向け汎用性能検査 harness。 p10 / p50 /
 
 絶対下限は固定値ではなく、 実行の中で測る。 `measureHarnessResolution` が空の関数を op と同じ経路で呼んで p10 を取り、 その 2 倍を下限にする。 それより小さい差は op ではなく harness 自身の往復を見ている。 詳細と却下した案は `docs/quality/perf-thresholds.md` § Regression detection defaults が SSOT。
 
+判定に使う量は p10 そのものではなく、 **同じ実行の中で 1 呼出ずつ交互に測った基準 op との比** (#1737)。 実行と実行の間で機械の状態が変われば実装が同じでも差が出るため、 分子と分母で相殺する。 実装は「今回の測定に `baseline の基準 p10 ÷ 今回の基準 p10` を掛けて baseline を測った時の機械の速さへ換算する」 形で、 比同士を比べるのと数学的に同じだが判定量が ms のまま残るので絶対下限も report の表記も意味を保てる。
+
+基準は呼出側に関数を書かせず、 種類 (`cpu` / `fs-read` / `fs-write`、 既定 `cpu`) を `PerfOpSpec.referenceKind` で宣言させ、 実装は `src/reference.ts` が持つ。 基準が対象と同じ邪魔を受けないと相殺が起きないため種類を合わせる (fs read の実行間振れ幅 = `fs-read` 基準で 135 → 17%、 `cpu` 基準では 170 → 171% と変わらない)。 呼出が自前の基準を書けると op ごとに都合のよい分母を選べてしまい、 比が op をまたいで比較できる量でなくなる。
+
+実行全体に乗るずれは消えたが (全 492 op の比の変化の中央値が 3 回の実測すべてで 0.0%)、 op 個別のばらつきは残る。 そのため `runPerf3Layer` の `regressionGate` の既定は false のまま。 詳細 = `docs/quality/perf-thresholds.md` § In-run normalization。
+
 ### 3. Warmup = fixed | convergent の 2 strategy
 
 旧実装は固定 n 回。 JIT / disk cache が warm 到達したかの判定なし。 現在は `warmupStrategy: 'convergent'` を選ぶと、 直近 window (default 20 sample) の p95 変動幅が mean の 5% 以内で安定した時点で自動終了する。 `MeasureResult.warmupConverged` に収束成否を返す。
@@ -121,6 +127,9 @@ await runPerf3Layer({
 |---|---|
 | `measure(input)` | 単一 op 測定。 percentile Type 7 / warmup convergent / trim percent 対応。 |
 | `measureHarnessResolution(opts?)` | 空の関数を同じ経路で呼んだ費用 (p10) を返す。 回帰判定の絶対下限の素になる。 |
+| `measureAlternating(input)` | 対象と基準 op を「基準 → 対象」 の順で 1 呼出ずつ交互に測る。 対象の `reference` field に基準の p10 を埋めて返す。 |
+| `createReferenceOps()` | 基準 op の一式を作る。 `get(kind)` で取り出し、 使い終わりに `dispose()` する (fs 系は temp dir を掘る)。 |
+| `resolveNormalization(current, baseline)` | 換算倍率と成立可否を返す。 種類 ・ 実装版 ・ 分母の有限性が揃った時だけ成立する。 |
 | `buildMeasureResult(name, iter, warmup, samples, trimPct?, converged?)` | 既存 samples から MeasureResult 再構築。 test 用途。 |
 | `percentileType7(sorted, ratio)` | Type 7 linear interpolation percentile。 SSOT 経路。 |
 | `detectRegression(input)` | bootstrap CI on p10 delta で regression 判定。 default 95% CI + threshold 20%。 |

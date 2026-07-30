@@ -20,6 +20,15 @@ title: "@kiwa-lab/perf-harness report の API 契約"
 export declare function emitPerfReport(result: MeasureResult, opts?: {
     baseline?: MeasureResult;
     includeSamples?: boolean;
+    /**
+     * 今回の値を baseline を測った時の機械の速さへ換算する倍率
+     * (`RegressionResult.normalizationScale`)。 既定 1 = 換算しない。
+     *
+     * 渡さないと、 この表だけが実測値どうしを比べることになる。 回帰判定は換算後の
+     * 値を読むため、 同じ report の中で verdict が `regressed` の行に改善を示す
+     * 差分が並ぶ (実測 +15.6% / 換算後 +23% のように符号ごと食い違う場合がある)。
+     */
+    normalizationScale?: number;
 }): string;
 ```
 

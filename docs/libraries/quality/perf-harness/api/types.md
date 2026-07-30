@@ -16,7 +16,7 @@ title: "@kiwa-lab/perf-harness types の API 契約"
 
 #### <code v-pre>MeasureInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L33) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L66) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface MeasureInput {
@@ -37,9 +37,35 @@ export interface MeasureInput {
 }
 ```
 
+#### <code v-pre>MeasureReference</code>
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L48) <code v-pre>packages/perf-harness/src/types.ts</code>
+
+同じ実行の中で交互に測った基準 op の記録。 回帰判定はこの値との比で行う。 基準の sample そのものは持たない。 判定に要るのは分母となる 1 つの値だけで、 全 op ぶんの sample を baseline に足すと file が 3 倍になる。
+
+```ts
+export interface MeasureReference {
+    kind: PerfReferenceKind;
+    /** 基準 op の名前 (`harness.reference.cpu` 等)。 */
+    name: string;
+    /** 基準 op の p10 (ms)。 対象と同じ実行 ・ 同じ交互測定で得た値。 */
+    p10: number;
+    /**
+     * 基準 op の実装の版 (`REFERENCE_IMPL_VERSION`)。
+     *
+     * 種類が同じままでも実装を変えれば分母の大きさが変わる。 版が違う記録との比較は
+     * 実装の差ではなく分母の差を報告するため、 比較せず記録を入れ替える。
+     *
+     * この field を持たない世代の記録があり得るので optional。 無い記録は版が不明なので
+     * 比較せず入れ替える扱いにする。
+     */
+    implVersion?: number;
+}
+```
+
 #### <code v-pre>MeasureResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L50) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L83) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface MeasureResult {
@@ -73,6 +99,13 @@ export interface MeasureResult {
     mad: number;
     /** 外れ値検出 = median ± 3 * MAD の外側にある sample 数。 */
     outlierCount: number;
+    /**
+     * 同じ実行の中で交互に測った基準 op。 `measureAlternating` の結果にだけ付く。
+     *
+     * 回帰判定はこの値を分母にした比で行う。 付いていない結果同士の比較は
+     * 従来どおり実測値そのものを比べる (live mode / 単独の `measure`)。
+     */
+    reference?: MeasureReference;
     trimmed?: {
         percent: number;
         /** trim 後の sample 数。 */
@@ -88,7 +121,7 @@ export interface MeasureResult {
 
 #### <code v-pre>PerfGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L242) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L324) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateInput {
@@ -105,7 +138,7 @@ export interface PerfGateInput {
 
 #### <code v-pre>PerfGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L253) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L335) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateResult {
@@ -115,9 +148,19 @@ export interface PerfGateResult {
 }
 ```
 
+#### <code v-pre>PerfReferenceKind</code>
+
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L40) <code v-pre>packages/perf-harness/src/types.ts</code>
+
+実行内正規化の基準 op の種類。 基準は対象と同じ邪魔を受けるものでないと相殺が起きない。 種類の選び方と 却下した案は `reference.ts` の冒頭と `docs/quality/perf-thresholds.md` § In-run normalization が実測値つきで持つ。
+
+```ts
+export type PerfReferenceKind = 'cpu' | 'fs-read' | 'fs-write';
+```
+
 #### <code v-pre>RegressionInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L100) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L141) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 Regression 判定 input。 bootstrap CI 経路。
 
@@ -155,32 +198,43 @@ export interface RegressionInput {
 
 #### <code v-pre>RegressionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L130) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L171) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface RegressionResult {
     regressed: boolean;
-    /** p10 の変化率。 例 0.15 = 15% 悪化。 verdict はこの値で決まる。 */
+    /**
+     * 判定量の変化率。 例 0.15 = 15% 悪化。 verdict はこの値で決まる。
+     *
+     * 正規化が成立した場合は「今回の p10 に `normalizationScale` を掛けた値」 と
+     * baseline の p10 を比べた率。 成立しなかった場合は実測 p10 どうしの率。
+     */
     deltaPct: number;
     /**
-     * 判定に使った統計量そのもの (ms)。
+     * 判定に使った統計量そのもの (ms)。 `current` は換算後の値。
      *
      * 保存済み baseline の世代によっては `p10` field が無く sample から計算し直すため、
      * 呼出側が同じ値を再現しようとすると計算が二重になる。 報告に出す値はここから取る。
+     * 実測値そのものは `MeasureResult.p10` で、 両者は `normalizationScale` 倍だけ違う。
      */
     judged: {
         current: number;
         baseline: number;
     };
     /**
-     * p95 の変化率。 判定には使わない。
+     * p95 の変化率 (今回側は換算後)。 判定には使わない。
      *
      * 一部の呼出だけが遅くなる変化 (条件分岐が増えた / 稀に遅い経路に入る) は
      * 下側に出ない。 p10 が動かないまま裾だけ伸びた事実を報告に残すために持つ。
      * この軸は実行をまたぐと実装と無関係に数百 % 動くため gate には載せられない。
      */
     tailDeltaPct: number;
-    /** bootstrap で推定した p10 delta の 95% CI (lower / upper、 単位 = ms)。 */
+    /**
+     * bootstrap で推定した判定量 delta の 95% CI (lower / upper、 単位 = ms)。
+     *
+     * 換算後の今回の sample と baseline の sample から取る。 倍率は定数として扱うため、
+     * 分母 (基準 op の p10) の推定誤差はこの区間に入っていない。
+     */
     ci: {
         lower: number;
         upper: number;
@@ -188,7 +242,13 @@ export interface RegressionResult {
     /** CI が 0 を含まないかつ delta > threshold なら true。 */
     significant: boolean;
     verdict: 'improved' | 'stable' | 'regressed';
-    /** 判定に使った絶対下限 (ms)。 */
+    /**
+     * 判定に使った絶対下限 (ms)。
+     *
+     * `resolutionMs` 由来の既定には `normalizationScale` が掛かっており (分解能も今回の
+     * 実行で測った値なので、 差と同じ単位へ揃える)、 呼出が置いた `minDeltaMs` には
+     * 掛からない (どの実行の測定値でもない定数のため)。
+     */
     floorMs: number;
     /**
      * 相対閾値を超えた有意な差だったが、 絶対下限に満たないため stable に落とした場合 true。
@@ -206,12 +266,28 @@ export interface RegressionResult {
      * 悪化が相対では極端に大きくなるという意味。
      */
     belowDetectionFloor: boolean;
+    /**
+     * 実行内正規化が成立したか。
+     *
+     * 双方の結果に同じ種類の基準 op が記録されている時だけ true。 false の場合は
+     * 実測値そのものを比べており、 実行と実行の間の機械の状態の差がそのまま
+     * 判定に乗る。
+     */
+    normalized: boolean;
+    /**
+     * 今回の測定を baseline を測った時の機械の速さへ換算する倍率
+     * (= baseline の基準 p10 ÷ 今回の基準 p10)。 正規化していない場合は 1。
+     *
+     * 比同士を比べるのと数学的には同じだが、 判定に使う量が ms のまま残るので
+     * 絶対下限も report の表記も従来の意味を保てる。
+     */
+    normalizationScale: number;
 }
 ```
 
 #### <code v-pre>Thresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L235) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L317) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface Thresholds {

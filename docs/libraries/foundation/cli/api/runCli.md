@@ -24,7 +24,7 @@ export declare function createDefaultDeps(): RunCliDeps;
 
 #### <code v-pre>runCli</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L360) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L437) <code v-pre>packages/cli/src/runCli.ts</code>
 
 Runs one `kiwa` invocation and resolves with the process exit code. `argv` excludes the node binary and the script path (`process.argv.slice(2)`). The function never terminates the process and never rejects: unexpected failures are reported on stderr as `ERR &lt;message&gt;` and resolve with 1.
 
