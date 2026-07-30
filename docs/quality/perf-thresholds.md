@@ -398,6 +398,21 @@ The instability is not confined to long sweeps. A single unit test that retained
 
 Measured on its own the picture looks fine — eight consecutive standalone runs of an fs workload gave `heapUsed` 22,080 B every time, identical to the byte. That reading is what made the two-axis change look correct at first. It only breaks under the full sweep, which is the condition the gate actually runs in. **Standalone stability is not evidence about a gate that runs inside a 90-minute sweep.**
 
+In-run normalization was the third candidate, and it makes the axis worse. #1737 removed run-to-run drift from the timing axis by measuring each op alternately with a harness-owned reference op and judging on the ratio; the same shape applied here would subtract a reference op's retention from the target's, on the theory that allocator behaviour lands on both.
+
+`packages/perf-harness/scripts/memory-inrun-probe.mjs` measures it — an fs-touching target and a reference that touches fs the same way but retains nothing, measured alternately in one process, six processes per condition. Raw bytes, and the same numbers after subtracting the reference:
+
+| axis | spread, idle | spread, machine saturated |
+|---|---|---|
+| `arrayBuffers` raw | 0 B | 0 B |
+| `arrayBuffers` minus reference | 0 B | 0 B |
+| `heapUsed` raw | 16 B | 16 B |
+| `heapUsed` minus reference | 16 B | **208,952 B** |
+
+The subtraction is stable while the machine is idle and swings by twice the cap once it is not. What moves is the reference measurement, not the target's: subtracting it injects instability that the raw reading does not have. The disturbance the timing axis cancels is multiplicative and lands on both measurements at once; retention is not, so there is nothing to cancel and the second measurement only adds noise.
+
+The load in that run was synthetic — CPU and allocation pressure from sibling processes, not a 90-minute sweep. It is enough to disqualify the subtraction (a candidate that fails under the easier condition will not survive the harder one) but it is not evidence that `heapUsed` raw is stable under a sweep. The sweep data above says it is not.
+
 Two other candidates were rejected without needing a full measurement. Ignoring differences under Node's 8 KB pool granularity would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible. Raising the iteration count until the pool saturates makes every measurement slower without addressing either the blindness or the drift.
 
 Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `ea99caa0a` then `a1a77cf9c`:
