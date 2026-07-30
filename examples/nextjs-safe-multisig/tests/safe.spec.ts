@@ -13,10 +13,21 @@ import { test, expect } from '@playwright/test';
  *   T-SAFE-007 nonce reuse → revert (INVALID_NONCE on replay)
  */
 
+/**
+ * 期待値は `lib/safe-mock.ts` を app と同じ手順で呼んで算出した固定値。
+ * (owners = anvil 既定 3 名を sort、 threshold = 2、 salt = 1n、 chainId = 31337)
+ *
+ * `0x` の存在だけを見ていると、 アドレスの詰め方が変わっても owners の順序が
+ * 無視されても test が通る。 実際 `toHex` で 42 byte に化けていた不具合 (#1742) は、
+ * 画面が落ちるまで誰も検知できなかった。 hash は値で固定する。
+ */
+const EXPECTED_SAFE_ADDRESS = '0x5434c0b8a2cbb17b98e7a76b07b02d0a5b199768';
+const EXPECTED_TX_HASH = '0xda76ea7bea859e2cd200506bc81b4269119458305fc29d2d7c7e120741c6d31a';
+
 test.describe('Safe multi-sig (Level B mock)', () => {
   test('T-SAFE-001 deploys with owners + threshold and shows nonce = 0', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByTestId('safe-address')).toContainText('address: 0x');
+    await expect(page.getByTestId('safe-address')).toHaveText(`address: ${EXPECTED_SAFE_ADDRESS}`);
     await expect(page.getByTestId('safe-threshold')).toContainText('threshold: 2');
     await expect(page.getByTestId('safe-nonce')).toContainText('nonce: 0');
   });
@@ -26,7 +37,7 @@ test.describe('Safe multi-sig (Level B mock)', () => {
     await page.getByTestId('exec-ok').click();
 
     await expect(page.getByTestId('status')).toHaveText('success', { timeout: 10_000 });
-    await expect(page.getByTestId('tx-hash')).toContainText('0x');
+    await expect(page.getByTestId('tx-hash')).toHaveText(EXPECTED_TX_HASH);
     await expect(page.getByTestId('safe-nonce')).toContainText('nonce: 1');
   });
 

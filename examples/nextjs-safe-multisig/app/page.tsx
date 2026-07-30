@@ -144,6 +144,9 @@ export default function Home() {
       const tx = sampleTx()!;
       const sigs = await sortedSigners(tx, [owner1, owner2]);
       await safeRef.current.execTransaction(tx, sigs);
+      // 1 回目は成功して nonce が進む。 replay が投げても、 進んだ事実は表示に
+      // 反映する (これを catch 側だけに置くと、 成功したのに 0 のままに見える)。
+      setNonce(safeRef.current.getNonce());
 
       // try replay with old nonce
       await safeRef.current.execTransaction(tx, sigs);
