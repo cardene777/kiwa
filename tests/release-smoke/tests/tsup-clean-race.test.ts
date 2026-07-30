@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -29,7 +30,11 @@ import { describe, expect, it } from 'vitest';
 
 // compile 後は `.vitest-dist/tests/` から走るため 4 階層上が repo root
 // (`.vitest-dist/tests` → `.vitest-dist` → `release-smoke` → `tests` → root)。
-const REPO_ROOT = join(import.meta.dirname, '..', '..', '..', '..');
+//
+// `import.meta.dirname` は Node 20.11.0 追加で、 repo の下限 (>=20) を下回る
+// 20.0-20.10 では undefined になり module 読込時に落ちる。 既存 24 件と同じ形にする。
+const HERE = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 /** tsup が単一 entry で出す実 file の集合。 */
