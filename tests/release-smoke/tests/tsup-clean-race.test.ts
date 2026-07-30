@@ -1,6 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -50,13 +49,16 @@ import { beforeAll, describe, expect, it } from 'vitest';
  * いずれも「検査が tsup の解決を作り直している」 ことが根で、 作り直しである限り
  * どこかで食い違う (`rules/quality.md` § shortcut pattern の 5 回目 = 契約変更)。
  *
- * 作り直すのをやめ、 **tsup を実際に走らせて結果を見る**。 一時 dir に目印を置き、
- * `tsup --out-dir <tmp>` で build して、 目印が残るか (clean 無効) 消えるか
- * (clean 有効) と、 出力 file の顔ぶれを見る。 設定をどう書いても、 tsup が実際に
- * する事だけが結果に出る。
+ * 作り直すのをやめ、 **package 自身の build script をそのまま走らせて結果を見る**。
+ * `dist/` に目印を置いて build し、 目印が残るか (clean 無効) 消えるか (clean 有効) と、
+ * 出力 file の顔ぶれを見る。 設定をどう書いても、 tsup が実際にする事だけが結果に出る。
  *
- * 出力先を一時 dir に振るので、 本物の `dist/` は触らない。 並列に走る他の test が
- * 読んでいる最中でも影響が無い。
+ * 出力先を一時 dir に振る形も試したが採らない。 `--out-dir` で上書きすると設定が
+ * `options.outDir` を見て分岐する時に実 build と違う結果が出て、 隔離のつもりで
+ * 測る対象そのものを変えてしまう (実測 = 実 build が `index.mjs`、 probe が `index.js`)。
+ *
+ * 本物の `dist/` を触るため、 この file は `package.json` の `test` で単独の vitest
+ * 実行に分けてある。 並列に走る他の test と重ならない。
  *
  * 条件 3 と 4 は build を走らせずに決まるので、 設定と script をそのまま見る。
  */
@@ -96,6 +98,9 @@ const FIXED_OUTPUT = [
  *
  * tsup の clean は glob で消すため、 先頭が `.` の file は消し漏れる。 dotfile を
  * 目印にすると clean が有効でも「残った」 と読めてしまう (実測 = `dapp` で確認)。
+ *
+ * 設定が外部の状態を見て `clean` を切り替える形は、 その時の実挙動しか判らない。
+ * 実 build も同じように振れるので、 どの検査でも決められない。
  */
 const PROBE = 'clean-probe.txt';
 
@@ -155,37 +160,38 @@ function readBuildScript(name: string): string | null {
 }
 
 /**
- * 一時 dir へ build して結果を見る。
+ * package 自身の build script をそのまま走らせて結果を見る。
  *
- * `cli` は設定 file を持たず entry を build script の引数で渡すため、 その引数を
- * そのまま使う。 それ以外は設定 file がすべてを決めるので `tsup` を素で呼ぶ。
- * `--onSuccess` は build 後に走る別 command で出力の顔ぶれを決めないため落とす
- * (一時 dir 相手に走らせても意味が無い)。
+ * 出力先を一時 dir に振る形は採らない。 `--out-dir` で上書きすると、 設定が
+ * `options.outDir` を見て分岐する時に実 build と違う結果が出る (実測 = 実 build が
+ * `index.mjs`、 上書きした probe が `index.js`)。 隔離のつもりで測る対象そのものを
+ * 変えてしまう。 build script の引数を取り出す必要も無くなる (引用符の中の `||` で
+ * 壊れる形があった)。
+ *
+ * 本物の `dist/` に目印を置いて build し、 残るか消えるかを見る。 build は冪等なので
+ * 走らせた後の `dist/` は通常の状態に戻る。 他の test と重ならないよう、 この file は
+ * `package.json` の `test` で単独の vitest 実行に分けてある。
  */
 function probeBuild(name: string): BuildProbe {
-  const out = mkdtempSync(join(tmpdir(), `kiwa-clean-probe-${name}-`));
-  writeFileSync(join(out, PROBE), 'probe', 'utf8');
+  const dist = join(PACKAGES_DIR, name, 'dist');
+  mkdirSync(dist, { recursive: true });
+  writeFileSync(join(dist, PROBE), 'probe', 'utf8');
   try {
-    const script = readBuildScript(name) ?? '';
-    // `||` の後 (失敗時の後始末) を落とし、 `tsup` から先の引数を取り出す。
-    const invocation = script.split('||')[0]!.trim();
-    const args = invocation.startsWith('tsup') ? invocation.slice('tsup'.length).trim() : '';
-    const cleaned = args.replace(/--onSuccess\s+"(?:[^"\\]|\\.)*"/g, '').trim();
-    execFileSync(
-      'npx',
-      ['tsup', ...(cleaned === '' ? [] : cleaned.split(/\s+/)), '--out-dir', out],
-      { cwd: join(PACKAGES_DIR, name), stdio: 'pipe', encoding: 'utf8' },
-    );
+    execFileSync('pnpm', ['--filter', `@kiwa-lab/${name}`, 'build'], {
+      cwd: REPO_ROOT,
+      stdio: 'pipe',
+      encoding: 'utf8',
+    });
     return {
-      probeSurvived: existsSync(join(out, PROBE)),
-      files: listFiles(out).filter((file) => file !== PROBE).sort(),
+      probeSurvived: existsSync(join(dist, PROBE)),
+      files: listFiles(dist).filter((file) => file !== PROBE).sort(),
       error: null,
     };
   } catch (error) {
     const stderr = (error as { stderr?: string }).stderr ?? '';
     return { probeSurvived: false, files: [], error: `${(error as Error).message}\n${stderr}` };
   } finally {
-    rmSync(out, { recursive: true, force: true });
+    rmSync(join(dist, PROBE), { force: true });
   }
 }
 
