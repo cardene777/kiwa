@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import ts from 'typescript';
@@ -108,7 +109,11 @@ interface TsupOptions {
   sourcemap?: unknown;
   clean?: unknown;
   splitting?: unknown;
-  outExtension?: (context: { format: string }) => { js?: string; dts?: string };
+  outExtension?: (context: {
+    format: string;
+    options?: unknown;
+    pkgType?: string;
+  }) => { js?: string; dts?: string };
 }
 
 /**
@@ -141,25 +146,34 @@ function resolveTsupOptions(name: string): TsupOptions[] | null {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
 
-  // tsup は設定を bundle-require で読む。 そちらから見える値を同じだけ渡す。
-  // 渡さないと `globalThis.process.env.X` や `typeof __dirname` の分岐が黙って
-  // 未定義側に落ち、 実際の build と違う設定を読んだまま検査が通ってしまう。
+  // 新しい context を作らず、 CommonJS module と同じ形で包んで実行する。
+  //
+  // 独立した context に必要な値を並べる形では、 並べ忘れた global を参照する分岐が
+  // 黙って未定義側に落ちる。 `setTimeout` / `setImmediate` / `TextEncoder` /
+  // `performance` のように数が多く、 列挙しきったことを確かめられない。 実際に
+  // `typeof globalThis.setTimeout === 'function'` で `clean` を切り替える設定は、
+  // 実 build では有効・検査では無効と読まれてすり抜けた。
+  //
+  // 包んで実行すれば global は Node の module と同一になる。 `require` も設定 file
+  // 基準の実物を渡すので、 組込 module や隣の file を読む設定も tsup と同じに解ける。
+  // `defineConfig` だけは差し替える (tsup を release-smoke から解決できないため。
+  // 実体は受け取った値を返すだけなので解決値は変わらない)。
   const dir = join(PACKAGES_DIR, name);
   const container = { exports: {} as Record<string, unknown> };
-  vm.runInNewContext(js, {
-    module: container,
-    exports: container.exports,
-    process,
-    __dirname: dir,
-    __filename: file,
-    console,
-    Buffer,
-    URL,
-    require: (id: string) => {
-      if (id === 'tsup') return { defineConfig: (value: unknown) => value };
-      throw new Error(`tsup.config.ts が ${id} を読み込んでいる。解決値を確かめられない`);
-    },
-  });
+  const nodeRequire = createRequire(file);
+  const requireForConfig = (id: string): unknown =>
+    id === 'tsup' ? { defineConfig: (value: unknown) => value } : nodeRequire(id);
+  const factory = vm.runInThisContext(
+    `(function (exports, require, module, __filename, __dirname) {\n${js}\n})`,
+    { filename: file },
+  ) as (
+    exports: unknown,
+    require: unknown,
+    module: unknown,
+    filename: string,
+    dirname: string,
+  ) => void;
+  factory(container.exports, requireForConfig, container, file, dir);
 
   const exported = container.exports['default'];
   const resolved = typeof exported === 'function'
@@ -216,22 +230,36 @@ function listFiles(dir: string, base = ''): string[] {
 function expectedOutputs(name: string, option: TsupOptions): string[] {
   const entry = option.entry as string[];
   const stem = entry[0]!.replace(/^.*\//, '').replace(/\.[cm]?tsx?$/, '');
-  const isModule = (JSON.parse(
+  const pkgType = (JSON.parse(
     readFileSync(join(PACKAGES_DIR, name, 'package.json'), 'utf8'),
-  ) as { type?: string }).type === 'module';
+  ) as { type?: string }).type;
+  const isModule = pkgType === 'module';
 
   const out: string[] = [];
   for (const format of option.format as string[]) {
     const fallback = format === 'cjs' ? (isModule ? '.cjs' : '.js') : isModule ? '.js' : '.mjs';
-    const extension = option.outExtension?.({ format });
-    const js = extension?.js ?? fallback;
+    // tsup は `{ format, options, pkgType }` を渡す。 `format` だけを渡すと、
+    // `options` の有無で拡張子を変える設定が実 build とだけ違う名前を出す。
+    // `options` に渡せるのは解決前の設定で、 tsup が渡す正規化後のものとは違う。
+    // その差で結果が動く設定は判定できないので、 文脈を欠いた呼出と突き合わせて
+    // 食い違ったら違反にする。
+    const full = option.outExtension?.({
+      format,
+      options: option,
+      ...(pkgType === undefined ? {} : { pkgType }),
+    });
+    const bare = option.outExtension?.({ format });
+    if (JSON.stringify(full) !== JSON.stringify(bare)) {
+      return [`(outExtension が文脈で結果を変えるため判定できない: ${format})`];
+    }
+    const js = full?.js ?? fallback;
     out.push(`${stem}${js}`);
     if (option.sourcemap === true) out.push(`${stem}${js}.map`);
     // 宣言の拡張子は既定では js 側に揃う (`.cjs` なら `.d.cts`)。 `outExtension` は
     // `dts` を js と独立に返せるので、 返ってきたらそちらを使う。 js から導くだけだと
     // 宣言の名前を変える設定を見落とし、 失敗時に消す file 名とも食い違う。
     if (option.dts === true) {
-      out.push(`${stem}${extension?.dts ?? `.d${js.replace(/^\.(\w)?js$/, '.$1ts')}`}`);
+      out.push(`${stem}${full?.dts ?? `.d${js.replace(/^\.(\w)?js$/, '.$1ts')}`}`);
     }
   }
   return [...new Set(out)].sort();
