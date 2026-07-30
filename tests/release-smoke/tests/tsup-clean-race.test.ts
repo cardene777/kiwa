@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -170,37 +172,51 @@ function readBuildScript(name: string): string | null {
  * 変えてしまう。 build script の引数を取り出す必要も無くなる (引用符の中の `||` で
  * 壊れる形があった)。
  *
- * 本物の `dist/` を空にしてから目印を置いて build し、 残るか消えるかを見る。 空に
- * するのは、 前の build の残りを「この実行の出力」 と読まないため。 build は冪等なので
- * 走らせた後の `dist/` は通常の状態に戻る。 他の test と重ならないよう、 この file は
+ * 本物の `dist/` を退避してから目印を置いて build し、 残るか消えるかを見る。 退避
+ * するのは、 前の build の残りを「この実行の出力」 と読まないため。 build が落ちた
+ * 時は退避した状態に戻すので、 空の `dist/` が残らない。 他の test と重ならないよう、 この file は
  * `package.json` の `test` で単独の vitest 実行に分けてある。
  */
 function probeBuild(name: string): BuildProbe {
   const dist = join(PACKAGES_DIR, name, 'dist');
-  // 前の build の残りを消してから測る。 残したまま測ると、 出力先を `dist` 以外に
+  const backup = `${dist}.probe-backup`;
+
+  // 前の build の残りを退避してから測る。 残したまま測ると、 出力先を `dist` 以外に
   // 変えた設定や、 filter が 1 件も一致せず何も build しなかった実行でも、 前回の
-  // 6 file がそのまま「正しい出力」 として読めてしまう (どちらも実測ですり抜けた)。
-  // 空にしてから build すれば、 見えるのはこの実行が書いたものだけになる。
-  rmSync(dist, { recursive: true, force: true });
+  // 6 file がそのまま「この実行の出力」 として読めてしまう (どちらも実測ですり抜けた)。
+  //
+  // 消さずに退避するのは、 build が落ちた時に空の `dist/` を残さないため。 空のまま
+  // 残すと後続の `tsc` が型定義を解決できず、 この検査と無関係な package まで落ちる
+  // (実測 = `data` / `e2e` / `observability` / `ui` が TS7016)。
+  rmSync(backup, { recursive: true, force: true });
+  if (existsSync(dist)) renameSync(dist, backup);
   mkdirSync(dist, { recursive: true });
   writeFileSync(join(dist, PROBE), 'probe', 'utf8');
+
   try {
-    execFileSync('pnpm', ['--filter', `@kiwa-lab/${name}`, 'build'], {
+    // `--fail-if-no-match` が無いと、 名前が 1 件も一致しない filter でも exit 0 に
+    // なる。 何も build していない実行を成功として読むことになる。
+    execFileSync('pnpm', ['--filter', `@kiwa-lab/${name}`, '--fail-if-no-match', 'build'], {
       cwd: REPO_ROOT,
       stdio: 'pipe',
       encoding: 'utf8',
     });
-    return {
-      probeSurvived: existsSync(join(dist, PROBE)),
-      files: listFiles(dist).filter((file) => file !== PROBE).sort(),
-      error: null,
-    };
   } catch (error) {
+    // 落ちた build の出力を残さない。 退避した前回の状態に戻す。
+    rmSync(dist, { recursive: true, force: true });
+    if (existsSync(backup)) renameSync(backup, dist);
     const stderr = (error as { stderr?: string }).stderr ?? '';
     return { probeSurvived: false, files: [], error: `${(error as Error).message}\n${stderr}` };
-  } finally {
-    rmSync(join(dist, PROBE), { force: true });
   }
+
+  const probe: BuildProbe = {
+    probeSurvived: existsSync(join(dist, PROBE)),
+    files: listFiles(dist).filter((file) => file !== PROBE).sort(),
+    error: null,
+  };
+  rmSync(join(dist, PROBE), { force: true });
+  rmSync(backup, { recursive: true, force: true });
+  return probe;
 }
 
 /**
