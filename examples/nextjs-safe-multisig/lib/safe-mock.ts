@@ -28,6 +28,7 @@ import {
   type Hex,
   recoverTypedDataAddress,
   keccak256,
+  padHex,
   toHex,
   concat,
   toBytes,
@@ -155,15 +156,18 @@ export class SafeMock {
     const safeTxHash = keccak256(
       concat([
         safeTxTypeHash,
-        toHex(tx.to, { size: 32 }),
+        // アドレスは `padHex`。 `toHex` は文字列を UTF-8 byte 列として符号化するため、
+        // `0x` + 40 桁 = 42 文字のアドレスが 42 byte になり `size: 32` を超える。
+        // 数値 (value / operation / gas 系 / nonce) は byte 幅に収まるので `toHex` で正しい。
+        padHex(tx.to, { size: 32 }),
         toHex(tx.value, { size: 32 }),
         dataHash,
         toHex(tx.operation, { size: 32 }),
         toHex(tx.safeTxGas, { size: 32 }),
         toHex(tx.baseGas, { size: 32 }),
         toHex(tx.gasPrice, { size: 32 }),
-        toHex(tx.gasToken, { size: 32 }),
-        toHex(tx.refundReceiver, { size: 32 }),
+        padHex(tx.gasToken, { size: 32 }),
+        padHex(tx.refundReceiver, { size: 32 }),
         toHex(tx.nonce, { size: 32 }),
       ]),
     );
@@ -172,7 +176,7 @@ export class SafeMock {
       concat([
         DOMAIN_TYPE_HASH,
         toHex(this.chainId, { size: 32 }),
-        toHex(this.address, { size: 32 }),
+        padHex(this.address, { size: 32 }),
       ]),
     );
 
@@ -345,7 +349,9 @@ export class SafeProxyFactory {
 
   computeAddress(owners: Address[], threshold: number, salt: bigint): Address {
     const seed = concat([
-      ...owners.map((o) => toHex(o, { size: 32 })),
+      // owners はアドレス = hex byte 列として 32 byte に左詰めする。 `toHex` だと
+      // 文字列として符号化されて 42 byte になり `SizeOverflowError` で落ちる。
+      ...owners.map((o) => padHex(o, { size: 32 })),
       toHex(threshold, { size: 32 }),
       toHex(salt, { size: 32 }),
     ]);
