@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
 import { runPerf3LayerLive } from '../src/live.js';
@@ -166,6 +166,33 @@ describe('runPerf3LayerLive — baseline の追記 (#1740)', () => {
     expect(report).toContain('この実行では baseline を書いていない');
   });
 
+  it('別の op が上限を割ると、 自分が通っていても未保存になる', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const reportPath = join(dir, 'report.md');
+
+    const result = await runPerf3LayerLive({
+      moduleName: 'live-sibling',
+      ops: [
+        op('alpha'),
+        // 上限 0ms は必ず割る。 これで実行全体の書込が止まる。
+        { name: 'beta', fn: () => {}, serialP95CapMs: 0, requiredEnv: [] },
+      ],
+      reportPath,
+      baselinePath,
+    });
+
+    expect(existsSync(baselinePath), 'baseline を 1 byte も書いていない').toBe(false);
+    // alpha 自身の上限は通っている。 それでも書けていないので seeded ではない。
+    expect(result.outcomes.find((o) => o.name === 'alpha')?.serialGatePassed).toBe(true);
+    expect(result.outcomes.find((o) => o.name === 'alpha')?.regressionVerdict).toBe(
+      'n/a (baseline 未保存)',
+    );
+    expect(result.outcomes.find((o) => o.name === 'beta')?.regressionVerdict).toBe(
+      'n/a (baseline 未保存)',
+    );
+  });
+
   it('前提が違う baseline は作り直す', async () => {
     const dir = tempDir();
     const baselinePath = join(dir, 'baseline.json');
@@ -303,6 +330,32 @@ describe('runPerf3Layer — mock 経路も同じ verdict を出す (#1740)', () 
     });
     expect(result.baselineSeeded).toBe(false);
     expect(result.outcomes[0]!.regressionVerdict).toBe('n/a (baseline 未保存)');
+  });
+
+  it('別の op が上限を割ると、 自分が通っていても未保存になる', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const result = await runPerf3Layer({
+      moduleName: 'mock-sibling',
+      ops: [
+        { name: 'alpha', fn: () => {}, serialP95CapMs: 1000 },
+        // 上限 0ms は必ず割る。 これで実行全体の書込が止まる。
+        { name: 'beta', fn: () => {}, serialP95CapMs: 0 },
+      ],
+      reportPath: join(dir, 'report.md'),
+      baselinePath,
+      serialIterations: 5,
+      serialWarmup: 1,
+      concurrency: 2,
+      iterationsPerWorker: 2,
+      memoryIterations: 5,
+    });
+
+    expect(existsSync(baselinePath), 'baseline を 1 byte も書いていない').toBe(false);
+    // alpha 自身の上限は通っている。 それでも書けていないので seeded ではない。
+    expect(result.outcomes[0]!.serialGatePassed).toBe(true);
+    expect(result.outcomes[0]!.regressionVerdict).toBe('n/a (baseline 未保存)');
+    expect(result.outcomes[1]!.regressionVerdict).toBe('n/a (baseline 未保存)');
   });
 
   it('書けた実行の未記録 op は seeded と書く', async () => {
