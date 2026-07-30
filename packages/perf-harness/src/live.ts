@@ -202,8 +202,12 @@ export async function runPerf3LayerLive(
       serialGatePassed: serialGate.verdict.passed,
       concurrentGatePassed: concurrentGate.verdict.passed,
       memoryGatePassed,
-      // seed が起きたかはこの時点で判らない (測定の成立を全 op 見終えてから決まる)。
-      // 暫定で seeded を置き、 保存の可否が決まってから書き換える。
+      // この経路の n/a は「seed が起きた」 を保証しない。 保存条件は
+      // `priorBaseline === null` かつ測定が成立していることで、 既存 baseline が
+      // ある実行では 1 byte も書かない (新しい op を足しても追記されない)。
+      // mock 経路は理由を分けて出すが、 live 側は保存経路そのものが足りていない
+      // ため、 文言だけ直すと「追記されるはず」 という別の誤解を生む。
+      // 保存経路と併せて別 Issue で扱う。
       regressionVerdict: regression ? regression.verdict : 'n/a (baseline seeded)',
       ...(regression === null ? {} : buildRegressionNote(regression, 0.2)),
     });
@@ -226,19 +230,6 @@ export async function runPerf3LayerLive(
       results: combinedForBaseline,
     });
     baselineSeeded = true;
-  }
-
-  // 保存されなかった実行の n/a を「seeded」 と書かない。 上限を割った実行や GC を
-  // 呼べない実行では 1 byte も書かれないので、 読み手が「次回は比較される」 と
-  // 読める表記を残すと、 上限違反が直るまで同じ状態が続くことが伝わらない。
-  if (!baselineSeeded) {
-    for (const outcome of outcomes) {
-      if (outcome.regressionVerdict === 'n/a (baseline seeded)') {
-        outcome.regressionVerdict = 'n/a (比較せず)';
-        outcome.regressionNote =
-          '測定が成立していないため baseline を書いていない (上限を割った op がある、 または GC を呼べない)';
-      }
-    }
   }
 
   writeLiveReport({

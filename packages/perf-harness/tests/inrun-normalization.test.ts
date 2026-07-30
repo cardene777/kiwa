@@ -27,6 +27,7 @@ import {
   resolveNormalization,
   runPerf3Layer,
 } from '../src/index.js';
+import { uncomparableReason } from '../src/three-layer.js';
 import type { MeasureResult, PerfReferenceKind } from '../src/index.js';
 
 /** 交互測定を経た結果を組み立てる。 baseline / current の両側を手で作るため。 */
@@ -383,7 +384,20 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
     expect(switched.outcomes[0]!.regressionNote).toContain('baseline cpu / 今回 fs-write');
     // 比較していない行に baseline 差分表を出さない (判定に使っていない差が
     // 判定結果と同じ重みで並ぶため)。
-    expect(readFileSync(join(tmpDir, 'r2.md'), 'utf8')).not.toContain('## Baseline diff');
+    const switchedReport = readFileSync(join(tmpDir, 'r2.md'), 'utf8');
+    expect(switchedReport).not.toContain('## Baseline diff');
+    // 正規化表の「baseline の比」 も n/a にする。 残すと、 別の分母で割った 2 値が
+    // 隣接列に並び、 引き算して「改善した」 と読める。
+    const normalizationRow = switchedReport
+      .split('\n')
+      .find((line) => line.startsWith('| op | fs-write |'));
+    expect(normalizationRow, '正規化表の行').toBeDefined();
+    // 末尾 3 列 = baseline の比 / 換算後 p10 / baseline p10。 揃って n/a になる。
+    expect(normalizationRow!.split('|').map((cell) => cell.trim()).slice(-4, -1)).toEqual([
+      'n/a',
+      'n/a',
+      'n/a',
+    ]);
 
     const stored = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
       results: Record<string, MeasureResult>;
@@ -630,6 +644,67 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
       'utf8',
     );
     expect(await loadBaseline(baselinePath)).toBeNull();
+  });
+});
+
+describe('uncomparableReason — 比較できない理由の 7 通り', () => {
+  const samples = Array.from({ length: 20 }, () => 1);
+
+  /** 理由の分岐は `resolveNormalization` の不成立と 1:1 で対応していなければ嘘になる。 */
+  const cases: Array<[string, MeasureResult, MeasureResult, RegExp]> = [
+    [
+      'baseline 側に基準の記録が無い',
+      withReference(samples, 0.1),
+      buildMeasureResult('op.serial', 20, 0, samples),
+      /基準 op の記録が無い世代/,
+    ],
+    [
+      '今回側に基準の記録が無い',
+      buildMeasureResult('op.serial', 20, 0, samples),
+      withReference(samples, 0.1),
+      /今回の測定に基準 op の記録が無い/,
+    ],
+    [
+      '種類が違う',
+      withReference(samples, 0.1, 'fs-read'),
+      withReference(samples, 0.1, 'cpu'),
+      /種類が baseline と違う.*baseline cpu \/ 今回 fs-read/,
+    ],
+    [
+      'baseline 側の p10 が分母にならない',
+      withReference(samples, 0.1),
+      withReference(samples, Number.POSITIVE_INFINITY),
+      /baseline 側の基準 p10 が分母にならない/,
+    ],
+    [
+      '今回側の p10 が分母にならない',
+      withReference(samples, Number.NaN),
+      withReference(samples, 0.1),
+      /今回の基準 p10 が分母にならない/,
+    ],
+    [
+      '双方有限正でも桁が離れて商が求まらない',
+      withReference(samples, 5e-324),
+      withReference(samples, 1e308),
+      /桁が離れていて換算倍率が求まらない/,
+    ],
+  ];
+
+  for (const [label, current, baseline, expected] of cases) {
+    it(`${label} を理由として報告する`, () => {
+      // 前提として、 いずれも正規化は不成立でなければならない。
+      expect(resolveNormalization(current, baseline).normalized, label).toBe(false);
+      expect(uncomparableReason(current, baseline), label).toMatch(expected);
+    });
+  }
+
+  it('実装の版が違う組は版を理由として報告する (種類は同じ)', () => {
+    const current = withReference(samples, 0.1);
+    const baseline = withReference(samples, 0.1);
+    baseline.reference = { ...baseline.reference!, implVersion: 999 };
+    expect(resolveNormalization(current, baseline).normalized).toBe(false);
+    expect(uncomparableReason(current, baseline)).toMatch(/実装の版が baseline と違う/);
+    expect(uncomparableReason(current, baseline)).toContain('baseline 999 / 今回 1');
   });
 });
 

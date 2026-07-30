@@ -536,15 +536,18 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
 /**
  * 記録はあるのに比較できない理由を 1 行にする。
  *
- * 原因を 1 つに固定して書くと嘘になる。 `resolveNormalization` が不成立を返す道は
- * 4 つあり (基準の記録が無い / 種類が違う / 実装の版が違う / 分母が分母にならない)、
- * 例えば版だけが違う組で「種類が食い違う」 と書くと、 読み手は種類を疑って
- * 見つからない原因を探すことになる。
+ * 原因を 1 つに固定して書くと嘘になる。 例えば版だけが違う組で「種類が食い違う」 と
+ * 書くと、 読み手は種類を疑って見つからない原因を探すことになる。
+ *
+ * `resolveNormalization` の不成立は 7 通りに分かれる。 基準の記録が無い (baseline 側 /
+ * 今回側) / 種類が違う / 実装の版が違う (どちらかが記録なしを含む) / p10 が分母に
+ * ならない (baseline 側 / 今回側) / 双方が有限正でも桁が離れて商が求まらない。
+ * 分岐を足す時はこの 7 通りとの対応を保つ。
  *
  * 記録を入れ替えたかどうかはここでは書かない。 書込には測定の成立が要り、 この時点で
  * 判っていない (report 冒頭が実行全体として書けたかを出す)。
  */
-function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
+export function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
   const currentReference = current.reference;
   const baselineReference = baseline.reference;
   if (baselineReference === undefined) {
