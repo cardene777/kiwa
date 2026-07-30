@@ -51,7 +51,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsup || { rm -f dist/index.d.ts dist/index.d.cts; exit 1; }",
+    "build": "tsup || node -e \"const{rmSync}=require('node:fs');for(const f of ['dist/index.d.ts','dist/index.d.cts'])rmSync(f,{force:true});process.exit(1)\"",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000",
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",

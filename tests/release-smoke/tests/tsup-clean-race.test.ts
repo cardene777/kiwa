@@ -59,9 +59,13 @@ const PACKAGES_DIR = join(REPO_ROOT, 'packages');
  *
  * `tsup` に引数を足す形 (`--clean` / `--config` / entry 追加) はすべて設定 file の
  * 解決値と食い違うため、 一致で縛って設定側だけを見れば済むようにする。
- * 後半は上の条件 4 (失敗時に宣言を残さない)。
+ * 後半は上の条件 4 (失敗時に宣言を残さない)。 `||` は sh と cmd.exe の双方が解釈するが、
+ * 中括弧 / `rm` / `exit` は sh にしか無い。 削除は Node に寄せて shell に依らない形にする。
  */
-const EXPECTED_BUILD = 'tsup || { rm -f dist/index.d.ts dist/index.d.cts; exit 1; }';
+const EXPECTED_BUILD =
+  'tsup || node -e "const{rmSync}=require(\'node:fs\');'
+  + "for(const f of ['dist/index.d.ts','dist/index.d.cts'])rmSync(f,{force:true});"
+  + 'process.exit(1)"';
 
 /** tsup が単一 entry で出す実 file の集合。 */
 const FIXED_OUTPUT = [
@@ -104,8 +108,22 @@ interface TsupOptions {
   sourcemap?: unknown;
   clean?: unknown;
   splitting?: unknown;
-  outExtension?: (context: { format: string }) => { js?: string };
+  outExtension?: (context: { format: string }) => { js?: string; dts?: string };
 }
+
+/**
+ * 出力の顔ぶれに関わらない設定 key。 ここに無い key を持つ設定は判定しない。
+ *
+ * `outDir` / `legacyOutput` / `esbuildOptions` のように出力先や名前を変えられる key は
+ * 意図的に外してある。 tsup の option は版ごとに増えるので、 知らない key が来たら
+ * 「出力を変えるかもしれない」 側に倒す。 増やす時は、 その key が出力する file の
+ * 名前と場所を変えないことを確かめてから足す。
+ */
+const OUTPUT_NEUTRAL_KEYS = new Set([
+  'entry', 'format', 'dts', 'sourcemap', 'clean', 'splitting', 'outExtension',
+  'external', 'noExternal', 'target', 'platform', 'tsconfig', 'shims',
+  'treeshake', 'minify', 'keepNames', 'define', 'env', 'silent', 'skipNodeModulesBundle',
+]);
 
 /**
  * `tsup.config.ts` を tsup と同じように評価して解決値を返す。
@@ -123,10 +141,20 @@ function resolveTsupOptions(name: string): TsupOptions[] | null {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
 
+  // tsup は設定を bundle-require で読む。 そちらから見える値を同じだけ渡す。
+  // 渡さないと `globalThis.process.env.X` や `typeof __dirname` の分岐が黙って
+  // 未定義側に落ち、 実際の build と違う設定を読んだまま検査が通ってしまう。
+  const dir = join(PACKAGES_DIR, name);
   const container = { exports: {} as Record<string, unknown> };
   vm.runInNewContext(js, {
     module: container,
     exports: container.exports,
+    process,
+    __dirname: dir,
+    __filename: file,
+    console,
+    Buffer,
+    URL,
     require: (id: string) => {
       if (id === 'tsup') return { defineConfig: (value: unknown) => value };
       throw new Error(`tsup.config.ts が ${id} を読み込んでいる。解決値を確かめられない`);
@@ -195,11 +223,16 @@ function expectedOutputs(name: string, option: TsupOptions): string[] {
   const out: string[] = [];
   for (const format of option.format as string[]) {
     const fallback = format === 'cjs' ? (isModule ? '.cjs' : '.js') : isModule ? '.js' : '.mjs';
-    const js = option.outExtension?.({ format })?.js ?? fallback;
+    const extension = option.outExtension?.({ format });
+    const js = extension?.js ?? fallback;
     out.push(`${stem}${js}`);
     if (option.sourcemap === true) out.push(`${stem}${js}.map`);
-    // 宣言の拡張子は js 側に揃う (`.cjs` なら `.d.cts`、 `.mjs` なら `.d.mts`)。
-    if (option.dts === true) out.push(`${stem}.d${js.replace(/^\.(\w)?js$/, '.$1ts')}`);
+    // 宣言の拡張子は既定では js 側に揃う (`.cjs` なら `.d.cts`)。 `outExtension` は
+    // `dts` を js と独立に返せるので、 返ってきたらそちらを使う。 js から導くだけだと
+    // 宣言の名前を変える設定を見落とし、 失敗時に消す file 名とも食い違う。
+    if (option.dts === true) {
+      out.push(`${stem}${extension?.dts ?? `.d${js.replace(/^\.(\w)?js$/, '.$1ts')}`}`);
+    }
   }
   return [...new Set(out)].sort();
 }
@@ -227,6 +260,13 @@ function fixedOutputViolations(name: string): string[] {
   }
 
   const option = options[0]!;
+  // 出力先や名前を変えられる key (`outDir` / `legacyOutput` / `esbuildOptions` 等) を
+  // 持つ設定は、 ここで組み立てる file 名と実際の出力が食い違う。 知らない key は
+  // 出力を変え得る側に倒す。
+  const unknownKeys = Object.keys(option).filter((key) => !OUTPUT_NEUTRAL_KEYS.has(key));
+  if (unknownKeys.length > 0) {
+    out.push(`${name}: 出力を変え得る設定がある (${unknownKeys.join(', ')})`);
+  }
   if (option.clean !== undefined && option.clean !== false) {
     out.push(`${name}: clean が無効でない (${String(option.clean)})`);
   }
@@ -250,19 +290,33 @@ function fixedOutputViolations(name: string): string[] {
     }
   }
 
-  // `dist/` に書くのが tsup だけであること。 `tsc -p` が同じ場所に emit すると、
-  // clean が無い分そのまま残る (実測 = 1 回で 6 file が 72 file になった)。
-  const tsconfig = join(PACKAGES_DIR, name, 'tsconfig.json');
-  if (!existsSync(tsconfig)) out.push(`${name}: tsconfig.json が無い`);
-  else {
-    const compilerOptions = (JSON.parse(readFileSync(tsconfig, 'utf8')) as {
-      compilerOptions?: { outDir?: string; noEmit?: boolean };
-    }).compilerOptions ?? {};
-    if (compilerOptions.outDir === 'dist' && compilerOptions.noEmit !== true) {
-      out.push(`${name}: tsconfig.json が dist へ emit する (noEmit が要る)`);
-    }
-  }
+  out.push(...emitViolations(name));
   return out;
+}
+
+/**
+ * `dist/` に書くのが tsup だけかを確かめる。 `tsc -p` が同じ場所に emit すると、
+ * clean が無い分そのまま残る (実測 = 1 回で 6 file が 72 file になった)。
+ *
+ * 判定は TypeScript に解決させる。 生の JSON を読むと `extends` を辿らないため、
+ * base 側で `noEmit` を立てた設定を誤って違反にし、 逆に base 側で `outDir` を
+ * 与える設定を見落とす。 `outDir` は解決後の絶対 path になるので、 文字列比較では
+ * なく package の `dist/` と同じ場所を指すかで見る。
+ */
+function emitViolations(name: string): string[] {
+  const dir = join(PACKAGES_DIR, name);
+  const tsconfig = join(dir, 'tsconfig.json');
+  if (!existsSync(tsconfig)) return [`${name}: tsconfig.json が無い`];
+
+  const read = ts.readConfigFile(tsconfig, (path) => readFileSync(path, 'utf8'));
+  if (read.error !== undefined) {
+    return [`${name}: tsconfig.json を読めない (${ts.flattenDiagnosticMessageText(read.error.messageText, ' ')})`];
+  }
+  const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, dir);
+  const { outDir, noEmit } = parsed.options;
+  if (outDir === undefined) return [];
+  if (resolve(outDir) !== resolve(dir, 'dist')) return [];
+  return noEmit === true ? [] : [`${name}: tsconfig.json が dist へ emit する (noEmit が要る)`];
 }
 
 /**
