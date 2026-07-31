@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.0098ms | 0.02ms | 30ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
-| pub_sub_burst (subscribe + 50 publish + drain) | 0.02ms | 0.09ms | 100ms | 0.00041ms | PASS | stable (換算後 p10 -5% (閾値未満)、 p95 +27% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.01ms | 0.02ms | 30ms | 0.00041ms | PASS | stable — gate 無効 (regressionGate=false) |
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.01ms | 0.02ms | 30ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
+| pub_sub_burst (subscribe + 50 publish + drain) | 0.02ms | 0.05ms | 100ms | 0.00041ms | PASS | stable — gate 無効 (regressionGate=false) |
+| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.01ms | 0.02ms | 30ms | 0.00042ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
@@ -18,25 +18,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
 |---|---|---|---|---|---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | cpu | 0.08ms | 0.09ms | 0.0098ms | 0.119 | 0.122 | 0.0098ms | 0.01ms |
-| pub_sub_burst (subscribe + 50 publish + drain) | cpu | 0.08ms | 0.09ms | 0.02ms | 0.222 | 0.234 | 0.02ms | 0.02ms |
-| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | cpu | 0.08ms | 0.09ms | 0.01ms | 0.140 | 0.144 | 0.01ms | 0.01ms |
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | cpu | 0.08ms | 0.09ms | 0.01ms | 0.134 | 0.122 | 0.01ms | 0.01ms |
+| pub_sub_burst (subscribe + 50 publish + drain) | cpu | 0.08ms | 0.09ms | 0.02ms | 0.218 | 0.234 | 0.02ms | 0.02ms |
+| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | cpu | 0.08ms | 0.09ms | 0.01ms | 0.136 | 0.144 | 0.01ms | 0.01ms |
 
 ## Concurrent p95 (concurrency = 4, 8 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.06ms | 60ms | PASS |
-| pub_sub_burst (subscribe + 50 publish + drain) | 0.10ms | 200ms | PASS |
-| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.10ms | 60ms | PASS |
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | 0.07ms | 60ms | PASS |
+| pub_sub_burst (subscribe + 50 publish + drain) | 0.07ms | 200ms | PASS |
+| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 0.05ms | 60ms | PASS |
 
 ## Memory retention (30 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| read_heavy_workload (80 get / 20 set / 100 ops burst) | -8776 B | 0 B | 102400 B | yes | PASS |
-| pub_sub_burst (subscribe + 50 publish + drain) | 9528 B | 0 B | 102400 B | yes | PASS |
-| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 2232 B | 0 B | 102400 B | yes | PASS |
+| read_heavy_workload (80 get / 20 set / 100 ops burst) | -11224 B | 0 B | 102400 B | yes | PASS |
+| pub_sub_burst (subscribe + 50 publish + drain) | 9608 B | 0 B | 102400 B | yes | PASS |
+| ttl_expiry_cycle (set with TTL + get + assertTTL loop) | 704 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -48,30 +48,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 30 |
 | warmup | 5 |
-| p10 | 0.0098ms |
+| p10 | 0.01ms |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
 | p99 | 0.02ms |
 | mean | 0.02ms |
-| stdev | 0.0046ms |
-| min | 0.0094ms |
+| stdev | 0.0039ms |
+| min | 0.0099ms |
 | max | 0.02ms |
-| total | 0.45ms |
+| total | 0.46ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 1.002)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.006)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0098ms | 0.01ms | -0.00025ms | -2.51% |
-| p50 | 0.01ms | 0.01ms | +0.0025ms | +22.32% |
-| p95 | 0.02ms | 0.02ms | +0.0020ms | +8.95% |
-| p99 | 0.02ms | 0.03ms | -0.0018ms | -7.07% |
-| mean | 0.02ms | 0.01ms | +0.0013ms | +9.73% |
-| min | 0.0094ms | 0.0096ms | -0.00023ms | -2.44% |
-| max | 0.02ms | 0.03ms | -0.0033ms | -12.28% |
-| total | 0.46ms | 0.41ms | +0.04ms | +9.73% |
+| p10 | 0.01ms | 0.01ms | +0.00093ms | +9.26% |
+| p50 | 0.01ms | 0.01ms | +0.0030ms | +26.38% |
+| p95 | 0.02ms | 0.02ms | +0.0013ms | +5.91% |
+| p99 | 0.02ms | 0.03ms | -0.0016ms | -6.14% |
+| mean | 0.02ms | 0.01ms | +0.0017ms | +12.39% |
+| min | 0.0099ms | 0.0096ms | +0.00031ms | +3.24% |
+| max | 0.02ms | 0.03ms | -0.0030ms | -10.95% |
+| total | 0.47ms | 0.41ms | +0.05ms | +12.39% |
 
 ### pub_sub_burst (subscribe + 50 publish + drain)
 
@@ -83,28 +83,28 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 1.
 | warmup | 5 |
 | p10 | 0.02ms |
 | p50 | 0.02ms |
-| p95 | 0.09ms |
-| p99 | 0.11ms |
+| p95 | 0.05ms |
+| p99 | 0.08ms |
 | mean | 0.03ms |
-| stdev | 0.03ms |
+| stdev | 0.02ms |
 | min | 0.02ms |
-| max | 0.11ms |
-| total | 0.98ms |
+| max | 0.09ms |
+| total | 0.82ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.994)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.988)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.00099ms | -5.26% |
-| p50 | 0.02ms | 0.02ms | -0.0014ms | -6.92% |
-| p95 | 0.09ms | 0.07ms | +0.02ms | +27.07% |
-| p99 | 0.11ms | 0.18ms | -0.08ms | -41.60% |
-| mean | 0.03ms | 0.04ms | -0.0032ms | -8.80% |
-| min | 0.02ms | 0.02ms | -0.00089ms | -4.81% |
-| max | 0.11ms | 0.22ms | -0.11ms | -50.87% |
-| total | 0.98ms | 1.07ms | -0.09ms | -8.80% |
+| p10 | 0.02ms | 0.02ms | -0.0013ms | -6.96% |
+| p50 | 0.02ms | 0.02ms | -0.0016ms | -7.81% |
+| p95 | 0.05ms | 0.07ms | -0.03ms | -34.16% |
+| p99 | 0.08ms | 0.18ms | -0.11ms | -58.47% |
+| mean | 0.03ms | 0.04ms | -0.0089ms | -24.90% |
+| min | 0.02ms | 0.02ms | -0.0010ms | -5.40% |
+| max | 0.09ms | 0.22ms | -0.13ms | -60.58% |
+| total | 0.81ms | 1.07ms | -0.27ms | -24.90% |
 
 ### ttl_expiry_cycle (set with TTL + get + assertTTL loop)
 
@@ -117,25 +117,25 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 | p10 | 0.01ms |
 | p50 | 0.01ms |
 | p95 | 0.02ms |
-| p99 | 0.09ms |
+| p99 | 0.07ms |
 | mean | 0.02ms |
-| stdev | 0.02ms |
+| stdev | 0.01ms |
 | min | 0.01ms |
-| max | 0.12ms |
-| total | 0.52ms |
+| max | 0.09ms |
+| total | 0.45ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.991)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.001)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.01ms | -0.00039ms | -3.32% |
-| p50 | 0.01ms | 0.01ms | -0.00026ms | -2.04% |
-| p95 | 0.02ms | 0.03ms | -0.0020ms | -7.59% |
-| p99 | 0.09ms | 0.03ms | +0.06ms | +164.61% |
-| mean | 0.02ms | 0.01ms | +0.0027ms | +19.21% |
-| min | 0.01ms | 0.01ms | +0.000067ms | +0.60% |
-| max | 0.12ms | 0.04ms | +0.08ms | +221.28% |
-| total | 0.51ms | 0.43ms | +0.08ms | +19.21% |
+| p10 | 0.01ms | 0.01ms | -0.00067ms | -5.69% |
+| p50 | 0.01ms | 0.01ms | -0.00087ms | -6.87% |
+| p95 | 0.02ms | 0.03ms | -0.0078ms | -30.19% |
+| p99 | 0.07ms | 0.03ms | +0.04ms | +112.40% |
+| mean | 0.02ms | 0.01ms | +0.00077ms | +5.38% |
+| min | 0.01ms | 0.01ms | -0.00033ms | -2.96% |
+| max | 0.09ms | 0.04ms | +0.06ms | +157.44% |
+| total | 0.45ms | 0.43ms | +0.02ms | +5.38% |
 
