@@ -1,8 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import {
-  existsSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, statSync,
-  writeFileSync,
+  existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync,
+  statSync, writeFileSync,
 } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -183,9 +184,56 @@ function readBuildScript(name: string): string | null {
  */
 function probeBuild(name: string): BuildProbe {
   const dist = join(PACKAGES_DIR, name, 'dist');
+  return withProbe(dist, (probe) => {
+    // 目印自身の更新時刻を基準にする。 別に時刻を採ると、 file system の分解能や
+    // 時計のずれで前後が入れ替わり得る。
+    //
+    // ただし刻みが粗い file system では、 前の build が書いた file と目印が同じ刻みに
+    // 載り得る。 その状態で「基準より前か」 を見ると、 前の build の file が「今回
+    // 書かれた」 と読めてしまう。 刻みが 1 つ進むまで待って境界を決定的にする。
+    const startedAt = advancePastTick(probe);
+
+    let error: string | null = null;
+    try {
+      // `--fail-if-no-match` が無いと、 名前が 1 件も一致しない filter でも exit 0 に
+      // なる。 何も build していない実行を成功として読むことになる。
+      execFileSync('pnpm', ['--filter', `@kiwa-lab/${name}`, '--fail-if-no-match', 'build'], {
+        cwd: REPO_ROOT,
+        stdio: 'pipe',
+        encoding: 'utf8',
+      });
+    } catch (thrown) {
+      const stderr = (thrown as { stderr?: string }).stderr ?? '';
+      error = `${(thrown as Error).message}\n${stderr}`;
+    }
+
+    // 目印の有無は後始末より先に見る。 消した後では clean が消したのかこちらが
+    // 消したのか判らない。
+    const probeSurvived = existsSync(probe);
+    if (error !== null) return { probeSurvived: false, files: [], stale: [], error };
+
+    const files = listFiles(dist).filter((file) => file !== PROBE).sort();
+    return {
+      probeSurvived,
+      files,
+      // この実行より前の更新時刻を持つ file。 1 件でもあれば、 その file は今回の
+      // build が書いたものではない。
+      stale: files.filter((file) => isStale(statSync(join(dist, file)).mtimeMs, startedAt)),
+      error: null,
+    };
+  });
+}
+
+/**
+ * `dist/` に目印を置いて処理を走らせ、 どう抜けても目印を消す。
+ *
+ * 後始末を本体の末尾に置くと、 途中で投げた時に目印が実 `dist/` に残る。 刻みが
+ * 進むのを待つ経路が上限で投げるのはまさにその形で、 残った目印が次の build の
+ * 出力集合に混ざる。
+ */
+export function withProbe<T>(dist: string, body: (probe: string) => T): T {
   const probe = join(dist, PROBE);
   mkdirSync(dist, { recursive: true });
-
   // 目印を 1 つ足すだけで、 既にある file には触らない。
   //
   // 以前は「この実行の出力だけを見る」 ために `dist/` を空にしていた。 だがこの
@@ -193,47 +241,12 @@ function probeBuild(name: string): BuildProbe {
   // 169 package を並列に走らせるので、 空にしている間に別 package の `tsc` が
   // 型定義を読みに来る。 release-smoke の中で実行を分けても、 外の 168 package
   // からは見えない。
-  //
-  // 代わりに、 出力 file の更新時刻がこの実行より後かどうかで「この実行が書いたか」
-  // を見る。 出力先を `dist` 以外に変えた設定も、 filter が 1 件も一致しなかった
-  // 実行も、 `dist/` の file は前のままなので更新時刻で判る。
   writeFileSync(probe, 'probe', 'utf8');
-  // 目印自身の更新時刻を基準にする。 別に時刻を採ると、 file system の分解能や
-  // 時計のずれで前後が入れ替わり得る。
-  //
-  // ただし刻みが粗い file system では、 前の build が書いた file と目印が同じ刻みに
-  // 載り得る。 その状態で「基準より前か」 を見ると、 前の build の file が「今回
-  // 書かれた」 と読めてしまう。 刻みが 1 つ進むまで待って境界を決定的にする。
-  const startedAt = advancePastTick(probe);
-
-  let error: string | null = null;
   try {
-    // `--fail-if-no-match` が無いと、 名前が 1 件も一致しない filter でも exit 0 に
-    // なる。 何も build していない実行を成功として読むことになる。
-    execFileSync('pnpm', ['--filter', `@kiwa-lab/${name}`, '--fail-if-no-match', 'build'], {
-      cwd: REPO_ROOT,
-      stdio: 'pipe',
-      encoding: 'utf8',
-    });
-  } catch (thrown) {
-    const stderr = (thrown as { stderr?: string }).stderr ?? '';
-    error = `${(thrown as Error).message}\n${stderr}`;
+    return body(probe);
+  } finally {
+    rmSync(probe, { force: true });
   }
-
-  // 目印を消す前に見る。 消した後では clean が消したのかこちらが消したのか判らない。
-  const probeSurvived = existsSync(probe);
-  rmSync(probe, { force: true });
-  if (error !== null) return { probeSurvived: false, files: [], stale: [], error };
-
-  const files = listFiles(dist).filter((file) => file !== PROBE).sort();
-  return {
-    probeSurvived,
-    files,
-    // この実行より前の更新時刻を持つ file。 1 件でもあれば、 その file は今回の
-    // build が書いたものではない。
-    stale: files.filter((file) => isStale(statSync(join(dist, file)).mtimeMs, startedAt)),
-    error: null,
-  };
 }
 
 /** 更新時刻の刻みが進むのを待つ上限。 */
@@ -522,6 +535,22 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       label: 'ok',
     });
     expect(result).toBe(1001);
+  });
+
+  it('途中で投げても目印を残さない', () => {
+    // 刻みが進むのを待つ経路が上限で投げると、 後始末を末尾に置いた形では目印が
+    // 実 dist に残る。 残った目印は次の build の出力集合に混ざる。
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-with-probe-'));
+    try {
+      expect(() => withProbe(dir, () => { throw new Error('boom'); })).toThrow('boom');
+      expect(readdirSync(dir), '投げた後に目印が残っていない').toEqual([]);
+
+      const returned = withProbe(dir, (probe) => existsSync(probe));
+      expect(returned, '本体からは目印が見える').toBe(true);
+      expect(readdirSync(dir), '正常に抜けた後も残っていない').toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('共有 build 対象が一覧から漏れていない', () => {
