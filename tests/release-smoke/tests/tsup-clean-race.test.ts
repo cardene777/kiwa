@@ -200,7 +200,11 @@ function probeBuild(name: string): BuildProbe {
   writeFileSync(probe, 'probe', 'utf8');
   // 目印自身の更新時刻を基準にする。 別に時刻を採ると、 file system の分解能や
   // 時計のずれで前後が入れ替わり得る。
-  const startedAt = statSync(probe).mtimeMs;
+  //
+  // ただし刻みが粗い file system では、 前の build が書いた file と目印が同じ刻みに
+  // 載り得る。 その状態で「基準より前か」 を見ると、 前の build の file が「今回
+  // 書かれた」 と読めてしまう。 刻みが 1 つ進むまで待って境界を決定的にする。
+  const startedAt = advancePastTick(probe);
 
   let error: string | null = null;
   try {
@@ -227,9 +231,47 @@ function probeBuild(name: string): BuildProbe {
     files,
     // この実行より前の更新時刻を持つ file。 1 件でもあれば、 その file は今回の
     // build が書いたものではない。
-    stale: files.filter((file) => statSync(join(dist, file)).mtimeMs < startedAt),
+    stale: files.filter((file) => isStale(statSync(join(dist, file)).mtimeMs, startedAt)),
     error: null,
   };
+}
+
+/**
+ * file の更新時刻が 1 刻み進むまで書き直し、 進んだ後の値を返す。
+ *
+ * これより前の更新時刻を持つ file は、 確実にこの呼出より前に書かれている。
+ * 同じ刻みに載って前後が判らなくなる状態を作らないための境界。
+ *
+ * 刻みが進まないまま上限に達したら投げる。 黙って進めると、 前の build の出力を
+ * 「今回書かれた」 と読む状態に戻る。
+ */
+function advancePastTick(path: string): number {
+  const first = statSync(path).mtimeMs;
+  const deadline = first + TICK_WAIT_LIMIT_MS;
+  for (let attempt = 0; ; attempt += 1) {
+    writeFileSync(path, `probe-${attempt}`, 'utf8');
+    const now = statSync(path).mtimeMs;
+    if (now > first) return now;
+    if (now > deadline) {
+      throw new Error(
+        `更新時刻が ${TICK_WAIT_LIMIT_MS}ms 進まない (${path})。` +
+          ' この file system では出力の新旧を判定できない',
+      );
+    }
+  }
+}
+
+/** 更新時刻の刻みが進むのを待つ上限。 */
+const TICK_WAIT_LIMIT_MS = 3_000;
+
+/**
+ * この実行より前に書かれた file か。
+ *
+ * 基準 (`startedAt`) は刻みが 1 つ進んだ後の値なので、 同じ刻みに載る file は
+ * 基準以降に書かれている。 等しい場合は「今回書かれた」 と読む。
+ */
+export function isStale(mtimeMs: number, startedAt: number): boolean {
+  return mtimeMs < startedAt;
 }
 
 /**
@@ -419,6 +461,15 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       'tsup は js を先に、 宣言を後に書く。 失敗時に宣言を消さないと、 新しい js と' +
         ` 古い宣言が同居したまま型検査が通る。 該当: ${offenders.join(' / ')}`,
     ).toEqual([]);
+  });
+
+  it('更新時刻の境界が決定的', () => {
+    // 基準は刻みが 1 つ進んだ後の値なので、 同じ刻みに載る file は基準以降に
+    // 書かれている。 等号を古い側に倒すと、 build 直後に書かれた file を
+    // 「今回書かれていない」 と読む。 新しい側に倒すのが正しい。
+    expect(isStale(100, 200), '基準より前は古い').toBe(true);
+    expect(isStale(200, 200), '基準と同じ刻みは今回書かれた').toBe(false);
+    expect(isStale(300, 200), '基準より後は今回書かれた').toBe(false);
   });
 
   it('共有 build 対象が一覧から漏れていない', () => {
