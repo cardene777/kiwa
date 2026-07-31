@@ -98,6 +98,25 @@ function collectServerPorts(name: string): Set<number> {
   return found;
 }
 
+/** browser を起動する対象か。 */
+function usesBrowser(dir: string): boolean {
+  for (const sub of ['tests', 'src']) {
+    for (const file of listSourceFiles(join(dir, sub))) {
+      const text = readFileSync(file, 'utf8');
+      if (/setupE2eEnv|setupBrowserComponentEnv|chromium\.launch/.test(text)) return true;
+    }
+  }
+  return false;
+}
+
+function readScripts(dir: string): Record<string, string> {
+  const manifest = join(dir, 'package.json');
+  if (!existsSync(manifest)) return {};
+  return (JSON.parse(readFileSync(manifest, 'utf8')) as {
+    scripts?: Record<string, string>;
+  }).scripts ?? {};
+}
+
 describe('ローカルチェーンのポートが重ならない (#1724)', () => {
   const owners = new Map<number, string[]>();
   if (existsSync(EXAMPLES_DIR)) {
@@ -139,6 +158,33 @@ describe('ローカルチェーンのポートが重ならない (#1724)', () =>
       shared,
       '並列実行で先着 1 つだけが起動し、 残りは Address already in use で落ちる。' +
         ` 該当: ${shared.join(' / ')}`,
+    ).toEqual([]);
+  });
+
+  it('browser を起動する対象は hook の待ち時間も指定している', () => {
+    // `--testTimeout` は test 本体にしか効かない。 browser の起動と終了は
+    // `beforeAll` / `afterEach` で行うため、 hook 側の既定 (10 秒) が効く。
+    // 並列実行の負荷では終了だけで 10 秒を超える (#1724 実測 =
+    // `full-stack-poc` の `afterEach` が `Hook timed out in 10000ms`)。
+    const missing: string[] = [];
+    for (const dir of ['packages', 'examples']) {
+      const root = join(REPO_ROOT, dir);
+      if (!existsSync(root)) continue;
+      for (const entry of readdirSync(root, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        if (!usesBrowser(join(root, entry.name))) continue;
+        const scripts = readScripts(join(root, entry.name));
+        for (const [key, script] of Object.entries(scripts)) {
+          if (!key.startsWith('test')) continue;
+          for (const call of script.match(/vitest run [^&|]*/g) ?? []) {
+            if (!call.includes('--hookTimeout')) missing.push(`${entry.name} (${key})`);
+          }
+        }
+      }
+    }
+    expect(
+      [...new Set(missing)].sort(),
+      `browser の起動 / 終了が hook の既定 10 秒に収まらない。 該当: ${missing.join(', ')}`,
     ).toEqual([]);
   });
 
