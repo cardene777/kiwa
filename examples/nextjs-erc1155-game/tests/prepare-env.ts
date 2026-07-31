@@ -6,7 +6,7 @@ import { type Hex } from 'viem';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const exampleRoot = resolve(__dirname, '..');
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8570;
 const CHAIN_ID = 31337;
 
 await runE2EPrepareEnv({

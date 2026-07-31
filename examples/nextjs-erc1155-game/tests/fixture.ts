@@ -1,8 +1,8 @@
 import { dappE2eTest } from '@kiwa-lab/dapp';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8570;
 
-// anvil is managed by tests/global-setup.ts on fixed port 8545.
+// anvil is managed by tests/global-setup.ts on fixed port 8570.
 export const test = dappE2eTest.extend({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _anvilHandle: async ({}: any, use: (h: { port: number; stop: () => Promise<void> }) => Promise<void>) => {

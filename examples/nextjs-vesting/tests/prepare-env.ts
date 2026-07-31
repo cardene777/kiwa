@@ -13,7 +13,7 @@ const exampleRoot = resolve(__dirname, '..');
 
 await runE2EPrepareEnv({
   exampleRoot,
-  port: 8545,
+  port: 8567,
   chainId: 31337,
   deploy: async ({ account, wallet, publicClient }) => {
     const erc20Artifact = JSON.parse(

@@ -19,7 +19,7 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8566;
 const STAKE_AMOUNT = 100n * 10n ** 18n;
 const SMALL_STAKE_AMOUNT = 1n;
 const TOP_UP_AMOUNT = 1n * 10n ** 18n;

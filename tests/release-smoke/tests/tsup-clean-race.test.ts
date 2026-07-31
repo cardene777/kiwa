@@ -22,8 +22,13 @@ import { beforeAll, describe, expect, it } from 'vitest';
  *
  * ## clean を外せる条件
  *
- * clean は「古い生成物を消す」 ためにある。 外してよいのは、 それが不要である
- * ことを別の形で保証できる package に限る。 4 条件すべてが要る。
+ * clean は 2 つの役目を持つ。 build 中に `dist/` を空にすることと、 古い生成物を
+ * 消すこと。 前者が race を作るので外し、 後者は publish の前に 1 度だけ消す step
+ * (`scripts/clean-dist.mjs`) が引き受ける。
+ *
+ * 外した上で、 開発中に古い生成物が悪さをしないことを 4 条件で保証する。 chunk を
+ * 出す `cli` / `dapp` は条件 1 と 2 を満たさないが、 entry file は毎回上書きされて
+ * 現行の chunk 名だけを参照するので、 残った chunk は読まれない。
  *
  * 1. **出力する file 名の集合が固定** — entry 1 つ / format 2 種 / dts / sourcemap で
  *    6 file に決まる。 毎回すべて上書きされるので古い生成物が残らない
@@ -131,7 +136,7 @@ const FIXED_OUTPUT_TARGETS = [
  * 出力が固定でない package。 clean を外すと古い chunk が残るため clean が要る。
  * `cli` は追加 entry (`bin.ts`) と chunk、 `dapp` は追加 entry (`vitest`) と chunk。
  */
-const CLEAN_REQUIRED_TARGETS = ['cli', 'dapp'] as const;
+const CHUNK_OUTPUT_TARGETS = ['cli', 'dapp'] as const;
 
 /** tsup を 1 回走らせた結果。 */
 interface BuildProbe {
@@ -407,7 +412,7 @@ function findManifests(root: string, depth = 0): string[] {
 
 describe('tsup clean と並列 test の race (#1741)', () => {
   beforeAll(() => {
-    for (const name of [...FIXED_OUTPUT_TARGETS, ...CLEAN_REQUIRED_TARGETS]) {
+    for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
       probes.set(name, probeBuild(name));
     }
   }, 900_000);
@@ -432,15 +437,27 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     ).toEqual([]);
   });
 
-  it('chunk を出す共有依存は全件 clean が有効', () => {
-    // 除外側も全件見る。 `some` にすると 1 件 clean があれば残りが無検査になる。
-    const missing = CLEAN_REQUIRED_TARGETS.filter(
-      (name) => probes.get(name)?.probeSurvived !== false,
+  it('chunk を出す共有依存も全件 clean が無効', () => {
+    // この 2 件も他 package の test から再 build されるので、 clean があると
+    // 同じ race を起こす。 古い chunk は publish 前の掃除が引き受ける。
+    const offenders = CHUNK_OUTPUT_TARGETS.filter(
+      (name) => probes.get(name)?.probeSurvived !== true,
     );
     expect(
-      missing,
-      `chunk を出す package で clean を外すと古い chunk が残る。 該当: ${missing.join(', ')}`,
+      offenders,
+      'clean が有効だと build 中に dist が空になり、 並列実行中の別 package が' +
+        ` 型定義を解決できない (#1724)。 該当: ${offenders.join(', ')}`,
     ).toEqual([]);
+  });
+
+  it('publish の前に dist を消す step がある', () => {
+    // clean をどこにも置かない以上、 古い生成物を落とすのは publish 前の掃除だけ。
+    // これが消えると、 過去の chunk がそのまま npm tarball に載る。
+    const release = (JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    }).scripts?.release ?? '';
+    expect(release.startsWith('node scripts/clean-dist.mjs &&'), release.slice(0, 80)).toBe(true);
+    expect(existsSync(join(REPO_ROOT, 'scripts/clean-dist.mjs'))).toBe(true);
   });
 
   it('出力が全件この実行の build で書かれている', () => {
@@ -463,15 +480,15 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       .map((name) => `${name} (${probes.get(name)?.files.join(', ')})`);
     expect(
       wrongSide,
-      '出力の顔ぶれが変わると、 clean を外したままでは古い生成物が残る。' +
-        ` CLEAN_REQUIRED_TARGETS へ移して clean を戻す: ${wrongSide.join(' / ')}`,
+      '出力の顔ぶれが固定でなくなると、 chunk 側の扱いに移す必要がある。' +
+        ` CHUNK_OUTPUT_TARGETS へ移す: ${wrongSide.join(' / ')}`,
     ).toEqual([]);
   });
 
   it('除外側は固定 6 file を出さない', () => {
     // `cli` / `dapp` を惰性で除外し続けないための逆向きの検査。 固定になったら
     // 固定側へ移して clean を外せる。
-    const nowFixed = CLEAN_REQUIRED_TARGETS.filter(
+    const nowFixed = CHUNK_OUTPUT_TARGETS.filter(
       (name) => probes.get(name)?.files.join(',') === FIXED_OUTPUT.join(','),
     );
     expect(
@@ -555,7 +572,7 @@ describe('tsup clean と並列 test の race (#1741)', () => {
 
   it('共有 build 対象が一覧から漏れていない', () => {
     // 新しい共有依存が増えた時に、 どちらの一覧にも入らないまま無検査になるのを防ぐ。
-    const known = new Set<string>([...FIXED_OUTPUT_TARGETS, ...CLEAN_REQUIRED_TARGETS]);
+    const known = new Set<string>([...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]);
     const unclassified = [...collectSharedBuildTargets()]
       .filter((name) => existsSync(join(PACKAGES_DIR, name)))
       .filter((name) => !known.has(name))

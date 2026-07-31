@@ -46,7 +46,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsup src/bin.ts src/index.ts --format esm --dts --clean --onSuccess \"node -e \\\"require('node:fs').cpSync('src/templates','dist/templates',{recursive:true})\\\"\"",
+    "build": "tsup src/bin.ts src/index.ts --format esm --dts --onSuccess \"node -e \\\"require('node:fs').cpSync('src/templates','dist/templates',{recursive:true})\\\"\"",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --no-file-parallelism --testTimeout 30000",
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",

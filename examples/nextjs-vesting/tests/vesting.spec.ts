@@ -8,7 +8,7 @@ import { createPublicClient, createWalletClient, defineChain, http, type Hex } f
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8567;
 const VEST_TOTAL = 1000n * 10n ** 18n;
 const CLIFF_DURATION = 300n;
 const VESTING_DURATION = 3600n;
