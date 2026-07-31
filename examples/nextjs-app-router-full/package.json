@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa-lab/nextjs -F @kiwa-lab/core build && next build",
+    "build": "node ../../scripts/build-deps.mjs @kiwa-lab/nextjs @kiwa-lab/core && next build",
     "dev": "next dev",
     "start": "next start",
     "test": "node ../../scripts/build-deps.mjs @kiwa-lab/nextjs @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",

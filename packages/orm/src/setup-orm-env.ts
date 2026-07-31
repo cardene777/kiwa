@@ -772,8 +772,10 @@ export async function setupOrmEnv(
  * 別に接続を試すのではなく `db push` 自体を再試行する。 実際に使う経路で判定するので、
  * 「立った」 と「使える」 の取り違えが起きない。 接続以外の理由 (schema の誤り 等)
  * で失敗する場合は再試行しても同じ結果になり、 上限に達して最後の出力を返す。
+ *
+ * `spawnSync` を引数で受けるのは、 container を立てずに再試行の判断を確かめるため。
  */
-function pushSchemaWithRetry(
+export function pushSchemaWithRetry(
   spawnSync: typeof import('node:child_process').spawnSync,
   schemaPath: string,
   envName: string,
@@ -783,12 +785,27 @@ function pushSchemaWithRetry(
   const startedAt = Date.now();
   let last: { status: number | null; stderr: string; stdout: string };
   for (;;) {
+    // 上限は 1 回の呼出にも掛ける。 掛けないと、 接続先で止まった `db push` が
+    // 戻らない限り上限の判定に到達せず、 全体テストごと止まる。
+    const remainingMs = Math.max(1, limitMs - (Date.now() - startedAt));
     const result = spawnSync(
       'pnpm',
       ['exec', 'prisma', 'db', 'push', `--schema=${schemaPath}`, '--skip-generate', '--accept-data-loss'],
-      { stdio: 'pipe', env: { ...process.env, [envName]: connectionUri }, encoding: 'utf8' },
+      {
+        stdio: 'pipe',
+        env: { ...process.env, [envName]: connectionUri },
+        encoding: 'utf8',
+        timeout: remainingMs,
+      },
     );
-    last = { status: result.status, stderr: result.stderr ?? '', stdout: result.stdout ?? '' };
+    // 起動できなかった / 打ち切られた場合、 理由は `error` にしか出ない。
+    // 落とすと最後の診断が空になる。
+    const spawnError = result.error ? `${result.error.message}\n` : '';
+    last = {
+      status: result.status,
+      stderr: spawnError + (result.stderr ?? ''),
+      stdout: result.stdout ?? '',
+    };
     if (result.status === 0) return last;
     // 接続を受けていないことが読み取れる時だけ待って繰り返す。
     const reachable = !/database server is running|ECONNREFUSED|Can't reach database server/i.test(last.stderr + last.stdout);

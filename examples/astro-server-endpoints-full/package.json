@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa-lab/astro -F @kiwa-lab/core build && astro build",
+    "build": "node ../../scripts/build-deps.mjs @kiwa-lab/astro @kiwa-lab/core && astro build",
     "dev": "astro dev",
     "start": "astro preview",
     "preview": "astro preview",
