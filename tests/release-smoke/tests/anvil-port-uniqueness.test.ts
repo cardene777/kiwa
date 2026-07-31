@@ -188,6 +188,27 @@ describe('ローカルチェーンのポートが重ならない (#1724)', () =>
     ).toEqual([]);
   });
 
+  it('browser を実起動する対象は直列 phase にいる', () => {
+    // browser は機械に 1 つしかない。 並列 phase に残すと、 起動と終了が他の負荷と
+    // 重なって hook の待ち時間を超える (#1724 実測 = `full-stack-poc` が 30 秒でも
+    // 溢れた)。 待ち時間をさらに延ばすのではなく、 直列にして重ならなくする。
+    //
+    // 「実起動する」 の判定は import ではなく実測に依る。 browser API に触れる
+    // 対象は 27 あるが、 実際に起動するのは環境が揃った一部だけで、 残りは
+    // 1 秒台で終わる。 一覧はその実測で決めた。
+    const SERIAL_BROWSER = ['@kiwa-lab/e2e', '@kiwa-lab/ui', 'examples-full-stack-poc'];
+    const script = (JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    }).scripts?.test ?? '';
+    const missing = SERIAL_BROWSER.filter(
+      (name) => !script.includes(`-F ${name} test`) && !script.includes(`-F ${name} `),
+    );
+    expect(missing, `直列 phase に無い: ${missing.join(', ')}`).toEqual([]);
+    // 並列 phase からは外れていること。
+    const excluded = SERIAL_BROWSER.filter((name) => !script.includes(`'!${name}'`));
+    expect(excluded, `並列 phase から除外されていない: ${excluded.join(', ')}`).toEqual([]);
+  });
+
   it('example の中でポートの指定が食い違わない', () => {
     // 起動時の指定と、 test / app 側の参照が別々の番号になっていると、
     // 起動は成功するのに繋がらない。
