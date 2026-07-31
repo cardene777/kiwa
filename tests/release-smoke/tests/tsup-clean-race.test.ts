@@ -236,33 +236,53 @@ function probeBuild(name: string): BuildProbe {
   };
 }
 
+/** 更新時刻の刻みが進むのを待つ上限。 */
+const TICK_WAIT_LIMIT_MS = 3_000;
+
 /**
  * file の更新時刻が 1 刻み進むまで書き直し、 進んだ後の値を返す。
  *
  * これより前の更新時刻を持つ file は、 確実にこの呼出より前に書かれている。
  * 同じ刻みに載って前後が判らなくなる状態を作らないための境界。
- *
- * 刻みが進まないまま上限に達したら投げる。 黙って進めると、 前の build の出力を
- * 「今回書かれた」 と読む状態に戻る。
  */
 function advancePastTick(path: string): number {
-  const first = statSync(path).mtimeMs;
-  const deadline = first + TICK_WAIT_LIMIT_MS;
+  return advanceUntilMtimeChanges({
+    first: statSync(path).mtimeMs,
+    rewrite: (attempt) => { writeFileSync(path, `probe-${attempt}`, 'utf8'); },
+    readMtime: () => statSync(path).mtimeMs,
+    now: () => performance.now(),
+    limitMs: TICK_WAIT_LIMIT_MS,
+    label: path,
+  });
+}
+
+/**
+ * 更新時刻が進むまで待つ loop の本体。 時計と file 操作を差し替えられる形にしてある。
+ *
+ * 上限は **更新時刻とは別の時計** で測る。 更新時刻を時計に使うと、 進まない
+ * file system では上限に達したことも判らず、 loop から抜けられない。
+ */
+export function advanceUntilMtimeChanges(input: {
+  first: number;
+  rewrite: (attempt: number) => void;
+  readMtime: () => number;
+  now: () => number;
+  limitMs: number;
+  label: string;
+}): number {
+  const startedAt = input.now();
   for (let attempt = 0; ; attempt += 1) {
-    writeFileSync(path, `probe-${attempt}`, 'utf8');
-    const now = statSync(path).mtimeMs;
-    if (now > first) return now;
-    if (now > deadline) {
+    input.rewrite(attempt);
+    const current = input.readMtime();
+    if (current > input.first) return current;
+    if (input.now() - startedAt > input.limitMs) {
       throw new Error(
-        `更新時刻が ${TICK_WAIT_LIMIT_MS}ms 進まない (${path})。` +
+        `更新時刻が ${input.limitMs}ms 進まない (${input.label})。` +
           ' この file system では出力の新旧を判定できない',
       );
     }
   }
 }
-
-/** 更新時刻の刻みが進むのを待つ上限。 */
-const TICK_WAIT_LIMIT_MS = 3_000;
 
 /**
  * この実行より前に書かれた file か。
@@ -470,6 +490,38 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     expect(isStale(100, 200), '基準より前は古い').toBe(true);
     expect(isStale(200, 200), '基準と同じ刻みは今回書かれた').toBe(false);
     expect(isStale(300, 200), '基準より後は今回書かれた').toBe(false);
+  });
+
+  it('更新時刻が進まない file system では上限で落ちる', () => {
+    // 上限は更新時刻とは別の時計で測る。 更新時刻を時計に使うと、 進まない
+    // file system では上限に達したことも判らず loop から抜けられない。
+    let clock = 0;
+    let rewrites = 0;
+    expect(() => advanceUntilMtimeChanges({
+      first: 1000,
+      // 何度書き直しても更新時刻が動かない file system を模す。
+      rewrite: () => { rewrites += 1; },
+      readMtime: () => 1000,
+      now: () => { clock += 10; return clock; },
+      limitMs: 100,
+      label: 'stuck',
+    })).toThrow(/100ms 進まない/);
+    // 上限までに何度か試してから落ちる (1 回で諦めない)。
+    expect(rewrites).toBeGreaterThan(1);
+  });
+
+  it('更新時刻が進めば待たずに返る', () => {
+    let mtime = 1000;
+    const result = advanceUntilMtimeChanges({
+      first: 1000,
+      // 2 回目の書き直しで刻みが進む。
+      rewrite: (attempt) => { if (attempt >= 1) mtime = 1001; },
+      readMtime: () => mtime,
+      now: () => 0,
+      limitMs: 100,
+      label: 'ok',
+    });
+    expect(result).toBe(1001);
   });
 
   it('共有 build 対象が一覧から漏れていない', () => {
