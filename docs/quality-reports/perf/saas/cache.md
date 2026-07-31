@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| redisEnvAccessor | 0.00013ms | 0.0012ms | 5ms | 0.00034ms | PASS | stable (検知には +0.00034ms (baseline 比 +273%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| memcachedEnvAccessor | 0.00013ms | 0.00025ms | 5ms | 0.00034ms | PASS | stable (検知には +0.00034ms (baseline 比 +269%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
-| keydbEnvAccessor | 0.00013ms | 0.00030ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +265%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| redisEnvAccessor | 0.00013ms | 0.00093ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +262%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| memcachedEnvAccessor | 0.00013ms | 0.0023ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +264%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
+| keydbEnvAccessor | 0.00013ms | 0.00072ms | 5ms | 0.00033ms | PASS | stable (検知には +0.00033ms (baseline 比 +262%) 以上の悪化が必要) — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
@@ -18,25 +18,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 
 | op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
 |---|---|---|---|---|---|---|---|---|
-| redisEnvAccessor | cpu | 0.08ms | 0.09ms | 0.00013ms | 0.002 | 0.002 | 0.00013ms | 0.00013ms |
-| memcachedEnvAccessor | cpu | 0.08ms | 0.08ms | 0.00013ms | 0.002 | 0.002 | 0.00013ms | 0.00013ms |
-| keydbEnvAccessor | cpu | 0.08ms | 0.08ms | 0.00013ms | 0.002 | 0.002 | 0.00012ms | 0.00013ms |
+| redisEnvAccessor | cpu | 0.08ms | 0.09ms | 0.00013ms | 0.001 | 0.002 | 0.00012ms | 0.00013ms |
+| memcachedEnvAccessor | cpu | 0.08ms | 0.14ms | 0.00013ms | 0.002 | 0.002 | 0.00012ms | 0.00013ms |
+| keydbEnvAccessor | cpu | 0.08ms | 0.09ms | 0.00013ms | 0.002 | 0.002 | 0.00012ms | 0.00013ms |
 
 ## Concurrent p95 (concurrency = 10, 50 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
 | redisEnvAccessor | 0.01ms | 10ms | PASS |
-| memcachedEnvAccessor | 0.01ms | 10ms | PASS |
+| memcachedEnvAccessor | 0.00ms | 10ms | PASS |
 | keydbEnvAccessor | 0.00ms | 10ms | PASS |
 
 ## Memory retention (200 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
 |---|---|---|---|---|---|
-| redisEnvAccessor | -15496 B | 0 B | 102400 B | yes | PASS |
-| memcachedEnvAccessor | -16432 B | 0 B | 102400 B | yes | PASS |
-| keydbEnvAccessor | 648 B | 0 B | 102400 B | yes | PASS |
+| redisEnvAccessor | -19408 B | 0 B | 102400 B | yes | PASS |
+| memcachedEnvAccessor | -16280 B | 0 B | 102400 B | yes | PASS |
+| keydbEnvAccessor | 2776 B | 0 B | 102400 B | yes | PASS |
 
 ## Detailed serial reports
 
@@ -50,28 +50,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../../quality/perf-thresh
 | warmup | 5 |
 | p10 | 0.00013ms |
 | p50 | 0.00017ms |
-| p95 | 0.0012ms |
-| p99 | 0.0040ms |
-| mean | 0.00032ms |
-| stdev | 0.00063ms |
+| p95 | 0.00093ms |
+| p99 | 0.0023ms |
+| mean | 0.00028ms |
+| stdev | 0.00055ms |
 | min | 0.00013ms |
-| max | 0.0042ms |
+| max | 0.0063ms |
 | total | 0.06ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 1.030)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.988)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00013ms | 0.00013ms | +0.0000037ms | +2.95% |
-| p50 | 0.00017ms | 0.00017ms | +0.0000049ms | +2.95% |
-| p95 | 0.0013ms | 0.0012ms | +0.000081ms | +6.94% |
-| p99 | 0.0042ms | 0.0031ms | +0.0011ms | +35.61% |
-| mean | 0.00033ms | 0.00030ms | +0.000024ms | +7.75% |
-| min | 0.00013ms | 0.00013ms | +0.0000037ms | +2.95% |
-| max | 0.0043ms | 0.0068ms | -0.0025ms | -37.23% |
-| total | 0.07ms | 0.06ms | +0.0047ms | +7.75% |
+| p10 | 0.00012ms | 0.00013ms | -0.0000015ms | -1.19% |
+| p50 | 0.00017ms | 0.00017ms | -9.9e-7ms | -0.60% |
+| p95 | 0.00091ms | 0.0012ms | -0.00025ms | -21.79% |
+| p99 | 0.0023ms | 0.0031ms | -0.00080ms | -26.17% |
+| mean | 0.00028ms | 0.00030ms | -0.000024ms | -7.75% |
+| min | 0.00012ms | 0.00013ms | -0.0000015ms | -1.19% |
+| max | 0.0062ms | 0.0068ms | -0.00062ms | -9.03% |
+| total | 0.06ms | 0.06ms | -0.0047ms | -7.75% |
 
 ### memcachedEnvAccessor
 
@@ -82,29 +82,29 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 1.
 | iterations | 200 |
 | warmup | 5 |
 | p10 | 0.00013ms |
-| p50 | 0.00013ms |
-| p95 | 0.00025ms |
-| p99 | 0.0018ms |
-| mean | 0.00020ms |
-| stdev | 0.00038ms |
+| p50 | 0.00017ms |
+| p95 | 0.0023ms |
+| p99 | 0.0034ms |
+| mean | 0.00053ms |
+| stdev | 0.0022ms |
 | min | 0.00013ms |
-| max | 0.0046ms |
-| total | 0.04ms |
+| max | 0.03ms |
+| total | 0.11ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 1.012)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.994)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00013ms | 0.00013ms | +0.0000016ms | +1.25% |
-| p50 | 0.00013ms | 0.00013ms | +0.0000016ms | +1.25% |
-| p95 | 0.00026ms | 0.00025ms | +0.0000052ms | +2.10% |
-| p99 | 0.0018ms | 0.0019ms | -0.000030ms | -1.62% |
-| mean | 0.00020ms | 0.00020ms | -4.6e-7ms | -0.23% |
-| min | 0.00013ms | 0.000084ms | +0.000043ms | +50.66% |
-| max | 0.0047ms | 0.0045ms | +0.00018ms | +4.06% |
-| total | 0.04ms | 0.04ms | -0.000093ms | -0.23% |
+| p10 | 0.00012ms | 0.00013ms | -7.0e-7ms | -0.56% |
+| p50 | 0.00017ms | 0.00013ms | +0.000041ms | +32.85% |
+| p95 | 0.0022ms | 0.00025ms | +0.0020ms | +799.94% |
+| p99 | 0.0034ms | 0.0019ms | +0.0016ms | +83.74% |
+| mean | 0.00053ms | 0.00020ms | +0.00032ms | +160.18% |
+| min | 0.00012ms | 0.000084ms | +0.000040ms | +47.98% |
+| max | 0.03ms | 0.0045ms | +0.03ms | +557.42% |
+| total | 0.11ms | 0.04ms | +0.06ms | +160.18% |
 
 ### keydbEnvAccessor
 
@@ -116,26 +116,26 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 1.
 | warmup | 5 |
 | p10 | 0.00013ms |
 | p50 | 0.00013ms |
-| p95 | 0.00030ms |
-| p99 | 0.0023ms |
-| mean | 0.00028ms |
-| stdev | 0.0011ms |
+| p95 | 0.00072ms |
+| p99 | 0.0045ms |
+| mean | 0.00041ms |
+| stdev | 0.0017ms |
 | min | 0.000083ms |
 | max | 0.02ms |
-| total | 0.06ms |
+| total | 0.08ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.998)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.988)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.00012ms | 0.00013ms | -2.0e-7ms | -0.16% |
-| p50 | 0.00012ms | 0.00013ms | -2.0e-7ms | -0.16% |
-| p95 | 0.00030ms | 0.00026ms | +0.000039ms | +15.39% |
-| p99 | 0.0023ms | 0.0034ms | -0.0011ms | -33.30% |
-| mean | 0.00028ms | 0.00030ms | -0.000021ms | -6.79% |
-| min | 0.000083ms | 0.000083ms | -1.3e-7ms | -0.16% |
-| max | 0.02ms | 0.02ms | -0.0041ms | -20.76% |
-| total | 0.06ms | 0.06ms | -0.0041ms | -6.79% |
+| p10 | 0.00012ms | 0.00013ms | -0.0000015ms | -1.17% |
+| p50 | 0.00012ms | 0.00013ms | -0.0000015ms | -1.17% |
+| p95 | 0.00071ms | 0.00026ms | +0.00045ms | +177.35% |
+| p99 | 0.0044ms | 0.0034ms | +0.0010ms | +30.56% |
+| mean | 0.00040ms | 0.00030ms | +0.000098ms | +32.39% |
+| min | 0.000082ms | 0.000083ms | -9.7e-7ms | -1.17% |
+| max | 0.02ms | 0.02ms | +0.0019ms | +9.65% |
+| total | 0.08ms | 0.06ms | +0.02ms | +32.39% |
 

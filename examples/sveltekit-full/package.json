@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm -F @kiwa-lab/sveltekit -F @kiwa-lab/core build",
+    "build": "node ../../scripts/build-deps.mjs @kiwa-lab/sveltekit @kiwa-lab/core",
     "dev": "vite dev",
     "prepare": "svelte-kit sync",
     "test": "pnpm build && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",

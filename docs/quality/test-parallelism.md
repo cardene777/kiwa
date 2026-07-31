@@ -1,0 +1,216 @@
+# Test parallelism and shared resources
+
+`pnpm -r test` runs packages concurrently (worker count = CPU cores). Some packages
+compete for a resource the machine has only one of. When they run at the same time,
+tests fail without the implementation having changed.
+
+This document records which packages contend, why serialising them is the chosen
+answer, and what was rejected.
+
+## Measured contention
+
+A full sweep on 2026-07-28 produced 15,336 passing tests and 14 failures. All 14 fell
+into two groups, and all 14 passed when their package ran alone. Fixing those exposed
+more groups underneath — each fix let the run get further before hitting the next shared
+resource. Eleven were found in total.
+
+| # | What is shared | How it failed |
+|---|---|---|
+| 1 | The chain port: 12 examples all declared `8545` | The first to bind wins; the rest exit in 32 ms with `Address already in use` |
+| 2 | The web server port: `3042` and `3046` each claimed by two examples | The second start reports `is already used` |
+| 3 | `dist/` of `dapp` / `cli`, emptied by `clean` on every build | A concurrent `next build` cannot resolve `@kiwa-lab/dapp` types |
+| 4 | `dist/` of every shared dependency, rewritten by 171 targets | A partially written `edge/dist/index.d.ts` reads as `is not a module` |
+| 5 | Chromium: `e2e`, `ui` and `examples/full-stack-poc` launch a real one | The launch does not finish inside the budget |
+| 6 | The hook budget during Chromium teardown | `--testTimeout` does not cover `beforeAll` / `afterEach`; the 10 s default is not enough |
+| 7 | The child process budget in `packages/cli` | Failed at 5004 ms — the 5 s default itself, not a hang |
+| 8 | The Docker daemon: `@kiwa-lab/orm` and four `orm-*-poc` examples start containers at once | `Port 3306 not bound after 120000ms` |
+| 9 | The Docker daemon during container start-up | `start()` returns before MySQL accepts connections; `prisma db push` is refused |
+| 10 | The chain's block production, in `examples/nextjs-staking` | A stake was assumed mined before time was advanced; the balance came back 10 % short |
+| 11 | The refresh of one on-screen value, in `examples/nextjs-vesting` | A release was read off a *different* element that had already refreshed; the balance still held the pre-release value |
+
+Groups 9 through 11 are not contention over a named resource. They are assumptions that
+happen to hold on an idle machine and stop holding under load, so they surface the same
+way — a failure with no change in the implementation. They are covered under
+*Assumptions that only hold when the machine is idle* below.
+
+None of the port groups is a slowness problem. Eighteen `anvil` processes started
+concurrently reach `listen` in 128 ms on an idle machine and 1,099 ms with every core
+busy — the 10 s default has nine times the headroom it needs. What broke was that they
+all asked for the same number.
+
+## What the repository does about it
+
+### One number per example
+
+Each example that starts a local chain owns a distinct port (`8560`-`8571`), and each
+web server likewise. `tests/release-smoke/tests/anvil-port-uniqueness.test.ts` fails if
+two examples ever claim the same one, or if an example's own start and listen
+declarations disagree.
+
+### `clean` is off everywhere
+
+`tsup`'s `clean` empties `dist/` on every build, and 171 targets rebuild their shared
+dependencies during `test`. Removing it removes the window (#1741). `cli` and `dapp`
+kept it at first because they emit content-hashed chunks, but they are rebuilt by 18
+examples too and produced the same failure, so they lost it as well. Stale artifacts are
+handled at the only point where they matter: `scripts/clean-dist.mjs` runs at the head of
+`release`, before anything is published.
+
+### One build up front instead of 1036
+
+Removing `clean` shrinks the window in which `dist/` is empty, but not the window in
+which a file is half written. `tsup` writes to the final path, so a reader can see a
+truncated `index.d.ts`. That window is a few milliseconds — and there were 1036 of them
+per run, because 171 targets each rebuilt their shared dependencies at the head of their
+own `test`, while 171 targets read them concurrently.
+
+The window cannot be removed without changing how `tsup` writes. The number of windows
+can. On a full sweep the root `test` exports `KIWA_DEPS_PREBUILT=1` and then runs
+`pnpm -r build` once, before anything else. Every pre-build of a shared dependency goes
+through `scripts/build-deps.mjs`, which does nothing when that variable is set. One
+build, not 1036, and it finishes before the first reader starts.
+
+The variable has to cover the head build too, not just the test phases. Five examples
+build a shared dependency as part of their own `build` (`pnpm -F @kiwa-lab/core build &&
+next build` and similar), and `pnpm -r build` runs those concurrently with everything
+else in the same topological wave. pnpm has already built the dependency by then, so the
+nested call is pure redundancy — and a write window against whatever is reading in
+parallel. Routing those five through `build-deps.mjs` makes them no-ops under the
+variable.
+
+Two of the five (`nuxt-server-routes-full`, `sveltekit-full`) also call `pnpm build` from
+their `test`, which put the same rebuild back inside the parallel test phase.
+
+A single package run (`pnpm -F <name> test`) does not set the variable, so it still
+builds its own dependencies.
+
+The variable has to be exported rather than prefixed, because a prefix does not carry
+across `&&`. The head build and all three phases therefore run inside one `sh -c`.
+
+### Serial phases for the two resources that cannot be split
+
+The root `test` script runs one build and then three phases.
+
+```
+export KIWA_DEPS_PREBUILT=1
+pnpm -r build
+pnpm -r --filter='!e2e' --filter='!ui' --filter='!full-stack-poc' --filter='!<containers>' test
+pnpm --workspace-concurrency=1 -F e2e -F ui -F full-stack-poc test
+pnpm --workspace-concurrency=1 -F orm -F <the four container examples> test
+```
+
+A browser and the Docker daemon are one per machine; no amount of renaming splits them.
+Only `@kiwa-lab/e2e`, `@kiwa-lab/ui` and `examples/full-stack-poc` launch a real browser.
+On the container side `@kiwa-lab/orm` starts one per test, and four of the nine
+`orm-*-poc` examples start one (the SQLite ones do not). Serialising eight targets out of
+the 247 that have a `test` script costs the duration of the shorter ones — measured at
+roughly +25 % on a ~900 s run, against a run that previously did not finish at all.
+
+Membership of both phases was decided by measurement, not by imports.
+
+Twenty-seven targets touch a browser API; only `full-stack-poc` ran longer than 5 s. The
+rest finish in about a second because the browser is never actually started.
+
+Eight targets import `testcontainers`, but only the two that ping the Docker daemon
+before starting anything (`packages/orm`'s live-mode suites) actually launch a container.
+The rest either reference the types or assert that an unreachable broker is rejected —
+`@kiwa-lab/queue`'s equivalent test finishes in 418 ms.
+
+Both lists are pinned by `tests/release-smoke/tests/anvil-port-uniqueness.test.ts`, which
+fails if a member is dropped from its serial phase or left in the parallel one.
+
+### Timeouts sized for a loaded machine
+
+Two places used a default that assumes an idle machine.
+
+`packages/cli` ran on Vitest's 5 s per test; the failure was at 5004 ms, i.e. the timeout
+itself. It now passes `--testTimeout 30000`, matching `e2e` and `ui`.
+
+Twenty-seven targets that launch a browser had no `--hookTimeout`. `--testTimeout` covers
+the test body only, and Chromium is started and stopped in `beforeAll` / `afterEach`, so
+the hook default of 10 s applied. Each now passes a hook budget equal to its test budget.
+
+Raising a timeout is the wrong answer when the thing being measured *is* the duration.
+Neither of these measures duration — they assert that a process starts and stops.
+
+## Assumptions that only hold when the machine is idle
+
+Two failures were not about a resource being taken. They were about a step being assumed
+complete. On an idle machine the assumption happens to hold, so the test passes for
+years; under load the gap opens and the test fails somewhere unrelated to the change
+being made.
+
+`examples/nextjs-staking` advanced the chain's clock right after clicking *stake*,
+having waited for `waitForRpcIdle`. That helper only observes that RPC traffic has
+stopped — not that the transaction was mined. Under load the stake landed in a block
+*after* the clock moved, so the contract saw an eight-day lock that had not elapsed and
+charged the 10 % early-exit penalty. The balance came back as `90e18` instead of
+`100e18`. The fix waits for the stake to appear in `staked` before advancing time, by
+polling the value rather than sleeping for a fixed period, so it does not depend on how
+fast the machine is.
+
+`examples/nextjs-vesting` read a token balance straight after waiting for a *different*
+element to show the release had landed. Each on-screen value is fetched independently, so
+one refreshing says nothing about the other. Under load the balance still held its
+pre-release value, and the release turned up between that read and the next one — making
+a no-op second release look like it had paid out (`0n` against `1000e18`). The fix waits
+on the element it is about to read.
+
+The same shape appeared in two more tests that had not yet failed: one asserted a partial
+release was above zero after a fixed 1.5 s wait, the other compared a contract address
+across a chain switch after waiting on the chain *name*. Both now wait on the value they
+read. `tests/release-smoke/tests/anvil-port-uniqueness.test.ts` scans every example spec
+for the pattern — a value read into a variable after a click, compared in an assertion,
+with no wait on that element in between. Tests that assert a value is *unchanged* are
+exempt, because the change they would wait for does not exist by construction.
+
+`testcontainers`' `start()` resolves when the container is up, which is earlier than
+MySQL or Postgres accepting connections; the two are separated by the database's own
+initialisation, and a busy daemon widens the gap. `prisma db push` was refused with
+`Please make sure your database server is running at localhost:33562`. The fix retries
+`db push` itself for up to 120 s, only while the output says the connection was refused.
+Retrying the real operation rather than probing the port separately keeps *up* and
+*usable* from being confused, and any other failure (a bad schema, say) reproduces
+immediately instead of being retried into a timeout.
+
+## A precondition this repository cannot enforce
+
+The Docker daemon is shared with everything else on the machine. During one measured run
+25 containers belonging to other projects were up, and a MySQL container for
+`orm-drizzle-mysql-poc` did not bind port 3306 within 120 s. Serialising this
+repository's own container starts removes its contribution; it cannot free capacity that
+something else is holding.
+
+The same 25 containers were up when `@kiwa-lab/orm` was found to be starting containers
+from the parallel phase. Its first test spent 153 s failing to bind 3306 while the rest
+of the suite ran, and the six tests after it — by which point the parallel phase had
+thinned out — took 9 to 27 s each. A failure at the daemon and a failure at the parallel
+phase look identical from the test output; the difference showed up in the timings.
+
+If the sweep fails on a container timeout, check `docker ps` before reading it as a
+regression.
+
+## Rejected
+
+| Option | Why not |
+|---|---|
+| Run everything sequentially (`scripts/test-all.mjs`) | A sequential sweep takes the better part of an hour. The parallel one takes minutes |
+| Serialise every package that mentions `anvil` | 21 packages and examples match. Most are gated on the binary being present, and serialising them all costs far more than the two that actually contend |
+| Give `getFreePort` a retry loop | The failure was the test timeout, not port exhaustion. `getFreePort` already retries 50 times and serialises its own allocations through a promise chain |
+| Raise the browser timeout instead of serialising | `e2e` and `ui` already use 30 s and still exceeded it under full parallel load. The launch is genuinely starved, not merely slow |
+| Replace real browsers with mocks | These tests exist to check behaviour in a real browser |
+| Raise the chain start timeout | Eighteen `anvil` processes started at once all reach `listen` within 1.1 s. The 10 s default already has nine times the headroom; the ports were the problem |
+| Serialise the 18 examples that start a chain | Giving each one its own port keeps them parallel and costs nothing |
+| Keep `clean` on `dapp` / `cli` | 18 examples rebuild them mid-run, and `dist/` is empty for the duration. Stale output is a publishing concern, and `scripts/clean-dist.mjs` already handles it at the head of `release` |
+| Make the dependency build atomic (write to a temp path, then rename) | It requires changing how `tsup` writes, with a blast radius that could not be bounded. Cutting 1036 builds to 1 removes the same failure |
+
+## Adding a package that contends
+
+Move it into the second phase of the root `test` script. A package belongs there when it
+starts something the machine has one of — a browser, a listener on a fixed port, a
+device. A package that spawns an ordinary child process does not; give it a timeout that
+survives a loaded machine instead.
+
+If a test waits for something to finish, check what the wait actually observes. Traffic
+going quiet, a process being up, or a file existing are each weaker than the thing being
+waited for, and the difference only shows under load.

@@ -13,7 +13,7 @@ import {
   SIMPLE_ACCOUNT_FACTORY_ABI,
 } from './aa';
 
-const ANVIL_PORT = Number(process.env.NEXT_PUBLIC_ANVIL_PORT ?? 8545);
+const ANVIL_PORT = Number(process.env.NEXT_PUBLIC_ANVIL_PORT ?? 8560);
 
 export const anvilChain = defineChain({
   id: 31337,

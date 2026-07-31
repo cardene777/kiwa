@@ -12,7 +12,7 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8565;
 const SUPPLY_AMOUNT = 100n * 10n ** 18n;
 const BORROW_AMOUNT = 50n * 10n ** 18n;
 const FULL_COLLATERAL_AMOUNT = 1000n * 10n ** 18n;

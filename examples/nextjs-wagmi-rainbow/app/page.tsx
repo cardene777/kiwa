@@ -7,7 +7,7 @@ import { createPublicClient, http } from 'viem';
 import { CONTRACT_ADDRESS, MINT_NFT_ABI } from '@/lib/wagmi';
 
 const RPC_MODE_KEY = 'dapp-e2e.wagmi-rainbow.rpc-mode';
-const HEALTHY_RPC_URL = 'http://127.0.0.1:8545';
+const HEALTHY_RPC_URL = 'http://127.0.0.1:8568';
 const BROKEN_RPC_URL = 'http://127.0.0.1:1';
 
 function readStoredRpcMode(): 'healthy' | 'broken' {

@@ -17,9 +17,10 @@ import {
   type Hex,
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import type { Page } from '@playwright/test';
 import { test, expect } from './fixture';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8566;
 const STAKE_AMOUNT = 100n * 10n ** 18n;
 const SMALL_STAKE_AMOUNT = 1n;
 const TOP_UP_AMOUNT = 1n * 10n ** 18n;
@@ -214,6 +215,26 @@ async function waitLoaded(page: import('@playwright/test').Page) {
   );
 }
 
+/**
+ * stake が chain に載るまで待つ。
+ *
+ * `waitForRpcIdle` は RPC の往復が止まったことしか見ておらず、 送った tx が mine
+ * されたことは保証しない。 その状態で時間を進めると、 stake の block が進めた後に
+ * 載って「早期解除」 と判定され、 unstake で 10% 引かれる。 並列実行の負荷でだけ
+ * 起きる (#1724 実測 = `stakeBalance` の戻りが 100e18 でなく 90e18)。
+ */
+async function waitStaked(page: Page, expected: bigint): Promise<void> {
+  await expect
+    .poll(
+      async () =>
+        ((await page.getByTestId('staked').textContent()) ?? '')
+          .replace('staked: ', '')
+          .trim(),
+      { timeout: 30_000 },
+    )
+    .toBe(expected.toString());
+}
+
 test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', () => {
   let snapshotId: Hex | undefined;
 
@@ -285,6 +306,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     await page.getByTestId('stake-button').click();
     await dappE2e.waitForRpcIdle();
 
+    await waitStaked(page, STAKE_AMOUNT);
     await increaseTime(pub, 2n);
     await page.waitForTimeout(2000);
     const pending = BigInt(
@@ -309,6 +331,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     await dappE2e.waitForRpcIdle();
     await page.getByTestId('stake-button').click();
     await dappE2e.waitForRpcIdle();
+    await waitStaked(page, STAKE_AMOUNT);
     await increaseTime(pub, 2n);
     await page.waitForTimeout(1500);
 
@@ -347,6 +370,7 @@ test.describe('Next.js Staking (stake / claim / unstake / reward accrual) e2e', 
     await dappE2e.waitForRpcIdle();
     await page.getByTestId('stake-button').click();
     await dappE2e.waitForRpcIdle();
+    await waitStaked(page, STAKE_AMOUNT);
     await increaseTime(pub, EIGHT_DAYS);
     await page.waitForTimeout(1500);
 

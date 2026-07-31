@@ -178,6 +178,12 @@ test.describe('Next.js multi-chain switch e2e', () => {
     await page.getByTestId('switch-10-button').click();
     await dappE2e.waitForRpcIdle();
     await expect(page.getByTestId('current-chain')).toContainText('Optimism');
+    // chain 名と contract address は別々に取得している。 chain 名が切替わっても
+    // address の表示は切替前のままのことがあり、 その状態で読むと同じ値を 2 回
+    // 読んで「変わっていない」 と落ちる。 読む表示そのものが動くまで待つ。
+    await expect(page.getByTestId('current-contract')).not.toHaveText(mainnetAddr, {
+      timeout: 10_000,
+    });
     const optimismAddr = (await page.getByTestId('current-contract').textContent()) ?? '';
     expect(mainnetAddr.replace('contract: ', '')).not.toBe(optimismAddr.replace('contract: ', ''));
     expect(mainnetAddr).toMatch(/0x[0-9a-fA-F]{40}/);

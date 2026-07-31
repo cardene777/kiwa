@@ -1,6 +1,6 @@
 import { dappE2eTest } from '@kiwa-lab/dapp';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8563;
 
 export const test = dappE2eTest.extend({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -7,7 +7,7 @@
     "dev": "next dev -p 3046",
     "build": "next build",
     "start": "next start -p 3046",
-    "test": "pnpm -F @kiwa-lab/dapp build && playwright test",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/dapp && playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
