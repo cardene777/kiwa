@@ -30,6 +30,8 @@ import {
   loadBaseline,
   saveBaselineEnvelope,
 } from './baseline.js';
+import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport, formatMs } from './report.js';
 import type { MeasureResult, PerfReferenceKind, RegressionResult } from './types.js';
@@ -217,16 +219,10 @@ export interface OpOutcome {
   concurrentGatePassed: boolean;
   memoryGatePassed: boolean;
   /**
-   * `n/a` は 2 種を分ける。 `baseline seeded` = 記録が無い実行 (初回)、
-   * `比較せず` = 記録はあるが基準が揃わず比較できない実行。 後者を seeded と
-   * 書くと、 書込が起きていない実行でも seed したと読める。
+   * `n/a` の 3 種の意味は `uncomparableVerdict` が SSOT。 記録の有無と、
+   * この実行で baseline を書けたかで分かれる。
    */
-  regressionVerdict:
-    | 'stable'
-    | 'improved'
-    | 'regressed'
-    | 'n/a (baseline seeded)'
-    | 'n/a (比較せず)';
+  regressionVerdict: 'stable' | 'improved' | 'regressed' | UncomparableVerdict;
   /**
    * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
    * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
@@ -302,6 +298,10 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     : null;
   const combinedForBaseline: Record<string, MeasureResult> = {};
   const outcomes: OpOutcome[] = [];
+  // 比較が成立しなかった op と、 その時点で記録があったか。 verdict は書込の
+  // 可否が決まるまで確定しない (後続 op が上限を割ると書けなくなる) ため、
+  // loop では「書けなかった」 側の値を入れておき、 書けたら後段で上げる。
+  const uncompared = new Map<string, boolean>();
 
   // 回帰判定の絶対下限を、この実行の中で測って決める。 固定値だと機械と Node の版で
   // 意味が変わり、 速い op では「差が下限に届かないので永久に stable」 になる。
@@ -385,6 +385,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
           })
         : null;
 
+      if (regression === null) uncompared.set(op.name, priorSerial !== undefined);
+
       combinedForBaseline[`${op.name}.serial`] = serial;
       combinedForBaseline[`${op.name}.concurrent`] = concurrent;
 
@@ -397,13 +399,9 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         serialGatePassed: serialGate.verdict.passed,
         concurrentGatePassed: concurrentGate.verdict.passed,
         memoryGatePassed,
-        // 記録が無い実行 (初回) と、 記録はあるのに比較できない実行を分ける。
-        // 後者を「seeded」 と書くと、 書込が起きていない実行でも seed したと読める。
         regressionVerdict: regression
           ? regression.verdict
-          : priorSerial === undefined
-            ? 'n/a (baseline seeded)'
-            : 'n/a (比較せず)',
+          : uncomparableVerdict(priorSerial !== undefined, false),
         ...(regression === null
           ? priorSerial === undefined
             ? {}
@@ -415,32 +413,6 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     references.dispose();
   }
 
-  // 今回測った op のうち、まだ記録の無いものだけ書き足す。
-  // 既存 op の値は保持しないと比較対象が毎回入れ替わって回帰を検出できない。
-  const priorResults = priorBaseline ?? {};
-  const currentKeys = new Set(Object.keys(combinedForBaseline));
-  const retained = pruneStaleOps(input)
-    ? Object.fromEntries(Object.entries(priorResults).filter(([key]) => currentKeys.has(key)))
-    : priorResults;
-  // 記録の無い op に加えて、 基準 op が食い違うようになった op も書き直す。
-  // 書き直さないと、 op の `referenceKind` を変えた瞬間から比較が成立しなく
-  // なり (key は既にあるので追記されない)、 その op だけ永久に n/a に留まる。
-  const staleNormalization = (key: string): boolean => {
-    const prior = priorResults[key];
-    const current = combinedForBaseline[key];
-    if (prior === undefined || current === undefined) return false;
-    // 双方に基準が無いのは正常。 concurrent 軸は正規化の対象ではない。
-    if (prior.reference === undefined && current.reference === undefined) return false;
-    return !resolveNormalization(current, prior).normalized;
-  };
-  const refreshedOps = Object.fromEntries(
-    Object.entries(combinedForBaseline).filter(
-      ([key]) => !(key in priorResults) || staleNormalization(key),
-    ),
-  );
-  const staleDropped = Object.keys(priorResults).length !== Object.keys(retained).length;
-  const envMismatched = loadedBaseline !== null && priorBaselineLoaded === null;
-
   // 測定そのものが成立しているか。GC を要求しているのに使えない実行の値で
   // baseline を作り直すと、成立しない前提を新しい正としてしまう。
   const premiseValid = !input.requireGc || outcomes.every((o) => o.memory.gcExposed);
@@ -448,37 +420,41 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     (o) => o.serialGatePassed && o.concurrentGatePassed && o.memoryGatePassed,
   );
 
-  // 前提が違う環境の値で既存 baseline を上書きすると、次に元の環境で測ったときも
-  // 不一致として扱われ、その間の回帰を比較せず通してしまう。
-  // 一方で保存しないままだと、Node 更新や CPU 変更のように前提が恒久的に変わった
-  // 場合に手動削除まで比較できない。測定が成立している実行なら作り直す。
-  const shouldReseed = envMismatched && premiseValid && hardGatePassed;
-  // 追記にも作り直しと同じ条件を課す。 上限を割った実行や GC を呼べない実行の値を
-  // 基準として採ると、 壊れた状態が次回以降の比較対象になる。 新しい op だけを
-  // 足す経路でも、 その値が成立していなければ意味は同じ。
-  const shouldAppend =
-    !envMismatched &&
-    premiseValid &&
-    hardGatePassed &&
-    (Object.keys(refreshedOps).length > 0 || staleDropped);
+  // 今回測った op のうち、まだ記録の無いものだけ書き足す。
+  // 既存 op の値は保持しないと比較対象が毎回入れ替わって回帰を検出できない。
+  const plan = planBaselineWrite({
+    prior: priorBaseline,
+    current: combinedForBaseline,
+    premiseValid,
+    hardGatePassed,
+    prune: pruneStaleOps(input),
+    // 記録の無い op に加えて、 基準 op が食い違うようになった op も書き直す。
+    // 書き直さないと、 op の `referenceKind` を変えた瞬間から比較が成立しなく
+    // なり (key は既にあるので追記されない)、 その op だけ永久に n/a に留まる。
+    needsRefresh: (_key, prior, current) => {
+      // 双方に基準が無いのは正常。 concurrent 軸は正規化の対象ではない。
+      if (prior.reference === undefined && current.reference === undefined) return false;
+      return !resolveNormalization(current, prior).normalized;
+    },
+  });
 
   let baselineSeeded = false;
-  if (shouldReseed) {
-    await saveBaselineEnvelope(baselinePath, {
-      schema: BASELINE_SCHEMA,
-      env: captureEnv(),
-      results: combinedForBaseline,
-    });
-    baselineSeeded = true;
-  } else if (shouldAppend) {
-    // 追記は現在の環境で測った値なので env も現在のものにする。
+  if (plan.written) {
+    // 書くのは現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
     await saveBaselineEnvelope(baselinePath, {
       schema: BASELINE_SCHEMA,
       env: captureEnv(),
-      results: { ...retained, ...refreshedOps },
+      results: plan.results,
     });
     baselineSeeded = priorBaseline === null;
+  }
+
+  // 記録が無かった op の verdict を、 実際に書けたかで確定する。
+  for (const outcome of outcomes) {
+    const hadPrior = uncompared.get(outcome.name);
+    if (hadPrior === undefined) continue;
+    outcome.regressionVerdict = uncomparableVerdict(hadPrior, plan.written);
   }
 
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md
@@ -515,7 +491,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     regressionGate,
     resolutionMs,
     baselineUnreadable,
-    baselineWritten: shouldReseed || shouldAppend,
+    baselineWritten: plan.written,
   });
 
   return { outcomes, allPassed, baselineSeeded };
