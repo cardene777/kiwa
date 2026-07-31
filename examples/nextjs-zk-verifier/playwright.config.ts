@@ -9,12 +9,12 @@ export default defineConfig({
   globalSetup: './tests/global-setup.ts',
   globalTeardown: './tests/global-teardown.ts',
   use: {
-    baseURL: 'http://127.0.0.1:3046',
+    baseURL: 'http://127.0.0.1:3049',
     headless: true,
   },
   webServer: {
     command: 'tsx tests/prepare-env.ts && pnpm build && pnpm start',
-    url: 'http://127.0.0.1:3046',
+    url: 'http://127.0.0.1:3049',
     timeout: 240_000,
     reuseExistingServer: false,
   },

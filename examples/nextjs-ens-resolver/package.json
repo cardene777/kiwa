@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3042",
+    "dev": "next dev -p 3048",
     "build": "next build",
-    "start": "next start -p 3042",
+    "start": "next start -p 3048",
     "test": "pnpm -F @kiwa-lab/dapp build && playwright test",
     "typecheck": "tsc --noEmit",
     "forge:build": "forge build"
