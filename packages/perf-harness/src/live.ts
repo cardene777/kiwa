@@ -34,7 +34,11 @@ import path from 'node:path';
 import { measure, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
-import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
+import {
+  RESOLUTION_FLOOR_MULTIPLE,
+  detectRegression,
+  hasSameMeasurementConfig,
+} from './regression.js';
 import {
   BASELINE_SCHEMA,
   captureEnv,
@@ -142,9 +146,9 @@ export async function runPerf3LayerLive(
   const combinedForBaseline: Record<string, MeasureResult> = {};
   const outcomes: LiveOpOutcome[] = [];
   // 比較が成立しなかった op。 mock 経路と同じく、 verdict は書込の可否が
-  // 決まってから確定する。 この経路で記録がある op は必ず比較まで進む
-  // (実行内正規化を使わないので、 記録さえあれば比較は成立する) ため、
-  // 値は常に false になる。 mock 経路と同じ helper を通すために形を揃える。
+  // 決まってから確定する。 実行内正規化を使わないので基準 op 由来の不成立は
+  // 起きないが、 測定条件が違う記録とは比べないため (#1730) 記録があっても
+  // 比較まで進まない op があり得る。
   const uncompared = new Map<string, boolean>();
   let baselineSeeded = false;
   let anySkipped = false;
@@ -208,7 +212,10 @@ export async function runPerf3LayerLive(
       (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
 
     const priorSerial = priorBaseline?.[`${op.name}.live.serial`];
-    const regression = priorSerial
+    // 測定条件が違う組は比べない。 反復数や空回しを変えると実装を変えなくても値が
+    // 動くため、 版 (`measurementPremise`) だけでは条件の変化を捕まえられない (#1730)。
+    const comparable = priorSerial !== undefined && hasSameMeasurementConfig(serial, priorSerial);
+    const regression = comparable
       ? detectRegression({
           current: serial,
           baseline: priorSerial,
@@ -269,6 +276,9 @@ export async function runPerf3LayerLive(
         premiseValid,
         hardGatePassed: allPassed,
         prune,
+        // 測定条件が変わった記録は入れ替える。 入れ替えないと key は既にあるので
+        // 追記されず、 その op は条件を戻すまで永久に比較できない (#1730)。
+        needsRefresh: (_key, prior, current) => !hasSameMeasurementConfig(current, prior),
       })
     : { results: {}, written: false };
 

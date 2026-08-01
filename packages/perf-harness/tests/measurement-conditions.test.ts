@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
-import { runPerf3Layer } from '../src/index.js';
+import { buildMeasureResult, runPerf3Layer } from '../src/index.js';
+import { runPerf3LayerLive } from '../src/live.js';
+import { hasSameMeasurementConfig } from '../src/regression.js';
+import type { MeasureResult } from '../src/types.js';
 
 /**
  * #1730 — 測定条件が report と baseline から読めない問題。
@@ -28,6 +31,10 @@ afterEach(() => {
   }
 });
 
+function readResults(path: string): Record<string, MeasureResult> {
+  return JSON.parse(readFileSync(path, 'utf8')).results as Record<string, MeasureResult>;
+}
+
 /** 3 層を最小の反復数で回す。 測定条件そのものが対象なので値の質は問わない。 */
 function baseInput(dir: string, name: string) {
   return {
@@ -42,6 +49,132 @@ function baseInput(dir: string, name: string) {
     ops: [{ name: 'alpha', fn: () => {}, serialP95CapMs: 1000 }],
   };
 }
+
+describe('hasSameMeasurementConfig — 測定条件の一致判定 (#1730)', () => {
+  const base = buildMeasureResult('alpha', 200, 5, [1, 1, 1]);
+
+  it('反復数と空回しが同じなら一致', () => {
+    expect(hasSameMeasurementConfig(buildMeasureResult('alpha', 200, 5, [2, 2, 2]), base)).toBe(
+      true,
+    );
+  });
+
+  it('反復数が違えば不一致', () => {
+    expect(hasSameMeasurementConfig(buildMeasureResult('alpha', 100, 5, [1, 1, 1]), base)).toBe(
+      false,
+    );
+  });
+
+  it('空回しが違えば不一致', () => {
+    expect(hasSameMeasurementConfig(buildMeasureResult('alpha', 200, 10, [1, 1, 1]), base)).toBe(
+      false,
+    );
+  });
+});
+
+describe('測定条件を変えた baseline が比較対象から外れる (#1730)', () => {
+  it('mock 経路 — 反復数を変えると比較せず、記録を入れ替える', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'mock.json');
+    const common = { moduleName: 'cfg-mock', baselinePath };
+
+    // 1 回目で記録を作り、2 回目で比較が成立することを確かめる。
+    await runPerf3Layer({ ...baseInput(dir, 'cfg-mock'), ...common, reportPath: join(dir, '1.md') });
+    const second = await runPerf3Layer({
+      ...baseInput(dir, 'cfg-mock'),
+      ...common,
+      reportPath: join(dir, '2.md'),
+    });
+    expect(second.outcomes[0]!.regressionVerdict).toMatch(/^(stable|improved|regressed)$/);
+
+    const before = readResults(baselinePath)['alpha.serial']!;
+    expect(before.iterations).toBe(5);
+
+    // 反復数を変えた実行は比較せず、記録を今回の条件で入れ替える。
+    const third = await runPerf3Layer({
+      ...baseInput(dir, 'cfg-mock'),
+      ...common,
+      reportPath: join(dir, '3.md'),
+      serialIterations: 9,
+    });
+    expect(third.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
+
+    const after = readResults(baselinePath)['alpha.serial']!;
+    // 入れ替えないと key は既にあるので追記されず、条件を戻すまで永久に比較できない。
+    expect(after.iterations).toBe(9);
+  });
+
+  it('mock 経路 — 比較しなかった理由が report から読める', async () => {
+    const dir = tempDir();
+    const common = { moduleName: 'cfg-reason', baselinePath: join(dir, 'reason.json') };
+
+    await runPerf3Layer({
+      ...baseInput(dir, 'cfg-reason'),
+      ...common,
+      reportPath: join(dir, '1.md'),
+    });
+    await runPerf3Layer({
+      ...baseInput(dir, 'cfg-reason'),
+      ...common,
+      reportPath: join(dir, '2.md'),
+      serialWarmup: 3,
+    });
+
+    const report = readFileSync(join(dir, '2.md'), 'utf8');
+    // 基準 op を疑う文言を出すと、読み手は分母を調べて原因に辿り着けない。
+    expect(report).toContain('測定条件が baseline と違うため比較せず');
+    expect(report).toContain('空回し');
+  });
+
+  it('条件を戻すと次の実行から再び比較できる', async () => {
+    const dir = tempDir();
+    const common = { moduleName: 'cfg-back', baselinePath: join(dir, 'back.json') };
+
+    await runPerf3Layer({ ...baseInput(dir, 'cfg-back'), ...common, reportPath: join(dir, '1.md') });
+    // 条件を変えた実行が記録を入れ替える。
+    await runPerf3Layer({
+      ...baseInput(dir, 'cfg-back'),
+      ...common,
+      reportPath: join(dir, '2.md'),
+      serialIterations: 9,
+    });
+    // 同じ条件で回せば比較が成立する。入れ替えが効いていないとここが n/a のまま。
+    const third = await runPerf3Layer({
+      ...baseInput(dir, 'cfg-back'),
+      ...common,
+      reportPath: join(dir, '3.md'),
+      serialIterations: 9,
+    });
+    expect(third.outcomes[0]!.regressionVerdict).toMatch(/^(stable|improved|regressed)$/);
+  });
+
+  it('実 API 経路 — 反復数を変えると比較せず、記録を入れ替える', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'live.json');
+    const common = {
+      moduleName: 'cfg-live',
+      baselinePath,
+      ops: [{ name: 'alpha', fn: () => {}, serialP95CapMs: 1000, requiredEnv: [] }],
+      serialIterations: 5,
+      serialWarmup: 1,
+      concurrency: 2,
+      iterationsPerWorker: 2,
+      memoryIterations: 5,
+    };
+
+    await runPerf3LayerLive({ ...common, reportPath: join(dir, '1.md') });
+    const second = await runPerf3LayerLive({ ...common, reportPath: join(dir, '2.md') });
+    expect(second.outcomes[0]!.regressionVerdict).toMatch(/^(stable|improved|regressed)$/);
+
+    const third = await runPerf3LayerLive({
+      ...common,
+      reportPath: join(dir, '3.md'),
+      serialIterations: 9,
+    });
+    expect(third.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
+    expect(readResults(baselinePath)['alpha.live.serial']!.iterations).toBe(9);
+  });
+});
 
 describe('memory の総呼出数が report から読める (#1730)', () => {
   it('空回しを入れた実行は総呼出数を内訳つきで出す', async () => {

@@ -20,7 +20,12 @@ import path from 'node:path';
 import { measureAlternating, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory, type MemorySample } from './memory.js';
-import { RESOLUTION_FLOOR_MULTIPLE, detectRegression, resolveNormalization } from './regression.js';
+import {
+  RESOLUTION_FLOOR_MULTIPLE,
+  detectRegression,
+  hasSameMeasurementConfig,
+  resolveNormalization,
+} from './regression.js';
 import { DEFAULT_REFERENCE_KIND, createReferenceOps } from './reference.js';
 import {
   BASELINE_SCHEMA,
@@ -371,8 +376,13 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       // 正規化が成立しない組では比べない。 基準の種類を変えた op や、 基準の記録が
       // 無い世代の baseline がこれに当たる。 実測値そのものの比較に落とすと、
       // 実行と実行の間の機械の状態の差がそのまま gate にかかる。
+      // 測定条件が違う組も比べない。 反復数や空回しを変えると実装を変えなくても
+      // 値が動くため、 版 (`measurementPremise`) だけを見ていると条件を変えた実行が
+      // 旧条件の記録と比較される (#1730)。
       const comparable =
-        priorSerial !== undefined && resolveNormalization(serial, priorSerial).normalized;
+        priorSerial !== undefined &&
+        resolveNormalization(serial, priorSerial).normalized &&
+        hasSameMeasurementConfig(serial, priorSerial);
       const regression = comparable
         ? detectRegression({
             current: serial,
@@ -433,6 +443,10 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     // 書き直さないと、 op の `referenceKind` を変えた瞬間から比較が成立しなく
     // なり (key は既にあるので追記されない)、 その op だけ永久に n/a に留まる。
     needsRefresh: (_key, prior, current) => {
+      // 測定条件が変わった記録は入れ替える。 入れ替えないと key は既にあるので
+      // 追記されず、 その op は条件を戻すまで永久に比較できない (#1730)。
+      // concurrent 軸も条件が変われば値が動くため、 基準の有無に関わらず先に見る。
+      if (!hasSameMeasurementConfig(current, prior)) return true;
       // 双方に基準が無いのは正常。 concurrent 軸は正規化の対象ではない。
       if (prior.reference === undefined && current.reference === undefined) return false;
       return !resolveNormalization(current, prior).normalized;
@@ -516,15 +530,21 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
  * 原因を 1 つに固定して書くと嘘になる。 例えば版だけが違う組で「種類が食い違う」 と
  * 書くと、 読み手は種類を疑って見つからない原因を探すことになる。
  *
- * `resolveNormalization` の不成立は 7 通りに分かれる。 基準の記録が無い (baseline 側 /
- * 今回側) / 種類が違う / 実装の版が違う (どちらかが記録なしを含む) / p10 が分母に
- * ならない (baseline 側 / 今回側) / 双方が有限正でも桁が離れて商が求まらない。
- * 分岐を足す時はこの 7 通りとの対応を保つ。
+ * 理由は 8 通りに分かれる。 測定条件が違う / `resolveNormalization` の不成立 7 通り
+ * (基準の記録が無い (baseline 側 / 今回側) / 種類が違う / 実装の版が違う (どちらかが
+ * 記録なしを含む) / p10 が分母にならない (baseline 側 / 今回側) / 双方が有限正でも
+ * 桁が離れて商が求まらない)。 分岐を足す時はこの 8 通りとの対応を保つ。
+ *
+ * 測定条件を先に見るのは、 条件が違えば基準 op の値も違う条件で測られているため。
+ * 基準の側の理由を先に出すと、 読み手は分母を疑って本当の原因に辿り着けない。
  *
  * 記録を入れ替えたかどうかはここでは書かない。 書込には測定の成立が要り、 この時点で
  * 判っていない (report 冒頭が実行全体として書けたかを出す)。
  */
 export function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
+  if (!hasSameMeasurementConfig(current, baseline)) {
+    return `測定条件が baseline と違うため比較せず (baseline ${baseline.iterations} 反復 / 空回し ${baseline.warmup}、 今回 ${current.iterations} 反復 / 空回し ${current.warmup})`;
+  }
   const currentReference = current.reference;
   const baselineReference = baseline.reference;
   if (baselineReference === undefined) {
