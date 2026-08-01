@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import {
   existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync,
   statSync, writeFileSync,
@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 /**
  * 共有依存の build が `dist/` を空にしないことを固定する (#1741)。
@@ -133,10 +133,33 @@ const FIXED_OUTPUT_TARGETS = [
 ] as const;
 
 /**
- * 出力が固定でない package。 clean を外すと古い chunk が残るため clean が要る。
- * `cli` は追加 entry (`bin.ts`) と chunk、 `dapp` は追加 entry (`vitest`) と chunk。
+ * 出力が固定でない package。 `cli` は追加 entry (`bin.ts`) と chunk、 `dapp` は
+ * 追加 entry (`vitest`) と chunk を出す。
+ *
+ * こちらも `clean` は無効。 出力の顔ぶれが実行ごとに変わるため古い chunk が残るが、
+ * publish に載るのは `release` の先頭の `scripts/clean-dist.mjs` が防ぐ (#1741)。
+ * 開発中に残っても、 entry file は毎回上書きされて現行の chunk だけを参照する。
  */
 const CHUNK_OUTPUT_TARGETS = ['cli', 'dapp'] as const;
+
+/**
+ * 内容 hash を持つ出力の file 名。 `chunk-P3SA3F4I.js` / `vitest-CF4UUB4M.d.ts` の形。
+ *
+ * 分類が「chunk を出す」 ことを実際に確かめるために使う。 「固定 6 file ではない」
+ * だけで判定すると、 chunk を出さないが出力数が 6 でない package が chunk 側に
+ * 居座れる (#1750-1)。
+ *
+ * **これは名前の規約であって、 chunk であることの証明ではない。** esbuild が付ける
+ * hash は大文字と数字の 8 桁で、 拡張子は `.js` / `.cjs` / `.mjs` と対応する宣言、
+ * `.map` を伴う場合がある。 手で `foo-DEADBEEF.js` という entry を置けば hash と
+ * 読まれる。 判定を厳密にするには esbuild の metafile で entry と chunk の関係を
+ * 見る必要があり、 build script をそのまま走らせる本検査の方針 (tsup の出力だけを
+ * 見て設定を再現しない) と噛み合わないため採らない。
+ *
+ * 誤検知が起きるのは「固定出力の package に hash 風の名前の entry を足した」 時で、
+ * その時は分類を見直す合図として扱う。
+ */
+const HASHED_OUTPUT = /(?:^chunk-|-)[A-Z0-9]{8}\.(?:[cm]?js|d\.[cm]?ts)(?:\.map)?$/;
 
 /** tsup を 1 回走らせた結果。 */
 interface BuildProbe {
@@ -456,7 +479,10 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     const release = (JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')) as {
       scripts?: Record<string, string>;
     }).scripts?.release ?? '';
-    expect(release.startsWith('node scripts/clean-dist.mjs &&'), release.slice(0, 80)).toBe(true);
+    // `sh -c '...'` で包んである (印を publish まで持ち越すため)。 その中で
+    // 最初に走ることを見る。
+    const body = release.replace(/^sh -c '/, '');
+    expect(body.startsWith('node scripts/clean-dist.mjs &&'), release.slice(0, 90)).toBe(true);
     expect(existsSync(join(REPO_ROOT, 'scripts/clean-dist.mjs'))).toBe(true);
   });
 
@@ -485,15 +511,97 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     ).toEqual([]);
   });
 
-  it('除外側は固定 6 file を出さない', () => {
-    // `cli` / `dapp` を惰性で除外し続けないための逆向きの検査。 固定になったら
-    // 固定側へ移して clean を外せる。
-    const nowFixed = CHUNK_OUTPUT_TARGETS.filter(
-      (name) => probes.get(name)?.files.join(',') === FIXED_OUTPUT.join(','),
+  it('chunk 側は実際に内容 hash 付きの出力を持つ', () => {
+    // 分類を惰性で維持しないための逆向きの検査。 「固定 6 file ではない」 だけで
+    // 判定すると、 chunk を出さないが出力数が 6 でない package が chunk 側に
+    // 居座り、 分類の名前と中身が食い違う (#1750-1)。
+    //
+    // 実際に hash 付きの file を出しているかを見る。 出していなければ出力は
+    // 実行ごとに変わらないので、 固定側の不変条件 (毎回同じ顔ぶれ) を課せる。
+    const withoutChunk = CHUNK_OUTPUT_TARGETS.filter(
+      (name) => !(probes.get(name)?.files ?? []).some((file) => HASHED_OUTPUT.test(file)),
     );
     expect(
-      nowFixed,
-      `固定出力になったので FIXED_OUTPUT_TARGETS へ移して clean を外せる: ${nowFixed.join(', ')}`,
+      withoutChunk,
+      '内容 hash 付きの出力が無い。 出力が固定なら FIXED_OUTPUT_TARGETS へ移す: ' +
+        withoutChunk
+          .map((name) => `${name} (${(probes.get(name)?.files ?? []).join(', ')})`)
+          .join(' / '),
+    ).toEqual([]);
+  });
+
+  it('固定側は内容 hash 付きの出力を持たない', () => {
+    // 逆向き。 固定側に hash 付きの出力が現れたら、 出力の顔ぶれが実行ごとに
+    // 変わるようになったということで、 chunk 側へ移す必要がある。
+    const withChunk = FIXED_OUTPUT_TARGETS.filter((name) =>
+      (probes.get(name)?.files ?? []).some((file) => HASHED_OUTPUT.test(file)),
+    );
+    expect(
+      withChunk,
+      `内容 hash 付きの出力が現れた。 CHUNK_OUTPUT_TARGETS へ移す: ${withChunk.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('設定が出力先の状態を見て分岐しない', () => {
+    // 本検査は `dist/` に目印を置いてから build し、 残ったかで clean を判定する。
+    // 設定が「目印があるか」 を見て entry や `splitting` を変えると、 検査中だけ
+    // 別の顔ぶれを出せる (#1750-2)。
+    //
+    // tsup の clean は `**/*` の glob で中身だけを消す (dir 自身は残る) ため、
+    // dir の inode を見る形にしても判定できない。 目印を置かない経路は無いので、
+    // 設定側が目印を観測する経路を塞ぐ。
+    //
+    // 読取り関数を名前で列挙する形は採らない。 `opendirSync` / `globSync` /
+    // `fs.promises.readdir` と、 数え上げた分だけ抜けが増える。 file system に
+    // 触る手段そのもの (`node:fs` の取込み) を禁じる。 設定は entry と出力形式を
+    // 決めるだけなので、 file を読む必要が無い。
+    //
+    // **静的検査の限界。** 間接参照 (`const m = 'node:' + 'fs'` を
+    // dynamic import に渡す) や、 別 module 経由の読取りは拾えない。 設定は build
+    // 時に評価される任意の JavaScript なので、 観測に基づく判定である以上ここは
+    // ゼロにできない。 塞げるのは「直接書く」 経路まで。
+    const reads: string[] = [];
+    const scanned: string[] = [];
+    for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
+      const config = join(PACKAGES_DIR, name, 'tsup.config.ts');
+      if (!existsSync(config)) continue;
+      scanned.push(name);
+      const source = readFileSync(config, 'utf8');
+      // comment を落とすのは AST に任せる。 行頭だけを見る形では、 code の末尾に
+      // 付けた `// existsSync()` を code と読んで誤検知する。
+      const sourceFile = ts.createSourceFile(config, source, ts.ScriptTarget.Latest, true);
+      const visit = (node: ts.Node): void => {
+        // 静的 import / `require()` / dynamic import の 3 経路を見る。
+        let moduleName: string | null = null;
+        if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+          moduleName = node.moduleSpecifier.text;
+        } else if (
+          ts.isCallExpression(node)
+          && (node.expression.kind === ts.SyntaxKind.ImportKeyword
+            || (ts.isIdentifier(node.expression) && node.expression.text === 'require'))
+          && node.arguments.length > 0
+          && node.arguments[0] !== undefined
+          && ts.isStringLiteral(node.arguments[0])
+        ) {
+          moduleName = (node.arguments[0] as ts.StringLiteral).text;
+        }
+        if (moduleName !== null && /^(node:)?fs(\/promises)?$/.test(moduleName)) {
+          reads.push(`${name} (${moduleName} を取込み)`);
+        }
+        // 目印の名前は、 file system 経由でなくても (plugin に渡す 等) 意味を持つ。
+        if (ts.isStringLiteral(node) && node.text.includes(PROBE)) {
+          reads.push(`${name} (目印の名前を参照)`);
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(sourceFile);
+    }
+    // 走査対象が空だと、 検査が何も見ないまま通る。
+    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(30);
+    expect(
+      [...new Set(reads)].sort(),
+      `設定が出力先の状態を読んでいる。 判定が実 build を観測する形である以上、`
+        + ` 設定が観測に反応すると検査が意味を失う: ${reads.join(', ')}`,
     ).toEqual([]);
   });
 
@@ -581,5 +689,189 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       unclassified,
       `他 package の test から build されるのに分類されていない。 該当: ${unclassified.join(', ')}`,
     ).toEqual([]);
+  });
+});
+
+/**
+ * publish 前の掃除が実際に消すことを固定する (#1750)。
+ *
+ * `clean` をどこにも置かない以上、 古い生成物を落とすのはこの step だけ。 受容した
+ * 3 件 (immutable file / PowerShell / process group ごとの kill、
+ * `docs/quality/build-clean-tradeoffs.md`) は、 いずれも「local に古い宣言が残るが
+ * publish 前に消える」 ことを根拠にしている。 その根拠を存在確認だけで済ませない。
+ *
+ * 本物の `packages/<name>/dist` を消す訳にはいかないので、 script を別の repo 構造に
+ * 向けて走らせる。 `packages/` の位置は script 自身の場所から決まるため、 一時 dir に
+ * `scripts/clean-dist.mjs` を写して同じ配置を作る。
+ */
+describe('publish 前の掃除 (#1750 受容 3 件の根拠)', () => {
+  // test ごとに独立した repo を作る。 共有すると前の test が置いた package が
+  // 次の件数判定に混ざり、 汚染を「多めに消えた」 として見逃す。
+  const sandboxes: string[] = [];
+
+  afterAll(() => {
+    for (const dir of sandboxes) rmSync(dir, { recursive: true, force: true });
+  });
+
+  function makeRepo(): string {
+    const sandbox = mkdtempSync(join(tmpdir(), 'clean-dist-'));
+    sandboxes.push(sandbox);
+    mkdirSync(join(sandbox, 'scripts'), { recursive: true });
+    writeFileSync(
+      join(sandbox, 'scripts', 'clean-dist.mjs'),
+      readFileSync(join(REPO_ROOT, 'scripts', 'clean-dist.mjs'), 'utf8'),
+    );
+    return sandbox;
+  }
+
+  function makePackage(sandbox: string, name: string, files: Record<string, string>): string {
+    const dist = join(sandbox, 'packages', name, 'dist');
+    mkdirSync(dist, { recursive: true });
+    for (const [file, body] of Object.entries(files)) {
+      const target = join(dist, file);
+      mkdirSync(dirname(target), { recursive: true });
+      writeFileSync(target, body);
+    }
+    return dist;
+  }
+
+  function runCleanDist(sandbox: string): string {
+    return execFileSync(process.execPath, [join(sandbox, 'scripts', 'clean-dist.mjs')], {
+      encoding: 'utf8',
+    });
+  }
+
+  it('古い宣言と古い chunk を消す', () => {
+    // 受容した 3 件が残すのは、 いずれもこの形 (build が上書きしない古い file)。
+    const sandbox = makeRepo();
+    const dist = makePackage(sandbox, 'stale-decl', {
+      'index.js': 'new',
+      'index.d.ts': 'old',
+      'chunk-DEADBEEF.js': 'old',
+    });
+    expect(existsSync(dist)).toBe(true);
+    runCleanDist(sandbox);
+    expect(existsSync(dist), '古い生成物が publish に載る').toBe(false);
+  });
+
+  it('入れ子の dir ごと消す', () => {
+    // chunk が sub dir に出る設定でも取り残さない。
+    const sandbox = makeRepo();
+    const dist = makePackage(sandbox, 'nested', { 'sub/deep/old.js': 'old' });
+    runCleanDist(sandbox);
+    expect(existsSync(dist)).toBe(false);
+  });
+
+  it('dist 以外には触らない', () => {
+    // `src/` を消すと publish どころか repo が壊れる。
+    const sandbox = makeRepo();
+    const pkg = join(sandbox, 'packages', 'keep-src');
+    mkdirSync(join(pkg, 'src'), { recursive: true });
+    writeFileSync(join(pkg, 'src', 'index.ts'), 'source');
+    writeFileSync(join(pkg, 'package.json'), '{}');
+    makePackage(sandbox, 'keep-src', { 'index.js': 'built' });
+    runCleanDist(sandbox);
+    expect(existsSync(join(pkg, 'src', 'index.ts')), 'source を消した').toBe(true);
+    expect(existsSync(join(pkg, 'package.json')), 'manifest を消した').toBe(true);
+    expect(existsSync(join(pkg, 'dist'))).toBe(false);
+  });
+
+  it('消した件数を数える', () => {
+    // 0 件で成功すると、 配置がずれて 1 件も見ていない状態と区別が付かない。
+    const sandbox = makeRepo();
+    makePackage(sandbox, 'counted-a', { 'index.js': 'x' });
+    makePackage(sandbox, 'counted-b', { 'index.js': 'x' });
+    const out = runCleanDist(sandbox);
+    const match = out.match(/(\d+) 件の dist を消した/);
+    expect(match, `件数を出していない: ${out}`).not.toBeNull();
+    // 過不足なく数える。 多い側を許すと、 前の test の残りが混ざっても通る。
+    expect(Number(match![1])).toBe(2);
+  });
+
+  it('dist が無い package は数えない', () => {
+    const sandbox = makeRepo();
+    mkdirSync(join(sandbox, 'packages', 'no-dist'), { recursive: true });
+    const out = runCleanDist(sandbox);
+    expect(out).toMatch(/0 件の dist を消した/);
+  });
+
+  it('消せない file があれば止まる', () => {
+    // 受容した 3 件のうち immutable file は、 publish 前の掃除でも消せない
+    // (`rmSync(recursive, force)` が `ENOTEMPTY` で落ちる、 実測)。 その時に
+    // 掃除が「消した」 ことにして先へ進むと、 古い生成物が tarball に載る。
+    //
+    // 根拠は「消える」 ではなく「消せなければ release が止まる」。 それを固定する。
+    if (process.platform !== 'darwin') return;
+    const sandbox = makeRepo();
+    const dist = makePackage(sandbox, 'immutable', { 'index.d.ts': 'old' });
+    const locked = join(dist, 'index.d.ts');
+    const lock = spawnSync('chflags', ['uchg', locked], { encoding: 'utf8' });
+    if (lock.status !== 0) return; // file system が対応しない環境では見ない
+    try {
+      const result = spawnSync(
+        process.execPath,
+        [join(sandbox, 'scripts', 'clean-dist.mjs')],
+        { encoding: 'utf8' },
+      );
+      expect(result.status, '消せないのに成功で返した').not.toBe(0);
+      expect(existsSync(locked)).toBe(true);
+    } finally {
+      spawnSync('chflags', ['nouchg', locked]);
+    }
+  });
+
+  it('publish は root の release からしか通らない', () => {
+    // 掃除は `release` の先頭でしか走らない。 `pnpm publish --filter <package>` で
+    // 直接 publish すると掃除を迂回し、 古い生成物が tarball に載る (#1750 review)。
+    //
+    // `prepublishOnly` が全 publish 対象に配線されていること、 その中身が root の
+    // release を要求すること、 `release` が実際に印を立てることの 3 点を見る。
+    const guard = readFileSync(join(REPO_ROOT, 'scripts', 'assert-pnpm-publish.mjs'), 'utf8');
+    expect(guard, 'guard が root release を要求していない').toContain('KIWA_RELEASE');
+
+    const release = (JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')) as {
+      scripts?: Record<string, string>;
+    }).scripts?.release ?? '';
+    expect(release, 'release が印を立てていない').toContain('KIWA_RELEASE=1');
+    // 掃除より後に立てると、 掃除が落ちても publish に進む。
+    expect(
+      release.indexOf('clean-dist.mjs') < release.indexOf('KIWA_RELEASE=1'),
+      '印を掃除より前に立てている',
+    ).toBe(true);
+
+    const unguarded: string[] = [];
+    for (const entry of readdirSync(PACKAGES_DIR, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const manifest = join(PACKAGES_DIR, entry.name, 'package.json');
+      if (!existsSync(manifest)) continue;
+      const pkg = JSON.parse(readFileSync(manifest, 'utf8')) as {
+        private?: boolean;
+        scripts?: Record<string, string>;
+      };
+      if (pkg.private === true) continue;
+      if (!(pkg.scripts?.prepublishOnly ?? '').includes('assert-pnpm-publish.mjs')) {
+        unguarded.push(entry.name);
+      }
+    }
+    expect(
+      unguarded.sort(),
+      `prepublishOnly が無い publish 対象: ${unguarded.join(', ')}`,
+    ).toEqual([]);
+  });
+
+  it('script が構文として読める', () => {
+    // 存在確認だけでは、 起動できない script を「ある」 と数えてしまう。
+    //
+    // 実際に起きた。 冒頭の block comment に `packages/` + `*` + `/dist` と書いた
+    // ため `*` と `/` が comment を閉じ、 以降が code として解釈されて
+    // `SyntaxError: Unexpected identifier 'tsup'` で落ちていた (#1741 の導入時から)。
+    // `pnpm release` は先頭で止まるので publish には至らないが、 clean を外した
+    // 前提を支える唯一の step が動かない状態だった。
+    const result = spawnSync(
+      process.execPath,
+      ['--check', join(REPO_ROOT, 'scripts', 'clean-dist.mjs')],
+      { encoding: 'utf8' },
+    );
+    expect(result.status, `構文エラー:\n${result.stderr}`).toBe(0);
   });
 });

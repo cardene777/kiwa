@@ -83,14 +83,42 @@ describe('publish guard against unresolved workspace: ranges', () => {
     expect(stderr).toContain('EUNSUPPORTEDPROTOCOL');
   });
 
-  it('the guard accepts a pnpm user agent', () => {
+  it('the guard accepts a pnpm user agent from the root release', () => {
     const script = resolve(REPO_ROOT, 'scripts/assert-pnpm-publish.mjs');
     expect(() =>
       execFileSync(process.execPath, [script], {
-        env: { ...process.env, npm_config_user_agent: 'pnpm/10.33.2 npm/? node/v22.0.0' },
+        env: {
+          ...process.env,
+          npm_config_user_agent: 'pnpm/10.33.2 npm/? node/v22.0.0',
+          KIWA_RELEASE: '1',
+        },
         stdio: ['ignore', 'pipe', 'pipe'],
       }),
     ).not.toThrow();
+  });
+
+  it('the guard rejects pnpm outside the root release', () => {
+    // `clean-dist.mjs` は root の `release` の先頭でしか走らない。
+    // `pnpm publish --filter <package>` はそれを迂回し、 `files: ["dist"]` の
+    // 中身をそのまま tarball に載せる (#1750 review)。
+    const script = resolve(REPO_ROOT, 'scripts/assert-pnpm-publish.mjs');
+    const env: NodeJS.ProcessEnv = {
+      ...process.env,
+      npm_config_user_agent: 'pnpm/10.33.2 npm/? node/v22.0.0',
+    };
+    delete env['KIWA_RELEASE'];
+    let exitCode = 0;
+    let stderr = '';
+    try {
+      execFileSync(process.execPath, [script], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch (err) {
+      const e = err as { status?: number; stderr?: Buffer };
+      exitCode = e.status ?? -1;
+      stderr = e.stderr?.toString('utf-8') ?? '';
+    }
+    expect(exitCode).toBe(1);
+    expect(stderr).toContain('outside the root release');
+    expect(stderr).toContain('pnpm release');
   });
 
   it('the release script publishes through pnpm, not npm', () => {
