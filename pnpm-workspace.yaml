@@ -57,14 +57,22 @@ overrides:
   axios: 1.18.0
   fast-uri: 3.1.4
   form-data: 4.0.6
+  # 2 example が `^4.6.0` で宣言しており範囲に収まる。
+  hono: 4.12.25
   immutable: 4.3.9
   js-yaml: 4.3.0
   lodash: 4.18.0
+  "@opentelemetry/propagator-jaeger": 2.9.0
   postcss: 8.5.18
   serialize-javascript: 7.0.5
+  # 0.35 は Node >=20.9.0 を要求する。 repo の engines も同じ下限に揃えた
+  # (20.0-20.8 は宣言上は対応しているのに install か実行で落ちる状態を避ける)。
+  sharp: 0.35.0
+  svgo: 4.0.2
   tmp: 0.2.7
   undici: 6.27.0
   ws: 8.21.0
-  # drizzle-orm との組合せで 0.28 系は型が壊れる。HIGH 3 件が残るが、
-  # 上げるなら drizzle-orm の major 更新とセットにする必要がある。
-  kysely: 0.27.6
+  # 0.27 系に HIGH 3 件 (SQL injection)。 前 PR は「drizzle-orm との組合せで型が
+  # 壊れる」 として据え置いたが、 実測では 249 package の typecheck が全て通り、
+  # orm 581 件と kysely example 12 件も通る。 受容理由が成立しないので上げた。
+  kysely: 0.28.17
