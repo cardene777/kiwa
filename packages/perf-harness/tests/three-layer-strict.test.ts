@@ -134,8 +134,9 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       baselinePath,
       ...settings,
     });
+    type Record_ = { samples: number[]; p10: number; ratioHistory?: number[] };
     const seeded = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
-      results: Record<string, { samples: number[] }>;
+      results: Record<string, Record_>;
     };
 
     await runPerf3LayerStrict({
@@ -149,13 +150,24 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ...settings,
     });
     const merged = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
-      results: Record<string, { samples: number[] }>;
+      results: Record<string, Record_>;
     };
 
-    // 既存 op を上書きすると比較対象が毎回入れ替わり、回帰を検出できなくなる。
-    expect(merged.results['existing.serial']).toEqual(seeded.results['existing.serial']);
+    // 既存 op の測定値を上書きすると比較対象が毎回入れ替わり、回帰を検出できなくなる。
+    //
+    // 履歴 (`ratioHistory`) だけは実行のたびに積む。 これは比較の基準ではなく、
+    // 「その op が実行をまたいでどれだけ動くか」 を推定するための材料なので、
+    // 積んでも比較対象は動かない (#1739)。
+    const { ratioHistory: seededHistory, ...seededRest } = seeded.results['existing.serial']!;
+    const { ratioHistory: mergedHistory, ...mergedRest } = merged.results['existing.serial']!;
+    expect(mergedRest).toEqual(seededRest);
     expect(merged.results['existing.concurrent']).toEqual(seeded.results['existing.concurrent']);
     expect(merged.results['added.serial']).toBeDefined();
+
+    // 履歴が積まれること自体は別 test (`ratio-history.test.ts`) が見る。 ここでは
+    // 履歴の有無が測定値の同一性判定を壊さないことだけを確かめる。
+    expect(seededHistory === undefined || Array.isArray(seededHistory)).toBe(true);
+    expect(mergedHistory === undefined || Array.isArray(mergedHistory)).toBe(true);
   });
 
   it('memory gate は ArrayBuffer 系の保持を検知する (#1719)', async () => {

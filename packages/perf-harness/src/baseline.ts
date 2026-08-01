@@ -276,6 +276,11 @@ function canonical(target: string): string {
  *   `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。
  *   正規化が成立するかは `reference` の有無が決める
  *
+ * #1739 で baseline に「対象 p10 ÷ 基準 p10」 の履歴が付いたが、 版は上げていない。
+ * 測り方は版 5 と同じで、 履歴を持たない記録は幅を推定できないだけ (従来の相対閾値に
+ * 落ちる) だから。 版を上げると全 baseline が作り直しになり、 その 1 回の実行に退行が
+ * 含まれていれば現在値が新しい正として焼き付いて以後検出できない。
+ *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
  */
@@ -420,11 +425,28 @@ function hasValidReference(candidate: Record<string, unknown>): boolean {
   return typeof fields.p10 === 'number' && Number.isFinite(fields.p10) && fields.p10 > 0;
 }
 
+/**
+ * 履歴が読める形か。 無いのは正常 (履歴を持たない世代の記録)。
+ *
+ * 配列でない値 (`{}` / 文字列) を通すと、 幅を推定する側が `.filter` を呼んだ時点で
+ * 例外になる。 baseline は file なので壊れた形が入り得るが、 例外は「読めない記録」
+ * として seed し直す経路に乗らず suite 全体を止める。 読めない形はここで弾く。
+ */
+function hasValidRatioHistory(candidate: Record<string, unknown>): boolean {
+  const history = candidate.ratioHistory;
+  if (history === undefined) return true;
+  if (!Array.isArray(history)) return false;
+  return history.every(
+    (value) => typeof value === 'number' && Number.isFinite(value) && value > 0,
+  );
+}
+
 function isMeasureResult(value: unknown): value is MeasureResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
   if (typeof candidate.name !== 'string') return false;
   if (!hasValidReference(candidate)) return false;
+  if (!hasValidRatioHistory(candidate)) return false;
   if (!Array.isArray(candidate.samples)) return false;
   // 2 件未満の記録は比較対象にならない。 bootstrap CI がこの件数で退化 CI ({0,0}) を
   // 返すため、 そのまま読むと何倍悪化しても有意にならず永久に stable になる。
@@ -547,7 +569,11 @@ function backfillDerivedStats(result: MeasureResult): MeasureResult {
     result.trimmed?.percent ?? 0,
     result.warmupConverged ?? true,
   );
+  // sample から作り直せない field は明示的に運ぶ。 ここに足し忘れると、 読み戻す
+  // たびに黙って消える (`ratioHistory` は消えると履歴が 1 件のまま積み上がらず、
+  // 実行間のばらつきを永久に推定できなくなる、 #1739)。
   if (result.reference !== undefined) rebuilt.reference = result.reference;
+  if (result.ratioHistory !== undefined) rebuilt.ratioHistory = result.ratioHistory;
   return rebuilt;
 }
 

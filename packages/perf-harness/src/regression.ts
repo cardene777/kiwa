@@ -79,12 +79,38 @@ export function detectRegression(input: RegressionInput): RegressionResult {
   // harness 自身の往復と区別できないので、 相対比がいくら大きくても判定を保留する。
   const meaningfulDelta = Math.abs(currentStat - baselineStat) >= minDeltaMs;
 
+  // 実行間のばらつきを超えた差だけを有意として扱う。
+  //
+  // bootstrap CI は 1 回の実行の中の標本から作るため、 実行と実行の間のばらつきを
+  // 含んでいない。 その状態で相対閾値だけを見ると、 実装を変えずに測るだけで
+  // 22-29 package が落ちていた (#1739)。
+  //
+  // 履歴が足りない間 (baseline を作った直後) は幅を推定できないので、 従来どおり
+  // 相対閾値だけで判定する。
+  // 幅は baseline 自身の比を基準に測る。 判定量が「今回の比 ÷ baseline の比」 の
+  // 率なので、 同じ基準で測らないと抑える量と判定する量が食い違う。
+  const anchorRatio = observedRatio(input.baseline);
+  const interRunSpread =
+    anchorRatio === null ? null : interRunRelativeSpread(input.baseline.ratioHistory, anchorRatio);
+  const effectiveThreshold =
+    interRunSpread === null
+      ? threshold
+      : Math.max(threshold, interRunSpread * INTER_RUN_SPREAD_MULTIPLE);
+
   let verdict: RegressionResult['verdict'] = 'stable';
-  if (significant && meaningfulDelta && deltaPct >= threshold) {
+  if (significant && meaningfulDelta && deltaPct >= effectiveThreshold) {
     verdict = 'regressed';
-  } else if (significant && meaningfulDelta && deltaPct <= -threshold) {
+  } else if (significant && meaningfulDelta && deltaPct <= -effectiveThreshold) {
     verdict = 'improved';
   }
+
+  // 相対閾値は超えたが実行間のばらつきの範囲に収まった場合を区別する。
+  // 「変化が無い」 と「その op の揺れと見分けが付かない」 は同じ stable でも意味が違う。
+  const suppressedByInterRunSpread =
+    significant &&
+    meaningfulDelta &&
+    Math.abs(deltaPct) >= threshold &&
+    Math.abs(deltaPct) < effectiveThreshold;
 
   // 下限が判定を抑えた場合と、そもそも変化が無い場合を呼出側で区別できるようにする。
   // 両方を stable として返すだけだと、検知できていない状態が安定と読める。
@@ -107,6 +133,9 @@ export function detectRegression(input: RegressionInput): RegressionResult {
     belowDetectionFloor,
     normalized,
     normalizationScale: scale,
+    ...(interRunSpread === null ? {} : { interRunSpread }),
+    effectiveThreshold,
+    suppressedByInterRunSpread,
   };
 }
 
@@ -158,6 +187,88 @@ export function resolveNormalization(
 /** 分母に使える値か。 `hasValidReference` (baseline.ts) と同じ強さに揃える。 */
 function isUsableDenominator(value: number): boolean {
   return Number.isFinite(value) && value > 0;
+}
+
+/**
+ * 実行間のばらつきを推定するのに要る履歴の最小数。
+ *
+ * 2 点では散らばりの推定が 1 つの差にそのまま引きずられる。 3 点あれば中央値と
+ * そこからの偏差が定まり、 1 点の外れ値で幅が決まらなくなる。 これを満たすまでは
+ * 従来どおり相対閾値だけで判定する (幅を推定できない間に幅で抑えると、
+ * baseline を作った直後の実行が常に stable になる)。
+ */
+export const MIN_RATIO_HISTORY = 3;
+
+/** baseline が保持する履歴の上限。 */
+export const MAX_RATIO_HISTORY = 8;
+
+/**
+ * 実行間のばらつきに対して何倍まで許すか。
+ *
+ * 全 493 op の実履歴 (6 回の実行) を使って、 履歴の末尾 1 件を「次の実行」 と見なし
+ * 判定を跨ぐ op を数えた実測。
+ *
+ * | 倍率 | 判定を跨ぐ op | 幅が閾値 20% を上回った op |
+ * |---|---|---|
+ * | 1.0 | 2 / 454 | 44 |
+ * | 1.2 | 2 / 454 | 66 |
+ * | 1.5 | 2 / 454 | 91 |
+ * | 2.0 | 1 / 454 | 143 |
+ * | 3.0 | 1 / 454 | 239 |
+ *
+ * 2 倍で跨ぐ op が 1 件まで落ちる。 3 倍にしても 1 件のままで、 代わりに幅が効く op が
+ * 143 → 239 に増える = 見逃しの範囲が広がるだけなので 2 倍を採る。
+ *
+ * 感度の代償は残る。 幅が効く op では、 その op 自身の揺れの 2 倍を超えない退行は
+ * 検知できない (`docs/quality/perf-thresholds.md` § Each op carries its own
+ * run-to-run spread に op ごとの最小検知幅の分布を載せている)。
+ */
+export const INTER_RUN_SPREAD_MULTIPLE = 2;
+
+/**
+ * この実行で観測した「対象 p10 ÷ 基準 p10」。
+ *
+ * 基準が無い / 分母にならない記録では求まらないので null を返す。 実 API 経路は
+ * 交互測定を使わないため常に null になる。
+ */
+export function observedRatio(result: MeasureResult): number | null {
+  const reference = result.reference;
+  if (reference === undefined || !isUsableDenominator(reference.p10)) return null;
+  const ratio = judgedStatistic(result) / reference.p10;
+  return Number.isFinite(ratio) && ratio > 0 ? ratio : null;
+}
+
+/**
+ * 履歴から実行間のばらつきを推定する。
+ *
+ * **基準は履歴自身の中心ではなく、 比較の相手になる `anchor` (baseline 自身の比)**。
+ * 判定量 `deltaPct` は今回の比を anchor と比べた率なので、 抑えたい量は
+ * 「anchor からどれだけ離れ得るか」 であって「履歴がどれだけ散らばっているか」 では
+ * ない。 返すのは履歴の中で anchor から最も離れた点の相対距離。
+ *
+ * 中央絶対偏差 (履歴の中央値まわりの散らばり) を最初に使ったが、 実測で 5 倍ほど
+ * 過小に出た (全 493 op で MAD 版の p50 が 1.6% / p90 が 4.9% に対し、 anchor から
+ * の最大偏差は p50 7.9% / p90 22.4%)。 その結果 3 倍しても相対閾値 20% を下回り、
+ * 幅がほとんど効かないまま実行ごとに 10-15 op が入れ替わっていた。
+ *
+ * 最大値を採るのは、 抑えたいのが「その op が実際に見せた最悪の振れ」 だから。
+ * 平均や中央値だと、 履歴の半分は必ずその外側に出る。 1 回の外れ値がその op の幅を
+ * 広げる代償は負うが、 上限 (`MAX_RATIO_HISTORY`) を置いてあるので古い外れ値は
+ * いずれ落ちる。
+ *
+ * 推定できない場合 (履歴が足りない / anchor が 0) は null を返す。
+ */
+export function interRunRelativeSpread(
+  history: readonly number[] | undefined,
+  anchor: number,
+): number | null {
+  if (history === undefined || history.length < MIN_RATIO_HISTORY) return null;
+  if (!Number.isFinite(anchor) || anchor <= 0) return null;
+  const usable = history.filter((value) => Number.isFinite(value) && value > 0);
+  if (usable.length < MIN_RATIO_HISTORY) return null;
+
+  const spread = Math.max(...usable.map((value) => Math.abs(value - anchor) / anchor));
+  return Number.isFinite(spread) && spread >= 0 ? spread : null;
 }
 
 /**

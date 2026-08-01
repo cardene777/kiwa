@@ -309,6 +309,87 @@ Two alternatives were rejected. Relaxing the relative threshold to 50 % hides re
 
 Those twelve reasons quote **pre-normalization** spreads, measured on the raw p10 rather than the ratio the verdict now reads. Several of them are inside the threshold under the ratio — `cli-test`'s `readFile` and `writeFile` measure 9 % and 11 % over six runs. The list has not been re-derived, because two analysis passes are not enough to move an op off it and the gate they guard is off in either case. Re-deriving it belongs with whatever turns the gate on.
 
+#### Each op carries its own run-to-run spread
+
+The waiver list above is a list of names, and the section that builds it says why that cannot work: of the 112 ops that moved past 20 %, 85 did so in exactly one pass out of three. A list derived from any two passes is falsified by the third. The problem is not which names are on the list — it is that a single global threshold is being asked to describe ops whose run-to-run spread ranges from 2 % to 322 %.
+
+So the threshold stops being global. Each op's baseline record carries `ratioHistory`, the last eight observations of `p10 ÷ reference p10`, and the verdict compares against that op's own measured spread instead of a number chosen for the suite.
+
+```mermaid
+graph LR
+    A["過去 8 回の比"] --> B["中央絶対偏差 ÷ 中央値"]
+    B --> C["その op の実行間のばらつき"]
+    C --> D{"今回の差が<br/>ばらつきの 3 倍を超えるか"}
+    D -->|"超える"| E[regressed]
+    D -->|"収まる"| F["stable<br/>(揺れと見分けが付かない)"]
+```
+
+The effective threshold is `max(20 %, spread × 3)`. It never goes below the relative threshold — an op that reads perfectly flat for eight runs would otherwise start failing on a 1 % change.
+
+Three choices in that formula were made deliberately.
+
+**Median absolute deviation, not standard deviation.** Run-to-run variation has a long tail on one side only; interference makes a measurement slower, never faster. A single interfered run would set the width for every subsequent comparison if the mean and standard deviation were used, and that op's gate would never fire again. The MAD of `[1.0, 1.0, 1.0, 1.0, 5.0]` is 0, so the outlier is described rather than absorbed.
+
+**Three observations minimum.** With two, the estimated width is whatever the single difference between them happens to be. Below the minimum the verdict falls back to the relative threshold alone, which is the pre-existing behaviour.
+
+**Three times the spread.** For a normal distribution 1 MAD ≈ 0.67 σ, so 3 MAD ≈ 2 σ. Against the measured per-pass distribution of ratio changes (p90 of +9.6 %, +16.7 %, +19.8 % over three passes), this suppresses the ops whose own spread exceeds the relative threshold and leaves the rest judged as before.
+
+The history resets when a verdict lands on `regressed` or `improved`, because the values before and after a real implementation change do not describe the same thing, and mixing them inflates the width until the gate stops firing.
+
+That reset had to be narrowed. Applied to every non-`stable` verdict it is circular: an op whose verdict flips from run-to-run noise has its history cleared each time it flips, never reaches three observations, and never gets the protection — the ops that need it most are the ones that never receive it. So the reset only applies once the width is actually being used, on the grounds that a verdict produced without it is not evidence of anything.
+
+Two alternatives were rejected.
+
+**Raising `minDeltaMs` to the observed spread** is the same proposal already rejected above: it produces a floor of +12 ms on a 1.4 ms op, which keeps the gate nominally on while guaranteeing it never fires, and nothing in the report says so. Storing the spread separately keeps it visible — the report prints each op's measured spread and the effective threshold beside the verdict, so an op that is being suppressed says which of the two bounds is doing it.
+
+**Storing several full measurements per op** rather than the ratio alone. The ratio is one number; a `MeasureResult` carries its whole sample array. At 130 baseline files and 2.9 MB today, keeping eight measurements per op multiplies the file rather than adding a bounded field to it, and nothing in the estimate needs the samples.
+
+This raises `MEASUREMENT_PREMISE` to 6. The way measurements are taken is unchanged from version 5, but a baseline written before this has no history, so no op in it can have its width estimated. Records from that generation are rebuilt rather than compared.
+
+##### Choosing the estimator, and the one that did not work
+
+The first version measured the width as the median absolute deviation around the history's own median. It read about five times too small — over all 493 ops, p50 1.6 % and p90 4.9 %, against a per-pass change distribution whose p90 the earlier sections put at 10-20 %. Three times a number that small stays under the 20 % relative threshold, so the mechanism almost never engaged: six passes over the whole suite left 10-15 ops reading `regressed` on unchanged code, barely better than before.
+
+The error was in what the width was measured against. The verdict compares this run's ratio to **the baseline's** ratio, but the width was describing how the history scattered around **its own** centre. A history that sits tightly together but uniformly away from the baseline reads as zero width while the verdict reads a large change. Measuring each history entry's distance from the baseline ratio instead gives p50 7.9 %, p90 22.4 %, p99 79 %, max 248.5 % — the same order as the changes being judged.
+
+The multiplier was then chosen against the real histories, treating each op's last entry as "the next run" and counting how many would cross their own bound:
+
+| multiplier | ops crossing | ops whose width exceeds 20 % |
+|---|---|---|
+| 1.0 | 2 / 454 | 44 |
+| 1.2 | 2 / 454 | 66 |
+| 1.5 | 2 / 454 | 91 |
+| 2.0 | 1 / 454 | 143 |
+| 3.0 | 1 / 454 | 239 |
+
+Two is the knee. Three does not reduce crossings further and only widens the range over which real regressions would be missed.
+
+##### Measured effect, and why the gate is still off
+
+Six passes over all 254 projects rebuilt the histories, then the gate was switched on and three more passes run with `--no-bail`, so that every package still ran and its history still grew:
+
+| pass | non-`stable` verdicts | packages failing on unchanged code |
+|---|---|---|
+| 1 | 11 | 5 |
+| 2 | 7 | 4 |
+| 3 | 5 | 3 |
+
+Verdicts agreed across all three passes for **486 of 493 ops**. The seven that moved are listed below; six of them settled after the first pass, which is the history reaching three entries.
+
+Against the 22 and 29 packages recorded before this change, three to five is a large reduction, and it is not zero. `astro`, `remix` and `vector` failed in every pass; `dapp-app-scenario` in two, `astro-app-scenario` in one. Some of that is self-inflicted — `vector`'s ops were split into insert and update in a neighbouring change, so their histories are the youngest in the suite.
+
+Two mechanisms account for the residue. An op whose record is replaced starts its history over and spends three passes judged on the relative threshold alone. And an op that is genuinely steady can still jump: `dogfood-trace-flame-graph`'s `drillDown` measured a width of 2.8 % and produced a 23.8 % excursion, which no estimate drawn from its own history can anticipate.
+
+So `regressionGate` stays false by default. What changed is the size of the problem, not its nature.
+
+The waiver list drops from twelve to nine. Three ops are removed because the ratio width now measured over eight runs contradicts the raw-p10 figure their reason quoted: `cli-test`'s `readFile` (3.9 %, quoted 60-100 %), `cli-test`'s `writeFile` (7.9 %, quoted 100-322 %), and `visual`'s `comparePngBuffersFullDiff` (11.0 %, quoted 17-41 %). The remaining nine keep their waivers; their widths are real, and the mechanism widens their thresholds rather than removing the need for the marker.
+
+##### What the history may contain
+
+Only observations whose verdict was `stable`, plus the run that seeded the record. A run judged `regressed` is not evidence of how far the op drifts while unchanged, and storing it is actively harmful: an op that doubled would record a ratio 100 % from its anchor, which widens its own threshold to 200 % and makes the same doubling read `stable` on the next run. The regression would be reported once and then silently accepted. This was reproduced directly before being fixed.
+
+Because regressions never enter the history, there is no need to discard it when one is detected — an earlier version did, and that turned out to be circular: an op whose verdict flipped from noise had its history cleared each time, never reached three entries, and never received the protection it needed. The ops with the shortest histories were exactly the ones failing the gate.
+
 ### The experiment that led to in-run normalization
 
 Four statistics were tried over a single run's samples — p95, p10, median, trimmed mean — and none of them removed the spread; it tracks when the measurement was taken. What did reduce it, measured on one package before the mechanism existed:

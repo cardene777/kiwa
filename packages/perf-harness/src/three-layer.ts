@@ -21,9 +21,13 @@ import { measureAlternating, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory, type MemorySample } from './memory.js';
 import {
+  INTER_RUN_SPREAD_MULTIPLE,
+  MAX_RATIO_HISTORY,
+  MIN_RATIO_HISTORY,
   RESOLUTION_FLOOR_MULTIPLE,
   detectRegression,
   hasSameMeasurementConfig,
+  observedRatio,
   resolveNormalization,
 } from './regression.js';
 import { DEFAULT_REFERENCE_KIND, createReferenceOps } from './reference.js';
@@ -36,7 +40,8 @@ import {
   loadBaseline,
   saveBaselineEnvelope,
 } from './baseline.js';
-import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import { applyRatioHistory, planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import type { RatioHistoryUpdate } from './baseline-write.js';
 import { recordPruneManifest } from './prune-manifest.js';
 import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
@@ -312,6 +317,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 可否が決まるまで確定しない (後続 op が上限を割ると書けなくなる) ため、
   // loop では「書けなかった」 側の値を入れておき、 書けたら後段で上げる。
   const uncompared = new Map<string, boolean>();
+  // この実行で観測した比。 書込の段で baseline の履歴に積む (#1739)。
+  const ratioUpdates = new Map<string, RatioHistoryUpdate>();
 
   // 回帰判定の絶対下限を、この実行の中で測って決める。 固定値だと機械と Node の版で
   // 意味が変わり、 速い op では「差が下限に届かないので永久に stable」 になる。
@@ -402,6 +409,28 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
 
       if (regression === null) uncompared.set(op.name, priorSerial !== undefined);
 
+      // この実行で観測した比を控える。 次の実行が「その op が実行をまたいでどれだけ
+      // 動くか」 を推定するのに使う (#1739)。
+      //
+      // 比較が成立しなかった実行でも積む。 baseline を作った実行の値もその op の
+      // 1 観測で、 除くと幅を推定できるまでに 1 回よけいに掛かる。 記録を入れ替えた
+      // 実行では入れ替え後の record に積むので、 古い実装の値は混ざらない。
+      // この実行で観測した比を控える。 次の実行が「その op が実行をまたいでどれだけ
+      // 動くか」 を推定するのに使う (#1739)。
+      //
+      // **積むのは verdict が stable の実行と、 比較しなかった実行だけ**。 退行した
+      // 実行の比を積むと、 その値が幅を押し広げて次回の実効閾値が退行そのものを
+      // 覆う大きさになり、 同じ退行が stable として通る (実測 = anchor の 2 倍へ
+      // 悪化した op の幅が 100% になり、 実効閾値 200% で delta 100% が収まる)。
+      //
+      // 幅が表すのは「実装が同じまま値がどれだけ動くか」 なので、 退行と判定した
+      // 観測はその定義に当てはまらない。
+      const ratio = observedRatio(serial);
+      const verdictForHistory = regression?.verdict;
+      if (ratio !== null && (verdictForHistory === undefined || verdictForHistory === 'stable')) {
+        ratioUpdates.set(`${op.name}.serial`, { ratio });
+      }
+
       combinedForBaseline[`${op.name}.serial`] = serial;
       combinedForBaseline[`${op.name}.concurrent`] = concurrent;
 
@@ -466,14 +495,28 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 完走したのに掃除されない状態になる。
   recordPruneManifest(baselinePath, Object.keys(combinedForBaseline));
 
+  // この実行で観測した比を baseline の履歴に積む。 記録そのもの (p10 / samples) は
+  // 動かさない。 履歴は「その op が実行をまたいでどれだけ動くか」 を推定するためだけの
+  // もので、 次の実行の有意性判断に使う (#1739)。
+  //
+  // 判定が振れた op は履歴を捨てて積み直す。 実装が変わった前後の値を混ぜると幅が
+  // 過大になり、 その op の gate が二度と発火しなくなる。
+  const historyBase = plan.written ? plan.results : (priorBaseline ?? {});
+  const history = applyRatioHistory(historyBase, ratioUpdates, MAX_RATIO_HISTORY);
+
+  // 履歴だけの更新でも、 測定が成立していない実行では書かない。 成立しない値で
+  // 幅を推定すると、 壊れた状態が次回以降の判定基準になる。
+  const measurable = premiseValid && hardGatePassed;
+  const shouldWrite = plan.written || (history.changed && measurable);
+
   let baselineSeeded = false;
-  if (plan.written) {
+  if (shouldWrite) {
     // 書くのは現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
     await saveBaselineEnvelope(baselinePath, {
       schema: BASELINE_SCHEMA,
       env: captureEnv(),
-      results: plan.results,
+      results: history.results,
     });
     baselineSeeded = priorBaseline === null;
   }
@@ -482,7 +525,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   for (const outcome of outcomes) {
     const hadPrior = uncompared.get(outcome.name);
     if (hadPrior === undefined) continue;
-    outcome.regressionVerdict = uncomparableVerdict(hadPrior, plan.written);
+    outcome.regressionVerdict = uncomparableVerdict(hadPrior, shouldWrite);
   }
 
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md
@@ -519,7 +562,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     regressionGate,
     resolutionMs,
     baselineUnreadable,
-    baselineWritten: plan.written,
+    baselineWritten: shouldWrite,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -768,8 +811,12 @@ function writeReport(input: WriteReportInput): void {
     '',
     '回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。',
     '',
-    '| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |',
-    '|---|---|---|---|---|---|---|---|---|',
+    '',
+    '「実行間のばらつき」 は baseline が持つ過去の比が、 baseline 自身の比からどれだけ離れたかの最大値。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の ' +
+      `${INTER_RUN_SPREAD_MULTIPLE} 倍と相対閾値の大きい方を超えた差だけを有意として扱う (#1739)。 履歴が ${MIN_RATIO_HISTORY} 件に満たない op では推定できないため n/a になり、 相対閾値だけで判定する。`,
+    '',
+    '| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |',
+    '|---|---|---|---|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -787,7 +834,7 @@ function writeReport(input: WriteReportInput): void {
     lines.push(
       // 基準の p95 も出す。 分母が同じ実行の中で暴れていれば比も暴れるので、
       // 比だけを見て「op が動いた」 と読まないための材料。
-      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serialReference.p95)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
+      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serialReference.p95)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression?.interRunSpread === undefined ? 'n/a' : `${(out.regression.interRunSpread * 100).toFixed(1)}%`} | ${out.regression === undefined ? 'n/a' : `${(out.regression.effectiveThreshold * 100).toFixed(1)}%`} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
     );
   });
 

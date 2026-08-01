@@ -82,7 +82,6 @@ describe(MODULE, () => {
             // 実測では大量 buffer 開放で negative delta になるが、 GC 挙動で
             // 逆に increase するケースも許容するため 16MB 上限。
             name: 'comparePngBuffersFullDiff',
-            regressionGateWaived: 'p10 の実行間の振れ幅が 17-41% で、測る時期によって閾値を跨ぐ (#1718)',
             serialP95CapMs: 200,
             memoryArrayBuffersCapBytes: 16 * 1024 * 1024,
             // 実装無変更で測り直すと arrayBuffers の増分が -5.9MB から +20.1MB まで動く。

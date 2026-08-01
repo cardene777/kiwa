@@ -8,35 +8,38 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| init_workflow (3 fresh project scaffold) | 1.92ms | 2.77ms | 500ms | 0.00048ms | PASS | stable — gate 無効 (regressionGate=false) |
-| spec_to_test_batch (5 consecutive runSpecToTest) | 0.50ms | 0.73ms | 300ms | 0.00037ms | PASS | stable — gate 無効 (regressionGate=false) |
-| init_error_handling (3 InitConflictError catch) | 0.59ms | 0.87ms | 500ms | 0.00046ms | PASS | improved — gate 無効 (regressionGate=false) |
+| init_workflow (3 fresh project scaffold) | 2.47ms | 7.28ms | 500ms | 0.00020ms | PASS | improved — gate 無効 (regressionGate=false) |
+| spec_to_test_batch (5 consecutive runSpecToTest) | 0.52ms | 1.26ms | 300ms | 0.00026ms | PASS | improved — gate 無効 (regressionGate=false) |
+| init_error_handling (3 InitConflictError catch) | 0.80ms | 1.72ms | 500ms | 0.00022ms | PASS | improved — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|---|
-| init_workflow (3 fresh project scaffold) | fs-write | 0.14ms | 0.39ms | 1.92ms | 13.586 | 13.022 | 1.84ms | 1.76ms |
-| spec_to_test_batch (5 consecutive runSpecToTest) | fs-write | 0.10ms | 0.33ms | 0.50ms | 4.890 | 5.493 | 0.36ms | 0.41ms |
-| init_error_handling (3 InitConflictError catch) | fs-write | 0.12ms | 0.31ms | 0.59ms | 4.951 | 6.201 | 0.55ms | 0.68ms |
+
+「実行間のばらつき」 は baseline が持つ過去の比が、 baseline 自身の比からどれだけ離れたかの最大値。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の 2 倍と相対閾値の大きい方を超えた差だけを有意として扱う (#1739)。 履歴が 3 件に満たない op では推定できないため n/a になり、 相対閾値だけで判定する。
+
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| init_workflow (3 fresh project scaffold) | fs-write | 0.34ms | 2.15ms | 2.47ms | 7.277 | 13.022 | n/a | 20.0% | 0.98ms | 1.76ms |
+| spec_to_test_batch (5 consecutive runSpecToTest) | fs-write | 0.14ms | 0.70ms | 0.52ms | 3.669 | 5.493 | n/a | 20.0% | 0.27ms | 0.41ms |
+| init_error_handling (3 InitConflictError catch) | fs-write | 0.25ms | 0.46ms | 0.80ms | 3.212 | 6.201 | n/a | 20.0% | 0.35ms | 0.68ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| init_workflow (3 fresh project scaffold) | 11.10ms | 1000ms | PASS |
-| spec_to_test_batch (5 consecutive runSpecToTest) | 2.82ms | 600ms | PASS |
-| init_error_handling (3 InitConflictError catch) | 3.57ms | 1000ms | PASS |
+| init_workflow (3 fresh project scaffold) | 12.41ms | 1000ms | PASS |
+| spec_to_test_batch (5 consecutive runSpecToTest) | 4.33ms | 600ms | PASS |
+| init_error_handling (3 InitConflictError catch) | 3.67ms | 1000ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
-|---|---|---|---|---|---|
-| init_workflow (3 fresh project scaffold) | 520 B | 0 B | 102400 B | yes | PASS |
-| spec_to_test_batch (5 consecutive runSpecToTest) | -2424 B | 0 B | 102400 B | yes | PASS |
-| init_error_handling (3 InitConflictError catch) | 5512 B | 0 B | 102400 B | yes | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |
+|---|---|---|---|---|---|---|
+| init_workflow (3 fresh project scaffold) | -1560 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| spec_to_test_batch (5 consecutive runSpecToTest) | -2144 B | -9200 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| init_error_handling (3 InitConflictError catch) | 5400 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
 
 ## Detailed serial reports
 
@@ -48,30 +51,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 1.92ms |
-| p50 | 2.13ms |
-| p95 | 2.77ms |
-| p99 | 2.81ms |
-| mean | 2.24ms |
-| stdev | 0.30ms |
-| min | 1.82ms |
-| max | 2.82ms |
-| total | 44.86ms |
+| p10 | 2.47ms |
+| p50 | 3.01ms |
+| p95 | 7.28ms |
+| p99 | 8.59ms |
+| mean | 3.71ms |
+| stdev | 1.75ms |
+| min | 2.34ms |
+| max | 8.92ms |
+| total | 74.22ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.954)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.399)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 1.84ms | 1.76ms | +0.08ms | +4.33% |
-| p50 | 2.03ms | 2.03ms | +0.00027ms | +0.01% |
-| p95 | 2.65ms | 2.64ms | +0.0045ms | +0.17% |
-| p99 | 2.68ms | 2.74ms | -0.06ms | -2.06% |
-| mean | 2.14ms | 2.09ms | +0.05ms | +2.22% |
-| min | 1.73ms | 1.54ms | +0.19ms | +12.35% |
-| max | 2.69ms | 2.77ms | -0.07ms | -2.59% |
-| total | 42.79ms | 41.86ms | +0.93ms | +2.22% |
+| p10 | 0.98ms | 1.76ms | -0.78ms | -44.12% |
+| p50 | 1.20ms | 2.03ms | -0.83ms | -40.84% |
+| p95 | 2.90ms | 2.64ms | +0.26ms | +9.82% |
+| p99 | 3.43ms | 2.74ms | +0.68ms | +24.99% |
+| mean | 1.48ms | 2.09ms | -0.61ms | -29.29% |
+| min | 0.93ms | 1.54ms | -0.61ms | -39.39% |
+| max | 3.56ms | 2.77ms | +0.79ms | +28.61% |
+| total | 29.60ms | 41.86ms | -12.26ms | -29.29% |
 
 ### spec_to_test_batch (5 consecutive runSpecToTest)
 
@@ -81,30 +84,30 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.50ms |
-| p50 | 0.61ms |
-| p95 | 0.73ms |
-| p99 | 0.77ms |
-| mean | 0.61ms |
-| stdev | 0.09ms |
-| min | 0.45ms |
-| max | 0.78ms |
-| total | 12.29ms |
+| p10 | 0.52ms |
+| p50 | 0.64ms |
+| p95 | 1.26ms |
+| p99 | 1.34ms |
+| mean | 0.75ms |
+| stdev | 0.27ms |
+| min | 0.49ms |
+| max | 1.35ms |
+| total | 14.98ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.733)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.527)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.36ms | 0.41ms | -0.04ms | -10.98% |
-| p50 | 0.45ms | 0.47ms | -0.03ms | -5.58% |
-| p95 | 0.53ms | 0.56ms | -0.03ms | -5.34% |
-| p99 | 0.57ms | 0.59ms | -0.02ms | -3.53% |
-| mean | 0.45ms | 0.48ms | -0.03ms | -5.58% |
-| min | 0.33ms | 0.40ms | -0.07ms | -18.68% |
-| max | 0.57ms | 0.59ms | -0.02ms | -3.11% |
-| total | 9.01ms | 9.54ms | -0.53ms | -5.58% |
+| p10 | 0.27ms | 0.41ms | -0.14ms | -33.21% |
+| p50 | 0.34ms | 0.47ms | -0.13ms | -28.62% |
+| p95 | 0.67ms | 0.56ms | +0.10ms | +18.50% |
+| p99 | 0.70ms | 0.59ms | +0.12ms | +20.08% |
+| mean | 0.40ms | 0.48ms | -0.08ms | -17.16% |
+| min | 0.26ms | 0.40ms | -0.14ms | -35.24% |
+| max | 0.71ms | 0.59ms | +0.12ms | +20.46% |
+| total | 7.90ms | 9.54ms | -1.64ms | -17.16% |
 
 ### init_error_handling (3 InitConflictError catch)
 
@@ -114,28 +117,28 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.59ms |
-| p50 | 0.73ms |
-| p95 | 0.87ms |
-| p99 | 0.89ms |
-| mean | 0.72ms |
-| stdev | 0.10ms |
-| min | 0.57ms |
-| max | 0.89ms |
-| total | 14.48ms |
+| p10 | 0.80ms |
+| p50 | 1.04ms |
+| p95 | 1.72ms |
+| p99 | 1.82ms |
+| mean | 1.11ms |
+| stdev | 0.32ms |
+| min | 0.69ms |
+| max | 1.84ms |
+| total | 22.20ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.922)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.442)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.55ms | 0.68ms | -0.14ms | -20.16% |
-| p50 | 0.67ms | 0.72ms | -0.05ms | -7.59% |
-| p95 | 0.80ms | 0.95ms | -0.14ms | -15.27% |
-| p99 | 0.82ms | 0.96ms | -0.14ms | -14.35% |
-| mean | 0.67ms | 0.76ms | -0.09ms | -11.62% |
-| min | 0.52ms | 0.65ms | -0.13ms | -19.82% |
-| max | 0.82ms | 0.96ms | -0.14ms | -14.12% |
-| total | 13.35ms | 15.10ms | -1.76ms | -11.62% |
+| p10 | 0.35ms | 0.68ms | -0.33ms | -48.20% |
+| p50 | 0.46ms | 0.72ms | -0.26ms | -36.55% |
+| p95 | 0.76ms | 0.95ms | -0.19ms | -19.64% |
+| p99 | 0.80ms | 0.96ms | -0.15ms | -16.00% |
+| mean | 0.49ms | 0.76ms | -0.26ms | -35.01% |
+| min | 0.31ms | 0.65ms | -0.34ms | -52.90% |
+| max | 0.81ms | 0.96ms | -0.14ms | -15.10% |
+| total | 9.82ms | 15.10ms | -5.29ms | -35.01% |
 
