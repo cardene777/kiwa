@@ -21,6 +21,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   buildMeasureResult,
   defaultBaselinePath,
+  envProfile,
   detectRegression,
   evaluatePerfGate,
   loadBaseline,
@@ -88,9 +89,13 @@ describe('tutorial 45 — baseline persistence', () => {
     rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it('writes to .perf-baseline/reverseString.json on first run', async () => {
+  it('writes to .perf-baseline/<env>/reverseString.json on first run', async () => {
+    // baseline は記録した環境でしか比較に使えないので、 環境名の dir を 1 階層挟む
+    // (#1729)。 挟まないと別の機械で回した実行が前の記録を上書きする。
     const baselinePath = defaultBaselinePath('reverseString');
-    expect(baselinePath).toBe(path.join(process.cwd(), '.perf-baseline', 'reverseString.json'));
+    expect(baselinePath).toBe(
+      path.join(process.cwd(), '.perf-baseline', envProfile(), 'reverseString.json'),
+    );
 
     const current = await measure({
       name: 'reverseString',

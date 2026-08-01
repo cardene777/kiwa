@@ -38,9 +38,14 @@ export {
 } from './regression.js';
 export {
   BASELINE_SCHEMA,
+  CANONICAL_ENV_PROFILE,
   MEASUREMENT_PREMISE,
   captureEnv,
+  envProfile,
+  isCanonicalEnv,
+  nonCanonicalEnvNotice,
   isComparableEnv,
+  baselinePathFor,
   defaultBaselinePath,
   resolveBaselineRoot,
   loadBaseline,

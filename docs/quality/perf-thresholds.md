@@ -200,7 +200,24 @@ The path used to be derived from `process.cwd()`, so the same module wrote to `p
 
 They are tracked because an untracked baseline means the first run on any checkout has nothing to compare against. "Whoever measures first cannot detect a regression" is not a property worth keeping.
 
-That help is limited to machines matching the one that recorded them. `isComparableEnv` requires the same Node version, platform, CPU model and core count, so a different machine gets no comparison on its first run and reseeds locally. **Do not commit that reseed** — it replaces the reference for everyone else with your machine's numbers. The committed set was recorded on a single machine; treat it as that machine's reference, not a portable one. Making the tracked set portable needs per-environment baseline files, which is a separate change.
+That help is limited to machines matching the one that recorded them. `isComparableEnv` requires the same Node version, platform, CPU model and core count, so a different machine gets no comparison on its first run and reseeds locally.
+
+Baselines therefore live under a directory naming the environment that produced them:
+
+```
+.perf-baseline/
+  darwin-arm64--apple-m4-pro-43c7d7--node24/
+    cache.json
+    ...
+```
+
+The name carries platform, CPU model, and Node **major**. Including the patch version would invalidate every baseline on a Node upgrade; dropping the major would compare across V8 changes. Core count is left out — it moves with load and container allocation on the same machine, and `isComparableEnv` rejects the mismatch anyway.
+
+**One profile is tracked**: `darwin-arm64--apple-m4-pro-43c7d7--node24`. Tracking every profile would multiply 148 files by the number of machines, and most copies would never be read. Other environments write to their own directory, which `.gitignore` excludes, so running `test:perf` elsewhere leaves the tracked files untouched — the earlier "do not commit your reseed" rule no longer depends on anyone remembering it.
+
+The cost is that a checkout only compares from the first run on the canonical environment. Anywhere else seeds locally first.
+
+That profile name appears in three places: `CANONICAL_ENV_PROFILE` in `packages/perf-harness/src/baseline.ts`, the `.gitignore` exception, and this paragraph. `packages/perf-harness/tests/canonical-profile.test.ts` fails if they drift apart.
 
 The machine's hostname is not recorded. It plays no part in the comparison, and a tracked file is the wrong place for it.
 

@@ -37,6 +37,7 @@ import {
   defaultBaselinePath,
   isComparableEnv,
   loadBaseline,
+  nonCanonicalEnvNotice,
   saveBaselineEnvelope,
 } from './baseline.js';
 import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
@@ -316,6 +317,10 @@ function writeLiveReport(input: WriteLiveReportInput): void {
     for (const o of skippedOps) lines.push(`| ${o.name} | ${o.skipReason} |`);
     lines.push('');
   }
+
+  // mock 経路と同じ注記を出す。 片方だけに置くと、 実 API 経路の report を見た
+  // 読み手が「git に入っている記録と比べた結果」 と受け取る (#1729)。
+  lines.push(...nonCanonicalEnvNotice());
 
   if (measuredOps.length === 0) {
     lines.push('_No live ops ran this pass. Set the required env vars to enable._');

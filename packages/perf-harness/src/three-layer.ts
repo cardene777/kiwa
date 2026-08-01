@@ -27,6 +27,7 @@ import {
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
+  nonCanonicalEnvNotice,
   loadBaseline,
   saveBaselineEnvelope,
 } from './baseline.js';
@@ -696,6 +697,9 @@ function writeReport(input: WriteReportInput): void {
           '',
         ]
       : []),
+    // 追跡している baseline は 1 つの環境の記録で、 他の環境では比較相手が別になる。
+    // 数値だけを見た読み手が「追跡分と比べた結果」 と受け取らないよう明示する (#1729)。
+    ...nonCanonicalEnvNotice(),
     '## Serial (concurrency = 1)',
     '',
     '| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |',
