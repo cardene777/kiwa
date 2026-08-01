@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { existsSync, realpathSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { arch, platform as osPlatform, cpus } from 'node:os';
@@ -103,7 +103,127 @@ export async function saveBaselineEnvelope(
  * 従来どおり cwd を使うので、 repo の外の呼出には影響しない。
  */
 export function defaultBaselinePath(moduleName: string): string {
-  return `${resolveBaselineRoot(process.cwd())}/.perf-baseline/${moduleName}.json`;
+  return baselinePathFor(resolveBaselineRoot(process.cwd()), moduleName);
+}
+
+/**
+ * baseline の置き場を組み立てる。 層を跨いで 1 箇所に集約するための入口。
+ *
+ * perf suite の多くは `path.join(REPO_ROOT, '.perf-baseline', ...)` を自前で組んで
+ * いる。 そこに profile を足し忘れると、 その suite だけ環境を跨いで同じ file を
+ * 共有し、 別の機械の記録を上書きする。 組み立てをここに集めて、 呼出側は層と
+ * module 名だけを渡す。
+ *
+ * `layer` は `saas` / `framework` のような区分。 省略すると profile 直下に置く。
+ */
+export function baselinePathFor(root: string, moduleName: string, layer?: string): string {
+  const segments = [root, '.perf-baseline', envProfile()];
+  if (layer !== undefined && layer.length > 0) segments.push(layer);
+  return join(...segments, `${moduleName}.json`);
+}
+
+/**
+ * baseline を置き分ける環境の名前。 例 `darwin-arm64--apple-m4-pro-43c7d7--node24`。
+ *
+ * baseline は記録した機械でしか比較に使えない (`isComparableEnv` が platform /
+ * CPU / Node 版の一致を要求する)。 同じ path に書くと、 別の機械で回した実行が
+ * 前の機械の記録を自分の値で上書きし、 追跡している file が汚れる。
+ *
+ * 名前に入れるのは platform と CPU model と Node の major まで。 patch 版まで
+ * 入れると Node を上げるたびに全 baseline が無効になる。 逆に major を落とすと
+ * V8 の変化を跨いで比較してしまう。
+ *
+ * cpu 数は入れない。 同じ機械でも measurement 中の負荷や container の割当で
+ * `os.cpus().length` が変わることがあり、 その都度 profile が分かれると
+ * 比較対象を見失う。 数の違いは `isComparableEnv` が別途弾く。
+ */
+export function envProfile(env: BaselineEnv | ProfileEnv = profileEnv()): string {
+  const slug = (value: string): string =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'unknown';
+  return `${slug(env.platform)}--${cpuSlug(env.cpuModel)}--node${nodeMajor(env.nodeVersion)}`;
+}
+
+/** profile を決めるのに要る 3 値。 */
+type ProfileEnv = Pick<BaselineEnv, 'platform' | 'cpuModel' | 'nodeVersion'>;
+
+let cachedProfileEnv: ProfileEnv | undefined;
+
+/**
+ * profile を決める 3 値だけを取る。 process の生存中は 1 度しか読まない。
+ *
+ * `captureEnv()` を既定引数にすると `git rev-parse` が毎回走る。 profile は
+ * baseline の path と report の注記の両方で引かれるため、 148 suite の実行で
+ * 数百回になり実測で 300 回 9 秒かかった。 profile に要るのは platform と
+ * CPU model と Node 版だけで、 いずれも process の生存中に変わらない。
+ */
+function profileEnv(): ProfileEnv {
+  cachedProfileEnv ??= {
+    platform: `${osPlatform()}-${arch()}`,
+    cpuModel: cpus()[0]?.model ?? 'unknown',
+    nodeVersion: process.version,
+  };
+  return cachedProfileEnv;
+}
+
+/** Node の major。 `v24.15.0` / `24.15.0` / `v24.0.0-nightly` のいずれも `24`。 */
+export function nodeMajor(version: string): string {
+  return /^v?(\d+)/.exec(version)?.[1] ?? 'unknown';
+}
+
+/**
+ * CPU model の dir 名。 読める形に raw 値の指紋を足す。
+ *
+ * slug 化だけだと区切り文字の違いが潰れる (`Intel Core i7-1065G7` と
+ * `Intel Core i7 1065G7` が同じ名前になる)。 `isComparableEnv` は raw の一致を
+ * 見るので、 同じ dir を読みながら互いに比較できず再 seed し合う。
+ *
+ * 指紋は raw 値そのものから取る。 読める部分は人が dir を見て判別するため、
+ * 指紋は衝突を避けるためだけに付ける。
+ */
+function cpuSlug(cpuModel: string): string {
+  const readable =
+    cpuModel
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'unknown';
+  const fingerprint = createHash('sha256').update(cpuModel).digest('hex').slice(0, 6);
+  return `${readable}-${fingerprint}`;
+}
+
+/**
+ * git が追跡する唯一の profile。
+ *
+ * checkout した直後から比較できるようにするには baseline を追跡する必要があるが
+ * (#1708 T004)、 全ての機械の分を追跡すると 148 file が機械の数だけ増える。
+ * 1 つを決めて追跡し、 他は `.gitignore` で外す。
+ *
+ * ここを変える時は `.gitignore` と `docs/quality/perf-thresholds.md` も同時に直す。
+ * 3 箇所が揃っていることは `tests/canonical-profile.test.ts` が確かめる。
+ */
+export const CANONICAL_ENV_PROFILE = 'darwin-arm64--apple-m4-pro-43c7d7--node24';
+
+/** 今の環境が追跡対象か。 report に「他の環境で測った」 と出すために使う。 */
+export function isCanonicalEnv(env: BaselineEnv | ProfileEnv = profileEnv()): boolean {
+  return envProfile(env) === CANONICAL_ENV_PROFILE;
+}
+
+/**
+ * canonical でない環境で測った時に report へ出す 1 行。 canonical なら空配列。
+ *
+ * 数値だけを見た読み手が「git に入っている記録と比べた結果」 と受け取らないよう、
+ * 実際の比較相手がどこにあるかを書く。 mock 経路と実 API 経路の両方から呼ぶ
+ * (片方だけに置くと、 もう片方の report で同じ誤読が起きる)。
+ */
+export function nonCanonicalEnvNotice(env: BaselineEnv | ProfileEnv = profileEnv()): string[] {
+  if (isCanonicalEnv(env)) return [];
+  return [
+    `**追跡対象でない環境で測定した** (\`${envProfile(env)}\`、 追跡分は \`${CANONICAL_ENV_PROFILE}\`)。`
+      + ' 比較相手はこの環境で作った baseline で、 git に入っている記録とは別。',
+    '',
+  ];
 }
 
 /**
@@ -198,9 +318,21 @@ export function isComparableEnv(baseline: BaselineEnv, current: BaselineEnv): bo
   return (
     baseline.measurementPremise === current.measurementPremise &&
     baseline.gcExposed === current.gcExposed &&
+    // **置き場と比較条件は別物** (#1729 Round 2 adversarial)。
+    //
+    // 置き場 (`envProfile`) は粗くてよい。 目的は「別の機械の記録を上書きしない」
+    // ことで、 粗く分ければ達成できる。 細かくすると同じ機械の中で dir が乱立し、
+    // 追跡する対象を決められなくなる。
+    //
+    // 比較条件はここで厳密に見る。 Node の patch でも V8 の最適化は変わり、
+    // cpu 数が並列度を下回れば worker が待ち行列に並ぶ。 どちらも測定値を動かす。
+    //
+    // 一致しない時に起きるのは「同じ dir を読んで、 比較はせず作り直す」。 これは
+    // 正しい挙動で、 別の機械の記録を壊すことはない (dir が分かれているため)。
     baseline.nodeVersion === current.nodeVersion &&
     baseline.platform === current.platform &&
-    // 別 CPU の測定値と比べると、実装ではなく機械の差を回帰として報告する。
+    // 置き場は指紋付き slug で分けるが、 比較は raw の一致を要求する。 指紋は
+    // 24 bit しかなく衝突し得るため、 dir が同じでも別 CPU の可能性が残る。
     baseline.cpuModel === current.cpuModel &&
     baseline.cpuCount === current.cpuCount
   );

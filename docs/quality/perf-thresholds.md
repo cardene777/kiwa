@@ -190,7 +190,7 @@ Sample count explains part of it and not the rest — 14 % of ops with more than
 
 Verdict agreement between passes is **440, 458 and 444 out of 492** for the three pairings, and **425 / 492** across all three at once. One pairing clears the 450 that #1737 set as its target and the other two do not, which is the same lesson as the four-pass selection above: a number taken from one pairing is a number about that pairing.
 - baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
-- to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
+- to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{env-profile}/{module}.json` (some modules sit under a layer directory, e.g. `.perf-baseline/{env-profile}/saas/{module}.json`) and rerun
 
 ### Where baselines live
 
@@ -200,7 +200,28 @@ The path used to be derived from `process.cwd()`, so the same module wrote to `p
 
 They are tracked because an untracked baseline means the first run on any checkout has nothing to compare against. "Whoever measures first cannot detect a regression" is not a property worth keeping.
 
-That help is limited to machines matching the one that recorded them. `isComparableEnv` requires the same Node version, platform, CPU model and core count, so a different machine gets no comparison on its first run and reseeds locally. **Do not commit that reseed** — it replaces the reference for everyone else with your machine's numbers. The committed set was recorded on a single machine; treat it as that machine's reference, not a portable one. Making the tracked set portable needs per-environment baseline files, which is a separate change.
+That help is limited to machines matching the one that recorded them. `isComparableEnv` requires the same Node version, platform, CPU model and core count, so a different machine gets no comparison on its first run and reseeds locally.
+
+Baselines therefore live under a directory naming the environment that produced them:
+
+```
+.perf-baseline/
+  darwin-arm64--apple-m4-pro-43c7d7--node24/
+    cache.json
+    ...
+```
+
+The name carries platform, CPU model, and Node **major**. Including the patch version would produce a new directory on every Node upgrade; core count is left out because it moves with load and container allocation on the same machine.
+
+**The directory name and the comparison rule are separate things.** The directory only has to be coarse enough that two machines never write to the same file. `isComparableEnv` is what decides whether a stored measurement can be compared, and it stays strict: exact Node version, platform, CPU model, and core count. A Node patch changes V8's optimisation decisions, and a core count below the fixed concurrency (10 serial, 20 for app scenarios) puts workers in a queue — both move the numbers.
+
+When they disagree, the run reads the directory, finds the premise does not match, and reseeds. That is correct: no other machine's record is at risk, because the directory already separated them.
+
+**One profile is tracked**: `darwin-arm64--apple-m4-pro-43c7d7--node24`. Tracking every profile would multiply 148 files by the number of machines, and most copies would never be read. Other environments write to their own directory, which `.gitignore` excludes, so running `test:perf` elsewhere leaves the tracked files untouched — the earlier "do not commit your reseed" rule no longer depends on anyone remembering it.
+
+The cost is that a checkout only compares from the first run on the canonical environment. Anywhere else seeds locally first.
+
+That profile name appears in three places: `CANONICAL_ENV_PROFILE` in `packages/perf-harness/src/baseline.ts`, the `.gitignore` exception, and this paragraph. `packages/perf-harness/tests/canonical-profile.test.ts` fails if they drift apart.
 
 The machine's hostname is not recorded. It plays no part in the comparison, and a tracked file is the wrong place for it.
 

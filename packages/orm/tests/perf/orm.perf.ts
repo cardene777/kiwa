@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
+import { baselinePathFor, resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import { eq } from 'drizzle-orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { setupOrmEnv } from '../../src/index.js';
@@ -10,7 +10,7 @@ import type { OrmTestEnvMock } from '../../src/index.js';
 const MODULE = 'orm';
 const REPO_ROOT = resolveKiwaRepoRoot(process.cwd());
 const REPORT_PATH = path.join(REPO_ROOT, 'docs/quality-reports/perf/saas', `${MODULE}.md`);
-const BASELINE_PATH = path.join(REPO_ROOT, '.perf-baseline/saas', `${MODULE}.json`);
+const BASELINE_PATH = baselinePathFor(REPO_ROOT, MODULE, 'saas');
 
 const users = sqliteTable('users', {
   id: integer('id').primaryKey(),
