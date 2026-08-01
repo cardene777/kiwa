@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness live の API 契約"
 
 #### <code v-pre>runPerf3LayerLive</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L110) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L119) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export declare function runPerf3LayerLive(input: RunPerf3LayerLiveInput): Promise<RunPerf3LayerLiveResult>;
@@ -24,7 +24,7 @@ export declare function runPerf3LayerLive(input: RunPerf3LayerLiveInput): Promis
 
 #### <code v-pre>LiveOpOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L97) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L106) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface LiveOpOutcome extends Partial<OpOutcome> {
@@ -36,7 +36,7 @@ export interface LiveOpOutcome extends Partial<OpOutcome> {
 
 #### <code v-pre>LivePerfOpSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L50) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L54) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface LivePerfOpSpec extends PerfOpSpec {
@@ -50,7 +50,7 @@ export interface LivePerfOpSpec extends PerfOpSpec {
 
 #### <code v-pre>RunPerf3LayerLiveInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L58) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L62) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface RunPerf3LayerLiveInput {
@@ -88,6 +88,11 @@ export interface RunPerf3LayerLiveInput {
      * 明示しても、 env 欠落で飛ばした op がある実行では掃除しない。 その実行の op 一覧は
      * 「測っていない」 のではなく「測れなかった」 ものを含むので、 落とすと credential を
      * 1 つ外した実行が他の op の比較対象を壊す (#1740 でそう決めた)。
+     *
+     * **true を渡す側が「この `ops` が当該 module の全 op である」 ことを保証する**。
+     * `anySkipped` が見張れるのは env 欠落で飛んだ op までで、 呼出前に `ops` から
+     * 外した op は harness からは見えない。 絞り込んだ一覧に true を付けると、
+     * 外した op の記録が落ちる。 絞り込み実行では既定 (省略) のままにする。
      */
     pruneStaleBaselineOps?: boolean;
 }
@@ -95,7 +100,7 @@ export interface RunPerf3LayerLiveInput {
 
 #### <code v-pre>RunPerf3LayerLiveResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L103) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L112) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface RunPerf3LayerLiveResult {

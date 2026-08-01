@@ -1,8 +1,8 @@
 /**
  * runPerf3LayerLive — 3-layer perf against a live third-party API.
  *
- * Companion to {@link runPerf3Layer}. Same shape, same reporting, same
- * baseline semantics. Three behavioural differences:
+ * Companion to {@link runPerf3Layer}. Same shape, same reporting, and the same
+ * baseline-write planner (`planBaselineWrite`). Four behavioural differences:
  *
  * 1. **env-skip contract** — the caller declares which env vars are required
  *    to reach the live API. When any required var is unset, the helper skips
@@ -20,6 +20,10 @@
  *    compares raw durations — carrying the run-to-run drift the mock path now
  *    cancels. The stored `measurementPremise` is shared with the mock path, so
  *    it does not distinguish the two; the presence of `reference` does.
+ * 4. **prune activation** — the mock path falls back to `KIWA_PERF_PRUNE_STALE`
+ *    when the caller says nothing. This path never reads that variable and
+ *    prunes only when the caller opts in explicitly, and only when no op was
+ *    skipped for missing env (#1746). See `pruneStaleBaselineOps` for why.
  *
  * Live runs cost money and are slow. Iterations default to 10 (vs 200 for
  * mock) so a full pass fits inside a coffee break. Concurrency defaults to
@@ -90,6 +94,11 @@ export interface RunPerf3LayerLiveInput {
    * 明示しても、 env 欠落で飛ばした op がある実行では掃除しない。 その実行の op 一覧は
    * 「測っていない」 のではなく「測れなかった」 ものを含むので、 落とすと credential を
    * 1 つ外した実行が他の op の比較対象を壊す (#1740 でそう決めた)。
+   *
+   * **true を渡す側が「この `ops` が当該 module の全 op である」 ことを保証する**。
+   * `anySkipped` が見張れるのは env 欠落で飛んだ op までで、 呼出前に `ops` から
+   * 外した op は harness からは見えない。 絞り込んだ一覧に true を付けると、
+   * 外した op の記録が落ちる。 絞り込み実行では既定 (省略) のままにする。
    */
   pruneStaleBaselineOps?: boolean;
 }
