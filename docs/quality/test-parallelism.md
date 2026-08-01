@@ -173,6 +173,64 @@ Retrying the real operation rather than probing the port separately keeps *up* a
 *usable* from being confused, and any other failure (a bad schema, say) reproduces
 immediately instead of being retried into a timeout.
 
+## Timing assertions do not belong in a suite that runs alongside other work
+
+`tests/release-smoke` used to start real performance suites. Three of its cases invoked
+`scripts/kiwa-taxonomy-run.mjs`, which runs the perf tests of `packages/ui` and
+`packages/cache` — and those assert on elapsed time (`p95 < 1 ms` for a
+`performance.now()` round trip, `max latency < 5 ms` for a hundred small allocations).
+
+The failure rate tracked how busy the machine was.
+
+| How it was run | Result |
+|---|---|
+| `packages/ui` alone, 10 times | 10 pass |
+| With `--reporter=json`, 10 times | 10 pass |
+| Through `spawnSync` with piped output, 10 times | 10 pass |
+| Through the CLI, 10 times | 9 pass, 1 fail |
+| Through the CLI with 12 cores saturated, 3 times | 3 fail |
+
+Serialising the file within release-smoke was tried first and was not enough — 2 failures
+in 6 runs.
+
+Serialising never removes contention from outside the repository; it removes this
+repository's own contribution, and that is true of the browser and Docker cases as well
+(the Docker daemon is shared with everything else on the machine — see below). What
+differs is what the test does with the load that remains.
+
+A functional test can absorb it. "Chromium starts", "port 3306 binds", "the transaction is
+mined" are all statements about something happening, so a budget generous enough for a
+loaded machine keeps them true without weakening what they assert. A timing assertion
+cannot: the load *is* what it measures. Widening the budget until unrelated work fits
+inside it is the same as deleting the test.
+
+Raising the thresholds is therefore not an option here, for the reason stated above.
+
+So the timing assertions left. release-smoke checks that the CLI parses its arguments and
+resolves the right targets; the numbers are `pnpm test:perf`'s job, which already runs
+with `--workspace-concurrency=1`. The file's own header comment said as much from the
+start ("CLI 本体の実 run は per-category に委ね、release-smoke は CLI 存在 + 引数 parse
+動作を担保する薄い gate") — the implementation had drifted from it.
+
+What the three cases became:
+
+| Was | Now |
+|---|---|
+| `--category perf --lib ui` had to report `pass`, to prove `.tsx` files are collected | `collectFiles` is called directly and asserted to return both `ui.perf.tsx` and `ui.skill.test.ts` |
+| `--category all --lib cache` ran all four categories for real | `--lib lean` has no test directory in any category, so every cell returns `no-files` and only the output shape is exercised — guarded by an assertion that those directories still do not exist |
+| `--category skill --lib cache` had to report `pass` | `test-taxonomy.config.json` is read directly. `--lib` bypasses the config entirely, so a row in the matrix never meant "in scope" |
+
+Dropping the real runs left a gap: the CLI's own perf adapter (`runPerfCell`) builds the
+Vitest command, parses its JSON, and maps the counts to a status, and nothing else
+exercises it — `pnpm test:perf` invokes each package's `test:perf` directly. It now takes
+its runner as an argument, so a stubbed runner returning fixed JSON pins the command
+arguments, `pass` / `fail` / `no-tests` / `parse-fail`, the `KIWA_MODE` propagation, and
+the early return when no perf config exists. None of that depends on elapsed time.
+
+Under the saturated-CPU condition that used to fail three times out of three, the file now
+passes three times out of three, and 543 release-smoke tests pass across three
+consecutive runs (#1751).
+
 ## A precondition this repository cannot enforce
 
 The Docker daemon is shared with everything else on the machine. During one measured run

@@ -102,7 +102,11 @@ function libsForCategory(category, config, allPackages) {
   throw new Error(`unknown category: ${category}`);
 }
 
-function collectFiles(dir, suffix) {
+// export するのは、 拡張子の accept を単体で確かめるため (#1751)。
+// 以前は release-smoke から実 perf を起動して間接的に見ていたが、 perf は時間そのものを
+// 測るので機械の空き具合で落ちる。 見たいのは「`.tsx` を拾うか」 だけなので、 その 1 点を
+// 直接見る。
+export function collectFiles(dir, suffix) {
   if (!existsSync(dir)) return [];
   // .ts と .tsx 両方を accept (JSX を含む component test も対象)。 SSOT = meta lint
   // 側 (test-taxonomy-existence.test.ts) の `[baseSuffix, `${baseSuffix}x`]` と整合。
@@ -303,7 +307,18 @@ function runOneCell(lib, category, includeReal = false, config = null) {
   return { status, passed, failed, total, realIncluded: includeReal };
 }
 
-function runPerfCell(libDir, includeReal) {
+/**
+ * perf 1 cell を実行して結果に変換する。
+ *
+ * `runner` を差し替えられるのは、 command の組立てと JSON の解釈を実 perf 計測なしで
+ * 確かめるため (#1751)。 perf は時間そのものを測るので、 実行を伴う test は機械の
+ * 空き具合で落ちる。 一方この関数が担うのは「何を起動し、 返ってきた JSON をどう
+ * 読むか」 で、 そこは時間に依存しない。
+ *
+ * `pnpm test:perf` は各 package の `test:perf` を直接叩くため、 この経路を通らない。
+ * ここが壊れても実 perf は緑のままになる。
+ */
+export function runPerfCell(libDir, includeReal, runner = spawnSync) {
   const configPath = join(libDir, 'vitest.perf.config.ts');
   if (!existsSync(configPath)) {
     return { status: 'no-files', passed: 0, failed: 0, total: 0 };
@@ -312,7 +327,7 @@ function runPerfCell(libDir, includeReal) {
   if (includeReal && !runEnv.KIWA_MODE) {
     runEnv.KIWA_MODE = 'real';
   }
-  const vitest = spawnSync(
+  const vitest = runner(
     'pnpm',
     ['exec', '--', 'vitest', 'run', '-c', 'vitest.perf.config.ts', '--reporter=json'],
     {
