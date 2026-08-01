@@ -500,9 +500,9 @@ The instability is not confined to long sweeps. A single unit test that retained
 
 Measured on its own the picture looks fine — eight consecutive standalone runs of an fs workload gave `heapUsed` 22,080 B every time, identical to the byte. That reading is what made the two-axis change look correct at first. It only breaks under the full sweep, which is the condition the gate actually runs in. **Standalone stability is not evidence about a gate that runs inside a 90-minute sweep.**
 
-In-run normalization was the third candidate, and it makes the axis worse. #1737 removed run-to-run drift from the timing axis by measuring each op alternately with a harness-owned reference op and judging on the ratio; the same shape applied here would subtract a reference op's retention from the target's, on the theory that allocator behaviour lands on both.
+In-run normalization was the third candidate, and in the one shape measured here it makes the axis worse. #1737 removed run-to-run drift from the timing axis by measuring each op alternately with a harness-owned reference op and judging on the ratio; the same shape applied here would subtract a reference op's retention from the target's, on the theory that allocator behaviour lands on both.
 
-`packages/perf-harness/scripts/memory-inrun-probe.mjs` measures it — an fs-touching target and a reference that touches fs the same way but retains nothing, measured alternately in one process, six processes per condition. Raw bytes, and the same numbers after subtracting the reference:
+`packages/perf-harness/scripts/memory-inrun-probe.mjs` measures it — an fs-touching target and a reference that touches fs the same way but retains nothing, measured alternately in one process (target, reference, reference, target per pass), six processes per condition. Building `@kiwa-lab/cli-test` first is required; the probe imports its `dist/`, which is untracked. Raw bytes, and the same numbers after subtracting the reference:
 
 | axis | spread, idle | spread, machine saturated |
 |---|---|---|
@@ -511,7 +511,9 @@ In-run normalization was the third candidate, and it makes the axis worse. #1737
 | `heapUsed` raw | 16 B | 16 B |
 | `heapUsed` minus reference | 16 B | **208,952 B** |
 
-The subtraction is stable while the machine is idle and swings by twice the cap once it is not. What moves is the reference measurement, not the target's: subtracting it injects instability that the raw reading does not have. The disturbance the timing axis cancels is multiplicative and lands on both measurements at once; retention is not, so there is nothing to cancel and the second measurement only adds noise.
+The subtraction is stable while the machine is idle and swings by twice the cap once it is not. What moves is the reference measurement, not the target's: subtracting it injects instability that the raw reading does not have. The disturbance the timing axis cancels is multiplicative and lands on both measurements at once. Here it did not land on both: the reference's variance entered the difference on its own.
+
+That is the limit of what this measurement shows. It rules out **this** reference and **this** ordering, not subtraction in general — additive noise shared by target and reference would still cancel, and a reference whose allocation profile tracks the target's more closely might produce one. What is established is that the obvious construction, built the same way the timing axis was, is worse than reading the raw number. Anyone proposing another reference should measure it the same way before adopting it.
 
 The load in that run was synthetic — CPU and allocation pressure from sibling processes, not a 90-minute sweep. It is enough to disqualify the subtraction (a candidate that fails under the easier condition will not survive the harder one) but it is not evidence that `heapUsed` raw is stable under a sweep. The sweep data above says it is not.
 

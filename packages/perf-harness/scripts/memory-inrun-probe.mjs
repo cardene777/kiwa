@@ -12,8 +12,12 @@
  * 時間軸との違いは、 外乱の乗り方。 CPU 速度は比で効くので #1737 は比を取ったが、
  * 保持量は確保器の振舞いが加算で乗ると考えられるので差を取る。 両方を測って比べる。
  *
- * 実行 = node packages/perf-harness/scripts/memory-inrun-probe.mjs
+ * 実行 = pnpm --filter @kiwa-lab/cli-test build
+ *        node packages/perf-harness/scripts/memory-inrun-probe.mjs
  *        PROBE_LOAD=1 を付けると負荷を掛けながら測る
+ *
+ * 先に build が要るのは、 子 process が `@kiwa-lab/cli-test` の `dist/` を直接 import する
+ * ため。 `dist/` は追跡対象外なので、 clone した直後の tree には存在しない。
  */
 import { execFileSync, spawn } from 'node:child_process';
 import { cpus } from 'node:os';
@@ -99,12 +103,16 @@ function measureOnce() {
 function startLoad() {
   const workers = [];
   for (let i = 0; i < Math.max(1, cpus().length - 1); i += 1) {
+    // 親が消えたら自分も止まる。 親が SIGKILL 等で落ちると finally も走らないため、
+    // 子側にも退出条件を持たせないと 10 分間 CPU を占有し続ける。
     workers.push(spawn(process.execPath, ['-e', `
+      const parent = ${process.pid};
       const t = Date.now();
       const buffers = [];
       while (Date.now() - t < 600000) {
         buffers.push(Buffer.alloc(1024 * 64));
         if (buffers.length > 200) buffers.length = 0;
+        try { process.kill(parent, 0); } catch { break; }
       }
     `], { stdio: 'ignore' }));
   }
@@ -119,8 +127,13 @@ const stopLoad = process.env['PROBE_LOAD'] === '1' ? startLoad() : null;
 if (stopLoad) await new Promise((r) => setTimeout(r, 2000));
 
 const samples = [];
-for (let pass = 0; pass < PASSES; pass += 1) samples.push(measureOnce());
-if (stopLoad) stopLoad();
+try {
+  for (let pass = 0; pass < PASSES; pass += 1) samples.push(measureOnce());
+} finally {
+  // 測定が途中で落ちても負荷 process を残さない。 残すと CPU 数 - 1 個が最大 10 分
+  // 走り続け、 その間の別の測定が汚れる。
+  stopLoad?.();
+}
 
 const columns = [
   ['arrayBuffers 生', (s) => s.targetArrayBuffers],
