@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness baseline の API 契約"
 
 #### <code v-pre>BASELINE&#95;SCHEMA</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L292) <code v-pre>packages/perf-harness/src/baseline.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L293) <code v-pre>packages/perf-harness/src/baseline.ts</code>
 
 保存する baseline の schema 版。 v2 で各 result に基準 op の記録が付く (#1737)。 読む側は v1 も受け付ける (`normalizeToEnvelope`)。
 
@@ -44,7 +44,7 @@ export declare const CANONICAL_ENV_PROFILE = "darwin-arm64--apple-m4-pro-43c7d7-
 
 #### <code v-pre>captureEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L295) <code v-pre>packages/perf-harness/src/baseline.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L296) <code v-pre>packages/perf-harness/src/baseline.ts</code>
 
 現行環境の env metadata を取得する。 git 未 install / 非 repo 環境では gitSha は "unknown"。
 
@@ -84,7 +84,7 @@ export declare function isCanonicalEnv(env?: BaselineEnv | ProfileEnv): boolean;
 
 #### <code v-pre>isComparableEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L315) <code v-pre>packages/perf-harness/src/baseline.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L316) <code v-pre>packages/perf-harness/src/baseline.ts</code>
 
 baseline を比較対象として使えるかを判定する。 `gitSha` や `hostname` の違いは測定値の意味を変えないが、GC を呼べるかどうかは memory 測定の前提そのものを変える。前提が違う baseline と比べると、実装が 変わっていなくても回帰と判定されてしまう。
 
@@ -104,12 +104,12 @@ export declare function loadBaseline(path: string): Promise<BaselineLoadResult |
 
 #### <code v-pre>MEASUREMENT&#95;PREMISE</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L286) <code v-pre>packages/perf-harness/src/baseline.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L287) <code v-pre>packages/perf-harness/src/baseline.ts</code>
 
-測定の取り方の版。 機械も Node も同じでも測り方が変われば、 保存済みの値は 比較対象にならない。 そのとき baseline を手で消して回るのではなく、 ここを 1 上げて「前提が違う」 と宣言し、 測定が成立している次の実行で作り直させる。 - 版 1 = workspace も vitest の file も並列で測っていた頃 (この field 自体が無い) - 版 2 = workspace を `--workspace-concurrency=1`、 vitest を `fileParallelism: false` にして 1 件ずつ測る (#1708) - 版 3 = memory 測定に空回しを入れた (#1708)。 それまでは初回の 1 回きりの 確保が反復数で割られて「1 回あたりの保持」 に載っており、 同じ実装でも arrayBuffers の増分が変わる。 serial / concurrent の測り方は版 2 と同じ (標本数の引き上げは試したが効果が確認できず戻した) - 版 4 = op を測る前に測定系の分解能を測るようになった (#1718)。 空の関数を 200 回まわしてから 1 つ目の op に入るため、 版 3 までは冷えたまま測られていた 最初の op が暖まった状態で測られる。 判定軸を p95 から p10 へ移した変更自体は 保存する値の意味を変えないが、 この空回しは同じ実装の測定値を動かす - 版 5 = op を基準 op と 1 呼出ずつ交互に測るようになった (#1737)。 対象の各 呼出の直前に基準 op が挟まるため、 cache と分岐予測の状態が版 4 までと違う。 比較に要る基準 p10 が版 4 以前の記録には無い、 という理由でも作り直しになる。 実 API 経路 (`runPerf3LayerLive`) は交互測定を使わないため、 この版でも `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。 正規化が成立するかは `reference` の有無が決める - 版 6 = baseline が「対象 p10 ÷ 基準 p10」 の履歴を持つようになった (#1739)。 有意性の判断に実行間のばらつきを使うため、 履歴を持たない世代の記録では その op の幅を推定できない。 測り方そのものは版 5 と同じだが、 判定の前提が 変わるので世代を分ける 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は 測り方ではないので上げない。
+測定の取り方の版。 機械も Node も同じでも測り方が変われば、 保存済みの値は 比較対象にならない。 そのとき baseline を手で消して回るのではなく、 ここを 1 上げて「前提が違う」 と宣言し、 測定が成立している次の実行で作り直させる。 - 版 1 = workspace も vitest の file も並列で測っていた頃 (この field 自体が無い) - 版 2 = workspace を `--workspace-concurrency=1`、 vitest を `fileParallelism: false` にして 1 件ずつ測る (#1708) - 版 3 = memory 測定に空回しを入れた (#1708)。 それまでは初回の 1 回きりの 確保が反復数で割られて「1 回あたりの保持」 に載っており、 同じ実装でも arrayBuffers の増分が変わる。 serial / concurrent の測り方は版 2 と同じ (標本数の引き上げは試したが効果が確認できず戻した) - 版 4 = op を測る前に測定系の分解能を測るようになった (#1718)。 空の関数を 200 回まわしてから 1 つ目の op に入るため、 版 3 までは冷えたまま測られていた 最初の op が暖まった状態で測られる。 判定軸を p95 から p10 へ移した変更自体は 保存する値の意味を変えないが、 この空回しは同じ実装の測定値を動かす - 版 5 = op を基準 op と 1 呼出ずつ交互に測るようになった (#1737)。 対象の各 呼出の直前に基準 op が挟まるため、 cache と分岐予測の状態が版 4 までと違う。 比較に要る基準 p10 が版 4 以前の記録には無い、 という理由でも作り直しになる。 実 API 経路 (`runPerf3LayerLive`) は交互測定を使わないため、 この版でも `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。 正規化が成立するかは `reference` の有無が決める #1739 で baseline に「対象 p10 ÷ 基準 p10」 の履歴が付いたが、 版は上げていない。 測り方は版 5 と同じで、 履歴を持たない記録は幅を推定できないだけ (従来の相対閾値に 落ちる) だから。 版を上げると全 baseline が作り直しになり、 その 1 回の実行に退行が 含まれていれば現在値が新しい正として焼き付いて以後検出できない。 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は 測り方ではないので上げない。
 
 ```ts
-export declare const MEASUREMENT_PREMISE = 6;
+export declare const MEASUREMENT_PREMISE = 5;
 ```
 
 #### <code v-pre>nonCanonicalEnvNotice</code>

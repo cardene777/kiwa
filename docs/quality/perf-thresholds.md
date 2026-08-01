@@ -366,25 +366,29 @@ Two is the knee. Three does not reduce crossings further and only widens the ran
 
 ##### Measured effect, and why the gate is still off
 
-The gate was then switched on by default and the whole suite run repeatedly, with `--no-bail` so that every package still ran and its history still grew:
+Six passes over all 254 projects rebuilt the histories, then the gate was switched on and three more passes run with `--no-bail`, so that every package still ran and its history still grew:
 
-| pass | packages failing on unchanged code |
-|---|---|
-| A | 8 |
-| B | 10 |
-| C | 5 |
-| D | 2 |
-| E | 3 |
-| F | 5 |
-| G | 4 |
+| pass | non-`stable` verdicts | packages failing on unchanged code |
+|---|---|---|
+| 1 | 11 | 5 |
+| 2 | 7 | 4 |
+| 3 | 5 | 3 |
 
-Against the 22 and 29 recorded before this change, that is a large reduction, and it is where the reduction stops. The count settles between two and five rather than reaching zero, and the set rotates: `design-check-app-scenario` and `remix` recur, while `api-app-scenario`, `visual-app-scenario`, `dogfood-multimodal-chat`, `dogfood-nats-jetstream` and `ably-collab-cursor` each appear once. That is the same pattern the paragraphs above describe — a list built from any two passes is falsified by the next — so a waiver list over the rotating members is not available either.
+Verdicts agreed across all three passes for **486 of 493 ops**. The seven that moved are listed below; six of them settled after the first pass, which is the history reaching three entries.
 
-Two mechanisms account for the residue. An op that does move to a new level has its history discarded and needs three more passes before its width can be estimated again, and during that window it is judged on the relative threshold alone; `design-check-app-scenario`'s `large_spec_conformance` failed pass D in exactly that state, with its width reading `n/a`. And an op that is genuinely steady can still jump: `dogfood-trace-flame-graph`'s `drillDown` has a width of 2.8 % and produced a 23.8 % excursion, which no estimate drawn from its own history can anticipate.
+Against the 22 and 29 packages recorded before this change, three to five is a large reduction, and it is not zero. `astro`, `remix` and `vector` failed in every pass; `dapp-app-scenario` in two, `astro-app-scenario` in one. Some of that is self-inflicted — `vector`'s ops were split into insert and update in a neighbouring change, so their histories are the youngest in the suite.
+
+Two mechanisms account for the residue. An op whose record is replaced starts its history over and spends three passes judged on the relative threshold alone. And an op that is genuinely steady can still jump: `dogfood-trace-flame-graph`'s `drillDown` measured a width of 2.8 % and produced a 23.8 % excursion, which no estimate drawn from its own history can anticipate.
 
 So `regressionGate` stays false by default. What changed is the size of the problem, not its nature.
 
 The waiver list drops from twelve to nine. Three ops are removed because the ratio width now measured over eight runs contradicts the raw-p10 figure their reason quoted: `cli-test`'s `readFile` (3.9 %, quoted 60-100 %), `cli-test`'s `writeFile` (7.9 %, quoted 100-322 %), and `visual`'s `comparePngBuffersFullDiff` (11.0 %, quoted 17-41 %). The remaining nine keep their waivers; their widths are real, and the mechanism widens their thresholds rather than removing the need for the marker.
+
+##### What the history may contain
+
+Only observations whose verdict was `stable`, plus the run that seeded the record. A run judged `regressed` is not evidence of how far the op drifts while unchanged, and storing it is actively harmful: an op that doubled would record a ratio 100 % from its anchor, which widens its own threshold to 200 % and makes the same doubling read `stable` on the next run. The regression would be reported once and then silently accepted. This was reproduced directly before being fixed.
+
+Because regressions never enter the history, there is no need to discard it when one is detected — an earlier version did, and that turned out to be circular: an op whose verdict flipped from noise had its history cleared each time, never reached three entries, and never received the protection it needed. The ops with the shortest histories were exactly the ones failing the gate.
 
 ### The experiment that led to in-run normalization
 
