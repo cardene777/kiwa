@@ -12,6 +12,22 @@
  */
 export interface MemorySample {
   iterationCount: number;
+  /**
+   * 測定区間の前に空回しした回数。
+   *
+   * 空回しは測定区間の外で `fn` を呼ぶ。 副作用や件数依存を持つ op では、
+   * その呼出も store の件数や cache の状態を進めるため、 同じ `iterations` でも
+   * 空回しの有無で測っているものが変わる (#1730)。
+   */
+  warmupCount: number;
+  /**
+   * `fn` を呼んだ総回数 (`warmupCount + iterationCount`)。
+   *
+   * 「N 反復」 とだけ報告すると、 空回しを入れた実行が実際には N + warmup 回
+   * 呼んでいることが読み手に伝わらない。 副作用を持つ op ではこの差が
+   * そのまま測定対象の違いになるので、 実際に呼んだ回数を残す。
+   */
+  totalCallCount: number;
   heapUsedDeltaBytes: number;
   heapUsedDeltaPerIterationBytes: number;
   rssDeltaBytes: number;
@@ -68,6 +84,8 @@ export async function measureMemory(input: MemoryInput): Promise<MemorySample> {
   const heapUsedDelta = after.heapUsed - before.heapUsed;
   return {
     iterationCount: input.iterations,
+    warmupCount: warmup,
+    totalCallCount: warmup + input.iterations,
     heapUsedDeltaBytes: heapUsedDelta,
     heapUsedDeltaPerIterationBytes: heapUsedDelta / input.iterations,
     rssDeltaBytes: after.rss - before.rss,

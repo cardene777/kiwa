@@ -20,7 +20,12 @@ import path from 'node:path';
 import { measureAlternating, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory, type MemorySample } from './memory.js';
-import { RESOLUTION_FLOOR_MULTIPLE, detectRegression, resolveNormalization } from './regression.js';
+import {
+  RESOLUTION_FLOOR_MULTIPLE,
+  detectRegression,
+  hasSameMeasurementConfig,
+  resolveNormalization,
+} from './regression.js';
 import { DEFAULT_REFERENCE_KIND, createReferenceOps } from './reference.js';
 import {
   BASELINE_SCHEMA,
@@ -32,9 +37,10 @@ import {
   saveBaselineEnvelope,
 } from './baseline.js';
 import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import { recordPruneManifest } from './prune-manifest.js';
 import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport, formatMs } from './report.js';
+import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
 import type { MeasureResult, PerfReferenceKind, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
@@ -189,13 +195,16 @@ export interface RunPerf3LayerInput {
    *
    * op 名を別処理へ付け替えたときに無関係な過去値と比較しないための掃除だが、
    * 常に有効だと絞り込み実行で op が一度欠けるだけで過去値が消える。
-   * 次の完全実行では再 seed されて直前の退行を見逃すので、suite 全体を
-   * 回す呼出だけが明示的に有効化する。
+   * 次の完全実行では再 seed されて直前の退行を見逃す。
    *
-   * 明示しない場合は環境変数 `KIWA_PERF_PRUNE_STALE=1` の有無で決まる。
-   * kiwa の root `test:perf` はこれを立てる = 全 package を絞り込みなしで
-   * 回す唯一の経路で、 そこでだけ掃除が働く。 個別 package の実行や
-   * `-t` での絞り込みでは立たないため、 過去値を巻き添えにしない。
+   * **渡す側が「この `ops` が当該 baseline の全 op である」 ことを保証する**。
+   * 絞り込んだ一覧に true を付けると、 外した op の記録が落ちる。
+   *
+   * 環境変数 `KIWA_PERF_PRUNE_STALE` はこの判断に使わない。 環境変数は子 process に
+   * 継承されるため、 export した shell から個別 package を実行すると絞り込まれた
+   * 一覧が「完全な一覧」 とみなされて記録が消えた (#1730)。 kiwa の `test:perf` は
+   * suite を完走した後に `scripts/perf-prune-stale.mjs` で一度だけ掃除する経路に
+   * 移してあるので、 この option を渡す必要はない。
    */
   pruneStaleBaselineOps?: boolean;
   /**
@@ -371,8 +380,13 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       // 正規化が成立しない組では比べない。 基準の種類を変えた op や、 基準の記録が
       // 無い世代の baseline がこれに当たる。 実測値そのものの比較に落とすと、
       // 実行と実行の間の機械の状態の差がそのまま gate にかかる。
+      // 測定条件が違う組も比べない。 反復数や空回しを変えると実装を変えなくても
+      // 値が動くため、 版 (`measurementPremise`) だけを見ていると条件を変えた実行が
+      // 旧条件の記録と比較される (#1730)。
       const comparable =
-        priorSerial !== undefined && resolveNormalization(serial, priorSerial).normalized;
+        priorSerial !== undefined &&
+        resolveNormalization(serial, priorSerial).normalized &&
+        hasSameMeasurementConfig(serial, priorSerial);
       const regression = comparable
         ? detectRegression({
             current: serial,
@@ -433,11 +447,24 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     // 書き直さないと、 op の `referenceKind` を変えた瞬間から比較が成立しなく
     // なり (key は既にあるので追記されない)、 その op だけ永久に n/a に留まる。
     needsRefresh: (_key, prior, current) => {
+      // 測定条件が変わった記録は入れ替える。 入れ替えないと key は既にあるので
+      // 追記されず、 その op は条件を戻すまで永久に比較できない (#1730)。
+      // concurrent 軸も条件が変われば値が動くため、 基準の有無に関わらず先に見る。
+      if (!hasSameMeasurementConfig(current, prior)) return true;
       // 双方に基準が無いのは正常。 concurrent 軸は正規化の対象ではない。
       if (prior.reference === undefined && current.reference === undefined) return false;
       return !resolveNormalization(current, prior).normalized;
     },
   });
+
+  // この実行が測った op を manifest に書き足す。 baseline には触れない。
+  // 掃除は suite を完走した後に orchestrator が一度だけ行う (#1730)。
+  //
+  // 書込の可否 (`plan.written`) とは独立に記録する。 上限を割って書けなかった実行でも
+  // 「この op を測った」 ことは事実で、 掃除の対象から外す根拠になる。 書けた実行だけ
+  // 記録すると、 1 op が上限を割っただけで module 全体が manifest から消え、
+  // 完走したのに掃除されない状態になる。
+  recordPruneManifest(baselinePath, Object.keys(combinedForBaseline));
 
   let baselineSeeded = false;
   if (plan.written) {
@@ -501,13 +528,19 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
 /**
  * 今回測っていない op を baseline から落とすかを決める。
  *
- * 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が
- * 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、
- * 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
+ * 呼出が明示した時だけ落とす。 明示しなければ落とさない。
+ *
+ * 以前は環境変数 `KIWA_PERF_PRUNE_STALE=1` を「suite 全体を回している」 の手がかりに
+ * していたが、 環境変数は子 process に継承されるためこれは成り立たない。 その変数を
+ * export した shell から個別 package を実行すると、 絞り込まれた一覧が「完全な一覧」
+ * とみなされて測っていない op の記録が消えた (#1730)。
+ *
+ * 実行の中で完全性を確かめる手立てが無いので、 判断そのものを実行の外へ出した。
+ * suite を完走した後に orchestrator (`scripts/perf-prune-stale.mjs`) が manifest と
+ * 突き合わせて一度だけ掃除する。 詳細は `prune-manifest.ts` の冒頭。
  */
 export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boolean {
-  if (input.pruneStaleBaselineOps !== undefined) return input.pruneStaleBaselineOps;
-  return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
+  return input.pruneStaleBaselineOps ?? false;
 }
 
 /**
@@ -516,15 +549,21 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
  * 原因を 1 つに固定して書くと嘘になる。 例えば版だけが違う組で「種類が食い違う」 と
  * 書くと、 読み手は種類を疑って見つからない原因を探すことになる。
  *
- * `resolveNormalization` の不成立は 7 通りに分かれる。 基準の記録が無い (baseline 側 /
- * 今回側) / 種類が違う / 実装の版が違う (どちらかが記録なしを含む) / p10 が分母に
- * ならない (baseline 側 / 今回側) / 双方が有限正でも桁が離れて商が求まらない。
- * 分岐を足す時はこの 7 通りとの対応を保つ。
+ * 理由は 8 通りに分かれる。 測定条件が違う / `resolveNormalization` の不成立 7 通り
+ * (基準の記録が無い (baseline 側 / 今回側) / 種類が違う / 実装の版が違う (どちらかが
+ * 記録なしを含む) / p10 が分母にならない (baseline 側 / 今回側) / 双方が有限正でも
+ * 桁が離れて商が求まらない)。 分岐を足す時はこの 8 通りとの対応を保つ。
+ *
+ * 測定条件を先に見るのは、 条件が違えば基準 op の値も違う条件で測られているため。
+ * 基準の側の理由を先に出すと、 読み手は分母を疑って本当の原因に辿り着けない。
  *
  * 記録を入れ替えたかどうかはここでは書かない。 書込には測定の成立が要り、 この時点で
  * 判っていない (report 冒頭が実行全体として書けたかを出す)。
  */
 export function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
+  if (!hasSameMeasurementConfig(current, baseline)) {
+    return `測定条件が baseline と違うため比較せず (baseline ${baseline.iterations} 反復 / 空回し ${baseline.warmup}、 今回 ${current.iterations} 反復 / 空回し ${current.warmup})`;
+  }
   const currentReference = current.reference;
   const baselineReference = baseline.reference;
   if (baselineReference === undefined) {
@@ -773,8 +812,11 @@ function writeReport(input: WriteReportInput): void {
     '',
     // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
     // 拾うため、no と yes の値を同じ基準で比べられない。
-    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |',
-    '|---|---|---|---|---|---|',
+    //
+    // 呼出 列も同じ証跡。 空回しは測定区間の外で fn を呼ぶため、 副作用や件数依存を
+    // 持つ op では「N 反復」 の見出しだけでは実際に何回呼んだかが読めない (#1730)。
+    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |',
+    '|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -789,7 +831,7 @@ function writeReport(input: WriteReportInput): void {
           ? 'PASS'
           : 'FAIL';
     lines.push(
-      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${verdict} |`,
+      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${verdict} |`,
     );
   });
 

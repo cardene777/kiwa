@@ -20,10 +20,12 @@
  *    compares raw durations — carrying the run-to-run drift the mock path now
  *    cancels. The stored `measurementPremise` is shared with the mock path, so
  *    it does not distinguish the two; the presence of `reference` does.
- * 4. **prune activation** — the mock path falls back to `KIWA_PERF_PRUNE_STALE`
- *    when the caller says nothing. This path never reads that variable and
- *    prunes only when the caller opts in explicitly, and only when no op was
- *    skipped for missing env (#1746). See `pruneStaleBaselineOps` for why.
+ * 4. **prune activation** — the mock path leaves pruning to an orchestrator that
+ *    runs once the whole suite has completed (#1730). This path prunes inside the
+ *    run instead, only when the caller opts in explicitly and only when no op was
+ *    skipped for missing env (#1746). It stays out of the manifest path because
+ *    env-gated skips mean the ops it measured are not the module's full set —
+ *    recording them as complete would delete the skipped ops' records (#1740).
  *
  * Live runs cost money and are slow. Iterations default to 10 (vs 200 for
  * mock) so a full pass fits inside a coffee break. Concurrency defaults to
@@ -34,7 +36,11 @@ import path from 'node:path';
 import { measure, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory } from './memory.js';
-import { RESOLUTION_FLOOR_MULTIPLE, detectRegression } from './regression.js';
+import {
+  RESOLUTION_FLOOR_MULTIPLE,
+  detectRegression,
+  hasSameMeasurementConfig,
+} from './regression.js';
 import {
   BASELINE_SCHEMA,
   captureEnv,
@@ -46,7 +52,7 @@ import {
 } from './baseline.js';
 import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport, formatMs } from './report.js';
+import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
 import type { MeasureResult } from './types.js';
 import { buildRegressionNote } from './three-layer.js';
 import type { OpOutcome, PerfOpSpec } from './three-layer.js';
@@ -85,11 +91,13 @@ export interface RunPerf3LayerLiveInput {
    * 落とさないと、 op 名を付け替えた時に旧名の記録が残り続ける。 後から同じ名前を
    * 別の処理に使うと、 その処理は無関係な測定値と比較される (#1746)。
    *
-   * mock 経路 (`runPerf3Layer`) と違い、 環境変数 `KIWA_PERF_PRUNE_STALE` は見ない。
-   * あの変数が言えるのは「今回の op 一覧が絞り込まれていない」 ことまでで、 live の
-   * op 一覧が完全かどうかは credential が揃っているかにも依る。 root の `test:perf`
-   * は変数を立てたまま example の live 経路も回すため、 変数を見ると credential を
-   * 持たない環境の実行が黙って掃除を始める。 呼出が明示した時だけ働かせる。
+   * 環境変数 `KIWA_PERF_PRUNE_STALE` は見ない。 あの変数が言えるのは「今回の op 一覧が
+   * 絞り込まれていない」 ことまでで、 live の op 一覧が完全かどうかは credential が
+   * 揃っているかにも依る。 root の `test:perf` は変数を立てたまま example の live 経路も
+   * 回すため、 変数を見ると credential を持たない環境の実行が黙って掃除を始める。
+   * (#1730 で mock 経路も同じ理由からこの変数を見なくなり、 掃除の判断は suite 完走後の
+   * orchestrator へ移った。 実 API 経路はその manifest 経路にも参加しない = 飛んだ op を
+   * 含む一覧を「完全」 として記録できないため。)
    *
    * 明示しても、 env 欠落で飛ばした op がある実行では掃除しない。 その実行の op 一覧は
    * 「測っていない」 のではなく「測れなかった」 ものを含むので、 落とすと credential を
@@ -142,9 +150,9 @@ export async function runPerf3LayerLive(
   const combinedForBaseline: Record<string, MeasureResult> = {};
   const outcomes: LiveOpOutcome[] = [];
   // 比較が成立しなかった op。 mock 経路と同じく、 verdict は書込の可否が
-  // 決まってから確定する。 この経路で記録がある op は必ず比較まで進む
-  // (実行内正規化を使わないので、 記録さえあれば比較は成立する) ため、
-  // 値は常に false になる。 mock 経路と同じ helper を通すために形を揃える。
+  // 決まってから確定する。 実行内正規化を使わないので基準 op 由来の不成立は
+  // 起きないが、 測定条件が違う記録とは比べないため (#1730) 記録があっても
+  // 比較まで進まない op があり得る。
   const uncompared = new Map<string, boolean>();
   let baselineSeeded = false;
   let anySkipped = false;
@@ -208,7 +216,10 @@ export async function runPerf3LayerLive(
       (!input.requireGc || memory.gcExposed) && memory.arrayBuffersDeltaBytes < memoryCap;
 
     const priorSerial = priorBaseline?.[`${op.name}.live.serial`];
-    const regression = priorSerial
+    // 測定条件が違う組は比べない。 反復数や空回しを変えると実装を変えなくても値が
+    // 動くため、 版 (`measurementPremise`) だけでは条件の変化を捕まえられない (#1730)。
+    const comparable = priorSerial !== undefined && hasSameMeasurementConfig(serial, priorSerial);
+    const regression = comparable
       ? detectRegression({
           current: serial,
           baseline: priorSerial,
@@ -269,6 +280,9 @@ export async function runPerf3LayerLive(
         premiseValid,
         hardGatePassed: allPassed,
         prune,
+        // 測定条件が変わった記録は入れ替える。 入れ替えないと key は既にあるので
+        // 追記されず、 その op は条件を戻すまで永久に比較できない (#1730)。
+        needsRefresh: (_key, prior, current) => !hasSameMeasurementConfig(current, prior),
       })
     : { results: {}, written: false };
 
@@ -396,14 +410,16 @@ function writeLiveReport(input: WriteLiveReportInput): void {
     lines.push('', '## Memory retention (LIVE)', '');
     // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
     // 拾うため、no と yes の値を同じ基準で比べられない。
-    lines.push('| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |');
-    lines.push('|---|---|---|---|---|---|');
+    // 呼出 列も同じ証跡。 空回しは測定区間の外で fn を呼ぶため、 副作用や件数依存を
+    // 持つ op では反復数だけでは実際に何回呼んだかが読めない (#1730)。
+    lines.push('| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |');
+    lines.push('|---|---|---|---|---|---|---|');
     input.ops.forEach((op) => {
       const out = input.outcomes.find((o) => o.name === op.name);
       if (!out || out.skipped || !out.memory) return;
       const cap = op.memoryArrayBuffersCapBytes ?? input.memoryCapDefault;
       lines.push(
-        `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
+        `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
       );
     });
 

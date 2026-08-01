@@ -161,6 +161,33 @@ function isUsableDenominator(value: number): boolean {
 }
 
 /**
+ * 2 つの記録が同じ測定条件で採られたかを判定する。
+ *
+ * `measurementPremise` (baseline.ts) は測り方の版を 1 つの数で表すが、 呼出ごとの
+ * 設定は表さない。 反復数や空回しの回数を変えても版は動かないため、 版だけを見て
+ * いると条件を変えた実行が旧条件の記録と比較される (#1730)。
+ *
+ * 条件が違うと値そのものが動く。 反復数を増やせば JIT が進んだ状態の標本が増えて
+ * p10 が下がり、 空回しを増やせば冷えた初回が標本から外れる。 実装を変えていなくても
+ * 差が出るため、 条件の違う記録とは比較しない。
+ *
+ * 見るのは記録に残っている `iterations` と `warmup`。 serial は呼出の設定がそのまま
+ * 入り、 concurrent は `concurrency × iterationsPerWorker` が `iterations` に、
+ * `warmup × concurrency` が `warmup` に入る。 並列度と worker あたりの反復数を
+ * 個別には持たないが、 どちらを変えても積が動くため条件の変化は捕まる。
+ *
+ * 積が同じになる組 (並列度 2 × 反復 50 と 並列度 5 × 反復 20) は区別できない。
+ * 区別するには記録に field を足す必要があり、 既存の baseline は全て「不明」 に
+ * 落ちて一斉に作り直しになる。 並列度だけを変える改修は稀なので、 現状は積で見る。
+ */
+export function hasSameMeasurementConfig(
+  current: MeasureResult,
+  baseline: MeasureResult,
+): boolean {
+  return current.iterations === baseline.iterations && current.warmup === baseline.warmup;
+}
+
+/**
  * strict mode — CI 99% + threshold 10%。 false negative を最小化。
  * 見逃し (regressed を stable と判定) が致命的な release gate 経路で使う。
  */

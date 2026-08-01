@@ -808,34 +808,40 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     expect(pruned.results['current.serial']).toBeDefined();
   });
 
-  describe('pruneStaleOps — 掃除を有効にする経路 (#1708)', () => {
+  describe('pruneStaleOps — 掃除を有効にする経路 (#1708 / #1730)', () => {
     const original = process.env['KIWA_PERF_PRUNE_STALE'];
     afterEach(() => {
       if (original === undefined) delete process.env['KIWA_PERF_PRUNE_STALE'];
       else process.env['KIWA_PERF_PRUNE_STALE'] = original;
     });
 
-    it('呼出が明示していれば環境変数より優先する', () => {
+    it('呼出が明示すればその通りになる', () => {
+      expect(pruneStaleOps({ pruneStaleBaselineOps: true })).toBe(true);
+      expect(pruneStaleOps({ pruneStaleBaselineOps: false })).toBe(false);
+    });
+
+    it('明示しなければ掃除しない', () => {
+      expect(pruneStaleOps({})).toBe(false);
+    });
+
+    /**
+     * #1730 — 環境変数は子 process に継承されるため「suite 全体を回している」 の
+     * 手がかりにならない。 export した shell から個別 package を実行すると、
+     * 絞り込まれた一覧が「完全な一覧」 とみなされて記録が消えていた。
+     *
+     * 掃除の判断は実行の外 (`scripts/perf-prune-stale.mjs`) へ移したので、
+     * この関数は環境変数を一切見ない。
+     */
+    it('環境変数では有効にならない', () => {
+      for (const value of ['1', '0', 'true']) {
+        process.env['KIWA_PERF_PRUNE_STALE'] = value;
+        expect(pruneStaleOps({}), `env=${value}`).toBe(false);
+      }
+    });
+
+    it('環境変数は呼出の明示を上書きしない', () => {
       process.env['KIWA_PERF_PRUNE_STALE'] = '1';
       expect(pruneStaleOps({ pruneStaleBaselineOps: false })).toBe(false);
-
-      delete process.env['KIWA_PERF_PRUNE_STALE'];
-      expect(pruneStaleOps({ pruneStaleBaselineOps: true })).toBe(true);
-    });
-
-    it('suite 全体を回す経路が立てる環境変数で有効になる', () => {
-      process.env['KIWA_PERF_PRUNE_STALE'] = '1';
-      expect(pruneStaleOps({})).toBe(true);
-    });
-
-    it('絞り込み実行では有効にならない', () => {
-      // 個別 package の実行や -t 付き実行では変数が立たない。
-      delete process.env['KIWA_PERF_PRUNE_STALE'];
-      expect(pruneStaleOps({})).toBe(false);
-
-      // 1 以外の値を「有効」 と解釈すると、 無関係な値が掃除を起こす。
-      process.env['KIWA_PERF_PRUNE_STALE'] = '0';
-      expect(pruneStaleOps({})).toBe(false);
     });
   });
 

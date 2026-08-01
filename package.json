@@ -15,7 +15,7 @@
     "test": "sh -c 'export KIWA_DEPS_PREBUILT=1; pnpm -r build && pnpm docs:gen:test && pnpm -r --filter='\\''!@kiwa-lab/e2e'\\'' --filter='\\''!@kiwa-lab/ui'\\'' --filter='\\''!examples-full-stack-poc'\\'' --filter='\\''!examples-orm-drizzle-mysql-poc'\\'' --filter='\\''!examples-orm-drizzle-postgres-poc'\\'' --filter='\\''!examples-orm-prisma-mysql-poc'\\'' --filter='\\''!examples-orm-prisma-postgres-poc'\\'' --filter='\\''!@kiwa-lab/orm'\\'' test && pnpm --workspace-concurrency=1 -F @kiwa-lab/e2e -F @kiwa-lab/ui -F examples-full-stack-poc test && pnpm --workspace-concurrency=1 -F @kiwa-lab/orm -F examples-orm-drizzle-mysql-poc -F examples-orm-drizzle-postgres-poc -F examples-orm-prisma-mysql-poc -F examples-orm-prisma-postgres-poc test'",
     "test:taxonomy": "node scripts/kiwa-taxonomy-run.mjs",
     "test:taxonomy:all": "node scripts/kiwa-taxonomy-run.mjs --category all",
-    "test:perf": "pnpm -r --filter='./packages/perf-harness' test && KIWA_PERF_PRUNE_STALE=1 pnpm -r --workspace-concurrency=1 --if-present run test:perf",
+    "test:perf": "pnpm test:perf-scripts && pnpm -r --filter='./packages/perf-harness' test && node scripts/perf-prune-stale.mjs --reset && KIWA_PERF_PRUNE_STALE=1 pnpm -r --workspace-concurrency=1 --if-present run test:perf && node scripts/perf-prune-stale.mjs --seal && node scripts/perf-prune-stale.mjs --apply",
     "test:mutation": "pnpm -F @kiwa-lab/core -F @kiwa-lab/api -F @kiwa-lab/ui -F @kiwa-lab/data -F @kiwa-lab/cli-test -F @kiwa-lab/observability -F @kiwa-lab/e2e -F @kiwa-lab/cli -F @kiwa-lab/dapp -F @kiwa-lab/a11y -F @kiwa-lab/visual -F @kiwa-lab/nextjs -F @kiwa-lab/nuxt -F @kiwa-lab/sveltekit -F @kiwa-lab/remix -F @kiwa-lab/astro -F @kiwa-lab/solidstart -F @kiwa-lab/qwikcity -F @kiwa-lab/edge -F @kiwa-lab/solidjs -F @kiwa-lab/fresh -F @kiwa-lab/hono -F @kiwa-lab/auth -F @kiwa-lab/payment -F @kiwa-lab/queue -F @kiwa-lab/cache -F @kiwa-lab/streaming -F @kiwa-lab/ai-llm -F @kiwa-lab/realtime -F @kiwa-lab/mcp -F @kiwa-lab/agent -F @kiwa-lab/component -F @kiwa-lab/search -F @kiwa-lab/orm --no-bail run test:mutation",
     "test:a11y": "pnpm -F @kiwa-lab/core -F @kiwa-lab/api -F @kiwa-lab/ui -F @kiwa-lab/data -F @kiwa-lab/cli-test -F @kiwa-lab/observability -F @kiwa-lab/e2e -F @kiwa-lab/cli -F @kiwa-lab/dapp -F @kiwa-lab/a11y -F @kiwa-lab/visual -F @kiwa-lab/nextjs -F @kiwa-lab/nuxt -F @kiwa-lab/sveltekit -F @kiwa-lab/remix -F @kiwa-lab/astro -F @kiwa-lab/solidstart -F @kiwa-lab/qwikcity -F @kiwa-lab/edge -F @kiwa-lab/solidjs -F @kiwa-lab/fresh -F @kiwa-lab/hono -F @kiwa-lab/auth -F @kiwa-lab/payment -F @kiwa-lab/queue -F @kiwa-lab/cache -F @kiwa-lab/streaming -F @kiwa-lab/ai-llm -F @kiwa-lab/realtime -F @kiwa-lab/mcp -F @kiwa-lab/agent -F @kiwa-lab/component -F @kiwa-lab/search -F @kiwa-lab/orm -F @kiwa-lab/perf-harness -F @kiwa-lab/quality-metrics -F @kiwa-lab/release-invariants --no-bail run test:a11y",
     "gate:coverage": "node scripts/check-coverage-gates.mjs",
@@ -34,7 +34,8 @@
     "test:docs-e2e": "playwright test tests/docs-site-e2e",
     "test:all": "node scripts/test-all.mjs",
     "typecheck:all": "node scripts/typecheck-all.mjs",
-    "typecheck:coverage": "node scripts/typecheck-coverage.mjs"
+    "typecheck:coverage": "node scripts/typecheck-coverage.mjs",
+    "test:perf-scripts": "node --test scripts/perf-prune-stale.test.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
