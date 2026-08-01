@@ -43,10 +43,11 @@ import {
 } from './regression.js';
 import {
   BASELINE_SCHEMA,
+  BaselineRevisionConflictError,
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
-  loadBaseline,
+  loadBaselineSnapshot,
   nonCanonicalEnvNotice,
   saveBaselineEnvelope,
 } from './baseline.js';
@@ -137,7 +138,14 @@ export async function runPerf3LayerLive(
     input.baselinePath ?? defaultBaselinePath(`${input.moduleName}.live`);
   const thresholdDocLink = input.thresholdDocLink ?? '../../quality/perf-thresholds';
 
-  const loadedBaseline = await loadBaseline(baselinePath);
+  // 中身と版を 1 回の read から採る。 別々に読むと、 その間に別の実行が書いた時に
+  // 「古い中身 + 新しい版」 の組ができ、 照合が通って上書きしてしまう (#1757)。
+  const baselineSnapshot = await loadBaselineSnapshot(baselinePath);
+  const loadedBaseline =
+    baselineSnapshot.envelope === null
+      ? null
+      : { envelope: baselineSnapshot.envelope, envMismatch: baselineSnapshot.envMismatch };
+  const baselineRevisionAtLoad = baselineSnapshot.revision;
   // 測定の前提が違う baseline とは比べない。 mock 経路 (`runPerf3Layer`) は #1708 から
   // これを行っていたが live 経路には無く、 版を上げるたびに前提の違う値と比べ続けていた。
   const priorBaselineLoaded =
@@ -155,6 +163,8 @@ export async function runPerf3LayerLive(
   // 比較まで進まない op があり得る。
   const uncompared = new Map<string, boolean>();
   let baselineSeeded = false;
+  // 別の実行と重なって書込を見送ったか。 report にその旨を出す。
+  let baselineWriteSkipped = false;
   let anySkipped = false;
 
   // mock 経路と同じく、 回帰判定の絶対下限をこの実行の中で測って決める。
@@ -287,23 +297,31 @@ export async function runPerf3LayerLive(
     : { results: {}, written: false };
 
   if (plan.written) {
-    await saveBaselineEnvelope(baselinePath, {
-      schema: BASELINE_SCHEMA,
-      env: captureEnv(),
-      results: plan.results,
-    });
-    baselineSeeded = priorBaseline === null;
+    // 読んだ後に別の実行が書いていたら、 こちらの snapshot で上書きしない。
+    // 自分の測定値は次の実行で積み直せるが、 消した記録は戻らない (#1757)。
+    try {
+      await saveBaselineEnvelope(
+        baselinePath,
+        { schema: BASELINE_SCHEMA, env: captureEnv(), results: plan.results },
+        { expectedRevision: baselineRevisionAtLoad },
+      );
+      baselineSeeded = priorBaseline === null;
+    } catch (error) {
+      if (!(error instanceof BaselineRevisionConflictError)) throw error;
+      baselineWriteSkipped = true;
+    }
   }
 
   // 記録が無かった op の verdict を、 実際に書けたかで確定する。
   for (const outcome of outcomes) {
     const hadPrior = uncompared.get(outcome.name);
     if (hadPrior === undefined) continue;
-    outcome.regressionVerdict = uncomparableVerdict(hadPrior, plan.written);
+    outcome.regressionVerdict = uncomparableVerdict(hadPrior, plan.written && !baselineWriteSkipped, baselineWriteSkipped);
   }
 
   writeLiveReport({
-    baselineWritten: plan.written,
+    baselineWritten: plan.written && !baselineWriteSkipped,
+    baselineWriteSkipped,
     reportPath: input.reportPath,
     moduleName: input.moduleName,
     outcomes,
@@ -341,6 +359,14 @@ interface WriteLiveReportInput {
    * 表記だけを出すと、 上限違反が直るまで同じ状態が繰り返されることが伝わらない。
    */
   baselineWritten: boolean;
+  /**
+   * 別の実行と重なって書込を見送ったか。
+   *
+   * 「測定が成立していないので書けない」 と「他と重なったので譲った」 は原因も次の
+   * 手当ても違う。 同じ注記で済ませると、 読み手が上限違反を疑って存在しない原因を
+   * 探すことになる (#1757)。
+   */
+  baselineWriteSkipped: boolean;
 }
 
 function writeLiveReport(input: WriteLiveReportInput): void {
@@ -363,6 +389,14 @@ function writeLiveReport(input: WriteLiveReportInput): void {
   // mock 経路と同じ注記を出す。 片方だけに置くと、 実 API 経路の report を見た
   // 読み手が「git に入っている記録と比べた結果」 と受け取る (#1729)。
   lines.push(...nonCanonicalEnvNotice());
+
+  // 競合で見送った実行は無条件で出す (#1757)。
+  if (input.baselineWriteSkipped) {
+    lines.push(
+      '**この実行では baseline を書いていない** (別の実行が同じ baseline を書いており、 上書きを避けて譲った)。 測定そのものは成立している。 次の実行で通常どおり書かれる。',
+      '',
+    );
+  }
 
   if (measuredOps.length === 0) {
     lines.push('_No live ops ran this pass. Set the required env vars to enable._');

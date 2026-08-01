@@ -138,7 +138,7 @@ export interface MeasureResult {
 
 #### <code v-pre>PerfGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L365) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L372) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateInput {
@@ -155,7 +155,7 @@ export interface PerfGateInput {
 
 #### <code v-pre>PerfGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L376) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L383) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateResult {
@@ -327,7 +327,7 @@ export interface RegressionResult {
 
 #### <code v-pre>Thresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L358) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L365) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface Thresholds {

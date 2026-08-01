@@ -31,7 +31,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 送出する message | 発生箇所 |
 | --- | --- |
-| <code v-pre>&#96;saveBaselineEnvelope: 標本が 2 件未満の記録は baseline にできない ($&#123;names&#125;)。&#96; + ' 比較には最低 2 件が要る (bootstrap CI がそれ未満で退化する)。 iterations を増やす。'</code> | [packages/perf-harness/src/baseline.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L72) |
+| <code v-pre>&#96;saveBaselineEnvelope: 標本が 2 件未満の記録は baseline にできない ($&#123;names&#125;)。&#96; + ' 比較には最低 2 件が要る (bootstrap CI がそれ未満で退化する)。 iterations を増やす。'</code> | [packages/perf-harness/src/baseline.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline.ts#L146) |
 | <code v-pre>measureConcurrent: concurrency must be &gt;= 1, got $&#123;input.concurrency&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L37) |
 | <code v-pre>measureConcurrent: iterationsPerWorker must be &gt;= 1, got $&#123;input.iterationsPerWorker&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L40) |
 | <code v-pre>measureConcurrent: warmup must be &gt;= 0, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/concurrent.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/concurrent.ts#L46) |
@@ -45,7 +45,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 | <code v-pre>&#96;$&#123;PRUNE&#95;MANIFEST&#95;PATH&#95;ENV&#125; は絶対 path で指定する (受け取った値 = $&#123;override&#125;)。&#96; + ' 相対 path は書く側と読む側で別の file を指すため受け取れない。'</code> | [packages/perf-harness/src/prune-manifest.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/prune-manifest.ts#L64) |
 | <code v-pre>unreachable</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L134) |
 | <code v-pre>&#96;createReferenceOps: 未知の基準 op の種類 $&#123;JSON.stringify(kind)&#125;。&#96; + &#96; 使える値は $&#123;REFERENCE&#95;KINDS.join(' / ')&#125;。&#96;</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L160) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L959) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L994) |
 
 ## API 契約
 
@@ -53,7 +53,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 宣言元 | 値 | 型 |
 | --- | --- | --- |
-| [baseline.ts](./api/baseline) | 14 | 0 |
+| [baseline.ts](./api/baseline) | 16 | 1 |
 | [concurrent.ts](./api/concurrent) | 1 | 1 |
 | [gate.ts](./api/gate) | 1 | 0 |
 | [live.ts](./api/live) | 1 | 4 |

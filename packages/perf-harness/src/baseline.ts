@@ -18,21 +18,78 @@ import type {
  * mismatch field を検出する。 legacy schema (単一 MeasureResult) は自動 upgrade して読む。
  */
 export async function loadBaseline(path: string): Promise<BaselineLoadResult | null> {
+  const snapshot = await loadBaselineSnapshot(path);
+  return snapshot.envelope === null
+    ? null
+    : { envelope: snapshot.envelope, envMismatch: snapshot.envMismatch, revision: snapshot.revision! };
+}
+
+/** 1 回の read から、 読めた中身と版の両方を返す。 */
+export interface BaselineSnapshot {
+  /** 読めた envelope。 file が無い / 解釈できない中身なら null。 */
+  envelope: BaselineEnvelope | null;
+  /** 現行環境と mismatch した field。 `envelope` が null なら空。 */
+  envMismatch: BaselineLoadResult['envMismatch'];
+  /** 読んだ時点の版。 file が無ければ null。 */
+  revision: string | null;
+}
+
+/**
+ * baseline を 1 回だけ読んで、 中身と版を同時に返す。
+ *
+ * **中身と版を別々の read で採ってはいけない**。 1 回目と 2 回目の間に別の実行が書くと、
+ * 古い中身と新しい版が組になる。 その組で保存すると照合が通り、 先に書いた更新を古い
+ * snapshot で上書きする = 防ごうとしていた事故がそのまま起きる (#1757)。
+ *
+ * 解釈できない中身でも版は返す。 壊れた baseline は「読めない = 作り直す」 判断になるが
+ * file 自体は存在するため、 版を「読めたか」 に紐付けると、 その実行が「file は無かった」
+ * 前提で書こうとして必ず衝突する。
+ */
+export async function loadBaselineSnapshot(path: string): Promise<BaselineSnapshot> {
   let body: string;
   try {
     body = await readFile(path, 'utf8');
   } catch (error) {
-    if (isMissingFile(error)) return null;
+    if (isMissingFile(error)) return { envelope: null, envMismatch: [], revision: null };
     throw error;
   }
+  const revision = contentRevision(body);
+
+  // 壊れた JSON は従来どおり投げる。 「読めない中身」 として飲み込むと、 呼出側は
+  // seed し直す判断に進み、 file が壊れている事実がどこにも出ない。
   const parsed = JSON.parse(body) as unknown;
   const envelope = normalizeToEnvelope(parsed);
   // baseline として解釈できない中身は「無い」ものとして返す。空の results を
   // 返すと呼び出し側が「baseline はある」と判断して seed し直さず、回帰判定が
   // 永久に n/a のまま修復されない。
-  if (envelope === null) return null;
-  const envMismatch = diffEnv(envelope.env, captureEnv());
-  return { envelope, envMismatch };
+  if (envelope === null) return { envelope: null, envMismatch: [], revision };
+  return { envelope, envMismatch: diffEnv(envelope.env, captureEnv()), revision };
+}
+
+/**
+ * file の中身から版を作る。 読んだ時と書く直前で同じなら、 間に誰も書いていない。
+ *
+ * mtime を使わないのは秒未満の解像度しか無い環境があるため。 大きさも使わないのは
+ * 同じ長さで中身が変わる形 (数値の桁が揃った書き換え) を取りこぼすため。
+ */
+function contentRevision(body: string): string {
+  return createHash('sha256').update(body).digest('hex');
+}
+
+/**
+ * 読んだ後に baseline が書き換わっていた時に投げる。
+ *
+ * 呼出側はこれを捕まえて **書込を諦める**。 自分の測定値は次の実行で積み直せるが、
+ * 上書きすると先に書いた実行の記録が消え、 それは戻らない。
+ */
+export class BaselineRevisionConflictError extends Error {
+  constructor(readonly path: string) {
+    super(
+      `baseline が読み込み後に書き換わった (${path})。 別の実行が同じ file を書いている。` +
+        ' 上書きすると先に書いた記録が消えるため、 この実行の書込は行わない。',
+    );
+    this.name = 'BaselineRevisionConflictError';
+  }
 }
 
 /**
@@ -63,6 +120,23 @@ export async function saveBaseline(
 export async function saveBaselineEnvelope(
   path: string,
   envelope: BaselineEnvelope,
+  opts?: {
+    /**
+     * 読んだ時の版。 渡すと、 書く直前に file を読み直して一致を確かめる。
+     *
+     * 一致しなければ `BaselineRevisionConflictError` を投げて 1 byte も書かない。
+     * 読んでから書くまでの間に別の実行が書いていた場合、 こちらの snapshot で
+     * 上書きすると相手の記録が消える (#1757)。
+     *
+     * baseline が無かった実行では `null` を渡す = 「書く直前も無いはず」 を要求する。
+     *
+     * **省略すると確認しない**。 既存の呼出との互換のために残してあるが、 読んで書き戻す
+     * 使い方でこれを省くと lost update がそのまま起きる。 `loadBaselineSnapshot` が返す
+     * `revision` をそのまま渡すのが既定の使い方で、 kiwa 内部の 2 経路はそうしている。
+     * 省略が正しいのは「読まずに書く」 場合 (新規作成 / 全面上書き) だけ。
+     */
+    expectedRevision?: string | null;
+  },
 ): Promise<void> {
   const uncomparable = Object.entries(envelope.results).filter(
     ([, result]) => result.samples.length < 2,
@@ -75,6 +149,18 @@ export async function saveBaselineEnvelope(
     );
   }
   await mkdir(dirname(path), { recursive: true });
+
+  // 読んだ後に誰かが書いていないかを、 書く直前に確かめる。
+  //
+  // 完全な排他ではない = この確認と rename の間にも隙間はある。 塞ぐには lock file が
+  // 要るが、 それは失敗時に stale lock を残す別の問題を持ち込む。 ここで消したいのは
+  // 「測定に数分かかる間に別の実行が書き終える」 という秒〜分規模の窓で、 それは
+  // この確認で閉じる。
+  if (opts !== undefined && 'expectedRevision' in opts) {
+    const actual = await currentRevision(path);
+    if (actual !== opts.expectedRevision) throw new BaselineRevisionConflictError(path);
+  }
+
   // 直接書くと truncate 後の空ファイルを別 worker が読み、JSON.parse が
   // "Unexpected end of JSON input" で落ちる。同一 directory の一時 file へ
   // 書いてから rename して、読み手からは切り替わりが原子的に見えるようにする。
@@ -84,6 +170,16 @@ export async function saveBaselineEnvelope(
     await rename(tempPath, path);
   } catch (error) {
     await rm(tempPath, { force: true });
+    throw error;
+  }
+}
+
+/** 今の file の版。 file が無ければ null (baseline を作る実行と同じ状態)。 */
+async function currentRevision(path: string): Promise<string | null> {
+  try {
+    return contentRevision(await readFile(path, 'utf8'));
+  } catch (error) {
+    if (isMissingFile(error)) return null;
     throw error;
   }
 }
