@@ -20,10 +20,12 @@
  *    compares raw durations — carrying the run-to-run drift the mock path now
  *    cancels. The stored `measurementPremise` is shared with the mock path, so
  *    it does not distinguish the two; the presence of `reference` does.
- * 4. **prune activation** — the mock path falls back to `KIWA_PERF_PRUNE_STALE`
- *    when the caller says nothing. This path never reads that variable and
- *    prunes only when the caller opts in explicitly, and only when no op was
- *    skipped for missing env (#1746). See `pruneStaleBaselineOps` for why.
+ * 4. **prune activation** — the mock path leaves pruning to an orchestrator that
+ *    runs once the whole suite has completed (#1730). This path prunes inside the
+ *    run instead, only when the caller opts in explicitly and only when no op was
+ *    skipped for missing env (#1746). It stays out of the manifest path because
+ *    env-gated skips mean the ops it measured are not the module's full set —
+ *    recording them as complete would delete the skipped ops' records (#1740).
  *
  * Live runs cost money and are slow. Iterations default to 10 (vs 200 for
  * mock) so a full pass fits inside a coffee break. Concurrency defaults to
@@ -89,11 +91,13 @@ export interface RunPerf3LayerLiveInput {
    * 落とさないと、 op 名を付け替えた時に旧名の記録が残り続ける。 後から同じ名前を
    * 別の処理に使うと、 その処理は無関係な測定値と比較される (#1746)。
    *
-   * mock 経路 (`runPerf3Layer`) と違い、 環境変数 `KIWA_PERF_PRUNE_STALE` は見ない。
-   * あの変数が言えるのは「今回の op 一覧が絞り込まれていない」 ことまでで、 live の
-   * op 一覧が完全かどうかは credential が揃っているかにも依る。 root の `test:perf`
-   * は変数を立てたまま example の live 経路も回すため、 変数を見ると credential を
-   * 持たない環境の実行が黙って掃除を始める。 呼出が明示した時だけ働かせる。
+   * 環境変数 `KIWA_PERF_PRUNE_STALE` は見ない。 あの変数が言えるのは「今回の op 一覧が
+   * 絞り込まれていない」 ことまでで、 live の op 一覧が完全かどうかは credential が
+   * 揃っているかにも依る。 root の `test:perf` は変数を立てたまま example の live 経路も
+   * 回すため、 変数を見ると credential を持たない環境の実行が黙って掃除を始める。
+   * (#1730 で mock 経路も同じ理由からこの変数を見なくなり、 掃除の判断は suite 完走後の
+   * orchestrator へ移った。 実 API 経路はその manifest 経路にも参加しない = 飛んだ op を
+   * 含む一覧を「完全」 として記録できないため。)
    *
    * 明示しても、 env 欠落で飛ばした op がある実行では掃除しない。 その実行の op 一覧は
    * 「測っていない」 のではなく「測れなかった」 ものを含むので、 落とすと credential を

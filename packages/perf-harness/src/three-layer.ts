@@ -37,6 +37,7 @@ import {
   saveBaselineEnvelope,
 } from './baseline.js';
 import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import { recordPruneManifest } from './prune-manifest.js';
 import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
 import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
@@ -194,13 +195,16 @@ export interface RunPerf3LayerInput {
    *
    * op 名を別処理へ付け替えたときに無関係な過去値と比較しないための掃除だが、
    * 常に有効だと絞り込み実行で op が一度欠けるだけで過去値が消える。
-   * 次の完全実行では再 seed されて直前の退行を見逃すので、suite 全体を
-   * 回す呼出だけが明示的に有効化する。
+   * 次の完全実行では再 seed されて直前の退行を見逃す。
    *
-   * 明示しない場合は環境変数 `KIWA_PERF_PRUNE_STALE=1` の有無で決まる。
-   * kiwa の root `test:perf` はこれを立てる = 全 package を絞り込みなしで
-   * 回す唯一の経路で、 そこでだけ掃除が働く。 個別 package の実行や
-   * `-t` での絞り込みでは立たないため、 過去値を巻き添えにしない。
+   * **渡す側が「この `ops` が当該 baseline の全 op である」 ことを保証する**。
+   * 絞り込んだ一覧に true を付けると、 外した op の記録が落ちる。
+   *
+   * 環境変数 `KIWA_PERF_PRUNE_STALE` はこの判断に使わない。 環境変数は子 process に
+   * 継承されるため、 export した shell から個別 package を実行すると絞り込まれた
+   * 一覧が「完全な一覧」 とみなされて記録が消えた (#1730)。 kiwa の `test:perf` は
+   * suite を完走した後に `scripts/perf-prune-stale.mjs` で一度だけ掃除する経路に
+   * 移してあるので、 この option を渡す必要はない。
    */
   pruneStaleBaselineOps?: boolean;
   /**
@@ -453,6 +457,15 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     },
   });
 
+  // この実行が測った op を manifest に書き足す。 baseline には触れない。
+  // 掃除は suite を完走した後に orchestrator が一度だけ行う (#1730)。
+  //
+  // 書込の可否 (`plan.written`) とは独立に記録する。 上限を割って書けなかった実行でも
+  // 「この op を測った」 ことは事実で、 掃除の対象から外す根拠になる。 書けた実行だけ
+  // 記録すると、 1 op が上限を割っただけで module 全体が manifest から消え、
+  // 完走したのに掃除されない状態になる。
+  recordPruneManifest(baselinePath, Object.keys(combinedForBaseline));
+
   let baselineSeeded = false;
   if (plan.written) {
     // 書くのは現在の環境で測った値なので env も現在のものにする。
@@ -515,13 +528,19 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
 /**
  * 今回測っていない op を baseline から落とすかを決める。
  *
- * 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が
- * 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、
- * 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
+ * 呼出が明示した時だけ落とす。 明示しなければ落とさない。
+ *
+ * 以前は環境変数 `KIWA_PERF_PRUNE_STALE=1` を「suite 全体を回している」 の手がかりに
+ * していたが、 環境変数は子 process に継承されるためこれは成り立たない。 その変数を
+ * export した shell から個別 package を実行すると、 絞り込まれた一覧が「完全な一覧」
+ * とみなされて測っていない op の記録が消えた (#1730)。
+ *
+ * 実行の中で完全性を確かめる手立てが無いので、 判断そのものを実行の外へ出した。
+ * suite を完走した後に orchestrator (`scripts/perf-prune-stale.mjs`) が manifest と
+ * 突き合わせて一度だけ掃除する。 詳細は `prune-manifest.ts` の冒頭。
  */
 export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boolean {
-  if (input.pruneStaleBaselineOps !== undefined) return input.pruneStaleBaselineOps;
-  return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
+  return input.pruneStaleBaselineOps ?? false;
 }
 
 /**

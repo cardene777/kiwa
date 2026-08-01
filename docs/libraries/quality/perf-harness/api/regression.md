@@ -24,7 +24,7 @@ export declare function detectRegression(input: RegressionInput): RegressionResu
 
 #### <code v-pre>detectRegressionStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L167) <code v-pre>packages/perf-harness/src/regression.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L194) <code v-pre>packages/perf-harness/src/regression.ts</code>
 
 strict mode — CI 99% + threshold 10%。 false negative を最小化。 見逃し (regressed を stable と判定) が致命的な release gate 経路で使う。
 

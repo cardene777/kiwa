@@ -55,6 +55,14 @@ export {
 export { evaluatePerfGate } from './gate.js';
 export { emitPerfReport } from './report.js';
 export {
+  PRUNE_MANIFEST_ENV,
+  PRUNE_MANIFEST_PATH_ENV,
+  pruneManifestPath,
+  recordPruneManifest,
+  shouldRecordPruneManifest,
+  type PruneManifestRecord,
+} from './prune-manifest.js';
+export {
   runPerf3Layer,
   runPerf3LayerStrict,
   resolveKiwaRepoRoot,

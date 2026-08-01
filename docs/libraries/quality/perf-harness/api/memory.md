@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness memory の API 契約"
 
 #### <code v-pre>measureMemory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L40) <code v-pre>packages/perf-harness/src/memory.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L56) <code v-pre>packages/perf-harness/src/memory.ts</code>
 
 ```ts
 export declare function measureMemory(input: MemoryInput): Promise<MemorySample>;
@@ -24,7 +24,7 @@ export declare function measureMemory(input: MemoryInput): Promise<MemorySample>
 
 #### <code v-pre>MemoryInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L23) <code v-pre>packages/perf-harness/src/memory.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L39) <code v-pre>packages/perf-harness/src/memory.ts</code>
 
 ```ts
 export interface MemoryInput {
@@ -54,6 +54,22 @@ measureMemory — capture heap deltas around a target function. Real production 
 ```ts
 export interface MemorySample {
     iterationCount: number;
+    /**
+     * 測定区間の前に空回しした回数。
+     *
+     * 空回しは測定区間の外で `fn` を呼ぶ。 副作用や件数依存を持つ op では、
+     * その呼出も store の件数や cache の状態を進めるため、 同じ `iterations` でも
+     * 空回しの有無で測っているものが変わる (#1730)。
+     */
+    warmupCount: number;
+    /**
+     * `fn` を呼んだ総回数 (`warmupCount + iterationCount`)。
+     *
+     * 「N 反復」 とだけ報告すると、 空回しを入れた実行が実際には N + warmup 回
+     * 呼んでいることが読み手に伝わらない。 副作用を持つ op ではこの差が
+     * そのまま測定対象の違いになるので、 実際に呼んだ回数を残す。
+     */
+    totalCallCount: number;
     heapUsedDeltaBytes: number;
     heapUsedDeltaPerIterationBytes: number;
     rssDeltaBytes: number;

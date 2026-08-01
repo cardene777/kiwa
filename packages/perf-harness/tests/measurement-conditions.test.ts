@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { buildMeasureResult, runPerf3Layer } from '../src/index.js';
 import { runPerf3LayerLive } from '../src/live.js';
+import { pruneManifestPath } from '../src/prune-manifest.js';
 import { hasSameMeasurementConfig } from '../src/regression.js';
 import type { MeasureResult } from '../src/types.js';
 
@@ -173,6 +174,145 @@ describe('測定条件を変えた baseline が比較対象から外れる (#173
     });
     expect(third.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
     expect(readResults(baselinePath)['alpha.live.serial']!.iterations).toBe(9);
+  });
+});
+
+/**
+ * #1730 — `KIWA_PERF_PRUNE_STALE=1` を export した shell から個別 package を実行すると、
+ * 絞り込まれた op 一覧が「完全な一覧」 とみなされて記録が消えていた。 環境変数は
+ * 子 process に継承されるため、 root の `test:perf` だけが立てるという前提が成り立たない。
+ */
+describe('環境変数を継承した実行が baseline を消さない (#1730)', () => {
+  const originalFlag = process.env['KIWA_PERF_PRUNE_STALE'];
+  const originalManifest = process.env['KIWA_PERF_PRUNE_MANIFEST'];
+
+  afterEach(() => {
+    if (originalFlag === undefined) delete process.env['KIWA_PERF_PRUNE_STALE'];
+    else process.env['KIWA_PERF_PRUNE_STALE'] = originalFlag;
+    if (originalManifest === undefined) delete process.env['KIWA_PERF_PRUNE_MANIFEST'];
+    else process.env['KIWA_PERF_PRUNE_MANIFEST'] = originalManifest;
+  });
+
+  it('環境変数を立てた絞り込み実行でも記録が消えない', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'inherit.json');
+    process.env['KIWA_PERF_PRUNE_MANIFEST'] = join(dir, 'manifest.jsonl');
+
+    // 全 op を測って記録を作る。
+    await runPerf3Layer({
+      ...baseInput(dir, 'inherit'),
+      baselinePath,
+      reportPath: join(dir, '1.md'),
+      ops: [
+        { name: 'alpha', fn: () => {}, serialP95CapMs: 1000 },
+        { name: 'beta', fn: () => {}, serialP95CapMs: 1000 },
+      ],
+    });
+    expect(Object.keys(readResults(baselinePath))).toContain('beta.serial');
+
+    // export された環境変数を継承したまま、 alpha だけを測る絞り込み実行。
+    // 直す前はここで beta の記録が消えていた。
+    process.env['KIWA_PERF_PRUNE_STALE'] = '1';
+    await runPerf3Layer({
+      ...baseInput(dir, 'inherit'),
+      baselinePath,
+      reportPath: join(dir, '2.md'),
+      ops: [{ name: 'alpha', fn: () => {}, serialP95CapMs: 1000 }],
+    });
+
+    expect(Object.keys(readResults(baselinePath))).toContain('beta.serial');
+  });
+
+  it('環境変数を立てた実行は manifest に測った op を残す', async () => {
+    const dir = tempDir();
+    const manifestPath = join(dir, 'manifest.jsonl');
+    process.env['KIWA_PERF_PRUNE_MANIFEST'] = manifestPath;
+    process.env['KIWA_PERF_PRUNE_STALE'] = '1';
+
+    await runPerf3Layer({
+      ...baseInput(dir, 'manifest'),
+      baselinePath: join(dir, 'manifest-baseline.json'),
+      reportPath: join(dir, '1.md'),
+    });
+
+    const records = readFileSync(manifestPath, 'utf8')
+      .split('\n')
+      .filter((line) => line.trim().length > 0)
+      .map((line) => JSON.parse(line) as { baselinePath: string; keys: string[] });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]!.keys).toContain('alpha.serial');
+    expect(records[0]!.keys).toContain('alpha.concurrent');
+  });
+
+  /**
+   * override を使う test だけだと、 置き場を導く経路が一度も走らない。
+   * 実際の実行は override を使わないので、 そこが壊れていても test は通る。
+   */
+  describe('manifest の置き場 (override なし)', () => {
+    it('絶対 path を返す', () => {
+      // 相対 path を返すと package ごとの cwd 配下に書かれ、 repo root を見る
+      // `--apply` が 1 件も拾えない = 掃除が一度も働かない。
+      const target = pruneManifestPath('/repo/.perf-baseline/profile/vector.json');
+      expect(isAbsolute(target)).toBe(true);
+      expect(target).toBe(join('/repo', '.perf-baseline', '.prune-manifest.jsonl'));
+    });
+
+    it('profile が何段深くても `.perf-baseline` の直下に置く', () => {
+      expect(pruneManifestPath('/repo/.perf-baseline/profile/saas/cache.json')).toBe(
+        join('/repo', '.perf-baseline', '.prune-manifest.jsonl'),
+      );
+    });
+
+    it('`.perf-baseline` を含まない path では baseline と同じ dir に置く', () => {
+      const target = pruneManifestPath('/tmp/whatever/base.json');
+      expect(isAbsolute(target)).toBe(true);
+      expect(target).toBe(join('/tmp/whatever', '.prune-manifest.jsonl'));
+    });
+
+    it('相対 path を渡されても絶対 path に直す', () => {
+      expect(isAbsolute(pruneManifestPath('rel/base.json'))).toBe(true);
+    });
+
+    it('相対の override は受け取らない', () => {
+      // 書く側は package ごとの cwd で解決するため、相対値だと読む側と別 file を
+      // 指す。manifest が package ごとに分裂し、掃除が黙って行われない。
+      process.env['KIWA_PERF_PRUNE_MANIFEST'] = 'rel/manifest.jsonl';
+      expect(() => pruneManifestPath('/repo/.perf-baseline/x.json')).toThrow(/絶対 path/);
+    });
+  });
+
+  it('manifest を書けない実行は落ちる (握り潰さない)', async () => {
+    const dir = tempDir();
+    // 書けない場所を指す。1 実行ぶんの行が欠けた manifest は構文としては正常なので、
+    // 握り潰すと掃除する側がそれを完全な一覧として読み、欠けた op を stale として
+    // 消す = 「掃除されない」 ではなく「消しすぎる」 方に倒れる。
+    process.env['KIWA_PERF_PRUNE_MANIFEST'] = join(dir, 'nested.jsonl', 'manifest.jsonl');
+    process.env['KIWA_PERF_PRUNE_STALE'] = '1';
+    writeFileSync(join(dir, 'nested.jsonl'), 'not a dir', 'utf8');
+
+    await expect(
+      runPerf3Layer({
+        ...baseInput(dir, 'failwrite'),
+        baselinePath: join(dir, 'failwrite.json'),
+        reportPath: join(dir, '1.md'),
+      }),
+    ).rejects.toThrow();
+  });
+
+  it('環境変数が無ければ manifest を書かない', async () => {
+    const dir = tempDir();
+    const manifestPath = join(dir, 'manifest.jsonl');
+    process.env['KIWA_PERF_PRUNE_MANIFEST'] = manifestPath;
+    delete process.env['KIWA_PERF_PRUNE_STALE'];
+
+    await runPerf3Layer({
+      ...baseInput(dir, 'nomanifest'),
+      baselinePath: join(dir, 'nomanifest.json'),
+      reportPath: join(dir, '1.md'),
+    });
+
+    expect(existsSync(manifestPath)).toBe(false);
   });
 });
 
