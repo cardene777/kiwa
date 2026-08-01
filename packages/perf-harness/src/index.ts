@@ -38,6 +38,8 @@ export {
 } from './regression.js';
 export {
   BASELINE_SCHEMA,
+  BaselineRevisionConflictError,
+  type BaselineSnapshot,
   CANONICAL_ENV_PROFILE,
   MEASUREMENT_PREMISE,
   captureEnv,
@@ -49,6 +51,7 @@ export {
   defaultBaselinePath,
   resolveBaselineRoot,
   loadBaseline,
+  loadBaselineSnapshot,
   saveBaseline,
   saveBaselineEnvelope,
 } from './baseline.js';

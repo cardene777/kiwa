@@ -33,11 +33,12 @@ import {
 import { DEFAULT_REFERENCE_KIND, createReferenceOps } from './reference.js';
 import {
   BASELINE_SCHEMA,
+  BaselineRevisionConflictError,
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
   nonCanonicalEnvNotice,
-  loadBaseline,
+  loadBaselineSnapshot,
   saveBaselineEnvelope,
 } from './baseline.js';
 import { applyRatioHistory, planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
@@ -296,7 +297,14 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 指して 404 になっていた。report の位置から SSOT までを毎回組み立てる。
   const thresholdDocLink = input.thresholdDocLink ?? resolveThresholdDocLink(input.reportPath);
 
-  const loadedBaseline = await loadBaseline(baselinePath);
+  // 中身と版を 1 回の read から採る。 別々に読むと、 その間に別の実行が書いた時に
+  // 「古い中身 + 新しい版」 の組ができ、 照合が通って上書きしてしまう (#1757)。
+  const baselineSnapshot = await loadBaselineSnapshot(baselinePath);
+  const loadedBaseline =
+    baselineSnapshot.envelope === null
+      ? null
+      : { envelope: baselineSnapshot.envelope, envMismatch: baselineSnapshot.envMismatch };
+  const baselineRevisionAtLoad = baselineSnapshot.revision;
   // file が無いのと、file はあるのに読めないのは別物。 前者は初回なので比較が
   // 無いのが正しく、後者は「比較するはずだったのに壊れていた」 状態。 どちらも
   // 読み込みは null を返して作り直す (誤った比較対象を掴むより安全) が、
@@ -510,22 +518,31 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   const shouldWrite = plan.written || (history.changed && measurable);
 
   let baselineSeeded = false;
+  // 別の実行と重なって書込を見送ったか。 report にその旨を出す。
+  let baselineWriteSkipped = false;
   if (shouldWrite) {
     // 書くのは現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
-    await saveBaselineEnvelope(baselinePath, {
-      schema: BASELINE_SCHEMA,
-      env: captureEnv(),
-      results: history.results,
-    });
-    baselineSeeded = priorBaseline === null;
+    // 読んだ後に別の実行が書いていたら、 こちらの snapshot で上書きしない。
+    // 自分の測定値は次の実行で積み直せるが、 消した記録は戻らない (#1757)。
+    try {
+      await saveBaselineEnvelope(
+        baselinePath,
+        { schema: BASELINE_SCHEMA, env: captureEnv(), results: history.results },
+        { expectedRevision: baselineRevisionAtLoad },
+      );
+      baselineSeeded = priorBaseline === null;
+    } catch (error) {
+      if (!(error instanceof BaselineRevisionConflictError)) throw error;
+      baselineWriteSkipped = true;
+    }
   }
 
   // 記録が無かった op の verdict を、 実際に書けたかで確定する。
   for (const outcome of outcomes) {
     const hadPrior = uncompared.get(outcome.name);
     if (hadPrior === undefined) continue;
-    outcome.regressionVerdict = uncomparableVerdict(hadPrior, shouldWrite);
+    outcome.regressionVerdict = uncomparableVerdict(hadPrior, shouldWrite && !baselineWriteSkipped, baselineWriteSkipped);
   }
 
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md
@@ -562,7 +579,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     regressionGate,
     resolutionMs,
     baselineUnreadable,
-    baselineWritten: shouldWrite,
+    baselineWritten: shouldWrite && !baselineWriteSkipped,
+    baselineWriteSkipped,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -752,6 +770,14 @@ interface WriteReportInput {
    * 表記だけを出すと、 上限違反が直るまで同じ状態が繰り返されることが伝わらない。
    */
   baselineWritten: boolean;
+  /**
+   * 別の実行と重なって書込を見送ったか。
+   *
+   * 「測定が成立していないので書けない」 と「他と重なったので譲った」 は原因も次の
+   * 手当ても違う。 同じ注記で済ませると、 読み手が上限違反を疑って存在しない原因を
+   * 探すことになる (#1757)。
+   */
+  baselineWriteSkipped: boolean;
 }
 
 function writeReport(input: WriteReportInput): void {
@@ -782,6 +808,15 @@ function writeReport(input: WriteReportInput): void {
     // 追跡している baseline は 1 つの環境の記録で、 他の環境では比較相手が別になる。
     // 数値だけを見た読み手が「追跡分と比べた結果」 と受け取らないよう明示する (#1729)。
     ...nonCanonicalEnvNotice(),
+    // 競合で見送った実行は無条件で出す。 比較できた op しか無い実行では従来の注記の
+    // 条件に入らず、 競合が report のどこにも出ないまま「今回は書かなかった」 だけが
+    // 残っていた (#1757)。
+    ...(input.baselineWriteSkipped
+      ? [
+          '**この実行では baseline を書いていない** (別の実行が同じ baseline を書いており、 上書きを避けて譲った)。 測定そのものは成立している。 次の実行で通常どおり書かれる。',
+          '',
+        ]
+      : []),
     '## Serial (concurrency = 1)',
     '',
     '| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |',

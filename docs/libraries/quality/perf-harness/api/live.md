@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness live の API 契約"
 
 #### <code v-pre>runPerf3LayerLive</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L127) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L128) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export declare function runPerf3LayerLive(input: RunPerf3LayerLiveInput): Promise<RunPerf3LayerLiveResult>;
@@ -24,7 +24,7 @@ export declare function runPerf3LayerLive(input: RunPerf3LayerLiveInput): Promis
 
 #### <code v-pre>LiveOpOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L114) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L115) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface LiveOpOutcome extends Partial<OpOutcome> {
@@ -36,7 +36,7 @@ export interface LiveOpOutcome extends Partial<OpOutcome> {
 
 #### <code v-pre>LivePerfOpSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L60) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L61) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface LivePerfOpSpec extends PerfOpSpec {
@@ -50,7 +50,7 @@ export interface LivePerfOpSpec extends PerfOpSpec {
 
 #### <code v-pre>RunPerf3LayerLiveInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L68) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L69) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface RunPerf3LayerLiveInput {
@@ -102,7 +102,7 @@ export interface RunPerf3LayerLiveInput {
 
 #### <code v-pre>RunPerf3LayerLiveResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L120) <code v-pre>packages/perf-harness/src/live.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/live.ts#L121) <code v-pre>packages/perf-harness/src/live.ts</code>
 
 ```ts
 export interface RunPerf3LayerLiveResult {

@@ -139,7 +139,8 @@ export function applyRatioHistory(
 export type UncomparableVerdict =
   | 'n/a (比較せず)'
   | 'n/a (baseline seeded)'
-  | 'n/a (baseline 未保存)';
+  | 'n/a (baseline 未保存)'
+  | 'n/a (baseline 競合で未保存)';
 
 /**
  * 比較できなかった op の verdict を決める。
@@ -159,7 +160,12 @@ export type UncomparableVerdict =
 export function uncomparableVerdict(
   hasPriorRecord: boolean,
   written: boolean,
+  conflicted = false,
 ): UncomparableVerdict {
   if (hasPriorRecord) return 'n/a (比較せず)';
-  return written ? 'n/a (baseline seeded)' : 'n/a (baseline 未保存)';
+  if (written) return 'n/a (baseline seeded)';
+  // 競合で見送った実行は、 測定が成立していない実行とは別。 前者は次の実行で普通に
+  // 書けるが、 後者は上限違反等が直るまで同じ状態が続く。 同じ文言にすると読み手が
+  // 直すべき対象を取り違える (#1757)。
+  return conflicted ? 'n/a (baseline 競合で未保存)' : 'n/a (baseline 未保存)';
 }

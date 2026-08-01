@@ -343,6 +343,13 @@ export interface BaselineEnvelope {
 export interface BaselineLoadResult {
   envelope: BaselineEnvelope;
   /**
+   * 読んだ時点の file の中身の版 (sha256)。
+   *
+   * 書く直前に読み直して一致を確かめると、 読んでから書くまでの間に別の実行が
+   * 書いていないことが判る (#1757)。
+   */
+  revision: string;
+  /**
    * 現行環境と mismatch した field 名。 empty ならば同一環境。
    *
    * `gcExposed` は boolean で v1 baseline には値そのものが無いが、 利用側の型を
