@@ -20,20 +20,32 @@ import path from 'node:path';
 import { measureAlternating, measureHarnessResolution } from './measure.js';
 import { measureConcurrent } from './concurrent.js';
 import { measureMemory, type MemorySample } from './memory.js';
-import { RESOLUTION_FLOOR_MULTIPLE, detectRegression, resolveNormalization } from './regression.js';
+import {
+  INTER_RUN_SPREAD_MULTIPLE,
+  MAX_RATIO_HISTORY,
+  MIN_RATIO_HISTORY,
+  RESOLUTION_FLOOR_MULTIPLE,
+  detectRegression,
+  hasSameMeasurementConfig,
+  observedRatio,
+  resolveNormalization,
+} from './regression.js';
 import { DEFAULT_REFERENCE_KIND, createReferenceOps } from './reference.js';
 import {
   BASELINE_SCHEMA,
   captureEnv,
   defaultBaselinePath,
   isComparableEnv,
+  nonCanonicalEnvNotice,
   loadBaseline,
   saveBaselineEnvelope,
 } from './baseline.js';
-import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import { applyRatioHistory, planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import type { RatioHistoryUpdate } from './baseline-write.js';
+import { recordPruneManifest } from './prune-manifest.js';
 import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport, formatMs } from './report.js';
+import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
 import type { MeasureResult, PerfReferenceKind, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
@@ -188,13 +200,16 @@ export interface RunPerf3LayerInput {
    *
    * op 名を別処理へ付け替えたときに無関係な過去値と比較しないための掃除だが、
    * 常に有効だと絞り込み実行で op が一度欠けるだけで過去値が消える。
-   * 次の完全実行では再 seed されて直前の退行を見逃すので、suite 全体を
-   * 回す呼出だけが明示的に有効化する。
+   * 次の完全実行では再 seed されて直前の退行を見逃す。
    *
-   * 明示しない場合は環境変数 `KIWA_PERF_PRUNE_STALE=1` の有無で決まる。
-   * kiwa の root `test:perf` はこれを立てる = 全 package を絞り込みなしで
-   * 回す唯一の経路で、 そこでだけ掃除が働く。 個別 package の実行や
-   * `-t` での絞り込みでは立たないため、 過去値を巻き添えにしない。
+   * **渡す側が「この `ops` が当該 baseline の全 op である」 ことを保証する**。
+   * 絞り込んだ一覧に true を付けると、 外した op の記録が落ちる。
+   *
+   * 環境変数 `KIWA_PERF_PRUNE_STALE` はこの判断に使わない。 環境変数は子 process に
+   * 継承されるため、 export した shell から個別 package を実行すると絞り込まれた
+   * 一覧が「完全な一覧」 とみなされて記録が消えた (#1730)。 kiwa の `test:perf` は
+   * suite を完走した後に `scripts/perf-prune-stale.mjs` で一度だけ掃除する経路に
+   * 移してあるので、 この option を渡す必要はない。
    */
   pruneStaleBaselineOps?: boolean;
   /**
@@ -302,6 +317,8 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 可否が決まるまで確定しない (後続 op が上限を割ると書けなくなる) ため、
   // loop では「書けなかった」 側の値を入れておき、 書けたら後段で上げる。
   const uncompared = new Map<string, boolean>();
+  // この実行で観測した比。 書込の段で baseline の履歴に積む (#1739)。
+  const ratioUpdates = new Map<string, RatioHistoryUpdate>();
 
   // 回帰判定の絶対下限を、この実行の中で測って決める。 固定値だと機械と Node の版で
   // 意味が変わり、 速い op では「差が下限に届かないので永久に stable」 になる。
@@ -370,8 +387,13 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       // 正規化が成立しない組では比べない。 基準の種類を変えた op や、 基準の記録が
       // 無い世代の baseline がこれに当たる。 実測値そのものの比較に落とすと、
       // 実行と実行の間の機械の状態の差がそのまま gate にかかる。
+      // 測定条件が違う組も比べない。 反復数や空回しを変えると実装を変えなくても
+      // 値が動くため、 版 (`measurementPremise`) だけを見ていると条件を変えた実行が
+      // 旧条件の記録と比較される (#1730)。
       const comparable =
-        priorSerial !== undefined && resolveNormalization(serial, priorSerial).normalized;
+        priorSerial !== undefined &&
+        resolveNormalization(serial, priorSerial).normalized &&
+        hasSameMeasurementConfig(serial, priorSerial);
       const regression = comparable
         ? detectRegression({
             current: serial,
@@ -386,6 +408,28 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         : null;
 
       if (regression === null) uncompared.set(op.name, priorSerial !== undefined);
+
+      // この実行で観測した比を控える。 次の実行が「その op が実行をまたいでどれだけ
+      // 動くか」 を推定するのに使う (#1739)。
+      //
+      // 比較が成立しなかった実行でも積む。 baseline を作った実行の値もその op の
+      // 1 観測で、 除くと幅を推定できるまでに 1 回よけいに掛かる。 記録を入れ替えた
+      // 実行では入れ替え後の record に積むので、 古い実装の値は混ざらない。
+      // この実行で観測した比を控える。 次の実行が「その op が実行をまたいでどれだけ
+      // 動くか」 を推定するのに使う (#1739)。
+      //
+      // **積むのは verdict が stable の実行と、 比較しなかった実行だけ**。 退行した
+      // 実行の比を積むと、 その値が幅を押し広げて次回の実効閾値が退行そのものを
+      // 覆う大きさになり、 同じ退行が stable として通る (実測 = anchor の 2 倍へ
+      // 悪化した op の幅が 100% になり、 実効閾値 200% で delta 100% が収まる)。
+      //
+      // 幅が表すのは「実装が同じまま値がどれだけ動くか」 なので、 退行と判定した
+      // 観測はその定義に当てはまらない。
+      const ratio = observedRatio(serial);
+      const verdictForHistory = regression?.verdict;
+      if (ratio !== null && (verdictForHistory === undefined || verdictForHistory === 'stable')) {
+        ratioUpdates.set(`${op.name}.serial`, { ratio });
+      }
 
       combinedForBaseline[`${op.name}.serial`] = serial;
       combinedForBaseline[`${op.name}.concurrent`] = concurrent;
@@ -432,20 +476,47 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     // 書き直さないと、 op の `referenceKind` を変えた瞬間から比較が成立しなく
     // なり (key は既にあるので追記されない)、 その op だけ永久に n/a に留まる。
     needsRefresh: (_key, prior, current) => {
+      // 測定条件が変わった記録は入れ替える。 入れ替えないと key は既にあるので
+      // 追記されず、 その op は条件を戻すまで永久に比較できない (#1730)。
+      // concurrent 軸も条件が変われば値が動くため、 基準の有無に関わらず先に見る。
+      if (!hasSameMeasurementConfig(current, prior)) return true;
       // 双方に基準が無いのは正常。 concurrent 軸は正規化の対象ではない。
       if (prior.reference === undefined && current.reference === undefined) return false;
       return !resolveNormalization(current, prior).normalized;
     },
   });
 
+  // この実行が測った op を manifest に書き足す。 baseline には触れない。
+  // 掃除は suite を完走した後に orchestrator が一度だけ行う (#1730)。
+  //
+  // 書込の可否 (`plan.written`) とは独立に記録する。 上限を割って書けなかった実行でも
+  // 「この op を測った」 ことは事実で、 掃除の対象から外す根拠になる。 書けた実行だけ
+  // 記録すると、 1 op が上限を割っただけで module 全体が manifest から消え、
+  // 完走したのに掃除されない状態になる。
+  recordPruneManifest(baselinePath, Object.keys(combinedForBaseline));
+
+  // この実行で観測した比を baseline の履歴に積む。 記録そのもの (p10 / samples) は
+  // 動かさない。 履歴は「その op が実行をまたいでどれだけ動くか」 を推定するためだけの
+  // もので、 次の実行の有意性判断に使う (#1739)。
+  //
+  // 判定が振れた op は履歴を捨てて積み直す。 実装が変わった前後の値を混ぜると幅が
+  // 過大になり、 その op の gate が二度と発火しなくなる。
+  const historyBase = plan.written ? plan.results : (priorBaseline ?? {});
+  const history = applyRatioHistory(historyBase, ratioUpdates, MAX_RATIO_HISTORY);
+
+  // 履歴だけの更新でも、 測定が成立していない実行では書かない。 成立しない値で
+  // 幅を推定すると、 壊れた状態が次回以降の判定基準になる。
+  const measurable = premiseValid && hardGatePassed;
+  const shouldWrite = plan.written || (history.changed && measurable);
+
   let baselineSeeded = false;
-  if (plan.written) {
+  if (shouldWrite) {
     // 書くのは現在の環境で測った値なので env も現在のものにする。
     // 古い env を残すと、どの環境の測定値と比較しているのか判別できない。
     await saveBaselineEnvelope(baselinePath, {
       schema: BASELINE_SCHEMA,
       env: captureEnv(),
-      results: plan.results,
+      results: history.results,
     });
     baselineSeeded = priorBaseline === null;
   }
@@ -454,7 +525,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   for (const outcome of outcomes) {
     const hadPrior = uncompared.get(outcome.name);
     if (hadPrior === undefined) continue;
-    outcome.regressionVerdict = uncomparableVerdict(hadPrior, plan.written);
+    outcome.regressionVerdict = uncomparableVerdict(hadPrior, shouldWrite);
   }
 
   // 閾値内でも有意な回帰は gate を落とす (docs/quality/perf-thresholds.md
@@ -491,7 +562,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
     regressionGate,
     resolutionMs,
     baselineUnreadable,
-    baselineWritten: plan.written,
+    baselineWritten: shouldWrite,
   });
 
   return { outcomes, allPassed, baselineSeeded };
@@ -500,13 +571,19 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
 /**
  * 今回測っていない op を baseline から落とすかを決める。
  *
- * 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が
- * 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、
- * 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
+ * 呼出が明示した時だけ落とす。 明示しなければ落とさない。
+ *
+ * 以前は環境変数 `KIWA_PERF_PRUNE_STALE=1` を「suite 全体を回している」 の手がかりに
+ * していたが、 環境変数は子 process に継承されるためこれは成り立たない。 その変数を
+ * export した shell から個別 package を実行すると、 絞り込まれた一覧が「完全な一覧」
+ * とみなされて測っていない op の記録が消えた (#1730)。
+ *
+ * 実行の中で完全性を確かめる手立てが無いので、 判断そのものを実行の外へ出した。
+ * suite を完走した後に orchestrator (`scripts/perf-prune-stale.mjs`) が manifest と
+ * 突き合わせて一度だけ掃除する。 詳細は `prune-manifest.ts` の冒頭。
  */
 export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boolean {
-  if (input.pruneStaleBaselineOps !== undefined) return input.pruneStaleBaselineOps;
-  return process.env['KIWA_PERF_PRUNE_STALE'] === '1';
+  return input.pruneStaleBaselineOps ?? false;
 }
 
 /**
@@ -515,15 +592,21 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
  * 原因を 1 つに固定して書くと嘘になる。 例えば版だけが違う組で「種類が食い違う」 と
  * 書くと、 読み手は種類を疑って見つからない原因を探すことになる。
  *
- * `resolveNormalization` の不成立は 7 通りに分かれる。 基準の記録が無い (baseline 側 /
- * 今回側) / 種類が違う / 実装の版が違う (どちらかが記録なしを含む) / p10 が分母に
- * ならない (baseline 側 / 今回側) / 双方が有限正でも桁が離れて商が求まらない。
- * 分岐を足す時はこの 7 通りとの対応を保つ。
+ * 理由は 8 通りに分かれる。 測定条件が違う / `resolveNormalization` の不成立 7 通り
+ * (基準の記録が無い (baseline 側 / 今回側) / 種類が違う / 実装の版が違う (どちらかが
+ * 記録なしを含む) / p10 が分母にならない (baseline 側 / 今回側) / 双方が有限正でも
+ * 桁が離れて商が求まらない)。 分岐を足す時はこの 8 通りとの対応を保つ。
+ *
+ * 測定条件を先に見るのは、 条件が違えば基準 op の値も違う条件で測られているため。
+ * 基準の側の理由を先に出すと、 読み手は分母を疑って本当の原因に辿り着けない。
  *
  * 記録を入れ替えたかどうかはここでは書かない。 書込には測定の成立が要り、 この時点で
  * 判っていない (report 冒頭が実行全体として書けたかを出す)。
  */
 export function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
+  if (!hasSameMeasurementConfig(current, baseline)) {
+    return `測定条件が baseline と違うため比較せず (baseline ${baseline.iterations} 反復 / 空回し ${baseline.warmup}、 今回 ${current.iterations} 反復 / 空回し ${current.warmup})`;
+  }
   const currentReference = current.reference;
   const baselineReference = baseline.reference;
   if (baselineReference === undefined) {
@@ -696,6 +779,9 @@ function writeReport(input: WriteReportInput): void {
           '',
         ]
       : []),
+    // 追跡している baseline は 1 つの環境の記録で、 他の環境では比較相手が別になる。
+    // 数値だけを見た読み手が「追跡分と比べた結果」 と受け取らないよう明示する (#1729)。
+    ...nonCanonicalEnvNotice(),
     '## Serial (concurrency = 1)',
     '',
     '| op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |',
@@ -725,8 +811,12 @@ function writeReport(input: WriteReportInput): void {
     '',
     '回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。',
     '',
-    '| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |',
-    '|---|---|---|---|---|---|---|---|---|',
+    '',
+    '「実行間のばらつき」 は baseline が持つ過去の比が、 baseline 自身の比からどれだけ離れたかの最大値。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の ' +
+      `${INTER_RUN_SPREAD_MULTIPLE} 倍と相対閾値の大きい方を超えた差だけを有意として扱う (#1739)。 履歴が ${MIN_RATIO_HISTORY} 件に満たない op では推定できないため n/a になり、 相対閾値だけで判定する。`,
+    '',
+    '| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |',
+    '|---|---|---|---|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -744,7 +834,7 @@ function writeReport(input: WriteReportInput): void {
     lines.push(
       // 基準の p95 も出す。 分母が同じ実行の中で暴れていれば比も暴れるので、
       // 比だけを見て「op が動いた」 と読まないための材料。
-      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serialReference.p95)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
+      `| ${op.name} | ${out.serial.reference?.kind ?? 'n/a'} | ${formatMs(referenceP10)} | ${formatMs(out.serialReference.p95)} | ${formatMs(out.serial.p10)} | ${Number.isFinite(ratio) ? ratio.toFixed(3) : 'n/a'} | ${priorRatio} | ${out.regression?.interRunSpread === undefined ? 'n/a' : `${(out.regression.interRunSpread * 100).toFixed(1)}%`} | ${out.regression === undefined ? 'n/a' : `${(out.regression.effectiveThreshold * 100).toFixed(1)}%`} | ${out.regression ? formatMs(out.regression.judged.current) : 'n/a'} | ${out.regression ? formatMs(out.regression.judged.baseline) : 'n/a'} |`,
     );
   });
 
@@ -769,8 +859,11 @@ function writeReport(input: WriteReportInput): void {
     '',
     // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
     // 拾うため、no と yes の値を同じ基準で比べられない。
-    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |',
-    '|---|---|---|---|---|---|',
+    //
+    // 呼出 列も同じ証跡。 空回しは測定区間の外で fn を呼ぶため、 副作用や件数依存を
+    // 持つ op では「N 反復」 の見出しだけでは実際に何回呼んだかが読めない (#1730)。
+    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |',
+    '|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -785,7 +878,7 @@ function writeReport(input: WriteReportInput): void {
           ? 'PASS'
           : 'FAIL';
     lines.push(
-      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${verdict} |`,
+      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${verdict} |`,
     );
   });
 

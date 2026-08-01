@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'userOp is required' }, { status: 400 });
     }
 
-    const port = Number(process.env.NEXT_PUBLIC_ANVIL_PORT ?? 8545);
+    const port = Number(process.env.NEXT_PUBLIC_ANVIL_PORT ?? 8560);
     const chain = defineChain({
       id: 31337,
       name: 'Anvil',

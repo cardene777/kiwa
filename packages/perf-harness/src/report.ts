@@ -132,6 +132,26 @@ export function formatMs(value: number): string {
   return `${value.toPrecision(2)}ms`;
 }
 
+/**
+ * memory 測定で `fn` を呼んだ回数を 1 セルにする。
+ *
+ * 空回しは測定区間の外で呼ぶため、 副作用や件数依存を持つ op では同じ
+ * `iterations` でも空回しの有無で測っているものが変わる。 表の見出しは反復数しか
+ * 出さないので、 実際の総呼出数をここで明示する (#1730)。
+ *
+ * 空回しが無い実行では反復数だけを出す。 `0 + 20 = 20` は読み手に何も足さない。
+ */
+export function formatMemoryCalls(sample: {
+  warmupCount?: number;
+  iterationCount: number;
+  totalCallCount?: number;
+}): string {
+  const warmup = sample.warmupCount ?? 0;
+  const total = sample.totalCallCount ?? warmup + sample.iterationCount;
+  if (warmup === 0) return `${total}`;
+  return `${total} (${warmup} + ${sample.iterationCount})`;
+}
+
 function formatSignedMs(value: number): string {
   const sign = value > 0 ? '+' : '';
   return `${sign}${formatMs(value)}`;

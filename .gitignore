@@ -23,6 +23,12 @@ coverage/
 # 起動場所ごとに分かれていた過去の置き場は読まれないので追跡しない。
 packages/*/.perf-baseline/
 examples/*/.perf-baseline/
+# baseline は記録した機械でしか比較に使えないため、環境ごとの dir に分ける (#1729)。
+# 全環境を追跡すると 148 file が機械の数だけ増えるので、1 つだけを追跡する。
+# ここを変える時は `packages/perf-harness/src/baseline.ts` の
+# `CANONICAL_ENV_PROFILE` と `docs/quality/perf-thresholds.md` も同時に直す。
+.perf-baseline/*
+!.perf-baseline/darwin-arm64--apple-m4-pro-43c7d7--node24/
 # v1.30-1 kept `.a11y-baseline/` ignored while stubs were in flight; v1.30-2
 # lands real 3-layer baselines so per-package `.a11y-baseline/<pkg>.json`
 # files are tracked from here on (folder stays writable).

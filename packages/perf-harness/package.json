@@ -52,7 +52,7 @@
   },
   "scripts": {
     "prebuild": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
-    "build": "tsup",
+    "build": "tsup || node -e \"const{rmSync}=require('node:fs');for(const f of ['dist/index.d.ts','dist/index.d.cts'])rmSync(f,{force:true});process.exit(1)\"",
     "pretest": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
     "pretest:cov": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",

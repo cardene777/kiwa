@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
+import { baselinePathFor, resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import { signJWT, verifyJWT } from '../../src/jwt.js';
 import { hashData, hmacDigest } from '../../src/hash.js';
 import { aesEncrypt, aesDecrypt } from '../../src/aes.js';
@@ -9,7 +9,7 @@ import { randomBytes } from 'node:crypto';
 const MODULE = 'crypto';
 const REPO_ROOT = resolveKiwaRepoRoot(process.cwd());
 const REPORT_PATH = path.join(REPO_ROOT, 'docs/quality-reports/perf', `${MODULE}.md`);
-const BASELINE_PATH = path.join(REPO_ROOT, '.perf-baseline', `${MODULE}.json`);
+const BASELINE_PATH = baselinePathFor(REPO_ROOT, MODULE);
 
 describe(MODULE, () => {
   it(

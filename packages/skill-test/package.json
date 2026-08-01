@@ -47,8 +47,9 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup",
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node"
+    "build": "tsup || node -e \"const{rmSync}=require('node:fs');for(const f of ['dist/index.d.ts','dist/index.d.cts'])rmSync(f,{force:true});process.exit(1)\"",
+    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

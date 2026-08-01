@@ -3,7 +3,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { dappE2eTest } from '@kiwa-lab/dapp';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8560;
 const OWNER_PK =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
 const __dirname = dirname(fileURLToPath(import.meta.url));

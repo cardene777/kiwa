@@ -1,12 +1,12 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
+import { baselinePathFor, resolveKiwaRepoRoot, runPerf3Layer } from '@kiwa-lab/perf-harness';
 import { createPythonAppEnv, dispatchRequest, renderTemplate, captureMiddlewareCall } from '../../src/index.js';
 
 const MODULE = 'python';
 const REPO_ROOT = resolveKiwaRepoRoot(process.cwd());
 const REPORT_PATH = path.join(REPO_ROOT, 'docs/quality-reports/perf', `${MODULE}.md`);
-const BASELINE_PATH = path.join(REPO_ROOT, '.perf-baseline', `${MODULE}.json`);
+const BASELINE_PATH = baselinePathFor(REPO_ROOT, MODULE);
 
 describe(MODULE, () => {
   it(

@@ -8,7 +8,7 @@ import { createPublicClient, createWalletClient, defineChain, http, type Hex } f
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture';
 
-const ANVIL_PORT = 8545;
+const ANVIL_PORT = 8567;
 const VEST_TOTAL = 1000n * 10n ** 18n;
 const CLIFF_DURATION = 300n;
 const VESTING_DURATION = 3600n;
@@ -141,7 +141,11 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
 
     await page.getByTestId('release-button').click();
     await dappE2e.waitForRpcIdle();
-    await page.waitForTimeout(1500);
+    // 固定の待機では、 負荷がかかった時に release がまだ反映されていない 0 を読み、
+    // 「partial release なのに 0」 として落ちる。 読む表示が 0 を離れるまで待つ。
+    await expect(page.getByTestId('released')).not.toHaveText('released: 0', {
+      timeout: 10_000,
+    });
 
     const released = bigintFromText(
       (await page.getByTestId('released').textContent()) ?? '',
@@ -217,9 +221,18 @@ test.describe('Next.js Vesting (cliff + linear release + anvil 時間操作) e2e
     // 1 回目 — 期間満了で全額 release
     await increaseTime(pub, VESTING_DURATION + 60n);
     await page.waitForTimeout(2000);
+    const balanceBeforeFirst =
+      (await page.getByTestId('token-balance').textContent()) ?? '';
     await page.getByTestId('release-button').click();
     await dappE2e.waitForRpcIdle();
     await expect(page.getByTestId('released')).toHaveText(`released: ${VEST_TOTAL}`, {
+      timeout: 10_000,
+    });
+    // `released` と残高は別々に取得しているため、 released が満額になっても残高の
+    // 表示はまだ 1 回目の前のままのことがある。 その状態で読むと、 2 回目の後に
+    // 届いた 1 回目の反映を「2 回目で増えた」 と読み違える。 待つ対象を、
+    // 実際に読む表示そのものにする。
+    await expect(page.getByTestId('token-balance')).not.toHaveText(balanceBeforeFirst, {
       timeout: 10_000,
     });
 
