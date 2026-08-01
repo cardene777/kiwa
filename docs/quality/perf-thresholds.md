@@ -190,7 +190,7 @@ Sample count explains part of it and not the rest — 14 % of ops with more than
 
 Verdict agreement between passes is **440, 458 and 444 out of 492** for the three pairings, and **425 / 492** across all three at once. One pairing clears the 450 that #1737 set as its target and the other two do not, which is the same lesson as the four-pass selection above: a number taken from one pairing is a number about that pairing.
 - baselines are discarded and reseeded when the measurement premise changes (Node version, platform, CPU, or whether `--expose-gc` was available). Comparing across those boundaries reports regressions that no code change caused. The first valid run under the new premise reseeds; comparison resumes from the run after that. A run that is not itself valid — `requireGc: true` with no GC available, or one that fails a hard cap — leaves the stored baseline untouched, so a broken environment cannot become the new reference.
-- to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{module}.json` and rerun
+- to intentionally accept the new baseline (e.g. after a deliberate optimisation regression), delete `.perf-baseline/{env-profile}/{module}.json` (some modules sit under a layer directory, e.g. `.perf-baseline/{env-profile}/saas/{module}.json`) and rerun
 
 ### Where baselines live
 
@@ -211,7 +211,11 @@ Baselines therefore live under a directory naming the environment that produced 
     ...
 ```
 
-The name carries platform, CPU model, and Node **major**. Including the patch version would invalidate every baseline on a Node upgrade; dropping the major would compare across V8 changes. Core count is left out — it moves with load and container allocation on the same machine, and `isComparableEnv` rejects the mismatch anyway.
+The name carries platform, CPU model, and Node **major**. Including the patch version would produce a new directory on every Node upgrade; core count is left out because it moves with load and container allocation on the same machine.
+
+**The directory name and the comparison rule are separate things.** The directory only has to be coarse enough that two machines never write to the same file. `isComparableEnv` is what decides whether a stored measurement can be compared, and it stays strict: exact Node version, platform, CPU model, and core count. A Node patch changes V8's optimisation decisions, and a core count below the fixed concurrency (10 serial, 20 for app scenarios) puts workers in a queue — both move the numbers.
+
+When they disagree, the run reads the directory, finds the premise does not match, and reseeds. That is correct: no other machine's record is at risk, because the directory already separated them.
 
 **One profile is tracked**: `darwin-arm64--apple-m4-pro-43c7d7--node24`. Tracking every profile would multiply 148 files by the number of machines, and most copies would never be read. Other environments write to their own directory, which `.gitignore` excludes, so running `test:perf` elsewhere leaves the tracked files untouched — the earlier "do not commit your reseed" rule no longer depends on anyone remembering it.
 

@@ -75,19 +75,26 @@ describe('環境ごとの baseline 分離 (#1729)', () => {
     expect(envProfile(few)).toBe(envProfile(many));
   });
 
-  it('同じ profile なら比較できる', () => {
-    // path を分ける条件と比較の条件が食い違うと、 同じ dir を読みながら
-    // 「比較できない」 と判断して再 seed し、 追跡している記録を上書きする
-    // (#1729 review MAJOR 1)。
+  it('置き場は粗く、比較は厳密に分ける', () => {
+    // 置き場 (`envProfile`) の目的は「別の機械の記録を上書きしない」 ことで、
+    // 粗く分ければ達成できる。 比較条件はそれとは別に厳密に見る。
+    //
+    // Node の patch でも V8 の最適化は変わり、 cpu 数が並列度を下回れば worker が
+    // 待ち行列に並ぶ。 どちらも測定値を動かすので比較しない (#1729 Round 2)。
+    //
+    // 一致しない時に起きるのは「同じ dir を読んで、 比較はせず作り直す」。
+    // dir が分かれているので別の機械の記録は壊れない。
     const base = captureEnv();
     for (const [label, override] of [
       ['Node patch 違い', { nodeVersion: 'v24.99.3' }],
       ['cpu 数違い', { cpuCount: 4 }],
     ] as const) {
       const other = envWith(override);
-      expect(envProfile(other), label).toBe(envProfile(base));
-      expect(isComparableEnv(other, base), `${label}: 同じ profile なのに比較できない`).toBe(true);
+      expect(envProfile(other), `${label}: 置き場が分かれてしまう`).toBe(envProfile(base));
+      expect(isComparableEnv(other, base), `${label}: 測定条件が違うのに比較する`).toBe(false);
     }
+    // 同一環境どうしは比較できる。
+    expect(isComparableEnv(base, base)).toBe(true);
   });
 
   it('違う profile なら比較できない', () => {
@@ -142,7 +149,7 @@ describe('環境ごとの baseline 分離 (#1729)', () => {
     expect(isCanonicalEnv(envWith({ platform: 'linux-x64' }))).toBe(false);
   });
 
-  it('`.gitignore` が canonical だけを通す', () => {
+  it('`.gitignore` の negation が canonical 1 件だけ', () => {
     // 文字列の一致ではなく git に聞く。 規則の書き方によっては、 意図した
     // 文字列が入っていても canonical が ignore される (git は dir を除外すると
     // 中の file を個別に戻せない)。
@@ -158,12 +165,27 @@ describe('環境ごとの baseline 分離 (#1729)', () => {
     ).toBe(true);
     // 層を挟んだ形でも同じ。
     expect(ignored(`.perf-baseline/${CANONICAL_ENV_PROFILE}/saas/x.json`)).toBe(false);
+
+    // negation は 1 件だけ。 canonical を変えた時に旧 profile の例外が残ると、
+    // 旧 profile で作った file が追跡され続ける。
+    const negations = readFileSync(join(REPO_ROOT, '.gitignore'), 'utf8')
+      .split('\n')
+      .filter((line) => line.startsWith('!.perf-baseline/'));
+    expect(negations, `例外が 1 件でない: ${negations.join(', ')}`).toEqual([
+      `!.perf-baseline/${CANONICAL_ENV_PROFILE}/`,
+    ]);
   });
 
-  it('文書が同じ profile を書いている', () => {
+  it('文書が canonical を 1 件だけ書いている', () => {
+    // `toContain` だけだと、 canonical を変えた時に旧値が残っていても通る。
+    // profile 名の形をした文字列を全部拾い、 canonical 以外が無いことを見る。
     const doc = join(REPO_ROOT, 'docs/quality/perf-thresholds.md');
     expect(existsSync(doc)).toBe(true);
-    expect(readFileSync(doc, 'utf8')).toContain(CANONICAL_ENV_PROFILE);
+    const body = readFileSync(doc, 'utf8');
+    const mentioned = [...body.matchAll(/[a-z0-9-]+--[a-z0-9-]+--node\d+/g)].map((m) => m[0]);
+    expect(mentioned.length, 'canonical を書いていない').toBeGreaterThan(0);
+    const others = [...new Set(mentioned)].filter((name) => name !== CANONICAL_ENV_PROFILE);
+    expect(others, `古い profile 名が残っている: ${others.join(', ')}`).toEqual([]);
   });
 
   it('profile の取得が git を呼ばない', () => {

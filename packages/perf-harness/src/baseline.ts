@@ -318,13 +318,23 @@ export function isComparableEnv(baseline: BaselineEnv, current: BaselineEnv): bo
   return (
     baseline.measurementPremise === current.measurementPremise &&
     baseline.gcExposed === current.gcExposed &&
-    // 環境の一致は `envProfile` の判定に合わせる (#1729)。 ここだけ厳しくすると、
-    // 同じ profile dir を読みながら「比較できない」 と判断して再 seed し、
-    // 追跡している記録を上書きして回帰判定を 1 世代失う。
+    // **置き場と比較条件は別物** (#1729 Round 2 adversarial)。
     //
-    // Node は major まで、 CPU は model まで、 cpu 数は見ない。 理由は
-    // `envProfile` の doc comment に書いた。
-    envProfile(baseline) === envProfile(current)
+    // 置き場 (`envProfile`) は粗くてよい。 目的は「別の機械の記録を上書きしない」
+    // ことで、 粗く分ければ達成できる。 細かくすると同じ機械の中で dir が乱立し、
+    // 追跡する対象を決められなくなる。
+    //
+    // 比較条件はここで厳密に見る。 Node の patch でも V8 の最適化は変わり、
+    // cpu 数が並列度を下回れば worker が待ち行列に並ぶ。 どちらも測定値を動かす。
+    //
+    // 一致しない時に起きるのは「同じ dir を読んで、 比較はせず作り直す」。 これは
+    // 正しい挙動で、 別の機械の記録を壊すことはない (dir が分かれているため)。
+    baseline.nodeVersion === current.nodeVersion &&
+    baseline.platform === current.platform &&
+    // 置き場は指紋付き slug で分けるが、 比較は raw の一致を要求する。 指紋は
+    // 24 bit しかなく衝突し得るため、 dir が同じでも別 CPU の可能性が残る。
+    baseline.cpuModel === current.cpuModel &&
+    baseline.cpuCount === current.cpuCount
   );
 }
 
