@@ -275,11 +275,15 @@ function canonical(target: string): string {
  *   実 API 経路 (`runPerf3LayerLive`) は交互測定を使わないため、 この版でも
  *   `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。
  *   正規化が成立するかは `reference` の有無が決める
+ * - 版 6 = baseline が「対象 p10 ÷ 基準 p10」 の履歴を持つようになった (#1739)。
+ *   有意性の判断に実行間のばらつきを使うため、 履歴を持たない世代の記録では
+ *   その op の幅を推定できない。 測り方そのものは版 5 と同じだが、 判定の前提が
+ *   変わるので世代を分ける
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
  */
-export const MEASUREMENT_PREMISE = 5;
+export const MEASUREMENT_PREMISE = 6;
 
 /**
  * 保存する baseline の schema 版。 v2 で各 result に基準 op の記録が付く (#1737)。
@@ -547,7 +551,11 @@ function backfillDerivedStats(result: MeasureResult): MeasureResult {
     result.trimmed?.percent ?? 0,
     result.warmupConverged ?? true,
   );
+  // sample から作り直せない field は明示的に運ぶ。 ここに足し忘れると、 読み戻す
+  // たびに黙って消える (`ratioHistory` は消えると履歴が 1 件のまま積み上がらず、
+  // 実行間のばらつきを永久に推定できなくなる、 #1739)。
   if (result.reference !== undefined) rebuilt.reference = result.reference;
+  if (result.ratioHistory !== undefined) rebuilt.ratioHistory = result.ratioHistory;
   return rebuilt;
 }
 

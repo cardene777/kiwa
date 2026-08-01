@@ -82,6 +82,63 @@ export function planBaselineWrite(input: BaselineWriteInput): BaselineWritePlan 
     : { written, results: {} };
 }
 
+/** 1 op ぶんの履歴の更新指示。 */
+export interface RatioHistoryUpdate {
+  /** この実行で観測した「対象 p10 ÷ 基準 p10」。 */
+  ratio: number;
+  /**
+   * 履歴を捨てて積み直すか。 判定が `regressed` / `improved` に振れた実行で立てる。
+   *
+   * 実装が変わった前後の値を混ぜると幅が過大になり、 その op の gate が二度と
+   * 発火しなくなる。
+   */
+  reset: boolean;
+}
+
+/**
+ * baseline の記録に、 この実行で観測した比を積む。
+ *
+ * 記録そのもの (p10 / samples) は動かさない。 動かすと比較の基準が毎回入れ替わって
+ * 回帰を検出できなくなる (#1740 でそう決めた)。 積むのは「その op が実行をまたいで
+ * どれだけ動くか」 を推定するための履歴だけ (#1739)。
+ *
+ * 古いものから捨てて上限 (`MAX_RATIO_HISTORY`) に収める。 上限を置くのは baseline の
+ * file が実行のたびに伸び続けないようにするため。
+ *
+ * 何も変わらなければ `changed: false` を返す。 同じ内容で書き直すと baseline の
+ * mtime だけが動き、 いつの測定値かが追えなくなる。
+ */
+export function applyRatioHistory(
+  results: Record<string, MeasureResult>,
+  updates: Map<string, RatioHistoryUpdate>,
+  maxEntries: number,
+): { results: Record<string, MeasureResult>; changed: boolean } {
+  if (updates.size === 0) return { results, changed: false };
+
+  const next: Record<string, MeasureResult> = { ...results };
+  let changed = false;
+
+  for (const [key, update] of updates) {
+    const record = next[key];
+    if (record === undefined) continue;
+    if (!Number.isFinite(update.ratio) || update.ratio <= 0) continue;
+
+    const prior = update.reset ? [] : (record.ratioHistory ?? []);
+    const appended = [...prior, update.ratio].slice(-maxEntries);
+    // 中身が同じなら書き換えない。
+    if (
+      appended.length === (record.ratioHistory?.length ?? 0) &&
+      appended.every((value, index) => value === record.ratioHistory?.[index])
+    ) {
+      continue;
+    }
+    next[key] = { ...record, ratioHistory: appended };
+    changed = true;
+  }
+
+  return changed ? { results: next, changed } : { results, changed: false };
+}
+
 /** 比較が成立しなかった op の verdict。 */
 export type UncomparableVerdict =
   | 'n/a (比較せず)'

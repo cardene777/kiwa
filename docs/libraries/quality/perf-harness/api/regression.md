@@ -24,7 +24,7 @@ export declare function detectRegression(input: RegressionInput): RegressionResu
 
 #### <code v-pre>detectRegressionStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L194) <code v-pre>packages/perf-harness/src/regression.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L335) <code v-pre>packages/perf-harness/src/regression.ts</code>
 
 strict mode — CI 99% + threshold 10%。 false negative を最小化。 見逃し (regressed を stable と判定) が致命的な release gate 経路で使う。
 
@@ -54,7 +54,7 @@ export declare const RESOLUTION_FLOOR_MULTIPLE = 2;
 
 #### <code v-pre>resolveNormalization</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L124) <code v-pre>packages/perf-harness/src/regression.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/regression.ts#L153) <code v-pre>packages/perf-harness/src/regression.ts</code>
 
 実行内正規化の倍率を決める。 判定したいのは比 (対象 ÷ 基準) の変化だが、 比のまま比べると判定に使う量が 無次元になり、 絶対下限 (ms) も report の表記も意味を失う。 代わりに今回の 測定へ `baseline の基準 p10 ÷ 今回の基準 p10` を掛けて、 baseline を測った時の 機械の速さに換算する。 比同士を比べるのと数学的には同じで、 単位は ms のまま残る。 双方に同じ種類の基準が記録されている時だけ成立する。 種類が違えば分母の意味が 違うので、 掛けても相殺は起きない。 片方にしか無い場合も同じ。
 

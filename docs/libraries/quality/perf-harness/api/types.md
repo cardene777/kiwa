@@ -106,6 +106,23 @@ export interface MeasureResult {
      * 従来どおり実測値そのものを比べる (live mode / 単独の `measure`)。
      */
     reference?: MeasureReference;
+    /**
+     * 同じ実装を測った過去の実行の「対象 p10 ÷ 基準 p10」。 新しい順ではなく古い順。
+     *
+     * 実行内正規化 (#1737) は実行全体に乗るずれを消したが、 op 個別の実行間ばらつきは
+     * 基準 op と邪魔を共有しないため相殺されずに残る。 判定に使う bootstrap CI は
+     * 1 回の実行の中の標本から作るので、 このばらつきを含んでいない。 結果として
+     * 実装を変えずに測るだけで 22-29 package が `regressed` になっていた (#1739)。
+     *
+     * この履歴から「その op が実行をまたいでどれだけ動くか」 を推定し、 その幅を
+     * 超えた差だけを有意として扱う。 履歴が足りない間は従来どおり相対閾値だけで
+     * 判定する (幅を推定できないため)。
+     *
+     * 判定が `regressed` / `improved` に振れた実行では履歴を捨てて積み直す。
+     * 実装が変わった前後の値を混ぜると幅が過大になり、 その op の gate が二度と
+     * 発火しなくなる。
+     */
+    ratioHistory?: number[];
     trimmed?: {
         percent: number;
         /** trim 後の sample 数。 */
@@ -121,7 +138,7 @@ export interface MeasureResult {
 
 #### <code v-pre>PerfGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L324) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L365) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateInput {
@@ -138,7 +155,7 @@ export interface PerfGateInput {
 
 #### <code v-pre>PerfGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L335) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L376) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateResult {
@@ -160,7 +177,7 @@ export type PerfReferenceKind = 'cpu' | 'fs-read' | 'fs-write';
 
 #### <code v-pre>RegressionInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L141) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L159) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 Regression 判定 input。 bootstrap CI 経路。
 
@@ -198,7 +215,7 @@ export interface RegressionInput {
 
 #### <code v-pre>RegressionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L171) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L189) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface RegressionResult {
@@ -282,12 +299,35 @@ export interface RegressionResult {
      * 絶対下限も report の表記も従来の意味を保てる。
      */
     normalizationScale: number;
+    /**
+     * baseline の履歴から推定した、 その op の実行間のばらつき (中央値に対する率)。
+     *
+     * 履歴が足りず推定できない場合は付かない。 `deltaPct` と同じ単位なので、
+     * 「今回の差がばらつきの何倍か」 を `deltaPct / interRunSpread` で読める。
+     */
+    interRunSpread?: number;
+    /**
+     * 実際に判定へ使った相対閾値。
+     *
+     * 履歴からばらつきを推定できた op では `max(threshold, ばらつき × 3)`、
+     * 推定できない op では `threshold` そのもの。 report はこの値を出す
+     * (`threshold` だけを出すと、 なぜ落ちなかったのかが読めない)。
+     */
+    effectiveThreshold: number;
+    /**
+     * 相対閾値は超えたが、 その op の実行間のばらつきの範囲に収まったため
+     * stable に落とした場合 true。
+     *
+     * 「変化が無い」 と「その op の揺れと見分けが付かない」 は同じ stable でも
+     * 意味が違う。 区別しないと、 検知できていない状態が安定していると読める。
+     */
+    suppressedByInterRunSpread: boolean;
 }
 ```
 
 #### <code v-pre>Thresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L317) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L358) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface Thresholds {

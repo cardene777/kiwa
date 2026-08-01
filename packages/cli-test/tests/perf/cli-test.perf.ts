@@ -39,7 +39,6 @@ describe(MODULE, () => {
             // syscall + relative path resolution overhead.
             name: 'writeFile',
             referenceKind: 'fs-write',
-            regressionGateWaived: 'p10 の実行間の振れ幅が 100-322% で、判定が regressed へ入れ替わる (#1718)',
             serialP95CapMs: 20,
             fn: async () => {
               await env.writeFile(`f-${++counter}.txt`, `content-${counter}`);
@@ -50,7 +49,6 @@ describe(MODULE, () => {
             // so this is a pure read syscall p95 measurement.
             name: 'readFile',
             referenceKind: 'fs-read',
-            regressionGateWaived: 'p10 の実行間の振れ幅が 60-100% で、判定が regressed へ入れ替わる (#1718)',
             serialP95CapMs: 10,
             fn: async () => {
               await env.readFile('seed.txt');
