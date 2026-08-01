@@ -44,7 +44,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 | <code v-pre>measureMemory: warmup must be a non-negative integer, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L48) |
 | <code v-pre>unreachable</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L134) |
 | <code v-pre>&#96;createReferenceOps: 未知の基準 op の種類 $&#123;JSON.stringify(kind)&#125;。&#96; + &#96; 使える値は $&#123;REFERENCE&#95;KINDS.join(' / ')&#125;。&#96;</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L160) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L887) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L870) |
 
 ## API 契約
 
@@ -52,7 +52,7 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 
 | 宣言元 | 値 | 型 |
 | --- | --- | --- |
-| [baseline.ts](./api/baseline) | 9 | 0 |
+| [baseline.ts](./api/baseline) | 14 | 0 |
 | [concurrent.ts](./api/concurrent) | 1 | 1 |
 | [gate.ts](./api/gate) | 1 | 0 |
 | [live.ts](./api/live) | 1 | 4 |

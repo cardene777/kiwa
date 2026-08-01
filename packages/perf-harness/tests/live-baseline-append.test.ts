@@ -220,6 +220,135 @@ describe('runPerf3LayerLive — baseline の追記 (#1740)', () => {
   });
 });
 
+/**
+ * #1746 — live 経路に掃除の経路が無く、 op 名を付け替えると旧記録が残り続ける問題。
+ *
+ * 旧名の記録が残ると、 後から同じ名前を別の処理に使った時にその処理が無関係な
+ * 測定値と比較される。 掃除を足すが、 #1740 で決めた「credential を 1 つ外した実行が
+ * 他の op の記録を消さない」 は保つ。
+ */
+describe('runPerf3LayerLive — 掃除の経路 (#1746)', () => {
+  const originalEnv = process.env['KIWA_PERF_PRUNE_STALE'];
+  afterEach(() => {
+    if (originalEnv === undefined) delete process.env['KIWA_PERF_PRUNE_STALE'];
+    else process.env['KIWA_PERF_PRUNE_STALE'] = originalEnv;
+  });
+
+  it('明示した実行では、 今回測っていない op の記録が消える', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const common = { moduleName: 'live-prune-on', baselinePath };
+
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), op('beta')],
+      reportPath: join(dir, '1.md'),
+    });
+    expect(Object.keys(readResults(baselinePath))).toContain('beta.live.serial');
+
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha')],
+      reportPath: join(dir, '2.md'),
+      pruneStaleBaselineOps: true,
+    });
+    expect(Object.keys(readResults(baselinePath)).sort()).toEqual([
+      'alpha.live.concurrent',
+      'alpha.live.serial',
+    ]);
+  });
+
+  it('明示しても、 env 欠落で飛ばした op がある実行では 1 件も消えない', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const common = { moduleName: 'live-prune-skip', baselinePath };
+
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), op('beta'), op('gamma')],
+      reportPath: join(dir, '1.md'),
+    });
+    const before = Object.keys(readResults(baselinePath)).sort();
+
+    // beta が credential 欠落で飛び、 gamma は op 一覧から外れた実行。
+    // 掃除を明示していても、 飛んだ op がある限り 1 件も落とさない。
+    const second = await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), { ...op('beta'), requiredEnv: ['KIWA_LIVE_TEST_ABSENT_KEY'] }],
+      reportPath: join(dir, '2.md'),
+      pruneStaleBaselineOps: true,
+    });
+    expect(second.anySkipped).toBe(true);
+    expect(Object.keys(readResults(baselinePath)).sort()).toEqual(before);
+  });
+
+  it('既定 (明示なし) では 1 件も消えない', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const common = { moduleName: 'live-prune-default', baselinePath };
+
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), op('beta')],
+      reportPath: join(dir, '1.md'),
+    });
+
+    // gamma を足して書込を起こす。 書込が起きても beta は落ちない。
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), op('gamma')],
+      reportPath: join(dir, '2.md'),
+    });
+    expect(Object.keys(readResults(baselinePath))).toContain('beta.live.serial');
+  });
+
+  it('環境変数だけでは掃除が始まらない', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const common = { moduleName: 'live-prune-env', baselinePath };
+
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), op('beta')],
+      reportPath: join(dir, '1.md'),
+    });
+
+    // root の `test:perf` はこの変数を立てたまま example の live 経路も回す。
+    // mock 経路と同じ helper を通すと、 credential を持たない環境の実行が
+    // 黙って掃除を始める。
+    process.env['KIWA_PERF_PRUNE_STALE'] = '1';
+    await runPerf3LayerLive({
+      ...common,
+      ops: [op('alpha'), op('gamma')],
+      reportPath: join(dir, '2.md'),
+    });
+    expect(Object.keys(readResults(baselinePath))).toContain('beta.live.serial');
+  });
+
+  it('付け替えた名前を再利用しても、 旧記録とは比較されない', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    const common = { moduleName: 'live-prune-rename', baselinePath, pruneStaleBaselineOps: true };
+
+    // 1. alpha を測って記録を作る
+    await runPerf3LayerLive({ ...common, ops: [op('alpha')], reportPath: join(dir, '1.md') });
+    // 2. alpha を beta に改名する。 掃除が働いて旧 alpha の記録が落ちる。
+    await runPerf3LayerLive({ ...common, ops: [op('beta')], reportPath: join(dir, '2.md') });
+    expect(Object.keys(readResults(baselinePath))).not.toContain('alpha.live.serial');
+
+    // 3. 別の処理を alpha という名前で足す。 1 の記録は残っていないので、
+    //    無関係な測定値との比較にならない。
+    const third = await runPerf3LayerLive({
+      ...common,
+      ops: [op('beta'), op('alpha')],
+      reportPath: join(dir, '3.md'),
+    });
+    expect(third.outcomes.find((o) => o.name === 'alpha')?.regressionVerdict).toBe(
+      'n/a (baseline seeded)',
+    );
+  });
+});
+
 describe('planBaselineWrite — 両経路で共有する書込の判断 (#1740)', () => {
   const alpha = buildMeasureResult('alpha', 3, 0, [1, 1, 1]);
   const beta = buildMeasureResult('beta', 3, 0, [2, 2, 2]);

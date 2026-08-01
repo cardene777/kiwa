@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness three-layer の API 契約"
 
 #### <code v-pre>pruneStaleOps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L531) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L508) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 今回測っていない op を baseline から落とすかを決める。 呼出が明示していればそれに従い、 していなければ suite 全体を回す経路が 立てる環境変数を見る。 絞り込み実行でこの変数が立つことはないため、 「今回の op 一覧が完全である」 という前提が成り立つ場合だけ掃除が働く。
 
@@ -26,7 +26,7 @@ export declare function pruneStaleOps(input: {
 
 #### <code v-pre>resolveKiwaRepoRoot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L878) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L861) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 resolveKiwaRepoRoot — walk upward from `start` until finding a package.json whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to resolve the report path regardless of vitest cwd.
 
@@ -36,7 +36,7 @@ export declare function resolveKiwaRepoRoot(start: string): string;
 
 #### <code v-pre>runPerf3Layer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L269) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L266) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
@@ -44,7 +44,7 @@ export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPer
 
 #### <code v-pre>runPerf3LayerStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L858) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L841) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + CI 99% + delta 10%。 見逃し (退行を stable と判定) が致命的な経路で使う。 defaults ... - serialIterations: 400 (v0.2 200) - serialWarmup: 10 (v0.2 5) - concurrency: 20 (v0.2 10) - iterationsPerWorker: 100 (v0.2 50) - memoryIterations: 400 (v0.2 200) - regressionThreshold: 0.1 (v0.2 0.2) - regressionConfidenceLevel: 0.99 (v0.2 0.95) 回帰判定の 2 つは、 名前が strict でありながら通常版と同じ設定で動いていた (`runPerf3Layer` が閾値を内部で固定していた)。 標本数だけ増えて判定は緩いまま だったので、 呼出から渡せるようにして名前どおりの挙動に揃えた (#1718)。
 
@@ -54,31 +54,9 @@ export declare function runPerf3LayerStrict(input: RunPerf3LayerInput): Promise<
 
 ### 型
 
-#### <code v-pre>UncomparableVerdict</code>
-
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/baseline-write.ts#L85) <code v-pre>packages/perf-harness/src/baseline-write.ts</code>
-
-```ts
-/** 比較が成立しなかった op の verdict。 */
-export type UncomparableVerdict =
-    | 'n/a (比較せず)'
-    | 'n/a (baseline seeded)'
-    | 'n/a (baseline 未保存)';
-```
-
-3 通りの意味。
-
-| 値 | 状態 | 次の実行で比較されるか |
-|---|---|---|
-| <code v-pre>n/a (比較せず)</code> | 記録はあるが基準が揃わず比較できない | 記録を入れ替えれば比較される |
-| <code v-pre>n/a (baseline seeded)</code> | 記録が無く、この実行で書けた | される |
-| <code v-pre>n/a (baseline 未保存)</code> | 記録が無く、書けなかった | されない。測定が成立するまで同じ状態が続く |
-
-書込には測定の成立 (GC を呼べる / 上限を通る) が要る。 同じ module の別 op が上限を割ると 1 byte も書かれないため、 自分の測定が通っていても書けないことがある。
-
 #### <code v-pre>OpOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L209) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L212) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface OpOutcome {
@@ -114,7 +92,7 @@ export interface OpOutcome {
 
 #### <code v-pre>PerfOpSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L37) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L40) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface PerfOpSpec {
@@ -193,7 +171,7 @@ export interface PerfOpSpec {
 
 #### <code v-pre>RunPerf3LayerInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L110) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L113) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface RunPerf3LayerInput {
@@ -298,7 +276,7 @@ export interface RunPerf3LayerInput {
 
 #### <code v-pre>RunPerf3LayerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L245) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L242) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface RunPerf3LayerResult {

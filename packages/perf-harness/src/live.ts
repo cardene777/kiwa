@@ -75,6 +75,23 @@ export interface RunPerf3LayerLiveInput {
    * 同じ契約にする (#1708)。
    */
   requireGc?: boolean;
+  /**
+   * 今回測っていない op を baseline から落とす (default false)。
+   *
+   * 落とさないと、 op 名を付け替えた時に旧名の記録が残り続ける。 後から同じ名前を
+   * 別の処理に使うと、 その処理は無関係な測定値と比較される (#1746)。
+   *
+   * mock 経路 (`runPerf3Layer`) と違い、 環境変数 `KIWA_PERF_PRUNE_STALE` は見ない。
+   * あの変数が言えるのは「今回の op 一覧が絞り込まれていない」 ことまでで、 live の
+   * op 一覧が完全かどうかは credential が揃っているかにも依る。 root の `test:perf`
+   * は変数を立てたまま example の live 経路も回すため、 変数を見ると credential を
+   * 持たない環境の実行が黙って掃除を始める。 呼出が明示した時だけ働かせる。
+   *
+   * 明示しても、 env 欠落で飛ばした op がある実行では掃除しない。 その実行の op 一覧は
+   * 「測っていない」 のではなく「測れなかった」 ものを含むので、 落とすと credential を
+   * 1 つ外した実行が他の op の比較対象を壊す (#1740 でそう決めた)。
+   */
+  pruneStaleBaselineOps?: boolean;
 }
 
 export interface LiveOpOutcome extends Partial<OpOutcome> {
@@ -233,14 +250,16 @@ export async function runPerf3LayerLive(
   //
   // env を跨いだ実行では op ごとに測れたり測れなかったりする。 環境変数が欠けて
   // 飛ばした op を「今回測っていない」 として掃除すると、 credential を 1 つ外した
-  // 実行が他の op の baseline を消してしまう。 掃除は行わない。
+  // 実行が他の op の baseline を消してしまう。 掃除は呼出が明示し、 かつ全 op を
+  // 測れた実行に限る (#1746)。
+  const prune = (input.pruneStaleBaselineOps ?? false) && !anySkipped;
   const plan = anyMeasured
     ? planBaselineWrite({
         prior: priorBaseline,
         current: combinedForBaseline,
         premiseValid,
         hardGatePassed: allPassed,
-        prune: false,
+        prune,
       })
     : { results: {}, written: false };
 
