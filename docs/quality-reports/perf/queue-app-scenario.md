@@ -8,35 +8,38 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| producer_burst (20 addJob + process + drain) | 5.59ms | 5.97ms | 200ms | 0.00056ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| consumer_processing_with_return (5 addJob + assertProcessed) | 26.16ms | 29.85ms | 200ms | 0.00047ms | PASS | stable — gate 無効 (regressionGate=false) |
-| error_retry_cycle (fail 3 job + assertFailed) | 15.54ms | 18.62ms | 200ms | 0.00050ms | PASS | stable — gate 無効 (regressionGate=false) |
+| producer_burst (20 addJob + process + drain) | 5.20ms | 6.49ms | 200ms | 0.00052ms | PASS | stable — gate 無効 (regressionGate=false) |
+| consumer_processing_with_return (5 addJob + assertProcessed) | 28.20ms | 31.14ms | 200ms | 0.00047ms | PASS | stable — gate 無効 (regressionGate=false) |
+| error_retry_cycle (fail 3 job + assertFailed) | 16.50ms | 18.90ms | 200ms | 0.00046ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|---|
-| producer_burst (20 addJob + process + drain) | cpu | 0.09ms | 0.13ms | 5.59ms | 64.099 | 52.765 | 6.30ms | 5.19ms |
-| consumer_processing_with_return (5 addJob + assertProcessed) | cpu | 0.09ms | 0.12ms | 26.16ms | 299.024 | 339.392 | 24.66ms | 27.99ms |
-| error_retry_cycle (fail 3 job + assertFailed) | cpu | 0.08ms | 0.21ms | 15.54ms | 186.616 | 205.291 | 15.44ms | 16.99ms |
+
+「実行間のばらつき」 は baseline が持つ過去の比が、 baseline 自身の比からどれだけ離れたかの最大値。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の 2 倍と相対閾値の大きい方を超えた差だけを有意として扱う (#1739)。 履歴が 3 件に満たない op では推定できないため n/a になり、 相対閾値だけで判定する。
+
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| producer_burst (20 addJob + process + drain) | cpu | 0.09ms | 0.13ms | 5.20ms | 55.024 | 52.765 | n/a | 20.0% | 5.41ms | 5.19ms |
+| consumer_processing_with_return (5 addJob + assertProcessed) | cpu | 0.09ms | 0.12ms | 28.20ms | 321.698 | 339.392 | n/a | 20.0% | 26.53ms | 27.99ms |
+| error_retry_cycle (fail 3 job + assertFailed) | cpu | 0.09ms | 0.17ms | 16.50ms | 184.000 | 205.291 | n/a | 20.0% | 15.23ms | 16.99ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| producer_burst (20 addJob + process + drain) | 6.07ms | 400ms | PASS |
-| consumer_processing_with_return (5 addJob + assertProcessed) | 27.75ms | 400ms | PASS |
-| error_retry_cycle (fail 3 job + assertFailed) | 17.57ms | 400ms | PASS |
+| producer_burst (20 addJob + process + drain) | 6.68ms | 400ms | PASS |
+| consumer_processing_with_return (5 addJob + assertProcessed) | 30.40ms | 400ms | PASS |
+| error_retry_cycle (fail 3 job + assertFailed) | 17.08ms | 400ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
-|---|---|---|---|---|---|
-| producer_burst (20 addJob + process + drain) | -13352 B | 0 B | 102400 B | yes | PASS |
-| consumer_processing_with_return (5 addJob + assertProcessed) | 3648 B | 0 B | 102400 B | yes | PASS |
-| error_retry_cycle (fail 3 job + assertFailed) | -288 B | 0 B | 102400 B | yes | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |
+|---|---|---|---|---|---|---|
+| producer_burst (20 addJob + process + drain) | -22120 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| consumer_processing_with_return (5 addJob + assertProcessed) | 5056 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| error_retry_cycle (fail 3 job + assertFailed) | -288 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
 
 ## Detailed serial reports
 
@@ -48,30 +51,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 5.59ms |
-| p50 | 5.86ms |
-| p95 | 5.97ms |
-| p99 | 5.98ms |
-| mean | 5.79ms |
-| stdev | 0.27ms |
-| min | 4.76ms |
-| max | 5.99ms |
-| total | 115.75ms |
+| p10 | 5.20ms |
+| p50 | 6.05ms |
+| p95 | 6.49ms |
+| p99 | 6.57ms |
+| mean | 5.94ms |
+| stdev | 0.56ms |
+| min | 4.88ms |
+| max | 6.60ms |
+| total | 118.77ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 1.127)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.040)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 6.30ms | 5.19ms | +1.11ms | +21.48% |
-| p50 | 6.60ms | 6.43ms | +0.17ms | +2.64% |
-| p95 | 6.72ms | 6.49ms | +0.24ms | +3.65% |
-| p99 | 6.74ms | 6.52ms | +0.22ms | +3.35% |
-| mean | 6.52ms | 5.98ms | +0.54ms | +8.98% |
-| min | 5.36ms | 4.57ms | +0.79ms | +17.30% |
-| max | 6.75ms | 6.53ms | +0.21ms | +3.28% |
-| total | 130.43ms | 119.68ms | +10.75ms | +8.98% |
+| p10 | 5.41ms | 5.19ms | +0.22ms | +4.28% |
+| p50 | 6.29ms | 6.43ms | -0.14ms | -2.22% |
+| p95 | 6.75ms | 6.49ms | +0.26ms | +4.01% |
+| p99 | 6.84ms | 6.52ms | +0.31ms | +4.78% |
+| mean | 6.18ms | 5.98ms | +0.19ms | +3.20% |
+| min | 5.07ms | 4.57ms | +0.51ms | +11.07% |
+| max | 6.86ms | 6.53ms | +0.32ms | +4.97% |
+| total | 123.51ms | 119.68ms | +3.83ms | +3.20% |
 
 ### consumer_processing_with_return (5 addJob + assertProcessed)
 
@@ -81,30 +84,30 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 1.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 26.16ms |
-| p50 | 27.72ms |
-| p95 | 29.85ms |
-| p99 | 29.98ms |
-| mean | 27.83ms |
-| stdev | 1.23ms |
-| min | 25.83ms |
-| max | 30.01ms |
-| total | 556.58ms |
+| p10 | 28.20ms |
+| p50 | 29.46ms |
+| p95 | 31.14ms |
+| p99 | 31.30ms |
+| mean | 29.57ms |
+| stdev | 1.14ms |
+| min | 27.25ms |
+| max | 31.34ms |
+| total | 591.42ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.943)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.941)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 24.66ms | 27.99ms | -3.33ms | -11.89% |
-| p50 | 26.13ms | 29.32ms | -3.19ms | -10.87% |
-| p95 | 28.14ms | 30.59ms | -2.45ms | -8.00% |
-| p99 | 28.26ms | 30.69ms | -2.42ms | -7.90% |
-| mean | 26.23ms | 29.15ms | -2.92ms | -10.02% |
-| min | 24.35ms | 26.86ms | -2.51ms | -9.33% |
-| max | 28.29ms | 30.71ms | -2.42ms | -7.88% |
-| total | 524.66ms | 583.06ms | -58.40ms | -10.02% |
+| p10 | 26.53ms | 27.99ms | -1.46ms | -5.21% |
+| p50 | 27.72ms | 29.32ms | -1.60ms | -5.46% |
+| p95 | 29.30ms | 30.59ms | -1.29ms | -4.21% |
+| p99 | 29.45ms | 30.69ms | -1.24ms | -4.03% |
+| mean | 27.82ms | 29.15ms | -1.33ms | -4.57% |
+| min | 25.63ms | 26.86ms | -1.22ms | -4.55% |
+| max | 29.49ms | 30.71ms | -1.23ms | -3.99% |
+| total | 556.42ms | 583.06ms | -26.65ms | -4.57% |
 
 ### error_retry_cycle (fail 3 job + assertFailed)
 
@@ -114,28 +117,28 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 15.54ms |
-| p50 | 16.41ms |
-| p95 | 18.62ms |
-| p99 | 19.16ms |
-| mean | 16.78ms |
-| stdev | 1.12ms |
-| min | 15.17ms |
-| max | 19.30ms |
-| total | 335.69ms |
+| p10 | 16.50ms |
+| p50 | 17.55ms |
+| p95 | 18.90ms |
+| p99 | 19.52ms |
+| mean | 17.51ms |
+| stdev | 1.07ms |
+| min | 14.79ms |
+| max | 19.68ms |
+| total | 350.11ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.994)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.923)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 15.44ms | 16.99ms | -1.55ms | -9.10% |
-| p50 | 16.31ms | 17.94ms | -1.63ms | -9.10% |
-| p95 | 18.50ms | 18.77ms | -0.26ms | -1.41% |
-| p99 | 19.04ms | 19.17ms | -0.12ms | -0.65% |
-| mean | 16.68ms | 17.81ms | -1.14ms | -6.38% |
-| min | 15.07ms | 15.06ms | +0.0057ms | +0.04% |
-| max | 19.17ms | 19.27ms | -0.09ms | -0.47% |
-| total | 333.54ms | 356.27ms | -22.73ms | -6.38% |
+| p10 | 15.23ms | 16.99ms | -1.76ms | -10.37% |
+| p50 | 16.19ms | 17.94ms | -1.75ms | -9.74% |
+| p95 | 17.44ms | 18.77ms | -1.33ms | -7.06% |
+| p99 | 18.02ms | 19.17ms | -1.15ms | -6.00% |
+| mean | 16.16ms | 17.81ms | -1.66ms | -9.30% |
+| min | 13.65ms | 15.06ms | -1.41ms | -9.39% |
+| max | 18.16ms | 19.27ms | -1.11ms | -5.74% |
+| total | 323.12ms | 356.27ms | -33.15ms | -9.30% |
 

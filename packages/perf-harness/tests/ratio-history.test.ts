@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { join } from 'node:path';
-import { buildMeasureResult, runPerf3Layer } from '../src/index.js';
+import { buildMeasureResult, captureEnv, runPerf3Layer } from '../src/index.js';
 import {
   INTER_RUN_SPREAD_MULTIPLE,
   MAX_RATIO_HISTORY,
@@ -164,7 +164,7 @@ describe('applyRatioHistory — baseline への積み方 (#1739)', () => {
   it('記録の測定値は動かさず履歴だけ積む', () => {
     const { results, changed } = applyRatioHistory(
       { 'op.serial': record },
-      new Map([['op.serial', { ratio: 0.5, reset: false }]]),
+      new Map([['op.serial', { ratio: 0.5 }]]),
       MAX_RATIO_HISTORY,
     );
     expect(changed).toBe(true);
@@ -179,7 +179,7 @@ describe('applyRatioHistory — baseline への積み方 (#1739)', () => {
     const full = { ...record, ratioHistory: Array.from({ length: MAX_RATIO_HISTORY }, () => 1) };
     const { results } = applyRatioHistory(
       { 'op.serial': full },
-      new Map([['op.serial', { ratio: 9, reset: false }]]),
+      new Map([['op.serial', { ratio: 9 }]]),
       MAX_RATIO_HISTORY,
     );
     const history = results['op.serial']!.ratioHistory!;
@@ -187,21 +187,10 @@ describe('applyRatioHistory — baseline への積み方 (#1739)', () => {
     expect(history[history.length - 1]).toBe(9);
   });
 
-  it('reset を立てると積み直す', () => {
-    const prior = { ...record, ratioHistory: [1, 1, 1] };
-    const { results } = applyRatioHistory(
-      { 'op.serial': prior },
-      new Map([['op.serial', { ratio: 3, reset: true }]]),
-      MAX_RATIO_HISTORY,
-    );
-    // 実装が変わった前後の値を混ぜると幅が過大になり、 gate が発火しなくなる。
-    expect(results['op.serial']!.ratioHistory).toEqual([3]);
-  });
-
   it('分母にならない比は積まない', () => {
     const { changed } = applyRatioHistory(
       { 'op.serial': record },
-      new Map([['op.serial', { ratio: Number.NaN, reset: false }]]),
+      new Map([['op.serial', { ratio: Number.NaN }]]),
       MAX_RATIO_HISTORY,
     );
     expect(changed).toBe(false);
@@ -210,7 +199,7 @@ describe('applyRatioHistory — baseline への積み方 (#1739)', () => {
   it('記録の無い key は無視する', () => {
     const { changed } = applyRatioHistory(
       { 'op.serial': record },
-      new Map([['absent.serial', { ratio: 1, reset: false }]]),
+      new Map([['absent.serial', { ratio: 1 }]]),
       MAX_RATIO_HISTORY,
     );
     expect(changed).toBe(false);
@@ -220,6 +209,62 @@ describe('applyRatioHistory — baseline への積み方 (#1739)', () => {
     // 同じ内容で書き直すと baseline の mtime だけが動き、 いつの測定値かが追えない。
     const { changed } = applyRatioHistory({ 'op.serial': record }, new Map(), MAX_RATIO_HISTORY);
     expect(changed).toBe(false);
+  });
+});
+
+describe('退行した実行の比は履歴に積まない (#1739 review)', () => {
+  it('退行を積むと次回その退行が stable になるため積まない', () => {
+    // 実測 = anchor の 2 倍へ悪化した op の比を積むと幅が 100% になり、
+    // 実効閾値 200% で同じ 100% の悪化が収まってしまう。
+    const anchor = 1.0;
+    const stableHistory = [1.0, 0.98, 1.02];
+    const withRegression = [...stableHistory, 2.0];
+
+    expect(interRunRelativeSpread(stableHistory, anchor)! * INTER_RUN_SPREAD_MULTIPLE).toBeLessThan(
+      1.0,
+    );
+    // 積んでしまうと 100% の悪化が実効閾値の内側に入る。
+    expect(
+      interRunRelativeSpread(withRegression, anchor)! * INTER_RUN_SPREAD_MULTIPLE,
+    ).toBeGreaterThan(1.0);
+  });
+
+  it('同じ退行を繰り返しても regressed のままになる', async () => {
+    const dir = tempDir();
+    let slow = false;
+    const input = (run: number) => ({
+      moduleName: 'reg',
+      ops: [
+        {
+          name: 'alpha',
+          fn: () => {
+            let t = 0;
+            const n = slow ? 60_000 : 20_000;
+            for (let i = 0; i < n; i += 1) t += Math.sqrt(i);
+            if (t < 0) throw new Error('unreachable');
+          },
+          serialP95CapMs: 1000,
+        },
+      ],
+      reportPath: join(dir, `${run}.md`),
+      baselinePath: join(dir, 'baseline.json'),
+      serialIterations: 12,
+      serialWarmup: 2,
+      concurrency: 2,
+      iterationsPerWorker: 2,
+      memoryIterations: 5,
+    });
+
+    // 幅が推定できるまで同じ実装で回す。
+    for (const run of [1, 2, 3, 4]) await runPerf3Layer(input(run));
+    // 3 倍の負荷に切り替える。
+    slow = true;
+    const first = await runPerf3Layer(input(5));
+    expect(first.outcomes[0]!.regressionVerdict).toBe('regressed');
+
+    // 退行した比を積んでいれば、次回は幅が広がって stable に化ける。
+    const second = await runPerf3Layer(input(6));
+    expect(second.outcomes[0]!.regressionVerdict).toBe('regressed');
   });
 });
 
@@ -277,5 +322,38 @@ describe('runPerf3Layer — 実行を重ねると履歴が積まれる (#1739)',
     // 幅を推定できた op は report に「実行間のばらつき」 が出る。
     expect(outcome.regression?.interRunSpread).toBeDefined();
     expect(readFileSync(join(dir, '4.md'), 'utf8')).toContain('実行間のばらつき');
+  });
+});
+
+describe('壊れた履歴を読まない (#1739 review)', () => {
+  it('配列でない履歴を持つ記録は読めない記録として扱う', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    // baseline は file なので壊れた形が入り得る。 そのまま通すと幅を推定する側が
+    // `.filter` を呼んだ時点で例外になり、 seed し直す経路に乗らず suite が止まる。
+    const seeded = buildMeasureResult('alpha.serial', 4, 0, [1, 1, 1, 1]);
+    writeFileSync(
+      baselinePath,
+      JSON.stringify({
+        schema: 2,
+        env: captureEnv(),
+        results: { 'alpha.serial': { ...seeded, ratioHistory: {} } },
+      }),
+      'utf8',
+    );
+
+    // 例外にならず、記録が無い扱いで seed し直される。
+    const result = await runPerf3Layer({
+      moduleName: 'broken',
+      ops: [{ name: 'alpha', fn: () => {}, serialP95CapMs: 1000 }],
+      reportPath: join(dir, 'r.md'),
+      baselinePath,
+      serialIterations: 5,
+      serialWarmup: 1,
+      concurrency: 2,
+      iterationsPerWorker: 2,
+      memoryIterations: 5,
+    });
+    expect(result.baselineSeeded).toBe(true);
   });
 });

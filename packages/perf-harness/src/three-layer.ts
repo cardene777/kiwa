@@ -27,7 +27,6 @@ import {
   RESOLUTION_FLOOR_MULTIPLE,
   detectRegression,
   hasSameMeasurementConfig,
-  isSustainedShift,
   observedRatio,
   resolveNormalization,
 } from './regression.js';
@@ -416,17 +415,20 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       // 比較が成立しなかった実行でも積む。 baseline を作った実行の値もその op の
       // 1 観測で、 除くと幅を推定できるまでに 1 回よけいに掛かる。 記録を入れ替えた
       // 実行では入れ替え後の record に積むので、 古い実装の値は混ざらない。
+      // この実行で観測した比を控える。 次の実行が「その op が実行をまたいでどれだけ
+      // 動くか」 を推定するのに使う (#1739)。
+      //
+      // **積むのは verdict が stable の実行と、 比較しなかった実行だけ**。 退行した
+      // 実行の比を積むと、 その値が幅を押し広げて次回の実効閾値が退行そのものを
+      // 覆う大きさになり、 同じ退行が stable として通る (実測 = anchor の 2 倍へ
+      // 悪化した op の幅が 100% になり、 実効閾値 200% で delta 100% が収まる)。
+      //
+      // 幅が表すのは「実装が同じまま値がどれだけ動くか」 なので、 退行と判定した
+      // 観測はその定義に当てはまらない。
       const ratio = observedRatio(serial);
-      if (ratio !== null) {
-        // 履歴を捨てるのは、 その op が新しい水準へ移ったと言える時だけ。
-        // 1 回の verdict では決めない (`isSustainedShift` の冒頭に理由)。
-        const priorRatio = priorSerial === undefined ? null : observedRatio(priorSerial);
-        ratioUpdates.set(`${op.name}.serial`, {
-          reset:
-            priorRatio !== null &&
-            isSustainedShift(priorSerial?.ratioHistory, priorRatio, ratio, regressionThreshold),
-          ratio,
-        });
+      const verdictForHistory = regression?.verdict;
+      if (ratio !== null && (verdictForHistory === undefined || verdictForHistory === 'stable')) {
+        ratioUpdates.set(`${op.name}.serial`, { ratio });
       }
 
       combinedForBaseline[`${op.name}.serial`] = serial;
@@ -810,7 +812,7 @@ function writeReport(input: WriteReportInput): void {
     '回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。',
     '',
     '',
-    '「実行間のばらつき」 は baseline が持つ過去の比の散らばり (中央値に対する中央絶対偏差)。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の ' +
+    '「実行間のばらつき」 は baseline が持つ過去の比が、 baseline 自身の比からどれだけ離れたかの最大値。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の ' +
       `${INTER_RUN_SPREAD_MULTIPLE} 倍と相対閾値の大きい方を超えた差だけを有意として扱う (#1739)。 履歴が ${MIN_RATIO_HISTORY} 件に満たない op では推定できないため n/a になり、 相対閾値だけで判定する。`,
     '',
     '| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |',

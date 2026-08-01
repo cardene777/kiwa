@@ -272,36 +272,6 @@ export function interRunRelativeSpread(
 }
 
 /**
- * その op が新しい水準へ移ったと言えるかを判定する。
- *
- * 履歴を捨てて積み直すかの判断に使う。 実装が変わった前後の値を混ぜると、 幅が
- * 変化そのものを覆う大きさまで広がり、 その op の gate が二度と発火しなくなる。
- *
- * **1 回の判定では決めない**。 「今回 regressed だったら捨てる」 は循環する = 実行間の
- * ばらつきで振れた op ほど履歴が積み上がらず、 幅を推定できないまま振れ続ける。
- * 実測でも、 gate を有効にした 3 回の実行で落ちた op の履歴長は 1 / 2 / 4 件しかなく、
- * 保護が要る op が保護されない状態になっていた。
- *
- * 代わりに「直近が揃って同じ側へ閾値ぶん離れている」 ことを要求する。 1 回きりの
- * 外れは満たさず、 水準が移った場合だけ満たす。
- */
-export function isSustainedShift(
-  priorHistory: readonly number[] | undefined,
-  anchor: number,
-  currentRatio: number,
-  threshold: number,
-): boolean {
-  if (!Number.isFinite(anchor) || anchor <= 0) return false;
-  const recent = [...(priorHistory ?? []), currentRatio].slice(-MIN_RATIO_HISTORY);
-  if (recent.length < MIN_RATIO_HISTORY) return false;
-
-  const shifted = (value: number, sign: 1 | -1): boolean =>
-    Number.isFinite(value) && value > 0 && sign * ((value - anchor) / anchor) >= threshold;
-
-  return recent.every((v) => shifted(v, 1)) || recent.every((v) => shifted(v, -1));
-}
-
-/**
  * 2 つの記録が同じ測定条件で採られたかを判定する。
  *
  * `measurementPremise` (baseline.ts) は測り方の版を 1 つの数で表すが、 呼出ごとの

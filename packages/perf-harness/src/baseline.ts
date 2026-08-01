@@ -275,15 +275,16 @@ function canonical(target: string): string {
  *   実 API 経路 (`runPerf3LayerLive`) は交互測定を使わないため、 この版でも
  *   `reference` を持たない記録を書く = 版だけでは 2 経路を区別できない。
  *   正規化が成立するかは `reference` の有無が決める
- * - 版 6 = baseline が「対象 p10 ÷ 基準 p10」 の履歴を持つようになった (#1739)。
- *   有意性の判断に実行間のばらつきを使うため、 履歴を持たない世代の記録では
- *   その op の幅を推定できない。 測り方そのものは版 5 と同じだが、 判定の前提が
- *   変わるので世代を分ける
+ *
+ * #1739 で baseline に「対象 p10 ÷ 基準 p10」 の履歴が付いたが、 版は上げていない。
+ * 測り方は版 5 と同じで、 履歴を持たない記録は幅を推定できないだけ (従来の相対閾値に
+ * 落ちる) だから。 版を上げると全 baseline が作り直しになり、 その 1 回の実行に退行が
+ * 含まれていれば現在値が新しい正として焼き付いて以後検出できない。
  *
  * 上げる条件は「同じ実装を測っても値が変わる」 変更に限る。 閾値や判定の変更は
  * 測り方ではないので上げない。
  */
-export const MEASUREMENT_PREMISE = 6;
+export const MEASUREMENT_PREMISE = 5;
 
 /**
  * 保存する baseline の schema 版。 v2 で各 result に基準 op の記録が付く (#1737)。
@@ -424,11 +425,28 @@ function hasValidReference(candidate: Record<string, unknown>): boolean {
   return typeof fields.p10 === 'number' && Number.isFinite(fields.p10) && fields.p10 > 0;
 }
 
+/**
+ * 履歴が読める形か。 無いのは正常 (履歴を持たない世代の記録)。
+ *
+ * 配列でない値 (`{}` / 文字列) を通すと、 幅を推定する側が `.filter` を呼んだ時点で
+ * 例外になる。 baseline は file なので壊れた形が入り得るが、 例外は「読めない記録」
+ * として seed し直す経路に乗らず suite 全体を止める。 読めない形はここで弾く。
+ */
+function hasValidRatioHistory(candidate: Record<string, unknown>): boolean {
+  const history = candidate.ratioHistory;
+  if (history === undefined) return true;
+  if (!Array.isArray(history)) return false;
+  return history.every(
+    (value) => typeof value === 'number' && Number.isFinite(value) && value > 0,
+  );
+}
+
 function isMeasureResult(value: unknown): value is MeasureResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
   if (typeof candidate.name !== 'string') return false;
   if (!hasValidReference(candidate)) return false;
+  if (!hasValidRatioHistory(candidate)) return false;
   if (!Array.isArray(candidate.samples)) return false;
   // 2 件未満の記録は比較対象にならない。 bootstrap CI がこの件数で退化 CI ({0,0}) を
   // 返すため、 そのまま読むと何倍悪化しても有意にならず永久に stable になる。

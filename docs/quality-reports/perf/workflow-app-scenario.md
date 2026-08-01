@@ -8,43 +8,46 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | 0.01ms | 0.03ms | 100ms | 0.00045ms | PASS | stable (換算後 p10 +3% (閾値未満)、 p95 +54% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| event_trigger_batch (5 event emits with 2 registered workflows each) | 0.0093ms | 0.02ms | 100ms | 0.00046ms | PASS | stable — gate 無効 (regressionGate=false) |
-| retry_error_handling (5 fail-then-succeed with backoff) | 0.03ms | 0.03ms | 100ms | 0.00044ms | PASS | stable — gate 無効 (regressionGate=false) |
+| multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | 0.01ms | 0.02ms | 100ms | 0.00045ms | PASS | stable — gate 無効 (regressionGate=false) |
+| event_trigger_batch (5 event emits with 2 registered workflows each) | 0.0077ms | 0.03ms | 100ms | 0.00046ms | PASS | stable (換算後 p10 -1% (閾値未満)、 p95 +20% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| retry_error_handling (5 fail-then-succeed with backoff) | 0.02ms | 0.03ms | 100ms | 0.00046ms | PASS | stable — gate 無効 (regressionGate=false) |
 | retry_recovery (5 flaky async retry to success) | 0.03ms | 0.04ms | 100ms | 0.00045ms | PASS | stable — gate 無効 (regressionGate=false) |
-| concurrent_batch (5 batches of 4 items with error isolation) | 0.01ms | 0.04ms | 100ms | 0.00046ms | PASS | stable (換算後 p10 +5% (閾値未満)、 p95 +183% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| concurrent_batch (5 batches of 4 items with error isolation) | 0.01ms | 0.02ms | 100ms | 0.00046ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
 回帰判定は実測値そのものではなく、 同じ実行の中で 1 呼出ずつ交互に測った基準 op との比を読む。 実行と実行の間で機械の状態が変わっても、 その差が分子と分母で相殺される。 「換算後 p10」 は今回の比を baseline を測った時の基準 p10 で ms に戻した値で、 baseline の実測 p10 と直接比べられる。
 
-| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 換算後 p10 | baseline p10 |
-|---|---|---|---|---|---|---|---|---|
-| multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | cpu | 0.09ms | 0.10ms | 0.01ms | 0.123 | 0.120 | 0.0099ms | 0.0097ms |
-| event_trigger_batch (5 event emits with 2 registered workflows each) | cpu | 0.09ms | 0.10ms | 0.0093ms | 0.104 | 0.087 | 0.0085ms | 0.0071ms |
-| retry_error_handling (5 fail-then-succeed with backoff) | cpu | 0.09ms | 0.10ms | 0.03ms | 0.278 | 0.292 | 0.02ms | 0.02ms |
-| retry_recovery (5 flaky async retry to success) | cpu | 0.09ms | 0.09ms | 0.03ms | 0.338 | 0.332 | 0.03ms | 0.03ms |
-| concurrent_batch (5 batches of 4 items with error isolation) | cpu | 0.09ms | 0.10ms | 0.01ms | 0.126 | 0.120 | 0.01ms | 0.0099ms |
+
+「実行間のばらつき」 は baseline が持つ過去の比が、 baseline 自身の比からどれだけ離れたかの最大値。 その op が実装を変えずに測るだけでどれだけ動くかを表す。 判定はこの幅の 2 倍と相対閾値の大きい方を超えた差だけを有意として扱う (#1739)。 履歴が 3 件に満たない op では推定できないため n/a になり、 相対閾値だけで判定する。
+
+| op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | cpu | 0.09ms | 0.10ms | 0.01ms | 0.121 | 0.120 | n/a | 20.0% | 0.0098ms | 0.0097ms |
+| event_trigger_batch (5 event emits with 2 registered workflows each) | cpu | 0.09ms | 0.10ms | 0.0077ms | 0.086 | 0.087 | n/a | 20.0% | 0.0070ms | 0.0071ms |
+| retry_error_handling (5 fail-then-succeed with backoff) | cpu | 0.09ms | 0.09ms | 0.02ms | 0.272 | 0.292 | n/a | 20.0% | 0.02ms | 0.02ms |
+| retry_recovery (5 flaky async retry to success) | cpu | 0.09ms | 0.09ms | 0.03ms | 0.338 | 0.332 | n/a | 20.0% | 0.03ms | 0.03ms |
+| concurrent_batch (5 batches of 4 items with error isolation) | cpu | 0.09ms | 0.11ms | 0.01ms | 0.121 | 0.120 | n/a | 20.0% | 0.010ms | 0.0099ms |
 
 ## Concurrent p95 (concurrency = 4, 5 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
 | multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | 0.05ms | 200ms | PASS |
-| event_trigger_batch (5 event emits with 2 registered workflows each) | 0.05ms | 200ms | PASS |
-| retry_error_handling (5 fail-then-succeed with backoff) | 0.13ms | 200ms | PASS |
-| retry_recovery (5 flaky async retry to success) | 0.14ms | 200ms | PASS |
+| event_trigger_batch (5 event emits with 2 registered workflows each) | 0.06ms | 200ms | PASS |
+| retry_error_handling (5 fail-then-succeed with backoff) | 0.12ms | 200ms | PASS |
+| retry_recovery (5 flaky async retry to success) | 0.29ms | 200ms | PASS |
 | concurrent_batch (5 batches of 4 items with error isolation) | 0.06ms | 200ms | PASS |
 
 ## Memory retention (20 iter, arrayBuffers axis is the gate; heap is informational)
 
-| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |
-|---|---|---|---|---|---|
-| multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | 2872 B | 0 B | 102400 B | yes | PASS |
-| event_trigger_batch (5 event emits with 2 registered workflows each) | 9248 B | 0 B | 102400 B | yes | PASS |
-| retry_error_handling (5 fail-then-succeed with backoff) | 3680 B | 0 B | 102400 B | yes | PASS |
-| retry_recovery (5 flaky async retry to success) | -376 B | 0 B | 102400 B | yes | PASS |
-| concurrent_batch (5 batches of 4 items with error isolation) | 4800 B | 0 B | 102400 B | yes | PASS |
+| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |
+|---|---|---|---|---|---|---|
+| multi_step_workflow (10 execute across 4 providers, 3-step order-fulfillment) | -1536 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| event_trigger_batch (5 event emits with 2 registered workflows each) | 9248 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| retry_error_handling (5 fail-then-succeed with backoff) | 4592 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| retry_recovery (5 flaky async retry to success) | -376 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
+| concurrent_batch (5 batches of 4 items with error isolation) | 2440 B | 0 B | 102400 B | yes | 23 (3 + 20) | PASS |
 
 ## Detailed serial reports
 
@@ -58,28 +61,28 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 | warmup | 3 |
 | p10 | 0.01ms |
 | p50 | 0.01ms |
-| p95 | 0.03ms |
-| p99 | 0.06ms |
-| mean | 0.02ms |
-| stdev | 0.01ms |
+| p95 | 0.02ms |
+| p99 | 0.02ms |
+| mean | 0.01ms |
+| stdev | 0.0034ms |
 | min | 0.0090ms |
-| max | 0.06ms |
-| total | 0.31ms |
+| max | 0.02ms |
+| total | 0.25ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.901)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.906)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0099ms | 0.0097ms | +0.00026ms | +2.72% |
-| p50 | 0.01ms | 0.01ms | +0.000093ms | +0.90% |
-| p95 | 0.03ms | 0.02ms | +0.0091ms | +54.21% |
-| p99 | 0.05ms | 0.02ms | +0.03ms | +189.51% |
-| mean | 0.01ms | 0.01ms | +0.0032ms | +28.64% |
-| min | 0.0081ms | 0.0084ms | -0.00031ms | -3.63% |
-| max | 0.06ms | 0.02ms | +0.04ms | +220.77% |
-| total | 0.28ms | 0.22ms | +0.06ms | +28.64% |
+| p10 | 0.0098ms | 0.0097ms | +0.00012ms | +1.26% |
+| p50 | 0.01ms | 0.01ms | +0.000038ms | +0.37% |
+| p95 | 0.02ms | 0.02ms | +0.0020ms | +11.78% |
+| p99 | 0.02ms | 0.02ms | +0.0022ms | +12.08% |
+| mean | 0.01ms | 0.01ms | +0.00043ms | +3.90% |
+| min | 0.0082ms | 0.0084ms | -0.00022ms | -2.63% |
+| max | 0.02ms | 0.02ms | +0.0022ms | +12.14% |
+| total | 0.23ms | 0.22ms | +0.0086ms | +3.90% |
 
 ### event_trigger_batch (5 event emits with 2 registered workflows each)
 
@@ -89,30 +92,30 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.0093ms |
-| p50 | 0.01ms |
-| p95 | 0.02ms |
+| p10 | 0.0077ms |
+| p50 | 0.0090ms |
+| p95 | 0.03ms |
 | p99 | 0.03ms |
 | mean | 0.01ms |
-| stdev | 0.0048ms |
-| min | 0.0089ms |
+| stdev | 0.0056ms |
+| min | 0.0075ms |
 | max | 0.03ms |
-| total | 0.24ms |
+| total | 0.22ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.915)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.916)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.0085ms | 0.0071ms | +0.0014ms | +19.17% |
-| p50 | 0.0094ms | 0.0077ms | +0.0017ms | +22.80% |
-| p95 | 0.02ms | 0.02ms | -0.00070ms | -3.64% |
-| p99 | 0.02ms | 0.02ms | +0.0028ms | +12.95% |
-| mean | 0.01ms | 0.0092ms | +0.0018ms | +19.36% |
-| min | 0.0082ms | 0.0070ms | +0.0012ms | +17.25% |
-| max | 0.03ms | 0.02ms | +0.0037ms | +16.48% |
-| total | 0.22ms | 0.18ms | +0.04ms | +19.36% |
+| p10 | 0.0070ms | 0.0071ms | -0.000097ms | -1.36% |
+| p50 | 0.0082ms | 0.0077ms | +0.00056ms | +7.25% |
+| p95 | 0.02ms | 0.02ms | +0.0039ms | +20.19% |
+| p99 | 0.02ms | 0.02ms | +0.0022ms | +9.93% |
+| mean | 0.01ms | 0.0092ms | +0.00085ms | +9.24% |
+| min | 0.0069ms | 0.0070ms | -0.000052ms | -0.74% |
+| max | 0.02ms | 0.02ms | +0.0017ms | +7.74% |
+| total | 0.20ms | 0.18ms | +0.02ms | +9.24% |
 
 ### retry_error_handling (5 fail-then-succeed with backoff)
 
@@ -122,30 +125,30 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 20 |
 | warmup | 3 |
-| p10 | 0.03ms |
+| p10 | 0.02ms |
 | p50 | 0.03ms |
 | p95 | 0.03ms |
 | p99 | 0.04ms |
 | mean | 0.03ms |
-| stdev | 0.0032ms |
-| min | 0.03ms |
+| stdev | 0.0031ms |
+| min | 0.02ms |
 | max | 0.04ms |
-| total | 0.57ms |
+| total | 0.53ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.871)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.911)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.02ms | 0.02ms | -0.0011ms | -4.78% |
-| p50 | 0.02ms | 0.02ms | -0.0013ms | -5.33% |
-| p95 | 0.03ms | 0.04ms | -0.01ms | -28.81% |
-| p99 | 0.03ms | 0.05ms | -0.02ms | -32.91% |
-| mean | 0.02ms | 0.03ms | -0.0027ms | -9.93% |
-| min | 0.02ms | 0.02ms | +0.00014ms | +0.63% |
-| max | 0.03ms | 0.05ms | -0.02ms | -33.71% |
-| total | 0.49ms | 0.55ms | -0.05ms | -9.93% |
+| p10 | 0.02ms | 0.02ms | -0.0016ms | -6.88% |
+| p50 | 0.02ms | 0.02ms | -0.0017ms | -6.76% |
+| p95 | 0.03ms | 0.04ms | -0.01ms | -24.73% |
+| p99 | 0.03ms | 0.05ms | -0.02ms | -34.79% |
+| mean | 0.02ms | 0.03ms | -0.0033ms | -12.14% |
+| min | 0.02ms | 0.02ms | -0.00065ms | -2.86% |
+| max | 0.03ms | 0.05ms | -0.02ms | -36.76% |
+| total | 0.48ms | 0.55ms | -0.07ms | -12.14% |
 
 ### retry_recovery (5 flaky async retry to success)
 
@@ -158,27 +161,27 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 | p10 | 0.03ms |
 | p50 | 0.03ms |
 | p95 | 0.04ms |
-| p99 | 0.04ms |
-| mean | 0.03ms |
-| stdev | 0.0020ms |
+| p99 | 0.07ms |
+| mean | 0.04ms |
+| stdev | 0.0098ms |
 | min | 0.03ms |
-| max | 0.04ms |
-| total | 0.64ms |
+| max | 0.07ms |
+| total | 0.70ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.894)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.903)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.03ms | 0.03ms | +0.00044ms | +1.65% |
-| p50 | 0.03ms | 0.03ms | +0.00023ms | +0.83% |
-| p95 | 0.03ms | 0.04ms | -0.0084ms | -20.64% |
-| p99 | 0.03ms | 0.08ms | -0.04ms | -56.29% |
-| mean | 0.03ms | 0.03ms | -0.0032ms | -10.13% |
-| min | 0.03ms | 0.03ms | +0.00071ms | +2.68% |
-| max | 0.03ms | 0.09ms | -0.05ms | -60.51% |
-| total | 0.57ms | 0.64ms | -0.06ms | -10.13% |
+| p10 | 0.03ms | 0.03ms | +0.00046ms | +1.73% |
+| p50 | 0.03ms | 0.03ms | +0.00073ms | +2.63% |
+| p95 | 0.04ms | 0.04ms | -0.00036ms | -0.89% |
+| p99 | 0.06ms | 0.08ms | -0.02ms | -19.79% |
+| mean | 0.03ms | 0.03ms | -0.000094ms | -0.29% |
+| min | 0.03ms | 0.03ms | +0.00042ms | +1.61% |
+| max | 0.07ms | 0.09ms | -0.02ms | -22.03% |
+| total | 0.63ms | 0.64ms | -0.0019ms | -0.29% |
 
 ### concurrent_batch (5 batches of 4 items with error isolation)
 
@@ -190,13 +193,13 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 | warmup | 3 |
 | p10 | 0.01ms |
 | p50 | 0.01ms |
-| p95 | 0.04ms |
-| p99 | 0.06ms |
-| mean | 0.02ms |
-| stdev | 0.01ms |
+| p95 | 0.02ms |
+| p99 | 0.02ms |
+| mean | 0.01ms |
+| stdev | 0.0017ms |
 | min | 0.01ms |
-| max | 0.07ms |
-| total | 0.36ms |
+| max | 0.02ms |
+| total | 0.26ms |
 
 ## Baseline diff
 
@@ -204,12 +207,12 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.01ms | 0.0099ms | +0.00048ms | +4.83% |
-| p50 | 0.01ms | 0.01ms | +0.00026ms | +2.42% |
-| p95 | 0.04ms | 0.01ms | +0.02ms | +182.55% |
-| p99 | 0.06ms | 0.01ms | +0.04ms | +295.58% |
-| mean | 0.02ms | 0.01ms | +0.0053ms | +47.65% |
-| min | 0.01ms | 0.0097ms | +0.00043ms | +4.40% |
-| max | 0.06ms | 0.02ms | +0.05ms | +320.56% |
-| total | 0.33ms | 0.22ms | +0.11ms | +47.65% |
+| p10 | 0.010ms | 0.0099ms | +0.000050ms | +0.50% |
+| p50 | 0.01ms | 0.01ms | +0.0014ms | +13.32% |
+| p95 | 0.01ms | 0.01ms | +0.00059ms | +4.35% |
+| p99 | 0.01ms | 0.01ms | -0.00031ms | -2.09% |
+| mean | 0.01ms | 0.01ms | +0.00072ms | +6.45% |
+| min | 0.0099ms | 0.0097ms | +0.00016ms | +1.60% |
+| max | 0.01ms | 0.02ms | -0.00054ms | -3.52% |
+| total | 0.24ms | 0.22ms | +0.01ms | +6.45% |
 

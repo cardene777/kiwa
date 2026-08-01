@@ -86,13 +86,6 @@ export function planBaselineWrite(input: BaselineWriteInput): BaselineWritePlan 
 export interface RatioHistoryUpdate {
   /** この実行で観測した「対象 p10 ÷ 基準 p10」。 */
   ratio: number;
-  /**
-   * 履歴を捨てて積み直すか。 判定が `regressed` / `improved` に振れた実行で立てる。
-   *
-   * 実装が変わった前後の値を混ぜると幅が過大になり、 その op の gate が二度と
-   * 発火しなくなる。
-   */
-  reset: boolean;
 }
 
 /**
@@ -104,6 +97,9 @@ export interface RatioHistoryUpdate {
  *
  * 古いものから捨てて上限 (`MAX_RATIO_HISTORY`) に収める。 上限を置くのは baseline の
  * file が実行のたびに伸び続けないようにするため。
+ *
+ * 履歴を明示的に捨てる経路は持たない。 記録が入れ替わる時 (`needsRefresh`) は新しい
+ * record に履歴が付いていないので、 そこから自然に積み直しになる。
  *
  * 何も変わらなければ `changed: false` を返す。 同じ内容で書き直すと baseline の
  * mtime だけが動き、 いつの測定値かが追えなくなる。
@@ -123,7 +119,7 @@ export function applyRatioHistory(
     if (record === undefined) continue;
     if (!Number.isFinite(update.ratio) || update.ratio <= 0) continue;
 
-    const prior = update.reset ? [] : (record.ratioHistory ?? []);
+    const prior = record.ratioHistory ?? [];
     const appended = [...prior, update.ratio].slice(-maxEntries);
     // 中身が同じなら書き換えない。
     if (
