@@ -34,7 +34,7 @@ import {
 import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
 import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport, formatMs } from './report.js';
+import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
 import type { MeasureResult, PerfReferenceKind, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
@@ -773,8 +773,11 @@ function writeReport(input: WriteReportInput): void {
     '',
     // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
     // 拾うため、no と yes の値を同じ基準で比べられない。
-    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |',
-    '|---|---|---|---|---|---|',
+    //
+    // 呼出 列も同じ証跡。 空回しは測定区間の外で fn を呼ぶため、 副作用や件数依存を
+    // 持つ op では「N 反復」 の見出しだけでは実際に何回呼んだかが読めない (#1730)。
+    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |',
+    '|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -789,7 +792,7 @@ function writeReport(input: WriteReportInput): void {
           ? 'PASS'
           : 'FAIL';
     lines.push(
-      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${verdict} |`,
+      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${verdict} |`,
     );
   });
 

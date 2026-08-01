@@ -46,7 +46,7 @@ import {
 } from './baseline.js';
 import { planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport, formatMs } from './report.js';
+import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
 import type { MeasureResult } from './types.js';
 import { buildRegressionNote } from './three-layer.js';
 import type { OpOutcome, PerfOpSpec } from './three-layer.js';
@@ -396,14 +396,16 @@ function writeLiveReport(input: WriteLiveReportInput): void {
     lines.push('', '## Memory retention (LIVE)', '');
     // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
     // 拾うため、no と yes の値を同じ基準で比べられない。
-    lines.push('| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | verdict |');
-    lines.push('|---|---|---|---|---|---|');
+    // 呼出 列も同じ証跡。 空回しは測定区間の外で fn を呼ぶため、 副作用や件数依存を
+    // 持つ op では反復数だけでは実際に何回呼んだかが読めない (#1730)。
+    lines.push('| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |');
+    lines.push('|---|---|---|---|---|---|---|');
     input.ops.forEach((op) => {
       const out = input.outcomes.find((o) => o.name === op.name);
       if (!out || out.skipped || !out.memory) return;
       const cap = op.memoryArrayBuffersCapBytes ?? input.memoryCapDefault;
       lines.push(
-        `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
+        `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${out.memoryGatePassed ? 'PASS' : 'FAIL'} |`,
       );
     });
 

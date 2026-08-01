@@ -109,4 +109,51 @@ describe('measureMemory', () => {
       }
     }
   });
+
+  /**
+   * #1730 — 空回しは測定区間の外で `fn` を呼ぶため、 副作用や件数依存を持つ op では
+   * 同じ `iterations` でも空回しの有無で測っているものが変わる。 実際に何回呼んだかを
+   * 記録に残し、 report から読めるようにする。
+   */
+  describe('総呼出数の記録 (#1730)', () => {
+    it('空回しの回数と総呼出数を記録する', async () => {
+      let calls = 0;
+      const result = await measureMemory({
+        fn: () => {
+          calls += 1;
+        },
+        iterations: 5,
+        warmup: 3,
+      });
+      // 実際に呼ばれた回数と記録が食い違うと、 report の値が証跡にならない。
+      expect(calls).toBe(8);
+      expect(result.warmupCount).toBe(3);
+      expect(result.iterationCount).toBe(5);
+      expect(result.totalCallCount).toBe(8);
+    });
+
+    it('空回しなしでは総呼出数が反復数と一致する', async () => {
+      let calls = 0;
+      const result = await measureMemory({
+        fn: () => {
+          calls += 1;
+        },
+        iterations: 4,
+      });
+      expect(calls).toBe(4);
+      expect(result.warmupCount).toBe(0);
+      expect(result.totalCallCount).toBe(4);
+    });
+
+    it('同じ反復数でも空回しの有無で総呼出数が変わる', async () => {
+      const fn = () => {};
+      const without = await measureMemory({ fn, iterations: 10 });
+      const withWarmup = await measureMemory({ fn, iterations: 10, warmup: 4 });
+      // 反復数だけを見ると同じ測定に見えるが、 副作用を持つ op では
+      // 4 回ぶん進んだ状態を測っている。
+      expect(without.iterationCount).toBe(withWarmup.iterationCount);
+      expect(without.totalCallCount).toBe(10);
+      expect(withWarmup.totalCallCount).toBe(14);
+    });
+  });
 });
