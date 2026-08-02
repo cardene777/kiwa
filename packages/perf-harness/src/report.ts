@@ -139,17 +139,42 @@ export function formatMs(value: number): string {
  * `iterations` でも空回しの有無で測っているものが変わる。 表の見出しは反復数しか
  * 出さないので、 実際の総呼出数をここで明示する (#1730)。
  *
- * 空回しが無い実行では反復数だけを出す。 `0 + 20 = 20` は読み手に何も足さない。
+ * 区間を分けた実行では反復数に区間の数を掛けた回数を呼ぶ (#1719)。
+ * 内訳に区間の数を出さないと `16 (6 + 5)` のように総数と内訳が合わなくなり、
+ * セル自体が読めなくなる。
+ *
+ * 内訳が総数と同じになる形では内訳を出さない。 `0 + 20 = 20` は読み手に何も足さない。
  */
 export function formatMemoryCalls(sample: {
   warmupCount?: number;
   iterationCount: number;
   totalCallCount?: number;
+  windowCount?: number;
 }): string {
   const warmup = sample.warmupCount ?? 0;
-  const total = sample.totalCallCount ?? warmup + sample.iterationCount;
-  if (warmup === 0) return `${total}`;
-  return `${total} (${warmup} + ${sample.iterationCount})`;
+  const windows = sample.windowCount ?? 1;
+  const total = sample.totalCallCount ?? warmup + sample.iterationCount * windows;
+  const measured = windows > 1 ? `${sample.iterationCount}×${windows}` : `${sample.iterationCount}`;
+  if (warmup === 0) {
+    return windows > 1 ? `${total} (${measured})` : `${total}`;
+  }
+  return `${total} (${warmup} + ${measured})`;
+}
+
+/**
+ * 区間ごとの `arrayBuffers` 増分を 1 セルにする (#1719)。
+ *
+ * 判定に使うのは最後の区間だけだが、 手前の区間との差が「増分が飽和したか」 の
+ * 証跡になる。 これが読めないと、 最後の区間が小さい理由が飽和なのか
+ * そもそも確保していないのかを report から判別できない。
+ *
+ * 1 区間しか測っていない実行では `-` を出す。 代表値と同じ数字を 2 度並べても
+ * 読み手に何も足さない。
+ */
+export function formatMemoryWindows(sample: { arrayBuffersDeltaByWindowBytes?: number[] }): string {
+  const deltas = sample.arrayBuffersDeltaByWindowBytes;
+  if (deltas === undefined || deltas.length < 2) return '-';
+  return deltas.map((value) => `${value >= 0 ? '+' : ''}${value}`).join(' → ');
 }
 
 function formatSignedMs(value: number): string {

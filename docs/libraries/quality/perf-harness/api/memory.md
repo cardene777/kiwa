@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness memory の API 契約"
 
 #### <code v-pre>measureMemory</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L56) <code v-pre>packages/perf-harness/src/memory.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L93) <code v-pre>packages/perf-harness/src/memory.ts</code>
 
 ```ts
 export declare function measureMemory(input: MemoryInput): Promise<MemorySample>;
@@ -24,7 +24,7 @@ export declare function measureMemory(input: MemoryInput): Promise<MemorySample>
 
 #### <code v-pre>MemoryInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L39) <code v-pre>packages/perf-harness/src/memory.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L55) <code v-pre>packages/perf-harness/src/memory.ts</code>
 
 ```ts
 export interface MemoryInput {
@@ -42,6 +42,27 @@ export interface MemoryInput {
      * kiwa 内部の 3 層測定は `memoryWarmup` で明示的に渡す。
      */
     warmup?: number;
+    /**
+     * 測定区間を何回に分けるか (default 1、 #1719)。
+     *
+     * 2 以上を渡すと `iterations` 回の区間をその数だけ続けて回し、
+     * **最後の区間の増分だけ** を代表値として返す。 手前の区間は捨てる。
+     *
+     * fs を触る op では Node の Buffer pool が反復数に応じて段階的に伸びる。
+     * 空回し (`warmup`) は固定回数なので、 反復数が増えるとその先で pool が
+     * また伸び、 1 区間しか測らないと伸びた分が「1 回あたりの保持」 として載る。
+     * 実測では `file_scaffold_workflow` の増分が同じ実装のまま
+     * 118,387 から 198,899 B まで動き、 上限 102,400 B を跨いでいた (#1719)。
+     *
+     * 区間を分けると、 手前の区間が反復数ぶんの pool の伸びを引き受け、
+     * 最後の区間には飽和後の増分だけが残る。 反復ごとに実際に保持している op は
+     * どの区間でも同じ量を出すため、 検知は落ちない。
+     *
+     * 既定を 1 にしているのは、 published API の直接の呼出で挙動を変えないため。
+     * `fn` の呼出回数が倍になるので、 副作用を持つ op では既定のまま変えない方が安全である。
+     * kiwa 内部の 3 層測定は `memoryWindows` で明示的に渡す。
+     */
+    windows?: number;
 }
 ```
 
@@ -63,13 +84,29 @@ export interface MemorySample {
      */
     warmupCount: number;
     /**
-     * `fn` を呼んだ総回数 (`warmupCount + iterationCount`)。
+     * `fn` を呼んだ総回数 (`warmupCount + iterationCount * windowCount`)。
      *
-     * 「N 反復」 とだけ報告すると、 空回しを入れた実行が実際には N + warmup 回
-     * 呼んでいることが読み手に伝わらない。 副作用を持つ op ではこの差が
+     * 「N 反復」 とだけ報告すると、 空回しや窓を入れた実行が実際には
+     * それ以上呼んでいることが読み手に伝わらない。 副作用を持つ op ではこの差が
      * そのまま測定対象の違いになるので、 実際に呼んだ回数を残す。
      */
     totalCallCount: number;
+    /**
+     * 測定区間を何回に分けたか (#1719)。
+     *
+     * 1 なら従来どおりの 1 区間。 2 以上なら最後の区間の値を代表値として返し、
+     * 手前の区間は飽和させるためだけに使う。
+     */
+    windowCount: number;
+    /**
+     * 区間ごとの `arrayBuffers` 増分 (#1719)。
+     *
+     * 代表値 (`arrayBuffersDeltaBytes`) は最後の要素と一致する。
+     * 手前の区間との差が、 その op の増分が飽和したかどうかの証跡になる。
+     * 飽和していれば後ろの区間ほど 0 に近づき、 実装が反復ごとに保持していれば
+     * どの区間でも同じ量が出る。
+     */
+    arrayBuffersDeltaByWindowBytes: number[];
     heapUsedDeltaBytes: number;
     heapUsedDeltaPerIterationBytes: number;
     rssDeltaBytes: number;

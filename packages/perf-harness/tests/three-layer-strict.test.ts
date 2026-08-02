@@ -194,6 +194,16 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
 
     expect(result.outcomes[0]!.memoryGatePassed).toBe(false);
     expect(result.outcomes[0]!.memory.arrayBuffersDeltaBytes).toBeGreaterThan(100 * 1024);
+
+    // 区間分割 (#1719) を入れても検知が落ちないことを固定する。 飽和する確保は
+    // 手前の区間で終わるが、 反復ごとに保持する op はどの区間でも同じ量を出す。
+    // 最後の区間だけが上限を超えている形だと、 判定が飽和の取りこぼしに
+    // 乗っているだけで、 保持を見ているとは言えない。
+    const byWindow = result.outcomes[0]!.memory.arrayBuffersDeltaByWindowBytes;
+    expect(byWindow.length).toBeGreaterThanOrEqual(2);
+    for (const delta of byWindow) {
+      expect(delta).toBeGreaterThan(100 * 1024);
+    }
   });
 
   it('JS heap 側の保持は arrayBuffers に出ない (#1719 の未解決部分)', async () => {

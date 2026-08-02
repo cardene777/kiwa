@@ -467,6 +467,8 @@ Every mock op is checked for growth in retained `ArrayBuffer` backing stores. Th
 
 The measured window is preceded by a warmup (a tenth of the iteration count, minimum 3). Without it the first call's one-off allocations land in the delta and get divided by the iteration count as if they recurred. Node grows its Buffer pool in 8 KB steps, so an fs-touching op showed 24 KB of "retention" over 15 iterations that dropped to 0 B once the pool had settled.
 
+The warmup is a fixed count, which is not enough on its own: the pool keeps growing with the cumulative number of allocations, so a larger iteration count reaches further into it. The measured window is therefore run **twice** and only the second is judged. See § The measured window is split in two below for the numbers.
+
 Measuring memory at all requires `--expose-gc`. Without it `measureMemory` cannot call `global.gc()`, so the delta includes allocations that were about to be released, and the comparison against a cap is not a comparison of retention. 117 of the 180 perf configs were missing it. `dogfood-nats-jetstream`'s `driveObject` reported 215,800 B against a 100 KB cap — reproducibly, to the byte, on every run — and 20,555 B once GC was available. The breach was an artefact of the measurement.
 
 Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'forks'`, and `requireGc: true` on the call. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. And a call that does not ask for GC will accept a run without it — the config only makes GC *available*, `requireGc` is what makes its absence a failure. 34 example suites were passing `runPerf3Layer` without it, so a run under a different config would have reported memory numbers that mean nothing and still passed. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks all three.
@@ -517,7 +519,41 @@ That is the limit of what this measurement shows. It rules out **this** referenc
 
 The load in that run was synthetic — CPU and allocation pressure from sibling processes, not a 90-minute sweep. It is enough to disqualify the subtraction (a candidate that fails under the easier condition will not survive the harder one) but it is not evidence that `heapUsed` raw is stable under a sweep. The sweep data above says it is not.
 
-Two other candidates were rejected without needing a full measurement. Ignoring differences under Node's 8 KB pool granularity would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible. Raising the iteration count until the pool saturates makes every measurement slower without addressing either the blindness or the drift.
+Ignoring differences under Node's 8 KB pool granularity was rejected without needing a full measurement: it would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible.
+
+### The measured window is split in two, and the first half is discarded
+
+The remaining candidate — letting the pool saturate before judging — was also rejected here on the reasoning that it "makes every measurement slower without addressing either the blindness or the drift." **The second half of that is wrong, and the measurement below is what corrects it.** It does not address the blindness, which is why the paragraphs above still stand. It does address the fs drift.
+
+The correction matters because the earlier claim was reasoning, not measurement, and it was the one candidate that had not been measured.
+
+Raising the iteration count is not quite the shape that works. The pool grows with the *cumulative* number of allocations, so a longer measured window contains more pool growth, not less — 5 and 15 iterations after 3 warmup both gave 0 B while 45 gave 29,568 B. What works is running the window twice and reading only the second. The first window absorbs whatever the pool does at that iteration count; the second sees a pool that has already reached it.
+
+`measureMemory` takes `windows` (default 1, unchanged for direct callers of the published API) and `runPerf3Layer` takes `memoryWindows` (default 2). The reported delta is the last window's; every window's delta is kept in `arrayBuffersDeltaByWindowBytes` and printed in the report's `区間 Δ` column, so a small final window can be told apart from an op that never allocated.
+
+Eight consecutive runs of `pnpm --filter @kiwa-lab/cli-test test:perf` on unchanged code, reading the judged (last-window) `arrayBuffers` value:
+
+| op | before (1 window) | after (2 windows) |
+|---|---|---|
+| `file_scaffold_workflow` | 118,387 / 136,796 / 198,899 B | 0 / 0 / 0 / 0 / 0 / 16,082 / 18,942 / 18,942 B |
+| `setup_cleanup_cycle` | -19,318 / +49,460 B | 0 / 0 / 0 / 0 / 0 / 16,082 / 16,082 B |
+| `batch_cli_run` | -14,745 / -1,743 / +2,863 B | 0 / 0 / 0 / 0 / 0 / 0 / 525 B |
+
+The cap is 102,400 B. Before, `file_scaffold_workflow` straddled it — same code, verdict decided by which run you looked at. After, the widest observed value is 18,942 B and all eight runs read PASS.
+
+The residual is quantized to Node's pool step: 16,082 and 18,942 B are one and two 8 KB blocks plus change. What is left is the allocator moving by a block or two, not a value that scales with the workload.
+
+The first window's own delta shows why it had to be discarded — across the same runs it ranged from -47,535 B to +18,742 B on the identical op. That is the number the gate used to read.
+
+`memoryGateWaived` is gone from `packages/cli-test/tests/perf/cli-test-app-scenario.perf.ts`.
+
+The cost is that `fn` runs twice as many times. For an op with side effects that is a change in what is measured, not just in duration, which is why the published API keeps its 1-window default and why `memoryWindows: 1` remains available.
+
+Retention that is real still fails. `tests/three-layer-strict.test.ts` retains 10 KB per iteration and asserts both that the gate fails and that **every** window exceeds the cap — a leak that only showed in the last window would mean the gate was reading leftover saturation rather than retention.
+
+The live path (`runPerfLive`) stays at one window. Doubling the call count there doubles real API calls, and the ops it measures are not the fs-heavy shape this fixes.
+
+The split settles the pool-granularity case and nothing wider. `visual`'s megabyte-per-call ops are not fixed by it and keep their waiver — the numbers are in the `visual` paragraph below.
 
 Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `ea99caa0a` then `a1a77cf9c`:
 
@@ -531,11 +567,17 @@ Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `ea9
 
 Two observations do not separate retained application state from a repeatable runtime or allocator effect, so this is a list of candidates rather than a finding. None are gated today.
 
-The axis therefore stays as it is: `arrayBuffers` only, with `memoryGateWaived` for the fs-heavy ops where even that is decided by the allocator. What would replace it needs a channel that is both complete and stable under load, and neither of the two Node exposes is.
+The channel therefore stays as it is — `arrayBuffers` only — while the *window* it is read over changed to two, with the second judged. What would replace the channel needs one that is both complete and stable under load, and neither of the two Node exposes is. `memoryGateWaived` stays available for ops the split does not settle.
 
 `crypto`'s `ed25519_batch` shows the same axis reacting to load rather than to code. Run on its own it reports 0 B three times in a row; during one full-suite sweep it reported 168,960 B against a 100 KB cap, and the next sweep put it back at 0 B. It carries no waiver — a single non-reproducing breach is not evidence about the op — but it is worth recording that the axis moves with what else is running, which is the same reason the ops below carry one.
 
 The same shape appears at a larger scale in `visual`'s `comparePngBuffersFullDiff`. Running `pnpm --filter @kiwa-lab/visual test:perf` four times with no code change and reading the `arrayBuffers` column of `docs/quality-reports/perf/visual.md` after each gives roughly +10.5 MB / -6.0 MB / +13.7 MB / +0.8 MB, and a separate full-suite pass recorded +20.1 MB. A spread wider than the 16.7 MB cap means the verdict is decided by allocator behaviour rather than by the library, and it failed at least one full-suite pass on unchanged code. It carries a waiver rather than a raised cap for the reason above. (The per-pass memory numbers are not in the stored sweep artifacts — those hold p10 only — so the figures above are reproduced by re-running the command, not read back from a log.)
+
+**The two-window split does not settle this op, which is the boundary of what the split fixes.** Four runs under two windows give a judged value of 16,482,784 / 5,639,510 / 5,812,310 / 9,552,613 B — a 10.8 MB spread against a 16.7 MB cap, with one run inside 300 KB of it. The waiver stays.
+
+The two cases differ in what is moving. In the fs case the residual is one or two 8 KB pool blocks, and the first window is where the large numbers live. Here the op allocates megabytes per call, the residual is megabytes, and the **second** window is consistently the larger of the two (+1,318,989 → +16,482,784 and +3,129,386 → +5,639,510 are typical). Saturating a pool is not what is happening, so a window that waits for saturation has nothing to wait for. `comparePngBuffersIdentical` behaves the same way (1.4-3.3 MB then 3.3-5.0 MB) and passes only because its cap is set well above where it lands.
+
+What the split fixes is the pool-granularity drift. Large-buffer ops need something else, and this measurement does not say what.
 
 ## Change control
 

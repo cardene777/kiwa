@@ -40,12 +40,13 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 | <code v-pre>measure: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L16) |
 | <code v-pre>measure: warmup must be &gt;= 0, got $&#123;warmupCount&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L25) |
 | <code v-pre>measureAlternating: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/measure.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/measure.ts#L99) |
-| <code v-pre>measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L58) |
-| <code v-pre>measureMemory: warmup must be a non-negative integer, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L64) |
+| <code v-pre>measureMemory: warmup must be a non-negative integer, got $&#123;warmup&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L101) |
+| <code v-pre>measureMemory: windows must be an integer &gt;= 1, got $&#123;windows&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L107) |
+| <code v-pre>measureMemory: iterations must be &gt;= 1, got $&#123;input.iterations&#125;</code> | [packages/perf-harness/src/memory.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/memory.ts#L95) |
 | <code v-pre>&#96;$&#123;PRUNE&#95;MANIFEST&#95;PATH&#95;ENV&#125; は絶対 path で指定する (受け取った値 = $&#123;override&#125;)。&#96; + ' 相対 path は書く側と読む側で別の file を指すため受け取れない。'</code> | [packages/perf-harness/src/prune-manifest.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/prune-manifest.ts#L64) |
 | <code v-pre>unreachable</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L134) |
 | <code v-pre>&#96;createReferenceOps: 未知の基準 op の種類 $&#123;JSON.stringify(kind)&#125;。&#96; + &#96; 使える値は $&#123;REFERENCE&#95;KINDS.join(' / ')&#125;。&#96;</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L160) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L994) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L1017) |
 
 ## API 契約
 

@@ -316,10 +316,13 @@ describe('環境変数を継承した実行が baseline を消さない (#1730)'
   });
 });
 
+// 区間の数は #1719 で既定が 2 になった。 この describe が確かめるのは
+// 「空回しが呼出数のセルに出るか」 なので、 区間は 1 に固定して #1730 当時の
+// 契約をそのまま残す。 既定 (2 区間) のセルは次の describe が受け持つ。
 describe('memory の総呼出数が report から読める (#1730)', () => {
   it('空回しを入れた実行は総呼出数を内訳つきで出す', async () => {
     const dir = tempDir();
-    await runPerf3Layer({ ...baseInput(dir, 'warm'), memoryWarmup: 4 });
+    await runPerf3Layer({ ...baseInput(dir, 'warm'), memoryWarmup: 4, memoryWindows: 1 });
     const report = readFileSync(join(dir, 'warm.md'), 'utf8');
 
     // 表の見出しに列があり、 行が「総数 (空回し + 反復)」 の形で出る。
@@ -329,7 +332,7 @@ describe('memory の総呼出数が report から読める (#1730)', () => {
 
   it('空回しなしの実行は反復数だけを出す', async () => {
     const dir = tempDir();
-    await runPerf3Layer({ ...baseInput(dir, 'cold'), memoryWarmup: 0 });
+    await runPerf3Layer({ ...baseInput(dir, 'cold'), memoryWarmup: 0, memoryWindows: 1 });
     const report = readFileSync(join(dir, 'cold.md'), 'utf8');
 
     // 空回しが無い実行で `0 + 5 = 5` と書いても読み手に何も足さない。
@@ -339,8 +342,8 @@ describe('memory の総呼出数が report から読める (#1730)', () => {
 
   it('同じ反復数でも空回しの有無で report の呼出数が変わる', async () => {
     const dir = tempDir();
-    await runPerf3Layer({ ...baseInput(dir, 'a'), memoryWarmup: 0 });
-    await runPerf3Layer({ ...baseInput(dir, 'b'), memoryWarmup: 6 });
+    await runPerf3Layer({ ...baseInput(dir, 'a'), memoryWarmup: 0, memoryWindows: 1 });
+    await runPerf3Layer({ ...baseInput(dir, 'b'), memoryWarmup: 6, memoryWindows: 1 });
 
     const withoutWarmup = readFileSync(join(dir, 'a.md'), 'utf8');
     const withWarmup = readFileSync(join(dir, 'b.md'), 'utf8');
@@ -349,5 +352,40 @@ describe('memory の総呼出数が report から読める (#1730)', () => {
     // report から読めないと、 副作用を持つ op で何を測ったのか判別できない。
     expect(withoutWarmup).toContain('| 5 |');
     expect(withWarmup).toContain('| 11 (6 + 5) |');
+  });
+});
+
+describe('memory の区間分割が report から読める (#1719)', () => {
+  it('既定は 2 区間で、内訳に区間の数が出る', async () => {
+    const dir = tempDir();
+    // memoryWindows を渡さない = 既定。 memoryIterations は baseInput が 5 を渡す。
+    await runPerf3Layer({ ...baseInput(dir, 'win'), memoryWarmup: 4 });
+    const report = readFileSync(join(dir, 'win.md'), 'utf8');
+
+    // 総数 14 = 空回し 4 + 5 反復 × 2 区間。 内訳に区間の数を出さないと
+    // `14 (4 + 5)` になり、 セルの足し算が合わなくなる。
+    expect(report).toContain('| 14 (4 + 5×2) |');
+  });
+
+  it('区間ごとの増分が列として出る', async () => {
+    const dir = tempDir();
+    await runPerf3Layer({ ...baseInput(dir, 'wincol') });
+    const report = readFileSync(join(dir, 'wincol.md'), 'utf8');
+
+    // 判定に使うのは最後の区間だけなので、 手前の区間がどれだけ引き受けたかが
+    // 読めないと、 最後の区間が小さい理由を report から判別できない。
+    expect(report).toContain('区間 Δ');
+    // 2 区間ぶんが矢印でつながって出る。
+    expect(report).toMatch(/\|\s*[+-]?\d+ → [+-]?\d+\s*\|/);
+  });
+
+  it('1 区間に戻した実行は区間の列に内訳を出さない', async () => {
+    const dir = tempDir();
+    await runPerf3Layer({ ...baseInput(dir, 'single'), memoryWindows: 1 });
+    const report = readFileSync(join(dir, 'single.md'), 'utf8');
+
+    // 代表値と同じ数字を 2 度並べても読み手に何も足さない。
+    expect(report).toContain('区間 Δ');
+    expect(report).not.toMatch(/\|\s*[+-]?\d+ → [+-]?\d+\s*\|/);
   });
 });

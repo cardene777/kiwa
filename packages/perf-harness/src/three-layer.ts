@@ -46,7 +46,7 @@ import type { RatioHistoryUpdate } from './baseline-write.js';
 import { recordPruneManifest } from './prune-manifest.js';
 import type { UncomparableVerdict } from './baseline-write.js';
 import { evaluatePerfGate } from './gate.js';
-import { emitPerfReport, formatMemoryCalls, formatMs } from './report.js';
+import { emitPerfReport, formatMemoryCalls, formatMemoryWindows, formatMs } from './report.js';
 import type { MeasureResult, PerfReferenceKind, RegressionResult } from './types.js';
 
 export interface PerfOpSpec {
@@ -161,6 +161,21 @@ export interface RunPerf3LayerInput {
    * その分が反復数で割られて「1 回あたりの保持」 として上限判定に載る。
    */
   memoryWarmup?: number;
+  /**
+   * memory 測定を何区間に分けるか (default 2、 #1719)。
+   *
+   * 空回しは固定回数なので、 反復数が増えるとその先で Buffer pool がまた伸びる。
+   * 1 区間しか測らないとその伸びが判定に載り、 同じ実装を測り直しただけで
+   * `file_scaffold_workflow` の増分が 118,387 から 198,899 B まで動いて
+   * 上限 102,400 B を跨いでいた。
+   *
+   * 区間を分けると手前の区間が反復数ぶんの伸びを引き受け、 最後の区間には
+   * 飽和後の増分だけが残る。 その最後の区間を上限判定に使う。
+   *
+   * 1 を渡すと従来どおりの 1 区間に戻る。 `fn` の呼出回数が区間の数だけ増えるため、
+   * 1 反復が重い op で測定時間を抑えたい場合の逃げ道として残してある。
+   */
+  memoryWindows?: number;
   /**
    * 回帰判定を `allPassed` に反映するか (default false)。
    *
@@ -288,6 +303,9 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // memory 側には無く、 Node の Buffer pool の初期確保が「1 回あたりの保持」 として
   // 上限判定に載っていた (#1708)。
   const memoryWarmup = input.memoryWarmup ?? Math.max(3, Math.ceil(memoryIterations / 10));
+  // 空回しは固定回数のため、 反復数ぶんの pool の伸びまでは吸えない。
+  // 手前の区間にそれを引き受けさせ、 最後の区間の増分を判定に使う (#1719)。
+  const memoryWindows = input.memoryWindows ?? 2;
   const memoryCapDefault = 100 * 1024;
   const regressionThreshold = input.regressionThreshold ?? 0.2;
   const regressionConfidenceLevel = input.regressionConfidenceLevel ?? 0.95;
@@ -367,6 +385,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         },
         iterations: memoryIterations,
         warmup: memoryWarmup,
+        windows: memoryWindows,
       });
 
       const concurrentCap = op.concurrentP95CapMs ?? op.serialP95CapMs * 2;
@@ -890,15 +909,19 @@ function writeReport(input: WriteReportInput): void {
 
   lines.push(
     '',
-    `## Memory retention (${input.memoryIterations} iter, arrayBuffers axis is the gate; heap is informational)`,
+    `## Memory retention (${input.memoryIterations} iter/window, arrayBuffers axis of the last window is the gate; heap is informational)`,
     '',
     // gc exposed 列は測定条件の証跡。--expose-gc なしだと解放される一時使用まで
     // 拾うため、no と yes の値を同じ基準で比べられない。
     //
     // 呼出 列も同じ証跡。 空回しは測定区間の外で fn を呼ぶため、 副作用や件数依存を
     // 持つ op では「N 反復」 の見出しだけでは実際に何回呼んだかが読めない (#1730)。
-    '| op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |',
-    '|---|---|---|---|---|---|---|',
+    //
+    // 区間 Δ 列は飽和の証跡。 判定に使うのは最後の区間だけなので、 手前の区間が
+    // どれだけ引き受けたかが読めないと、 最後の区間が小さい理由が飽和なのか
+    // そもそも確保していないのかを判別できない (#1719)。
+    '| op | heapUsed Δ | arrayBuffers Δ | 区間 Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |',
+    '|---|---|---|---|---|---|---|---|',
   );
   input.ops.forEach((op, idx) => {
     const out = input.outcomes[idx]!;
@@ -913,7 +936,7 @@ function writeReport(input: WriteReportInput): void {
           ? 'PASS'
           : 'FAIL';
     lines.push(
-      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${verdict} |`,
+      `| ${op.name} | ${out.memory.heapUsedDeltaBytes} B | ${out.memory.arrayBuffersDeltaBytes} B | ${formatMemoryWindows(out.memory)} | ${cap} B | ${out.memory.gcExposed ? 'yes' : 'no'} | ${formatMemoryCalls(out.memory)} | ${verdict} |`,
     );
   });
 
