@@ -76,3 +76,16 @@ overrides:
   # 壊れる」 として据え置いたが、 実測では 249 package の typecheck が全て通り、
   # orm 581 件と kysely example 12 件も通る。 受容理由が成立しないので上げた。
   kysely: 0.28.17
+  # ここから下は CVE 回避ではなく、 上の override との互換を取るための固定。
+  #
+  # `js-yaml: 4.3.0` の巻き添えで `pnpm changeset` が動かなくなる。
+  # 経路は `@changesets/cli` → `@manypkg/get-packages@1.1.3` → `read-yaml-file@1.1.0` で、
+  # 1.1.0 は js-yaml 4 で削除された `yaml.safeLoad` を呼ぶ。
+  # `Function yaml.safeLoad is removed in js-yaml 4` で exit 1 になる。
+  #
+  # changesets 側の引き上げでは解けない。 最新の `@changesets/cli` (2.31.0) も
+  # `@manypkg/get-packages@^1.1.3` を要求し、 1.1.3 が `read-yaml-file@^1.1.0` を要求する。
+  #
+  # 2.1.0 は js-yaml 4 を要求する最初の版で、 CJS のまま (`main: index.js`)。
+  # 3.0.0 は ESM 専用 (`type: module`) で、 `@manypkg/get-packages` の `require()` 経路が壊れる。
+  read-yaml-file: 2.1.0
