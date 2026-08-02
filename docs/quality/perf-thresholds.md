@@ -469,6 +469,20 @@ The measured window is preceded by a warmup (a tenth of the iteration count, min
 
 Measuring memory at all requires `--expose-gc`. Without it `measureMemory` cannot call `global.gc()`, so the delta includes allocations that were about to be released, and the comparison against a cap is not a comparison of retention. 117 of the 180 perf configs were missing it. `dogfood-nats-jetstream`'s `driveObject` reported 215,800 B against a 100 KB cap — reproducibly, to the byte, on every run — and 20,555 B once GC was available. The breach was an artefact of the measurement.
 
+**Forced GC narrowed that op's readings but did not make them mean anything** (#1765). With `--expose-gc` in place it still crossed the cap in two of the recorded sweeps (119,769 B and 215,800 B) while passing in others (29,152 B), and the readings do not scale with the iteration count:
+
+| iterations | three runs |
+|---|---|
+| 100 | -21,580 / 0 / **-283,669** B |
+| 200 | **+162,911** / -282,536 / +93,855 B |
+| 400 | +16,405 / -82,022 / **+270,115** B |
+
+The spread exceeds 550 KB at every count — more than five times the cap — and 100 iterations swings wider than 400. Four further runs at the default 200 gave -246,834 / -191,842 / -501,753 / -55,961 B, putting the widest observed range at 771,868 B. Running the op on its own for 100, 200, and 400 iterations gives 0 B in all three, so nothing is retained per call.
+
+The cause is the volume of transient allocation relative to the cap. `driveObject` is the only op in that file that allocates a typed array (`new Uint8Array(1024)`, one per call), so 200 iterations create and drop 204,800 B of `ArrayBuffer` — twice the cap — inside the measured window. What the axis then reports is how much of that the forced GC happened to have reclaimed by the time of the closing snapshot, not what the code holds.
+
+**An op whose transient `ArrayBuffer` volume per window exceeds the cap cannot be gated on this axis**, with or without GC. That op carries a waiver. The general form of this limit is worth checking before adding a cap to any op that allocates typed arrays in a loop: compare `bytes per call × iterations` against the cap before trusting the verdict.
+
 Three things have to be present together. `--expose-gc` in `execArgv`, `pool: 'forks'`, and `requireGc: true` on the call. `worker_threads` silently ignores `execArgv`, so a config that sets the flag under the default pool looks configured and measures without GC. And a call that does not ask for GC will accept a run without it — the config only makes GC *available*, `requireGc` is what makes its absence a failure. 34 example suites were passing `runPerf3Layer` without it, so a run under a different config would have reported memory numbers that mean nothing and still passed. `tests/release-smoke/tests/perf-gate-coverage.test.ts` checks all three.
 
 ### The axis sees only half of what it should, and the other half has no usable channel
