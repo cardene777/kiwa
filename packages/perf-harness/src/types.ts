@@ -262,7 +262,12 @@ export interface RegressionResult {
    */
   normalizationScale: number;
   /**
-   * baseline の履歴から推定した、 その op の実行間のばらつき (中央値に対する率)。
+   * baseline の履歴から推定した、 その op の実行間のばらつき。
+   *
+   * **baseline 自身の比 (anchor) から最も離れた履歴の相対距離**。 履歴の中心
+   * まわりの散らばりではない。 判定量 `deltaPct` が anchor との比である以上、
+   * 抑えたいのは「anchor からどれだけ離れ得るか」 だから (中央絶対偏差を使った
+   * 最初の版は実測で 5 倍ほど過小に出て却下した、 `interRunRelativeSpread` 参照)。
    *
    * 履歴が足りず推定できない場合は付かない。 `deltaPct` と同じ単位なので、
    * 「今回の差がばらつきの何倍か」 を `deltaPct / interRunSpread` で読める。
@@ -271,9 +276,13 @@ export interface RegressionResult {
   /**
    * 実際に判定へ使った相対閾値。
    *
-   * 履歴からばらつきを推定できた op では `max(threshold, ばらつき × 3)`、
-   * 推定できない op では `threshold` そのもの。 report はこの値を出す
-   * (`threshold` だけを出すと、 なぜ落ちなかったのかが読めない)。
+   * 履歴からばらつきを推定できた op では
+   * `max(threshold, ばらつき × INTER_RUN_SPREAD_MULTIPLE)`、 推定できない op では
+   * `threshold` そのもの。 倍率は 2 で、 実履歴に対する実測で決めた
+   * (`INTER_RUN_SPREAD_MULTIPLE` に根拠の表がある)。
+   *
+   * report はこの値を出す (`threshold` だけを出すと、 なぜ落ちなかったのかが
+   * 読めない)。
    */
   effectiveThreshold: number;
   /**

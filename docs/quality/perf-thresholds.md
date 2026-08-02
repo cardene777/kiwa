@@ -317,26 +317,44 @@ So the threshold stops being global. Each op's baseline record carries `ratioHis
 
 ```mermaid
 graph LR
-    A["過去 8 回の比"] --> B["中央絶対偏差 ÷ 中央値"]
+    A["過去 8 回の比"] --> B["baseline 自身の比からの最大距離"]
     B --> C["その op の実行間のばらつき"]
-    C --> D{"今回の差が<br/>ばらつきの 3 倍を超えるか"}
+    C --> D{"今回の差が<br/>ばらつきの 2 倍を超えるか"}
     D -->|"超える"| E[regressed]
     D -->|"収まる"| F["stable<br/>(揺れと見分けが付かない)"]
 ```
 
-The effective threshold is `max(20 %, spread × 3)`. It never goes below the relative threshold — an op that reads perfectly flat for eight runs would otherwise start failing on a 1 % change.
+The effective threshold is `max(20 %, spread × 2)`. It never goes below the relative threshold — an op that reads perfectly flat for eight runs would otherwise start failing on a 1 % change.
 
-Three choices in that formula were made deliberately.
-
-**Median absolute deviation, not standard deviation.** Run-to-run variation has a long tail on one side only; interference makes a measurement slower, never faster. A single interfered run would set the width for every subsequent comparison if the mean and standard deviation were used, and that op's gate would never fire again. The MAD of `[1.0, 1.0, 1.0, 1.0, 5.0]` is 0, so the outlier is described rather than absorbed.
+Two choices in that formula were made deliberately. The estimator itself went through a rejected first attempt, recorded under § Choosing the estimator below; the numbers here describe what shipped.
 
 **Three observations minimum.** With two, the estimated width is whatever the single difference between them happens to be. Below the minimum the verdict falls back to the relative threshold alone, which is the pre-existing behaviour.
 
-**Three times the spread.** For a normal distribution 1 MAD ≈ 0.67 σ, so 3 MAD ≈ 2 σ. Against the measured per-pass distribution of ratio changes (p90 of +9.6 %, +16.7 %, +19.8 % over three passes), this suppresses the ops whose own spread exceeds the relative threshold and leaves the rest judged as before.
+**Twice the spread.** Measured against the real histories by treating each op's last entry as "the next run": 2× leaves one op of 454 crossing its own bound, and 3× leaves the same one while widening the set of ops whose width exceeds 20 % from 143 to 239. The table is under § Choosing the estimator.
 
-The history resets when a verdict lands on `regressed` or `improved`, because the values before and after a real implementation change do not describe the same thing, and mixing them inflates the width until the gate stops firing.
+A run that compares and lands on `regressed` or `improved` does not add its ratio, because the values before and after a real implementation change do not describe the same thing, and mixing them inflates the width until the gate stops firing. A run with nothing to compare against — the seed, or a record whose measurement conditions changed — does add its ratio; it is one observation of the op like any other.
 
-That reset had to be narrowed. Applied to every non-`stable` verdict it is circular: an op whose verdict flips from run-to-run noise has its history cleared each time it flips, never reaches three observations, and never gets the protection — the ops that need it most are the ones that never receive it. So the reset only applies once the width is actually being used, on the grounds that a verdict produced without it is not evidence of anything.
+**Nothing clears an existing history.** `applyRatioHistory` only appends, and a rebuilt record carries its history forward. The one way entries disappear is a record replacement: when the measurement conditions change or the reference op stops resolving, `planBaselineWrite` swaps in the fresh measurement, and a fresh measurement has no history field. That is driven by the measurement config, never by a verdict.
+
+##### The append condition is circular, and it is not fixed
+
+The rule above is circular for one class of op. An op whose natural spread exceeds the 20 % relative threshold is judged `regressed` on its first comparison, adds nothing, never reaches three observations, and is judged by the relative threshold forever. No width, so regressed; regressed, so no width. Nothing clears its history — it never gains an entry in the first place, because every run after the baseline exists is a comparison and every comparison reads `regressed`.
+
+Measured over six passes of the full suite: `astro`'s `invokeEndpoint`, `remix`'s `invokeAction`, `vector`'s `queryNearestTop5` and `cli-app-scenario`'s `init_workflow` held zero history throughout, while sibling ops in the same files reached six. `astro`'s own `renderAstroPage` sits in the same file at six entries. Those four were the only ops that read `regressed` in all three passes once the histories had warmed.
+
+**Appending unconditionally during warm-up was written and then withdrawn.** It creates a worse failure. With anchor 1 and a real regression to ratio R present on runs 2 and 3, the history reads `[1, R, R]`; on run 4 the width is `R − 1`, the effective threshold is `2(R − 1)`, and the delta being judged is `R − 1`. The regression reads `stable` from that run onward and keeps appending, so the state locks in. The width cannot be widened by observations that have not first been shown to be noise.
+
+Telling a one-off excursion from a sustained regression needs the same primitive as the censoring problem below, so both are tracked together rather than patched separately.
+
+##### The width is censored, and reads low because of it
+
+The `stable`-only rule censors the estimate: any run where the op moved past its bound is, by definition, not added. The width is therefore built only from the runs that stayed inside, and reads systematically low.
+
+Measured on pass 6 of a six-pass sweep, among the ops that read `regressed` with a width already estimated: `a11y-app-scenario`'s `violation_report_batch` at 3.7 %, `design-check`'s `checkLayoutRegression` at 4.9 %, `grpc-app-scenario`'s `streaming_batch` at 5.2 %. An op recorded as moving 3.7 % had just moved more than 20 %.
+
+Across the three warmed passes, 45 ops read `regressed` at least once and **39 of them did so in exactly one pass of three** — the same shape the top of this section describes, with the mechanism meant to absorb it already in place. The six passes read 18 / 19 / 21 / 6 / 27 / 21; the fourth is an outlier, not a trend, and a warmed history does not settle the count.
+
+Separating "estimate the width" from "decide the verdict" is what both problems need, and it requires state the baseline does not carry yet. Until then `regressionGate` stays off by default.
 
 Two alternatives were rejected.
 
@@ -344,7 +362,7 @@ Two alternatives were rejected.
 
 **Storing several full measurements per op** rather than the ratio alone. The ratio is one number; a `MeasureResult` carries its whole sample array. At 130 baseline files and 2.9 MB today, keeping eight measurements per op multiplies the file rather than adding a bounded field to it, and nothing in the estimate needs the samples.
 
-This raises `MEASUREMENT_PREMISE` to 6. The way measurements are taken is unchanged from version 5, but a baseline written before this has no history, so no op in it can have its width estimated. Records from that generation are rebuilt rather than compared.
+`MEASUREMENT_PREMISE` stays at 5. The way measurements are taken did not change, and the premise is only raised when the same implementation would read differently — a threshold or a judgment rule is not that. A baseline written before this simply has no history field, so its ops fall back to the relative threshold until three runs have added one; they are compared, not rebuilt.
 
 ##### Choosing the estimator, and the one that did not work
 
