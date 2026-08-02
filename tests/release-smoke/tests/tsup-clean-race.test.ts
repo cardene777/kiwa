@@ -1,4 +1,4 @@
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFile, execFileSync, spawnSync } from 'node:child_process';
 import {
   existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync,
   statSync, writeFileSync,
@@ -6,8 +6,11 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 import ts from 'typescript';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+const execFileAsync = promisify(execFile);
 
 /**
  * 共有依存の build が `dist/` を空にしないことを固定する (#1741)。
@@ -175,6 +178,21 @@ interface BuildProbe {
 
 const probes = new Map<string, BuildProbe>();
 
+/** event loop の詰まりを測る間隔。 */
+const LAG_SAMPLE_INTERVAL_MS = 200;
+
+/**
+ * 詰まりの上限。 これを超えたら build が event loop を掴んだままになっている。
+ *
+ * birpc の呼出は既定 60 秒で timeout する。 その手前で落とすため、 余裕を持って
+ * 10 秒に置く。 build 1 件は 1-3 秒なので、 非同期に回している限り届かない
+ * (#1763 実測 = 修正後の最大 lag は 1 秒未満)。
+ */
+const LOOP_LAG_LIMIT_MS = 10_000;
+
+/** build を回している間の event loop の遅れ (ms)。 */
+const loopLagSamplesMs: number[] = [];
+
 /** dir を降りて実 file の相対 path だけを集める。 空 dir は出力に数えない。 */
 function listFiles(dir: string, base = ''): string[] {
   const out: string[] = [];
@@ -210,9 +228,9 @@ function readBuildScript(name: string): string | null {
  * 残りを「この実行の出力」 と読まないための判定は、 出力 file の更新時刻で行う。 他の test と重ならないよう、 この file は
  * `package.json` の `test` で単独の vitest 実行に分けてある。
  */
-function probeBuild(name: string): BuildProbe {
+async function probeBuild(name: string): Promise<BuildProbe> {
   const dist = join(PACKAGES_DIR, name, 'dist');
-  return withProbe(dist, (probe) => {
+  return withProbeAsync(dist, async (probe) => {
     // 目印自身の更新時刻を基準にする。 別に時刻を採ると、 file system の分解能や
     // 時計のずれで前後が入れ替わり得る。
     //
@@ -225,9 +243,14 @@ function probeBuild(name: string): BuildProbe {
     try {
       // `--fail-if-no-match` が無いと、 名前が 1 件も一致しない filter でも exit 0 に
       // なる。 何も build していない実行を成功として読むことになる。
-      execFileSync('pnpm', ['--filter', `@kiwa-lab/${name}`, '--fail-if-no-match', 'build'], {
+      //
+      // 同期版 (`execFileSync`) を使わない。 41 件を同期で回すと event loop が
+      // 100 秒前後塞がり、 その間 worker が vitest 本体からの RPC 応答を処理できない。
+      // birpc の呼出は既定 60 秒で timeout するため、 全 test が pass した後に
+      // `[vitest-worker]: Timeout calling "onTaskUpdate"` が投げられて rc 1 になる
+      // (#1763 実測 = 101.63s と 114.51s の 2 回とも再現)。
+      await execFileAsync('pnpm', ['--filter', `@kiwa-lab/${name}`, '--fail-if-no-match', 'build'], {
         cwd: REPO_ROOT,
-        stdio: 'pipe',
         encoding: 'utf8',
       });
     } catch (thrown) {
@@ -259,6 +282,28 @@ function probeBuild(name: string): BuildProbe {
  * 進むのを待つ経路が上限で投げるのはまさにその形で、 残った目印が次の build の
  * 出力集合に混ざる。
  */
+/**
+ * `withProbe` の非同期版。 本体を待ってから目印を消す。
+ *
+ * 同期版に `Promise` を返す本体を渡すと、 目印の後始末が `await` より先に走る。
+ * build が終わる前に目印が消え、 「clean が消したか自分が消したか」 の判定が
+ * 成立しなくなる。 型の上でも `T = Promise<...>` として通ってしまうため、
+ * 待つ責務を持つ別の関数に分けてある。
+ */
+export async function withProbeAsync<T>(
+  dist: string,
+  body: (probe: string) => Promise<T>,
+): Promise<T> {
+  const probe = join(dist, PROBE);
+  mkdirSync(dist, { recursive: true });
+  writeFileSync(probe, 'probe', 'utf8');
+  try {
+    return await body(probe);
+  } finally {
+    rmSync(probe, { force: true });
+  }
+}
+
 export function withProbe<T>(dist: string, body: (probe: string) => T): T {
   const probe = join(dist, PROBE);
   mkdirSync(dist, { recursive: true });
@@ -434,11 +479,39 @@ function findManifests(root: string, depth = 0): string[] {
 }
 
 describe('tsup clean と並列 test の race (#1741)', () => {
-  beforeAll(() => {
-    for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
-      probes.set(name, probeBuild(name));
+  beforeAll(async () => {
+    // build を回している間、 event loop が塞がっていないことを測る。
+    // 塞がると worker が vitest 本体からの RPC 応答を処理できず、 birpc の既定
+    // 60 秒で timeout して rc 1 になる (#1763)。 判定は下の test が行う。
+    let previous = Date.now();
+    const timer = setInterval(() => {
+      const now = Date.now();
+      loopLagSamplesMs.push(now - previous - LAG_SAMPLE_INTERVAL_MS);
+      previous = now;
+    }, LAG_SAMPLE_INTERVAL_MS);
+    // 測定用の timer が実行の終了を引き止めないようにする。
+    timer.unref();
+
+    try {
+      for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
+        probes.set(name, await probeBuild(name));
+      }
+    } finally {
+      clearInterval(timer);
     }
   }, 900_000);
+
+  it('build 中に event loop を掴んだままにしない (#1763)', () => {
+    // 同期 build に戻すとここが落ちる。 全 test が pass した後に
+    // `[vitest-worker]: Timeout calling "onTaskUpdate"` で rc 1 になる形を、
+    // 原因側 (event loop の詰まり) で固定する。
+    //
+    // rc は test の結果に出ないので、 rc だけを見る test では書けない。
+    expect(loopLagSamplesMs.length, '測れていないと上限判定が素通りする').toBeGreaterThan(0);
+
+    const worst = Math.max(...loopLagSamplesMs);
+    expect(worst).toBeLessThan(LOOP_LAG_LIMIT_MS);
+  });
 
   it('build が全件通る', () => {
     // 落ちた build の結果は clean の有無を語らない。 先に落ちたことを出す。
