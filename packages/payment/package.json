@@ -74,8 +74,8 @@
     "@types/node": "^22.10.0",
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
-    "vitest": "^2.1.0",
-    "@vitest/coverage-v8": "^2.1.0",
+    "vitest": "^3.2.6",
+    "@vitest/coverage-v8": "^3.2.6",
     "@kiwa-lab/skill-test": "workspace:*"
   }
 }
