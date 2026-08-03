@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { createAnvilPool, setupTestEnv, type AnvilPool } from '../src/index.js';
+import { createAnvilPool, type AnvilPool } from '../src/anvil-pool.js';
+import { setupTestEnv } from '../src/vitest.js';
 
 const pools: AnvilPool[] = [];
 

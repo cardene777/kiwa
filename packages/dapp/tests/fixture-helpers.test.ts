@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Page } from '@playwright/test';
-import { setStorageSlot, waitForWalletConnected } from '../src/index.js';
+import { setStorageSlot } from '../src/set-storage-slot.js';
+import { waitForWalletConnected } from '../src/wait-for-wallet-connected.js';
 import type { Hex } from '../src/types.js';
 
 describe('waitForWalletConnected', () => {

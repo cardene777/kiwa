@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createEventEmitter } from '../src/index.js';
+import { createEventEmitter } from '../src/event-emitter.js';
 
 describe('createEventEmitter', () => {
   it('T-EVT-001 on("accountsChanged") の handler が emit で発火する', () => {

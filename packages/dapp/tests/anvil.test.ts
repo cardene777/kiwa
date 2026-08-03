@@ -1,12 +1,7 @@
 import net from 'node:net';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  getFreePort,
-  startAnvil,
-  startAnvilCluster,
-  type AnvilClusterHandle,
-  type AnvilHandle,
-} from '../src/index.js';
+import { getFreePort, startAnvil, type AnvilHandle } from '../src/anvil.js';
+import { startAnvilCluster, type AnvilClusterHandle } from '../src/anvil-cluster.js';
 
 function checkPortListening(port: number, timeoutMs: number): Promise<boolean> {
   return new Promise((resolve) => {

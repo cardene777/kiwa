@@ -2,7 +2,8 @@ import { mkdtempSync, existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ANVIL_DEFAULT_PRIVATE_KEYS, setupTestEnv, withAnvil, type TestEnv } from '../src/index.js';
+import { ANVIL_DEFAULT_PRIVATE_KEYS } from '../src/anvil-default-keys.js';
+import { setupTestEnv, type TestEnv, withAnvil } from '../src/vitest.js';
 
 const envs: TestEnv[] = [];
 
