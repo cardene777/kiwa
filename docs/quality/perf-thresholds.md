@@ -437,9 +437,48 @@ Under the previous rule every one of those `regressed` verdicts failed the gate,
 
 Seven ops account for the residue: `vector`'s `queryNearestTop5` in five passes of six, `remix`'s `invokeAction` in three, `go-lib-app-scenario`'s `rest_batch` and `edge-app-scenario`'s `kv_bound_batch` in two each, and `workflow-app-scenario`'s `event_trigger_batch`, `astro`'s `invokeEndpoint` and `core-app-scenario`'s `pool_lifecycle` in one each.
 
-`invokeEndpoint` is the useful case. It read `regressed` in all six passes under the previous rule and now fails in one, because its deviation from the anchor is not perfectly steady and the width finally sees the spread. `queryNearestTop5` is the opposite: its ratio sits about 25 % above its anchor in every pass, in the same direction, and it also breaches the measured absolute floor. That is a stale anchor rather than an op the estimate can absorb, and no width drawn from its own history will make it read `stable`.
+`invokeEndpoint` is the useful case. It read `regressed` in all six passes under the previous rule and now fails in one, because its deviation from the anchor is not perfectly steady and the width finally sees the spread. `queryNearestTop5` is the opposite: it sits far above its anchor in every pass, in the same direction. That is a stale anchor rather than an op the estimate can absorb, and no width drawn from its own history will make it read `stable`.
 
-So `regressionGate` still stays false by default. Turning it on requires the remaining anchors to be re-measured, which is a change to the baseline data rather than to the judgment rule.
+##### A changed workload reads as a regression, and the harness cannot see the difference
+
+Eight candidates were then measured five more times each — the ops holding a `regressed` or `improved` deposit whose deviation exceeded their own effective threshold. Deviation from the anchor, pass by pass, with the history length beside it:
+
+| op | pass 1-5 | history |
+|---|---|---|
+| `vector` `queryNearestTop5` | +546 / +511 / +464 / +488 / +491 % | 0 → 0 → 0 → 0 → 0 |
+| `agent-app-scenario` `assistant_run_cycle` | +80 / +43 / +2 / +11 / +15 % | 5 → 5 → 6 → 7 → 8 |
+| `a11y-app-scenario` `violation_report_batch` | +66 / +34 / +26 / +46 / +14 % | 5 → 5 → 5 → 5 → 6 |
+| `a11y-app-scenario` `audit_workflow` | +41 / +74 / +44 / +64 / −5 % | 5 → 5 → 5 → 5 → 6 |
+| `a11y` `runAxeClean` | +42 / +54 / +30 / +36 / +6 % | 5 → 5 → 5 → 5 → 6 |
+| `a11y` `runAxeDirtyReport` | +13 / +7 / +32 / +16 / +4 % | 7 → 8 → 8 → 8 → 8 |
+| `core-app-scenario` `pool_lifecycle` | −1 / +1 / +1 / −1 / +1 % | 6 → 7 → 8 → 8 → 8 |
+| `migration-app-scenario` `lock_acquire_release_batch` | −33 / −33 / −33 / −28 / −28 % | 2 → 2 → 2 → 2 → 2 |
+
+Six of the eight converge. Their histories grow — an excursion is admitted whenever the direction changes — and the widening width absorbs the deviation, so the verdict settles. That is the mechanism working, and it is why the count of gate failures per pass is small and unstable rather than fixed.
+
+Two do not, and they are the shape the width cannot reach: the history never grows because every pass reads the same direction, so there is nothing to widen it with.
+
+`queryNearestTop5` is the diagnosable one. #1730 changed its population from 20 rows to 200, and `queryNearest` scans and sorts the whole set, so the work per call went up roughly tenfold. The measured jump is 6.2×, the same order. **The implementation did not regress; the thing being measured changed.**
+
+Nothing in the record can show that. `hasSameMeasurementConfig` compares `iterations` and `warmup`, and a change inside the op's `fn` moves neither. The only visible symptom is a deviation that persists in one direction — which is exactly what a real, unfixed regression looks like too.
+
+So the op declares it. `PerfOpSpec.workloadVersion` is a number the author bumps when the work changes; it is stored on the record and compared alongside the measurement config, and a mismatch means "do not compare, replace the record" — the same contract `MeasureReference.implVersion` already has for the reference op.
+
+**"Treat a missing version as matching" does not work**, which was found by implementing it and measuring. Every existing record lacks the field, so a newly declared version never mismatches, the record is never replaced, the version never reaches the baseline, and the next run compares again. The declaration has no effect, permanently. Comparing the two values directly — absent being one of the values — is what makes the first declaring run replace the record. Ops that never declare a version have it absent on both sides and are unaffected.
+
+Measured after declaring `workloadVersion: 2` on that op: the anchor moved from 0.045 to 0.260 (the ratio the current workload actually produces), the verdict left `regressed`, and the history began accumulating — 1, 2, 3, 4 entries over four passes, where it had been stuck at 0 for eleven.
+
+The version is recorded on both the serial and the concurrent measurement, and on both the mock and the live path. Only the serial record decides a verdict, but the concurrent record is stored, and leaving the version off it means `needsRefresh` sees two records that both lack one, treats them as matching, and keeps the old workload's numbers there indefinitely. `runPerf3LayerLive` needs it for a stronger reason: `LivePerfOpSpec` extends `PerfOpSpec`, so the field is part of its public type, and without wiring it the declaration would be accepted and silently do nothing.
+
+The declaration is checked before anything is measured, and only there. A version has to be a safe integer above zero. `NaN` never equals itself, so a record carrying one is replaced on every run and that op is never compared again — and rejecting it on read does not help, because the next run writes the same value. Fractions make `1.0` and `1` indistinguishable, zero and negatives are hard to tell from "not declared", and past 2^53 adding one leaves the value unchanged, so bumping the version silently does nothing.
+
+The read side stays looser on purpose. `isResultMap` validates with `every`, so one rejected record discards the whole baseline file — every op's history and anchor with it. Tightening the read side would turn one malformed value into a suite-wide reseed.
+
+What this does not cover is forgetting to bump. The declaration is manual, so an unbumped workload change still reads as a regression forever, with the signature above: one direction, every pass, history frozen. That signature is the thing to look for.
+
+`lock_acquire_release_batch` is the remaining unexplained case — a persistent −28 to −33 % with its history stuck at 2. It reads `improved`, and the gate only fails on regressions, so it does not block anything; whether its anchor is stale in the same way is not established here.
+
+So `regressionGate` still stays false by default.
 
 ##### What the history may contain
 

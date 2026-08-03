@@ -26,7 +26,9 @@ import {
   MIN_RATIO_HISTORY,
   RESOLUTION_FLOOR_MULTIPLE,
   detectRegression,
+  assertValidWorkloadVersions,
   hasSameMeasurementConfig,
+  hasSameWorkload,
   observedRatio,
   resolveNormalization,
 } from './regression.js';
@@ -90,6 +92,31 @@ export interface PerfOpSpec {
    * 選び方と却下した案は `docs/quality/perf-thresholds.md` § In-run normalization。
    */
   referenceKind?: PerfReferenceKind;
+  /**
+   * この op が測っている作業内容の版 (#1739)。 中身を変えたら 1 上げる。
+   *
+   * 回帰判定は「実装が遅くなった」 を見るためのものなので、 測る対象そのものを
+   * 変えたら前の記録とは比べられない。 だが harness からは区別が付かない。 反復数や
+   * 空回しは記録に残るので `hasSameMeasurementConfig` が捕まえるのに対し、 作業内容は
+   * `fn` の中にあって何も動かさないためどの検査にも掛からない。
+   *
+   * 版が変われば比較せず記録を入れ替える (`MeasureReference.implVersion` と同じ形)。
+   * 宣言しないと、 作業内容を変えた実行が旧条件の記録と比べられ、 その差が実装の
+   * 退行として報告され続ける。
+   *
+   * 実測 = `vector` の `queryNearestTop5` は #1730 で母集団を 20 → 200 件に変えた。
+   * `queryNearest` は全件走査 + sort なので作業量が 10 倍になり、 比が anchor の
+   * 6.2 倍に跳ねた。 5 パス測って +464% 〜 +546% の一方向で、 判定は毎回 `regressed`、
+   * 履歴は 1 件も積まれない (持続的なずれとして預かりが捨てられ続けるため)。
+   *
+   * 判定は「無い」 も 1 つの値として単純に等しいかを見る。 版を宣言しない op は両側とも
+   * 「無い」 ので影響を受けず、 宣言した op はその実行で 1 度だけ記録が入れ替わる。
+   *
+   * 「片方に無ければ同じとみなす」 は成立しない。 既存の記録は全て版を持たないので、
+   * そう書くと宣言しても記録が入れ替わらず、 入れ替わらないので版が baseline に載らず、
+   * 載らないので次も比較が成立する = 宣言が永久に効かない (実装して実測で確認した)。
+   */
+  workloadVersion?: number;
   /**
    * Optional override for memory arrayBuffers cap.
    * Default = 100 KB across 200 iterations.
@@ -323,6 +350,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 黙って混ざると「別の op の退行が 2 回続いた」 ことになって gate が誤って落ちる。
   // 測る前に止める = 混ざった記録が baseline に残らない。
   assertUniqueOpNames(input.ops);
+  assertValidWorkloadVersions(input.ops);
   const serialIterations = input.serialIterations ?? 200;
   const serialWarmup = input.serialWarmup ?? 5;
   const concurrency = input.concurrency ?? 10;
@@ -395,7 +423,12 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
           await op.fn();
         },
       });
-      const serial = alternating.target;
+      // 作業内容の版を記録に載せる (#1739)。 載せないと baseline に残らず、
+      // 次の実行で「版が違う」 ことを判定できない。
+      const serial =
+        op.workloadVersion === undefined
+          ? alternating.target
+          : { ...alternating.target, workloadVersion: op.workloadVersion };
       const concurrent = await measureConcurrent({
         name: `${op.name}.concurrent`,
         concurrency,
@@ -505,7 +538,13 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         ).sustained;
 
       combinedForBaseline[`${op.name}.serial`] = serial;
-      combinedForBaseline[`${op.name}.concurrent`] = concurrent;
+      // concurrent 側にも版を載せる。 回帰判定は serial だけを読むが、 記録は残るので、
+      // 載せないと版を上げた後も concurrent だけ旧 workload の測定値で固定される
+      // (`needsRefresh` が両側とも版を持たない組を「同じ」 と見るため)。
+      combinedForBaseline[`${op.name}.concurrent`] =
+        op.workloadVersion === undefined
+          ? concurrent
+          : { ...concurrent, workloadVersion: op.workloadVersion };
 
       outcomes.push({
         name: op.name,
@@ -683,15 +722,25 @@ export function pruneStaleOps(input: { pruneStaleBaselineOps?: boolean }): boole
  * 理由は 8 通りに分かれる。 測定条件が違う / `resolveNormalization` の不成立 7 通り
  * (基準の記録が無い (baseline 側 / 今回側) / 種類が違う / 実装の版が違う (どちらかが
  * 記録なしを含む) / p10 が分母にならない (baseline 側 / 今回側) / 双方が有限正でも
- * 桁が離れて商が求まらない)。 分岐を足す時はこの 8 通りとの対応を保つ。
+ * 桁が離れて商が求まらない)。 これに作業内容の版の不一致 (#1739) を足して 9 通り。
+ * 分岐を足す時はこの 9 通りとの対応を保つ。
  *
- * 測定条件を先に見るのは、 条件が違えば基準 op の値も違う条件で測られているため。
+ * 作業内容の版を最初に見るのは、 版が違えば測っている対象そのものが違うため。
+ * 測定条件にまとめると、 反復数も空回しも同じ組で同じ数字を並べた理由が出る。
+ *
+ * 測定条件を基準の側より先に見るのは、 条件が違えば基準 op の値も違う条件で測られているため。
  * 基準の側の理由を先に出すと、 読み手は分母を疑って本当の原因に辿り着けない。
  *
  * 記録を入れ替えたかどうかはここでは書かない。 書込には測定の成立が要り、 この時点で
  * 判っていない (report 冒頭が実行全体として書けたかを出す)。
  */
 export function uncomparableReason(current: MeasureResult, baseline: MeasureResult): string {
+  // 作業内容の版を先に見る。 まとめて「測定条件が違う」 と書くと、 反復数も空回しも
+  // 同じ組で「200 反復 / 空回し 5 対 200 反復 / 空回し 5」 という嘘の理由が出る (#1739)。
+  if (!hasSameWorkload(current, baseline)) {
+    const shown = (v: number | undefined) => (v === undefined ? '宣言なし' : String(v));
+    return `作業内容の版が baseline と違うため比較せず (baseline ${shown(baseline.workloadVersion)} / 今回 ${shown(current.workloadVersion)})`;
+  }
   if (!hasSameMeasurementConfig(current, baseline)) {
     return `測定条件が baseline と違うため比較せず (baseline ${baseline.iterations} 反復 / 空回し ${baseline.warmup}、 今回 ${current.iterations} 反復 / 空回し ${current.warmup})`;
   }

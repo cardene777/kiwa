@@ -295,7 +295,64 @@ export function hasSameMeasurementConfig(
   current: MeasureResult,
   baseline: MeasureResult,
 ): boolean {
-  return current.iterations === baseline.iterations && current.warmup === baseline.warmup;
+  return (
+    current.iterations === baseline.iterations &&
+    current.warmup === baseline.warmup &&
+    hasSameWorkload(current, baseline)
+  );
+}
+
+/**
+ * op が宣言した作業内容の版が、 版として成立しているかを確かめる (#1739)。
+ *
+ * 厳しくするのは宣言の側だけにする。 読み取り側 (`hasValidWorkloadVersion`) を同じ
+ * 厳しさにすると、 `isResultMap` が `every` で判定するため 1 record の不正で baseline
+ * file 全体が破棄され、 無関係な全 op の履歴と anchor が消える。
+ *
+ * 弾く値と理由。
+ *   NaN      = 自分自身と等しくならないので記録が毎回入れ替わり、 その op は永久に
+ *              比較されない。 読み取り側が弾いても次の実行で同じ値が書かれるため
+ *              seed し直しが延々と続く。
+ *   小数     = 1.0 と 1 が同値になるなど、 版として意図した区別が付かない。
+ *   0 / 負   = 「宣言していない」 との区別が読み手に付かない。
+ *   2^53 超  = 1 上げても同値になり、 版を上げたつもりで記録が入れ替わらない。
+ */
+export function assertValidWorkloadVersions(
+  ops: readonly { name: string; workloadVersion?: number }[],
+): void {
+  const bad = ops.filter((op) => {
+    const v = op.workloadVersion;
+    return v !== undefined && !(Number.isSafeInteger(v) && v > 0);
+  });
+  if (bad.length === 0) return;
+  throw new Error(
+    `perf op の workloadVersion が版として成立していません: ${bad.map((op) => op.name).join(', ')}。` +
+      ' 1 以上の安全な整数を指定してください。',
+  );
+}
+
+/**
+ * 2 つの記録が同じ作業内容を測ったかを判定する (#1739)。
+ *
+ * 反復数と空回しは記録に残るので上の検査が捕まえるが、 作業内容は `fn` の中にあって
+ * 記録に痕跡を残さない。 op が版を宣言した時だけ、 その一致を要求する。
+ *
+ * **「片方だけが版を持つ組は同じとみなす」 は成立しない**。 既存の baseline は全て
+ * 版を持たないので、 そう書くと版を宣言しても記録が入れ替わらず、 入れ替わらないので
+ * 版が baseline に載らず、 載らないので次も比較が成立する = 宣言が永久に効かない
+ * (実装して実測し、 `vector` の記録が `workloadVersion: undefined` のまま anchor も
+ * 動かないことを確認した)。
+ *
+ * 無い状態も 1 つの値として扱い、 単純に等しいかを見る。 版を宣言していない op は
+ * 両方とも「無い」 なので比較が成立し、 影響を受けない。 宣言した op はその実行で
+ * 1 度だけ記録が入れ替わり、 以降は版どうしの比較になる。
+ *
+ * 検知できないのは「版を上げ忘れた作業内容の変更」。 宣言が要る設計なので、 上げ忘れ
+ * ればその差は実装の退行として報告され続ける。 それが起きた時に見える形は
+ * `docs/quality/perf-thresholds.md` § A changed workload reads as a regression が持つ。
+ */
+export function hasSameWorkload(current: MeasureResult, baseline: MeasureResult): boolean {
+  return current.workloadVersion === baseline.workloadVersion;
 }
 
 /**

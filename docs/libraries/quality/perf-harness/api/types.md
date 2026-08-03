@@ -107,6 +107,17 @@ export interface MeasureResult {
      */
     reference?: MeasureReference;
     /**
+     * この記録を採った時の作業内容の版 (`PerfOpSpec.workloadVersion`、 #1739)。
+     *
+     * 版が違う記録どうしは比較せず入れ替える。 反復数や空回しと違い、 作業内容は
+     * `fn` の中にあって記録に痕跡を残さないため、 宣言が無いと変更を検知できない。
+     *
+     * 宣言しない op では付かない。 判定は「無い」 も 1 つの値として等しいかを見るため、
+     * 片方だけが版を持つ組は「違う」 = 比較せず入れ替える。 宣言を始めた実行で 1 度だけ
+     * 入れ替わり、 以降は版どうしの比較になる。
+     */
+    workloadVersion?: number;
+    /**
      * 同じ実装を測った過去の実行の「対象 p10 ÷ 基準 p10」。 新しい順ではなく古い順。
      *
      * 実行内正規化 (#1737) は実行全体に乗るずれを消したが、 op 個別の実行間ばらつきは
@@ -164,7 +175,7 @@ export interface MeasureResult {
 
 #### <code v-pre>PerfGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L407) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L419) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateInput {
@@ -181,7 +192,7 @@ export interface PerfGateInput {
 
 #### <code v-pre>PerfGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L418) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L430) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateResult {
@@ -203,7 +214,7 @@ export type PerfReferenceKind = 'cpu' | 'fs-read' | 'fs-write';
 
 #### <code v-pre>RegressionInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L185) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L197) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 Regression 判定 input。 bootstrap CI 経路。
 
@@ -241,7 +252,7 @@ export interface RegressionInput {
 
 #### <code v-pre>RegressionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L215) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L227) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface RegressionResult {
@@ -362,7 +373,7 @@ export interface RegressionResult {
 
 #### <code v-pre>Thresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L400) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L412) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface Thresholds {

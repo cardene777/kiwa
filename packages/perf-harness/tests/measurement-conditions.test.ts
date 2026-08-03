@@ -351,3 +351,248 @@ describe('memory の総呼出数が report から読める (#1730)', () => {
     expect(withWarmup).toContain('| 11 (6 + 5) |');
   });
 });
+
+describe('作業内容の版が違う記録とは比較しない (#1739)', () => {
+  /** 版だけが違う 2 つの記録を作る。 測定条件は揃える。 */
+  function withVersion(version: number | undefined): MeasureResult {
+    const base = buildMeasureResult('op.serial', 4, 0, [1, 1, 1, 1]);
+    return version === undefined ? base : { ...base, workloadVersion: version };
+  }
+
+  it('版が同じなら比較する', () => {
+    expect(hasSameMeasurementConfig(withVersion(2), withVersion(2))).toBe(true);
+  });
+
+  it('版が違えば比較しない', () => {
+    // 作業内容を変えた実行が旧条件の記録と比べられると、 その差が実装の退行として
+    // 報告され続ける (実測 = vector の queryNearestTop5 が 5 パス連続 +464% 〜 +546%)。
+    expect(hasSameMeasurementConfig(withVersion(2), withVersion(1))).toBe(false);
+  });
+
+  it('版を宣言していない op どうしは比較する', () => {
+    // 宣言しない op は両方とも版を持たない。 既存の記録は影響を受けない。
+    expect(hasSameMeasurementConfig(withVersion(undefined), withVersion(undefined))).toBe(true);
+  });
+
+  it('版を宣言した実行は、版を持たない記録と比較しない', () => {
+    // ここを「比較する」 にすると宣言が永久に効かない。 記録が入れ替わらないので
+    // 版が baseline に載らず、 載らないので次も比較が成立する (実装して実測で確認)。
+    expect(hasSameMeasurementConfig(withVersion(2), withVersion(undefined))).toBe(false);
+    // 宣言を外した場合も 1 度だけ入れ替わり、 以降は両方とも「無い」 に揃う。
+    expect(hasSameMeasurementConfig(withVersion(undefined), withVersion(2))).toBe(false);
+  });
+
+  it('版が同じでも測定条件が違えば比較しない', () => {
+    // 版の検査が既存の検査を上書きしていないことの確認。
+    const a = { ...withVersion(2), iterations: 100 };
+    const b = { ...withVersion(2), iterations: 200 };
+    expect(hasSameMeasurementConfig(a, b)).toBe(false);
+  });
+});
+
+describe('作業内容の版を上げると記録が入れ替わる (#1739)', () => {
+  const created: string[] = [];
+  function dir(): string {
+    const d = mkdtempSync(join(os.tmpdir(), 'perf-harness-workload-'));
+    created.push(d);
+    return d;
+  }
+  afterEach(() => {
+    while (created.length > 0) {
+      const d = created.pop();
+      if (d) rmSync(d, { recursive: true, force: true });
+    }
+  });
+
+  /** 作業量を係数で変える op。 版だけを付け替えて同じ経路を通す。 */
+  function input(target: string, workloadVersion: number | undefined, weight: number) {
+    return {
+      moduleName: 'workload-version',
+      ops: [
+        {
+          name: 'alpha',
+          ...(workloadVersion === undefined ? {} : { workloadVersion }),
+          fn: () => {
+            let t = 0;
+            for (let i = 0; i < 20_000 * weight; i += 1) t += Math.sqrt(i);
+            if (t < 0) throw new Error('unreachable');
+          },
+          serialP95CapMs: 1000,
+        },
+      ],
+      reportPath: join(target, `${workloadVersion ?? 'none'}-${weight}.md`),
+      baselinePath: join(target, 'baseline.json'),
+      serialIterations: 12,
+      serialWarmup: 2,
+      concurrency: 2,
+      iterationsPerWorker: 2,
+      memoryIterations: 5,
+    };
+  }
+
+  function record(target: string) {
+    const results = JSON.parse(readFileSync(join(target, 'baseline.json'), 'utf8'))
+      .results as Record<string, MeasureResult>;
+    return results['alpha.serial']!;
+  }
+
+  it('版が baseline に残り、読み戻しても消えない', async () => {
+    const target = dir();
+    await runPerf3Layer(input(target, 3, 1));
+    // 記録に載らない / 読み戻しで落ちると、次の実行で版の一致を判定できない。
+    expect(record(target).workloadVersion).toBe(3);
+  });
+
+  it('版を上げると比較せず記録を入れ替える', async () => {
+    const target = dir();
+    await runPerf3Layer(input(target, 1, 1));
+    const before = record(target).p10;
+
+    // 作業量を 5 倍にして版も上げる。実装の退行ではないので比較してはいけない。
+    const bumped = await runPerf3Layer(input(target, 2, 5));
+    expect(bumped.outcomes[0]!.regressionVerdict).toBe('n/a (比較せず)');
+    // 記録が今回の測定に入れ替わる = 次回からは新しい作業内容が基準になる。
+    expect(record(target).p10).toBeGreaterThan(before);
+    expect(record(target).workloadVersion).toBe(2);
+  });
+
+  it('版を据え置くと従来どおり比較する', async () => {
+    const target = dir();
+    await runPerf3Layer(input(target, 1, 1));
+    const second = await runPerf3Layer(input(target, 1, 1));
+    expect(second.outcomes[0]!.regressionVerdict).toMatch(/^(stable|improved|regressed)$/);
+  });
+
+  it.each([
+    ['文字列', 'v2'],
+    ['null', null],
+    ['真偽値', true],
+    ['配列', [2]],
+    ['文字列の Infinity', 'Infinity'],
+    // baseline は JSON なので `NaN` / `Infinity` の literal は `JSON.parse` の段階で
+    // 落ち、読み取り検証まで到達しない (実測で確認)。数でありながら成立しない値は
+    // 宣言側の `assertValidWorkloadVersions` が測る前に止める。
+  ])('壊れた版を持つ記録は読めない記録として扱う — %s', async (_label, broken) => {
+    const target = dir();
+    await runPerf3Layer(input(target, 1, 1));
+    const path = join(target, 'baseline.json');
+    const envelope = JSON.parse(readFileSync(path, 'utf8')) as {
+      results: Record<string, Record<string, unknown>>;
+    };
+    envelope.results['alpha.serial']!.workloadVersion = broken;
+    writeFileSync(path, JSON.stringify(envelope), 'utf8');
+
+    const next = await runPerf3Layer(input(target, 1, 1));
+    expect(next.baselineSeeded).toBe(true);
+  });
+
+});
+
+describe('作業内容の版は concurrent の記録にも載る (#1739)', () => {
+  const created: string[] = [];
+  function dir(): string {
+    const d = mkdtempSync(join(os.tmpdir(), 'perf-harness-wv-conc-'));
+    created.push(d);
+    return d;
+  }
+  afterEach(() => {
+    while (created.length > 0) {
+      const d = created.pop();
+      if (d) rmSync(d, { recursive: true, force: true });
+    }
+  });
+
+  function input(target: string, workloadVersion: number, weight: number) {
+    return {
+      moduleName: 'workload-version-concurrent',
+      ops: [
+        {
+          name: 'alpha',
+          workloadVersion,
+          fn: () => {
+            let t = 0;
+            for (let i = 0; i < 20_000 * weight; i += 1) t += Math.sqrt(i);
+            if (t < 0) throw new Error('unreachable');
+          },
+          serialP95CapMs: 1000,
+        },
+      ],
+      reportPath: join(target, `${workloadVersion}-${weight}.md`),
+      baselinePath: join(target, 'baseline.json'),
+      serialIterations: 12,
+      serialWarmup: 2,
+      concurrency: 2,
+      iterationsPerWorker: 2,
+      memoryIterations: 5,
+    };
+  }
+
+  function records(target: string) {
+    return JSON.parse(readFileSync(join(target, 'baseline.json'), 'utf8')).results as Record<
+      string,
+      MeasureResult
+    >;
+  }
+
+  it('版を上げると concurrent の記録も入れ替わる', async () => {
+    const target = dir();
+    await runPerf3Layer(input(target, 1, 1));
+    const before = records(target)['alpha.concurrent']!;
+    expect(before.workloadVersion).toBe(1);
+
+    // 作業量を 5 倍にして版も上げる。
+    await runPerf3Layer(input(target, 2, 5));
+    const after = records(target)['alpha.concurrent']!;
+    // 載せないと `needsRefresh` が「両側とも版なし = 同じ」 と見て、concurrent だけ
+    // 旧 workload の測定値で固定される。
+    expect(after.workloadVersion).toBe(2);
+    // 記録そのものが入れ替わったことを見る。 p10 の大小で見ると、 machine の負荷で
+    // 5 倍の workload が前回より速く出ることがあり test が負荷に依存して落ちる
+    // (実測で 6 回に 1 回)。 入れ替えの有無は samples の同一性で判定できる。
+    expect(after.samples).not.toEqual(before.samples);
+  });
+});
+
+describe('作業内容の版は数として成立していないと測る前に止める (#1739)', () => {
+  const created: string[] = [];
+  function dir(): string {
+    const d = mkdtempSync(join(os.tmpdir(), 'perf-harness-wv-bad-'));
+    created.push(d);
+    return d;
+  }
+  afterEach(() => {
+    while (created.length > 0) {
+      const d = created.pop();
+      if (d) rmSync(d, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    ['NaN', Number.NaN],
+    ['Infinity', Number.POSITIVE_INFINITY],
+    ['-Infinity', Number.NEGATIVE_INFINITY],
+    ['小数', 1.5],
+    ['0', 0],
+    ['負', -1],
+    ['2^53 超 (1 上げても同値になる)', 2 ** 53 + 1],
+  ])('%s を宣言すると例外にする', async (_label, version) => {
+    const target = dir();
+    // NaN は自分自身と等しくならないため、通すと記録が毎回入れ替わり、その op は
+    // 永久に比較されない。読み取り側の検証だけでは seed し直しが延々と続く。
+    await expect(
+      runPerf3Layer({
+        moduleName: 'bad-workload-version',
+        ops: [{ name: 'alpha', workloadVersion: version, fn: () => {}, serialP95CapMs: 1000 }],
+        reportPath: join(target, 'r.md'),
+        baselinePath: join(target, 'baseline.json'),
+        serialIterations: 5,
+        serialWarmup: 1,
+        concurrency: 2,
+        iterationsPerWorker: 2,
+        memoryIterations: 5,
+      }),
+    ).rejects.toThrow(/workloadVersion が版として成立していません/);
+    // 測る前に止めるので baseline は作られない。
+    expect(existsSync(join(target, 'baseline.json'))).toBe(false);
+  });
+});

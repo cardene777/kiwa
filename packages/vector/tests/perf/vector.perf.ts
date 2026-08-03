@@ -112,6 +112,10 @@ describe(MODULE, () => {
             // 母集団は QUERY_CARDINALITY 件で固定。 測定中に書き換わらない。
             name: 'queryNearestTop5',
             serialP95CapMs: 5,
+            // #1730 で母集団を 20 → 200 件に変えた。 全件走査 + sort なので作業量が
+            // 10 倍になり、 比が anchor の 6.2 倍に跳ねている。 実装の退行ではないので
+            // 版を上げて記録を入れ替える (#1739)。
+            workloadVersion: 2,
             fn: async () => {
               queryNearest(readClient, query, { topK: 5, metric: 'cosine' });
             },
