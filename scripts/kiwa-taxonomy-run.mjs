@@ -15,18 +15,37 @@
  *   --category <name>   perf / fidelity / skill / integration のいずれか (必須)
  *   --lib <name>        単一 lib で実行 (省略 = 該当 lib 全走査)
  *   --format <fmt>      table (default) or json
+ *   --packages-dir <p>  lib を探す root を差し替える (default = <repo>/packages)
+ *                       絶対 path 必須、 実在する dir かつ package を 1 件以上含むこと
  *
  * 出力 = lib × 該当 category の matrix (table or JSON)、 exit code 0 = 全 pass、 1 = 1 件でも fail。
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 // readFileSync is used by analyzeTestFile
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG_PATH = join(ROOT, 'tests/release-smoke/test-taxonomy.config.json');
-const PACKAGES_DIR = join(ROOT, 'packages');
+/**
+ * lib を探す既定の root。 `--packages-dir` で差し替えられる。
+ *
+ * 差し替えを持つのは、 中身 chk 層 (minCases / expect 未呼出 / trivial) を確かめる側が
+ * 「その形をした lib」 を用意する必要があるため。 実 workspace の `packages/` に置くと、
+ * `packages/*` を走査する他の検査 (license / taxonomy meta lint / publish guard /
+ * release script filter 等) がそれを実 package と誤認する。 `packages/` 直下を列挙する
+ * 検査は 8 file あり、 どれが反応するかは置いた lib の属性 (private か / workspace: 依存を
+ * 持つか) で入れ替わるため、 走査側に除外を配る形では塞ぎ切れない (#1780)。
+ *
+ * 渡す path は信頼済であることが前提。 本 CLI は root 配下を cwd として `pnpm exec tsc` と
+ * `pnpm exec vitest` を起動し、 `process.env` をそのまま継承する (`--include-real` では
+ * `KIWA_MODE=real` も注入する)。 未信頼の path を外部入力から組み立てて渡してはいけない。
+ * 現在の呼出元 (`package.json` の `test:taxonomy` / `test:taxonomy:all`、
+ * `scripts/release-readiness-check.mjs` の Gate 3) はいずれも引数を hardcode しており、
+ * 外部入力が到達する経路は無い。
+ */
+const DEFAULT_PACKAGES_DIR = join(ROOT, 'packages');
 
 const CATEGORY_SUFFIX = {
   perf: '.perf.ts',
@@ -50,11 +69,24 @@ const CATEGORY_REAL_SUFFIX = {
 const VALID_CATEGORIES = Object.keys(CATEGORY_SUFFIX);
 
 function parseArgs(argv) {
-  const args = { category: null, lib: null, format: 'table', includeReal: false };
+  const args = {
+    category: null,
+    lib: null,
+    format: 'table',
+    includeReal: false,
+    packagesDir: DEFAULT_PACKAGES_DIR,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === '--category') args.category = argv[++i];
     else if (a === '--lib') args.lib = argv[++i];
+    // 値を取り損ねた形を default と混ぜない。 `resolve(undefined)` も `resolve('')` も cwd に
+    // なるため、 黙って別 root を見に行く。 次 token が別 flag の形 (`--packages-dir --format`)
+    // も値の取り違えなので同じ扱いにする (main で弾く)。
+    else if (a === '--packages-dir') {
+      const value = argv[++i];
+      args.packagesDir = value === undefined || value === '' || value.startsWith('-') ? null : value;
+    }
     else if (a === '--format') args.format = argv[++i];
     else if (a === '--include-real') args.includeReal = true;
     else if (a === '--help' || a === '-h') args.help = true;
@@ -65,7 +97,13 @@ function parseArgs(argv) {
 function printHelp() {
   process.stdout.write(`kiwa-taxonomy-run — test-taxonomy 分類別実行 chk\n\n`);
   process.stdout.write(`Usage:\n`);
-  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration|all> [--lib <name>] [--format <table|json>] [--include-real]\n\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration|all> [--lib <name>] [--packages-dir <path>] [--format <table|json>] [--include-real]\n\n`);
+  process.stdout.write(`Options:\n`);
+  process.stdout.write(`  --category <name>   perf / fidelity / skill / integration / all のいずれか (必須)\n`);
+  process.stdout.write(`  --lib <name>        単一 lib で実行 (省略 = 該当 lib 全走査)\n`);
+  process.stdout.write(`  --packages-dir <p>  lib を探す root (default = <repo>/packages)、 絶対 path 必須\n`);
+  process.stdout.write(`  --format <fmt>      table (default) or json\n`);
+  process.stdout.write(`  --include-real      real driver test (*.real.<category>.test.ts) を実行対象に含める\n\n`);
   process.stdout.write(`Examples:\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category skill --lib agent\n`);
@@ -78,9 +116,9 @@ function loadConfig() {
   return JSON.parse(readFileSync(CONFIG_PATH, 'utf-8'));
 }
 
-function listPackages() {
-  return readdirSync(PACKAGES_DIR).filter((name) => {
-    const pkgPath = join(PACKAGES_DIR, name);
+function listPackages(packagesDir = DEFAULT_PACKAGES_DIR) {
+  return readdirSync(packagesDir).filter((name) => {
+    const pkgPath = join(packagesDir, name);
     if (!statSync(pkgPath).isDirectory()) return false;
     return existsSync(join(pkgPath, 'package.json'));
   });
@@ -202,8 +240,8 @@ const DEFAULT_MIN_CASES = {
   integration: 5,
 };
 
-function runOneCell(lib, category, includeReal = false, config = null) {
-  const libDir = join(PACKAGES_DIR, lib);
+function runOneCell(lib, category, includeReal = false, config = null, packagesDir = DEFAULT_PACKAGES_DIR) {
+  const libDir = join(packagesDir, lib);
   const testDir = join(libDir, 'tests', category);
   const suffix = CATEGORY_SUFFIX[category];
   const realSuffix = CATEGORY_REAL_SUFFIX[category];
@@ -391,13 +429,40 @@ function summarize(results) {
   return { passed, failed, noFiles, total: Object.keys(results).length };
 }
 
+/**
+ * category 単位の合否。 対象 0 件は pass ではなく fail。
+ *
+ * `libsForCategory` は config 記載 lib を root の実在 package と交差させるため、 root に
+ * 該当 lib が 1 つも無いと scope が空になり、 `failed` が 0 のまま exit 0 に落ちる。
+ * 出力上は「全 pass」 と見分けが付かないので、 検査が 1 件も走らなかった形を fail に倒す。
+ * no-files を fail と判定しているのと同じ理由で、 対象不在を「通った」 と読ませない (#1780)。
+ */
+function categoryFailed(summary) {
+  return summary.failed > 0 || summary.total === 0;
+}
+
+/**
+ * 対象 0 件を stderr に名指しする。
+ *
+ * 0 件は表の上では `pass=0 fail=0 total=0` が並ぶだけで、 root の指定ミスなのか実際に
+ * 通ったのかを読み手が判別できない。 exit code を fail に倒すだけでは「見分けさせる」
+ * 目的が半分しか達成できないため、 単一 category と `--category all` の両経路で出す。
+ */
+function warnEmptyScope(category, summary) {
+  if (summary.total === 0) {
+    process.stderr.write(
+      `[taxonomy-run] ${category}: 対象 lib が 0 件。 検査が 1 件も走っていない\n`,
+    );
+  }
+}
+
 function runSingleCategory(category, args, config, allPackages) {
   const scope = args.lib ? [args.lib] : libsForCategory(category, config, allPackages);
   const results = {};
   const realTag = args.includeReal ? ' [+real]' : '';
   for (const lib of scope) {
     process.stderr.write(`[taxonomy-run] ${lib} × ${category}${realTag} ...`);
-    const r = runOneCell(lib, category, args.includeReal, config);
+    const r = runOneCell(lib, category, args.includeReal, config, args.packagesDir);
     results[lib] = r;
     process.stderr.write(` ${statusLabel(r)}\n`);
   }
@@ -437,8 +502,30 @@ async function main() {
     process.exit(1);
   }
 
+  // root の差し替えは検査対象そのものを決めるため、 曖昧な形を 1 つも通さない。
+  // 「対象が 0 件」 と「全 pass」 は出力上で区別が付かないので、 0 件になり得る形は
+  // すべてここで exit 1 に倒す (#1780 review)。
+  if (args.packagesDir === null) {
+    process.stderr.write(`--packages-dir requires a non-empty path\n`);
+    process.exit(1);
+  }
+  if (!isAbsolute(args.packagesDir)) {
+    // 相対 path は呼んだ場所で指す先が変わる。 script 位置基準と cwd 基準のどちらに
+    // 寄せても取り違えが残るため、 絶対 path だけを受ける。
+    process.stderr.write(`--packages-dir must be an absolute path: "${args.packagesDir}"\n`);
+    process.exit(1);
+  }
+  if (!existsSync(args.packagesDir) || !statSync(args.packagesDir).isDirectory()) {
+    process.stderr.write(`--packages-dir not found or not a directory: "${args.packagesDir}"\n`);
+    process.exit(1);
+  }
+
   const config = loadConfig();
-  const allPackages = listPackages();
+  const allPackages = listPackages(args.packagesDir);
+  if (allPackages.length === 0) {
+    process.stderr.write(`--packages-dir has no package: "${args.packagesDir}"\n`);
+    process.exit(1);
+  }
 
   if (args.lib && !allPackages.includes(args.lib)) {
     process.stderr.write(`unknown --lib "${args.lib}"\n`);
@@ -453,7 +540,8 @@ async function main() {
     for (const category of VALID_CATEGORIES) {
       allResults[category] = runSingleCategory(category, args, config, allPackages);
       summaries[category] = summarize(allResults[category]);
-      if (summaries[category].failed > 0) anyFail = true;
+      warnEmptyScope(category, summaries[category]);
+      if (categoryFailed(summaries[category])) anyFail = true;
     }
     if (args.format === 'json') {
       process.stdout.write(
@@ -492,7 +580,8 @@ async function main() {
     );
   }
 
-  process.exit(summary.failed > 0 ? 1 : 0);
+  warnEmptyScope(args.category, summary);
+  process.exit(categoryFailed(summary) ? 1 : 0);
 }
 
 const isEntry = pathToFileURL(process.argv[1] ?? '').href === import.meta.url;

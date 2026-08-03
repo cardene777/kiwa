@@ -144,7 +144,9 @@ pnpm test:taxonomy:all                                       # 4 分類 (perf/fi
 - `--lib` = 単一 lib 指定 (省略 = config 記載の該当 lib 全走査)
 - `--format` = table (default) or json
 - `--include-real` = `*.real.<category>.test.ts` (real driver test) を実行対象に含める、 KIWA_MODE=real env auto 注入 (Q6-5)
-- exit code = 0 (全 pass) / 1 (1 件でも fail / compile-fail / parse-fail / no-files / no-tests)
+- `--packages-dir` = lib を探す root を差し替える (default = `<repo>/packages`)、 CLI 自身の検査が fixture lib を実 workspace の外に置くための経路 (#1780)。 絶対 path 必須、 実在する dir かつ package を 1 件以上含むこと、 値なし / 空文字 / 相対 path は exit 1
+- exit code = 0 (全 pass) / 1 (1 件でも fail / compile-fail / parse-fail / no-files / no-tests / 対象 lib 0 件)
+- **対象 0 件も fail 判定** = 検査が 1 件も走らなかった状態は「全 pass」 と出力上で区別が付かない。 no-files を fail と判定しているのと同じ理由で、 root の指定ミスを pass に倒さない (#1780)
 - **no-files も fail 判定** = CLI の目的は「揃ってる + 実行 pass」 の完全 chk、 file 不在で pass 扱いは意味を持たない。 config 記載 lib で該当分類 file 0 件 = 必ず exit 1 (flag なし)
 - **中身 chk 3 軸 (Q7)** = 「file 揃ってる + 実行 pass」 に加えて質 gate を強制。
   - **insufficient-cases** = category 別 minCases (perf 3 / fidelity 5 / skill 5 / integration 5) 未達で fail
