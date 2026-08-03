@@ -170,10 +170,22 @@ pnpm test:taxonomy -- --category fidelity --include-real
 - `--lib <name>` = 単一 lib 指定 (省略 = config 記載の該当 lib 全走査)
 - `--format <fmt>` = table (default) or json
 - `--include-real` = `*.real.<category>.test.ts` (real driver test) を実行対象に含める、 KIWA_MODE=real env auto 注入
-- `--packages-dir <path>` = lib を探す root を差し替える (default = `<repo>/packages`)、 実在しない path と値なしは exit 1
-- exit code = 0 (全 pass) / 1 (1 件でも fail or compile-fail)
+- `--packages-dir <path>` = lib を探す root を差し替える (default = `<repo>/packages`)
+- exit code = 0 (全 pass) / 1 (1 件でも fail or compile-fail、 対象 lib が 0 件)
 
 `--packages-dir` は CLI 自身を検査する test のためにある。 中身 chk 層 (minCases / expect 未呼出 / trivial) を確かめるには「その形をした lib」 が要るが、 それを実 `packages/` に置くと `packages/*` を走査する他の検査が実 package と誤認する。 反応する走査側は置いた lib の属性で入れ替わるため、 走査側に除外を配るのではなく fixture を外に出す (#1780)。
+
+root の差し替えは検査対象そのものを決めるため、 曖昧な形は 1 つも受けない。 以下はすべて exit 1 になる。
+
+| 形 | 理由 |
+|---|---|
+| 値なし / 空文字 / 次 token が `-` 始まり | `path.resolve` が cwd を返し、 呼んだ場所次第で別 root を見に行く |
+| 相対 path | 呼んだ場所で指す先が変わる |
+| 実在しない path / dir でない path | 対象が 0 件になり「全 pass」 と区別が付かない |
+| package を 1 件も含まない root | 同上 |
+| config 記載 lib を 1 件も含まない root | `libsForCategory` が交差を取るため scope が空になり、 検査が 1 件も走らない |
+
+渡す path は信頼済であることが前提。 本 CLI は root 配下を cwd として `pnpm exec tsc` と `pnpm exec vitest` を起動し、 `process.env` をそのまま継承する (`--include-real` では `KIWA_MODE=real` も注入する)。 未信頼の path を外部入力から組み立てて渡してはいけない。
 
 **出力例**。
 

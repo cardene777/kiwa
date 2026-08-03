@@ -18,6 +18,16 @@ const ROOT = resolve(HERE, '..', '..', '..', '..');
 const CLI_PATH = join(ROOT, 'scripts/kiwa-taxonomy-run.mjs');
 
 /**
+ * CLI を起動する `spawnSync` の上限。
+ *
+ * `spawnSync` は worker を同期 block するため、 vitest の `testTimeout` では中断できない
+ * (実測 = `testTimeout: 1000` に対し `spawnSync('sleep', ['5'])` が 5013 ms 走り切り、
+ * timeout は終わった後に事後報告されるだけだった)。 CLI が返らない形になると suite ごと
+ * 止まるので、 spawn 側で切る (#1780 review)。
+ */
+const SPAWN_TIMEOUT_MS = 60_000;
+
+/**
  * CLI が非 0 で返った時に、 何が起きたかを assertion message へ残す (#1751)。
  *
  * この CLI は内部で `tsc` と `vitest` を起動する。 release-smoke の他 test と並列に
@@ -74,6 +84,19 @@ describe('Q5 test-taxonomy CLI shape', () => {
     expect(result.status).toBe(0);
     expect(result.stdout).toMatch(/--include-real/);
     expect(result.stdout).toMatch(/KIWA_MODE=real/);
+  });
+
+  it('--help 出力に --packages-dir の既定値と制約が含まれる (#1780)', () => {
+    // header comment と docs 2 本だけが既定値を持ち、 help が名前しか出さない状態は
+    // CLI 利用者から見た SSOT が欠ける。
+    const result = spawnSync('node', [CLI_PATH, '--help'], {
+      encoding: 'utf-8',
+      timeout: SPAWN_TIMEOUT_MS,
+    });
+    expect(result.status).toBe(0);
+    expect(result.stdout).toMatch(/--packages-dir/);
+    expect(result.stdout).toMatch(/default = <repo>\/packages/);
+    expect(result.stdout).toMatch(/絶対 path 必須/);
   });
 
   it('config 拡張後は cache が skill の対象に入っている', () => {
@@ -145,7 +168,7 @@ describe('Q5 test-taxonomy CLI shape', () => {
     const shapeResult = spawnSync(
       'node',
       [CLI_PATH, '--category', 'all', '--lib', 'lean', '--format', 'json'],
-      { encoding: 'utf-8', timeout: 60_000 },
+      { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
     );
     const output = JSON.parse(shapeResult.stdout);
     expect(output.category).toBe('all');
@@ -163,8 +186,8 @@ describe('Q5 test-taxonomy CLI shape', () => {
   it('中身 chk 3 軸 = minCases 下限 / expect 未呼出 / trivial pattern を検出 (Q7、 CLI 単独 release-worthy 判定)', async () => {
     // CLI の 中身 chk 層 (insufficient-cases / missing-assertion / trivial-assertion の 3 軸) は
     // 「file 揃ってる + 実行 pass」 の構造 gate に加えて「domain-specific 中身が空でない」 の
-    // 質 gate を担う。 本 test は 3 軸のうち trivial-assertion を一時 fixture lib で再現し、
-    // CLI が fail 判定するかを verify する (残る 2 軸は fixture を踏ませていない)。
+    // 質 gate を担う。 3 軸それぞれに fixture lib を作り、 CLI が対応する status で fail
+    // 判定するかを verify する。
     //
     // fixture は実 workspace の外 (tmpdir) に置き、 CLI へは `--packages-dir` で渡す (#1780)。
     // `packages/` 直下に作ると、 同じ suite で `packages/*` を走査する他 test が fixture を
@@ -172,18 +195,38 @@ describe('Q5 test-taxonomy CLI shape', () => {
     // 走査側が動いた回だけ落ち、 落ちる test は実行ごとに変わった。
     const { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } = await import('node:fs');
     const { tmpdir } = await import('node:os');
+    const { relative, sep } = await import('node:path');
 
-    const sandbox = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-fixture-'));
-    const sandboxPackages = join(sandbox, 'packages');
-    const fixLib = join(sandboxPackages, 'fixture-quality-gate');
-    const fixDir = join(fixLib, 'tests/fidelity');
-    mkdirSync(fixDir, { recursive: true });
-    writeFileSync(join(fixLib, 'package.json'), JSON.stringify({ name: '@kiwa-lab/fixture-quality-gate', version: '0.0.0', private: true }));
-
-    // trivial assertion 5 case
-    writeFileSync(
-      join(fixDir, 'trivial.fidelity.test.ts'),
-      `import { describe, expect, it } from 'vitest';
+    // fidelity の minCases 下限は 5 (config に minCases が無いため CLI の既定値)。
+    // insufficient は 2 case、 残り 2 軸は 5 case 置いて下限を先に通す。
+    const CASES = [
+      {
+        lib: 'fixture-insufficient-cases',
+        expected: /FAIL \(min-cases 2\)/,
+        source: `import { describe, expect, it } from 'vitest';
+describe('insufficient', () => {
+  it('c1', () => { expect(2 + 2).toBe(4); });
+  it('c2', () => { expect('ab'.length).toBe(2); });
+});
+`,
+      },
+      {
+        lib: 'fixture-missing-assertion',
+        expected: /FAIL \(no-expect 1\)/,
+        source: `import { describe, expect, it } from 'vitest';
+describe('missing assertion', () => {
+  it('c1', () => { expect(2 + 2).toBe(4); });
+  it('c2', () => { expect(3 + 3).toBe(6); });
+  it('c3', () => { expect(4 + 4).toBe(8); });
+  it('c4', () => { expect(5 + 5).toBe(10); });
+  it('c5', () => { const unused = 1 + 1; void unused; });
+});
+`,
+      },
+      {
+        lib: 'fixture-trivial-assertion',
+        expected: /FAIL \(trivial 5\)/,
+        source: `import { describe, expect, it } from 'vitest';
 describe('trivial', () => {
   it('c1', () => { expect(true).toBe(true); });
   it('c2', () => { expect(1).toBe(1); });
@@ -192,49 +235,195 @@ describe('trivial', () => {
   it('c5', () => { expect([]).toEqual([]); });
 });
 `,
-    );
+      },
+    ];
+
+    // `mkdtempSync` の直後から try に入れる。 fixture 構築中に投げると finally に届かず
+    // sandbox が残る。
+    const sandbox = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-fixture-'));
     try {
-      const result = spawnSync(
-        'node',
-        [
-          CLI_PATH, '--category', 'fidelity', '--lib', 'fixture-quality-gate',
-          '--packages-dir', sandboxPackages,
-        ],
-        { encoding: 'utf-8', timeout: 60_000 },
-      );
-      expect(result.status, describeFailure(result)).toBe(1);
-      expect(result.stdout).toMatch(/FAIL \(trivial/);
+      // fixture が repo の中に生えていないことを、 名前ではなく位置で押さえる。
+      // 置き場所は `os.tmpdir()` = `TMPDIR` 依存で、 repo 配下を指す環境なら
+      // 名前の検査 (下の readdirSync) を素通りしてしまう。
+      //
+      // 判定は segment 境界で行う。 前置 match だけだと `<repo>/..tmp` のような
+      // repo 内の dir が `..tmp/...` を返して repo 外と誤判定される。
+      const rel = relative(ROOT, sandbox);
+      expect(
+        rel === '..' || rel.startsWith(`..${sep}`),
+        `fixture が repo 内に作られている: ${sandbox}`,
+      ).toBe(true);
+
+      const sandboxPackages = join(sandbox, 'packages');
+      for (const testCase of CASES) {
+        const fixLib = join(sandboxPackages, testCase.lib);
+        const fixDir = join(fixLib, 'tests/fidelity');
+        mkdirSync(fixDir, { recursive: true });
+        writeFileSync(
+          join(fixLib, 'package.json'),
+          JSON.stringify({ name: `@kiwa-lab/${testCase.lib}`, version: '0.0.0', private: true }),
+        );
+        writeFileSync(join(fixDir, 'fixture.fidelity.test.ts'), testCase.source);
+      }
+
+      for (const testCase of CASES) {
+        const result = spawnSync(
+          'node',
+          [
+            CLI_PATH, '--category', 'fidelity', '--lib', testCase.lib,
+            '--packages-dir', sandboxPackages,
+          ],
+          { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+        );
+        expect(result.status, describeFailure(result)).toBe(1);
+        expect(result.stdout, `${testCase.lib}: ${result.stdout}`).toMatch(testCase.expected);
+      }
 
       // fixture が生きている間、 実 workspace には現れない。 ここが破れると `packages/*` を
       // 走査する検査 (license / taxonomy meta lint / publish guard / release script filter)
       // が fixture を実 package と読んで落ちる。 どれが反応するかは fixture の属性で
       // 入れ替わるため、 走査側ではなくこの 1 点で押さえる (#1780)。
-      expect(readdirSync(join(ROOT, 'packages'))).not.toContain('fixture-quality-gate');
+      expect(readdirSync(join(ROOT, 'packages')).filter((n) => n.startsWith('fixture-'))).toEqual([]);
     } finally {
       rmSync(sandbox, { recursive: true, force: true });
     }
   });
 
-  it('--packages-dir が実在しなければ exit 1 (#1780)', () => {
-    // 対象が 1 件も無い状態は「全 lib pass」 と区別が付かない。 root の指定ミスを
-    // 0 件 pass として通すと、 検査を外したことに気付けない。
-    const result = spawnSync(
-      'node',
-      [CLI_PATH, '--category', 'fidelity', '--packages-dir', join(ROOT, 'no-such-packages-root')],
-      { encoding: 'utf-8' },
-    );
-    expect(result.status).toBe(1);
-    expect(result.stderr).toMatch(/--packages-dir not found/);
+  it('--packages-dir が実在しなければ exit 1 (#1780)', async () => {
+    // 実在しない path は tmpdir 配下に作る。 repo 直下の固定名を使うと、 同名 dir が
+    // 生えた時に検査対象が変わる。
+    const { mkdtempSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const sandbox = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-missing-'));
+    try {
+      const result = spawnSync(
+        'node',
+        [CLI_PATH, '--category', 'fidelity', '--packages-dir', join(sandbox, 'no-such-root')],
+        { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+      );
+      expect(result.status).toBe(1);
+      expect(result.stderr).toMatch(/--packages-dir not found or not a directory/);
+    } finally {
+      rmSync(sandbox, { recursive: true, force: true });
+    }
   });
 
-  it('--packages-dir に値が無ければ exit 1 (cwd に落とさない) (#1780)', () => {
-    // 値なしを既定へ倒すと `path.resolve(undefined)` が cwd になり、 呼んだ場所次第で
-    // 別 root を黙って見に行く。
-    const result = spawnSync('node', [CLI_PATH, '--category', 'fidelity', '--packages-dir'], {
-      encoding: 'utf-8',
-    });
+  it('--packages-dir が dir でなければ exit 1 (#1780)', () => {
+    // file を渡すと `readdirSync` が ENOTDIR を投げて stack trace になっていた。
+    const result = spawnSync(
+      'node',
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir', join(ROOT, 'package.json')],
+      { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+    );
     expect(result.status).toBe(1);
-    expect(result.stderr).toMatch(/--packages-dir requires a path/);
+    expect(result.stderr).toMatch(/--packages-dir not found or not a directory/);
+  });
+
+  it('--packages-dir が値なし / 空文字 / 別 flag なら exit 1 (cwd に落とさない) (#1780)', () => {
+    // いずれも `path.resolve` が cwd を返す形。 既定へ倒すと呼んだ場所次第で別 root を
+    // 黙って見に行く。 `--packages-dir --format json` は値の取り違えで、 `--format` を
+    // path として食う。
+    for (const argv of [
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir'],
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir', ''],
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir', '--format', 'json'],
+    ]) {
+      const result = spawnSync('node', argv, { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS });
+      expect(result.status, argv.join(' ')).toBe(1);
+      expect(result.stderr, argv.join(' ')).toMatch(/--packages-dir requires a non-empty path/);
+    }
+  });
+
+  it('--packages-dir が相対 path なら exit 1 (#1780)', () => {
+    // 相対 path は呼んだ場所で指す先が変わる。
+    const result = spawnSync(
+      'node',
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir', 'packages'],
+      { encoding: 'utf-8', cwd: ROOT, timeout: SPAWN_TIMEOUT_MS },
+    );
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/--packages-dir must be an absolute path/);
+  });
+
+  it('package を 1 件も持たない root は exit 1 (0 件 pass にしない) (#1780)', async () => {
+    // 実在する dir でも package が無ければ検査は 1 件も走らない。 それを exit 0 で返すと
+    // 「全 pass」 と見分けが付かず、 taxonomy gate を無効化できる (review Round 1 MAJOR)。
+    const { mkdtempSync, rmSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const empty = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-empty-'));
+    try {
+      const result = spawnSync(
+        'node',
+        [CLI_PATH, '--category', 'all', '--packages-dir', empty],
+        { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+      );
+      expect(result.status, describeFailure(result)).toBe(1);
+      expect(result.stderr).toMatch(/--packages-dir has no package/);
+    } finally {
+      rmSync(empty, { recursive: true, force: true });
+    }
+  });
+
+  it('--category all も全 category 0 件なら exit 1 + 名指しの警告 (#1780)', async () => {
+    // `all` 経路は category ごとに集計するため、 単一 category 経路とは別に固定する。
+    // `lean` は perf exempt かつ fidelity / skill / integration の config 対象外なので、
+    // これ 1 件だけを置くと 4 category すべてが 0 件になる。
+    const { mkdirSync, mkdtempSync, rmSync, writeFileSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const sandbox = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-allzero-'));
+    try {
+      const pkgDir = join(sandbox, 'packages', 'lean');
+      mkdirSync(pkgDir, { recursive: true });
+      writeFileSync(
+        join(pkgDir, 'package.json'),
+        JSON.stringify({ name: '@kiwa-lab/lean', version: '0.0.0', private: true }),
+      );
+      const result = spawnSync(
+        'node',
+        [CLI_PATH, '--category', 'all', '--format', 'json', '--packages-dir', join(sandbox, 'packages')],
+        { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+      );
+      expect(result.status, describeFailure(result)).toBe(1);
+      const output = JSON.parse(result.stdout) as {
+        summaries: Record<string, { total: number }>;
+      };
+      for (const category of ['perf', 'fidelity', 'skill', 'integration']) {
+        expect(output.summaries[category]?.total, `${category} が 0 件でない`).toBe(0);
+      }
+      // exit code だけでは「0 件」 と「全 pass」 を読み手が見分けられない。
+      for (const category of ['perf', 'fidelity', 'skill', 'integration']) {
+        expect(result.stderr, `${category} の警告が無い`).toMatch(
+          new RegExp(`${category}: 対象 lib が 0 件`),
+        );
+      }
+    } finally {
+      rmSync(sandbox, { recursive: true, force: true });
+    }
+  });
+
+  it('config 記載 lib を 1 件も含まない root は exit 1 (0 件 pass にしない) (#1780)', async () => {
+    // package はあるが config 記載 lib が 1 件も無い形。 `libsForCategory` が交差を取るため
+    // scope が空になり、 `failed` が 0 のまま exit 0 に落ちていた経路。
+    const { mkdirSync, mkdtempSync, rmSync, writeFileSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const sandbox = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-nolib-'));
+    try {
+      const pkgDir = join(sandbox, 'packages', 'fixture-unknown-lib');
+      mkdirSync(pkgDir, { recursive: true });
+      writeFileSync(
+        join(pkgDir, 'package.json'),
+        JSON.stringify({ name: '@kiwa-lab/fixture-unknown-lib', version: '0.0.0', private: true }),
+      );
+      const result = spawnSync(
+        'node',
+        [CLI_PATH, '--category', 'fidelity', '--packages-dir', join(sandbox, 'packages')],
+        { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+      );
+      expect(result.status, describeFailure(result)).toBe(1);
+      expect(result.stderr).toMatch(/対象 lib が 0 件/);
+    } finally {
+      rmSync(sandbox, { recursive: true, force: true });
+    }
   });
 });
 
