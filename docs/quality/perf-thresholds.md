@@ -332,29 +332,47 @@ Two choices in that formula were made deliberately. The estimator itself went th
 
 **Twice the spread.** Measured against the real histories by treating each op's last entry as "the next run": 2× leaves one op of 454 crossing its own bound, and 3× leaves the same one while widening the set of ops whose width exceeds 20 % from 143 to 239. The table is under § Choosing the estimator.
 
-A run that compares and lands on `regressed` or `improved` does not add its ratio, because the values before and after a real implementation change do not describe the same thing, and mixing them inflates the width until the gate stops firing. A run with nothing to compare against — the seed, or a record whose measurement conditions changed — does add its ratio; it is one observation of the op like any other.
+A run that compares and lands on `regressed` or `improved` does not add its ratio on the spot, because the values before and after a real implementation change do not describe the same thing, and mixing them inflates the width until the gate stops firing. The ratio is held and added only if the following run moves off that direction, which is what tells an excursion apart from a change; the rule is below under § The append condition was circular. A run with nothing to compare against — the seed, or a record whose measurement conditions changed — adds its ratio immediately; it is one observation of the op like any other.
 
 **Nothing clears an existing history.** `applyRatioHistory` only appends, and a rebuilt record carries its history forward. The one way entries disappear is a record replacement: when the measurement conditions change or the reference op stops resolving, `planBaselineWrite` swaps in the fresh measurement, and a fresh measurement has no history field. That is driven by the measurement config, never by a verdict.
 
-##### The append condition is circular, and it is not fixed
+##### The append condition was circular, and the judgment now waits one run
 
-The rule above is circular for one class of op. An op whose natural spread exceeds the 20 % relative threshold is judged `regressed` on its first comparison, adds nothing, never reaches three observations, and is judged by the relative threshold forever. No width, so regressed; regressed, so no width. Nothing clears its history — it never gains an entry in the first place, because every run after the baseline exists is a comparison and every comparison reads `regressed`.
+The `stable`-only rule was circular for one class of op. An op whose natural spread exceeds the 20 % relative threshold is judged `regressed` on its first comparison, adds nothing, never reaches three observations, and is judged by the relative threshold forever. No width, so regressed; regressed, so no width. Nothing cleared its history — it never gained an entry in the first place, because every run after the baseline exists is a comparison and every comparison read `regressed`.
 
-Measured over six passes of the full suite: `astro`'s `invokeEndpoint`, `remix`'s `invokeAction`, `vector`'s `queryNearestTop5` and `cli-app-scenario`'s `init_workflow` held zero history throughout, while sibling ops in the same files reached six. `astro`'s own `renderAstroPage` sits in the same file at six entries. Those four were the only ops that read `regressed` in all three passes once the histories had warmed.
+Measured over six passes of the full suite before the change: `astro`'s `invokeEndpoint`, `remix`'s `invokeAction`, `vector`'s `queryNearestTop5` and `cli-app-scenario`'s `init_workflow` held zero history throughout, while sibling ops in the same files reached six. `astro`'s own `renderAstroPage` sits in the same file at six entries.
 
 **Appending unconditionally during warm-up was written and then withdrawn.** It creates a worse failure. With anchor 1 and a real regression to ratio R present on runs 2 and 3, the history reads `[1, R, R]`; on run 4 the width is `R − 1`, the effective threshold is `2(R − 1)`, and the delta being judged is `R − 1`. The regression reads `stable` from that run onward and keeps appending, so the state locks in. The width cannot be widened by observations that have not first been shown to be noise.
 
-Telling a one-off excursion from a sustained regression needs the same primitive as the censoring problem below, so both are tracked together rather than patched separately.
+What separates the two cases is not available at the moment of the verdict. It is available on the next run: a one-off excursion is followed by a return, a sustained regression is followed by more of the same. So the ratio of a `regressed` or `improved` run is neither discarded nor appended. It is held on the record as `pendingRatio`, together with the direction that produced it, and resolved when the next run arrives.
 
-##### The width is censored, and reads low because of it
+| the next run reads | the held ratio | the gate |
+|---|---|---|
+| `regressed` again | discarded | fails — the regression is sustained |
+| `improved` again | discarded | does not fail — the gate only reads regressions |
+| anything else | appended to the history | does not fail — the run was an excursion |
 
-The `stable`-only rule censors the estimate: any run where the op moved past its bound is, by definition, not added. The width is therefore built only from the runs that stayed inside, and reads systematically low.
+A sustained `improved` is treated the same way as a sustained `regressed` for the *history* — it is a real change, not spread, so admitting it would widen the width just as much. It is not a gate failure, because the gate exists to catch things getting slower.
 
-Measured on pass 6 of a six-pass sweep, among the ops that read `regressed` with a width already estimated: `a11y-app-scenario`'s `violation_report_batch` at 3.7 %, `design-check`'s `checkLayoutRegression` at 4.9 %, `grpc-app-scenario`'s `streaming_batch` at 5.2 %. An op recorded as moving 3.7 % had just moved more than 20 %.
+Once a deviation has been judged sustained, the ratio it holds stays out of the history even if the direction later changes. Without that, `regressed → regressed → stable` moves the second regression's ratio into the width — and that is the exact value the gate just failed on, so the same regression would read `stable` the next time. Measured on a history of `[1, 1, 1]` with ratios of `2.0`, `2.1`, `1.0`: the history becomes `[1, 1, 1, 2.1, 1]`, the width 110 %, and the effective threshold 220 %.
 
-Across the three warmed passes, 45 ops read `regressed` at least once and **39 of them did so in exactly one pass of three** — the same shape the top of this section describes, with the mechanism meant to absorb it already in place. The six passes read 18 / 19 / 21 / 6 / 27 / 21; the fourth is an outlier, not a trend, and a warmed history does not settle the count.
+An op that swings past its bound and comes back gains an entry describing exactly how far it swung, which is the observation its width was missing. An op that moves and stays moved gains nothing, so its own regression never widens its threshold. The report prints which of the two states an op is in, so a `regressed` row says whether it is the first occurrence or the one that fails the gate.
 
-Separating "estimate the width" from "decide the verdict" is what both problems need, and it requires state the baseline does not carry yet. Until then `regressionGate` stays off by default.
+**An op that deviates in one direction and stays there never accumulates history at all**, and that is the intended behaviour rather than a residue of the circularity above. The two cases are different: symmetric noise alternates direction and appends on every second run, while a persistent offset — a stale anchor, or a real change that was never re-baselined — appends nothing, because widening its width would make the offset read `stable`. The cost is that such an op is judged on the relative threshold alone for as long as the offset lasts. Re-measuring its anchor is the only thing that clears it.
+
+This shows up in the test suite as well: an integration test that measures the same workload repeatedly cannot assert that a width eventually becomes available, because a machine whose load changes mid-test produces exactly the persistent-offset shape. Those tests assert the routing rule per run and leave the convergence to a case that fills the history directly.
+
+##### The width was censored, and the delay uncensors it
+
+The `stable`-only rule censored the estimate: any run where the op moved past its bound was, by definition, not added. The width was therefore built only from the runs that stayed inside, and read systematically low.
+
+Measured on pass 6 of a six-pass sweep before the change, among the ops that read `regressed` with a width already estimated: `a11y-app-scenario`'s `violation_report_batch` at 3.7 %, `design-check`'s `checkLayoutRegression` at 4.9 %, `grpc-app-scenario`'s `streaming_batch` at 5.2 %. An op recorded as moving 3.7 % had just moved more than 20 %.
+
+Across the three warmed passes, 45 ops read `regressed` at least once and **39 of them did so in exactly one pass of three**. Those 39 are the excursions the held ratio now captures, and they were the bulk of what the estimate was missing.
+
+The delay does not slow warm-up. A `stable` run still appends immediately, so three passes still produce three entries; the width first shows up in the *fourth* pass because a verdict is computed against the baseline as it stood before that pass wrote to it. That was true before this change too. Measured over the six passes below, the count of ops with an estimated width is 0 / 0 / 0 / 474 / 484 / 487 out of 493 — the step at pass 4 is the read-before-write offset, not the hold.
+
+For an op whose runs are not all `stable`, the hold makes warm-up *faster* than the previous rule: a run judged `regressed` used to contribute nothing at all, and now contributes its ratio as soon as the following run moves off that direction.
 
 Two alternatives were rejected.
 
@@ -402,11 +420,34 @@ So `regressionGate` stays false by default. What changed is the size of the prob
 
 The waiver list drops from twelve to nine. Three ops are removed because the ratio width now measured over eight runs contradicts the raw-p10 figure their reason quoted: `cli-test`'s `readFile` (3.9 %, quoted 60-100 %), `cli-test`'s `writeFile` (7.9 %, quoted 100-322 %), and `visual`'s `comparePngBuffersFullDiff` (11.0 %, quoted 17-41 %). The remaining nine keep their waivers; their widths are real, and the mechanism widens their thresholds rather than removing the need for the marker.
 
+##### What the one-run delay measured, and what is left
+
+Six further passes over the whole suite, with the delayed append in place. The middle column is what the gate would fail on — a `regressed` verdict whose previous run was also `regressed`:
+
+| pass | ops the gate would fail | `regressed` verdicts |
+|---|---|---|
+| 1 | 0 | 11 |
+| 2 | 3 | 14 |
+| 3 | 2 | 9 |
+| 4 | 4 | 7 |
+| 5 | 4 | 14 |
+| 6 | 2 | 9 |
+
+Under the previous rule every one of those `regressed` verdicts failed the gate, and the same six passes read 18 / 19 / 21 / 6 / 27 / 21. The count of `regressed` verdicts also falls, because the widths now include the excursions that were being censored out of them.
+
+Seven ops account for the residue: `vector`'s `queryNearestTop5` in five passes of six, `remix`'s `invokeAction` in three, `go-lib-app-scenario`'s `rest_batch` and `edge-app-scenario`'s `kv_bound_batch` in two each, and `workflow-app-scenario`'s `event_trigger_batch`, `astro`'s `invokeEndpoint` and `core-app-scenario`'s `pool_lifecycle` in one each.
+
+`invokeEndpoint` is the useful case. It read `regressed` in all six passes under the previous rule and now fails in one, because its deviation from the anchor is not perfectly steady and the width finally sees the spread. `queryNearestTop5` is the opposite: its ratio sits about 25 % above its anchor in every pass, in the same direction, and it also breaches the measured absolute floor. That is a stale anchor rather than an op the estimate can absorb, and no width drawn from its own history will make it read `stable`.
+
+So `regressionGate` still stays false by default. Turning it on requires the remaining anchors to be re-measured, which is a change to the baseline data rather than to the judgment rule.
+
 ##### What the history may contain
 
-Only observations whose verdict was `stable`, plus the run that seeded the record. A run judged `regressed` is not evidence of how far the op drifts while unchanged, and storing it is actively harmful: an op that doubled would record a ratio 100 % from its anchor, which widens its own threshold to 200 % and makes the same doubling read `stable` on the next run. The regression would be reported once and then silently accepted. This was reproduced directly before being fixed.
+Observations shown not to persist, plus the run that seeded the record. A run judged `stable` enters directly. A run judged `regressed` or `improved` enters only once the following run has moved off that direction — until then it sits in `pendingRatio` and is not part of any estimate.
 
-Because regressions never enter the history, there is no need to discard it when one is detected — an earlier version did, and that turned out to be circular: an op whose verdict flipped from noise had its history cleared each time, never reached three entries, and never received the protection it needed. The ops with the shortest histories were exactly the ones failing the gate.
+Storing a persisting deviation is actively harmful: an op that doubled would record a ratio 100 % from its anchor, which widens its own threshold to 200 % and makes the same doubling read `stable` on the next run. The regression would be reported once and then silently accepted. This was reproduced directly before the rule was written, and the one-run delay is what keeps it out while still admitting the excursion that returns.
+
+Because persisting deviations never enter the history, there is no need to discard it when one is detected — an earlier version did, and that turned out to be circular: an op whose verdict flipped from noise had its history cleared each time, never reached three entries, and never received the protection it needed. The ops with the shortest histories were exactly the ones failing the gate.
 
 ### The experiment that led to in-run normalization
 
