@@ -319,19 +319,46 @@ describe('trivial', () => {
     expect(result.stderr).toMatch(/--packages-dir not found or not a directory/);
   });
 
-  it('--packages-dir が値なし / 空文字 / 別 flag なら exit 1 (cwd に落とさない) (#1780)', () => {
+  it('--packages-dir の値の取り違え 3 形を parseArgs が null にする (#1783)', async () => {
     // いずれも `path.resolve` が cwd を返す形。 既定へ倒すと呼んだ場所次第で別 root を
     // 黙って見に行く。 `--packages-dir --format json` は値の取り違えで、 `--format` を
     // path として食う。
+    //
+    // 3 形とも `parseArgs` が `packagesDir` を `null` にするだけで判定が完結するため、
+    // process を跨がずに見る (#1783)。 `main()` が exit 1 で止まることは次の test が
+    // spawn 1 本で確かめる。
+    const mod = (await import(
+      pathToFileURL(join(ROOT, 'scripts/kiwa-taxonomy-run.mjs')).href
+    )) as { parseArgs: (argv: string[]) => { packagesDir: string | null } };
+
     for (const argv of [
-      [CLI_PATH, '--category', 'fidelity', '--packages-dir'],
-      [CLI_PATH, '--category', 'fidelity', '--packages-dir', ''],
-      [CLI_PATH, '--category', 'fidelity', '--packages-dir', '--format', 'json'],
+      ['--category', 'fidelity', '--packages-dir'],
+      ['--category', 'fidelity', '--packages-dir', ''],
+      ['--category', 'fidelity', '--packages-dir', '--format', 'json'],
     ]) {
-      const result = spawnSync('node', argv, { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS });
-      expect(result.status, argv.join(' ')).toBe(1);
-      expect(result.stderr, argv.join(' ')).toMatch(/--packages-dir requires a non-empty path/);
+      expect(mod.parseArgs(argv).packagesDir, argv.join(' ')).toBeNull();
     }
+
+    // 正常な値を `null` に倒していないこと。 これが無いと「常に null を返す」 実装でも通る。
+    expect(mod.parseArgs(['--packages-dir', '/tmp/kiwa-packages']).packagesDir).toBe(
+      '/tmp/kiwa-packages',
+    );
+    // 未指定は既定 root のまま (null にしない)。
+    expect(mod.parseArgs(['--category', 'fidelity']).packagesDir).toBe(
+      join(ROOT, 'packages'),
+    );
+  });
+
+  it('値の取り違えで main が exit 1 + stderr に理由を出す (#1783)', () => {
+    // 上の in-process test は `parseArgs` の戻り値までしか見ない。 `main()` がその `null` を
+    // 受けて実際に停止することは、 3 形の代表 1 つを実起動して確かめる。
+    const result = spawnSync(
+      'node',
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir'],
+      { encoding: 'utf-8', timeout: SPAWN_TIMEOUT_MS },
+    );
+    expect(result.status, describeFailure(result)).toBe(1);
+    expect(result.stderr).toMatch(/--packages-dir requires a non-empty path/);
   });
 
   it('--packages-dir が相対 path なら exit 1 (#1780)', () => {

@@ -68,7 +68,17 @@ const CATEGORY_REAL_SUFFIX = {
 
 const VALID_CATEGORIES = Object.keys(CATEGORY_SUFFIX);
 
-function parseArgs(argv) {
+/**
+ * export するのは、 値の取り違えを単体で確かめるため (#1783)。
+ *
+ * `--packages-dir` の値なし / 空文字 / 次 token が別 flag の 3 形は、 いずれも
+ * `args.packagesDir` を `null` にするだけで判定が完結する。 以前はこの 3 形を
+ * `spawnSync` で実 CLI を 3 回起動して見ていたが、 増えるのは `node` の起動費だけで、
+ * 見たい分岐は process を跨がずに観測できる (`collectFiles` / `runPerfCell` と同じ理由)。
+ *
+ * `main()` が exit 1 で止まることは別途 spawn 1 本で確かめる。
+ */
+export function parseArgs(argv) {
   const args = {
     category: null,
     lib: null,
