@@ -37,7 +37,7 @@ pnpm exec vitest run test/unit/signup.test.ts
 
 ## runtime を追加する
 
-skill が生成する test で library を import する場合は、対象 package を project に追加します。共通の spec parser を使うなら `@kiwa-lab/core`、フォームなら `@kiwa-lab/form` のように、対象の library ページにある install command を使います。
+skill が生成する test で library を import する場合は、対象 package を project に追加します。共通の spec parser を使うなら `@kiwa-lab/core`、UI コンポーネントなら `@kiwa-lab/ui` のように、対象の library ページにある install command を使います。
 
 ```bash
 pnpm add -D @kiwa-lab/core

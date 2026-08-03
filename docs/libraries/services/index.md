@@ -4,15 +4,15 @@
 
 ## 外部へ送る処理
 
-メール送信は [email](./email/)、Push、SMS、アプリ内通知は [notification](./notification/)、ファイルの保存は [upload](./upload/) を選びます。署名付きの受信イベントと再試行は [webhook](./webhook/)、双方向接続は [websocket](./websocket/) が対象です。決済状態や billing webhook は [payment](./payment/) を使います。
+メール送信は [email](./email/) を選びます。決済状態や billing webhook は [payment](./payment/) を使います。
 
 ## データとバックグラウンド処理
 
-キャッシュの hit、miss、expiry は [cache](./cache/)、ORM 経由の query と transaction は [orm](./orm/)、schema の適用と rollback は [migration](./migration/) で扱います。ジョブの遅延、再試行、失敗隔離は [queue](./queue/)、長時間処理の進行と補償は [workflow](./workflow/) を選んでください。
+キャッシュの hit、miss、expiry は [cache](./cache/)、ORM 経由の query と transaction は [orm](./orm/) で扱います。ジョブの遅延、再試行、失敗隔離は [queue](./queue/) を選んでください。
 
-## 認証と通信の境界
+## 認証の境界
 
-session、OAuth、passkey は [auth](./auth/)、鍵、JWT、暗号化は [crypto](./crypto/)、feature flag の評価と rollout は [feature-flag](./feature-flag/) を参照します。GraphQL、gRPC、tRPC の server contract はそれぞれ [graphql](./graphql/)、[grpc](./grpc/)、[trpc](./trpc/) にあります。
+session、OAuth、passkey は [auth](./auth/) を参照します。
 
 ## 読み進め方
 

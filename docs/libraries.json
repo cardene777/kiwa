@@ -4,62 +4,128 @@
       "text": "基盤",
       "slug": "foundation",
       "packages": [
-        "core", "dapp", "e2e", "api", "ui", "cli", "cli-test", "component",
-        "data", "design-check", "kaname", "lean", "skill-test", "desktop", "mobile"
+        "core",
+        "dapp",
+        "e2e",
+        "api",
+        "ui",
+        "cli",
+        "cli-test",
+        "component",
+        "data",
+        "design-check",
+        "kaname",
+        "lean",
+        "skill-test",
+        "desktop",
+        "mobile"
       ]
-    },
-    {
-      "text": "アプリUI",
-      "slug": "application",
-      "packages": ["form", "state", "query", "chart", "date", "i18n", "react-native", "expo", "macos-app"]
     },
     {
       "text": "Webフレームワーク",
       "slug": "frameworks",
-      "packages": ["astro", "edge", "fresh", "hono", "nextjs", "nuxt", "qwikcity", "remix", "solidjs", "solidstart", "sveltekit"]
+      "packages": [
+        "astro",
+        "edge",
+        "fresh",
+        "hono",
+        "nextjs",
+        "nuxt",
+        "qwikcity",
+        "remix",
+        "solidjs",
+        "solidstart",
+        "sveltekit"
+      ]
     },
     {
       "text": "サービス",
       "slug": "services",
-      "packages": ["auth", "cache", "crypto", "email", "feature-flag", "graphql", "grpc", "migration", "notification", "orm", "payment", "queue", "trpc", "upload", "webhook", "websocket", "workflow"]
+      "packages": [
+        "auth",
+        "cache",
+        "email",
+        "orm",
+        "payment",
+        "queue"
+      ]
     },
     {
       "text": "AIとリアルタイム",
       "slug": "ai-realtime",
-      "packages": ["agent", "ai-llm", "mcp", "observability", "realtime", "search", "streaming", "vector", "visual"]
+      "packages": [
+        "agent",
+        "ai-llm",
+        "mcp",
+        "observability",
+        "realtime",
+        "search",
+        "streaming",
+        "visual"
+      ]
     },
     {
       "text": "品質とセキュリティ",
       "slug": "quality",
-      "packages": ["a11y", "perf-harness", "quality-metrics", "release-invariants", "security", "security-devsecops"]
-    },
-    {
-      "text": "言語アダプター",
-      "slug": "languages",
-      "packages": ["go-lib", "python", "ruby", "rust-lib"]
+      "packages": [
+        "a11y",
+        "perf-harness",
+        "quality-metrics",
+        "release-invariants",
+        "security",
+        "security-devsecops"
+      ]
     }
   ],
-
   "exemptDocuments": [
-    { "name": "kiwa", "category": "foundation", "label": "kiwa 全体" },
-    { "name": "go", "category": "native-languages", "label": "kiwa-test-go" },
-    { "name": "python", "category": "native-languages", "label": "kiwa-test-py" },
-    { "name": "rust", "category": "native-languages", "label": "kiwa-test-rs" }
+    {
+      "name": "kiwa",
+      "category": "foundation",
+      "label": "kiwa 全体"
+    },
+    {
+      "name": "go",
+      "category": "native-languages",
+      "label": "kiwa-test-go"
+    },
+    {
+      "name": "python",
+      "category": "native-languages",
+      "label": "kiwa-test-py"
+    },
+    {
+      "name": "rust",
+      "category": "native-languages",
+      "label": "kiwa-test-rs"
+    }
   ],
-
   "standaloneCategory": {
     "slug": "native-languages",
     "text": "ネイティブ言語"
   },
-
   "documentKinds": [
-    { "slug": "", "text": "概要" },
-    { "slug": "quickstart", "text": "はじめる" },
-    { "slug": "how-to", "text": "使い方" },
-    { "slug": "reference", "text": "リファレンス" }
+    {
+      "slug": "",
+      "text": "概要"
+    },
+    {
+      "slug": "quickstart",
+      "text": "はじめる"
+    },
+    {
+      "slug": "how-to",
+      "text": "使い方"
+    },
+    {
+      "slug": "reference",
+      "text": "リファレンス"
+    }
   ],
-
-  "requiredPages": ["index.md", "quickstart.md", "how-to.md", "reference.md"],
-
+  "requiredPages": [
+    "index.md",
+    "quickstart.md",
+    "how-to.md",
+    "reference.md"
+  ],
   "packageScope": "@kiwa-lab"
 }
