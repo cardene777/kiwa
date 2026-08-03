@@ -631,6 +631,30 @@ The load in that run was synthetic — CPU and allocation pressure from sibling 
 
 Two other candidates were rejected without needing a full measurement. Ignoring differences under Node's 8 KB pool granularity would quiet the `arrayBuffers` noise but leave an 8 KB-per-iteration `Buffer` leak invisible. Raising the iteration count until the pool saturates makes every measurement slower without addressing either the blindness or the drift.
 
+**Splitting the measured window in two and reading only the second half** was measured and rejected. The idea is that the first window absorbs whatever pool growth is still happening, so the second reports steady-state retention. Both conditions were run to completion over 177 packages and 493 ops.
+
+| | one window | two windows |
+|---|---|---|
+| ops over the cap | `driveObject` only | `driveObject` only |
+| `driveObject` | 29,152 B (pass) / 119,769 B on another sweep | **215,800 B (fail)** |
+| `cli-test`'s three ops | pass | pass |
+| ops whose \|value\| is larger | 63 | 46 |
+
+**The second window is not systematically smaller.** 63 against 46 with 384 unchanged is close to even, so the "the earlier window absorbs the pool growth" effect does not appear across the suite. And on the one op that actually breaches the cap it makes the verdict worse, turning a pass into a fail. Halving the samples per window is a real cost with nothing bought.
+
+The premise of the issue that proposed this had also expired. `file_scaffold_workflow` was recorded at 118,387 / 136,796 / 198,899 B against a 102,400 B cap, and none of that reproduces: fourteen measurements put the maximum at 27,334 B, 26.7 % of the cap.
+
+| condition | observed |
+|---|---|
+| default warmup, standalone × 4 | 0 / 19,342 / -16,398 / 0 B |
+| default warmup, standalone × 4 (conditions matched) | 0 / -87,476 / 0 / 0 B |
+| default warmup, full sweep × 2 | -34,442 / -41,898 B |
+| warmup 15, standalone × 4 | 27,334 / -12,708 / 0 / -15,708 B |
+
+The warmup added in #1730 (`max(3, ceil(memoryIterations / 10))`) covers it — that op runs 15 iterations, so it gets 3 warmup calls, the same condition this section already records as taking an fs-touching op from 24 KB to 0 B. Raising warmup fivefold does not lower the number further (19,342 → 27,334 B), which is consistent with the pool having already settled.
+
+So the waiver on that op came off without changing the axis. What did not get fixed is the axis itself: it still reports allocator behaviour rather than retention on fs-heavy work, and it is still blind to JS-heap retention. Both remain, for the reasons above.
+
 Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `ea99caa0a` then `a1a77cf9c`:
 
 | op | sweep 1 | sweep 2 |
@@ -644,6 +668,8 @@ Five ops exceeded the cap on `heapUsed` in both recorded sweeps. Raw bytes, `ea9
 Two observations do not separate retained application state from a repeatable runtime or allocator effect, so this is a list of candidates rather than a finding. None are gated today.
 
 The axis therefore stays as it is: `arrayBuffers` only, with `memoryGateWaived` for the fs-heavy ops where even that is decided by the allocator. What would replace it needs a channel that is both complete and stable under load, and neither of the two Node exposes is.
+
+Four replacements have now been measured and rejected — `heapUsed` as a second axis, in-run normalization against a reference op, a pool-granularity floor, and splitting the window in two. The first two were measured across the full suite; the third fails on inspection (an 8 KB-per-iteration leak sits exactly at the floor); the fourth was measured across the full suite and moves nothing in the aggregate while making the one real breach worse. Anyone proposing a fifth should read the four above first — three of them looked correct until they were measured against a sweep rather than a standalone run.
 
 `crypto`'s `ed25519_batch` shows the same axis reacting to load rather than to code. Run on its own it reports 0 B three times in a row; during one full-suite sweep it reported 168,960 B against a 100 KB cap, and the next sweep put it back at 0 B. It carries no waiver — a single non-reproducing breach is not evidence about the op — but it is worth recording that the axis moves with what else is running, which is the same reason the ops below carry one.
 
