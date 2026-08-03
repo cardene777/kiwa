@@ -15,6 +15,7 @@
  *   --category <name>   perf / fidelity / skill / integration のいずれか (必須)
  *   --lib <name>        単一 lib で実行 (省略 = 該当 lib 全走査)
  *   --format <fmt>      table (default) or json
+ *   --packages-dir <p>  lib を探す root を差し替える (default = <repo>/packages)
  *
  * 出力 = lib × 該当 category の matrix (table or JSON)、 exit code 0 = 全 pass、 1 = 1 件でも fail。
  */
@@ -26,7 +27,17 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG_PATH = join(ROOT, 'tests/release-smoke/test-taxonomy.config.json');
-const PACKAGES_DIR = join(ROOT, 'packages');
+/**
+ * lib を探す既定の root。 `--packages-dir` で差し替えられる。
+ *
+ * 差し替えを持つのは、 中身 chk 層 (minCases / expect 未呼出 / trivial) を確かめる側が
+ * 「その形をした lib」 を用意する必要があるため。 実 workspace の `packages/` に置くと、
+ * `packages/*` を走査する他の検査 (license / taxonomy meta lint / publish guard /
+ * release script filter) がそれを実 package と誤認する。 走査側は 7 file あり、 どれが
+ * 反応するかは置いた lib の属性 (private か / workspace: 依存を持つか) で入れ替わるため、
+ * 走査側に除外を配る形では塞ぎ切れない (#1780)。
+ */
+const DEFAULT_PACKAGES_DIR = join(ROOT, 'packages');
 
 const CATEGORY_SUFFIX = {
   perf: '.perf.ts',
@@ -50,11 +61,20 @@ const CATEGORY_REAL_SUFFIX = {
 const VALID_CATEGORIES = Object.keys(CATEGORY_SUFFIX);
 
 function parseArgs(argv) {
-  const args = { category: null, lib: null, format: 'table', includeReal: false };
+  const args = {
+    category: null,
+    lib: null,
+    format: 'table',
+    includeReal: false,
+    packagesDir: DEFAULT_PACKAGES_DIR,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === '--category') args.category = argv[++i];
     else if (a === '--lib') args.lib = argv[++i];
+    // 値なしで渡された形を default と混ぜない。 `resolve(undefined)` は cwd になるため、
+    // 黙って別 root を見に行く (main で弾く)。
+    else if (a === '--packages-dir') args.packagesDir = argv[++i] ?? null;
     else if (a === '--format') args.format = argv[++i];
     else if (a === '--include-real') args.includeReal = true;
     else if (a === '--help' || a === '-h') args.help = true;
@@ -65,7 +85,7 @@ function parseArgs(argv) {
 function printHelp() {
   process.stdout.write(`kiwa-taxonomy-run — test-taxonomy 分類別実行 chk\n\n`);
   process.stdout.write(`Usage:\n`);
-  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration|all> [--lib <name>] [--format <table|json>] [--include-real]\n\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category <perf|fidelity|skill|integration|all> [--lib <name>] [--packages-dir <path>] [--format <table|json>] [--include-real]\n\n`);
   process.stdout.write(`Examples:\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category skill --lib agent\n`);
@@ -78,9 +98,9 @@ function loadConfig() {
   return JSON.parse(readFileSync(CONFIG_PATH, 'utf-8'));
 }
 
-function listPackages() {
-  return readdirSync(PACKAGES_DIR).filter((name) => {
-    const pkgPath = join(PACKAGES_DIR, name);
+function listPackages(packagesDir = DEFAULT_PACKAGES_DIR) {
+  return readdirSync(packagesDir).filter((name) => {
+    const pkgPath = join(packagesDir, name);
     if (!statSync(pkgPath).isDirectory()) return false;
     return existsSync(join(pkgPath, 'package.json'));
   });
@@ -202,8 +222,8 @@ const DEFAULT_MIN_CASES = {
   integration: 5,
 };
 
-function runOneCell(lib, category, includeReal = false, config = null) {
-  const libDir = join(PACKAGES_DIR, lib);
+function runOneCell(lib, category, includeReal = false, config = null, packagesDir = DEFAULT_PACKAGES_DIR) {
+  const libDir = join(packagesDir, lib);
   const testDir = join(libDir, 'tests', category);
   const suffix = CATEGORY_SUFFIX[category];
   const realSuffix = CATEGORY_REAL_SUFFIX[category];
@@ -397,7 +417,7 @@ function runSingleCategory(category, args, config, allPackages) {
   const realTag = args.includeReal ? ' [+real]' : '';
   for (const lib of scope) {
     process.stderr.write(`[taxonomy-run] ${lib} × ${category}${realTag} ...`);
-    const r = runOneCell(lib, category, args.includeReal, config);
+    const r = runOneCell(lib, category, args.includeReal, config, args.packagesDir);
     results[lib] = r;
     process.stderr.write(` ${statusLabel(r)}\n`);
   }
@@ -437,8 +457,19 @@ async function main() {
     process.exit(1);
   }
 
+  if (args.packagesDir === null) {
+    process.stderr.write(`--packages-dir requires a path\n`);
+    process.exit(1);
+  }
+  args.packagesDir = resolve(args.packagesDir);
+  if (!existsSync(args.packagesDir)) {
+    // 存在しない root を黙って許すと、 全 lib が「対象なし」 になって 0 件 pass に見える。
+    process.stderr.write(`--packages-dir not found: "${args.packagesDir}"\n`);
+    process.exit(1);
+  }
+
   const config = loadConfig();
-  const allPackages = listPackages();
+  const allPackages = listPackages(args.packagesDir);
 
   if (args.lib && !allPackages.includes(args.lib)) {
     process.stderr.write(`unknown --lib "${args.lib}"\n`);

@@ -161,21 +161,22 @@ describe('Q5 test-taxonomy CLI shape', () => {
   });
 
   it('中身 chk 3 軸 = minCases 下限 / expect 未呼出 / trivial pattern を検出 (Q7、 CLI 単独 release-worthy 判定)', async () => {
-    // 一時 fixture lib で 3 pattern (insufficient-cases / missing-assertion / trivial-assertion)
-    // を再現、 各々 CLI が fail 判定するかを verify する。 CLI の 中身 chk 層は「file 揃ってる +
-    // 実行 pass」 の構造 gate に加えて「domain-specific 中身が空でない」 の質 gate を担う。
-    const { existsSync, mkdirSync, rmSync, writeFileSync } = await import('node:fs');
-    const { spawnSync } = await import('node:child_process');
-    const { join, resolve, dirname } = await import('node:path');
-    const { fileURLToPath } = await import('node:url');
-    const HERE = dirname(fileURLToPath(import.meta.url));
-    const ROOT = resolve(HERE, '..', '..', '..', '..');
-    const CLI = join(ROOT, 'scripts/kiwa-taxonomy-run.mjs');
+    // CLI の 中身 chk 層 (insufficient-cases / missing-assertion / trivial-assertion の 3 軸) は
+    // 「file 揃ってる + 実行 pass」 の構造 gate に加えて「domain-specific 中身が空でない」 の
+    // 質 gate を担う。 本 test は 3 軸のうち trivial-assertion を一時 fixture lib で再現し、
+    // CLI が fail 判定するかを verify する (残る 2 軸は fixture を踏ませていない)。
+    //
+    // fixture は実 workspace の外 (tmpdir) に置き、 CLI へは `--packages-dir` で渡す (#1780)。
+    // `packages/` 直下に作ると、 同じ suite で `packages/*` を走査する他 test が fixture を
+    // 実 package と誤認する。 vitest は file 間を並列に走らせるので、 fixture が生きている間に
+    // 走査側が動いた回だけ落ち、 落ちる test は実行ごとに変わった。
+    const { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
 
-    // fixture = packages/fixture-quality-gate 一時作成、 fidelity dir に trivial pattern 書出
-    const fixLib = join(ROOT, 'packages/fixture-quality-gate');
+    const sandbox = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-fixture-'));
+    const sandboxPackages = join(sandbox, 'packages');
+    const fixLib = join(sandboxPackages, 'fixture-quality-gate');
     const fixDir = join(fixLib, 'tests/fidelity');
-    if (existsSync(fixLib)) rmSync(fixLib, { recursive: true, force: true });
     mkdirSync(fixDir, { recursive: true });
     writeFileSync(join(fixLib, 'package.json'), JSON.stringify({ name: '@kiwa-lab/fixture-quality-gate', version: '0.0.0', private: true }));
 
@@ -195,14 +196,45 @@ describe('trivial', () => {
     try {
       const result = spawnSync(
         'node',
-        [CLI, '--category', 'fidelity', '--lib', 'fixture-quality-gate'],
+        [
+          CLI_PATH, '--category', 'fidelity', '--lib', 'fixture-quality-gate',
+          '--packages-dir', sandboxPackages,
+        ],
         { encoding: 'utf-8', timeout: 60_000 },
       );
-      expect(result.status).toBe(1);
+      expect(result.status, describeFailure(result)).toBe(1);
       expect(result.stdout).toMatch(/FAIL \(trivial/);
+
+      // fixture が生きている間、 実 workspace には現れない。 ここが破れると `packages/*` を
+      // 走査する検査 (license / taxonomy meta lint / publish guard / release script filter)
+      // が fixture を実 package と読んで落ちる。 どれが反応するかは fixture の属性で
+      // 入れ替わるため、 走査側ではなくこの 1 点で押さえる (#1780)。
+      expect(readdirSync(join(ROOT, 'packages'))).not.toContain('fixture-quality-gate');
     } finally {
-      rmSync(fixLib, { recursive: true, force: true });
+      rmSync(sandbox, { recursive: true, force: true });
     }
+  });
+
+  it('--packages-dir が実在しなければ exit 1 (#1780)', () => {
+    // 対象が 1 件も無い状態は「全 lib pass」 と区別が付かない。 root の指定ミスを
+    // 0 件 pass として通すと、 検査を外したことに気付けない。
+    const result = spawnSync(
+      'node',
+      [CLI_PATH, '--category', 'fidelity', '--packages-dir', join(ROOT, 'no-such-packages-root')],
+      { encoding: 'utf-8' },
+    );
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/--packages-dir not found/);
+  });
+
+  it('--packages-dir に値が無ければ exit 1 (cwd に落とさない) (#1780)', () => {
+    // 値なしを既定へ倒すと `path.resolve(undefined)` が cwd になり、 呼んだ場所次第で
+    // 別 root を黙って見に行く。
+    const result = spawnSync('node', [CLI_PATH, '--category', 'fidelity', '--packages-dir'], {
+      encoding: 'utf-8',
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/--packages-dir requires a path/);
   });
 });
 

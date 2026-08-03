@@ -170,7 +170,10 @@ pnpm test:taxonomy -- --category fidelity --include-real
 - `--lib <name>` = 単一 lib 指定 (省略 = config 記載の該当 lib 全走査)
 - `--format <fmt>` = table (default) or json
 - `--include-real` = `*.real.<category>.test.ts` (real driver test) を実行対象に含める、 KIWA_MODE=real env auto 注入
+- `--packages-dir <path>` = lib を探す root を差し替える (default = `<repo>/packages`)、 実在しない path と値なしは exit 1
 - exit code = 0 (全 pass) / 1 (1 件でも fail or compile-fail)
+
+`--packages-dir` は CLI 自身を検査する test のためにある。 中身 chk 層 (minCases / expect 未呼出 / trivial) を確かめるには「その形をした lib」 が要るが、 それを実 `packages/` に置くと `packages/*` を走査する他の検査が実 package と誤認する。 反応する走査側は置いた lib の属性で入れ替わるため、 走査側に除外を配るのではなく fixture を外に出す (#1780)。
 
 **出力例**。
 
