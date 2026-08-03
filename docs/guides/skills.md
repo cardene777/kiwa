@@ -5,7 +5,7 @@ description: Claude Code に kiwa の skill を導入し、テスト設計から
 
 # kiwa の skill を使う
 
-kiwa のライブラリは、テストで使う runtime と、テストを設計・生成・レビューする Claude Code skill を分けています。`@kiwa-lab/form` のような package はアプリケーションの test から import します。`/kiwa:kiwa-form` のような skill は、その package を使う test のたたき台を作る入口です。skill が package を実行時に置き換えることはありません。
+kiwa のライブラリは、テストで使う runtime と、テストを設計・生成・レビューする Claude Code skill を分けています。`@kiwa-lab/ui` のような package はアプリケーションの test から import します。`/kiwa:kiwa-ui` のような skill は、その package を使う test のたたき台を作る入口です。skill が package を実行時に置き換えることはありません。
 
 ## 導入する
 
@@ -17,7 +17,7 @@ Claude Code で、対象プロジェクトを開いてから次を順に実行�
 /reload-plugins
 ```
 
-導入後の skill 名には `kiwa:` が付きます。たとえば repository 内で `/kiwa-form` と表記される skill は、plugin を導入したプロジェクトでは `/kiwa:kiwa-form` と実行します。package を使う各ページでは、plugin 用の完全な名前でコマンドを示します。
+導入後の skill 名には `kiwa:` が付きます。たとえば repository 内で `/kiwa-ui` と表記される skill は、plugin を導入したプロジェクトでは `/kiwa:kiwa-ui` と実行します。package を使う各ページでは、plugin 用の完全な名前でコマンドを示します。
 
 ## 実行する順序
 

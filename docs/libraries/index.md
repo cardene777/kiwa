@@ -5,17 +5,17 @@ description: テスト対象の境界から kiwa のライブラリを選ぶ。
 
 # kiwa ライブラリ
 
-kiwa は、アプリケーションが外部と接する場所ごとに選べる 74 のテストライブラリ群です。TypeScript package に加え、Go、Python、Rust のネイティブライブラリがあります。各ページは README、public export、代表 test を根拠にしています。まずテストしたい境界を決め、そこで必要な最小のライブラリだけを選んでください。
+kiwa は、アプリケーションが外部と接する場所ごとに選べる 49 のテストライブラリ群です。TypeScript package に加え、Go、Python、Rust のネイティブライブラリがあります。各ページは README、public export、代表 test を根拠にしています。まずテストしたい境界を決め、そこで必要な最小のライブラリだけを選んでください。
 
-<img src="/images/kiwa-docs/library-catalog.webp" alt="テスト対象から八つのライブラリカテゴリを選ぶ流れ" width="1693" height="929" loading="lazy" decoding="async">
+<img src="/images/kiwa-docs/library-catalog.webp" alt="テスト対象からライブラリカテゴリを選ぶ流れ" width="1693" height="929" loading="lazy" decoding="async">
 
 ## テスト対象から選ぶ
 
-HTTP、ブラウザ、CLI、dApp、端末などアプリケーションそのものの境界を扱う場合は [基盤](./foundation/) を開きます。フォーム、状態、query、日付、翻訳、アプリの端末 API は [アプリケーション](./application/) にあります。Next.js、Nuxt、Hono、Remix の route と server handler は [フレームワーク](./frameworks/) を選んでください。
+HTTP、ブラウザ、CLI、dApp、端末などアプリケーションそのものの境界を扱う場合は [基盤](./foundation/) を開きます。Next.js、Nuxt、Hono、Remix の route と server handler は [フレームワーク](./frameworks/) を選んでください。
 
-認証、決済、メール、ストレージ、queue、workflow のように外部サービスとやり取りする処理は [サービス](./services/) が対象です。LLM、agent、検索、イベント配信、画像比較は [AI とリアルタイム](./ai-realtime/) にあります。a11y、性能、release gate、security evidence をテスト結果へ組み込む場合は [品質](./quality/) を参照します。
+認証、決済、メール、キャッシュ、queue のように外部サービスとやり取りする処理は [サービス](./services/) が対象です。LLM、agent、検索、イベント配信、画像比較は [AI とリアルタイム](./ai-realtime/) にあります。a11y、性能、release gate、security evidence をテスト結果へ組み込む場合は [品質](./quality/) を参照します。
 
-TypeScript のテストから Go、Python、Ruby、Rust の Web アプリを扱う場合は [言語アダプター](./languages/) を選びます。それぞれの言語の標準 test runner で直接使う場合は [ネイティブ言語](./native-languages/) を使います。
+Go、Python、Rust の標準 test runner で直接使う場合は [ネイティブ言語](./native-languages/) を選びます。
 
 ## ページの役割
 

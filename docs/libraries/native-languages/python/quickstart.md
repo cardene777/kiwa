@@ -67,7 +67,7 @@ pytest -q tests/test_items_spec.py
 
 ## skill との関係
 
-`kiwa-test-py` 用に Python test を直接生成する companion skill はありません。`/kiwa:kiwa-python` は TypeScript package の `@kiwa-lab/python` を対象にする別の skill です。仕様 Markdown を作る場合は、初回だけ kiwa plugin を導入して対象の API や画面に合う design skill を実行します。
+`kiwa-test-py` 用に Python test を直接生成する companion skill はありません。仕様 Markdown を作る場合は、初回だけ kiwa plugin を導入して対象の API や画面に合う design skill を実行します。
 
 ```text
 /plugin marketplace add cardene777/kiwa

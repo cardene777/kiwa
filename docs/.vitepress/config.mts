@@ -675,10 +675,6 @@ export default defineConfig({
           text: 'Composition patterns (v2.8、 SaaS + backend + mobile + DevX + infra 26 lib composition)',
           items: [
             { text: '200 — Email transactional flow (Resend + template + webhook signature verify)', link: '/tutorials/200-email-transactional' },
-            { text: '201 — Crypto pipeline (JWT RS256 + RSA + AES-GCM + hash + HMAC + X.509)', link: '/tutorials/201-crypto-jwt-flow' },
-            { text: '202 — Vector RAG pipeline (Pinecone upsert + top-k + metadata filter + LLM context)', link: '/tutorials/202-vector-rag-pipeline' },
-            { text: '203 — GraphQL server + typed client + subscription (Apollo)', link: '/tutorials/203-graphql-server-client' },
-            { text: '204 — macOS native app (SwiftUI + AppKit + accessibility + notification)', link: '/tutorials/204-macos-app-a11y' },
           ],
         },
       ],
@@ -884,56 +880,6 @@ export default defineConfig({
           text: 'SaaS',
           items: [
             { text: 'email', link: '/api/email' },
-            { text: 'webhook', link: '/api/webhook' },
-            { text: 'feature-flag', link: '/api/feature-flag' },
-            { text: 'upload', link: '/api/upload' },
-            { text: 'notification', link: '/api/notification' },
-            { text: 'vector', link: '/api/vector' },
-            { text: 'graphql', link: '/api/graphql' },
-            { text: 'trpc', link: '/api/trpc' },
-            { text: 'i18n', link: '/api/i18n' },
-            { text: 'workflow', link: '/api/workflow' },
-          ],
-        },
-        {
-          text: 'バックエンド言語',
-          items: [
-            { text: 'python', link: '/api/python' },
-            { text: 'ruby', link: '/api/ruby' },
-            { text: 'rust-lib', link: '/api/rust-lib' },
-            { text: 'go-lib', link: '/api/go-lib' },
-          ],
-        },
-        {
-          text: 'モバイル',
-          items: [
-            { text: 'react-native', link: '/api/react-native' },
-            { text: 'expo', link: '/api/expo' },
-          ],
-        },
-        {
-          text: 'プラットフォーム',
-          items: [
-            { text: 'macos-app', link: '/api/macos-app' },
-          ],
-        },
-        {
-          text: 'DevX',
-          items: [
-            { text: 'form', link: '/api/form' },
-            { text: 'state', link: '/api/state' },
-            { text: 'query', link: '/api/query' },
-            { text: 'date', link: '/api/date' },
-            { text: 'chart', link: '/api/chart' },
-          ],
-        },
-        {
-          text: 'インフラ',
-          items: [
-            { text: 'crypto', link: '/api/crypto' },
-            { text: 'migration', link: '/api/migration' },
-            { text: 'websocket', link: '/api/websocket' },
-            { text: 'grpc', link: '/api/grpc' },
           ],
         },
       ],

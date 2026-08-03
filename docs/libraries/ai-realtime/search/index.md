@@ -18,4 +18,4 @@ index operation と search option を分けて渡します。文書を追加、�
 
 ## 読み進める
 
-[Quickstart](./quickstart) で文書を登録して検索し、[使い方](./how-to) で filter、更新、削除を同じ test file に追加します。embedding の近傍検索は [Vector](/libraries/ai-realtime/vector/)、LLM へ渡す検索結果は [AI LLM](/libraries/ai-realtime/ai-llm/) と組み合わせます。adapter API は [リファレンス](./reference) にあります。
+[Quickstart](./quickstart) で文書を登録して検索し、[使い方](./how-to) で filter、更新、削除を同じ test file に追加します。LLM へ渡す検索結果は [AI LLM](/libraries/ai-realtime/ai-llm/) と組み合わせます。adapter API は [リファレンス](./reference) にあります。

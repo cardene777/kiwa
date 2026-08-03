@@ -1,6 +1,6 @@
 # Multi-provider mock pattern
 
-kiwa は SaaS domain (email / webhook / feature-flag / upload / notification / vector / graphql / trpc / i18n / workflow / auth / cache / queue / search / streaming / ai-llm / realtime / payment / orm / agent / mcp) の各 lib で「複数 provider を統一 interface で mock する」 pattern を採用する。 本 doc はその設計思想 + 実装 SSOT。
+kiwa は SaaS domain (email / auth / cache / queue / search / streaming / ai-llm / realtime / payment / orm / agent / mcp) の各 lib で「複数 provider を統一 interface で mock する」 pattern を採用する。 本 doc はその設計思想 + 実装 SSOT。
 
 ## Why (なぜ統一 interface か)
 
@@ -57,26 +57,6 @@ test 間で state を reset、 `beforeEach(() => client.clear())` pattern で te
 | 分類 | lib | provider 数 |
 |---|---|---|
 | email | @kiwa-lab/email | 4 (Resend / SendGrid / Postmark / SES) |
-| webhook | @kiwa-lab/webhook | 4 (Stripe / GitHub / Slack / Twilio) |
-| feature-flag | @kiwa-lab/feature-flag | 4 (GrowthBook / LaunchDarkly / PostHog / Unleash) |
-| upload | @kiwa-lab/upload | 4 (S3 / GCS / R2 / Cloudinary) |
-| notification | @kiwa-lab/notification | 5 (FCM / APNs / Twilio / SNS / inapp) |
-| vector | @kiwa-lab/vector | 4 (Pinecone / Weaviate / Qdrant / pgvector) |
-| graphql | @kiwa-lab/graphql | 4 (Apollo / Yoga / urql / Relay) |
-| i18n | @kiwa-lab/i18n | 4 (next-intl / vue-i18n / react-i18next / Lingui) |
-| workflow | @kiwa-lab/workflow | 4 (Temporal / Inngest / Trigger.dev / Step Functions) |
-| form | @kiwa-lab/form | 4 (React Hook Form / Zod / Formik / Conform) |
-| state | @kiwa-lab/state | 5 (Zustand / Redux / Jotai / Valtio / MobX) |
-| query | @kiwa-lab/query | 4 (TanStack Query / SWR / urql / Apollo Client) |
-| date | @kiwa-lab/date | 4 (date-fns / dayjs / Luxon / Temporal) |
-| chart | @kiwa-lab/chart | 4 (Recharts / Chart.js / D3 / Visx) |
-| migration | @kiwa-lab/migration | 4 (Prisma / Drizzle / Kysely / Knex) |
-| websocket | @kiwa-lab/websocket | 4 (ws / uWebSockets / Socket.IO / Colyseus) |
-| grpc | @kiwa-lab/grpc | 4 (grpc-js / nice-grpc / twirp / connect-rpc) |
-| python | @kiwa-lab/python | 4 (Django / Flask / FastAPI / Starlette) |
-| ruby | @kiwa-lab/ruby | 4 (Rails / Sinatra / Roda / Hanami) |
-| rust-lib | @kiwa-lab/rust-lib | 4 (axum / actix-web / tower-http / rocket) |
-| go-lib | @kiwa-lab/go-lib | 4 (gin / echo / fiber / chi) |
 
 計 22 lib で 5 primitive の統一 pattern を採用。
 

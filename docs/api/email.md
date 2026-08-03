@@ -88,4 +88,3 @@ console.log(event.type, event.emailId); // delivered re-1
 ## Related skills
 
 - [`/kiwa-email`](../skills/kiwa-email) — email test 生成 skill
-- [`/kiwa-webhook`](../skills/kiwa-webhook) — webhook signature verify test (related)
