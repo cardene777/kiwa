@@ -45,7 +45,8 @@ wall clockのsub millisecond測定はOS schedulerの影響を受けます。共�
 | <code v-pre>&#96;$&#123;PRUNE&#95;MANIFEST&#95;PATH&#95;ENV&#125; は絶対 path で指定する (受け取った値 = $&#123;override&#125;)。&#96; + ' 相対 path は書く側と読む側で別の file を指すため受け取れない。'</code> | [packages/perf-harness/src/prune-manifest.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/prune-manifest.ts#L64) |
 | <code v-pre>unreachable</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L134) |
 | <code v-pre>&#96;createReferenceOps: 未知の基準 op の種類 $&#123;JSON.stringify(kind)&#125;。&#96; + &#96; 使える値は $&#123;REFERENCE&#95;KINDS.join(' / ')&#125;。&#96;</code> | [packages/perf-harness/src/reference.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/reference.ts#L160) |
-| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L994) |
+| <code v-pre>Could not resolve repo root from $&#123;start&#125;</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L1070) |
+| <code v-pre>&#96;perf op 名が重複しています: $&#123;&#91;...duplicated&#93;.sort().join(', ')&#125;。&#96; + ' baseline は op 名で記録を引くため、 重複すると記録と履歴が混ざります。'</code> | [packages/perf-harness/src/three-layer.ts](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L313) |
 
 ## API 契約
 

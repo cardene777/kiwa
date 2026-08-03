@@ -41,7 +41,12 @@ import {
   loadBaselineSnapshot,
   saveBaselineEnvelope,
 } from './baseline.js';
-import { applyRatioHistory, planBaselineWrite, uncomparableVerdict } from './baseline-write.js';
+import {
+  applyRatioHistory,
+  planBaselineWrite,
+  resolvePendingRatio,
+  uncomparableVerdict,
+} from './baseline-write.js';
 import type { RatioHistoryUpdate } from './baseline-write.js';
 import { recordPruneManifest } from './prune-manifest.js';
 import type { UncomparableVerdict } from './baseline-write.js';
@@ -240,6 +245,18 @@ export interface OpOutcome {
    */
   regressionVerdict: 'stable' | 'improved' | 'regressed' | UncomparableVerdict;
   /**
+   * `regressed` が 2 回続いたか (#1770)。
+   *
+   * `regressionGate` はこの値で落とす。 1 回の実行で落とすと、 その op の揺れと
+   * 持続的なずれを見分けられない。 全 493 op を 6 パス測った実測では、 判定が
+   * `regressed` になるのが 1 パスあたり 7-14 op で、 そのうち前回も同じ方向
+   * だったのは 0-4 op だった。
+   *
+   * 幅で抑える形は、 抑える相手 (大きく動いた実行) が幅の推定から除かれるため
+   * 原理的に届かない。 続くかどうかは実行をまたいだ事実なので、 幅とは独立に読める。
+   */
+  sustainedRegression: boolean;
+  /**
    * verdict だけでは伝わらない判定の状態。 stable の理由が「変化が無い」 なのか
    * 「差が絶対下限に届かず判定できない」 なのかを report 読者に見せるために持つ。
    * 補足が要らない場合は undefined。
@@ -278,7 +295,34 @@ function resolveThresholdDocLink(reportPath: string): string {
   return relative.split(path.sep).join('/');
 }
 
+/**
+ * op 名が重複していないことを確かめる。
+ *
+ * baseline の key は `${op.name}.serial` / `${op.name}.concurrent` で、 op 名だけで
+ * 引く。 同じ名前が 2 つあると後の op が前の記録を上書きし、 履歴と預かりは前の op が
+ * 残したものを後の op が読む。 名前で引ける前提が崩れるので、 測る前に止める。
+ */
+function assertUniqueOpNames(ops: readonly PerfOpSpec[]): void {
+  const seen = new Set<string>();
+  const duplicated = new Set<string>();
+  for (const op of ops) {
+    if (seen.has(op.name)) duplicated.add(op.name);
+    seen.add(op.name);
+  }
+  if (duplicated.size > 0) {
+    throw new Error(
+      `perf op 名が重複しています: ${[...duplicated].sort().join(', ')}。` +
+        ' baseline は op 名で記録を引くため、 重複すると記録と履歴が混ざります。',
+    );
+  }
+}
+
 export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult> {
+  // op 名は baseline の key (`${name}.serial` / `.concurrent`) そのもの。 重複すると
+  // 記録が最後の op で上書きされ、 前回の預かり (#1770) も別の op のものを読む。
+  // 黙って混ざると「別の op の退行が 2 回続いた」 ことになって gate が誤って落ちる。
+  // 測る前に止める = 混ざった記録が baseline に残らない。
+  assertUniqueOpNames(input.ops);
   const serialIterations = input.serialIterations ?? 200;
   const serialWarmup = input.serialWarmup ?? 5;
   const concurrency = input.concurrency ?? 10;
@@ -423,21 +467,42 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       // 比較が成立しなかった実行でも積む。 baseline を作った実行の値もその op の
       // 1 観測で、 除くと幅を推定できるまでに 1 回よけいに掛かる。 記録を入れ替えた
       // 実行では入れ替え後の record に積むので、 古い実装の値は混ざらない。
-      // この実行で観測した比を控える。 次の実行が「その op が実行をまたいでどれだけ
-      // 動くか」 を推定するのに使う (#1739)。
       //
-      // **積むのは verdict が stable の実行と、 比較しなかった実行だけ**。 退行した
-      // 実行の比を積むと、 その値が幅を押し広げて次回の実効閾値が退行そのものを
-      // 覆う大きさになり、 同じ退行が stable として通る (実測 = anchor の 2 倍へ
-      // 悪化した op の幅が 100% になり、 実効閾値 200% で delta 100% が収まる)。
+      // 退行 / 改善と判定した実行の比は、 その場で積まず 1 実行預ける (#1770)。
+      // 次の実行で同じ方向が続かなければ「一度きりの跳ね」 として積み、 続けば
+      // 持続的なずれとみなして捨てる。 判定と履歴の解決は `applyRatioHistory` が行う。
       //
-      // 幅が表すのは「実装が同じまま値がどれだけ動くか」 なので、 退行と判定した
-      // 観測はその定義に当てはまらない。
+      // その場で捨てていた頃は、 その op が実際に見せた振れ幅が推定から抜け落ちて
+      // 幅が系統的に小さく出ていた (実測 = 幅 3.7% と記録された op が 20% 超動く)。
+      // その場で積むと、 持続する退行が自分の幅を広げて同じ退行が stable として通る。
+      //
+      // 比を作れなかった実行でも指示は出す。 出さないと前回の預かりが解決されず、
+      // 何実行も後の `regressed` が「2 回連続」 になる (#1770 review 指摘 2)。
+      // 積む値が無いことは `ratio` を省くことで伝える。
       const ratio = observedRatio(serial);
       const verdictForHistory = regression?.verdict;
-      if (ratio !== null && (verdictForHistory === undefined || verdictForHistory === 'stable')) {
-        ratioUpdates.set(`${op.name}.serial`, { ratio });
-      }
+      ratioUpdates.set(`${op.name}.serial`, {
+        ...(ratio === null ? {} : { ratio }),
+        ...(verdictForHistory === undefined ? {} : { verdict: verdictForHistory }),
+      });
+
+      // 同じ方向の判定が 2 回続いたか。 gate はこれを見る (#1770)。
+      //
+      // 1 回の実行で落とすと、 その op の揺れと持続的なずれを見分けられない。
+      // 幅で抑える形は、 抑える相手 (大きく動いた実行) が推定から除かれるため
+      // 原理的に届かない。 続くかどうかは実行をまたいだ事実なので、 幅の推定とは
+      // 独立に読める。
+      //
+      // 判定は履歴を積む側と同じ関数で行う。 別に書くと、 gate が落とす条件と
+      // 履歴が伸びない条件がずれて「落ちたのに幅が広がる」 状態を作れてしまう。
+      const sustainedRegression =
+        regression?.verdict === 'regressed' &&
+        resolvePendingRatio(
+          priorSerial?.pendingRatio,
+          priorSerial?.pendingVerdict,
+          regression.verdict,
+          priorSerial?.pendingSustained,
+        ).sustained;
 
       combinedForBaseline[`${op.name}.serial`] = serial;
       combinedForBaseline[`${op.name}.concurrent`] = concurrent;
@@ -451,6 +516,7 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
         serialGatePassed: serialGate.verdict.passed,
         concurrentGatePassed: concurrentGate.verdict.passed,
         memoryGatePassed,
+        sustainedRegression,
         regressionVerdict: regression
           ? regression.verdict
           : uncomparableVerdict(priorSerial !== undefined, false),
@@ -507,8 +573,10 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
   // 動かさない。 履歴は「その op が実行をまたいでどれだけ動くか」 を推定するためだけの
   // もので、 次の実行の有意性判断に使う (#1739)。
   //
-  // 判定が振れた op は履歴を捨てて積み直す。 実装が変わった前後の値を混ぜると幅が
-  // 過大になり、 その op の gate が二度と発火しなくなる。
+  // 既存の履歴は捨てない。 未確定の比 (退行 / 改善と判定した実行の値) だけを
+  // 次の実行まで預け、 一度きりの跳ねと判ってから積む (#1770)。 実装が変わった前後の
+  // 値を混ぜると幅が過大になり、 その op の gate が二度と発火しなくなるため、
+  // 持続的なずれと判った値は預かりごと捨てる。
   const historyBase = plan.written ? plan.results : (priorBaseline ?? {});
   const history = applyRatioHistory(historyBase, ratioUpdates, MAX_RATIO_HISTORY);
 
@@ -561,7 +629,9 @@ export async function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3
       outcome.serialGatePassed &&
       outcome.concurrentGatePassed &&
       outcome.memoryGatePassed &&
-      (!regressionGated || outcome.regressionVerdict !== 'regressed')
+      // 1 回の `regressed` では落とさない。 同じ方向が 2 回続いた時だけ落とす (#1770)。
+      // 判定そのものは report に出るので、 一度きりの跳ねも読み取れる。
+      (!regressionGated || !outcome.sustainedRegression)
     );
   });
 
@@ -680,9 +750,15 @@ function waiverReason(raw: string | undefined): string | undefined {
  * 外れている理由 (呼出全体で無効 / この op だけ除外) を同じ列に出す。
  */
 function regressionCell(op: PerfOpSpec, outcome: OpOutcome, regressionGate: boolean): string {
-  const verdict = outcome.regressionNote
+  const base = outcome.regressionNote
     ? `${outcome.regressionVerdict} (${outcome.regressionNote})`
     : outcome.regressionVerdict;
+  // 退行が 1 回目か 2 回続いたかを出す。 gate はこの違いで落とすので、 出さないと
+  // 同じ `regressed` の行がなぜ落ちたり落ちなかったりするのかが読めない (#1770)。
+  const verdict =
+    outcome.regressionVerdict === 'regressed'
+      ? `${base} — ${outcome.sustainedRegression ? '2 回連続' : '1 回目 (次も続けば gate)'}`
+      : base;
   if (!regressionGate) return `${verdict} — gate 無効 (regressionGate=false)`;
   const waiver = waiverReason(op.regressionGateWaived);
   if (waiver === undefined || waiver.length === 0) return verdict;

@@ -508,21 +508,31 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
       ...settings,
     });
 
-    const slowed = await runPerf3Layer({
+    const slowedInput = (report: string) => ({
       moduleName: 'inrun-3x',
       ops: [{ name: 'op', fn: burn(0.9), serialP95CapMs: 10_000 }],
-      reportPath: join(tmpDir, 'r2.md'),
+      reportPath: join(tmpDir, report),
       baselinePath,
       // 既定では判定を gate に載せないので、 検知そのものを見るために明示する。
       regressionGate: true,
       ...settings,
     });
 
+    const slowed = await runPerf3Layer(slowedInput('r2.md'));
+
     expect(slowed.outcomes[0]!.regression?.normalized).toBe(true);
     expect(slowed.outcomes[0]!.regressionVerdict).toBe('regressed');
     // 上限には収まっているので、 落ちたのは回帰判定だけ。
     expect(slowed.outcomes[0]!.serialGatePassed).toBe(true);
-    expect(slowed.allPassed).toBe(false);
+    // 1 回目は落とさない。 その op の揺れと持続的なずれを 1 回では見分けられない (#1770)。
+    expect(slowed.outcomes[0]!.sustainedRegression).toBe(false);
+    expect(slowed.allPassed).toBe(true);
+
+    // 同じ遅延のまま 2 回目。 続いたので持続的なずれと判る。
+    const again = await runPerf3Layer(slowedInput('r3.md'));
+    expect(again.outcomes[0]!.regressionVerdict).toBe('regressed');
+    expect(again.outcomes[0]!.sustainedRegression).toBe(true);
+    expect(again.allPassed).toBe(false);
   });
 
   it('上限の判定は 3 軸すべて実測値のまま (正規化は回帰判定にしか効かない)', async () => {

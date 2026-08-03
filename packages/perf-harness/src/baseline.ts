@@ -537,12 +537,34 @@ function hasValidRatioHistory(candidate: Record<string, unknown>): boolean {
   );
 }
 
+/**
+ * 預かり (#1770) が読める形か。 無いのは正常 (預かりを持たない世代 / 直前が stable)。
+ *
+ * 比と方向は対で意味を持つ。 片方だけの形は下の 2 つの検査が落とすので、 対である
+ * ことを別に確かめない (確かめても結果が変わらない分岐になる)。
+ *
+ * 壊れた値を通すと、 次の実行でそれがそのまま履歴に移る。 履歴は幅の推定に使うので、
+ * 数でない値が 1 つ入るだけで閾値が `NaN` になり、 比較が全て偽になって何倍悪化しても
+ * `stable` が出る。 `ratioHistory` と同じく、 読めない記録として seed し直させる。
+ */
+function hasValidPendingRatio(candidate: Record<string, unknown>): boolean {
+  const { pendingRatio, pendingVerdict } = candidate;
+  if (pendingRatio === undefined && pendingVerdict === undefined) return true;
+  if (typeof pendingRatio !== 'number' || !Number.isFinite(pendingRatio) || pendingRatio <= 0) {
+    return false;
+  }
+  if (pendingVerdict !== 'regressed' && pendingVerdict !== 'improved') return false;
+  const { pendingSustained } = candidate;
+  return pendingSustained === undefined || typeof pendingSustained === 'boolean';
+}
+
 function isMeasureResult(value: unknown): value is MeasureResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
   if (typeof candidate.name !== 'string') return false;
   if (!hasValidReference(candidate)) return false;
   if (!hasValidRatioHistory(candidate)) return false;
+  if (!hasValidPendingRatio(candidate)) return false;
   if (!Array.isArray(candidate.samples)) return false;
   // 2 件未満の記録は比較対象にならない。 bootstrap CI がこの件数で退化 CI ({0,0}) を
   // 返すため、 そのまま読むと何倍悪化しても有意にならず永久に stable になる。
@@ -670,6 +692,11 @@ function backfillDerivedStats(result: MeasureResult): MeasureResult {
   // 実行間のばらつきを永久に推定できなくなる、 #1739)。
   if (result.reference !== undefined) rebuilt.reference = result.reference;
   if (result.ratioHistory !== undefined) rebuilt.ratioHistory = result.ratioHistory;
+  // 預かり中の比も同じ理由で運ぶ。 落とすと「前回も退行だった」 が読めなくなり、
+  // 持続的なずれが毎回 1 回目として扱われて gate が永久に落ちない (#1770)。
+  if (result.pendingRatio !== undefined) rebuilt.pendingRatio = result.pendingRatio;
+  if (result.pendingVerdict !== undefined) rebuilt.pendingVerdict = result.pendingVerdict;
+  if (result.pendingSustained !== undefined) rebuilt.pendingSustained = result.pendingSustained;
   return rebuilt;
 }
 

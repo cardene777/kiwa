@@ -399,9 +399,9 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       ...settings,
     });
 
-    // 2 回目は明確に遅くする。cap には収まるが 20% を大きく超える悪化なので
-    // gate は落ちる (docs/quality/perf-thresholds.md § Regression detection defaults)。
-    const slowed = await runPerf3LayerStrict({
+    // 2 回目以降は明確に遅くする。cap には収まるが 20% を大きく超える悪化。
+    // gate は同じ方向が 2 回続いた時に落ちる (#1770)。
+    const slowedInput = (report: string) => ({
       moduleName: 'regression-gate',
       ops: [
         {
@@ -415,24 +415,35 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
           serialP95CapMs: 10_000,
         },
       ],
-      reportPath: join(tmpDir, 'r2.md'),
+      reportPath: join(tmpDir, report),
       baselinePath,
       // 回帰判定を gate に載せるかは呼出側が決める (既定は false)。
       regressionGate: true,
       ...settings,
     });
 
+    const slowed = await runPerf3LayerStrict(slowedInput('r2.md'));
+
     expect(slowed.outcomes[0]!.regressionVerdict).toBe('regressed');
     expect(slowed.outcomes[0]!.serialGatePassed).toBe(true);
-    expect(slowed.allPassed).toBe(false);
+    // 1 回目は判定に出すが gate は落とさない。
+    expect(slowed.outcomes[0]!.sustainedRegression).toBe(false);
+    expect(slowed.allPassed).toBe(true);
 
     // 感度の補足は「まだ検知に至っていない」 行の説明なので、検知できた行には
     // 付けない。付けると report 上で「regressed」 と「検知には … が必要」 が
     // 同じ行に並び、判定と矛盾して読める (#1708)。
     expect(slowed.outcomes[0]!.regressionNote).toBeUndefined();
     const report = readFileSync(join(tmpDir, 'r2.md'), 'utf8');
-    expect(report).toMatch(/\| regressed \|/);
+    // 1 回目か 2 回続いたかを同じ列に出す (#1770)。
+    expect(report).toMatch(/\| regressed — 1 回目 \(次も続けば gate\) \|/);
     expect(report).not.toMatch(/検知には/);
+
+    // 同じ遅延のまま 2 回目。 続いたので gate が落ちる。
+    const again = await runPerf3LayerStrict(slowedInput('r3.md'));
+    expect(again.outcomes[0]!.regressionVerdict).toBe('regressed');
+    expect(again.outcomes[0]!.sustainedRegression).toBe(true);
+    expect(again.allPassed).toBe(false);
   });
 
   it('回帰判定は既定では gate に載らない (#1708 / #1737)', async () => {
@@ -474,7 +485,7 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
     // 判定だけを書くと、regressed の行があるのに suite が通る report になり、
     // 読み手が gate の有無を区別できない。無効であることも同じ列に出す。
     expect(readFileSync(join(tmpDir, 'd2.md'), 'utf8')).toMatch(
-      /regressed — gate 無効 \(regressionGate=false\)/,
+      /regressed — 1 回目 \(次も続けば gate\) — gate 無効 \(regressionGate=false\)/,
     );
   });
 
@@ -502,14 +513,19 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       baselinePath: gatedBaseline,
       ...settings,
     });
-    const gated = await runPerf3LayerStrict({
+    // gate は同じ方向が 2 回続いた時に落ちる (#1770)。 waiver の有無を見る test なので
+    // 続いた状態まで進めてから比べる。
+    const gatedSlow = (report: string) => ({
       moduleName: 'regression-waiver-off',
       ops: [slow],
-      reportPath: join(tmpDir, 'g2.md'),
+      reportPath: join(tmpDir, report),
       baselinePath: gatedBaseline,
       regressionGate: true,
       ...settings,
     });
+    await runPerf3LayerStrict(gatedSlow('g2.md'));
+    const gated = await runPerf3LayerStrict(gatedSlow('g3.md'));
+    expect(gated.outcomes[0]!.sustainedRegression).toBe(true);
     expect(gated.allPassed).toBe(false);
 
     // 理由つきで外すと gate は落ちないが、判定そのものは残る。
@@ -522,19 +538,24 @@ describe('runPerf3LayerStrict — v0.3 strict variant', () => {
       regressionGate: true,
       ...settings,
     });
-    const waived = await runPerf3LayerStrict({
+    const waivedSlow = (report: string) => ({
       moduleName: 'regression-waiver-on',
       ops: [{ ...slow, regressionGateWaived: '実行ごとの振れ幅が閾値を超える' }],
-      reportPath: join(tmpDir, 'w2.md'),
+      reportPath: join(tmpDir, report),
       baselinePath: waivedBaseline,
       regressionGate: true,
       ...settings,
     });
+    await runPerf3LayerStrict(waivedSlow('w2.md'));
+    const waived = await runPerf3LayerStrict(waivedSlow('w3.md'));
     expect(waived.outcomes[0]!.regressionVerdict, '判定は残す').toBe('regressed');
+    // 続いている = waiver が無ければ落ちる状態。 それでも gate は落ちない。
+    expect(waived.outcomes[0]!.sustainedRegression, '続いてはいる').toBe(true);
     expect(waived.allPassed, 'gate は落ちない').toBe(true);
 
-    const report = readFileSync(join(tmpDir, 'w2.md'), 'utf8');
-    expect(report).toMatch(/regressed — gate 対象外 \(実行ごとの振れ幅が閾値を超える\)/);
+    // 続いた状態の report を読む。 w2 は 1 回目なので「2 回連続」 にはならない。
+    const report = readFileSync(join(tmpDir, 'w3.md'), 'utf8');
+    expect(report).toMatch(/regressed — 2 回連続 — gate 対象外 \(実行ごとの振れ幅が閾値を超える\)/);
   });
 
   it('回帰の除外は上限の判定には効かない (#1708)', async () => {

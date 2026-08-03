@@ -84,8 +84,62 @@ export function planBaselineWrite(input: BaselineWriteInput): BaselineWritePlan 
 
 /** 1 op ぶんの履歴の更新指示。 */
 export interface RatioHistoryUpdate {
-  /** この実行で観測した「対象 p10 ÷ 基準 p10」。 */
-  ratio: number;
+  /**
+   * この実行で観測した「対象 p10 ÷ 基準 p10」。
+   *
+   * 比を作れなかった実行では省く。 その場合も判定は渡す = 預かりの解決だけは
+   * 進める。 渡さないと前回の預かりが解決されないまま残り、 何実行も後の
+   * `regressed` が「2 回連続」 と誤認される (#1770 review)。
+   */
+  ratio?: number;
+  /**
+   * この実行の回帰判定 (#1770)。
+   *
+   * `regressed` / `improved` の比はその場で積まず `pendingRatio` に預ける。
+   * 比較しなかった実行は `undefined` で、 その場で積む。
+   */
+  verdict?: 'stable' | 'regressed' | 'improved';
+}
+
+/** 前回預けた比を、 今回の判定と突き合わせて解決した結果 (#1770)。 */
+export interface PendingResolution {
+  /** 履歴に移す比。 一度きりの跳ねだったと判った場合だけ入る。 */
+  commit?: number;
+  /** 同じ方向の判定が 2 回続いたか。 gate はこれを見る。 */
+  sustained: boolean;
+}
+
+/**
+ * 前回預けた比を、 今回の判定と突き合わせて解決する (#1770)。
+ *
+ * 前回が `regressed` / `improved` で今回も同じ方向なら、 持続的なずれとみなして
+ * 捨てる。 その比を積むと幅が広がり、 同じずれが次回 `stable` として通る。
+ *
+ * 方向が変わった (または今回は判定しなかった) なら、 前回のは一度きりの跳ねだった
+ * ことになる。 その op が実際に見せた振れ幅なので履歴に移す。 ここで捨てると
+ * 幅の推定から裾が抜け落ち、 系統的に小さく出る (本 Issue の根)。
+ *
+ * **既に持続と判定された預かりは、 後で方向が変わっても履歴に移さない**
+ * (`pendingSustained`)。 `regressed → regressed → stable` の形で移してしまうと、
+ * gate を落としたその値が幅を広げ、 同じ規模の退行が次回 `stable` になる
+ * (#1770 review 指摘 1、 実測 = 履歴 `[1,1,1]` で比が `2.0 → 2.1 → 1.0` と動くと
+ * 履歴が `[1,1,1,2.1,1]` になり実効閾値が 220% に開く)。
+ *
+ * 預かりが無い実行では何も起きない。
+ */
+export function resolvePendingRatio(
+  pendingRatio: number | undefined,
+  pendingVerdict: 'regressed' | 'improved' | undefined,
+  currentVerdict: 'stable' | 'regressed' | 'improved' | undefined,
+  pendingSustained = false,
+): PendingResolution {
+  if (pendingRatio === undefined || pendingVerdict === undefined) {
+    return { sustained: false };
+  }
+  if (currentVerdict === pendingVerdict) return { sustained: true };
+  // 持続と判った値は「実装が同じまま動いた幅」 ではないので履歴に入れない。
+  if (pendingSustained) return { sustained: false };
+  return { commit: pendingRatio, sustained: false };
 }
 
 /**
@@ -117,18 +171,64 @@ export function applyRatioHistory(
   for (const [key, update] of updates) {
     const record = next[key];
     if (record === undefined) continue;
-    if (!Number.isFinite(update.ratio) || update.ratio <= 0) continue;
+
+    // 比を作れたか。 作れない実行 (対象の判定量が 0 で比が正にならない等) でも、
+    // 預かりの解決だけは進める。 ここで record ごと飛ばすと前回の預かりが残り続け、
+    // 何実行も後の `regressed` が「2 回連続」 になる (#1770 review 指摘 2)。
+    const usableRatio =
+      update.ratio !== undefined && Number.isFinite(update.ratio) && update.ratio > 0
+        ? update.ratio
+        : undefined;
+
+    // 前回預けた比を今回の判定で解決する。 一度きりの跳ねだったなら履歴に移す。
+    const resolution = resolvePendingRatio(
+      record.pendingRatio,
+      record.pendingVerdict,
+      update.verdict,
+      record.pendingSustained,
+    );
+
+    // 今回の比は、 判定が付いたなら預ける。 付かない (比較しなかった) 実行は
+    // 打ち消す相手がいないのでその場で積む。
+    // 預ける値が無い実行では預からない = 続きを主張できないので鎖を切る。
+    const holdCurrent =
+      usableRatio !== undefined && (update.verdict === 'regressed' || update.verdict === 'improved');
 
     const prior = record.ratioHistory ?? [];
-    const appended = [...prior, update.ratio].slice(-maxEntries);
+    const additions = [
+      ...(resolution.commit === undefined ? [] : [resolution.commit]),
+      ...(!holdCurrent && usableRatio !== undefined ? [usableRatio] : []),
+    ];
+    const appended = additions.length === 0 ? prior : [...prior, ...additions].slice(-maxEntries);
+
+    const nextPendingRatio = holdCurrent ? usableRatio : undefined;
+    const nextPendingVerdict = holdCurrent
+      ? (update.verdict as 'regressed' | 'improved')
+      : undefined;
+    // 持続と判った直後に預け直す値は、 その持続の一部。 後で方向が変わっても
+    // 履歴に移さないよう印を持ち越す (#1770 review 指摘 1)。
+    const nextPendingSustained = holdCurrent && resolution.sustained ? true : undefined;
+
+    const historySame =
+      appended.length === prior.length && appended.every((value, i) => value === prior[i]);
+    const pendingSame =
+      nextPendingRatio === record.pendingRatio &&
+      nextPendingVerdict === record.pendingVerdict &&
+      nextPendingSustained === record.pendingSustained;
     // 中身が同じなら書き換えない。
-    if (
-      appended.length === (record.ratioHistory?.length ?? 0) &&
-      appended.every((value, index) => value === record.ratioHistory?.[index])
-    ) {
-      continue;
-    }
-    next[key] = { ...record, ratioHistory: appended };
+    if (historySame && pendingSame) continue;
+
+    const rebuilt: MeasureResult = { ...record, ratioHistory: appended };
+    // 預かりが無い状態は field を落とす。 undefined を持たせると JSON に出ない一方で
+    // 「消した」 のか「元から無い」 のかが型の上で曖昧になる。
+    if (nextPendingRatio === undefined) delete rebuilt.pendingRatio;
+    else rebuilt.pendingRatio = nextPendingRatio;
+    if (nextPendingVerdict === undefined) delete rebuilt.pendingVerdict;
+    else rebuilt.pendingVerdict = nextPendingVerdict;
+    if (nextPendingSustained === undefined) delete rebuilt.pendingSustained;
+    else rebuilt.pendingSustained = nextPendingSustained;
+
+    next[key] = rebuilt;
     changed = true;
   }
 

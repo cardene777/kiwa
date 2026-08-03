@@ -118,11 +118,37 @@ export interface MeasureResult {
      * 超えた差だけを有意として扱う。 履歴が足りない間は従来どおり相対閾値だけで
      * 判定する (幅を推定できないため)。
      *
-     * 積むのは verdict が stable の実行と、 比較しなかった実行だけ。 退行した実行の比を
-     * 積むと、 その値が幅を押し広げて次回の実効閾値が退行そのものを覆う大きさになり、
-     * 同じ退行が stable として通る。
+     * 積むかどうかは 1 実行遅れて決まる。 退行 / 改善と判定した実行の比は
+     * `pendingRatio` に預け、 次の実行で同じ方向が続かなければ「一度きりの跳ね」 として
+     * ここに積む。 続けば持続的なずれとみなして捨てる (#1770)。
+     *
+     * その場で捨てると、 その op が実際に見せた振れ幅が推定から抜け落ちて幅が
+     * 系統的に小さく出る。 その場で積むと、 持続する退行が自分の幅を広げて
+     * 同じ退行が stable として通る。 1 実行遅らせると両方を避けられる。
      */
     ratioHistory?: number[];
+    /**
+     * 前回の実行で観測した比のうち、 履歴に積むかどうかが未確定のもの (#1770)。
+     *
+     * 退行 / 改善と判定した実行の比が入る。 次の実行で同じ方向が続かなければ
+     * `ratioHistory` に移し、 続けば捨てる。
+     */
+    pendingRatio?: number;
+    /**
+     * `pendingRatio` を預けた時の判定 (#1770)。
+     *
+     * 次の実行の判定と突き合わせて、 一度きりの跳ねか持続的なずれかを決める。
+     * gate もこの値を使う = 同じ方向の判定が 2 回続いた時だけ落とす。
+     */
+    pendingVerdict?: 'regressed' | 'improved';
+    /**
+     * `pendingRatio` が既に持続と判定された分か (#1770)。
+     *
+     * `regressed` が 2 回続いた時点で gate は落ちるが、 3 回目に方向が変わると
+     * その預かりが履歴に移ってしまう。 移った値は gate を落とした当の値なので、
+     * 幅が広がって同じ規模の退行が次回 `stable` になる。 印を持ち越して移さない。
+     */
+    pendingSustained?: boolean;
     trimmed?: {
         percent: number;
         /** trim 後の sample 数。 */
@@ -138,7 +164,7 @@ export interface MeasureResult {
 
 #### <code v-pre>PerfGateInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L381) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L407) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateInput {
@@ -155,7 +181,7 @@ export interface PerfGateInput {
 
 #### <code v-pre>PerfGateResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L392) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L418) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface PerfGateResult {
@@ -177,7 +203,7 @@ export type PerfReferenceKind = 'cpu' | 'fs-read' | 'fs-write';
 
 #### <code v-pre>RegressionInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L159) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L185) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 Regression 判定 input。 bootstrap CI 経路。
 
@@ -215,7 +241,7 @@ export interface RegressionInput {
 
 #### <code v-pre>RegressionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L189) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L215) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface RegressionResult {
@@ -336,7 +362,7 @@ export interface RegressionResult {
 
 #### <code v-pre>Thresholds</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L374) <code v-pre>packages/perf-harness/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/types.ts#L400) <code v-pre>packages/perf-harness/src/types.ts</code>
 
 ```ts
 export interface Thresholds {
