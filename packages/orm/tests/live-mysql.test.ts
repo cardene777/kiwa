@@ -65,14 +65,34 @@ beforeAll(async () => {
   // T-ORM-201 の中で見ると `resetTables` が先に表を作ってしまうため、 `setupOrmEnv`
   // が migration を黙って無視する回帰を見逃す (#1773 review 指摘 2)。 ここで採れば
   // test の実行順にも `.only` にも依存しない。
-  const [tables] = await shared.raw.query("SHOW TABLES LIKE 'users'");
-  migrationAppliedBySetup = Array.isArray(tables) && tables.length === 1;
+  //
+  // 1 文目 (users) だけでなく 2 文目 (index) も見る。 users だけだと「先頭の
+  // CREATE TABLE しか実行しない」 回帰を見逃す (#1775 review 指摘 1、 同じ欠陥が
+  // ここにもあった)。 `information_schema` を使うのは、 `SHOW INDEX` が対象の table が
+  // 無い時に例外を投げ、 検知したい状況そのもので suite が止まるため。
+  const [rows] = await shared.raw.query(
+    `SELECT
+       (SELECT COUNT(*) FROM information_schema.tables
+         WHERE table_schema = DATABASE() AND table_name = 'users') AS u,
+       (SELECT COUNT(*) FROM information_schema.statistics
+         WHERE table_schema = DATABASE() AND table_name = 'users'
+           AND index_name = 'users_email_idx') AS i`,
+  );
+  const row = Array.isArray(rows)
+    ? (rows[0] as { u: number; i: number } | undefined)
+    : undefined;
+  migrationAppliedBySetup = Number(row?.u) === 1 && Number(row?.i) >= 1;
 }, 180_000);
 
 afterAll(async () => {
   await shared?.stop();
   shared = null;
 }, 60_000);
+
+// 本体の `splitSqlStatements` と同じ切り方にする。 素の `split(';')` は
+// `DEFAULT 'a;b'` のような literal 内の semicolon でも切るため、 `setupOrmEnv` は
+// 通るのに `resetTables` だけが壊れた SQL を投げる非対称が生まれる (#1775 review 指摘 2)。
+const MIGRATION_STATEMENTS = /;\s*(?:\r?\n|$)/;
 
 /**
  * 共有 container の表を作り直す。
@@ -86,7 +106,7 @@ async function resetTables(env: OrmTestEnvLiveMysql<AppSchema>): Promise<void> {
   // FK 検証 (T-ORM-205) が黙って無効化される。 唯一の FK は users の自己参照で、
   // 表ごと落とす分には検査を切る必要がないので使わない。
   await env.raw.query('DROP TABLE IF EXISTS users');
-  for (const stmt of MIGRATION.split(';')) {
+  for (const stmt of MIGRATION.split(MIGRATION_STATEMENTS)) {
     const sql = stmt.trim();
     if (sql.length > 0) await env.raw.query(sql);
   }

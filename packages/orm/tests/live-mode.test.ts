@@ -66,14 +66,28 @@ beforeAll(async () => {
   // T-ORM-101 の中で見ると `resetTables` が先に表を作ってしまうため、 `setupOrmEnv`
   // が migration を黙って無視する回帰を見逃す (#1773 review 指摘 2)。 ここで採れば
   // test の実行順にも `.only` にも依存しない。
-  const found = await shared.raw.unsafe("SELECT to_regclass('public.users') AS t");
-  migrationAppliedBySetup = Array.from(found as unknown as Iterable<{ t: string | null }>)[0]?.t === 'users';
+  //
+  // 1 文目 (users) だけでなく 2 文目 (index) も見る。 users だけだと「先頭の
+  // CREATE TABLE しか実行しない」 回帰を見逃す (#1775 review 指摘 1、 同じ欠陥が
+  // ここにもあった)。 `to_regclass` は無い対象に NULL を返すので例外にならない。
+  const found = await shared.raw.unsafe(
+    "SELECT to_regclass('public.users') AS u, to_regclass('public.users_email_idx') AS i",
+  );
+  const row = Array.from(
+    found as unknown as Iterable<{ u: string | null; i: string | null }>,
+  )[0];
+  migrationAppliedBySetup = row?.u === 'users' && row?.i === 'users_email_idx';
 }, 120_000);
 
 afterAll(async () => {
   await shared?.stop();
   shared = null;
 }, 30_000);
+
+// 本体の `splitSqlStatements` と同じ切り方にする。 素の `split(';')` は
+// `DEFAULT 'a;b'` のような literal 内の semicolon でも切るため、 `setupOrmEnv` は
+// 通るのに `resetTables` だけが壊れた SQL を投げる非対称が生まれる (#1775 review 指摘 2)。
+const MIGRATION_STATEMENTS = /;\s*(?:\r?\n|$)/;
 
 /**
  * 共有 container の表を作り直す。
@@ -83,7 +97,7 @@ afterAll(async () => {
  */
 async function resetTables(env: OrmTestEnvLive<AppSchema>): Promise<void> {
   await env.raw.unsafe('DROP TABLE IF EXISTS users CASCADE');
-  for (const stmt of MIGRATION.split(';')) {
+  for (const stmt of MIGRATION.split(MIGRATION_STATEMENTS)) {
     const sql = stmt.trim();
     if (sql.length > 0) await env.raw.unsafe(sql);
   }
