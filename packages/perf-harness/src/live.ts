@@ -39,6 +39,7 @@ import { measureMemory } from './memory.js';
 import {
   RESOLUTION_FLOOR_MULTIPLE,
   detectRegression,
+  assertValidWorkloadVersions,
   hasSameMeasurementConfig,
 } from './regression.js';
 import {
@@ -128,6 +129,8 @@ export interface RunPerf3LayerLiveResult {
 export async function runPerf3LayerLive(
   input: RunPerf3LayerLiveInput,
 ): Promise<RunPerf3LayerLiveResult> {
+  // 版が版として成立していない宣言は測る前に止める (#1739)。 mock 経路と同じ検証。
+  assertValidWorkloadVersions(input.ops);
   const serialIterations = input.serialIterations ?? 10;
   const serialWarmup = input.serialWarmup ?? 1;
   const concurrency = input.concurrency ?? 3;
@@ -187,23 +190,37 @@ export async function runPerf3LayerLive(
       continue;
     }
 
-    const serial = await measure({
-      name: `${op.name}.live.serial`,
-      iterations: serialIterations,
-      warmup: serialWarmup,
-      fn: async () => {
-        await op.fn();
-      },
-    });
-    const concurrent = await measureConcurrent({
-      name: `${op.name}.live.concurrent`,
-      concurrency,
-      iterationsPerWorker,
-      warmup: 1,
-      fn: async () => {
-        await op.fn();
-      },
-    });
+    // 作業内容の版を測定直後に載せる (#1739)。 `LivePerfOpSpec` は `PerfOpSpec` を
+    // 継承するので型としては版を宣言できる。 載せないと双方が `undefined` のまま
+    // 一致し、 版を上げても旧 workload との比較が永久に続く = 機構が live 経路で
+    // 丸ごと効かない (#1739 review 指摘 1)。
+    //
+    // 比較 (`hasSameMeasurementConfig`) より前に載せる。 後に載せると記録には残るが
+    // その実行の判定には効かず、 版を上げた実行だけが旧 baseline と比較される。
+    const withVersion = <T extends MeasureResult>(r: T): T =>
+      op.workloadVersion === undefined ? r : { ...r, workloadVersion: op.workloadVersion };
+
+    const serial = withVersion(
+      await measure({
+        name: `${op.name}.live.serial`,
+        iterations: serialIterations,
+        warmup: serialWarmup,
+        fn: async () => {
+          await op.fn();
+        },
+      }),
+    );
+    const concurrent = withVersion(
+      await measureConcurrent({
+        name: `${op.name}.live.concurrent`,
+        concurrency,
+        iterationsPerWorker,
+        warmup: 1,
+        fn: async () => {
+          await op.fn();
+        },
+      }),
+    );
     const memory = await measureMemory({
       fn: async () => {
         await op.fn();

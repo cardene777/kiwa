@@ -657,7 +657,7 @@ describe('runPerf3Layer — baseline に基準が残り、 次の実行で読み
   });
 });
 
-describe('uncomparableReason — 比較できない理由の 7 通り', () => {
+describe('uncomparableReason — 比較できない理由の 8 通り', () => {
   const samples = Array.from({ length: 20 }, () => 1);
 
   /** 理由の分岐は `resolveNormalization` の不成立と 1:1 で対応していなければ嘘になる。 */
@@ -707,6 +707,24 @@ describe('uncomparableReason — 比較できない理由の 7 通り', () => {
       expect(uncomparableReason(current, baseline), label).toMatch(expected);
     });
   }
+
+  it('作業内容の版だけが違う組は、測定条件ではなく版を理由として報告する (#1739)', () => {
+    // まとめて「測定条件が違う」 と書くと、 反復数も空回しも同じ組で
+    // 「200 反復 / 空回し 5 対 200 反復 / 空回し 5」 という嘘の理由が出る。
+    const base = withReference(samples, 0.1);
+    const current = { ...base, workloadVersion: 2 };
+    const baseline = { ...base, workloadVersion: 1 };
+    const reason = uncomparableReason(current, baseline);
+    expect(reason).toMatch(/作業内容の版が baseline と違う/);
+    expect(reason).toMatch(/baseline 1 \/ 今回 2/);
+    expect(reason).not.toMatch(/測定条件が baseline と違う/);
+  });
+
+  it('版を宣言し始めた組は「宣言なし」 を明示する (#1739)', () => {
+    const base = withReference(samples, 0.1);
+    const reason = uncomparableReason({ ...base, workloadVersion: 2 }, base);
+    expect(reason).toMatch(/baseline 宣言なし \/ 今回 2/);
+  });
 
   it('実装の版が違う組は版を理由として報告する (種類は同じ)', () => {
     const current = withReference(samples, 0.1);

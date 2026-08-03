@@ -514,3 +514,91 @@ describe('uncomparableVerdict — n/a の 3 種 (#1740)', () => {
     expect(uncomparableVerdict(true, false)).toBe('n/a (比較せず)');
   });
 });
+
+describe('runPerf3LayerLive — 作業内容の版 (#1739)', () => {
+  /** 作業量を係数で変える live op。 版だけを付け替えて同じ経路を通す。 */
+  function versioned(name: string, workloadVersion: number | undefined, weight: number) {
+    return {
+      name,
+      ...(workloadVersion === undefined ? {} : { workloadVersion }),
+      fn: () => {
+        let t = 0;
+        for (let i = 0; i < 5_000 * weight; i += 1) t += Math.sqrt(i);
+        if (t < 0) throw new Error('unreachable');
+      },
+      serialP95CapMs: 1000,
+      requiredEnv: [],
+    };
+  }
+
+  it('版が serial / concurrent の両方の記録に残る', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    await runPerf3LayerLive({
+      moduleName: 'live-wv',
+      ops: [versioned('alpha', 3, 1)],
+      reportPath: join(dir, 'r.md'),
+      baselinePath,
+    });
+    const results = readResults(baselinePath);
+    // 載せないと双方が undefined のまま一致し、版を上げても比較が続く。
+    expect(results['alpha.live.serial']?.workloadVersion).toBe(3);
+    expect(results['alpha.live.concurrent']?.workloadVersion).toBe(3);
+  });
+
+  it('版を上げると比較せず記録を入れ替える', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    await runPerf3LayerLive({
+      moduleName: 'live-wv',
+      ops: [versioned('alpha', 1, 1)],
+      reportPath: join(dir, 'r1.md'),
+      baselinePath,
+    });
+    const before = readResults(baselinePath)['alpha.live.serial']!;
+
+    // 作業量を 5 倍にして版も上げる。実装の退行ではないので比較してはいけない。
+    const bumped = await runPerf3LayerLive({
+      moduleName: 'live-wv',
+      ops: [versioned('alpha', 2, 5)],
+      reportPath: join(dir, 'r2.md'),
+      baselinePath,
+    });
+    expect(bumped.outcomes[0]?.regressionVerdict).toBe('n/a (比較せず)');
+    const after = readResults(baselinePath)['alpha.live.serial']!;
+    expect(after.workloadVersion).toBe(2);
+    // 記録そのものが入れ替わったことを見る (p10 の大小は負荷で入れ替わる)。
+    expect(after.samples).not.toEqual(before.samples);
+  });
+
+  it('版を据え置くと従来どおり比較する', async () => {
+    const dir = tempDir();
+    const baselinePath = join(dir, 'baseline.json');
+    await runPerf3LayerLive({
+      moduleName: 'live-wv',
+      ops: [versioned('alpha', 1, 1)],
+      reportPath: join(dir, 'r1.md'),
+      baselinePath,
+    });
+    const second = await runPerf3LayerLive({
+      moduleName: 'live-wv',
+      ops: [versioned('alpha', 1, 1)],
+      reportPath: join(dir, 'r2.md'),
+      baselinePath,
+    });
+    expect(second.outcomes[0]?.regressionVerdict).toMatch(/^(stable|improved|regressed)$/);
+  });
+
+  it('版として成立しない宣言は測る前に止める', async () => {
+    const dir = tempDir();
+    await expect(
+      runPerf3LayerLive({
+        moduleName: 'live-wv-bad',
+        ops: [versioned('alpha', 1.5, 1)],
+        reportPath: join(dir, 'r.md'),
+        baselinePath: join(dir, 'baseline.json'),
+      }),
+    ).rejects.toThrow(/workloadVersion が版として成立していません/);
+    expect(existsSync(join(dir, 'baseline.json'))).toBe(false);
+  });
+});

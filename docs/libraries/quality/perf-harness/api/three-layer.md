@@ -14,7 +14,7 @@ title: "@kiwa-lab/perf-harness three-layer の API 契約"
 
 #### <code v-pre>pruneStaleOps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L673) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L712) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 今回測っていない op を baseline から落とすかを決める。 呼出が明示した時だけ落とす。 明示しなければ落とさない。 以前は環境変数 `KIWA_PERF_PRUNE_STALE=1` を「suite 全体を回している」 の手がかりに していたが、 環境変数は子 process に継承されるためこれは成り立たない。 その変数を export した shell から個別 package を実行すると、 絞り込まれた一覧が「完全な一覧」 とみなされて測っていない op の記録が消えた (#1730)。 実行の中で完全性を確かめる手立てが無いので、 判断そのものを実行の外へ出した。 suite を完走した後に orchestrator (`scripts/perf-prune-stale.mjs`) が manifest と 突き合わせて一度だけ掃除する。 詳細は `prune-manifest.ts` の冒頭。
 
@@ -26,7 +26,7 @@ export declare function pruneStaleOps(input: {
 
 #### <code v-pre>resolveKiwaRepoRoot</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L1061) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L1110) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 resolveKiwaRepoRoot — walk upward from `start` until finding a package.json whose `name` matches `kiwa-monorepo`. Used by every kiwa perf test to resolve the report path regardless of vitest cwd.
 
@@ -36,7 +36,7 @@ export declare function resolveKiwaRepoRoot(start: string): string;
 
 #### <code v-pre>runPerf3Layer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L320) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L347) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPerf3LayerResult>;
@@ -44,7 +44,7 @@ export declare function runPerf3Layer(input: RunPerf3LayerInput): Promise<RunPer
 
 #### <code v-pre>runPerf3LayerStrict</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L1041) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L1090) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 runPerf3LayerStrict — v0.3 strict variant。 iter 2 倍 + CI 99% + delta 10%。 見逃し (退行を stable と判定) が致命的な経路で使う。 defaults ... - serialIterations: 400 (v0.2 200) - serialWarmup: 10 (v0.2 5) - concurrency: 20 (v0.2 10) - iterationsPerWorker: 100 (v0.2 50) - memoryIterations: 400 (v0.2 200) - regressionThreshold: 0.1 (v0.2 0.2) - regressionConfidenceLevel: 0.99 (v0.2 0.95) 回帰判定の 2 つは、 名前が strict でありながら通常版と同じ設定で動いていた (`runPerf3Layer` が閾値を内部で固定していた)。 標本数だけ増えて判定は緩いまま だったので、 呼出から渡せるようにして名前どおりの挙動に揃えた (#1718)。
 
@@ -56,7 +56,7 @@ export declare function runPerf3LayerStrict(input: RunPerf3LayerInput): Promise<
 
 #### <code v-pre>OpOutcome</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L232) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L259) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface OpOutcome {
@@ -104,7 +104,7 @@ export interface OpOutcome {
 
 #### <code v-pre>PerfOpSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L57) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L59) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface PerfOpSpec {
@@ -143,6 +143,31 @@ export interface PerfOpSpec {
      * 選び方と却下した案は `docs/quality/perf-thresholds.md` § In-run normalization。
      */
     referenceKind?: PerfReferenceKind;
+    /**
+     * この op が測っている作業内容の版 (#1739)。 中身を変えたら 1 上げる。
+     *
+     * 回帰判定は「実装が遅くなった」 を見るためのものなので、 測る対象そのものを
+     * 変えたら前の記録とは比べられない。 だが harness からは区別が付かない。 反復数や
+     * 空回しは記録に残るので `hasSameMeasurementConfig` が捕まえるのに対し、 作業内容は
+     * `fn` の中にあって何も動かさないためどの検査にも掛からない。
+     *
+     * 版が変われば比較せず記録を入れ替える (`MeasureReference.implVersion` と同じ形)。
+     * 宣言しないと、 作業内容を変えた実行が旧条件の記録と比べられ、 その差が実装の
+     * 退行として報告され続ける。
+     *
+     * 実測 = `vector` の `queryNearestTop5` は #1730 で母集団を 20 → 200 件に変えた。
+     * `queryNearest` は全件走査 + sort なので作業量が 10 倍になり、 比が anchor の
+     * 6.2 倍に跳ねた。 5 パス測って +464% 〜 +546% の一方向で、 判定は毎回 `regressed`、
+     * 履歴は 1 件も積まれない (持続的なずれとして預かりが捨てられ続けるため)。
+     *
+     * 判定は「無い」 も 1 つの値として単純に等しいかを見る。 版を宣言しない op は両側とも
+     * 「無い」 ので影響を受けず、 宣言した op はその実行で 1 度だけ記録が入れ替わる。
+     *
+     * 「片方に無ければ同じとみなす」 は成立しない。 既存の記録は全て版を持たないので、
+     * そう書くと宣言しても記録が入れ替わらず、 入れ替わらないので版が baseline に載らず、
+     * 載らないので次も比較が成立する = 宣言が永久に効かない (実装して実測で確認した)。
+     */
+    workloadVersion?: number;
     /**
      * Optional override for memory arrayBuffers cap.
      * Default = 100 KB across 200 iterations.
@@ -183,7 +208,7 @@ export interface PerfOpSpec {
 
 #### <code v-pre>RunPerf3LayerInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L130) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L157) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface RunPerf3LayerInput {
@@ -291,7 +316,7 @@ export interface RunPerf3LayerInput {
 
 #### <code v-pre>RunPerf3LayerResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L274) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/perf-harness/src/three-layer.ts#L301) <code v-pre>packages/perf-harness/src/three-layer.ts</code>
 
 ```ts
 export interface RunPerf3LayerResult {

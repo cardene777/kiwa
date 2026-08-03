@@ -558,6 +558,23 @@ function hasValidPendingRatio(candidate: Record<string, unknown>): boolean {
   return pendingSustained === undefined || typeof pendingSustained === 'boolean';
 }
 
+/**
+ * 作業内容の版が読める形か (#1739)。 無いのは正常 (版を宣言しない op)。
+ *
+ * 数でない値を通すと `hasSameWorkload` の等値比較が常に偽になり、 その op は
+ * 永久に「作業内容が違う」 扱いで比較されなくなる (回帰を検出できない)。
+ *
+ * `Number.isFinite` の側は変異試験で覆えていない。 baseline は JSON なので
+ * `NaN` / `Infinity` の literal は `JSON.parse` の段階で落ち、 ここに到達しない
+ * (実測で確認)。 数でありながら成立しない値は宣言側の `assertValidWorkloadVersions`
+ * が測る前に止める。 別実装が書いた file を読む場合の防御として残す。
+ */
+function hasValidWorkloadVersion(candidate: Record<string, unknown>): boolean {
+  const { workloadVersion } = candidate;
+  if (workloadVersion === undefined) return true;
+  return typeof workloadVersion === 'number' && Number.isFinite(workloadVersion);
+}
+
 function isMeasureResult(value: unknown): value is MeasureResult {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
   const candidate = value as Record<string, unknown>;
@@ -565,6 +582,7 @@ function isMeasureResult(value: unknown): value is MeasureResult {
   if (!hasValidReference(candidate)) return false;
   if (!hasValidRatioHistory(candidate)) return false;
   if (!hasValidPendingRatio(candidate)) return false;
+  if (!hasValidWorkloadVersion(candidate)) return false;
   if (!Array.isArray(candidate.samples)) return false;
   // 2 件未満の記録は比較対象にならない。 bootstrap CI がこの件数で退化 CI ({0,0}) を
   // 返すため、 そのまま読むと何倍悪化しても有意にならず永久に stable になる。
@@ -691,6 +709,9 @@ function backfillDerivedStats(result: MeasureResult): MeasureResult {
   // たびに黙って消える (`ratioHistory` は消えると履歴が 1 件のまま積み上がらず、
   // 実行間のばらつきを永久に推定できなくなる、 #1739)。
   if (result.reference !== undefined) rebuilt.reference = result.reference;
+  // 作業内容の版も sample から作り直せないので運ぶ (#1739)。 落とすと版の一致を
+  // 検査できなくなり、 作業内容を変えた記録が旧記録と比較され続ける。
+  if (result.workloadVersion !== undefined) rebuilt.workloadVersion = result.workloadVersion;
   if (result.ratioHistory !== undefined) rebuilt.ratioHistory = result.ratioHistory;
   // 預かり中の比も同じ理由で運ぶ。 落とすと「前回も退行だった」 が読めなくなり、
   // 持続的なずれが毎回 1 回目として扱われて gate が永久に落ちない (#1770)。
