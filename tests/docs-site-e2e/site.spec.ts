@@ -267,7 +267,6 @@ const V1_28_PAGES = [
 // asserts an anchor phrase that a rendered VitePress build will always
 // include in <main>.
 const V1_29_PAGES = [
-  { path: '/tutorials/55-release-script-filter-ssot', title: 'Release script filter SSOT' },
   { path: '/migrations/v1.28-to-v1.29', title: 'v1.28 → v1.29' },
 ];
 

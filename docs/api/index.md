@@ -8,11 +8,6 @@ kiwa の各 lib API を分類別に列挙。 各 lib page には Overview + Supp
 
 ## Libraries by category
 
-### SaaS (1)
-
-| lib | package | domain |
-|---|---|---|
-
 ## Auto-generated language API refs
 
 kiwa は上記の hand-written reference に加えて、 language-native の auto-generated API reference も持つ:

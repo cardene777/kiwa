@@ -25,7 +25,7 @@ const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
   : SCRIPT_ROOT;
 
 /**
- * v1.27-2 + v1.27-3 scope: 33 packages across four tiers.
+ * v1.27-2 + v1.27-3 scope: 25 packages across four tiers.
  *
  * v1.27-2 landed 9 core + 11 framework baselines. v1.27-3 extends to the
  * remaining 13 packages: 3 test-type packages (a11y / visual / component) +

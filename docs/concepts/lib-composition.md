@@ -6,57 +6,6 @@ kiwa の各 lib は独立に使えるが、 real SaaS app の test は複数 lib
 
 test を「1 lib = 1 domain」 で書き分けると、 real app の flow (「login → order → email → webhook → notification」) が横断的に test されない。 kiwa は各 lib の interface を統一しているため、 複数 lib の client を beforeEach で組立てて、 downstream の flow を 1 test で通す pattern を推奨する。
 
-## Pattern 1 — E-commerce order flow (4 lib composition)
-
-sign-in → order → payment charge → email send の 4 stage を、 4 lib で構成する。
-
-```typescript
-import { createAuthClient } from '@kiwa-lab/auth';
-import { createPaymentClient } from '@kiwa-lab/payment';
-import { createEmailClient } from '@kiwa-lab/email';
-import { createCacheClient } from '@kiwa-lab/cache';
-import { describe, expect, it, beforeEach } from 'vitest';
-
-describe('e-commerce order flow', () => {
-  let auth: ReturnType<typeof createAuthClient>;
-  let payment: ReturnType<typeof createPaymentClient>;
-  let email: ReturnType<typeof createEmailClient>;
-  let cache: ReturnType<typeof createCacheClient>;
-
-  beforeEach(() => {
-    auth = createAuthClient({ provider: 'supabase' });
-    payment = createPaymentClient({ provider: 'stripe' });
-    email = createEmailClient({ provider: 'resend' });
-    cache = createCacheClient({ provider: 'in-memory' });
-  });
-
-  it('sign-in → order → charge → email', async () => {
-    // 1. Auth
-    const user = await auth.signIn({ email: 'a@x', password: 'p' });
-    expect(user.id).toBeDefined();
-
-    // 2. Order create (cache に載せて後続の読み出しを速くする)
-    const order = createOrder({ userId: user.id, total: 1500 });
-    await cache.set(`order:${order.id}`, order);
-    expect(await cache.get(`order:${order.id}`)).toEqual(order);
-
-    // 3. Payment charge
-    const charge = await payment.charge({ amount: 1500, currency: 'jpy', source: 'pm_test' });
-    expect(charge.status).toBe('succeeded');
-
-    // 4. Confirmation email
-    await email.send({
-      from: 'shop@x',
-      to: user.email,
-      subject: `Order confirmed: ${order.id}`,
-    });
-    expect(email.listSent()).toHaveLength(1);
-  });
-});
-```
-
-4 lib の composition で「real app の end-to-end user journey」 を 1 test で verify する。 各 lib は互いに疎結合、 provider 変更は独立に行える。
-
 ## Pattern 2 — RAG chatbot (3 lib composition)
 
 質問の受付 → 検索 → LLM 応答の 3 stage を、 3 lib で構成する。

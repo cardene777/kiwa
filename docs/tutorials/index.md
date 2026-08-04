@@ -55,7 +55,6 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 52 | [WebRTC video call (signaling + ICE + simulcast + ICE restart walkthrough)](./52-webrtc-video-signaling) | Node.js / vitest | 15 min |
 | 53 | [WebTransport stream (uni / bi / Datagram / migration walkthrough)](./53-webtransport-stream) | Node.js / vitest | 15 min |
 | 54 | [HTTP/3 multiplex (stream priority + HPACK + 0-RTT walkthrough)](./54-http3-multiplex) | Node.js / vitest | 15 min |
-| 55 | [Release script filter SSOT (systematic root cause pattern walkthrough)](./55-release-script-filter-ssot) | Node.js / vitest | 15 min |
 | 56 | [A11y baseline (axe-core + WCAG 2.1 AA gate + 3-layer harness walkthrough)](./56-a11y-baseline) | Node.js / vitest + jsdom | 15 min |
 | 57 | [A11y baseline migration (0 → 34 package sweep methodology)](./57-a11y-baseline-migration) | Node.js / vitest + jsdom | 15 min |
 | 61 | [Postgres logical replication advanced (streaming + origin + two-safe + cascade walkthrough)](./61-postgres-logical-replication-advanced) | Node.js / vitest | 15 min |

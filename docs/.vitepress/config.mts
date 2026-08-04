@@ -355,7 +355,6 @@ export default defineConfig({
         {
           text: 'Release invariants (v1.29)',
           items: [
-            { text: '55 — Release script filter SSOT (systematic root cause pattern walkthrough)', link: '/tutorials/55-release-script-filter-ssot' },
           ],
         },
         {
@@ -420,6 +419,7 @@ export default defineConfig({
           items: [
             { text: '79 — Prompt injection defense (direct + indirect + jailbreak + role-hijack + Constitutional AI + PII redaction walkthrough)', link: '/tutorials/79-prompt-injection-defense' },
             { text: '80 — LLM eval + hallucination (self-consistency + factuality + citation + LLM-as-judge + rubric + preference + Elo walkthrough)', link: '/tutorials/80-llm-eval-hallucination' },
+            { text: '81 — Agent orchestration (ReAct + ToT + reflection + tool selection + budget + latency + routing + fallback walkthrough)', link: '/tutorials/81-agent-orchestration' },
           ],
         },
         {

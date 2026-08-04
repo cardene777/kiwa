@@ -46,7 +46,7 @@ half an hour, and prints a line per package as it goes:
 
 ```
 $ pnpm test:all
-testing 219 packages, one at a time
+testing 179 packages, one at a time
 
 [  1/219] ok    examples/astro-server-endpoints-full  2.5s
 [  9/219] RED   examples/basic-connect  2.5s
@@ -142,7 +142,7 @@ while a single error was all anyone ever saw.
 
 ```
 $ pnpm typecheck:all
-typechecking 221 packages, 1 at a time
+typechecking 179 packages, 1 at a time
 
 RED  examples/nuxt-server-routes-full
        server/plugins/analytics.ts(17,34): error TS2345: Argument of type ...
