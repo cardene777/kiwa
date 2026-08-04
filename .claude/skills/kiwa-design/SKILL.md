@@ -424,7 +424,7 @@ mode column が `mock` = in-memory queue + fake clock、 `live` = 将来 SQS / K
 | Mode | `static` / `fetch` / `node` / `ssr` (`setupE2eEnv({ mode })` と 1 対 1) |
 | Route | `/login` / `/dashboard` 等の URL path |
 
-mode column が `static` = file:/ or static html、 `fetch` = client side fetch を mock、 `node` = node サーバ起動 + browser から接続、 `ssr` = Next.js / Nuxt 等 SSR 框架 dev server。
+mode column が `static` = file:// or static html、 `fetch` = client side fetch を mock、 `node` = node サーバ起動 + browser から接続、 `ssr` = Next.js / Nuxt 等 SSR 框架 dev server。
 `/kiwa-e2e` Layer 2 skill が本 9 column を `@kiwa-lab/e2e/setupE2eEnv` の引数に機械変換する。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.e2e.md` (`.e2e.md` suffix で `@kiwa-lab/e2e` 経路向けと識別、 dApp の `tests/spec/e2e/test-spec-{module}.md` とは path で区別)。
