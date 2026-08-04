@@ -1,6 +1,6 @@
 {
   "name": "kiwa-marketplace",
-  "description": "kiwa - OSS test framework for dApps + web apps + full-stack frameworks。 Claude Code skill chain で contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli / Next.js App Router (Server Actions + middleware + RSC) 3 v2 / Python pytest の 11 観点 × 全 framework をカバーする test 体制を 1 plugin で配布 (v2.17 milestone、 43 npm packages + 1 PyPI package、 pre-release / All rights reserved)。",
+  "description": "kiwa - OSS test framework for dApps + web apps + full-stack frameworks。 Claude Code skill chain で contract / dApp e2e / 汎用 e2e / a11y / visual / api / ui / data / cli / Next.js App Router (Server Actions + middleware + RSC) / Nuxt 3 / SvelteKit / Remix v2 / Astro / Python pytest の 11 観点 × 全 framework をカバーする test 体制を 1 plugin で配布 (v2.17 milestone、 31 npm packages + 1 PyPI package、 pre-release / All rights reserved)。",
   "owner": {
     "name": "cardene777",
     "email": "cardene777@gmail.com"
@@ -9,7 +9,7 @@
     {
       "name": "kiwa",
       "source": "./",
-      "description": "kiwa v2.17 — 29 skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual / kiwa-nextjs / kiwa-nuxt / kiwa-sveltekit / kiwa-remix / kiwa-astro / kiwa-observe / kiwa-test / kiwa-review) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design で 11 観点の test 仕様書を 9 column 表で生成、 /kiwa-forge + /kiwa-hardhat で Foundry / Hardhat contract test、 /kiwa-play で dApp e2e (Playwright + viem + anvil)、 /kiwa-e2e で 汎用 browser e2e、 /kiwa-a11y で accessibility (axe-core)、 /kiwa-visual で visual regression (pixelmatch)、 /kiwa-nextjs で Next.js App Router の Server Actions + middleware + RSC、 /kiwa-nuxt で Nuxt 3 Server Routes、 /kiwa-sveltekit で SvelteKit load + form actions、 /kiwa-remix で Remix v2 / React Router v7 loader + action、 /kiwa-astro で Astro Server Endpoints、 /kiwa-api + /kiwa-ui + /kiwa-data + /kiwa-cli-test + /kiwa-vitest で各 layer の test 生成、 /kiwa-observe で flaky / spec gap 分析、 /kiwa-review で 3 mode (spec / test / result) review が実行可能。 統合 orchestrator /kiwa-test --target {contract|dapp|web|nextjs|both|all} で全 framework chain を 1 コマンド実行。 runtime fixture は @kiwa-lab/* npm として 31 packages 全公開済 (core / dapp / api / ui / data / e2e / a11y / visual / cli-test / observability / cli / nextjs / nuxt / sveltekit / remix / astro)、 Python pytest adapter は kiwa-test-py として PyPI 公開可能。",
+      "description": "kiwa v2.17 — 29 skill chain (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-vitest / kiwa-api / kiwa-ui / kiwa-data / kiwa-cli-test / kiwa-e2e / kiwa-a11y / kiwa-visual / kiwa-nextjs / kiwa-observe / kiwa-test / kiwa-review) を 1 plugin で同梱。 dApp project に install すると Claude Code から /kiwa-design で 11 観点の test 仕様書を 9 column 表で生成、 /kiwa-forge + /kiwa-hardhat で Foundry / Hardhat contract test、 /kiwa-play で dApp e2e (Playwright + viem + anvil)、 /kiwa-e2e で 汎用 browser e2e、 /kiwa-a11y で accessibility (axe-core)、 /kiwa-visual で visual regression (pixelmatch)、 /kiwa-nextjs で Next.js App Router の Server Actions + middleware + RSC、 /kiwa-api + /kiwa-ui + /kiwa-data + /kiwa-cli-test + /kiwa-vitest で各 layer の test 生成、 /kiwa-observe で flaky / spec gap 分析、 /kiwa-review で 3 mode (spec / test / result) review が実行可能。 統合 orchestrator /kiwa-test --target {contract|dapp|web|nextjs|both|all} で全 framework chain を 1 コマンド実行。 runtime fixture は @kiwa-lab/* npm として 31 packages 全公開済 (core / dapp / api / ui / data / e2e / a11y / visual / cli-test / observability / cli / nextjs / nuxt / sveltekit / remix / astro)、 Python pytest adapter は kiwa-test-py として PyPI 公開可能。",
       "version": "2.19.0",
       "author": {
         "name": "cardene777",
@@ -39,13 +39,6 @@
         "rsc",
         "react-server-components",
         "middleware",
-        "nuxt",
-        "nuxt3",
-        "sveltekit",
-        "remix",
-        "react-router",
-        "astro",
-        "server-endpoints",
         "pytest",
         "python"
       ]

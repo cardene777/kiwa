@@ -89,3 +89,7 @@ overrides:
   # 2.1.0 は js-yaml 4 を要求する最初の版で、 CJS のまま (`main: index.js`)。
   # 3.0.0 は ESM 専用 (`type: module`) で、 `@manypkg/get-packages` の `require()` 経路が壊れる。
   read-yaml-file: 2.1.0
+
+  # #1785 で package を削除した際、 viem / wagmi の optional peer が v4 に動いた。
+  # 宣言は packages/dapp の ^3.23.8 のみで不変なので、 削除前の解決に固定する。
+  zod: 3.25.76
