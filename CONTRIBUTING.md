@@ -5,25 +5,42 @@ We welcome bug reports, documentation fixes, tests, examples, and feature improv
 
 ## Language policy (SSOT)
 
-All public collaboration on this repository is conducted in **English**. This
-covers every artifact a maintainer or reviewer encounters through the public
-GitHub surface:
+The policy is split by audience. Artifacts a reader consumes to *understand or
+use* the project are English; the running record of *how a change was made* may
+be Japanese.
 
-- Issue titles and bodies
-- Pull request titles, bodies, and review comments
-- Commit messages
+**English is required** for:
+
 - Code comments and identifiers
 - Documentation authored under `docs/` for public consumption
+- Issue titles and bodies
 
-The goal is a low-friction path for OSS contributors regardless of first
-language. Japanese is used only in files explicitly marked as Japanese
-translations (for example, `README.ja.md`, `docs/ja/`) and in internal
-retrospectives outside this repository. If you must reference Japanese source
-material, quote and translate the relevant fragment in English inline.
+These are what a contributor reads before they can act. Keeping them English is
+what makes the project approachable regardless of first language.
 
-This policy is retroactive for **new work** starting at v2.18. Existing
-Japanese content that predates the policy will be migrated opportunistically;
-please do not open bulk-translation PRs without discussing scope first.
+**Japanese is accepted** for:
+
+- Commit messages
+- Pull request titles, bodies, and review comments
+
+These are the change record. They are read alongside the diff by whoever is
+working on that change, and the maintainer works in Japanese. Requiring English
+here adds translation cost to every commit without making the project easier to
+pick up. See § Commit message style for the commit format.
+
+Japanese is also used in files explicitly marked as Japanese translations (for
+example, `README.ja.md`, `docs/ja/`). If you must reference Japanese source
+material from an English artifact, quote and translate the relevant fragment in
+English inline.
+
+Contributions written entirely in English are welcome and need no translation —
+the Japanese allowance is permission, not a requirement.
+
+This policy applies to **new work** starting at v2.18. Existing content that
+predates it is left as is; **no rewriting of past commits or pull requests is
+expected or wanted**. Japanese content in English-required surfaces will be
+migrated opportunistically; please do not open bulk-translation PRs without
+discussing scope first.
 
 ## Getting started
 
@@ -215,7 +232,7 @@ docs or examples if the workflow changes.
 ## Commit message style
 
 We use emoji-prefixed conventional commits in Japanese (for example,
-`📚 docs(scope): ...`).
+`📚 docs(scope): ...`), which § Language policy (SSOT) permits.
 For English contributions, `feat:`, `fix:`, and `docs:` prefixes are also accepted.
 
 Keep commits focused and easy to review.
