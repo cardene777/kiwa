@@ -668,8 +668,9 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       visit(sourceFile);
     }
     // 走査対象が空だと、 検査が何も見ないまま通る。
-    // 下限は実 package 数に追随させる (#1785 で 46 -> 31 package)。
-    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(20);
+    // 下限は実走査数の直下に置く (#1785 で 46 -> 31 package、 実走査 29 件)。
+    // 余裕を持たせると、 clean 制約が外れた package を取りこぼしても通ってしまう。
+    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(28);
     expect(
       [...new Set(reads)].sort(),
       `設定が出力先の状態を読んでいる。 判定が実 build を観測する形である以上、`

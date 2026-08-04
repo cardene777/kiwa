@@ -21,13 +21,10 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 9 | [Supabase Realtime chat + presence + typing debounce](./09-supabase-realtime-chat) | Node.js / vitest | 10 min |
 | 10 | [Ably shared cursor + 60 fps throttle + history rewind](./10-ably-collab-cursor) | Node.js / vitest | 10 min |
 | 11 | [Socket.io notification + reconnect + backpressure](./11-socketio-notification) | Node.js / vitest | 12 min |
-| 12 | [Payment webhook mock (Stripe / Paddle / Lemon Squeezy)](./12-payment) | Node.js / vitest | 10 min |
 | 13 | [Search mock (Meilisearch / Algolia / Typesense)](./13-search) | Node.js / vitest | 10 min |
 | 14 | [Telemetry mock (OpenTelemetry / Datadog / Sentry)](./14-observability) | Node.js / vitest | 10 min |
 | 15 | [kiwa-test-go v0.5 Iris + Chi](./15-go-iris-chi) | Go / go test | 10 min |
 | 16 | [Multimodal chat (image + audio + Whisper)](./16-multimodal-chat) | Node.js / vitest | 12 min |
-| 17 | [MCP tool-use agent (JSON-RPC 2.0 chain)](./17-mcp-tool-agent) | Node.js / vitest | 12 min |
-| 18 | [Agent orchestration (LangGraph + Assistants v2)](./18-agent-orchestration) | Node.js / vitest | 12 min |
 | 19 | [Storybook 8 design system](./19-storybook-design-system) | Node.js / vitest | 12 min |
 | 20 | [Playwright CT for 5 form patterns](./20-playwright-ct) | Node.js / vitest | 12 min |
 | 21 | [Visual regression baseline / diff / accept](./21-visual-regression) | Node.js / vitest | 12 min |
@@ -40,17 +37,11 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 28 | [SolidJS Signal + Effect + Resource + Suspense (fine-grained reactivity)](./28-solidjs-signal-app) | Node.js / vitest | 10 min |
 | 29 | [Fresh Islands + Route Handler + Head normalize (Deno partial hydration)](./29-fresh-islands) | Node.js / vitest | 10 min |
 | 30 | [HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](./30-hono-workers-rpc) | Node.js / vitest | 12 min |
-| 31 | [Kafka event pipeline (producer + consumer group + exactly-once + DLQ)](./31-kafka-event-pipeline) | Node.js / vitest | 12 min |
-| 32 | [Redpanda + schema registry (Avro schemas + evolution + compatibility)](./32-redpanda-schema-registry) | Node.js / vitest | 12 min |
-| 33 | [NATS JetStream (persistent streams + KV + Object store + subject routing)](./33-nats-jetstream) | Node.js / vitest | 12 min |
 | 34 | [WebAuthn L3 + Passkey (virtual authenticator + attestation + sync fabric)](./34-webauthn-passkey) | Node.js / vitest | 12 min |
 | 35 | [OAuth 2.1 provider (PKCE + DPoP + refresh rotation + revocation)](./35-oauth21-provider) | Node.js / vitest | 12 min |
 | 36 | [OIDC provider + Federation (Discovery + DCR + id_token + trust chain)](./36-oidc-federation) | Node.js / vitest | 12 min |
 | 37 | [Real driver testing (Keycloak + oauth2-mock-server testcontainers)](./37-real-driver-testing) | Node.js / vitest + Docker | 15 min |
 | 38 | [Passkey caBLE hybrid transport (QR + BLE + WebSocket tunnel)](./38-passkey-cable-flow) | Node.js / vitest | 15 min |
-| 39 | [Stripe advanced billing (subscription + 3DS + dunning)](./39-stripe-billing) | Node.js / vitest | 15 min |
-| 40 | [Paddle merchant-of-record (inline checkout + tier + VAT/GST auto-calc)](./40-paddle-merchant) | Node.js / vitest | 15 min |
-| 41 | [Lemon Squeezy refund + chargeback dispute lifecycle](./41-lemon-squeezy-license) | Node.js / vitest | 15 min |
 | 42 | [Cloudflare Workers Durable Object (realtime chat + Hibernation + storage)](./42-cloudflare-durable-object) | Node.js / vitest | 15 min |
 | 43 | [Vercel Edge streaming (Next.js 15 middleware + geo routing + SSE backpressure)](./43-vercel-edge-streaming) | Node.js / vitest | 15 min |
 | 44 | [Deno Deploy geo (Deno KV + read-your-writes + Cron trigger)](./44-deno-deploy-geo) | Node.js / vitest | 15 min |
@@ -67,15 +58,9 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 55 | [Release script filter SSOT (systematic root cause pattern walkthrough)](./55-release-script-filter-ssot) | Node.js / vitest | 15 min |
 | 56 | [A11y baseline (axe-core + WCAG 2.1 AA gate + 3-layer harness walkthrough)](./56-a11y-baseline) | Node.js / vitest + jsdom | 15 min |
 | 57 | [A11y baseline migration (0 → 34 package sweep methodology)](./57-a11y-baseline-migration) | Node.js / vitest + jsdom | 15 min |
-| 58 | [Kafka raw protocol (KIP-98 idempotent + txn coordinator + fetch session + ISR walkthrough)](./58-kafka-raw-protocol) | Node.js / vitest | 15 min |
-| 59 | [Redpanda schema evolution (BACKWARD / FORWARD / FULL + subject naming + references walkthrough)](./59-redpanda-schema-evolution) | Node.js / vitest | 15 min |
-| 60 | [NATS JetStream durable consumer (ack_wait + max_deliver + backoff + quarantine walkthrough)](./60-nats-jetstream-durable) | Node.js / vitest | 15 min |
 | 61 | [Postgres logical replication advanced (streaming + origin + two-safe + cascade walkthrough)](./61-postgres-logical-replication-advanced) | Node.js / vitest | 15 min |
 | 62 | [MySQL group replication (member join + primary election + conflict detection + member leave walkthrough)](./62-mysql-group-replication) | Node.js / vitest | 15 min |
 | 63 | [SQLite WAL + FTS5 (journal_mode + checkpoint + virtual table + tokenizer + BM25 rank walkthrough)](./63-sqlite-wal-fts5) | Node.js / vitest | 15 min |
-| 64 | [Payment orchestration (multi-provider routing + failover + retry ladder + circuit breaker walkthrough)](./64-payment-orchestration) | Node.js / vitest | 15 min |
-| 65 | [Stripe Connect marketplace (dispute + refund + webhook idempotency + DAC7 walkthrough)](./65-stripe-connect-marketplace) | Node.js / vitest | 15 min |
-| 66 | [Paddle Billing v2 (grace period + proration + coupon stacking + recovery + vault migration walkthrough)](./66-paddle-billing-v2) | Node.js / vitest | 15 min |
 | 67 | [RSC streaming SSR (Server Components + Suspense + selective hydration + view transitions walkthrough)](./67-rsc-streaming-ssr) | Node.js / vitest | 15 min |
 | 68 | [Server Action + optimistic UI (form action + useFormStatus + useOptimistic + revalidatePath + revalidateTag + redirect walkthrough)](./68-server-action-optimistic) | Node.js / vitest | 15 min |
 | 69 | [Storybook 8 MDX (CSF3 + MDX doc + interaction runner + coverage report walkthrough)](./69-storybook-8-mdx) | Node.js / vitest | 15 min |

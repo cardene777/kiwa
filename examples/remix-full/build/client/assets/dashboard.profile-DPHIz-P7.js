@@ -1,1 +1,0 @@
-import{j as r}from"./jsx-runtime-56DGgGmo.js";import{u as s}from"./components-BTLEhIi7.js";function n(){const e=s();return r.jsxs("section",{children:[r.jsxs("h2",{children:["Profile of ",e.username]}),r.jsxs("p",{children:["unread: ",e.unread]})]})}export{n as default};

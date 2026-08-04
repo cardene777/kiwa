@@ -71,7 +71,6 @@ The response-bank pattern from v1.12 does not apply directly to MCP because MCP 
 
 `@kiwa-lab/agent` covers two orchestration styles under one API:
 
-- **LangGraph-style `StateGraph`** — declarative dataflow. Nodes are pure state → patch functions; edges are unconditional (v0.1). The graph is validated on `.compile()` with 6 fail-fast checks (see [Tutorial 18](../tutorials/18-agent-orchestration) for the list).
 - **OpenAI Assistants v2** — stateful multi-turn. Runs move through 5 statuses (`queued` / `in_progress` / `requires_action` / `completed` / `failed`); tool outputs are submitted asynchronously via `submitToolOutputs`.
 
 Both styles share a common failure mode: **runaway loops**. A conditional edge that never terminates, or an assistant handler that emits `tool_calls` on every turn without ever emitting `message`, blows the token budget in production. The mock guards this with a `maxSteps` cap (default 100 for LangGraph, 50 for Assistants v2 polling); tests that exceed the cap fail with a clear error, not a hang.
@@ -131,8 +130,6 @@ Two failure modes are specific to agent orchestration and only show up in tests 
 - [AI-LLM testing (v1.12 SSOT)](./ai-llm-testing) — non-determinism + 11-axis gate, unchanged
 - [Realtime testing (v1.13 SSOT)](./realtime-testing) — time-axis mock; the mock-time-line pattern applies to Assistants v2 polling too
 - [Tutorial 16 — Multimodal chat](../tutorials/16-multimodal-chat)
-- [Tutorial 17 — MCP tool-use agent](../tutorials/17-mcp-tool-agent)
-- [Tutorial 18 — Agent orchestration](../tutorials/18-agent-orchestration)
 - [`@kiwa-lab/ai-llm` README](https://github.com/cardene777/kiwa/blob/main/packages/ai-llm/README.md)
 - [`@kiwa-lab/mcp` README](https://github.com/cardene777/kiwa/blob/main/packages/mcp/README.md)
 - [`@kiwa-lab/agent` README](https://github.com/cardene777/kiwa/blob/main/packages/agent/README.md)

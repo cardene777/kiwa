@@ -12,8 +12,6 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 4 | [Testing Next.js Server Actions with @kiwa-lab/nextjs](./04-nextjs-server-actions.md) | Node.js / vitest | 6 min |
 | 5 | [Multi-provider auth (NextAuth + Clerk + Auth0)](./05-multi-provider-auth.md) | Node.js / vitest | 12 min |
 | 16 | [Multimodal chat — image + audio + Whisper](./16-multimodal-chat.md) | Node.js / vitest | 10 min |
-| 17 | [MCP tool-use agent — JSON-RPC 2.0 chain](./17-mcp-tool-agent.md) | Node.js / vitest | 12 min |
-| 18 | [Agent orchestration — LangGraph + Assistants v2](./18-agent-orchestration.md) | Node.js / vitest | 12 min |
 
 ## Style
 
