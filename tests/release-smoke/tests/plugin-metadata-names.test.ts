@@ -41,11 +41,14 @@ const NATIVE_PACKAGES = ['kiwa-test-py', 'kiwa-test-rs', 'kiwa-test-go'] as cons
 // list must resolve to a real package, which is what stops a removed package name from
 // lingering here. Add a term only when it is genuinely a concept, not a shortcut around a
 // failing assertion.
+//
+// A term that is also a package name must NOT appear here — it would keep the keyword valid
+// after the package is removed, which is exactly the failure this axis exists to catch. The
+// `declares no concept term that shadows a package` assertion enforces that.
 const CONCEPT_KEYWORDS = [
   'kiwa',
   'testing',
   'test-framework',
-  'e2e',
   'end-to-end',
   'playwright',
   'vitest',
@@ -56,11 +59,9 @@ const CONCEPT_KEYWORDS = [
   'wagmi',
   'solidity',
   'smart-contract',
-  'dapp',
   'web3',
   'ethereum',
   'accessibility',
-  'a11y',
   'visual-regression',
   'spec-driven',
   'claude-code',
@@ -73,6 +74,35 @@ const CONCEPT_KEYWORDS = [
   'golang',
 ] as const;
 
+// Packages and skills removed in PR #1786. Their names lived in the metadata prose and
+// keywords for a full release after removal, and prose mentions are not caught by the
+// "must be a real package" assertions below — a bare `payment` in a sentence matches no
+// `@kiwa-lab/` prefix. This list is the direct guard against that specific regression.
+// Entries are never removed; a name that once shipped and was withdrawn stays banned.
+const WITHDRAWN_NAMES = [
+  'agent',
+  'astro',
+  'design-check',
+  'desktop',
+  'email',
+  'mcp',
+  'mobile',
+  'nuxt',
+  'payment',
+  'qwikcity',
+  'release-invariants',
+  'remix',
+  'security-devsecops',
+  'streaming',
+  'sveltekit',
+  'kiwa-astro',
+  'kiwa-email',
+  'kiwa-nuxt',
+  'kiwa-qwikcity',
+  'kiwa-remix',
+  'kiwa-sveltekit',
+] as const;
+
 interface LibrariesJson {
   libraryCategories: { packages: string[] }[];
 }
@@ -80,6 +110,7 @@ interface LibrariesJson {
 interface PluginJson {
   description?: string;
   keywords?: string[];
+  version?: string;
 }
 
 function readJson<T>(rel: string): T {
@@ -103,10 +134,24 @@ describe('plugin metadata names', () => {
   const plugin = readJson<PluginJson>('.claude-plugin/plugin.json');
   const marketplace = readJson<Record<string, unknown>>('.claude-plugin/marketplace.json');
 
-  // Every string the two files contain, so a name cannot hide in a field the test forgot.
+  // Every string *value* in both files, so a name cannot hide in a field the test forgot.
+  // Values under a `email` key are skipped: the maintainer's address contains the word
+  // `email`, which would collide with the withdrawn `@kiwa-lab/email` package name. Keys are
+  // excluded too — matching them would flag `"email":` itself.
+  function collectStrings(node: unknown, key?: string): string[] {
+    if (typeof node === 'string') return key === 'email' ? [] : [node];
+    if (Array.isArray(node)) return node.flatMap((v) => collectStrings(v));
+    if (node !== null && typeof node === 'object') {
+      return Object.entries(node as Record<string, unknown>).flatMap(([k, v]) =>
+        collectStrings(v, k),
+      );
+    }
+    return [];
+  }
+
   const metadataText = [
-    readFileSync(resolve(REPO_ROOT, '.claude-plugin/plugin.json'), 'utf-8'),
-    readFileSync(resolve(REPO_ROOT, '.claude-plugin/marketplace.json'), 'utf-8'),
+    ...collectStrings(plugin),
+    ...collectStrings(marketplace),
   ].join('\n');
 
   it('reads real package and skill lists', () => {
@@ -116,8 +161,22 @@ describe('plugin metadata names', () => {
     expect(marketplace).toBeTypeOf('object');
   });
 
+  it('declares no concept term that shadows a package', () => {
+    // A concept term equal to a package name would stay valid after that package is removed,
+    // silently defeating the keyword assertion below.
+    const shadowing = CONCEPT_KEYWORDS.filter((k) => packages.includes(k));
+
+    expect(
+      shadowing,
+      'These concept terms are also package names. Remove them from CONCEPT_KEYWORDS — they are ' +
+        'already allowed as packages, and keeping them here would keep the keyword valid after ' +
+        'the package is deleted.',
+    ).toEqual([]);
+  });
+
   it('references only packages that exist', () => {
-    const referenced = [...metadataText.matchAll(/@kiwa-lab\/([a-z0-9-]+)/g)]
+    // The trailing boundary keeps `@kiwa-lab/api_extra` from being read as the real `api`.
+    const referenced = [...metadataText.matchAll(/@kiwa-lab\/([a-z0-9-]+)(?![a-z0-9-_])/g)]
       .map((m) => m[1])
       .filter((n): n is string => n !== undefined);
     const unknown = [...new Set(referenced)].filter((n) => !packages.includes(n));
@@ -130,7 +189,9 @@ describe('plugin metadata names', () => {
   });
 
   it('references only skills that exist', () => {
-    const referenced = [...metadataText.matchAll(/\/(kiwa-[a-z0-9-]+)/g)]
+    // Claude Code namespaces plugin skills, so `/kiwa:kiwa-play` is the same reference as
+    // `/kiwa-play` and has to be matched too.
+    const referenced = [...metadataText.matchAll(/\/(?:kiwa:)?(kiwa-[a-z0-9-]+)/g)]
       .map((m) => m[1])
       .filter((n): n is string => n !== undefined);
     const unknown = [...new Set(referenced)].filter((n) => !skills.includes(n));
@@ -139,6 +200,19 @@ describe('plugin metadata names', () => {
       unknown,
       'These /kiwa-* skills are advertised in the plugin metadata but have no directory under ' +
         '.claude/skills/. Remove them from the prose or restore the skill.',
+    ).toEqual([]);
+  });
+
+  it('never reintroduces a withdrawn package or skill name', () => {
+    // Prose mentions carry no `@kiwa-lab/` prefix, so the assertions above cannot see them.
+    const found = WITHDRAWN_NAMES.filter((name) =>
+      new RegExp(`(?<![a-z0-9-])${name}(?![a-z0-9-])`, 'i').test(metadataText),
+    );
+
+    expect(
+      found,
+      'These names belong to packages or skills removed in PR #1786 and must not appear in the ' +
+        'published metadata. They described features the plugin no longer ships.',
     ).toEqual([]);
   });
 
@@ -169,20 +243,38 @@ describe('plugin metadata names', () => {
   });
 
   it('states counts that match the real lists', () => {
-    const description = plugin.description ?? '';
-
-    const packageCount = /(\d+)\s+npm packages/.exec(description)?.[1];
+    // Both files state counts, and the marketplace entry also names a version. Scanning every
+    // string value catches a stale figure wherever it lives — the drift this axis was written
+    // for had the plugin description on v1.42 and the marketplace on v2.17 while the real
+    // version was 2.19.0.
+    const packageCounts = [...metadataText.matchAll(/(\d+)\s+npm packages/g)].map((m) =>
+      Number(m[1]),
+    );
     expect(
-      packageCount,
-      'The description no longer states an npm package count; the count assertion cannot run.',
-    ).toBeDefined();
-    expect(Number(packageCount)).toBe(packages.length);
-
-    const skillCount = /(\d+)\s+Claude Code skills/.exec(description)?.[1];
+      packageCounts.length,
+      'No npm package count is stated anywhere in the metadata; the assertion cannot run.',
+    ).toBeGreaterThan(0);
     expect(
-      skillCount,
-      'The description no longer states a skill count; the count assertion cannot run.',
-    ).toBeDefined();
-    expect(Number(skillCount)).toBe(skills.length);
+      [...new Set(packageCounts)],
+      `Stated npm package counts disagree with the ${packages.length} packages in docs/libraries.json.`,
+    ).toEqual([packages.length]);
+
+    const skillCounts = [...metadataText.matchAll(/(\d+)\s+(?:Claude Code )?skills/g)].map((m) =>
+      Number(m[1]),
+    );
+    expect(
+      skillCounts.length,
+      'No skill count is stated anywhere in the metadata; the assertion cannot run.',
+    ).toBeGreaterThan(0);
+    expect(
+      [...new Set(skillCounts)],
+      `Stated skill counts disagree with the ${skills.length} directories under .claude/skills/.`,
+    ).toEqual([skills.length]);
+
+    const versions = [...metadataText.matchAll(/\bv(\d+\.\d+\.\d+)\b/g)].map((m) => m[1]);
+    expect(
+      [...new Set(versions)].filter((v) => v !== plugin.version),
+      `Version strings in the metadata disagree with plugin.json version ${plugin.version}.`,
+    ).toEqual([]);
   });
 });
