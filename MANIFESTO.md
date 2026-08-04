@@ -23,7 +23,7 @@ kiwa は 「testing framework」 に留まらない。 **開発 workflow の 各
 
 - 選ばれた入力例 に対して、 実行時挙動を verify
 - 対象 = 副作用 / integration / performance / UX、 静的検証不可能な domain
-- 実装 = kiwa 40+ package (dApp / API / UI / component / a11y / visual / e2e / edge / mobile / desktop / auth / payment / cache / queue / streaming / observability / search / cli-test / orm / real driver...)
+- 実装 = kiwa 31 package (dApp / API / UI / component / a11y / visual / e2e / edge / mobile / desktop / auth / payment / cache / queue / streaming / observability / search / cli-test / orm / real driver...)
 
 ### 軸 2 = 形式検証 (static verification)
 
@@ -83,7 +83,7 @@ OrchestratorSpec (SSOT)
 
 ## v2.15 現状の到達点 (2026-07-09)
 
-- 42 npm package (@kiwa-lab org、 v1.x @kiwa-test/* 41 package deprecated 誘導済)
+- 31 npm package (@kiwa-lab org、 v1.x @kiwa-test/* 41 package deprecated 誘導済)
 - `@kiwa-lab/lean` v0.3 = Lean spec 生成 + 実 toolchain 検証 (Level 1 + Level 2)
 - systematic pattern 57 度到達 = 5 原則が 半世紀 pattern 適用 の 定常運用 phase
 - backend systems layer 完全普及 (transaction / session / cache / job / cli の 5 lifecycle-orchestrator = depth-5 到達)

@@ -4,7 +4,6 @@
 
 ## 外部へ送る処理
 
-メール送信は [email](./email/) を選びます。決済状態や billing webhook は [payment](./payment/) を使います。
 
 ## データとバックグラウンド処理
 

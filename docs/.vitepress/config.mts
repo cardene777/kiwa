@@ -812,7 +812,6 @@ export default defineConfig({
         {
           text: 'SaaS',
           items: [
-            { text: 'email', link: '/api/email' },
           ],
         },
       ],

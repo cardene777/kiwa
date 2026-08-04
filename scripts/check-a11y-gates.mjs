@@ -63,7 +63,7 @@ export const A11Y_TIER_THRESHOLD = Object.freeze({
  * ({ critical, serious, moderate }) — critical MUST stay at 0.
  *
  * NOTE: keep this table sorted by tier so review can spot a mis-tiered
- * addition at a glance. Package list must stay in sync with the 37-package
+ * addition at a glance. Package list must stay in sync with the 27-package
  * matrix in `docs/quality/a11y-thresholds.md § Tier assignment` and the
  * root `package.json` `test:a11y` script pnpm filter list.
  */

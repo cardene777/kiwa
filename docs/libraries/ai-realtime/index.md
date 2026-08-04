@@ -4,11 +4,9 @@ AI とリアルタイムカテゴリは、非決定的な応答、外部ツー�
 
 ## AI の振る舞いを確認する
 
-チャット completion、tool call、streaming token、usage は [AI LLM](./ai-llm/) を選びます。複数の tool を選ぶ agent の手順は [Agent](./agent/)、MCP client と server の message は [MCP](./mcp/) を使います。trace、metric、log からテスト結果を読む処理は [Observability](./observability/) が対象です。
 
 ## 検索と配信を確認する
 
-keyword と filter を含む検索結果は [Search](./search/) を使います。WebSocket や realtime channel の接続、再接続、presence は [Realtime](./realtime/) を参照してください。Kafka、NATS、schema registry、DLQ のようなイベント配信は [Streaming](./streaming/) が扱います。画像比較と visual regression は [Visual](./visual/) を選びます。
 
 ## 実サービスへ戻す判断
 

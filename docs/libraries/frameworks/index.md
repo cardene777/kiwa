@@ -4,9 +4,7 @@
 
 ## 使用中のフレームワークから選ぶ
 
-Next.js は [nextjs](./nextjs/)、Nuxt は [nuxt](./nuxt/)、Remix は [remix](./remix/)、SvelteKit は [sveltekit](./sveltekit/) を選びます。Astro の endpoint と action は [astro](./astro/)、Hono の middleware と RPC は [hono](./hono/)、Fresh の route と island の境界は [fresh](./fresh/) を参照してください。
 
-Solid の component と signal は [solidjs](./solidjs/)、SolidStart の server function と routing は [solidstart](./solidstart/) が担当します。Qwik City の loader と action は [qwikcity](./qwikcity/)、edge runtime の標準 Request と Response を直接扱う処理は [edge](./edge/) から始めます。
 
 ## ここで検証すること
 
