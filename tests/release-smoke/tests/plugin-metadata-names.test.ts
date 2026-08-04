@@ -23,8 +23,7 @@
 // The remaining assertions cover what the comparison cannot: whether the generator's own
 // prose template names things that exist, and whether the counts stated outside the generated
 // files still agree.
-import { readFileSync } from 'node:fs';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -49,6 +48,11 @@ interface Generator {
     version: string;
   };
   NATIVE_PACKAGES: NativePackage[];
+  checkNativePackages: () => { name: string; ok: boolean; reason?: string }[];
+  checkPackageDirectories: (packages: string[]) => {
+    missingDirectory: string[];
+    unlisted: string[];
+  };
 }
 
 function read(rel: string): string {
@@ -90,17 +94,77 @@ describe('plugin metadata names', () => {
     }
   });
 
-  it('names language-native packages that exist', () => {
-    // These ship outside the npm workspace, so the generator carries them as a literal list
-    // and nothing else would notice one being deleted.
-    const missing = generator.NATIVE_PACKAGES.filter(
-      (n) => !existsSync(resolve(REPO_ROOT, n.dir)),
-    ).map((n) => `${n.name} (expected ${n.dir}/)`);
+  it('advertises language-native packages their manifests still declare', () => {
+    // These ship outside the npm workspace, so nothing else notices one being renamed or
+    // deleted. Checking the directory alone is not enough — review renamed the advertised
+    // name to `kiwa-test-pythonx` and every assertion still passed.
+    const broken = generator
+      .checkNativePackages()
+      .filter((n) => !n.ok)
+      .map((n) => `${n.name}: ${n.reason}`);
 
     expect(
-      missing,
-      'These language-native packages are advertised but their directories are gone. Remove ' +
-        'them from NATIVE_PACKAGES in scripts/rebuild-plugin-metadata.mjs and regenerate.',
+      broken,
+      'These language-native packages are advertised but their manifests say otherwise. ' +
+        'Update NATIVE_PACKAGES in scripts/rebuild-plugin-metadata.mjs and regenerate.',
+    ).toEqual([]);
+  });
+
+  it('lists packages that exist on disk, and no others', () => {
+    // docs/libraries.json is the generator's source, so a package deleted from disk but left
+    // in the list would be advertised forever. The reverse direction catches a new package
+    // that was never added to the list.
+    const { missingDirectory, unlisted } = generator.checkPackageDirectories(built.packages);
+
+    expect(
+      missingDirectory,
+      'docs/libraries.json lists packages with no directory under packages/. The metadata ' +
+        'advertises them because the generator trusts that file.',
+    ).toEqual([]);
+    expect(
+      unlisted,
+      'These packages exist but are absent from docs/libraries.json, so the metadata does ' +
+        'not mention them.',
+    ).toEqual([]);
+  });
+
+  it('counts only skill directories that hold a SKILL.md', () => {
+    // A directory left behind after SKILL.md is deleted is not a skill. Review removed
+    // kiwa-play/SKILL.md and the count stayed at 29 with the metadata still advertising it.
+    const withoutManifest = readdirSync(resolve(REPO_ROOT, '.claude/skills'), {
+      withFileTypes: true,
+    })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => !existsSync(resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md')));
+
+    expect(
+      built.skills.filter((s) => withoutManifest.includes(s)),
+      'The generator counted skill directories that have no SKILL.md.',
+    ).toEqual([]);
+  });
+
+  it('rejects malformed package and skill references', () => {
+    // Review found `@kiwa-lab/api~removed` extracted as the real `api`, and
+    // `/kiwa::kiwa-removed` extracted nothing at all — both let a corrupted template pass the
+    // "only real names" assertions below. Anything following the prefix that is not a valid
+    // name is a failure in itself.
+    const text = serialize(built.plugin) + serialize(built.marketplace);
+    const malformed = [
+      ...[...text.matchAll(/@kiwa-lab\/(\S+)/g)]
+        .map((m) => m[1])
+        .filter((n): n is string => n !== undefined)
+        .filter((n) => !/^[a-z0-9]+(-[a-z0-9]+)*[.,;:)]?$/.test(n)),
+      ...[...text.matchAll(/\/kiwa:+(\S+)/g)]
+        .map((m) => m[0])
+        .filter((n): n is string => n !== undefined)
+        .filter((n) => !/^\/kiwa:kiwa-[a-z0-9]+(-[a-z0-9]+)*[.,;:)]?$/.test(n)),
+    ];
+
+    expect(
+      malformed,
+      'These references are not well-formed package or skill names. Fix the template in ' +
+        'scripts/rebuild-plugin-metadata.mjs.',
     ).toEqual([]);
   });
 
