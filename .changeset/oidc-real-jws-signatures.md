@@ -1,5 +1,5 @@
 ---
-"@kiwa-lab/auth": minor
+"@kiwa-lab/auth": major
 ---
 
 OIDC モックの id_token を実署名にし、JWKS から検証器を組み立てる経路を公開する。
@@ -26,10 +26,13 @@ ECDSA P-256 で、RFC 7518 §3.4 が要求する R||S 連結 (`dsaEncoding: 'iee
 RP が `jwks_uri` から取得した JWKS 文書だけを材料に、4 軸 (JWS 署名 / claims / nonce echo /
 hash chain) を検査する同期の検証器を返す。OP の内部状態には触れない。
 
-**利用者への影響。**
+**破壊的変更。**
+
+公開 interface `JwksEndpoint` に必須 method `signingKeyFor(kid)` を追加した。
+独自実装を持つ利用者は追加するまで型検査が通らない。実装は kid から秘密鍵を返し、
+保持期間を過ぎた kid では `undefined` を返す形にする。
 
 `setupOidcEnv` / `createJwksEndpoint` / `createIdTokenSigner` の呼び出し形は変わらない。
-`JwksEndpoint` を独自に実装している場合のみ `signingKeyFor` の追加が必要になる。
 
 `createJwksEndpoint` 1 回につき鍵生成が入る。実測で RSA-2048 が 24 ms、EC P-256 が 0.02 ms。
 既定は従来どおり RS256 で、`initialAlg: 'ES256'` を渡せば生成コストは無視できる範囲になる。

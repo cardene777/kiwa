@@ -102,3 +102,131 @@ export function assertUserinfoSubMatches(
 }
 
 export { IdTokenVerifyError };
+
+/**
+ * Outcome of the callback exchange. `status` is the HTTP status the route
+ * returns; `message` becomes the `statusMessage`.
+ *
+ * Returning a value rather than throwing an HTTP error keeps this module free
+ * of the Nitro helpers, which is what lets a test run it.
+ */
+export type CallbackOutcome<TUserinfo extends UserinfoLike = UserinfoLike> =
+  | { ok: true; userinfo: TUserinfo; claims: IdTokenClaims }
+  | { ok: false; status: number; message: string };
+
+/**
+ * The only field of a userinfo response the callback reasons about. The route
+ * keeps its own richer type; this module stays generic over it so narrowing
+ * the response shape here does not erase the caller's fields.
+ */
+export interface UserinfoLike {
+  sub: string;
+}
+
+/** Token endpoint response fields the callback consumes. */
+export interface TokenResponseLike {
+  access_token: string;
+  id_token: string;
+}
+
+/**
+ * Everything the callback needs that it cannot compute itself. The network
+ * calls are injected so a test can drive each failure without a live OP, the
+ * same way `runCli` takes its `spawn`.
+ */
+export interface RunCallbackDeps<TUserinfo extends UserinfoLike = UserinfoLike> {
+  fetchJwks: () => Promise<JwksDocument>;
+  exchangeCode: () => Promise<TokenResponseLike>;
+  fetchUserinfo: (accessToken: string) => Promise<TUserinfo>;
+  now?: () => number;
+}
+
+/** Request-derived and cookie-derived values, already read by the route. */
+export interface RunCallbackInput {
+  code: string;
+  state: string;
+  cookieState: string | undefined;
+  cookieNonce: string | undefined;
+  cookieVerifier: string | undefined;
+  issuer: string;
+  clientId: string;
+}
+
+/**
+ * Run the callback exchange and decide what the route should answer.
+ *
+ * The order matters and is asserted by the tests: the CSRF gate precedes the
+ * token exchange, verification precedes the userinfo fetch, and a failed
+ * verification stops before anything is stored. A caller that skipped a step
+ * would still compile, so the sequence is pinned by execution rather than by
+ * review.
+ */
+export async function runCallback<TUserinfo extends UserinfoLike>(
+  input: RunCallbackInput,
+  deps: RunCallbackDeps<TUserinfo>,
+): Promise<CallbackOutcome<TUserinfo>> {
+  if (typeof input.code !== 'string' || typeof input.state !== 'string') {
+    return { ok: false, status: 400, message: 'callback body missing code or state' };
+  }
+  if (input.cookieState === undefined || input.cookieState !== input.state) {
+    return { ok: false, status: 400, message: 'state mismatch (CSRF gate)' };
+  }
+  if (input.cookieVerifier === undefined) {
+    return { ok: false, status: 400, message: 'code_verifier cookie missing' };
+  }
+  if (input.cookieNonce === undefined) {
+    return { ok: false, status: 400, message: 'nonce cookie missing' };
+  }
+
+  const tokenResponse = await deps.exchangeCode();
+
+  let jwks: JwksDocument;
+  try {
+    jwks = await deps.fetchJwks();
+  } catch {
+    // No keys means no way to tell a genuine id_token from a forged one.
+    // Skipping verification here would hand an attacker the whole exchange.
+    return { ok: false, status: 401, message: 'id_token rejected: JWKS unavailable' };
+  }
+
+  let claims: IdTokenClaims;
+  try {
+    claims = verifyCallbackIdToken({
+      jwks,
+      idToken: tokenResponse.id_token,
+      accessToken: tokenResponse.access_token,
+      code: input.code,
+      nonce: input.cookieNonce,
+      issuer: input.issuer,
+      clientId: input.clientId,
+      ...(deps.now === undefined ? {} : { now: deps.now }),
+    });
+  } catch (err) {
+    // The axis goes in the message because an operator reading a 401 needs to
+    // tell a misconfigured OP (claims / nonce) from a forged token.
+    const issue = err instanceof IdTokenVerifyError ? err.issue : undefined;
+    return {
+      ok: false,
+      status: 401,
+      message:
+        issue === undefined
+          ? 'id_token rejected'
+          : `id_token rejected: ${issue.axis} — ${issue.reason}`,
+    };
+  }
+
+  const userinfo = await deps.fetchUserinfo(tokenResponse.access_token);
+
+  try {
+    assertUserinfoSubMatches(userinfo.sub, claims);
+  } catch (err) {
+    return {
+      ok: false,
+      status: 401,
+      message:
+        err instanceof UserinfoSubMismatchError ? err.message : 'userinfo sub check failed',
+    };
+  }
+
+  return { ok: true, userinfo, claims };
+}

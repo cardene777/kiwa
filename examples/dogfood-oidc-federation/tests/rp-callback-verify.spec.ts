@@ -19,6 +19,7 @@ import type { JwksDocument } from '@kiwa-lab/auth';
 import {
   assertUserinfoSubMatches,
   IdTokenVerifyError,
+  runCallback,
   UserinfoSubMismatchError,
   verifyCallbackIdToken,
 } from '../src/lib/rp-callback.js';
@@ -159,6 +160,61 @@ describe('verifyCallbackIdToken — signature axis', () => {
     expect(error.issue.reason).toContain('signature verification failed');
   });
 
+  it('rejects a JWKS entry whose alg does not match its key type', async () => {
+    // alg confusion — Node picks the signature scheme from the key, not from
+    // `alg`, so an entry advertising ES256 over RSA material used to verify an
+    // RSA signature while the header claimed ECDSA.
+    const { generateKeyPairSync, sign } = await import('node:crypto');
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+    });
+    const jwk = publicKey.export({ format: 'jwk' });
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    const b64 = (value: string | Buffer): string =>
+      Buffer.from(value).toString('base64url');
+    const headerB64 = b64(
+      JSON.stringify({ alg: 'ES256', typ: 'JWT', kid: 'confused' }),
+    );
+    const payloadB64 = b64(
+      JSON.stringify({
+        iss: ISSUER,
+        sub: SUBJECT,
+        aud: CLIENT_ID,
+        exp: nowSec + 3600,
+        iat: nowSec,
+      }),
+    );
+    const signature = b64(
+      sign('sha256', Buffer.from(`${headerB64}.${payloadB64}`, 'ascii'), privateKey),
+    );
+
+    const h = await harness();
+    const forged: JwksDocument = {
+      keys: [
+        {
+          kid: 'confused',
+          alg: 'ES256',
+          kty: 'RSA',
+          n: jwk.n as string,
+          e: jwk.e as string,
+          use: 'sig',
+        },
+      ],
+    };
+
+    const error = rejectionOf(
+      inputFor(h, {
+        jwks: forged,
+        idToken: `${headerB64}.${payloadB64}.${signature}`,
+        // The forged token carries no nonce or hashes; the signature axis must
+        // reject before those are ever compared.
+      }),
+    );
+
+    expect(error.issue.axis).toBe('signature');
+  });
+
   it('rejects when the JWKS carries no key material for the kid', async () => {
     const h = await harness();
     const stripped: JwksDocument = {
@@ -252,5 +308,134 @@ describe('assertUserinfoSubMatches — OIDC Core §5.3.2', () => {
     expect(() => {
       assertUserinfoSubMatches('someone-else', claims);
     }).toThrow(UserinfoSubMismatchError);
+  });
+});
+
+describe('runCallback — the route wiring', () => {
+  /** Deps that succeed, so a case can break exactly one of them. */
+  async function goodDeps() {
+    const h = await harness();
+    const calls = { jwks: 0, token: 0, userinfo: 0 };
+    return {
+      h,
+      calls,
+      input: {
+        code: CODE,
+        state: 'state-1',
+        cookieState: 'state-1',
+        cookieNonce: NONCE,
+        cookieVerifier: 'verifier-1',
+        issuer: ISSUER,
+        clientId: CLIENT_ID,
+      },
+      deps: {
+        fetchJwks: async () => {
+          calls.jwks += 1;
+          return h.jwks;
+        },
+        exchangeCode: async () => {
+          calls.token += 1;
+          return { access_token: ACCESS_TOKEN, id_token: h.idToken };
+        },
+        fetchUserinfo: async (_token: string) => {
+          calls.userinfo += 1;
+          return { sub: SUBJECT, name: 'Test User' };
+        },
+      },
+    };
+  }
+
+  it('returns the userinfo when every step passes', async () => {
+    const { input, deps } = await goodDeps();
+
+    const outcome = await runCallback(input, deps);
+
+    expect(outcome.ok).toBe(true);
+    if (outcome.ok) {
+      expect(outcome.userinfo.sub).toBe(SUBJECT);
+      expect(outcome.claims.sub).toBe(SUBJECT);
+    }
+  });
+
+  it('rejects with 401 and never fetches userinfo when the id_token is forged', async () => {
+    const { h, calls, input, deps } = await goodDeps();
+    const other = await harness();
+
+    const outcome = await runCallback(input, {
+      ...deps,
+      exchangeCode: async () => ({
+        access_token: ACCESS_TOKEN,
+        // Signed by a key `h.jwks` does not carry.
+        id_token: other.idToken,
+      }),
+    });
+
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.status).toBe(401);
+      expect(outcome.message).toContain('id_token rejected');
+    }
+    // The whole point of verifying first: nothing downstream ran.
+    expect(calls.userinfo).toBe(0);
+    expect(h.jwks.keys.length).toBeGreaterThan(0);
+  });
+
+  it('rejects with 401 when the JWKS cannot be fetched', async () => {
+    const { calls, input, deps } = await goodDeps();
+
+    const outcome = await runCallback(input, {
+      ...deps,
+      fetchJwks: async () => {
+        throw new Error('network down');
+      },
+    });
+
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.status).toBe(401);
+      expect(outcome.message).toContain('JWKS unavailable');
+    }
+    expect(calls.userinfo).toBe(0);
+  });
+
+  it('rejects with 401 when userinfo describes a different subject', async () => {
+    const { input, deps } = await goodDeps();
+
+    const outcome = await runCallback(input, {
+      ...deps,
+      fetchUserinfo: async () => ({ sub: 'someone-else' }),
+    });
+
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.status).toBe(401);
+      expect(outcome.message).toContain('does not match');
+    }
+  });
+
+  it('rejects with 400 before exchanging the code when state does not match', async () => {
+    const { calls, input, deps } = await goodDeps();
+
+    const outcome = await runCallback({ ...input, cookieState: 'other' }, deps);
+
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.status).toBe(400);
+      expect(outcome.message).toContain('CSRF gate');
+    }
+    // The CSRF gate must precede the token exchange.
+    expect(calls.token).toBe(0);
+  });
+
+  it('rejects with 400 when the nonce cookie is absent', async () => {
+    const { input, deps } = await goodDeps();
+
+    const outcome = await runCallback({ ...input, cookieNonce: undefined }, deps);
+
+    expect(outcome.ok).toBe(false);
+    if (!outcome.ok) {
+      expect(outcome.status).toBe(400);
+      expect(outcome.message).toContain('nonce cookie missing');
+    }
   });
 });

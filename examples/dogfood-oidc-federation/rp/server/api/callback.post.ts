@@ -15,14 +15,9 @@
 // verification in step 3 runs against the JWKS the OP publishes, so it holds
 // against a real OP and not only the mock.
 
-import type { IdTokenClaims, JwksDocument } from '@kiwa-lab/auth';
+import type { JwksDocument } from '@kiwa-lab/auth';
 
-import {
-  assertUserinfoSubMatches,
-  IdTokenVerifyError,
-  UserinfoSubMismatchError,
-  verifyCallbackIdToken,
-} from '../../../src/lib/rp-callback.js';
+import { runCallback } from '../../../src/lib/rp-callback.js';
 
 interface CallbackRequest {
   code: string;
@@ -46,113 +41,51 @@ interface UserinfoResponse {
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const body = await readBody<CallbackRequest>(event);
-
-  if (typeof body.code !== 'string' || typeof body.state !== 'string') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'callback body missing code or state',
-    });
-  }
-
-  const cookieState = getCookie(event, 'rp_state');
-  const cookieNonce = getCookie(event, 'rp_nonce');
   const cookieVerifier = getCookie(event, 'rp_code_verifier');
-  if (cookieState === undefined || cookieState !== body.state) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'state mismatch (CSRF gate)',
-    });
-  }
-  if (cookieVerifier === undefined) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'code_verifier cookie missing',
-    });
-  }
-  if (cookieNonce === undefined) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'nonce cookie missing',
-    });
-  }
 
-  // Token exchange — POST /token with authorization_code + code_verifier.
-  // The OP validates the code + PKCE + returns access_token + id_token.
-  // Sub-Issue v1.21-4d wires this against a running OP; the skeleton
-  // route uses `$fetch` so the wire shape is fixed today.
-  const tokenResponse = await $fetch<TokenResponse>(`${config.opIssuer}/token`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
+  // The decision logic lives in `runCallback` so a test can execute it; this
+  // handler only supplies the I/O and maps the outcome onto an HTTP response.
+  const outcome = await runCallback(
+    {
       code: body.code,
-      redirect_uri: config.rpRedirectUri,
-      client_id: config.rpClientId,
-      code_verifier: cookieVerifier,
-    }).toString(),
-  });
-
-  // id_token verification. Everything below this point trusts `claims`, so a
-  // token that fails any of the four axes must not reach it.
-  //
-  // The JWKS is fetched per callback rather than cached. A cache would have to
-  // invalidate on the OP's key rotation, and getting that wrong fails closed
-  // in the worst way — a rotated-away key would keep verifying.
-  let jwks: JwksDocument;
-  try {
-    jwks = await $fetch<JwksDocument>(`${config.opIssuer}/jwks`);
-  } catch (_err) {
-    // No keys means no way to tell a genuine id_token from a forged one.
-    // Refusing is the only safe answer; skipping verification here would
-    // hand an attacker the whole point of the exchange.
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'id_token rejected: JWKS unavailable',
-    });
-  }
-
-  let claims: IdTokenClaims;
-  try {
-    claims = verifyCallbackIdToken({
-      jwks,
-      idToken: tokenResponse.id_token,
-      accessToken: tokenResponse.access_token,
-      code: body.code,
-      nonce: cookieNonce,
+      state: body.state,
+      cookieState: getCookie(event, 'rp_state'),
+      cookieNonce: getCookie(event, 'rp_nonce'),
+      cookieVerifier,
       issuer: config.opIssuer,
       clientId: config.rpClientId,
-    });
-  } catch (err) {
-    // `IdTokenVerifyError` carries the axis that failed. It goes in the status
-    // message because an RP operator reading a 401 needs to know whether the
-    // OP is misconfigured (claims / nonce) or the token was forged
-    // (signature).
-    const issue = err instanceof IdTokenVerifyError ? err.issue : undefined;
+    },
+    {
+      // The JWKS is fetched per callback rather than cached. A stale cache
+      // would keep verifying a rotated-away key, which fails open.
+      fetchJwks: () => $fetch<JwksDocument>(`${config.opIssuer}/jwks`),
+      exchangeCode: () =>
+        $fetch<TokenResponse>(`${config.opIssuer}/token`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: body.code,
+            redirect_uri: config.rpRedirectUri,
+            client_id: config.rpClientId,
+            code_verifier: cookieVerifier ?? '',
+          }).toString(),
+        }),
+      fetchUserinfo: (accessToken: string) =>
+        $fetch<UserinfoResponse>(`${config.opIssuer}/userinfo`, {
+          headers: { authorization: `Bearer ${accessToken}` },
+        }),
+    },
+  );
+
+  if (!outcome.ok) {
     throw createError({
-      statusCode: 401,
-      statusMessage:
-        issue === undefined
-          ? 'id_token rejected'
-          : `id_token rejected: ${issue.axis} — ${issue.reason}`,
+      statusCode: outcome.status,
+      statusMessage: outcome.message,
     });
   }
 
-  // Userinfo — GET /userinfo with the access_token as a Bearer.
-  const userinfo = await $fetch<UserinfoResponse>(`${config.opIssuer}/userinfo`, {
-    headers: { authorization: `Bearer ${tokenResponse.access_token}` },
-  });
-
-  try {
-    assertUserinfoSubMatches(userinfo.sub, claims);
-  } catch (err) {
-    throw createError({
-      statusCode: 401,
-      statusMessage:
-        err instanceof UserinfoSubMismatchError
-          ? err.message
-          : 'userinfo sub check failed',
-    });
-  }
+  const userinfo = outcome.userinfo;
 
   // Persist userinfo in the RP session so `/api/userinfo` can serve it. The
   // full session-store wiring lands in Sub-Issue v1.21-4d; the skeleton uses

@@ -107,6 +107,19 @@ function verifySignature(
   signatureB64: string,
   key: JwksKey,
 ): boolean {
+  // `alg` must agree with the key type it is declared against. Node picks the
+  // signature scheme from the key, not from `alg`, so an entry advertising
+  // `alg: "ES256"` over RSA material would verify an RSA signature while the
+  // header claimed ECDSA — the caller's `header.alg === key.alg` check reads
+  // as an algorithm policy but enforces nothing on its own (RFC 7518 §3.1
+  // binds each `alg` to one key type).
+  if (key.alg === 'RS256' && key.kty !== 'RSA') {
+    return false;
+  }
+  if (key.alg === 'ES256' && key.kty !== 'EC') {
+    return false;
+  }
+
   // Only the RFC 7517 members go to `createPublicKey`. `kid` / `use` /
   // `retiredAt` are JWKS bookkeeping and are not key material.
   //
@@ -120,7 +133,9 @@ function verifySignature(
     }
     jwk = { kty: 'RSA', n: key.n, e: key.e };
   } else {
-    if (key.crv === undefined || key.x === undefined || key.y === undefined) {
+    // ES256 is the only EC algorithm this signer emits, and RFC 7518 §3.4
+    // binds it to P-256. Any other curve is outside the declared policy.
+    if (key.crv !== 'P-256' || key.x === undefined || key.y === undefined) {
       return false;
     }
     jwk = { kty: 'EC', crv: key.crv, x: key.x, y: key.y };
