@@ -73,6 +73,93 @@ describe('license consistency across every declaring surface', () => {
     expect(kiwa?.version).toBe(pluginVersion);
   });
 
+  // GH #1792 — 貢献条件とライセンスの矛盾。 LICENSE は PR を歓迎すると書きながら、 その PR を
+  // 作るのに必要な fork / 複製 / 変更を禁じていた。 同時に CONTRIBUTING.md は貢献物が MIT に
+  // なると書き、 README 2 本と VitePress footer も MIT を掲げていた。 外部貢献者は「PR を出して
+  // よいか」 も「貢献物がどう扱われるか」 も文書から判断できなかった。
+  //
+  // 上の LICENSE 検査だけでは、 これらの面が MIT に戻っても気付けない。
+  it('LICENSE grants what CONTRIBUTING instructs contributors to do', () => {
+    const license = readText('LICENSE');
+    const contributing = readText('CONTRIBUTING.md');
+
+    // CONTRIBUTING が fork を指示する以上、 LICENSE 側にその許諾が要る。
+    expect(
+      contributing,
+      'CONTRIBUTING no longer instructs contributors to fork; the grant assertion below is stale',
+    ).toContain('Fork and clone the repository');
+
+    // grant block 全体を照合する。 見出し語 1 語だけを見ると `You MAY ALSO` を `You MAY NOT` に
+    // 書き換えても通ってしまう (review が実測)。
+    const grant = [
+      'You MAY ALSO, for the sole purpose of preparing and submitting a contribution',
+      'to this repository:',
+      '',
+      '  - fork the repository, clone it, and create branches;',
+      '  - modify the Software and build, run, and test your modifications locally;',
+      '  - publish your fork on the hosting platform to the extent required to open a',
+      '    pull request against this repository.',
+    ].join('\n');
+    expect(license, 'the contribution grant block no longer matches verbatim').toContain(grant);
+
+    // 許諾を後段で打ち消していないか。 hosting platform への公開は上の許諾で明示的に除外する。
+    expect(license).toContain(
+      'Except for the publication\non the hosting platform described immediately above',
+    );
+  });
+
+  it('references a DCO that exists in the repository', () => {
+    // LICENSE と CONTRIBUTING が DCO を条件にする以上、 その本文が repo に無いと同意を確認できない。
+    const dco = readText('DCO');
+    expect(dco).toContain('Developer Certificate of Origin');
+    expect(dco).toContain('Version 1.1');
+
+    expect(readText('LICENSE')).toContain('version 1.1 as reproduced verbatim in the DCO file');
+    expect(readText('CONTRIBUTING.md')).toContain('git commit -s');
+  });
+
+  it('every published surface declares the proprietary license', () => {
+    // npm 以外の 3 package は PyPI / crates.io / pkg.go.dev から直接見える面で、
+    // 最初の実装はここを丸ごと見落としていた (grep pattern が .toml を含んでいなかった)。
+    const declarations: Array<[string, string]> = [
+      ['kiwa-py/pyproject.toml', 'LicenseRef-Proprietary'],
+      ['kiwa-rs/Cargo.toml', 'LicenseRef-Proprietary'],
+      ['kiwa-py/README.md', 'All rights reserved'],
+      ['kiwa-rs/README.md', 'All rights reserved'],
+      ['kiwa-go/README.md', 'All rights reserved'],
+    ];
+
+    for (const [rel, expected] of declarations) {
+      expect(readText(rel), `${rel} does not declare the proprietary license`).toContain(expected);
+    }
+  });
+
+  it('no contributor-facing surface claims an MIT grant', () => {
+    // 語形を絞りすぎると `Licensed under MIT.` や `MIT-licensed` を見逃す (review が実測)。
+    const mitClaim = /\bMIT\b/;
+    const surfaces = [
+      'CONTRIBUTING.md',
+      'README.ja.md',
+      'docs/.vitepress/config.mts',
+      'kiwa-py/pyproject.toml',
+      'kiwa-rs/Cargo.toml',
+      'kiwa-py/README.md',
+      'kiwa-rs/README.md',
+      'kiwa-go/README.md',
+    ];
+
+    for (const rel of surfaces) {
+      expect(readText(rel), `${rel} mentions MIT while LICENSE is All rights reserved`).not.toMatch(
+        mitClaim,
+      );
+    }
+
+    // README.md は milestone 履歴に MIT を含むため、 現行の宣言だけを見る。
+    const readme = readText('README.md');
+    expect(readme).not.toMatch(/license-MIT/);
+    expect(readme).not.toMatch(/\[MIT\]\(\.\/LICENSE\)/);
+  });
+
   it('no manifest still references the retired @kiwa/ scope', () => {
     for (const rel of ['.claude-plugin/plugin.json', '.claude-plugin/marketplace.json']) {
       const src = readText(rel);

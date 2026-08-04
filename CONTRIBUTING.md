@@ -66,6 +66,12 @@ discussing scope first.
 3. Run tests (`pnpm test:all` — not `pnpm test`, which stops at the first failure)
 4. Make sure typecheck passes (`pnpm typecheck:all`)
 5. Make sure build passes (`pnpm build`)
+6. Sign off every commit with `git commit -s`
+
+The `Signed-off-by:` trailer that `-s` adds certifies the Developer Certificate
+of Origin version 1.1, reproduced verbatim in [`DCO`](./DCO). It states where
+the contribution came from. It is separate from the ownership and relicensing
+terms in [`LICENSE`](./LICENSE), which you agree to by opening a pull request.
 
 ### When tests fail
 
@@ -282,4 +288,8 @@ For quick replies / DMs, you can also reach the maintainer on X at [@cardene777]
 
 ## License
 
-By contributing, you agree your contributions will be licensed under the MIT License.
+By contributing, you agree to the contribution terms in [`LICENSE`](./LICENSE): the
+contribution grant that lets you fork and open a pull request, and the Developer
+Certificate of Origin under which accepted contributions become the property of the
+copyright holder. The project is pre-release and All rights reserved — contributions are
+**not** placed under an open-source license at this stage.

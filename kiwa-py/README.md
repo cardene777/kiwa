@@ -65,4 +65,5 @@ Initial release covers parser + sync / async HTTP adapters. FastAPI TestClient h
 
 ## License
 
-MIT
+Pre-release — All rights reserved. See the LICENSE file in the
+[kiwa repository](https://github.com/cardene777/kiwa/blob/main/LICENSE).

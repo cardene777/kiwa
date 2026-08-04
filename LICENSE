@@ -5,7 +5,8 @@ proprietary and confidential property of the copyright holder. This is a
 pre-release, work-in-progress project intended for public visibility during
 active development toward an eventual open-source release.
 
-No permission is granted, whether express or implied, to:
+Except as expressly permitted in the two grants below, no permission is
+granted, whether express or implied, to:
 
   - copy, fork, modify, adapt, translate, or create derivative works of the
     Software, in whole or in part;
@@ -23,12 +24,42 @@ non-commercial) experimentation:
     of your own private, non-redistributed projects;
   - read the source code that has been made publicly viewable on GitHub;
   - report issues and suggest improvements through the project's public issue
-    tracker.
+    tracker;
+  - create and publish a minimal, non-production reproducer solely for
+    reporting an issue, provided it contains no copy or derivative of the
+    Software beyond a dependency declaration.
 
-Contributions submitted through pull requests are welcome but, if accepted,
-become the property of the copyright holder under the terms of the Developer
-Certificate of Origin (DCO); the copyright holder may relicense contributed
-material under the eventual open-source license without further notice.
+You MAY ALSO, for the sole purpose of preparing and submitting a contribution
+to this repository:
+
+  - fork the repository, clone it, and create branches;
+  - modify the Software and build, run, and test your modifications locally;
+  - publish your fork on the hosting platform to the extent required to open a
+    pull request against this repository.
+
+This contribution grant is limited to that purpose. Except for the publication
+on the hosting platform described immediately above, it does not permit using a
+fork or its build output in production, distributing it to any other third
+party, or keeping it published once the associated pull request is closed or
+abandoned.
+
+Contributions submitted through pull requests are welcome. Two separate things
+apply to them.
+
+First, origin. Every commit in a pull request must carry a `Signed-off-by:`
+trailer (`git commit -s`), which certifies the Developer Certificate of Origin
+version 1.1 as reproduced verbatim in the DCO file at the root of this
+repository. The DCO certifies where the contribution came from; it grants the
+copyright holder nothing by itself.
+
+Second, terms. By submitting a pull request you agree that, if it is accepted,
+the contributed material becomes the property of the copyright holder, and that
+the copyright holder may relicense it under the eventual open-source license
+without further notice.
+
+The Software as a whole remains under the terms above — the contribution grant
+does not place contributed material, or the Software, under any open-source
+license.
 
 This license will be replaced with an OSI-approved open-source license (such
 as MIT or Apache-2.0) at general availability. Until that replacement is

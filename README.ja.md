@@ -12,7 +12,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-lab/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-lab/dapp)
 [![packages](https://img.shields.io/badge/npm%20packages-11-cb3837?logo=npm)](#whats-in-the-box)
 [![python](https://img.shields.io/badge/PyPI-kiwa--test--py-3776ab?logo=python&logoColor=white)](./kiwa-py)
-[![license](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+[![license](https://img.shields.io/badge/license-All%20Rights%20Reserved-red)](./LICENSE)
 [![tests](https://img.shields.io/badge/tests-292%20execution%20PASS-success)](#testing--quality)
 [![flaky](https://img.shields.io/badge/flaky-0%2F292-success)](#testing--quality)
 [![coverage](https://img.shields.io/badge/coverage-Lines%2090%2B%20%2F%20Branches%2080%2B-success)](#quality-gates)
@@ -576,7 +576,7 @@ Claude Code 利用者向け — skill 完全リファレンス:
 
 ## License
 
-[MIT](./LICENSE) © [cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
+All rights reserved — [LICENSE](./LICENSE) © [cardene](https://github.com/cardene777) — [GitHub](https://github.com/cardene777) / [X](https://x.com/cardene777)
 
 <div align="center">
 

@@ -458,4 +458,5 @@ The git tag prefix follows the standard Go monorepo convention
 
 ## License
 
-MIT
+Pre-release — All rights reserved. See the LICENSE file in the
+[kiwa repository](https://github.com/cardene777/kiwa/blob/main/LICENSE).

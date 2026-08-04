@@ -792,7 +792,7 @@ For bug reports, please [open an Issue](https://github.com/cardene777/kiwa/issue
 
 ## License
 
-[MIT](./LICENSE) © [cardene](https://github.com/cardene777) — find me on [GitHub](https://github.com/cardene777) and [X](https://x.com/cardene777).
+All rights reserved — [LICENSE](./LICENSE) © [cardene](https://github.com/cardene777) — find me on [GitHub](https://github.com/cardene777) and [X](https://x.com/cardene777).
 
 <div align="center">
 
