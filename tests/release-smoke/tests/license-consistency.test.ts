@@ -88,30 +88,76 @@ describe('license consistency across every declaring surface', () => {
       contributing,
       'CONTRIBUTING no longer instructs contributors to fork; the grant assertion below is stale',
     ).toContain('Fork and clone the repository');
-    expect(
-      license,
-      'CONTRIBUTING tells contributors to fork, but LICENSE grants no such permission',
-    ).toContain('fork the repository, clone it, and create branches');
-    // 許諾が目的限定であることを明示する文が要る (無制限の fork 許諾と読ませない)。
-    expect(license).toContain('This contribution grant is limited to that purpose');
-    // 禁止 list が許諾より前にあるため、 例外への参照が無いと字面が衝突する。
-    expect(license).toContain('Except as expressly permitted in the two grants below');
+
+    // grant block 全体を照合する。 見出し語 1 語だけを見ると `You MAY ALSO` を `You MAY NOT` に
+    // 書き換えても通ってしまう (review が実測)。
+    const grant = [
+      'You MAY ALSO, for the sole purpose of preparing and submitting a contribution',
+      'to this repository:',
+      '',
+      '  - fork the repository, clone it, and create branches;',
+      '  - modify the Software and build, run, and test your modifications locally;',
+      '  - publish your fork on the hosting platform to the extent required to open a',
+      '    pull request against this repository.',
+    ].join('\n');
+    expect(license, 'the contribution grant block no longer matches verbatim').toContain(grant);
+
+    // 許諾を後段で打ち消していないか。 hosting platform への公開は上の許諾で明示的に除外する。
+    expect(license).toContain(
+      'Except for the publication\non the hosting platform described immediately above',
+    );
+  });
+
+  it('references a DCO that exists in the repository', () => {
+    // LICENSE と CONTRIBUTING が DCO を条件にする以上、 その本文が repo に無いと同意を確認できない。
+    const dco = readText('DCO');
+    expect(dco).toContain('Developer Certificate of Origin');
+    expect(dco).toContain('Version 1.1');
+
+    expect(readText('LICENSE')).toContain('version 1.1 as reproduced verbatim in the DCO file');
+    expect(readText('CONTRIBUTING.md')).toContain('git commit -s');
+  });
+
+  it('every published surface declares the proprietary license', () => {
+    // npm 以外の 3 package は PyPI / crates.io / pkg.go.dev から直接見える面で、
+    // 最初の実装はここを丸ごと見落としていた (grep pattern が .toml を含んでいなかった)。
+    const declarations: Array<[string, string]> = [
+      ['kiwa-py/pyproject.toml', 'LicenseRef-Proprietary'],
+      ['kiwa-rs/Cargo.toml', 'LicenseRef-Proprietary'],
+      ['kiwa-py/README.md', 'All rights reserved'],
+      ['kiwa-rs/README.md', 'All rights reserved'],
+      ['kiwa-go/README.md', 'All rights reserved'],
+    ];
+
+    for (const [rel, expected] of declarations) {
+      expect(readText(rel), `${rel} does not declare the proprietary license`).toContain(expected);
+    }
   });
 
   it('no contributor-facing surface claims an MIT grant', () => {
-    const surfaces: Array<[string, RegExp]> = [
-      ['CONTRIBUTING.md', /licensed under the MIT License/],
-      ['README.md', /license-MIT|\[MIT\]\(\.\/LICENSE\)/],
-      ['README.ja.md', /license-MIT|\[MIT\]\(\.\/LICENSE\)/],
-      ['docs/.vitepress/config.mts', /Released under the MIT License/],
+    // 語形を絞りすぎると `Licensed under MIT.` や `MIT-licensed` を見逃す (review が実測)。
+    const mitClaim = /\bMIT\b/;
+    const surfaces = [
+      'CONTRIBUTING.md',
+      'README.ja.md',
+      'docs/.vitepress/config.mts',
+      'kiwa-py/pyproject.toml',
+      'kiwa-rs/Cargo.toml',
+      'kiwa-py/README.md',
+      'kiwa-rs/README.md',
+      'kiwa-go/README.md',
     ];
 
-    for (const [rel, pattern] of surfaces) {
-      expect(
-        readText(rel),
-        `${rel} claims an MIT grant while LICENSE is All rights reserved`,
-      ).not.toMatch(pattern);
+    for (const rel of surfaces) {
+      expect(readText(rel), `${rel} mentions MIT while LICENSE is All rights reserved`).not.toMatch(
+        mitClaim,
+      );
     }
+
+    // README.md は milestone 履歴に MIT を含むため、 現行の宣言だけを見る。
+    const readme = readText('README.md');
+    expect(readme).not.toMatch(/license-MIT/);
+    expect(readme).not.toMatch(/\[MIT\]\(\.\/LICENSE\)/);
   });
 
   it('no manifest still references the retired @kiwa/ scope', () => {

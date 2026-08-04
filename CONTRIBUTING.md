@@ -66,6 +66,12 @@ discussing scope first.
 3. Run tests (`pnpm test:all` — not `pnpm test`, which stops at the first failure)
 4. Make sure typecheck passes (`pnpm typecheck:all`)
 5. Make sure build passes (`pnpm build`)
+6. Sign off every commit with `git commit -s`
+
+The `Signed-off-by:` trailer that `-s` adds certifies the Developer Certificate
+of Origin version 1.1, reproduced verbatim in [`DCO`](./DCO). It states where
+the contribution came from. It is separate from the ownership and relicensing
+terms in [`LICENSE`](./LICENSE), which you agree to by opening a pull request.
 
 ### When tests fail
 

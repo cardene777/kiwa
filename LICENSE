@@ -24,7 +24,10 @@ non-commercial) experimentation:
     of your own private, non-redistributed projects;
   - read the source code that has been made publicly viewable on GitHub;
   - report issues and suggest improvements through the project's public issue
-    tracker.
+    tracker;
+  - create and publish a minimal, non-production reproducer solely for
+    reporting an issue, provided it contains no copy or derivative of the
+    Software beyond a dependency declaration.
 
 You MAY ALSO, for the sole purpose of preparing and submitting a contribution
 to this repository:
@@ -34,15 +37,27 @@ to this repository:
   - publish your fork on the hosting platform to the extent required to open a
     pull request against this repository.
 
-This contribution grant is limited to that purpose. It does not permit using a
-fork or its build output in production, distributing it to third parties, or
-keeping it published once the associated pull request is closed or abandoned.
+This contribution grant is limited to that purpose. Except for the publication
+on the hosting platform described immediately above, it does not permit using a
+fork or its build output in production, distributing it to any other third
+party, or keeping it published once the associated pull request is closed or
+abandoned.
 
-Contributions submitted through pull requests are welcome but, if accepted,
-become the property of the copyright holder under the terms of the Developer
-Certificate of Origin (DCO); the copyright holder may relicense contributed
-material under the eventual open-source license without further notice. The
-Software as a whole remains under the terms above — the contribution grant
+Contributions submitted through pull requests are welcome. Two separate things
+apply to them.
+
+First, origin. Every commit in a pull request must carry a `Signed-off-by:`
+trailer (`git commit -s`), which certifies the Developer Certificate of Origin
+version 1.1 as reproduced verbatim in the DCO file at the root of this
+repository. The DCO certifies where the contribution came from; it grants the
+copyright holder nothing by itself.
+
+Second, terms. By submitting a pull request you agree that, if it is accepted,
+the contributed material becomes the property of the copyright holder, and that
+the copyright holder may relicense it under the eventual open-source license
+without further notice.
+
+The Software as a whole remains under the terms above — the contribution grant
 does not place contributed material, or the Software, under any open-source
 license.
 

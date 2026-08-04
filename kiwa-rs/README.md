@@ -634,4 +634,5 @@ including the negative-path panic assertions).
 
 ## License
 
-MIT
+Pre-release — All rights reserved. See the LICENSE file in the
+[kiwa repository](https://github.com/cardene777/kiwa/blob/main/LICENSE).
