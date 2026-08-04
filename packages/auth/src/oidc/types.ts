@@ -1,3 +1,5 @@
+import type { KeyObject } from 'node:crypto';
+
 import type { TestEnvBase } from '@kiwa-lab/core';
 
 import type {
@@ -103,7 +105,12 @@ export interface JwksKey {
   alg: 'RS256' | 'ES256';
   /** Key type. `RSA` for `RS256`, `EC` for `ES256`. */
   kty: 'RSA' | 'EC';
-  /** Public exponent (RS256). Base64url-encoded placeholder. */
+  /**
+   * RSA modulus and public exponent (RS256), base64url-encoded per RFC 7518
+   * §6.3.1. These are the real public half of the signing keypair — an RP can
+   * feed them to `crypto.createPublicKey({ format: 'jwk' })` and verify a
+   * signature the mock produced.
+   */
   n?: string;
   e?: string;
   /** EC curve params (ES256). */
@@ -143,6 +150,15 @@ export interface JwksEndpoint {
    * Test-only inspection.
    */
   allKeys(): readonly JwksKey[];
+  /**
+   * Private half of the keypair behind `kid`, for signing. Returns
+   * `undefined` once the kid has aged out of the retention window.
+   *
+   * The private key never appears in `fetch()` / `allKeys()` — those return
+   * the public JWKS document an RP would download. Signing is the only
+   * caller.
+   */
+  signingKeyFor(kid: string): KeyObject | undefined;
 }
 
 /**

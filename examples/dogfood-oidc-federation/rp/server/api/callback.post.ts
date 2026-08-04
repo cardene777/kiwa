@@ -7,12 +7,22 @@
 //   3. verifies the id_token via `src/lib/id-token.ts` — enforcing the four
 //      fidelity axes (JWS signature, claims, nonce, hash chain);
 //   4. calls `/userinfo` with the access_token to fetch the RP's user profile;
-//   5. stores the userinfo in the RP session so the index page can read it.
+//   5. checks the userinfo `sub` against the verified id_token `sub`
+//      (OIDC Core §5.3.2);
+//   6. stores the userinfo in the RP session so the index page can read it.
 //
-// Sub-Issue v1.21-4c (this state) lands the skeleton wiring — the routes are
-// typed + serialize the right envelope shapes, but the id_token verification
-// is deferred to Sub-Issue v1.21-4d which wires the JWKS discovery + rotation
-// e2e against a running OP.
+// Every failure between step 1 and step 5 returns 4xx and stores nothing. The
+// verification in step 3 runs against the JWKS the OP publishes, so it holds
+// against a real OP and not only the mock.
+
+import type { IdTokenClaims, JwksDocument } from '@kiwa-lab/auth';
+
+import {
+  assertUserinfoSubMatches,
+  IdTokenVerifyError,
+  UserinfoSubMismatchError,
+  verifyCallbackIdToken,
+} from '../../../src/lib/rp-callback.js';
 
 interface CallbackRequest {
   code: string;
@@ -82,15 +92,67 @@ export default defineEventHandler(async (event) => {
     }).toString(),
   });
 
-  // TODO(v1.21-4d) — invoke `src/lib/id-token.ts`'s `mustVerifyIdToken` here
-  // once the RP has JWKS discovery wired in. For the skeleton state the
-  // token exchange itself is enough to prove the flow shape; the verifier
-  // path is exercised in `tests/id-token-verify.spec.ts` against the mock.
+  // id_token verification. Everything below this point trusts `claims`, so a
+  // token that fails any of the four axes must not reach it.
+  //
+  // The JWKS is fetched per callback rather than cached. A cache would have to
+  // invalidate on the OP's key rotation, and getting that wrong fails closed
+  // in the worst way — a rotated-away key would keep verifying.
+  let jwks: JwksDocument;
+  try {
+    jwks = await $fetch<JwksDocument>(`${config.opIssuer}/jwks`);
+  } catch (_err) {
+    // No keys means no way to tell a genuine id_token from a forged one.
+    // Refusing is the only safe answer; skipping verification here would
+    // hand an attacker the whole point of the exchange.
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'id_token rejected: JWKS unavailable',
+    });
+  }
+
+  let claims: IdTokenClaims;
+  try {
+    claims = verifyCallbackIdToken({
+      jwks,
+      idToken: tokenResponse.id_token,
+      accessToken: tokenResponse.access_token,
+      code: body.code,
+      nonce: cookieNonce,
+      issuer: config.opIssuer,
+      clientId: config.rpClientId,
+    });
+  } catch (err) {
+    // `IdTokenVerifyError` carries the axis that failed. It goes in the status
+    // message because an RP operator reading a 401 needs to know whether the
+    // OP is misconfigured (claims / nonce) or the token was forged
+    // (signature).
+    const issue = err instanceof IdTokenVerifyError ? err.issue : undefined;
+    throw createError({
+      statusCode: 401,
+      statusMessage:
+        issue === undefined
+          ? 'id_token rejected'
+          : `id_token rejected: ${issue.axis} — ${issue.reason}`,
+    });
+  }
 
   // Userinfo — GET /userinfo with the access_token as a Bearer.
   const userinfo = await $fetch<UserinfoResponse>(`${config.opIssuer}/userinfo`, {
     headers: { authorization: `Bearer ${tokenResponse.access_token}` },
   });
+
+  try {
+    assertUserinfoSubMatches(userinfo.sub, claims);
+  } catch (err) {
+    throw createError({
+      statusCode: 401,
+      statusMessage:
+        err instanceof UserinfoSubMismatchError
+          ? err.message
+          : 'userinfo sub check failed',
+    });
+  }
 
   // Persist userinfo in the RP session so `/api/userinfo` can serve it. The
   // full session-store wiring lands in Sub-Issue v1.21-4d; the skeleton uses
