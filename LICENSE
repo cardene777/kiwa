@@ -5,7 +5,8 @@ proprietary and confidential property of the copyright holder. This is a
 pre-release, work-in-progress project intended for public visibility during
 active development toward an eventual open-source release.
 
-No permission is granted, whether express or implied, to:
+Except as expressly permitted in the two grants below, no permission is
+granted, whether express or implied, to:
 
   - copy, fork, modify, adapt, translate, or create derivative works of the
     Software, in whole or in part;
@@ -25,10 +26,25 @@ non-commercial) experimentation:
   - report issues and suggest improvements through the project's public issue
     tracker.
 
+You MAY ALSO, for the sole purpose of preparing and submitting a contribution
+to this repository:
+
+  - fork the repository, clone it, and create branches;
+  - modify the Software and build, run, and test your modifications locally;
+  - publish your fork on the hosting platform to the extent required to open a
+    pull request against this repository.
+
+This contribution grant is limited to that purpose. It does not permit using a
+fork or its build output in production, distributing it to third parties, or
+keeping it published once the associated pull request is closed or abandoned.
+
 Contributions submitted through pull requests are welcome but, if accepted,
 become the property of the copyright holder under the terms of the Developer
 Certificate of Origin (DCO); the copyright holder may relicense contributed
-material under the eventual open-source license without further notice.
+material under the eventual open-source license without further notice. The
+Software as a whole remains under the terms above — the contribution grant
+does not place contributed material, or the Software, under any open-source
+license.
 
 This license will be replaced with an OSI-approved open-source license (such
 as MIT or Apache-2.0) at general availability. Until that replacement is

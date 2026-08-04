@@ -282,4 +282,8 @@ For quick replies / DMs, you can also reach the maintainer on X at [@cardene777]
 
 ## License
 
-By contributing, you agree your contributions will be licensed under the MIT License.
+By contributing, you agree to the contribution terms in [`LICENSE`](./LICENSE): the
+contribution grant that lets you fork and open a pull request, and the Developer
+Certificate of Origin under which accepted contributions become the property of the
+copyright holder. The project is pre-release and All rights reserved — contributions are
+**not** placed under an open-source license at this stage.

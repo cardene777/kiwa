@@ -825,7 +825,7 @@ export default defineConfig({
       text: 'GitHub で編集する',
     },
     footer: {
-      message: 'Released under the MIT License.',
+      message: 'Pre-release — All rights reserved. See LICENSE.',
       copyright: `© ${new Date().getFullYear()} cardene`,
     },
     search: {

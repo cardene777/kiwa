@@ -73,6 +73,47 @@ describe('license consistency across every declaring surface', () => {
     expect(kiwa?.version).toBe(pluginVersion);
   });
 
+  // GH #1792 — 貢献条件とライセンスの矛盾。 LICENSE は PR を歓迎すると書きながら、 その PR を
+  // 作るのに必要な fork / 複製 / 変更を禁じていた。 同時に CONTRIBUTING.md は貢献物が MIT に
+  // なると書き、 README 2 本と VitePress footer も MIT を掲げていた。 外部貢献者は「PR を出して
+  // よいか」 も「貢献物がどう扱われるか」 も文書から判断できなかった。
+  //
+  // 上の LICENSE 検査だけでは、 これらの面が MIT に戻っても気付けない。
+  it('LICENSE grants what CONTRIBUTING instructs contributors to do', () => {
+    const license = readText('LICENSE');
+    const contributing = readText('CONTRIBUTING.md');
+
+    // CONTRIBUTING が fork を指示する以上、 LICENSE 側にその許諾が要る。
+    expect(
+      contributing,
+      'CONTRIBUTING no longer instructs contributors to fork; the grant assertion below is stale',
+    ).toContain('Fork and clone the repository');
+    expect(
+      license,
+      'CONTRIBUTING tells contributors to fork, but LICENSE grants no such permission',
+    ).toContain('fork the repository, clone it, and create branches');
+    // 許諾が目的限定であることを明示する文が要る (無制限の fork 許諾と読ませない)。
+    expect(license).toContain('This contribution grant is limited to that purpose');
+    // 禁止 list が許諾より前にあるため、 例外への参照が無いと字面が衝突する。
+    expect(license).toContain('Except as expressly permitted in the two grants below');
+  });
+
+  it('no contributor-facing surface claims an MIT grant', () => {
+    const surfaces: Array<[string, RegExp]> = [
+      ['CONTRIBUTING.md', /licensed under the MIT License/],
+      ['README.md', /license-MIT|\[MIT\]\(\.\/LICENSE\)/],
+      ['README.ja.md', /license-MIT|\[MIT\]\(\.\/LICENSE\)/],
+      ['docs/.vitepress/config.mts', /Released under the MIT License/],
+    ];
+
+    for (const [rel, pattern] of surfaces) {
+      expect(
+        readText(rel),
+        `${rel} claims an MIT grant while LICENSE is All rights reserved`,
+      ).not.toMatch(pattern);
+    }
+  });
+
   it('no manifest still references the retired @kiwa/ scope', () => {
     for (const rel of ['.claude-plugin/plugin.json', '.claude-plugin/marketplace.json']) {
       const src = readText(rel);
