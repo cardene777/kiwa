@@ -5,33 +5,38 @@ We welcome bug reports, documentation fixes, tests, examples, and feature improv
 
 ## Language policy (SSOT)
 
-The policy is split by audience. Artifacts a reader consumes to *understand or
-use* the project are English; the running record of *how a change was made* may
-be Japanese.
+Every surface has one designated language. The split follows what a reader needs
+in order to act: entry points a newcomer must read before contributing are
+English, while the running record of how a change was made may be Japanese.
 
 **English is required** for:
 
 - Code comments and identifiers
-- Documentation authored under `docs/` for public consumption
-- Issue titles and bodies
-
-These are what a contributor reads before they can act. Keeping them English is
-what makes the project approachable regardless of first language.
+- Test and suite names
+- Issue and Discussion titles, bodies, and comments
+- `README.md` and the English documentation locale (`docs/en/`)
 
 **Japanese is accepted** for:
 
-- Commit messages
+- Commit messages (see § Commit message style)
 - Pull request titles, bodies, and review comments
+- Changeset summaries (`.changeset/*.md`) and the CHANGELOG entries generated
+  from them
+- `README.ja.md` and the default documentation locale — unprefixed paths under
+  `docs/` and `docs/ja/`, as configured in `docs/.vitepress/config.mts`
 
-These are the change record. They are read alongside the diff by whoever is
-working on that change, and the maintainer works in Japanese. Requiring English
-here adds translation cost to every commit without making the project easier to
-pick up. See § Commit message style for the commit format.
+Note that `docs/` is **not** uniformly English. Its root locale is Japanese and
+English lives under `docs/en/`; write in the language of the locale you are
+editing.
 
-Japanese is also used in files explicitly marked as Japanese translations (for
-example, `README.ja.md`, `docs/ja/`). If you must reference Japanese source
-material from an English artifact, quote and translate the relevant fragment in
-English inline.
+For anything not listed above, apply this rule: if a reader consumes it to
+understand or use the project, write English; if it exists to record how a
+change was made, follow the language of the artifact it belongs to. When neither
+reading is clear, choose English — it is the safer default for a public
+repository.
+
+Security reports are accepted in either language and need no translation; see
+[`SECURITY.md`](./SECURITY.md).
 
 Contributions written entirely in English are welcome and need no translation —
 the Japanese allowance is permission, not a requirement.
