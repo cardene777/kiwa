@@ -116,7 +116,7 @@ function printHelp() {
   process.stdout.write(`  --include-real      real driver test (*.real.<category>.test.ts) を実行対象に含める\n\n`);
   process.stdout.write(`Examples:\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity\n`);
-  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category skill --lib agent\n`);
+  process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category skill --lib cache\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category integration --format json\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category fidelity --include-real  # KIWA_MODE=real real driver test 含む\n`);
   process.stdout.write(`  node scripts/kiwa-taxonomy-run.mjs --category all  # 4 分類 (perf/fidelity/skill/integration) 一括実行 + 統合 matrix\n`);

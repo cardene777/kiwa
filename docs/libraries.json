@@ -4,38 +4,30 @@
       "text": "基盤",
       "slug": "foundation",
       "packages": [
-        "core",
-        "dapp",
-        "e2e",
         "api",
-        "ui",
         "cli",
         "cli-test",
         "component",
+        "core",
+        "dapp",
         "data",
-        "design-check",
+        "e2e",
         "kaname",
         "lean",
         "skill-test",
-        "desktop",
-        "mobile"
+        "ui"
       ]
     },
     {
       "text": "Webフレームワーク",
       "slug": "frameworks",
       "packages": [
-        "astro",
         "edge",
         "fresh",
         "hono",
         "nextjs",
-        "nuxt",
-        "qwikcity",
-        "remix",
         "solidjs",
-        "solidstart",
-        "sveltekit"
+        "solidstart"
       ]
     },
     {
@@ -44,9 +36,7 @@
       "packages": [
         "auth",
         "cache",
-        "email",
         "orm",
-        "payment",
         "queue"
       ]
     },
@@ -54,13 +44,10 @@
       "text": "AIとリアルタイム",
       "slug": "ai-realtime",
       "packages": [
-        "agent",
         "ai-llm",
-        "mcp",
         "observability",
         "realtime",
         "search",
-        "streaming",
         "visual"
       ]
     },
@@ -71,9 +58,7 @@
         "a11y",
         "perf-harness",
         "quality-metrics",
-        "release-invariants",
-        "security",
-        "security-devsecops"
+        "security"
       ]
     }
   ],

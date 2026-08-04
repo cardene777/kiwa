@@ -6,11 +6,11 @@
 
 **際を制するものが 開発を制する。 The dev-flow platform where testing, formal verification, and spec-driven development meet.**
 
-kiwa (「際」 = boundary, edge, connection) is a **spec-driven development platform** that fuses 3 axes: runtime testing (40+ npm packages), formal verification (Lean 4 spec generator + `lean --check`), and spec-driven workflow (specFormal / specRuntime 2-file separation with 3-layer classification). Read the [MANIFESTO](./MANIFESTO.md) for the full philosophy.
+kiwa (「際」 = boundary, edge, connection) is a **spec-driven development platform** that fuses 3 axes: runtime testing (31 npm packages), formal verification (Lean 4 spec generator + `lean --check`), and spec-driven workflow (specFormal / specRuntime 2-file separation with 3-layer classification). Read the [MANIFESTO](./MANIFESTO.md) for the full philosophy.
 
 **Every test layer · one spec · every verification path · TypeScript / Solidity / Python / Lean 4.**
 
-One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **42+ npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
+One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **31 npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-lab/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-lab/dapp)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-lab/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-lab/dapp)
@@ -551,10 +551,6 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 
 | Example | Stack / 対象 helper | Unit tests (kiwa) | E2E tests (Playwright) |
 |---|---|---|---|
-| [`nuxt-server-routes-full`](./examples/nuxt-server-routes-full) ⭐ | Nuxt 3 + `@kiwa-lab/nuxt` v1.0.4+ (3 helper 全 demo) | 20 (Server Routes 8 + route middleware 6 + Nitro plugin 6) | 4 (real `nuxt dev` :3030) |
-| [`sveltekit-full`](./examples/sveltekit-full) ⭐ | SvelteKit 2 + `@kiwa-lab/sveltekit` v1.0.x (3 helper 全 demo) | 19 (load 8 + actions 6 + handle 5) | 4 (real `vite dev` :3040) |
-| [`remix-full`](./examples/remix-full) ⭐ | Remix v2 + `@kiwa-lab/remix` v1.1.x (loader + action + Resource Route + nested route chain + 共通 auth) | 31 (loader 8 + action 7 + resource 6 + auth 5 + nested chain 5) | 7 (real `remix vite:dev` :3050) |
-| [`astro-server-endpoints-full`](./examples/astro-server-endpoints-full) ⭐ | Astro v5 SSR + `@kiwa-lab/astro` v1.0.x (APIRoute GET/POST + middleware locals) | 24 (items GET 8 + items POST 7 + counter 5 + auth 4) | 7 (real `astro dev` :3060) |
 | [`nextjs-app-router-full`](./examples/nextjs-app-router-full) ⭐ | Next.js v15 App Router + `@kiwa-lab/nextjs` v1.0.x (Server Actions + middleware + RSC + Route Handler の 4 layer) | 21 (action 6 + middleware 5 + RSC 5 + route 5) | 7 (real `next dev` :3070) |
 
 ---
@@ -669,17 +665,7 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Next.js React Server Components (async server component) | ✅ production-ready (v1.0.3+) | `/kiwa-nextjs` (`--layer nextjs-rsc`) | `@kiwa-lab/nextjs` v1.0.3 |
 | Next.js Parallel Routes + Intercepting Routes (`@modal` / `@sidebar` / `(.)`) | ✅ production-ready (v1.0.4+) | `/kiwa-nextjs` (`--layer nextjs-parallel-route`) | `@kiwa-lab/nextjs` v1.0.4 |
 | Next.js RSC streaming + Suspense boundary (chunk capture + fallback / resolved 遷移 + error boundary) | ✅ production-ready (v1.1+) | `/kiwa-nextjs` (`--layer nextjs-rsc-streaming`) | `@kiwa-lab/nextjs` v1.1 |
-| Nuxt 3 Server Routes (`defineEventHandler`) | ✅ production-ready (v1.0.0+) | `/kiwa-nuxt` (`--layer nuxt-server-route`) | `@kiwa-lab/nuxt` v1.0.0 |
-| Nuxt 3 route middleware (`middleware/*.ts`) | ✅ production-ready (v1.0.2+) | `/kiwa-nuxt` (`--layer nuxt-route-middleware`) | `@kiwa-lab/nuxt` v1.0.2 |
-| Nuxt 3 Nitro plugin lifecycle (`defineNitroPlugin`) | ✅ production-ready (v1.0.3+) | `/kiwa-nuxt` (`--layer nuxt-nitro-plugin`) | `@kiwa-lab/nuxt` v1.0.3 |
-| SvelteKit load + form actions + hooks.server (handle / handleFetch / handleError) | ✅ production-ready (v1.0.1+) | `/kiwa-sveltekit` (`--layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error`) | `@kiwa-lab/sveltekit` v1.0.1 |
-| Remix v2 / React Router v7 loader + action | ✅ production-ready (v1.0.0+) | `/kiwa-remix` (`--layer remix-loader` / `--layer remix-action`) | `@kiwa-lab/remix` v1.0.0 |
-| Remix v2 Resource Routes (HTTP method dispatch + 405 capture) | ✅ production-ready (v1.0.2+) | `/kiwa-remix` (`--layer remix-resource-route`) | `@kiwa-lab/remix` v1.0.2 |
-| Remix v2 nested route chain (parent → child loader + `headers()` merge + Set-Cookie persist + `defer()`) | ✅ production-ready (v1.1+) | `/kiwa-remix` (`--layer remix-nested-route-chain`) | `@kiwa-lab/remix` v1.1.0 |
-| Astro Server Endpoints (`pages/api/*.ts`) | ✅ production-ready (v1.0.0+) | `/kiwa-astro` (`--layer astro-endpoint`) | `@kiwa-lab/astro` v1.0.0 |
-| Astro `.astro` page SSR (redirect / notFound / rewrite signal capture) | ✅ production-ready (v1.0.2+) | `/kiwa-astro` (`--layer astro-ssr`) | `@kiwa-lab/astro` v1.0.2 |
 | SolidStart Server Functions + API Routes | ✅ production-ready (v1.0.0+) | `/kiwa-solidstart` (`--layer solidstart-server-function` / `--layer solidstart-api-route`) | `@kiwa-lab/solidstart` v1.0.0 |
-| Qwik City routeAction + routeLoader + Endpoints | ✅ production-ready (v1.0.0+) | `/kiwa-qwikcity` (`--layer qwikcity-action` / `--layer qwikcity-loader` / `--layer qwikcity-endpoint`) | `@kiwa-lab/qwikcity` v1.0.0 |
 | Edge runtime (Cloudflare Workers / Vercel Edge / generic fetch handler) | ✅ production-ready (v1.0.0+) | `/kiwa-edge` (`--layer edge-handler`) | `@kiwa-lab/edge` v1.0.0 |
 | Auth (NextAuth v5 / Auth.js — session + 3 provider + database adapter mocks) | ✅ production-ready (v0.1+) | `/kiwa-design` (`--layer auth-nextauth`) | `@kiwa-lab/auth` v0.1.0 |
 | SolidJS Signal + Effect + createResource + Suspense (`@kiwa-lab/solidjs`) | ✅ production-ready (v0.1+, Issue #813) | (test-only helpers) | `@kiwa-lab/solidjs` v0.1.0 |
@@ -695,18 +681,8 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **Next.js Server Actions** (`'use server'`) | ✅ shipped in v1.0.1 — `/kiwa-nextjs` skill + `@kiwa-lab/nextjs` runtime | (n/a, fully supported) | [#493](https://github.com/cardene777/kiwa/issues/493) ✅ resolved |
 | **Next.js React Server Components (RSC)** | ✅ shipped in v1.0.3 — `/kiwa-nextjs --layer nextjs-rsc` + `renderServerComponent` + `findAll` + `textContent` | (n/a, fully supported) | [#494](https://github.com/cardene777/kiwa/issues/494) ✅ resolved |
 | **Next.js middleware.ts** | ✅ shipped in v1.0.2 — `/kiwa-nextjs --layer nextjs-middleware` + `invokeMiddleware` | (n/a, fully supported) | [#495](https://github.com/cardene777/kiwa/issues/495) ✅ resolved |
-| **Nuxt 3 Server Routes** | ✅ shipped in v1.0.0 — `/kiwa-nuxt --layer nuxt-server-route` + `invokeEventHandler` | (n/a, Server Routes fully supported) | [#496](https://github.com/cardene777/kiwa/issues/496) ✅ resolved (composables → kiwa-ui Vue mode) |
-| **Nuxt 3 route middleware** | ✅ shipped in v1.0.2 — `/kiwa-nuxt --layer nuxt-route-middleware` + `invokeRouteMiddleware` (navigateTo / abortNavigation signal capture) | (n/a, route middleware fully supported) | [#523](https://github.com/cardene777/kiwa/issues/523) ✅ resolved |
-| **Nuxt 3 Nitro plugin lifecycle** | ✅ shipped in v1.0.3 — `/kiwa-nuxt --layer nuxt-nitro-plugin` + `invokeNitroPlugin` (7 hook + hookOnce + callHookErrors) | (n/a, Nitro plugin lifecycle fully supported) | [#523](https://github.com/cardene777/kiwa/issues/523) ✅ resolved |
 | **Next.js Parallel Routes + Intercepting Routes** | ✅ shipped in v1.0.4 — `/kiwa-nextjs --layer nextjs-parallel-route` + `invokeParallelRoutes` (parallel slot await + intercepting variant) | (n/a, parallel + intercepting routes fully supported) | [#523](https://github.com/cardene777/kiwa/issues/523) ✅ resolved |
-| **Astro `.astro` page SSR** | ✅ shipped in v1.0.2 — `/kiwa-astro --layer astro-ssr` + `renderAstroPage` (redirect / notFound / rewrite + cookies + locals) | (n/a, `.astro` page SSR fully supported; HTML-perfect snapshot は Astro Container API 直接利用も併用可) | [#523](https://github.com/cardene777/kiwa/issues/523) ✅ resolved |
-| **Remix v2 Resource Routes** | ✅ shipped in v1.0.2 — `/kiwa-remix --layer remix-resource-route` + `invokeResourceRoute` (HTTP method dispatch + 405 + allow list) | (n/a, Resource Routes fully supported including binary download) | [#523](https://github.com/cardene777/kiwa/issues/523) ✅ resolved |
-| **Remix v2 nested route chain** | ✅ shipped in v1.1.0 — `/kiwa-remix --layer remix-nested-route-chain` + `setupRemixNestedRouteEnv` (parent → child loader chain + parent JSON Response auto-deserialize + `Set-Cookie` cookieStore persist + `getDocumentHeaders` 互換 `headers()` merge + `defer()` / `resolveDeferred()` streaming resolve) | (n/a, nested route chain fully supported including `defer()`) | [#561](https://github.com/cardene777/kiwa/issues/561) ✅ resolved |
-| **SvelteKit load / form actions** | ✅ shipped in v1.0.0 — `/kiwa-sveltekit` + `invokeLoad` / `invokeAction` | (n/a, load + actions fully supported; `hooks.server.ts` still tracked) | [#497](https://github.com/cardene777/kiwa/issues/497) ✅ resolved |
-| **Remix / React Router v7 loader / action** | ✅ shipped in v1.0.0 — `/kiwa-remix` + `invokeLoader` / `invokeAction` | (n/a, loader + action fully supported including Response normalize) | [#498](https://github.com/cardene777/kiwa/issues/498) ✅ resolved |
-| **Astro Server Endpoints** | ✅ shipped in v1.0.0 — `/kiwa-astro` + `invokeEndpoint` | (n/a, Server Endpoints fully supported; Islands → kiwa-ui framework adapter; `.astro` rendering → Astro Container API direct) | [#499](https://github.com/cardene777/kiwa/issues/499) ✅ resolved |
 | **SolidStart Server Functions + API Routes** | ✅ shipped in v1.0.0 — `/kiwa-solidstart` + `invokeServerFunction` / `invokeApiRoute` | (n/a, fully supported) | [#518](https://github.com/cardene777/kiwa/issues/518) ✅ resolved |
-| **Qwik City routeAction + routeLoader + Endpoints** | ✅ shipped in v1.0.0 — `/kiwa-qwikcity` + `invokeRouteAction` / `invokeRouteLoader` / `invokeEndpoint` | (n/a, fully supported) | [#519](https://github.com/cardene777/kiwa/issues/519) ✅ resolved |
 | **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
 | **Bun runtime (`bun.sh`)** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Bun via `bunx --bun vitest run` (verified locally pre-merge via `/verify` skill) | (n/a, pnpm install + bunx vitest) | [#520](https://github.com/cardene777/kiwa/issues/520) ✅ resolved |
 | **Deno runtime** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Deno via `deno run --allow-all npm:vitest run` (verified locally pre-merge via `/verify` skill) | (n/a, pnpm install + deno run) | [#521](https://github.com/cardene777/kiwa/issues/521) ✅ resolved |

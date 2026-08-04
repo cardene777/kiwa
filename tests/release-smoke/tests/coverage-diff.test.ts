@@ -27,12 +27,7 @@ const FULL = {
   '@kiwa-lab/a11y': { lines: 100, branches: 95, functions: 100, statements: 100 },
   '@kiwa-lab/visual': { lines: 100, branches: 85, functions: 100, statements: 100 },
   '@kiwa-lab/nextjs': { lines: 98, branches: 94, functions: 87, statements: 98 },
-  '@kiwa-lab/nuxt': { lines: 100, branches: 100, functions: 100, statements: 100 },
-  '@kiwa-lab/sveltekit': { lines: 100, branches: 91, functions: 100, statements: 100 },
-  '@kiwa-lab/remix': { lines: 95, branches: 94, functions: 100, statements: 95 },
-  '@kiwa-lab/astro': { lines: 100, branches: 100, functions: 100, statements: 100 },
   '@kiwa-lab/solidstart': { lines: 100, branches: 97, functions: 100, statements: 100 },
-  '@kiwa-lab/qwikcity': { lines: 100, branches: 100, functions: 100, statements: 100 },
   '@kiwa-lab/edge': { lines: 100, branches: 100, functions: 100, statements: 100 },
 };
 

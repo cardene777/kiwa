@@ -1,31 +1,21 @@
 ---
 "@kiwa-lab/a11y": major
 "@kiwa-lab/api": major
-"@kiwa-lab/astro": major
 "@kiwa-lab/auth": major
 "@kiwa-lab/cache": major
 "@kiwa-lab/cli-test": major
 "@kiwa-lab/data": major
-"@kiwa-lab/design-check": major
-"@kiwa-lab/desktop": major
 "@kiwa-lab/e2e": major
 "@kiwa-lab/edge": major
 "@kiwa-lab/fresh": major
 "@kiwa-lab/hono": major
 "@kiwa-lab/kaname": major
-"@kiwa-lab/mobile": major
 "@kiwa-lab/nextjs": major
-"@kiwa-lab/nuxt": major
 "@kiwa-lab/observability": major
 "@kiwa-lab/orm": major
 "@kiwa-lab/queue": major
-"@kiwa-lab/qwikcity": major
-"@kiwa-lab/remix": major
-"@kiwa-lab/security-devsecops": major
 "@kiwa-lab/solidjs": major
 "@kiwa-lab/solidstart": major
-"@kiwa-lab/streaming": major
-"@kiwa-lab/sveltekit": major
 "@kiwa-lab/ui": major
 "@kiwa-lab/visual": major
 ---

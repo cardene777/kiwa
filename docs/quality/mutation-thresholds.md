@@ -28,25 +28,16 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
 | `@kiwa-lab/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. |
 | `@kiwa-lab/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
-| `@kiwa-lab/nuxt` | Framework | 70 / 60 / 50 | SSR + hydration + Nitro adapter drift. |
-| `@kiwa-lab/sveltekit` | Framework | 70 / 60 / 50 | SSR + hydration + load / actions drift. |
-| `@kiwa-lab/remix` | Framework | 70 / 60 / 50 | SSR + loader / action + client hydration drift. |
-| `@kiwa-lab/astro` | Framework | 70 / 60 / 50 | Islands + SSR + partial hydration drift. |
 | `@kiwa-lab/solidstart` | Framework | 70 / 60 / 50 | Solid SSR + resource + server-function drift. |
-| `@kiwa-lab/qwikcity` | Framework | 70 / 60 / 50 | Resumability + SSR + route loader drift. |
 | `@kiwa-lab/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. |
 | `@kiwa-lab/solidjs` | Framework | 70 / 60 / 50 | Solid signal + resource + SSR drift. |
 | `@kiwa-lab/fresh` | Framework | 70 / 60 / 50 | Deno Fresh islands + SSR drift. |
 | `@kiwa-lab/hono` | Framework | 70 / 60 / 50 | Hono edge + node adapter drift. |
 | `@kiwa-lab/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. |
 | `@kiwa-lab/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
-| `@kiwa-lab/payment` | SaaS | 65 / 55 / 50 | Stripe / Paddle / Lemon Squeezy — webhook shape + billing semantics drift. |
 | `@kiwa-lab/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
 | `@kiwa-lab/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. v1.27-3 baseline mutates `in-memory-cache.js` only; `testcontainers-cache.js` is excluded for the same reason as queue. |
-| `@kiwa-lab/streaming` | SaaS | 65 / 55 / 50 | Kafka / NATS / Redpanda with DLQ + exactly-once semantics. |
 | `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-lab/quality-metrics` (mutation-tested there). |
-| `@kiwa-lab/mcp` | SaaS | 65 / 55 / 50 | MCP JSON-RPC protocol + transport drift. |
-| `@kiwa-lab/agent` | SaaS | 65 / 55 / 50 | LangGraph + OpenAI Assistants v2 — graph + polling semantics drift. |
 | `@kiwa-lab/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. |
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |

@@ -70,12 +70,7 @@ export const PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/cli': { tier: 'core' },
   // Framework tier (SSR / hydration / adapter drift).
   '@kiwa-lab/nextjs': { tier: 'framework' },
-  '@kiwa-lab/nuxt': { tier: 'framework' },
-  '@kiwa-lab/sveltekit': { tier: 'framework' },
-  '@kiwa-lab/remix': { tier: 'framework' },
-  '@kiwa-lab/astro': { tier: 'framework' },
   '@kiwa-lab/solidstart': { tier: 'framework' },
-  '@kiwa-lab/qwikcity': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
   '@kiwa-lab/solidjs': { tier: 'framework' },
   '@kiwa-lab/fresh': { tier: 'framework' },
@@ -89,20 +84,16 @@ export const PACKAGE_TIER = Object.freeze({
   // integration). Threshold left at tier default so the gate stays honest
   // once the baseline lands.
   '@kiwa-lab/ai-llm': { tier: 'saas' },
-  '@kiwa-lab/payment': { tier: 'saas' },
   '@kiwa-lab/queue': { tier: 'saas' },
   // cache landed at 62.68 % covered MSI on `in-memory-cache.js` (the sole
   // mutated file after excluding testcontainers-cache.js). Held at 60 % —
   // above tier break 50 — until follow-up covers the TTL + eviction edge
   // cases surfaced by the surviving mutant list.
   '@kiwa-lab/cache': { tier: 'saas', override: 60, reason: 'in-memory-cache.js TTL + eviction follow-up.' },
-  '@kiwa-lab/streaming': { tier: 'saas' },
   // realtime landed at 62.31 % covered MSI across engine / fidelity / ably
   // (pusher / socketio / report excluded, see stryker.config.mjs). Held at
   // 60 % until follow-up fidelity tests raise it back to 65.
   '@kiwa-lab/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
-  '@kiwa-lab/mcp': { tier: 'saas' },
-  '@kiwa-lab/agent': { tier: 'saas' },
   '@kiwa-lab/search': { tier: 'saas' },
   // orm landed at 61.84 % covered MSI on `expectations.js`. Held at 60 %
   // until follow-up query-planner tests raise it back to 65.
@@ -137,12 +128,7 @@ const PKG_DIRS = {
   '@kiwa-lab/cli': 'packages/cli',
   // Framework tier.
   '@kiwa-lab/nextjs': 'packages/nextjs',
-  '@kiwa-lab/nuxt': 'packages/nuxt',
-  '@kiwa-lab/sveltekit': 'packages/sveltekit',
-  '@kiwa-lab/remix': 'packages/remix',
-  '@kiwa-lab/astro': 'packages/astro',
   '@kiwa-lab/solidstart': 'packages/solidstart',
-  '@kiwa-lab/qwikcity': 'packages/qwikcity',
   '@kiwa-lab/edge': 'packages/edge',
   '@kiwa-lab/solidjs': 'packages/solidjs',
   '@kiwa-lab/fresh': 'packages/fresh',
@@ -150,13 +136,9 @@ const PKG_DIRS = {
   '@kiwa-lab/auth': 'packages/auth',
   // SaaS tier.
   '@kiwa-lab/ai-llm': 'packages/ai-llm',
-  '@kiwa-lab/payment': 'packages/payment',
   '@kiwa-lab/queue': 'packages/queue',
   '@kiwa-lab/cache': 'packages/cache',
-  '@kiwa-lab/streaming': 'packages/streaming',
   '@kiwa-lab/realtime': 'packages/realtime',
-  '@kiwa-lab/mcp': 'packages/mcp',
-  '@kiwa-lab/agent': 'packages/agent',
   '@kiwa-lab/search': 'packages/search',
   '@kiwa-lab/orm': 'packages/orm',
   '@kiwa-lab/dapp': 'packages/dapp',

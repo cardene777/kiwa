@@ -141,10 +141,6 @@ const V1_19_PAGES = [
 // titles). Coverage adds Kafka event pipeline + Redpanda schema registry +
 // NATS JetStream as 3 new streaming provider tutorials.
 const V1_20_PAGES = [
-  { path: '/tutorials/31-kafka-event-pipeline', title: 'Kafka event pipeline' },
-  { path: '/tutorials/32-redpanda-schema-registry', title: 'Redpanda + schema registry' },
-  { path: '/tutorials/33-nats-jetstream', title: 'NATS JetStream' },
-  { path: '/concepts/streaming-testing', title: 'Streaming testing' },
   { path: '/migrations/v1.19-to-v1.20', title: 'v1.19 → v1.20' },
 ];
 
@@ -183,10 +179,6 @@ const V1_22_PAGES = [
 // Stripe advanced billing / Paddle merchant-of-record / Lemon Squeezy license
 // flow as 3 new payment provider tutorials.
 const V1_23_PAGES = [
-  { path: '/tutorials/39-stripe-billing', title: 'Stripe advanced billing' },
-  { path: '/tutorials/40-paddle-merchant', title: 'Paddle merchant-of-record' },
-  { path: '/tutorials/41-lemon-squeezy-license', title: 'Lemon Squeezy' },
-  { path: '/concepts/billing-semantics', title: 'Advanced billing semantics' },
   { path: '/migrations/v1.22-to-v1.23', title: 'v1.22 → v1.23' },
 ];
 
@@ -275,8 +267,6 @@ const V1_28_PAGES = [
 // asserts an anchor phrase that a rendered VitePress build will always
 // include in <main>.
 const V1_29_PAGES = [
-  { path: '/tutorials/55-release-script-filter-ssot', title: 'Release script filter SSOT' },
-  { path: '/concepts/release-invariants', title: 'Release invariants SSOT' },
   { path: '/migrations/v1.28-to-v1.29', title: 'v1.28 → v1.29' },
 ];
 
@@ -309,10 +299,6 @@ const V1_30_PAGES = [
 // testing SSOT (8 axis × 3 provider = 24 cell grid + testcontainers pattern)
 // concept doc + v1.30 → v1.31 additive-only migration guide.
 const V1_31_PAGES = [
-  { path: '/tutorials/58-kafka-raw-protocol', title: 'Kafka raw-protocol' },
-  { path: '/tutorials/59-redpanda-schema-evolution', title: 'Redpanda schema evolution' },
-  { path: '/tutorials/60-nats-jetstream-durable', title: 'NATS JetStream durable consumer' },
-  { path: '/concepts/streaming-real-driver-testing', title: 'Streaming real-driver testing' },
   { path: '/migrations/v1.30-to-v1.31', title: 'v1.30 → v1.31' },
 ];
 
@@ -351,10 +337,6 @@ const V1_32_PAGES = [
 // testcontainers-shaped env-gate pattern) concept doc + v1.32 → v1.33
 // additive-only migration guide.
 const V1_33_PAGES = [
-  { path: '/tutorials/64-payment-orchestration', title: 'Payment orchestration' },
-  { path: '/tutorials/65-stripe-connect-marketplace', title: 'Stripe Connect marketplace' },
-  { path: '/tutorials/66-paddle-billing-v2', title: 'Paddle Billing v2' },
-  { path: '/concepts/payment-real-driver-testing', title: 'Payment real-driver testing' },
   { path: '/migrations/v1.32-to-v1.33', title: 'v1.32 → v1.33' },
 ];
 
@@ -430,7 +412,6 @@ const V1_36_PAGES = [
 const V1_38_PAGES = [
   { path: '/tutorials/79-prompt-injection-defense', title: 'Prompt injection defense' },
   { path: '/tutorials/80-llm-eval-hallucination', title: 'LLM eval' },
-  { path: '/tutorials/81-agent-orchestration', title: 'Agent orchestration' },
   { path: '/concepts/ai-llm-real-driver-testing', title: 'AI-LLM real-driver testing' },
   { path: '/migrations/v1.37-to-v1.38', title: 'v1.37 → v1.38' },
 ];
@@ -490,10 +471,6 @@ const V1_40_PAGES = [
 // 24 advanced III cell grid + 25-axis combined harness + pair 深度 4 段 2 例目
 // record) concept doc + v1.40 → v1.41 additive-only migration guide.
 const V1_41_PAGES = [
-  { path: '/tutorials/88-embedded-finance-bnpl', title: 'Embedded finance + BNPL' },
-  { path: '/tutorials/89-crypto-payment-fx', title: 'Crypto payment + FX cross-border' },
-  { path: '/tutorials/90-recurring-orchestration-fraud-regulatory', title: 'Recurring revenue + Payment orchestration II + Fraud detection + Regulatory reporting' },
-  { path: '/concepts/payment-advanced-III-testing', title: 'Payment advanced III testing' },
   { path: '/migrations/v1.40-to-v1.41', title: 'v1.40 → v1.41' },
 ];
 
@@ -562,23 +539,19 @@ const V1_45_PAGES = [
 // v1.46 = quality gate integrity + DevSecOps library 2 軸。
 // 1 dogfood + 2 tutorial (103 DevSecOps + 104 perf strict) + concept doc + migration。
 const V1_46_PAGES = [
-  { path: '/tutorials/103-security-devsecops', title: 'DevSecOps 6 axis' },
   { path: '/tutorials/104-perf-strict', title: 'Perf strict mode' },
-  { path: '/concepts/security-devsecops-library-integration', title: 'DevSecOps library integration' },
   { path: '/migrations/v1.45-to-v1.46', title: 'v1.45 → v1.46' },
 ];
 
 // v1.47 = security-devsecops v0.2 adapter 統合 Phase 2 完成、 単軸 milestone。
 // 1 dogfood + 1 tutorial (105 adapter) + migration。
 const V1_47_PAGES = [
-  { path: '/tutorials/105-security-adapter', title: 'DevSecOps adapter' },
   { path: '/migrations/v1.46-to-v1.47', title: 'v1.46 → v1.47' },
 ];
 
 // v1.48 = security-devsecops v0.3 Phase 3 orchestrator 単軸 milestone。
 // 1 dogfood + 1 tutorial (106 orchestrator) + migration。
 const V1_48_PAGES = [
-  { path: '/tutorials/106-security-orchestrator', title: 'DevSecOps single entry' },
   { path: '/migrations/v1.47-to-v1.48', title: 'v1.47 → v1.48' },
 ];
 
@@ -593,106 +566,76 @@ const V1_49_PAGES = [
 
 // v1.50 = Mobile new-base pair 第 13、 1 dogfood + 1 tutorial (110) + migration + concept。
 const V1_50_PAGES = [
-  { path: '/tutorials/110-mobile-testing', title: 'Mobile testing baseline' },
-  { path: '/concepts/mobile-testing-baseline', title: 'Mobile testing baseline' },
   { path: '/migrations/v1.49-to-v1.50', title: 'v1.49 → v1.50' },
 ];
 
 // v1.51 = Mobile 深化 II、 pair 第 13 の 2 段目 Phase 2、 1 dogfood + 1 tutorial (111) + migration + concept。
 const V1_51_PAGES = [
-  { path: '/tutorials/111-mobile-advanced', title: 'Mobile advanced II' },
-  { path: '/concepts/mobile-testing-advanced', title: 'Mobile testing advanced II' },
   { path: '/migrations/v1.50-to-v1.51', title: 'v1.50 → v1.51' },
 ];
 
 // v1.52 = Mobile 深化 III、 pair 深度 3 段拡張達成 5 例目、 30 milestone streak 突入。
 const V1_52_PAGES = [
-  { path: '/tutorials/112-mobile-new-architecture', title: 'Mobile New Architecture' },
-  { path: '/concepts/mobile-testing-advanced-III', title: 'Mobile testing advanced III' },
   { path: '/migrations/v1.51-to-v1.52', title: 'v1.51 → v1.52' },
 ];
 
 // v1.53 = Mobile 深化 IV、 pair 深度 4 段拡張達成 4 例目 depth-4 record、 31 milestone streak。
 const V1_53_PAGES = [
-  { path: '/tutorials/113-mobile-real-driver', title: 'Mobile v0.4 real driver adapter' },
-  { path: '/concepts/mobile-testing-real-driver', title: 'Mobile real driver adapter interface' },
   { path: '/migrations/v1.52-to-v1.53', title: 'v1.52 → v1.53' },
 ];
 
 // v1.54 = 2 軸 milestone (rules 昇格 + Mobile 深化 V)、 pair 深度 5 段拡張 1 例目 candidate、 depth-5 pattern 新設、 32 milestone streak。
 const V1_54_PAGES = [
-  { path: '/tutorials/114-mobile-real-cli', title: 'Mobile v0.5 child_process.spawn stub' },
-  { path: '/concepts/mobile-testing-real-cli', title: 'Mobile v0.5 child_process.spawn stub 契約層' },
   { path: '/migrations/v1.53-to-v1.54', title: 'v1.53 → v1.54' },
 ];
 
 // v1.55 = Mobile 深化 VI、 depth-5 pattern 実装完成、 kiwa milestone 史上初 6 段拡張、 33 milestone streak。
 const V1_55_PAGES = [
-  { path: '/tutorials/115-mobile-v06-spawn', title: 'Mobile v0.6 実 child_process.spawn 実行' },
-  { path: '/concepts/mobile-testing-v06-spawn', title: 'Mobile v0.6 実 child_process.spawn 実行' },
   { path: '/migrations/v1.54-to-v1.55', title: 'v1.54 → v1.55' },
 ];
 
 // v1.56 = Desktop new-base pair 第 14、 42 package 到達、 34 milestone streak。
 const V1_56_PAGES = [
-  { path: '/tutorials/116-desktop-testing', title: 'Desktop testing baseline' },
-  { path: '/concepts/desktop-testing-baseline', title: 'Desktop testing baseline' },
   { path: '/migrations/v1.55-to-v1.56', title: 'v1.55 → v1.56' },
 ];
 
 // v1.57 = Desktop 深化 I (v0.2 advanced 5 axis)、 35 milestone streak、 systematic pattern 32 度目。
 const V1_57_PAGES = [
-  { path: '/tutorials/117-desktop-advanced-axis', title: 'Desktop advanced axis' },
-  { path: '/concepts/desktop-advanced-axis', title: 'Desktop advanced axis' },
   { path: '/migrations/v1.56-to-v1.57', title: 'v1.56 → v1.57' },
 ];
 
 // v1.58 = Desktop 深化 II (v0.3 advanced III 4 axis)、 36 milestone streak、 systematic pattern 33 度目、 Mobile v1.50-v1.52 rhythm 再現。
 const V1_58_PAGES = [
-  { path: '/tutorials/118-desktop-advanced-iii', title: 'Desktop advanced III' },
-  { path: '/concepts/desktop-advanced-iii', title: 'Desktop advanced III' },
   { path: '/migrations/v1.57-to-v1.58', title: 'v1.57 → v1.58' },
 ];
 
 // v1.59 = Desktop 深化 III (v0.4 adapter layer + fidelity harness)、 37 milestone streak、 systematic pattern 34 度目、 depth-4 record 5 例目、 Mobile v1.53 rhythm 再現。
 const V1_59_PAGES = [
-  { path: '/tutorials/119-desktop-adapter-layer', title: 'Desktop adapter layer' },
-  { path: '/concepts/desktop-adapter-layer', title: 'Desktop adapter layer' },
   { path: '/migrations/v1.58-to-v1.59', title: 'v1.58 → v1.59' },
 ];
 
 // v1.60 = Desktop 深化 IV (v0.5 spawn stub 契約層)、 38 milestone streak、 systematic pattern 35 度目、 depth-5 pattern 2 例目 candidate、 Mobile v1.54 rhythm 再現。
 const V1_60_PAGES = [
-  { path: '/tutorials/120-desktop-spawn-stub', title: 'Desktop spawn stub 契約層' },
-  { path: '/concepts/desktop-spawn-stub', title: 'Desktop spawn stub 契約層' },
   { path: '/migrations/v1.59-to-v1.60', title: 'v1.59 → v1.60' },
 ];
 
 // v1.61 = Desktop 深化 V (v0.6 実 spawn 実装完成)、 39 milestone streak、 systematic pattern 36 度目、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 kiwa milestone 史上初、 Mobile v1.55 rhythm 再現。
 const V1_61_PAGES = [
-  { path: '/tutorials/121-desktop-v06-spawn', title: 'Desktop v0.6 実 child_process.spawn 実行' },
-  { path: '/concepts/desktop-v06-spawn', title: 'Desktop v0.6 実 child_process.spawn 実行' },
   { path: '/migrations/v1.60-to-v1.61', title: 'v1.60 → v1.61' },
 ];
 
 // v1.62 = Desktop 深化 VI (v0.7 real behavior runner + fidelity harness behavior diff early warning)、 40 milestone streak、 systematic pattern 37 度目、 depth-7 pattern 新設 candidate。
 const V1_62_PAGES = [
-  { path: '/tutorials/122-desktop-real-behavior', title: 'Desktop v0.7 real behavior runner' },
-  { path: '/concepts/desktop-real-behavior', title: 'Desktop v0.7 real behavior runner' },
   { path: '/migrations/v1.61-to-v1.62', title: 'v1.61 → v1.62' },
 ];
 
 // v1.63 = Desktop 深化 VII (v0.8 native binding availability probe + skip)、 41 milestone streak、 systematic pattern 38 度目、 depth-8 pattern 新設 candidate。
 const V1_63_PAGES = [
-  { path: '/tutorials/123-desktop-probe', title: 'Desktop v0.8 native binding availability probe' },
-  { path: '/concepts/desktop-probe', title: 'Desktop v0.8 native binding availability probe' },
   { path: '/migrations/v1.62-to-v1.63', title: 'v1.62 → v1.63' },
 ];
 
 // v1.64 = Desktop 深化 VIII (v0.9 実 native binding 呼出)、 42 milestone streak、 systematic pattern 39 度目、 depth-9 pattern 新設 candidate。
 const V1_64_PAGES = [
-  { path: '/tutorials/124-desktop-native-invoke', title: 'Desktop v0.9 実 native binding 呼出' },
-  { path: '/concepts/desktop-native-invoke', title: 'Desktop v0.9 実 native binding 呼出' },
   { path: '/migrations/v1.63-to-v1.64', title: 'v1.63 → v1.64' },
 ];
 
@@ -712,8 +655,6 @@ const V1_66_PAGES = [
 
 // v1.67 = Desktop 深化 IX (v1.0 invoke-cache layer)、 45 milestone streak、 systematic pattern 42 度目、 depth-6 pattern 2 例目確定 candidate。
 const V1_67_PAGES = [
-  { path: '/tutorials/127-desktop-invoke-cache', title: 'Desktop v1.0 invoke-cache layer' },
-  { path: '/concepts/desktop-invoke-cache', title: 'Desktop v1.0 invoke-cache layer' },
   { path: '/migrations/v1.66-to-v1.67', title: 'v1.66 → v1.67' },
 ];
 
@@ -733,8 +674,6 @@ const V2_2_PAGES = [
 
 // v2.3 = Payment pair depth-5 到達 (payment v2.1 lifecycle-orchestrator)、 depth-5 pattern 4 例目確定 dominant pattern 昇格 confirmed、 49 milestone streak、 systematic pattern 46 度目 continuous state machine variant Payment 転用。
 const V2_3_PAGES = [
-  { path: '/tutorials/130-payment-lifecycle-orchestrator', title: '@kiwa-lab/payment v2.1 lifecycle-orchestrator' },
-  { path: '/concepts/payment-lifecycle-orchestrator', title: '@kiwa-lab/payment v2.1 lifecycle-orchestrator SSOT' },
   { path: '/migrations/v2.2-to-v2.3', title: 'v2.2 → v2.3' },
 ];
 
@@ -747,8 +686,6 @@ const V2_4_PAGES = [
 
 // v2.5 = Streaming pair depth-5 到達 (streaming v2.1 pipeline-orchestrator)、 depth-5 pattern 6 例目発生 = systematic law CONFIRMED、 51 milestone streak、 systematic pattern 48 度目。
 const V2_5_PAGES = [
-  { path: '/tutorials/132-streaming-pipeline-orchestrator', title: '@kiwa-lab/streaming v2.1 pipeline-orchestrator' },
-  { path: '/concepts/streaming-pipeline-orchestrator', title: '@kiwa-lab/streaming v2.1 pipeline-orchestrator SSOT' },
   { path: '/migrations/v2.4-to-v2.5', title: 'v2.4 → v2.5' },
 ];
 

@@ -3,8 +3,8 @@
 ## Why this file exists
 
 kiwa v1.16 introduced `@kiwa-lab/a11y` (axe-core WCAG 2.1 AA wrapper) as a single test-adapter package.
-v1.30 promotes accessibility from one-package coverage to a 37-package infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
-(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers all 37 published packages including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale.)
+v1.30 promotes accessibility from one-package coverage to a 27-package infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
+(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers all 27 published packages including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale.)
 
 Every kiwa package publishes an `.axe-config.mjs` that pins its WCAG 2.1 AA rule set + tag filter + `.a11y-baseline/{pkg}.json` output path, and every `test:a11y` script writes a machine-readable baseline that downstream release gates (v1.30-4, 13th axis) can enforce.
 Without a shared threshold rationale, each package would land its own bar and drift for the same reasons the mutation-testing rollout drifted before v1.27 — no documented "why 0 critical here" survives the review that lands the code six weeks later.
@@ -28,7 +28,7 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 `critical > 0` fails the run in every tier.
 `serious` and `moderate` counts are checked against the tier's allowed range.
 
-## Tier assignment — 37-package matrix
+## Tier assignment — 27-package matrix
 
 | Package | Tier | Threshold (critical / serious / moderate) | Reason |
 |---|---|---|---|
@@ -40,27 +40,17 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 | `@kiwa-lab/observability` | Core | 0 / 0 / 0-3 | Flaky detection + coverage gap analysis. No DOM. |
 | `@kiwa-lab/perf-harness` | Core | 0 / 0 / 0-3 | Perf runner + tinybench wrapper. No DOM. |
 | `@kiwa-lab/quality-metrics` | Core | 0 / 0 / 0-3 | Release gate calculator. No DOM. |
-| `@kiwa-lab/release-invariants` | Core | 0 / 0 / 0-3 | Release script filter + provenance flag + gate script checkers. No DOM. |
 | `@kiwa-lab/nextjs` | Framework | 0 / 0-3 / 0-10 | RSC + Server Actions + Middleware. Serious tolerance for Next router link internals. |
-| `@kiwa-lab/nuxt` | Framework | 0 / 0-3 / 0-10 | SSR + hydration + Nitro adapter. Serious tolerance for Nuxt teleport. |
-| `@kiwa-lab/sveltekit` | Framework | 0 / 0-3 / 0-10 | SSR + hydration + load / actions. Serious tolerance for SvelteKit-owned markup. |
-| `@kiwa-lab/remix` | Framework | 0 / 0-3 / 0-10 | SSR + loader / action + client hydration. Serious tolerance for Remix-owned markup. |
-| `@kiwa-lab/astro` | Framework | 0 / 0-3 / 0-10 | Islands + SSR + partial hydration. Serious tolerance for Astro island wrappers. |
 | `@kiwa-lab/solidstart` | Framework | 0 / 0-3 / 0-10 | Solid SSR + resource + server-function. |
-| `@kiwa-lab/qwikcity` | Framework | 0 / 0-3 / 0-10 | Resumability + SSR + route loader. |
 | `@kiwa-lab/edge` | Framework | 0 / 0-3 / 0-10 | Workers / Deno / Bun edge runtimes with divergent APIs. |
 | `@kiwa-lab/solidjs` | Framework | 0 / 0-3 / 0-10 | Solid signal + resource + SSR. |
 | `@kiwa-lab/fresh` | Framework | 0 / 0-3 / 0-10 | Deno Fresh islands + SSR. |
 | `@kiwa-lab/hono` | Framework | 0 / 0-3 / 0-10 | Hono edge + node adapter. |
 | `@kiwa-lab/auth` | Framework | 0 / 0-3 / 0-10 | NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth. |
 | `@kiwa-lab/ai-llm` | SaaS | 0 / 0 / 0 | Anthropic / OpenAI / Vercel AI SDK / LangChain adapters. No DOM. |
-| `@kiwa-lab/payment` | SaaS | 0 / 0 / 0 | Stripe / Paddle / Lemon Squeezy. No DOM. |
 | `@kiwa-lab/queue` | SaaS | 0 / 0 / 0 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ. No DOM. |
 | `@kiwa-lab/cache` | SaaS | 0 / 0 / 0 | Redis / KeyDB / Memcached. No DOM. |
-| `@kiwa-lab/streaming` | SaaS | 0 / 0 / 0 | Kafka / NATS / Redpanda. No DOM. |
 | `@kiwa-lab/realtime` | SaaS | 0 / 0 / 0 | Supabase Realtime / Ably / Pusher / Socket.io. No DOM. |
-| `@kiwa-lab/mcp` | SaaS | 0 / 0 / 0 | MCP JSON-RPC protocol + transport. No DOM. |
-| `@kiwa-lab/agent` | SaaS | 0 / 0 / 0 | LangGraph + OpenAI Assistants v2. No DOM. |
 | `@kiwa-lab/search` | SaaS | 0 / 0 / 0 | Algolia / Meilisearch / Typesense. No DOM. |
 | `@kiwa-lab/orm` | SaaS | 0 / 0 / 0 | Prisma / Drizzle / Kysely. No DOM. |
 | `@kiwa-lab/dapp` | SaaS | 0 / 0 / 0 | viem + anvil + wallet fixture. No DOM. |
@@ -154,8 +144,6 @@ Each entry is an object with `name` required plus any of `protocol` / `semantics
 | `@kiwa-lab/auth` | 10 | 6 provider (auth0 / better-auth / clerk / lucia / supabase / supabase-advanced) + 4 protocol (oauth21 / oidc / passkey / webauthn). |
 | `@kiwa-lab/queue` | 5 | bullmq / inngest / cloudflare-queues / sqs / rabbitmq. `rabbitmq-advanced` is an axis of `rabbitmq`. |
 | `@kiwa-lab/cache` | 3 | in-memory / keydb / memcached. |
-| `@kiwa-lab/payment` | 27 | 3 brand (stripe / paddle / lemonsqueezy) × 9 axis (invoice / retry / subscription-lifecycle / chargeback / dunning / tax / three-ds / sca / psd2). |
-| `@kiwa-lab/streaming` | 15 | 3 brand (kafka / nats / redpanda) × 5 semantics (dlq / exactly-once / schema-registry / partition / retention). |
 | `@kiwa-lab/orm` | 72 | 3 brand (drizzle / prisma / kysely) × 3 backend (postgres / mysql / sqlite) × 8 axis (cdc / replication / mvcc / partitioning / connection-pool / logical-replication / rls / vector-store). |
 
 Non-SaaS packages omit the field; the baseline shape is unchanged (no `providers` key). Adding a new provider adapter is a two-file edit — append to `.axe-config.mjs` `providers` and re-run `pnpm test:a11y` to refresh the baseline — no other config changes needed.

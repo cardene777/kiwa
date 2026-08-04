@@ -10,7 +10,7 @@ HTTP の request と response を確認するなら [api](./api/)、ブラウザ
 
 ## 実行環境ごとの入口
 
-デスクトップアプリの native invoke やウィンドウ操作は [desktop](./desktop/)、モバイル端末の permission や lifecycle は [mobile](./mobile/) が担当します。非同期のキューと時間を進める処理は [data](./data/)、デザインシステムと画面差分は [design-check](./design-check/) を選びます。ツール呼び出しそのものをテストする場合は [skill-test](./skill-test/) を使います。dApp 開発の初期化と環境診断には [cli](./cli/) を用意しています。
+非同期のキューと時間を進める処理は [data](./data/)。ツール呼び出しそのものをテストする場合は [skill-test](./skill-test/) を使います。dApp 開発の初期化と環境診断には [cli](./cli/) を用意しています。
 
 ## 読み進め方
 

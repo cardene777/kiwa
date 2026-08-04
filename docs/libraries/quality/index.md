@@ -4,9 +4,9 @@
 
 ## 確認したい品質から選ぶ
 
-画面の accessibility tree と rule 違反を扱うなら [A11y](./a11y/)、計測値としきい値を比較するなら [Perf Harness](./perf-harness/) を使います。複数の metric を品質レポートへまとめ、release gate を評価するには [Quality Metrics](./quality-metrics/) を選びます。リリースに必要な構造的な前提を検証する場合は [Release Invariants](./release-invariants/) が対象です。
+画面の accessibility tree と rule 違反を扱うなら [A11y](./a11y/)、計測値としきい値を比較するなら [Perf Harness](./perf-harness/) を使います。複数の metric を品質レポートへまとめ、release gate を評価するには [Quality Metrics](./quality-metrics/) を選びます。
 
-脆弱な入力、認可、秘密情報、依存関係を扱うテストは [Security](./security/)、SAST、SBOM、CI 上の security evidence を組み立てる処理は [Security DevSecOps](./security-devsecops/) を参照してください。
+脆弱な入力、認可、秘密情報、依存関係を扱うテストは [Security](./security/)、SAST、SBOM。
 
 ## 使い方の順序
 

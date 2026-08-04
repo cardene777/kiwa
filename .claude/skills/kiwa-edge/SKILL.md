@@ -15,7 +15,6 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 `/kiwa-design --layer edge-handler` が出力した 9 column 表を、 `@kiwa-lab/edge` v1.0+ の `invokeEdgeHandler` を使った Vitest test に機械変換する。
 
-対象は **Cloudflare Workers**、 **Vercel Edge Functions**、 **汎用 ESM 形式 fetch handler** (`export default { fetch(request, env, ctx) { ... } }`)。 Next.js Edge runtime と直接統合する場合は `/kiwa-nextjs` (middleware mode) を併用、 SvelteKit Cloudflare adapter は `/kiwa-sveltekit` + 本 skill を併用。
 
 ## 前提
 
@@ -67,7 +66,6 @@ it('{ID} {Observation}', async () => {
 - runtime fixture ... `@kiwa-lab/edge` v1.0+ (`packages/edge/`)
 - 下流 ... `/kiwa-review --layer edge-handler`
 - Next.js Edge runtime ... `/kiwa-nextjs` (middleware mode) を併用
-- SvelteKit Cloudflare adapter ... `/kiwa-sveltekit` + 本 skill 併用
 
 ## Out of scope (本 v1.0 では未対応、 需要次第で別 Issue)
 

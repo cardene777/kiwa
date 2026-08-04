@@ -46,7 +46,7 @@ half an hour, and prints a line per package as it goes:
 
 ```
 $ pnpm test:all
-testing 219 packages, one at a time
+testing 179 packages, one at a time
 
 [  1/219] ok    examples/astro-server-endpoints-full  2.5s
 [  9/219] RED   examples/basic-connect  2.5s
@@ -128,9 +128,8 @@ Nothing else. In particular:
   reaches one.
 - **`expo`, `react-native`, `metro`, `gradle`, `electron-builder` and
   `electron-updater` are not needed.** Two dogfood examples used to spawn them,
-  and one of them ran `/usr/bin/osascript` on macOS. They now drive
-  `@kiwa-lab/mobile` and `@kiwa-lab/desktop` through the deterministic
-  `dry-run` path and spawn nothing.
+  and one of them ran `/usr/bin/osascript` on macOS. Those examples and the
+  mobile / desktop adapters they drove are gone, so nothing spawns them.
 
 ### When typecheck fails
 
@@ -143,7 +142,7 @@ while a single error was all anyone ever saw.
 
 ```
 $ pnpm typecheck:all
-typechecking 221 packages, 1 at a time
+typechecking 179 packages, 1 at a time
 
 RED  examples/nuxt-server-routes-full
        server/plugins/analytics.ts(17,34): error TS2345: Argument of type ...

@@ -24,8 +24,6 @@ This doc pins **every** perf threshold in kiwa to one of three grounded rational
 | `@kiwa-lab/realtime` | `ably.channel.publish` (mock) | 20 ms | mock-invariant |
 | `@kiwa-lab/realtime` | `pusher.subscribeChannel` (mock) | 20 ms | mock-invariant |
 | `@kiwa-lab/realtime` | `socketio.emit` (mock) | 20 ms | mock-invariant |
-| `@kiwa-lab/payment` | `signWebhook` (mock) | 10 ms | mock-invariant (HMAC-SHA256 over ~500 bytes is < 1 ms on modern hardware) |
-| `@kiwa-lab/payment` | `verifyWebhook` (mock) | 10 ms | mock-invariant |
 | `@kiwa-lab/search` | `search` on 20-doc index (mock) | 5 ms | mock-invariant (linear scan over 20 docs) |
 | `dogfood-anthropic-chatbot` | `reply` (mock mode) | 30 ms | mock-invariant + one @kiwa-lab/ai-llm call ⇒ threshold matches ai-llm + adapter overhead budget |
 | `dogfood-anthropic-chatbot` | `replyStream` (mock mode) | 50 ms | mock-invariant + streaming chunk fan-out (~5 chunks) ⇒ 5 × single-call budget |

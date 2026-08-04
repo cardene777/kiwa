@@ -1,6 +1,6 @@
 # Turning off `tsup`'s `clean`, and what that leaves open
 
-`clean` empties `dist/` at the start of every build. 169 packages rebuild their shared
+`clean` empties `dist/` at the start of every build. 179 packages rebuild their shared
 dependencies during `test`, and `pnpm -r test` runs them in parallel, so that emptying
 overlaps with whatever is reading `dist/` at the time. Removing `clean` removes the
 overlap (#1741, #1724).
@@ -121,9 +121,8 @@ PowerShell 5.1 does not — it fails to parse. A repository can select it with
 
 Accepted, because this repository does not target Windows as a development environment.
 `package.json` declares `engines.node >= 20` and no `os` field, there is no `.npmrc`
-pinning a shell, and the tooling assumes POSIX utilities in several places. The Windows
-references in `README.md` are about `@kiwa-lab/desktop` abstracting Windows APIs for its
-*users*, not about building kiwa on Windows.
+pinning a shell, and the tooling assumes POSIX utilities in several places. `README.md` に Windows への言及があっても、 それは
+library の利用者側の対応範囲を指すもので、 kiwa 自体を Windows で build する話ではない。
 
 If that changes, the cleanup has to move out of the shell — a small Node script invoked
 as `tsup || node scripts/drop-declarations.mjs` would work in any shell, at the cost of

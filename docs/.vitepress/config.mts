@@ -246,7 +246,6 @@ export default defineConfig({
         {
           text: '横軸拡張 (v1.14)',
           items: [
-            { text: '12 — Payment webhook mock (Stripe / Paddle / Lemon Squeezy)', link: '/tutorials/12-payment' },
             { text: '13 — Search mock (Meilisearch / Algolia / Typesense)', link: '/tutorials/13-search' },
             { text: '14 — Telemetry mock (OpenTelemetry / Datadog / Sentry)', link: '/tutorials/14-observability' },
             { text: '15 — kiwa-test-go v0.5 Iris + Chi', link: '/tutorials/15-go-iris-chi' },
@@ -256,8 +255,6 @@ export default defineConfig({
           text: 'AI-LLM 深化 (v1.15)',
           items: [
             { text: '16 — Multimodal chat (image + audio + Whisper)', link: '/tutorials/16-multimodal-chat' },
-            { text: '17 — MCP tool-use agent (JSON-RPC 2.0 chain)', link: '/tutorials/17-mcp-tool-agent' },
-            { text: '18 — Agent orchestration (LangGraph + Assistants v2)', link: '/tutorials/18-agent-orchestration' },
           ],
         },
         {
@@ -295,9 +292,6 @@ export default defineConfig({
         {
           text: 'Streaming 深化 (v1.20)',
           items: [
-            { text: '31 — Kafka event pipeline (producer + consumer group + exactly-once + DLQ)', link: '/tutorials/31-kafka-event-pipeline' },
-            { text: '32 — Redpanda + schema registry (Avro schemas + evolution + compatibility)', link: '/tutorials/32-redpanda-schema-registry' },
-            { text: '33 — NATS JetStream (persistent streams + KV + Object store + subject routing)', link: '/tutorials/33-nats-jetstream' },
           ],
         },
         {
@@ -318,9 +312,6 @@ export default defineConfig({
         {
           text: 'Payment 深化 (v1.23)',
           items: [
-            { text: '39 — Stripe advanced billing (subscription + 3DS + dunning)', link: '/tutorials/39-stripe-billing' },
-            { text: '40 — Paddle merchant-of-record (inline checkout + tier + VAT/GST auto-calc)', link: '/tutorials/40-paddle-merchant' },
-            { text: '41 — Lemon Squeezy refund + chargeback dispute lifecycle', link: '/tutorials/41-lemon-squeezy-license' },
           ],
         },
         {
@@ -364,7 +355,6 @@ export default defineConfig({
         {
           text: 'Release invariants (v1.29)',
           items: [
-            { text: '55 — Release script filter SSOT (systematic root cause pattern walkthrough)', link: '/tutorials/55-release-script-filter-ssot' },
           ],
         },
         {
@@ -377,9 +367,6 @@ export default defineConfig({
         {
           text: 'Streaming 深化 II (v1.31)',
           items: [
-            { text: '58 — Kafka raw protocol (KIP-98 idempotent + txn coordinator + fetch session + ISR walkthrough)', link: '/tutorials/58-kafka-raw-protocol' },
-            { text: '59 — Redpanda schema evolution (BACKWARD / FORWARD / FULL + subject naming + references walkthrough)', link: '/tutorials/59-redpanda-schema-evolution' },
-            { text: '60 — NATS JetStream durable consumer (ack_wait + max_deliver + backoff + quarantine walkthrough)', link: '/tutorials/60-nats-jetstream-durable' },
           ],
         },
         {
@@ -393,9 +380,6 @@ export default defineConfig({
         {
           text: 'Payment 深化 II (v1.33)',
           items: [
-            { text: '64 — Payment orchestration (multi-provider routing + failover + retry ladder + circuit breaker walkthrough)', link: '/tutorials/64-payment-orchestration' },
-            { text: '65 — Stripe Connect marketplace (dispute + refund + webhook idempotency + DAC7 walkthrough)', link: '/tutorials/65-stripe-connect-marketplace' },
-            { text: '66 — Paddle Billing v2 (grace period + proration + coupon stacking + recovery + vault migration walkthrough)', link: '/tutorials/66-paddle-billing-v2' },
           ],
         },
         {
@@ -457,9 +441,6 @@ export default defineConfig({
         {
           text: 'Payment 深化 III (v1.41)',
           items: [
-            { text: '88 — Embedded finance + BNPL (BaaS + card + KYC/KYB + installment + risk + late fee walkthrough)', link: '/tutorials/88-embedded-finance-bnpl' },
-            { text: '89 — Crypto payment + FX cross-border (stablecoin + on-chain + gas abstraction + rate lock + SWIFT/SEPA walkthrough)', link: '/tutorials/89-crypto-payment-fx' },
-            { text: '90 — Recurring revenue + Orchestration II + Fraud detection + Regulatory reporting (MRR/NRR + smart route + ML fraud + PCI/PSD2/DORA/SAR walkthrough)', link: '/tutorials/90-recurring-orchestration-fraud-regulatory' },
           ],
         },
         {
@@ -497,20 +478,17 @@ export default defineConfig({
         {
           text: 'Quality gate integrity + DevSecOps library (v1.46)',
           items: [
-            { text: '103 — DevSecOps 6 axis (SAST + SCA + Secret + IaC + DAST + Container walkthrough)', link: '/tutorials/103-security-devsecops' },
             { text: '104 — Perf strict mode (iter 400 + Welch |t|>3 + delta 10% + fail-fast release gate walkthrough)', link: '/tutorials/104-perf-strict' },
           ],
         },
         {
           text: 'DevSecOps adapter integration Phase 2 (v1.47)',
           items: [
-            { text: '105 — DevSecOps adapter (6 axis × mock/real pair + env-gate + fidelity harness walkthrough)', link: '/tutorials/105-security-adapter' },
           ],
         },
         {
           text: 'DevSecOps orchestrator Phase 3 (v1.48)',
           items: [
-            { text: '106 — DevSecOps single entry (runSecurityAudit + 4 preset + summary walkthrough)', link: '/tutorials/106-security-orchestrator' },
           ],
         },
         {
@@ -524,91 +502,76 @@ export default defineConfig({
         {
           text: 'Mobile new-base pair 第 13 (v1.50、 41 package 到達)',
           items: [
-            { text: '110 — Mobile testing baseline (React Native + Expo + Metro walkthrough)', link: '/tutorials/110-mobile-testing' },
           ],
         },
         {
           text: 'Mobile 深化 II (v1.51、 pair 第 13 の 2 段目 Phase 2)',
           items: [
-            { text: '111 — Mobile advanced II (navigation + reanimated + async-storage + secure-storage walkthrough + real driver env-gate)', link: '/tutorials/111-mobile-advanced' },
           ],
         },
         {
           text: 'Mobile 深化 III (v1.52、 pair 第 13 の 3 段目 Phase 3、 3 段拡張達成 5 例目 pair 深度 3 段記録、 30 milestone streak 突入)',
           items: [
-            { text: '112 — Mobile New Architecture (fabric + turbo-modules + codegen + new-architecture walkthrough)', link: '/tutorials/112-mobile-new-architecture' },
           ],
         },
         {
           text: 'Mobile 深化 IV (v1.53、 pair 第 13 の 4 段目 Phase 4、 pair 深度 4 段拡張達成 4 例目 depth-4 record、 31 milestone streak)',
           items: [
-            { text: '113 — Mobile real driver adapter (11 axis × mock/real + fidelity harness walkthrough)', link: '/tutorials/113-mobile-real-driver' },
           ],
         },
         {
           text: 'Mobile 深化 V (v1.54、 pair 第 13 の 5 段目 Phase 5、 pair 深度 5 段拡張 1 例目 candidate depth-5 pattern 新設、 32 milestone streak)',
           items: [
-            { text: '114 — Mobile v0.5 spawn stub (child_process.spawn 契約層 + 6 CLI stub + env-gate + fail-closed walkthrough)', link: '/tutorials/114-mobile-real-cli' },
           ],
         },
         {
           text: 'Mobile 深化 VI (v1.55、 pair 第 13 の 6 段目 Phase 6、 depth-5 pattern 実装完成 kiwa milestone 史上初 6 段拡張、 33 milestone streak)',
           items: [
-            { text: '115 — Mobile v0.6 real child_process.spawn (dry-run + DI + sanitize + safety guards walkthrough)', link: '/tutorials/115-mobile-v06-spawn' },
           ],
         },
         {
           text: 'Desktop new-base pair 第 14 (v1.56、 42 package 到達、 v2.0 milestone desktop adapter goal 達成、 34 milestone streak)',
           items: [
-            { text: '116 — Desktop testing baseline (Electron + Tauri + Webview walkthrough)', link: '/tutorials/116-desktop-testing' },
           ],
         },
         {
           text: 'Desktop 深化 I (v1.57、 v0.2 advanced 5 axis、 systematic pattern 32 度目、 35 milestone streak)',
           items: [
-            { text: '117 — Desktop advanced axis (Auto-updater + FS permissions + Notification + Menu-bar + Tray-icon walkthrough)', link: '/tutorials/117-desktop-advanced-axis' },
           ],
         },
         {
           text: 'Desktop 深化 II (v1.58、 v0.3 advanced III 4 axis、 systematic pattern 33 度目、 36 milestone streak、 Mobile v1.50-v1.52 rhythm 再現)',
           items: [
-            { text: '118 — Desktop advanced III (Screen recording + Global shortcut + Clipboard + Dark-mode walkthrough)', link: '/tutorials/118-desktop-advanced-iii' },
           ],
         },
         {
           text: 'Desktop 深化 III (v1.59、 v0.4 adapter layer + fidelity harness、 systematic pattern 34 度目、 37 milestone streak、 depth-4 record 5 例目、 Mobile v1.53 rhythm 再現)',
           items: [
-            { text: '119 — Desktop adapter layer (AdapterInvocation + AdapterResult + MOCK/REAL_ADAPTERS + fidelity harness walkthrough)', link: '/tutorials/119-desktop-adapter-layer' },
           ],
         },
         {
           text: 'Desktop 深化 IV (v1.60、 v0.5 spawn stub 契約層、 systematic pattern 35 度目、 38 milestone streak、 depth-5 pattern 2 例目 candidate、 Mobile v1.54 rhythm 再現)',
           items: [
-            { text: '120 — Desktop spawn stub (invokeDesktopCli + cliForAxis + buildSpawnInvocation + env-gate + fail-closed walkthrough)', link: '/tutorials/120-desktop-spawn-stub' },
           ],
         },
         {
           text: 'Desktop 深化 V (v1.61、 v0.6 実 spawn 実装完成、 systematic pattern 36 度目、 39 milestone streak、 depth-5 pattern 2 例目確定 + depth-6 pattern 新設 kiwa milestone 史上初、 Mobile v1.55 rhythm 再現)',
           items: [
-            { text: '121 — Desktop v0.6 実 spawn (spawn-executor + per-command env allowlist + timeout + buffer 上限 + DI + dry-run walkthrough)', link: '/tutorials/121-desktop-v06-spawn' },
           ],
         },
         {
           text: 'Desktop 深化 VI (v1.62、 v0.7 real behavior runner + fidelity harness behavior diff early warning、 systematic pattern 37 度目、 40 milestone streak、 depth-7 pattern 新設 candidate)',
           items: [
-            { text: '122 — Desktop v0.7 real behavior runner (REAL_AXIS_RUNNERS + fidelity harness 拡張 + summarizeFidelityBehaviorDiff walkthrough)', link: '/tutorials/122-desktop-real-behavior' },
           ],
         },
         {
           text: 'Desktop 深化 VII (v1.63、 v0.8 native binding availability probe + skip 経路、 systematic pattern 38 度目、 41 milestone streak、 depth-8 pattern 新設 candidate)',
           items: [
-            { text: '123 — Desktop v0.8 probe (probeCliAvailable + shouldSkipAxis + platformGate + runFidelityCheckWithProbe walkthrough)', link: '/tutorials/123-desktop-probe' },
           ],
         },
         {
           text: 'Desktop 深化 VIII (v1.64、 v0.9 実 native binding 呼出、 systematic pattern 39 度目、 42 milestone streak、 depth-9 pattern 新設 candidate、 3 layer separation 完全 pay off)',
           items: [
-            { text: '124 — Desktop v0.9 実 native binding 呼出 (probeAndInvoke + probeAndInvokeAll + InvokeStatus 4 経路 walkthrough)', link: '/tutorials/124-desktop-native-invoke' },
           ],
         },
         {
@@ -626,7 +589,6 @@ export default defineConfig({
         {
           text: 'Desktop 深化 IX (v1.67、 v1.0 invoke-cache layer、 systematic pattern 42 度目、 45 milestone streak、 depth-6 pattern 2 例目確定 candidate)',
           items: [
-            { text: '127 — Desktop v1.0 invoke-cache (InvokeCache + withCache + buildCacheKey + 4 status walkthrough)', link: '/tutorials/127-desktop-invoke-cache' },
           ],
         },
         {
@@ -644,7 +606,6 @@ export default defineConfig({
         {
           text: 'Payment pair depth-5 到達 (v2.3、 payment v2.1 lifecycle-orchestrator、 depth-5 pattern 4 例目確定 = dominant pattern 昇格 confirmed、 systematic pattern 46 度目 continuous state machine variant Payment 転用、 49 milestone streak)',
           items: [
-            { text: '130 — payment v2.1 lifecycle-orchestrator (5 state SSOT + 8 event SSOT + 40 セル 遷移表 + soft-reject vs throw guard walkthrough)', link: '/tutorials/130-payment-lifecycle-orchestrator' },
           ],
         },
         {
@@ -656,7 +617,6 @@ export default defineConfig({
         {
           text: 'Streaming pair depth-5 到達 (v2.5、 streaming v2.1 pipeline-orchestrator、 depth-5 pattern 6 例目発生 = **systematic law CONFIRMED**、 systematic pattern 48 度目、 51 milestone streak)',
           items: [
-            { text: '132 — streaming v2.1 pipeline-orchestrator (5 state SSOT + 8 event SSOT + 40 セル 遷移表 + producer/consumer/rebalance/DLQ walkthrough)', link: '/tutorials/132-streaming-pipeline-orchestrator' },
           ],
         },
         {
@@ -674,7 +634,6 @@ export default defineConfig({
         {
           text: 'Composition patterns (v2.8、 SaaS + backend + mobile + DevX + infra 26 lib composition)',
           items: [
-            { text: '200 — Email transactional flow (Resend + template + webhook signature verify)', link: '/tutorials/200-email-transactional' },
           ],
         },
       ],
@@ -687,27 +646,21 @@ export default defineConfig({
             { text: 'AI-LLM testing (non-determinism SSOT)', link: '/concepts/ai-llm-testing' },
             { text: 'AI-LLM multimodal testing (image + audio + MCP + agent SSOT)', link: '/concepts/ai-llm-multimodal-testing' },
             { text: 'Realtime testing (time-axis mock SSOT)', link: '/concepts/realtime-testing' },
-            { text: 'Payment testing (webhook signature SSOT)', link: '/concepts/payment-testing' },
             { text: 'Search testing (ranking + typo tolerance SSOT)', link: '/concepts/search-testing' },
             { text: 'Telemetry testing (span + metric + log aggregation SSOT)', link: '/concepts/telemetry-testing' },
             { text: 'Component testing (story + CT + visual diff SSOT)', link: '/concepts/component-testing' },
             { text: 'Observability v2 testing (dashboard + alert + trace + correlation SSOT)', link: '/concepts/observability-v2-testing' },
             { text: 'Blockchain testing (chain state / EL client / fuzz / reorg SSOT)', link: '/concepts/blockchain-testing' },
             { text: 'Modern web framework testing (Signal reactivity / Islands / edge runtime + RPC type-safety SSOT)', link: '/concepts/modern-web-framework-testing' },
-            { text: 'Streaming testing (producer / consumer / exactly-once / DLQ / schema-registry SSOT)', link: '/concepts/streaming-testing' },
             { text: 'Auth protocol testing (virtual authenticator / PKCE+DPoP / id_token / discovery+federation SSOT)', link: '/concepts/auth-protocol-testing' },
             { text: 'Real driver testing (mock only / real-optional / real-required 3 execution modes SSOT)', link: '/concepts/real-driver-testing' },
-            { text: 'Advanced billing semantics (9-axis SSOT — dunning / retry / 3DS / SCA / PSD2 / subscription / invoice / tax / chargeback)', link: '/concepts/billing-semantics' },
             { text: 'Edge runtime testing (8-axis SSOT — Durable Object / WebSocket / edge KV / geo-replicated / Cron / subrequest / CPU / streaming)', link: '/concepts/edge-runtime-testing' },
             { text: 'Perf-testing SSOT (p50 / p95 / p99 + baseline persistence + regression detection + 3-layer harness + 33 package coverage)', link: '/concepts/perf-testing-ssot' },
             { text: 'Db advanced testing SSOT (8 axis — replication / CDC / logical replication / MVCC / RLS / connection pool / partitioning / vector store)', link: '/concepts/db-advanced-testing' },
             { text: 'Mutation testing SSOT (kill rate + 4-tier threshold + baseline persistence + 12-axis release gate)', link: '/concepts/mutation-testing-ssot' },
             { text: 'WebRTC / WebTransport / HTTP/3 testing (8-axis SSOT + P2P vs SFU + ICE trickle vs half-trickle + WebTransport vs WebSocket)', link: '/concepts/webrtc-webtransport-testing' },
-            { text: 'Release invariants (3-invariant SSOT — release script filter symmetry + provenance flag absence + gate script package coverage)', link: '/concepts/release-invariants' },
             { text: 'A11y testing SSOT (WCAG 2.1 AA + 4-tier threshold + baseline persistence + 3-layer harness + 13-axis release gate)', link: '/concepts/a11y-testing-ssot' },
-            { text: 'Streaming real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/streaming-real-driver-testing' },
             { text: 'Database real-driver testing (16 axis SSOT + 3 provider × 3 backend × 16 axis = 144 cell grid + testcontainers pattern + KIWA_MODE=real env-gate)', link: '/concepts/database-real-driver-testing' },
-            { text: 'Payment real-driver testing (8 axis SSOT + 3 provider × 8 axis = 24 cell grid + testcontainers-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/payment-real-driver-testing' },
             { text: 'Frontend real-driver testing (8 axis SSOT + 3 target × 8 axis = 24 cell grid + browser-shaped env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/frontend-real-driver-testing' },
             { text: 'Observability real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/observability-real-driver-testing' },
             { text: 'Search real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _URL / _KEY env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/search-real-driver-testing' },
@@ -715,36 +668,16 @@ export default defineConfig({
             { text: 'AI-LLM real-driver testing (8 axis SSOT + 4 provider × 8 axis = 32 cell grid + provider _API_KEY + KIWA_LLM_BUDGET_USD budget guard + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-real-driver-testing' },
             { text: 'Security advanced II testing (v0.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced cell grid + provider _URL / _TOKEN env-gate pattern + KIWA_MODE=real env-gate)', link: '/concepts/security-advanced-II-testing' },
             { text: 'AI-LLM advanced III testing (v0.5 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 record + KIWA_MODE=real env-gate)', link: '/concepts/ai-llm-advanced-III-testing' },
-            { text: 'Payment advanced III testing (v0.5 8 axis SSOT + 3 provider × 8 axis = 24 advanced III cell grid + 25-axis combined harness + pair 深度 4 段 2 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/payment-advanced-III-testing' },
             { text: 'Observability advanced III testing (v2.2 8 axis SSOT + 4 provider × 8 axis = 32 advanced III cell grid + 16-axis combined harness + pair 深度 4 段 3 例目 record + KIWA_MODE=real env-gate)', link: '/concepts/observability-advanced-III-testing' },
             { text: 'Edge / Serverless advanced testing (v1.2 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + 16-axis combined harness + pair 第 12 新規 base pair 導入 + KIWA_MODE=real env-gate)', link: '/concepts/edge-serverless-advanced-testing' },
             { text: 'Auth advanced III testing (v0.6 8 axis SSOT + 3 platform × 8 axis = 24 advanced cell grid + pair 第 1 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/auth-advanced-III-testing' },
             { text: 'Realtime advanced III testing (v0.3 8 axis SSOT + 3 protocol MoQ / WebCodecs / AI-media × 8 axis + pair 第 2 pair 3 段拡張達成 record + KIWA_MODE=real env-gate)', link: '/concepts/realtime-advanced-III-testing' },
-            { text: 'DevSecOps library integration (v0.1 6 axis SAST + SCA + Secret + IaC + DAST + Container + 4 skill 置換 pattern SSOT + 段階的移行 Phase 1-3)', link: '/concepts/security-devsecops-library-integration' },
             { text: 'Frontend advanced III testing (v1.49 6 axis SSOT + pair 深度 3 段 4 例目)', link: '/concepts/frontend-advanced-III-testing' },
-            { text: 'Mobile testing baseline (v1.50 3 axis SSOT + new-base pair 第 13 + 41 package 到達)', link: '/concepts/mobile-testing-baseline' },
-            { text: 'Mobile testing advanced II (v1.51 7 axis SSOT + real driver env-gate + pair 第 13 2 段目)', link: '/concepts/mobile-testing-advanced' },
-            { text: 'Mobile testing advanced III (v1.52 11 axis SSOT + pair 深度 3 段記録 5 例目 + 30 milestone streak 突入)', link: '/concepts/mobile-testing-advanced-III' },
-            { text: 'Mobile real driver adapter (v1.53 adapter interface SSOT + 66 combination + pair 深度 4 段記録 4 例目 depth-4)', link: '/concepts/mobile-testing-real-driver' },
-            { text: 'Mobile spawn stub 契約層 (v1.54 spawn-driver SSOT + 6 CLI stub + pair 深度 5 段拡張 1 例目 candidate depth-5 pattern 新設)', link: '/concepts/mobile-testing-real-cli' },
-            { text: 'Mobile v0.6 実 child_process.spawn (v1.55 spawn-executor SSOT + per-command allowlist + dry-run + DI + safety guards + depth-5 pattern 実装完成 kiwa milestone 史上初 6 段拡張)', link: '/concepts/mobile-testing-v06-spawn' },
-            { text: 'Desktop testing baseline (v1.56 3 axis SSOT + new-base pair 第 14 + 42 package 到達 + v2.0 milestone desktop adapter goal 達成)', link: '/concepts/desktop-testing-baseline' },
-            { text: 'Desktop advanced axis (v1.57 v0.2 5 axis SSOT + auto-updater + fs-permissions + notification + menu-bar + tray-icon + 24 spec fidelity grid + systematic pattern 32 度目)', link: '/concepts/desktop-advanced-axis' },
-            { text: 'Desktop advanced III (v1.58 v0.3 4 axis SSOT + screen-recording + global-shortcut + clipboard + dark-mode + 36 spec fidelity grid + systematic pattern 33 度目 + Mobile v1.50-v1.52 rhythm 再現)', link: '/concepts/desktop-advanced-iii' },
-            { text: 'Desktop adapter layer (v1.59 v0.4 adapter interface + fidelity harness SSOT + 24 adapter pair + 72 combination + 36 fidelity pair + systematic pattern 34 度目 + Mobile v1.53 rhythm 再現 + depth-4 record 5 例目)', link: '/concepts/desktop-adapter-layer' },
-            { text: 'Desktop spawn stub 契約層 (v1.60 v0.5 8 CLI stub SSOT + 12 axis → 8 CLI + 4 non-CLI mapping + KIWA_DESKTOP_MODE env-gate + args 上限 32 + fail-closed + systematic pattern 35 度目 + Mobile v1.54 rhythm 再現 + depth-5 pattern 2 例目 candidate)', link: '/concepts/desktop-spawn-stub' },
-            { text: 'Desktop v0.6 実 spawn (v1.61 spawn-executor 3 type SSOT + per-command env allowlist 8 CLI × env + safety layer 4 段 + invokeDesktopCli 3 経路分岐 + DI 経路 + KIWA_DESKTOP_SPAWN=dry-run + shape 契約 preserving + systematic pattern 36 度目 + Mobile v1.55 rhythm 再現 + depth-5 2 例目確定 + depth-6 新設 kiwa milestone 史上初)', link: '/concepts/desktop-v06-spawn' },
-            { text: 'Desktop v0.7 real behavior runner (v1.62 REAL_AXIS_RUNNERS 12 axis 別 behavior 差別化 SSOT + fidelity harness 拡張 metadataDiffs + durationDiffMs + summarizeFidelityBehaviorDiff + shape 契約 preserving 絶対維持 + v0.4 fidelity harness 設計思想の実運用開始 + systematic pattern 37 度目 + depth-7 pattern 新設 candidate)', link: '/concepts/desktop-real-behavior' },
-            { text: 'Desktop v0.8 probe layer (v1.63 probe.ts 新設 5 type SSOT + probeCliAvailable which/where + shouldSkipAxis 12 axis 別 skip strategy + platformGate + computeSkipMatrix + fidelity harness runFidelityCheckWithProbe + SkippedPair 統合 + shape 契約 preserving 絶対維持 + systematic pattern 38 度目 + depth-8 pattern 新設 candidate)', link: '/concepts/desktop-probe' },
-            { text: 'Desktop v0.9 実 native binding 呼出 (v1.64 native-invoke.ts 新設 3 type SSOT + probeAndInvoke + probeAndInvokeAll + InvokeStatus 4 経路 + 4 step probe → invoke 統合 + shape 契約 preserving 絶対維持 + 3 layer separation 完全 pay off + systematic pattern 39 度目 + depth-9 pattern 新設 candidate)', link: '/concepts/desktop-native-invoke' },
             { text: 'quality-metrics v0.5 historical trend + drift (v1.65 history.ts 新設 6 type SSOT + captureSnapshot + compareToBaseline + detectDrift + generateTrendReport + axis 別 上昇=改善/悪化 判定 + shape 契約 preserving 絶対維持 + depth-5 pattern 3 例目確定 = 絶対的 rule 昇格 signal + systematic pattern 40 度突入)', link: '/concepts/quality-metrics-history' },
             { text: 'quality-metrics v0.6 evaluateReleaseGate に drift check opt-in 統合 (v1.66 ReleaseGateContext 3 新 field = driftBaseline + driftThresholdPct + driftEnabled + drift.{axis} blocker 1:1 格上げ + axesEvaluated +1 lane 加算 + default off backward compat 絶対維持 + shape 契約 preserving + depth-5 pattern 3 例目確定 実運用 継続 + systematic pattern 41 度目)', link: '/concepts/quality-metrics-drift-gate' },
-            { text: 'Desktop v1.0 invoke-cache layer (v1.67 InvokeCache class LRU + TTL 両立 + withCache helper probeAndInvoke 統合 + buildCacheKey SSOT + 4 status 経路 = cache-hit/miss/invalidated/disabled + default 5 分 TTL + 128 maxEntries + shape 契約 preserving + backward compat 絶対維持 + depth-6 pattern 2 例目確定 candidate + systematic pattern 42 度目)', link: '/concepts/desktop-invoke-cache' },
             { text: 'quality-metrics v2.1 adaptive drift threshold learning (v2.1 threshold-learning.ts 新設 learnAdaptiveThreshold + pickThresholdForAxis + AdaptiveThreshold / AdaptiveThresholdReport type SSOT + 統計的異常検知 mean+k*stdev SSOT + axis 別独立学習 + baseline=0 Infinity 除外 + shape 契約 preserving + backward compat 絶対維持 + depth-5 実運用継続 3 例目 compound 深化 + systematic pattern 44 度目 statistical inference variant + 4 PR rhythm 復帰)', link: '/concepts/quality-metrics-adaptive-threshold' },
             { text: 'auth v0.7 continuous-auth 状態機械 (v2.2 continuous-auth.ts 新設 startContinuousAuth + scoreToLevel + evaluateRisk + completeStepUp + freezeSession + terminateContinuousAuth + 5 state SSOT monitoring/elevated/step-up-required/session-frozen/terminated + 4 段 risk level low/medium/high/critical + interval 動的切替 60_000ms/15_000ms + events log 累積 + guard clause + Auth pair v0.4 → v0.7 4 段深化 pioneer record 更新 + systematic pattern 45 度目 continuous state machine variant 8 原則統合)', link: '/concepts/auth-continuous-state-machine' },
-            { text: 'payment v2.1 lifecycle-orchestrator (v2.3 lifecycle-orchestrator.ts 新設 startLifecycle + handleEvent + summarizeLifecycle + 5 state SSOT active-billing/grace-period/dunning-active/chargeback-dispute/canceled + 8 event SSOT + 40 セル 遷移表 + soft-reject + invalid log pattern payment webhook 重複配信対応 + Payment pair 5 段深化 = depth-5 pattern 4 例目確定 dominant pattern 昇格 confirmed + systematic pattern 46 度目 continuous state machine variant Payment 転用)', link: '/concepts/payment-lifecycle-orchestrator' },
             { text: 'realtime v2.1 session-orchestrator (v2.4 session-orchestrator.ts 新設 startSession + dispatchEvent + summarizeSession + 5 state SSOT connecting/subscribed/reconnecting/degraded/closed + 8 event SSOT + 40 セル 遷移表 + heartbeat 動的 QoS 3 回連続失敗 で degraded 降格 + soft-reject pattern + Realtime pair 5 段深化 = depth-5 pattern 5 例目発生 = systematic law 昇格 candidate 到達 + systematic pattern 47 度目 continuous state machine variant Realtime 転用)', link: '/concepts/realtime-session-orchestrator' },
-            { text: 'streaming v2.1 pipeline-orchestrator (v2.5 pipeline-orchestrator.ts 新設 startPipeline + dispatchPipelineEvent + summarizePipeline + 5 state SSOT producing/consuming/rebalancing/dlq-active/stopped + 8 event SSOT + 40 セル 遷移表 + producer + consumer group + exactly-once + DLQ + schema registry 継続合成 + Streaming pair 5 段深化 = depth-5 pattern 6 例目発生 = **systematic law CONFIRMED** = kiwa 全体 最上位規範化 confirmed + systematic pattern 48 度目)', link: '/concepts/streaming-pipeline-orchestrator' },
             { text: 'search v2.1 query-orchestrator (v2.6 query-orchestrator.ts 新設 startQuery + dispatchQueryEvent + summarizeQuery + 5 state SSOT parsing/searching/reranking/facet-aggregating/completed + 8 event SSOT + query DSL + faceted + semantic + geo + relevance 継続合成 + Search pair 5 段深化 = depth-5 pattern 7 例目発生 systematic law 継続強化 + systematic pattern 49 度目 systematic law 継承 第 1 例)', link: '/concepts/search-query-orchestrator' },
             { text: 'observability v2.1 incident-orchestrator (v2.7 incident-orchestrator.ts 新設 startIncident + dispatchIncidentEvent + summarizeIncident + 5 state SSOT detecting/triaging/escalating/mitigating/resolved + 8 event SSOT + alert + escalation + AIOps + FinOps + chaos 継続合成 + Observability pair 5 段深化 = depth-5 pattern 8 例目発生 systematic law 継続強化 第 2 例 + **systematic pattern 50 度到達 milestone**)', link: '/concepts/observability-incident-orchestrator' },
             { text: 'auth v0.8 session-lifecycle-orchestrator', link: '/concepts/auth-session-lifecycle-orchestrator' },
@@ -879,7 +812,6 @@ export default defineConfig({
         {
           text: 'SaaS',
           items: [
-            { text: 'email', link: '/api/email' },
           ],
         },
       ],

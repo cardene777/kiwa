@@ -3,6 +3,7 @@
 //   node --test scripts/check-a11y-gates.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -34,10 +35,15 @@ test('A11Y_TIER_THRESHOLD critical bar is 0 in every tier (SSOT invariant)', () 
   }
 });
 
-test('A11Y_PACKAGE_TIER covers the 37-package release set', () => {
-  // Same count as the pnpm filter list in root package.json's `test:a11y`.
+test('A11Y_PACKAGE_TIER covers the release set named by root test:a11y', () => {
+  // 件数を直接固定すると、 package が増減するたびに「守る対象が変わった」 ことを
+  // 退行として報告してしまう (#1785 で 46 -> 31 package)。 root の filter list を
+  // 正として集合そのものを突き合わせる。
+  const root = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'));
+  const filtered = [...root.scripts['test:a11y'].matchAll(/-F (@kiwa-lab\/[a-z0-9-]+)/g)]
+    .map((m) => m[1]);
   const packages = Object.keys(A11Y_PACKAGE_TIER);
-  assert.equal(packages.length, 37, `expected 37 packages, got ${packages.length}`);
+  assert.deepEqual([...packages].sort(), [...new Set(filtered)].sort());
   // Every entry has a valid tier.
   for (const [pkg, entry] of Object.entries(A11Y_PACKAGE_TIER)) {
     assert.ok(

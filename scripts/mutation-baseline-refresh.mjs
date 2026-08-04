@@ -25,7 +25,7 @@ const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
   : SCRIPT_ROOT;
 
 /**
- * v1.27-2 + v1.27-3 scope: 33 packages across four tiers.
+ * v1.27-2 + v1.27-3 scope: 25 packages across four tiers.
  *
  * v1.27-2 landed 9 core + 11 framework baselines. v1.27-3 extends to the
  * remaining 13 packages: 3 test-type packages (a11y / visual / component) +
@@ -49,12 +49,7 @@ const PACKAGES = {
   '@kiwa-lab/e2e': 'packages/e2e',
   '@kiwa-lab/cli': 'packages/cli',
   '@kiwa-lab/nextjs': 'packages/nextjs',
-  '@kiwa-lab/nuxt': 'packages/nuxt',
-  '@kiwa-lab/sveltekit': 'packages/sveltekit',
-  '@kiwa-lab/remix': 'packages/remix',
-  '@kiwa-lab/astro': 'packages/astro',
   '@kiwa-lab/solidstart': 'packages/solidstart',
-  '@kiwa-lab/qwikcity': 'packages/qwikcity',
   '@kiwa-lab/edge': 'packages/edge',
   '@kiwa-lab/solidjs': 'packages/solidjs',
   '@kiwa-lab/fresh': 'packages/fresh',
@@ -68,11 +63,7 @@ const PACKAGES = {
   '@kiwa-lab/queue': 'packages/queue',
   '@kiwa-lab/cache': 'packages/cache',
   '@kiwa-lab/orm': 'packages/orm',
-  '@kiwa-lab/payment': 'packages/payment',
-  '@kiwa-lab/streaming': 'packages/streaming',
   '@kiwa-lab/search': 'packages/search',
-  '@kiwa-lab/mcp': 'packages/mcp',
-  '@kiwa-lab/agent': 'packages/agent',
   '@kiwa-lab/realtime': 'packages/realtime',
 };
 

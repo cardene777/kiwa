@@ -12,7 +12,7 @@
 // treated as non-publishable and skipped. A short manual allowlist (`NON_PUBLISHED_ALLOWLIST`)
 // is reserved for deliberate exclusions where the `private` flag alone cannot
 // capture the intent (e.g., a package published under a different pipeline);
-// it starts empty because the current 36-package set is all first-party
+// it starts empty because the current 31-package set is all first-party
 // `@kiwa-lab/*` scope.
 //
 // When this test fails, the fix is exactly one of:
@@ -95,7 +95,7 @@ describe('release script filter — systematic root cause pattern SSOT (Issue #9
   });
 
   it('discovers publishable @kiwa-lab/* packages from packages/*/package.json', () => {
-    // The full 36-package set (v1.28 landing) has to be visible — otherwise the
+    // The full 31-package set (v1.28 landing) has to be visible — otherwise the
     // per-package assertion below silently drops packages and stops catching drift.
     // The lower bound is deliberately conservative so a new package landing
     // does not fail this line; the per-package assertion is where the real
