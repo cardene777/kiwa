@@ -127,7 +127,9 @@ The v1.25 milestone applied the 3-layer harness to every kiwa package.
 | Layer | Packages |
 |---|---|
 | core (9) | `@kiwa-lab/core` + `@kiwa-lab/dapp` + `@kiwa-lab/api` + `@kiwa-lab/ui` + `@kiwa-lab/data` + `@kiwa-lab/cli-test` + `@kiwa-lab/observability` + `@kiwa-lab/e2e` + `@kiwa-lab/cli` |
+| framework adapter (6) | `@kiwa-lab/nextjs` + `@kiwa-lab/solidstart` + `@kiwa-lab/edge` + `@kiwa-lab/fresh` + `@kiwa-lab/hono` + `@kiwa-lab/solidjs` |
 | test type (3) | `@kiwa-lab/a11y` + `@kiwa-lab/visual` + `@kiwa-lab/component` |
+| SaaS layer (5) | `@kiwa-lab/auth` + `@kiwa-lab/queue` + `@kiwa-lab/cache` + `@kiwa-lab/orm` + `@kiwa-lab/search` |
 
 Every package writes a per-op p95 baseline, runs the 3-layer gate on every `pnpm test:perf` invocation, and feeds the report into `docs/quality-reports/perf/{package}.md`. The release gate (`evaluateReleaseGate`) treats a `regressed` verdict on any package as a release blocker on the `perf.p95Ms` axis.
 
