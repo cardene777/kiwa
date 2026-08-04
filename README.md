@@ -27,7 +27,7 @@ One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js 
 
 [**Quickstart**](#quickstart) • [**4 layer chain**](#4-layer-chain) • [**Features**](#features) • [**Examples**](#examples) • [**Docs**](./docs/en/README.md) • [**Cookbook**](./docs/en/cookbook/README.md) • [**FAQ**](./docs/en/faq.md) • [**Changelog**](./CHANGELOG.md) • [**License**](./LICENSE)
 
-> **Status: pre-release.** kiwa is public for visibility only. Source is under an "All rights reserved" license until general availability; see [LICENSE](./LICENSE) for what you may and may not do. Issues and pull requests are conducted in **English** per [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+> **Status: pre-release.** kiwa is public for visibility only. Source is under an "All rights reserved" license until general availability; see [LICENSE](./LICENSE) for what you may and may not do. Issues are written in **English**; pull requests and commit messages may be English or Japanese, per [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 [🇬🇧 English](./README.md) • [🇯🇵 日本語](./README.ja.md)
 

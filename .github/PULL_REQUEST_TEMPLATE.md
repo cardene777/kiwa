@@ -1,7 +1,9 @@
 <!--
 Thank you for contributing to kiwa.
 Please fill out the sections below so reviewers can understand the change quickly.
-For Japanese contributors: 日本語で書いても構いません。
+English and Japanese are both accepted for pull requests; no translation is
+required. Note that Issues and code comments are English-only.
+See CONTRIBUTING.md "Language policy (SSOT)" for the full split.
 -->
 
 ## 概要

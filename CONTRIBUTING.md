@@ -5,25 +5,59 @@ We welcome bug reports, documentation fixes, tests, examples, and feature improv
 
 ## Language policy (SSOT)
 
-All public collaboration on this repository is conducted in **English**. This
-covers every artifact a maintainer or reviewer encounters through the public
-GitHub surface:
+This policy covers contributions **to this repository**. It does not govern the
+files kiwa generates into your own project — those follow your project's
+conventions and the skill's `$DOC_LANG` setting.
 
-- Issue titles and bodies
-- Pull request titles, bodies, and review comments
-- Commit messages
+Each surface below names the language it accepts. The split follows what a
+reader needs in order to act: entry points a newcomer must read before
+contributing are English, while the running record of how a change was made may
+be in either language.
+
+**English only:**
+
 - Code comments and identifiers
-- Documentation authored under `docs/` for public consumption
+- Test and suite names
+- Issue and Discussion titles, bodies, and comments
+- `README.md` and the English documentation locale (`docs/en/`)
+- Contributor-facing guides such as `.changeset/README.md`
 
-The goal is a low-friction path for OSS contributors regardless of first
-language. Japanese is used only in files explicitly marked as Japanese
-translations (for example, `README.ja.md`, `docs/ja/`) and in internal
-retrospectives outside this repository. If you must reference Japanese source
-material, quote and translate the relevant fragment in English inline.
+**English or Japanese — either is fine, and no translation is expected:**
 
-This policy is retroactive for **new work** starting at v2.18. Existing
-Japanese content that predates the policy will be migrated opportunistically;
-please do not open bulk-translation PRs without discussing scope first.
+- Commit messages (see § Commit message style)
+- Pull request titles, bodies, and review comments
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- Changeset summaries (`.changeset/*.md`, excluding `README.md`) and the
+  CHANGELOG entries generated from them
+- Security reports (see [`SECURITY.md`](./SECURITY.md))
+
+**Localized content — write in the language of the locale you are editing:**
+
+- `README.ja.md`, the default documentation locale (unprefixed paths under
+  `docs/`), and `docs/ja/` are Japanese
+- `docs/en/` is English
+
+Note that `docs/` is **not** uniformly English. Its root locale is Japanese and
+English lives under `docs/en/`, as configured in `docs/.vitepress/config.mts`.
+Adding English prose to a Japanese page (or the reverse) is not the same as
+contributing in English — localized pages stay in their own language.
+
+These rules govern **prose**. Embedded code, comments, identifiers, frontmatter
+keys, and commit-trailer tokens (`Co-authored-by:` and similar) keep their own
+syntax and language requirements no matter what surrounds them. A Japanese pull
+request body may contain an English code block, and a review suggestion written
+in Japanese still carries English code comments.
+
+For anything not listed above, apply this rule: if a reader consumes it to
+understand or use the project, write English; if it exists to record how a
+change was made, either language is fine. When neither reading is clear, choose
+English — it is the safer default for a public repository.
+
+This policy applies to **new work** starting at v2.18. Existing content that
+predates it is left as is; **no rewriting of past commits or pull requests is
+expected or wanted**. Japanese content in English-required surfaces will be
+migrated opportunistically; please do not open bulk-translation PRs without
+discussing scope first.
 
 ## Getting started
 
@@ -215,7 +249,7 @@ docs or examples if the workflow changes.
 ## Commit message style
 
 We use emoji-prefixed conventional commits in Japanese (for example,
-`📚 docs(scope): ...`).
+`📚 docs(scope): ...`), which § Language policy (SSOT) permits.
 For English contributions, `feat:`, `fix:`, and `docs:` prefixes are also accepted.
 
 Keep commits focused and easy to review.

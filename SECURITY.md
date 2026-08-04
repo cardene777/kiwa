@@ -9,6 +9,9 @@
 If you discover a security vulnerability in kiwa, please report it privately so
 we can address it before public disclosure.
 
+Reports are accepted in English or Japanese; no translation is required. Do not
+delay a report to translate it.
+
 ### How to report
 Please **do not** open a public GitHub Issue for security vulnerabilities.
 Instead, contact the maintainer directly:
