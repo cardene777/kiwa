@@ -89,14 +89,19 @@ function sectionOf(pkg: PackageJson, name: string): 'dependencies' | 'devDepende
  * the lockfile. Derived from `package.json` rather than the lockfile so that a
  * lockfile that fails to mention an importer is detectable as a gap.
  */
-function declaredViemImporters(): Map<string, Declaration> {
+function declaredViemImporters(): { importers: Map<string, Declaration>; unreadableRoots: string[] } {
   const out = new Map<string, Declaration>();
+  // A root that cannot be listed drops every importer under it. Silently
+  // skipping would let all three assertions pass over a shrunken set, which is
+  // the same fail-open shape this axis exists to prevent — so it is reported.
+  const unreadableRoots: string[] = [];
 
   for (const root of IMPORTER_ROOTS) {
     let entries: string[];
     try {
       entries = readdirSync(resolve(REPO_ROOT, root));
     } catch {
+      unreadableRoots.push(root);
       continue;
     }
 
@@ -119,7 +124,7 @@ function declaredViemImporters(): Map<string, Declaration> {
     }
   }
 
-  return out;
+  return { importers: out, unreadableRoots };
 }
 
 /**
@@ -225,7 +230,7 @@ function readViemZodPeers(): Map<string, string[]> {
 }
 
 describe('viem/zod peer uniformity', () => {
-  const declared = declaredViemImporters();
+  const { importers: declared, unreadableRoots } = declaredViemImporters();
   const peers = readViemZodPeers();
 
   it('declares zod in every importer that declares viem or wagmi', () => {
@@ -265,6 +270,11 @@ describe('viem/zod peer uniformity', () => {
     // reference importer readable while the rest vanish, and the comparison in
     // the next assertion would then hold vacuously.
     expect(declared.size).toBeGreaterThan(0);
+    expect(
+      unreadableRoots,
+      'These workspace roots could not be listed, so any importer under them was skipped ' +
+        'without being checked. Restore the directory rather than narrowing IMPORTER_ROOTS.',
+    ).toEqual([]);
 
     const missing = [...declared.keys()].filter((name) => !peers.has(name));
 
