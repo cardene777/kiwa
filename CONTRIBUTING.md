@@ -5,41 +5,53 @@ We welcome bug reports, documentation fixes, tests, examples, and feature improv
 
 ## Language policy (SSOT)
 
-Every surface has one designated language. The split follows what a reader needs
-in order to act: entry points a newcomer must read before contributing are
-English, while the running record of how a change was made may be Japanese.
+This policy covers contributions **to this repository**. It does not govern the
+files kiwa generates into your own project — those follow your project's
+conventions and the skill's `$DOC_LANG` setting.
 
-**English is required** for:
+Each surface below names the language it accepts. The split follows what a
+reader needs in order to act: entry points a newcomer must read before
+contributing are English, while the running record of how a change was made may
+be in either language.
+
+**English only:**
 
 - Code comments and identifiers
 - Test and suite names
 - Issue and Discussion titles, bodies, and comments
 - `README.md` and the English documentation locale (`docs/en/`)
+- Contributor-facing guides such as `.changeset/README.md`
 
-**Japanese is accepted** for:
+**English or Japanese — either is fine, and no translation is expected:**
 
 - Commit messages (see § Commit message style)
 - Pull request titles, bodies, and review comments
-- Changeset summaries (`.changeset/*.md`) and the CHANGELOG entries generated
-  from them
-- `README.ja.md` and the default documentation locale — unprefixed paths under
-  `docs/` and `docs/ja/`, as configured in `docs/.vitepress/config.mts`
+- `.github/PULL_REQUEST_TEMPLATE.md`
+- Changeset summaries (`.changeset/*.md`, excluding `README.md`) and the
+  CHANGELOG entries generated from them
+- Security reports (see [`SECURITY.md`](./SECURITY.md))
+
+**Localized content — write in the language of the locale you are editing:**
+
+- `README.ja.md`, the default documentation locale (unprefixed paths under
+  `docs/`), and `docs/ja/` are Japanese
+- `docs/en/` is English
 
 Note that `docs/` is **not** uniformly English. Its root locale is Japanese and
-English lives under `docs/en/`; write in the language of the locale you are
-editing.
+English lives under `docs/en/`, as configured in `docs/.vitepress/config.mts`.
+Adding English prose to a Japanese page (or the reverse) is not the same as
+contributing in English — localized pages stay in their own language.
+
+These rules govern **prose**. Embedded code, comments, identifiers, frontmatter
+keys, and commit-trailer tokens (`Co-authored-by:` and similar) keep their own
+syntax and language requirements no matter what surrounds them. A Japanese pull
+request body may contain an English code block, and a review suggestion written
+in Japanese still carries English code comments.
 
 For anything not listed above, apply this rule: if a reader consumes it to
 understand or use the project, write English; if it exists to record how a
-change was made, follow the language of the artifact it belongs to. When neither
-reading is clear, choose English — it is the safer default for a public
-repository.
-
-Security reports are accepted in either language and need no translation; see
-[`SECURITY.md`](./SECURITY.md).
-
-Contributions written entirely in English are welcome and need no translation —
-the Japanese allowance is permission, not a requirement.
+change was made, either language is fine. When neither reading is clear, choose
+English — it is the safer default for a public repository.
 
 This policy applies to **new work** starting at v2.18. Existing content that
 predates it is left as is; **no rewriting of past commits or pull requests is
