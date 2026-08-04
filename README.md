@@ -551,10 +551,6 @@ These three examples have **forge test + hardhat test (where applicable) + playw
 
 | Example | Stack / 対象 helper | Unit tests (kiwa) | E2E tests (Playwright) |
 |---|---|---|---|
-| [`nuxt-server-routes-full`](./examples/nuxt-server-routes-full) ⭐ | Nuxt 3 + `@kiwa-lab/nuxt` v1.0.4+ (3 helper 全 demo) | 20 (Server Routes 8 + route middleware 6 + Nitro plugin 6) | 4 (real `nuxt dev` :3030) |
-| [`sveltekit-full`](./examples/sveltekit-full) ⭐ | SvelteKit 2 + `@kiwa-lab/sveltekit` v1.0.x (3 helper 全 demo) | 19 (load 8 + actions 6 + handle 5) | 4 (real `vite dev` :3040) |
-| [`remix-full`](./examples/remix-full) ⭐ | Remix v2 + `@kiwa-lab/remix` v1.1.x (loader + action + Resource Route + nested route chain + 共通 auth) | 31 (loader 8 + action 7 + resource 6 + auth 5 + nested chain 5) | 7 (real `remix vite:dev` :3050) |
-| [`astro-server-endpoints-full`](./examples/astro-server-endpoints-full) ⭐ | Astro v5 SSR + `@kiwa-lab/astro` v1.0.x (APIRoute GET/POST + middleware locals) | 24 (items GET 8 + items POST 7 + counter 5 + auth 4) | 7 (real `astro dev` :3060) |
 | [`nextjs-app-router-full`](./examples/nextjs-app-router-full) ⭐ | Next.js v15 App Router + `@kiwa-lab/nextjs` v1.0.x (Server Actions + middleware + RSC + Route Handler の 4 layer) | 21 (action 6 + middleware 5 + RSC 5 + route 5) | 7 (real `next dev` :3070) |
 
 ---
@@ -669,17 +665,7 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Next.js React Server Components (async server component) | ✅ production-ready (v1.0.3+) | `/kiwa-nextjs` (`--layer nextjs-rsc`) | `@kiwa-lab/nextjs` v1.0.3 |
 | Next.js Parallel Routes + Intercepting Routes (`@modal` / `@sidebar` / `(.)`) | ✅ production-ready (v1.0.4+) | `/kiwa-nextjs` (`--layer nextjs-parallel-route`) | `@kiwa-lab/nextjs` v1.0.4 |
 | Next.js RSC streaming + Suspense boundary (chunk capture + fallback / resolved 遷移 + error boundary) | ✅ production-ready (v1.1+) | `/kiwa-nextjs` (`--layer nextjs-rsc-streaming`) | `@kiwa-lab/nextjs` v1.1 |
-| Nuxt 3 Server Routes (`defineEventHandler`) | ✅ production-ready (v1.0.0+) | `/kiwa-nuxt` (`--layer nuxt-server-route`) | `@kiwa-lab/nuxt` v1.0.0 |
-| Nuxt 3 route middleware (`middleware/*.ts`) | ✅ production-ready (v1.0.2+) | `/kiwa-nuxt` (`--layer nuxt-route-middleware`) | `@kiwa-lab/nuxt` v1.0.2 |
-| Nuxt 3 Nitro plugin lifecycle (`defineNitroPlugin`) | ✅ production-ready (v1.0.3+) | `/kiwa-nuxt` (`--layer nuxt-nitro-plugin`) | `@kiwa-lab/nuxt` v1.0.3 |
-| SvelteKit load + form actions + hooks.server (handle / handleFetch / handleError) | ✅ production-ready (v1.0.1+) | `/kiwa-sveltekit` (`--layer sveltekit-load` / `--layer sveltekit-action` / `--layer sveltekit-handle` / `--layer sveltekit-handle-fetch` / `--layer sveltekit-handle-error`) | `@kiwa-lab/sveltekit` v1.0.1 |
-| Remix v2 / React Router v7 loader + action | ✅ production-ready (v1.0.0+) | `/kiwa-remix` (`--layer remix-loader` / `--layer remix-action`) | `@kiwa-lab/remix` v1.0.0 |
-| Remix v2 Resource Routes (HTTP method dispatch + 405 capture) | ✅ production-ready (v1.0.2+) | `/kiwa-remix` (`--layer remix-resource-route`) | `@kiwa-lab/remix` v1.0.2 |
-| Remix v2 nested route chain (parent → child loader + `headers()` merge + Set-Cookie persist + `defer()`) | ✅ production-ready (v1.1+) | `/kiwa-remix` (`--layer remix-nested-route-chain`) | `@kiwa-lab/remix` v1.1.0 |
-| Astro Server Endpoints (`pages/api/*.ts`) | ✅ production-ready (v1.0.0+) | `/kiwa-astro` (`--layer astro-endpoint`) | `@kiwa-lab/astro` v1.0.0 |
-| Astro `.astro` page SSR (redirect / notFound / rewrite signal capture) | ✅ production-ready (v1.0.2+) | `/kiwa-astro` (`--layer astro-ssr`) | `@kiwa-lab/astro` v1.0.2 |
 | SolidStart Server Functions + API Routes | ✅ production-ready (v1.0.0+) | `/kiwa-solidstart` (`--layer solidstart-server-function` / `--layer solidstart-api-route`) | `@kiwa-lab/solidstart` v1.0.0 |
-| Qwik City routeAction + routeLoader + Endpoints | ✅ production-ready (v1.0.0+) | `/kiwa-qwikcity` (`--layer qwikcity-action` / `--layer qwikcity-loader` / `--layer qwikcity-endpoint`) | `@kiwa-lab/qwikcity` v1.0.0 |
 | Edge runtime (Cloudflare Workers / Vercel Edge / generic fetch handler) | ✅ production-ready (v1.0.0+) | `/kiwa-edge` (`--layer edge-handler`) | `@kiwa-lab/edge` v1.0.0 |
 | Auth (NextAuth v5 / Auth.js — session + 3 provider + database adapter mocks) | ✅ production-ready (v0.1+) | `/kiwa-design` (`--layer auth-nextauth`) | `@kiwa-lab/auth` v0.1.0 |
 | SolidJS Signal + Effect + createResource + Suspense (`@kiwa-lab/solidjs`) | ✅ production-ready (v0.1+, Issue #813) | (test-only helpers) | `@kiwa-lab/solidjs` v0.1.0 |

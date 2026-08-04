@@ -125,12 +125,10 @@ const PROBE = 'clean-probe.txt';
  * 残り 16 件に `clean` が戻っても検知できない。
  */
 const FIXED_OUTPUT_TARGETS = [
-  'a11y', 'ai-llm', 'api', 'astro', 'auth', 'cache', 'cli-test', 'component',
-  'core', 'data', 'desktop', 'e2e', 'edge', 'fresh', 'hono', 'lean', 'mcp',
-  'mobile', 'nextjs', 'nuxt', 'observability', 'orm', 'payment',
-  'quality-metrics', 'queue', 'qwikcity', 'realtime', 'remix', 'search',
-  'security', 'security-devsecops', 'solidjs', 'solidstart', 'streaming',
-  'sveltekit', 'ui', 'visual',
+  'a11y', 'ai-llm', 'api', 'auth', 'cache', 'cli-test', 'component', 'core',
+  'data', 'e2e', 'edge', 'fresh', 'hono', 'lean', 'nextjs', 'observability',
+  'orm', 'quality-metrics', 'queue', 'realtime', 'search', 'security', 'solidjs', 'solidstart',
+  'ui', 'visual',
   // release-smoke 自身の事前 build が並列に走らせるため、 同じ race 源になる。
   'perf-harness', 'skill-test',
 ] as const;
@@ -670,7 +668,8 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       visit(sourceFile);
     }
     // 走査対象が空だと、 検査が何も見ないまま通る。
-    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(30);
+    // 下限は実 package 数に追随させる (#1785 で 46 -> 31 package)。
+    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(20);
     expect(
       [...new Set(reads)].sort(),
       `設定が出力先の状態を読んでいる。 判定が実 build を観測する形である以上、`

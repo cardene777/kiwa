@@ -12,7 +12,6 @@ kiwa の各 lib API を分類別に列挙。 各 lib page には Overview + Supp
 
 | lib | package | domain |
 |---|---|---|
-| [email](./email) | `@kiwa-lab/email` | Resend / SendGrid / Postmark / SES email send + template + webhook |
 
 ## Auto-generated language API refs
 

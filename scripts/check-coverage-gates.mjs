@@ -33,18 +33,11 @@ const PACKAGES = [
   '@kiwa-lab/a11y',
   '@kiwa-lab/visual',
   '@kiwa-lab/nextjs',
-  '@kiwa-lab/nuxt',
-  '@kiwa-lab/sveltekit',
-  '@kiwa-lab/remix',
-  '@kiwa-lab/astro',
   '@kiwa-lab/solidstart',
-  '@kiwa-lab/qwikcity',
   '@kiwa-lab/edge',
   '@kiwa-lab/solidjs',
   '@kiwa-lab/fresh',
   '@kiwa-lab/hono',
-  '@kiwa-lab/streaming',
-  '@kiwa-lab/design-check',
 ];
 
 const PKG_DIRS = {
@@ -60,18 +53,11 @@ const PKG_DIRS = {
   '@kiwa-lab/a11y': 'packages/a11y',
   '@kiwa-lab/visual': 'packages/visual',
   '@kiwa-lab/nextjs': 'packages/nextjs',
-  '@kiwa-lab/nuxt': 'packages/nuxt',
-  '@kiwa-lab/sveltekit': 'packages/sveltekit',
-  '@kiwa-lab/remix': 'packages/remix',
-  '@kiwa-lab/astro': 'packages/astro',
   '@kiwa-lab/solidstart': 'packages/solidstart',
-  '@kiwa-lab/qwikcity': 'packages/qwikcity',
   '@kiwa-lab/edge': 'packages/edge',
   '@kiwa-lab/solidjs': 'packages/solidjs',
   '@kiwa-lab/fresh': 'packages/fresh',
   '@kiwa-lab/hono': 'packages/hono',
-  '@kiwa-lab/streaming': 'packages/streaming',
-  '@kiwa-lab/design-check': 'packages/design-check',
 };
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the

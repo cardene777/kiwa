@@ -106,7 +106,6 @@ Tutorials 28 – 30 exercise the three new modern web framework adapters — [`@
 
 ## Streaming 深化 tutorials (v1.20)
 
-Tutorials 31 – 33 exercise the new [`@kiwa-lab/streaming`](https://github.com/cardene777/kiwa/blob/main/packages/streaming/README.md) unified mock — one for each of Kafka (kafkajs-shaped producer / consumer group / transactional producer / DLQ), Redpanda (Kafka API compat + colocated schema registry with BACKWARD / FORWARD / FULL compatibility gates), and NATS JetStream (persistent streams + KV Store + Object Store + subject-based routing with `*` single-token and `>` trailing-multi-token wildcards). See [`docs/concepts/streaming-testing.md`](../concepts/streaming-testing) for the 5 semantics (producer / consumer / exactly-once / DLQ / schema-registry) that streaming tests need beyond the time-axis mocks of v1.13.
 
 ## Auth 深化 tutorials (v1.21)
 
@@ -118,7 +117,6 @@ Tutorials 37 – 38 exercise the v1.22 real driver layer on top of the v1.21 4 p
 
 ## Payment 深化 tutorials (v1.23)
 
-Tutorials 39 – 41 exercise the v0.3 additions to [`@kiwa-lab/payment`](https://github.com/cardene777/kiwa/blob/main/packages/payment/README.md) — 9 axes of advanced billing semantics (dunning / retry / 3DS v2 / SCA / PSD2 mandate / subscription lifecycle / invoice lifecycle / VAT-GST-sales-tax / chargeback dispute) — one for each of the 3 target providers Stripe (Next.js 15 subscription + 3DS + Smart Retries dunning), Paddle (Nuxt 3 merchant-of-record + inline checkout + tier upgrade + VAT/GST auto-calc), and Lemon Squeezy (SvelteKit hosted checkout + license key + refund + chargeback dispute). See [`docs/concepts/billing-semantics.md`](../concepts/billing-semantics) for the 9-axis SSOT + provider-specific fidelity surface reference across all 3 v1.23 dogfood merchant apps.
 
 ## Edge/Serverless 深化 tutorials (v1.24)
 
@@ -142,7 +140,6 @@ Tutorials 52 – 54 exercise the v0.2 additions to [`@kiwa-lab/realtime`](https:
 
 ## Release invariants tutorials (v1.29)
 
-Tutorial 55 exercises the v0.1 release of [`@kiwa-lab/release-invariants`](https://github.com/cardene777/kiwa/blob/main/packages/release-invariants/README.md) — 3 pure invariant checkers (`checkReleaseScriptFilter` + `checkProvenanceFlagAbsence` + `checkGateScriptPackageCoverage`) + 1-shot `buildReleaseInvariantsSummary` aggregator — the systematic root cause pattern SSOT that turned a 4-time recurring release script filter bug into a first-class fail-fast release-smoke axis. Tutorial 55 walks the provider-neutral `ReleaseInvariantsAdapter` contract with a mock adapter + a file adapter, plus 4 RED / GREEN behavior tests that pin the exact failure modes v1.14 payment / v1.25 perf-harness / v1.27 quality-metrics / v1.28 realtime all rediscovered. See [`docs/concepts/release-invariants.md`](../concepts/release-invariants) for the 3-invariant SSOT + systematic root cause pattern + 4-time rediscovery ledger + 7-milestone snippet validation streak reference.
 
 ## A11y sweep tutorials (v1.30)
 
@@ -150,7 +147,6 @@ Tutorials 56 – 57 exercise the v1.1 rollout of [`@kiwa-lab/a11y`](https://gith
 
 ## Streaming 深化 II tutorials (v1.31)
 
-Tutorials 58 – 60 exercise the v0.3 additions to [`@kiwa-lab/streaming`](https://github.com/cardene777/kiwa/blob/main/packages/streaming/README.md) — 8 advanced-semantics axes (`createKafkaRawProtocol` + `createKafkaConsumerGroup` + `createRedpandaSchemaEvolution` + `createRedpandaTransactions` + `createNatsJetStreamDurable` + `createNatsKvObject` + `createExactlyOnceSemantics` + `createConsumerLagTelemetry`) layered on top of the v0.1 5-semantic base + a `createFidelityHarness()` describing the 3 provider × 8 axis = 24 cell grid + a `KIWA_MODE=real` env-gate that lets the same assertions run against real Kafka 3.7 / Redpanda 23+ / NATS 2.10+ testcontainers. Tutorial 58 walks the Kafka raw protocol adapter (KIP-98 idempotent producer + transaction coordinator state machine + KIP-227 incremental fetch session + ISR + high-watermark advance rules); tutorial 59 walks the Redpanda schema evolution adapter (BACKWARD / FORWARD / FULL compatibility check with structural markers + 3 subject naming strategies + Confluent-shaped schema reference graph); tutorial 60 walks the NATS JetStream durable adapter (`durable_name` + `ack_wait` + `max_deliver` + `backoff[]` + `ack_policy` + quarantine on the `maxDeliver`+1st failure with explicit-clock `sweepExpired`). See [`docs/concepts/streaming-real-driver-testing.md`](../concepts/streaming-real-driver-testing) for the 8-axis SSOT + 24-cell grid + testcontainers pattern + `KIWA_MODE=real` env-gate contract + `not-applicable` semantics reference across all 3 v1.31 dogfood streaming apps.
 
 ## Database 深化 II tutorials (v1.32)
 
@@ -158,7 +154,6 @@ Tutorials 61 – 63 exercise the v0.10 additions to [`@kiwa-lab/orm`](https://gi
 
 ## Payment 深化 II tutorials (v1.33)
 
-Tutorials 64 – 66 exercise the v0.4 additions to [`@kiwa-lab/payment`](https://github.com/cardene777/kiwa/blob/main/packages/payment/README.md) — 8 advanced-semantics axes (`startOrchestration` + `startRecovery` + `startRefund` + `openDispute` + `startIdempotency` + `calculateLocalizedTax` + `startSubscriptionMachine` + `startVault`) layered on top of the v0.3 9-semantic base + a `collectFidelityCoverage()` describing the 3 provider × 17 axis grid (of which 24 cells belong to the v0.4 slice) + a `KIWA_MODE=real` env-gate (`resolveMode` / `resolveAllModes` / `assertMode`) that lets the same assertions run against real Stripe test mode + Paddle sandbox + Lemon Squeezy sandbox. Tutorial 64 walks the payment orchestration adapter (ordered provider list + `maxRetriesPerProvider` retry ladder + failover cascade + `circuitBreakerThreshold` + `probeCircuit` outage window); tutorial 65 walks the Stripe Connect marketplace surface (5-stage dispute lifecycle + partial refund with policy caps + webhook idempotency scoped by handler name + EU DAC7 report aggregation with reverse-charge B2B handling); tutorial 66 walks the Paddle Billing v2 subscription surface (grace period with recover / expire branches + mid-cycle proration arithmetic + coupon stacking with 100 % cap + 4-mechanism recovery ladder + cross-provider vault migration with PCI SAQ-A verification). See [`docs/concepts/payment-real-driver-testing.md`](../concepts/payment-real-driver-testing) for the 8-axis SSOT + 24-cell grid + `KIWA_MODE=real` env-gate contract + provider-specific `_KEY` env mapping (`STRIPE_KEY` / `PADDLE_KEY` / `LEMONSQUEEZY_KEY`) reference across all 3 v1.33 dogfood payment apps.
 
 ## Frontend 深化 tutorials (v1.34)
 

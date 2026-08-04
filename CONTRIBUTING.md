@@ -128,9 +128,8 @@ Nothing else. In particular:
   reaches one.
 - **`expo`, `react-native`, `metro`, `gradle`, `electron-builder` and
   `electron-updater` are not needed.** Two dogfood examples used to spawn them,
-  and one of them ran `/usr/bin/osascript` on macOS. They now drive
-  `@kiwa-lab/mobile` and `@kiwa-lab/desktop` through the deterministic
-  `dry-run` path and spawn nothing.
+  and one of them ran `/usr/bin/osascript` on macOS. Those examples and the
+  mobile / desktop adapters they drove are gone, so nothing spawns them.
 
 ### When typecheck fails
 

@@ -56,7 +56,6 @@ test 間で state を reset、 `beforeEach(() => client.clear())` pattern で te
 
 | 分類 | lib | provider 数 |
 |---|---|---|
-| email | @kiwa-lab/email | 4 (Resend / SendGrid / Postmark / SES) |
 
 計 22 lib で 5 primitive の統一 pattern を採用。
 

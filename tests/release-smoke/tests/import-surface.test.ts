@@ -123,100 +123,6 @@ describe('@kiwa-lab/nextjs surface', () => {
   });
 });
 
-describe('@kiwa-lab/nuxt surface', () => {
-  it('exports invokeEventHandler + NUXT_REDIRECT_SYMBOL (v1.0.0)', async () => {
-    const mod = await import('@kiwa-lab/nuxt');
-    expect(typeof mod.invokeEventHandler).toBe('function');
-    expect(typeof mod.NUXT_REDIRECT_SYMBOL).toBe('symbol');
-  });
-
-  it('exports invokeRouteMiddleware + NUXT_MIDDLEWARE_REDIRECT_SYMBOL + NUXT_MIDDLEWARE_ABORT_SYMBOL (v1.0.2+)', async () => {
-    const mod = await import('@kiwa-lab/nuxt');
-    expect(typeof mod.invokeRouteMiddleware).toBe('function');
-    expect(typeof mod.NUXT_MIDDLEWARE_REDIRECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.NUXT_MIDDLEWARE_ABORT_SYMBOL).toBe('symbol');
-  });
-
-  it('exports invokeNitroPlugin (v1.0.3+)', async () => {
-    const mod = await import('@kiwa-lab/nuxt');
-    expect(typeof mod.invokeNitroPlugin).toBe('function');
-  });
-});
-
-describe('@kiwa-lab/sveltekit surface', () => {
-  it('exports invokeLoad + invokeAction + redirect + error + fail + 3 signals (v1.0.0)', async () => {
-    const mod = await import('@kiwa-lab/sveltekit');
-    expect(typeof mod.invokeLoad).toBe('function');
-    expect(typeof mod.invokeAction).toBe('function');
-    expect(typeof mod.redirect).toBe('function');
-    expect(typeof mod.error).toBe('function');
-    expect(typeof mod.fail).toBe('function');
-    expect(typeof mod.SK_REDIRECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.SK_ERROR_SYMBOL).toBe('symbol');
-    expect(typeof mod.SK_FAIL_SYMBOL).toBe('symbol');
-  });
-
-  it('exports invokeHandle + invokeHandleFetch + invokeHandleError (v1.0.1+)', async () => {
-    const mod = await import('@kiwa-lab/sveltekit');
-    expect(typeof mod.invokeHandle).toBe('function');
-    expect(typeof mod.invokeHandleFetch).toBe('function');
-    expect(typeof mod.invokeHandleError).toBe('function');
-  });
-
-  it('exports setupSvelteKitHooksEnv + sequence (v1.1+)', async () => {
-    const mod = await import('@kiwa-lab/sveltekit');
-    expect(typeof mod.setupSvelteKitHooksEnv).toBe('function');
-    expect(typeof mod.sequence).toBe('function');
-  });
-});
-
-describe('@kiwa-lab/remix surface', () => {
-  it('exports invokeLoader + invokeAction + redirect + json + REMIX_REDIRECT_SYMBOL (v1.0.0)', async () => {
-    const mod = await import('@kiwa-lab/remix');
-    expect(typeof mod.invokeLoader).toBe('function');
-    expect(typeof mod.invokeAction).toBe('function');
-    expect(typeof mod.redirect).toBe('function');
-    expect(typeof mod.json).toBe('function');
-    expect(typeof mod.REMIX_REDIRECT_SYMBOL).toBe('symbol');
-  });
-
-  it('exports invokeResourceRoute + RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL (v1.0.2+)', async () => {
-    const mod = await import('@kiwa-lab/remix');
-    expect(typeof mod.invokeResourceRoute).toBe('function');
-    expect(typeof mod.RESOURCE_ROUTE_METHOD_NOT_ALLOWED_SYMBOL).toBe('symbol');
-  });
-
-  it('exports setupRemixNestedRouteEnv + defer + resolveDeferred + isDeferred + DEFERRED_DATA_SYMBOL (v1.1+)', async () => {
-    const mod = await import('@kiwa-lab/remix');
-    expect(typeof mod.setupRemixNestedRouteEnv).toBe('function');
-    expect(typeof mod.defer).toBe('function');
-    expect(typeof mod.resolveDeferred).toBe('function');
-    expect(typeof mod.isDeferred).toBe('function');
-    expect(typeof mod.DEFERRED_DATA_SYMBOL).toBe('symbol');
-  });
-});
-
-describe('@kiwa-lab/astro surface', () => {
-  it('exports invokeEndpoint (v1.0.0)', async () => {
-    const mod = await import('@kiwa-lab/astro');
-    expect(typeof mod.invokeEndpoint).toBe('function');
-  });
-
-  it('exports renderAstroPage + kiwaAstroNotFound + 3 signals (v1.0.2+)', async () => {
-    const mod = await import('@kiwa-lab/astro');
-    expect(typeof mod.renderAstroPage).toBe('function');
-    expect(typeof mod.kiwaAstroNotFound).toBe('function');
-    expect(typeof mod.ASTRO_REDIRECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.ASTRO_NOT_FOUND_SYMBOL).toBe('symbol');
-    expect(typeof mod.ASTRO_REWRITE_SYMBOL).toBe('symbol');
-  });
-
-  it('exports setupAstroViewTransitionEnv (v1.1.0+)', async () => {
-    const mod = await import('@kiwa-lab/astro');
-    expect(typeof mod.setupAstroViewTransitionEnv).toBe('function');
-  });
-});
-
 describe('@kiwa-lab/solidstart surface', () => {
   it('exports invokeServerFunction + invokeApiRoute + helpers (v1.0.0)', async () => {
     const mod = await import('@kiwa-lab/solidstart');
@@ -226,18 +132,6 @@ describe('@kiwa-lab/solidstart surface', () => {
     expect(typeof mod.redirectResponse).toBe('function');
     expect(typeof mod.json).toBe('function');
     expect(typeof mod.SOLIDSTART_REDIRECT_SYMBOL).toBe('symbol');
-  });
-});
-
-describe('@kiwa-lab/qwikcity surface', () => {
-  it('exports invokeRouteAction + invokeRouteLoader + invokeEndpoint + 3 signals (v1.0.0)', async () => {
-    const mod = await import('@kiwa-lab/qwikcity');
-    expect(typeof mod.invokeRouteAction).toBe('function');
-    expect(typeof mod.invokeRouteLoader).toBe('function');
-    expect(typeof mod.invokeEndpoint).toBe('function');
-    expect(typeof mod.QWIK_FAIL_SYMBOL).toBe('symbol');
-    expect(typeof mod.QWIK_REDIRECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.QWIK_ENDPOINT_REDIRECT_SYMBOL).toBe('symbol');
   });
 });
 
