@@ -90,13 +90,12 @@ $ pnpm test:all
 testing 171 packages, one at a time
 
 [  1/171] ok    examples/auth-auth0-poc  6.6s
-[122/171] RED   examples/orm-drizzle-mysql-poc  187.3s
-        FAIL  .vitest-dist/tests/users-repo.test.js
-[156/171] RED   packages/lean  21.3s
-        × T-LEAN-103 a named toolchain is honored, so pinning actually pins
+[122/171] ok    examples/orm-drizzle-mysql-poc  25.1s
+[127/171] ok    examples/orm-prisma-mysql-poc  65.9s
+[171/171] ok    tests/release-smoke  60.1s
 ...
 
-green: 166   red: 5   dirty: 0   not run: 0
+green: 171   red: 0   dirty: 0   not run: 0
 ```
 
 The four counters add up to the number of packages, always: one verdict each.
@@ -125,28 +124,31 @@ It exits 1 when anything is red, blocked or dirty. Like `typecheck:all`, it is
 sequential on purpose: many `test` scripts build the workspace packages they
 depend on, so two at once rewrite the same `dist` while the other reads it.
 
-**`main` is not all green.** Five packages are red there, so a sweep of your
-branch exiting 1 does not by itself mean you broke something. Compare against
-this list before assuming your change is at fault:
+**Four packages are flaky, and they are the ones that start containers:**
+`orm-drizzle-mysql-poc`, `orm-drizzle-postgres-poc`, `orm-prisma-mysql-poc` and
+`orm-prisma-postgres-poc`. Two full sweeps taken the same day disagreed about
+all four — red in one, green in the other — and the package that took 187 s in
+the first took 25 s in the second. The four of them together went from 16
+minutes to 2.3.
 
-| package | what a sweep reports |
-|---|---|
-| `examples/orm-drizzle-mysql-poc` | `FAIL .vitest-dist/tests/users-repo.test.js`, at file level |
-| `examples/orm-drizzle-postgres-poc` | the same file, same shape |
-| `examples/orm-prisma-mysql-poc` | `T-PM-001`, timed out at 240 s |
-| `examples/orm-prisma-postgres-poc` | `T-PP-001`, timed out at 180 s |
-| `packages/lean` | `T-LEAN-103`, on toolchain pinning |
+What the failure looks like differs between the pairs. The Prisma pair names a
+case and a timeout: `T-PM-001` at 240 s, `T-PP-001` at 180 s. The Drizzle pair
+reports only `FAIL .vitest-dist/tests/users-repo.test.js` — a sweep does not say
+which case failed there, or why, so `--only` is the way to find out.
 
-The Drizzle pair reports only the file, not a test name — a sweep does not say
-which case failed, so `--only` is the way to find out.
+So a red in one of those four is not by itself evidence that you broke
+something. Re-run it alone with `--only` before believing it — they pass in
+seconds that way. Everything else is green on `main`, and a red anywhere else is
+worth taking at face value. What makes these four swing by a factor of seven is
+not yet known, and is tracked in #1800.
 
-The four ORM examples need a working container runtime and are slow even when
-they pass; they account for roughly 15 minutes of the sweep on their own.
+The four ORM examples need a working container runtime. Even in a good run they
+are the slowest examples in the sweep — 2.3 minutes between them, against
+seconds for most others.
 
-Getting these five green is tracked in #1799. Keep the table above in step with
-what a sweep actually reports — if it goes stale it stops being a way to tell
-your own breakage from the pre-existing kind, which is the only reason it is
-here.
+Keep this section in step with what a sweep actually reports — if it goes stale
+it stops being a way to tell your own breakage from the pre-existing kind, which
+is the only reason it is here.
 
 Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
 change the per-package limit (900 seconds by default; a package killed for
