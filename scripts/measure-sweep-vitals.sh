@@ -86,7 +86,9 @@ _sample() {
 printf 'time\tfree_mb\tswap_used_mb\tcontainers\tswapins\tpageouts\tcompressed\tload1\n' > "$OUT"
 : > "$PROCLOG"
 
-cd "$ROOT"
+# A failed `cd` would run the sweep against whatever directory the caller
+# happened to be in and quietly measure the wrong thing.
+cd "$ROOT" || exit 1
 
 # One sample before anything starts, so even a sweep that dies immediately
 # leaves two points to subtract.
@@ -107,6 +109,9 @@ _stop_sampler() {
 # Killing only the sampler would leave `pnpm` running in the foreground; the
 # script would then wait for it, print `rc=0` and look like a clean run. A
 # cancelled sweep must not read as a successful one.
+#
+# Reached through `trap`, which shellcheck cannot see.
+# shellcheck disable=SC2329
 _on_signal() {
   local sig="$1" code="$2"
   _stop_sampler
@@ -131,6 +136,7 @@ _on_signal() {
   exit "$code"
 }
 
+# shellcheck disable=SC2329  # reached through `trap`
 _cleanup() {
   _stop_sampler
   [ -n "${STAMPER_FIFO:-}" ] && rm -f "$STAMPER_FIFO"
