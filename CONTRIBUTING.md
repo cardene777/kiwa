@@ -89,7 +89,7 @@ package as it goes:
 $ pnpm test:all
 testing 171 packages, one at a time
 
-[  1/171] ok    examples/astro-server-endpoints-full  2.5s
+[  1/171] ok    examples/auth-auth0-poc  6.6s
 [122/171] RED   examples/orm-drizzle-mysql-poc  187.3s
         FAIL  .vitest-dist/tests/users-repo.test.js
 [156/171] RED   packages/lean  21.3s
@@ -129,13 +129,16 @@ depend on, so two at once rewrite the same `dist` while the other reads it.
 branch exiting 1 does not by itself mean you broke something. Compare against
 this list before assuming your change is at fault:
 
-| package | what fails |
+| package | what a sweep reports |
 |---|---|
-| `examples/orm-drizzle-mysql-poc` | the round-trip against the MySQL container |
-| `examples/orm-drizzle-postgres-poc` | the same, against Postgres |
-| `examples/orm-prisma-mysql-poc` | `T-PM-001`, which times out after 240 s |
-| `examples/orm-prisma-postgres-poc` | the same, against Postgres |
+| `examples/orm-drizzle-mysql-poc` | `FAIL .vitest-dist/tests/users-repo.test.js`, at file level |
+| `examples/orm-drizzle-postgres-poc` | the same file, same shape |
+| `examples/orm-prisma-mysql-poc` | `T-PM-001`, timed out at 240 s |
+| `examples/orm-prisma-postgres-poc` | `T-PP-001`, timed out at 180 s |
 | `packages/lean` | `T-LEAN-103`, on toolchain pinning |
+
+The Drizzle pair reports only the file, not a test name — a sweep does not say
+which case failed, so `--only` is the way to find out.
 
 The four ORM examples need a working container runtime and are slow even when
 they pass; they account for roughly 15 minutes of the sweep on their own.
@@ -233,9 +236,17 @@ with esbuild and never looks at a type.
 `pnpm typecheck:coverage` finds test files that nothing compiles, and exits 1 if
 there are any:
 
+On `main` it finds none:
+
 ```
 $ pnpm typecheck:coverage
 packages with test files: 171
+packages whose tests nothing compiles: 0
+```
+
+When it does find one, it names the package and the files nothing compiles:
+
+```
 packages whose tests nothing compiles: 1
 
   examples/remix-full   1/6

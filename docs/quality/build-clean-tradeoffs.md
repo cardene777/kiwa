@@ -1,9 +1,9 @@
 # Turning off `tsup`'s `clean`, and what that leaves open
 
-`clean` empties `dist/` at the start of every build. 179 packages rebuild their shared
-dependencies during `test`, and `pnpm -r test` runs them in parallel, so that emptying
-overlaps with whatever is reading `dist/` at the time. Removing `clean` removes the
-overlap (#1741, #1724).
+`clean` empties `dist/` at the start of every build. The packages that have a `test`
+script — 171 of them — rebuild their shared dependencies during `test`, and
+`pnpm -r test` runs them in parallel, so that emptying overlaps with whatever is
+reading `dist/` at the time. Removing `clean` removes the overlap (#1741, #1724).
 
 `clean` also served a second purpose — deleting output that a later build no longer
 produces. That job moved to `scripts/clean-dist.mjs`, which runs at the head of
