@@ -9,15 +9,12 @@
 "@kiwa-lab/edge": major
 "@kiwa-lab/fresh": major
 "@kiwa-lab/hono": major
-"@kiwa-lab/kaname": major
 "@kiwa-lab/nextjs": major
 "@kiwa-lab/observability": major
 "@kiwa-lab/orm": major
 "@kiwa-lab/queue": major
 "@kiwa-lab/solidjs": major
-"@kiwa-lab/solidstart": major
 "@kiwa-lab/ui": major
-"@kiwa-lab/visual": major
 ---
 
 `peerDependencies.vitest` の対応範囲を `^2` から `^3.2.6` に上げる。

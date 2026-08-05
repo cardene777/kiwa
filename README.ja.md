@@ -107,7 +107,6 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 | [`/kiwa-e2e`](./.claude/skills/kiwa-e2e/SKILL.md) | **Layer 2** (e2e) | Layer 1 仕様 → 非 web3 文脈の汎用 browser e2e test (static html / fetch / Node handler / SSR) を Playwright で生成 |
 | [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (dApp e2e) | Layer 1 仕様 → wallet inject / anvil / viem を使う web3 dApp e2e test を Playwright で生成 |
 | [`/kiwa-a11y`](./.claude/skills/kiwa-a11y/SKILL.md) | **Layer 2** (a11y) | Layer 1 仕様 → axe-core による accessibility test を jsdom + Playwright で生成、 WCAG 2.1 AA 違反検出 |
-| [`/kiwa-visual`](./.claude/skills/kiwa-visual/SKILL.md) | **Layer 2** (visual) | Layer 1 仕様 → pixelmatch による visual regression test を baseline / actual / diff snapshot 管理付きで生成 |
 | [`/kiwa-data`](./.claude/skills/kiwa-data/SKILL.md) | **Layer 2** (data) | Layer 1 仕様 → in-memory queue + fake clock による queue / cron / batch / DLQ test を生成 |
 | [`/kiwa-cli-test`](./.claude/skills/kiwa-cli-test/SKILL.md) | **Layer 2** (cli) | Layer 1 仕様 → isolated tempdir + stdout/stderr snapshot による CLI / shell / file IO test を生成 |
 | [`/kiwa-observe`](./.claude/skills/kiwa-observe/SKILL.md) | **observability** | vitest JSON 結果集約 → flaky 検出 + spec-coverage gap 解析 + markdown dashboard 出力 |
@@ -127,7 +126,6 @@ kiwa は 2 つに分かれており、 連携も単独利用もできます。
 | [`@kiwa-lab/e2e`](./packages/e2e) | 汎用 browser E2E adapter (Playwright + static html / fetch app) |
 | [`@kiwa-lab/observability`](./packages/observability) | run history 収集 / flaky 検出 / coverage report / spec-coverage gap 解析 |
 | [`@kiwa-lab/a11y`](./packages/a11y) | accessibility adapter — axe-core 統合 (jsdom + Playwright) |
-| [`@kiwa-lab/visual`](./packages/visual) | visual regression adapter — pixelmatch + pngjs による PNG pixel diff |
 | [`kiwa-test-py`](./kiwa-py) (PyPI) | Python pytest adapter — `@kiwa-lab/core` の Python port + requests / httpx adapter |
 
 **skill 単独** (npm 依存なし — test file を生成するだけ) でも、 **fixture 単独** (Claude なし — `pnpm add @kiwa-lab/dapp` だけ) でも、 両方併用しても OK。
@@ -395,7 +393,6 @@ kiwa は release 時に **独立した 2 gate** を強制し、 どちらかが�
 | [`@kiwa-lab/cli`](./packages/cli) | 84.44 % | 80 |
 | [`@kiwa-lab/e2e`](./packages/e2e) | 84.21 % | 80 |
 | [`@kiwa-lab/observability`](./packages/observability) | 84.12 % | 80 |
-| [`@kiwa-lab/visual`](./packages/visual) | 83.02 % | 80 |
 
 local で両 gate を回すには:
 

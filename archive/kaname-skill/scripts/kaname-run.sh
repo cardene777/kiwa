@@ -34,7 +34,7 @@ kiwa_root="$(cd "$script_dir/../../../.." && pwd)"
 node -e "
 const fs = require('node:fs');
 const path = require('node:path');
-const { classify, splitSpec } = require(process.argv[3] + '/packages/kaname/dist/index.cjs');
+const { classify, splitSpec } = require(process.argv[3] + '/archive/kaname/dist/index.cjs');
 const doc = JSON.parse(fs.readFileSync(process.argv[1], 'utf-8'));
 const report = classify(doc);
 if (!report.ok) {

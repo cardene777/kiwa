@@ -31,7 +31,6 @@ const PACKAGES = [
   { name: '@kiwa-lab/cli', dir: 'packages/cli' },
   { name: '@kiwa-lab/dapp', dir: 'packages/core' },
   { name: '@kiwa-lab/a11y', dir: 'packages/a11y' },
-  { name: '@kiwa-lab/visual', dir: 'packages/visual' },
 ];
 
 const METRICS = ['lines', 'branches', 'functions', 'statements'];

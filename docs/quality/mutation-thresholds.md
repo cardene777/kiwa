@@ -13,7 +13,7 @@ This doc pins every package to one of four rationale tiers and encodes the mappi
 | Core | 80 % | 60 % | 50 % | Pure logic packages with fully deterministic tests and no external protocol drift. |
 | Framework | 70 % | 60 % | 50 % | SSR / hydration / RSC / adapter-wrapper layers where framework internals + client / server dual code paths lower the maximum practical kill-rate. |
 | SaaS | 65 % | 55 % | 50 % | Provider-specific adapters (Stripe / Paddle / Anthropic / Ably / Redis / Prisma / …) where mocks approximate a live external API and drift is expected. |
-| Test type | 60 % | 50 % | 40 % | Test harness packages (component / visual / a11y / e2e) where DOM / measurement noise + browser dependence inflates false-negative mutants. |
+| Test type | 60 % | 50 % | 40 % | Test harness packages (component / a11y / e2e) where DOM / measurement noise + browser dependence inflates false-negative mutants. |
 
 Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stryker's `json` reporter. `high` colours the HTML report green, `low` colours it yellow, `break` fails the mutation run.
 
@@ -28,7 +28,6 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
 | `@kiwa-lab/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. |
 | `@kiwa-lab/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
-| `@kiwa-lab/solidstart` | Framework | 70 / 60 / 50 | Solid SSR + resource + server-function drift. |
 | `@kiwa-lab/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. |
 | `@kiwa-lab/solidjs` | Framework | 70 / 60 / 50 | Solid signal + resource + SSR drift. |
 | `@kiwa-lab/fresh` | Framework | 70 / 60 / 50 | Deno Fresh islands + SSR drift. |
@@ -43,7 +42,6 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
 | `@kiwa-lab/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
 | `@kiwa-lab/a11y` | Test type | 60 / 50 / 40 | axe-core WCAG 2.1 AA — measurement noise + jsdom limits. |
-| `@kiwa-lab/visual` | Test type | 60 / 50 / 40 | Screenshot + baseline / diff / accept — image diff tolerance. |
 | `@kiwa-lab/component` | Test type | 60 / 50 / 40 | Storybook + Playwright CT + Chromatic — DOM + visual noise. |
 | `@kiwa-lab/e2e` | Test type | 60 / 50 / 40 | Playwright fixture + test env — browser fixture noise. |
 

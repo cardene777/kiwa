@@ -95,12 +95,16 @@ describe('release script filter — systematic root cause pattern SSOT (Issue #9
   });
 
   it('discovers publishable @kiwa-lab/* packages from packages/*/package.json', () => {
-    // The full 31-package set (v1.28 landing) has to be visible — otherwise the
-    // per-package assertion below silently drops packages and stops catching drift.
+    // The full package set has to be visible — otherwise the per-package
+    // assertion below silently drops packages and stops catching drift.
     // The lower bound is deliberately conservative so a new package landing
     // does not fail this line; the per-package assertion is where the real
     // fail-fast happens.
-    expect(publishable.length).toBeGreaterThanOrEqual(30);
+    //
+    // 28 since #1803 dropped `visual` and `solidstart` and moved `kaname` to
+    // `archive/`. The floor tracks the real count, or shrinking the set on
+    // purpose reads as the guard breaking.
+    expect(publishable.length).toBeGreaterThanOrEqual(28);
   });
 
   it.each(assertable.map((name) => ({ name })))(

@@ -23,21 +23,21 @@ describe('v2.17 publish', () => {
     expect(major > 2 || (major === 2 && minor >= 17)).toBe(true);
   });
   it('/kaname skill SKILL.md exists', () => {
-    expect(existsSync(resolve(REPO_ROOT, '.claude/skills/kaname/SKILL.md'))).toBe(true);
+    expect(existsSync(resolve(REPO_ROOT, 'archive/kaname-skill/SKILL.md'))).toBe(true);
   });
   it('SKILL.md declares user_invocable + 5 段階 dialog flow', () => {
-    const src = readText('.claude/skills/kaname/SKILL.md');
+    const src = readText('archive/kaname-skill/SKILL.md');
     expect(src).toContain('user_invocable: true');
     expect(src).toContain('5 段階 dialog flow SSOT');
     expect(src).toContain('3 layer specification model');
   });
   it('kaname-run.sh helper script exists + executable', () => {
-    const script = '.claude/skills/kaname/scripts/kaname-run.sh';
+    const script = 'archive/kaname-skill/scripts/kaname-run.sh';
     expect(existsSync(resolve(REPO_ROOT, script))).toBe(true);
     const src = readText(script);
     expect(src).toContain('classify');
     expect(src).toContain('splitSpec');
-    expect(src).toContain('packages/kaname/dist/index.cjs');
+    expect(src).toContain('archive/kaname/dist/index.cjs');
   });
   it('announcement v2.17 exists', () => {
     expect(

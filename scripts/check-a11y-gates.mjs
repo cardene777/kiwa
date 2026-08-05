@@ -79,7 +79,6 @@ export const A11Y_PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/quality-metrics': { tier: 'core' },
   // Framework tier (SSR / hydration / adapter wrapper).
   '@kiwa-lab/nextjs': { tier: 'framework' },
-  '@kiwa-lab/solidstart': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
   '@kiwa-lab/solidjs': { tier: 'framework' },
   '@kiwa-lab/fresh': { tier: 'framework' },
@@ -96,7 +95,6 @@ export const A11Y_PACKAGE_TIER = Object.freeze({
   // Test-type tier (DOM measurement noise, browser dependence).
   '@kiwa-lab/ui': { tier: 'test-type' },
   '@kiwa-lab/a11y': { tier: 'test-type' },
-  '@kiwa-lab/visual': { tier: 'test-type' },
   '@kiwa-lab/component': { tier: 'test-type' },
   '@kiwa-lab/e2e': { tier: 'test-type' },
 });
@@ -122,7 +120,6 @@ const PKG_DIRS = Object.freeze({
   '@kiwa-lab/perf-harness': 'packages/perf-harness',
   '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
   '@kiwa-lab/nextjs': 'packages/nextjs',
-  '@kiwa-lab/solidstart': 'packages/solidstart',
   '@kiwa-lab/edge': 'packages/edge',
   '@kiwa-lab/solidjs': 'packages/solidjs',
   '@kiwa-lab/fresh': 'packages/fresh',
@@ -137,7 +134,6 @@ const PKG_DIRS = Object.freeze({
   '@kiwa-lab/dapp': 'packages/dapp',
   '@kiwa-lab/ui': 'packages/ui',
   '@kiwa-lab/a11y': 'packages/a11y',
-  '@kiwa-lab/visual': 'packages/visual',
   '@kiwa-lab/component': 'packages/component',
   '@kiwa-lab/e2e': 'packages/e2e',
 });

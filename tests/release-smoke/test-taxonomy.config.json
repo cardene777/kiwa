@@ -5,14 +5,12 @@
     "exempt": [
       "perf-harness",
       "skill-test",
-      "kaname",
       "kiwa",
       "lean"
     ],
     "exemptReasons": {
       "perf-harness": "本体が perf primitive、 自己 dogfood は不要",
       "skill-test": "本体が skill 発火 assertion primitive、 domain 実装なし = perf 対象外",
-      "kaname": "meta pkg (kiwa 内部 CLI wrapper)",
       "kiwa": "meta pkg (unified re-export)",
       "lean": "experimental、 未実装 stub"
     }
@@ -37,9 +35,7 @@
       "e2e",
       "dapp",
       "a11y",
-      "visual",
       "nextjs",
-      "solidstart",
       "edge",
       "solidjs",
       "fresh",
@@ -63,9 +59,7 @@
       "e2e",
       "dapp",
       "a11y",
-      "visual",
       "nextjs",
-      "solidstart",
       "edge",
       "solidjs",
       "fresh",
@@ -96,9 +90,7 @@
       "observability",
       "cli",
       "a11y",
-      "visual",
       "nextjs",
-      "solidstart",
       "edge",
       "solidjs",
       "fresh",

@@ -23,7 +23,7 @@ function readJson<T = unknown>(rel: string): T {
  */
 describe('v2.19 spec-kit -> kaname rename', () => {
   it('package is published as @kiwa-lab/kaname', () => {
-    expect(readJson<{ name: string }>('packages/kaname/package.json').name).toBe(
+    expect(readJson<{ name: string }>('archive/kaname/package.json').name).toBe(
       '@kiwa-lab/kaname',
     );
   });
@@ -34,29 +34,23 @@ describe('v2.19 spec-kit -> kaname rename', () => {
 
   it('repository.directory points at the new path', () => {
     expect(
-      readJson<{ repository: { directory: string } }>('packages/kaname/package.json').repository
+      readJson<{ repository: { directory: string } }>('archive/kaname/package.json').repository
         .directory,
-    ).toBe('packages/kaname');
+    ).toBe('archive/kaname');
   });
 
-  it('release script filters on the new name', () => {
-    const release = readJson<{ scripts: { release: string } }>('package.json').scripts.release;
-    expect(release).toContain('-F @kiwa-lab/kaname');
-    expect(release).toContain('--filter @kiwa-lab/kaname');
-    expect(release).not.toContain('@kiwa-lab/spec-kit');
-  });
 
   it('the skill is renamed to /kaname', () => {
-    const skill = '.claude/skills/kaname/SKILL.md';
+    const skill = 'archive/kaname-skill/SKILL.md';
     expect(existsSync(resolve(REPO_ROOT, skill))).toBe(true);
     expect(existsSync(resolve(REPO_ROOT, '.claude/skills/spec-kit'))).toBe(false);
     expect(readText(skill)).toContain('name: kaname');
   });
 
   it('the helper script is renamed and points at the new dist', () => {
-    const script = '.claude/skills/kaname/scripts/kaname-run.sh';
+    const script = 'archive/kaname-skill/scripts/kaname-run.sh';
     expect(existsSync(resolve(REPO_ROOT, script))).toBe(true);
-    expect(readText(script)).toContain('packages/kaname/dist/index.cjs');
+    expect(readText(script)).toContain('archive/kaname/dist/index.cjs');
   });
 
   it('concept docs are renamed', () => {
@@ -86,12 +80,12 @@ describe('v2.19 spec-kit -> kaname rename', () => {
         }
       }
     };
-    walk('packages/kaname/src');
+    walk('archive/kaname/src');
     expect(offenders).toEqual([]);
   });
 
   it('the exported surface is unchanged by the rename', () => {
-    const index = readText('packages/kaname/src/index.ts');
+    const index = readText('archive/kaname/src/index.ts');
     for (const symbol of ['classify', 'splitSpec', 'SpecLayer', 'SpecItem', 'SpecDoc']) {
       expect(index).toContain(symbol);
     }

@@ -75,13 +75,6 @@ describe('@kiwa-lab/a11y surface', () => {
   });
 });
 
-describe('@kiwa-lab/visual surface', () => {
-  it('exports comparePngBuffers + expectNoVisualDiff', async () => {
-    const mod = await import('@kiwa-lab/visual');
-    expect(typeof mod.comparePngBuffers).toBe('function');
-    expect(typeof mod.expectNoVisualDiff).toBe('function');
-  });
-});
 
 describe('@kiwa-lab/nextjs surface', () => {
   it('exports invokeServerAction + REDIRECT_SYMBOL', async () => {
@@ -123,17 +116,6 @@ describe('@kiwa-lab/nextjs surface', () => {
   });
 });
 
-describe('@kiwa-lab/solidstart surface', () => {
-  it('exports invokeServerFunction + invokeApiRoute + helpers (v1.0.0)', async () => {
-    const mod = await import('@kiwa-lab/solidstart');
-    expect(typeof mod.invokeServerFunction).toBe('function');
-    expect(typeof mod.invokeApiRoute).toBe('function');
-    expect(typeof mod.redirect).toBe('function');
-    expect(typeof mod.redirectResponse).toBe('function');
-    expect(typeof mod.json).toBe('function');
-    expect(typeof mod.SOLIDSTART_REDIRECT_SYMBOL).toBe('symbol');
-  });
-});
 
 describe('@kiwa-lab/edge surface', () => {
   it('exports invokeEdgeHandler + createKvNamespace (v1.0.0)', async () => {

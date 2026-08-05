@@ -18,7 +18,7 @@ The tiers are named after the shape of the code axe-core runs over — pure logi
 |---|---|---|---|---|
 | Core | 0 | 0 | 0-3 | Pure logic packages with no DOM output. Bar is 0 across the board because "no DOM" means "no excuse". Moderate 0-3 covers axe incompleteness for headless test harnesses that still emit a jsdom fixture. |
 | Framework | 0 | 0-3 | 0-10 | SSR / hydration / RSC / adapter-wrapper layers. Serious 0-3 is the tolerance for framework-owned markup (Next router link, Nuxt teleport, Astro island) whose fix requires an upstream PR. |
-| Test type | 0 | 0-3 | 0-10 | Test harness packages (component / visual / a11y / e2e / ui) where DOM measurement noise + browser dependence produce false-positive violations that only reproduce inside our test runners. The bar is the same as Framework because the harness must not itself leak violations, but moderate 0-10 covers jsdom quirks. |
+| Test type | 0 | 0-3 | 0-10 | Test harness packages (component / a11y / e2e / ui) where DOM measurement noise + browser dependence produce false-positive violations that only reproduce inside our test runners. The bar is the same as Framework because the harness must not itself leak violations, but moderate 0-10 covers jsdom quirks. |
 | SaaS | 0 | 0 | 0 | Provider-specific adapters (Stripe / Paddle / Anthropic / Ably / Redis / Prisma / …) that expose no DOM. Bar is a strict 0 because a SaaS adapter that emits any WCAG violation is emitting DOM it should not be emitting — the violation itself is a bug marker. |
 
 `AA critical`, `AA serious`, `AA moderate` map to axe-core's `impact` field on `AxeViolation` (see `packages/a11y/src/types.ts`).
@@ -41,7 +41,6 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 | `@kiwa-lab/perf-harness` | Core | 0 / 0 / 0-3 | Perf runner + tinybench wrapper. No DOM. |
 | `@kiwa-lab/quality-metrics` | Core | 0 / 0 / 0-3 | Release gate calculator. No DOM. |
 | `@kiwa-lab/nextjs` | Framework | 0 / 0-3 / 0-10 | RSC + Server Actions + Middleware. Serious tolerance for Next router link internals. |
-| `@kiwa-lab/solidstart` | Framework | 0 / 0-3 / 0-10 | Solid SSR + resource + server-function. |
 | `@kiwa-lab/edge` | Framework | 0 / 0-3 / 0-10 | Workers / Deno / Bun edge runtimes with divergent APIs. |
 | `@kiwa-lab/solidjs` | Framework | 0 / 0-3 / 0-10 | Solid signal + resource + SSR. |
 | `@kiwa-lab/fresh` | Framework | 0 / 0-3 / 0-10 | Deno Fresh islands + SSR. |
@@ -56,7 +55,6 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 | `@kiwa-lab/dapp` | SaaS | 0 / 0 / 0 | viem + anvil + wallet fixture. No DOM. |
 | `@kiwa-lab/ui` | Test type | 0 / 0-3 / 0-10 | Vue / Solid / Lit / Qwik / Angular DOM harness. jsdom + framework noise. |
 | `@kiwa-lab/a11y` | Test type | 0 / 0-3 / 0-10 | axe-core WCAG 2.1 AA wrapper. Self-tests exercise DOM fixtures. |
-| `@kiwa-lab/visual` | Test type | 0 / 0-3 / 0-10 | Screenshot + baseline / diff / accept. DOM fixture noise. |
 | `@kiwa-lab/component` | Test type | 0 / 0-3 / 0-10 | Storybook + Playwright CT + Chromatic. DOM fixture noise. |
 | `@kiwa-lab/e2e` | Test type | 0 / 0-3 / 0-10 | Playwright fixture. Browser fixture noise. |
 

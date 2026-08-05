@@ -49,14 +49,12 @@ const PACKAGES = {
   '@kiwa-lab/e2e': 'packages/e2e',
   '@kiwa-lab/cli': 'packages/cli',
   '@kiwa-lab/nextjs': 'packages/nextjs',
-  '@kiwa-lab/solidstart': 'packages/solidstart',
   '@kiwa-lab/edge': 'packages/edge',
   '@kiwa-lab/solidjs': 'packages/solidjs',
   '@kiwa-lab/fresh': 'packages/fresh',
   '@kiwa-lab/hono': 'packages/hono',
   // v1.27-3 scope: test-type layer (3 packages).
   '@kiwa-lab/a11y': 'packages/a11y',
-  '@kiwa-lab/visual': 'packages/visual',
   '@kiwa-lab/component': 'packages/component',
   // v1.27-3 scope: SaaS layer (10 packages).
   '@kiwa-lab/auth': 'packages/auth',

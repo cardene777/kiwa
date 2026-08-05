@@ -35,7 +35,7 @@ kiwa は 「testing framework」 に留まらない。 **開発 workflow の 各
 
 - 仕様書を **形式検証可能** / **runtime test 対象** / **human review 対象** の **3 layer に分類**、 検証 gap を 構造的に排除
 - **仕様 = 検証の source of truth**、 書けなかった仕様は 検証されない
-- 実装 = `@kiwa-lab/kaname` (v2.16+) = specFormal / specRuntime 2 file 分離生成 + 3 layer 分類器
+- 実装 = `archive/kaname` (旧 `@kiwa-lab/kaname`、 v2.16-v2.19 で公開) = specFormal / specRuntime 2 file 分離生成 + 3 layer 分類器。 未完成のまま利用者が付かなかったため build と公開の対象から外して `archive/` に置いた。 軸 3 そのものは kiwa の柱として残る
 
 ## 5 原則統合 pattern SSOT
 
@@ -83,7 +83,7 @@ OrchestratorSpec (SSOT)
 
 ## v2.15 現状の到達点 (2026-07-09)
 
-- 31 npm package (@kiwa-lab org、 v1.x @kiwa-test/* 41 package deprecated 誘導済)
+- 28 npm package (@kiwa-lab org、 v1.x @kiwa-test/* 41 package deprecated 誘導済)
 - `@kiwa-lab/lean` v0.3 = Lean spec 生成 + 実 toolchain 検証 (Level 1 + Level 2)
 - systematic pattern 57 度到達 = 5 原則が 半世紀 pattern 適用 の 定常運用 phase
 - backend systems layer 完全普及 (transaction / session / cache / job / cli の 5 lifecycle-orchestrator = depth-5 到達)
