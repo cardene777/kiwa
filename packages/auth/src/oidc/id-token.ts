@@ -107,38 +107,44 @@ function verifySignature(
   signatureB64: string,
   key: JwksKey,
 ): boolean {
-  // `alg` must agree with the key type it is declared against. Node picks the
-  // signature scheme from the key, not from `alg`, so an entry advertising
-  // `alg: "ES256"` over RSA material would verify an RSA signature while the
-  // header claimed ECDSA — the caller's `header.alg === key.alg` check reads
-  // as an algorithm policy but enforces nothing on its own (RFC 7518 §3.1
-  // binds each `alg` to one key type).
-  if (key.alg === 'RS256' && key.kty !== 'RSA') {
-    return false;
-  }
-  if (key.alg === 'ES256' && key.kty !== 'EC') {
-    return false;
-  }
-
-  // Only the RFC 7517 members go to `createPublicKey`. `kid` / `use` /
-  // `retiredAt` are JWKS bookkeeping and are not key material.
+  // `alg` decides everything below, so it is matched against a closed set
+  // rather than trusted for what it claims.
   //
-  // The members are optional on {@link JwksKey} because one shape declares
-  // both algorithms. An entry missing the material for its own `kty` carries
-  // no key to check against, so nothing can verify under it.
+  // Two reasons the set has to be exhaustive. Node picks the signature scheme
+  // from the key, not from `alg`, so an entry advertising `alg: "ES256"` over
+  // RSA material would check an RSA signature while the header said ECDSA.
+  // And `alg` arrives over HTTP, so the TypeScript union is not enforced at
+  // runtime — an unlisted value such as `"PS256"` (RSA-PSS in RFC 7518 §3.5)
+  // would otherwise fall through to the RSA branch and be verified as
+  // PKCS#1 v1.5. Anything this signer does not emit is rejected.
+  //
+  // `kid` / `use` / `retiredAt` are JWKS bookkeeping and never reach
+  // `createPublicKey`; only the RFC 7517 key members do.
   let jwk: JsonWebKey;
-  if (key.kty === 'RSA') {
-    if (key.n === undefined || key.e === undefined) {
-      return false;
+  switch (key.alg) {
+    case 'RS256': {
+      if (key.kty !== 'RSA' || key.n === undefined || key.e === undefined) {
+        return false;
+      }
+      jwk = { kty: 'RSA', n: key.n, e: key.e };
+      break;
     }
-    jwk = { kty: 'RSA', n: key.n, e: key.e };
-  } else {
-    // ES256 is the only EC algorithm this signer emits, and RFC 7518 §3.4
-    // binds it to P-256. Any other curve is outside the declared policy.
-    if (key.crv !== 'P-256' || key.x === undefined || key.y === undefined) {
-      return false;
+    case 'ES256': {
+      // RFC 7518 §3.4 binds ES256 to P-256. Any other curve is outside the
+      // declared policy even when the rest of the entry is well-formed.
+      if (
+        key.kty !== 'EC' ||
+        key.crv !== 'P-256' ||
+        key.x === undefined ||
+        key.y === undefined
+      ) {
+        return false;
+      }
+      jwk = { kty: 'EC', crv: key.crv, x: key.x, y: key.y };
+      break;
     }
-    jwk = { kty: 'EC', crv: key.crv, x: key.x, y: key.y };
+    default:
+      return false;
   }
 
   let publicKey: KeyObject;

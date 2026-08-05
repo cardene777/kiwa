@@ -215,6 +215,58 @@ describe('verifyCallbackIdToken — signature axis', () => {
     expect(error.issue.axis).toBe('signature');
   });
 
+  it('rejects an alg the signer never emits, even over well-formed RSA material', async () => {
+    // `alg` arrives over HTTP, so the TypeScript union does not constrain it.
+    // `PS256` is RSA-PSS (RFC 7518 §3.5); without a closed allowlist it would
+    // fall through to the RSA branch and be checked as PKCS#1 v1.5.
+    const { generateKeyPairSync, sign } = await import('node:crypto');
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+    });
+    const jwk = publicKey.export({ format: 'jwk' });
+
+    const nowSec = Math.floor(Date.now() / 1000);
+    const b64 = (value: string | Buffer): string =>
+      Buffer.from(value).toString('base64url');
+    const headerB64 = b64(JSON.stringify({ alg: 'PS256', typ: 'JWT', kid: 'ps' }));
+    const payloadB64 = b64(
+      JSON.stringify({
+        iss: ISSUER,
+        sub: SUBJECT,
+        aud: CLIENT_ID,
+        exp: nowSec + 3600,
+        iat: nowSec,
+      }),
+    );
+    const signature = b64(
+      sign('sha256', Buffer.from(`${headerB64}.${payloadB64}`, 'ascii'), privateKey),
+    );
+
+    const h = await harness();
+    const forged = {
+      keys: [
+        {
+          kid: 'ps',
+          // Outside the declared union — the shape a real JWKS could carry.
+          alg: 'PS256' as unknown as 'RS256',
+          kty: 'RSA' as const,
+          n: jwk.n as string,
+          e: jwk.e as string,
+          use: 'sig' as const,
+        },
+      ],
+    };
+
+    const error = rejectionOf(
+      inputFor(h, {
+        jwks: forged,
+        idToken: `${headerB64}.${payloadB64}.${signature}`,
+      }),
+    );
+
+    expect(error.issue.axis).toBe('signature');
+  });
+
   it('rejects when the JWKS carries no key material for the kid', async () => {
     const h = await harness();
     const stripped: JwksDocument = {
