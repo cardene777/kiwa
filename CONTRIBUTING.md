@@ -140,6 +140,11 @@ this list before assuming your change is at fault:
 The four ORM examples need a working container runtime and are slow even when
 they pass; they account for roughly 15 minutes of the sweep on their own.
 
+Getting these five green is tracked in #1799. Keep the table above in step with
+what a sweep actually reports — if it goes stale it stops being a way to tell
+your own breakage from the pre-existing kind, which is the only reason it is
+here.
+
 Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
 change the per-package limit (900 seconds by default; a package killed for
 exceeding it is reported red, never green).
