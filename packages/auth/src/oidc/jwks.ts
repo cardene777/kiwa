@@ -1,4 +1,5 @@
-import { randomBytes } from 'node:crypto';
+import { generateKeyPairSync } from 'node:crypto';
+import type { KeyObject } from 'node:crypto';
 import type { JwksDocument, JwksEndpoint, JwksKey } from './types.js';
 
 /**
@@ -17,48 +18,64 @@ export function __resetJwksCounter(): void {
 }
 
 /**
- * Base64url-encode a `Buffer`. RFC 7636 §4.1 requires base64url without
- * padding — every mock key material uses the same encoding for grep-friendly
- * output.
+ * A minted key — the public half that goes into the JWKS document an RP
+ * downloads, paired with the private half the signer keeps.
  */
-function base64Url(input: Buffer): string {
-  return input
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+interface MintedKey {
+  publicJwk: JwksKey;
+  privateKey: KeyObject;
 }
 
 /**
- * Build a fresh JWKS key. `alg` selects RS256 (RSA) or ES256 (EC P-256). The
- * mock does not actually generate RSA / ECDSA key material — the fields are
- * base64url-encoded placeholders sized to match the algorithms so a real
- * JWK parser could ingest the shape without cracking the cryptographic
- * invariants.
+ * Build a fresh JWKS keypair. `alg` selects RS256 (RSA-2048) or ES256
+ * (EC P-256).
+ *
+ * The key material is real. An RP that downloads the JWKS can reconstruct the
+ * public key with `crypto.createPublicKey({ format: 'jwk' })` and verify a
+ * signature the signer produced, which is what makes the mock usable as a
+ * stand-in for a real OP in a verification path.
+ *
+ * `export({ format: 'jwk' })` emits exactly the RFC 7517 members the
+ * {@link JwksKey} shape declares — `kty`/`n`/`e` for RSA, `kty`/`crv`/`x`/`y`
+ * for EC — so the JWKS document carries no synthesised fields.
  */
-function createKey(alg: 'RS256' | 'ES256'): JwksKey {
+function createKey(alg: 'RS256' | 'ES256'): MintedKey {
   kidCounter += 1;
   const kid = `k${kidCounter.toString().padStart(3, '0')}`;
+
   if (alg === 'RS256') {
+    const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+    });
+    const jwk = publicKey.export({ format: 'jwk' });
     return {
-      kid,
-      alg,
-      kty: 'RSA',
-      // 2048-bit modulus placeholder (256 bytes → 342 base64url chars). The
-      // mock keeps the shape so a real JWK parser accepts it.
-      n: base64Url(randomBytes(256)),
-      e: 'AQAB',
-      use: 'sig',
+      publicJwk: {
+        kid,
+        alg,
+        kty: 'RSA',
+        n: jwk.n as string,
+        e: jwk.e as string,
+        use: 'sig',
+      },
+      privateKey,
     };
   }
+
+  const { publicKey, privateKey } = generateKeyPairSync('ec', {
+    namedCurve: 'P-256',
+  });
+  const jwk = publicKey.export({ format: 'jwk' });
   return {
-    kid,
-    alg,
-    kty: 'EC',
-    crv: 'P-256',
-    x: base64Url(randomBytes(32)),
-    y: base64Url(randomBytes(32)),
-    use: 'sig',
+    publicJwk: {
+      kid,
+      alg,
+      kty: 'EC',
+      crv: 'P-256',
+      x: jwk.x as string,
+      y: jwk.y as string,
+      use: 'sig',
+    },
+    privateKey,
   };
 }
 
@@ -97,8 +114,19 @@ export function createJwksEndpoint(
   const retentionSec = options.retentionSec ?? 86400;
   const now = options.now ?? (() => Date.now());
 
-  let active: JwksKey = createKey(initialAlg);
+  let activeMinted: MintedKey = createKey(initialAlg);
+  let active: JwksKey = activeMinted.publicJwk;
   const retired: JwksKey[] = [];
+
+  /**
+   * Private halves by kid. Signing draws from here; the public JWKS document
+   * never exposes it. Entries are dropped alongside their public key when the
+   * retention window closes, so a kid the JWKS no longer advertises cannot be
+   * signed with either.
+   */
+  const privateKeys = new Map<string, KeyObject>([
+    [activeMinted.publicJwk.kid, activeMinted.privateKey],
+  ]);
 
   function currentSeconds(): number {
     return Math.floor(now() / 1000);
@@ -119,6 +147,9 @@ export function createJwksEndpoint(
       // should never have been in `retired` (defensive guard).
       if (key.retiredAt === undefined || key.retiredAt <= cutoff) {
         retired.splice(i, 1);
+        // The private half outlives nothing the public key does — dropping it
+        // here keeps the two registries from drifting apart.
+        privateKeys.delete(key.kid);
       }
     }
   }
@@ -136,7 +167,9 @@ export function createJwksEndpoint(
     // longest expected token lifetime.
     const retiredAt = currentSeconds() + retentionSec;
     retired.push({ ...active, retiredAt });
-    active = createKey(active.alg);
+    activeMinted = createKey(active.alg);
+    active = activeMinted.publicJwk;
+    privateKeys.set(active.kid, activeMinted.privateKey);
     return { ...active };
   }
 
@@ -149,11 +182,17 @@ export function createJwksEndpoint(
     return [active, ...retired].map((key) => ({ ...key }));
   }
 
+  function signingKeyFor(kid: string): KeyObject | undefined {
+    pruneRetired();
+    return privateKeys.get(kid);
+  }
+
   return {
     url,
     fetch,
     rotate,
     activeKey,
     allKeys,
+    signingKeyFor,
   };
 }

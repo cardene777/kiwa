@@ -5,5 +5,10 @@
     "outDir": ".vitest-dist",
     "noEmit": false
   },
-  "include": ["src/**/*", "tests/**/*", "rp/lib/**/*"]
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "rp/lib/**/*",
+    "rp/server/api/callback.post.ts"
+  ]
 }

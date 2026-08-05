@@ -35,6 +35,7 @@ export {
   __resetIdTokenCounter,
   computeTokenHash,
   createIdTokenSigner,
+  createJwksDocumentVerifier,
 } from './id-token.js';
 export {
   __resetJwksCounter,

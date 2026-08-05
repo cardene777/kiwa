@@ -7,12 +7,17 @@
 //   3. verifies the id_token via `src/lib/id-token.ts` — enforcing the four
 //      fidelity axes (JWS signature, claims, nonce, hash chain);
 //   4. calls `/userinfo` with the access_token to fetch the RP's user profile;
-//   5. stores the userinfo in the RP session so the index page can read it.
+//   5. checks the userinfo `sub` against the verified id_token `sub`
+//      (OIDC Core §5.3.2);
+//   6. stores the userinfo in the RP session so the index page can read it.
 //
-// Sub-Issue v1.21-4c (this state) lands the skeleton wiring — the routes are
-// typed + serialize the right envelope shapes, but the id_token verification
-// is deferred to Sub-Issue v1.21-4d which wires the JWKS discovery + rotation
-// e2e against a running OP.
+// Every failure between step 1 and step 5 returns 4xx and stores nothing. The
+// verification in step 3 runs against the JWKS the OP publishes, so it holds
+// against a real OP and not only the mock.
+
+import type { JwksDocument } from '@kiwa-lab/auth';
+
+import { runCallback } from '../../../src/lib/rp-callback.js';
 
 interface CallbackRequest {
   code: string;
@@ -36,61 +41,51 @@ interface UserinfoResponse {
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event);
   const body = await readBody<CallbackRequest>(event);
-
-  if (typeof body.code !== 'string' || typeof body.state !== 'string') {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'callback body missing code or state',
-    });
-  }
-
-  const cookieState = getCookie(event, 'rp_state');
-  const cookieNonce = getCookie(event, 'rp_nonce');
   const cookieVerifier = getCookie(event, 'rp_code_verifier');
-  if (cookieState === undefined || cookieState !== body.state) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'state mismatch (CSRF gate)',
-    });
-  }
-  if (cookieVerifier === undefined) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'code_verifier cookie missing',
-    });
-  }
-  if (cookieNonce === undefined) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'nonce cookie missing',
-    });
-  }
 
-  // Token exchange — POST /token with authorization_code + code_verifier.
-  // The OP validates the code + PKCE + returns access_token + id_token.
-  // Sub-Issue v1.21-4d wires this against a running OP; the skeleton
-  // route uses `$fetch` so the wire shape is fixed today.
-  const tokenResponse = await $fetch<TokenResponse>(`${config.opIssuer}/token`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
+  // The decision logic lives in `runCallback` so a test can execute it; this
+  // handler only supplies the I/O and maps the outcome onto an HTTP response.
+  const outcome = await runCallback(
+    {
       code: body.code,
-      redirect_uri: config.rpRedirectUri,
-      client_id: config.rpClientId,
-      code_verifier: cookieVerifier,
-    }).toString(),
-  });
+      state: body.state,
+      cookieState: getCookie(event, 'rp_state'),
+      cookieNonce: getCookie(event, 'rp_nonce'),
+      cookieVerifier,
+      issuer: config.opIssuer,
+      clientId: config.rpClientId,
+    },
+    {
+      // The JWKS is fetched per callback rather than cached. A stale cache
+      // would keep verifying a rotated-away key, which fails open.
+      fetchJwks: () => $fetch<JwksDocument>(`${config.opIssuer}/jwks`),
+      exchangeCode: () =>
+        $fetch<TokenResponse>(`${config.opIssuer}/token`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: body.code,
+            redirect_uri: config.rpRedirectUri,
+            client_id: config.rpClientId,
+            code_verifier: cookieVerifier ?? '',
+          }).toString(),
+        }),
+      fetchUserinfo: (accessToken: string) =>
+        $fetch<UserinfoResponse>(`${config.opIssuer}/userinfo`, {
+          headers: { authorization: `Bearer ${accessToken}` },
+        }),
+    },
+  );
 
-  // TODO(v1.21-4d) — invoke `src/lib/id-token.ts`'s `mustVerifyIdToken` here
-  // once the RP has JWKS discovery wired in. For the skeleton state the
-  // token exchange itself is enough to prove the flow shape; the verifier
-  // path is exercised in `tests/id-token-verify.spec.ts` against the mock.
+  if (!outcome.ok) {
+    throw createError({
+      statusCode: outcome.status,
+      statusMessage: outcome.message,
+    });
+  }
 
-  // Userinfo — GET /userinfo with the access_token as a Bearer.
-  const userinfo = await $fetch<UserinfoResponse>(`${config.opIssuer}/userinfo`, {
-    headers: { authorization: `Bearer ${tokenResponse.access_token}` },
-  });
+  const userinfo = outcome.userinfo;
 
   // Persist userinfo in the RP session so `/api/userinfo` can serve it. The
   // full session-store wiring lands in Sub-Issue v1.21-4d; the skeleton uses

@@ -364,6 +364,7 @@ export {
   createDiscoveryEndpoint,
   createEntityStatement as createOidcEntityStatement,
   createIdTokenSigner,
+  createJwksDocumentVerifier,
   createJwksEndpoint,
   createTrustAnchor as createOidcTrustAnchor,
   dynamicClientRegistration,
