@@ -46,8 +46,17 @@ _eq() {
 _bounded() {
   local secs="$1"; shift
   local pid dog rc
+  # `set -m` gives the job a process group of its own so the watchdog can reach
+  # what it spawned — the sampler, the stamper, the mock and its child. Aiming
+  # at the pid alone would rely on the job's own trap to pass the signal down,
+  # and the watchdog exists for the case where the job is not behaving.
+  #
+  # Measured: a job that ignores TERM and spawns a child leaves that child
+  # running when only the pid is signalled.
+  set -m
   "$@" &
   pid=$!
+  set +m
   # The watchdog polls in half-second steps rather than sleeping the whole
   # budget in one go. A single long sleep survives the kill below — the sleep is
   # the watchdog's own child, not the watchdog — and sits there for the rest of
@@ -59,9 +68,9 @@ _bounded() {
       sleep 0.5
       _waited=$((_waited + 1))
     done
-    kill -TERM "$pid" 2>/dev/null
+    kill -TERM -- -"$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null
     sleep 5
-    kill -KILL "$pid" 2>/dev/null
+    kill -KILL -- -"$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null
   ) &
   dog=$!
   wait "$pid"
