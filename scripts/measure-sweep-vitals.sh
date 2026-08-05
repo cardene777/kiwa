@@ -131,7 +131,12 @@ _on_signal() {
   exit "$code"
 }
 
-trap '_stop_sampler' EXIT
+_cleanup() {
+  _stop_sampler
+  [ -n "${STAMPER_FIFO:-}" ] && rm -f "$STAMPER_FIFO"
+}
+
+trap '_cleanup' EXIT
 trap '_on_signal INT 130' INT
 trap '_on_signal TERM 143' TERM
 
@@ -139,9 +144,6 @@ trap '_on_signal TERM 143' TERM
 # carries only per-package durations, and there is no way to line a package up
 # against the rows in the TSV — which is the entire point of measuring.
 #
-# The sweep runs in the background so its PID is available to the signal
-# handlers; `pnpm` inside a pipeline would not be reachable. `PIPESTATUS[0]`
-# keeps the sweep's own status rather than `awk`'s.
 # The sweep writes to a pipe that a separate `awk` reads, rather than the two
 # being one pipeline. A pipeline's members are not reachable from the parent —
 # only the last one is — so signalling it would leave `pnpm` running while the
@@ -166,9 +168,12 @@ wait "$SWEEP_PID"
 RC=$?
 SWEEP_PID=""
 
-# Close the writing end so `awk` sees EOF, then let it drain.
-exec 3>"$STAMPER_FIFO"
-exec 3>&-
+# `pnpm` held the only write end, so closing it already gave `awk` its EOF.
+# Just wait for the drain.
+#
+# Opening the FIFO again here to "close" it would be a way to hang forever: if
+# `awk` has already finished, nothing is reading, and opening a write end blocks
+# until a reader appears. A 45-minute sweep would finish and then never return.
 wait "$STAMPER_PID" 2>/dev/null
 rm -f "$STAMPER_FIFO"
 
