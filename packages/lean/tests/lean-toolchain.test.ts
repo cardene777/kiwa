@@ -100,6 +100,11 @@ describe.skipIf(!HAS_LEAN)('the generated spec is accepted by Lean', () => {
     expect(out).not.toContain('--check');
   });
 
+  // This is the only case in the file that leaves the machine. `no such release`
+  // is elan's answer after it asks the network whether the version exists, and
+  // that round trip took 13.4 s when this timeout was added — past the 5 s
+  // default, so the case failed on time rather than on its assertions. The rest
+  // of the file drives a local Lean and finishes in well under a second.
   it('T-LEAN-103 a named toolchain is honored, so pinning actually pins', () => {
     // elan reads `lean-toolchain` from the working directory. Naming a version
     // that does not exist must fail rather than fall back to whatever is
@@ -110,7 +115,7 @@ describe.skipIf(!HAS_LEAN)('the generated spec is accepted by Lean', () => {
 
     expect(result.status).toBe('verification-failed');
     expect(result.diagnostics).toContain('no such release');
-  });
+  }, 60_000);
 
   it('T-LEAN-104 without one, the machine’s own Lean checks the specs', () => {
     // Pinning by default makes a contributor who already has Lean download a
