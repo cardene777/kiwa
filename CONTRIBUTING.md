@@ -81,22 +81,22 @@ packages had been failing since a rewrite in `@kiwa-lab/mobile` and
 `@kiwa-lab/desktop`, and nobody saw it, because something earlier in the
 alphabet failed first.
 
-`pnpm test:all` runs all 219 of them and reports each failure. It takes about
-half an hour, and prints a line per package as it goes:
+`pnpm test:all` runs every package that has a `test` script and reports each
+failure. It takes about three quarters of an hour, and prints a line per
+package as it goes:
 
 ```
 $ pnpm test:all
-testing 179 packages, one at a time
+testing 171 packages, one at a time
 
-[  1/219] ok    examples/astro-server-endpoints-full  2.5s
-[  9/219] RED   examples/basic-connect  2.5s
-        Error: No tests found
-[145/219] RED   examples/nextjs-safe-multisig  (killed after 900s)  (and it dirtied the tree)  900.3s
-        anything it leaked outlives it. Later packages may fail because of this one.
+[  1/171] ok    examples/astro-server-endpoints-full  2.5s
+[122/171] RED   examples/orm-drizzle-mysql-poc  187.3s
+        FAIL  .vitest-dist/tests/users-repo.test.js
+[156/171] RED   packages/lean  21.3s
+        × T-LEAN-103 a named toolchain is honored, so pinning actually pins
 ...
 
-green: 211   red: 8   dirty: 0   not run: 0
-2 of the red packages also dirtied the tree.
+green: 166   red: 5   dirty: 0   not run: 0
 ```
 
 The four counters add up to the number of packages, always: one verdict each.
@@ -125,6 +125,21 @@ It exits 1 when anything is red, blocked or dirty. Like `typecheck:all`, it is
 sequential on purpose: many `test` scripts build the workspace packages they
 depend on, so two at once rewrite the same `dist` while the other reads it.
 
+**`main` is not all green.** Five packages are red there, so a sweep of your
+branch exiting 1 does not by itself mean you broke something. Compare against
+this list before assuming your change is at fault:
+
+| package | what fails |
+|---|---|
+| `examples/orm-drizzle-mysql-poc` | the round-trip against the MySQL container |
+| `examples/orm-drizzle-postgres-poc` | the same, against Postgres |
+| `examples/orm-prisma-mysql-poc` | `T-PM-001`, which times out after 240 s |
+| `examples/orm-prisma-postgres-poc` | the same, against Postgres |
+| `packages/lean` | `T-LEAN-103`, on toolchain pinning |
+
+The four ORM examples need a working container runtime and are slow even when
+they pass; they account for roughly 15 minutes of the sweep on their own.
+
 Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
 change the per-package limit (900 seconds by default; a package killed for
 exceeding it is reported red, never green).
@@ -135,11 +150,11 @@ Two things to know before you trust a number it prints:
   package's run is blamed on that package. A sweep once reported
   `packages/lean/tests/async.test.ts` as dirtied by
   `examples/nextjs-safe-multisig`, because that is where the file was edited.
-- **A killed package can poison the ones after it.** `examples/nextjs-safe-multisig`
-  hangs, and the `next-server` its Playwright config starts survives the kill
-  and keeps port 3046. `examples/nextjs-zk-verifier` uses the same port, and
-  fails with `already used` for a reason that has nothing to do with it. Until
-  #1397 lands, check any red package alone with `--only` before believing it.
+- **A killed package can poison the ones after it.** A package that hangs is
+  killed at the timeout, but a server its Playwright config started can survive
+  the kill and hold its port. The next package that wants that port then fails
+  with `already used` for a reason that has nothing to do with it. Check any red
+  package alone with `--only` before believing it.
 
 ### What `pnpm test` actually needs
 
@@ -151,10 +166,12 @@ Measured, by hiding each tool and running the sweep — not by reading
 | Node.js 20+, pnpm 10+ | everything | — |
 | Playwright Chromium | the 22 packages whose `test` script ends in `playwright test` | `Executable doesn't exist at .../chromium_headless_shell-1223` |
 | Foundry (`anvil` on `PATH`) | the packages that start a chain, through `@kiwa-lab/dapp` | `Error: anvil not found in PATH` |
+| A container runtime | the four `orm-*-poc` examples listed above | they are red either way today, so this buys you nothing yet |
 
-Nothing else. In particular:
+Beyond those:
 
-- **Docker is not needed.** Thirty-four examples name `testcontainers` somewhere:
+- **Docker is needed by four examples, and by no others.** Thirty-four examples
+  name `testcontainers` somewhere:
 
   | | examples |
   |---|---|
@@ -163,9 +180,11 @@ Nothing else. In particular:
   | name it only in a `package.json` description | 6 |
   | name it in a README, source or test as well | 19 |
 
-  All of them pass with `DOCKER_HOST` pointed at a socket that does not exist,
-  because a container is only started by a `real` adapter and `pnpm test` never
-  reaches one.
+  Only the four `orm-*-poc` examples actually start a container under
+  `pnpm test`; the rest never reach a `real` adapter and pass with `DOCKER_HOST`
+  pointed at a socket that does not exist. The four that do reach one are red on
+  `main` with the runtime present, so having Docker does not currently turn them
+  green — it only changes how they fail.
 - **`expo`, `react-native`, `metro`, `gradle`, `electron-builder` and
   `electron-updater` are not needed.** Two dogfood examples used to spawn them,
   and one of them ran `/usr/bin/osascript` on macOS. Those examples and the
@@ -182,14 +201,17 @@ while a single error was all anyone ever saw.
 
 ```
 $ pnpm typecheck:all
-typechecking 179 packages, 1 at a time
+typechecking 173 packages, 1 at a time
 
 RED  examples/nuxt-server-routes-full
        server/plugins/analytics.ts(17,34): error TS2345: Argument of type ...
        ... and 16 more (--verbose)
 
-green: 220   red: 1
+green: 172   red: 1
 ```
+
+`main` is green here: 173 packages, 0 red. The block above shows the shape of a
+failure, not the current state.
 
 It is sequential on purpose. Many `typecheck` scripts build the workspace
 packages they depend on, so two running at once rewrite the same `dist` while
@@ -208,7 +230,7 @@ there are any:
 
 ```
 $ pnpm typecheck:coverage
-packages with test files: 218
+packages with test files: 171
 packages whose tests nothing compiles: 1
 
   examples/remix-full   1/6
@@ -265,7 +287,7 @@ commit body or pull request description.
 ## Pull request checklist
 
 - [ ] `pnpm typecheck:all` shows no red package
-- [ ] `pnpm test:all` shows no red or dirty package that `main` does not already show. The pre-existing red and dirty packages are tracked in #1396 and #1397; adding to them is not allowed, and `pnpm test` cannot tell you either way because it stops at the ninth package
+- [ ] `pnpm test:all` shows no red or dirty package that `main` does not already show. `main` currently has 5 red and 0 dirty (see § When tests fail); adding to them is not allowed, and `pnpm test` cannot tell you either way because it stops at the first failure
 - [ ] `pnpm build` passes
 - [ ] Documentation updated (if API changed)
 - [ ] Changeset added (`pnpm changeset`) for package version bumps
