@@ -127,24 +127,28 @@ depend on, so two at once rewrite the same `dist` while the other reads it.
 **Four packages are flaky, and they are the ones that start containers:**
 `orm-drizzle-mysql-poc`, `orm-drizzle-postgres-poc`, `orm-prisma-mysql-poc` and
 `orm-prisma-postgres-poc`. Two full sweeps taken the same day disagreed about
-all four — red in one, green in the other — and the same case took 187 s in the
-first and 25 s in the second. When they fail they fail on time, not on an
-assertion: the Prisma pair reports `T-PM-001` / `T-PP-001` timing out, and the
-Drizzle pair reports only `FAIL .vitest-dist/tests/users-repo.test.js` without
-naming a case.
+all four — red in one, green in the other — and the package that took 187 s in
+the first took 25 s in the second. The four of them together went from 16
+minutes to 2.3.
+
+What the failure looks like differs between the pairs. The Prisma pair names a
+case and a timeout: `T-PM-001` at 240 s, `T-PP-001` at 180 s. The Drizzle pair
+reports only `FAIL .vitest-dist/tests/users-repo.test.js` — a sweep does not say
+which case failed there, or why, so `--only` is the way to find out.
 
 So a red in one of those four is not by itself evidence that you broke
 something. Re-run it alone with `--only` before believing it — they pass in
 seconds that way. Everything else is green on `main`, and a red anywhere else is
-worth taking at face value. What makes these four slow enough to time out is not
-yet known, and is tracked in #1800.
+worth taking at face value. What makes these four swing by a factor of seven is
+not yet known, and is tracked in #1800.
 
-The four ORM examples need a working container runtime and are slow even when
-they pass; they account for roughly 15 minutes of the sweep on their own.
+The four ORM examples need a working container runtime. Even in a good run they
+are the slowest examples in the sweep — 2.3 minutes between them, against
+seconds for most others.
 
-Keep the table above in step with what a sweep actually reports — if it goes
-stale it stops being a way to tell your own breakage from the pre-existing kind,
-which is the only reason it is here.
+Keep this section in step with what a sweep actually reports — if it goes stale
+it stops being a way to tell your own breakage from the pre-existing kind, which
+is the only reason it is here.
 
 Use `--only <substring>` while iterating on one package, and `--timeout <n>` to
 change the per-package limit (900 seconds by default; a package killed for
