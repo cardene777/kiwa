@@ -142,6 +142,12 @@ seconds that way. Everything else is green on `main`, and a red anywhere else is
 worth taking at face value. What makes these four swing by a factor of seven is
 not yet known, and is tracked in #1800.
 
+**If you do hit a red one, `bash scripts/measure-sweep-vitals.sh` runs the sweep
+while recording memory, swap, containers and load.** The red run that opened
+#1800 was never measured, and six attempts to reproduce it since — alone, in a
+partial sweep, in two full sweeps, with two codex runs competing for memory —
+all came back green. Whoever sees it next has the chance nobody has had yet.
+
 The four ORM examples need a working container runtime. Even in a good run they
 are the slowest examples in the sweep — 2.3 minutes between them, against
 seconds for most others.
