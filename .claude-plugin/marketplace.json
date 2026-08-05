@@ -1,6 +1,6 @@
 {
   "name": "kiwa-marketplace",
-  "description": "kiwa — test toolchain for application boundaries, distributed as a single Claude Code plugin. 29 skills generate and run the test layers a stack needs, backed by 31 npm packages and three language-native packages. Pre-release; all rights reserved.",
+  "description": "kiwa — test toolchain for application boundaries, distributed as a single Claude Code plugin. 26 skills generate and run the test layers a stack needs, backed by 28 npm packages and three language-native packages. Pre-release; all rights reserved.",
   "owner": {
     "name": "cardene777",
     "email": "cardene777@gmail.com"
@@ -9,7 +9,7 @@
     {
       "name": "kiwa",
       "source": "./",
-      "description": "kiwa v2.19.0 — 29 skills in one plugin. Install it in a project and Claude Code can write a Layer 1 test spec with /kiwa-design, generate Foundry or Hardhat contract tests with /kiwa-forge and /kiwa-hardhat, drive dApp end-to-end runs on anvil forks with /kiwa-play, cover unit, API, component, data, CLI, and browser layers with /kiwa-vitest, /kiwa-api, /kiwa-ui, /kiwa-data, /kiwa-cli-test, and /kiwa-e2e, review spec and test coverage with /kiwa-review, and orchestrate the contract, dApp, browser, Rust, and Go chains with /kiwa-test.",
+      "description": "kiwa v2.19.0 — 26 skills in one plugin. Install it in a project and Claude Code can write a Layer 1 test spec with /kiwa-design, generate Foundry or Hardhat contract tests with /kiwa-forge and /kiwa-hardhat, drive dApp end-to-end runs on anvil forks with /kiwa-play, cover unit, API, component, data, CLI, and browser layers with /kiwa-vitest, /kiwa-api, /kiwa-ui, /kiwa-data, /kiwa-cli-test, and /kiwa-e2e, review spec and test coverage with /kiwa-review, and orchestrate the contract, dApp, browser, Rust, and Go chains with /kiwa-test.",
       "version": "2.19.0",
       "author": {
         "name": "cardene777",

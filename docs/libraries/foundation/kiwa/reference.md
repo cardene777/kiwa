@@ -10,7 +10,7 @@ plugin 経由では skill 名の先頭に `kiwa:` が付きます。たとえば
 
 ## 主要な入口
 
-`@kiwa-lab/core` は各 adapter で共有する spec parser と基盤型です。`@kiwa-lab/api`、`@kiwa-lab/ui`、`@kiwa-lab/e2e` は境界ごとの test harness です。`@kiwa-lab/kaname` と `@kiwa-lab/lean` は仕様を検証可能な形に分け、形式的な検査が必要な場合に使います。各 package の export、引数、return 値、failure condition は、個別 library の Reference を正本とします。
+`@kiwa-lab/core` は各 adapter で共有する spec parser と基盤型です。`@kiwa-lab/api`、`@kiwa-lab/ui`、`@kiwa-lab/e2e` は境界ごとの test harness です。`@kiwa-lab/lean` は仕様を形式検証できる形に落とし、状態遷移表の網羅性を Lean 4 の検査で証明します。各 package の export、引数、return 値、failure condition は、個別 library の Reference を正本とします。
 
 ## 根拠
 

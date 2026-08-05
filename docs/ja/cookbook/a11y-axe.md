@@ -94,5 +94,4 @@ const results = await runAxe({
 ## 関連
 
 - Package: [`@kiwa-lab/a11y`](../../../packages/a11y/README.md)
-- visual regression cookbook: [visual-regression.md](./visual-regression.md)
 - axe-core rule catalogue: https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md

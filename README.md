@@ -6,11 +6,11 @@
 
 **際を制するものが 開発を制する。 The dev-flow platform where testing, formal verification, and spec-driven development meet.**
 
-kiwa (「際」 = boundary, edge, connection) is a **spec-driven development platform** that fuses 3 axes: runtime testing (31 npm packages), formal verification (Lean 4 spec generator + `lean --check`), and spec-driven workflow (specFormal / specRuntime 2-file separation with 3-layer classification). Read the [MANIFESTO](./MANIFESTO.md) for the full philosophy.
+kiwa (「際」 = boundary, edge, connection) is a **spec-driven development platform** that fuses 3 axes: runtime testing (28 npm packages), formal verification (Lean 4 spec generator + `lean --check`), and spec-driven workflow (specFormal / specRuntime 2-file separation with 3-layer classification). Read the [MANIFESTO](./MANIFESTO.md) for the full philosophy.
 
 **Every test layer · one spec · every verification path · TypeScript / Solidity / Python / Lean 4.**
 
-One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **31 npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
+One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **28 npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-lab/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-lab/dapp)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-lab/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-lab/dapp)
@@ -97,7 +97,7 @@ graph TD
 
 kiwa ships in two halves that work together but stand alone:
 
-### 1. Claude Code skills (29 skills, the design + generation half)
+### 1. Claude Code skills (26 skills, the design + generation half)
 
 | Skill | Layer | Role |
 |---|---|---|
@@ -113,7 +113,6 @@ kiwa ships in two halves that work together but stand alone:
 | [`/kiwa-e2e`](./.claude/skills/kiwa-e2e/SKILL.md) | **Layer 2** (e2e) | Layer 1 spec → Playwright generic browser e2e tests (static html / fetch / Node handler / SSR app) for non-web3 contexts |
 | [`/kiwa-play`](./.claude/skills/kiwa-play/SKILL.md) | **Layer 2** (dApp e2e) | Layer 1 spec → Playwright `.spec.ts` + `prepare-env.ts` with wallet inject / anvil / viem for web3 contexts |
 | [`/kiwa-a11y`](./.claude/skills/kiwa-a11y/SKILL.md) | **Layer 2** (a11y) | Layer 1 spec → axe-core accessibility tests (jsdom + Playwright), WCAG 2.1 AA violation detection |
-| [`/kiwa-visual`](./.claude/skills/kiwa-visual/SKILL.md) | **Layer 2** (visual) | Layer 1 spec → pixelmatch visual regression tests with baseline / actual / diff snapshot management |
 | [`/kiwa-data`](./.claude/skills/kiwa-data/SKILL.md) | **Layer 2** (data) | Layer 1 spec → in-memory queue + fake clock tests for queue / cron / batch / DLQ semantics |
 | [`/kiwa-cli-test`](./.claude/skills/kiwa-cli-test/SKILL.md) | **Layer 2** (cli) | Layer 1 spec → CLI / shell / file IO tests with isolated tempdir + stdout/stderr snapshot |
 | [`/kiwa-auth`](./.claude/skills/kiwa-auth/SKILL.md) | **Layer 2** (auth) | Layer 1 spec → Vitest `test/*.auth.test.ts` driven by `@kiwa-lab/auth` (5 provider: NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0), covers session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations + Clerk orgs + Auth0 tenant + rules + Management API mock, `--provider` flag で provider 別生成 (v1.8 + v1.9) |
@@ -136,7 +135,6 @@ kiwa ships in two halves that work together but stand alone:
 | [`@kiwa-lab/e2e`](./packages/e2e) | Generic browser E2E adapter (Playwright + static html / fetch app) |
 | [`@kiwa-lab/observability`](./packages/observability) | Run history collection / flaky detection / coverage report / spec-coverage gap analysis |
 | [`@kiwa-lab/a11y`](./packages/a11y) | Accessibility adapter — axe-core integration for jsdom + Playwright pages |
-| [`@kiwa-lab/visual`](./packages/visual) | Visual regression adapter — pixel-level PNG diff backed by pixelmatch + pngjs |
 | [`@kiwa-lab/auth`](./packages/auth) (v0.2+) | Auth test adapter — 5 provider: NextAuth v5 (Auth.js) session (jwt + database) + Google / GitHub / Email (Magic Link) provider mocks + Prisma / Drizzle-compatible in-memory database adapter + Lucia v3 + Better Auth + Clerk (SaaS user + session + orgs mock) + Auth0 (enterprise tenant + rules + Management API mock) (v1.8 + v1.9) |
 | [`@kiwa-lab/queue`](./packages/queue) (v0.2+) | Queue test adapter — 4 provider: BullMQ (Redis-backed) sandbox (in-memory) + testcontainers Redis env + Inngest (event-driven) dev-server + stub env + Cloudflare Queues (miniflare + wrangler edge queue) + AWS SQS (stub + localstack standard + FIFO), with job / run / message assertion helpers (`waitForJob` / `assertProcessed` / `assertFailed` / `assertRetried` / `assertQueueDrained` / `assertFunctionRan` / `assertStepRan` / `assertAcknowledged` / `assertDeadLettered` / `assertDeleted`) (v1.8 + v1.9) |
 | [`@kiwa-lab/cache`](./packages/cache) (v0.2+) | Cache test adapter — 3 provider: Redis (testcontainers) live env + in-memory sandbox env + Memcached (stub + testcontainers with 8 core commands + multi-server consistent hashing) + KeyDB (stub + testcontainers with Redis-compatible surface + multi-master replication + cross-region Pub/Sub), with TTL / Pub/Sub / expiry / consistent-hash / multi-master assertion helpers (`assertTTL` / `subscribe` / `assertPublished` / `serverFor` / `listEntries`) (v1.8 + v1.9) |
@@ -187,7 +185,6 @@ Every kiwa surface follows the same `kiwa-design → Layer 2 generator → kiwa-
 | dApp e2e (Playwright + viem + anvil) | `/kiwa-design --layer e2e` | `/kiwa-play` | `/kiwa-review --layer e2e` | `@kiwa-lab/dapp` |
 | generic browser e2e (non-web3) | `/kiwa-design --layer e2e-generic` | `/kiwa-e2e` | `/kiwa-review --layer e2e-generic` | `@kiwa-lab/e2e` |
 | accessibility (WCAG 2.1 AA) | `/kiwa-design --layer a11y` | `/kiwa-a11y` | `/kiwa-review --layer a11y` | `@kiwa-lab/a11y` (axe-core) |
-| visual regression (pixel diff) | `/kiwa-design --layer visual` | `/kiwa-visual` | `/kiwa-review --layer visual` | `@kiwa-lab/visual` (pixelmatch) |
 | HTTP API (REST / GraphQL) | `/kiwa-design --layer api` | `/kiwa-api` | `/kiwa-review --layer api` | `@kiwa-lab/api` |
 | React component | `/kiwa-design --layer ui` | `/kiwa-ui` | `/kiwa-review --layer ui` | `@kiwa-lab/ui` |
 | queue / cron / batch | `/kiwa-design --layer data` | `/kiwa-data` | `/kiwa-review --layer data` | `@kiwa-lab/data` |
@@ -211,7 +208,7 @@ Install the kiwa skill chain as a Claude Code plugin — no clone required, avai
 /reload-plugins                            # activate without restarting the session
 ```
 
-After install, all 29 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
+After install, all 26 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
 
 ```bash
 # Layer 1 — design tests (output: tests/spec/<layer>/test-spec-<module>.md)
@@ -476,7 +473,6 @@ Lines / Statements / Functions ≥ **90 %**, Branches ≥ **80 %**, across all 1
 | [`@kiwa-lab/cli`](./packages/cli) | 84.44 % | 80 |
 | [`@kiwa-lab/e2e`](./packages/e2e) | 84.21 % | 80 |
 | [`@kiwa-lab/observability`](./packages/observability) | 84.12 % | 80 |
-| [`@kiwa-lab/visual`](./packages/visual) | 83.02 % | 80 |
 
 Run both gates locally:
 
@@ -620,7 +616,7 @@ Reference docs:
 
 |  |  |
 |---|---|
-| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 29 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 26 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) |
 | [`tests/docs/skill-chain-tutorial.md`](./tests/docs/skill-chain-tutorial.md) ⭐ | **skill chain walkthrough** (retrofit-first) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 directly-handled RPC + anvil fallback |
@@ -655,7 +651,6 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Client components (React / Vue / Svelte / SolidJS / Lit / Qwik / Angular / Chromium) | ✅ production-ready, 8 frameworks | `/kiwa-ui` | `@kiwa-lab/ui` v1.0.1 |
 | Generic browser e2e (Playwright, non-web3) | ✅ production-ready | `/kiwa-e2e` | `@kiwa-lab/e2e` v1.0.1 |
 | Accessibility (axe-core, WCAG 2.1 AA) | ✅ production-ready | `/kiwa-a11y` | `@kiwa-lab/a11y` v1.0.1 |
-| Visual regression (pixelmatch + pngjs) | ✅ production-ready | `/kiwa-visual` | `@kiwa-lab/visual` v1.0.1 |
 | Queue / cron / batch / DLQ | ✅ production-ready | `/kiwa-data` | `@kiwa-lab/data` v1.0.1 |
 | CLI / shell / file IO | ✅ production-ready | `/kiwa-cli-test` | `@kiwa-lab/cli-test` v1.0.1 |
 | Unit tests (Vitest generic) | ✅ production-ready | `/kiwa-vitest` | Vitest |
@@ -665,7 +660,6 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Next.js React Server Components (async server component) | ✅ production-ready (v1.0.3+) | `/kiwa-nextjs` (`--layer nextjs-rsc`) | `@kiwa-lab/nextjs` v1.0.3 |
 | Next.js Parallel Routes + Intercepting Routes (`@modal` / `@sidebar` / `(.)`) | ✅ production-ready (v1.0.4+) | `/kiwa-nextjs` (`--layer nextjs-parallel-route`) | `@kiwa-lab/nextjs` v1.0.4 |
 | Next.js RSC streaming + Suspense boundary (chunk capture + fallback / resolved 遷移 + error boundary) | ✅ production-ready (v1.1+) | `/kiwa-nextjs` (`--layer nextjs-rsc-streaming`) | `@kiwa-lab/nextjs` v1.1 |
-| SolidStart Server Functions + API Routes | ✅ production-ready (v1.0.0+) | `/kiwa-solidstart` (`--layer solidstart-server-function` / `--layer solidstart-api-route`) | `@kiwa-lab/solidstart` v1.0.0 |
 | Edge runtime (Cloudflare Workers / Vercel Edge / generic fetch handler) | ✅ production-ready (v1.0.0+) | `/kiwa-edge` (`--layer edge-handler`) | `@kiwa-lab/edge` v1.0.0 |
 | Auth (NextAuth v5 / Auth.js — session + 3 provider + database adapter mocks) | ✅ production-ready (v0.1+) | `/kiwa-design` (`--layer auth-nextauth`) | `@kiwa-lab/auth` v0.1.0 |
 | SolidJS Signal + Effect + createResource + Suspense (`@kiwa-lab/solidjs`) | ✅ production-ready (v0.1+, Issue #813) | (test-only helpers) | `@kiwa-lab/solidjs` v0.1.0 |
@@ -682,7 +676,6 @@ Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested thro
 | **Next.js React Server Components (RSC)** | ✅ shipped in v1.0.3 — `/kiwa-nextjs --layer nextjs-rsc` + `renderServerComponent` + `findAll` + `textContent` | (n/a, fully supported) | [#494](https://github.com/cardene777/kiwa/issues/494) ✅ resolved |
 | **Next.js middleware.ts** | ✅ shipped in v1.0.2 — `/kiwa-nextjs --layer nextjs-middleware` + `invokeMiddleware` | (n/a, fully supported) | [#495](https://github.com/cardene777/kiwa/issues/495) ✅ resolved |
 | **Next.js Parallel Routes + Intercepting Routes** | ✅ shipped in v1.0.4 — `/kiwa-nextjs --layer nextjs-parallel-route` + `invokeParallelRoutes` (parallel slot await + intercepting variant) | (n/a, parallel + intercepting routes fully supported) | [#523](https://github.com/cardene777/kiwa/issues/523) ✅ resolved |
-| **SolidStart Server Functions + API Routes** | ✅ shipped in v1.0.0 — `/kiwa-solidstart` + `invokeServerFunction` / `invokeApiRoute` | (n/a, fully supported) | [#518](https://github.com/cardene777/kiwa/issues/518) ✅ resolved |
 | **Python pytest adapter (PyPI publish)** | ✅ shipped in v1.0.0 — `pip install kiwa-test-py` | (n/a, fully supported) | [#492](https://github.com/cardene777/kiwa/issues/492) ✅ resolved |
 | **Bun runtime (`bun.sh`)** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Bun via `bunx --bun vitest run` (verified locally pre-merge via `/verify` skill) | (n/a, pnpm install + bunx vitest) | [#520](https://github.com/cardene777/kiwa/issues/520) ✅ resolved |
 | **Deno runtime** | ✅ shipped in v1.2 — all 19 packages pass Vitest under Deno via `deno run --allow-all npm:vitest run` (verified locally pre-merge via `/verify` skill) | (n/a, pnpm install + deno run) | [#521](https://github.com/cardene777/kiwa/issues/521) ✅ resolved |

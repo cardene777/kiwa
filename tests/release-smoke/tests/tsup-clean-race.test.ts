@@ -127,8 +127,8 @@ const PROBE = 'clean-probe.txt';
 const FIXED_OUTPUT_TARGETS = [
   'a11y', 'ai-llm', 'api', 'auth', 'cache', 'cli-test', 'component', 'core',
   'data', 'e2e', 'edge', 'fresh', 'hono', 'lean', 'nextjs', 'observability',
-  'orm', 'quality-metrics', 'queue', 'realtime', 'search', 'security', 'solidjs', 'solidstart',
-  'ui', 'visual',
+  'orm', 'quality-metrics', 'queue', 'realtime', 'search', 'security', 'solidjs',
+  'ui',
   // release-smoke 自身の事前 build が並列に走らせるため、 同じ race 源になる。
   'perf-harness', 'skill-test',
 ] as const;
@@ -668,9 +668,10 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       visit(sourceFile);
     }
     // 走査対象が空だと、 検査が何も見ないまま通る。
-    // 下限は実走査数の直下に置く (#1785 で 46 -> 31 package、 実走査 29 件)。
-    // 余裕を持たせると、 clean 制約が外れた package を取りこぼしても通ってしまう。
-    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(28);
+    // 下限は実走査数の直下に置く (#1785 で 46 -> 31 package、 #1803 で 28 package
+    // になり実走査 27 件)。 余裕を持たせると、 clean 制約が外れた package を
+    // 取りこぼしても通ってしまう。
+    expect(scanned.length, '設定を 1 件も走査していない').toBeGreaterThan(26);
     expect(
       [...new Set(reads)].sort(),
       `設定が出力先の状態を読んでいる。 判定が実 build を観測する形である以上、`

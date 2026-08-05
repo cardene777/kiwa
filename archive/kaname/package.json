@@ -21,7 +21,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cardene777/kiwa.git",
-    "directory": "packages/kaname"
+    "directory": "archive/kaname"
   },
   "homepage": "https://github.com/cardene777/kiwa#readme",
   "bugs": {
@@ -71,5 +71,6 @@
     "tsup": "^8.3.0",
     "typescript": "^5.6.0",
     "vitest": "^3.2.6"
-  }
+  },
+  "private": true
 }

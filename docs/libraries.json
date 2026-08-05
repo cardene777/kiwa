@@ -12,7 +12,6 @@
         "dapp",
         "data",
         "e2e",
-        "kaname",
         "lean",
         "skill-test",
         "ui"
@@ -26,8 +25,7 @@
         "fresh",
         "hono",
         "nextjs",
-        "solidjs",
-        "solidstart"
+        "solidjs"
       ]
     },
     {
@@ -47,8 +45,7 @@
         "ai-llm",
         "observability",
         "realtime",
-        "search",
-        "visual"
+        "search"
       ]
     },
     {

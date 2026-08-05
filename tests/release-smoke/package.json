@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/a11y @kiwa-lab/ai-llm @kiwa-lab/api @kiwa-lab/auth @kiwa-lab/cache @kiwa-lab/cli-test @kiwa-lab/component @kiwa-lab/core @kiwa-lab/data @kiwa-lab/e2e @kiwa-lab/edge @kiwa-lab/fresh @kiwa-lab/hono @kiwa-lab/lean @kiwa-lab/nextjs @kiwa-lab/observability @kiwa-lab/orm @kiwa-lab/quality-metrics @kiwa-lab/queue @kiwa-lab/realtime @kiwa-lab/search @kiwa-lab/security @kiwa-lab/solidjs @kiwa-lab/solidstart @kiwa-lab/ui @kiwa-lab/visual @kiwa-lab/cli @kiwa-lab/dapp @kiwa-lab/skill-test @kiwa-lab/perf-harness && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/tsup-clean-race.test.js' --environment node --testTimeout 30000 && vitest run .vitest-dist/tests/tsup-clean-race.test.js --environment node --testTimeout 900000",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/a11y @kiwa-lab/ai-llm @kiwa-lab/api @kiwa-lab/auth @kiwa-lab/cache @kiwa-lab/cli-test @kiwa-lab/component @kiwa-lab/core @kiwa-lab/data @kiwa-lab/e2e @kiwa-lab/edge @kiwa-lab/fresh @kiwa-lab/hono @kiwa-lab/lean @kiwa-lab/nextjs @kiwa-lab/observability @kiwa-lab/orm @kiwa-lab/quality-metrics @kiwa-lab/queue @kiwa-lab/realtime @kiwa-lab/search @kiwa-lab/security @kiwa-lab/solidjs @kiwa-lab/ui @kiwa-lab/cli @kiwa-lab/dapp @kiwa-lab/skill-test @kiwa-lab/perf-harness && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/tsup-clean-race.test.js' --environment node --testTimeout 30000 && vitest run .vitest-dist/tests/tsup-clean-race.test.js --environment node --testTimeout 900000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,9 +22,7 @@
     "@kiwa-lab/nextjs": "workspace:*",
     "@kiwa-lab/observability": "workspace:*",
     "@kiwa-lab/solidjs": "workspace:*",
-    "@kiwa-lab/solidstart": "workspace:*",
-    "@kiwa-lab/ui": "workspace:*",
-    "@kiwa-lab/visual": "workspace:*"
+    "@kiwa-lab/ui": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

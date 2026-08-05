@@ -25,9 +25,7 @@ const FULL = {
   '@kiwa-lab/cli': { lines: 94, branches: 82, functions: 100, statements: 94 },
   '@kiwa-lab/dapp': { lines: 98, branches: 90, functions: 100, statements: 98 },
   '@kiwa-lab/a11y': { lines: 100, branches: 95, functions: 100, statements: 100 },
-  '@kiwa-lab/visual': { lines: 100, branches: 85, functions: 100, statements: 100 },
   '@kiwa-lab/nextjs': { lines: 98, branches: 94, functions: 87, statements: 98 },
-  '@kiwa-lab/solidstart': { lines: 100, branches: 97, functions: 100, statements: 100 },
   '@kiwa-lab/edge': { lines: 100, branches: 100, functions: 100, statements: 100 },
 };
 

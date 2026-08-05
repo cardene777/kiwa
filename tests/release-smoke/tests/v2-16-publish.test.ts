@@ -41,7 +41,7 @@ describe('v2.16-3 publish', () => {
     ).toBe(true);
   });
   it('@kiwa-lab/kaname version >= 0.1.0', () => {
-    const v = readJson<{ version: string }>('packages/kaname/package.json').version;
+    const v = readJson<{ version: string }>('archive/kaname/package.json').version;
     const parts = v.split('.').map(Number);
     const major = parts[0] ?? 0;
     const minor = parts[1] ?? 0;
@@ -49,20 +49,15 @@ describe('v2.16-3 publish', () => {
     expect(major > 0 || minor > 1 || (minor === 1 && patch >= 0)).toBe(true);
   });
   it('kaname classify source', () => {
-    const src = readText('packages/kaname/src/classify.ts');
+    const src = readText('archive/kaname/src/classify.ts');
     expect(src).toContain('export function classify');
     expect(src).toContain('both-layers-touch-same-artifact');
   });
   it('kaname split source', () => {
-    const src = readText('packages/kaname/src/split.ts');
+    const src = readText('archive/kaname/src/split.ts');
     expect(src).toContain('export function splitSpec');
     expect(src).toContain('specFormal');
     expect(src).toContain('specRuntime');
-  });
-  it('release filter @kiwa-lab/kaname', () => {
-    expect(readJson<{ scripts: { release: string } }>('package.json').scripts.release).toContain(
-      '-F @kiwa-lab/kaname',
-    );
   });
   it('migration v2.15-to-v2.16 exists', () => {
     expect(existsSync(resolve(REPO_ROOT, 'docs/migrations/v2.15-to-v2.16.md'))).toBe(true);
