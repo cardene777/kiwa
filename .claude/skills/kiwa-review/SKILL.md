@@ -29,7 +29,7 @@ $ARGUMENTS
 
 - `--mode {spec-review|test-review|result-review}` — review mode (必須)
 - `--module {name}` — 対象 module 名 (spec / test file の特定キー)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|solidstart-server-function|solidstart-api-route|edge-handler|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|auth|job-queue|cache|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用、 詳細は `/kiwa-design § 出力 path の決定` SSOT)。 spec-review / test-review / result-review 3 mode は全 layer に対応 (framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.4-6 polyglot Rust / Go 4 layer は Issue #581 で追加、 v1.5-6 polyglot 縦深化 Rust / Go web framework 4 layer は Issue #597 で追加、 v1.7-6 polyglot 継続深化 Rust tower-http + Go Fiber 2 layer は Issue #627 で追加、 v1.8 新 layer auth / job-queue / cache は Issue #642 で追加)
+- `--layer {contract|e2e|e2e-generic|a11y|api|ui|data|cli|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|auth|job-queue|cache|integration|unit|all}` — spec layer (default `all`、 spec path 解決に使用、 詳細は `/kiwa-design § 出力 path の決定` SSOT)。 spec-review / test-review / result-review 3 mode は全 layer に対応 (framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.4-6 polyglot Rust / Go 4 layer は Issue #581 で追加、 v1.5-6 polyglot 縦深化 Rust / Go web framework 4 layer は Issue #597 で追加、 v1.7-6 polyglot 継続深化 Rust tower-http + Go Fiber 2 layer は Issue #627 で追加、 v1.8 新 layer auth / job-queue / cache は Issue #642 で追加)
 - `--spec-path {path}` — spec file path を明示指定 (`--module` の代替)
 - `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 default は spec から推定)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
@@ -81,12 +81,12 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
   - Playwright (dApp): `{example}/tests/*.spec.ts` or `tests/fixtures/{example}/e2e-test/*.spec.ts`
   - 汎用 e2e (`--layer e2e-generic`): `{example}/tests/*.e2e.spec.ts` or `tests/fixtures/{example}/e2e-generic-test/*.spec.ts`
   - a11y (`--layer a11y`): `{example}/tests/*.a11y.test.ts` or `tests/fixtures/{example}/a11y-test/*.test.ts`
-  - visual (`--layer visual`): `{example}/tests/*.visual.test.ts` or `tests/fixtures/{example}/visual-test/*.test.ts`
+  - ORM query (`--layer orm-query`): `{example}/tests/{module}.test.ts` (`/kiwa-orm` の既定出力先)
   - Next.js Server Actions (`--layer nextjs-server-action`): `{example}/tests/*.nextjs.test.ts` or `{example}/tests/integration/*.nextjs.test.ts`
   - Next.js middleware (`--layer nextjs-middleware`): `{example}/tests/*.middleware.test.ts` or `{example}/tests/integration/*.middleware.test.ts`
   - Next.js RSC (`--layer nextjs-rsc`): `{example}/tests/*.rsc.test.ts` or `{example}/tests/integration/*.rsc.test.ts`
   - Next.js Parallel Routes (`--layer nextjs-parallel-route`): `{example}/tests/*.parallel.test.ts` or `{example}/tests/integration/*.parallel.test.ts`
-  - SolidStart Server Functions + API Routes (`--layer solidstart-server-function` / `--layer solidstart-api-route`): `{example}/tests/*.solidstart.test.ts` or `{example}/src/lib/**/*.test.ts` or `{example}/src/routes/api/*.test.ts`
+  - Next.js RSC streaming (`--layer nextjs-rsc-streaming`): `{example}/tests/integration/{module}.nextjs.test.ts` (`/kiwa-nextjs` の既定出力先、 `--output` で上書き可)
   - Edge runtime fetch handler (`--layer edge-handler`): `{example}/tests/*.edge.test.ts` or `{example}/src/index.test.ts`
   - Rust cargo test unit (`--layer rust-unit`、 Issue #581 v1.4-6): `examples/{example}/tests/*.rs` (cargo の integration test 慣習、 1 file = 1 crate)
   - Rust cargo test integration (`--layer rust-integration`、 Issue #581 v1.4-6): `examples/{example}/tests/*_integration.rs` or `examples/{example}/tests/*.rs` (mock_server 経路、 unit と同 dir、 file 名 suffix or test 関数 prefix で識別)
@@ -105,7 +105,6 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 - 新 3 layer 専用観点の追加 SSOT
   - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Action + Expected) を Layer 2 mapping と照合
   - `a11y`: 9 column (Mode `jsdom`/`playwright` + Component + WCAG-rule + Severity) を axe-core rule 適用率で照合
-  - `visual`: 9 column (State + Component + Viewport + Threshold + Mask) を baseline file 存在 + diff 結果で照合
 
 #### 1C: result-review mode
 

@@ -28,7 +28,7 @@ $ARGUMENTS
 ## オプション
 
 - `--example {name}` — 対象 example 名 (必須、 `examples/{name}/` を参照)
-- `--target {contract|dapp|web|nextjs|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 3 surface セット (`/kiwa-e2e` + `/kiwa-a11y` + `/kiwa-visual`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は contract + dapp + web + nextjs + rust + go の 9 surface 全網羅
+- `--target {contract|dapp|web|nextjs|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は web + rust + go を起動する (contract / dapp は `both`、 nextjs は専用 Step が未実装。 内訳は各 Step の起動条件が SSOT で、 surface 数は数えない)
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 全子 skill に伝播)
@@ -104,19 +104,19 @@ multiSelect: false
   description: "理由 — 小規模 dApp / contract 中心の変更時。 kiwa-design (--layer contract) → ($RUNNER に応じて) kiwa-forge / kiwa-hardhat / 両方 → kiwa-review。 実行時間目安 5-10 分 (single runner) / 10-15 分 (both)。 ⭐⭐⭐⭐⭐"
 - label: "🌐 dApp e2e のみ (Playwright)"
   description: "理由 — UI / wallet flow 中心の変更時。 kiwa-design (--layer e2e) → kiwa-play → kiwa-review の 3 step。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
-- label: "🖥️ 汎用 web 3 surface (e2e-generic + a11y + visual)"
-  description: "理由 — 非 web3 web app の品質ゲート (browser flow + accessibility + visual regression)。 kiwa-design (--layer e2e-generic / a11y / visual) → kiwa-e2e + kiwa-a11y + kiwa-visual → kiwa-review。 実行時間目安 10-15 分。 ⭐⭐⭐⭐"
+- label: "🖥️ 汎用 web 2 surface (e2e-generic + a11y)"
+  description: "理由 — 非 web3 web app の品質ゲート (browser flow + accessibility)。 kiwa-design (--layer e2e-generic / a11y) → kiwa-e2e + kiwa-a11y → kiwa-review。 実行時間目安 10-15 分。 ⭐⭐⭐⭐"
 - label: "🔷+🌐 両方 (contract + dApp)"
   description: "理由 — full coverage check。 contract ($RUNNER) → dApp の順で順次実行 (--mode sequential が default)。 実行時間目安 15-30 分。 ⭐⭐⭐⭐"
-- label: "🌈 6 surface 全網羅 (contract + dApp + web)"
-  description: "理由 — 動画 v10 で謳う 11 観点 × 6 surface 完全網羅。 contract / dapp / web (e2e-generic + a11y + visual) を順次実行、 統合 report に 6 surface 全 result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
+- label: "🌈 all (web + Rust + Go を通す)"
+  description: "理由 — `all` が起動するのは web (e2e-generic + a11y) / Rust / Go の 3 chain。 contract と dApp は `both` を、 Next.js は専用 Step が未実装のため個別 skill を使う (#1809)。 統合 report に各 chain の result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
 - label: "🦀 Rust polyglot (rust-unit + rust-integration、 v1.4-6)"
   description: "理由 — polyglot test toolchain の Rust 経路 (Issue #581)。 kiwa-design (--layer rust-unit / rust-integration) → kiwa-rust → kiwa-review の 3 step、 cargo test + mock_server で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 - label: "🐹 Go polyglot (go-unit + go-integration、 v1.4-6)"
   description: "理由 — polyglot test toolchain の Go 経路 (Issue #581)。 kiwa-design (--layer go-unit / go-integration) → kiwa-go → kiwa-review の 3 step、 testing.T + httptest で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 ```
 
-確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `both`)。
+確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `web` / `nextjs` / `rust` / `go` / `both` / `all`)。
 
 ### Step 2: 環境 + dir check
 
@@ -253,9 +253,9 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
   ↓ tests/reports/review/test-review-{example}.{lang}.md Write (contract と同 path、 後勝ち or suffix 区別)
 ```
 
-### Step 4w: web 3 surface chain 実行 (target=web or all)
+### Step 4w: web chain 実行 (e2e-generic + a11y、 target=web or all)
 
-target=web (汎用 web 3 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y / visual の 3 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 3 子 skill が同時 Read するだけ、 file 書込 path は別)。
+target=web (汎用 web 2 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y の 2 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 2 子 skill が同時 Read するだけ、 file 書込 path は別)。
 
 ```text
 [Step 4w-e2e-a] /kiwa-design --layer e2e-generic --module {example} --input app/ --lang $DOC_LANG [--no-review]
@@ -273,17 +273,9 @@ target=web (汎用 web 3 surface セット) または target=all の場合に実
   ↓ tests/{example}.a11y.test.ts 生成
   ↓ @kiwa-lab/a11y で axe-core 評価
   ↓ tests/reports/review/test-review-{example}.a11y.{lang}.md Write
-
-[Step 4w-visual-a] /kiwa-design --layer visual --module {example} --input app/ --lang $DOC_LANG [--no-review]
-  ↓ tests/spec/integration/test-spec-{example}.visual.{lang}.md Write
-
-[Step 4w-visual-b] /kiwa-visual --mode new --lang $DOC_LANG [--no-review]
-  ↓ tests/{example}.visual.test.ts 生成 + tests/visual/baseline/{example}/ baseline 画像生成
-  ↓ @kiwa-lab/visual で pixelmatch 評価
-  ↓ tests/reports/review/test-review-{example}.visual.{lang}.md Write
 ```
 
-3 surface の result は Step 5 統合 report の「web (e2e-generic / a11y / visual)」 section に集約する。
+2 surface の result は Step 5 統合 report の「web (e2e-generic / a11y)」 section に集約する。
 
 ### Step 4r: Rust polyglot chain 実行 (target=rust or all、 Issue #581 v1.4-6)
 
@@ -359,8 +351,6 @@ Total duration: {sec} 秒
 | 7. 汎用 e2e test | /kiwa-e2e | ✅ PASS or ⏭️ skipped | N passed / 0 failed / test-review X.X/10 |
 | 8. spec 生成 (a11y) | /kiwa-design (Layer 1) | ✅ PASS or ⏭️ skipped | TC N 件 (axe-core rule カバー) / spec-review X.X/10 |
 | 9. a11y test | /kiwa-a11y | ✅ PASS or ⏭️ skipped | WCAG 違反 N 件 (critical 0 / serious 0) |
-| 10. spec 生成 (visual) | /kiwa-design (Layer 1) | ✅ PASS or ⏭️ skipped | TC N 件 / spec-review X.X/10 |
-| 11. visual test | /kiwa-visual | ✅ PASS or ⏭️ skipped | baseline N 枚 / diff 0 件 |
 
 **判定 — ✅ ALL PASS** ({reason}) / **⚠️ PARTIAL FAIL** ({failed_step}) / **❌ FAIL** ({failed_step})
 
@@ -586,14 +576,14 @@ graph TD
     B -->|dapp| D1["/kiwa-design --layer e2e"]
     B -->|web| W1["/kiwa-design --layer e2e-generic"]
     B -->|web| W3["/kiwa-design --layer a11y"]
-    B -->|web| W5["/kiwa-design --layer visual"]
+    B -->|rust| RS1["/kiwa-design --layer rust-unit / rust-integration"]
+    B -->|go| GO1["/kiwa-design --layer go-unit / go-integration"]
     B -->|both| C1
     B -->|both| D1
-    B -->|all| C1
-    B -->|all| D1
     B -->|all| W1
     B -->|all| W3
-    B -->|all| W5
+    B -->|all| RS1
+    B -->|all| GO1
     C1 -->|Step 6| R1["/kiwa-review --mode spec-review --layer contract"]
     R1 --> C2["/kiwa-forge"]
     C2 -->|Step 6| R2["/kiwa-review --mode test-review --layer contract"]
@@ -608,14 +598,16 @@ graph TD
     W3 -->|Step 6| RW3["/kiwa-review --mode spec-review --layer a11y"]
     RW3 --> W4["/kiwa-a11y --mode new"]
     W4 -->|Step 6| RW4["/kiwa-review --mode test-review --layer a11y"]
-    W5 -->|Step 6| RW5["/kiwa-review --mode spec-review --layer visual"]
-    RW5 --> W6["/kiwa-visual --mode new"]
-    W6 -->|Step 6| RW6["/kiwa-review --mode test-review --layer visual"]
     R3 --> E["Step 5 統合 report"]
     R5 --> E
     RW2 --> E
     RW4 --> E
-    RW6 --> E
+    RS1 -->|Step 4r| RS2["/kiwa-rust"]
+    RS2 -->|Step 6| RS3["/kiwa-review --layer rust-unit"]
+    RS3 --> E
+    GO1 -->|Step 4g| GO2["/kiwa-go"]
+    GO2 -->|Step 6| GO3["/kiwa-review --layer go-unit"]
+    GO3 --> E
     E --> M["Step 5.5 fixtures 退避<br>(git mv examples/ → tests/fixtures/)"]
     M --> R6["/kiwa-review --mode result-review (Step 5b)"]
     R6 -->|PASS| F["Step 6 user に summary return"]
