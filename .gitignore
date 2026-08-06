@@ -43,6 +43,10 @@ examples/*/.env
 examples/*/dist/
 examples/*/tsconfig.tsbuildinfo
 examples/*/.context/
+# Detection output and anvil state. Both are derived from the project and are
+# rewritten on demand, so committing them would only make them go stale.
+.kiwa/
+
 examples/*/lcov.info
 # Every dogfood example's `pnpm test` rewrites `quality-report/fidelity-latest.{json,md}`.
 # `reportedAt` changes on every run, and ten of them also carry wall-clock latency

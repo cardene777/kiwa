@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -712,5 +712,64 @@ describe('package entry point', () => {
     const h = harness();
     await expect(publicEntry.runCli(['--help'], h.deps)).resolves.toBe(0);
     expect(h.out()).toBe(USAGE);
+  });
+});
+
+describe('init --detect', () => {
+  it('refuses a scaffold flag alongside --detect', async () => {
+    // `--detect` writes no scaffold, so `--force` means nothing here. The rest
+    // of `init` fails loudly on conflicting input; ignoring the flag silently
+    // would be the odd one out.
+    const h = harness();
+    const code = await runCli(['init', '--detect', '--force'], h.deps);
+    expect(code).toBe(2);
+    expect(h.err()).toContain('--detect does not scaffold');
+    // runInit throws if called, so reaching here proves nothing scaffolded.
+  });
+
+  it('refuses the = form of a scaffold flag too', async () => {
+    const h = harness();
+    const code = await runCli(['init', '--detect', '--testDir=e2e'], h.deps);
+    expect(code).toBe(2);
+    expect(h.err()).toContain('--testDir');
+  });
+
+  it('reports that nothing was found in an empty directory', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-detect-'));
+    try {
+      const h = harness({ cwd: () => dir });
+      const code = await runCli(['init', '--detect'], h.deps);
+      expect(code).toBe(0);
+      expect(h.out()).toContain('No manifest found.');
+      // AC: the look is read-only. Creating `.kiwa/stack.json` here would write
+      // into a directory that has nothing to do with kiwa.
+      expect(existsSync(join(dir, '.kiwa', 'stack.json'))).toBe(false);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('invalidates an earlier answer when the manifests are gone', async () => {
+    // Deleting the manifests left the previous run's layers readable, so a
+    // skill would keep acting on a stack the project no longer has.
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-detect-'));
+    try {
+      mkdirSync(join(dir, '.kiwa'), { recursive: true });
+      writeFileSync(
+        join(dir, '.kiwa', 'stack.json'),
+        JSON.stringify({ detected: [{ layer: 'rust-axum' }] }),
+      );
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['init', '--detect'], h.deps)).toBe(0);
+      const after = JSON.parse(readFileSync(join(dir, '.kiwa', 'stack.json'), 'utf-8'));
+      expect(after.detected).toEqual([]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('names --detect in the usage text', () => {
+    // A flag absent from --help is a flag nobody finds.
+    expect(USAGE).toContain('--detect');
   });
 });

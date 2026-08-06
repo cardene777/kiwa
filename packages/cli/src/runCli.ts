@@ -3,6 +3,14 @@ import { InitConflictError, runInit, type InitOptions, type InitResult } from '.
 import { runAnvilSeed, type AnvilSeedOptions, type AnvilSeedResult } from './commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from './commands/spec-to-test.js';
 import { runWatch, type RunWatchLayer, type RunWatchOptions, type RunWatchResult } from './commands/run-watch.js';
+import {
+  detectFrom,
+  loadSignalTable,
+  resolveDetections,
+  scanManifests,
+  stackFileExists,
+  writeStackFile,
+} from './detect/index.js';
 
 /** Usage text printed by `--help` / `-h` and appended to the unknown-command error. */
 export const USAGE = `Usage: kiwa <command> [options]
@@ -16,6 +24,9 @@ Commands:
   --help, -h                                                Show this message
 
 init options:
+  --detect                      Report which kiwa layers the project's dependencies point at,
+                                write .kiwa/stack.json, and scaffold nothing. Other init
+                                options do not apply and are refused.
   --force                       Overwrite existing files instead of failing on conflict
   --testDir <path>              Place generated spec under <path> instead of e2e/ (relative)
   --config-suffix <name>        Generate playwright.<name>.config.ts instead of playwright.config.ts
@@ -361,7 +372,84 @@ function doctorCommand(deps: RunCliDeps): number {
   }
 }
 
+/**
+ * Report which layers the project's own dependencies point at.
+ *
+ * Detection is opt-in and does not scaffold. A project that is a Rust service
+ * or a Next.js app has had the same dApp files written into it since v0.1, and
+ * the fix for that is not to guess harder by default — it is to say what was
+ * found and let the caller act on it. `--detect` prints and records; nothing
+ * else changes unless the caller asks separately.
+ */
+function detectCommand(deps: RunCliDeps): number {
+  const cwd = deps.cwd();
+  const manifests = scanManifests(cwd);
+
+  if (!manifests.length) {
+    deps.stdout('No manifest found.\n');
+    deps.stdout('Looked for: Cargo.toml, go.mod, package.json (here and in workspace members)\n');
+    // A previous run's answer must not survive a run that found no basis for
+    // it, so an existing file is emptied. A project that never had one keeps
+    // none — the AC asks for a read-only look, and creating `.kiwa/stack.json`
+    // in a directory with no manifest writes into something unrelated.
+    if (stackFileExists(cwd)) writeStackFile(cwd, []);
+    return 0;
+  }
+
+  const table = loadSignalTable();
+  const hits = manifests.flatMap((m) => detectFrom(table, m.language, m.path, m.deps));
+  const layers = resolveDetections(hits);
+
+  for (const m of manifests) {
+    deps.stdout(`read: ${m.path} (${m.deps.length} dependencies)\n`);
+  }
+
+  if (!layers.length) {
+    // No fallback to the dApp scaffold. Detecting nothing is information, and
+    // silently producing Playwright files for a Go service is what this command
+    // exists to stop.
+    //
+    // The empty result still gets written. A previous run's file would
+    // otherwise survive a dependency removal and keep telling the skills about
+    // a layer the project no longer has — the stale state this file exists to
+    // prevent, produced by the file itself.
+    const cleared = writeStackFile(cwd, []);
+    deps.stdout('\nNo kiwa layer matched. Use --layer to choose one explicitly.\n');
+    deps.stdout(`wrote: ${cleared} (empty)\n`);
+    return 0;
+  }
+
+  deps.stdout('\nDetected layers:\n');
+  for (const d of layers) {
+    deps.stdout(`  ${d.layer}  (${d.signal} in ${d.manifest})\n`);
+  }
+
+  const written = writeStackFile(cwd, layers);
+  deps.stdout(`\nwrote: ${written}\n`);
+  deps.stdout('Run `kiwa init` to scaffold, or pass a layer to the kiwa skills.\n');
+  return 0;
+}
+
+/** `init` options that scaffold, and so mean nothing alongside `--detect`. */
+const SCAFFOLD_FLAGS = ['--force', '--testDir', '--config-suffix', '--script-key', '--with-deploy'];
+
 function initCommand(argv: string[], deps: RunCliDeps): number {
+  if (argv.includes('--detect')) {
+    // Refuse rather than ignore. `--detect` scaffolds nothing, so
+    // `--detect --force` reads as "detect and overwrite" and does neither —
+    // the rest of `init` fails loudly on conflicting input (InitConflictError,
+    // a missing flag value) and this is the same shape.
+    const conflicting = SCAFFOLD_FLAGS.filter((flag) =>
+      argv.some((token) => token === flag || token.startsWith(`${flag}=`)),
+    );
+    if (conflicting.length) {
+      deps.stderr(`ERR --detect does not scaffold, so ${conflicting.join(', ')} cannot apply\n`);
+      deps.stderr('Run `kiwa init --detect` first, then `kiwa init` with the options you want.\n');
+      return 2;
+    }
+    return detectCommand(deps);
+  }
+
   try {
     const testDir = takeFlagValue(argv, '--testDir');
     const configSuffix = takeFlagValue(argv, '--config-suffix');
