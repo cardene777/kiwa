@@ -155,6 +155,28 @@ describe('absence is established by looking', () => {
     }
   });
 
+  it('reaches three levels below the working directory', async () => {
+    // The budget was passed with one level already spent, so it reached two and
+    // missed `apps/services/api` — and a runtime whose only manifest sits there
+    // would be excluded on a search that never looked.
+    const { presentLanguages } = await import('../src/detect/scan.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-depth-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"name":"app"}');
+      mkdirSync(join(root, 'apps', 'services', 'api'), { recursive: true });
+      writeFileSync(join(root, 'apps', 'services', 'api', 'go.mod'), 'module x\n');
+      expect(presentLanguages(root)).toContain('go');
+
+      // One level further is out of range, which is the bound doing its job
+      // rather than a second accident.
+      mkdirSync(join(root, 'a', 'b', 'c', 'd'), { recursive: true });
+      writeFileSync(join(root, 'a', 'b', 'c', 'd', 'Cargo.toml'), '[dependencies]\n');
+      expect(presentLanguages(root)).not.toContain('rust');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
   it('keeps a runtime the project turns out to contain', () => {
     const root = fixture(
       { 'package.json': '{"name":"app"}', 'services/api/go.mod': 'module x\n' },

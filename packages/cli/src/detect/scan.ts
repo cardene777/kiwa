@@ -162,7 +162,15 @@ const SKIP = new Set([
   '.turbo',
 ]);
 
-/** How far below the working directory a manifest is still the project's own. */
+/**
+ * How many levels below the working directory a manifest is still the project's
+ * own.
+ *
+ * Counted as levels below the root, so 3 reaches `a/b/c/go.mod`. Passing this
+ * to the walk as a remaining-budget with one already spent made it reach two,
+ * which misses `apps/services/api` — a shape common enough that the runtime
+ * would have been excluded on a search that never looked there.
+ */
 const DEPTH = 3;
 
 /**
@@ -200,7 +208,7 @@ export function presentLanguages(cwd: string): string[] {
     }
   };
 
-  visit(root, DEPTH - 1);
+  visit(root, DEPTH);
   return [...found].sort();
 }
 
