@@ -41,7 +41,7 @@ $ARGUMENTS
 
 - `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)、 単数指定
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
-- `--layer {contract|e2e|e2e-generic|a11y|visual|api|ui|data|cli|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|solidstart-server-function|solidstart-api-route|edge-handler|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|auth|job-queue|cache|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 dApp e2e / 汎用 browser e2e / a11y / visual / Next.js (Server Actions + middleware + RSC + Parallel Routes + RSC streaming) / SolidStart / Edge runtime / Rust (cargo test unit + hyper mock_server integration + axum Router test + actix-web App test + tower-http middleware chain test) / Go (testing.T unit + net/http/httptest integration + Gin TestServer + Echo TestServer + Fiber TestServer) の各 framework 対応 (詳細は各 layer 別 9 column 拡張表 section、 5 framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.3-1 RSC streaming は Issue #558 で追加、 v1.4-5 polyglot 拡張 (rust-unit / rust-integration / go-unit / go-integration) は Issue #580 で追加、 v1.5-5 polyglot 縦深化 (rust-axum / rust-actix-web / go-gin / go-echo) は Issue #596 で追加、 v1.7-6 polyglot 継続深化 (rust-tower-http / go-fiber) は Issue #627 で追加、 v1.8 新 layer (auth / job-queue / cache) は Issue #642 で追加)
+- `--layer {contract|e2e|e2e-generic|a11y|api|ui|data|cli|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|auth|job-queue|cache|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 dApp e2e / 汎用 browser e2e / a11y / Next.js (Server Actions + middleware + RSC + Parallel Routes + RSC streaming) / Edge runtime / Rust (cargo test unit + hyper mock_server integration + axum Router test + actix-web App test + tower-http middleware chain test) / Go (testing.T unit + net/http/httptest integration + Gin TestServer + Echo TestServer + Fiber TestServer) の各 framework 対応 (詳細は各 layer 別 9 column 拡張表 section、 5 framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.3-1 RSC streaming は Issue #558 で追加、 v1.4-5 polyglot 拡張 (rust-unit / rust-integration / go-unit / go-integration) は Issue #580 で追加、 v1.5-5 polyglot 縦深化 (rust-axum / rust-actix-web / go-gin / go-echo) は Issue #596 で追加、 v1.7-6 polyglot 継続深化 (rust-tower-http / go-fiber) は Issue #627 で追加、 v1.8 新 layer (auth / job-queue / cache) は Issue #642 で追加)
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
@@ -57,7 +57,6 @@ $ARGUMENTS
 | `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` (dApp e2e、 wallet inject / contract deploy / multi-chain 対応) |
 | `e2e-generic` | `tests/spec/integration/test-spec-{module}.e2e.md` | `/kiwa-e2e` (汎用 browser e2e、 static html / fetch app / SSR、 web3 非依存) |
 | `a11y` | `tests/spec/integration/test-spec-{module}.a11y.md` | `/kiwa-a11y` (axe-core + WCAG 2.1 AA、 jsdom / playwright 2 mode) |
-| `visual` | `tests/spec/integration/test-spec-{module}.visual.md` | `/kiwa-visual` (pixelmatch + threshold + mask、 Playwright screenshot / DOM snapshot) |
 | `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-lab/api) |
 | `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
 | `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-lab/ui`) |
@@ -69,8 +68,6 @@ $ARGUMENTS
 | `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` (Next.js async React Server Components 専用、 `renderServerComponent` で direct await + `findAll` / `textContent` で element tree 検証、 notFound / forbidden / redirect signal 捕捉、 `@kiwa-lab/nextjs`) |
 | `nextjs-parallel-route` | `tests/spec/integration/test-spec-{module}.parallel.md` | `/kiwa-nextjs` (Next.js App Router Parallel Routes `@modal` / `@sidebar` + Intercepting Routes `(.)` / `(..)` / `(...)` 専用、 `invokeParallelRoutes` で全 slot 並列 await + per-slot error isolation + intercepting variant 切替 + default fallback 強制 render 捕捉、 `@kiwa-lab/nextjs` v1.0.4+) |
 | `nextjs-rsc-streaming` | `tests/spec/integration/test-spec-{module}.rsc-streaming.md` | `/kiwa-nextjs` (Next.js RSC streaming + Suspense boundary 専用、 `setupNextRscEnv` で chunk 配列 + fallback / resolved 遷移 + errorBoundary + timeout を deterministic に capture、 `@kiwa-lab/nextjs` v1.1+、 Issue #558) |
-| `solidstart-server-function` | `tests/spec/integration/test-spec-{module}.solidstart.md` | `/kiwa-solidstart` (SolidStart `'use server'` function 専用、 `invokeServerFunction` で args / headers / cookies + redirect signal 捕捉、 `@kiwa-lab/solidstart`) |
-| `solidstart-api-route` | `tests/spec/integration/test-spec-{module}.solidstart-api.md` | `/kiwa-solidstart` (SolidStart `routes/api/*.ts` 専用、 `invokeApiRoute` で simulated APIEvent (request / params / locals) + Response を normalize 捕捉、 `@kiwa-lab/solidstart`) |
 | `edge-handler` | `tests/spec/integration/test-spec-{module}.edge.md` | `/kiwa-edge` (Edge runtime fetch handler 専用、 Cloudflare Workers / Vercel Edge / 汎用 ESM 形式、 `invokeEdgeHandler` で env binding (KV / R2 / D1 / vars) + ExecutionContext (waitUntil / passThroughOnException) を捕捉、 `@kiwa-lab/edge`) |
 | `rust-unit` | `tests/spec/unit/test-spec-{module}.rs.md` | `kiwa-test-rs` (Rust cargo test 専用、 `kiwa::unit::setup_env(SetupOpts { mode, seed, label })` + `assert_kiwa_eq!` / `assert_kiwa_close!` + `Drop` 経由 auto cleanup、 `KiwaEnv` は `!Send` で test thread 局所、 v1.4-1 で追加) |
 | `rust-integration` | `tests/spec/integration/test-spec-{module}.rs.md` | `kiwa-test-rs` (Rust hyper backed API mock 専用、 `kiwa::integration::mock_server(MockServerOpts { routes, recorder })` で in-memory hyper server 起動 + `reqwest` PoC、 request recorder で method / path / body を捕捉、 v1.4-2 で追加) |
@@ -449,26 +446,6 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 `/kiwa-a11y` Layer 2 skill が本 9 column を `@kiwa-lab/a11y` API に機械変換する。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.a11y.md` (`.a11y.md` suffix で `@kiwa-lab/a11y` 経路向けと識別)。
-
-#### visual layer 専用 column (visual regression)
-
-`--layer visual` 指定時は pixel-level 比較セマンティクスを直接表現する **9 column 拡張表** を使う (`@kiwa-lab/visual` の `comparePngBuffers` / `expectNoVisualDiff` と直接 mapping)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-VIS-001` 等の連番 |
-| State | screenshot 対象状態 (`default` / `hover` / `error` / `loading` 等) |
-| Component | `<Button />` / `header` 等の対象要素識別子 |
-| Viewport | `375x667` / `1280x720` 等の解像度 (mobile / tablet / desktop) |
-| Threshold | 許容 diff 比率 (`0.001` / `0.01` 等の pixelmatch threshold) |
-| Mask | 動的領域 mask セレクタ (時刻 / カウンタ / アバター等を `[data-testid=ts]` で除外) |
-| Expected | 期待 (`baseline と diff ≦ threshold` 等の assertion) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-
-`/kiwa-visual` Layer 2 skill が本 9 column を `@kiwa-lab/visual` API に機械変換する。 baseline 画像は `tests/visual/baseline/` 配下、 diff 失敗時は `tests/visual/diff/` に actual / expected / diff の 3 枚を生成する。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.visual.md` (`.visual.md` suffix で `@kiwa-lab/visual` 経路向けと識別)。
 
 #### nextjs-server-action layer 専用 column (Next.js App Router `'use server'`)
 
