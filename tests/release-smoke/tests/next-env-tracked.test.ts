@@ -21,10 +21,11 @@ import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // Four levels: `tests/release-smoke/.vitest-dist/tests/` → repo root.
-const ROOT = resolve(HERE, '..', '..', '..', '..');
-
+const ROOT = repoRoot(HERE);
 /** Paths git is tracking under the given pathspec. Empty when none match. */
 function trackedUnder(pathspec: string): string[] {
   const out = execFileSync('git', ['ls-files', '--', pathspec], {

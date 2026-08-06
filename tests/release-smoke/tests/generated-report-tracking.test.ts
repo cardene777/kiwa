@@ -26,13 +26,14 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // This file runs from `tests/release-smoke/.vitest-dist/tests/`, not from its source
 // directory. Four levels, not three: with three, `git ls-files` runs inside `tests/`,
 // where the `examples/*` pathspec matches nothing and the first test below passes
 // while checking nothing at all.
-const ROOT = resolve(HERE, '..', '..', '..', '..');
-
+const ROOT = repoRoot(HERE);
 /** Paths git is tracking under the given pathspec. Empty when none match. */
 function trackedUnder(pathspec: string): string[] {
   const out = execFileSync('git', ['ls-files', '--', pathspec], {

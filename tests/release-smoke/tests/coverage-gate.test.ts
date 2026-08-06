@@ -9,10 +9,12 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const execFileAsync = promisify(execFile);
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = repo root (`tests/release-smoke/.vitest-dist/tests/` 配下)
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+const REPO_ROOT = repoRoot(HERE);
 const GATE_SCRIPT = resolve(REPO_ROOT, 'scripts/check-coverage-gates.mjs');
 
 function buildSummary(opts: { lines: number; branches: number; functions: number; statements: number }) {

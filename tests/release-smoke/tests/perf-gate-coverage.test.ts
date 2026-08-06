@@ -53,9 +53,11 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = repo root
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+const REPO_ROOT = repoRoot(HERE);
 const ROOTS = ['packages', 'examples'];
 
 function walk(dir: string, match: (name: string) => boolean): string[] {

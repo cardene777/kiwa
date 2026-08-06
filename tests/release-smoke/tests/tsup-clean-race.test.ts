@@ -10,6 +10,8 @@ import { promisify } from 'node:util';
 import ts from 'typescript';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const execFileAsync = promisify(execFile);
 
 /**
@@ -81,27 +83,7 @@ const execFileAsync = promisify(execFile);
 // `import.meta.dirname` は Node 20.11.0 追加で、 repo の下限 (>=20) を下回る
 // 20.0-20.10 では undefined になり module 読込時に落ちる。 既存 24 件と同じ形にする。
 const HERE = dirname(fileURLToPath(import.meta.url));
-/**
- * Walk up to the repository root rather than counting directories.
- *
- * This file runs from two places — `tests/` when read as source and
- * `.vitest-dist/tests/` when compiled — which are one level apart. A fixed
- * depth is right for one of them and points outside the repository in the
- * other, which made every probe read an empty `dist/` and report no stale
- * files. The check passed by finding nothing to check (#1821).
- */
-function repoRoot(): string {
-  let dir = HERE;
-  for (let up = 0; up < 8; up += 1) {
-    if (existsSync(resolve(dir, 'pnpm-workspace.yaml'))) return dir;
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  throw new Error('pnpm-workspace.yaml not found above this test');
-}
-
-const REPO_ROOT = repoRoot();
+const REPO_ROOT = repoRoot(HERE);
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 /**

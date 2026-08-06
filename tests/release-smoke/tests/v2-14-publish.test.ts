@@ -4,9 +4,10 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { generateLeanSpec, type OrchestratorSpec } from '@kiwa-lab/lean';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+import { repoRoot } from './repo-root.js';
 
+const HERE = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = repoRoot(HERE);
 function readText(rel: string): string {
   return readFileSync(resolve(REPO_ROOT, rel), 'utf-8');
 }

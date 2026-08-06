@@ -27,10 +27,11 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = repo root (`tests/release-smoke/.vitest-dist/tests/` 配下)
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
-
+const REPO_ROOT = repoRoot(HERE);
 // Packages that are intentionally excluded from the standard release filter.
 // Keep empty unless there is a hard reason a `@kiwa-lab/*` name cannot appear
 // in the pnpm build+publish pair. Each entry needs a one-line comment justifying

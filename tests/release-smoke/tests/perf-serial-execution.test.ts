@@ -23,10 +23,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = repo root (`tests/release-smoke/.vitest-dist/tests/` 配下)
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
-
+const REPO_ROOT = repoRoot(HERE);
 // `pnpm-workspace.yaml` の `*` glob に対応する親 dir。
 const WORKSPACE_PARENTS = ['packages', 'examples', 'tests/fixtures'] as const;
 
