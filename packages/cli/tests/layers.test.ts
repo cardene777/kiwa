@@ -59,6 +59,23 @@ describe('narrowing happens per runtime', () => {
     });
   });
 
+  it('says which runtimes it excluded and why', () => {
+    // `scan` reads the working directory and one level of declared workspace
+    // members, so a Go service in an undeclared subdirectory is absent to it
+    // and present to the project — its five layers stop being offered. The
+    // exclusion is the better default; being unable to find out why is not.
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      const { warnings } = resolveLayers({ cwd: root });
+      expect(warnings.join('\n')).toMatch(/excluded go: no go manifest/);
+      expect(warnings.join('\n')).toMatch(/excluded typescript: no typescript manifest/);
+    });
+  });
+
   it('keeps every TypeScript layer, because nothing can detect them', () => {
     // `docs/stack-signals.json` carries no TypeScript signals — JS detection was
     // left out of #1812 because the corpus to measure it against does not

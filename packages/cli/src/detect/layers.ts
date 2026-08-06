@@ -251,19 +251,32 @@ export function resolveLayers(options: {
   const readable = readableLanguages();
   const speakable = languagesWithSignals();
 
+  const excluded = new Set<string>();
   const kept = table.filter((layer) => {
     const runtime = layer.runtime;
     // No reader for this runtime, so nothing was looked for and nothing can be
     // concluded. `contract` sits here: `foundry.toml` is not read.
     if (!runtime || !readable.has(runtime)) return true;
     // A reader exists and found nothing of that language. That is the one case
-    // where absence is evidence.
-    if (!seen.has(runtime)) return false;
+    // where absence is evidence — but only as strong as the search was. `scan`
+    // reads the working directory and one level of declared workspace members,
+    // so a Go service in an undeclared subdirectory is absent to it and present
+    // to the project. The exclusion is still the better default; what it must
+    // not be is silent, because the layers simply stop being offered and
+    // nothing says why.
+    if (!seen.has(runtime)) {
+      excluded.add(runtime);
+      return false;
+    }
     // The manifest was read but the table has no signals for the language, so
     // "nothing detected" carries no information. TypeScript is here today.
     if (!speakable.has(runtime)) return true;
     return detected.has(layer.id);
   });
+
+  for (const runtime of [...excluded].sort()) {
+    warnings.push(`excluded ${runtime}: no ${runtime} manifest in the scanned directories`);
+  }
 
   // Keeping everything means the detection changed nothing, and saying
   // `detected` would overstate what happened.
