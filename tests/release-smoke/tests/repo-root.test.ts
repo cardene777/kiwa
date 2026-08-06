@@ -9,6 +9,16 @@ import { repoRoot } from './repo-root.js';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TESTS_DIR = resolve(repoRoot(HERE), 'tests', 'release-smoke', 'tests');
 
+/** Does this file build a path from its own location? */
+function inScope(body: string): boolean {
+  return /(resolve|join)\(\s*HERE\b/.test(body) || usesHelper(body);
+}
+
+/** Does it get the repository root the one supported way? */
+function usesHelper(body: string): boolean {
+  return /repoRoot\(HERE\)/.test(body) && /from '\.\/repo-root\.js'/.test(body);
+}
+
 describe('repoRoot finds the same place from either layout', () => {
   it('answers the same from the source tree and the build output', () => {
     // The two places these tests run from are one directory apart. A root that
@@ -49,6 +59,50 @@ describe('repoRoot finds the same place from either layout', () => {
   });
 });
 
+describe('the guard picks its targets without reading names', () => {
+  it('catches a file that calls the root something else', () => {
+    // The previous form selected by variable name, so `PROJECT_DIR` was outside
+    // the check and could count directories freely.
+    const body = [
+      "const HERE = dirname(fileURLToPath(import.meta.url));",
+      "const PROJECT_DIR = resolve(HERE, '..', '..', '..', '..');",
+    ].join('\n');
+    expect(inScope(body), 'path を組み立てている file は対象').toBe(true);
+    expect(usesHelper(body), 'helper を使っていない').toBe(false);
+  });
+
+  it('does not accept a mention of the helper as use of it', () => {
+    // `repoRoot` appearing anywhere is not the same as calling it with this
+    // file's own location and importing it. A comment naming the helper, or a
+    // local function that shadows the name, would satisfy a looser check while
+    // the root is still counted by hand.
+    expect(usesHelper('// use repoRoot here later\nconst ROOT = resolve(HERE, "../../../..");')).toBe(
+      false,
+    );
+    expect(usesHelper('function repoRoot() { return "/" }\nconst ROOT = repoRoot();')).toBe(false);
+    expect(usesHelper("import { repoRoot } from './repo-root.js';\nconst ROOT = repoRoot(OTHER);")).toBe(
+      false,
+    );
+    // Both halves are required. Calling it without importing it does not
+    // compile today, but the check should say what it wants rather than lean
+    // on the compiler to say it.
+    expect(usesHelper('const ROOT = repoRoot(HERE);')).toBe(false);
+  });
+
+  it('leaves alone a file that never builds a path from its own location', () => {
+    expect(inScope("import { x } from './y.js';\nconst a = 1;")).toBe(false);
+  });
+
+  it('accepts the helper as the only way in scope', () => {
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const ROOT = repoRoot(HERE);',
+    ].join('\n');
+    expect(inScope(body)).toBe(true);
+    expect(usesHelper(body)).toBe(true);
+  });
+});
+
 describe('no test resolves the repository root by counting directories', () => {
   it('every test file uses the helper', () => {
     // The fixed-depth form is right for the compiled layout and points outside
@@ -63,20 +117,20 @@ describe('no test resolves the repository root by counting directories', () => {
     // as one argument, or going through an intermediate all reintroduce the
     // same depth while the guard stays green. Requiring the helper leaves no
     // second way to answer the question.
-    const usesHelper: string[] = [];
+    const covered: string[] = [];
     const missing: string[] = [];
     for (const name of readdirSync(TESTS_DIR).filter((f) => f.endsWith('.test.ts'))) {
       const body = readFileSync(join(TESTS_DIR, name), 'utf8');
-      // A test that never asks for the root has nothing to get wrong.
-      if (!/\b(REPO_ROOT|ROOT|PACKAGES_DIR)\b/.test(body)) continue;
-      if (/repoRoot\(HERE\)/.test(body) && /from '\.\/repo-root\.js'/.test(body)) {
-        usesHelper.push(name);
-      } else {
-        missing.push(name);
-      }
+      const uses = usesHelper(body);
+      // In scope if it builds a path from its own location — that is the act
+      // this guard is about, and it is visible without knowing what the result
+      // gets called. Selecting by variable name (`REPO_ROOT`, `ROOT`) left a
+      // file that named it anything else outside the check entirely.
+      if (!inScope(body)) continue;
+      (uses ? covered : missing).push(name);
     }
     expect(missing, 'root を helper 以外で決めている').toEqual([]);
     // A guard that finds nothing to guard is not a guard.
-    expect(usesHelper.length).toBeGreaterThan(20);
+    expect(covered.length).toBeGreaterThan(20);
   });
 });
