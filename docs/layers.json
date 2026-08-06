@@ -37,7 +37,9 @@
     "",
     "targets records which --target values actually start a Step, not which ones the prose claims. Step 4r and 4g invoke only rust-unit / rust-integration and go-unit / go-integration; the six framework layers have no Step of their own and so carry no target. Assigning them by runtime, as a first pass did, describes an intent rather than the behaviour.",
     "",
-    "test_outputs is keyed by consumer because one layer can have more than one. contract is written by kiwa-forge as *.t.sol and by kiwa-hardhat as *.test.cjs, and a single value silently dropped the Hardhat review path."
+    "test_outputs is keyed by consumer because one layer can have more than one. contract is written by kiwa-forge as *.t.sol and by kiwa-hardhat as *.test.cjs, and a single value silently dropped the Hardhat review path.",
+    "",
+    "Each consumer's output is a list because Step 5.5 moves generated tests from examples/ into tests/fixtures/, so the same test lives in one of two places depending on whether that move has run. The original resolver carried both and the first version of this table kept only the first, which would have made review miss every test already moved."
   ],
   "specRoot": "tests/spec",
   "layers": [
@@ -63,8 +65,14 @@
       ],
       "selected_by": "kiwa-test --runner {foundry|hardhat|both}",
       "test_outputs": {
-        "kiwa-forge": "{example}/test/*.t.sol",
-        "kiwa-hardhat": "{example}/hardhat-test/*.test.cjs"
+        "kiwa-forge": [
+          "{example}/test/*.t.sol",
+          "tests/fixtures/{example}/contract-test/*.t.sol"
+        ],
+        "kiwa-hardhat": [
+          "{example}/hardhat-test/*.test.cjs",
+          "tests/fixtures/{example}/hardhat-test/*.test.cjs"
+        ]
       }
     },
     {
@@ -84,7 +92,10 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-play": "{example}/tests/*.spec.ts"
+        "kiwa-play": [
+          "{example}/tests/*.spec.ts",
+          "tests/fixtures/{example}/e2e-test/*.spec.ts"
+        ]
       }
     },
     {
@@ -104,7 +115,10 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-e2e": "{example}/tests/*.e2e.spec.ts"
+        "kiwa-e2e": [
+          "{example}/tests/*.e2e.spec.ts",
+          "tests/fixtures/{example}/e2e-generic-test/*.spec.ts"
+        ]
       }
     },
     {
@@ -124,7 +138,10 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-a11y": "{example}/tests/*.a11y.test.ts"
+        "kiwa-a11y": [
+          "{example}/tests/*.a11y.test.ts",
+          "tests/fixtures/{example}/a11y-test/*.test.ts"
+        ]
       }
     },
     {
@@ -141,7 +158,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-api": "{example}/test/integration/{module}.test.ts"
+        "kiwa-api": [
+          "{example}/test/integration/{module}.test.ts"
+        ]
       }
     },
     {
@@ -158,7 +177,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-api": "{example}/test/integration/{module}.test.ts"
+        "kiwa-api": [
+          "{example}/test/integration/{module}.test.ts"
+        ]
       }
     },
     {
@@ -175,7 +196,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-ui": "{example}/tests/{module}.test.tsx"
+        "kiwa-ui": [
+          "{example}/tests/{module}.test.tsx"
+        ]
       }
     },
     {
@@ -192,7 +215,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-data": "{example}/tests/{module}.test.ts"
+        "kiwa-data": [
+          "{example}/tests/{module}.test.ts"
+        ]
       }
     },
     {
@@ -209,7 +234,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-cli-test": "{example}/tests/{module}.test.ts"
+        "kiwa-cli-test": [
+          "{example}/tests/{module}.test.ts"
+        ]
       }
     },
     {
@@ -226,7 +253,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-vitest": "{example}/tests/{module}.test.ts"
+        "kiwa-vitest": [
+          "{example}/tests/{module}.test.ts"
+        ]
       }
     },
     {
@@ -247,7 +276,9 @@
       ],
       "selected_by": "spec の記述から kiwa-orm が判断 (flag なし)",
       "test_outputs": {
-        "kiwa-orm": "{example}/tests/{module}.test.ts"
+        "kiwa-orm": [
+          "{example}/tests/{module}.test.ts"
+        ]
       }
     },
     {
@@ -264,7 +295,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
       }
     },
     {
@@ -281,7 +314,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
       }
     },
     {
@@ -298,7 +333,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
       }
     },
     {
@@ -315,7 +352,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
       }
     },
     {
@@ -332,7 +371,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
       }
     },
     {
@@ -349,7 +390,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-edge": "{example}/tests/*.edge.test.ts"
+        "kiwa-edge": [
+          "{example}/tests/*.edge.test.ts"
+        ]
       }
     },
     {
@@ -372,7 +415,9 @@
       "variants": [],
       "selected_by": "kiwa-auth --provider",
       "test_outputs": {
-        "kiwa-auth": "{example}/tests/*.auth.test.ts"
+        "kiwa-auth": [
+          "{example}/tests/*.auth.test.ts"
+        ]
       }
     },
     {
@@ -394,7 +439,9 @@
       "variants": [],
       "selected_by": "kiwa-queue --provider",
       "test_outputs": {
-        "kiwa-queue": "{example}/tests/*.queue.test.ts"
+        "kiwa-queue": [
+          "{example}/tests/*.queue.test.ts"
+        ]
       }
     },
     {
@@ -415,7 +462,9 @@
       "variants": [],
       "selected_by": "kiwa-cache --provider",
       "test_outputs": {
-        "kiwa-cache": "{example}/tests/*.cache.test.ts"
+        "kiwa-cache": [
+          "{example}/tests/*.cache.test.ts"
+        ]
       }
     },
     {
@@ -435,7 +484,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-rust": "examples/{example}/tests/*.rs"
+        "kiwa-rust": [
+          "examples/{example}/tests/*.rs"
+        ]
       }
     },
     {
@@ -455,7 +506,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-rust": "examples/{example}/tests/*_integration.rs"
+        "kiwa-rust": [
+          "examples/{example}/tests/*_integration.rs"
+        ]
       }
     },
     {
@@ -473,7 +526,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-rust": "examples/{example}/tests/*_axum.rs"
+        "kiwa-rust": [
+          "examples/{example}/tests/*_axum.rs"
+        ]
       }
     },
     {
@@ -491,7 +546,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-rust": "examples/{example}/tests/*_actix.rs"
+        "kiwa-rust": [
+          "examples/{example}/tests/*_actix.rs"
+        ]
       }
     },
     {
@@ -509,7 +566,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-rust": "examples/{example}/tests/*_tower_http.rs"
+        "kiwa-rust": [
+          "examples/{example}/tests/*_tower_http.rs"
+        ]
       }
     },
     {
@@ -529,7 +588,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-go": "examples/{example}/*_test.go"
+        "kiwa-go": [
+          "examples/{example}/*_test.go"
+        ]
       }
     },
     {
@@ -549,7 +610,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-go": "examples/{example}/integration/*_test.go"
+        "kiwa-go": [
+          "examples/{example}/integration/*_test.go"
+        ]
       }
     },
     {
@@ -567,7 +630,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-go": "examples/{example}/*_gin_test.go"
+        "kiwa-go": [
+          "examples/{example}/*_gin_test.go"
+        ]
       }
     },
     {
@@ -585,7 +650,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-go": "examples/{example}/*_echo_test.go"
+        "kiwa-go": [
+          "examples/{example}/*_echo_test.go"
+        ]
       }
     },
     {
@@ -603,7 +670,9 @@
       "variants": [],
       "selected_by": null,
       "test_outputs": {
-        "kiwa-go": "examples/{example}/*_fiber_test.go"
+        "kiwa-go": [
+          "examples/{example}/*_fiber_test.go"
+        ]
       }
     }
   ]

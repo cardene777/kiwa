@@ -86,11 +86,11 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 
 | layer | 書き手 | 対応 test file |
 |---|---|---|
-| `contract` | `/kiwa-forge` | `{example}/test/*.t.sol` |
-| `contract` | `/kiwa-hardhat` | `{example}/hardhat-test/*.test.cjs` |
-| `e2e` | `/kiwa-play` | `{example}/tests/*.spec.ts` |
-| `e2e-generic` | `/kiwa-e2e` | `{example}/tests/*.e2e.spec.ts` |
-| `a11y` | `/kiwa-a11y` | `{example}/tests/*.a11y.test.ts` |
+| `contract` | `/kiwa-forge` | `{example}/test/*.t.sol` または `tests/fixtures/{example}/contract-test/*.t.sol` |
+| `contract` | `/kiwa-hardhat` | `{example}/hardhat-test/*.test.cjs` または `tests/fixtures/{example}/hardhat-test/*.test.cjs` |
+| `e2e` | `/kiwa-play` | `{example}/tests/*.spec.ts` または `tests/fixtures/{example}/e2e-test/*.spec.ts` |
+| `e2e-generic` | `/kiwa-e2e` | `{example}/tests/*.e2e.spec.ts` または `tests/fixtures/{example}/e2e-generic-test/*.spec.ts` |
+| `a11y` | `/kiwa-a11y` | `{example}/tests/*.a11y.test.ts` または `tests/fixtures/{example}/a11y-test/*.test.ts` |
 | `integration` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
 | `api` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
 | `ui` | `/kiwa-ui` | `{example}/tests/{module}.test.tsx` |

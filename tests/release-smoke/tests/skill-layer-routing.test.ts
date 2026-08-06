@@ -38,7 +38,7 @@ interface Layer {
   variants: string[];
   selected_by: string | null;
   mode?: string;
-  test_outputs: Record<string, string>;
+  test_outputs: Record<string, string[]>;
   targets: string[];
 }
 
@@ -312,7 +312,7 @@ describe('the skills carry what the table renders', () => {
       for (const skill of Object.keys(l.test_outputs)) {
         if (!known.has(skill)) wrong.push(`${l.id}: "${skill}" is not a consumer`);
       }
-      if (!l.test_outputs[l.consumer_skill]) wrong.push(`${l.id}: primary consumer has no output`);
+      if (!l.test_outputs[l.consumer_skill]?.length) wrong.push(`${l.id}: primary consumer has no output`);
     }
     expect(wrong).toEqual([]);
   });

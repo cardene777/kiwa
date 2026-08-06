@@ -102,7 +102,7 @@ function loadLayers() {
         throw new Error(`${TABLE}: ${l.id}: test_outputs names "${skill}", which is not a consumer`);
       }
     }
-    if (!l.test_outputs[l.consumer_skill]) {
+    if (!l.test_outputs[l.consumer_skill]?.length) {
       throw new Error(`${TABLE}: ${l.id}: no test_output for its primary consumer`);
     }
     if (l.backing_package && l.backing_runtime_package) {
@@ -184,8 +184,10 @@ function renderResolver(layers) {
   // single column dropped the Hardhat path entirely.
   const lines = ['', '| layer | 書き手 | 対応 test file |', '|---|---|---|'];
   for (const l of layers) {
-    for (const [skill, out] of Object.entries(l.test_outputs)) {
-      lines.push(`| \`${l.id}\` | \`/${skill}\` | \`${out}\` |`);
+    for (const [skill, outs] of Object.entries(l.test_outputs)) {
+      // Two places, because Step 5.5 moves generated tests from examples/ into
+      // tests/fixtures/. Review has to look in both.
+      lines.push(`| \`${l.id}\` | \`/${skill}\` | ${outs.map((o) => `\`${o}\``).join(' または ')} |`);
     }
   }
   lines.push('');
