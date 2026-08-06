@@ -88,7 +88,7 @@ describe("{module} — auth", () => {
 
 - 上流 ... `/kiwa-design --layer auth` (Layer 1 spec 生成)
 - 下流 ... `/kiwa-review --mode test-review --layer auth` (test 品質 review)
-- 統合 ... `/kiwa-test --target auth` で Layer 1 → Layer 2 → review を 1 コマンド chain
+- 統合 ... 無し。 `/kiwa-test` に `auth` の Step が無いため、 本 skill は単体起動する (#1809)
 
 ## 関連
 

@@ -236,6 +236,161 @@ describe('docs/layers.json is internally consistent', () => {
   });
 });
 
+describe('the target values and the Step conditions agree', () => {
+  const TEST_SKILL = read('.claude/skills/kiwa-test/SKILL.md');
+
+  /** The values `--target` accepts, from its own option line. */
+  function declaredTargets(): string[] {
+    const m = /`--target \{([^}]+)\}`/.exec(TEST_SKILL);
+    expect(m, '--target option line not found').toBeTruthy();
+    return m![1]!.split('|');
+  }
+
+  /** The values the Step headings actually admit, e.g. `(target=web or all)`. */
+  function admittedTargets(): Set<string> {
+    const out = new Set<string>();
+    for (const line of TEST_SKILL.split('\n')) {
+      if (!line.startsWith('### Step ')) continue;
+      // The heading carries more than the condition — `(e2e-generic + a11y,
+      // target=web or all)` and `(target=rust or all, Issue #581)` both occur —
+      // so read from `target=` to the first separator rather than to `)`.
+      const m = /target=([^),、]+)/.exec(line);
+      if (!m) continue;
+      for (const value of m[1]!.split(/\s+or\s+/)) out.add(value.trim());
+    }
+    return out;
+  }
+
+  it('every accepted target starts at least one Step', () => {
+    // `nextjs` was accepted and started nothing: the value existed, no Step
+    // admitted it, and asking for it did nothing at all.
+    const orphans = declaredTargets().filter((t) => !admittedTargets().has(t));
+    expect(orphans).toEqual([]);
+  });
+
+  it('every target a Step admits is accepted', () => {
+    const admitted = [...admittedTargets()];
+    const declared = new Set(declaredTargets());
+    expect(admitted.filter((t) => !declared.has(t))).toEqual([]);
+  });
+
+  it('no skill points anyone at a target that does not exist', () => {
+    // Removing the value from the option line is not enough on its own: a skill
+    // telling readers to run `--target nextjs` sends them at something that
+    // stopped existing. `kiwa-nextjs` did exactly that.
+    const declared = new Set(declaredTargets());
+    const offenders: string[] = [];
+    const files = readdirSync(resolve(REPO_ROOT, '.claude/skills')).map((name) => [
+      name,
+      resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md'),
+    ]);
+    // The README points readers at the same flag, and it is the copy someone
+    // reads before ever opening a skill.
+    files.push(['README.md', resolve(REPO_ROOT, 'README.md')]);
+    for (const [name, file] of files) {
+      if (!existsSync(file!)) continue;
+      const body = readFileSync(file!, 'utf-8');
+
+      // Only references aimed at `kiwa-test`. `--target` is overloaded — in
+      // `kiwa-rust` and `kiwa-go` it names the implementation file under test —
+      // so an unqualified match reads those as target values.
+      for (const m of body.matchAll(/kiwa-test[^`\n]*--target ([a-z]+)/g)) {
+        if (!declared.has(m[1]!)) offenders.push(`${name}: --target ${m[1]}`);
+      }
+
+      // The other way readers meet the flag is the enum itself, which the
+      // README repeats and `kiwa-test` declares. A stale value there points at
+      // nothing just as loudly, and the bare-value pattern above skips it —
+      // `--target {` is not `--target ` followed by a word.
+      // The same list appears without the flag name — `$TARGET` holds one of
+      // these — and a value left behind there is as stale as one in the enum.
+      for (const m of body.matchAll(/\$TARGET[^\n]*?\(([^)]+)\)/g)) {
+        const items = m[1]!.split('/').map((v) => v.trim());
+        // A list of values, each written as inline code. Requiring the shape
+        // keeps ordinary parentheses on a line that happens to mention
+        // `$TARGET` from being read as candidates — shell snippets carry
+        // `(dev)` and `(null)` for unrelated reasons.
+        if (items.length < 2 || !items.every((v) => /^`[a-z-]+`$/.test(v))) continue;
+        for (const value of items) {
+          const clean = value.replace(/`/g, '');
+          if (!declared.has(clean)) offenders.push(`${name}: $TARGET may hold ${clean}`);
+        }
+      }
+
+      for (const m of body.matchAll(/--target \{([^}]+)\}/g)) {
+        // An alternation, not a placeholder. `--target {path}` in `kiwa-rust`
+        // names the implementation file, and `--target {target}` in a report
+        // template is a slot to fill — neither lists values.
+        if (!m[1]!.includes('|')) continue;
+        for (const value of m[1]!.split(/\\?\|/)) {
+          const clean = value.replace(/[`\\ ]/g, '');
+          if (clean && !declared.has(clean)) offenders.push(`${name}: enum lists ${clean}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('all covers exactly the layers the table gives it', () => {
+    // The description says web + rust + go. `docs/layers.json` is where that
+    // claim has to hold, since the skills are generated from it.
+    const byTarget = (t: string) =>
+      LAYERS.filter((l) => (l.targets ?? []).includes(t)).map((l) => l.id);
+    expect(byTarget('all').sort()).toEqual(
+      [...byTarget('web'), ...byTarget('rust'), ...byTarget('go')].sort(),
+    );
+  });
+
+  it('both covers exactly contract plus dapp', () => {
+    const byTarget = (t: string) =>
+      LAYERS.filter((l) => (l.targets ?? []).includes(t)).map((l) => l.id);
+    expect(byTarget('both').sort()).toEqual(
+      [...byTarget('contract'), ...byTarget('dapp')].sort(),
+    );
+  });
+});
+
+/** Escape a path so it can be matched literally inside a RegExp. */
+function escapeForRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+describe('every declared output path is one its producer writes', () => {
+  it('each test_outputs entry appears in the producing skill', () => {
+    // The rows were written from the old resolver rather than from the
+    // producers, and 15 of 31 named a path no skill declares. A review that
+    // looks where nothing is written finds nothing and says so.
+    // `kiwa-test` Step 5.5 moves generated tests out of the example directory,
+    // so the second path of a row is declared there rather than by the producer.
+    const mover = read('.claude/skills/kiwa-test/SKILL.md');
+
+    const missing: string[] = [];
+    for (const layer of LAYERS) {
+      for (const [skill, outputs] of Object.entries(layer.test_outputs ?? {})) {
+        const body = read(`.claude/skills/${skill}/SKILL.md`);
+        // Every path, not just one of them. Checking the array with `some`
+        // let 9 of 23 single-slot reverts survive, and the fixture paths passed
+        // on the strength of a sibling that had nothing to do with them.
+        for (const output of outputs as string[]) {
+          // The producer states its own path; the table prefixes the example
+          // directory because `kiwa-test` runs the skill from inside one.
+          const bare = output.replace(/^(examples\/)?\{example\}\//, '');
+          const where = output.startsWith('tests/fixtures/') ? mover : body;
+          // As a whole token, not as a substring. `tests/{module}.test.ts`
+          // occurs inside `tests/{module}.test.tsx`, so a plain `includes`
+          // lets a row claim a path its producer never writes as long as some
+          // longer path happens to start the same way.
+          const declared = new RegExp(`(^|[^-\\w./{])${escapeForRegExp(bare)}([^-\\w./}]|$)`, 'm').test(
+            where,
+          );
+          if (!declared) missing.push(`${layer.id} -> ${skill}: ${output}`);
+        }
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+});
+
 describe('the skills carry what the table renders', () => {
   it('the generated regions are up to date', () => {
     // The renderer is the assertion. `--check` re-renders from the table and

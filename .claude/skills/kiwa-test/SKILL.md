@@ -28,7 +28,7 @@ $ARGUMENTS
 ## オプション
 
 - `--example {name}` — 対象 example 名 (必須、 `examples/{name}/` を参照)
-- `--target {contract|dapp|web|nextjs|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は web + rust + go を起動する (contract / dapp は `both`、 nextjs は専用 Step が未実装。 内訳は各 Step の起動条件が SSOT で、 surface 数は数えない)
+- `--target {contract|dapp|web|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は web + rust + go を起動する (contract / dapp は `both` で起動する。 内訳は各 Step の起動条件が SSOT で、 surface 数は数えない)
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 全子 skill に伝播)
@@ -116,7 +116,7 @@ multiSelect: false
   description: "理由 — polyglot test toolchain の Go 経路 (Issue #581)。 kiwa-design (--layer go-unit / go-integration) → kiwa-go → kiwa-review の 3 step、 testing.T + httptest で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 ```
 
-確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `web` / `nextjs` / `rust` / `go` / `both` / `all`)。
+確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `web` / `rust` / `go` / `both` / `all`)。
 
 ### Step 2: 環境 + dir check
 

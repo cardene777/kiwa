@@ -101,7 +101,7 @@ kiwa ships in two halves that work together but stand alone:
 
 | Skill | Layer | Role |
 |---|---|---|
-| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (`--target {contract\|dapp\|web\|nextjs\|rust\|go\|both\|all}`, where `web` runs the generic-e2e + a11y pair against the same `app/` source, `rust`/`go` cover polyglot Rust / Go layers via `/kiwa-rust` / `/kiwa-go`, and `all` runs the web, Rust and Go chains) |
+| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (`--target {contract\|dapp\|web\|rust\|go\|both\|all}`, where `web` runs the generic-e2e + a11y pair against the same `app/` source, `rust`/`go` cover polyglot Rust / Go layers via `/kiwa-rust` / `/kiwa-go`, and `all` runs the web, Rust and Go chains) |
 | [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | Reverse-engineer a 9-section / 9-column test spec from existing contracts, APIs, screens, or written feature specs |
 | [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 spec → Foundry `.t.sol` with fuzz / invariant / `vm.prank` / custom-error reverts, run `forge test`, gate on `forge coverage` |
 | [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | Same Layer 1 spec → Hardhat `.test.cjs` with `chai-matchers` / `fast-check` / `loadFixture`, run `npx hardhat test`, gate on `solidity-coverage` |
@@ -191,7 +191,7 @@ Every kiwa surface follows the same `kiwa-design → Layer 2 generator → kiwa-
 | CLI / shell / file IO | `/kiwa-design --layer cli` | `/kiwa-cli-test` | `/kiwa-review --layer cli` | `@kiwa-lab/cli-test` |
 | ORM query (Drizzle + Prisma + Kysely 全 3 ORM × SQLite mock + Postgres/MySQL testcontainers + drizzle-orm/migrator folder migration + Prisma + Postgres testcontainers、 v0.6 / v1.2 完遂版) | `/kiwa-design --layer orm-query` | `/kiwa-orm` | `/kiwa-review --layer orm-query` | `@kiwa-lab/orm` (Prisma + MySQL testcontainers は future follow-up) |
 
-`/kiwa-test --target {contract|dapp|web|both|all}` orchestrates the chain end-to-end for any subset of surfaces — `web` runs the generic e2e / a11y / visual trio against the same `app/` source, and `all` covers all 6 web-side surfaces (contract + dapp + web). The integrated report at `tests/reports/integrated/{example}-{target}.{lang}.md` aggregates every surface's pass/fail count, coverage, and reviewer score in one table.
+`/kiwa-test --target {contract|dapp|web|rust|go|both|all}` orchestrates the chain end-to-end for any subset of surfaces — `web` runs the generic e2e / a11y pair against the same `app/` source, `both` covers contract + dapp, and `all` covers web + rust + go. The integrated report at `tests/reports/integrated/{example}-{target}.{lang}.md` aggregates every surface's pass/fail count, coverage, and reviewer score in one table.
 
 ---
 

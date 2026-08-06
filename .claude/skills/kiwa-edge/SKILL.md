@@ -22,6 +22,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 - Layer 1 spec が存在
 - `@kiwa-lab/edge` v1.0+ install 済 (`pnpm add -D @kiwa-lab/edge`)
 - vitest standard 開発環境
+- 出力先 `tests/{module}.edge.test.ts` への Write 権限
 
 ## 9 column 拡張表 (`/kiwa-design --layer edge-handler`)
 

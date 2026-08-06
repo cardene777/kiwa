@@ -67,11 +67,11 @@
       "test_outputs": {
         "kiwa-forge": [
           "{example}/test/*.t.sol",
-          "tests/fixtures/{example}/contract-test/*.t.sol"
+          "tests/fixtures/{example}/contract-test/{Contract}.t.sol"
         ],
         "kiwa-hardhat": [
-          "{example}/hardhat-test/*.test.cjs",
-          "tests/fixtures/{example}/hardhat-test/*.test.cjs"
+          "{example}/test/*.test.ts",
+          "tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs"
         ]
       }
     },
@@ -94,7 +94,7 @@
       "test_outputs": {
         "kiwa-play": [
           "{example}/tests/*.spec.ts",
-          "tests/fixtures/{example}/e2e-test/*.spec.ts"
+          "tests/fixtures/{example}/e2e-test/{example}.spec.ts"
         ]
       }
     },
@@ -116,8 +116,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-e2e": [
-          "{example}/tests/*.e2e.spec.ts",
-          "tests/fixtures/{example}/e2e-generic-test/*.spec.ts"
+          "{example}/tests/e2e/{module}.spec.ts"
         ]
       }
     },
@@ -139,8 +138,8 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-a11y": [
-          "{example}/tests/*.a11y.test.ts",
-          "tests/fixtures/{example}/a11y-test/*.test.ts"
+          "{example}/tests/a11y/{module}.test.tsx",
+          "{example}/tests/a11y/{module}.spec.ts"
         ]
       }
     },
@@ -254,7 +253,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-vitest": [
-          "{example}/tests/{module}.test.ts"
+          "{example}/test/unit/{module}.test.{ts,tsx}"
         ]
       }
     },
@@ -391,7 +390,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-edge": [
-          "{example}/tests/*.edge.test.ts"
+          "{example}/tests/{module}.edge.test.ts"
         ]
       }
     },
@@ -416,7 +415,7 @@
       "selected_by": "kiwa-auth --provider",
       "test_outputs": {
         "kiwa-auth": [
-          "{example}/tests/*.auth.test.ts"
+          "{example}/tests/{module}.auth.test.ts"
         ]
       }
     },
@@ -440,7 +439,7 @@
       "selected_by": "kiwa-queue --provider",
       "test_outputs": {
         "kiwa-queue": [
-          "{example}/tests/*.queue.test.ts"
+          "{example}/tests/{module}.queue.test.ts"
         ]
       }
     },
@@ -463,7 +462,7 @@
       "selected_by": "kiwa-cache --provider",
       "test_outputs": {
         "kiwa-cache": [
-          "{example}/tests/*.cache.test.ts"
+          "{example}/tests/{module}.cache.test.ts"
         ]
       }
     },
@@ -485,7 +484,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/*.rs"
+          "examples/{example}/tests/{module}.rs"
         ]
       }
     },
@@ -507,7 +506,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/*_integration.rs"
+          "examples/{example}/tests/{module}.rs"
         ]
       }
     },
@@ -527,7 +526,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/*_axum.rs"
+          "examples/{example}/tests/{module}_axum.rs"
         ]
       }
     },
@@ -547,7 +546,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/*_actix.rs"
+          "examples/{example}/tests/{module}_actix.rs"
         ]
       }
     },
@@ -567,7 +566,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/*_tower_http.rs"
+          "examples/{example}/tests/{module}_tower_http.rs"
         ]
       }
     },
@@ -589,7 +588,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/*_test.go"
+          "examples/{example}/{module}_test.go"
         ]
       }
     },
@@ -611,7 +610,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/integration/*_test.go"
+          "examples/{example}/integration/{module}_test.go"
         ]
       }
     },
@@ -631,7 +630,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/*_gin_test.go"
+          "examples/{example}/{module}_gin_test.go"
         ]
       }
     },
@@ -651,7 +650,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/*_echo_test.go"
+          "examples/{example}/{module}_echo_test.go"
         ]
       }
     },
@@ -671,7 +670,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/*_fiber_test.go"
+          "examples/{example}/{module}_fiber_test.go"
         ]
       }
     }

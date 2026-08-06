@@ -90,7 +90,7 @@ describe("{module} — queue happy path", () => {
 
 - 上流 ... `/kiwa-design --layer job-queue` (Layer 1 spec 生成)
 - 下流 ... `/kiwa-review --mode test-review --layer job-queue` (test 品質 review)
-- 統合 ... `/kiwa-test --target queue` で Layer 1 → Layer 2 → review を 1 コマンド chain
+- 統合 ... 無し。 `/kiwa-test` に `queue` の Step が無いため、 本 skill は単体起動する (#1809)
 
 ## 関連
 
