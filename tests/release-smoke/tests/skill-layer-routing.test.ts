@@ -52,7 +52,8 @@ function routingTable(rel: string): Map<string, string[]> {
   for (const line of read(rel).split('\n')) {
     const m = /^\| `([a-z0-9-]+)` \| `[^`]*` \| (.+)$/.exec(line);
     if (!m) continue;
-    const skills = [...m[2]!.matchAll(/`\/([a-z-]+)`/g)].map((s) => s[1]!);
+    // Digits belong in the class: `kiwa-e2e` and `kiwa-a11y` both exist.
+    const skills = [...m[2]!.matchAll(/`\/([a-z0-9-]+)`/g)].map((s) => s[1]!);
     rows.set(m[1]!, skills);
   }
   return rows;
@@ -113,12 +114,17 @@ describe('--layer routing agrees with the filesystem', () => {
     // A slash followed by a name is not enough to mean "skill call". The same
     // shape appears in a worktree path (`../kiwa-gh-pages`), a cargo/go package
     // (`kiwa-test-rs`), and a script path (`scripts/kiwa-taxonomy-run.mjs`).
-    // A call starts the token: preceded by whitespace, a backtick, or a line
-    // start, never by a path segment.
+    // A call starts the token: what precedes it is never a path character.
+    // Excluding `[A-Za-z0-9_./-]` admits quotes, brackets and table pipes —
+    // which is what Mermaid nodes (`["/kiwa-forge"]`) and Markdown links
+    // (`[/kiwa-forge](...)`) use — while still rejecting `../kiwa-gh-pages`
+    // and `scripts/kiwa-taxonomy-run.mjs`.
+    //
+    // The narrower form this replaced missed 20 calls in one Mermaid block.
     const dirs = skillDirs();
     const dangling: string[] = [];
     for (const rel of skillFiles()) {
-      for (const m of read(rel).matchAll(/(^|[\s`(])\/(kiwa-[a-z0-9-]+)/gm)) {
+      for (const m of read(rel).matchAll(/(^|[^A-Za-z0-9_./-])\/(kiwa-[a-z0-9-]+)/gm)) {
         if (!dirs.has(m[2]!)) dangling.push(`${rel} -> /${m[2]!}`);
       }
     }

@@ -108,15 +108,15 @@ multiSelect: false
   description: "理由 — 非 web3 web app の品質ゲート (browser flow + accessibility)。 kiwa-design (--layer e2e-generic / a11y) → kiwa-e2e + kiwa-a11y → kiwa-review。 実行時間目安 10-15 分。 ⭐⭐⭐⭐"
 - label: "🔷+🌐 両方 (contract + dApp)"
   description: "理由 — full coverage check。 contract ($RUNNER) → dApp の順で順次実行 (--mode sequential が default)。 実行時間目安 15-30 分。 ⭐⭐⭐⭐"
-- label: "🌈 contract + dApp + web を通す"
-  description: "理由 — 動画 v10 で謳う 11 観点を contract / dapp / web で通す。 contract / dapp / web (e2e-generic + a11y) を順次実行、 統合 report に各 chain の result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
+- label: "🌈 all (web + Rust + Go を通す)"
+  description: "理由 — `all` が起動するのは web (e2e-generic + a11y) / Rust / Go の 3 chain。 contract と dApp は `both` を、 Next.js は専用 Step が未実装のため個別 skill を使う (#1809)。 統合 report に各 chain の result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
 - label: "🦀 Rust polyglot (rust-unit + rust-integration、 v1.4-6)"
   description: "理由 — polyglot test toolchain の Rust 経路 (Issue #581)。 kiwa-design (--layer rust-unit / rust-integration) → kiwa-rust → kiwa-review の 3 step、 cargo test + mock_server で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 - label: "🐹 Go polyglot (go-unit + go-integration、 v1.4-6)"
   description: "理由 — polyglot test toolchain の Go 経路 (Issue #581)。 kiwa-design (--layer go-unit / go-integration) → kiwa-go → kiwa-review の 3 step、 testing.T + httptest で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 ```
 
-確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `both`)。
+確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `web` / `nextjs` / `rust` / `go` / `both` / `all`)。
 
 ### Step 2: 環境 + dir check
 
@@ -576,12 +576,14 @@ graph TD
     B -->|dapp| D1["/kiwa-design --layer e2e"]
     B -->|web| W1["/kiwa-design --layer e2e-generic"]
     B -->|web| W3["/kiwa-design --layer a11y"]
+    B -->|rust| RS1["/kiwa-design --layer rust-unit / rust-integration"]
+    B -->|go| GO1["/kiwa-design --layer go-unit / go-integration"]
     B -->|both| C1
     B -->|both| D1
-    B -->|all| C1
-    B -->|all| D1
     B -->|all| W1
     B -->|all| W3
+    B -->|all| RS1
+    B -->|all| GO1
     C1 -->|Step 6| R1["/kiwa-review --mode spec-review --layer contract"]
     R1 --> C2["/kiwa-forge"]
     C2 -->|Step 6| R2["/kiwa-review --mode test-review --layer contract"]
@@ -600,6 +602,12 @@ graph TD
     R5 --> E
     RW2 --> E
     RW4 --> E
+    RS1 -->|Step 4r| RS2["/kiwa-rust"]
+    RS2 -->|Step 6| RS3["/kiwa-review --layer rust-unit"]
+    RS3 --> E
+    GO1 -->|Step 4g| GO2["/kiwa-go"]
+    GO2 -->|Step 6| GO3["/kiwa-review --layer go-unit"]
+    GO3 --> E
     E --> M["Step 5.5 fixtures 退避<br>(git mv examples/ → tests/fixtures/)"]
     M --> R6["/kiwa-review --mode result-review (Step 5b)"]
     R6 -->|PASS| F["Step 6 user に summary return"]
