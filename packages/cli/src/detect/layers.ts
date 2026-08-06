@@ -333,18 +333,20 @@ export function resolveLayers(options: {
     // to the project. The exclusion is still the better default; what it must
     // not be is silent, because the layers simply stop being offered and
     // nothing says why.
+    // The two passes disagreeing comes first. When a runtime's only manifest
+    // sits somewhere the search does not enter, it is absent from `present`
+    // entirely — so testing absence before disagreement excluded the runtime
+    // on a search that had already been shown not to cover it.
+    if (partiallyRead.has(runtime)) {
+      unread.add(runtime);
+      return true;
+    }
     if (!present.has(runtime)) {
       excluded.add(runtime);
       return false;
     }
     // Present but never opened, so nothing was asked and nothing was answered.
     if (!read.has(runtime)) return true;
-    // Opened in part. What went unread could name anything, so what was read
-    // cannot stand for the whole.
-    if (partiallyRead.has(runtime)) {
-      unread.add(runtime);
-      return true;
-    }
     // Opened, but the table has no signals for the language, so "nothing
     // detected" carries no information. TypeScript is here today.
     if (!speakable.has(runtime)) return true;

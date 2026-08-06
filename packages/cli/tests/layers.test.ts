@@ -294,6 +294,31 @@ describe('absence is established by looking', () => {
     });
   });
 
+  it('keeps a runtime whose only manifest sits where the search does not go', () => {
+    // The sharper form of the same disagreement: with no Rust manifest visible
+    // to the search, the runtime is absent from `present` altogether. Testing
+    // absence before disagreement excluded all five layers on a search already
+    // known not to cover them.
+    const root = fixture(
+      { 'package.json': '{"name":"app"}', 'vendor/inner/Cargo.toml': '[dependencies]\n' },
+      {
+        generated_at: fresh(),
+        scanned: [
+          { manifest: 'package.json', language: 'typescript' },
+          { manifest: 'vendor/inner/Cargo.toml', language: 'rust' },
+        ],
+        detected: [],
+      },
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'rust').length,
+      );
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded rust/);
+    });
+  });
+
   it('still narrows a runtime whose manifests were all read', () => {
     // The other half: an unread manifest is what suspends the narrowing, not
     // the mere possibility of one.
