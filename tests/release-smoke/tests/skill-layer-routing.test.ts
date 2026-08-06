@@ -186,4 +186,47 @@ describe('the skills carry what the table renders', () => {
     const values = rendered![1]!.split('|').filter((v) => v !== 'all');
     expect([...values].sort()).toEqual([...LAYERS.map((l) => l.id)].sort());
   });
+
+  it('no skill declares a --layer enum outside a generated region', () => {
+    // Without this the whole scheme has a hole: `--check` only compares what is
+    // inside the markers, and the assertion above reads the first match, so a
+    // second enum written anywhere else passes both. Verified by writing
+    // `--layer {contract|bogus-layer}` into a neighbouring section — the suite
+    // stayed green.
+    //
+    // One declaration per skill, and it has to be the generated one.
+    const stray: string[] = [];
+    for (const [rel, region] of [
+      ['.claude/skills/kiwa-design/SKILL.md', 'design-enum'],
+      ['.claude/skills/kiwa-review/SKILL.md', 'review-enum'],
+      ['.claude/skills/kiwa-rust/SKILL.md', 'rust-enum'],
+      ['.claude/skills/kiwa-go/SKILL.md', 'go-enum'],
+    ] as const) {
+      const source = read(rel);
+      const declarations = [...source.matchAll(/`--layer \{/g)];
+      if (declarations.length !== 1) {
+        stray.push(`${rel}: ${declarations.length} declarations, expected 1`);
+        continue;
+      }
+      const from = source.indexOf(`<!-- kiwa-layers:${region}:start -->`);
+      const to = source.indexOf(`<!-- kiwa-layers:${region}:end -->`);
+      const at = declarations[0]!.index!;
+      if (!(from < at && at < to)) stray.push(`${rel}: declaration sits outside the region`);
+    }
+    expect(stray).toEqual([]);
+  });
+
+  it('the routing table appears only inside its region', () => {
+    // Same hole, other shape: a second routing table elsewhere in the file
+    // would read as authoritative to anyone following the skill.
+    const source = read('.claude/skills/kiwa-design/SKILL.md');
+    const from = source.indexOf('<!-- kiwa-layers:routing-table:start -->');
+    const to = source.indexOf('<!-- kiwa-layers:routing-table:end -->');
+    const outside: string[] = [];
+    for (const m of source.matchAll(/^\| `[a-z0-9-]+` \| `tests\/spec\//gm)) {
+      const at = m.index!;
+      if (!(from < at && at < to)) outside.push(m[0]!.slice(0, 40));
+    }
+    expect(outside).toEqual([]);
+  });
 });
