@@ -501,6 +501,25 @@ describe('an implied layer holds only while nothing more specific appears', () =
   });
 });
 
+describe('the signal table stays unambiguous', () => {
+  it('no signal carries both layer and default', () => {
+    // The two would mean different things — `layer` is asserted, `default` only
+    // holds while nothing more specific turned up — and the resolver keeps the
+    // asserted one. A signal written with both silently loses its `default`,
+    // which reads as a working fallback to whoever wrote it.
+    const offenders: string[] = [];
+    for (const [language, signals] of Object.entries(TABLE.signals)) {
+      for (const signal of signals) {
+        if (signal.layer && signal.default) offenders.push(`${language}: ${signal.match}`);
+      }
+    }
+    for (const signal of TABLE.generated.signals) {
+      if (signal.layer && signal.default) offenders.push(`generated: ${signal.match}`);
+    }
+    expect(offenders).toEqual([]);
+  });
+});
+
 describe('every detected layer exists in docs/layers.json', () => {
   it('no signal points at a layer the table does not define', () => {
     // #1810 removed `contract-rust` because nothing implemented it. A signal
