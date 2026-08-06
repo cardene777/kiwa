@@ -421,6 +421,50 @@ const FIXTURE_DIRS: Record<string, string> = {
 };
 
 /**
+ * Split a markdown table row on its unescaped pipes.
+ *
+ * A `\\|` inside a cell is an escaped pipe rather than a separator — the
+ * review-report row carries one — but "the character before is a backslash" is
+ * not the same question. `\\\\|` is an escaped backslash followed by a real
+ * separator, and a lookbehind one character wide reads it as escaped, merging
+ * two cells into one and letting a malformed row pass the shape check.
+ *
+ * What decides it is whether the run of backslashes ending at the pipe is odd.
+ */
+function splitRow(row: string): string[] {
+  const cells: string[] = [];
+  let current = '';
+  for (let i = 0; i < row.length; i += 1) {
+    const ch = row[i]!;
+    if (ch === '\\') {
+      // Consume the whole run, so its length decides what follows it.
+      let run = 0;
+      while (row[i] === '\\') {
+        run += 1;
+        i += 1;
+      }
+      // Each pair of backslashes is one literal backslash. An odd run leaves
+      // one over, and that one escapes whatever follows.
+      if (row[i] === '|' && run % 2 === 1) {
+        current += '\\'.repeat((run - 1) / 2) + '|';
+        continue; // the pipe was consumed by the escape
+      }
+      current += '\\'.repeat(Math.floor(run / 2)) + (run % 2 === 1 ? '\\' : '');
+      i -= 1; // hand the next character back to the loop
+      continue;
+    }
+    if (ch === '|') {
+      cells.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
+/**
  * The data rows of the table under a heading, as cell arrays.
  *
  * Nothing is dropped. Discarding a row that does not fit means the check passes
@@ -436,16 +480,7 @@ function tableRows(body: string, heading: string): string[][] {
   const section = end === -1 ? rest : rest.slice(0, end);
 
   const lines = section.split('\n').filter((line) => line.trimStart().startsWith('|'));
-  const cells = lines.map((line) =>
-    line
-      .trim()
-      .replace(/^\||\|$/g, '')
-      // A `\|` inside a cell is an escaped pipe, not a separator. Splitting on
-      // every pipe read the review-report row as four cells when it has three,
-      // which the strict shape check then reported as a malformed table.
-      .split(/(?<!\\)\|/)
-      .map((c) => c.trim().replace(/\\\|/g, '|')),
-  );
+  const cells = lines.map((line) => splitRow(line.trim().replace(/^\||\|$/g, '')));
   expect(cells.length, `${heading} に表が無い`).toBeGreaterThan(2);
 
   const [header, separator, ...rows] = cells as [string[], string[], ...string[][]];
@@ -459,6 +494,22 @@ function tableRows(body: string, heading: string): string[][] {
 
   return rows;
 }
+
+describe('a table row splits on its unescaped pipes', () => {
+  it('keeps an escaped pipe inside its cell', () => {
+    expect(splitRow('a | b \\| c | d')).toEqual(['a', 'b | c', 'd']);
+  });
+
+  it('treats a pipe after an escaped backslash as a separator', () => {
+    // The case a one-character lookbehind gets wrong: the backslash is itself
+    // escaped, so the pipe that follows is a real separator.
+    expect(splitRow('a | b \\\\| c')).toEqual(['a', 'b \\', 'c']);
+  });
+
+  it('reads a run of three backslashes as escaping the pipe', () => {
+    expect(splitRow('a \\\\\\| b')).toEqual(['a \\| b']);
+  });
+});
 
 describe('each producer claims its own fixture row', () => {
   const mover = read('.claude/skills/kiwa-test/SKILL.md');
