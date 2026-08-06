@@ -10,12 +10,12 @@ import { dirname, resolve } from 'node:path';
  * `resolve(HERE, '..', '..', '..', '..')` is right for one and points outside
  * the repository for the other.
  *
- * That is not a loud failure. Ten of these tests enumerate something and assert
- * the offenders list is empty — with the root outside the repository the
- * enumeration finds nothing and the test passes having checked nothing. In
- * #1821 that produced a test which "passed alone and failed in the sweep" for
- * two full sweeps before the cause was found: the sweep was the only place it
- * was running at all.
+ * Measured, the tests fail loudly from the wrong root rather than passing on
+ * nothing — reading a file that is not there throws. The exception was
+ * `tsup-clean-race`, whose probe swallowed the build error and enumerated an
+ * empty directory, so it passed having checked nothing. That produced a test
+ * which "passed alone and failed in the sweep" and cost two full sweeps to
+ * diagnose (#1821): the sweep was the only place it was running at all.
  *
  * `pnpm-workspace.yaml` is the marker because it exists at the repository root
  * and nowhere else in the tree.
