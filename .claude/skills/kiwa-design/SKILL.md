@@ -60,7 +60,7 @@ $ARGUMENTS
 
 | layer | spec 出力先 | 消費 skill | 実行 runtime | provider |
 |---|---|---|---|---|
-| `contract` | `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` | solidity | `foundry` / `hardhat` |
+| `contract` | `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` | solidity | `foundry` / `hardhat` (kiwa-test --runner {foundry|hardhat|both}) |
 | `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` | typescript | — |
 | `e2e-generic` | `tests/spec/integration/test-spec-{module}.e2e.md` | `/kiwa-e2e` | typescript | — |
 | `a11y` | `tests/spec/integration/test-spec-{module}.a11y.md` | `/kiwa-a11y` | typescript | — |
@@ -70,7 +70,7 @@ $ARGUMENTS
 | `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` | typescript | — |
 | `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` | typescript | — |
 | `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` | typescript | — |
-| `orm-query` | `tests/spec/integration/test-spec-{module}.orm.md` | `/kiwa-orm` | typescript | `drizzle` / `prisma` / `kysely` |
+| `orm-query` | `tests/spec/integration/test-spec-{module}.orm.md` | `/kiwa-orm` | typescript | `drizzle` / `prisma` / `kysely` (spec の記述から kiwa-orm が判断 (flag なし)) |
 | `nextjs-server-action` | `tests/spec/integration/test-spec-{module}.nextjs.md` | `/kiwa-nextjs` | typescript | — |
 | `nextjs-middleware` | `tests/spec/integration/test-spec-{module}.middleware.md` | `/kiwa-nextjs` | typescript | — |
 | `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` | typescript | — |

@@ -114,7 +114,14 @@ function renderDesignEnum(layers) {
 function renderRoutingTable(layers) {
   const lines = ['', '| layer | spec 出力先 | 消費 skill | 実行 runtime | provider |', '|---|---|---|---|---|'];
   for (const l of layers) {
-    const providers = l.providers.length ? l.providers.map((p) => `\`${p}\``).join(' / ') : '—';
+    // A provider is a flag value; a variant is an alternative chosen elsewhere.
+    // Printing both in one column would claim a `--provider` that only three
+    // layers have.
+    const providers = l.providers.length
+      ? l.providers.map((p) => `\`${p}\``).join(' / ')
+      : l.variants.length
+        ? `${l.variants.map((p) => `\`${p}\``).join(' / ')} (${l.selected_by})`
+        : '—';
     const mode = l.mode ? ` (\`--mode ${l.mode}\`)` : '';
     lines.push(
       `| \`${l.id}\` | \`${l.spec_path}\` | \`/${l.consumer_skill}\`${mode} | ${l.runtime} | ${providers} |`,

@@ -35,6 +35,8 @@ interface Layer {
   backing_package: string | null;
   backing_runtime_package: string | null;
   providers: string[];
+  variants: string[];
+  selected_by: string | null;
   mode?: string;
   test_output: string;
   targets: string[];
@@ -127,6 +129,40 @@ describe('docs/layers.json is internally consistent', () => {
       (l) => (l.runtime === 'rust' || l.runtime === 'go') && !l.backing_runtime_package,
     ).map((l) => l.id);
     expect(missing).toEqual([]);
+  });
+
+  it('providers name a flag the consumer actually declares', () => {
+    // Writing a value into `providers` claims the consumer has a `--provider`
+    // flag. Three skills do; the rest choose their variant some other way, and
+    // the two lived in one column until review asked whether the values were
+    // really flags. `contract` picks its runner through `kiwa-test --runner`,
+    // and `orm-query`'s three ORMs are read out of the spec with no flag.
+    const wrong: string[] = [];
+    for (const l of LAYERS) {
+      if (!l.providers.length) continue;
+      const skill = read(`.claude/skills/${l.consumer_skill}/SKILL.md`);
+      const declared = /`--provider \{([^}]+)\}`/.exec(skill);
+      if (!declared) {
+        wrong.push(`${l.id}: /${l.consumer_skill} declares no --provider`);
+        continue;
+      }
+      const accepted = new Set(declared[1]!.split('|'));
+      for (const p of l.providers) {
+        if (!accepted.has(p)) wrong.push(`${l.id}: /${l.consumer_skill} does not accept "${p}"`);
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('a layer carries providers or variants, never both', () => {
+    const both = LAYERS.filter((l) => l.providers.length && l.variants.length).map((l) => l.id);
+    expect(both).toEqual([]);
+  });
+
+  it('a variant says how it is selected', () => {
+    // A variant with no `selected_by` is a value nobody can act on.
+    const unexplained = LAYERS.filter((l) => l.variants.length && !l.selected_by).map((l) => l.id);
+    expect(unexplained).toEqual([]);
   });
 
   it('a mode belongs only to a layer whose consumer accepts one', () => {

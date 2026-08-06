@@ -31,7 +31,9 @@
     "                   the Step headings, not from the prose describing them; the two",
     "                   disagree today and #1809 decides which one moves.",
     "",
-    "contract-rust is deliberately absent. It had a routing row in kiwa-design and no entry in either enum, and the skill it named (/kiwa-rust) implements neither the layer nor the --provider flag the row advertised. Rendering it into the enum would have advertised an option nothing can serve. #1809 decides whether to implement it or drop the row; until then the table records what works."
+    "contract-rust is deliberately absent. It had a routing row in kiwa-design and no entry in either enum, and the skill it named (/kiwa-rust) implements neither the layer nor the --provider flag the row advertised. Rendering it into the enum would have advertised an option nothing can serve. #1809 decides whether to implement it or drop the row; until then the table records what works.",
+    "",
+    "providers vs variants: providers are the values a consumer accepts on its own --provider flag, which is only auth, job-queue and cache. variants are alternatives chosen some other way -- contract picks foundry or hardhat through kiwa-test --runner, and orm-query's three ORMs are read out of the spec with no flag at all. They were one column until review asked whether the values were really flags; writing them into providers claimed an interface that does not exist."
   ],
   "specRoot": "tests/spec",
   "layers": [
@@ -46,15 +48,17 @@
       ],
       "backing_package": null,
       "backing_runtime_package": null,
-      "providers": [
-        "foundry",
-        "hardhat"
-      ],
+      "providers": [],
       "test_output": "{example}/test/*.t.sol",
       "targets": [
         "contract",
         "both"
-      ]
+      ],
+      "variants": [
+        "foundry",
+        "hardhat"
+      ],
+      "selected_by": "kiwa-test --runner {foundry|hardhat|both}"
     },
     {
       "id": "e2e",
@@ -70,7 +74,9 @@
       "targets": [
         "dapp",
         "both"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "e2e-generic",
@@ -86,7 +92,9 @@
       "targets": [
         "web",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "a11y",
@@ -102,7 +110,9 @@
       "targets": [
         "web",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "integration",
@@ -115,7 +125,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/test/integration/{module}.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "api",
@@ -128,7 +140,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/test/integration/{module}.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "ui",
@@ -141,7 +155,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/{module}.test.tsx",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "data",
@@ -154,7 +170,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/{module}.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "cli",
@@ -167,7 +185,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/{module}.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "unit",
@@ -180,7 +200,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/{module}.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "orm-query",
@@ -191,13 +213,15 @@
       "also_consumed_by": [],
       "backing_package": "orm",
       "backing_runtime_package": null,
-      "providers": [
+      "providers": [],
+      "test_output": "{example}/tests/{module}.test.ts",
+      "targets": [],
+      "variants": [
         "drizzle",
         "prisma",
         "kysely"
       ],
-      "test_output": "{example}/tests/{module}.test.ts",
-      "targets": []
+      "selected_by": "spec の記述から kiwa-orm が判断 (flag なし)"
     },
     {
       "id": "nextjs-server-action",
@@ -210,7 +234,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "nextjs-middleware",
@@ -223,7 +249,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "nextjs-rsc",
@@ -236,7 +264,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "nextjs-parallel-route",
@@ -249,7 +279,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "nextjs-rsc-streaming",
@@ -262,7 +294,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "edge-handler",
@@ -275,7 +309,9 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/*.edge.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "auth",
@@ -294,7 +330,9 @@
         "auth0"
       ],
       "test_output": "{example}/tests/*.auth.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": "kiwa-auth --provider"
     },
     {
       "id": "job-queue",
@@ -312,7 +350,9 @@
         "sqs"
       ],
       "test_output": "{example}/tests/*.queue.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": "kiwa-queue --provider"
     },
     {
       "id": "cache",
@@ -329,7 +369,9 @@
         "keydb"
       ],
       "test_output": "{example}/tests/*.cache.test.ts",
-      "targets": []
+      "targets": [],
+      "variants": [],
+      "selected_by": "kiwa-cache --provider"
     },
     {
       "id": "rust-unit",
@@ -345,7 +387,9 @@
       "targets": [
         "rust",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "rust-integration",
@@ -361,7 +405,9 @@
       "targets": [
         "rust",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "rust-axum",
@@ -378,7 +424,9 @@
       "targets": [
         "rust",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "rust-actix-web",
@@ -395,7 +443,9 @@
       "targets": [
         "rust",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "rust-tower-http",
@@ -412,7 +462,9 @@
       "targets": [
         "rust",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "go-unit",
@@ -428,7 +480,9 @@
       "targets": [
         "go",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "go-integration",
@@ -444,7 +498,9 @@
       "targets": [
         "go",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "go-gin",
@@ -461,7 +517,9 @@
       "targets": [
         "go",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "go-echo",
@@ -478,7 +536,9 @@
       "targets": [
         "go",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     },
     {
       "id": "go-fiber",
@@ -495,7 +555,9 @@
       "targets": [
         "go",
         "all"
-      ]
+      ],
+      "variants": [],
+      "selected_by": null
     }
   ]
 }
