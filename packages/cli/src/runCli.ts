@@ -7,6 +7,7 @@ import {
   detectFrom,
   loadSignalTable,
   resolveDetections,
+  resolveLayers,
   scanManifests,
   stackFileExists,
   writeStackFile,
@@ -18,10 +19,16 @@ export const USAGE = `Usage: kiwa <command> [options]
 Commands:
   init [options]                                            Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
   doctor                                                    Check that anvil is installed
+  layers [--layer L] [--json]                               Print the layers this run applies to
   anvil seed <script> --out <path>                          Run <script> against a fresh anvil and dump state to <path>
   spec-to-test --in <spec.md> --out <test.ts> [--layer L]   Generate a vitest test file from a Layer 1 spec.md
   run --watch [--layer L]...                                Run vitest in watch mode across one or more layers (default unit + api + ui)
   --help, -h                                                Show this message
+
+layers options:
+  --layer L                     Use L instead of the detection. Wins outright.
+  --json                        Emit one record per layer with its consumer skill,
+                                mode and spec path, plus how the list was chosen.
 
 init options:
   --detect                      Report which kiwa layers the project's dependencies point at,
@@ -358,6 +365,59 @@ function specToTestCommand(argv: string[], deps: RunCliDeps): number {
   }
 }
 
+/**
+ * Print the layers this run applies to.
+ *
+ * Read-only by design. Skills call it to learn what to work on, so it must be
+ * safe to run at any point and must never change what a later command sees.
+ *
+ * Warnings go to stderr and never change the exit code: an ignored detection
+ * still leaves a usable answer, and a caller reading stdout in a shell pipeline
+ * should not have to distinguish "some detections were stale" from "the command
+ * failed".
+ */
+function layersCommand(args: string[], deps: RunCliDeps): number {
+  let explicit: string | undefined;
+  let asJson = false;
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i]!;
+    if (arg === '--json') {
+      asJson = true;
+    } else if (arg === '--layer') {
+      explicit = args[i + 1];
+      i += 1;
+    } else if (arg.startsWith('--layer=')) {
+      explicit = arg.slice('--layer='.length);
+    } else {
+      deps.stderr(`ERR layers: unknown option ${arg}\n`);
+      return 2;
+    }
+  }
+
+  if (explicit !== undefined && !explicit) {
+    deps.stderr('ERR layers: --layer needs a value\n');
+    return 2;
+  }
+
+  let resolved: ReturnType<typeof resolveLayers>;
+  try {
+    resolved = resolveLayers({ cwd: deps.cwd(), explicit });
+  } catch (error) {
+    deps.stderr(`ERR layers: ${(error as Error).message}\n`);
+    return 2;
+  }
+
+  for (const warning of resolved.warnings) deps.stderr(`WARN ${warning}\n`);
+
+  if (asJson) {
+    deps.stdout(`${JSON.stringify({ source: resolved.source, layers: resolved.layers }, null, 2)}\n`);
+    return 0;
+  }
+  for (const layer of resolved.layers) deps.stdout(`${layer.id}\n`);
+  return 0;
+}
+
 function doctorCommand(deps: RunCliDeps): number {
   try {
     const path = deps.execSync('which anvil').trim();
@@ -413,7 +473,7 @@ function detectCommand(deps: RunCliDeps): number {
     // otherwise survive a dependency removal and keep telling the skills about
     // a layer the project no longer has — the stale state this file exists to
     // prevent, produced by the file itself.
-    const cleared = writeStackFile(cwd, []);
+    const cleared = writeStackFile(cwd, [], manifests);
     deps.stdout('\nNo kiwa layer matched. Use --layer to choose one explicitly.\n');
     deps.stdout(`wrote: ${cleared} (empty)\n`);
     return 0;
@@ -424,7 +484,7 @@ function detectCommand(deps: RunCliDeps): number {
     deps.stdout(`  ${d.layer}  (${d.signal} in ${d.manifest})\n`);
   }
 
-  const written = writeStackFile(cwd, layers);
+  const written = writeStackFile(cwd, layers, manifests);
   deps.stdout(`\nwrote: ${written}\n`);
   deps.stdout('Run `kiwa init` to scaffold, or pass a layer to the kiwa skills.\n');
   return 0;
@@ -502,6 +562,9 @@ async function dispatch(argv: string[], deps: RunCliDeps): Promise<number> {
   }
   if (cmd === 'doctor') {
     return doctorCommand(deps);
+  }
+  if (cmd === 'layers') {
+    return layersCommand(argv.slice(1), deps);
   }
   if (cmd === 'init') {
     return initCommand(argv.slice(1), deps);

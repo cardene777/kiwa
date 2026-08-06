@@ -34,7 +34,6 @@ cpSync(join(PACKAGE_ROOT, 'src/templates'), join(PACKAGE_ROOT, 'dist/templates')
   recursive: true,
 });
 
-copyFileSync(
-  join(repoRoot(), 'docs', 'stack-signals.json'),
-  join(PACKAGE_ROOT, 'dist', 'stack-signals.json'),
-);
+for (const name of ['stack-signals.json', 'layers.json']) {
+  copyFileSync(join(repoRoot(), 'docs', name), join(PACKAGE_ROOT, 'dist', name));
+}
