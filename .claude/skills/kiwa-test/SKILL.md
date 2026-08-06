@@ -28,7 +28,7 @@ $ARGUMENTS
 ## オプション
 
 - `--example {name}` — 対象 example 名 (必須、 `examples/{name}/` を参照)
-- `--target {contract|dapp|web|nextjs|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は contract + dapp + web + nextjs + rust + go の 9 surface 全網羅
+- `--target {contract|dapp|web|nextjs|rust|go|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `nextjs` は Next.js App Router Server Actions (`/kiwa-nextjs`、 Issue #493、 RSC / middleware は #494 / #495)、 `rust` は polyglot Rust test 2 layer (rust-unit + rust-integration、 `/kiwa-rust`、 Issue #581 v1.4-6)、 `go` は polyglot Go test 2 layer (go-unit + go-integration、 `/kiwa-go`、 Issue #581 v1.4-6)、 `both` は contract + dapp、 `all` は contract + dapp + web + nextjs + rust + go の 8 surface 全網羅
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 全子 skill に伝播)
@@ -108,8 +108,8 @@ multiSelect: false
   description: "理由 — 非 web3 web app の品質ゲート (browser flow + accessibility)。 kiwa-design (--layer e2e-generic / a11y) → kiwa-e2e + kiwa-a11y → kiwa-review。 実行時間目安 10-15 分。 ⭐⭐⭐⭐"
 - label: "🔷+🌐 両方 (contract + dApp)"
   description: "理由 — full coverage check。 contract ($RUNNER) → dApp の順で順次実行 (--mode sequential が default)。 実行時間目安 15-30 分。 ⭐⭐⭐⭐"
-- label: "🌈 6 surface 全網羅 (contract + dApp + web)"
-  description: "理由 — 動画 v10 で謳う 11 観点 × 6 surface 完全網羅。 contract / dapp / web (e2e-generic + a11y) を順次実行、 統合 report に 6 surface 全 result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
+- label: "🌈 5 surface 全網羅 (contract + dApp + web)"
+  description: "理由 — 動画 v10 で謳う 11 観点 × 5 surface 完全網羅。 contract / dapp / web (e2e-generic + a11y) を順次実行、 統合 report に 5 surface 全 result を集約。 実行時間目安 25-45 分。 ⭐⭐⭐"
 - label: "🦀 Rust polyglot (rust-unit + rust-integration、 v1.4-6)"
   description: "理由 — polyglot test toolchain の Rust 経路 (Issue #581)。 kiwa-design (--layer rust-unit / rust-integration) → kiwa-rust → kiwa-review の 3 step、 cargo test + mock_server で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 - label: "🐹 Go polyglot (go-unit + go-integration、 v1.4-6)"
@@ -253,7 +253,7 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
   ↓ tests/reports/review/test-review-{example}.{lang}.md Write (contract と同 path、 後勝ち or suffix 区別)
 ```
 
-### Step 4w: web 3 surface chain 実行 (target=web or all)
+### Step 4w: web 2 surface chain 実行 (target=web or all)
 
 target=web (汎用 web 2 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y の 2 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 2 子 skill が同時 Read するだけ、 file 書込 path は別)。
 
