@@ -38,7 +38,7 @@ interface Layer {
   variants: string[];
   selected_by: string | null;
   mode?: string;
-  test_output: string;
+  test_outputs: Record<string, string>;
   targets: string[];
 }
 
@@ -300,6 +300,21 @@ describe('the skills carry what the table renders', () => {
       }
     }
     expect(stray).toEqual([]);
+  });
+
+  it('every test_outputs key is a declared consumer', () => {
+    // `contract` is written by two skills in two shapes. A single value dropped
+    // the Hardhat review path silently, so the column is keyed by consumer and
+    // the keys have to be consumers the layer actually names.
+    const wrong: string[] = [];
+    for (const l of LAYERS) {
+      const known = new Set([l.consumer_skill, ...l.also_consumed_by]);
+      for (const skill of Object.keys(l.test_outputs)) {
+        if (!known.has(skill)) wrong.push(`${l.id}: "${skill}" is not a consumer`);
+      }
+      if (!l.test_outputs[l.consumer_skill]) wrong.push(`${l.id}: primary consumer has no output`);
+    }
+    expect(wrong).toEqual([]);
   });
 
   it('the routing table appears only inside its region', () => {

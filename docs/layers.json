@@ -33,7 +33,11 @@
     "",
     "contract-rust is deliberately absent. It had a routing row in kiwa-design and no entry in either enum, and the skill it named (/kiwa-rust) implements neither the layer nor the --provider flag the row advertised. Rendering it into the enum would have advertised an option nothing can serve. #1809 decides whether to implement it or drop the row; until then the table records what works.",
     "",
-    "providers vs variants: providers are the values a consumer accepts on its own --provider flag, which is only auth, job-queue and cache. variants are alternatives chosen some other way -- contract picks foundry or hardhat through kiwa-test --runner, and orm-query's three ORMs are read out of the spec with no flag at all. They were one column until review asked whether the values were really flags; writing them into providers claimed an interface that does not exist."
+    "providers vs variants: providers are the values a consumer accepts on its own --provider flag, which is only auth, job-queue and cache. variants are alternatives chosen some other way -- contract picks foundry or hardhat through kiwa-test --runner, and orm-query's three ORMs are read out of the spec with no flag at all. They were one column until review asked whether the values were really flags; writing them into providers claimed an interface that does not exist.",
+    "",
+    "targets records which --target values actually start a Step, not which ones the prose claims. Step 4r and 4g invoke only rust-unit / rust-integration and go-unit / go-integration; the six framework layers have no Step of their own and so carry no target. Assigning them by runtime, as a first pass did, describes an intent rather than the behaviour.",
+    "",
+    "test_outputs is keyed by consumer because one layer can have more than one. contract is written by kiwa-forge as *.t.sol and by kiwa-hardhat as *.test.cjs, and a single value silently dropped the Hardhat review path."
   ],
   "specRoot": "tests/spec",
   "layers": [
@@ -49,7 +53,6 @@
       "backing_package": null,
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/test/*.t.sol",
       "targets": [
         "contract",
         "both"
@@ -58,7 +61,11 @@
         "foundry",
         "hardhat"
       ],
-      "selected_by": "kiwa-test --runner {foundry|hardhat|both}"
+      "selected_by": "kiwa-test --runner {foundry|hardhat|both}",
+      "test_outputs": {
+        "kiwa-forge": "{example}/test/*.t.sol",
+        "kiwa-hardhat": "{example}/hardhat-test/*.test.cjs"
+      }
     },
     {
       "id": "e2e",
@@ -70,13 +77,15 @@
       "backing_package": "dapp",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/*.spec.ts",
       "targets": [
         "dapp",
         "both"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-play": "{example}/tests/*.spec.ts"
+      }
     },
     {
       "id": "e2e-generic",
@@ -88,13 +97,15 @@
       "backing_package": "e2e",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/*.e2e.spec.ts",
       "targets": [
         "web",
         "all"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-e2e": "{example}/tests/*.e2e.spec.ts"
+      }
     },
     {
       "id": "a11y",
@@ -106,13 +117,15 @@
       "backing_package": "a11y",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/*.a11y.test.ts",
       "targets": [
         "web",
         "all"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-a11y": "{example}/tests/*.a11y.test.ts"
+      }
     },
     {
       "id": "integration",
@@ -124,10 +137,12 @@
       "backing_package": "api",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/test/integration/{module}.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-api": "{example}/test/integration/{module}.test.ts"
+      }
     },
     {
       "id": "api",
@@ -139,10 +154,12 @@
       "backing_package": "api",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/test/integration/{module}.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-api": "{example}/test/integration/{module}.test.ts"
+      }
     },
     {
       "id": "ui",
@@ -154,10 +171,12 @@
       "backing_package": "ui",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/{module}.test.tsx",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-ui": "{example}/tests/{module}.test.tsx"
+      }
     },
     {
       "id": "data",
@@ -169,10 +188,12 @@
       "backing_package": "data",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/{module}.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-data": "{example}/tests/{module}.test.ts"
+      }
     },
     {
       "id": "cli",
@@ -184,10 +205,12 @@
       "backing_package": "cli-test",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/{module}.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-cli-test": "{example}/tests/{module}.test.ts"
+      }
     },
     {
       "id": "unit",
@@ -199,10 +222,12 @@
       "backing_package": null,
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/{module}.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-vitest": "{example}/tests/{module}.test.ts"
+      }
     },
     {
       "id": "orm-query",
@@ -214,14 +239,16 @@
       "backing_package": "orm",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/{module}.test.ts",
       "targets": [],
       "variants": [
         "drizzle",
         "prisma",
         "kysely"
       ],
-      "selected_by": "spec の記述から kiwa-orm が判断 (flag なし)"
+      "selected_by": "spec の記述から kiwa-orm が判断 (flag なし)",
+      "test_outputs": {
+        "kiwa-orm": "{example}/tests/{module}.test.ts"
+      }
     },
     {
       "id": "nextjs-server-action",
@@ -233,10 +260,12 @@
       "backing_package": "nextjs",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+      }
     },
     {
       "id": "nextjs-middleware",
@@ -248,10 +277,12 @@
       "backing_package": "nextjs",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+      }
     },
     {
       "id": "nextjs-rsc",
@@ -263,10 +294,12 @@
       "backing_package": "nextjs",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+      }
     },
     {
       "id": "nextjs-parallel-route",
@@ -278,10 +311,12 @@
       "backing_package": "nextjs",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+      }
     },
     {
       "id": "nextjs-rsc-streaming",
@@ -293,10 +328,12 @@
       "backing_package": "nextjs",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": "{example}/tests/integration/{module}.nextjs.test.ts"
+      }
     },
     {
       "id": "edge-handler",
@@ -308,10 +345,12 @@
       "backing_package": "edge",
       "backing_runtime_package": null,
       "providers": [],
-      "test_output": "{example}/tests/*.edge.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-edge": "{example}/tests/*.edge.test.ts"
+      }
     },
     {
       "id": "auth",
@@ -329,10 +368,12 @@
         "clerk",
         "auth0"
       ],
-      "test_output": "{example}/tests/*.auth.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": "kiwa-auth --provider"
+      "selected_by": "kiwa-auth --provider",
+      "test_outputs": {
+        "kiwa-auth": "{example}/tests/*.auth.test.ts"
+      }
     },
     {
       "id": "job-queue",
@@ -349,10 +390,12 @@
         "cloudflare",
         "sqs"
       ],
-      "test_output": "{example}/tests/*.queue.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": "kiwa-queue --provider"
+      "selected_by": "kiwa-queue --provider",
+      "test_outputs": {
+        "kiwa-queue": "{example}/tests/*.queue.test.ts"
+      }
     },
     {
       "id": "cache",
@@ -368,10 +411,12 @@
         "memcached",
         "keydb"
       ],
-      "test_output": "{example}/tests/*.cache.test.ts",
       "targets": [],
       "variants": [],
-      "selected_by": "kiwa-cache --provider"
+      "selected_by": "kiwa-cache --provider",
+      "test_outputs": {
+        "kiwa-cache": "{example}/tests/*.cache.test.ts"
+      }
     },
     {
       "id": "rust-unit",
@@ -383,13 +428,15 @@
       "backing_package": null,
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
-      "test_output": "examples/{example}/tests/*.rs",
       "targets": [
         "rust",
         "all"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": "examples/{example}/tests/*.rs"
+      }
     },
     {
       "id": "rust-integration",
@@ -401,13 +448,15 @@
       "backing_package": null,
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
-      "test_output": "examples/{example}/tests/*_integration.rs",
       "targets": [
         "rust",
         "all"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": "examples/{example}/tests/*_integration.rs"
+      }
     },
     {
       "id": "rust-axum",
@@ -420,13 +469,12 @@
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
       "mode": "axum",
-      "test_output": "examples/{example}/tests/*_axum.rs",
-      "targets": [
-        "rust",
-        "all"
-      ],
+      "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": "examples/{example}/tests/*_axum.rs"
+      }
     },
     {
       "id": "rust-actix-web",
@@ -439,13 +487,12 @@
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
       "mode": "actix-web",
-      "test_output": "examples/{example}/tests/*_actix.rs",
-      "targets": [
-        "rust",
-        "all"
-      ],
+      "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": "examples/{example}/tests/*_actix.rs"
+      }
     },
     {
       "id": "rust-tower-http",
@@ -458,13 +505,12 @@
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
       "mode": "tower-http",
-      "test_output": "examples/{example}/tests/*_tower_http.rs",
-      "targets": [
-        "rust",
-        "all"
-      ],
+      "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": "examples/{example}/tests/*_tower_http.rs"
+      }
     },
     {
       "id": "go-unit",
@@ -476,13 +522,15 @@
       "backing_package": null,
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
-      "test_output": "examples/{example}/*_test.go",
       "targets": [
         "go",
         "all"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": "examples/{example}/*_test.go"
+      }
     },
     {
       "id": "go-integration",
@@ -494,13 +542,15 @@
       "backing_package": null,
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
-      "test_output": "examples/{example}/integration/*_test.go",
       "targets": [
         "go",
         "all"
       ],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": "examples/{example}/integration/*_test.go"
+      }
     },
     {
       "id": "go-gin",
@@ -513,13 +563,12 @@
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
       "mode": "gin",
-      "test_output": "examples/{example}/*_gin_test.go",
-      "targets": [
-        "go",
-        "all"
-      ],
+      "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": "examples/{example}/*_gin_test.go"
+      }
     },
     {
       "id": "go-echo",
@@ -532,13 +581,12 @@
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
       "mode": "echo",
-      "test_output": "examples/{example}/*_echo_test.go",
-      "targets": [
-        "go",
-        "all"
-      ],
+      "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": "examples/{example}/*_echo_test.go"
+      }
     },
     {
       "id": "go-fiber",
@@ -551,13 +599,12 @@
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
       "mode": "fiber",
-      "test_output": "examples/{example}/*_fiber_test.go",
-      "targets": [
-        "go",
-        "all"
-      ],
+      "targets": [],
       "variants": [],
-      "selected_by": null
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": "examples/{example}/*_fiber_test.go"
+      }
     }
   ]
 }

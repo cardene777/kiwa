@@ -84,38 +84,39 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 
 <!-- kiwa-layers:resolver:start -->
 
-| layer | 対応 test file |
-|---|---|
-| `contract` | `{example}/test/*.t.sol` |
-| `e2e` | `{example}/tests/*.spec.ts` |
-| `e2e-generic` | `{example}/tests/*.e2e.spec.ts` |
-| `a11y` | `{example}/tests/*.a11y.test.ts` |
-| `integration` | `{example}/test/integration/{module}.test.ts` |
-| `api` | `{example}/test/integration/{module}.test.ts` |
-| `ui` | `{example}/tests/{module}.test.tsx` |
-| `data` | `{example}/tests/{module}.test.ts` |
-| `cli` | `{example}/tests/{module}.test.ts` |
-| `unit` | `{example}/tests/{module}.test.ts` |
-| `orm-query` | `{example}/tests/{module}.test.ts` |
-| `nextjs-server-action` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-middleware` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-rsc` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-parallel-route` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-rsc-streaming` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `edge-handler` | `{example}/tests/*.edge.test.ts` |
-| `auth` | `{example}/tests/*.auth.test.ts` |
-| `job-queue` | `{example}/tests/*.queue.test.ts` |
-| `cache` | `{example}/tests/*.cache.test.ts` |
-| `rust-unit` | `examples/{example}/tests/*.rs` |
-| `rust-integration` | `examples/{example}/tests/*_integration.rs` |
-| `rust-axum` | `examples/{example}/tests/*_axum.rs` |
-| `rust-actix-web` | `examples/{example}/tests/*_actix.rs` |
-| `rust-tower-http` | `examples/{example}/tests/*_tower_http.rs` |
-| `go-unit` | `examples/{example}/*_test.go` |
-| `go-integration` | `examples/{example}/integration/*_test.go` |
-| `go-gin` | `examples/{example}/*_gin_test.go` |
-| `go-echo` | `examples/{example}/*_echo_test.go` |
-| `go-fiber` | `examples/{example}/*_fiber_test.go` |
+| layer | 書き手 | 対応 test file |
+|---|---|---|
+| `contract` | `/kiwa-forge` | `{example}/test/*.t.sol` |
+| `contract` | `/kiwa-hardhat` | `{example}/hardhat-test/*.test.cjs` |
+| `e2e` | `/kiwa-play` | `{example}/tests/*.spec.ts` |
+| `e2e-generic` | `/kiwa-e2e` | `{example}/tests/*.e2e.spec.ts` |
+| `a11y` | `/kiwa-a11y` | `{example}/tests/*.a11y.test.ts` |
+| `integration` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
+| `api` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
+| `ui` | `/kiwa-ui` | `{example}/tests/{module}.test.tsx` |
+| `data` | `/kiwa-data` | `{example}/tests/{module}.test.ts` |
+| `cli` | `/kiwa-cli-test` | `{example}/tests/{module}.test.ts` |
+| `unit` | `/kiwa-vitest` | `{example}/tests/{module}.test.ts` |
+| `orm-query` | `/kiwa-orm` | `{example}/tests/{module}.test.ts` |
+| `nextjs-server-action` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-middleware` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-rsc` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-parallel-route` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-rsc-streaming` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
+| `edge-handler` | `/kiwa-edge` | `{example}/tests/*.edge.test.ts` |
+| `auth` | `/kiwa-auth` | `{example}/tests/*.auth.test.ts` |
+| `job-queue` | `/kiwa-queue` | `{example}/tests/*.queue.test.ts` |
+| `cache` | `/kiwa-cache` | `{example}/tests/*.cache.test.ts` |
+| `rust-unit` | `/kiwa-rust` | `examples/{example}/tests/*.rs` |
+| `rust-integration` | `/kiwa-rust` | `examples/{example}/tests/*_integration.rs` |
+| `rust-axum` | `/kiwa-rust` | `examples/{example}/tests/*_axum.rs` |
+| `rust-actix-web` | `/kiwa-rust` | `examples/{example}/tests/*_actix.rs` |
+| `rust-tower-http` | `/kiwa-rust` | `examples/{example}/tests/*_tower_http.rs` |
+| `go-unit` | `/kiwa-go` | `examples/{example}/*_test.go` |
+| `go-integration` | `/kiwa-go` | `examples/{example}/integration/*_test.go` |
+| `go-gin` | `/kiwa-go` | `examples/{example}/*_gin_test.go` |
+| `go-echo` | `/kiwa-go` | `examples/{example}/*_echo_test.go` |
+| `go-fiber` | `/kiwa-go` | `examples/{example}/*_fiber_test.go` |
 
 <!-- kiwa-layers:resolver:end -->
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read

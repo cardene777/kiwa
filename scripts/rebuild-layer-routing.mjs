@@ -19,12 +19,28 @@
  * `--check` contract follows `scripts/rebuild-plugin-metadata.mjs`.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { dirname, isAbsolute, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
+
+/**
+ * The real path when it exists, the lexical one when it does not.
+ *
+ * A symlink resolves lexically to a place inside the tree while pointing
+ * outside it, so containment has to be judged after following links. Paths that
+ * do not exist yet cannot be symlinks, and a spec directory is allowed not to
+ * exist before its first spec is written.
+ */
+function realish(path) {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
+}
 
 const TABLE = 'docs/layers.json';
 
@@ -52,19 +68,42 @@ function loadLayers() {
     // "../../docs" produces a spec_path that passes a prefix comparison and
     // resolves outside the repository, and the skills would then be told to
     // write there.
-    const root = resolve(ROOT, table.specRoot);
-    const dir = resolve(root, l.spec_dir);
-    const file = resolve(ROOT, l.spec_path);
+    //
+    // `resolve` alone is not enough in two ways. An absolute value ignores its
+    // base entirely — `resolve('/a', '/etc')` is `/etc` — so absolutes are
+    // refused outright. And a symlink inside the tree resolves lexically but
+    // points elsewhere, so the real paths are compared once the directories
+    // exist. A path that does not exist yet cannot be a symlink, which is why
+    // a missing target falls back to the lexical result.
+    for (const [label, value] of [
+      ['specRoot', table.specRoot],
+      ['spec_dir', l.spec_dir],
+      ['spec_path', l.spec_path],
+    ]) {
+      if (isAbsolute(value)) throw new Error(`${TABLE}: ${l.id}: ${label} must be relative`);
+      if (value.split('/').includes('..')) {
+        throw new Error(`${TABLE}: ${l.id}: ${label} may not contain ".."`);
+      }
+    }
+    const root = realish(resolve(ROOT, table.specRoot));
+    const dir = realish(resolve(ROOT, table.specRoot, l.spec_dir));
+    const file = realish(resolve(ROOT, l.spec_path));
     for (const [label, target, base] of [
       ['spec_dir', dir, root],
       ['spec_path', file, dir],
     ]) {
-      if (target !== base && !target.startsWith(base + '/')) {
+      if (target !== base && !target.startsWith(base + sep)) {
         throw new Error(`${TABLE}: ${l.id}: ${label} escapes "${base}"`);
       }
     }
-    if (l.spec_dir.includes('..') || l.spec_path.includes('..')) {
-      throw new Error(`${TABLE}: ${l.id}: spec paths may not contain ".."`);
+    for (const skill of Object.keys(l.test_outputs)) {
+      const known = [l.consumer_skill, ...l.also_consumed_by];
+      if (!known.includes(skill)) {
+        throw new Error(`${TABLE}: ${l.id}: test_outputs names "${skill}", which is not a consumer`);
+      }
+    }
+    if (!l.test_outputs[l.consumer_skill]) {
+      throw new Error(`${TABLE}: ${l.id}: no test_output for its primary consumer`);
     }
     if (l.backing_package && l.backing_runtime_package) {
       throw new Error(`${TABLE}: ${l.id}: carries both a package and a runtime package`);
@@ -141,9 +180,13 @@ function renderReviewEnum(layers) {
 }
 
 function renderResolver(layers) {
-  const lines = ['', '| layer | 対応 test file |', '|---|---|'];
+  // Keyed by consumer: `contract` is written by two skills in two shapes, and a
+  // single column dropped the Hardhat path entirely.
+  const lines = ['', '| layer | 書き手 | 対応 test file |', '|---|---|---|'];
   for (const l of layers) {
-    lines.push(`| \`${l.id}\` | \`${l.test_output}\` |`);
+    for (const [skill, out] of Object.entries(l.test_outputs)) {
+      lines.push(`| \`${l.id}\` | \`/${skill}\` | \`${out}\` |`);
+    }
   }
   lines.push('');
   return lines.join('\n');
