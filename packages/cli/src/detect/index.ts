@@ -67,7 +67,7 @@ export function writeStackFile(
   cwd: string,
   layers: Detection[],
   scanned: { path: string; language: string }[] = [],
-  languages: string[] = [],
+  presence: { languages: string[]; complete: boolean } = { languages: [], complete: false },
   now: Date = new Date(),
 ): string {
   const dir = join(cwd, '.kiwa');
@@ -88,7 +88,11 @@ export function writeStackFile(
     // definition, and a service in an undeclared directory is absent from it
     // while being present in the project. A reader excluding layers on absence
     // needs the wider answer.
-    languages,
+    languages: presence.languages,
+    // And whether the search that produced it finished. An unfinished search
+    // can only say what it found, never what is not there, so a reader must not
+    // exclude anything on the strength of it.
+    languages_complete: presence.complete,
     // Recording the signal and the manifest, not just the layer, so a wrong
     // detection can be traced to the dependency that caused it.
     detected: layers.map((d) => ({
@@ -104,5 +108,5 @@ export function writeStackFile(
 
 export { detectFrom, resolve as resolveDetections } from './detect.js';
 export { loadLayerTable, resolveLayers, type LayerRecord, type ResolvedLayers } from './layers.js';
-export { presentLanguages, scan as scanManifests } from './scan.js';
+export { presentLanguages, scan as scanManifests, type LanguagePresence } from './scan.js';
 export type { Detection, SignalTable } from './detect.js';

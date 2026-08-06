@@ -48,6 +48,7 @@ describe('narrowing happens per runtime', () => {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -69,6 +70,7 @@ describe('narrowing happens per runtime', () => {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -86,6 +88,7 @@ describe('narrowing happens per runtime', () => {
       generated_at: fresh(),
       scanned: [{ manifest: 'package.json', language: 'typescript' }],
       languages: ['typescript'],
+      languages_complete: true,
       detected: [],
     });
     withFixture(root, () => {
@@ -109,6 +112,7 @@ describe('narrowing happens per runtime', () => {
           { manifest: 'package.json', language: 'typescript' },
         ],
       languages: ['rust', 'typescript'],
+      languages_complete: true,
         detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
       },
     );
@@ -134,7 +138,7 @@ describe('absence is established by looking', () => {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'services', 'api'), { recursive: true });
       writeFileSync(join(root, 'services', 'api', 'go.mod'), 'module x\n');
-      expect(presentLanguages(root)).toEqual(['go', 'typescript']);
+      expect(presentLanguages(root).languages).toEqual(['go', 'typescript']);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -149,32 +153,85 @@ describe('absence is established by looking', () => {
         mkdirSync(join(root, noise), { recursive: true });
         writeFileSync(join(root, noise, 'Cargo.toml'), '[dependencies]\n');
       }
-      expect(presentLanguages(root)).toEqual(['typescript']);
+      expect(presentLanguages(root).languages).toEqual(['typescript']);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
   });
 
-  it('reaches three levels below the working directory', async () => {
-    // The budget was passed with one level already spent, so it reached two and
-    // missed `apps/services/api` — and a runtime whose only manifest sits there
-    // would be excluded on a search that never looked.
+  it('does not stop at a fixed depth', async () => {
+    // A depth limit makes every project with a service one level further down
+    // look like a project without one, and no depth is right for every layout:
+    // three missed `apps/services/api`, four would miss the next shape.
     const { presentLanguages } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-depth-'));
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
-      mkdirSync(join(root, 'apps', 'services', 'api'), { recursive: true });
-      writeFileSync(join(root, 'apps', 'services', 'api', 'go.mod'), 'module x\n');
-      expect(presentLanguages(root)).toContain('go');
-
-      // One level further is out of range, which is the bound doing its job
-      // rather than a second accident.
-      mkdirSync(join(root, 'a', 'b', 'c', 'd'), { recursive: true });
-      writeFileSync(join(root, 'a', 'b', 'c', 'd', 'Cargo.toml'), '[dependencies]\n');
-      expect(presentLanguages(root)).not.toContain('rust');
+      mkdirSync(join(root, 'a', 'b', 'c', 'd', 'e'), { recursive: true });
+      writeFileSync(join(root, 'a', 'b', 'c', 'd', 'e', 'go.mod'), 'module x\n');
+      const found = presentLanguages(root);
+      expect(found.languages).toContain('go');
+      expect(found.complete).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  it('reports that it stopped rather than reporting what it did not reach', async () => {
+    // The budget is what makes an unbounded walk safe, and the flag is what
+    // keeps a stopped walk from being read as an answer. Neither is observable
+    // without being able to exhaust it.
+    const { presentLanguages } = await import('../src/detect/scan.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-cap-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"name":"app"}');
+      mkdirSync(join(root, 'a', 'b', 'c'), { recursive: true });
+      writeFileSync(join(root, 'a', 'b', 'c', 'go.mod'), 'module x\n');
+
+      const stopped = presentLanguages(root, 2);
+      expect(stopped.complete).toBe(false);
+      expect(stopped.languages).not.toContain('go');
+
+      const finished = presentLanguages(root);
+      expect(finished.complete).toBe(true);
+      expect(finished.languages).toContain('go');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps every runtime when the search ran out of budget', () => {
+    // An unfinished search can say what it found and nothing about what it did
+    // not. Excluding on its silence turns "we stopped looking" into "it is not
+    // there".
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
+      languages_complete: false,
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'go').length,
+      );
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded/);
+    });
+  });
+
+  it('falls back when the recording does not say whether the search finished', () => {
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/whether the language search finished/);
+    });
   });
 
   it('keeps a runtime the project turns out to contain', () => {
@@ -184,6 +241,7 @@ describe('absence is established by looking', () => {
         generated_at: fresh(),
         scanned: [{ manifest: 'package.json', language: 'typescript' }],
         languages: ['go', 'typescript'],
+        languages_complete: true,
         detected: [],
       },
     );
@@ -258,6 +316,7 @@ describe('a recording without a usable timestamp is discarded', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -274,6 +333,7 @@ describe('a recording without a usable timestamp is discarded', () => {
       generated_at: 'sometime last week',
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -288,6 +348,7 @@ describe('an explicit choice wins', () => {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -309,6 +370,7 @@ describe('an explicit choice wins', () => {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -327,6 +389,7 @@ describe('a recording that no longer describes the project is discarded', () => 
       generated_at: new Date(Date.now() - 60_000).toISOString(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -342,6 +405,7 @@ describe('a recording that no longer describes the project is discarded', () => 
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -387,6 +451,7 @@ describe('an unusable recording is not an error', () => {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [
         { layer: 'rust-axum', manifest: 'Cargo.toml' },
         { layer: 'rust-from-the-future', manifest: 'Cargo.toml' },
@@ -415,6 +480,7 @@ describe('an unusable recording is not an error', () => {
         { manifest: 'go.mod', language: 'go' },
       ],
       languages: ['go', 'rust', 'typescript'],
+      languages_complete: true,
       detected: TABLE.filter((l) => l.runtime === 'rust' || l.runtime === 'go').map((l) => ({
         layer: l.id,
         manifest: l.runtime === 'rust' ? 'Cargo.toml' : 'go.mod',

@@ -159,6 +159,7 @@ interface StackFile {
   generated_at?: unknown;
   scanned?: unknown;
   languages?: unknown;
+  languages_complete?: unknown;
   detected?: unknown;
 }
 
@@ -212,6 +213,9 @@ function validate(cwd: string, file: StackFile, table: LayerRecord[]): string | 
   // A recording without this predates the field. Which languages the project
   // contains would be unknown, and no runtime could be excluded on evidence.
   if (!Array.isArray(file.languages)) return 'it does not record which languages are present';
+  if (typeof file.languages_complete !== 'boolean') {
+    return 'it does not record whether the language search finished';
+  }
   if ((file.languages as unknown[]).some((l) => typeof l !== 'string' || !l)) {
     return 'its language list holds something that is not a language';
   }
@@ -284,6 +288,10 @@ export function resolveLayers(options: {
   // the second, and "nothing detected for Go" is not evidence when Go was
   // never opened.
   const present = new Set((file.languages as string[]).filter(Boolean));
+  // An unfinished search can say what it found and nothing about what it did
+  // not. Excluding on its silence would turn "we stopped looking" into "it is
+  // not there".
+  const searchFinished = file.languages_complete === true;
   const read = new Set((file.scanned as ScannedEntry[]).map((e) => str(e.language)!));
   const detected = new Set(
     ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
@@ -306,6 +314,7 @@ export function resolveLayers(options: {
     // not be is silent, because the layers simply stop being offered and
     // nothing says why.
     if (!present.has(runtime)) {
+      if (!searchFinished) return true;
       excluded.add(runtime);
       return false;
     }

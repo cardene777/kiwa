@@ -163,18 +163,30 @@ const SKIP = new Set([
 ]);
 
 /**
- * How many levels below the working directory a manifest is still the project's
- * own.
+ * How many directories the search will open before giving up.
  *
- * Counted as levels below the root, so 3 reaches `a/b/c/go.mod`. Passing this
- * to the walk as a remaining-budget with one already spent made it reach two,
- * which misses `apps/services/api` — a shape common enough that the runtime
- * would have been excluded on a search that never looked there.
+ * A cap rather than a depth limit. A depth limit makes every project with a
+ * service one level further down look like a project without one, and there is
+ * no depth that is right for every layout — the previous bound of three missed
+ * `apps/services/api`, and four would miss the next shape. A cap bounds the
+ * cost without pretending to know where manifests live, and reaching it is
+ * reported rather than treated as an answer.
  */
-const DEPTH = 3;
+const VISIT_CAP = 20_000;
+
+export interface LanguagePresence {
+  /** Languages a manifest was found for. */
+  languages: string[];
+  /**
+   * Whether the search finished. When false it ran out of budget, so a language
+   * being absent from the list means nothing was found *so far* — not that the
+   * project does not contain it.
+   */
+  complete: boolean;
+}
 
 /**
- * Which languages the project contains a manifest for, anywhere below.
+ * Which languages the project contains a manifest for.
  *
  * This answers a different question from `scan`, and the difference matters.
  * `scan` reads the members the project declares — honouring `!pkgs/skip`,
@@ -185,17 +197,23 @@ const DEPTH = 3;
  * the directories a workspace file named" is much weaker than "no `go.mod`",
  * and a Go service in an undeclared `services/api` is invisible to it. Since
  * `resolveLayers` excludes a runtime's layers on absence, the absence has to be
- * established by looking rather than by not having been told.
+ * established by looking.
+ *
+ * Which is also why the result says whether the looking finished.
  */
-export function presentLanguages(cwd: string): string[] {
+export function presentLanguages(cwd: string, cap: number = VISIT_CAP): LanguagePresence {
   const root = resolve(cwd);
   const found = new Set<string>();
+  let budget = cap;
 
-  const visit = (dir: string, depth: number): void => {
+  const visit = (dir: string): void => {
+    if (budget <= 0) return;
+    budget -= 1;
+
     for (const [name, reader] of Object.entries(READERS)) {
       if (existsSync(join(dir, name))) found.add(reader.language);
     }
-    if (depth <= 0) return;
+
     let entries;
     try {
       entries = readdirSync(dir, { withFileTypes: true });
@@ -204,12 +222,12 @@ export function presentLanguages(cwd: string): string[] {
     }
     for (const entry of entries) {
       if (!entry.isDirectory() || SKIP.has(entry.name) || entry.name.startsWith('.')) continue;
-      visit(join(dir, entry.name), depth - 1);
+      visit(join(dir, entry.name));
     }
   };
 
-  visit(root, DEPTH);
-  return [...found].sort();
+  visit(root);
+  return { languages: [...found].sort(), complete: budget > 0 };
 }
 
 /** Every manifest worth reading, starting from `cwd`. */

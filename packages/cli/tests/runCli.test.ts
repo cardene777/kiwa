@@ -793,6 +793,7 @@ describe('layers', () => {
     generated_at: new Date(Date.now() + 60_000).toISOString(),
     scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
     languages: ['rust'],
+    languages_complete: true,
     detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
   };
 
@@ -844,6 +845,7 @@ describe('layers', () => {
       generated_at: new Date(Date.now() - 60_000).toISOString(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
       languages: ['rust'],
+      languages_complete: true,
       detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
     });
     try {

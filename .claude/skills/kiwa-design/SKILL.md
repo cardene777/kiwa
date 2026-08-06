@@ -88,6 +88,7 @@ kiwa layers --json
 | 条件 | 扱い |
 |---|---|
 | reader が無い runtime (`contract`) | 全部残す (語れない) |
+| 探索が打切られた | 全部残す (見終わっていない) |
 | project に manifest が無い | 除く (不在の証拠) |
 | manifest はあるが読んでいない | 全部残す (問うていない) |
 | 読んだが signal が無い (今の typescript) | 全部残す (語れない) |
