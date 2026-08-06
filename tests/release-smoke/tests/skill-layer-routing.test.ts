@@ -289,11 +289,28 @@ describe('the target values and the Step conditions agree', () => {
     files.push(['README.md', resolve(REPO_ROOT, 'README.md')]);
     for (const [name, file] of files) {
       if (!existsSync(file!)) continue;
+      const body = readFileSync(file!, 'utf-8');
+
       // Only references aimed at `kiwa-test`. `--target` is overloaded — in
       // `kiwa-rust` and `kiwa-go` it names the implementation file under test —
       // so an unqualified match reads those as target values.
-      for (const m of readFileSync(file!, 'utf-8').matchAll(/kiwa-test[^`\n]*--target ([a-z]+)/g)) {
+      for (const m of body.matchAll(/kiwa-test[^`\n]*--target ([a-z]+)/g)) {
         if (!declared.has(m[1]!)) offenders.push(`${name}: --target ${m[1]}`);
+      }
+
+      // The other way readers meet the flag is the enum itself, which the
+      // README repeats and `kiwa-test` declares. A stale value there points at
+      // nothing just as loudly, and the bare-value pattern above skips it —
+      // `--target {` is not `--target ` followed by a word.
+      for (const m of body.matchAll(/--target \{([^}]+)\}/g)) {
+        // An alternation, not a placeholder. `--target {path}` in `kiwa-rust`
+        // names the implementation file, and `--target {target}` in a report
+        // template is a slot to fill — neither lists values.
+        if (!m[1]!.includes('|')) continue;
+        for (const value of m[1]!.split(/\\?\|/)) {
+          const clean = value.replace(/[`\\ ]/g, '');
+          if (clean && !declared.has(clean)) offenders.push(`${name}: enum lists ${clean}`);
+        }
       }
     }
     expect(offenders).toEqual([]);
@@ -318,6 +335,11 @@ describe('the target values and the Step conditions agree', () => {
   });
 });
 
+/** Escape a path so it can be matched literally inside a RegExp. */
+function escapeForRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 describe('every declared output path is one its producer writes', () => {
   it('each test_outputs entry appears in the producing skill', () => {
     // The rows were written from the old resolver rather than from the
@@ -338,9 +360,14 @@ describe('every declared output path is one its producer writes', () => {
           // The producer states its own path; the table prefixes the example
           // directory because `kiwa-test` runs the skill from inside one.
           const bare = output.replace(/^(examples\/)?\{example\}\//, '');
-          const declared = output.startsWith('tests/fixtures/')
-            ? mover.includes(bare)
-            : body.includes(bare);
+          const where = output.startsWith('tests/fixtures/') ? mover : body;
+          // As a whole token, not as a substring. `tests/{module}.test.ts`
+          // occurs inside `tests/{module}.test.tsx`, so a plain `includes`
+          // lets a row claim a path its producer never writes as long as some
+          // longer path happens to start the same way.
+          const declared = new RegExp(`(^|[^-\\w./{])${escapeForRegExp(bare)}([^-\\w./}]|$)`, 'm').test(
+            where,
+          );
           if (!declared) missing.push(`${layer.id} -> ${skill}: ${output}`);
         }
       }
