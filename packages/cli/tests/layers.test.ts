@@ -124,20 +124,23 @@ describe('absence is established by looking', () => {
     // no warning. `scan` cannot see it — it reads declared members, honouring
     // `!pkgs/skip`, which is right for reading dependencies and wrong as a
     // basis for concluding a language is absent.
-    const { presentLanguages } = await import('../src/detect/scan.js');
+    const { presentManifests } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-present-'));
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'services', 'api'), { recursive: true });
       writeFileSync(join(root, 'services', 'api', 'go.mod'), 'module x\n');
-      expect(presentLanguages(root).languages).toEqual(['go', 'typescript']);
+      expect(presentManifests(root).manifests.map((m) => m.path).sort()).toEqual([
+        join('services', 'api', 'go.mod'),
+        'package.json',
+      ].sort());
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
   });
 
   it('does not read other people\'s manifests', async () => {
-    const { presentLanguages } = await import('../src/detect/scan.js');
+    const { presentManifests } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-present-skip-'));
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
@@ -145,7 +148,7 @@ describe('absence is established by looking', () => {
         mkdirSync(join(root, noise), { recursive: true });
         writeFileSync(join(root, noise, 'Cargo.toml'), '[dependencies]\n');
       }
-      expect(presentLanguages(root).languages).toEqual(['typescript']);
+      expect(presentManifests(root).manifests.map((m) => m.language)).toEqual(['typescript']);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -155,14 +158,14 @@ describe('absence is established by looking', () => {
     // A depth limit makes every project with a service one level further down
     // look like a project without one, and no depth is right for every layout:
     // three missed `apps/services/api`, four would miss the next shape.
-    const { presentLanguages } = await import('../src/detect/scan.js');
+    const { presentManifests } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-depth-'));
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'a', 'b', 'c', 'd', 'e'), { recursive: true });
       writeFileSync(join(root, 'a', 'b', 'c', 'd', 'e', 'go.mod'), 'module x\n');
-      const found = presentLanguages(root);
-      expect(found.languages).toContain('go');
+      const found = presentManifests(root);
+      expect(found.manifests.map((m) => m.language)).toContain('go');
       expect(found.complete).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
@@ -173,20 +176,20 @@ describe('absence is established by looking', () => {
     // The budget is what makes an unbounded walk safe, and the flag is what
     // keeps a stopped walk from being read as an answer. Neither is observable
     // without being able to exhaust it.
-    const { presentLanguages } = await import('../src/detect/scan.js');
+    const { presentManifests } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-cap-'));
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'a', 'b', 'c'), { recursive: true });
       writeFileSync(join(root, 'a', 'b', 'c', 'go.mod'), 'module x\n');
 
-      const stopped = presentLanguages(root, 2);
+      const stopped = presentManifests(root, 2);
       expect(stopped.complete).toBe(false);
-      expect(stopped.languages).not.toContain('go');
+      expect(stopped.manifests.map((m) => m.language)).not.toContain('go');
 
-      const finished = presentLanguages(root);
+      const finished = presentManifests(root);
       expect(finished.complete).toBe(true);
-      expect(finished.languages).toContain('go');
+      expect(finished.manifests.map((m) => m.language)).toContain('go');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -196,7 +199,7 @@ describe('absence is established by looking', () => {
     // The same mistake as ignoring the budget, in a different guise: the Go
     // module is there, the search could not see it, and reporting the search as
     // finished would let the reader exclude all five Go layers.
-    const { presentLanguages } = await import('../src/detect/scan.js');
+    const { presentManifests } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-perm-'));
     const closed = join(root, 'services');
     try {
@@ -205,8 +208,8 @@ describe('absence is established by looking', () => {
       writeFileSync(join(closed, 'api', 'go.mod'), 'module x\n');
       chmodSync(closed, 0o000);
 
-      const result = presentLanguages(root);
-      expect(result.languages).not.toContain('go');
+      const result = presentManifests(root);
+      expect(result.manifests.map((m) => m.language)).not.toContain('go');
       expect(result.complete).toBe(false);
     } finally {
       try {
@@ -231,11 +234,81 @@ describe('absence is established by looking', () => {
     withFixture(root, () => {
       const resolved = resolveLayers({
         cwd: root,
-        presence: { languages: ['rust'], complete: false },
+        presence: { manifests: [{ path: 'Cargo.toml', language: 'rust' }], complete: false },
       });
       expect(resolved.source).toBe('all');
       expect(resolved.layers).toHaveLength(TABLE.length);
       expect(resolved.warnings.join(' ')).toMatch(/did not finish/);
+    });
+  });
+
+  it('does not narrow a runtime whose manifests were not all read', () => {
+    // `scan` follows the workspace definition, so an undeclared second crate is
+    // never opened. Its framework could be anything, and narrowing to what the
+    // declared crate said would drop the layer the undeclared one needs — the
+    // language set alone cannot see this, because both crates are Rust.
+    const root = fixture(
+      {
+        'Cargo.toml': '[dependencies]\n',
+        'services/worker/Cargo.toml': '[dependencies]\nactix-web = "4"\n',
+      },
+      {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      },
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'rust').length,
+      );
+      expect(resolved.warnings.join('\n')).toMatch(/services\/worker\/Cargo\.toml was not read/);
+    });
+  });
+
+  it('still narrows a runtime whose manifests were all read', () => {
+    // The other half: an unread manifest is what suspends the narrowing, not
+    // the mere possibility of one.
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'rust').map((l) => l.id)).toEqual([
+        'rust-axum',
+      ]);
+      expect(resolved.warnings.join('\n')).not.toMatch(/was not read/);
+    });
+  });
+
+  it('suspends only the runtime with the unread manifest', () => {
+    const root = fixture(
+      {
+        'Cargo.toml': '[dependencies]\n',
+        'services/worker/Cargo.toml': '[dependencies]\n',
+        'go.mod': 'module x\n',
+      },
+      {
+        generated_at: fresh(),
+        scanned: [
+          { manifest: 'Cargo.toml', language: 'rust' },
+          { manifest: 'go.mod', language: 'go' },
+        ],
+        detected: [
+          { layer: 'rust-axum', manifest: 'Cargo.toml' },
+          { layer: 'go-gin', manifest: 'go.mod' },
+        ],
+      },
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'rust').length,
+      );
+      expect(resolved.layers.filter((l) => l.runtime === 'go').map((l) => l.id)).toEqual(['go-gin']);
     });
   });
 

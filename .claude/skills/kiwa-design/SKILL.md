@@ -91,6 +91,7 @@ kiwa layers --json
 | 探索が見終わらなかった | **何も絞らない** (打切り / 開けない dir) |
 | project に manifest が無い | 除く (不在の証拠) |
 | manifest はあるが読んでいない | 全部残す (問うていない) |
+| 同じ言語に未読の manifest がある | 全部残す (読んだ分が全体を代表しない) |
 | 読んだが signal が無い (今の typescript) | 全部残す (語れない) |
 | 読んで signal もある | 検出した layer に絞る |
 

@@ -39,7 +39,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { SignalTable } from './detect.js';
-import { presentLanguages, type LanguagePresence } from './scan.js';
+import { presentManifests, type ManifestPresence } from './scan.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -247,7 +247,7 @@ export function resolveLayers(options: {
   cwd: string;
   explicit?: string | undefined;
   /** Injectable so a test can exhaust the search budget without 20000 directories. */
-  presence?: LanguagePresence | undefined;
+  presence?: ManifestPresence | undefined;
 }): ResolvedLayers {
   const table = loadLayerTable();
   const warnings: string[] = [];
@@ -282,7 +282,7 @@ export function resolveLayers(options: {
   // actually opened and honours the workspace definition. A Go module in an
   // undeclared directory is present and unread, and "nothing detected for Go"
   // is not evidence when Go was never opened.
-  const found = options.presence ?? presentLanguages(options.cwd);
+  const found = options.presence ?? presentManifests(options.cwd);
 
   // An unfinished search can say what it found and nothing about what it did
   // not, so it cannot support narrowing at all — not the exclusions, which rest
@@ -292,8 +292,19 @@ export function resolveLayers(options: {
     warnings.push('kept every layer: the search for project manifests did not finish');
     return { layers: table, source: 'all', warnings };
   }
-  const present = new Set(found.languages);
-  const read = new Set((file.scanned as ScannedEntry[]).map((e) => str(e.language)!));
+  const present = new Set(found.manifests.map((m) => m.language));
+  const scanned = file.scanned as ScannedEntry[];
+  const read = new Set(scanned.map((e) => str(e.language)!));
+  const readPaths = new Set(scanned.map((e) => str(e.manifest)!));
+
+  // A language being read is not the same as all of its manifests being read.
+  // `scan` follows the workspace definition, so a second Rust crate in an
+  // undeclared directory leaves the language set unchanged while carrying a
+  // framework nobody looked at — and narrowing to what was detected would drop
+  // the layer that crate actually needs.
+  const partiallyRead = new Set(
+    found.manifests.filter((m) => !readPaths.has(m.path)).map((m) => m.language),
+  );
   const detected = new Set(
     ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
   );
@@ -302,6 +313,7 @@ export function resolveLayers(options: {
   const speakable = languagesWithSignals();
 
   const excluded = new Set<string>();
+  const unread = new Set<string>();
   const kept = table.filter((layer) => {
     const runtime = layer.runtime;
     // No reader for this runtime, so nothing was looked for and nothing can be
@@ -320,6 +332,12 @@ export function resolveLayers(options: {
     }
     // Present but never opened, so nothing was asked and nothing was answered.
     if (!read.has(runtime)) return true;
+    // Opened in part. What went unread could name anything, so what was read
+    // cannot stand for the whole.
+    if (partiallyRead.has(runtime)) {
+      unread.add(runtime);
+      return true;
+    }
     // Opened, but the table has no signals for the language, so "nothing
     // detected" carries no information. TypeScript is here today.
     if (!speakable.has(runtime)) return true;
@@ -328,6 +346,12 @@ export function resolveLayers(options: {
 
   for (const runtime of [...excluded].sort()) {
     warnings.push(`excluded ${runtime}: no ${runtime} manifest in the scanned directories`);
+  }
+  for (const runtime of [...unread].sort()) {
+    const unreadPaths = found.manifests
+      .filter((m) => m.language === runtime && !readPaths.has(m.path))
+      .map((m) => m.path);
+    warnings.push(`kept every ${runtime} layer: ${unreadPaths.join(', ')} was not read`);
   }
 
   // Keeping everything means the detection changed nothing, and saying

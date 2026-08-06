@@ -174,36 +174,41 @@ const SKIP = new Set([
  */
 const VISIT_CAP = 20_000;
 
-export interface LanguagePresence {
-  /** Languages a manifest was found for. */
-  languages: string[];
+export interface ManifestPresence {
+  /** Every manifest found, relative to the directory the search started from. */
+  manifests: { path: string; language: string }[];
   /**
-   * Whether the search finished. When false it ran out of budget, so a language
-   * being absent from the list means nothing was found *so far* — not that the
-   * project does not contain it.
+   * Whether the search finished. When false it ran out of budget or could not
+   * open a directory, so a manifest being absent from the list means nothing
+   * was found *so far* — not that the project does not contain it.
    */
   complete: boolean;
 }
 
 /**
- * Which languages the project contains a manifest for.
+ * Every manifest the project contains, found by looking rather than by being
+ * told.
  *
  * This answers a different question from `scan`, and the difference matters.
  * `scan` reads the members the project declares — honouring `!pkgs/skip`,
  * because a project excluding a directory from its workspace means it. That is
  * the right basis for reading dependencies.
  *
- * It is the wrong basis for concluding a language is absent. "No `go.mod` in
- * the directories a workspace file named" is much weaker than "no `go.mod`",
- * and a Go service in an undeclared `services/api` is invisible to it. Since
+ * It is the wrong basis for concluding something is absent. "No `go.mod` in the
+ * directories a workspace file named" is much weaker than "no `go.mod`", and a
+ * Go service in an undeclared `services/api` is invisible to it. Since
  * `resolveLayers` excludes a runtime's layers on absence, the absence has to be
  * established by looking.
  *
+ * Paths rather than languages, because the same distinction applies one level
+ * down: a second Rust crate the workspace does not declare leaves the language
+ * set unchanged while carrying a framework nobody read.
+ *
  * Which is also why the result says whether the looking finished.
  */
-export function presentLanguages(cwd: string, cap: number = VISIT_CAP): LanguagePresence {
+export function presentManifests(cwd: string, cap: number = VISIT_CAP): ManifestPresence {
   const root = resolve(cwd);
-  const found = new Set<string>();
+  const found: { path: string; language: string }[] = [];
   let budget = cap;
   let missed = false;
 
@@ -215,7 +220,12 @@ export function presentLanguages(cwd: string, cap: number = VISIT_CAP): Language
     budget -= 1;
 
     for (const [name, reader] of Object.entries(READERS)) {
-      if (existsSync(join(dir, name))) found.add(reader.language);
+      const full = join(dir, name);
+      if (!existsSync(full)) continue;
+      // Relative to the search root, matching what `scan` records, so the two
+      // can be compared without either side normalising the other's paths.
+      const rel = full.startsWith(root) ? full.slice(root.length + 1) || name : full;
+      found.push({ path: rel, language: reader.language });
     }
 
     let entries;
@@ -236,7 +246,8 @@ export function presentLanguages(cwd: string, cap: number = VISIT_CAP): Language
   };
 
   visit(root);
-  return { languages: [...found].sort(), complete: !missed };
+  found.sort((a, b) => a.path.localeCompare(b.path));
+  return { manifests: found, complete: !missed };
 }
 
 /** Every manifest worth reading, starting from `cwd`. */
