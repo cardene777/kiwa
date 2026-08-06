@@ -264,7 +264,7 @@ describe('the target values and the Step conditions agree', () => {
   it('every accepted target starts at least one Step', () => {
     // `nextjs` was accepted and started nothing: the value existed, no Step
     // admitted it, and asking for it did nothing at all.
-    const orphans = declaredTargets().filter((t) => t !== 'both' && !admittedTargets().has(t));
+    const orphans = declaredTargets().filter((t) => !admittedTargets().has(t));
     expect(orphans).toEqual([]);
   });
 
@@ -272,6 +272,31 @@ describe('the target values and the Step conditions agree', () => {
     const admitted = [...admittedTargets()];
     const declared = new Set(declaredTargets());
     expect(admitted.filter((t) => !declared.has(t))).toEqual([]);
+  });
+
+  it('no skill points anyone at a target that does not exist', () => {
+    // Removing the value from the option line is not enough on its own: a skill
+    // telling readers to run `--target nextjs` sends them at something that
+    // stopped existing. `kiwa-nextjs` did exactly that.
+    const declared = new Set(declaredTargets());
+    const offenders: string[] = [];
+    const files = readdirSync(resolve(REPO_ROOT, '.claude/skills')).map((name) => [
+      name,
+      resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md'),
+    ]);
+    // The README points readers at the same flag, and it is the copy someone
+    // reads before ever opening a skill.
+    files.push(['README.md', resolve(REPO_ROOT, 'README.md')]);
+    for (const [name, file] of files) {
+      if (!existsSync(file!)) continue;
+      // Only references aimed at `kiwa-test`. `--target` is overloaded — in
+      // `kiwa-rust` and `kiwa-go` it names the implementation file under test —
+      // so an unqualified match reads those as target values.
+      for (const m of readFileSync(file!, 'utf-8').matchAll(/kiwa-test[^`\n]*--target ([a-z]+)/g)) {
+        if (!declared.has(m[1]!)) offenders.push(`${name}: --target ${m[1]}`);
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 
   it('all covers exactly the layers the table gives it', () => {
@@ -298,16 +323,26 @@ describe('every declared output path is one its producer writes', () => {
     // The rows were written from the old resolver rather than from the
     // producers, and 15 of 31 named a path no skill declares. A review that
     // looks where nothing is written finds nothing and says so.
+    // `kiwa-test` Step 5.5 moves generated tests out of the example directory,
+    // so the second path of a row is declared there rather than by the producer.
+    const mover = read('.claude/skills/kiwa-test/SKILL.md');
+
     const missing: string[] = [];
     for (const layer of LAYERS) {
       for (const [skill, outputs] of Object.entries(layer.test_outputs ?? {})) {
         const body = read(`.claude/skills/${skill}/SKILL.md`);
-        // The producer states its own path; the table prefixes the example
-        // directory because `kiwa-test` runs the skill from inside one.
-        const found = (outputs as string[]).some((o) =>
-          body.includes(o.replace(/^(examples\/)?\{example\}\//, '')),
-        );
-        if (!found) missing.push(`${layer.id} -> ${skill}: ${(outputs as string[])[0]}`);
+        // Every path, not just one of them. Checking the array with `some`
+        // let 9 of 23 single-slot reverts survive, and the fixture paths passed
+        // on the strength of a sibling that had nothing to do with them.
+        for (const output of outputs as string[]) {
+          // The producer states its own path; the table prefixes the example
+          // directory because `kiwa-test` runs the skill from inside one.
+          const bare = output.replace(/^(examples\/)?\{example\}\//, '');
+          const declared = output.startsWith('tests/fixtures/')
+            ? mover.includes(bare)
+            : body.includes(bare);
+          if (!declared) missing.push(`${layer.id} -> ${skill}: ${output}`);
+        }
       }
     }
     expect(missing).toEqual([]);

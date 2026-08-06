@@ -126,7 +126,7 @@ describe('{MODULE} server action', () => {
 - 上流 (Layer 1) ... `/kiwa-design --layer nextjs-server-action`
 - runtime fixture ... `@kiwa-lab/nextjs` v1.0+ (`packages/nextjs/`)
 - 下流 (review) ... `/kiwa-review --layer nextjs-server-action`
-- 統合 chain ... `/kiwa-test --target nextjs`
+- 統合 chain ... 無し。 `/kiwa-test` に nextjs 専用 Step が無いため、 本 skill は単体起動する (#1809)
 - RSC test ... 下記 § RSC mode (#494、 v1.0.3+ 対応済)
 - middleware test ... 下記 § middleware mode (#495、 v1.0.2+ 対応済)
 - PoC ... `examples/nextjs-server-actions-poc/`、 `examples/nextjs-middleware-poc/`、 `examples/nextjs-rsc-poc/`
