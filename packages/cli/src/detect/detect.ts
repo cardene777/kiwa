@@ -81,9 +81,16 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
       }
     }
     // A bare dependency with no recognised feature still says something: the
-    // project uses the runtime adapter, which is the unit layer.
+    // project uses the runtime adapter, which is the unit layer. It is a
+    // fallback, so it yields to anything more specific in the same group.
     if (!hits.length && signal.default) {
-      hits.push({ layer: signal.default, signal: dep.name, manifest, strength: signal.strength });
+      hits.push({
+        layer: signal.default,
+        signal: dep.name,
+        manifest,
+        strength: signal.strength,
+        implied: true,
+      });
     }
     // The adapter can serve the integration layer too, and no manifest tells
     // the two apart. It is marked as following from the base layer rather than
@@ -101,22 +108,41 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
     return hits;
   }
 
-  // `also` applies to plain signals too. The Go adapter is one: it names its
-  // layer directly rather than through features, and reading `also` only on the
-  // feature path left `go-integration` undetected.
+  // Plain signals carry the same three roles as feature ones. `layer` states
+  // the layer outright; `default` is the layer that holds while nothing more
+  // specific turned up; `also` is what the same dependency may additionally
+  // mean.
+  //
+  // Reading `default` as an assertion here made the Go adapter report
+  // `go-unit` beside `go-gin`, while the Rust adapter — whose matched feature
+  // replaces the default — reported the framework layer alone. Same intent,
+  // two answers, decided by which mechanism the language happened to use.
   const from = signal.default ?? signal.layer;
-  const asserted: Detection[] = signal.layer
-    ? [{ layer: signal.layer, signal: dep.name, manifest, strength: signal.strength }]
-    : [];
-  const implied: Detection[] = (signal.also ?? []).map((layer) => ({
-    layer,
-    signal: dep.name,
-    manifest,
-    strength: signal.strength,
-    implied: true,
-    ...(from ? { impliedBy: from } : {}),
-  }));
-  return [...asserted, ...implied];
+  const out: Detection[] = [];
+
+  if (signal.layer) {
+    out.push({ layer: signal.layer, signal: dep.name, manifest, strength: signal.strength });
+  }
+  if (signal.default) {
+    out.push({
+      layer: signal.default,
+      signal: dep.name,
+      manifest,
+      strength: signal.strength,
+      implied: true,
+    });
+  }
+  for (const layer of signal.also ?? []) {
+    out.push({
+      layer,
+      signal: dep.name,
+      manifest,
+      strength: signal.strength,
+      implied: true,
+      ...(from ? { impliedBy: from } : {}),
+    });
+  }
+  return out;
 }
 
 /**

@@ -369,18 +369,19 @@ describe('workspace resolution', () => {
 
 describe('detection against the polyglot corpus', () => {
   it.each([
-    // The integration layer appears for the two projects that actually carry a
-    // second test file — `rust-cargo-poc` (tests/poc.rs + tests/poc_integration.rs)
-    // and `go-testing-poc` (calc_test.go + integration/client_test.go). The six
-    // framework projects carry one test file each, and reporting an integration
-    // suite for them was a claim the corpus contradicts.
+    // The unit and integration layers are what the adapter means when nothing
+    // more specific turned up. `rust-cargo-poc` (tests/poc.rs +
+    // tests/poc_integration.rs) and `go-testing-poc` (calc_test.go +
+    // integration/client_test.go) are those projects. The six framework
+    // projects each name a framework and carry one test file, so they report
+    // that framework alone — which is what AC 71 and AC 72 ask for.
     ['rust-axum-poc', ['rust-axum']],
     ['rust-actix-web-poc', ['rust-actix-web']],
     ['rust-tower-http-poc', ['rust-tower-http']],
     ['rust-cargo-poc', ['rust-integration', 'rust-unit']],
-    ['go-gin-poc', ['go-gin', 'go-unit']],
-    ['go-echo-poc', ['go-echo', 'go-unit']],
-    ['go-fiber-poc', ['go-fiber', 'go-unit']],
+    ['go-gin-poc', ['go-gin']],
+    ['go-echo-poc', ['go-echo']],
+    ['go-fiber-poc', ['go-fiber']],
     ['go-testing-poc', ['go-integration', 'go-unit']],
   ])('%s detects %j', (name, expected) => {
     expect(detectExample(name)).toEqual(expected);
@@ -460,13 +461,36 @@ describe('an implied layer holds only while nothing more specific appears', () =
 
   it('drops it once a framework layer is named', () => {
     // `go-gin-poc` depends on both the adapter and gin, and carries a single
-    // `counter_test.go`. Reporting `go-integration` there asserted a suite the
-    // project does not have.
+    // `counter_test.go`. Both the unit and the integration layer are fallbacks
+    // here, and the framework layer is what the project actually names — which
+    // is also what the Rust side already did through its feature list.
     const all = detectFrom(TABLE, 'go', 'go.mod', [
       { name: 'github.com/cardene777/kiwa-test-go', features: [] },
       { name: 'github.com/gin-gonic/gin', features: [] },
     ]);
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['go-gin', 'go-unit']);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['go-gin']);
+  });
+
+  it('lets the default yield to a framework signal from another dependency', () => {
+    // With the current table this is unobservable: every Rust framework signal
+    // is weak, so it is suppressed before the default is ever compared against
+    // it. A synthetic exact signal makes the intent testable — the default is a
+    // fallback on the feature path too, not an assertion.
+    const table: SignalTable = {
+      manifests: TABLE.manifests,
+      signals: {
+        rust: [
+          { match: 'kiwa-test-rs', kind: 'feature', features: {}, default: 'rust-unit', strength: 'exact' },
+          { match: 'axum', layer: 'rust-axum', strength: 'exact' },
+        ],
+      },
+      generated: { signals: [] },
+    };
+    const all = detectFrom(table, 'rust', 'Cargo.toml', [
+      { name: 'kiwa-test-rs', features: [] },
+      { name: 'axum', features: [] },
+    ]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-axum']);
   });
 
   it('says nothing at all when the entry inherits from the workspace', () => {

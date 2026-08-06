@@ -79,7 +79,6 @@
     "go": [
       {
         "match": "github.com/cardene777/kiwa-test-go",
-        "layer": "go-unit",
         "strength": "exact",
         "note": "Presence of the adapter means the unit layer. It may also mean the integration layer — go-testing-poc carries calc_test.go and integration/client_test.go against one module — so `also` states that as a fallback the resolver drops once a framework layer appears.",
         "default": "go-unit",

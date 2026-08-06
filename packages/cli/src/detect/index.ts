@@ -6,7 +6,7 @@
  * stays a matter of printing.
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -53,6 +53,16 @@ export function loadSignalTable(): SignalTable {
  * change. Prompting to overwrite a cache would make re-detection a chore, and
  * keeping a stale one is the failure this file exists to prevent.
  */
+/**
+ * Whether a previous run left an answer here.
+ *
+ * The path is defined in this module, so the question is asked here too rather
+ * than rebuilt at the call site where the two could drift apart.
+ */
+export function stackFileExists(cwd: string): boolean {
+  return existsSync(join(cwd, '.kiwa', 'stack.json'));
+}
+
 export function writeStackFile(cwd: string, layers: Detection[]): string {
   const dir = join(cwd, '.kiwa');
   mkdirSync(dir, { recursive: true });

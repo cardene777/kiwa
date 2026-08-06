@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -741,6 +741,9 @@ describe('init --detect', () => {
       const code = await runCli(['init', '--detect'], h.deps);
       expect(code).toBe(0);
       expect(h.out()).toContain('No manifest found.');
+      // AC: the look is read-only. Creating `.kiwa/stack.json` here would write
+      // into a directory that has nothing to do with kiwa.
+      expect(existsSync(join(dir, '.kiwa', 'stack.json'))).toBe(false);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

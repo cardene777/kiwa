@@ -3,7 +3,14 @@ import { InitConflictError, runInit, type InitOptions, type InitResult } from '.
 import { runAnvilSeed, type AnvilSeedOptions, type AnvilSeedResult } from './commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from './commands/spec-to-test.js';
 import { runWatch, type RunWatchLayer, type RunWatchOptions, type RunWatchResult } from './commands/run-watch.js';
-import { detectFrom, loadSignalTable, resolveDetections, scanManifests, writeStackFile } from './detect/index.js';
+import {
+  detectFrom,
+  loadSignalTable,
+  resolveDetections,
+  scanManifests,
+  stackFileExists,
+  writeStackFile,
+} from './detect/index.js';
 
 /** Usage text printed by `--help` / `-h` and appended to the unknown-command error. */
 export const USAGE = `Usage: kiwa <command> [options]
@@ -381,10 +388,11 @@ function detectCommand(deps: RunCliDeps): number {
   if (!manifests.length) {
     deps.stdout('No manifest found.\n');
     deps.stdout('Looked for: Cargo.toml, go.mod, package.json (here and in workspace members)\n');
-    // Same contract as detecting nothing: a previous run's answer must not
-    // survive a run that found no basis for it. Returning early left the old
-    // layers readable after the manifests themselves had been removed.
-    writeStackFile(cwd, []);
+    // A previous run's answer must not survive a run that found no basis for
+    // it, so an existing file is emptied. A project that never had one keeps
+    // none — the AC asks for a read-only look, and creating `.kiwa/stack.json`
+    // in a directory with no manifest writes into something unrelated.
+    if (stackFileExists(cwd)) writeStackFile(cwd, []);
     return 0;
   }
 
