@@ -355,6 +355,51 @@ function escapeForRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/**
+ * Whether a skill declares this path as somewhere it writes.
+ *
+ * A whole-token match anywhere in the body was still too loose: a producer
+ * saying "this path is *not* used" or leaving an old one in a note would count.
+ * The declarations are written in two shapes and nothing else uses either.
+ *
+ * | shape | example |
+ * |---|---|
+ * | inline code | ``- 出力先 `tests/e2e/{module}.spec.ts` への Write 権限`` |
+ * | a whole table cell | `| Foundry test (退避済) | tests/fixtures/.../{Contract}.t.sol |` |
+ *
+ * Limiting to a named section instead was tried and does not work: the three
+ * declaration forms sit under different headings (`## 前提`, `## オプション`,
+ * `## 出力 path 早見`) and the headings are not consistent across producers.
+ */
+function declaresOutput(body: string, path: string): boolean {
+  const escaped = escapeForRegExp(path);
+  // The path has to be the whole token, not a piece of one. `tests/{module}.test.ts`
+  // sits inside `tests/{module}.test.tsx`, so allowing anything around it lets a
+  // row claim a path whose producer writes a different file.
+  const inlineCode = new RegExp('`\\s*' + escaped + '\\s*`');
+  const wholeCell = new RegExp('\\|\\s*' + escaped + '\\s*\\|');
+  return inlineCode.test(body) || wholeCell.test(body);
+}
+
+describe('a mention is not a declaration', () => {
+  it('does not accept a path that only appears in prose', () => {
+    // The check has to separate "this is where I write" from "this path exists
+    // in a sentence". A whole-token match anywhere in the body cannot.
+    expect(declaresOutput('この path (tests/nowhere/{m}.ts) は読まない。', 'tests/nowhere/{m}.ts')).toBe(
+      false,
+    );
+  });
+
+  it('accepts the two shapes producers actually use', () => {
+    expect(declaresOutput('- 出力先 `tests/e2e/{module}.spec.ts` への Write 権限', 'tests/e2e/{module}.spec.ts')).toBe(true);
+    expect(declaresOutput('| Foundry test | tests/fixtures/x/{C}.t.sol | Layer 2 |', 'tests/fixtures/x/{C}.t.sol')).toBe(true);
+  });
+
+  it('does not accept a longer path that merely starts the same way', () => {
+    expect(declaresOutput('- 出力先 `tests/{module}.test.tsx`', 'tests/{module}.test.ts')).toBe(false);
+  });
+});
+
 describe('every declared output path is one its producer writes', () => {
   it('each test_outputs entry appears in the producing skill', () => {
     // The rows were written from the old resolver rather than from the
@@ -376,14 +421,7 @@ describe('every declared output path is one its producer writes', () => {
           // directory because `kiwa-test` runs the skill from inside one.
           const bare = output.replace(/^(examples\/)?\{example\}\//, '');
           const where = output.startsWith('tests/fixtures/') ? mover : body;
-          // As a whole token, not as a substring. `tests/{module}.test.ts`
-          // occurs inside `tests/{module}.test.tsx`, so a plain `includes`
-          // lets a row claim a path its producer never writes as long as some
-          // longer path happens to start the same way.
-          const declared = new RegExp(`(^|[^-\\w./{])${escapeForRegExp(bare)}([^-\\w./}]|$)`, 'm').test(
-            where,
-          );
-          if (!declared) missing.push(`${layer.id} -> ${skill}: ${output}`);
+          if (!declaresOutput(where, bare)) missing.push(`${layer.id} -> ${skill}: ${output}`);
         }
       }
     }

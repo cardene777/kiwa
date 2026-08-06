@@ -22,6 +22,7 @@ dApp で「ユーザー操作 → wallet → contract → state 検証」の往�
 - pnpm / npm / yarn のいずれか
 - foundry (forge / anvil) — 未インストールなら `curl -L https://foundry.paradigm.xyz | bash && foundryup`
 - Playwright のブラウザバイナリ — `pnpm exec playwright install`
+- 出力先 `tests/*.spec.ts` への Write 権限
 
 ## ユーザーのリクエスト
 
