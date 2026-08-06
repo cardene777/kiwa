@@ -23,6 +23,8 @@ export interface Signal {
   kind?: 'feature';
   features?: Record<string, string>;
   default?: string;
+  /** Layers the same dependency also implies, which a manifest cannot separate. */
+  also?: string[];
   strength: Strength;
   note?: string;
 }
@@ -69,12 +71,21 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
     if (!hits.length && signal.default) {
       hits.push({ layer: signal.default, signal: dep.name, manifest, strength: signal.strength });
     }
+    // The adapter serves the integration layer as well, and no manifest can
+    // tell the two apart — `rust-cargo-poc` has `tests/poc.rs` and
+    // `tests/poc_integration.rs` against one `kiwa-test-rs` entry. Reporting
+    // only the unit layer would hide half of what the project already tests.
+    for (const layer of signal.also ?? []) {
+      hits.push({ layer, signal: dep.name, manifest, strength: signal.strength });
+    }
     return hits;
   }
 
-  return signal.layer
-    ? [{ layer: signal.layer, signal: dep.name, manifest, strength: signal.strength }]
-    : [];
+  // `also` applies to plain signals too. The Go adapter is one: it names its
+  // layer directly rather than through features, and reading `also` only on the
+  // feature path left `go-integration` undetected.
+  const layers = [...(signal.layer ? [signal.layer] : []), ...(signal.also ?? [])];
+  return layers.map((layer) => ({ layer, signal: dep.name, manifest, strength: signal.strength }));
 }
 
 /**

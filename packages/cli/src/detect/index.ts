@@ -43,7 +43,16 @@ export function loadSignalTable(): SignalTable {
   throw new Error('stack-signals.json not found');
 }
 
-/** Where the detection is recorded, so `doctor` and the skills read one answer. */
+/**
+ * Where the detection is recorded, so `doctor` and the skills read one answer.
+ *
+ * This overwrites without asking, unlike the rest of `init`, which refuses to
+ * clobber and tells you to pass `--force`. The difference is what the file is:
+ * scaffolded files are a starting point the user then edits, while this one is
+ * derived entirely from the manifests and is meant to be replaced whenever they
+ * change. Prompting to overwrite a cache would make re-detection a chore, and
+ * keeping a stale one is the failure this file exists to prevent.
+ */
 export function writeStackFile(cwd: string, layers: Detection[]): string {
   const dir = join(cwd, '.kiwa');
   mkdirSync(dir, { recursive: true });

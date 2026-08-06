@@ -33,7 +33,9 @@
     "",
     "This file only lists what a manifest can show. Detection never installs;",
     "`kiwa init --detect` prints and writes .kiwa/stack.json, and `--apply` is a",
-    "separate step. A wrong guess costs a line of output."
+    "separate step. A wrong guess costs a line of output.",
+    "",
+    "`also` exists because one dependency can imply more than one layer. The adapter package serves the unit and the integration layer alike, and nothing in Cargo.toml or go.mod distinguishes them: rust-cargo-poc has tests/poc.rs and tests/poc_integration.rs and one kiwa-test-rs entry. Reporting only the unit layer would hide half of what the project already tests."
   ],
   "manifests": {
     "Cargo.toml": "rust",
@@ -52,7 +54,10 @@
         },
         "default": "rust-unit",
         "strength": "exact",
-        "note": "The feature list is the project's own statement of what it tests. A bare dependency with no feature means the unit layer."
+        "note": "Presence of the adapter means both the unit and the integration layer. A manifest cannot tell them apart — rust-cargo-poc carries tests/poc.rs and tests/poc_integration.rs against the same dependency — so both are reported and the caller narrows it.",
+        "also": [
+          "rust-integration"
+        ]
       },
       {
         "match": "axum",
@@ -60,19 +65,43 @@
         "strength": "weak",
         "note": "rust-tower-http-poc depends on axum as well, so this only applies when no feature said otherwise."
       },
-      { "match": "actix-web", "layer": "rust-actix-web", "strength": "weak" },
-      { "match": "tower-http", "layer": "rust-tower-http", "strength": "weak" }
+      {
+        "match": "actix-web",
+        "layer": "rust-actix-web",
+        "strength": "weak"
+      },
+      {
+        "match": "tower-http",
+        "layer": "rust-tower-http",
+        "strength": "weak"
+      }
     ],
     "go": [
       {
         "match": "github.com/cardene777/kiwa-test-go",
         "layer": "go-unit",
         "strength": "exact",
-        "note": "Presence alone means the unit layer; the framework modules below refine it."
+        "note": "Presence of the adapter means both the unit and the integration layer. A manifest cannot tell them apart — rust-cargo-poc carries tests/poc.rs and tests/poc_integration.rs against the same dependency — so both are reported and the caller narrows it.",
+        "default": "go-unit",
+        "also": [
+          "go-integration"
+        ]
       },
-      { "match": "github.com/gin-gonic/gin", "layer": "go-gin", "strength": "exact" },
-      { "match": "github.com/labstack/echo", "layer": "go-echo", "strength": "exact" },
-      { "match": "github.com/gofiber/fiber", "layer": "go-fiber", "strength": "exact" }
+      {
+        "match": "github.com/gin-gonic/gin",
+        "layer": "go-gin",
+        "strength": "exact"
+      },
+      {
+        "match": "github.com/labstack/echo",
+        "layer": "go-echo",
+        "strength": "exact"
+      },
+      {
+        "match": "github.com/gofiber/fiber",
+        "layer": "go-fiber",
+        "strength": "exact"
+      }
     ],
     "typescript": []
   },

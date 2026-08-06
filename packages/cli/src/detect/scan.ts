@@ -77,14 +77,24 @@ function workspaceDirs(root: string): string[] {
   }
 
   const dirs = new Set<string>();
+  const excluded: string[] = [];
+
   for (const pattern of patterns) {
-    if (pattern.startsWith('!')) continue;
+    if (pattern.startsWith('!')) {
+      excluded.push(pattern.slice(1));
+      continue;
+    }
     const star = pattern.indexOf('*');
     if (star === -1) {
       const full = join(root, pattern);
       if (existsSync(full)) dirs.add(full);
       continue;
     }
+    // Only `prefix/*` is expanded. A deeper pattern like `packages/*/nested`
+    // used to expand to `packages/*` — the same directories, one level short of
+    // what was asked for — so the scan read siblings of the intended members.
+    // Reading less is the safe failure here; reading the wrong directory is not.
+    if (pattern.slice(star) !== '*') continue;
     const base = join(root, pattern.slice(0, star).replace(/\/$/, ''));
     if (!existsSync(base)) continue;
     try {
@@ -95,6 +105,21 @@ function workspaceDirs(root: string): string[] {
       // Unreadable directory: skip rather than abort the scan.
     }
   }
+
+  // `!pattern` removes a member the earlier globs added. Ignoring it read
+  // directories the project had explicitly excluded.
+  for (const pattern of excluded) {
+    const star = pattern.indexOf('*');
+    if (star === -1) {
+      dirs.delete(join(root, pattern));
+      continue;
+    }
+    const prefix = join(root, pattern.slice(0, star));
+    for (const dir of [...dirs]) {
+      if (dir.startsWith(prefix)) dirs.delete(dir);
+    }
+  }
+
   return [...dirs];
 }
 

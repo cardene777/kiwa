@@ -17,6 +17,9 @@ Commands:
   --help, -h                                                Show this message
 
 init options:
+  --detect                      Report which kiwa layers the project's dependencies point at,
+                                write .kiwa/stack.json, and scaffold nothing. Other init
+                                options do not apply and are refused.
   --force                       Overwrite existing files instead of failing on conflict
   --testDir <path>              Place generated spec under <path> instead of e2e/ (relative)
   --config-suffix <name>        Generate playwright.<name>.config.ts instead of playwright.config.ts
@@ -393,7 +396,14 @@ function detectCommand(deps: RunCliDeps): number {
     // No fallback to the dApp scaffold. Detecting nothing is information, and
     // silently producing Playwright files for a Go service is what this command
     // exists to stop.
+    //
+    // The empty result still gets written. A previous run's file would
+    // otherwise survive a dependency removal and keep telling the skills about
+    // a layer the project no longer has — the stale state this file exists to
+    // prevent, produced by the file itself.
+    const cleared = writeStackFile(cwd, []);
     deps.stdout('\nNo kiwa layer matched. Use --layer to choose one explicitly.\n');
+    deps.stdout(`wrote: ${cleared} (empty)\n`);
     return 0;
   }
 
@@ -408,8 +418,23 @@ function detectCommand(deps: RunCliDeps): number {
   return 0;
 }
 
+/** `init` options that scaffold, and so mean nothing alongside `--detect`. */
+const SCAFFOLD_FLAGS = ['--force', '--testDir', '--config-suffix', '--script-key', '--with-deploy'];
+
 function initCommand(argv: string[], deps: RunCliDeps): number {
   if (argv.includes('--detect')) {
+    // Refuse rather than ignore. `--detect` scaffolds nothing, so
+    // `--detect --force` reads as "detect and overwrite" and does neither —
+    // the rest of `init` fails loudly on conflicting input (InitConflictError,
+    // a missing flag value) and this is the same shape.
+    const conflicting = SCAFFOLD_FLAGS.filter((flag) =>
+      argv.some((token) => token === flag || token.startsWith(`${flag}=`)),
+    );
+    if (conflicting.length) {
+      deps.stderr(`ERR --detect does not scaffold, so ${conflicting.join(', ')} cannot apply\n`);
+      deps.stderr('Run `kiwa init --detect` first, then `kiwa init` with the options you want.\n');
+      return 2;
+    }
     return detectCommand(deps);
   }
 

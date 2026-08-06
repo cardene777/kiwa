@@ -1,12 +1,20 @@
 /**
  * Read what a project depends on, without a TOML or go.mod parser.
  *
- * Detection only needs dependency names and, for Rust, the feature list on one
- * of them. Pulling in a full parser for that is more surface than the question
- * warrants, and both formats state dependencies in a shape a few lines of
- * regex handle: one entry per line, name first.
+ * Detection needs dependency names and, for Rust, the feature list on one of
+ * them. A full parser is more surface than that warrants — but "a few lines of
+ * regex" was too little. Review found three real forms the first version got
+ * wrong: `[dev-dependencies.kiwa-test-rs]` as its own table, features spread
+ * over several lines, and `// indirect` entries in `go.mod`. Each one either
+ * lost the framework feature or invented a dependency the project does not use.
  *
- * The readers are deliberately incurious. Anything they cannot parse is absent
+ * So the Cargo side reads sections rather than lines and tracks brace depth,
+ * which covers the forms above. What it still does not cover, deliberately:
+ * `workspace = true` inheritance (the feature lives in another file), and
+ * `Cargo.toml` workspace members (`scan` does not read them). Both make
+ * detection report less, never something wrong.
+ *
+ * The readers are incurious by design. Anything they cannot parse is absent
  * rather than an error — a malformed manifest should make `--detect` report
  * nothing, not abort the command a user ran for a different reason.
  */
@@ -39,38 +47,80 @@ function stripComment(line: string, marker: string): string {
  * actually testing.
  */
 export function readCargoToml(source: string): Dependency[] {
-  const deps: Dependency[] = [];
-  let inDeps = false;
+  const deps = new Map<string, Dependency>();
 
-  for (const raw of source.split('\n')) {
-    const line = stripComment(raw, '#').trim();
-    if (!line) continue;
+  /** Merge, because one dependency can appear inline and as its own table. */
+  const record = (name: string, features: string[]): void => {
+    const existing = deps.get(name);
+    if (existing) existing.features.push(...features.filter((f) => !existing.features.includes(f)));
+    else deps.set(name, { name, features: [...features] });
+  };
 
-    if (line.startsWith('[')) {
-      // `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]`, and the
-      // target-specific `[target.'cfg(...)'.dependencies]`.
-      inDeps = /^\[(?:[^\]]*\.)?(?:dev-|build-)?dependencies\]$/.test(line);
+  const featuresIn = (text: string): string[] => {
+    const list = /features\s*=\s*\[([^\]]*)\]/s.exec(text);
+    return list ? [...list[1]!.matchAll(/["']([^"']+)["']/g)].map((m) => m[1]!) : [];
+  };
+
+  // Sections, not lines. An entry can span several lines
+  // (`axum = {\n  features = [...]\n}`) and a dependency can be its own table
+  // (`[dev-dependencies.kiwa-test-rs]`), and neither survives reading one line
+  // at a time — which is how the framework feature went missing.
+  const lines = source.split('\n').map((l) => stripComment(l, '#'));
+  let header: string | null = null;
+  let body: string[] = [];
+
+  const flush = (): void => {
+    if (header === null) return;
+
+    // `[dev-dependencies.kiwa-test-rs]` — the table *is* the dependency.
+    const own = /^\[(?:[^\]]*\.)?(?:dev-|build-)?dependencies\.([^\].]+)\]$/.exec(header);
+    if (own) {
+      record(own[1]!.replace(/^["']|["']$/g, ''), featuresIn(body.join('\n')));
+      header = null;
+      body = [];
+      return;
+    }
+
+    if (/^\[(?:[^\]]*\.)?(?:dev-|build-)?dependencies\]$/.test(header)) {
+      // Entries inside the table, each possibly spanning lines.
+      const text = body.join('\n');
+      const entry = /^\s*([A-Za-z0-9_.-]+|"[^"]+"|'[^']+')\s*=\s*/gm;
+      const starts: { name: string; from: number }[] = [];
+      for (const m of text.matchAll(entry)) {
+        // Only a `name =` at brace depth zero starts an entry. Inside braces it
+        // is a field of the entry already open — `version` and `features` both
+        // match the same shape, and counting them as entries split one
+        // dependency into three.
+        let depth = 0;
+        for (const ch of text.slice(0, m.index!)) {
+          if (ch === '{' || ch === '[') depth += 1;
+          else if (ch === '}' || ch === ']') depth -= 1;
+        }
+        if (depth !== 0) continue;
+        starts.push({ name: m[1]!.replace(/^["']|["']$/g, ''), from: m.index! + m[0].length });
+      }
+      for (let i = 0; i < starts.length; i += 1) {
+        const value = text.slice(starts[i]!.from, starts[i + 1]?.from ?? text.length);
+        record(starts[i]!.name, featuresIn(value));
+      }
+    }
+
+    header = null;
+    body = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('[')) {
+      flush();
+      header = trimmed;
       continue;
     }
-    if (!inDeps) continue;
-
-    const eq = line.indexOf('=');
-    if (eq === -1) continue;
-    const name = line.slice(0, eq).trim().replace(/^["']|["']$/g, '');
-    if (!name) continue;
-
-    // `features = ["a", "b"]` on the same line. An entry spread over several
-    // lines is not read; the corpus writes them inline and a missed feature
-    // degrades to the weaker signal rather than to a wrong one.
-    const rest = line.slice(eq + 1);
-    const featureList = /features\s*=\s*\[([^\]]*)\]/.exec(rest);
-    const features = featureList
-      ? [...featureList[1]!.matchAll(/["']([^"']+)["']/g)].map((m) => m[1]!)
-      : [];
-
-    deps.push({ name, features });
+    if (header !== null) body.push(line);
   }
-  return deps;
+  flush();
+
+  return [...deps.values()];
 }
 
 /**
@@ -85,6 +135,15 @@ export function readGoMod(source: string): Dependency[] {
   let inRequireBlock = false;
 
   for (const raw of source.split('\n')) {
+    // `// indirect` marks a dependency the module graph pulled in, not one the
+    // project imports. `go-gin-poc` carries 29 of them against 2 direct ones,
+    // and a project that uses echo can hold gin transitively — detecting the
+    // framework it does not use.
+    //
+    // The marker has to be read before comments are stripped, since stripping
+    // is what removes it.
+    if (/\/\/\s*indirect\s*$/.test(raw)) continue;
+
     const line = stripComment(raw, '//').trim();
     if (!line) continue;
 

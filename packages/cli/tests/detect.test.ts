@@ -1,5 +1,6 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -68,6 +69,50 @@ describe('manifest readers', () => {
     expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
   });
 
+  it('reads a dependency declared as its own table', () => {
+    // `[dev-dependencies.kiwa-test-rs]` is a normal way to write an entry with
+    // several fields, and reading tables by name alone missed it entirely —
+    // taking the framework feature with it.
+    const deps = readCargoToml(
+      ['[dev-dependencies.kiwa-test-rs]', 'version = "0.5"', 'features = ["axum"]'].join('\n'),
+    );
+    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
+  });
+
+  it('reads features spread over several lines', () => {
+    const deps = readCargoToml(
+      [
+        '[dependencies]',
+        'axum = {',
+        '  version = "0.8",',
+        '  features = [',
+        '    "json",',
+        '    "tokio"',
+        '  ]',
+        '}',
+      ].join('\n'),
+    );
+    expect(deps).toEqual([{ name: 'axum', features: ['json', 'tokio'] }]);
+  });
+
+  it('keeps entries separate when one spans lines', () => {
+    // The failure this guards against is a multi-line entry swallowing the
+    // next one's features.
+    const deps = readCargoToml(
+      [
+        '[dependencies]',
+        'axum = {',
+        '  version = "0.8"',
+        '}',
+        'kiwa-test-rs = { version = "0.5", features = ["tower-http"] }',
+      ].join('\n'),
+    );
+    expect(deps).toEqual([
+      { name: 'axum', features: [] },
+      { name: 'kiwa-test-rs', features: ['tower-http'] },
+    ]);
+  });
+
   it('ignores a commented-out Cargo dependency', () => {
     const deps = readCargoToml(['[dependencies]', '# axum = "0.8"', 'serde = "1"'].join('\n'));
     expect(deps.map((d) => d.name)).toEqual(['serde']);
@@ -113,6 +158,21 @@ describe('manifest readers', () => {
     expect(deps).toEqual([]);
   });
 
+  it('skips indirect dependencies', () => {
+    // `go-gin-poc` carries 29 indirect entries against 2 direct ones. A project
+    // that uses echo can hold gin transitively, and reading indirect entries
+    // would report the framework it does not use.
+    const deps = readGoMod(
+      [
+        'require (',
+        '\tgithub.com/gin-gonic/gin v1.12.0',
+        '\tgithub.com/bytedance/sonic v1.15.0 // indirect',
+        ')',
+      ].join('\n'),
+    );
+    expect(deps.map((d) => d.name)).toEqual(['github.com/gin-gonic/gin']);
+  });
+
   it('does not read a replace block as dependencies', () => {
     // The block form is what the guard actually earns its place for: outside a
     // block these lines are skipped anyway for want of a `require ` prefix.
@@ -137,16 +197,91 @@ describe('manifest readers', () => {
   });
 });
 
+describe('workspace resolution', () => {
+  function fixture(files: Record<string, string>): string {
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-scan-'));
+    for (const [rel, body] of Object.entries(files)) {
+      const full = join(dir, rel);
+      mkdirSync(dirname(full), { recursive: true });
+      writeFileSync(full, body, 'utf-8');
+    }
+    return dir;
+  }
+
+  it('reads workspace members named by pnpm-workspace.yaml', () => {
+    // In a monorepo the dependencies live in the members, not the root. Reading
+    // only cwd finds nothing there.
+    const dir = fixture({
+      'pnpm-workspace.yaml': 'packages:\n  - "apps/*"\n',
+      'package.json': '{"name":"root"}',
+      'apps/web/package.json': '{"dependencies":{"next":"15"}}',
+    });
+    try {
+      const paths = scan(dir).map((m) => m.path);
+      expect(paths).toContain(join('apps', 'web', 'package.json'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('does not expand a pattern deeper than one level', () => {
+    // `packages/*/nested` once expanded to `packages/*`: the same directories,
+    // one level short of what was asked for. Reading less is the safe failure.
+    const dir = fixture({
+      'pnpm-workspace.yaml': 'packages:\n  - "libs/*/nested"\n',
+      'package.json': '{"name":"root"}',
+      'libs/one/package.json': '{"dependencies":{"axum":"1"}}',
+    });
+    try {
+      const paths = scan(dir).map((m) => m.path);
+      expect(paths).not.toContain(join('libs', 'one', 'package.json'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('honours a negated pattern', () => {
+    const dir = fixture({
+      'pnpm-workspace.yaml': 'packages:\n  - "pkgs/*"\n  - "!pkgs/skip"\n',
+      'package.json': '{"name":"root"}',
+      'pkgs/keep/package.json': '{"dependencies":{"a":"1"}}',
+      'pkgs/skip/package.json': '{"dependencies":{"b":"1"}}',
+    });
+    try {
+      const paths = scan(dir).map((m) => m.path);
+      expect(paths).toContain(join('pkgs', 'keep', 'package.json'));
+      expect(paths).not.toContain(join('pkgs', 'skip', 'package.json'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('skips node_modules when expanding', () => {
+    const dir = fixture({
+      'pnpm-workspace.yaml': 'packages:\n  - "*"\n',
+      'package.json': '{"name":"root"}',
+      'node_modules/pkg/package.json': '{"dependencies":{"react":"19"}}',
+    });
+    try {
+      expect(scan(dir).map((m) => m.path)).not.toContain(
+        join('node_modules', 'pkg', 'package.json'),
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
 describe('detection against the polyglot corpus', () => {
   it.each([
-    ['rust-axum-poc', ['rust-axum']],
-    ['rust-actix-web-poc', ['rust-actix-web']],
-    ['rust-tower-http-poc', ['rust-tower-http']],
-    ['rust-cargo-poc', ['rust-unit']],
-    ['go-gin-poc', ['go-gin', 'go-unit']],
-    ['go-echo-poc', ['go-echo', 'go-unit']],
-    ['go-fiber-poc', ['go-fiber', 'go-unit']],
-    ['go-testing-poc', ['go-unit']],
+    ['rust-axum-poc', ['rust-axum', 'rust-integration']],
+    ['rust-actix-web-poc', ['rust-actix-web', 'rust-integration']],
+    ['rust-tower-http-poc', ['rust-integration', 'rust-tower-http']],
+    ['rust-cargo-poc', ['rust-integration', 'rust-unit']],
+    ['go-gin-poc', ['go-gin', 'go-integration', 'go-unit']],
+    ['go-echo-poc', ['go-echo', 'go-integration', 'go-unit']],
+    ['go-fiber-poc', ['go-fiber', 'go-integration', 'go-unit']],
+    ['go-testing-poc', ['go-integration', 'go-unit']],
   ])('%s detects %j', (name, expected) => {
     expect(detectExample(name)).toEqual(expected);
   });
@@ -165,7 +300,10 @@ describe('precedence', () => {
       { name: 'axum', features: [] },
       { name: 'kiwa-test-rs', features: ['tower-http'] },
     ]);
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-tower-http']);
+    // `also` puts rust-integration alongside it: the adapter serves both and a
+    // manifest cannot separate them. What matters here is that the weak
+    // rust-axum signal is gone.
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-integration', 'rust-tower-http']);
   });
 
   it('a weak signal still applies when nothing exact claimed its group', () => {
@@ -186,6 +324,7 @@ describe('precedence', () => {
     ];
     expect(resolvePrecedence([...decided, ...weakElsewhere]).map((d) => d.layer)).toEqual([
       'go-gin',
+      'rust-integration',
       'rust-tower-http',
     ]);
   });
@@ -206,7 +345,10 @@ describe('precedence', () => {
       { name: 'axum', features: [] },
       { name: 'kiwa-test-rs', features: ['axum'] },
     ]);
-    expect(resolvePrecedence(all)).toHaveLength(1);
+    // rust-axum once (not twice), plus rust-integration from `also`.
+    const layers = resolvePrecedence(all).map((d) => d.layer);
+    expect(layers.filter((l) => l === 'rust-axum')).toHaveLength(1);
+    expect(layers).toEqual(['rust-axum', 'rust-integration']);
   });
 });
 
@@ -225,11 +367,12 @@ describe('every detected layer exists in docs/layers.json', () => {
       for (const signal of list) {
         if (signal.layer) named.add(signal.layer);
         if (signal.default) named.add(signal.default);
+        for (const layer of signal.also ?? []) named.add(layer);
         for (const layer of Object.values(signal.features ?? {})) named.add(layer);
       }
     }
 
     expect([...named].filter((l) => !known.has(l))).toEqual([]);
-    expect(named.size).toBeGreaterThanOrEqual(7);
+    expect(named.size).toBeGreaterThanOrEqual(10);
   });
 });

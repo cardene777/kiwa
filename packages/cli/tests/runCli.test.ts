@@ -714,3 +714,40 @@ describe('package entry point', () => {
     expect(h.out()).toBe(USAGE);
   });
 });
+
+describe('init --detect', () => {
+  it('refuses a scaffold flag alongside --detect', async () => {
+    // `--detect` writes no scaffold, so `--force` means nothing here. The rest
+    // of `init` fails loudly on conflicting input; ignoring the flag silently
+    // would be the odd one out.
+    const h = harness();
+    const code = await runCli(['init', '--detect', '--force'], h.deps);
+    expect(code).toBe(2);
+    expect(h.err()).toContain('--detect does not scaffold');
+    // runInit throws if called, so reaching here proves nothing scaffolded.
+  });
+
+  it('refuses the = form of a scaffold flag too', async () => {
+    const h = harness();
+    const code = await runCli(['init', '--detect', '--testDir=e2e'], h.deps);
+    expect(code).toBe(2);
+    expect(h.err()).toContain('--testDir');
+  });
+
+  it('reports that nothing was found in an empty directory', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-detect-'));
+    try {
+      const h = harness({ cwd: () => dir });
+      const code = await runCli(['init', '--detect'], h.deps);
+      expect(code).toBe(0);
+      expect(h.out()).toContain('No manifest found.');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('names --detect in the usage text', () => {
+    // A flag absent from --help is a flag nobody finds.
+    expect(USAGE).toContain('--detect');
+  });
+});
