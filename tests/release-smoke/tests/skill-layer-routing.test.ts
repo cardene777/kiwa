@@ -401,6 +401,33 @@ function declaresOutput(body: string, ...forms: string[]): boolean {
   return false;
 }
 
+describe('the fixture rows and the slots that claim them line up', () => {
+  it('each row is claimed exactly once', () => {
+    // The fixture paths are the only rows checked against a shared file, so a
+    // slot swapped to a sibling's path still finds something and passes. What
+    // it cannot do is keep the pairing one-to-one: the sibling's row ends up
+    // claimed twice and its own row not at all.
+    const mover = read('.claude/skills/kiwa-test/SKILL.md');
+    const rows = [...mover.matchAll(/^\|[^|\n]*\|\s*(tests\/fixtures\/[^|\n]+?)\s*\|/gm)].map(
+      (m) => m[1]!,
+    );
+    expect(rows.length, 'Step 5.5 が退避先を宣言していない').toBeGreaterThan(0);
+
+    const claimed = LAYERS.flatMap((layer) =>
+      Object.values(layer.test_outputs ?? {})
+        .flat()
+        .filter((o) => (o as string).startsWith('tests/fixtures/')),
+    ) as string[];
+
+    const counts = new Map<string, number>();
+    for (const path of claimed) counts.set(path, (counts.get(path) ?? 0) + 1);
+
+    expect([...counts.entries()].filter(([, n]) => n > 1).map(([p]) => p)).toEqual([]);
+    expect(rows.filter((row) => !counts.has(row))).toEqual([]);
+    expect(claimed.filter((path) => !rows.includes(path))).toEqual([]);
+  });
+});
+
 describe('a mention is not a declaration', () => {
   it('does not accept a path that only appears in prose', () => {
     // The check has to separate "this is where I write" from "this path exists
