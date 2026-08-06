@@ -41,7 +41,12 @@ $ARGUMENTS
 
 - `--module {name}` — 出力 file 名のキー (出力 path は `--layer` と組み合わせて決定)、 単数指定
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
-- `--layer {contract|e2e|e2e-generic|a11y|api|ui|data|cli|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|auth|job-queue|cache|integration|unit|all}` — 想定 test layer を指定 (default `all`、 出力 path と推奨観点が変わる)。 dApp e2e / 汎用 browser e2e / a11y / Next.js (Server Actions + middleware + RSC + Parallel Routes + RSC streaming) / Edge runtime / Rust (cargo test unit + hyper mock_server integration + axum Router test + actix-web App test + tower-http middleware chain test) / Go (testing.T unit + net/http/httptest integration + Gin TestServer + Echo TestServer + Fiber TestServer) の各 framework 対応 (詳細は各 layer 別 9 column 拡張表 section、 5 framework sub-feature は v1.2 milestone Issue #523 で追加、 v1.3-1 RSC streaming は Issue #558 で追加、 v1.4-5 polyglot 拡張 (rust-unit / rust-integration / go-unit / go-integration) は Issue #580 で追加、 v1.5-5 polyglot 縦深化 (rust-axum / rust-actix-web / go-gin / go-echo) は Issue #596 で追加、 v1.7-6 polyglot 継続深化 (rust-tower-http / go-fiber) は Issue #627 で追加、 v1.8 新 layer (auth / job-queue / cache) は Issue #642 で追加)
+<!-- kiwa-layers:design-enum:start -->
+
+- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — 想定 test layer を指定 (default `all`)。
+  各値の出力先と消費 skill は下の routing 表を参照する。
+
+<!-- kiwa-layers:design-enum:end -->
 - `--input {path}` — 機能仕様 file の path (省略時は対話形式で要約を求める)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
@@ -51,40 +56,42 @@ $ARGUMENTS
 
 `--layer` に応じて出力 path を分岐する。 layer 別に dir を分けることで Layer 2 skill (`/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play`) が対象 layer の spec だけを Read できる。
 
-| `--layer` | 出力 path | 主要消費 Layer 2 skill |
-|---|---|---|
-| `contract` | `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` / `/kiwa-hardhat` |
-| `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` (dApp e2e、 wallet inject / contract deploy / multi-chain 対応) |
-| `e2e-generic` | `tests/spec/integration/test-spec-{module}.e2e.md` | `/kiwa-e2e` (汎用 browser e2e、 static html / fetch app / SSR、 web3 非依存) |
-| `a11y` | `tests/spec/integration/test-spec-{module}.a11y.md` | `/kiwa-a11y` (axe-core + WCAG 2.1 AA、 jsdom / playwright 2 mode) |
-| `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` (Vitest + msw + supertest、 @kiwa-lab/api) |
-| `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` (HTTP / REST / GraphQL 専用、 mode column 必須) |
-| `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` (React component 専用、 render / interaction / snapshot 3 mode、 `@kiwa-lab/ui`) |
-| `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` (queue / cron / batch 専用、 mock / live mode + fake clock、 `@kiwa-lab/data`) |
-| `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` (CLI / shell / file IO 専用、 isolated tempdir + stdout/stderr snapshot、 `@kiwa-lab/cli-test`) |
-| `orm-query` | `tests/spec/integration/test-spec-{module}.orm.md` | `/kiwa-orm` (ORM query 専用、 v0.1 は Drizzle + in-memory SQLite、 `setupOrmEnv` + `expectQuery` + `expectRowCount`、 `@kiwa-lab/orm`、 Postgres / MySQL / Prisma / Kysely 対応は follow-up Issue #527-2 .. #527-5) |
-| `nextjs-server-action` | `tests/spec/integration/test-spec-{module}.nextjs.md` | `/kiwa-nextjs` (Next.js App Router `'use server'` action 専用、 `invokeServerAction` で redirect / cookies / headers 捕捉、 `@kiwa-lab/nextjs`) |
-| `nextjs-middleware` | `tests/spec/integration/test-spec-{module}.middleware.md` | `/kiwa-nextjs` (Next.js `middleware.ts` 専用、 `invokeMiddleware` で auth gate / locale rewrite / geo block / response header inject 捕捉、 `@kiwa-lab/nextjs`) |
-| `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` (Next.js async React Server Components 専用、 `renderServerComponent` で direct await + `findAll` / `textContent` で element tree 検証、 notFound / forbidden / redirect signal 捕捉、 `@kiwa-lab/nextjs`) |
-| `nextjs-parallel-route` | `tests/spec/integration/test-spec-{module}.parallel.md` | `/kiwa-nextjs` (Next.js App Router Parallel Routes `@modal` / `@sidebar` + Intercepting Routes `(.)` / `(..)` / `(...)` 専用、 `invokeParallelRoutes` で全 slot 並列 await + per-slot error isolation + intercepting variant 切替 + default fallback 強制 render 捕捉、 `@kiwa-lab/nextjs` v1.0.4+) |
-| `nextjs-rsc-streaming` | `tests/spec/integration/test-spec-{module}.rsc-streaming.md` | `/kiwa-nextjs` (Next.js RSC streaming + Suspense boundary 専用、 `setupNextRscEnv` で chunk 配列 + fallback / resolved 遷移 + errorBoundary + timeout を deterministic に capture、 `@kiwa-lab/nextjs` v1.1+、 Issue #558) |
-| `edge-handler` | `tests/spec/integration/test-spec-{module}.edge.md` | `/kiwa-edge` (Edge runtime fetch handler 専用、 Cloudflare Workers / Vercel Edge / 汎用 ESM 形式、 `invokeEdgeHandler` で env binding (KV / R2 / D1 / vars) + ExecutionContext (waitUntil / passThroughOnException) を捕捉、 `@kiwa-lab/edge`) |
-| `rust-unit` | `tests/spec/unit/test-spec-{module}.rs.md` | `kiwa-test-rs` (Rust cargo test 専用、 `kiwa::unit::setup_env(SetupOpts { mode, seed, label })` + `assert_kiwa_eq!` / `assert_kiwa_close!` + `Drop` 経由 auto cleanup、 `KiwaEnv` は `!Send` で test thread 局所、 v1.4-1 で追加) |
-| `rust-integration` | `tests/spec/integration/test-spec-{module}.rs.md` | `kiwa-test-rs` (Rust hyper backed API mock 専用、 `kiwa::integration::mock_server(MockServerOpts { routes, recorder })` で in-memory hyper server 起動 + `reqwest` PoC、 request recorder で method / path / body を捕捉、 v1.4-2 で追加) |
-| `go-unit` | `tests/spec/unit/test-spec-{module}.go.md` | `kiwa-test-go` (Go testing.T 専用、 `kiwa.SetupUnitEnv(t, UnitOpts{ Mode, Seed, Label })` + `kiwa.AssertEqual` / `kiwa.AssertClose` + `t.Cleanup` 経由 auto cleanup、 `UnitEnv` は cross-goroutine 非対応で test goroutine 局所、 v1.4-3 で追加) |
-| `go-integration` | `tests/spec/integration/test-spec-{module}.go.md` | `kiwa-test-go` (Go net/http/httptest 専用、 `kiwa.NewMockServer(t, MockServerOpts{ Routes })` で httptest.Server 起動 + request recorder + `t.Cleanup` 経由 port release、 `http.Client` で driver 化、 v1.4-4 で追加) |
-| `rust-axum` | `tests/spec/integration/test-spec-{module}.rust-axum.md` | `kiwa-test-rs` (Rust axum Router 専用、 `kiwa::axum::test_app(router)` + `TestApp::request(HttpMethod, path)` + `.header()` / `.body()` / `.json()` / `.send()` chain で in-process `tower::Service::oneshot` 駆動、 `TestResponse` (`status()` / `json()` / `body_str()` / `headers()`) で response 検証、 real port bind なし + TIME_WAIT flakiness 回避、 v1.5-1 で追加) |
-| `rust-actix-web` | `tests/spec/integration/test-spec-{module}.rust-actix.md` | `kiwa-test-rs` (Rust actix-web `App` 専用、 `kiwa::actix::test_app(factory)` (factory closure 必須、 `App` は `!Clone`) + `TestApp::request(HttpMethod, path)` + `.send()` chain で in-process `actix_web::test::call_service` 駆動、 `TestResponse` は axum adapter と 1:1 surface (`status()` / `json()` / `body_str()` / `headers()`)、 actix-rt runtime auto-drop、 v1.5-2 で追加) |
-| `go-gin` | `tests/spec/integration/test-spec-{module}.go-gin.md` | `kiwa-test-go` (Go Gin `*gin.Engine` 専用、 `kiwa_gin.NewTestServer(t, engine)` + `srv.Request(kiwa.MethodGET, path)` + `.Header(k, v)` / `.Body(b)` / `.JSON(b)` / `.Send()` chain で `httptest.NewRecorder` + `engine.ServeHTTP` 駆動、 `*Response` (`StatusCode()` / `Headers()` / `Body()` / `BodyString()` / `JSON()`) で response 検証、 `srv.RecordedRequests()` で v1.4 互換 recorder 共有、 v1.5-3 で追加) |
-| `go-echo` | `tests/spec/integration/test-spec-{module}.go-echo.md` | `kiwa-test-go` (Go Echo `*echo.Echo` 専用、 `kiwa_echo.NewTestServer(t, e)` + `srv.Request(kiwa.MethodGET, path)` + `.Header(k, v)` / `.Body(b)` / `.JSON(b)` / `.Send()` chain で `httptest.NewRecorder` + `e.ServeHTTP` 駆動、 surface は Gin adapter と 1:1 (`StatusCode()` / `Headers()` / `Body()` / `BodyString()` / `JSON()`)、 `srv.RecordedRequests()` で v1.4 互換 recorder 共有、 v1.5-4 で追加) |
-| `rust-tower-http` | `tests/spec/integration/test-spec-{module}.rust-tower-http.md` | `kiwa-test-rs` (Rust tower-http `ServiceBuilder<...>` middleware chain 専用、 `kiwa::tower_http::test_chain(layers, router)` で `ServiceBuilder` layer stack を axum Router に被せて in-process `oneshot` 駆動 + 6 middleware helper (`cors::test_cors` / `trace::assert_trace_id` / `compression::assert_compressed` / `auth::with_bearer` + `with_basic` / `rate_limit::exhaust` / `timeout::assert_timed_out`) で middleware 固有 assertion、 `TestApp` / `TestResponse` surface は axum adapter と 1:1、 real port bind なし + TIME_WAIT flakiness 回避、 v1.7-1 (chain helper PR #629) + v1.7-2 (6 middleware helper PR #630) で追加) |
-| `go-fiber` | `tests/spec/integration/test-spec-{module}.go-fiber.md` | `kiwa-test-go` (Go Fiber `*fiber.App` 専用、 `kiwa_fiber.NewTestServer(t, app)` + `srv.Request(kiwa.MethodGET, path)` + `.Header(k, v)` / `.Body(b)` / `.JSON(b)` / `.Send()` chain で Fiber の `*App.Test(*http.Request)` hook (fasthttp base + in-memory net conn) 駆動、 surface は Gin / Echo adapter と 1:1 (`StatusCode()` / `Headers()` / `Body()` / `BodyString()` / `JSON()`)、 `srv.RecordedRequests()` で v1.4 互換 recorder 共有、 real port bind なし + TIME_WAIT flakiness 回避、 v1.7-4 (fiber subpackage PR #632) + v1.7-5 (fasthttp 互換 API PR #633) で追加) |
-| `auth` | `tests/spec/integration/test-spec-{module}.auth.md` | `/kiwa-auth` (auth session / provider / DB adapter mock 専用、 `@kiwa-lab/auth` の 5 provider (NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0) を statement-level に mapping、 session mock + OAuth provider mock + email/password + magic link + 2FA + passkey + organizations + Clerk orgs + Auth0 tenant + rules + Management API mock の sub-feature を 1 spec 内で cover、 v1.8-1〜v1.8-3 で `@kiwa-lab/auth` v0.1 追加、 v1.8-6 で本 layer 追加、 v1.9-1/-2 で Clerk / Auth0 provider dimension 追加、 `--provider {nextauth|lucia|better-auth|clerk|auth0}` で provider 別 spec 生成対応) |
-| `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` (job queue / event queue / edge queue / AWS queue 専用、 `@kiwa-lab/queue` の 4 provider (BullMQ (sandbox / testcontainers) + Inngest (stub / dev-server) + Cloudflare Queues (miniflare / wrangler) + AWS SQS (stub / localstack)) を statement-level に mapping、 job add / process / retry / fail / drain / delay + event send / step function / concurrency + queue send / consumer batch / DLQ + SQS FIFO / batch / long polling / visibility timeout の sub-feature を 1 spec 内で cover、 v1.8-4〜v1.8-5 で v0.1 追加、 v1.8-6 で本 layer 追加、 v1.9-3/-4 で Cloudflare Queues / SQS provider dimension 追加、 `--provider {bullmq|inngest|cloudflare|sqs}` で provider 別 spec 生成対応) |
-| `cache` | `tests/spec/integration/test-spec-{module}.cache.md` | `/kiwa-cache` (cache 専用、 `@kiwa-lab/cache` の 3 provider (Redis (`setupCacheEnv`、 in-memory / testcontainers) + Memcached (`setupMemcachedEnv`、 stub / testcontainers) + KeyDB (`setupKeyDBEnv`、 stub / testcontainers)) を statement-level に mapping、 get / set / delete / TTL / expiry / Pub/Sub / publish-subscribe / assertPublished + Memcached 8 command + consistent-hash + KeyDB multi-master + cross-region Pub/Sub の sub-feature を 1 spec 内で cover、 v1.8-6 で本 layer + `@kiwa-lab/cache` v0.1 同時追加、 v1.9-5/-6 で Memcached / KeyDB provider dimension 追加、 `--provider {redis|memcached|keydb}` で provider 別 spec 生成対応) |
-| `contract-rust` | `tests/spec/contract/test-spec-{module}.contract-rust.md` | `/kiwa-rust --layer contract-rust --provider {foundry|alloy}` (Rust から Solidity contract test を driving する専用 layer、 `kiwa-test-rs` v0.4.1 で追加された `kiwa::contract::foundry` (feature `contract-foundry`、 forge / cast / anvil subprocess wrapper + Drop-based Anvil + coverage summary + lcov emit + graceful skip pattern) と v0.4.2 で追加された `kiwa::contract::alloy` (feature `contract-alloy`、 Foundry `out/*.json` の SolAbi parser + 4-byte selector 計算 (built-in keccak-256) + Signer 4 種 (LocalWallet / AwsKms / Ledger / Trezor) + Provider 3 種 (Http / Ws / Ipc) + ContractCall encoding) の 2 provider を statement-level に mapping、 対象 contract (Solidity file) / 対象 method / 呼出方向 (call / send) / signer path / provider transport / assertion 型 の 6 次元を 9 column 拡張表で cover、 `--provider {foundry|alloy}` で provider 別 spec 生成対応、 v1.10-5/-6 で追加) |
-| `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` (Vitest 汎用 unit runner) |
-| `all` (default) | `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (旧 default 経路、 互換性維持) |
+<!-- kiwa-layers:routing-table:start -->
+
+| layer | spec 出力先 | 消費 skill | 実行 runtime | provider |
+|---|---|---|---|---|
+| `contract` | `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` | solidity | `foundry` / `hardhat` (kiwa-test --runner {foundry|hardhat|both}) |
+| `e2e` | `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` | typescript | — |
+| `e2e-generic` | `tests/spec/integration/test-spec-{module}.e2e.md` | `/kiwa-e2e` | typescript | — |
+| `a11y` | `tests/spec/integration/test-spec-{module}.a11y.md` | `/kiwa-a11y` | typescript | — |
+| `integration` | `tests/spec/integration/test-spec-{module}.md` | `/kiwa-api` | typescript | — |
+| `api` | `tests/spec/integration/test-spec-{module}.api.md` | `/kiwa-api` | typescript | — |
+| `ui` | `tests/spec/integration/test-spec-{module}.ui.md` | `/kiwa-ui` | typescript | — |
+| `data` | `tests/spec/integration/test-spec-{module}.data.md` | `/kiwa-data` | typescript | — |
+| `cli` | `tests/spec/integration/test-spec-{module}.cli.md` | `/kiwa-cli-test` | typescript | — |
+| `unit` | `tests/spec/unit/test-spec-{module}.md` | `/kiwa-vitest` | typescript | — |
+| `orm-query` | `tests/spec/integration/test-spec-{module}.orm.md` | `/kiwa-orm` | typescript | `drizzle` / `prisma` / `kysely` (spec の記述から kiwa-orm が判断 (flag なし)) |
+| `nextjs-server-action` | `tests/spec/integration/test-spec-{module}.nextjs.md` | `/kiwa-nextjs` | typescript | — |
+| `nextjs-middleware` | `tests/spec/integration/test-spec-{module}.middleware.md` | `/kiwa-nextjs` | typescript | — |
+| `nextjs-rsc` | `tests/spec/integration/test-spec-{module}.rsc.md` | `/kiwa-nextjs` | typescript | — |
+| `nextjs-parallel-route` | `tests/spec/integration/test-spec-{module}.parallel.md` | `/kiwa-nextjs` | typescript | — |
+| `nextjs-rsc-streaming` | `tests/spec/integration/test-spec-{module}.rsc-streaming.md` | `/kiwa-nextjs` | typescript | — |
+| `edge-handler` | `tests/spec/integration/test-spec-{module}.edge.md` | `/kiwa-edge` | typescript | — |
+| `auth` | `tests/spec/integration/test-spec-{module}.auth.md` | `/kiwa-auth` | typescript | `nextauth` / `lucia` / `better-auth` / `clerk` / `auth0` |
+| `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` | typescript | `bullmq` / `inngest` / `cloudflare` / `sqs` |
+| `cache` | `tests/spec/integration/test-spec-{module}.cache.md` | `/kiwa-cache` | typescript | `redis` / `memcached` / `keydb` |
+| `rust-unit` | `tests/spec/unit/test-spec-{module}.rs.md` | `/kiwa-rust` | rust | — |
+| `rust-integration` | `tests/spec/integration/test-spec-{module}.rs.md` | `/kiwa-rust` | rust | — |
+| `rust-axum` | `tests/spec/integration/test-spec-{module}.rust-axum.md` | `/kiwa-rust` (`--mode axum`) | rust | — |
+| `rust-actix-web` | `tests/spec/integration/test-spec-{module}.rust-actix.md` | `/kiwa-rust` (`--mode actix-web`) | rust | — |
+| `rust-tower-http` | `tests/spec/integration/test-spec-{module}.rust-tower-http.md` | `/kiwa-rust` (`--mode tower-http`) | rust | — |
+| `go-unit` | `tests/spec/unit/test-spec-{module}.go.md` | `/kiwa-go` | go | — |
+| `go-integration` | `tests/spec/integration/test-spec-{module}.go.md` | `/kiwa-go` | go | — |
+| `go-gin` | `tests/spec/integration/test-spec-{module}.go-gin.md` | `/kiwa-go` (`--mode gin`) | go | — |
+| `go-echo` | `tests/spec/integration/test-spec-{module}.go-echo.md` | `/kiwa-go` (`--mode echo`) | go | — |
+| `go-fiber` | `tests/spec/integration/test-spec-{module}.go-fiber.md` | `/kiwa-go` (`--mode fiber`) | go | — |
+
+<!-- kiwa-layers:routing-table:end -->
 
 出力 path 親 dir (`tests/spec/{layer}/`) は skill が `mkdir -p` で自動作成する。 既存 file がある場合は上書きせず `tests/spec/{layer}/test-spec-{module}-{n}.md` (n は 2 以降の連番) として Write、 衝突回避する。
 
@@ -814,7 +821,6 @@ Layer 1 出力を Layer 2 skill が消費する経路と引き渡し方は `refe
 | `kiwa-test-go` (Go Gin / Echo、 v1.5-3/4) | `tests/spec/integration/test-spec-{module}.go-gin.md` + `tests/spec/integration/test-spec-{module}.go-echo.md` | `*_test.go` + `go test ./...` 実行 | 正常系 = `kiwa_gin.NewTestServer(t, engine)` / `kiwa_echo.NewTestServer(t, e)` / 異常系 = 4xx/5xx status / middleware = `engine.Use(...)` / `e.Use(...)` / group = `engine.Group(...)` / `e.Group(...)` / param binding = `:param` matcher / response 検証 = `*Response` (`StatusCode` / `Headers` / `Body` / `BodyString` / `JSON`) / recorder = `srv.RecordedRequests()` (v1.4 互換 `kiwa.RecordedRequest` shape) |
 | `kiwa-test-rs` (Rust tower-http、 v1.7-1/2) | `tests/spec/integration/test-spec-{module}.rust-tower-http.md` | `tests/*.rs` + `cargo test --features kiwa/tower-http` 実行 | 正常系 = `kiwa::tower_http::test_chain(layers, router)` / CORS = `kiwa::tower_http::cors::{test_cors, assert_preflight_ok}` / 圧縮 = `kiwa::tower_http::compression::{test_compression, assert_compressed}` / auth = `kiwa::tower_http::auth::{with_bearer, with_basic}` / rate limit = `kiwa::tower_http::rate_limit::exhaust` / timeout = `kiwa::tower_http::timeout::assert_timed_out` / trace = `kiwa::tower_http::trace::assert_trace_id` / response 検証 = `TestResponse` (axum adapter と 1:1 surface) |
 | `kiwa-test-go` (Go Fiber、 v1.7-4/5) | `tests/spec/integration/test-spec-{module}.go-fiber.md` | `*_test.go` + `go test ./...` 実行 | 正常系 = `kiwa_fiber.NewTestServer(t, app)` / 異常系 = 4xx/5xx status / middleware = `app.Use(...)` / group = `app.Group(...)` / param binding = `:param` / `+wildcard` matcher / response 検証 = `*Response` (`StatusCode` / `Headers` / `Body` / `BodyString` / `JSON`、 gin / echo adapter と 1:1) / recorder = `srv.RecordedRequests()` (v1.4 互換 `kiwa.RecordedRequest` shape) / fasthttp base のため `*App.Test(*http.Request)` hook 経由 |
-| `kiwa-test-rs` (Rust contract、 v1.10-5/6) | `tests/spec/contract/test-spec-{module}.contract-rust.md` | `tests/*.rs` + `cargo test --features kiwa-test-rs/contract-foundry` + `--features kiwa-test-rs/contract-alloy` 実行 | 正常系 = `FoundryEnv::detect()` graceful skip / anvil = `Anvil::spawn_deterministic(port)` + `Drop` cleanup + `wait_ready(timeout)` / forge test = `env.forge_test(project)` + summary parser / coverage = `env.forge_coverage(project)` + `emit_lcov_to(&report, path)` / cast = `env.cast_call(rpc_url, target, sig, args)` + `cast_send` + `cast_rpc` (signing credential redact) / alloy ABI = `SolAbi::parse_foundry_out(name, json)` + `.selector_of(func)` / signer = `Signer::LocalWallet` / `AwsKms` / `Ledger` / `Trezor` / provider = `Provider::Http` / `Ws` / `Ipc` / call encoding = `ContractCall::no_args` / `with_encoded_args` / assertion 型 = `bool` / `success` / `stdout` / `stderr` / `SolAbiItem.selector` |
 
 Layer 2 skill は仕様書の「テストケース一覧」表を行単位で読み取り、 観点 → ランナー特化 helper に変換する。
 

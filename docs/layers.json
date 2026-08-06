@@ -1,0 +1,679 @@
+{
+  "$comment": [
+    "The layer contract, in one place.",
+    "",
+    "A layer is a routing decision: it names where /kiwa-design writes a spec, which",
+    "Layer 2 skill turns that spec into test code, where that code lands, and which",
+    "--target values of /kiwa-test pull it in.",
+    "",
+    "Four SKILL.md files used to declare the --layer enum independently, and a fifth",
+    "place held the routing. Nothing compared them, so deleting a package in #1804",
+    "left routing behind, and three inconsistencies survived until #1810 read them",
+    "side by side: contract-rust had a routing row but no enum entry, /kiwa-rust knew",
+    "neither contract-rust nor --provider, and --mode was missing tower-http.",
+    "",
+    "scripts/rebuild-layer-routing.mjs renders this file into those skills. Editing",
+    "the generated regions by hand is caught by --check. Add a layer here, never",
+    "there.",
+    "",
+    "Column notes:",
+    "  consumer_skill   the skill that reads the spec and writes test code. Always a",
+    "                   directory under .claude/skills/.",
+    "  backing_package  the library the generated test imports. null when the layer",
+    "                   is served by a cargo/go package instead (kiwa-test-rs,",
+    "                   kiwa-test-go), which is what backing_runtime_package names.",
+    "                   These were one column until #1810; conflating them is why the",
+    "                   earlier check skipped ten rows.",
+    "  test_output      where consumer_skill writes. The contract for /kiwa-review's",
+    "                   resolver. Six layers disagreed with their producer and four",
+    "                   had no entry at all before this table.",
+    "  targets          which /kiwa-test --target values run this layer. Derived from",
+    "                   the Step headings, not from the prose describing them; the two",
+    "                   disagree today and #1809 decides which one moves.",
+    "",
+    "contract-rust is deliberately absent. It had a routing row in kiwa-design and no entry in either enum, and the skill it named (/kiwa-rust) implements neither the layer nor the --provider flag the row advertised. Rendering it into the enum would have advertised an option nothing can serve. #1809 decides whether to implement it or drop the row; until then the table records what works.",
+    "",
+    "providers vs variants: providers are the values a consumer accepts on its own --provider flag, which is only auth, job-queue and cache. variants are alternatives chosen some other way -- contract picks foundry or hardhat through kiwa-test --runner, and orm-query's three ORMs are read out of the spec with no flag at all. They were one column until review asked whether the values were really flags; writing them into providers claimed an interface that does not exist.",
+    "",
+    "targets records which --target values actually start a Step, not which ones the prose claims. Step 4r and 4g invoke only rust-unit / rust-integration and go-unit / go-integration; the six framework layers have no Step of their own and so carry no target. Assigning them by runtime, as a first pass did, describes an intent rather than the behaviour.",
+    "",
+    "test_outputs is keyed by consumer because one layer can have more than one. contract is written by kiwa-forge as *.t.sol and by kiwa-hardhat as *.test.cjs, and a single value silently dropped the Hardhat review path.",
+    "",
+    "Each consumer's output is a list because Step 5.5 moves generated tests from examples/ into tests/fixtures/, so the same test lives in one of two places depending on whether that move has run. The original resolver carried both and the first version of this table kept only the first, which would have made review miss every test already moved."
+  ],
+  "specRoot": "tests/spec",
+  "layers": [
+    {
+      "id": "contract",
+      "spec_dir": "contract",
+      "spec_path": "tests/spec/contract/test-spec-{module}.md",
+      "runtime": "solidity",
+      "consumer_skill": "kiwa-forge",
+      "also_consumed_by": [
+        "kiwa-hardhat"
+      ],
+      "backing_package": null,
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [
+        "contract",
+        "both"
+      ],
+      "variants": [
+        "foundry",
+        "hardhat"
+      ],
+      "selected_by": "kiwa-test --runner {foundry|hardhat|both}",
+      "test_outputs": {
+        "kiwa-forge": [
+          "{example}/test/*.t.sol",
+          "tests/fixtures/{example}/contract-test/*.t.sol"
+        ],
+        "kiwa-hardhat": [
+          "{example}/hardhat-test/*.test.cjs",
+          "tests/fixtures/{example}/hardhat-test/*.test.cjs"
+        ]
+      }
+    },
+    {
+      "id": "e2e",
+      "spec_dir": "e2e",
+      "spec_path": "tests/spec/e2e/test-spec-{module}.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-play",
+      "also_consumed_by": [],
+      "backing_package": "dapp",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [
+        "dapp",
+        "both"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-play": [
+          "{example}/tests/*.spec.ts",
+          "tests/fixtures/{example}/e2e-test/*.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "e2e-generic",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.e2e.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-e2e",
+      "also_consumed_by": [],
+      "backing_package": "e2e",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [
+        "web",
+        "all"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-e2e": [
+          "{example}/tests/*.e2e.spec.ts",
+          "tests/fixtures/{example}/e2e-generic-test/*.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "a11y",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.a11y.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-a11y",
+      "also_consumed_by": [],
+      "backing_package": "a11y",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [
+        "web",
+        "all"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-a11y": [
+          "{example}/tests/*.a11y.test.ts",
+          "tests/fixtures/{example}/a11y-test/*.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "integration",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-api",
+      "also_consumed_by": [],
+      "backing_package": "api",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-api": [
+          "{example}/test/integration/{module}.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "api",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.api.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-api",
+      "also_consumed_by": [],
+      "backing_package": "api",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-api": [
+          "{example}/test/integration/{module}.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "ui",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.ui.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-ui",
+      "also_consumed_by": [],
+      "backing_package": "ui",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-ui": [
+          "{example}/tests/{module}.test.tsx"
+        ]
+      }
+    },
+    {
+      "id": "data",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.data.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-data",
+      "also_consumed_by": [],
+      "backing_package": "data",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-data": [
+          "{example}/tests/{module}.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "cli",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.cli.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-cli-test",
+      "also_consumed_by": [],
+      "backing_package": "cli-test",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-cli-test": [
+          "{example}/tests/{module}.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "unit",
+      "spec_dir": "unit",
+      "spec_path": "tests/spec/unit/test-spec-{module}.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-vitest",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-vitest": [
+          "{example}/tests/{module}.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "orm-query",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.orm.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-orm",
+      "also_consumed_by": [],
+      "backing_package": "orm",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [
+        "drizzle",
+        "prisma",
+        "kysely"
+      ],
+      "selected_by": "spec の記述から kiwa-orm が判断 (flag なし)",
+      "test_outputs": {
+        "kiwa-orm": [
+          "{example}/tests/{module}.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-server-action",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.nextjs.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-nextjs",
+      "also_consumed_by": [],
+      "backing_package": "nextjs",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-middleware",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.middleware.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-nextjs",
+      "also_consumed_by": [],
+      "backing_package": "nextjs",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-rsc",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.rsc.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-nextjs",
+      "also_consumed_by": [],
+      "backing_package": "nextjs",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-parallel-route",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.parallel.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-nextjs",
+      "also_consumed_by": [],
+      "backing_package": "nextjs",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "nextjs-rsc-streaming",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.rsc-streaming.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-nextjs",
+      "also_consumed_by": [],
+      "backing_package": "nextjs",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-nextjs": [
+          "{example}/tests/integration/{module}.nextjs.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "edge-handler",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.edge.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-edge",
+      "also_consumed_by": [],
+      "backing_package": "edge",
+      "backing_runtime_package": null,
+      "providers": [],
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-edge": [
+          "{example}/tests/*.edge.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "auth",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.auth.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-auth",
+      "also_consumed_by": [],
+      "backing_package": "auth",
+      "backing_runtime_package": null,
+      "providers": [
+        "nextauth",
+        "lucia",
+        "better-auth",
+        "clerk",
+        "auth0"
+      ],
+      "targets": [],
+      "variants": [],
+      "selected_by": "kiwa-auth --provider",
+      "test_outputs": {
+        "kiwa-auth": [
+          "{example}/tests/*.auth.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "job-queue",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.queue.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-queue",
+      "also_consumed_by": [],
+      "backing_package": "queue",
+      "backing_runtime_package": null,
+      "providers": [
+        "bullmq",
+        "inngest",
+        "cloudflare",
+        "sqs"
+      ],
+      "targets": [],
+      "variants": [],
+      "selected_by": "kiwa-queue --provider",
+      "test_outputs": {
+        "kiwa-queue": [
+          "{example}/tests/*.queue.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "cache",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.cache.md",
+      "runtime": "typescript",
+      "consumer_skill": "kiwa-cache",
+      "also_consumed_by": [],
+      "backing_package": "cache",
+      "backing_runtime_package": null,
+      "providers": [
+        "redis",
+        "memcached",
+        "keydb"
+      ],
+      "targets": [],
+      "variants": [],
+      "selected_by": "kiwa-cache --provider",
+      "test_outputs": {
+        "kiwa-cache": [
+          "{example}/tests/*.cache.test.ts"
+        ]
+      }
+    },
+    {
+      "id": "rust-unit",
+      "spec_dir": "unit",
+      "spec_path": "tests/spec/unit/test-spec-{module}.rs.md",
+      "runtime": "rust",
+      "consumer_skill": "kiwa-rust",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-rs",
+      "providers": [],
+      "targets": [
+        "rust",
+        "all"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": [
+          "examples/{example}/tests/*.rs"
+        ]
+      }
+    },
+    {
+      "id": "rust-integration",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.rs.md",
+      "runtime": "rust",
+      "consumer_skill": "kiwa-rust",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-rs",
+      "providers": [],
+      "targets": [
+        "rust",
+        "all"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": [
+          "examples/{example}/tests/*_integration.rs"
+        ]
+      }
+    },
+    {
+      "id": "rust-axum",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.rust-axum.md",
+      "runtime": "rust",
+      "consumer_skill": "kiwa-rust",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-rs",
+      "providers": [],
+      "mode": "axum",
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": [
+          "examples/{example}/tests/*_axum.rs"
+        ]
+      }
+    },
+    {
+      "id": "rust-actix-web",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.rust-actix.md",
+      "runtime": "rust",
+      "consumer_skill": "kiwa-rust",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-rs",
+      "providers": [],
+      "mode": "actix-web",
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": [
+          "examples/{example}/tests/*_actix.rs"
+        ]
+      }
+    },
+    {
+      "id": "rust-tower-http",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.rust-tower-http.md",
+      "runtime": "rust",
+      "consumer_skill": "kiwa-rust",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-rs",
+      "providers": [],
+      "mode": "tower-http",
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-rust": [
+          "examples/{example}/tests/*_tower_http.rs"
+        ]
+      }
+    },
+    {
+      "id": "go-unit",
+      "spec_dir": "unit",
+      "spec_path": "tests/spec/unit/test-spec-{module}.go.md",
+      "runtime": "go",
+      "consumer_skill": "kiwa-go",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-go",
+      "providers": [],
+      "targets": [
+        "go",
+        "all"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": [
+          "examples/{example}/*_test.go"
+        ]
+      }
+    },
+    {
+      "id": "go-integration",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.go.md",
+      "runtime": "go",
+      "consumer_skill": "kiwa-go",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-go",
+      "providers": [],
+      "targets": [
+        "go",
+        "all"
+      ],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": [
+          "examples/{example}/integration/*_test.go"
+        ]
+      }
+    },
+    {
+      "id": "go-gin",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.go-gin.md",
+      "runtime": "go",
+      "consumer_skill": "kiwa-go",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-go",
+      "providers": [],
+      "mode": "gin",
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": [
+          "examples/{example}/*_gin_test.go"
+        ]
+      }
+    },
+    {
+      "id": "go-echo",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.go-echo.md",
+      "runtime": "go",
+      "consumer_skill": "kiwa-go",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-go",
+      "providers": [],
+      "mode": "echo",
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": [
+          "examples/{example}/*_echo_test.go"
+        ]
+      }
+    },
+    {
+      "id": "go-fiber",
+      "spec_dir": "integration",
+      "spec_path": "tests/spec/integration/test-spec-{module}.go-fiber.md",
+      "runtime": "go",
+      "consumer_skill": "kiwa-go",
+      "also_consumed_by": [],
+      "backing_package": null,
+      "backing_runtime_package": "kiwa-test-go",
+      "providers": [],
+      "mode": "fiber",
+      "targets": [],
+      "variants": [],
+      "selected_by": null,
+      "test_outputs": {
+        "kiwa-go": [
+          "examples/{example}/*_fiber_test.go"
+        ]
+      }
+    }
+  ]
+}

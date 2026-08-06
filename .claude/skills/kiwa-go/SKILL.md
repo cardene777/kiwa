@@ -40,8 +40,12 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致、 例 `counter` / `counter-api`)
-- `--layer {go-unit|go-integration|go-gin|go-echo|go-fiber}` — 入力 spec の layer (省略時は spec file の存在を Glob で確認して推定、 複数存在なら AskUserQuestion)。 `--mode` と組み合わせも許容 (`--mode gin` は `--layer go-gin` の syntactic sugar、 `--mode fiber` は `--layer go-fiber` の syntactic sugar)
-- `--mode {gin|echo|fiber}` — v1.5-6 で `gin` / `echo`、 v1.7-6 で `fiber` を追加、 web framework mode flag。 `--mode gin` = `--layer go-gin` (`kiwa_gin.NewTestServer(t, engine)` 経路)、 `--mode echo` = `--layer go-echo` (`kiwa_echo.NewTestServer(t, e)` 経路)、 `--mode fiber` = `--layer go-fiber` (`kiwa_fiber.NewTestServer(t, app)` 経路、 fasthttp base のため `*App.Test(*http.Request)` hook 経由)。 `--layer` と併用時は `--mode` 優先 (framework mode を明示的に選ぶ意図と解釈)、 両者が矛盾する場合は起動時 error で abort
+<!-- kiwa-layers:go-enum:start -->
+
+- `--layer {go-unit|go-integration|go-gin|go-echo|go-fiber}` — 対象 layer。
+- `--mode {gin|echo|fiber}` — framework 別 helper の選択 (layer が `--mode` を持つ時のみ)。
+
+<!-- kiwa-layers:go-enum:end -->
 - `--input-spec {path}` — Layer 1 spec の path (省略時は layer / mode から推定)
 - `--target {path}` — 対象実装 file (`{module}.go` 等、 grep で識別)
 - `--example {name}` — `examples/{name}/` の Go example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
