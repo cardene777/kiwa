@@ -35,10 +35,21 @@ const ROOT = resolve(HERE, '..');
  * exist before its first spec is written.
  */
 function realish(path) {
-  try {
-    return realpathSync(path);
-  } catch {
-    return path;
+  // Walk up to the nearest existing ancestor, resolve that, and re-attach the
+  // part that does not exist yet. Resolving the whole path and giving up on
+  // ENOENT hands back the lexical form, so a symlinked parent with a
+  // not-yet-created leaf slips through untouched.
+  const missing = [];
+  let at = path;
+  for (;;) {
+    try {
+      return resolve(realpathSync(at), ...missing);
+    } catch {
+      const parent = dirname(at);
+      if (parent === at) return path;
+      missing.unshift(at.slice(parent.length + 1));
+      at = parent;
+    }
   }
 }
 
@@ -85,10 +96,16 @@ function loadLayers() {
         throw new Error(`${TABLE}: ${l.id}: ${label} may not contain ".."`);
       }
     }
+    // The chain has to be anchored to the repository, not merely internally
+    // consistent. If `specRoot` is a symlink pointing outside, root, dir and
+    // file all resolve to the far side and contain one another perfectly while
+    // sitting outside the repository entirely.
+    const repo = realish(ROOT);
     const root = realish(resolve(ROOT, table.specRoot));
     const dir = realish(resolve(ROOT, table.specRoot, l.spec_dir));
     const file = realish(resolve(ROOT, l.spec_path));
     for (const [label, target, base] of [
+      ['specRoot', root, repo],
       ['spec_dir', dir, root],
       ['spec_path', file, dir],
     ]) {
