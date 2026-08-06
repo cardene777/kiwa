@@ -212,13 +212,20 @@ const LOOP_LAG_LIMIT_MS = 10_000;
 const loopLagSamplesMs: number[] = [];
 
 /**
- * 内容 hash で名前が決まる出力か。
+ * 内容 hash で名前が決まる chunk か。
  *
  * `chunk-<hash>.js` と、 その sourcemap。 source が変われば名前が変わるので、
  * 前の名前の file が `dist/` に残る。
+ *
+ * hash の桁と拡張子は `HASHED_OUTPUT` と同じ定義に揃える。 別々に書くと、
+ * `outExtension` を変えた時に片方だけ追随して「古い chunk を stale と誤検知する」
+ * か「hash でない entry を chunk として見逃す」 のどちらかが起きる。
+ *
+ * `HASHED_OUTPUT` と違い chunk だけを見る = 同 regex は entry 側の
+ * `index-<hash>.js` も拾うが、 ここで除外してよいのは chunk に限る。
  */
 function isChunk(file: string): boolean {
-  return /^chunk-[A-Z0-9]+\.(js|cjs)(\.map)?$/.test(file);
+  return /^chunk-[A-Z0-9]{8}\.[cm]?js(\.map)?$/.test(file);
 }
 
 /** dir を降りて実 file の相対 path だけを集める。 空 dir は出力に数えない。 */
@@ -653,8 +660,25 @@ describe('tsup clean と並列 test の race (#1741)', () => {
   it('chunk かどうかの判定が entry file を巻き込まない', () => {
     // 除外を入れた以上、 除外の境界そのものを固定する。 広げすぎると検査全体が
     // 素通しになり、 狭すぎると chunk を出す package が触るたびに落ちる。
-    for (const chunk of ['chunk-3TTHI3XI.js', 'chunk-ABC123.cjs', 'chunk-ABC123.js.map']) {
+    for (const chunk of [
+      'chunk-3TTHI3XI.js',
+      'chunk-3TTHI3XI.cjs',
+      'chunk-3TTHI3XI.mjs',
+      'chunk-3TTHI3XI.js.map',
+    ]) {
       expect(isChunk(chunk), `${chunk} は chunk`).toBe(true);
+    }
+
+    // hash の桁と字種が違うものは chunk ではない。 緩めると entry file を
+    // 巻き込み、 締めすぎると正当な chunk を stale と数える。
+    for (const notChunk of [
+      'chunk-ABC123.js', // 6 桁
+      'chunk-ABC123456.js', // 9 桁
+      'chunk-3tthi3xi.js', // 小文字
+      'chunk-3TTHI3X-.js', // hash に区切り
+      'chunk-3TTHI3XI.d.ts', // 宣言 file
+    ]) {
+      expect(isChunk(notChunk), `${notChunk} は chunk ではない`).toBe(false);
     }
     for (const kept of [
       'index.js',
