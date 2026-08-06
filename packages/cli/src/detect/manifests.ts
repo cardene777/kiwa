@@ -53,18 +53,37 @@ function stripComment(line: string, marker: string): string {
  */
 function depthAt(text: string, offset: number): number {
   let depth = 0;
+  /** The delimiter that closes the string being read: `"`, `'`, `"""` or `'''`. */
   let quote: string | null = null;
+
   for (let i = 0; i < offset; i += 1) {
     const ch = text[i]!;
+
     if (quote) {
-      if (ch === '\\') i += 1;
-      else if (ch === quote) quote = null;
+      // Escapes exist in basic strings only; TOML literal strings (`'`) have
+      // none, so a backslash there is an ordinary character.
+      if (ch === '\\' && quote[0] === '"') i += 1;
+      else if (text.startsWith(quote, i)) i += quote.length - 1, (quote = null);
       continue;
     }
-    if (ch === '"' || ch === "'") quote = ch;
-    else if (ch === '{' || ch === '[') depth += 1;
+
+    if (ch === '"' || ch === "'") {
+      // `"""` is one delimiter, not three. Reading it as three leaves the count
+      // of open strings odd, which swallows the entry after it.
+      const triple = ch.repeat(3);
+      if (text.startsWith(triple, i)) {
+        quote = triple;
+        i += 2;
+      } else {
+        quote = ch;
+      }
+      continue;
+    }
+
+    if (ch === '{' || ch === '[') depth += 1;
     else if (ch === '}' || ch === ']') depth -= 1;
   }
+
   return depth;
 }
 
@@ -183,10 +202,12 @@ export function readGoMod(source: string): Dependency[] {
     // The marker has to be read before comments are stripped, since stripping
     // is what removes it.
     //
-    // Anchoring to the end of the line was too strict — `// indirect // extra`
-    // read as direct. A word boundary keeps `// indirectly used` out while
-    // letting anything follow the marker.
-    if (/\/\/[^\n]*?\bindirect\b/.test(raw)) continue;
+    // The marker is the first word of the comment, and anything may follow it.
+    // Anchoring to the end of the line was too strict (`// indirect // extra`
+    // read as direct); allowing the marker anywhere in the comment was too
+    // loose (`// see https://example.com/indirect` dropped a direct
+    // dependency). `// indirectly used` stays out either way.
+    if (/\/\/\s*indirect\b/.test(raw)) continue;
 
     const line = stripComment(raw, '//').trim();
     if (!line) continue;

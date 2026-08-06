@@ -96,6 +96,23 @@ describe('manifest readers', () => {
     ]);
   });
 
+  it('reads a multi-line string as one delimiter, not three', () => {
+    // `\"\"\"` counted as three separate quotes leaves the reader inside a string
+    // it never left, so the next entry vanished and its features were recorded
+    // against the wrong dependency.
+    const deps = readCargoToml(
+      [
+        '[dev-dependencies]',
+        'weird = { note = \"\"\"a\"b\"\"\" }',
+        'kiwa-test-rs = { features = ["axum"] }',
+      ].join('\n'),
+    );
+    expect(deps).toEqual([
+      { name: 'weird', features: [] },
+      { name: 'kiwa-test-rs', features: ['axum'] },
+    ]);
+  });
+
   it('marks a workspace-inherited entry as unresolved', () => {
     // The feature list lives in the workspace root, which this reader does not
     // open. Recording it as a plain featureless entry let the caller apply the
@@ -121,6 +138,15 @@ describe('manifest readers', () => {
       ['require (', '\tgithub.com/gin-gonic/gin v1.9.0 // indirect // vendored', ')'].join('\n'),
     );
     expect(deps).toEqual([]);
+  });
+
+  it('does not read a comment that merely mentions indirect as the marker', () => {
+    // Widening the matcher to fix `// indirect // extra` made any comment
+    // holding the word drop the dependency, which loses a direct one.
+    const deps = readGoMod(
+      ['require (', '\tgithub.com/x/y v1.0.0 // see https://example.com/indirect', ')'].join('\n'),
+    );
+    expect(deps).toEqual([{ name: 'github.com/x/y', features: [] }]);
   });
 
   it('does not mistake "indirectly" for the indirect marker', () => {
