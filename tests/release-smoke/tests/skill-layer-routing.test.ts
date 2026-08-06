@@ -236,6 +236,84 @@ describe('docs/layers.json is internally consistent', () => {
   });
 });
 
+describe('the target values and the Step conditions agree', () => {
+  const TEST_SKILL = read('.claude/skills/kiwa-test/SKILL.md');
+
+  /** The values `--target` accepts, from its own option line. */
+  function declaredTargets(): string[] {
+    const m = /`--target \{([^}]+)\}`/.exec(TEST_SKILL);
+    expect(m, '--target option line not found').toBeTruthy();
+    return m![1]!.split('|');
+  }
+
+  /** The values the Step headings actually admit, e.g. `(target=web or all)`. */
+  function admittedTargets(): Set<string> {
+    const out = new Set<string>();
+    for (const line of TEST_SKILL.split('\n')) {
+      if (!line.startsWith('### Step ')) continue;
+      // The heading carries more than the condition — `(e2e-generic + a11y,
+      // target=web or all)` and `(target=rust or all, Issue #581)` both occur —
+      // so read from `target=` to the first separator rather than to `)`.
+      const m = /target=([^),、]+)/.exec(line);
+      if (!m) continue;
+      for (const value of m[1]!.split(/\s+or\s+/)) out.add(value.trim());
+    }
+    return out;
+  }
+
+  it('every accepted target starts at least one Step', () => {
+    // `nextjs` was accepted and started nothing: the value existed, no Step
+    // admitted it, and asking for it did nothing at all.
+    const orphans = declaredTargets().filter((t) => t !== 'both' && !admittedTargets().has(t));
+    expect(orphans).toEqual([]);
+  });
+
+  it('every target a Step admits is accepted', () => {
+    const admitted = [...admittedTargets()];
+    const declared = new Set(declaredTargets());
+    expect(admitted.filter((t) => !declared.has(t))).toEqual([]);
+  });
+
+  it('all covers exactly the layers the table gives it', () => {
+    // The description says web + rust + go. `docs/layers.json` is where that
+    // claim has to hold, since the skills are generated from it.
+    const byTarget = (t: string) =>
+      LAYERS.filter((l) => (l.targets ?? []).includes(t)).map((l) => l.id);
+    expect(byTarget('all').sort()).toEqual(
+      [...byTarget('web'), ...byTarget('rust'), ...byTarget('go')].sort(),
+    );
+  });
+
+  it('both covers exactly contract plus dapp', () => {
+    const byTarget = (t: string) =>
+      LAYERS.filter((l) => (l.targets ?? []).includes(t)).map((l) => l.id);
+    expect(byTarget('both').sort()).toEqual(
+      [...byTarget('contract'), ...byTarget('dapp')].sort(),
+    );
+  });
+});
+
+describe('every declared output path is one its producer writes', () => {
+  it('each test_outputs entry appears in the producing skill', () => {
+    // The rows were written from the old resolver rather than from the
+    // producers, and 15 of 31 named a path no skill declares. A review that
+    // looks where nothing is written finds nothing and says so.
+    const missing: string[] = [];
+    for (const layer of LAYERS) {
+      for (const [skill, outputs] of Object.entries(layer.test_outputs ?? {})) {
+        const body = read(`.claude/skills/${skill}/SKILL.md`);
+        // The producer states its own path; the table prefixes the example
+        // directory because `kiwa-test` runs the skill from inside one.
+        const found = (outputs as string[]).some((o) =>
+          body.includes(o.replace(/^(examples\/)?\{example\}\//, '')),
+        );
+        if (!found) missing.push(`${layer.id} -> ${skill}: ${(outputs as string[])[0]}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+});
+
 describe('the skills carry what the table renders', () => {
   it('the generated regions are up to date', () => {
     // The renderer is the assertion. `--check` re-renders from the table and
