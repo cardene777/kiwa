@@ -1,7 +1,7 @@
 import { execFile, execFileSync, spawnSync } from 'node:child_process';
 import {
-  existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync,
-  statSync, writeFileSync,
+  appendFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync,
+  rmSync, statSync, writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -81,7 +81,27 @@ const execFileAsync = promisify(execFile);
 // `import.meta.dirname` は Node 20.11.0 追加で、 repo の下限 (>=20) を下回る
 // 20.0-20.10 では undefined になり module 読込時に落ちる。 既存 24 件と同じ形にする。
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+/**
+ * Walk up to the repository root rather than counting directories.
+ *
+ * This file runs from two places — `tests/` when read as source and
+ * `.vitest-dist/tests/` when compiled — which are one level apart. A fixed
+ * depth is right for one of them and points outside the repository in the
+ * other, which made every probe read an empty `dist/` and report no stale
+ * files. The check passed by finding nothing to check (#1821).
+ */
+function repoRoot(): string {
+  let dir = HERE;
+  for (let up = 0; up < 8; up += 1) {
+    if (existsSync(resolve(dir, 'pnpm-workspace.yaml'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error('pnpm-workspace.yaml not found above this test');
+}
+
+const REPO_ROOT = repoRoot();
 const PACKAGES_DIR = join(REPO_ROOT, 'packages');
 
 /**
@@ -191,6 +211,23 @@ const LOOP_LAG_LIMIT_MS = 10_000;
 /** build を回している間の event loop の遅れ (ms)。 */
 const loopLagSamplesMs: number[] = [];
 
+/**
+ * 内容 hash で名前が決まる chunk か。
+ *
+ * `chunk-<hash>.js` と、 その sourcemap。 source が変われば名前が変わるので、
+ * 前の名前の file が `dist/` に残る。
+ *
+ * hash の桁と拡張子は `HASHED_OUTPUT` と同じ定義に揃える。 別々に書くと、
+ * `outExtension` を変えた時に片方だけ追随して「古い chunk を stale と誤検知する」
+ * か「hash でない entry を chunk として見逃す」 のどちらかが起きる。
+ *
+ * `HASHED_OUTPUT` と違い chunk だけを見る = 同 regex は entry 側の
+ * `index-<hash>.js` も拾うが、 ここで除外してよいのは chunk に限る。
+ */
+function isChunk(file: string): boolean {
+  return /^chunk-[A-Z0-9]{8}\.[cm]?js(\.map)?$/.test(file);
+}
+
 /** dir を降りて実 file の相対 path だけを集める。 空 dir は出力に数えない。 */
 function listFiles(dir: string, base = ''): string[] {
   const out: string[] = [];
@@ -226,6 +263,41 @@ function readBuildScript(name: string): string | null {
  * 残りを「この実行の出力」 と読まないための判定は、 出力 file の更新時刻で行う。 他の test と重ならないよう、 この file は
  * `package.json` の `test` で単独の vitest 実行に分けてある。
  */
+/** どこへ証跡を残すか。 gitignore 配下なので working tree を汚さない。 */
+const EVIDENCE = join(REPO_ROOT, '.context', 'scratch', 'tsup-probe.tsv');
+
+/**
+ * probe 1 件の結果を残す。
+ *
+ * この test は `pnpm test:all` の中でだけ落ちる (#1821)。 sweep の reporter は
+ * 落ちた test の名前しか出さないため、 どの package が stale だったか、 build が
+ * どれだけ掛かったかが赤い run のたびに失われていた。 単独で走らせると通るので、
+ * 後から取り直すこともできない。
+ *
+ * `scripts/measure-sweep-vitals.sh` (#1800) と同じ考えで、 赤い run が証拠を残す
+ * ようにする。 書込は best-effort = 証跡が取れないことで test を落とさない。
+ */
+function recordProbe(name: string, probe: BuildProbe, elapsedMs: number): void {
+  try {
+    mkdirSync(dirname(EVIDENCE), { recursive: true });
+    if (!existsSync(EVIDENCE)) {
+      writeFileSync(EVIDENCE, 'time\tpackage\telapsed_ms\tfiles\tstale\terror\n', 'utf8');
+    }
+    const row = [
+      new Date().toISOString(),
+      name,
+      String(elapsedMs),
+      String(probe.files.length),
+      probe.stale.join(',') || '-',
+      // 改行を含む stderr がそのまま入ると行が壊れる。
+      (probe.error ?? '-').replace(/\s+/g, ' ').slice(0, 200),
+    ].join('\t');
+    appendFileSync(EVIDENCE, `${row}\n`, 'utf8');
+  } catch {
+    // 証跡が残せなくても検査は成立する。
+  }
+}
+
 async function probeBuild(name: string): Promise<BuildProbe> {
   const dist = join(PACKAGES_DIR, name, 'dist');
   return withProbeAsync(dist, async (probe) => {
@@ -492,7 +564,10 @@ describe('tsup clean と並列 test の race (#1741)', () => {
 
     try {
       for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
-        probes.set(name, await probeBuild(name));
+        const startedAt = Date.now();
+        const probe = await probeBuild(name);
+        probes.set(name, probe);
+        recordProbe(name, probe, Date.now() - startedAt);
       }
     } finally {
       clearInterval(timer);
@@ -561,13 +636,75 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     // 出力先を `dist` 以外に変えた設定や、 filter が 1 件も一致しなかった実行は、
     // `dist/` の file が前のまま残る。 顔ぶれだけを見ると素通りするので、
     // 更新時刻でこの実行が書いたことを確かめる。
+    //
+    // chunk だけは別。 名前が内容から決まるので、 source が変われば新しい名前の
+    // chunk が増え、 前の名前の file は残る。 これは clean を外した時点で受け入れた
+    // 状態で、 冒頭の条件 2 がそう書いている = entry file は毎回上書きされて現行の
+    // chunk 名だけを参照するため、 残った chunk は読まれない。 publish の前に
+    // `scripts/clean-dist.mjs` が消す。
+    //
+    // 数えると、 chunk を出す package を触るたびにこの検査が落ちる。 実際 #1821 は
+    // `packages/cli` に 13 個の chunk が溜まった状態で落ちており、 うち今回の build が
+    // 書いたのは 1 個だった。
     const stale = [...probes.entries()]
-      .filter(([, probe]) => probe.error === null && probe.stale.length > 0)
-      .map(([name, probe]) => `${name} (${probe.stale.join(', ')})`);
+      .filter(([, probe]) => probe.error === null)
+      .map(([name, probe]) => [name, probe.stale.filter((f) => !isChunk(f))] as const)
+      .filter(([, remaining]) => remaining.length > 0)
+      .map(([name, remaining]) => `${name} (${remaining.join(', ')})`);
     expect(
       stale,
       `build が別の場所へ書いたか、 何も build していない。 該当: ${stale.join(' / ')}`,
     ).toEqual([]);
+  });
+
+  it('chunk かどうかの判定が entry file を巻き込まない', () => {
+    // 除外を入れた以上、 除外の境界そのものを固定する。 広げすぎると検査全体が
+    // 素通しになり、 狭すぎると chunk を出す package が触るたびに落ちる。
+    for (const chunk of [
+      'chunk-3TTHI3XI.js',
+      'chunk-3TTHI3XI.cjs',
+      'chunk-3TTHI3XI.mjs',
+      'chunk-3TTHI3XI.js.map',
+    ]) {
+      expect(isChunk(chunk), `${chunk} は chunk`).toBe(true);
+    }
+
+    // hash の桁と字種が違うものは chunk ではない。 緩めると entry file を
+    // 巻き込み、 締めすぎると正当な chunk を stale と数える。
+    for (const notChunk of [
+      'chunk-ABC123.js', // 6 桁
+      'chunk-ABC123456.js', // 9 桁
+      'chunk-3tthi3xi.js', // 小文字
+      'chunk-3TTHI3X-.js', // hash に区切り
+      'chunk-3TTHI3XI.d.ts', // 宣言 file
+    ]) {
+      expect(isChunk(notChunk), `${notChunk} は chunk ではない`).toBe(false);
+    }
+    for (const kept of [
+      'index.js',
+      'index.cjs',
+      'index.d.ts',
+      'index.d.cts',
+      'index.js.map',
+      'bin.js',
+      'layers.json',
+      'stack-signals.json',
+      'templates/connect.spec.ts.tpl',
+    ]) {
+      expect(isChunk(kept), `${kept} は chunk ではない`).toBe(false);
+    }
+  });
+
+  it('chunk 側も entry file はこの実行で書かれている', () => {
+    // chunk を除いた分は依然として全件が今回の build のもの、 を chunk 側でも
+    // 確かめる。 除外を入れた以上、 除外が検査全体を素通しにしていないことを
+    // 逆向きに固定する必要がある。
+    const notWritten = CHUNK_OUTPUT_TARGETS.filter((name) => {
+      const probe = probes.get(name);
+      if (!probe || probe.error !== null) return false;
+      return probe.stale.some((file) => !isChunk(file));
+    });
+    expect(notWritten, 'chunk 側の entry file が今回の build で書かれていない').toEqual([]);
   });
 
   it('固定出力の共有依存は全件が同じ 6 file を出す', () => {
