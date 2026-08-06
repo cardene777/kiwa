@@ -420,7 +420,58 @@ const FIXTURE_DIRS: Record<string, string> = {
   'kiwa-play': 'e2e-test',
 };
 
-/** The data rows of the table under a heading, as cell arrays. */
+/**
+ * Split a markdown table row on its unescaped pipes.
+ *
+ * A `\\|` inside a cell is an escaped pipe rather than a separator — the
+ * review-report row carries one — but "the character before is a backslash" is
+ * not the same question. `\\\\|` is an escaped backslash followed by a real
+ * separator, and a lookbehind one character wide reads it as escaped, merging
+ * two cells into one and letting a malformed row pass the shape check.
+ *
+ * What decides it is whether the run of backslashes ending at the pipe is odd.
+ */
+function splitRow(row: string): string[] {
+  const cells: string[] = [];
+  let current = '';
+  for (let i = 0; i < row.length; i += 1) {
+    const ch = row[i]!;
+    if (ch === '\\') {
+      // Consume the whole run, so its length decides what follows it.
+      let run = 0;
+      while (row[i] === '\\') {
+        run += 1;
+        i += 1;
+      }
+      // Each pair of backslashes is one literal backslash. An odd run leaves
+      // one over, and that one escapes whatever follows.
+      if (row[i] === '|' && run % 2 === 1) {
+        current += '\\'.repeat((run - 1) / 2) + '|';
+        continue; // the pipe was consumed by the escape
+      }
+      current += '\\'.repeat(Math.floor(run / 2)) + (run % 2 === 1 ? '\\' : '');
+      i -= 1; // hand the next character back to the loop
+      continue;
+    }
+    if (ch === '|') {
+      cells.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  cells.push(current.trim());
+  return cells;
+}
+
+/**
+ * The data rows of the table under a heading, as cell arrays.
+ *
+ * Nothing is dropped. Discarding a row that does not fit means the check passes
+ * when the table breaks, which is the opposite of what a check on the table is
+ * for — so a row whose shape does not match the header is an error here rather
+ * than a row that quietly disappears.
+ */
 function tableRows(body: string, heading: string): string[][] {
   const start = body.indexOf(heading);
   expect(start, `${heading} が見つからない`).toBeGreaterThan(-1);
@@ -428,21 +479,70 @@ function tableRows(body: string, heading: string): string[][] {
   const end = rest.search(/^## /m);
   const section = end === -1 ? rest : rest.slice(0, end);
 
-  return section
-    .split('\n')
-    .filter((line) => line.trimStart().startsWith('|'))
-    .map((line) => line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim()))
-    // The header and its separator are not data.
-    .filter((cells) => cells.length > 1 && !cells.every((c) => /^-+$/.test(c)))
-    .slice(1);
+  const lines = section.split('\n').filter((line) => line.trimStart().startsWith('|'));
+  const cells = lines.map((line) => splitRow(line.trim().replace(/^\||\|$/g, '')));
+  expect(cells.length, `${heading} に表が無い`).toBeGreaterThan(2);
+
+  const [header, separator, ...rows] = cells as [string[], string[], ...string[][]];
+  expect(separator.every((c) => /^-+$/.test(c)), `${heading} の 2 行目が区切りでない`).toBe(true);
+
+  const malformed = rows
+    .map((row, i) => ({ row, i }))
+    .filter(({ row }) => row.length !== header.length)
+    .map(({ row, i }) => `row ${i + 1}: ${row.length} cells, header has ${header.length}`);
+  expect(malformed, `${heading} の行が header と cell 数で食い違う`).toEqual([]);
+
+  return rows;
 }
+
+describe('a table row splits on its unescaped pipes', () => {
+  it('keeps an escaped pipe inside its cell', () => {
+    expect(splitRow('a | b \\| c | d')).toEqual(['a', 'b | c', 'd']);
+  });
+
+  it('treats a pipe after an escaped backslash as a separator', () => {
+    // The case a one-character lookbehind gets wrong: the backslash is itself
+    // escaped, so the pipe that follows is a real separator.
+    expect(splitRow('a | b \\\\| c')).toEqual(['a', 'b \\', 'c']);
+  });
+
+  it('keeps a trailing backslash run at the end of the row', () => {
+    // The run ends the string, so there is no next character to escape.
+    expect(splitRow('a | b \\\\')).toEqual(['a', 'b \\']);
+  });
+
+  it('leaves a backslash that escapes something other than a pipe', () => {
+    expect(splitRow('a \\x | b')).toEqual(['a \\x', 'b']);
+  });
+
+  it('keeps empty cells', () => {
+    expect(splitRow('a || b')).toEqual(['a', '', 'b']);
+  });
+
+  it('handles a cell that is only a backslash', () => {
+    expect(splitRow('a | \\\\ | b')).toEqual(['a', '\\', 'b']);
+  });
+
+  it('reads a run of three backslashes as escaping the pipe', () => {
+    expect(splitRow('a \\\\\\| b')).toEqual(['a \\| b']);
+  });
+});
 
 describe('each producer claims its own fixture row', () => {
   const mover = read('.claude/skills/kiwa-test/SKILL.md');
 
+  const rows = tableRows(mover, '## 2. 生成 file 一覧');
+
   /** Every row of the Step 5.5 table whose path is a fixture destination. */
-  const fixtureRows = tableRows(mover, '## 2. 生成 file 一覧')
-    .map((cells) => cells[1] ?? '')
+  const fixtureRows = rows
+    .map((cells) => {
+      const path = cells[1];
+      // Asserted before the filter. Filtering first turns an empty cell into a
+      // row that simply is not a fixture row, which is indistinguishable from a
+      // row that never was one.
+      expect(path, `path cell が空の行がある: ${cells.join(' | ')}`).toBeTruthy();
+      return path!;
+    })
     .filter((path) => path.startsWith('tests/fixtures/'));
 
   it('parses the table rather than pattern-matching the file', () => {
@@ -473,12 +573,17 @@ describe('each producer claims its own fixture row', () => {
     expect(wrong).toEqual([]);
   });
 
-  it('the table and the map describe the same set of destinations', () => {
+  it('the table and the map describe the same destinations, one each', () => {
     // Keeps the map from going stale in either direction: a row added to the
     // table without an entry here fails, and an entry here with no row fails.
+    //
+    // Compared as lists rather than sets. Collapsing duplicates first hides
+    // exactly the edits worth catching — a second row for a destination that
+    // already has one, or a map entry nothing uses.
     // tests / fixtures / {example} / <dir> — the destination is the fourth part.
-    const fromTable = [...new Set(fixtureRows.map((p) => p.split('/')[3]))].sort();
-    expect(fromTable).toEqual([...new Set(Object.values(FIXTURE_DIRS))].sort());
+    const fromTable = fixtureRows.map((p) => p.split('/')[3]).sort();
+    const fromMap = Object.values(FIXTURE_DIRS).sort();
+    expect(fromTable).toEqual(fromMap);
   });
 });
 
