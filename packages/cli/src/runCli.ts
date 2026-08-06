@@ -3,6 +3,7 @@ import { InitConflictError, runInit, type InitOptions, type InitResult } from '.
 import { runAnvilSeed, type AnvilSeedOptions, type AnvilSeedResult } from './commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from './commands/spec-to-test.js';
 import { runWatch, type RunWatchLayer, type RunWatchOptions, type RunWatchResult } from './commands/run-watch.js';
+import { detectFrom, loadSignalTable, resolveDetections, scanManifests, writeStackFile } from './detect/index.js';
 
 /** Usage text printed by `--help` / `-h` and appended to the unknown-command error. */
 export const USAGE = `Usage: kiwa <command> [options]
@@ -361,7 +362,57 @@ function doctorCommand(deps: RunCliDeps): number {
   }
 }
 
+/**
+ * Report which layers the project's own dependencies point at.
+ *
+ * Detection is opt-in and does not scaffold. A project that is a Rust service
+ * or a Next.js app has had the same dApp files written into it since v0.1, and
+ * the fix for that is not to guess harder by default — it is to say what was
+ * found and let the caller act on it. `--detect` prints and records; nothing
+ * else changes unless the caller asks separately.
+ */
+function detectCommand(deps: RunCliDeps): number {
+  const cwd = deps.cwd();
+  const manifests = scanManifests(cwd);
+
+  if (!manifests.length) {
+    deps.stdout('No manifest found.\n');
+    deps.stdout('Looked for: Cargo.toml, go.mod, package.json (here and in workspace members)\n');
+    return 0;
+  }
+
+  const table = loadSignalTable();
+  const hits = manifests.flatMap((m) => detectFrom(table, m.language, m.path, m.deps));
+  const layers = resolveDetections(hits);
+
+  for (const m of manifests) {
+    deps.stdout(`read: ${m.path} (${m.deps.length} dependencies)\n`);
+  }
+
+  if (!layers.length) {
+    // No fallback to the dApp scaffold. Detecting nothing is information, and
+    // silently producing Playwright files for a Go service is what this command
+    // exists to stop.
+    deps.stdout('\nNo kiwa layer matched. Use --layer to choose one explicitly.\n');
+    return 0;
+  }
+
+  deps.stdout('\nDetected layers:\n');
+  for (const d of layers) {
+    deps.stdout(`  ${d.layer}  (${d.signal} in ${d.manifest})\n`);
+  }
+
+  const written = writeStackFile(cwd, layers);
+  deps.stdout(`\nwrote: ${written}\n`);
+  deps.stdout('Run `kiwa init` to scaffold, or pass a layer to the kiwa skills.\n');
+  return 0;
+}
+
 function initCommand(argv: string[], deps: RunCliDeps): number {
+  if (argv.includes('--detect')) {
+    return detectCommand(deps);
+  }
+
   try {
     const testDir = takeFlagValue(argv, '--testDir');
     const configSuffix = takeFlagValue(argv, '--config-suffix');

@@ -1,0 +1,88 @@
+{
+  "$comment": [
+    "The reverse index into docs/layers.json: from a library a project already",
+    "depends on, to the kiwa layer that tests it.",
+    "",
+    "docs/layers.json answers 'what does this layer need'. This file answers the",
+    "question `kiwa init --detect` actually asks, which is the other way round:",
+    "here is a Cargo.toml, which layers apply.",
+    "",
+    "Two kinds of entry, and they are not interchangeable:",
+    "",
+    "  generated  Six packages name their target libraries in peerDependencies",
+    "             (auth, orm, cache, queue, ui, dapp). Those lists are the",
+    "             declaration; scripts/rebuild-stack-signals.mjs copies them here",
+    "             and --check fails when a peer is added without regenerating.",
+    "",
+    "  manual     The rest declare only `vitest` or nothing at all — nextjs, edge,",
+    "             hono, fresh, solidjs, and the ai-realtime four plus component.",
+    "             Their adapters mock the framework rather than importing it, so",
+    "             there is nothing to read. Eleven packages, written by hand.",
+    "",
+    "The boundary is not arbitrary: it lines up with the categories in",
+    "docs/libraries.json. Services are transparent, frameworks and ai-realtime are",
+    "opaque.",
+    "",
+    "Precedence. A signal can point at more than one layer — `ioredis` serves both",
+    "cache and job-queue, `axum` appears in a project whose real subject is",
+    "tower-http. `strength` orders them: an `exact` signal settles the question, a",
+    "`weak` one only applies when no exact signal claimed the same layer group.",
+    "For Rust the exact signal is the kiwa-test-rs feature, because the framework",
+    "dependency alone cannot tell rust-axum from rust-tower-http — the tower-http",
+    "example depends on axum too.",
+    "",
+    "This file only lists what a manifest can show. Detection never installs;",
+    "`kiwa init --detect` prints and writes .kiwa/stack.json, and `--apply` is a",
+    "separate step. A wrong guess costs a line of output."
+  ],
+  "manifests": {
+    "Cargo.toml": "rust",
+    "go.mod": "go",
+    "package.json": "typescript"
+  },
+  "signals": {
+    "rust": [
+      {
+        "match": "kiwa-test-rs",
+        "kind": "feature",
+        "features": {
+          "axum": "rust-axum",
+          "actix-web": "rust-actix-web",
+          "tower-http": "rust-tower-http"
+        },
+        "default": "rust-unit",
+        "strength": "exact",
+        "note": "The feature list is the project's own statement of what it tests. A bare dependency with no feature means the unit layer."
+      },
+      {
+        "match": "axum",
+        "layer": "rust-axum",
+        "strength": "weak",
+        "note": "rust-tower-http-poc depends on axum as well, so this only applies when no feature said otherwise."
+      },
+      { "match": "actix-web", "layer": "rust-actix-web", "strength": "weak" },
+      { "match": "tower-http", "layer": "rust-tower-http", "strength": "weak" }
+    ],
+    "go": [
+      {
+        "match": "github.com/cardene777/kiwa-test-go",
+        "layer": "go-unit",
+        "strength": "exact",
+        "note": "Presence alone means the unit layer; the framework modules below refine it."
+      },
+      { "match": "github.com/gin-gonic/gin", "layer": "go-gin", "strength": "exact" },
+      { "match": "github.com/labstack/echo", "layer": "go-echo", "strength": "exact" },
+      { "match": "github.com/gofiber/fiber", "layer": "go-fiber", "strength": "exact" }
+    ],
+    "typescript": []
+  },
+  "generated": {
+    "$comment": [
+      "Filled by scripts/rebuild-stack-signals.mjs from the six transparent",
+      "packages' peerDependencies. Empty until the TypeScript detector lands —",
+      "see the Issue for why that waits: 83 of the 139 JS examples carry no real",
+      "library at all, so a detector there cannot be measured yet."
+    ],
+    "signals": []
+  }
+}
