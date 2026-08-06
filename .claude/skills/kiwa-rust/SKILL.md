@@ -42,7 +42,7 @@ $ARGUMENTS
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致、 例 `counter` / `counter-api` / `profile-api`)
 <!-- kiwa-layers:rust-enum:start -->
 
-- `--layer {contract-rust|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http}` — 対象 layer。
+- `--layer {rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http}` — 対象 layer。
 - `--mode {axum|actix-web|tower-http}` — framework 別 helper の選択 (layer が `--mode` を持つ時のみ)。
 
 <!-- kiwa-layers:rust-enum:end -->

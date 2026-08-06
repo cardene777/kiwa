@@ -48,8 +48,23 @@ function loadLayers() {
   if (dupes.length) throw new Error(`${TABLE}: duplicate id: ${[...new Set(dupes)].join(', ')}`);
 
   for (const l of layers) {
-    if (!l.spec_path.startsWith(`${table.specRoot}/${l.spec_dir}/`)) {
-      throw new Error(`${TABLE}: ${l.id}: spec_path does not sit under spec_dir "${l.spec_dir}"`);
+    // Containment is a path question, not a string question. `spec_dir` of
+    // "../../docs" produces a spec_path that passes a prefix comparison and
+    // resolves outside the repository, and the skills would then be told to
+    // write there.
+    const root = resolve(ROOT, table.specRoot);
+    const dir = resolve(root, l.spec_dir);
+    const file = resolve(ROOT, l.spec_path);
+    for (const [label, target, base] of [
+      ['spec_dir', dir, root],
+      ['spec_path', file, dir],
+    ]) {
+      if (target !== base && !target.startsWith(base + '/')) {
+        throw new Error(`${TABLE}: ${l.id}: ${label} escapes "${base}"`);
+      }
+    }
+    if (l.spec_dir.includes('..') || l.spec_path.includes('..')) {
+      throw new Error(`${TABLE}: ${l.id}: spec paths may not contain ".."`);
     }
     if (l.backing_package && l.backing_runtime_package) {
       throw new Error(`${TABLE}: ${l.id}: carries both a package and a runtime package`);
@@ -78,6 +93,11 @@ function renderRegion(source, name, body, rel) {
   if (to < from) throw new Error(`${rel}: region "${name}" has its end before its start`);
   if (source.indexOf(start, from + 1) !== -1) {
     throw new Error(`${rel}: region "${name}" is opened twice`);
+  }
+  // A second end marker leaves a stray line the renderer would preserve as if
+  // it were content. Checking only the start let that through.
+  if (source.indexOf(end, to + 1) !== -1) {
+    throw new Error(`${rel}: region "${name}" is closed twice`);
   }
   return source.slice(0, from + start.length) + '\n' + body + '\n' + source.slice(to);
 }
@@ -163,15 +183,22 @@ function main() {
   const layers = loadLayers();
   const drifted = [];
 
+  // Render every file before writing any. Writing as we go left the worktree
+  // half-updated when a later file turned out to have a malformed marker: the
+  // command failed, and the first file had already changed.
+  const pending = [];
   for (const file of PLAN) {
     const before = read(file.rel);
     let after = before;
     for (const region of file.regions) {
       after = renderRegion(after, region.name, region.render(layers), file.rel);
     }
-    if (after === before) continue;
-    if (check) drifted.push(file.rel);
-    else writeFileSync(resolve(ROOT, file.rel), after, 'utf-8');
+    if (after !== before) pending.push({ rel: file.rel, after });
+  }
+
+  for (const { rel, after } of pending) {
+    if (check) drifted.push(rel);
+    else writeFileSync(resolve(ROOT, rel), after, 'utf-8');
   }
 
   if (check) {

@@ -29,7 +29,9 @@
     "                   had no entry at all before this table.",
     "  targets          which /kiwa-test --target values run this layer. Derived from",
     "                   the Step headings, not from the prose describing them; the two",
-    "                   disagree today and #1809 decides which one moves."
+    "                   disagree today and #1809 decides which one moves.",
+    "",
+    "contract-rust is deliberately absent. It had a routing row in kiwa-design and no entry in either enum, and the skill it named (/kiwa-rust) implements neither the layer nor the --provider flag the row advertised. Rendering it into the enum would have advertised an option nothing can serve. #1809 decides whether to implement it or drop the row; until then the table records what works."
   ],
   "specRoot": "tests/spec",
   "layers": [
@@ -39,12 +41,20 @@
       "spec_path": "tests/spec/contract/test-spec-{module}.md",
       "runtime": "solidity",
       "consumer_skill": "kiwa-forge",
-      "also_consumed_by": ["kiwa-hardhat"],
+      "also_consumed_by": [
+        "kiwa-hardhat"
+      ],
       "backing_package": null,
       "backing_runtime_package": null,
-      "providers": ["foundry", "hardhat"],
+      "providers": [
+        "foundry",
+        "hardhat"
+      ],
       "test_output": "{example}/test/*.t.sol",
-      "targets": ["contract", "both"]
+      "targets": [
+        "contract",
+        "both"
+      ]
     },
     {
       "id": "e2e",
@@ -57,7 +67,10 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/*.spec.ts",
-      "targets": ["dapp", "both"]
+      "targets": [
+        "dapp",
+        "both"
+      ]
     },
     {
       "id": "e2e-generic",
@@ -70,7 +83,10 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/*.e2e.spec.ts",
-      "targets": ["web", "all"]
+      "targets": [
+        "web",
+        "all"
+      ]
     },
     {
       "id": "a11y",
@@ -83,7 +99,10 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/*.a11y.test.ts",
-      "targets": ["web", "all"]
+      "targets": [
+        "web",
+        "all"
+      ]
     },
     {
       "id": "integration",
@@ -172,7 +191,11 @@
       "also_consumed_by": [],
       "backing_package": "orm",
       "backing_runtime_package": null,
-      "providers": ["drizzle", "prisma", "kysely"],
+      "providers": [
+        "drizzle",
+        "prisma",
+        "kysely"
+      ],
       "test_output": "{example}/tests/{module}.test.ts",
       "targets": []
     },
@@ -187,7 +210,7 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": ["nextjs"]
+      "targets": []
     },
     {
       "id": "nextjs-middleware",
@@ -200,7 +223,7 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": ["nextjs"]
+      "targets": []
     },
     {
       "id": "nextjs-rsc",
@@ -213,7 +236,7 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": ["nextjs"]
+      "targets": []
     },
     {
       "id": "nextjs-parallel-route",
@@ -226,7 +249,7 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": ["nextjs"]
+      "targets": []
     },
     {
       "id": "nextjs-rsc-streaming",
@@ -239,7 +262,7 @@
       "backing_runtime_package": null,
       "providers": [],
       "test_output": "{example}/tests/integration/{module}.nextjs.test.ts",
-      "targets": ["nextjs"]
+      "targets": []
     },
     {
       "id": "edge-handler",
@@ -263,7 +286,13 @@
       "also_consumed_by": [],
       "backing_package": "auth",
       "backing_runtime_package": null,
-      "providers": ["nextauth", "lucia", "better-auth", "clerk", "auth0"],
+      "providers": [
+        "nextauth",
+        "lucia",
+        "better-auth",
+        "clerk",
+        "auth0"
+      ],
       "test_output": "{example}/tests/*.auth.test.ts",
       "targets": []
     },
@@ -276,7 +305,12 @@
       "also_consumed_by": [],
       "backing_package": "queue",
       "backing_runtime_package": null,
-      "providers": ["bullmq", "inngest", "cloudflare-queues", "sqs"],
+      "providers": [
+        "bullmq",
+        "inngest",
+        "cloudflare",
+        "sqs"
+      ],
       "test_output": "{example}/tests/*.queue.test.ts",
       "targets": []
     },
@@ -289,22 +323,13 @@
       "also_consumed_by": [],
       "backing_package": "cache",
       "backing_runtime_package": null,
-      "providers": ["redis", "memcached", "keydb"],
+      "providers": [
+        "redis",
+        "memcached",
+        "keydb"
+      ],
       "test_output": "{example}/tests/*.cache.test.ts",
       "targets": []
-    },
-    {
-      "id": "contract-rust",
-      "spec_dir": "contract",
-      "spec_path": "tests/spec/contract/test-spec-{module}.contract-rust.md",
-      "runtime": "rust",
-      "consumer_skill": "kiwa-rust",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-rs",
-      "providers": ["foundry", "alloy"],
-      "test_output": "examples/{example}/tests/*_contract.rs",
-      "targets": ["rust", "all"]
     },
     {
       "id": "rust-unit",
@@ -317,7 +342,10 @@
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
       "test_output": "examples/{example}/tests/*.rs",
-      "targets": ["rust", "all"]
+      "targets": [
+        "rust",
+        "all"
+      ]
     },
     {
       "id": "rust-integration",
@@ -330,7 +358,10 @@
       "backing_runtime_package": "kiwa-test-rs",
       "providers": [],
       "test_output": "examples/{example}/tests/*_integration.rs",
-      "targets": ["rust", "all"]
+      "targets": [
+        "rust",
+        "all"
+      ]
     },
     {
       "id": "rust-axum",
@@ -344,7 +375,10 @@
       "providers": [],
       "mode": "axum",
       "test_output": "examples/{example}/tests/*_axum.rs",
-      "targets": ["rust", "all"]
+      "targets": [
+        "rust",
+        "all"
+      ]
     },
     {
       "id": "rust-actix-web",
@@ -358,7 +392,10 @@
       "providers": [],
       "mode": "actix-web",
       "test_output": "examples/{example}/tests/*_actix.rs",
-      "targets": ["rust", "all"]
+      "targets": [
+        "rust",
+        "all"
+      ]
     },
     {
       "id": "rust-tower-http",
@@ -372,7 +409,10 @@
       "providers": [],
       "mode": "tower-http",
       "test_output": "examples/{example}/tests/*_tower_http.rs",
-      "targets": ["rust", "all"]
+      "targets": [
+        "rust",
+        "all"
+      ]
     },
     {
       "id": "go-unit",
@@ -385,7 +425,10 @@
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
       "test_output": "examples/{example}/*_test.go",
-      "targets": ["go", "all"]
+      "targets": [
+        "go",
+        "all"
+      ]
     },
     {
       "id": "go-integration",
@@ -398,7 +441,10 @@
       "backing_runtime_package": "kiwa-test-go",
       "providers": [],
       "test_output": "examples/{example}/integration/*_test.go",
-      "targets": ["go", "all"]
+      "targets": [
+        "go",
+        "all"
+      ]
     },
     {
       "id": "go-gin",
@@ -412,7 +458,10 @@
       "providers": [],
       "mode": "gin",
       "test_output": "examples/{example}/*_gin_test.go",
-      "targets": ["go", "all"]
+      "targets": [
+        "go",
+        "all"
+      ]
     },
     {
       "id": "go-echo",
@@ -426,7 +475,10 @@
       "providers": [],
       "mode": "echo",
       "test_output": "examples/{example}/*_echo_test.go",
-      "targets": ["go", "all"]
+      "targets": [
+        "go",
+        "all"
+      ]
     },
     {
       "id": "go-fiber",
@@ -440,7 +492,10 @@
       "providers": [],
       "mode": "fiber",
       "test_output": "examples/{example}/*_fiber_test.go",
-      "targets": ["go", "all"]
+      "targets": [
+        "go",
+        "all"
+      ]
     }
   ]
 }

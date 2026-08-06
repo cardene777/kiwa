@@ -31,7 +31,7 @@ $ARGUMENTS
 - `--module {name}` — 対象 module 名 (spec / test file の特定キー)
 <!-- kiwa-layers:review-enum:start -->
 
-- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|contract-rust|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — review 対象の layer を指定 (default `all`)。
+- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — review 対象の layer を指定 (default `all`)。
   値は `kiwa-design` の enum と同一で、どちらも `docs/layers.json` から生成される。
 
 <!-- kiwa-layers:review-enum:end -->
@@ -106,7 +106,6 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 | `auth` | `{example}/tests/*.auth.test.ts` |
 | `job-queue` | `{example}/tests/*.queue.test.ts` |
 | `cache` | `{example}/tests/*.cache.test.ts` |
-| `contract-rust` | `examples/{example}/tests/*_contract.rs` |
 | `rust-unit` | `examples/{example}/tests/*.rs` |
 | `rust-integration` | `examples/{example}/tests/*_integration.rs` |
 | `rust-axum` | `examples/{example}/tests/*_axum.rs` |

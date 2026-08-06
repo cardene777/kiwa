@@ -138,9 +138,45 @@ describe('docs/layers.json is internally consistent', () => {
     expect(stray).toEqual([]);
   });
 
-  it('covers a non-trivial number of layers', () => {
-    // A table that parsed to nothing would satisfy every assertion above.
-    expect(LAYERS.length).toBeGreaterThanOrEqual(30);
+  it('holds exactly the layers the repository expects', () => {
+    // A floor is a liveness check on the parser, not an inventory: dropping one
+    // row and re-rendering satisfies it, and every generated artifact moves in
+    // step so nothing else notices. Adding or removing a layer is a design act,
+    // so it updates this list in the same commit and a reviewer sees it.
+    expect([...LAYERS.map((l) => l.id)].sort()).toEqual(
+      [
+        'a11y',
+        'api',
+        'auth',
+        'cache',
+        'cli',
+        'contract',
+        'data',
+        'e2e',
+        'e2e-generic',
+        'edge-handler',
+        'go-echo',
+        'go-fiber',
+        'go-gin',
+        'go-integration',
+        'go-unit',
+        'integration',
+        'job-queue',
+        'nextjs-middleware',
+        'nextjs-parallel-route',
+        'nextjs-rsc',
+        'nextjs-rsc-streaming',
+        'nextjs-server-action',
+        'orm-query',
+        'rust-actix-web',
+        'rust-axum',
+        'rust-integration',
+        'rust-tower-http',
+        'rust-unit',
+        'ui',
+        'unit',
+      ].sort(),
+    );
   });
 });
 
@@ -212,6 +248,20 @@ describe('the skills carry what the table renders', () => {
       const to = source.indexOf(`<!-- kiwa-layers:${region}:end -->`);
       const at = declarations[0]!.index!;
       if (!(from < at && at < to)) stray.push(`${rel}: declaration sits outside the region`);
+
+      // `--layer foo` in running prose names a specific layer without the brace
+      // form, so counting declarations misses it. Any layer named outside the
+      // region has to be one the table knows.
+      //
+      // `all` is not a layer. It is the reserved value meaning "every layer",
+      // which is why the renderer appends it to the enum rather than reading it
+      // from the table.
+      const known = new Set([...LAYERS.map((l) => l.id), 'all']);
+      for (const m of source.matchAll(/--layer\s+([a-z][a-z0-9-]*)/g)) {
+        const idx = m.index!;
+        if (from < idx && idx < to) continue;
+        if (!known.has(m[1]!)) stray.push(`${rel}: names unknown layer "${m[1]}" outside the region`);
+      }
     }
     expect(stray).toEqual([]);
   });

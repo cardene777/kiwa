@@ -43,7 +43,7 @@ $ARGUMENTS
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
 <!-- kiwa-layers:design-enum:start -->
 
-- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|contract-rust|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — 想定 test layer を指定 (default `all`)。
+- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — 想定 test layer を指定 (default `all`)。
   各値の出力先と消費 skill は下の routing 表を参照する。
 
 <!-- kiwa-layers:design-enum:end -->
@@ -78,9 +78,8 @@ $ARGUMENTS
 | `nextjs-rsc-streaming` | `tests/spec/integration/test-spec-{module}.rsc-streaming.md` | `/kiwa-nextjs` | typescript | — |
 | `edge-handler` | `tests/spec/integration/test-spec-{module}.edge.md` | `/kiwa-edge` | typescript | — |
 | `auth` | `tests/spec/integration/test-spec-{module}.auth.md` | `/kiwa-auth` | typescript | `nextauth` / `lucia` / `better-auth` / `clerk` / `auth0` |
-| `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` | typescript | `bullmq` / `inngest` / `cloudflare-queues` / `sqs` |
+| `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` | typescript | `bullmq` / `inngest` / `cloudflare` / `sqs` |
 | `cache` | `tests/spec/integration/test-spec-{module}.cache.md` | `/kiwa-cache` | typescript | `redis` / `memcached` / `keydb` |
-| `contract-rust` | `tests/spec/contract/test-spec-{module}.contract-rust.md` | `/kiwa-rust` | rust | `foundry` / `alloy` |
 | `rust-unit` | `tests/spec/unit/test-spec-{module}.rs.md` | `/kiwa-rust` | rust | — |
 | `rust-integration` | `tests/spec/integration/test-spec-{module}.rs.md` | `/kiwa-rust` | rust | — |
 | `rust-axum` | `tests/spec/integration/test-spec-{module}.rust-axum.md` | `/kiwa-rust` (`--mode axum`) | rust | — |
