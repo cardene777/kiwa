@@ -66,6 +66,13 @@ function skillDirs(): Set<string> {
   );
 }
 
+/** Every `SKILL.md`, relative to the repository root. */
+function skillFiles(): string[] {
+  return [...skillDirs()]
+    .map((name) => `.claude/skills/${name}/SKILL.md`)
+    .filter((rel) => existsSync(resolve(REPO_ROOT, rel)));
+}
+
 describe('--layer routing agrees with the filesystem', () => {
   it('every routing row names a skill that exists', () => {
     const dirs = skillDirs();
@@ -97,21 +104,49 @@ describe('--layer routing agrees with the filesystem', () => {
   });
 
   it('no skill calls a skill that does not exist', () => {
+    // Every `SKILL.md`, not the three this PR touched. 24 of them name a
+    // `/kiwa-*` skill, and a stale call in any of them breaks the same way.
+    //
+    // Both notations count. The flow blocks write bare calls
+    // (`[Step 3a] /kiwa-design --layer contract`) while prose uses backticks,
+    // and `/kiwa-test` carried its stale `/kiwa-visual` calls in both forms.
+    // A slash followed by a name is not enough to mean "skill call". The same
+    // shape appears in a worktree path (`../kiwa-gh-pages`), a cargo/go package
+    // (`kiwa-test-rs`), and a script path (`scripts/kiwa-taxonomy-run.mjs`).
+    // A call starts the token: preceded by whitespace, a backtick, or a line
+    // start, never by a path segment.
     const dirs = skillDirs();
     const dangling: string[] = [];
-    for (const rel of [DESIGN, REVIEW, TEST]) {
-      for (const m of read(rel).matchAll(/`\/(kiwa-[a-z-]+)`/g)) {
-        if (!dirs.has(m[1]!)) dangling.push(`${rel} -> /${m[1]!}`);
+    for (const rel of skillFiles()) {
+      for (const m of read(rel).matchAll(/(^|[\s`(])\/(kiwa-[a-z0-9-]+)/gm)) {
+        if (!dirs.has(m[2]!)) dangling.push(`${rel} -> /${m[2]!}`);
       }
     }
     expect([...new Set(dangling)]).toEqual([]);
   });
 
-  it('the scan covers a non-trivial number of layers', () => {
+  it('a routing row is not silently overwritten by a duplicate', () => {
+    // `routingTable` keys by layer, so two rows for one layer would collapse
+    // and the second would never be checked.
+    const seen: string[] = [];
+    for (const line of read(DESIGN).split('\n')) {
+      const m = /^\| `([a-z0-9-]+)` \| `[^`]*` \|/.exec(line);
+      if (m) seen.push(m[1]!);
+    }
+    expect(seen.length).toBe(new Set(seen).size);
+  });
+
+  it('the scan covers a non-trivial number of layers and skills', () => {
     // Without this, a parser that silently matches nothing would make every
     // assertion above pass on an empty set.
+    //
+    // The floors sit just under the real counts. Raising them to the exact
+    // number would fail on every legitimate addition; leaving them at zero
+    // would let a broken parser through. They are a liveness check on the
+    // parser, not an inventory.
     expect(layerEnum(DESIGN).length).toBeGreaterThanOrEqual(30);
     expect(routingTable(DESIGN).size).toBeGreaterThanOrEqual(30);
+    expect(skillFiles().length).toBeGreaterThanOrEqual(20);
   });
 
   it('the three skill files are where this expects them', () => {

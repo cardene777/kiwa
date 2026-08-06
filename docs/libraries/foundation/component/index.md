@@ -8,7 +8,7 @@
 
 利用者はまず component の代表状態を story として登録します。`mount` は meta と story の args を解決して `MockNode` の canvas を返します。その canvas に対して play function の操作、名前のない button や label のない input の検出、markup の変更判定を実行します。これにより、たとえば Save button の既定ラベル、play が失敗する step、変更された story を承認する前の状態を、network や cloud service なしで再現できます。
 
-この library は framework を選びません。ただし、React、Vue、Svelte、Solid の component 自体を render するものではありません。render 関数は `MockNode` を返す必要があります。実 browser の CSS、viewport ごとの layout、focus 移動、screen reader tree、pixel diff はここで証明できないため、component test、`@kiwa-lab/a11y`、`@kiwa-lab/e2e` (Playwright の `toHaveScreenshot()`) に渡します。
+この library は framework を選びません。ただし、React、Vue、Svelte、Solid の component 自体を render するものではありません。render 関数は `MockNode` を返す必要があります。実 browser の CSS、viewport ごとの layout、focus 移動、screen reader tree、pixel diff はここで証明できないため、component test、`@kiwa-lab/a11y`、browser を実際に動かす E2E test に渡します。pixel diff は Playwright の `expect(page).toHaveScreenshot()` が担います (`@playwright/test` から直接 import します)。
 
 ## 採用する判断
 

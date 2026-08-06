@@ -81,12 +81,12 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
   - Playwright (dApp): `{example}/tests/*.spec.ts` or `tests/fixtures/{example}/e2e-test/*.spec.ts`
   - 汎用 e2e (`--layer e2e-generic`): `{example}/tests/*.e2e.spec.ts` or `tests/fixtures/{example}/e2e-generic-test/*.spec.ts`
   - a11y (`--layer a11y`): `{example}/tests/*.a11y.test.ts` or `tests/fixtures/{example}/a11y-test/*.test.ts`
-  - ORM query (`--layer orm-query`): `{example}/tests/*.orm.test.ts` or `tests/fixtures/{example}/orm-test/*.test.ts`
+  - ORM query (`--layer orm-query`): `{example}/tests/{module}.test.ts` (`/kiwa-orm` の既定出力先)
   - Next.js Server Actions (`--layer nextjs-server-action`): `{example}/tests/*.nextjs.test.ts` or `{example}/tests/integration/*.nextjs.test.ts`
   - Next.js middleware (`--layer nextjs-middleware`): `{example}/tests/*.middleware.test.ts` or `{example}/tests/integration/*.middleware.test.ts`
   - Next.js RSC (`--layer nextjs-rsc`): `{example}/tests/*.rsc.test.ts` or `{example}/tests/integration/*.rsc.test.ts`
   - Next.js Parallel Routes (`--layer nextjs-parallel-route`): `{example}/tests/*.parallel.test.ts` or `{example}/tests/integration/*.parallel.test.ts`
-  - Next.js RSC streaming (`--layer nextjs-rsc-streaming`): `{example}/tests/*.rsc-streaming.test.ts` or `{example}/tests/integration/*.rsc-streaming.test.ts`
+  - Next.js RSC streaming (`--layer nextjs-rsc-streaming`): `{example}/tests/integration/{module}.nextjs.test.ts` (`/kiwa-nextjs` の既定出力先、 `--output` で上書き可)
   - Edge runtime fetch handler (`--layer edge-handler`): `{example}/tests/*.edge.test.ts` or `{example}/src/index.test.ts`
   - Rust cargo test unit (`--layer rust-unit`、 Issue #581 v1.4-6): `examples/{example}/tests/*.rs` (cargo の integration test 慣習、 1 file = 1 crate)
   - Rust cargo test integration (`--layer rust-integration`、 Issue #581 v1.4-6): `examples/{example}/tests/*_integration.rs` or `examples/{example}/tests/*.rs` (mock_server 経路、 unit と同 dir、 file 名 suffix or test 関数 prefix で識別)

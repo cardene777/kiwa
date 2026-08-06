@@ -10,7 +10,7 @@ kiwa (「際」 = boundary, edge, connection) is a **spec-driven development pla
 
 **Every test layer · one spec · every verification path · TypeScript / Solidity / Python / Lean 4.**
 
-One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js (Server Actions / middleware / RSC) tests in parallel, across **28 npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
+One Layer 1 spec → contract / API / component / e2e / a11y / Next.js (Server Actions / middleware / RSC) tests in parallel, across **28 npm packages + 1 PyPI package + Foundry / Hardhat bridges + Lean 4 spec verification**. Coverage and Mutation gates **enforced at release** by `scripts/check-{coverage,mutation}-gates.mjs`.
 
 [![npm version](https://img.shields.io/npm/v/@kiwa-lab/dapp?color=cb3837&logo=npm)](https://www.npmjs.com/package/@kiwa-lab/dapp)
 [![npm downloads](https://img.shields.io/npm/dm/@kiwa-lab/dapp?color=4ec1c0)](https://www.npmjs.com/package/@kiwa-lab/dapp)
@@ -50,7 +50,7 @@ One Layer 1 spec → contract / API / component / e2e / a11y / visual / Next.js 
 
 Modern stacks scatter their tests across **mismatched runners**: Foundry / Hardhat for contracts, Vitest for unit + API, Playwright for e2e, Testing Library for components, axe-core for a11y, pixelmatch for visual, pytest for Python services. Every runner has its own conventions, fixtures, and gates — and **no single source of truth** spans them.
 
-**kiwa is a test toolchain that turns one Layer 1 spec into every test layer your stack actually needs.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove. dApps and smart contracts are first-class citizens, alongside REST APIs (msw / supertest / Playwright request), SPA components (8 framework adapters), CLI tools, queue workers, generic browser e2e (Playwright), accessibility (axe-core), visual regression (pixelmatch), Next.js App Router (Server Actions / middleware / RSC), and Python pytest (port of the spec parser + requests/httpx adapter, published as `kiwa-test-py` on PyPI).
+**kiwa is a test toolchain that turns one Layer 1 spec into every test layer your stack actually needs.** "kiwa" means **edge / boundary / limit** in Japanese — exactly what good tests prove. dApps and smart contracts are first-class citizens, alongside REST APIs (msw / supertest / Playwright request), SPA components (8 framework adapters), CLI tools, queue workers, generic browser e2e (Playwright), accessibility (axe-core), Next.js App Router (Server Actions / middleware / RSC), and Python pytest (port of the spec parser + requests/httpx adapter, published as `kiwa-test-py` on PyPI).
 
 ```mermaid
 graph TD
@@ -61,7 +61,7 @@ graph TD
     C --> F["/kiwa-vitest → Vitest .test.ts"]
     C --> G["/kiwa-api → msw + supertest"]
     C --> H["/kiwa-play → Playwright .spec.ts"]
-    C --> I["a11y + visual + CLI + data adapters"]
+    C --> I["a11y + CLI + data adapters"]
     D --> J[forge test]
     E --> K[npx hardhat test]
     F --> L[vitest run]
@@ -101,7 +101,7 @@ kiwa ships in two halves that work together but stand alone:
 
 | Skill | Layer | Role |
 |---|---|---|
-| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (`--target {contract\|dapp\|web\|nextjs\|rust\|go\|both\|all}`, where `web` runs the generic-e2e + a11y + visual trio against the same `app/` source, `rust`/`go` cover polyglot Rust / Go layers via `/kiwa-rust` / `/kiwa-go`, and `all` covers every surface) |
+| [`/kiwa-test`](./.claude/skills/kiwa-test/SKILL.md) | **orchestrator** | Run the full chain in one command (`--target {contract\|dapp\|web\|nextjs\|rust\|go\|both\|all}`, where `web` runs the generic-e2e + a11y pair against the same `app/` source, `rust`/`go` cover polyglot Rust / Go layers via `/kiwa-rust` / `/kiwa-go`, and `all` runs the web, Rust and Go chains) |
 | [`/kiwa-design`](./.claude/skills/kiwa-design/SKILL.md) | **Layer 1** | Reverse-engineer a 9-section / 9-column test spec from existing contracts, APIs, screens, or written feature specs |
 | [`/kiwa-forge`](./.claude/skills/kiwa-forge/SKILL.md) | **Layer 2** (contract) | Layer 1 spec → Foundry `.t.sol` with fuzz / invariant / `vm.prank` / custom-error reverts, run `forge test`, gate on `forge coverage` |
 | [`/kiwa-hardhat`](./.claude/skills/kiwa-hardhat/SKILL.md) | **Layer 2** (contract) | Same Layer 1 spec → Hardhat `.test.cjs` with `chai-matchers` / `fast-check` / `loadFixture`, run `npx hardhat test`, gate on `solidity-coverage` |
