@@ -97,5 +97,5 @@ export function writeStackFile(
 
 export { detectFrom, resolve as resolveDetections } from './detect.js';
 export { loadLayerTable, resolveLayers, type LayerRecord, type ResolvedLayers } from './layers.js';
-export { presentLanguages, scan as scanManifests, type LanguagePresence } from './scan.js';
+export { presentManifests, scan as scanManifests, type ManifestPresence } from './scan.js';
 export type { Detection, SignalTable } from './detect.js';
