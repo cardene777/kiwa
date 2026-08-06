@@ -381,6 +381,10 @@ function detectCommand(deps: RunCliDeps): number {
   if (!manifests.length) {
     deps.stdout('No manifest found.\n');
     deps.stdout('Looked for: Cargo.toml, go.mod, package.json (here and in workspace members)\n');
+    // Same contract as detecting nothing: a previous run's answer must not
+    // survive a run that found no basis for it. Returning early left the old
+    // layers readable after the manifests themselves had been removed.
+    writeStackFile(cwd, []);
     return 0;
   }
 

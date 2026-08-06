@@ -13,6 +13,12 @@ import { join, resolve } from 'node:path';
 
 import { readCargoToml, readGoMod, readPackageJson, type Dependency } from './manifests.js';
 
+/** Drop a trailing YAML comment, which `[a, b] # note` would otherwise carry. */
+function stripHash(line: string): string {
+  const at = line.indexOf('#');
+  return at === -1 ? line : line.slice(0, at);
+}
+
 export interface ScannedManifest {
   /** Relative to the directory the scan started from, for the report. */
   path: string;
@@ -57,7 +63,20 @@ function workspaceDirs(root: string): string[] {
     try {
       for (const line of readFileSync(pnpm, 'utf-8').split('\n')) {
         const m = /^\s*-\s*["']?([^"'#]+?)["']?\s*$/.exec(line);
-        if (m) patterns.push(m[1]!);
+        if (m) {
+          patterns.push(m[1]!);
+          continue;
+        }
+        // `packages: [apps/*, libs/*]` is the same list written inline, and
+        // reading only the block form scanned the root manifest alone in a
+        // monorepo that uses it.
+        const flow = /^\s*packages\s*:\s*\[([^\]]*)\]\s*$/.exec(stripHash(line));
+        if (flow) {
+          for (const item of flow[1]!.split(',')) {
+            const value = item.trim().replace(/^["']|["']$/g, '');
+            if (value) patterns.push(value);
+          }
+        }
       }
     } catch {
       // A workspace file we cannot read means no children, not a failure.

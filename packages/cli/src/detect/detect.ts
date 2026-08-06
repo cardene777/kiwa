@@ -37,6 +37,13 @@ export interface SignalTable {
 
 export interface Detection {
   layer: string;
+  /**
+   * Set when the layer follows from another one rather than from a signal of
+   * its own. Kept only while nothing more specific turned up in the group.
+   */
+  implied?: true;
+  /** The layer this one follows from, used to decide "more specific". */
+  impliedBy?: string;
   /** The dependency (or feature) that produced it, for the report. */
   signal: string;
   manifest: string;
@@ -59,6 +66,13 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
   if (dep.name !== signal.match && !dep.name.startsWith(`${signal.match}/`)) return [];
 
   if (signal.kind === 'feature') {
+    // `kiwa-test-rs = { workspace = true }` states the dependency and hides the
+    // feature list, which is the only thing that says which layer. Falling back
+    // to the default would report `rust-unit` for an axum project — a definite
+    // answer built from an absent one.
+    if (dep.unresolved) return [];
+
+    const base = signal.default ?? signal.layer;
     const hits: Detection[] = [];
     for (const feature of dep.features) {
       const layer = signal.features?.[feature];
@@ -71,12 +85,18 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
     if (!hits.length && signal.default) {
       hits.push({ layer: signal.default, signal: dep.name, manifest, strength: signal.strength });
     }
-    // The adapter serves the integration layer as well, and no manifest can
-    // tell the two apart — `rust-cargo-poc` has `tests/poc.rs` and
-    // `tests/poc_integration.rs` against one `kiwa-test-rs` entry. Reporting
-    // only the unit layer would hide half of what the project already tests.
+    // The adapter can serve the integration layer too, and no manifest tells
+    // the two apart. It is marked as following from the base layer rather than
+    // asserted: `resolve` keeps it only while nothing more specific appeared.
     for (const layer of signal.also ?? []) {
-      hits.push({ layer, signal: dep.name, manifest, strength: signal.strength });
+      hits.push({
+        layer,
+        signal: dep.name,
+        manifest,
+        strength: signal.strength,
+        implied: true,
+        ...(base ? { impliedBy: base } : {}),
+      });
     }
     return hits;
   }
@@ -84,8 +104,19 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
   // `also` applies to plain signals too. The Go adapter is one: it names its
   // layer directly rather than through features, and reading `also` only on the
   // feature path left `go-integration` undetected.
-  const layers = [...(signal.layer ? [signal.layer] : []), ...(signal.also ?? [])];
-  return layers.map((layer) => ({ layer, signal: dep.name, manifest, strength: signal.strength }));
+  const from = signal.default ?? signal.layer;
+  const asserted: Detection[] = signal.layer
+    ? [{ layer: signal.layer, signal: dep.name, manifest, strength: signal.strength }]
+    : [];
+  const implied: Detection[] = (signal.also ?? []).map((layer) => ({
+    layer,
+    signal: dep.name,
+    manifest,
+    strength: signal.strength,
+    implied: true,
+    ...(from ? { impliedBy: from } : {}),
+  }));
+  return [...asserted, ...implied];
 }
 
 /**
@@ -119,5 +150,25 @@ export function resolve(all: Detection[]): Detection[] {
     const existing = kept.get(d.layer);
     if (!existing || (existing.strength === 'weak' && d.strength === 'exact')) kept.set(d.layer, d);
   }
+
+  // An implied layer is a guess that holds only while nothing else in its group
+  // says otherwise. `kiwa-test-rs` implies the integration layer because the
+  // plain corpus project (`rust-cargo-poc`) carries both `tests/poc.rs` and
+  // `tests/poc_integration.rs` — but the framework projects each carry a single
+  // test file, so keeping it once a framework layer appeared would report an
+  // integration suite that no such project has.
+  const asserted = new Map<string, Set<string>>();
+  for (const d of kept.values()) {
+    if (d.implied) continue;
+    const g = group(d.layer);
+    if (!asserted.has(g)) asserted.set(g, new Set());
+    asserted.get(g)!.add(d.layer);
+  }
+  for (const [layer, d] of [...kept]) {
+    if (!d.implied) continue;
+    const others = [...(asserted.get(group(layer)) ?? [])].filter((l) => l !== d.impliedBy);
+    if (others.length) kept.delete(layer);
+  }
+
   return [...kept.values()].sort((a, b) => a.layer.localeCompare(b.layer));
 }

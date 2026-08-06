@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -741,6 +741,25 @@ describe('init --detect', () => {
       const code = await runCli(['init', '--detect'], h.deps);
       expect(code).toBe(0);
       expect(h.out()).toContain('No manifest found.');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('invalidates an earlier answer when the manifests are gone', async () => {
+    // Deleting the manifests left the previous run's layers readable, so a
+    // skill would keep acting on a stack the project no longer has.
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-detect-'));
+    try {
+      mkdirSync(join(dir, '.kiwa'), { recursive: true });
+      writeFileSync(
+        join(dir, '.kiwa', 'stack.json'),
+        JSON.stringify({ detected: [{ layer: 'rust-axum' }] }),
+      );
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['init', '--detect'], h.deps)).toBe(0);
+      const after = JSON.parse(readFileSync(join(dir, '.kiwa', 'stack.json'), 'utf-8'));
+      expect(after.detected).toEqual([]);
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

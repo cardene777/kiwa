@@ -79,6 +79,57 @@ describe('manifest readers', () => {
     expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
   });
 
+  it('is not thrown off by a bracket inside a string value', () => {
+    // A string can hold an unbalanced bracket, and counting it as nesting made
+    // every entry after it look like a field of an entry still open — so the
+    // dependency that decides the layer was dropped without a trace.
+    const deps = readCargoToml(
+      [
+        '[dev-dependencies]',
+        'weird = { version = "{{{" }',
+        'kiwa-test-rs = { version = "0.5", features = ["axum"] }',
+      ].join('\n'),
+    );
+    expect(deps).toEqual([
+      { name: 'weird', features: [] },
+      { name: 'kiwa-test-rs', features: ['axum'] },
+    ]);
+  });
+
+  it('marks a workspace-inherited entry as unresolved', () => {
+    // The feature list lives in the workspace root, which this reader does not
+    // open. Recording it as a plain featureless entry let the caller apply the
+    // default layer — a definite answer built from an absent one.
+    const deps = readCargoToml(
+      ['[dev-dependencies]', 'kiwa-test-rs = { workspace = true }'].join('\n'),
+    );
+    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: [], unresolved: true }]);
+  });
+
+  it('does not mark an entry unresolved once its features are stated', () => {
+    const deps = readCargoToml(
+      ['[dev-dependencies]', 'kiwa-test-rs = { workspace = true, features = ["axum"] }'].join('\n'),
+    );
+    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
+  });
+
+  it('skips an indirect entry that carries a trailing comment', () => {
+    // Anchoring the marker to the end of the line read this as a direct
+    // dependency, so a framework the project only holds transitively would be
+    // reported as one it tests.
+    const deps = readGoMod(
+      ['require (', '\tgithub.com/gin-gonic/gin v1.9.0 // indirect // vendored', ')'].join('\n'),
+    );
+    expect(deps).toEqual([]);
+  });
+
+  it('does not mistake "indirectly" for the indirect marker', () => {
+    const deps = readGoMod(
+      ['require (', '\tgithub.com/gin-gonic/gin v1.9.0 // indirectly relevant', ')'].join('\n'),
+    );
+    expect(deps).toEqual([{ name: 'github.com/gin-gonic/gin', features: [] }]);
+  });
+
   it('reads features spread over several lines', () => {
     const deps = readCargoToml(
       [
@@ -256,6 +307,24 @@ describe('workspace resolution', () => {
     }
   });
 
+  it('reads members from an inline packages list', () => {
+    // `packages: [apps/*]` is the same declaration written on one line, and
+    // reading only the block form scanned the root manifest alone.
+    const dir = fixture({
+      'pnpm-workspace.yaml': 'packages: [apps/*, "libs/*"]\n',
+      'package.json': '{"name":"root"}',
+      'apps/web/package.json': '{"dependencies":{"a":"1"}}',
+      'libs/util/package.json': '{"dependencies":{"b":"1"}}',
+    });
+    try {
+      const paths = scan(dir).map((m) => m.path);
+      expect(paths).toContain(join('apps', 'web', 'package.json'));
+      expect(paths).toContain(join('libs', 'util', 'package.json'));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('skips node_modules when expanding', () => {
     const dir = fixture({
       'pnpm-workspace.yaml': 'packages:\n  - "*"\n',
@@ -274,13 +343,18 @@ describe('workspace resolution', () => {
 
 describe('detection against the polyglot corpus', () => {
   it.each([
-    ['rust-axum-poc', ['rust-axum', 'rust-integration']],
-    ['rust-actix-web-poc', ['rust-actix-web', 'rust-integration']],
-    ['rust-tower-http-poc', ['rust-integration', 'rust-tower-http']],
+    // The integration layer appears for the two projects that actually carry a
+    // second test file — `rust-cargo-poc` (tests/poc.rs + tests/poc_integration.rs)
+    // and `go-testing-poc` (calc_test.go + integration/client_test.go). The six
+    // framework projects carry one test file each, and reporting an integration
+    // suite for them was a claim the corpus contradicts.
+    ['rust-axum-poc', ['rust-axum']],
+    ['rust-actix-web-poc', ['rust-actix-web']],
+    ['rust-tower-http-poc', ['rust-tower-http']],
     ['rust-cargo-poc', ['rust-integration', 'rust-unit']],
-    ['go-gin-poc', ['go-gin', 'go-integration', 'go-unit']],
-    ['go-echo-poc', ['go-echo', 'go-integration', 'go-unit']],
-    ['go-fiber-poc', ['go-fiber', 'go-integration', 'go-unit']],
+    ['go-gin-poc', ['go-gin', 'go-unit']],
+    ['go-echo-poc', ['go-echo', 'go-unit']],
+    ['go-fiber-poc', ['go-fiber', 'go-unit']],
     ['go-testing-poc', ['go-integration', 'go-unit']],
   ])('%s detects %j', (name, expected) => {
     expect(detectExample(name)).toEqual(expected);
@@ -300,10 +374,10 @@ describe('precedence', () => {
       { name: 'axum', features: [] },
       { name: 'kiwa-test-rs', features: ['tower-http'] },
     ]);
-    // `also` puts rust-integration alongside it: the adapter serves both and a
-    // manifest cannot separate them. What matters here is that the weak
-    // rust-axum signal is gone.
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-integration', 'rust-tower-http']);
+    // `also` does not add rust-integration here, because the feature named a
+    // framework layer and that is more specific. What matters for this case is
+    // that the weak rust-axum signal is gone.
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-tower-http']);
   });
 
   it('a weak signal still applies when nothing exact claimed its group', () => {
@@ -324,7 +398,6 @@ describe('precedence', () => {
     ];
     expect(resolvePrecedence([...decided, ...weakElsewhere]).map((d) => d.layer)).toEqual([
       'go-gin',
-      'rust-integration',
       'rust-tower-http',
     ]);
   });
@@ -345,10 +418,36 @@ describe('precedence', () => {
       { name: 'axum', features: [] },
       { name: 'kiwa-test-rs', features: ['axum'] },
     ]);
-    // rust-axum once (not twice), plus rust-integration from `also`.
+    // rust-axum once, not twice — the weak name signal and the exact feature
+    // signal both point at it.
     const layers = resolvePrecedence(all).map((d) => d.layer);
     expect(layers.filter((l) => l === 'rust-axum')).toHaveLength(1);
-    expect(layers).toEqual(['rust-axum', 'rust-integration']);
+    expect(layers).toEqual(['rust-axum']);
+  });
+});
+
+describe('an implied layer holds only while nothing more specific appears', () => {
+  it('keeps the integration layer when the adapter is all the manifest says', () => {
+    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [{ name: 'kiwa-test-rs', features: [] }]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-integration', 'rust-unit']);
+  });
+
+  it('drops it once a framework layer is named', () => {
+    // `go-gin-poc` depends on both the adapter and gin, and carries a single
+    // `counter_test.go`. Reporting `go-integration` there asserted a suite the
+    // project does not have.
+    const all = detectFrom(TABLE, 'go', 'go.mod', [
+      { name: 'github.com/cardene777/kiwa-test-go', features: [] },
+      { name: 'github.com/gin-gonic/gin', features: [] },
+    ]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['go-gin', 'go-unit']);
+  });
+
+  it('says nothing at all when the entry inherits from the workspace', () => {
+    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [
+      { name: 'kiwa-test-rs', features: [], unresolved: true },
+    ]);
+    expect(resolvePrecedence(all)).toEqual([]);
   });
 });
 

@@ -5,7 +5,27 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+
+/**
+ * Walk up to the repository root rather than counting directories.
+ *
+ * This file runs from two places — `tests/` when read as source and
+ * `.vitest-dist/tests/` when compiled — which are one level apart. A fixed
+ * depth is right for one of them and silently reads the wrong tree in the
+ * other.
+ */
+function repoRoot(): string {
+  let dir = HERE;
+  for (let up = 0; up < 8; up += 1) {
+    if (existsSync(resolve(dir, 'docs', 'layers.json'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error('docs/layers.json not found above this test');
+}
+
+const REPO_ROOT = repoRoot();
 
 function read(rel: string): string {
   return readFileSync(resolve(REPO_ROOT, rel), 'utf-8');

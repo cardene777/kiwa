@@ -24,6 +24,12 @@ export interface Dependency {
   name: string;
   /** Cargo features, when the entry carries them. Empty for every other format. */
   features: string[];
+  /**
+   * The entry inherits from the workspace, so its feature list lives in another
+   * file this reader does not open. The dependency is present; what it selects
+   * is unknown, and callers must not fill that in with a default.
+   */
+  unresolved?: true;
 }
 
 /**
@@ -40,6 +46,29 @@ function stripComment(line: string, marker: string): string {
 }
 
 /**
+ * Bracket nesting at an offset, ignoring anything inside a string.
+ *
+ * TOML strings can hold unbalanced brackets, and counting those makes the
+ * reader lose every entry that follows.
+ */
+function depthAt(text: string, offset: number): number {
+  let depth = 0;
+  let quote: string | null = null;
+  for (let i = 0; i < offset; i += 1) {
+    const ch = text[i]!;
+    if (quote) {
+      if (ch === '\\') i += 1;
+      else if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") quote = ch;
+    else if (ch === '{' || ch === '[') depth += 1;
+    else if (ch === '}' || ch === ']') depth -= 1;
+  }
+  return depth;
+}
+
+/**
  * Cargo dependencies, from every `[dependencies]`-like table.
  *
  * `[dev-dependencies]` matters as much as `[dependencies]` here: `kiwa-test-rs`
@@ -50,16 +79,26 @@ export function readCargoToml(source: string): Dependency[] {
   const deps = new Map<string, Dependency>();
 
   /** Merge, because one dependency can appear inline and as its own table. */
-  const record = (name: string, features: string[]): void => {
+  const record = (name: string, features: string[], unresolved: boolean): void => {
     const existing = deps.get(name);
-    if (existing) existing.features.push(...features.filter((f) => !existing.features.includes(f)));
-    else deps.set(name, { name, features: [...features] });
+    if (existing) {
+      existing.features.push(...features.filter((f) => !existing.features.includes(f)));
+      // One of the two spellings resolved the features, so the entry is no
+      // longer unknown. Only an entry that never states them stays unresolved.
+      if (!unresolved) delete existing.unresolved;
+      return;
+    }
+    deps.set(name, { name, features: [...features], ...(unresolved ? { unresolved: true } : {}) });
   };
 
   const featuresIn = (text: string): string[] => {
     const list = /features\s*=\s*\[([^\]]*)\]/s.exec(text);
     return list ? [...list[1]!.matchAll(/["']([^"']+)["']/g)].map((m) => m[1]!) : [];
   };
+
+  /** `workspace = true` without a feature list of its own. */
+  const inherits = (text: string, features: string[]): boolean =>
+    features.length === 0 && /\bworkspace\s*=\s*true\b/.test(text);
 
   // Sections, not lines. An entry can span several lines
   // (`axum = {\n  features = [...]\n}`) and a dependency can be its own table
@@ -75,7 +114,9 @@ export function readCargoToml(source: string): Dependency[] {
     // `[dev-dependencies.kiwa-test-rs]` — the table *is* the dependency.
     const own = /^\[(?:[^\]]*\.)?(?:dev-|build-)?dependencies\.([^\].]+)\]$/.exec(header);
     if (own) {
-      record(own[1]!.replace(/^["']|["']$/g, ''), featuresIn(body.join('\n')));
+      const text = body.join('\n');
+      const features = featuresIn(text);
+      record(own[1]!.replace(/^["']|["']$/g, ''), features, inherits(text, features));
       header = null;
       body = [];
       return;
@@ -91,17 +132,16 @@ export function readCargoToml(source: string): Dependency[] {
         // is a field of the entry already open — `version` and `features` both
         // match the same shape, and counting them as entries split one
         // dependency into three.
-        let depth = 0;
-        for (const ch of text.slice(0, m.index!)) {
-          if (ch === '{' || ch === '[') depth += 1;
-          else if (ch === '}' || ch === ']') depth -= 1;
-        }
-        if (depth !== 0) continue;
+        //
+        // Brackets inside a string do not nest anything. `note = "{{{"` would
+        // otherwise leave the depth at 3 and swallow every dependency after it.
+        if (depthAt(text, m.index!) !== 0) continue;
         starts.push({ name: m[1]!.replace(/^["']|["']$/g, ''), from: m.index! + m[0].length });
       }
       for (let i = 0; i < starts.length; i += 1) {
         const value = text.slice(starts[i]!.from, starts[i + 1]?.from ?? text.length);
-        record(starts[i]!.name, featuresIn(value));
+        const features = featuresIn(value);
+        record(starts[i]!.name, features, inherits(value, features));
       }
     }
 
@@ -142,7 +182,11 @@ export function readGoMod(source: string): Dependency[] {
     //
     // The marker has to be read before comments are stripped, since stripping
     // is what removes it.
-    if (/\/\/\s*indirect\s*$/.test(raw)) continue;
+    //
+    // Anchoring to the end of the line was too strict — `// indirect // extra`
+    // read as direct. A word boundary keeps `// indirectly used` out while
+    // letting anything follow the marker.
+    if (/\/\/[^\n]*?\bindirect\b/.test(raw)) continue;
 
     const line = stripComment(raw, '//').trim();
     if (!line) continue;
