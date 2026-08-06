@@ -401,6 +401,87 @@ function declaresOutput(body: string, ...forms: string[]): boolean {
   return false;
 }
 
+/**
+ * Which directory under `tests/fixtures/` each producer's output is moved to.
+ *
+ * This is a correspondence table, which is the thing these changes have been
+ * removing rather than adding — but the objection was never to writing one
+ * down. It was to writing it down in prose in a file nobody compares against
+ * anything. Here both sides are checked against it in the same run: a producer
+ * whose path stops matching fails, and a row this map does not cover fails too.
+ *
+ * The set-based check it replaces could not see a swap. Exchanging the Forge
+ * and Hardhat paths leaves every path claimed exactly once, so counting alone
+ * says nothing about whether the right producer claimed the right one.
+ */
+const FIXTURE_DIRS: Record<string, string> = {
+  'kiwa-forge': 'contract-test',
+  'kiwa-hardhat': 'hardhat-test',
+  'kiwa-play': 'e2e-test',
+};
+
+/** The data rows of the table under a heading, as cell arrays. */
+function tableRows(body: string, heading: string): string[][] {
+  const start = body.indexOf(heading);
+  expect(start, `${heading} が見つからない`).toBeGreaterThan(-1);
+  const rest = body.slice(start + heading.length);
+  const end = rest.search(/^## /m);
+  const section = end === -1 ? rest : rest.slice(0, end);
+
+  return section
+    .split('\n')
+    .filter((line) => line.trimStart().startsWith('|'))
+    .map((line) => line.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim()))
+    // The header and its separator are not data.
+    .filter((cells) => cells.length > 1 && !cells.every((c) => /^-+$/.test(c)))
+    .slice(1);
+}
+
+describe('each producer claims its own fixture row', () => {
+  const mover = read('.claude/skills/kiwa-test/SKILL.md');
+
+  /** Every row of the Step 5.5 table whose path is a fixture destination. */
+  const fixtureRows = tableRows(mover, '## 2. 生成 file 一覧')
+    .map((cells) => cells[1] ?? '')
+    .filter((path) => path.startsWith('tests/fixtures/'));
+
+  it('parses the table rather than pattern-matching the file', () => {
+    // Reading the whole file for a shape meant a row written differently was
+    // invisible: the count stayed at 3 and the check passed while the table had
+    // grown. Parsing the table means an unparseable row is a row with the wrong
+    // number of cells, not a row that quietly vanishes.
+    expect(fixtureRows.length).toBeGreaterThan(0);
+    for (const path of fixtureRows) {
+      expect(path, 'fixture 行の path cell が空').not.toBe('');
+    }
+  });
+
+  it('every producer writes into the directory the table gives it', () => {
+    // A swap between two producers keeps each path claimed once, so the pairing
+    // has to be checked directly.
+    const wrong: string[] = [];
+    for (const layer of LAYERS) {
+      for (const [skill, outputs] of Object.entries(layer.test_outputs ?? {})) {
+        for (const output of outputs as string[]) {
+          if (!output.startsWith('tests/fixtures/')) continue;
+          const expected = FIXTURE_DIRS[skill];
+          expect(expected, `${skill} の退避先が FIXTURE_DIRS に無い`).toBeTruthy();
+          if (!output.includes(`/${expected}/`)) wrong.push(`${layer.id} -> ${skill}: ${output}`);
+        }
+      }
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('the table and the map describe the same set of destinations', () => {
+    // Keeps the map from going stale in either direction: a row added to the
+    // table without an entry here fails, and an entry here with no row fails.
+    // tests / fixtures / {example} / <dir> — the destination is the fourth part.
+    const fromTable = [...new Set(fixtureRows.map((p) => p.split('/')[3]))].sort();
+    expect(fromTable).toEqual([...new Set(Object.values(FIXTURE_DIRS))].sort());
+  });
+});
+
 describe('a mention is not a declaration', () => {
   it('does not accept a path that only appears in prose', () => {
     // The check has to separate "this is where I write" from "this path exists
