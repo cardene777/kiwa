@@ -302,9 +302,16 @@ export function resolveLayers(options: {
   // undeclared directory leaves the language set unchanged while carrying a
   // framework nobody looked at — and narrowing to what was detected would drop
   // the layer that crate actually needs.
-  const partiallyRead = new Set(
-    found.manifests.filter((m) => !readPaths.has(m.path)).map((m) => m.language),
-  );
+  const foundPaths = new Set(found.manifests.map((m) => m.path));
+  const partiallyRead = new Set([
+    // Found but never opened. The undeclared crate case.
+    ...found.manifests.filter((m) => !readPaths.has(m.path)).map((m) => m.language),
+    // Opened but not found — the reverse, and it means the same thing. `scan`
+    // follows the workspace definition into places the search declines to go
+    // (`dist`, `vendor`, anything dot-prefixed), so the two sets can disagree
+    // in both directions and neither disagreement leaves a complete picture.
+    ...scanned.filter((e) => !foundPaths.has(str(e.manifest)!)).map((e) => str(e.language)!),
+  ]);
   const detected = new Set(
     ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
   );
@@ -348,10 +355,13 @@ export function resolveLayers(options: {
     warnings.push(`excluded ${runtime}: no ${runtime} manifest in the scanned directories`);
   }
   for (const runtime of [...unread].sort()) {
-    const unreadPaths = found.manifests
-      .filter((m) => m.language === runtime && !readPaths.has(m.path))
-      .map((m) => m.path);
-    warnings.push(`kept every ${runtime} layer: ${unreadPaths.join(', ')} was not read`);
+    const disagreeing = [
+      ...found.manifests.filter((m) => m.language === runtime && !readPaths.has(m.path)).map((m) => m.path),
+      ...scanned
+        .filter((e) => str(e.language) === runtime && !foundPaths.has(str(e.manifest)!))
+        .map((e) => str(e.manifest)!),
+    ].sort();
+    warnings.push(`kept every ${runtime} layer: ${disagreeing.join(', ')} was not read by both passes`);
   }
 
   // Keeping everything means the detection changed nothing, and saying

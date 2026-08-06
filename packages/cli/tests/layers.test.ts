@@ -263,7 +263,34 @@ describe('absence is established by looking', () => {
       expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
         TABLE.filter((l) => l.runtime === 'rust').length,
       );
-      expect(resolved.warnings.join('\n')).toMatch(/services\/worker\/Cargo\.toml was not read/);
+      expect(resolved.warnings.join('\n')).toMatch(/services\/worker\/Cargo\.toml was not read by both passes/);
+    });
+  });
+
+  it('does not narrow when the read set names something the search never saw', () => {
+    // The reverse asymmetry. `scan` follows the workspace definition into
+    // places the search declines to enter (`dist`, `vendor`, dot-prefixed), so
+    // a manifest can be read and not found. Either disagreement means the two
+    // passes did not see the same project.
+    // The file has to exist, or the recording is discarded as stale and the
+    // fallback would make this pass without the branch under test running.
+    const root = fixture(
+      { 'Cargo.toml': '[dependencies]\n', 'vendor/inner/Cargo.toml': '[dependencies]\n' },
+      {
+        generated_at: fresh(),
+        scanned: [
+          { manifest: 'Cargo.toml', language: 'rust' },
+          { manifest: 'vendor/inner/Cargo.toml', language: 'rust' },
+        ],
+        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      },
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'rust').length,
+      );
+      expect(resolved.warnings.join('\n')).toMatch(/vendor\/inner\/Cargo\.toml/);
     });
   });
 
