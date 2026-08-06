@@ -40,8 +40,12 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致、 例 `counter` / `counter-api` / `profile-api`)
-- `--layer {rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http}` — 入力 spec の layer (省略時は spec file の存在を Glob で確認して推定、 複数存在なら AskUserQuestion)。 `--mode` と組み合わせも許容 (`--mode axum` は `--layer rust-axum` の syntactic sugar、 `--mode tower-http` は `--layer rust-tower-http` の syntactic sugar)
-- `--mode {axum|actix-web|tower-http}` — v1.5-6 で `axum` / `actix-web`、 v1.7-6 で `tower-http` を追加、 web framework mode flag。 `--mode axum` = `--layer rust-axum` (`kiwa::axum::test_app(router)` 経路)、 `--mode actix-web` = `--layer rust-actix-web` (`kiwa::actix::test_app(factory)` 経路)、 `--mode tower-http` = `--layer rust-tower-http` (`kiwa::tower_http::test_chain(layers, router)` + 6 middleware helper 経路)。 `--layer` と併用時は `--mode` 優先 (framework mode を明示的に選ぶ意図と解釈)、 両者が矛盾する場合は起動時 error で abort
+<!-- kiwa-layers:rust-enum:start -->
+
+- `--layer {contract-rust|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http}` — 対象 layer。
+- `--mode {axum|actix-web|tower-http}` — framework 別 helper の選択 (layer が `--mode` を持つ時のみ)。
+
+<!-- kiwa-layers:rust-enum:end -->
 - `--input-spec {path}` — Layer 1 spec の path (省略時は layer / mode から推定)
 - `--target {path}` — 対象実装 file (`src/lib.rs` 等、 grep で識別)
 - `--example {name}` — `examples/{name}/` の Rust example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
