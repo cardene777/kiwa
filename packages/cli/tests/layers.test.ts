@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
@@ -196,6 +196,32 @@ describe('absence is established by looking', () => {
       expect(finished.complete).toBe(true);
       expect(finished.languages).toContain('go');
     } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not call a search finished when a directory could not be opened', async () => {
+    // The same mistake as ignoring the budget, in a different guise: the Go
+    // module is there, the search could not see it, and reporting the search as
+    // finished would let the reader exclude all five Go layers.
+    const { presentLanguages } = await import('../src/detect/scan.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-perm-'));
+    const closed = join(root, 'services');
+    try {
+      writeFileSync(join(root, 'package.json'), '{"name":"app"}');
+      mkdirSync(join(closed, 'api'), { recursive: true });
+      writeFileSync(join(closed, 'api', 'go.mod'), 'module x\n');
+      chmodSync(closed, 0o000);
+
+      const result = presentLanguages(root);
+      expect(result.languages).not.toContain('go');
+      expect(result.complete).toBe(false);
+    } finally {
+      try {
+        chmodSync(closed, 0o755);
+      } catch {
+        // Already gone, or never created.
+      }
       rmSync(root, { recursive: true, force: true });
     }
   });

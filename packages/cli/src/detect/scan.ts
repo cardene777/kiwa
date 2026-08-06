@@ -205,9 +205,13 @@ export function presentLanguages(cwd: string, cap: number = VISIT_CAP): Language
   const root = resolve(cwd);
   const found = new Set<string>();
   let budget = cap;
+  let missed = false;
 
   const visit = (dir: string): void => {
-    if (budget <= 0) return;
+    if (budget <= 0) {
+      missed = true;
+      return;
+    }
     budget -= 1;
 
     for (const [name, reader] of Object.entries(READERS)) {
@@ -218,6 +222,11 @@ export function presentLanguages(cwd: string, cap: number = VISIT_CAP): Language
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
+      // A directory we cannot open is a part of the project we did not see.
+      // Skipping it quietly and still reporting the search as finished is the
+      // same mistake as ignoring the budget: it turns "we could not look" into
+      // "there is nothing there".
+      missed = true;
       return;
     }
     for (const entry of entries) {
@@ -227,7 +236,7 @@ export function presentLanguages(cwd: string, cap: number = VISIT_CAP): Language
   };
 
   visit(root);
-  return { languages: [...found].sort(), complete: budget > 0 };
+  return { languages: [...found].sort(), complete: !missed };
 }
 
 /** Every manifest worth reading, starting from `cwd`. */
