@@ -356,29 +356,49 @@ function escapeForRegExp(value: string): string {
 }
 
 /**
+ * The sentence shapes a producer uses to say "this is where I write".
+ *
+ * Matching the path alone is not enough. A producer can write the same token in
+ * a sentence that says the opposite — "この path `x` は使わない" — or leave an old
+ * one in a note, and a token match reads both as declarations. The point of
+ * this check is to tell a declaration from a mention, so the line has to carry
+ * one of the shapes producers actually declare in.
+ */
+const DECLARATION_FORMS = [
+  /出力先[^\n]*への\s*Write\s*権限/, // `## 前提` の Write 権限行
+  /--output[^\n]*(default|省略時)/, //   `## オプション` の default
+  /を\s*Write\s*(して|する)/, //        冒頭の要約行
+];
+
+/**
  * Whether a skill declares this path as somewhere it writes.
  *
- * A whole-token match anywhere in the body was still too loose: a producer
- * saying "this path is *not* used" or leaving an old one in a note would count.
- * The declarations are written in two shapes and nothing else uses either.
+ * Two placements count. An inline-code token on a line that carries one of the
+ * declaration shapes, or a table cell whose entire content is the path — the
+ * `## 出力 path 早見` tables put nothing else in that cell, so the cell itself
+ * is the declaration and no sentence shape applies.
  *
- * | shape | example |
- * |---|---|
- * | inline code | ``- 出力先 `tests/e2e/{module}.spec.ts` への Write 権限`` |
- * | a whole table cell | `| Foundry test (退避済) | tests/fixtures/.../{Contract}.t.sol |` |
+ * Both the path as `docs/layers.json` writes it and the form with the example
+ * directory stripped are tried, because producers differ: the Rust table gives
+ * the full `examples/{example}/...` path while the prose forms give the tail.
  *
- * Limiting to a named section instead was tried and does not work: the three
- * declaration forms sit under different headings (`## 前提`, `## オプション`,
- * `## 出力 path 早見`) and the headings are not consistent across producers.
+ * Limiting to a named section instead was tried and does not work: the shapes
+ * sit under different headings (`## 前提`, `## オプション`, `## 出力 path 早見`)
+ * and the headings are not consistent across producers.
  */
-function declaresOutput(body: string, path: string): boolean {
-  const escaped = escapeForRegExp(path);
-  // The path has to be the whole token, not a piece of one. `tests/{module}.test.ts`
-  // sits inside `tests/{module}.test.tsx`, so allowing anything around it lets a
-  // row claim a path whose producer writes a different file.
-  const inlineCode = new RegExp('`\\s*' + escaped + '\\s*`');
-  const wholeCell = new RegExp('\\|\\s*' + escaped + '\\s*\\|');
-  return inlineCode.test(body) || wholeCell.test(body);
+function declaresOutput(body: string, ...forms: string[]): boolean {
+  for (const line of body.split('\n')) {
+    for (const form of forms) {
+      const escaped = escapeForRegExp(form);
+      // The path has to be the whole token, not a piece of one.
+      // `tests/{module}.test.ts` sits inside `tests/{module}.test.tsx`.
+      const inlineCode = new RegExp('`\\s*' + escaped + '\\s*`');
+      if (inlineCode.test(line) && DECLARATION_FORMS.some((shape) => shape.test(line))) return true;
+      const wholeCell = new RegExp('\\|\\s*`?\\s*' + escaped + '\\s*`?\\s*\\|');
+      if (wholeCell.test(line)) return true;
+    }
+  }
+  return false;
 }
 
 describe('a mention is not a declaration', () => {
@@ -390,9 +410,23 @@ describe('a mention is not a declaration', () => {
     );
   });
 
-  it('accepts the two shapes producers actually use', () => {
+  it('accepts the shapes producers actually use', () => {
     expect(declaresOutput('- 出力先 `tests/e2e/{module}.spec.ts` への Write 権限', 'tests/e2e/{module}.spec.ts')).toBe(true);
     expect(declaresOutput('| Foundry test | tests/fixtures/x/{C}.t.sol | Layer 2 |', 'tests/fixtures/x/{C}.t.sol')).toBe(true);
+    expect(declaresOutput('- `--output {path}` — 出力先 (default `tests/{m}.auth.test.ts`)', 'tests/{m}.auth.test.ts')).toBe(true);
+  });
+
+  it('rejects a negated sentence that puts the path in inline code', () => {
+    // The token is there and correct. The sentence says the opposite, and a
+    // token match cannot tell the two apart — which is the whole point of the
+    // check this test guards.
+    expect(declaresOutput('この path `tests/x/{m}.ts` は使わない。', 'tests/x/{m}.ts')).toBe(false);
+  });
+
+  it('rejects a cell that carries the path plus something else', () => {
+    // Otherwise a producer could satisfy the cell rule by putting backticks
+    // around the path and a note beside it, sidestepping the sentence shapes.
+    expect(declaresOutput('| out | `tests/x/{m}.ts` (退避済) |', 'tests/x/{m}.ts')).toBe(false);
   });
 
   it('does not accept a longer path that merely starts the same way', () => {
@@ -421,7 +455,7 @@ describe('every declared output path is one its producer writes', () => {
           // directory because `kiwa-test` runs the skill from inside one.
           const bare = output.replace(/^(examples\/)?\{example\}\//, '');
           const where = output.startsWith('tests/fixtures/') ? mover : body;
-          if (!declaresOutput(where, bare)) missing.push(`${layer.id} -> ${skill}: ${output}`);
+          if (!declaresOutput(where, bare, output)) missing.push(`${layer.id} -> ${skill}: ${output}`);
         }
       }
     }
