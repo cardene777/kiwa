@@ -14,9 +14,11 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // Four levels: `tests/release-smoke/.vitest-dist/tests/` → repo root。
-const ROOT = resolve(HERE, '..', '..', '..', '..');
+const ROOT = repoRoot(HERE);
 const PACKAGES_DIR = join(ROOT, 'packages');
 const CONFIG_PATH = join(ROOT, 'tests/release-smoke/test-taxonomy.config.json');
 

@@ -2,10 +2,11 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 つ親 = repo root
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
-
+const REPO_ROOT = repoRoot(HERE);
 async function loadModule() {
   return (await import(`${REPO_ROOT}/scripts/post-coverage-diff.mjs`)) as {
     buildDeltaRows: (cur: Record<string, unknown>, base: Record<string, unknown>) => unknown[];

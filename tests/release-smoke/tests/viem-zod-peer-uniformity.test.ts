@@ -41,11 +41,12 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 levels up = repo root (mirrors the convention
 // used by release-script-filter.test.ts and test-taxonomy-existence.test.ts).
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
-
+const REPO_ROOT = repoRoot(HERE);
 // The published adapter every affected importer consumes. Its declaration is the
 // single source for the expected range, so bumping the adapter to a new zod major
 // makes this axis demand that the importers move with it rather than silently

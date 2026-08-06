@@ -3,6 +3,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 /**
  * example が使うポートが互いに重ならないことを固定する (#1724)。
  *
@@ -31,7 +33,7 @@ import { describe, expect, it } from 'vitest';
 // `import.meta.dirname` は Node 20.11.0 追加で、 repo の下限 (>=20) を下回る
 // 20.0-20.10 では undefined になり module 読込時に落ちる。 既存 24 件と同じ形にする。
 const HERE = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+const REPO_ROOT = repoRoot(HERE);
 const EXAMPLES_DIR = join(REPO_ROOT, 'examples');
 
 /**

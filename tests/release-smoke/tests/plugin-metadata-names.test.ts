@@ -28,9 +28,11 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 levels up = repo root.
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+const REPO_ROOT = repoRoot(HERE);
 const GENERATOR = resolve(REPO_ROOT, 'scripts/rebuild-plugin-metadata.mjs');
 
 interface NativePackage {

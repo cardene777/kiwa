@@ -13,8 +13,10 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
+import { repoRoot } from './repo-root.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = resolve(HERE, '..', '..', '..', '..');
+const ROOT = repoRoot(HERE);
 const CLI_PATH = join(ROOT, 'scripts/kiwa-taxonomy-run.mjs');
 
 /**
