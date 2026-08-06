@@ -506,6 +506,23 @@ describe('a table row splits on its unescaped pipes', () => {
     expect(splitRow('a | b \\\\| c')).toEqual(['a', 'b \\', 'c']);
   });
 
+  it('keeps a trailing backslash run at the end of the row', () => {
+    // The run ends the string, so there is no next character to escape.
+    expect(splitRow('a | b \\\\')).toEqual(['a', 'b \\']);
+  });
+
+  it('leaves a backslash that escapes something other than a pipe', () => {
+    expect(splitRow('a \\x | b')).toEqual(['a \\x', 'b']);
+  });
+
+  it('keeps empty cells', () => {
+    expect(splitRow('a || b')).toEqual(['a', '', 'b']);
+  });
+
+  it('handles a cell that is only a backslash', () => {
+    expect(splitRow('a | \\\\ | b')).toEqual(['a', '\\', 'b']);
+  });
+
   it('reads a run of three backslashes as escaping the pipe', () => {
     expect(splitRow('a \\\\\\| b')).toEqual(['a \\| b']);
   });
