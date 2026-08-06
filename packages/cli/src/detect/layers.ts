@@ -24,17 +24,18 @@
  *
  * | 条件 | 扱い |
  * |---|---|
- * | reader があり manifest が 1 つも無い | その runtime を除く (不在の証拠) |
- * | reader があり manifest もあり signal もある | 検出した layer に絞る |
- * | reader があり manifest もあるが signal が無い | 全部残す (語れない) |
  * | reader が無い runtime | 全部残す (語れない) |
+ * | project に manifest が無い | 除く (不在の証拠) |
+ * | manifest はあるが読んでいない | 全部残す (問うていない) |
+ * | 読んだが signal が無い | 全部残す (語れない) |
+ * | 読んで signal もある | 検出した layer に絞る |
  *
  * The detection is advisory throughout. It is written to `.kiwa/`, which is
  * gitignored, so its absence is the normal state on a fresh checkout.
  */
 
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { SignalTable } from './detect.js';
@@ -81,17 +82,38 @@ function str(value: unknown): string | null {
  * published package, which carries its own copy beside the build rather than
  * reaching for a `docs/` directory that is not shipped.
  */
-function loadJson<T>(names: string[]): T | null {
-  let dir = HERE;
+export function loadJson<T>(name: string, from: string = HERE): T | null {
+  /** Parse a candidate that exists. A corrupt one is an error, not a miss. */
+  const read = (path: string): T => {
+    let raw: string;
+    try {
+      raw = readFileSync(path, 'utf-8');
+    } catch {
+      throw new Error(`${path} could not be read`);
+    }
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      throw new Error(`${path} is not valid JSON`);
+    }
+  };
+
+  // The copy the build puts beside itself, which is what a published install
+  // has. If it is there it is the answer — climbing past it could only find
+  // something that is not ours.
+  const beside = resolve(from, '..', name);
+  if (existsSync(beside)) return read(beside);
+
+  let dir = from;
   for (let up = 0; up < 8; up += 1) {
-    for (const name of names) {
-      for (const rel of [name, join('docs', name)]) {
-        try {
-          return JSON.parse(readFileSync(resolve(dir, rel), 'utf-8')) as T;
-        } catch {
-          // Not here; keep looking.
-        }
-      }
+    // Under `node_modules` means installed, and the build copy was the only
+    // legitimate candidate. Anything above belongs to whoever installed us:
+    // their own `layers.json` would be adopted as ours and answer with their
+    // layers, consumer skills and spec paths.
+    if (basename(dir) === 'node_modules') return null;
+    for (const rel of [name, join('docs', name)]) {
+      const candidate = resolve(dir, rel);
+      if (existsSync(candidate)) return read(candidate);
     }
     const parent = dirname(dir);
     if (parent === dir) break;
@@ -102,7 +124,7 @@ function loadJson<T>(names: string[]): T | null {
 
 /** Every layer `docs/layers.json` declares. */
 export function loadLayerTable(): LayerRecord[] {
-  const parsed = loadJson<{ layers?: unknown }>(['layers.json']);
+  const parsed = loadJson<{ layers?: unknown }>('layers.json');
   if (!parsed) throw new Error('layers.json not found');
   const rows = Array.isArray(parsed.layers) ? (parsed.layers as RawLayer[]) : [];
   return rows
@@ -118,7 +140,7 @@ export function loadLayerTable(): LayerRecord[] {
 
 /** The languages the signal table can actually say something about. */
 function languagesWithSignals(): Set<string> {
-  const table = loadJson<SignalTable>(['stack-signals.json']);
+  const table = loadJson<SignalTable>('stack-signals.json');
   const out = new Set<string>();
   if (!table) return out;
   for (const [language, signals] of Object.entries(table.signals ?? {})) {
@@ -129,13 +151,14 @@ function languagesWithSignals(): Set<string> {
 
 /** The languages a manifest reader exists for, whether or not it has signals. */
 function readableLanguages(): Set<string> {
-  const table = loadJson<SignalTable>(['stack-signals.json']);
+  const table = loadJson<SignalTable>('stack-signals.json');
   return new Set(Object.values(table?.manifests ?? {}));
 }
 
 interface StackFile {
   generated_at?: unknown;
   scanned?: unknown;
+  languages?: unknown;
   detected?: unknown;
 }
 
@@ -165,33 +188,59 @@ function readStackFile(cwd: string): StackFile | null {
 }
 
 /**
- * Whether the recording still describes the project.
+ * Whether the recording can be acted on at all.
  *
- * A manifest that has been edited since the detection was taken may name a
- * dependency the recording does not, and narrowing on the older answer picks a
- * layer the project has moved off. A manifest that is gone entirely says the
- * same thing more loudly.
+ * Returns the reason it cannot, or `null` when every part of it holds. The
+ * checks are deliberately in one place and applied together: a snapshot is one
+ * statement about one moment, so a part of it being wrong says the statement is
+ * wrong, not that the rest can be trusted.
  *
- * Both are judged against the whole file rather than per entry, because a
- * detection is one snapshot: if part of it is out of date, the part that agrees
- * is agreeing by luck.
+ * That is why an unknown layer id discards the whole recording rather than the
+ * one entry. The writer knew a layer this build does not, which means the two
+ * were built from different tables — and the entries that happen to be
+ * recognised are recognised by coincidence, not by agreement.
  */
-function stale(cwd: string, file: StackFile, scanned: ScannedEntry[]): string | null {
+function validate(cwd: string, file: StackFile, table: LayerRecord[]): string | null {
   const takenAt = str(file.generated_at);
   const taken = takenAt ? Date.parse(takenAt) : Number.NaN;
+  if (!Number.isFinite(taken)) return 'it carries no usable timestamp';
 
-  for (const entry of scanned) {
+  if (!Array.isArray(file.scanned) || !file.scanned.length) {
+    return 'it does not record which manifests were read';
+  }
+
+  // A recording without this predates the field. Which languages the project
+  // contains would be unknown, and no runtime could be excluded on evidence.
+  if (!Array.isArray(file.languages)) return 'it does not record which languages are present';
+  if ((file.languages as unknown[]).some((l) => typeof l !== 'string' || !l)) {
+    return 'its language list holds something that is not a language';
+  }
+
+  for (const entry of file.scanned as ScannedEntry[]) {
     const manifest = str(entry.manifest);
-    if (!manifest) continue;
+    const language = str(entry.language);
+    if (!manifest || !language) return 'a scanned entry is missing its manifest or language';
+
     const full = join(cwd, manifest);
     if (!existsSync(full)) return `${manifest} no longer exists`;
-    if (Number.isNaN(taken)) continue;
     try {
       if (statSync(full).mtimeMs > taken) return `${manifest} changed after the detection was taken`;
     } catch {
       return `${manifest} could not be read`;
     }
   }
+
+  if (file.detected !== undefined && !Array.isArray(file.detected)) {
+    return 'its detected list is not a list';
+  }
+  for (const entry of ((file.detected ?? []) as StackEntry[])) {
+    const id = str(entry.layer);
+    if (!id) return 'a detected entry is missing its layer';
+    if (!table.some((layer) => layer.id === id)) {
+      return `it names "${id}", which this build's layer table does not declare`;
+    }
+  }
+
   return null;
 }
 
@@ -218,35 +267,27 @@ export function resolveLayers(options: {
   const file = readStackFile(options.cwd);
   if (!file) return { layers: table, source: 'all', warnings };
 
-  const scanned = Array.isArray(file.scanned) ? (file.scanned as ScannedEntry[]) : [];
-  const reason = stale(options.cwd, file, scanned);
-  if (reason) {
-    warnings.push(`ignored the detection: ${reason}`);
+  // Validation happens before any narrowing, and it is all-or-nothing. Judging
+  // the parts separately lets a recording fail one check, get patched up, and
+  // still decide the answer — which is how a snapshot from a different version
+  // of the tables ends up narrowing a runtime down to nothing.
+  const rejected = validate(options.cwd, file, table);
+  if (rejected) {
+    warnings.push(`ignored the detection: ${rejected}`);
     return { layers: table, source: 'all', warnings };
   }
 
-  // A recording without `scanned` predates the field, so which languages were
-  // looked at is unknown and no runtime can be excluded on evidence.
-  if (!scanned.length) return { layers: table, source: 'all', warnings };
-
-  const seen = new Set<string>();
-  for (const entry of scanned) {
-    const language = str(entry.language);
-    if (language) seen.add(language);
-  }
-
-  const detected = new Set<string>();
-  for (const entry of (Array.isArray(file.detected) ? file.detected : []) as StackEntry[]) {
-    const id = str(entry.layer);
-    if (!id) continue;
-    if (!table.some((layer) => layer.id === id)) {
-      // Drop the one entry rather than the whole file: a recording naming a
-      // layer this build does not know should cost that layer, not the answer.
-      warnings.push(`ignored unknown layer "${id}"`);
-      continue;
-    }
-    detected.add(id);
-  }
+  // Two different sets, because a language can be present without having been
+  // read. `languages` is what the project contains, found by looking;
+  // `scanned` is what detection actually opened, which honours the workspace
+  // definition. A Go module in an undeclared directory is in the first and not
+  // the second, and "nothing detected for Go" is not evidence when Go was
+  // never opened.
+  const present = new Set((file.languages as string[]).filter(Boolean));
+  const read = new Set((file.scanned as ScannedEntry[]).map((e) => str(e.language)!));
+  const detected = new Set(
+    ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
+  );
 
   const readable = readableLanguages();
   const speakable = languagesWithSignals();
@@ -264,12 +305,14 @@ export function resolveLayers(options: {
     // to the project. The exclusion is still the better default; what it must
     // not be is silent, because the layers simply stop being offered and
     // nothing says why.
-    if (!seen.has(runtime)) {
+    if (!present.has(runtime)) {
       excluded.add(runtime);
       return false;
     }
-    // The manifest was read but the table has no signals for the language, so
-    // "nothing detected" carries no information. TypeScript is here today.
+    // Present but never opened, so nothing was asked and nothing was answered.
+    if (!read.has(runtime)) return true;
+    // Opened, but the table has no signals for the language, so "nothing
+    // detected" carries no information. TypeScript is here today.
     if (!speakable.has(runtime)) return true;
     return detected.has(layer.id);
   });

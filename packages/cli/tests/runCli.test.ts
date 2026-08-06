@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as publicEntry from '../src/index.js';
-import { createDefaultDeps, runCli, takeFlagValue, USAGE, type RunCliDeps } from '../src/runCli.js';
+import { USAGE, createDefaultDeps, exitCodeForLayersError, runCli, takeFlagValue, type RunCliDeps } from '../src/runCli.js';
 import { InitConflictError, runInit, type InitOptions } from '../src/commands/init.js';
 import { runAnvilSeed, type AnvilSeedOptions } from '../src/commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from '../src/commands/spec-to-test.js';
@@ -792,6 +792,7 @@ describe('layers', () => {
   const detection = {
     generated_at: new Date(Date.now() + 60_000).toISOString(),
     scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+    languages: ['rust'],
     detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
   };
 
@@ -842,6 +843,7 @@ describe('layers', () => {
     const dir = project({
       generated_at: new Date(Date.now() - 60_000).toISOString(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
     });
     try {
@@ -863,6 +865,15 @@ describe('layers', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it('separates a typo from a broken install', () => {
+    // Both reach the same catch, and collapsing them leaves a caller unable to
+    // tell "you asked for a layer that does not exist" from "this package is
+    // missing a file it ships".
+    expect(exitCodeForLayersError('unknown layer: nope')).toBe(2);
+    expect(exitCodeForLayersError('layers.json not found')).toBe(1);
+    expect(exitCodeForLayersError('/x/layers.json is not valid JSON')).toBe(1);
   });
 
   it('refuses an unknown option with exit 2', async () => {

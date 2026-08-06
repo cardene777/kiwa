@@ -67,6 +67,7 @@ export function writeStackFile(
   cwd: string,
   layers: Detection[],
   scanned: { path: string; language: string }[] = [],
+  languages: string[] = [],
   now: Date = new Date(),
 ): string {
   const dir = join(cwd, '.kiwa');
@@ -82,6 +83,12 @@ export function writeStackFile(
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.
     scanned: scanned.map((m) => ({ manifest: m.path, language: m.language })),
+    // Which languages the project contains at all, which is a wider question
+    // than which manifests were read: the read set honours the workspace
+    // definition, and a service in an undeclared directory is absent from it
+    // while being present in the project. A reader excluding layers on absence
+    // needs the wider answer.
+    languages,
     // Recording the signal and the manifest, not just the layer, so a wrong
     // detection can be traced to the dependency that caused it.
     detected: layers.map((d) => ({
@@ -97,5 +104,5 @@ export function writeStackFile(
 
 export { detectFrom, resolve as resolveDetections } from './detect.js';
 export { loadLayerTable, resolveLayers, type LayerRecord, type ResolvedLayers } from './layers.js';
-export { scan as scanManifests } from './scan.js';
+export { presentLanguages, scan as scanManifests } from './scan.js';
 export type { Detection, SignalTable } from './detect.js';

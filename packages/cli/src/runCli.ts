@@ -6,6 +6,7 @@ import { runWatch, type RunWatchLayer, type RunWatchOptions, type RunWatchResult
 import {
   detectFrom,
   loadSignalTable,
+  presentLanguages,
   resolveDetections,
   resolveLayers,
   scanManifests,
@@ -366,6 +367,17 @@ function specToTestCommand(argv: string[], deps: RunCliDeps): number {
 }
 
 /**
+ * How a failure to resolve layers should be reported.
+ *
+ * 2 is for being asked for something that does not exist. A missing or corrupt
+ * asset is the CLI's own problem and gets 1, so a caller can tell "you typed a
+ * layer that is not real" from "this install is broken".
+ */
+export function exitCodeForLayersError(message: string): number {
+  return message.startsWith('unknown layer') ? 2 : 1;
+}
+
+/**
  * Print the layers this run applies to.
  *
  * Read-only by design. Skills call it to learn what to work on, so it must be
@@ -404,8 +416,9 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
   try {
     resolved = resolveLayers({ cwd: deps.cwd(), explicit });
   } catch (error) {
-    deps.stderr(`ERR layers: ${(error as Error).message}\n`);
-    return 2;
+    const message = (error as Error).message;
+    deps.stderr(`ERR layers: ${message}\n`);
+    return exitCodeForLayersError(message);
   }
 
   for (const warning of resolved.warnings) deps.stderr(`WARN ${warning}\n`);
@@ -473,7 +486,7 @@ function detectCommand(deps: RunCliDeps): number {
     // otherwise survive a dependency removal and keep telling the skills about
     // a layer the project no longer has — the stale state this file exists to
     // prevent, produced by the file itself.
-    const cleared = writeStackFile(cwd, [], manifests);
+    const cleared = writeStackFile(cwd, [], manifests, presentLanguages(cwd));
     deps.stdout('\nNo kiwa layer matched. Use --layer to choose one explicitly.\n');
     deps.stdout(`wrote: ${cleared} (empty)\n`);
     return 0;
@@ -484,7 +497,7 @@ function detectCommand(deps: RunCliDeps): number {
     deps.stdout(`  ${d.layer}  (${d.signal} in ${d.manifest})\n`);
   }
 
-  const written = writeStackFile(cwd, layers, manifests);
+  const written = writeStackFile(cwd, layers, manifests, presentLanguages(cwd));
   deps.stdout(`\nwrote: ${written}\n`);
   deps.stdout('Run `kiwa init` to scaffold, or pass a layer to the kiwa skills.\n');
   return 0;

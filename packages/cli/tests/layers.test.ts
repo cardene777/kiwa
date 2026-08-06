@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-import { loadLayerTable, resolveLayers } from '../src/detect/layers.js';
+import { loadJson, loadLayerTable, resolveLayers } from '../src/detect/layers.js';
 
 const TABLE = loadLayerTable();
 
@@ -47,6 +47,7 @@ describe('narrowing happens per runtime', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -67,6 +68,7 @@ describe('narrowing happens per runtime', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -83,6 +85,7 @@ describe('narrowing happens per runtime', () => {
     const root = fixture({ 'package.json': '{"name":"app"}' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      languages: ['typescript'],
       detected: [],
     });
     withFixture(root, () => {
@@ -105,6 +108,7 @@ describe('narrowing happens per runtime', () => {
           { manifest: 'Cargo.toml', language: 'rust' },
           { manifest: 'package.json', language: 'typescript' },
         ],
+      languages: ['rust', 'typescript'],
         detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
       },
     );
@@ -117,11 +121,151 @@ describe('narrowing happens per runtime', () => {
   });
 });
 
+describe('absence is established by looking', () => {
+  it('sees a Go module the workspace definition never named', async () => {
+    // The case review flagged and the probe reproduced: root `package.json`,
+    // an undeclared `services/api/go.mod`, and all five Go layers dropped with
+    // no warning. `scan` cannot see it — it reads declared members, honouring
+    // `!pkgs/skip`, which is right for reading dependencies and wrong as a
+    // basis for concluding a language is absent.
+    const { presentLanguages } = await import('../src/detect/scan.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-present-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"name":"app"}');
+      mkdirSync(join(root, 'services', 'api'), { recursive: true });
+      writeFileSync(join(root, 'services', 'api', 'go.mod'), 'module x\n');
+      expect(presentLanguages(root)).toEqual(['go', 'typescript']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not read other people\'s manifests', async () => {
+    const { presentLanguages } = await import('../src/detect/scan.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-present-skip-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"name":"app"}');
+      for (const noise of ['node_modules/dep', 'target/debug', '.next/cache']) {
+        mkdirSync(join(root, noise), { recursive: true });
+        writeFileSync(join(root, noise, 'Cargo.toml'), '[dependencies]\n');
+      }
+      expect(presentLanguages(root)).toEqual(['typescript']);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps a runtime the project turns out to contain', () => {
+    const root = fixture(
+      { 'package.json': '{"name":"app"}', 'services/api/go.mod': 'module x\n' },
+      {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        languages: ['go', 'typescript'],
+        detected: [],
+      },
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'go').length,
+      );
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded go/);
+    });
+  });
+
+  it('falls back when the recording predates the language list', () => {
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/which languages are present/);
+    });
+  });
+});
+
+describe('an asset is taken from this package or not at all', () => {
+  /** `dist/detect/` beside a `dist/<name>.json`, the shape a published install has. */
+  function installed(assetBody: string | null): { start: string; root: string } {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-asset-'));
+    const start = join(root, 'node_modules', '@kiwa-lab', 'cli', 'dist', 'detect');
+    mkdirSync(start, { recursive: true });
+    if (assetBody !== null) {
+      writeFileSync(join(start, '..', 'layers.json'), assetBody);
+    }
+    return { start, root };
+  }
+
+  it('takes the copy the build put beside itself', () => {
+    const { start, root } = installed('{"layers":[{"id":"from-the-package"}]}');
+    withFixture(root, () => {
+      const parsed = loadJson<{ layers: { id: string }[] }>('layers.json', start);
+      expect(parsed?.layers[0]?.id).toBe('from-the-package');
+    });
+  });
+
+  it('does not climb out of node_modules into the installing project', () => {
+    // Without the boundary, an install whose asset went missing would adopt
+    // the user's own `layers.json` and answer with their layers, consumer
+    // skills and spec paths — as if they were ours.
+    const { start, root } = installed(null);
+    writeFileSync(join(root, 'layers.json'), '{"layers":[{"id":"theirs"}]}');
+    mkdirSync(join(root, 'docs'), { recursive: true });
+    writeFileSync(join(root, 'docs', 'layers.json'), '{"layers":[{"id":"theirs-too"}]}');
+    withFixture(root, () => {
+      expect(loadJson('layers.json', start)).toBeNull();
+    });
+  });
+
+  it('refuses a corrupt asset instead of looking further up', () => {
+    // Treating a parse failure as "not here" would walk past the real answer
+    // and keep going until something else parsed.
+    const { start, root } = installed('{ not json');
+    withFixture(root, () => {
+      expect(() => loadJson('layers.json', start)).toThrow(/not valid JSON/);
+    });
+  });
+});
+
+describe('a recording without a usable timestamp is discarded', () => {
+  it('falls back when generated_at is absent', () => {
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/no usable timestamp/);
+    });
+  });
+
+  it('falls back when generated_at is not a date', () => {
+    // Without the check the comparison against it is silently false and every
+    // staleness test passes by accident.
+    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+      generated_at: 'sometime last week',
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
+      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    });
+    withFixture(root, () => {
+      expect(resolveLayers({ cwd: root }).source).toBe('all');
+    });
+  });
+});
+
 describe('an explicit choice wins', () => {
   it('takes the flag over the detection', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -142,6 +286,7 @@ describe('an explicit choice wins', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -159,6 +304,7 @@ describe('a recording that no longer describes the project is discarded', () => 
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: new Date(Date.now() - 60_000).toISOString(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -173,6 +319,7 @@ describe('a recording that no longer describes the project is discarded', () => 
     const root = fixture({}, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -213,10 +360,11 @@ describe('an unusable recording is not an error', () => {
     });
   });
 
-  it('drops one unknown layer rather than the whole recording', () => {
+  it('discards the whole recording when it names a layer this build does not know', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      languages: ['rust'],
       detected: [
         { layer: 'rust-axum', manifest: 'Cargo.toml' },
         { layer: 'rust-from-the-future', manifest: 'Cargo.toml' },
@@ -224,11 +372,13 @@ describe('an unusable recording is not an error', () => {
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      // Asserting `toContain` alone would also pass if the whole recording were
-      // discarded, since the fallback contains every layer.
-      expect(resolved.source).toBe('detected');
-      expect(resolved.layers.length).toBeLessThan(TABLE.length);
-      expect(resolved.layers.map((l) => l.id)).toContain('rust-axum');
+      // This reverses the first version, which dropped the single entry and
+      // narrowed on the rest. Review pointed out what that leaves behind: the
+      // writer knew a layer this build does not, so the two came from different
+      // tables, and the entries that happen to be recognised are recognised by
+      // coincidence. Narrowing on them can take a runtime down to nothing.
+      expect(resolved.source).toBe('all');
+      expect(resolved.layers).toHaveLength(TABLE.length);
       expect(resolved.warnings.join(' ')).toMatch(/rust-from-the-future/);
     });
   });
@@ -242,6 +392,7 @@ describe('an unusable recording is not an error', () => {
         { manifest: 'Cargo.toml', language: 'rust' },
         { manifest: 'go.mod', language: 'go' },
       ],
+      languages: ['go', 'rust', 'typescript'],
       detected: TABLE.filter((l) => l.runtime === 'rust' || l.runtime === 'go').map((l) => ({
         layer: l.id,
         manifest: l.runtime === 'rust' ? 'Cargo.toml' : 'go.mod',

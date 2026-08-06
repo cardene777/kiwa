@@ -142,6 +142,68 @@ function workspaceDirs(root: string): string[] {
   return [...dirs];
 }
 
+/**
+ * Directories a search must not descend into.
+ *
+ * Dependencies and build output hold thousands of manifests describing other
+ * people's projects, and `node_modules` alone would bury the project's own.
+ */
+const SKIP = new Set([
+  'node_modules',
+  '.git',
+  'target',
+  'dist',
+  'build',
+  'out',
+  '.next',
+  'vendor',
+  '.venv',
+  'coverage',
+  '.turbo',
+]);
+
+/** How far below the working directory a manifest is still the project's own. */
+const DEPTH = 3;
+
+/**
+ * Which languages the project contains a manifest for, anywhere below.
+ *
+ * This answers a different question from `scan`, and the difference matters.
+ * `scan` reads the members the project declares — honouring `!pkgs/skip`,
+ * because a project excluding a directory from its workspace means it. That is
+ * the right basis for reading dependencies.
+ *
+ * It is the wrong basis for concluding a language is absent. "No `go.mod` in
+ * the directories a workspace file named" is much weaker than "no `go.mod`",
+ * and a Go service in an undeclared `services/api` is invisible to it. Since
+ * `resolveLayers` excludes a runtime's layers on absence, the absence has to be
+ * established by looking rather than by not having been told.
+ */
+export function presentLanguages(cwd: string): string[] {
+  const root = resolve(cwd);
+  const found = new Set<string>();
+
+  const visit = (dir: string, depth: number): void => {
+    for (const [name, reader] of Object.entries(READERS)) {
+      if (existsSync(join(dir, name))) found.add(reader.language);
+    }
+    if (depth <= 0) return;
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() || SKIP.has(entry.name) || entry.name.startsWith('.')) continue;
+      visit(join(dir, entry.name), depth - 1);
+    }
+  };
+
+  visit(root, DEPTH - 1);
+  return [...found].sort();
+}
+
 /** Every manifest worth reading, starting from `cwd`. */
 export function scan(cwd: string): ScannedManifest[] {
   const root = resolve(cwd);

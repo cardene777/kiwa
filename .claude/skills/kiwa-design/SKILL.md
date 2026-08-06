@@ -83,7 +83,17 @@ kiwa layers --json
 
 ### 絞り込みが効かない範囲
 
-検出は 30 layer 中 10 件しか語れない (`docs/stack-signals.json` の signal は rust 4 / go 4 / typescript 0)。 TypeScript の 19 layer と `contract` は、 検出結果が空でも除外されない。 `source=detected` でも TypeScript layer が全部残るのはこのため。
+検出は 30 layer 中 10 件しか語れない (`docs/stack-signals.json` の signal は rust 4 / go 4 / typescript 0)。 除外は runtime ごとに 5 通りで判定され、 語れない runtime は絞られない。
+
+| 条件 | 扱い |
+|---|---|
+| reader が無い runtime (`contract`) | 全部残す (語れない) |
+| project に manifest が無い | 除く (不在の証拠) |
+| manifest はあるが読んでいない | 全部残す (問うていない) |
+| 読んだが signal が無い (今の typescript) | 全部残す (語れない) |
+| 読んで signal もある | 検出した layer に絞る |
+
+除外した runtime は `kiwa layers` が stderr に理由を出す。 意図せず消えている場合は `--layer` を明示すれば回避できる。
 
 ## 出力 path の決定
 
