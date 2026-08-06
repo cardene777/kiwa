@@ -302,6 +302,21 @@ describe('the target values and the Step conditions agree', () => {
       // README repeats and `kiwa-test` declares. A stale value there points at
       // nothing just as loudly, and the bare-value pattern above skips it —
       // `--target {` is not `--target ` followed by a word.
+      // The same list appears without the flag name — `$TARGET` holds one of
+      // these — and a value left behind there is as stale as one in the enum.
+      for (const m of body.matchAll(/\$TARGET[^\n]*?\(([^)]+)\)/g)) {
+        const items = m[1]!.split('/').map((v) => v.trim());
+        // A list of values, each written as inline code. Requiring the shape
+        // keeps ordinary parentheses on a line that happens to mention
+        // `$TARGET` from being read as candidates — shell snippets carry
+        // `(dev)` and `(null)` for unrelated reasons.
+        if (items.length < 2 || !items.every((v) => /^`[a-z-]+`$/.test(v))) continue;
+        for (const value of items) {
+          const clean = value.replace(/`/g, '');
+          if (!declared.has(clean)) offenders.push(`${name}: $TARGET may hold ${clean}`);
+        }
+      }
+
       for (const m of body.matchAll(/--target \{([^}]+)\}/g)) {
         // An alternation, not a placeholder. `--target {path}` in `kiwa-rust`
         // names the implementation file, and `--target {target}` in a report

@@ -116,7 +116,7 @@ multiSelect: false
   description: "理由 — polyglot test toolchain の Go 経路 (Issue #581)。 kiwa-design (--layer go-unit / go-integration) → kiwa-go → kiwa-review の 3 step、 testing.T + httptest で 2 layer 同時生成。 実行時間目安 5-10 分。 ⭐⭐⭐⭐"
 ```
 
-確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `web` / `nextjs` / `rust` / `go` / `both` / `all`)。
+確定後 `$TARGET` を skill 内変数に保持 (`contract` / `dapp` / `web` / `rust` / `go` / `both` / `all`)。
 
 ### Step 2: 環境 + dir check
 
