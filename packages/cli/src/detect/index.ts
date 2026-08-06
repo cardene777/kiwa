@@ -63,11 +63,25 @@ export function stackFileExists(cwd: string): boolean {
   return existsSync(join(cwd, '.kiwa', 'stack.json'));
 }
 
-export function writeStackFile(cwd: string, layers: Detection[]): string {
+export function writeStackFile(
+  cwd: string,
+  layers: Detection[],
+  scanned: { path: string; language: string }[] = [],
+  now: Date = new Date(),
+): string {
   const dir = join(cwd, '.kiwa');
   mkdirSync(dir, { recursive: true });
   const file = join(dir, 'stack.json');
   const body = {
+    // When the answer was taken. A reader compares it against the manifests to
+    // tell a current detection from one that predates an edit — without it,
+    // adding `axum` to Cargo.toml and not re-running leaves the file claiming
+    // the unit layer, and a reader narrowing on that picks the wrong one.
+    generated_at: now.toISOString(),
+    // Which manifests were read, not just which ones matched. "We read
+    // package.json and nothing matched" and "there is no package.json" lead to
+    // opposite conclusions, and recording only hits cannot tell them apart.
+    scanned: scanned.map((m) => ({ manifest: m.path, language: m.language })),
     // Recording the signal and the manifest, not just the layer, so a wrong
     // detection can be traced to the dependency that caused it.
     detected: layers.map((d) => ({
@@ -82,5 +96,6 @@ export function writeStackFile(cwd: string, layers: Detection[]): string {
 }
 
 export { detectFrom, resolve as resolveDetections } from './detect.js';
-export { scan as scanManifests } from './scan.js';
+export { loadLayerTable, resolveLayers, type LayerRecord, type ResolvedLayers } from './layers.js';
+export { presentLanguages, scan as scanManifests, type LanguagePresence } from './scan.js';
 export type { Detection, SignalTable } from './detect.js';

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as publicEntry from '../src/index.js';
-import { createDefaultDeps, runCli, takeFlagValue, USAGE, type RunCliDeps } from '../src/runCli.js';
+import { USAGE, createDefaultDeps, exitCodeForLayersError, runCli, takeFlagValue, type RunCliDeps } from '../src/runCli.js';
 import { InitConflictError, runInit, type InitOptions } from '../src/commands/init.js';
 import { runAnvilSeed, type AnvilSeedOptions } from '../src/commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from '../src/commands/spec-to-test.js';
@@ -768,8 +768,120 @@ describe('init --detect', () => {
     }
   });
 
+  it('names layers in the usage text', () => {
+    expect(USAGE).toContain('layers');
+  });
+
   it('names --detect in the usage text', () => {
     // A flag absent from --help is a flag nobody finds.
     expect(USAGE).toContain('--detect');
+  });
+});
+
+describe('layers', () => {
+  function project(stack: unknown | null): string {
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-layers-cmd-'));
+    writeFileSync(join(dir, 'Cargo.toml'), '[dependencies]\n');
+    if (stack !== null) {
+      mkdirSync(join(dir, '.kiwa'), { recursive: true });
+      writeFileSync(join(dir, '.kiwa', 'stack.json'), JSON.stringify(stack));
+    }
+    return dir;
+  }
+
+  const detection = {
+    generated_at: new Date(Date.now() + 60_000).toISOString(),
+    scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+    detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+  };
+
+  it('prints one layer id per line', async () => {
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers'], h.deps)).toBe(0);
+      expect(h.out().trim().split('\n')).toContain('rust-axum');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('emits the consumer skill and mode with --json', async () => {
+    // The caller needs to know which skill to start and with which mode, and
+    // making it look that up separately is how the contract drifted before.
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as {
+        source: string;
+        layers: { id: string; consumer_skill: string | null; mode: string | null }[];
+      };
+      expect(parsed.source).toBe('detected');
+      const axum = parsed.layers.find((l) => l.id === 'rust-axum');
+      expect(axum).toMatchObject({ consumer_skill: 'kiwa-rust', mode: 'axum' });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('lets an explicit layer win over the detection', async () => {
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'contract'], h.deps)).toBe(0);
+      expect(h.out().trim()).toBe('contract');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('stays at exit 0 when the detection is discarded', async () => {
+    // Detection only supplies a default. Failing to supply one must not stop
+    // the caller, so the warning goes to stderr and the code stays 0.
+    const dir = project({
+      generated_at: new Date(Date.now() - 60_000).toISOString(),
+      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
+    });
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers'], h.deps)).toBe(0);
+      expect(h.err()).toContain('WARN');
+      expect(h.out().trim().split('\n').length).toBeGreaterThan(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses an unknown layer with exit 2', async () => {
+    const dir = project(null);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'nope'], h.deps)).toBe(2);
+      expect(h.err()).toContain('unknown layer');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('separates a typo from a broken install', () => {
+    // Both reach the same catch, and collapsing them leaves a caller unable to
+    // tell "you asked for a layer that does not exist" from "this package is
+    // missing a file it ships".
+    expect(exitCodeForLayersError('unknown layer: nope')).toBe(2);
+    expect(exitCodeForLayersError('layers.json not found')).toBe(1);
+    expect(exitCodeForLayersError('/x/layers.json is not valid JSON')).toBe(1);
+  });
+
+  it('refuses an unknown option with exit 2', async () => {
+    const dir = project(null);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--wat'], h.deps)).toBe(2);
+      expect(h.err()).toContain('unknown option');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });

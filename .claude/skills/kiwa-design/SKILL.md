@@ -52,6 +52,52 @@ $ARGUMENTS
 - `--no-examples` — examples/ サンプル参照をスキップ (skill 内部の参照のみで仕様書を生成)
 - `--no-review` — Step 6 の kiwa-review 自動呼出 (spec-review) を skip (CI / 自動化用)
 
+## --layer 省略時の解決 (Issue #1814)
+
+`--layer` を指定せずに起動した場合、 **`kiwa layers --json` を 1 回実行して対象 layer を決める**。 SKILL.md 側でこの判定を書き下さない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 ここに複製すると同じ契約が再び散る。
+
+```bash
+kiwa layers --json
+```
+
+返る形は `{ "source": "flag|detected|all", "layers": [{ "id", "consumer_skill", "mode", "spec_path", "runtime" }] }`。 `layers[].id` が対象 layer、 `consumer_skill` と `mode` が Layer 2 skill の起動引数になる。
+
+| `source` | 意味 | 本 skill の振る舞い |
+|---|---|---|
+| `detected` | `.kiwa/stack.json` の検出で絞れた | 返った layer それぞれに対して spec を出力する |
+| `all` | 検出が無い / 使えない / 絞れなかった | 従来の `--layer all` と同一 (1 file に全 layer 混在) |
+
+**必ず exit 0 が返る**。 `kiwa` が未 build / 未 install で command 自体が失敗した場合は「検出なし」 として `all` に倒す。 検出は既定を供給するだけで、 供給できないことが作業を止めてはいけない。
+
+### 解決した値を出力に残す
+
+`.kiwa/` は gitignore 対象で、 **入力は追跡外なのに成果物 (spec / 生成 test) は追跡下** という逆転がある。 同じ commit で同じ command を叩いた 2 人が別の spec を得ても、 diff からは理由が読めない。
+
+そのため生成した spec の冒頭 meta に 1 行残す。
+
+```
+<!-- kiwa-layers: source=detected layers=rust-axum -->
+```
+
+`source=all` の場合も書く。 追跡下の成果物だけを見て、 どの入力が効いたかを追えるようにするため。
+
+### 絞り込みが効かない範囲
+
+検出は 30 layer 中 10 件しか語れない (`docs/stack-signals.json` の signal は rust 4 / go 4 / typescript 0)。 除外は runtime ごとに 5 通りで判定され、 語れない runtime は絞られない。
+
+| 条件 | 扱い |
+|---|---|
+| reader が無い runtime (`contract`) | 全部残す (語れない) |
+| 探索が見終わらなかった | **何も絞らない** (打切り / 開けない dir) |
+| project に manifest が無い | 除く (不在の証拠) |
+| manifest はあるが読んでいない | 全部残す (問うていない) |
+| 読んだが signal が無い (今の typescript) | 全部残す (語れない) |
+| 読んで signal もある | 検出した layer に絞る |
+
+存在するかどうかは `kiwa layers` を叩いた時点で調べる (記録から読まない)。 検出後に `go.mod` を足した場合もその場で見えるため、 再検出は要らない。
+
+除外した runtime は stderr に理由を出す。 意図せず消えている場合は `--layer` を明示すれば回避できる。
+
 ## 出力 path の決定
 
 `--layer` に応じて出力 path を分岐する。 layer 別に dir を分けることで Layer 2 skill (`/kiwa-forge` / `/kiwa-hardhat` / `/kiwa-play`) が対象 layer の spec だけを Read できる。

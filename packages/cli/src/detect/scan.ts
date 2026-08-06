@@ -142,6 +142,103 @@ function workspaceDirs(root: string): string[] {
   return [...dirs];
 }
 
+/**
+ * Directories a search must not descend into.
+ *
+ * Dependencies and build output hold thousands of manifests describing other
+ * people's projects, and `node_modules` alone would bury the project's own.
+ */
+const SKIP = new Set([
+  'node_modules',
+  '.git',
+  'target',
+  'dist',
+  'build',
+  'out',
+  '.next',
+  'vendor',
+  '.venv',
+  'coverage',
+  '.turbo',
+]);
+
+/**
+ * How many directories the search will open before giving up.
+ *
+ * A cap rather than a depth limit. A depth limit makes every project with a
+ * service one level further down look like a project without one, and there is
+ * no depth that is right for every layout — the previous bound of three missed
+ * `apps/services/api`, and four would miss the next shape. A cap bounds the
+ * cost without pretending to know where manifests live, and reaching it is
+ * reported rather than treated as an answer.
+ */
+const VISIT_CAP = 20_000;
+
+export interface LanguagePresence {
+  /** Languages a manifest was found for. */
+  languages: string[];
+  /**
+   * Whether the search finished. When false it ran out of budget, so a language
+   * being absent from the list means nothing was found *so far* — not that the
+   * project does not contain it.
+   */
+  complete: boolean;
+}
+
+/**
+ * Which languages the project contains a manifest for.
+ *
+ * This answers a different question from `scan`, and the difference matters.
+ * `scan` reads the members the project declares — honouring `!pkgs/skip`,
+ * because a project excluding a directory from its workspace means it. That is
+ * the right basis for reading dependencies.
+ *
+ * It is the wrong basis for concluding a language is absent. "No `go.mod` in
+ * the directories a workspace file named" is much weaker than "no `go.mod`",
+ * and a Go service in an undeclared `services/api` is invisible to it. Since
+ * `resolveLayers` excludes a runtime's layers on absence, the absence has to be
+ * established by looking.
+ *
+ * Which is also why the result says whether the looking finished.
+ */
+export function presentLanguages(cwd: string, cap: number = VISIT_CAP): LanguagePresence {
+  const root = resolve(cwd);
+  const found = new Set<string>();
+  let budget = cap;
+  let missed = false;
+
+  const visit = (dir: string): void => {
+    if (budget <= 0) {
+      missed = true;
+      return;
+    }
+    budget -= 1;
+
+    for (const [name, reader] of Object.entries(READERS)) {
+      if (existsSync(join(dir, name))) found.add(reader.language);
+    }
+
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      // A directory we cannot open is a part of the project we did not see.
+      // Skipping it quietly and still reporting the search as finished is the
+      // same mistake as ignoring the budget: it turns "we could not look" into
+      // "there is nothing there".
+      missed = true;
+      return;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory() || SKIP.has(entry.name) || entry.name.startsWith('.')) continue;
+      visit(join(dir, entry.name));
+    }
+  };
+
+  visit(root);
+  return { languages: [...found].sort(), complete: !missed };
+}
+
 /** Every manifest worth reading, starting from `cwd`. */
 export function scan(cwd: string): ScannedManifest[] {
   const root = resolve(cwd);
