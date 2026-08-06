@@ -67,7 +67,6 @@ export function writeStackFile(
   cwd: string,
   layers: Detection[],
   scanned: { path: string; language: string }[] = [],
-  presence: { languages: string[]; complete: boolean } = { languages: [], complete: false },
   now: Date = new Date(),
 ): string {
   const dir = join(cwd, '.kiwa');
@@ -83,16 +82,6 @@ export function writeStackFile(
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.
     scanned: scanned.map((m) => ({ manifest: m.path, language: m.language })),
-    // Which languages the project contains at all, which is a wider question
-    // than which manifests were read: the read set honours the workspace
-    // definition, and a service in an undeclared directory is absent from it
-    // while being present in the project. A reader excluding layers on absence
-    // needs the wider answer.
-    languages: presence.languages,
-    // And whether the search that produced it finished. An unfinished search
-    // can only say what it found, never what is not there, so a reader must not
-    // exclude anything on the strength of it.
-    languages_complete: presence.complete,
     // Recording the signal and the manifest, not just the layer, so a wrong
     // detection can be traced to the dependency that caused it.
     detected: layers.map((d) => ({

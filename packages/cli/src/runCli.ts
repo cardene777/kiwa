@@ -6,7 +6,6 @@ import { runWatch, type RunWatchLayer, type RunWatchOptions, type RunWatchResult
 import {
   detectFrom,
   loadSignalTable,
-  presentLanguages,
   resolveDetections,
   resolveLayers,
   scanManifests,
@@ -486,7 +485,7 @@ function detectCommand(deps: RunCliDeps): number {
     // otherwise survive a dependency removal and keep telling the skills about
     // a layer the project no longer has — the stale state this file exists to
     // prevent, produced by the file itself.
-    const cleared = writeStackFile(cwd, [], manifests, presentLanguages(cwd));
+    const cleared = writeStackFile(cwd, [], manifests);
     deps.stdout('\nNo kiwa layer matched. Use --layer to choose one explicitly.\n');
     deps.stdout(`wrote: ${cleared} (empty)\n`);
     return 0;
@@ -497,7 +496,7 @@ function detectCommand(deps: RunCliDeps): number {
     deps.stdout(`  ${d.layer}  (${d.signal} in ${d.manifest})\n`);
   }
 
-  const written = writeStackFile(cwd, layers, manifests, presentLanguages(cwd));
+  const written = writeStackFile(cwd, layers, manifests);
   deps.stdout(`\nwrote: ${written}\n`);
   deps.stdout('Run `kiwa init` to scaffold, or pass a layer to the kiwa skills.\n');
   return 0;

@@ -88,13 +88,15 @@ kiwa layers --json
 | 条件 | 扱い |
 |---|---|
 | reader が無い runtime (`contract`) | 全部残す (語れない) |
-| 探索が打切られた | 全部残す (見終わっていない) |
+| 探索が見終わらなかった | **何も絞らない** (打切り / 開けない dir) |
 | project に manifest が無い | 除く (不在の証拠) |
 | manifest はあるが読んでいない | 全部残す (問うていない) |
 | 読んだが signal が無い (今の typescript) | 全部残す (語れない) |
 | 読んで signal もある | 検出した layer に絞る |
 
-除外した runtime は `kiwa layers` が stderr に理由を出す。 意図せず消えている場合は `--layer` を明示すれば回避できる。
+存在するかどうかは `kiwa layers` を叩いた時点で調べる (記録から読まない)。 検出後に `go.mod` を足した場合もその場で見えるため、 再検出は要らない。
+
+除外した runtime は stderr に理由を出す。 意図せず消えている場合は `--layer` を明示すれば回避できる。
 
 ## 出力 path の決定
 

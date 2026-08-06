@@ -47,8 +47,6 @@ describe('narrowing happens per runtime', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -69,8 +67,6 @@ describe('narrowing happens per runtime', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -87,8 +83,6 @@ describe('narrowing happens per runtime', () => {
     const root = fixture({ 'package.json': '{"name":"app"}' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'package.json', language: 'typescript' }],
-      languages: ['typescript'],
-      languages_complete: true,
       detected: [],
     });
     withFixture(root, () => {
@@ -111,8 +105,6 @@ describe('narrowing happens per runtime', () => {
           { manifest: 'Cargo.toml', language: 'rust' },
           { manifest: 'package.json', language: 'typescript' },
         ],
-      languages: ['rust', 'typescript'],
-      languages_complete: true,
         detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
       },
     );
@@ -226,37 +218,46 @@ describe('absence is established by looking', () => {
     }
   });
 
-  it('keeps every runtime when the search ran out of budget', () => {
+  it('narrows nothing when the search did not finish', () => {
     // An unfinished search can say what it found and nothing about what it did
-    // not. Excluding on its silence turns "we stopped looking" into "it is not
-    // there".
+    // not — so it supports neither the exclusions, which rest on absence, nor
+    // the within-language narrowing, since the crate that would have widened it
+    // may be in the part that went unseen.
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: false,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
+    withFixture(root, () => {
+      const resolved = resolveLayers({
+        cwd: root,
+        presence: { languages: ['rust'], complete: false },
+      });
+      expect(resolved.source).toBe('all');
+      expect(resolved.layers).toHaveLength(TABLE.length);
+      expect(resolved.warnings.join(' ')).toMatch(/did not finish/);
+    });
+  });
+
+  it('sees a manifest added after the recording was taken', () => {
+    // The recording answers for the moment it was taken. Reading which
+    // languages exist from it would miss a `go.mod` added since — and the
+    // staleness check cannot catch that, because it only knows the manifests
+    // the recording already named.
+    const root = fixture(
+      { 'Cargo.toml': '[dependencies]\n', 'services/api/go.mod': 'module x\n' },
+      {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      },
+    );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(
         TABLE.filter((l) => l.runtime === 'go').length,
       );
-      expect(resolved.warnings.join('\n')).not.toMatch(/excluded/);
-    });
-  });
-
-  it('falls back when the recording does not say whether the search finished', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
-      generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
-    });
-    withFixture(root, () => {
-      const resolved = resolveLayers({ cwd: root });
-      expect(resolved.source).toBe('all');
-      expect(resolved.warnings.join(' ')).toMatch(/whether the language search finished/);
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded go/);
     });
   });
 
@@ -266,8 +267,6 @@ describe('absence is established by looking', () => {
       {
         generated_at: fresh(),
         scanned: [{ manifest: 'package.json', language: 'typescript' }],
-        languages: ['go', 'typescript'],
-        languages_complete: true,
         detected: [],
       },
     );
@@ -280,18 +279,6 @@ describe('absence is established by looking', () => {
     });
   });
 
-  it('falls back when the recording predates the language list', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
-      generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
-    });
-    withFixture(root, () => {
-      const resolved = resolveLayers({ cwd: root });
-      expect(resolved.source).toBe('all');
-      expect(resolved.warnings.join(' ')).toMatch(/which languages are present/);
-    });
-  });
 });
 
 describe('an asset is taken from this package or not at all', () => {
@@ -341,8 +328,6 @@ describe('a recording without a usable timestamp is discarded', () => {
   it('falls back when generated_at is absent', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -358,8 +343,6 @@ describe('a recording without a usable timestamp is discarded', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: 'sometime last week',
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -373,8 +356,6 @@ describe('an explicit choice wins', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -395,8 +376,6 @@ describe('an explicit choice wins', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -414,8 +393,6 @@ describe('a recording that no longer describes the project is discarded', () => 
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: new Date(Date.now() - 60_000).toISOString(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -430,8 +407,6 @@ describe('a recording that no longer describes the project is discarded', () => 
     const root = fixture({}, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
     });
     withFixture(root, () => {
@@ -476,8 +451,6 @@ describe('an unusable recording is not an error', () => {
     const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      languages: ['rust'],
-      languages_complete: true,
       detected: [
         { layer: 'rust-axum', manifest: 'Cargo.toml' },
         { layer: 'rust-from-the-future', manifest: 'Cargo.toml' },
@@ -505,8 +478,6 @@ describe('an unusable recording is not an error', () => {
         { manifest: 'Cargo.toml', language: 'rust' },
         { manifest: 'go.mod', language: 'go' },
       ],
-      languages: ['go', 'rust', 'typescript'],
-      languages_complete: true,
       detected: TABLE.filter((l) => l.runtime === 'rust' || l.runtime === 'go').map((l) => ({
         layer: l.id,
         manifest: l.runtime === 'rust' ? 'Cargo.toml' : 'go.mod',

@@ -39,6 +39,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { SignalTable } from './detect.js';
+import { presentLanguages, type LanguagePresence } from './scan.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -158,8 +159,6 @@ function readableLanguages(): Set<string> {
 interface StackFile {
   generated_at?: unknown;
   scanned?: unknown;
-  languages?: unknown;
-  languages_complete?: unknown;
   detected?: unknown;
 }
 
@@ -210,16 +209,6 @@ function validate(cwd: string, file: StackFile, table: LayerRecord[]): string | 
     return 'it does not record which manifests were read';
   }
 
-  // A recording without this predates the field. Which languages the project
-  // contains would be unknown, and no runtime could be excluded on evidence.
-  if (!Array.isArray(file.languages)) return 'it does not record which languages are present';
-  if (typeof file.languages_complete !== 'boolean') {
-    return 'it does not record whether the language search finished';
-  }
-  if ((file.languages as unknown[]).some((l) => typeof l !== 'string' || !l)) {
-    return 'its language list holds something that is not a language';
-  }
-
   for (const entry of file.scanned as ScannedEntry[]) {
     const manifest = str(entry.manifest);
     const language = str(entry.language);
@@ -257,6 +246,8 @@ function validate(cwd: string, file: StackFile, table: LayerRecord[]): string | 
 export function resolveLayers(options: {
   cwd: string;
   explicit?: string | undefined;
+  /** Injectable so a test can exhaust the search budget without 20000 directories. */
+  presence?: LanguagePresence | undefined;
 }): ResolvedLayers {
   const table = loadLayerTable();
   const warnings: string[] = [];
@@ -281,17 +272,27 @@ export function resolveLayers(options: {
     return { layers: table, source: 'all', warnings };
   }
 
-  // Two different sets, because a language can be present without having been
-  // read. `languages` is what the project contains, found by looking;
-  // `scanned` is what detection actually opened, which honours the workspace
-  // definition. A Go module in an undeclared directory is in the first and not
-  // the second, and "nothing detected for Go" is not evidence when Go was
-  // never opened.
-  const present = new Set((file.languages as string[]).filter(Boolean));
+  // Which languages the project contains is asked now rather than read from the
+  // recording. A recording answers for the moment it was taken, and a `go.mod`
+  // added since would be missing from it while being present in the project —
+  // the staleness check cannot see that, because it only knows the manifests
+  // the recording already named.
+  //
+  // This is a different question from `scanned`, which is what detection
+  // actually opened and honours the workspace definition. A Go module in an
+  // undeclared directory is present and unread, and "nothing detected for Go"
+  // is not evidence when Go was never opened.
+  const found = options.presence ?? presentLanguages(options.cwd);
+
   // An unfinished search can say what it found and nothing about what it did
-  // not. Excluding on its silence would turn "we stopped looking" into "it is
-  // not there".
-  const searchFinished = file.languages_complete === true;
+  // not, so it cannot support narrowing at all — not the exclusions, which rest
+  // on absence, and not the within-language narrowing either, since the crate
+  // that would have widened it may be in the part that went unseen.
+  if (!found.complete) {
+    warnings.push('kept every layer: the search for project manifests did not finish');
+    return { layers: table, source: 'all', warnings };
+  }
+  const present = new Set(found.languages);
   const read = new Set((file.scanned as ScannedEntry[]).map((e) => str(e.language)!));
   const detected = new Set(
     ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
@@ -314,7 +315,6 @@ export function resolveLayers(options: {
     // not be is silent, because the layers simply stop being offered and
     // nothing says why.
     if (!present.has(runtime)) {
-      if (!searchFinished) return true;
       excluded.add(runtime);
       return false;
     }
