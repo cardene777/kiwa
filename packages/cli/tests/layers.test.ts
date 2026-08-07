@@ -20,8 +20,23 @@ const TABLE = loadLayerTable();
  * the moment a signal is added — and a stale literal would read as the count
  * still holding.
  */
+const NAMED_BY_SIGNALS = (() => {
+  const named = new Set<string>();
+  const lists = [...Object.values(SIGNALS.signals ?? {}), SIGNALS.generated?.signals ?? []];
+  for (const list of lists) {
+    for (const signal of list ?? []) {
+      const s = signal as { layer?: string; default?: string; also?: string[]; features?: Record<string, string> };
+      if (s.layer) named.add(s.layer);
+      if (s.default) named.add(s.default);
+      for (const layer of s.also ?? []) named.add(layer);
+      for (const layer of Object.values(s.features ?? {})) named.add(layer);
+    }
+  }
+  return named;
+})();
+
 const UNDETECTABLE_TS = TABLE.filter(
-  (l) => l.runtime === 'typescript' && !l.id.startsWith('nextjs-'),
+  (l) => l.runtime === 'typescript' && !NAMED_BY_SIGNALS.has(l.id),
 ).length;
 
 /** A timestamp after every file the fixture writes, so nothing reads as stale. */
@@ -122,7 +137,10 @@ describe('narrowing happens per runtime', () => {
       const resolved = resolveLayers({ cwd: root });
       const counts = runtimes(resolved.layers);
       expect(counts.typescript).toBe(UNDETECTABLE_TS);
-      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(0);
+      // Every TypeScript layer some signal names is ruled out by an empty
+      // recording; the rest stay because nothing could have detected them.
+      expect(resolved.layers.filter((l) => NAMED_BY_SIGNALS.has(l.id) && l.runtime === 'typescript'))
+        .toHaveLength(0);
       expect(counts.rust).toBeUndefined();
       expect(counts.go).toBeUndefined();
     });
@@ -636,11 +654,18 @@ describe('an unusable recording is not an error', () => {
     // Every narrowable layer has to be detected for that to hold, which now
     // includes the five `nextjs-*` ones — so the fixture depends on `next`.
     // Leaving it out ruled them out, and the recording then did do work.
+    // Every layer some signal names has to come back detected, or the recording
+    // did narrow and `all` would be the wrong answer. Derived from the table so
+    // that adding a signal updates the fixture rather than breaking this.
     const narrowable = (l: { id: string; runtime: string | null }): boolean =>
-      l.runtime === 'rust' || l.runtime === 'go' || l.id.startsWith('nextjs-');
+      l.runtime === 'rust' || l.runtime === 'go' || NAMED_BY_SIGNALS.has(l.id);
     const manifestFor = (l: { id: string; runtime: string | null }): string =>
       l.runtime === 'rust' ? 'Cargo.toml' : l.runtime === 'go' ? 'go.mod' : 'package.json';
-    const root = fixture({ 'package.json': '{"dependencies":{"next":"^15.0.0"}}', 'Cargo.toml': '[dependencies]\n', 'go.mod': 'module x\n' }, {
+    // The dependencies are chosen so every named TypeScript layer is detected:
+    // `next` for the five `nextjs-*`, and one subject each for auth, cache,
+    // job-queue, orm-query and ui.
+    const deps = '{"dependencies":{"next":"^15","next-auth":"^4","redis":"^4","bullmq":"^5","drizzle-orm":"^0.30","react":"^19"}}';
+    const root = fixture({ 'package.json': deps, 'Cargo.toml': '[dependencies]\n', 'go.mod': 'module x\n' }, {
       generated_at: fresh(),
       scanned: [
         { manifest: 'package.json', language: 'typescript' },
@@ -864,7 +889,10 @@ describe('a recording has to come from the table it is read against', () => {
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.source).toBe('detected');
-      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(0);
+      // Every TypeScript layer some signal names is ruled out by an empty
+      // recording; the rest stay because nothing could have detected them.
+      expect(resolved.layers.filter((l) => NAMED_BY_SIGNALS.has(l.id) && l.runtime === 'typescript'))
+        .toHaveLength(0);
     });
   });
 
