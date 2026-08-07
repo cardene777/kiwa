@@ -181,6 +181,7 @@ clear だけを書くと、 既存 row を前提にする TC (重複検出 / 状
 ```ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
+{選択 2 では action を it の中で動的 import するので、 この行は出さない}
 import { {ACTION} } from '{ACTION_PATH}';
 
 {data seam / 選択 1 — reset か seed を export している module。 実装をそのまま通す}
@@ -194,11 +195,17 @@ vi.mock('{STATE_MODULE}', () => ({
 
 {data seam — 判定が 0 件でない時のみ}
 beforeEach(() => {
-  {選択 1 なら {RESET_EXPORT}();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}
+  {選択 1 なら {RESET_EXPORT}();、 選択 2 なら vi.resetModules();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}
 });
 
 describe('{MODULE} server action', () => {
   it('{ID} {Observation}', async () => {
+    {data seam / Given.data がある行のみ — clear の後に入れ直す}
+    {Given.data を 選択 1 なら seed export 呼出、 選択 3 なら {STATE_NAME}.{STATE_FIELD} への書込に展開}
+
+    {data seam / 選択 2 のみ — reset 後の module を掴み直す}
+    const { {ACTION} } = await import('{ACTION_PATH}');
+
     const fd = new FormData();
     {FormData の各 entry を fd.set(key, value) に展開}
     const { result, error, env } = await invokeServerAction({
@@ -270,7 +277,16 @@ describe('signup server action', () => {
 
 `vi.hoisted` を外して素の `const seam = { users: new Map() }` にすると `ReferenceError: Cannot access 'seam' before initialization` で **1 件も実行されない**。 `vi.mock` は巻き上げられるので、 factory が走る時点で `seam` はまだ初期化されていない。
 
-**壊れるのは factory が state を「値として」 返す時だけ**。 上の `store: seam.users` がそれで、 factory の実行時に `seam` を参照する。 `findUserByEmail` のように関数本体の中で参照する形は、 参照が呼出時まで遅れるので `vi.hoisted` が無くても動く。
+分かれ目は **factory の実行時に `seam` を読むかどうか**で、 export の種類ではない。
+
+| 形 | 例 | factory 実行時に読むか |
+|---|---|---|
+| 値として返す | `store: seam.users` | 読む |
+| 値から導く | `size: seam.users.size` / `rows: [...seam.users]` | 読む |
+| 既定値に使う | `limit: seam.config.limit ?? 10` | 読む |
+| 関数本体の中で読む | `find: async (k) => seam.users.get(k)` | 読まない (呼出時まで遅れる) |
+
+上の `store: seam.users` は 1 行目。 `findUserByEmail` は 4 行目で、 `vi.hoisted` が無くても動く。
 
 両方の形が同じ factory に同居するのが普通なので、 **形で場合分けせず常に `vi.hoisted` に置く**。 場合分けすると、 後から export を 1 つ足しただけで test が全滅する。
 
@@ -361,7 +377,7 @@ it('{ID} {Observation}', async () => {
 ```
 
 
-本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state は § data seam (seed する軸) に従って列挙し、 1 件以上なら上の template に seed 経路 (`vi.mock` か reset 呼出 + `beforeEach`) を足す。 判定と seed の仕方は 5 mode 共通で、 本節には書き写さない。
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.middleware.md`。
 
@@ -406,7 +422,7 @@ it('{ID} {Observation}', async () => {
 ```
 
 
-本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state は § data seam (seed する軸) に従って列挙し、 1 件以上なら上の template に seed 経路 (`vi.mock` か reset 呼出 + `beforeEach`) を足す。 判定と seed の仕方は 5 mode 共通で、 本節には書き写さない。
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc.md`。
 
@@ -469,7 +485,7 @@ it('{ID} {Observation}', async () => {
 | 回帰 | Intercepting Routes 既知 bug 再現 URL → expected variant + distance |
 
 
-本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state は § data seam (seed する軸) に従って列挙し、 1 件以上なら上の template に seed 経路 (`vi.mock` か reset 呼出 + `beforeEach`) を足す。 判定と seed の仕方は 5 mode 共通で、 本節には書き写さない。
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.parallel.md`。
 
@@ -522,6 +538,6 @@ it('{ID} {Observation}', async () => {
 | 回帰 | 既知 streaming bug 再現 source → expected chunk 配列 |
 
 
-本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state は § data seam (seed する軸) に従って列挙し、 1 件以上なら上の template に seed 経路 (`vi.mock` か reset 呼出 + `beforeEach`) を足す。 判定と seed の仕方は 5 mode 共通で、 本節には書き写さない。
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc-streaming.md`。

@@ -67,6 +67,47 @@ function stepThreeTemplate(): string {
 }
 
 /**
+ * The code lines the template introduces with a `{data seam ...}` marker,
+ * reduced to the literal text around their placeholders.
+ *
+ * The worked example is written by hand, so the two can drift: an added line in
+ * the template stays undemonstrated and the example still runs. Deriving the
+ * list from the template means a new line has to show up in the example or this
+ * fails (#1857 Round 2, R2-F4).
+ *
+ * Lines under a marker naming 選択 1 or 選択 2 are exempt — the example expands
+ * 選択 3, and those two routes produce different code.
+ */
+function dataSeamContractLines(): string[] {
+  const lines = stepThreeTemplate().split('\n');
+  const out: string[] = [];
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i] ?? '';
+    if (!/^\{data seam/.test(line.trim())) continue;
+    if (/選択 1|選択 2/.test(line)) continue;
+    // The marker introduces the code lines up to the next blank line.
+    for (let j = i + 1; j < lines.length; j += 1) {
+      const code = lines[j] ?? '';
+      if (code.trim() === '') break;
+      // A line that is nothing but a placeholder carries no literal to match.
+      if (/^\s*\{[^}]*\}\s*,?\s*$/.test(code)) continue;
+      out.push(code.trim());
+    }
+  }
+  expect(out.length, 'data seam の code 行が template から取れない').toBeGreaterThan(0);
+  return out;
+}
+
+/** A template line as a regex: literals kept, `{placeholder}` made a wildcard. */
+function skeletonToRegex(line: string): RegExp {
+  const parts = line.split(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/);
+  const body = parts
+    .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('[\\s\\S]*?');
+  return new RegExp(body);
+}
+
+/**
  * The runnable expansion of the Step 3 template, between the marker comments.
  *
  * The template itself is full of `{placeholder}` text and cannot be executed.
@@ -148,6 +189,17 @@ function runWorkedExample(source: string): { ok: boolean; output: string } {
 }
 
 describe('kiwa-nextjs は data seam を検出して seed する', () => {
+  // The helper seeds only its own env in every mode, so a module-level store
+  // leaks the same way behind `invokeMiddleware` / `renderServerComponent` /
+  // `invokeParallelRoutes` / `setupNextRscEnv`. Fixing only the mode that was
+  // measured leaves the other four broken.
+  const OTHER_MODES = [
+    '## middleware mode (Issue #495、 v1.0.2+)',
+    '## RSC mode (Issue #494、 v1.0.3+)',
+    '## Parallel Routes mode (Issue #523、 v1.0.4+)',
+    '## RSC streaming + Suspense boundary 拡張 (`--layer nextjs-rsc-streaming`、 Issue #558)',
+  ];
+
   // `invokeServerAction` seeds formData / args / cookies / headers and nothing
   // else. An action reading a module-level store leaks state between cases,
   // and the env-seam check does not notice because the action touches neither
@@ -244,6 +296,78 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     expect(example).toMatch(/seam\.users\.clear\(\)/);
   });
 
+  it('展開例が template の data seam 行をすべて実演している', () => {
+    // Derived from the template, not listed here. Adding a line to the template
+    // extends what the example has to show, without editing this test.
+    const example = workedExample();
+    for (const line of dataSeamContractLines()) {
+      expect(example, `展開例が template の行を実演していない: ${line}`).toMatch(
+        skeletonToRegex(line),
+      );
+    }
+  });
+
+  it('template が 3 つの seed 経路すべてに展開先を持つ', () => {
+    // Step 2 offers reset export / vi.resetModules / vi.mock. A route named in
+    // the rules but absent from the template cannot be generated, which is how
+    // R2-F2 shipped: `vi.resetModules` was the recommended middle option and
+    // the template had no place to put it.
+    const template = stepThreeTemplate();
+    // Asserted on the code each route emits, not on the label. The label
+    // appears in several comment lines, so `toContain('選択 2')` stayed green
+    // when the dynamic-import block was deleted.
+    const routeCode: [string, RegExp][] = [
+      ['選択 1', /import \{ \{RESET_EXPORT\} \} from/],
+      ['選択 2', /await import\('\{ACTION_PATH\}'\)/],
+      ['選択 3', /vi\.mock\('\{STATE_MODULE\}'/],
+    ];
+    for (const [route, code] of routeCode) {
+      expect(template, `template に ${route} の展開先が無い`).toMatch(code);
+    }
+    expect(template, '選択 2 の reset 呼出が template に無い').toContain('vi.resetModules()');
+  });
+
+  it('hoist が壊れる条件を eager 評価で説明している', () => {
+    const example = section('##### 展開例 (release-smoke が実際に走らせる)');
+    // "state を値として返す時だけ" is too narrow: `size: seam.users.size` and a
+    // spread are eager too, and reading the rule as a list of shapes makes the
+    // other eager forms look safe. The boundary is when the factory runs.
+    //
+    // Asserted on the table, not the sentence above it. The sentence's wording
+    // also appears in the example's own comment, so a phrase check stayed green
+    // when the claim was narrowed back.
+    const rows = example
+      .split('\n')
+      .filter((line) => line.startsWith('|') && /読む|読まない/.test(line));
+    const eager = rows.filter((line) => /\|\s*読む\s*\|?\s*$/.test(line.trim()));
+    const deferred = rows.filter((line) => line.includes('読まない'));
+    expect(eager.length, `eager な形が 1 つしか挙がっていない:\n${rows.join('\n')}`)
+      .toBeGreaterThanOrEqual(3);
+    expect(deferred).toHaveLength(1);
+    // The claim this replaced. Stating it again contradicts the table.
+    expect(example, '「値として返す時だけ」 の断定が戻っている').not.toMatch(
+      /「値として」\s*返す時だけ/,
+    );
+  });
+
+  it('template が Given の data 部分を展開する場所を持つ', () => {
+    // The rule lives in Step 2; without a slot in the template the generator
+    // has nowhere to put the seed and every Given row is silently dropped.
+    const template = stepThreeTemplate();
+    expect(template).toMatch(/\{Given\.data[^}]*\}/);
+  });
+
+  it('4 mode の参照が共有節の条件を書き写していない', () => {
+    // Round 1's pointer said "1 件以上なら seed 経路を足す", which predates the
+    // three-value rule and silently excluded 未確認. A copied condition goes
+    // stale the moment the shared section changes, so the pointers carry none.
+    for (const heading of OTHER_MODES) {
+      const body = section(heading);
+      expect(body, `${heading} が条件を書き写している`).not.toMatch(/1 件以上なら/);
+      expect(body).toContain('書き写さない');
+    }
+  });
+
   it('Step 3 の template が seed 経路を持つ', () => {
     const template = stepThreeTemplate();
     expect(template, 'mock 経路が template に無い').toContain('vi.mock');
@@ -267,17 +391,6 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       .filter((line) => line.includes('data seam') && !line.startsWith('{'));
     expect(conditional.join('\n')).toMatch(/0 件.*省く|だけ出す/);
   });
-
-  // The helper seeds only its own env in every mode, so a module-level store
-  // leaks the same way behind `invokeMiddleware` / `renderServerComponent` /
-  // `invokeParallelRoutes` / `setupNextRscEnv`. Fixing only the mode that was
-  // measured leaves the other four broken.
-  const OTHER_MODES = [
-    '## middleware mode (Issue #495、 v1.0.2+)',
-    '## RSC mode (Issue #494、 v1.0.3+)',
-    '## Parallel Routes mode (Issue #523、 v1.0.4+)',
-    '## RSC streaming + Suspense boundary 拡張 (`--layer nextjs-rsc-streaming`、 Issue #558)',
-  ];
 
   it.each(OTHER_MODES)('%s も data seam を省かない', (heading) => {
     expect(section(heading)).toContain('data seam (seed する軸) に従');
