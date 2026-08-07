@@ -575,48 +575,142 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
 
   // #1858: replacing the module wholesale makes any TC whose expectation the
   // module decides assert against the mock, so a real defect still passes.
-  // Those rows are not generated at all — a green test is read as evidence,
-  // and one that cannot fail is worse than an absent one.
+  //
+  // The rule lives in a script rather than in prose. Two rounds of review found
+  // defects in the prose version that no test could see — first it keyed on
+  // observation names, then it dropped every mixed case into "cannot tell"
+  // (#1859 R1-F1 / R2-F1). Running the script is what makes the rule checkable.
   const GATE_SECTION = '##### 差し替えた module に答えを預けた TC は生成しない';
+  const DECIDE = resolve(REPO_ROOT, '.claude/skills/kiwa-nextjs/scripts/decide-generation.mjs');
 
-  /** What the gate keys on, read from its decision table. */
-  function gateOutcomes(): { decidedBy: string; generate: boolean }[] {
-    const rows = section(GATE_SECTION)
-      .split('\n')
-      .filter((line) => line.startsWith('|') && /生成する|生成しない/.test(line));
-    return rows.map((line) => {
-      const cells = line.split('|').map((c) => c.trim());
-      return {
-        decidedBy: cells[1] ?? '',
-        generate: !(cells[2] ?? '').includes('生成しない'),
-      };
+  function decide(input: unknown): { generated: { id: string }[]; omitted: { id: string }[] } {
+    const out = execFileSync('node', [DECIDE, JSON.stringify(input)], {
+      encoding: 'utf-8',
+      stdio: 'pipe',
     });
+    return JSON.parse(out) as { generated: { id: string }[]; omitted: { id: string }[] };
   }
 
-  it('判定が観点名ではなく依存で書かれている', () => {
-    const gate = section(GATE_SECTION);
-    // The first version keyed on three observation names. That is wrong in
-    // three directions at once: the same observation can be independent of the
-    // module, the vocabulary differs per mode, and one TC can carry two
-    // observations (#1859 Round 1, F1 / F2 / F3).
-    expect(gate).toContain('観点名では行わない');
-    expect(gate, '何が Then を決めるかで判定していない').toMatch(/`Then` の期待値を決めているのが誰か/);
+  const MOCKED = ['findUserByEmail', 'createUser'];
+  const PASSTHROUGH = ['normaliseEmail'];
+
+  it('差し替えた export の実装が答えを出す TC は生成しない', () => {
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-001', dependsOn: ['findUserByEmail'], answeredBy: 'mocked-export-logic' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-001']);
   });
 
-  it('依存の 4 通りに答えが付いている', () => {
-    const outcomes = gateOutcomes();
-    expect(outcomes).toHaveLength(4);
-    // The module's behaviour and "cannot tell" both stop generation; the
-    // action's own branches and the seeded env do not.
-    const byKey = Object.fromEntries(outcomes.map((o) => [o.decidedBy, o.generate]));
-    const mocked = Object.keys(byKey).find((k) => k.includes('差し替えた module'));
-    const undecidable = Object.keys(byKey).find((k) => k.includes('決められない'));
-    expect(mocked, '差し替えた module の行が無い').toBeTruthy();
-    expect(undecidable, '判定不能の行が無い').toBeTruthy();
-    expect(byKey[mocked ?? ''], '差し替えた module 依存を生成してしまう').toBe(false);
-    expect(byKey[undecidable ?? ''], '判定不能を生成してしまう (fail-closed でない)').toBe(false);
-    // The other two generate, or the gate would drop everything.
-    expect(outcomes.filter((o) => o.generate)).toHaveLength(2);
+  it('action の分岐が答えを出す TC は生成する', () => {
+    // The module supplies the input, the action decides the outcome. Dropping
+    // these was the regression in R2-F1: every normal-path and state-transition
+    // case goes through the store, so almost nothing survived.
+    const { generated } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-002', dependsOn: ['findUserByEmail'], answeredBy: 'action-branch' }],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['T-002']);
+  });
+
+  it('seed した env が答えを出す TC は生成する', () => {
+    const { generated } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-003', dependsOn: [], answeredBy: 'seeded-env' }],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['T-003']);
+  });
+
+  it('判定できない TC は生成しない', () => {
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-004', dependsOn: ['createUser'], answeredBy: 'unknown' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-004']);
+  });
+
+  it('部分 mock で素通しした export しか触らない TC は生成する', () => {
+    // `importOriginal()` passthrough runs the real implementation, so gating by
+    // module rather than by export was over-exclusion (R2-F2).
+    const { generated } = decide({
+      mockedExports: MOCKED,
+      passthroughExports: PASSTHROUGH,
+      cases: [
+        { id: 'T-005', dependsOn: ['normaliseEmail'], answeredBy: 'mocked-export-logic' },
+      ],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['T-005']);
+  });
+
+  it('未知の answeredBy は生成しない', () => {
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-006', dependsOn: ['createUser'], answeredBy: 'probably-fine' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-006']);
+  });
+
+  it('同じ export を mocked と passthrough の両方に書いた入力は止まる', () => {
+    // The two lists contradict each other; guessing which wins would make the
+    // decision depend on the reader.
+    expect(() =>
+      decide({
+        mockedExports: ['createUser'],
+        passthroughExports: ['createUser'],
+        cases: [{ id: 'T-007', dependsOn: ['createUser'], answeredBy: 'action-branch' }],
+      }),
+    ).toThrow();
+  });
+
+  it('11 観点を通しても観点名では切られない', () => {
+    // Same observation, different dependency: the outcome follows the
+    // dependency. A name-based gate would split these two the same way.
+    const { generated, omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [
+        { id: 'AUTH-A', dependsOn: [], answeredBy: 'seeded-env' },
+        { id: 'AUTH-B', dependsOn: ['findUserByEmail'], answeredBy: 'mocked-export-logic' },
+      ],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['AUTH-A']);
+    expect(omitted.map((o) => o.id)).toEqual(['AUTH-B']);
+  });
+
+  it('理由が残る', () => {
+    // The report and the file header both quote it, so an empty reason makes
+    // the omission unexplainable.
+    const { generated, omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [
+        { id: 'T-008', dependsOn: ['createUser'], answeredBy: 'action-branch' },
+        { id: 'T-009', dependsOn: ['createUser'], answeredBy: 'mocked-export-logic' },
+      ],
+    });
+    for (const d of [...generated, ...omitted]) {
+      expect((d as { reason?: string }).reason ?? '').not.toBe('');
+    }
+  });
+
+  it('SKILL.md が script を呼ぶと書いてある', () => {
+    const gate = section(GATE_SECTION);
+    // A script nobody is told to run is the same as no script.
+    expect(gate).toContain('scripts/decide-generation.mjs');
+    expect(gate, '出力に従う旨が無い').toMatch(/`generate` に従う/);
+  });
+
+  it('SKILL.md の answeredBy 4 値が script の受理値と一致する', () => {
+    const gate = section(GATE_SECTION);
+    const script = readFileSync(DECIDE, 'utf-8');
+    for (const value of ['mocked-export-logic', 'action-branch', 'seeded-env', 'unknown']) {
+      expect(gate, `SKILL.md に ${value} が無い`).toContain(value);
+      expect(script, `script が ${value} を受理しない`).toContain(`'${value}'`);
+    }
+  });
+
+  it('factory を読めない形は全 export を差し替え扱いにする', () => {
+    // Deciding `mockedExports` is the caller's job, so the fail-closed default
+    // has to be stated where the caller reads it.
+    expect(section(GATE_SECTION)).toMatch(/factory を読めない形[\s\S]*fail-closed/);
   });
 
   it('観点名で切ってはいけない理由が 3 つ挙がっている', () => {
@@ -636,19 +730,13 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
         `${name} が 4 mode 節に現れる (名前一致が成立してしまう)`,
       ).toBe(0);
     }
-    // So the gate must say it is mode-independent.
     expect(section(GATE_SECTION)).toContain('5 mode 共通');
   });
 
   it('差し替えたかどうかを申告ではなく生成物で決める', () => {
     const gate = section(GATE_SECTION);
-    // Declaring 選択 1 while emitting `vi.mock` would bypass the gate.
     expect(gate).toContain("vi.mock('<state module>')");
     expect(gate, '申告に頼らない旨が書かれていない').toMatch(/申告/);
-  });
-
-  it('gate が 5 mode 共通だと書いてある', () => {
-    expect(section(GATE_SECTION)).toContain('5 mode 共通');
   });
 
   // The gate drops TCs on purpose. `/kiwa-review --mode test-review` scores
@@ -664,8 +752,6 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
   it('producer が Step 5 metadata にも未生成 TC を残す', () => {
     const step5 = section('### Step 5: result-review 用 metadata の Write');
     expect(step5, 'metadata に未生成 TC が無い').toContain('未生成 TC');
-    // Omitting the field when empty makes a gated run indistinguishable from a
-    // run where the gate never fired.
     expect(step5).toMatch(/0 件なら/);
   });
 
@@ -678,17 +764,33 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     expect(section2b, 'fail-closed の既定が無い').toMatch(/従来どおり全件|解釈しない/);
   });
 
+  it('consumer が参照する節名が実在する', () => {
+    // The gate section was renamed mid-PR and the reference went stale (R2-F5).
+    const refs = [...REVIEW_SKILL.matchAll(/§ ([^\n。]+?) にある/g)].map((m) => m[1] ?? '');
+    expect(refs.length, '参照が 1 件も無い').toBeGreaterThan(0);
+    for (const ref of refs) {
+      expect(SKILL, `参照先の節が kiwa-nextjs に無い: ${ref}`).toContain(ref);
+    }
+  });
+
   it('除外が score の得点にならない', () => {
     const section2b = REVIEW_SKILL.split('##### 未生成 TC の扱い')[1] ?? '';
-    // Removing rows from the denominator raises cover 率, so a gated run could
-    // outscore a fully generated one — the gate would become a way to win.
     expect(section2b, '相殺防止が書かれていない').toContain('CONDITIONAL');
     expect(section2b).toMatch(/PASS にしない/);
   });
 
+  it('report template の判定値が 3 値になっている', () => {
+    // 2B says CONDITIONAL while the template offered PASS / FAIL only, so the
+    // output contract still allowed a score-driven PASS (R2-F3).
+    expect(REVIEW_SKILL).toContain('✅ PASS / ⚠️ CONDITIONAL / ❌ FAIL');
+    expect(REVIEW_SKILL, 'CONDITIONAL が score より優先すると書かれていない').toMatch(
+      /CONDITIONAL は score より優先/,
+    );
+    // The completion check has to accept the same three values.
+    expect(REVIEW_SKILL).toContain('(PASS / CONDITIONAL / FAIL)');
+  });
+
   it('producer と consumer が同じ 2 行を指している', () => {
-    // The record is the interface between the two skills. If they describe
-    // different markers, the exemption never applies and the gate gets undone.
     for (const marker of ['// mock:', '// 未生成:']) {
       expect(stepThreeTemplate(), `producer の template に ${marker} が無い`).toContain(marker);
       expect(REVIEW_SKILL, `consumer が ${marker} を知らない`).toContain(marker);

@@ -174,7 +174,7 @@ Layer 2 は spec の TC を全件 test にするとは限らない。 生成し�
 
 **除くだけで済ませない**。 report には「未生成」 として別枠で列挙し、 冒頭行に書かれた次の手 (どの module に何を export すれば生成できるか) をそのまま載せる。 分母から消しただけだと、 検証されていない観点があることが report から消える。
 
-理由は `skills/kiwa-nextjs/SKILL.md` § 選択 3 では観点によって生成しない にある。 module ごと差し替えた test は mock の実装を測るだけなので、 通っても何も証明しない。 それを実装漏れとして数えると「mock でもいいから足せ」 という圧力になり、 落ちようのない test が戻る。
+理由は `skills/kiwa-nextjs/SKILL.md` § 差し替えた module に答えを預けた TC は生成しない にある。 module ごと差し替えた test は mock の実装を測るだけなので、 通っても何も証明しない。 それを実装漏れとして数えると「mock でもいいから足せ」 という圧力になり、 落ちようのない test が戻る。
 
 冒頭 2 行が無い test は従来どおり全件を分母に入れる。 記録が無いことを「意図的に生成しなかった」 と解釈しない (fail-closed)。
 
@@ -201,9 +201,19 @@ Target: {spec_path} / {test_paths}
 |---|---|---|---|
 | {軸 1} | 8/10 | 0.30 | 2.40 |
 | {軸 2} | ... | ... | ... |
-| **Weighted Score** | **{N.N}/10** | 1.00 | (7.0 以上で PASS) |
+| **Weighted Score** | **{N.N}/10** | 1.00 | (7.0 以上で PASS。 未生成 TC が 1 件でもあれば score に関わらず CONDITIONAL) |
 
-**判定 — ✅ PASS / ❌ FAIL** ({reason})
+**判定 — ✅ PASS / ⚠️ CONDITIONAL / ❌ FAIL** ({reason})
+
+判定は 3 値で、 優先順位がある。
+
+| 条件 | 判定 |
+|---|---|
+| 未解決の指摘がある | ❌ FAIL |
+| 未生成 TC が 1 件以上ある | ⚠️ CONDITIONAL (score に関わらず) |
+| 上記いずれも無く score 7.0 以上 | ✅ PASS |
+
+CONDITIONAL は score より優先する。 score だけで決めると、 未生成 TC を分母から外した分だけ cover 率が上がって PASS に届く = gate を通すほど成績が良くなる。
 
 ## 2. critical / major 指摘
 
@@ -275,7 +285,7 @@ multiSelect: false
 ## 完了条件
 
 - `tests/reports/review/{mode}-review-{module}.{lang}.md` が 5 section format で Write 済
-- weighted_score が計算されて判定 (PASS / FAIL) 確定
+- weighted_score が計算されて判定 (PASS / CONDITIONAL / FAIL) 確定
 - critical / major 指摘 + 追加 test 提案が列挙
 - 自動呼出時は呼出元への chain return が正しく動作
 

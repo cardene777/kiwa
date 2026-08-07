@@ -172,20 +172,57 @@ import graph は無制限に辿らない。
 
 そういう TC は**生成しない**。 記録だけ残して生成すると、 緑の test が証拠として読まれる。 落ちようのない test は、 無い test より悪い。
 
-###### 判定は依存で行う。 観点名では行わない
+###### 判定は script に委ねる
 
-TC 1 件ごとに、 **`Then` の期待値を決めているのが誰か**を見る。
+判定を散文で書くと、 適用したかどうかを誰も確かめられない。 **`scripts/decide-generation.mjs` を呼び、 出力の `generate` に従う**。
 
-| `Then` を決めているもの | 判定 |
+```bash
+node .claude/skills/kiwa-nextjs/scripts/decide-generation.mjs '{
+  "mockedExports": ["findUserByEmail", "createUser"],
+  "passthroughExports": ["normaliseEmail"],
+  "cases": [
+    {"id": "T-001", "dependsOn": ["createUser"], "answeredBy": "action-branch"}
+  ]
+}'
+```
+
+`{ generated: [...], omitted: [...] }` が返る。 `omitted` がそのまま § 生成しなかった TC を返す の対象になる。
+
+###### script に渡す前に決めること
+
+判断が要るのは入力を作るところまで。 そこから先は機械的で、 判定の一貫性は script が持つ。
+
+| 入力 | 決め方 |
 |---|---|
-| 差し替えた module の振る舞い | **生成しない** |
-| action 自身の分岐 (入力の検証 / 早期 return) | 生成する |
-| helper が seed する env (`cookies` / `headers` / `formData` / `args`) | 生成する |
-| どちらとも決められない | **生成しない** (fail-closed) |
+| `mockedExports` | `vi.mock` の factory が値を返している export 名 |
+| `passthroughExports` | factory が `importOriginal()` から素通ししている export 名 |
+| `dependsOn` | TC の `Given` / `Then` が到達する export 名 |
+| `answeredBy` | 下表の 4 値から 1 つ |
 
-`Given` に既存 row を要求する TC も、 その row を差し替えた module が保持するなら生成しない。
+`answeredBy` は **`Then` の期待値を決めているのが誰か**を表す。
 
-**観点名で判定してはいけない**。 3 つの理由がある。
+| 値 | 意味 | 例 |
+|---|---|---|
+| `mocked-export-logic` | 差し替えた export の実装そのものが決める | 大文字小文字を無視して重複を見つけるのは module の仕事 |
+| `action-branch` | action 自身の分岐が決める。 差し替えた export は入力を供給するだけ | 既存 row があった時に `already-registered` を返すのは action の分岐 |
+| `seeded-env` | helper が seed した `cookies` / `headers` / `formData` / `args` が決める | 入力の検証で弾く |
+| `unknown` | 決められない | |
+
+###### script が持つ規則
+
+3 点あり、 いずれも散文で書いていた時に外していた。
+
+**差し替えに届かない TC は生成する**。 部分 mock (`importOriginal()` で一部だけ差し替える形) で素通しした export しか触らない TC は、 実装をそのまま通る。 module 単位で落とすと過剰除外になる。
+
+**`action-branch` と `seeded-env` は生成する**。 差し替えた export が入力を供給するだけなら、 test は action 側の振る舞いを測れる。 module 自身の正しさは測れないので、 その旨が `reason` に残る。
+
+初版は「差し替えた module が答えを持つなら生成しない」 とだけ書いており、 action と module が共同で結果を作る TC が「決められない」 に落ちて大量に未生成になった。 正常系も状態遷移も store を通るので、 ほとんど残らない。
+
+**`unknown` は生成しない**。 落ちない test が緑で残るより、 未生成として報告される方がよい。 誤りの向きが違う。
+
+###### 観点名で判定してはいけない
+
+初版は「権限 / 冪等性 / セキュリティ の 3 観点を落とす」 だった。 3 方向すべてで外れる。
 
 | 理由 | 例 |
 |---|---|
@@ -193,19 +230,15 @@ TC 1 件ごとに、 **`Then` の期待値を決めているのが誰か**を見
 | 観点名は mode ごとに違う | middleware は `auth gate` / `geo block`、 RSC は `notFound` / `props 分岐` で、 5 mode 共通の語彙が無い |
 | 1 TC に複数観点が書かれる | 「権限 / セキュリティ」 のような複合表記を名前一致で捌けない |
 
-以前は「権限 / 冪等性 / セキュリティ の 3 観点を落とす」 と書いていた。 これらは**依存が生じやすい観点**ではあるが、 判定の条件ではない。 名前で切ると上表の 3 方向すべてに外れる。
-
-###### 迷ったら生成しない
-
-判定できない TC を生成すると、 **落ちない test が緑として残る**。 生成しなければ未生成として報告され、 人が読む。 誤りの向きが違う。
-
-観点名が上の 3 つ (権限 / 冪等性 / セキュリティ) やそれに相当する mode 別の名前 (`auth gate` / `forbidden` 等) の時は、 依存が無いと**判断できた場合のみ**生成する。 判断の根拠を報告に 1 行書く。
+これらは**依存が生じやすい観点**ではあるが、 判定の条件ではない。
 
 ###### 差し替えたかどうかは生成物から判る
 
 gate が効くのは 選択 3 を採った時だけ。 その判定は申告ではなく、 **生成 test に `vi.mock('<state module>')` があるか**で決まる。
 
 申告に頼ると、 選択 1 と書いて `vi.mock` を書く形が通る。 生成物を見れば食い違いようがない。
+
+factory を読めない形 (動的に組み立てる等) では `mockedExports` を決められないので、 全 export を `mockedExports` として扱う (fail-closed)。
 
 ##### 生成しなかった TC を返す
 
