@@ -164,6 +164,10 @@ describe('adding the option changed nothing about where anything is written', ()
         .find((l) => l.startsWith('- `--output {path}`'));
       expect(line).toMatch(/以降の step と早見表/);
       expect(line).toMatch(/`--output` を渡した場合はそちらが優先/);
+      // Scoped to the generated test. The 早見表 also lists coverage reports,
+      // and "every path below" would hand those to `--output` too.
+      expect(line).toMatch(/生成 test の/);
+      expect(line).toMatch(/coverage report 等の他の出力先は `--output` の対象外/);
     }
   });
 
