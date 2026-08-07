@@ -140,19 +140,32 @@ export function loadLayerTable(): LayerRecord[] {
 }
 
 /** The languages the signal table can actually say something about. */
-function languagesWithSignals(): Set<string> {
-  const table = loadJson<SignalTable>('stack-signals.json');
+function languagesWithSignals(table: SignalTable | null): Set<string> {
   const out = new Set<string>();
   if (!table) return out;
   for (const [language, signals] of Object.entries(table.signals ?? {})) {
     if (Array.isArray(signals) && signals.length) out.add(language);
   }
+  // The generated half speaks for its own language too. Reading only the
+  // hand-written half leaves a language covered entirely by generated signals
+  // "unspeakable", and the caller then keeps every layer of that runtime
+  // regardless of what was detected — narrowing that silently does nothing.
+  // TypeScript is exactly that shape: its hand-written list is empty and its
+  // signals come from six packages' peerDependencies.
+  //
+  // The `typeof` check keeps the set typed against a malformed file; it cannot
+  // change the answer. A missing or empty `language` would add a key that no
+  // runtime name equals, and the caller has already returned for a layer whose
+  // runtime is empty. Mutating it away leaves every test passing, which is the
+  // measurement, not an oversight.
+  for (const signal of table.generated?.signals ?? []) {
+    if (typeof signal?.language === 'string') out.add(signal.language);
+  }
   return out;
 }
 
 /** The languages a manifest reader exists for, whether or not it has signals. */
-function readableLanguages(): Set<string> {
-  const table = loadJson<SignalTable>('stack-signals.json');
+function readableLanguages(table: SignalTable | null): Set<string> {
   return new Set(Object.values(table?.manifests ?? {}));
 }
 
@@ -248,6 +261,13 @@ export function resolveLayers(options: {
   explicit?: string | undefined;
   /** Injectable so a test can exhaust the search budget without 20000 directories. */
   presence?: ManifestPresence | undefined;
+  /**
+   * Injectable so a test can state which languages the table speaks for.
+   *
+   * `null` means the table is missing, which is not the same as omitting the
+   * option — omitting it loads the real file.
+   */
+  signalTable?: SignalTable | null | undefined;
 }): ResolvedLayers {
   const table = loadLayerTable();
   const warnings: string[] = [];
@@ -316,8 +336,14 @@ export function resolveLayers(options: {
     ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
   );
 
-  const readable = readableLanguages();
-  const speakable = languagesWithSignals();
+  // Loaded once and handed to both. Two calls read the same file for two
+  // questions about it, and the pair only makes sense against one answer.
+  const signalTable =
+    options.signalTable === undefined
+      ? loadJson<SignalTable>('stack-signals.json')
+      : options.signalTable;
+  const readable = readableLanguages(signalTable);
+  const speakable = languagesWithSignals(signalTable);
 
   const excluded = new Set<string>();
   const unread = new Set<string>();

@@ -663,3 +663,93 @@ describe('what --detect writes is what the resolver reads', () => {
     }
   });
 });
+
+describe('a language is speakable through either half of the signal table', () => {
+  // Narrowing only applies to a runtime the table has signals for; otherwise
+  // "nothing detected" carries no information and every layer is kept. The
+  // question is which half of the table counts, and TypeScript is the case
+  // that separates them: its hand-written list is empty and its signals come
+  // from six packages' peerDependencies.
+  const MANIFESTS = { 'Cargo.toml': 'rust', 'go.mod': 'go', 'package.json': 'typescript' };
+
+  function withTypescriptProject<T>(body: (root: string) => T): T {
+    const root = fixture({ 'package.json': '{"dependencies":{"drizzle-orm":"^0.30.0"}}\n' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      detected: [{ layer: 'orm-query', manifest: 'package.json' }],
+    });
+    return withFixture(root, () => body(root));
+  }
+
+  const typescriptLayers = (layers: { runtime: string | null }[]): number =>
+    layers.filter((l) => l.runtime === 'typescript').length;
+
+  const total = TABLE.filter((l) => l.runtime === 'typescript').length;
+
+  it('narrows when only the generated half speaks for the language', () => {
+    withTypescriptProject((root) => {
+      const resolved = resolveLayers({
+        cwd: root,
+        signalTable: {
+          manifests: MANIFESTS,
+          signals: { typescript: [] },
+          generated: {
+            signals: [
+              { match: 'drizzle-orm', layer: 'orm-query', strength: 'exact', language: 'typescript' },
+            ],
+          },
+        },
+      });
+      expect(resolved.source).toBe('detected');
+      expect(resolved.layers.map((l) => l.id)).toContain('orm-query');
+      expect(typescriptLayers(resolved.layers)).toBe(1);
+    });
+  });
+
+  it('keeps every layer when neither half speaks for the language', () => {
+    withTypescriptProject((root) => {
+      const resolved = resolveLayers({
+        cwd: root,
+        signalTable: { manifests: MANIFESTS, signals: { typescript: [] }, generated: { signals: [] } },
+      });
+      // Not an assertion that nothing was detected — the recording names
+      // `orm-query`. The table cannot speak for TypeScript, so the detection is
+      // not evidence about the layers that went unmentioned.
+      expect(typescriptLayers(resolved.layers)).toBe(total);
+      expect(total).toBeGreaterThan(1);
+    });
+  });
+
+  // Pins the boundary from the caller's side. It does not prove the `typeof`
+  // guard: a malformed entry adds a key no runtime name equals either way, so
+  // removing the guard leaves this passing. Measured, not assumed.
+  it('does not count a generated entry that states no language', () => {
+    withTypescriptProject((root) => {
+      const resolved = resolveLayers({
+        cwd: root,
+        signalTable: {
+          manifests: MANIFESTS,
+          signals: { typescript: [] },
+          generated: {
+            signals: [{ match: 'drizzle-orm', layer: 'orm-query', strength: 'exact' }],
+          } as never,
+        },
+      });
+      expect(typescriptLayers(resolved.layers)).toBe(total);
+    });
+  });
+
+  it('still speaks for a language through the hand-written half alone', () => {
+    withTypescriptProject((root) => {
+      const resolved = resolveLayers({
+        cwd: root,
+        signalTable: {
+          manifests: MANIFESTS,
+          signals: { typescript: [{ match: 'drizzle-orm', layer: 'orm-query', strength: 'exact' }] },
+          generated: { signals: [] },
+        },
+      });
+      expect(typescriptLayers(resolved.layers)).toBe(1);
+    });
+  });
+});
