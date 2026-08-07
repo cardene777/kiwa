@@ -23,7 +23,7 @@ CLI / shell / file IO の test を Layer 1 spec から自動生成する。
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.cli.md`) が存在
 - vitest + `@kiwa-lab/cli-test` が devDependencies で利用可能
-- 出力先 `tests/{module}.test.ts` への Write 権限
+- 出力先 `tests/{module}.cli.test.ts` への Write 権限
 
 ## ユーザーのリクエスト
 
@@ -33,7 +33,7 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名
 - `--input-spec {path}` — spec path
-- `--output {path}` — 生成 test の path (省略時は `tests/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
+- `--output {path}` — 生成 test の path (省略時は `tests/{module}.cli.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
 - `--no-review` — kiwa-review 自動呼出を skip
 
 ## 実行フロー
@@ -107,7 +107,7 @@ describe('kiwa CLI (help / errors)', () => {
 
 ## 完了条件
 
-- Layer 1 spec の Automation=yes 全 TC が `tests/{module}.test.ts` に Write 済
+- Layer 1 spec の Automation=yes 全 TC が `tests/{module}.cli.test.ts` に Write 済
 - `pnpm exec vitest run` 全 PASS
 - Topic 別 `describe` グループが spec の Topic 一覧と一致
 - exit code / stdout / stderr / file 副作用の観点が cover されている

@@ -39,6 +39,17 @@ $ARGUMENTS
 - `--coverage-threshold {N}` — integration coverage threshold (default 100%、 production target のみ評価対象)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
 - `--output {path}` — 生成 test の path (省略時は `test/integration/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
+
+### layer 別の生成先
+
+本 skill は 2 layer の consumer で、 `--output` 省略時の生成先は入力 spec の suffix に従う。
+
+| layer | 入力 spec の suffix | 生成 test |
+|---|---|---|
+| `integration` | (suffix なし) | `test/integration/{module}.test.ts` |
+| `api` | `.api.md` | `test/integration/{module}.api.test.ts` |
+
+以前は 2 layer とも `{module}.test.ts` に書いており、 順に起動すると上書きされていた。
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip
 
 ## 出力 path 早見

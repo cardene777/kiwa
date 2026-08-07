@@ -177,7 +177,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-api": [
-          "{example}/test/integration/{module}.test.ts"
+          "{example}/test/integration/{module}.api.test.ts"
         ]
       }
     },
@@ -215,7 +215,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-data": [
-          "{example}/tests/{module}.test.ts"
+          "{example}/tests/{module}.data.test.ts"
         ]
       }
     },
@@ -234,7 +234,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-cli-test": [
-          "{example}/tests/{module}.test.ts"
+          "{example}/tests/{module}.cli.test.ts"
         ]
       }
     },
@@ -276,7 +276,7 @@
       "selected_by": "spec の記述から kiwa-orm が判断 (flag なし)",
       "test_outputs": {
         "kiwa-orm": [
-          "{example}/tests/{module}.test.ts"
+          "{example}/tests/{module}.orm.test.ts"
         ]
       }
     },
@@ -314,7 +314,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-nextjs": [
-          "{example}/tests/integration/{module}.nextjs.test.ts"
+          "{example}/tests/integration/{module}.middleware.test.ts"
         ]
       }
     },
@@ -333,7 +333,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-nextjs": [
-          "{example}/tests/integration/{module}.nextjs.test.ts"
+          "{example}/tests/integration/{module}.rsc.test.ts"
         ]
       }
     },
@@ -352,7 +352,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-nextjs": [
-          "{example}/tests/integration/{module}.nextjs.test.ts"
+          "{example}/tests/integration/{module}.parallel.test.ts"
         ]
       }
     },
@@ -371,7 +371,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-nextjs": [
-          "{example}/tests/integration/{module}.nextjs.test.ts"
+          "{example}/tests/integration/{module}.rsc-streaming.test.ts"
         ]
       }
     },

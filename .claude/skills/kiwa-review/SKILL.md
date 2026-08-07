@@ -92,17 +92,17 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 | `e2e-generic` | `/kiwa-e2e` | `{example}/tests/e2e/{module}.spec.ts` |
 | `a11y` | `/kiwa-a11y` | `{example}/tests/a11y/{module}.test.tsx` または `{example}/tests/a11y/{module}.spec.ts` |
 | `integration` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
-| `api` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
+| `api` | `/kiwa-api` | `{example}/test/integration/{module}.api.test.ts` |
 | `ui` | `/kiwa-ui` | `{example}/tests/{module}.test.tsx` |
-| `data` | `/kiwa-data` | `{example}/tests/{module}.test.ts` |
-| `cli` | `/kiwa-cli-test` | `{example}/tests/{module}.test.ts` |
+| `data` | `/kiwa-data` | `{example}/tests/{module}.data.test.ts` |
+| `cli` | `/kiwa-cli-test` | `{example}/tests/{module}.cli.test.ts` |
 | `unit` | `/kiwa-vitest` | `{example}/test/unit/{module}.test.{ts,tsx}` |
-| `orm-query` | `/kiwa-orm` | `{example}/tests/{module}.test.ts` |
+| `orm-query` | `/kiwa-orm` | `{example}/tests/{module}.orm.test.ts` |
 | `nextjs-server-action` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-middleware` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-rsc` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-parallel-route` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-rsc-streaming` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-middleware` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.middleware.test.ts` |
+| `nextjs-rsc` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.rsc.test.ts` |
+| `nextjs-parallel-route` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.parallel.test.ts` |
+| `nextjs-rsc-streaming` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.rsc-streaming.test.ts` |
 | `edge-handler` | `/kiwa-edge` | `{example}/tests/{module}.edge.test.ts` |
 | `auth` | `/kiwa-auth` | `{example}/tests/{module}.auth.test.ts` |
 | `job-queue` | `/kiwa-queue` | `{example}/tests/{module}.queue.test.ts` |

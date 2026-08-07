@@ -143,9 +143,10 @@ describe('the defaults are pinned so they cannot drift silently', () => {
   it('each default is the value its own docs and the layer table agree on', () => {
     const before: Record<string, string> = {
       'kiwa-api': 'test/integration/{module}.test.ts',
-      'kiwa-cli-test': 'tests/{module}.test.ts',
-      'kiwa-data': 'tests/{module}.test.ts',
-      'kiwa-orm': 'tests/{module}.test.ts',
+      // #1844 で衝突を解くため spec の suffix を写した
+      'kiwa-cli-test': 'tests/{module}.cli.test.ts',
+      'kiwa-data': 'tests/{module}.data.test.ts',
+      'kiwa-orm': 'tests/{module}.orm.test.ts',
       'kiwa-nextjs': 'tests/integration/{module}.nextjs.test.ts',
       // Changed by #1842 from `examples/{example}/…` to the target-root form.
       'kiwa-rust': 'tests/{module}.rs',

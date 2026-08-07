@@ -34,6 +34,22 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 - `--module {name}` — spec / test の module 名キー (1 起動 = 1 module)
 - `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/integration/test-spec-{module}.nextjs.md`)
 - `--output {path}` — 生成 test の path (省略時は `tests/integration/{module}.nextjs.test.ts`)
+
+### mode 別の生成先
+
+`--output` 省略時の生成先は layer ごとに違う。 入力 spec の suffix をそのまま写した形で、
+5 mode を 1 file に上書きしないための分離。
+
+| layer | 入力 spec の suffix | 生成 test |
+|---|---|---|
+| `nextjs-server-action` | `.nextjs.md` | `tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-middleware` | `.middleware.md` | `tests/integration/{module}.middleware.test.ts` |
+| `nextjs-rsc` | `.rsc.md` | `tests/integration/{module}.rsc.test.ts` |
+| `nextjs-parallel-route` | `.parallel.md` | `tests/integration/{module}.parallel.test.ts` |
+| `nextjs-rsc-streaming` | `.rsc-streaming.md` | `tests/integration/{module}.rsc-streaming.test.ts` |
+
+以前は 5 layer とも `{module}.nextjs.test.ts` に書いており、 順に起動すると最後の 1 つしか
+残らなかった。 入力は suffix で分かれているのに出力が分かれていない形だった。
 - `--lang {ja|en|<ISO 639-1>}` — 生成 test 内コメント言語 (省略時は `--input-spec` から自動判定)
 - `--no-review` — Step 6 の `/kiwa-review --layer nextjs-server-action` 自動呼出を skip
 
