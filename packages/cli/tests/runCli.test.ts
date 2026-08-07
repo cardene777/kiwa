@@ -815,6 +815,34 @@ describe('layers', () => {
     }
   });
 
+  it('emits every field layers.json declares, not a subset', async () => {
+    // The caller narrows on what is declared. `providers` and `selected_by`
+    // are the pair that decides whether `kiwa-auth` generates one provider or
+    // all five, and a projection that drops them leaves no way to ask.
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      // Named directly: the fixture has only a `Cargo.toml`, so the TypeScript
+      // layers are excluded from a detected run for want of a manifest.
+      expect(await runCli(['layers', '--layer', 'auth', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: Record<string, unknown>[] };
+      const auth = parsed.layers.find((l) => l.id === 'auth');
+      expect(auth).toMatchObject({
+        providers: ['nextauth', 'lucia', 'better-auth', 'clerk', 'auth0'],
+        selected_by: 'kiwa-auth --provider',
+        backing_package: 'auth',
+        spec_dir: 'integration',
+      });
+      expect(auth).toHaveProperty('test_outputs');
+      expect(auth).toHaveProperty('targets');
+      expect(auth).toHaveProperty('variants');
+      expect(auth).toHaveProperty('also_consumed_by');
+      expect(auth).toHaveProperty('backing_runtime_package');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('emits the consumer skill and mode with --json', async () => {
     // The caller needs to know which skill to start and with which mode, and
     // making it look that up separately is how the contract drifted before.

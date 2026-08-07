@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-import { loadJson, loadLayerTable, resolveLayers } from '../src/detect/layers.js';
+import { loadJson, loadLayerTable, outputMap, resolveLayers, strList } from '../src/detect/layers.js';
 import { signalsFingerprint, type SignalTable } from '../src/detect/detect.js';
 import { loadSignalTable } from '../src/detect/index.js';
 
@@ -906,5 +906,106 @@ describe('a recording has to come from the table it is read against', () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+describe('the layer table is mirrored, not selected from', () => {
+  // Projecting a subset makes a second, narrower contract over the same SSOT:
+  // `docs/layers.json` declares what a layer needs and the only programmatic
+  // reader answers with less. Choosing which fields to pass is itself the
+  // drift, because the choice has to be remade every time a field is added.
+  const raw = loadJson<{ layers: Record<string, unknown>[] }>('layers.json')!;
+
+  it('every field in layers.json survives the projection', () => {
+    const declared = new Set(raw.layers.flatMap((row) => Object.keys(row)));
+    const produced = new Set(Object.keys(TABLE[0]!));
+    expect([...declared].sort()).toEqual([...produced].sort());
+  });
+
+  it('carries the providers and how they are chosen', () => {
+    // The case that motivated this. Without these two, a caller cannot narrow
+    // and `kiwa-auth` generates all five providers for an app using one.
+    const auth = TABLE.find((l) => l.id === 'auth')!;
+    expect(auth.providers).toEqual(['nextauth', 'lucia', 'better-auth', 'clerk', 'auth0']);
+    expect(auth.selected_by).toBe('kiwa-auth --provider');
+  });
+
+  it('carries variants, which are chosen without a flag', () => {
+    const orm = TABLE.find((l) => l.id === 'orm-query')!;
+    expect(orm.variants).toEqual(['drizzle', 'prisma', 'kysely']);
+    expect(orm.selected_by).toMatch(/kiwa-orm/);
+  });
+
+  it('carries where each consuming skill writes', () => {
+    const nextjs = TABLE.find((l) => l.id === 'nextjs-rsc')!;
+    expect(nextjs.test_outputs).toEqual({
+      'kiwa-nextjs': ['{example}/tests/integration/{module}.nextjs.test.ts'],
+    });
+  });
+
+  it('keeps lists and maps as lists and maps', () => {
+    // Passing them through `str()` would turn every one into null, which reads
+    // as "not declared" for a field that is declared and non-empty.
+    for (const layer of TABLE) {
+      expect(Array.isArray(layer.providers)).toBe(true);
+      expect(Array.isArray(layer.targets)).toBe(true);
+      expect(Array.isArray(layer.variants)).toBe(true);
+      expect(Array.isArray(layer.also_consumed_by)).toBe(true);
+      expect(typeof layer.test_outputs).toBe('object');
+      expect(Array.isArray(layer.test_outputs)).toBe(false);
+    }
+  });
+
+  it('gives a list field an empty list rather than null when it is absent', () => {
+    // Absent and empty mean the same thing for a list — no choice to make — so
+    // callers get one shape instead of two.
+    const noProviders = TABLE.filter((l) => !l.providers.length);
+    expect(noProviders.length).toBeGreaterThan(0);
+    for (const layer of noProviders) expect(layer.providers).toEqual([]);
+  });
+
+  it('leaves a scalar null when it is absent', () => {
+    // `mode` is declared on 6 of the 30. The other 24 have no key at all, and
+    // null says that more plainly than an empty string.
+    const withoutMode = TABLE.filter((l) => l.mode === null);
+    expect(withoutMode.length).toBeGreaterThan(0);
+  });
+});
+
+describe('a hand-edited layers.json degrades predictably', () => {
+  // `docs/layers.json` is written by hand and every entry in it is well formed,
+  // so none of this is reachable through the real file. It is reachable through
+  // an edit, and the alternative to handling it is a crash or a value of the
+  // wrong shape reaching a caller that trusts the type.
+
+  it('reads a missing list as empty rather than absent', () => {
+    // The caller checks `providers.length`. Null would throw there, and the
+    // throw would land far from the edit that caused it.
+    expect(strList(undefined)).toEqual([]);
+    expect(strList(null)).toEqual([]);
+    expect(strList('nextauth')).toEqual([]);
+    expect(strList({ 0: 'nextauth' })).toEqual([]);
+  });
+
+  it('drops list entries that are not usable strings', () => {
+    expect(strList(['nextauth', 42, null, '', 'lucia', { a: 1 }])).toEqual(['nextauth', 'lucia']);
+  });
+
+  it('reads a missing output map as empty', () => {
+    expect(outputMap(undefined)).toEqual({});
+    expect(outputMap(null)).toEqual({});
+    expect(outputMap('paths')).toEqual({});
+  });
+
+  it('does not read an array as an output map', () => {
+    // An array is an object. Passing it through would produce `{"0": [...]}`,
+    // keyed by index rather than by consuming skill.
+    expect(outputMap(['a', 'b'])).toEqual({});
+  });
+
+  it('keeps the map keyed by skill and its values lists', () => {
+    expect(outputMap({ 'kiwa-auth': ['a.ts', 7, 'b.ts'], 'kiwa-orm': 'not-a-list' })).toEqual({
+      'kiwa-auth': ['a.ts', 'b.ts'],
+      'kiwa-orm': [],
+    });
   });
 });
