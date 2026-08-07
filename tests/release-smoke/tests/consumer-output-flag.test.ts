@@ -166,7 +166,14 @@ describe('a consumer can be told where its input is and what to call it', () => 
       const line = read(`.claude/skills/${skill}/SKILL.md`)
         .split('\n')
         .find((l) => SPEC_FLAGS.some((flag) => l.startsWith(`- \`${flag} {path}\``)));
-      return !line || !/(?:省略時は|default) `[^`]+`/.test(line);
+      if (!line) return true;
+      // A literal path, or a pointer to the section that resolves one. The
+      // property is whether the caller learns what omitting the flag does, and
+      // #1861 moves skills from stating a path to naming the section that
+      // derives it — which answers the same question.
+      const statesLiteral = /(?:省略時は|default) `[^`]+`/.test(line);
+      const pointsAtSection = /省略時は[^、]*§[^、]+で解決/.test(line);
+      return !statesLiteral && !pointsAtSection;
     });
     expect(silent.sort()).toEqual([
       'kiwa-auth',

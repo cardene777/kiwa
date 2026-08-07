@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -103,17 +103,6 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(specSuffix, `spec path を自前で組む行が残っている:\n${specSuffix.join('\n')}`).toEqual([]);
   });
 
-  it('LANG ではなく DOC_LANG を使うと書いてある', () => {
-    // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
-    // makes the CLI refuse the value. Measured (#1860 Round 1, F1).
-    for (const skill of ['kiwa-app', 'kiwa-review']) {
-      const body = read(`.claude/skills/${skill}/SKILL.md`);
-      expect(body, `${skill} が LANG を使わない旨を書いていない`).toMatch(
-        /`LANG` を使わない/,
-      );
-    }
-  });
-
   it('skill が実際に渡す変数が DOC_LANG である', () => {
     // Asserted on the command, not on the prose beside it. Reverting the
     // command to `${LANG:+--lang "$LANG"}` left the warning in place and every
@@ -128,6 +117,81 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(invocation, '呼出が shell locale の LANG を渡している').not.toMatch(
       /\$\{LANG[:}]|"\$LANG"/,
     );
+  });
+
+  /**
+   * The skills migrated onto the CLI path so far.
+   *
+   * Listed rather than derived, because migration is staged (#1861 moves 20
+   * consumers in four groups) and a derived list would either pass vacuously
+   * before the work or fail for skills nobody has reached yet.
+   *
+   * A skill is added here when its group lands. What the check itself asserts
+   * is derived from the file, so adding a name is the only edit needed.
+   */
+  const MIGRATED = ['kiwa-app', 'kiwa-review', 'kiwa-nextjs', 'kiwa-api', 'kiwa-ui'];
+
+  it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
+    // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
+    // makes the CLI refuse the value. Measured (#1860 Round 1, F1).
+    //
+    // Applied to every migrated skill, not to the two moved first. Naming them
+    // meant a skill migrated later could drop the warning and nothing noticed.
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    expect(body, `${skill} が LANG を使わない旨を書いていない`).toMatch(/`LANG` を使わない/);
+  });
+
+  it.each(MIGRATED)('%s が CLI から spec path を受け取る', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    // Asserted on the command, not on prose about the rule. `kiwa-review` had
+    // a note next to a `LANG_SUFFIX` block that was still the real instruction.
+    const invocation = body
+      .split('\n')
+      .filter((line) => line.includes('kiwa layers --json'))
+      .join('\n');
+    expect(invocation, `${skill} が kiwa layers を呼んでいない`).toContain('--lang');
+  });
+
+  it.each(MIGRATED)('%s が spec path の LANG_SUFFIX を自前で組まない', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    // The report path (`tests/reports/`) builds its own suffix and is outside
+    // what `kiwa layers` resolves, so only the spec path is checked.
+    const offenders = body
+      .split('\n')
+      .filter((line) => line.includes('LANG_SUFFIX') && line.includes('test-spec'));
+    expect(offenders, `自前で組む行が残っている:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it.each(MIGRATED)('%s の --input-spec 既定が固定 path でない', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const option = body.split('\n').find((line) => line.includes('`--input-spec'));
+    if (option === undefined) return; // 入口 skill と review は --input-spec を持たない
+    // A hardcoded default is the English path, so `--lang ja` silently points
+    // at a file the producer did not write (#1855).
+    expect(option, `${skill} の既定が固定 path`).not.toMatch(/省略時は `tests\/spec/);
+  });
+
+  it('移行済 skill の数が Issue の群と一致する', () => {
+    // A guard against the list drifting: group 1 is three skills plus the two
+    // moved in #1860.
+    expect(MIGRATED).toHaveLength(5);
+  });
+
+  it('未移行の skill が残っていることを記録する', () => {
+    // Not a failure — the migration is staged. Asserted so the count moving to
+    // zero is visible rather than something to notice by hand.
+    const skills = readdirSync(resolve(REPO_ROOT, '.claude/skills'));
+    const remaining = skills.filter((name) => {
+      if (MIGRATED.includes(name) || name === 'kiwa-design') return false;
+      try {
+        const body = read(`.claude/skills/${name}/SKILL.md`);
+        return /省略時は `tests\/spec/.test(body);
+      } catch {
+        return false;
+      }
+    });
+    // #1861 群 2-4. Recorded, not required to be empty.
+    expect(remaining.length, `未移行: ${remaining.join(', ')}`).toBeLessThanOrEqual(20);
   });
 
   it('入口 skill が --lang を CLI に渡す', () => {

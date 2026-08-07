@@ -33,7 +33,7 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致)
-- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/integration/test-spec-{module}.md`)
+- `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
 - `--target {path}` — 対象実装 file (`app/api/*/route.ts` 等、 grep で識別)
 - `--backend {msw|supertest|playwright}` — integration test backend (default `msw` for Next.js App Router、 supertest / playwright も選択可)
 - `--coverage-threshold {N}` — integration coverage threshold (default 100%、 production target のみ評価対象)
@@ -59,6 +59,24 @@ $ARGUMENTS
 | integration test file | `test/integration/{module}.test.ts` |
 | coverage report | `tests/reports/integration/coverage-report-{module}.{lang}.md` |
 
+### 入力 spec の path は CLI から受け取る
+
+`--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。
+
+```bash
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" \
+  | jq -r '.layers[0].spec_path' \
+  | sed "s/{module}/$MODULE/"
+```
+
+返る `spec_path` は言語込みで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix`)。 en と省略は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}` で、 layer suffix とは直交して言語が常に末尾に来る。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
+
+本 SKILL.md 内の spec path 表記は説明のための例示で、 解決の指示ではない。
+
 ## 実行フロー
 
 5 段階を順に通る。 飛ばし / 順序入れ替えは禁止。
@@ -69,11 +87,11 @@ AskUserQuestion で coverage report 生成言語を確認。 `--lang {code}` 指
 
 ### lang suffix 規約 (Issue #341 SSOT)
 
-producer (`/kiwa-design`) と consumer の file 名規約一致: en (default) は suffix なし / ja は `.ja` / その他 ISO 639-1 は `.{code}`。 `${LANG_SUFFIX}` 計算は `/kiwa-design` § lang suffix 規約 参照。 input spec path は `tests/spec/integration/test-spec-${MODULE}${LANG_SUFFIX}.md` (en で `.md`、 ja で `.ja.md`、 layer suffix `.api.md` と直交)。
+input spec の path は § 入力 spec の path は CLI から受け取る で解決する。 producer (`/kiwa-design`) と同じ規約を CLI が実装しており、 skill 側では組み立てない。
 
 ### Step 1: Layer 1 spec 読込
 
-`tests/spec/integration/test-spec-{module}.md` を Read、 9 column 表から TC 行を全件抽出。 「API 契約」 sub-section (HTTP method / path / request / response) と「外部連携」 sub-section (3rd-party API / RPC / webhook) を併読し、 各 TC を msw handler / Playwright request の対応 helper に対応付ける map を内部で作る。
+§ 入力 spec の path は CLI から受け取る で解決した path を Read、 9 column 表から TC 行を全件抽出。 「API 契約」 sub-section (HTTP method / path / request / response) と「外部連携」 sub-section (3rd-party API / RPC / webhook) を併読し、 各 TC を msw handler / Playwright request の対応 helper に対応付ける map を内部で作る。
 
 ### Step 2: 対象実装 file 確認
 
