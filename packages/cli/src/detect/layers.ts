@@ -50,22 +50,45 @@ import { presentManifests, type ManifestPresence } from './scan.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-/** One layer as `docs/layers.json` declares it. */
+/**
+ * One layer as `docs/layers.json` declares it, field for field.
+ *
+ * Mirrors the file rather than selecting from it. Projecting a subset makes a
+ * second, narrower contract over the same SSOT: the file declares what a layer
+ * needs and the only programmatic reader answers with less, so a caller cannot
+ * ask what is written down. `auth` declares five `providers` and says they are
+ * chosen by `kiwa-auth --provider`; with those fields dropped, a caller has no
+ * way to narrow and falls back to generating all five.
+ *
+ * Choosing which fields to pass is itself the drift: the decision has to be
+ * remade every time a field is added, and until it is, the declaration exists
+ * and does not arrive. `every field in layers.json survives the projection`
+ * fails when the two diverge.
+ */
 export interface LayerRecord {
   id: string;
-  consumer_skill: string | null;
-  mode: string | null;
+  spec_dir: string | null;
   spec_path: string | null;
   runtime: string | null;
+  consumer_skill: string | null;
+  /** Skills that consume this layer besides `consumer_skill`. */
+  also_consumed_by: string[];
+  backing_package: string | null;
+  backing_runtime_package: string | null;
+  /** Interchangeable implementations of the same subject (`auth` has five). */
+  providers: string[];
+  /** Values the consuming skill accepts for `--target`. */
+  targets: string[];
+  /** Like providers, but where the choice shows in the test rather than a flag. */
+  variants: string[];
+  /** How a provider or variant gets chosen, in prose. Null when there is no choice. */
+  selected_by: string | null;
+  mode: string | null;
+  /** Where each consuming skill writes, keyed by skill. */
+  test_outputs: Record<string, string[]>;
 }
 
-interface RawLayer {
-  id?: unknown;
-  consumer_skill?: unknown;
-  mode?: unknown;
-  spec_path?: unknown;
-  runtime?: unknown;
-}
+type RawLayer = Record<string, unknown>;
 
 export type LayerSource = 'flag' | 'detected' | 'all';
 
@@ -80,6 +103,30 @@ export interface ResolvedLayers {
 
 function str(value: unknown): string | null {
   return typeof value === 'string' && value ? value : null;
+}
+
+/**
+ * A list field, with anything unusable dropped rather than carried.
+ *
+ * Absent and empty are the same answer here — `providers: []` and no
+ * `providers` key both mean "no choice to make" — so both become `[]` and the
+ * caller has one shape to handle. Scalars keep `null` because absent and empty
+ * string are also the same answer, and `null` says so more plainly than `''`.
+ */
+export function strList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === 'string' && entry !== '');
+}
+
+/** `test_outputs`, which maps a consuming skill to the paths it writes. */
+export function outputMap(value: unknown): Record<string, string[]> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([skill, paths]) => [
+      skill,
+      strList(paths),
+    ]),
+  );
 }
 
 /**
@@ -139,10 +186,19 @@ export function loadLayerTable(): LayerRecord[] {
     .filter((row) => str(row.id))
     .map((row) => ({
       id: str(row.id)!,
-      consumer_skill: str(row.consumer_skill),
-      mode: str(row.mode),
+      spec_dir: str(row.spec_dir),
       spec_path: str(row.spec_path),
       runtime: str(row.runtime),
+      consumer_skill: str(row.consumer_skill),
+      also_consumed_by: strList(row.also_consumed_by),
+      backing_package: str(row.backing_package),
+      backing_runtime_package: str(row.backing_runtime_package),
+      providers: strList(row.providers),
+      targets: strList(row.targets),
+      variants: strList(row.variants),
+      selected_by: str(row.selected_by),
+      mode: str(row.mode),
+      test_outputs: outputMap(row.test_outputs),
     }));
 }
 

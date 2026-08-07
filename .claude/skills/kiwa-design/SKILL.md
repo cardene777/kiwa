@@ -60,7 +60,15 @@ $ARGUMENTS
 kiwa layers --json
 ```
 
-返る形は `{ "source": "flag|detected|all", "layers": [{ "id", "consumer_skill", "mode", "spec_path", "runtime" }] }`。 `layers[].id` が対象 layer、 `consumer_skill` と `mode` が Layer 2 skill の起動引数になる。
+返る形は `{ "source": "flag|detected|all", "layers": [...] }` で、 `layers[]` の各要素は `docs/layers.json` の宣言をそのまま持つ。 field を選んで渡していないので、 宣言されているものは全て読める。
+
+`layers[].id` が対象 layer、 `consumer_skill` と `mode` が Layer 2 skill の起動引数になる。 本 skill が併せて見る field は 3 つ。
+
+| field | 用途 |
+|---|---|
+| `spec_path` / `spec_dir` | spec の書き出し先 |
+| `providers` / `variants` | 同じ主題の実装違い (`auth` は 5 provider、 `orm-query` は 3 variant) |
+| `selected_by` | provider / variant がどう選ばれるか (`kiwa-auth --provider` / spec の記述から判断 / 選択なし) |
 
 | `source` | 意味 | 本 skill の振る舞い |
 |---|---|---|
@@ -83,7 +91,9 @@ kiwa layers --json
 
 ### 絞り込みが効かない範囲
 
-検出は 30 layer 中 10 件しか語れない (`docs/stack-signals.json` の signal は rust 4 / go 4 / typescript 0)。 除外は runtime ごとに 5 通りで判定され、 語れない runtime は絞られない。
+検出は 30 layer 中 15 件しか語れない (`docs/stack-signals.json` の signal が名指しするのは rust 5 / go 5 / nextjs 5)。 残る 15 件 (typescript 14 + `contract`) はどの signal も名指ししていないため絞られない。
+
+**語れるかどうかは layer ごとに判定される**。 signal の被覆は言語内で一様ではなく、 typescript は 19 layer 中 5 件しか名指しされていない。 言語単位で判定すると、 nextjs 5 件の証拠で残り 14 件まで根拠なく落ちる。
 
 | 条件 | 扱い |
 |---|---|
@@ -92,8 +102,10 @@ kiwa layers --json
 | project に manifest が無い | 除く (不在の証拠) |
 | manifest はあるが読んでいない | 全部残す (問うていない) |
 | 同じ言語に未読の manifest がある | 全部残す (読んだ分が全体を代表しない) |
-| 読んだが signal が無い (今の typescript) | 全部残す (語れない) |
-| 読んで signal もある | 検出した layer に絞る |
+| どの signal も名指ししない layer | 残す (語れない) |
+| signal が名指しする layer | 検出されたものだけ残す |
+
+recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む側の table が一致しない場合に捨てられる。 signal を足した後の初回は `source=all` に倒れるので、 `kiwa init --detect` を掛け直す。
 
 存在するかどうかは `kiwa layers` を叩いた時点で調べる (記録から読まない)。 検出後に `go.mod` を足した場合もその場で見えるため、 再検出は要らない。
 
