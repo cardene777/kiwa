@@ -1,0 +1,166 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it } from 'vitest';
+
+import { repoRoot } from './repo-root.js';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+
+const REPO_ROOT = repoRoot(HERE);
+
+function read(rel: string): string {
+  return readFileSync(resolve(REPO_ROOT, rel), 'utf-8');
+}
+
+interface Layer {
+  id: string;
+  consumer_skill: string;
+  also_consumed_by: string[];
+  test_outputs: Record<string, string[]>;
+}
+
+const LAYERS = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).layers;
+
+/**
+ * The option list a skill declares, read from the section that declares options.
+ *
+ * Scanning the whole file finds `/kiwa-review --layer nextjs-server-action` and
+ * reads it as a `--layer` option of the file's own skill. That mistake shipped
+ * once already (#1841 Round 1), so the section boundary is the check.
+ */
+function declaredOptions(skill: string): string[] {
+  const text = read(`.claude/skills/${skill}/SKILL.md`);
+  const head = ['## オプション', '## 引数仕様', '## 引数'].find((h) => text.includes(h));
+  if (!head) return [];
+  const from = text.slice(text.indexOf(head) + 3);
+  const next = from.indexOf('\n## ');
+  const section = next >= 0 ? from.slice(0, next) : from;
+  return [...new Set(section.match(/^- `(--[a-z][a-z-]*)/gm)?.map((m) => m.slice(3)) ?? [])];
+}
+
+/**
+ * The path a skill writes to when `--output` is omitted, as its own docs state it.
+ *
+ * Two spellings are in use — `省略時は \`…\`` and `default \`…\`` — and both are
+ * read. Normalising the wording is a separate change; reading only one of them
+ * would report three skills as declaring no default when they do.
+ */
+function declaredDefault(skill: string): string | null {
+  const line = read(`.claude/skills/${skill}/SKILL.md`)
+    .split('\n')
+    .find((l) => l.startsWith('- `--output {path}`'));
+  if (!line) return null;
+  return line.match(/(?:省略時は|default) `([^`]+)`/)?.[1] ?? null;
+}
+
+/** Every skill some layer names as a producer of test files. */
+const producers = [
+  ...new Set(
+    LAYERS.flatMap((layer) => Object.keys(layer.test_outputs ?? {})).filter((skill) => {
+      try {
+        read(`.claude/skills/${skill}/SKILL.md`);
+        return true;
+      } catch {
+        return false;
+      }
+    }),
+  ),
+].sort();
+
+describe('a skill that writes test files can be told where to write them', () => {
+  // Until this landed, one producer of seven could. `docs/layers.json` declares
+  // where each layer's tests go, and changing that declaration did nothing for
+  // six of them — they write to a path fixed in their own prose. Declaring one
+  // thing and doing another is worse than not declaring it, because the entry
+  // point reads the declaration and reports success.
+  it('ten of the eighteen producers declare it, and the eight that do not are named', () => {
+    // Not "all of them". Four of the remaining eight declare a glob or brace
+    // expansion (`test/*.t.sol`, `test/unit/{module}.test.{ts,tsx}`) — they emit
+    // more than one file, so `--output {path}` is the wrong shape for them and
+    // the question of what shape fits is a separate one.
+    //
+    // Listing them by name means finishing the set has to update this, and
+    // adding a producer that cannot be redirected fails here rather than
+    // silently joining the backlog.
+    const without = producers.filter((skill) => !declaredOptions(skill).includes('--output'));
+    expect(without.sort()).toEqual([
+      'kiwa-a11y',
+      'kiwa-e2e',
+      'kiwa-edge',
+      'kiwa-forge',
+      'kiwa-hardhat',
+      'kiwa-play',
+      'kiwa-ui',
+      'kiwa-vitest',
+    ]);
+    expect(producers).toHaveLength(18);
+  });
+
+  it('every --output that exists states what it falls back to', () => {
+    // An option with no stated default is one whose behaviour has to be read
+    // out of the implementation, which is the state this replaces.
+    const withFlag = producers.filter((skill) => declaredOptions(skill).includes('--output'));
+    expect(withFlag).toHaveLength(10);
+    expect(withFlag.filter((skill) => !declaredDefault(skill))).toEqual([]);
+  });
+});
+
+describe('the stated default matches what the layer table declares', () => {
+  // Two shapes exist today. Most skills state a project-relative path and the
+  // table prefixes `{example}/`; Rust and Go state the `examples/` path itself.
+  // The second shape is why those ten layers cannot be written into somebody
+  // else's project (#1842) — recorded here so that fix has to update this.
+  const anchored = (skill: string): string[] =>
+    LAYERS.flatMap((layer) => layer.test_outputs?.[skill] ?? []);
+
+  it('each default appears in the table, with or without the example prefix', () => {
+    const mismatched: string[] = [];
+    for (const skill of producers) {
+      const fallback = declaredDefault(skill);
+      if (!fallback) continue;
+      const paths = anchored(skill);
+      if (!paths.length) continue;
+      const ok = paths.some((path) => path === fallback || path === `{example}/${fallback}`);
+      if (!ok) mismatched.push(`${skill}: ${fallback} vs ${paths.join(', ')}`);
+    }
+    expect(mismatched).toEqual([]);
+  });
+
+  it('names the two skills that state the examples path themselves', () => {
+    const selfAnchored = producers.filter((skill) => declaredDefault(skill)?.startsWith('examples/'));
+    expect(selfAnchored.sort()).toEqual(['kiwa-go', 'kiwa-rust']);
+  });
+});
+
+describe('adding the option changed nothing about where anything is written', () => {
+  // The point of keeping every default as it was: this lands on its own without
+  // touching the dogfood path, and the declaration changes come after.
+  it('the layer table is untouched by this change', () => {
+    // Measured against the values in place before the option existed. A default
+    // edited to "tidy it up" would move output for every existing example.
+    const before: Record<string, string> = {
+      'kiwa-api': 'test/integration/{module}.test.ts',
+      'kiwa-cli-test': 'tests/{module}.test.ts',
+      'kiwa-data': 'tests/{module}.test.ts',
+      'kiwa-orm': 'tests/{module}.test.ts',
+      'kiwa-nextjs': 'tests/integration/{module}.nextjs.test.ts',
+      'kiwa-rust': 'examples/{example}/tests/{module}.rs',
+      'kiwa-go': 'examples/{example}/{module}_test.go',
+    };
+    for (const [skill, path] of Object.entries(before)) {
+      expect(declaredDefault(skill)).toBe(path);
+    }
+  });
+
+  it('the two skills with mode suffixes say the suffix is not added to an explicit path', () => {
+    // `kiwa-rust` writes `{module}_axum.rs` under `--mode axum`. Applying that
+    // to a caller-supplied path would rewrite the name it asked for.
+    for (const skill of ['kiwa-rust', 'kiwa-go']) {
+      const line = read(`.claude/skills/${skill}/SKILL.md`)
+        .split('\n')
+        .find((l) => l.startsWith('- `--output {path}`'));
+      expect(line).toMatch(/suffix を足さない/);
+    }
+  });
+});

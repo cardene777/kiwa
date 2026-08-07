@@ -51,6 +51,7 @@ $ARGUMENTS
 - `--example {name}` — `examples/{name}/` の Go example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
 - `--coverage-threshold {N}` — `go test -cover` coverage 目標 (default 80%)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
+- `--output {path}` — 生成 test の path (省略時は `examples/{example}/{module}_test.go`、 `--mode` 指定時は suffix 付き)。 指定した場合は渡された path をそのまま使い、 suffix を足さない
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip (CI 用)
 
 ## 出力 path 早見

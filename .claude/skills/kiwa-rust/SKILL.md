@@ -51,6 +51,7 @@ $ARGUMENTS
 - `--example {name}` — `examples/{name}/` の Rust example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
 - `--coverage-threshold {N}` — cargo llvm-cov coverage 目標 (default 80%、 `cargo llvm-cov` 未 install なら Step 5 で警告のみ出して skip)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
+- `--output {path}` — 生成 test の path (省略時は `examples/{example}/tests/{module}.rs`、 `--mode` 指定時は suffix 付き)。 指定した場合は渡された path をそのまま使い、 suffix を足さない
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip (CI 用)
 
 ## 出力 path 早見

@@ -38,6 +38,7 @@ $ARGUMENTS
 - `--backend {msw|supertest|playwright}` — integration test backend (default `msw` for Next.js App Router、 supertest / playwright も選択可)
 - `--coverage-threshold {N}` — integration coverage threshold (default 100%、 production target のみ評価対象)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
+- `--output {path}` — 生成 test の path (省略時は `test/integration/{module}.test.ts`)
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip
 
 ## 出力 path 早見

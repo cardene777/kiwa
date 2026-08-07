@@ -34,6 +34,7 @@ $ARGUMENTS
 - `--module {name}` — 対象 module 名
 - `--input-spec {path}` — spec path (省略時は `tests/spec/integration/test-spec-{module}.orm.md`)
 - `--schema-import {path}` — schema file path (default `../src/schema`)
+- `--output {path}` — 生成 test の path (省略時は `tests/{module}.test.ts`)
 - `--no-review` — kiwa-review 自動呼出を skip
 
 ## 出力 path 早見
