@@ -73,7 +73,7 @@ import {
 
 ### Step 3: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer cli --test-path tests/{module}.test.ts` を内部呼出し、 5 軸判定。
+`/kiwa-review --mode test-review --module {module} --layer cli --test-path <解決した出力先>` を内部呼出し、 5 軸判定。 `--test-path` には生成した path をそのまま渡す (既定は `tests/{module}.cli.test.ts`)。
 
 ## 実装例 (実 PoC `examples/cli-poc/`)
 

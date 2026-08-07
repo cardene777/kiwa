@@ -106,7 +106,7 @@ describe('{MODULE} server action', () => {
 
 ### Step 4: test 実行 + 結果取得
 
-`pnpm vitest run tests/integration/{module}.nextjs.test.ts --environment node` を起動。 fail 行を spec の対応 TC ID と紐付けて report する。
+`pnpm vitest run <解決した出力先> --environment node` を起動。 出力先は § mode 別の生成先 で layer ごとに違うので、 生成した path をそのまま渡す。 fail 行を spec の対応 TC ID と紐付けて report する。
 
 ### Step 5: result-review 用 metadata の Write
 

@@ -198,6 +198,41 @@ describe('the defaults are pinned so they cannot drift silently', () => {
     }
   });
 
+  it('a consumer serving several layers does not hardcode one of their paths', () => {
+    // Splitting the declarations (#1844) is inert while the steps still name a
+    // single literal: `kiwa-nextjs` ran `vitest tests/integration/{module}.nextjs.test.ts`
+    // for all five modes, and `kiwa-cli-test` passed the old path to
+    // `/kiwa-review`. Four skills carried this and none of the checks saw it.
+    //
+    // The lines that run or review the generated file have to name the resolved
+    // output, not a path.
+    const multi = ['kiwa-nextjs', 'kiwa-api', 'kiwa-cli-test', 'kiwa-data'];
+    const offenders: string[] = [];
+    for (const skill of multi) {
+      const text = read(`.claude/skills/${skill}/SKILL.md`);
+      const declaring = new Set(
+        text
+          .split('\n')
+          .filter((l) => l.startsWith('- `--output') || l.trim().startsWith('|'))
+          .map((l) => l.trim()),
+      );
+      for (const line of text.split('\n')) {
+        // Only lines that run or review a *specific generated file*. A directory
+        // (`vitest run test/integration/`) or a flag-only invocation
+        // (`vitest run --coverage`) names no single output and is not the issue.
+        const runsOrReviews = /vitest run|--test-path|出力 file 名は/.test(line);
+        const namesOneFile = /\{module\}[^\s`]*\.(test\.tsx?|spec\.ts|rs|go)/.test(line);
+        if (!runsOrReviews || !namesOneFile) continue;
+        // The declaration itself is where the literal belongs.
+        if (declaring.has(line.trim())) continue;
+        if (!line.includes('解決した出力先') && !line.includes('解決済み出力先')) {
+          offenders.push(`${skill}: ${line.trim().slice(0, 60)}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
   it('the two skills with mode suffixes say the suffix is not added to an explicit path', () => {
     // `kiwa-rust` writes `{module}_axum.rs` under `--mode axum`. Applying that
     // to a caller-supplied path would rewrite the name it asked for.
