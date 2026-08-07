@@ -153,13 +153,36 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 
 | 軸 | 評価内容 | passing 基準 |
 |---|---|---|
-| **TC ID mapping** | spec の全 TC ID が test code に存在 (1:1 mapping)、 spec にない test ID は許容するが flag | spec TC 100% 実装、 余剰 test は別途記載 |
+| **TC ID mapping** | spec の全 TC ID が test code に存在 (1:1 mapping)、 spec にない test ID は許容するが flag。 意図的に生成しなかった TC は下記 § 未生成 TC の扱い に従って除く | spec TC 100% 実装 (未生成 TC を除く)、 余剰 test は別途記載 |
 | **観点 grouping 一致** | test code の describe / コメント (`// 観点 N: {name}`) が spec の観点 grouping と一致 | 全観点 grouping が spec と同名 |
 | **assertion 品質** | spec の「期待結果」 column と test の `expect()` / `assertEq()` が意味的に対応、 truthy 判定 (`toBeTruthy()`) ではなく具体値 assertion | 抽象 assertion (`toBeTruthy` 等) 0 件、 具体値検証 |
-| **観点別 cover 率** | 観点ごとに spec TC が全件実装されているか (例 観点 5 権限が 5 TC 設計、 test に 3 件しかなければ 60%) | 各観点 100% (実装漏れなし) |
+| **観点別 cover 率** | 観点ごとに spec TC が全件実装されているか (例 観点 5 権限が 5 TC 設計、 test に 3 件しかなければ 60%)。 未生成 TC は母数から除く | 各観点 100% (実装漏れなし、 未生成 TC を除く) |
 | **追加すべき test 提案** | spec にも test にも無いが、 contract / UI 実装を見て「この観点 / 機能の test も追加すべき」 と判定 | 提案を report に列挙 (実装漏れと将来 enhancement を区別) |
 
 各軸 0-10 score、 `weighted_score = (mapping 0.3 + grouping 0.15 + assertion 0.25 + cover 0.2 + 提案 0.1)` で総合判定。
+
+##### 未生成 TC の扱い
+
+Layer 2 は spec の TC を全件 test にするとは限らない。 生成しないと判断した TC は、 生成 test の **冒頭 2 行**に残っている。
+
+```
+// mock: store, findUserByEmail, createUser
+// 未生成: T-NA-050, T-NA-070 (冪等性 / セキュリティ)。 ./lib/users.ts に reset か seed を export すれば生成できる
+```
+
+この 2 行があれば、 列挙された TC ID を **実装漏れと分けて数える**。 TC ID mapping の分母からも、 観点別 cover 率の分母からも除く。
+
+**除くだけで済ませない**。 report には「未生成」 として別枠で列挙し、 冒頭行に書かれた次の手 (どの module に何を export すれば生成できるか) をそのまま載せる。 分母から消しただけだと、 検証されていない観点があることが report から消える。
+
+理由は `skills/kiwa-nextjs/SKILL.md` § 選択 3 では観点によって生成しない にある。 module ごと差し替えた test は mock の実装を測るだけなので、 通っても何も証明しない。 それを実装漏れとして数えると「mock でもいいから足せ」 という圧力になり、 落ちようのない test が戻る。
+
+冒頭 2 行が無い test は従来どおり全件を分母に入れる。 記録が無いことを「意図的に生成しなかった」 と解釈しない (fail-closed)。
+
+**除外を score の得点に変えない**。 分母から外すと cover 率は上がる。 未生成 TC を持つ run が、 全件生成した run より高い `weighted_score` を出しうる = gate を通すほど成績が良くなる。
+
+そのため未生成 TC が 1 件でもある場合、 総合判定は PASS にしない。 `CONDITIONAL` として返し、 未検証の観点と次の手を添える。 score は参考値として併記するが、 判定の根拠にしない。
+
+判定を分けるのは、 「全件通った」 と「一部は測っていないが残りは通った」 が別の状態だから。 数字 1 つに畳むと後者が前者に見える。
 
 ### Step 3: report Write
 

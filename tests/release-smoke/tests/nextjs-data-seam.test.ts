@@ -16,6 +16,12 @@ const SKILL = readFileSync(
   'utf-8',
 );
 
+/** The downstream skill that scores the generated test. */
+const REVIEW_SKILL = readFileSync(
+  resolve(REPO_ROOT, '.claude/skills/kiwa-review/SKILL.md'),
+  'utf-8',
+);
+
 /**
  * The body of a `##`/`###`/`####` section, up to the next heading of the same
  * or shallower depth.
@@ -567,113 +573,125 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     },
   );
 
-  // #1858: replacing the module wholesale makes the security / 権限 / 冪等性
-  // cases assert against the mock, so a real defect in that module still
-  // passes. Those rows are not generated at all under 選択 3 — a green test is
-  // read as evidence, and one that cannot fail is worse than an absent one.
-  const GATED_OBSERVATIONS = ['権限', '冪等性', 'セキュリティ'];
+  // #1858: replacing the module wholesale makes any TC whose expectation the
+  // module decides assert against the mock, so a real defect still passes.
+  // Those rows are not generated at all — a green test is read as evidence,
+  // and one that cannot fail is worse than an absent one.
+  const GATE_SECTION = '##### 差し替えた module に答えを預けた TC は生成しない';
 
-  const GATE_SECTION = '##### 選択 3 では観点によって生成しない';
-
-  /** The `Observation` values Step 2 says 選択 3 must not generate. */
-  function gatedObservations(): string[] {
-    // Scoped to the gate's own table. Reading the whole data-seam section also
-    // picked up the reporting table's `Observation` row, which says what the
-    // reason column means — not which observations are gated.
+  /** What the gate keys on, read from its decision table. */
+  function gateOutcomes(): { decidedBy: string; generate: boolean }[] {
     const rows = section(GATE_SECTION)
       .split('\n')
-      .filter((line) => line.startsWith('|') && line.includes('生成しない'));
-    // Read from the table rather than listed here, so changing the table
-    // changes what the test requires.
-    return rows.map((line) => (line.split('|')[1] ?? '').trim()).filter((s) => s !== '');
+      .filter((line) => line.startsWith('|') && /生成する|生成しない/.test(line));
+    return rows.map((line) => {
+      const cells = line.split('|').map((c) => c.trim());
+      return {
+        decidedBy: cells[1] ?? '',
+        generate: !(cells[2] ?? '').includes('生成しない'),
+      };
+    });
   }
 
-  it('生成しない観点が 3 つ、 表から読める', () => {
-    expect(gatedObservations().sort()).toEqual([...GATED_OBSERVATIONS].sort());
+  it('判定が観点名ではなく依存で書かれている', () => {
+    const gate = section(GATE_SECTION);
+    // The first version keyed on three observation names. That is wrong in
+    // three directions at once: the same observation can be independent of the
+    // module, the vocabulary differs per mode, and one TC can carry two
+    // observations (#1859 Round 1, F1 / F2 / F3).
+    expect(gate).toContain('観点名では行わない');
+    expect(gate, '何が Then を決めるかで判定していない').toMatch(/`Then` の期待値を決めているのが誰か/);
   });
 
-  it('選択 3 以外は 8 観点をすべて生成すると書いてある', () => {
-    const row = section(GATE_SECTION)
-      .split('\n')
-      .find((line) => line.startsWith('|') && line.includes('上記以外'));
-    expect(row, '「上記以外の 8 観点」 の行が無い').toBeTruthy();
-    // Both columns say generate — the gate is on the observation, not on 選択 3
-    // as a whole.
-    const cells = (row ?? '').split('|').map((c) => c.trim());
-    expect(cells.filter((c) => c === '生成する')).toHaveLength(2);
+  it('依存の 4 通りに答えが付いている', () => {
+    const outcomes = gateOutcomes();
+    expect(outcomes).toHaveLength(4);
+    // The module's behaviour and "cannot tell" both stop generation; the
+    // action's own branches and the seeded env do not.
+    const byKey = Object.fromEntries(outcomes.map((o) => [o.decidedBy, o.generate]));
+    const mocked = Object.keys(byKey).find((k) => k.includes('差し替えた module'));
+    const undecidable = Object.keys(byKey).find((k) => k.includes('決められない'));
+    expect(mocked, '差し替えた module の行が無い').toBeTruthy();
+    expect(undecidable, '判定不能の行が無い').toBeTruthy();
+    expect(byKey[mocked ?? ''], '差し替えた module 依存を生成してしまう').toBe(false);
+    expect(byKey[undecidable ?? ''], '判定不能を生成してしまう (fail-closed でない)').toBe(false);
+    // The other two generate, or the gate would drop everything.
+    expect(outcomes.filter((o) => o.generate)).toHaveLength(2);
   });
 
-  it('選択 1 / 選択 2 では 3 観点とも生成すると書いてある', () => {
-    for (const obs of GATED_OBSERVATIONS) {
-      const row = section(GATE_SECTION)
-        .split('\n')
-        .find((line) => line.startsWith(`| ${obs} `));
-      expect(row, `${obs} の行が無い`).toBeTruthy();
-      const cells = (row ?? '').split('|').map((c) => c.trim());
-      // cells = ['', Observation, 選択1/2, 選択3, '']
-      expect(cells[2], `${obs} が 選択 1 / 選択 2 で生成されない`).toBe('生成する');
-      expect(cells[3], `${obs} が 選択 3 で生成されてしまう`).toContain('生成しない');
+  it('観点名で切ってはいけない理由が 3 つ挙がっている', () => {
+    const gate = section(GATE_SECTION);
+    for (const reason of ['依存が違う', 'mode ごとに違う', '複数観点']) {
+      expect(gate, `理由の列挙に ${reason} が無い`).toContain(reason);
     }
   });
 
-  /**
-   * Apply the gate to a spec table using the rule read from SKILL.md.
-   *
-   * The generator is the skill, not code, so release-smoke cannot watch it
-   * obey. What it can check is that the rule is unambiguous enough to apply
-   * mechanically and that changing the table changes the outcome.
-   */
-  function applyGate(
-    rows: { id: string; observation: string }[],
-    route: Route,
-  ): { generated: string[]; omitted: string[] } {
-    const gated = route === 'mock' ? gatedObservations() : [];
-    const generated: string[] = [];
-    const omitted: string[] = [];
-    for (const row of rows) {
-      (gated.includes(row.observation) ? omitted : generated).push(row.id);
+  it('4 mode の Observation 語彙が 3 観点名と重ならないことを踏まえている', () => {
+    // Measured: 権限 / 冪等性 / セキュリティ appear 0 times in the four mode
+    // sections. A name-based gate would have been inert there.
+    const modes = SKILL.slice(SKILL.indexOf('## middleware mode'));
+    for (const name of ['権限', '冪等性', 'セキュリティ']) {
+      expect(
+        modes.split(name).length - 1,
+        `${name} が 4 mode 節に現れる (名前一致が成立してしまう)`,
+      ).toBe(0);
     }
-    return { generated, omitted };
-  }
-
-  // One row per observation `/kiwa-design` emits, so a change to the gated set
-  // shows up as a different split rather than passing silently.
-  const SPEC_ROWS = [
-    { id: 'T-001', observation: '正常系' },
-    { id: 'T-002', observation: '異常系' },
-    { id: 'T-003', observation: '境界値' },
-    { id: 'T-004', observation: '状態遷移' },
-    { id: 'T-005', observation: '権限' },
-    { id: 'T-006', observation: '入力バリデーション' },
-    { id: 'T-007', observation: '冪等性' },
-    { id: 'T-008', observation: '並行処理' },
-    { id: 'T-009', observation: '性能' },
-    { id: 'T-010', observation: 'セキュリティ' },
-    { id: 'T-011', observation: '回帰' },
-  ];
-
-  it('選択 3 では 3 観点の TC が落ち、 8 観点が残る', () => {
-    const { generated, omitted } = applyGate(SPEC_ROWS, 'mock');
-    expect(omitted).toEqual(['T-005', 'T-007', 'T-010']);
-    expect(generated).toHaveLength(8);
+    // So the gate must say it is mode-independent.
+    expect(section(GATE_SECTION)).toContain('5 mode 共通');
   });
 
-  it.each(['reset', 'resetModules'] as Route[])(
-    '%s では 11 観点すべてが残る',
-    (route) => {
-      // The same spec, a different module: what the module exports decides how
-      // far the tests reach. That relationship is the point of the gate.
-      const { generated, omitted } = applyGate(SPEC_ROWS, route);
-      expect(omitted).toEqual([]);
-      expect(generated).toHaveLength(SPEC_ROWS.length);
-    },
-  );
+  it('差し替えたかどうかを申告ではなく生成物で決める', () => {
+    const gate = section(GATE_SECTION);
+    // Declaring 選択 1 while emitting `vi.mock` would bypass the gate.
+    expect(gate).toContain("vi.mock('<state module>')");
+    expect(gate, '申告に頼らない旨が書かれていない').toMatch(/申告/);
+  });
 
-  it('落とす観点は 11 観点の中にある名前で書かれている', () => {
-    // A gated name that no spec ever emits would silently gate nothing.
-    const known = SPEC_ROWS.map((r) => r.observation);
-    for (const obs of gatedObservations()) {
-      expect(known, `${obs} は /kiwa-design が出さない観点名`).toContain(obs);
+  it('gate が 5 mode 共通だと書いてある', () => {
+    expect(section(GATE_SECTION)).toContain('5 mode 共通');
+  });
+
+  // The gate drops TCs on purpose. `/kiwa-review --mode test-review` scores
+  // 観点別 cover 率 with "各観点 100%" as the bar, so without a way to tell
+  // intent from omission it reports 実装漏れ for exactly those TCs — and the
+  // obvious fix is to add the mocked tests back, undoing the gate.
+  it('producer が下流との衝突を書いている', () => {
+    const record = section('##### 生成しなかった TC を返す');
+    expect(record, 'cover 率との衝突が書かれていない').toContain('cover 率');
+    expect(record).toContain('kiwa-review');
+  });
+
+  it('producer が Step 5 metadata にも未生成 TC を残す', () => {
+    const step5 = section('### Step 5: result-review 用 metadata の Write');
+    expect(step5, 'metadata に未生成 TC が無い').toContain('未生成 TC');
+    // Omitting the field when empty makes a gated run indistinguishable from a
+    // run where the gate never fired.
+    expect(step5).toMatch(/0 件なら/);
+  });
+
+  it('consumer が未生成 TC を実装漏れと分けて数える', () => {
+    expect(REVIEW_SKILL, 'kiwa-review が未生成 TC を知らない').toContain('未生成 TC の扱い');
+    const section2b = REVIEW_SKILL.split('##### 未生成 TC の扱い')[1] ?? '';
+    expect(section2b).toContain('TC ID mapping');
+    expect(section2b).toContain('cover 率');
+    expect(section2b, '未生成 TC を report に残す指示が無い').toMatch(/別枠で列挙|report には/);
+    expect(section2b, 'fail-closed の既定が無い').toMatch(/従来どおり全件|解釈しない/);
+  });
+
+  it('除外が score の得点にならない', () => {
+    const section2b = REVIEW_SKILL.split('##### 未生成 TC の扱い')[1] ?? '';
+    // Removing rows from the denominator raises cover 率, so a gated run could
+    // outscore a fully generated one — the gate would become a way to win.
+    expect(section2b, '相殺防止が書かれていない').toContain('CONDITIONAL');
+    expect(section2b).toMatch(/PASS にしない/);
+  });
+
+  it('producer と consumer が同じ 2 行を指している', () => {
+    // The record is the interface between the two skills. If they describe
+    // different markers, the exemption never applies and the gate gets undone.
+    for (const marker of ['// mock:', '// 未生成:']) {
+      expect(stepThreeTemplate(), `producer の template に ${marker} が無い`).toContain(marker);
+      expect(REVIEW_SKILL, `consumer が ${marker} を知らない`).toContain(marker);
     }
   });
 
