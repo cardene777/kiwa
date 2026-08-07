@@ -5,15 +5,43 @@ import { mkdtempSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { loadJson, loadLayerTable, resolveLayers } from '../src/detect/layers.js';
+import { signalsFingerprint, type SignalTable } from '../src/detect/detect.js';
+import { loadSignalTable } from '../src/detect/index.js';
+
+/** The table the CLI actually loads, so fixtures fingerprint what it will read. */
+const SIGNALS = loadSignalTable() as SignalTable;
 
 const TABLE = loadLayerTable();
+
+/**
+ * TypeScript layers that no signal names, so no detection can rule them out.
+ *
+ * Counted from the table rather than written as 14, because the number moves
+ * the moment a signal is added — and a stale literal would read as the count
+ * still holding.
+ */
+const UNDETECTABLE_TS = TABLE.filter(
+  (l) => l.runtime === 'typescript' && !l.id.startsWith('nextjs-'),
+).length;
 
 /** A timestamp after every file the fixture writes, so nothing reads as stale. */
 function fresh(): string {
   return new Date(Date.now() + 60_000).toISOString();
 }
 
-function fixture(files: Record<string, string>, stack: unknown | null): string {
+/**
+ * A project directory with an optional recording.
+ *
+ * The recording is stamped with the fingerprint of the table it will be read
+ * against, because the reader rejects one that cannot say which table produced
+ * it. Tests that inject a table pass it here so the two agree; tests about the
+ * rejection itself put their own `signals` in `stack`, which wins.
+ */
+function fixture(
+  files: Record<string, string>,
+  stack: unknown | null,
+  signalTable: SignalTable | null = SIGNALS,
+): string {
   const root = mkdtempSync(join(tmpdir(), 'kiwa-layers-'));
   for (const [rel, body] of Object.entries(files)) {
     mkdirSync(join(root, rel, '..'), { recursive: true });
@@ -21,7 +49,11 @@ function fixture(files: Record<string, string>, stack: unknown | null): string {
   }
   if (stack !== null) {
     mkdirSync(join(root, '.kiwa'), { recursive: true });
-    writeFileSync(join(root, '.kiwa', 'stack.json'), JSON.stringify(stack, null, 2));
+    const body =
+      stack && typeof stack === 'object' && !Array.isArray(stack)
+        ? { signals: signalsFingerprint(signalTable), ...(stack as Record<string, unknown>) }
+        : stack;
+    writeFileSync(join(root, '.kiwa', 'stack.json'), JSON.stringify(body, null, 2));
   }
   return root;
 }
@@ -76,10 +108,11 @@ describe('narrowing happens per runtime', () => {
     });
   });
 
-  it('keeps every TypeScript layer, because nothing can detect them', () => {
-    // `docs/stack-signals.json` carries no TypeScript signals — JS detection was
-    // left out of #1812 because the corpus to measure it against does not
-    // exist. Narrowing on an empty result would delete 19 layers on no evidence.
+  it('keeps the TypeScript layers no signal can detect', () => {
+    // Narrowing on an empty result would delete layers on no evidence. Which
+    // layers that applies to is asked per layer, not per language: `next` names
+    // the five `nextjs-*` ones, so their absence from a manifest with no
+    // dependencies is evidence and they go. Nothing names the other fourteen.
     const root = fixture({ 'package.json': '{"name":"app"}' }, {
       generated_at: fresh(),
       scanned: [{ manifest: 'package.json', language: 'typescript' }],
@@ -88,15 +121,18 @@ describe('narrowing happens per runtime', () => {
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       const counts = runtimes(resolved.layers);
-      expect(counts.typescript).toBe(TABLE.filter((l) => l.runtime === 'typescript').length);
+      expect(counts.typescript).toBe(UNDETECTABLE_TS);
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(0);
       expect(counts.rust).toBeUndefined();
       expect(counts.go).toBeUndefined();
     });
   });
 
   it('does not let a Rust detection delete the TypeScript half of a monorepo', () => {
-    // The case the first design got wrong: a Next.js frontend beside a Rust
-    // service would have lost all 19 TypeScript layers silently.
+    // The case the first design got wrong: a Rust service beside a JS package
+    // would have lost every TypeScript layer silently. What survives is now
+    // decided by TypeScript's own evidence — the `package.json` here has no
+    // dependencies, so the five `nextjs-*` layers go and the rest stay.
     const root = fixture(
       { 'Cargo.toml': '[dependencies]\n', 'package.json': '{"name":"app"}' },
       {
@@ -110,7 +146,7 @@ describe('narrowing happens per runtime', () => {
     );
     withFixture(root, () => {
       const counts = runtimes(resolveLayers({ cwd: root }).layers);
-      expect(counts.typescript).toBe(TABLE.filter((l) => l.runtime === 'typescript').length);
+      expect(counts.typescript).toBe(UNDETECTABLE_TS);
       expect(counts.rust).toBe(1);
       expect(counts.go).toBeUndefined();
     });
@@ -596,17 +632,22 @@ describe('an unusable recording is not an error', () => {
 
   it('reports all when the detection narrowed nothing', () => {
     // Saying `detected` here would claim the recording did work it did not do.
-    const root = fixture({ 'package.json': '{"name":"app"}', 'Cargo.toml': '[dependencies]\n', 'go.mod': 'module x\n' }, {
+    //
+    // Every narrowable layer has to be detected for that to hold, which now
+    // includes the five `nextjs-*` ones — so the fixture depends on `next`.
+    // Leaving it out ruled them out, and the recording then did do work.
+    const narrowable = (l: { id: string; runtime: string | null }): boolean =>
+      l.runtime === 'rust' || l.runtime === 'go' || l.id.startsWith('nextjs-');
+    const manifestFor = (l: { id: string; runtime: string | null }): string =>
+      l.runtime === 'rust' ? 'Cargo.toml' : l.runtime === 'go' ? 'go.mod' : 'package.json';
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"^15.0.0"}}', 'Cargo.toml': '[dependencies]\n', 'go.mod': 'module x\n' }, {
       generated_at: fresh(),
       scanned: [
         { manifest: 'package.json', language: 'typescript' },
         { manifest: 'Cargo.toml', language: 'rust' },
         { manifest: 'go.mod', language: 'go' },
       ],
-      detected: TABLE.filter((l) => l.runtime === 'rust' || l.runtime === 'go').map((l) => ({
-        layer: l.id,
-        manifest: l.runtime === 'rust' ? 'Cargo.toml' : 'go.mod',
-      })),
+      detected: TABLE.filter(narrowable).map((l) => ({ layer: l.id, manifest: manifestFor(l) })),
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
@@ -664,92 +705,206 @@ describe('what --detect writes is what the resolver reads', () => {
   });
 });
 
-describe('a language is speakable through either half of the signal table', () => {
-  // Narrowing only applies to a runtime the table has signals for; otherwise
-  // "nothing detected" carries no information and every layer is kept. The
-  // question is which half of the table counts, and TypeScript is the case
-  // that separates them: its hand-written list is empty and its signals come
-  // from six packages' peerDependencies.
+describe('a layer is narrowable only when a signal names it', () => {
+  // Narrowing asks "was it detected", and that only means something for a layer
+  // some signal could have detected. Coverage is uneven within a language, so
+  // the question is asked per layer: `orm-query` here is named and absent, so
+  // it goes; the layers nothing names stay regardless.
   const MANIFESTS = { 'Cargo.toml': 'rust', 'go.mod': 'go', 'package.json': 'typescript' };
+  const ORM: Record<string, unknown> = {
+    match: 'drizzle-orm',
+    layer: 'orm-query',
+    strength: 'exact',
+  };
 
-  function withTypescriptProject<T>(body: (root: string) => T): T {
-    const root = fixture({ 'package.json': '{"dependencies":{"drizzle-orm":"^0.30.0"}}\n' }, {
-      generated_at: fresh(),
-      scanned: [{ manifest: 'package.json', language: 'typescript' }],
-      detected: [{ layer: 'orm-query', manifest: 'package.json' }],
-    });
+  // The recording is stamped with the injected table's fingerprint, because the
+  // reader rejects one taken with a different table before it narrows anything.
+  function withEmptyProject<T>(signalTable: SignalTable, body: (root: string) => T): T {
+    const root = fixture(
+      { 'package.json': '{"name":"app"}' },
+      {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        detected: [],
+      },
+      signalTable,
+    );
     return withFixture(root, () => body(root));
   }
 
-  const typescriptLayers = (layers: { runtime: string | null }[]): number =>
-    layers.filter((l) => l.runtime === 'typescript').length;
+  const ids = (layers: { id: string }[]) => layers.map((l) => l.id);
 
-  const total = TABLE.filter((l) => l.runtime === 'typescript').length;
+  it('drops a layer the generated half names', () => {
+    const table = {
+      manifests: MANIFESTS,
+      signals: { typescript: [] },
+      generated: { signals: [{ ...ORM, language: 'typescript' }] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
+      expect(ids(resolved.layers)).not.toContain('orm-query');
+      // Same runtime, same recording, no signal names it.
+      expect(ids(resolved.layers)).toContain('unit');
+    });
+  });
 
-  it('narrows when only the generated half speaks for the language', () => {
-    withTypescriptProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: { typescript: [] },
-          generated: {
-            signals: [
-              { match: 'drizzle-orm', layer: 'orm-query', strength: 'exact', language: 'typescript' },
-            ],
-          },
-        },
-      });
+  it('drops a layer the hand-written half names', () => {
+    const table = {
+      manifests: MANIFESTS,
+      signals: { typescript: [ORM] },
+      generated: { signals: [] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
+      expect(ids(resolved.layers)).not.toContain('orm-query');
+      expect(ids(resolved.layers)).toContain('unit');
+    });
+  });
+
+  it('keeps it when no signal names it', () => {
+    const table: SignalTable = {
+      manifests: MANIFESTS,
+      signals: { typescript: [] },
+      generated: { signals: [] },
+    };
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
+      expect(ids(resolved.layers)).toContain('orm-query');
+    });
+  });
+
+  it('counts a layer named only through also', () => {
+    // `also` is how one dependency implies several layers. Reading only `layer`
+    // and `default` would leave those unnarrowable while the signal that names
+    // them is right there.
+    const table = {
+      manifests: MANIFESTS,
+      signals: {
+        typescript: [{ match: 'x', default: 'unit', also: ['orm-query'], strength: 'exact' }],
+      },
+      generated: { signals: [] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
+      expect(ids(resolved.layers)).not.toContain('orm-query');
+      expect(ids(resolved.layers)).not.toContain('unit');
+      expect(ids(resolved.layers)).toContain('data');
+    });
+  });
+
+  it('counts a layer named only through a feature map', () => {
+    const table = {
+      manifests: MANIFESTS,
+      signals: {
+        typescript: [
+          { match: 'x', kind: 'feature', features: { q: 'orm-query' }, strength: 'exact' },
+        ],
+      },
+      generated: { signals: [] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
+      expect(ids(resolved.layers)).not.toContain('orm-query');
+      expect(ids(resolved.layers)).toContain('unit');
+    });
+  });
+});
+
+describe('a recording has to come from the table it is read against', () => {
+  // The staleness check compares the recording to the project, so it cannot see
+  // that the signal table changed underneath. A recording taken before `next`
+  // existed says nothing about the five `nextjs-*` layers, and reading its
+  // silence as absence removes exactly what the signal was added to find.
+  const project = { 'package.json': '{"dependencies":{"next":"^15.0.0"}}' };
+  const recording = {
+    generated_at: fresh(),
+    scanned: [{ manifest: 'package.json', language: 'typescript' }],
+    detected: [],
+  };
+
+  it('falls back when the recording names no table', () => {
+    // What every `.kiwa/stack.json` written before this field looks like.
+    const root = fixture(project, { ...recording, signals: undefined });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/does not record which signal table/);
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(5);
+    });
+  });
+
+  it('says the table was unreadable rather than that it differed', () => {
+    // Without this branch the two cases collapse: a missing table makes the
+    // expected fingerprint empty, which no recorded one equals, so the reader
+    // would report "a different signal table" for a table that is not there.
+    // The outcome is the same either way — the diagnosis is not.
+    const root = fixture(project, recording, null);
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root, signalTable: null });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/signal table could not be read/);
+      expect(resolved.warnings.join(' ')).not.toMatch(/different signal table/);
+    });
+  });
+
+  it('falls back when the recording names a different table', () => {
+    const root = fixture(project, { ...recording, signals: 'deadbeefdeadbeef' });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/different signal table/);
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(5);
+    });
+  });
+
+  it('uses the recording when the table matches', () => {
+    // The other side of the same check: without this, rejecting everything
+    // would satisfy the two above.
+    const root = fixture(project, recording);
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
       expect(resolved.source).toBe('detected');
-      expect(resolved.layers.map((l) => l.id)).toContain('orm-query');
-      expect(typescriptLayers(resolved.layers)).toBe(1);
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(0);
     });
   });
 
-  it('keeps every layer when neither half speaks for the language', () => {
-    withTypescriptProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: { manifests: MANIFESTS, signals: { typescript: [] }, generated: { signals: [] } },
-      });
-      // Not an assertion that nothing was detected — the recording names
-      // `orm-query`. The table cannot speak for TypeScript, so the detection is
-      // not evidence about the layers that went unmentioned.
-      expect(typescriptLayers(resolved.layers)).toBe(total);
-      expect(total).toBeGreaterThan(1);
-    });
+  it('is not disturbed by reformatting or reordering the table', () => {
+    // Key order and whitespace do not change which layers a dependency yields.
+    // Invalidating every recording over a reformat costs a re-run for nothing.
+    const reordered: SignalTable = {
+      manifests: SIGNALS.manifests,
+      generated: SIGNALS.generated,
+      signals: Object.fromEntries(Object.entries(SIGNALS.signals).reverse()),
+    };
+    expect(signalsFingerprint(reordered)).toBe(signalsFingerprint(SIGNALS));
   });
 
-  // Pins the boundary from the caller's side. It does not prove the `typeof`
-  // guard: a malformed entry adds a key no runtime name equals either way, so
-  // removing the guard leaves this passing. Measured, not assumed.
-  it('does not count a generated entry that states no language', () => {
-    withTypescriptProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: { typescript: [] },
-          generated: {
-            signals: [{ match: 'drizzle-orm', layer: 'orm-query', strength: 'exact' }],
-          } as never,
-        },
-      });
-      expect(typescriptLayers(resolved.layers)).toBe(total);
-    });
+  it('changes when a signal changes', () => {
+    const edited: SignalTable = {
+      ...SIGNALS,
+      signals: { ...SIGNALS.signals, typescript: [] },
+    };
+    expect(signalsFingerprint(edited)).not.toBe(signalsFingerprint(SIGNALS));
   });
 
-  it('still speaks for a language through the hand-written half alone', () => {
-    withTypescriptProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: { typescript: [{ match: 'drizzle-orm', layer: 'orm-query', strength: 'exact' }] },
-          generated: { signals: [] },
-        },
-      });
-      expect(typescriptLayers(resolved.layers)).toBe(1);
-    });
+  it('what the writer records is what the reader accepts', async () => {
+    // The two sides derive the fingerprint independently. A test that only
+    // checked the reader would pass with a writer that never wrote one.
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-roundtrip-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"dependencies":{"next":"^15.0.0"}}');
+      writeStackFile(
+        root,
+        [{ layer: 'nextjs-rsc', signal: 'next', manifest: 'package.json', strength: 'exact' }],
+        [{ path: 'package.json', language: 'typescript' }],
+        new Date(Date.now() + 60_000),
+      );
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).not.toMatch(/signal table/);
+      expect(resolved.source).toBe('detected');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

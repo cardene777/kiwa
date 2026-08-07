@@ -506,6 +506,87 @@ describe('an implied layer holds only while nothing more specific appears', () =
   });
 });
 
+describe('a Next.js project is detected from the framework it depends on', () => {
+  const NEXTJS_LAYERS = [
+    'nextjs-middleware',
+    'nextjs-parallel-route',
+    'nextjs-rsc',
+    'nextjs-rsc-streaming',
+    'nextjs-server-action',
+  ];
+
+  it('reports every nextjs layer, because a manifest cannot tell them apart', () => {
+    // Server actions, middleware, RSC, parallel routes and streaming are
+    // distinguished by file layout. `next` settles that the project is a
+    // Next.js one and nothing more, so all five are implied together rather
+    // than one being guessed.
+    const all = detectFrom(TABLE, 'typescript', 'package.json', [{ name: 'next', features: [] }]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(NEXTJS_LAYERS);
+  });
+
+  it('marks them implied rather than asserted', () => {
+    // The distinction is what lets a more specific signal drop them later. If
+    // they were asserted, adding one would leave the other four standing.
+    const all = detectFrom(TABLE, 'typescript', 'package.json', [{ name: 'next', features: [] }]);
+    expect(resolvePrecedence(all).every((d) => d.implied)).toBe(true);
+  });
+
+  // Characterisation, not endorsement. An asserted signal is meant to drop the
+  // implied ones in its group, and it does — but only when its dependency is
+  // listed first. `resolve` keeps the first entry it sees for a layer and only
+  // replaces a weak one with an exact one, so an implied-exact entry blocks the
+  // asserted-exact entry for the same layer, and the group then looks like it
+  // has nothing asserted at all.
+  //
+  // Reordering two lines of a package.json changes the answer. Tracked
+  // separately; pinned here so a fix shows up as these two disagreeing.
+  describe('the resolver answers differently depending on dependency order', () => {
+    const asserted: SignalTable = {
+      manifests: TABLE.manifests,
+      signals: {
+        typescript: [
+          ...TABLE.signals.typescript!,
+          { match: 'next-safe-action', layer: 'nextjs-server-action', strength: 'exact' },
+        ],
+      },
+      generated: { signals: [] },
+    };
+    const detect = (names: string[]) =>
+      resolvePrecedence(
+        detectFrom(
+          asserted,
+          'typescript',
+          'package.json',
+          names.map((name) => ({ name, features: [] })),
+        ),
+      ).map((d) => d.layer);
+
+    it('drops the implied four when the asserted dependency comes first', () => {
+      expect(detect(['next-safe-action', 'next'])).toEqual(['nextjs-server-action']);
+    });
+
+    it('keeps all five when the implying dependency comes first', () => {
+      expect(detect(['next', 'next-safe-action'])).toEqual(NEXTJS_LAYERS);
+    });
+  });
+
+  it('does not answer a Cargo.toml that happens to depend on a crate named next', () => {
+    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [{ name: 'next', features: [] }]);
+    expect(all).toEqual([]);
+  });
+
+  it('finds them in an example that carries the real dependency', () => {
+    // The signal exists for exactly this: kiwa's own adapter mocks Next.js, so
+    // the evidence has to come from the project side. 18 of the 26 `*nextjs*`
+    // examples depend on `next`; this is one of them.
+    //
+    // `dogfood-nextjs-server-action-app` is not — it depends on
+    // `@kiwa-lab/nextjs` and nothing else. Naming an example without opening it
+    // is how this test first passed against an empty result.
+    expect(detectExample('nextjs-app-router-full')).toEqual(NEXTJS_LAYERS);
+  });
+});
+
 describe('a generated signal applies only to the language it came from', () => {
   // `redis` is the case that forces this: it is a real npm package and a real
   // Rust crate. A signal derived from the TypeScript `cache` package's

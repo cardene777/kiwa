@@ -10,7 +10,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { Detection, SignalTable } from './detect.js';
+import { signalsFingerprint, type Detection, type SignalTable } from './detect.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -41,6 +41,21 @@ export function loadSignalTable(): SignalTable {
     dir = parent;
   }
   throw new Error('stack-signals.json not found');
+}
+
+/**
+ * The table if it can be found, rather than throwing.
+ *
+ * Writing the stack file is the caller's goal; a missing signal table makes the
+ * fingerprint unusable but is not a reason to abandon the write. The reader
+ * rejects a recording with no fingerprint, so the failure surfaces there.
+ */
+function loadSignalTableOrNull(): SignalTable | null {
+  try {
+    return loadSignalTable();
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -82,6 +97,16 @@ export function writeStackFile(
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.
     scanned: scanned.map((m) => ({ manifest: m.path, language: m.language })),
+    // Which table produced this answer. The staleness check compares the
+    // recording against the manifests, which cannot see that the signal table
+    // itself changed — and a recording taken before a signal existed says
+    // nothing about the layer that signal names. Reading its silence as absence
+    // removes exactly the layers the signal was added to find.
+    //
+    // Failing to load the table leaves this empty, which the reader treats as
+    // unusable. A recording that cannot say which table produced it is not
+    // safer than no recording.
+    signals: signalsFingerprint(loadSignalTableOrNull()),
     // Recording the signal and the manifest, not just the layer, so a wrong
     // detection can be traced to the dependency that caused it.
     detected: layers.map((d) => ({
