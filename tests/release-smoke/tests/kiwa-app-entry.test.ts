@@ -322,6 +322,40 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     expect(step4).toContain('--output');
   });
 
+  it('the secondary consumer has its own output entry, not the primary one', () => {
+    // `contract` is the only layer with a second consumer. Reusing the primary's
+    // path would have `kiwa-hardhat` write to the `.t.sol` slot `kiwa-forge`
+    // owns — the same overwrite as the collision above, one level down.
+    const withSecondary = LAYERS.filter(
+      (l) => ((l as unknown as { also_consumed_by: string[] }).also_consumed_by ?? []).length > 0,
+    );
+    expect(withSecondary.map((l) => l.id)).toEqual(['contract']);
+
+    for (const layer of withSecondary) {
+      const secondaries = (layer as unknown as { also_consumed_by: string[] }).also_consumed_by;
+      for (const skill of secondaries) {
+        expect(Object.keys(layer.test_outputs)).toContain(skill);
+        // Different artefacts, so a shared path would be wrong even in principle.
+        expect(layer.test_outputs[skill]).not.toEqual(layer.test_outputs[layer.consumer_skill]);
+      }
+    }
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    expect(step4).toMatch(/consumer 別に鍵が分かれている/);
+  });
+
+  it('both consumers of that layer are asked for their own options', () => {
+    // They happen to declare the same nine. The skill says that is a measured
+    // fact rather than an assumption, because the check that follows is what
+    // would catch it changing.
+    const contract = LAYERS.find((l) => l.id === 'contract')!;
+    const secondaries = (contract as unknown as { also_consumed_by: string[] }).also_consumed_by;
+    for (const skill of [contract.consumer_skill, ...secondaries]) {
+      expect(declaredOptions(skill)).toContain('--spec-path');
+    }
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    expect(step4).toMatch(/option も相手ごとに読む/);
+  });
+
   it('one consumer declares no options at all', () => {
     // `kiwa-edge` has no option section. Reading the declaration means finding
     // nothing to pass, which is a different outcome from guessing `--module`.

@@ -93,9 +93,6 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"}
 報告には `kiwa layers --json` が stderr に出した warning をそのまま載せる。 なぜ絞れなかったかは
 そこに書いてある (manifest が無い / 探索が終わらなかった / recording が古い)。
 
-報告には `kiwa layers --json` が stderr に出した warning をそのまま載せる。 なぜ絞れなかったかは
-そこに書いてある (manifest が無い / 探索が終わらなかった / recording が古い)。
-
 ## Step 3: 生成できる layer を選ぶ
 
 `layers[].test_outputs` の path には 3 つの形が混ざっている。 実測した内訳。
@@ -210,6 +207,14 @@ consumer が違っても同じ (`cli` / `data` / `orm-query` は 3 つとも別 
 layer は `selected_by` と相手の option 宣言の両方が揃った時だけ渡す。
 
 `also_consumed_by` を持つ layer は、 主 consumer の後に副次 consumer も同じ規則で起動する。
+実測すると該当は `contract` 1 件で、 主 `kiwa-forge` / 副 `kiwa-hardhat`。
+
+**`test_outputs` は consumer 別に鍵が分かれている**。 副次 consumer の出力先は自分の鍵の下に
+あるので、 主 consumer の path を流用しない。 `contract` は `kiwa-forge` が `.t.sol` を、
+`kiwa-hardhat` が `.test.ts` を書く = 同じ layer でも成果物が違う。
+
+option も相手ごとに読む。 両者はたまたま同じ 9 option を宣言しているが、 それは確かめた結果で
+あって前提ではない。
 
 `providers` / `variants` を持つ layer は `selected_by` が選び方を宣言している。 その宣言に従う
 だけで、 どれを選ぶかは決めない。
