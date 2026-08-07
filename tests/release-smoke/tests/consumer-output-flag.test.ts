@@ -143,9 +143,10 @@ describe('the defaults are pinned so they cannot drift silently', () => {
   it('each default is the value its own docs and the layer table agree on', () => {
     const before: Record<string, string> = {
       'kiwa-api': 'test/integration/{module}.test.ts',
-      'kiwa-cli-test': 'tests/{module}.test.ts',
-      'kiwa-data': 'tests/{module}.test.ts',
-      'kiwa-orm': 'tests/{module}.test.ts',
+      // #1844 で衝突を解くため spec の suffix を写した
+      'kiwa-cli-test': 'tests/{module}.cli.test.ts',
+      'kiwa-data': 'tests/{module}.data.test.ts',
+      'kiwa-orm': 'tests/{module}.orm.test.ts',
       'kiwa-nextjs': 'tests/integration/{module}.nextjs.test.ts',
       // Changed by #1842 from `examples/{example}/…` to the target-root form.
       'kiwa-rust': 'tests/{module}.rs',
@@ -195,6 +196,59 @@ describe('the defaults are pinned so they cannot drift silently', () => {
       expect(text).toMatch(/対象 root からの相対/);
       expect(text).toMatch(/`examples\/\{name\}\/` が root/);
     }
+  });
+
+  it('a consumer serving several layers does not hardcode one of their paths', () => {
+    // Splitting the declarations (#1844) is inert while the steps still name a
+    // single literal: `kiwa-nextjs` ran `vitest tests/integration/{module}.nextjs.test.ts`
+    // for all five modes, and `kiwa-cli-test` passed the old path to
+    // `/kiwa-review`. Four skills carried this and none of the checks saw it.
+    //
+    // The lines that run or review the generated file have to name the resolved
+    // output, not a path.
+    const multi = ['kiwa-nextjs', 'kiwa-api', 'kiwa-cli-test', 'kiwa-data'];
+    const offenders: string[] = [];
+    for (const skill of multi) {
+      const text = read(`.claude/skills/${skill}/SKILL.md`);
+      const declaring = new Set(
+        text
+          .split('\n')
+          .filter((l) => l.startsWith('- `--output') || l.trim().startsWith('|'))
+          .map((l) => l.trim()),
+      );
+      for (const line of text.split('\n')) {
+        // Only lines that run or review a *specific generated file*. A directory
+        // (`vitest run test/integration/`) or a flag-only invocation
+        // (`vitest run --coverage`) names no single output and is not the issue.
+        const runsOrReviews = /vitest run|--test-path|出力 file 名は/.test(line);
+        const namesOneFile = /\{module\}[^\s`]*\.(test\.tsx?|spec\.ts|rs|go)/.test(line);
+        if (!runsOrReviews || !namesOneFile) continue;
+        // The declaration itself is where the literal belongs.
+        if (declaring.has(line.trim())) continue;
+        if (!line.includes('解決した出力先') && !line.includes('解決済み出力先')) {
+          offenders.push(`${skill}: ${line.trim().slice(0, 60)}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it('a consumer serving several layers does not hardcode one of their layer ids', () => {
+    // The path was fixed first and the layer was still pinned: `kiwa-nextjs`
+    // passed `--layer nextjs-server-action` to review for all five modes, so
+    // four of them would be scored against another layer's spec.
+    const nextjsLayers = LAYERS.filter((l) => l.consumer_skill === 'kiwa-nextjs').map((l) => l.id);
+    expect(nextjsLayers).toHaveLength(5);
+
+    const text = read('.claude/skills/kiwa-nextjs/SKILL.md');
+    const declaring = (line: string): boolean =>
+      line.trim().startsWith('|') || line.includes('/kiwa-design --layer');
+    const offenders = text
+      .split('\n')
+      .filter((line) => /kiwa-review/.test(line))
+      .filter((line) => !declaring(line))
+      .filter((line) => nextjsLayers.some((id) => line.includes(`--layer ${id}`)));
+    expect(offenders).toEqual([]);
   });
 
   it('the two skills with mode suffixes say the suffix is not added to an explicit path', () => {

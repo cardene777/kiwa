@@ -295,22 +295,12 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     // Four groups collide, not one. The Next.js five are the largest, but
     // `cli` / `data` / `orm-query` share a path across three different
     // consumers, which the same overwrite applies to.
+    // One group left, and it is deliberate: cargo treats `tests/` as integration
+    // tests, one file per crate, and `kiwa-rust` states it lines both layers up
+    // on purpose. The other three were split in #1844 by writing each layer's
+    // spec suffix into its output name.
     expect(collisions).toEqual([
-      ['{example}/test/integration/{module}.test.ts', ['api', 'integration']],
-      [
-        '{example}/tests/integration/{module}.nextjs.test.ts',
-        [
-          'nextjs-middleware',
-          'nextjs-parallel-route',
-          'nextjs-rsc',
-          'nextjs-rsc-streaming',
-          'nextjs-server-action',
-        ],
-      ],
-      // Deliberate: cargo treats `tests/` as integration tests, one file per
-      // crate, and `kiwa-rust` states it lines both layers up on purpose.
       ['{example}/tests/{module}.rs', ['rust-integration', 'rust-unit']],
-      ['{example}/tests/{module}.test.ts', ['cli', 'data', 'orm-query']],
     ]);
   });
 

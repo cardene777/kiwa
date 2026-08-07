@@ -39,6 +39,17 @@ $ARGUMENTS
 - `--coverage-threshold {N}` — integration coverage threshold (default 100%、 production target のみ評価対象)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
 - `--output {path}` — 生成 test の path (省略時は `test/integration/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
+
+### layer 別の生成先
+
+本 skill は 2 layer の consumer で、 `--output` 省略時の生成先は入力 spec の suffix に従う。
+
+| layer | 入力 spec の suffix | 生成 test |
+|---|---|---|
+| `integration` | (suffix なし) | `test/integration/{module}.test.ts` |
+| `api` | `.api.md` | `test/integration/{module}.api.test.ts` |
+
+以前は 2 layer とも `{module}.test.ts` に書いており、 順に起動すると上書きされていた。
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip
 
 ## 出力 path 早見
@@ -90,7 +101,7 @@ producer (`/kiwa-design`) と consumer の file 名規約一致: en (default) �
 
 ### Step 4: `*.test.ts` Write + `vitest run` 実行
 
-各 TC を `it(name, async () => { ... })` 1 行に変換、 観点別に `describe` でグループ化。 出力 file 名は `test/integration/{module}.test.ts`。 msw backend なら `setupServer(...handlers)` を `beforeAll` / `afterAll` で起動 / teardown する boilerplate を冒頭に置く。 Write 後に `pnpm exec vitest run` 実行、 全 PASS で次へ。
+各 TC を `it(name, async () => { ... })` 1 行に変換、 観点別に `describe` でグループ化。 出力先は § layer 別の生成先 で解決した path (`--output` があればそちら)。 `integration` と `api` で file 名が違うので、 起動時の layer を見て決める。 msw backend なら `setupServer(...handlers)` を `beforeAll` / `afterAll` で起動 / teardown する boilerplate を冒頭に置く。 Write 後に `pnpm exec vitest run` 実行、 全 PASS で次へ。
 
 ### Step 5: coverage 評価 + auto loop + report
 
@@ -245,14 +256,14 @@ describe('items API (mock mode)', () => {
 ### 入力 / 出力 path
 
 - 入力 spec ... `tests/spec/integration/test-spec-{module}.api.md` (`/kiwa-design --layer api` 出力)
-- 出力 test ... `tests/{module}.test.ts` (Vitest + msw + supertest)
+- 出力 test ... `test/integration/{module}.api.test.ts` (Vitest + msw + supertest)
 - 既存 dApp + 実 anvil 経路の spec (`tests/spec/integration/test-spec-{module}.md`) は `@kiwa-lab/dapp` setupTestEnv 経路で従来通り動作
 
 `env.stop()` は `afterEach` / `afterAll` で必ず呼ぶ (live server / msw server を確実に停止する)。
 
 ## 完了条件
 
-- Layer 1 spec の「自動化すべきテスト」 全 TC が `test/integration/{module}.test.ts` に Write 済
+- Layer 1 spec の「自動化すべきテスト」 全 TC が解決済み出力先に Write 済 (`integration` は `test/integration/{module}.test.ts`、 `api` は `test/integration/{module}.api.test.ts`)
 - `pnpm exec vitest run test/integration/` 全 PASS (failure 0 件)
 - `pnpm exec vitest run --coverage` で production target が threshold 達成 (default 100%)、 もしくは残 uncovered が全て「不可能」分類と report で明示
 - `tests/reports/integration/coverage-report-{module}.md` が 4 section format で Write 済

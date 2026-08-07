@@ -34,8 +34,24 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 - `--module {name}` — spec / test の module 名キー (1 起動 = 1 module)
 - `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/integration/test-spec-{module}.nextjs.md`)
 - `--output {path}` — 生成 test の path (省略時は `tests/integration/{module}.nextjs.test.ts`)
+
+### mode 別の生成先
+
+`--output` 省略時の生成先は layer ごとに違う。 入力 spec の suffix をそのまま写した形で、
+5 mode を 1 file に上書きしないための分離。
+
+| layer | 入力 spec の suffix | 生成 test |
+|---|---|---|
+| `nextjs-server-action` | `.nextjs.md` | `tests/integration/{module}.nextjs.test.ts` |
+| `nextjs-middleware` | `.middleware.md` | `tests/integration/{module}.middleware.test.ts` |
+| `nextjs-rsc` | `.rsc.md` | `tests/integration/{module}.rsc.test.ts` |
+| `nextjs-parallel-route` | `.parallel.md` | `tests/integration/{module}.parallel.test.ts` |
+| `nextjs-rsc-streaming` | `.rsc-streaming.md` | `tests/integration/{module}.rsc-streaming.test.ts` |
+
+以前は 5 layer とも `{module}.nextjs.test.ts` に書いており、 順に起動すると最後の 1 つしか
+残らなかった。 入力は suffix で分かれているのに出力が分かれていない形だった。
 - `--lang {ja|en|<ISO 639-1>}` — 生成 test 内コメント言語 (省略時は `--input-spec` から自動判定)
-- `--no-review` — Step 6 の `/kiwa-review --layer nextjs-server-action` 自動呼出を skip
+- `--no-review` — Step 6 の `/kiwa-review` 自動呼出を skip
 
 ## 実行フロー
 
@@ -90,7 +106,7 @@ describe('{MODULE} server action', () => {
 
 ### Step 4: test 実行 + 結果取得
 
-`pnpm vitest run tests/integration/{module}.nextjs.test.ts --environment node` を起動。 fail 行を spec の対応 TC ID と紐付けて report する。
+`pnpm vitest run <解決した出力先> --environment node` を起動。 出力先は § mode 別の生成先 で layer ごとに違うので、 生成した path をそのまま渡す。 fail 行を spec の対応 TC ID と紐付けて report する。
 
 ### Step 5: result-review 用 metadata の Write
 
@@ -103,7 +119,7 @@ describe('{MODULE} server action', () => {
 
 ### Step 6: kiwa-review 自動呼出
 
-`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer nextjs-server-action --module {module}` を起動して 11 観点の cover 率を判定する。
+`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer <起動時の layer> --module {module} --test-path <解決した出力先>` を起動して 11 観点の cover 率を判定する。 5 mode それぞれ別の layer / 別の生成先なので、 `nextjs-server-action` に固定すると他 4 mode の review が別 layer の spec と突き合わされる。
 
 ## 11 観点 → invokeServerAction mapping
 
@@ -125,7 +141,7 @@ describe('{MODULE} server action', () => {
 
 - 上流 (Layer 1) ... `/kiwa-design --layer nextjs-server-action`
 - runtime fixture ... `@kiwa-lab/nextjs` v1.0+ (`packages/nextjs/`)
-- 下流 (review) ... `/kiwa-review --layer nextjs-server-action`
+- 下流 (review) ... `/kiwa-review --layer <起動時の layer>` (5 mode それぞれ別 layer)
 - 統合 chain ... 無し。 `/kiwa-test` に nextjs 専用 Step が無いため、 本 skill は単体起動する (#1809)
 - RSC test ... 下記 § RSC mode (#494、 v1.0.3+ 対応済)
 - middleware test ... 下記 § middleware mode (#495、 v1.0.2+ 対応済)

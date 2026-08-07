@@ -23,7 +23,7 @@ queue / cron / batch job の test を Layer 1 spec から自動生成する。
 
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.data.md`) が存在
 - vitest + `@kiwa-lab/data` が devDependencies で利用可能
-- 出力先 `tests/{module}.test.ts` への Write 権限
+- 出力先 `tests/{module}.data.test.ts` への Write 権限
 
 ## ユーザーのリクエスト
 
@@ -33,14 +33,14 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名
 - `--input-spec {path}` — spec path (省略時は `tests/spec/integration/test-spec-{module}.data.md`)
-- `--output {path}` — 生成 test の path (省略時は `tests/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
+- `--output {path}` — 生成 test の path (省略時は `tests/{module}.data.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
 - `--no-review` — kiwa-review 自動呼出を skip
 
 ## 出力 path 早見
 
 | 観点 | 出力 path |
 |---|---|
-| Data test file | `tests/{module}.test.ts` |
+| Data test file | `tests/{module}.data.test.ts` |
 
 ## 実行フロー
 
@@ -84,7 +84,7 @@ await expectAtLeastOnce(env.client, body, 3, expect);
 
 ### Step 4: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer data --test-path tests/{module}.test.ts` を内部呼出し、 5 軸判定。
+`/kiwa-review --mode test-review --module {module} --layer data --test-path <解決した出力先>` を内部呼出し、 5 軸判定。 `--test-path` には生成した path をそのまま渡す (既定は `tests/{module}.data.test.ts`)。
 
 ## 実装例 (実 PoC `examples/queue-poc/`)
 
@@ -121,7 +121,7 @@ describe('cron schedule (fake clock)', () => {
 
 ## 完了条件
 
-- Layer 1 spec の Automation=yes 全 TC が `tests/{module}.test.ts` に Write 済
+- Layer 1 spec の Automation=yes 全 TC が `tests/{module}.data.test.ts` に Write 済
 - `pnpm exec vitest run` 全 PASS (failure 0 件)
 - Topic 別 `describe` グループが spec の Topic 一覧と一致
 - DLQ / idempotency / fake clock / cron schedule の観点が cover されている

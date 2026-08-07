@@ -23,7 +23,7 @@ ORM query layer (Drizzle / Prisma / Kysely) の test を Layer 1 spec から自�
 - Layer 1 spec (`tests/spec/integration/test-spec-{module}.orm.md`) が存在
 - `@kiwa-lab/orm` v0.1+ + `drizzle-orm` + `better-sqlite3` + `vitest` が devDependencies
 - 対象 module の Drizzle schema (`schema.ts` 等) が存在
-- 出力先 `tests/{module}.test.ts` への Write 権限
+- 出力先 `tests/{module}.orm.test.ts` への Write 権限
 
 ## ユーザーのリクエスト
 
@@ -34,14 +34,14 @@ $ARGUMENTS
 - `--module {name}` — 対象 module 名
 - `--input-spec {path}` — spec path (省略時は `tests/spec/integration/test-spec-{module}.orm.md`)
 - `--schema-import {path}` — schema file path (default `../src/schema`)
-- `--output {path}` — 生成 test の path (省略時は `tests/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
+- `--output {path}` — 生成 test の path (省略時は `tests/{module}.orm.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
 - `--no-review` — kiwa-review 自動呼出を skip
 
 ## 出力 path 早見
 
 | 観点 | 出力 path |
 |---|---|
-| ORM test file | `tests/{module}.test.ts` |
+| ORM test file | `tests/{module}.orm.test.ts` |
 
 ## 9 column 表 (Layer 1 spec が出力する形式)
 

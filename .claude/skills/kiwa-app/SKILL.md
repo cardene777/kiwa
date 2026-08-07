@@ -164,32 +164,28 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"}
 path を組み立て直すと suffix が落ち、 5 layer が区別できなくなる。 宣言された `spec_path` を
 そのまま使う。
 
-### 出力先が衝突する組がある
+### 出力先が衝突する組は 1 つだけ残っている
 
-**入力は分かれているが出力は分かれていない**。 実測すると 4 group が出力先を共有する。
+実測すると出力先を共有するのは 1 group。
 
-| 共有される出力先 | 共有する layer |
-|---|---|
-| `{example}/tests/integration/{module}.nextjs.test.ts` | nextjs 5 layer 全て |
-| `{example}/tests/{module}.test.ts` | `cli` / `data` / `orm-query` |
-| `{example}/test/integration/{module}.test.ts` | `api` / `integration` |
-| `{example}/tests/{module}.rs` | `rust-unit` / `rust-integration` (cargo の慣習に沿った意図的な同一化) |
+| 共有される出力先 | 共有する layer | 性質 |
+|---|---|---|
+| `{example}/tests/{module}.rs` | `rust-unit` / `rust-integration` | **意図的**。 cargo は `tests/` 配下を integration test として扱い 1 file = 1 crate なので、 `kiwa-rust` が両 layer を 1 file に揃えている |
 
-順に起動すると後の layer が前の layer の生成物を上書きし、 最後の 1 つしか残らない。
-consumer が違っても同じ (`cli` / `data` / `orm-query` は 3 つとも別 skill)。
+以前は 4 group あった。 nextjs 5 layer / `api` と `integration` / `cli` と `data` と
+`orm-query` の 3 group は #1844 で分けた。 入力 spec の suffix を出力名に写す形で、
+`{module}.rsc.test.ts` / `{module}.api.test.ts` / `{module}.orm.test.ts` のように分かれる。
 
-起動前に、 対象 layer 群の解決済み出力 path を集めて重複を数える。 重複があれば 2 つのうち
-片方を採る。
+残る 1 件は宣言の誤りではないので、 上書きを避ける必要がない。 それでも起動前に解決済み出力
+path の重複は数える = 新しい衝突が入った時に黙って上書きしないため。
 
 | 相手が `--output` を宣言している | 振る舞い |
 |---|---|
-| している | `spec_path` の suffix を出力名に写して衝突を解く (`{module}.rsc.test.ts` 等) |
+| している | `spec_path` の suffix を出力名に写して衝突を解く |
 | していない | その group は先頭 1 件だけ生成し、 残りを飛ばして報告に理由を残す |
 
 **黙って上書きしない**。 5 回起動して 1 file しか残らない状態は、 4 layer 分の生成が失敗したのと
 同じでありながら成功に見える。
-
-出力先を分けるのは本来 `docs/layers.json` 側の宣言で解くべき問題で、 本 skill の回避は暫定。
 
 `mode` を持つ layer (30 中 6) は、 相手が `--mode` を宣言していれば渡す。 `providers` を持つ
 layer は `selected_by` と相手の option 宣言の両方が揃った時だけ渡す。
