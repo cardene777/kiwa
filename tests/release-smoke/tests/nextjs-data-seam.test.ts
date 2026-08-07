@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -64,6 +64,97 @@ function stepThreeTemplate(): string {
   );
   expect(blocks, 'placeholder を持つ template block が 1 つでない').toHaveLength(1);
   return blocks[0] ?? '';
+}
+
+/** The three seed routes Step 2 offers, in the order it recommends them. */
+type Route = 'reset' | 'resetModules' | 'mock';
+
+const ROUTE_LABEL: Record<Route, string> = {
+  reset: '選択 1',
+  resetModules: '選択 2',
+  mock: '選択 3',
+};
+
+/**
+ * Expand the Step 3 template for one route into runnable code.
+ *
+ * Every `{placeholder}` has to be covered by the route's map. A placeholder the
+ * map does not know fails the test, so adding one to the template forces a
+ * decision about how it expands instead of being silently dropped.
+ *
+ * Round 2 checked the template against a hand-written example and skipped any
+ * line that was nothing but a placeholder — which is exactly where `Given.data`
+ * and the dynamic import live (#1857 Round 2 retry, R2b-F2).
+ */
+function expandTemplate(route: Route, values: Record<string, string>): string {
+  const lines = stepThreeTemplate().split('\n');
+  const label = ROUTE_LABEL[route];
+  const out: string[] = [];
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i] ?? '';
+    const trimmed = line.trim();
+    // A marker is a standalone directive that governs the lines after it. A
+    // line that merely mentions a route (`{選択 1 なら ...}` in `beforeEach`)
+    // is content to substitute — treating it as a marker ate the block it sat
+    // in and produced unparseable code.
+    const isMarker =
+      trimmed.startsWith('{data seam') ||
+      (trimmed.startsWith('{') && trimmed.includes('出さない'));
+
+    if (!isMarker) {
+      out.push(line);
+      continue;
+    }
+
+    // A marker either introduces a block or excludes the next line. The
+    // exclusion form says so in words ("この行は出さない").
+    const excludes = trimmed.includes('出さない');
+    const named = /選択 [123]/.exec(trimmed)?.[0];
+    // A marker that names no route applies to every route.
+    const applies = named === undefined || named === label;
+
+    if (excludes) {
+      // Drop the following line when the marker's route is the target.
+      if (applies) i += 1;
+      continue;
+    }
+
+    // Skip the block when the marker names another route. The block runs to
+    // the next blank line.
+    if (!applies) {
+      while (i + 1 < lines.length && (lines[i + 1] ?? '').trim() !== '') i += 1;
+      i += 1; // the blank line itself
+    }
+  }
+
+  let code = out.join('\n');
+
+  // Prose placeholders first: they contain token placeholders inside, so
+  // substituting tokens first would stop them matching the map.
+  const prose = /\{[^{}]*[^\x00-\x7F][^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g;
+  const unknown: string[] = [];
+  code = code.replace(prose, (m) => {
+    const v = values[m];
+    if (v === undefined) {
+      unknown.push(m);
+      return m;
+    }
+    return v;
+  });
+
+  // Then bare token placeholders: `{ACTION}`, `{STATE_NAME}` and friends.
+  code = code.replace(/\{([A-Z][A-Za-z_]*)\}/g, (m) => {
+    const v = values[m];
+    if (v === undefined) {
+      unknown.push(m);
+      return m;
+    }
+    return v;
+  });
+
+  expect(unknown, `${label} の展開 map に無い placeholder:\n${unknown.join('\n')}`).toEqual([]);
+  return code;
 }
 
 /**
@@ -131,28 +222,46 @@ afterAll(() => {
 });
 
 /**
- * Write the worked example into a throwaway project alongside the action and
- * state module it names, then run it under this repo's Vitest.
+ * The state module each route needs.
+ *
+ * `reset` gets the reset and seed exports Step 2 asks for first; the other two
+ * do not, which is what pushes them to the later routes.
  */
-function runWorkedExample(source: string): { ok: boolean; output: string } {
+function usersModule(route: Route | 'example'): string {
+  const base = [
+    // Exported as a value as well as through functions. Modules commonly do
+    // both, and the two forms behave differently inside a `vi.mock` factory.
+    'export const store = new Map();',
+    'export async function findUserByEmail(email) { return store.get(email) ?? null; }',
+    'export async function createUser(input) {',
+    '  const user = { id: `u_${store.size + 1}`, email: input.email };',
+    '  store.set(input.email, user);',
+    '  return user;',
+    '}',
+  ];
+  if (route !== 'reset') return base.join('\n');
+  return [
+    ...base,
+    'export function __resetForTesting() { store.clear(); }',
+    'export async function seedUser(input) {',
+    "  store.set(input.email, { id: 'u_seed', email: input.email });",
+    '}',
+  ].join('\n');
+}
+
+/**
+ * Write generated code into a throwaway project alongside the action and state
+ * module it names, then run it under this repo's Vitest.
+ */
+function runGenerated(
+  source: string,
+  route: Route | 'example' = 'example',
+): { ok: boolean; output: string } {
   const dir = mkdtempSync(join(tmpdir(), 'kiwa-seam-'));
   TMP_ROOTS.push(dir);
   mkdirSync(join(dir, 'tests'), { recursive: true });
 
-  writeFileSync(
-    join(dir, 'tests', 'users.js'),
-    [
-      // Exported as a value as well as through functions. Modules commonly do
-      // both, and the two forms behave differently inside a `vi.mock` factory.
-      'export const store = new Map();',
-      'export async function findUserByEmail(email) { return store.get(email) ?? null; }',
-      'export async function createUser(input) {',
-      '  const user = { id: `u_${store.size + 1}`, email: input.email };',
-      '  store.set(input.email, user);',
-      '  return user;',
-      '}',
-    ].join('\n'),
-  );
+  writeFileSync(join(dir, 'tests', 'users.js'), usersModule(route));
 
   writeFileSync(
     join(dir, 'tests', 'signup.js'),
@@ -172,6 +281,24 @@ function runWorkedExample(source: string): { ok: boolean; output: string } {
 
   writeFileSync(join(dir, 'tests', 'generated.test.js'), source);
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ type: 'module' }));
+
+  // The template imports the helper by package name, which does not resolve in
+  // a throwaway directory. Aliased to the real source rather than stubbed, so
+  // the expansion runs against the helper it will run against in a user's app.
+  //
+  // The config file is loaded by Node, not by Vitest's resolver, so it needs a
+  // real `node_modules` next to it to find `vitest/config`.
+  symlinkSync(resolve(REPO_ROOT, 'node_modules'), join(dir, 'node_modules'), 'dir');
+  const helper = resolve(REPO_ROOT, 'packages/nextjs/src/index.ts');
+  writeFileSync(
+    join(dir, 'vitest.config.js'),
+    [
+      "import { defineConfig } from 'vitest/config';",
+      'export default defineConfig({',
+      `  resolve: { alias: { '@kiwa-lab/nextjs': ${JSON.stringify(helper)} } },`,
+      '});',
+    ].join('\n'),
+  );
 
   const vitestBin = resolve(REPO_ROOT, 'node_modules/.bin/vitest');
   try {
@@ -270,7 +397,7 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
   // The defect Round 1 caught: every wording assertion passed while the
   // template produced a test file that collected zero cases.
   it('展開例が実際に Vitest で走る', () => {
-    const { ok, output } = runWorkedExample(workedExample());
+    const { ok, output } = runGenerated(workedExample());
     expect(ok, `展開例が走らなかった:\n${output}`).toBe(true);
     expect(output).toMatch(/3 passed|Tests {2}3 passed/);
   });
@@ -283,7 +410,7 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       'const seam = { users: new Map() };',
     );
     expect(broken, '差し替え対象が展開例に無い').not.toBe(workedExample());
-    const { ok, output } = runWorkedExample(broken);
+    const { ok, output } = runGenerated(broken);
     expect(ok).toBe(false);
     expect(output).toMatch(/before initialization|hoisted/);
   });
@@ -295,6 +422,112 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     expect(example).toMatch(/seam\.users\.set\(/);
     expect(example).toMatch(/seam\.users\.clear\(\)/);
   });
+
+  // Round 2 retry (R2b-F2): the check above skips lines that are nothing but a
+  // placeholder, which is exactly where `Given.data` and the dynamic import
+  // live. Expanding the template for each route and running the result covers
+  // them, and a placeholder the map does not know fails outright.
+  const ROUTE_VALUES: Record<Route, Record<string, string>> = {
+    reset: {
+      '{ACTION}': 'signup',
+      '{ACTION_PATH}': './signup.js',
+      '{MODULE}': 'signup',
+      '{ID}': 'T-001',
+      '{Observation}': '既存 row を seed して重複を検出する',
+      // The template's 選択 1 covers modules exporting reset *or* seed; this
+      // fixture exports both, so the import list carries both.
+      '{RESET_EXPORT}': '__resetForTesting, seedUser',
+      '{STATE_MODULE}': './users.js',
+      '{選択 1 なら {RESET_EXPORT}();、 選択 2 なら vi.resetModules();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}':
+        '__resetForTesting();',
+      '{Given.data を 選択 1 なら seed export 呼出、 選択 3 なら {STATE_NAME}.{STATE_FIELD} への書込に展開}':
+        "await seedUser({ email: 'a@b' });",
+      '{FormData の各 entry を fd.set(key, value) に展開}':
+        "fd.set('email', 'a@b'); fd.set('password', 'abcd1234');",
+      '{Given.cookies を object に展開}': '{}',
+      '{Given.headers を object に展開}': '{}',
+      '{Args を配列に展開}': '[]',
+      '{Then を expect(...).toBe(...) 等に展開}':
+        "expect(result).toEqual({ ok: false, error: 'already-registered' });",
+    },
+    resetModules: {
+      '{ACTION}': 'signup',
+      '{ACTION_PATH}': './signup.js',
+      '{MODULE}': 'signup',
+      '{ID}': 'T-001',
+      '{Observation}': 'reset 後の module で登録できる',
+      '{STATE_MODULE}': './users.js',
+      '{選択 1 なら {RESET_EXPORT}();、 選択 2 なら vi.resetModules();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}':
+        'vi.resetModules();',
+      '{Given.data を 選択 1 なら seed export 呼出、 選択 3 なら {STATE_NAME}.{STATE_FIELD} への書込に展開}':
+        '',
+      '{FormData の各 entry を fd.set(key, value) に展開}':
+        "fd.set('email', 'a@b'); fd.set('password', 'abcd1234');",
+      '{Given.cookies を object に展開}': '{}',
+      '{Given.headers を object に展開}': '{}',
+      '{Args を配列に展開}': '[]',
+      '{Then を expect(...).toBe(...) 等に展開}':
+        'expect(result).toMatchObject({ ok: true });',
+    },
+    mock: {
+      '{ACTION}': 'signup',
+      '{ACTION_PATH}': './signup.js',
+      '{MODULE}': 'signup',
+      '{ID}': 'T-001',
+      '{Observation}': '既存 row を seed して重複を検出する',
+      '{STATE_MODULE}': './users.js',
+      '{STATE_NAME}': 'seam',
+      '{STATE_FIELD}': 'users',
+      '{STATE_INITIALIZER}': 'new Map()',
+      '{STATE_MODULE の各 export を {STATE_NAME}.{STATE_FIELD} 経由の実装に差し替える}':
+        [
+          'store: seam.users,',
+          '  findUserByEmail: async (email) => seam.users.get(email) ?? null,',
+          '  createUser: async (input) => {',
+          '    const user = { id: `u_${seam.users.size + 1}`, email: input.email };',
+          '    seam.users.set(input.email, user);',
+          '    return user;',
+          '  }',
+        ].join('\n'),
+      '{選択 1 なら {RESET_EXPORT}();、 選択 2 なら vi.resetModules();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}':
+        'seam.users.clear();',
+      '{Given.data を 選択 1 なら seed export 呼出、 選択 3 なら {STATE_NAME}.{STATE_FIELD} への書込に展開}':
+        "seam.users.set('a@b', { id: 'u_seed', email: 'a@b' });",
+      '{FormData の各 entry を fd.set(key, value) に展開}':
+        "fd.set('email', 'a@b'); fd.set('password', 'abcd1234');",
+      '{Given.cookies を object に展開}': '{}',
+      '{Given.headers を object に展開}': '{}',
+      '{Args を配列に展開}': '[]',
+      '{Then を expect(...).toBe(...) 等に展開}':
+        "expect(result).toEqual({ ok: false, error: 'already-registered' });",
+    },
+  };
+
+  it.each(['reset', 'resetModules', 'mock'] as Route[])(
+    'template を %s で展開したものが実際に走る',
+    (route) => {
+      const code = expandTemplate(route, ROUTE_VALUES[route]);
+      expect(code, '展開結果に placeholder が残っている').not.toMatch(/\{[A-Z][A-Za-z_]*\}/);
+
+      // The action is bound once. `resetModules` re-imports it inside the test
+      // so it sees the fresh module; keeping the static import as well still
+      // runs (the inner `const` shadows it) but leaves an unused import in
+      // every generated file, which is what the exclusion marker prevents.
+      const staticImport = new RegExp(`^import \\{ signup \\} from`, 'm').test(code);
+      const dynamicImport = /await import\('\.\/signup\.js'\)/.test(code);
+      if (route === 'resetModules') {
+        expect(dynamicImport, 'resetModules 経路に動的 import が無い').toBe(true);
+        expect(staticImport, 'resetModules 経路に静的 import が残っている').toBe(false);
+      } else {
+        expect(staticImport, `${route} 経路に静的 import が無い`).toBe(true);
+        expect(dynamicImport, `${route} 経路に動的 import が混ざっている`).toBe(false);
+      }
+
+      const { ok, output } = runGenerated(code, route);
+      expect(ok, `${route} の展開が走らなかった:\n${output}\n--- code ---\n${code}`).toBe(true);
+      expect(output).toMatch(/1 passed/);
+    },
+  );
 
   it('展開例が template の data seam 行をすべて実演している', () => {
     // Derived from the template, not listed here. Adding a line to the template
