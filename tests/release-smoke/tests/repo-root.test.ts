@@ -30,6 +30,16 @@ function visit(node: ts.Node, seen: (node: ts.Node) => void): void {
   node.forEachChild((child) => visit(child, seen));
 }
 
+/** Walk, but do not descend into anything that defers execution. */
+function visitOutsideFunctions(node: ts.Node, seen: (node: ts.Node) => void): void {
+  // Checked on the way in, not on the way down. The initializer itself can be
+  // the arrow — `const unused = () => repoRoot(HERE)` — and testing only the
+  // children walks straight into its body.
+  if (ts.isFunctionLike(node)) return;
+  seen(node);
+  node.forEachChild((child) => visitOutsideFunctions(child, seen));
+}
+
 /**
  * Does this file work out where it is?
  *
@@ -101,10 +111,13 @@ function usesHelper(body: string): boolean {
     for (const declaration of statement.declarationList.declarations) {
       if (!declaration.initializer) continue;
       // The call may be composed — `resolve(repoRoot(HERE), 'tests')` is a
-      // module-scope initialisation too. What matters is that it happens at
-      // module scope, which is what keeps a decoy inside a function from
-      // counting.
-      visit(declaration.initializer, (node) => {
+      // module-scope initialisation too. What matters is that it runs when the
+      // module loads, which is what keeps a decoy from counting.
+      //
+      // So the walk stops at anything function-like. `const unused = () =>
+      // repoRoot(HERE)` sits at module scope but never runs, and accepting it
+      // is the same silent bypass one syntax over.
+      visitOutsideFunctions(declaration.initializer, (node) => {
         if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression)) return;
         if (node.expression.text !== helper) return;
         const [arg] = node.arguments;
@@ -264,6 +277,24 @@ describe('the guard picks its targets without reading names', () => {
       "const ROOT = resolve(HERE, '..', '..', '..', '..');",
     ].join('\n');
     expect(usesHelper(body)).toBe(false);
+  });
+
+  it('rejects a module-scope binding that only defers the call', () => {
+    // It sits at module scope but never runs. Accepting it is the same silent
+    // bypass one syntax over from the decoy inside a function.
+    for (const deferred of [
+      'const unused = () => repoRoot(HERE);',
+      'const unused = function () { return repoRoot(HERE); };',
+      'const unused = { get root() { return repoRoot(HERE); } };',
+    ]) {
+      const body = [
+        "import { repoRoot } from './repo-root.js';",
+        'const HERE = dirname(fileURLToPath(import.meta.url));',
+        deferred,
+        "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+      ].join('\n');
+      expect(usesHelper(body), deferred).toBe(false);
+    }
   });
 
   it('accepts the helper composed into a larger expression', () => {
