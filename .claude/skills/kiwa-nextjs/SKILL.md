@@ -73,23 +73,139 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 | Automation | `yes` / `no` / `manual` |
 | Action | 対象 Server Action の identifier (`login` / `createPost` 等) |
 
-### Step 2: action の import + injectable seam 確認
+### Step 2: action の依存を 2 軸で確認する
 
-対象 Server Action の export を Grep で探す (`app/actions.ts` / `app/{path}/actions.ts` / `lib/actions/*.ts` 等)。 redirect / cookies / revalidatePath への依存は **injectable seam (parameter / module setter)** で書き換える必要がある (production の `redirect()` import を直接 throw する形では unit test 不可)。
+対象 Server Action の export を Grep で探す (`app/actions.ts` / `app/{path}/actions.ts` / `lib/actions/*.ts` 等)。
+
+確認するのは 2 軸で、 **止める軸と seed する軸が違う**。
+
+| 軸 | 対象 | 未整備の時 |
+|---|---|---|
+| env seam | `redirect` / `cookies` / `revalidatePath` への依存 | **test 生成を中断する** |
+| data seam | action が import する module 直下の可変 state | **生成は続け、 seed 経路を test に入れる** |
+
+#### env seam (中断する軸)
+
+redirect / cookies / revalidatePath への依存は **injectable seam (parameter / module setter)** で書き換える必要がある (production の `redirect()` import を直接 throw する形では unit test 不可)。
 
 seam 未整備の action を検出したら test 生成を中断し、 user に「Server Action を `(formData, env?)` 形式に refactor が必要」 を返す。 詳細パターンは `references/server-action-seam.md` 参照。
+
+#### data seam (seed する軸)
+
+**本節は 5 mode 共通**。 helper が seed するのは自分の env だけで、 対象が読み書きする data 層はどの mode でも入らない。
+
+| mode | helper | helper が seed するもの |
+|---|---|---|
+| Server Actions | `invokeServerAction` | `formData` / `args` / `cookies` / `headers` |
+| middleware | `invokeMiddleware` | `url` / `method` / `headers` / `cookies` / `geo` |
+| RSC | `renderServerComponent` | `props` |
+| Parallel Routes | `invokeParallelRoutes` | `children` / `childrenProps` / `slots` |
+| RSC streaming | `setupNextRscEnv` | `dataSource` / `suspenseFallback` / `props` |
+
+seed しないと先行 case の書込が後続 case に残り、 重複検出 / 冪等性 / 状態遷移の TC が互いを倒す。
+
+対象 (action / middleware / component / layout / dataSource) が import する module を辿り、 **module 直下の可変 state** を列挙する。 探す形は 4 つ。
+
+| 形 | 例 |
+|---|---|
+| `let` 宣言 | `let current: User \| null = null` |
+| `new Map` / `new Set` | `const store = new Map<string, User>()` |
+| 配列リテラル | `const rows: Row[] = []` |
+| 可変 object リテラル | `const cache: Record<string, T> = {}` |
+
+```bash
+# 候補を粗く拾う。 これは絞り込みであって判定ではない
+grep -nE "^[[:space:]]*(export[[:space:]]+)?(let[[:space:]]|const[[:space:]])" lib/users.ts
+```
+
+**grep の結果で 0 件と決めない**。 上の regex は有効な TypeScript の一部しか拾えず、 実際に落ちる形がある。
+
+| 落ちる形 | 例 |
+|---|---|
+| factory 経由 | `const pool = createPool()` (右辺が呼出) |
+| 分割代入 | `const { cache } = makeDeps()` |
+| class の static | `class Store { static rows = new Map() }` |
+| 別名 re-export の先 | `export { store } from './inner'` |
+
+候補を拾った後は **対象 file を Read して確かめる**。 判定材料は「top-level に束縛されているか」 と「その値が可変か」 の 2 点で、 宣言の書き方ではない。
+
+##### 辿る範囲
+
+import graph は無制限に辿らない。
+
+| 項目 | 値 |
+|---|---|
+| 対象 | 相対 import と project の alias (`@/` 等) のみ。 `node_modules` は辿らない |
+| 再訪防止 | 解決後の絶対 path で visited set を持つ (循環 import で止まらなくなる) |
+| 上限 | 深さ 5 または file 50 件のいずれか先に達した方 |
+| 上限に達した時 | **0 件ではなく「未確認」** として扱う |
+
+`export { x } from './y'` の再 export と、 literal 引数の動的 import (`await import('./users')`) は辿る。 変数を渡す動的 import は解決できないため「未確認」 に落とす。
+
+##### 判定は 3 値
+
+**「無い」 と「確かめられなかった」 を分ける**。 混ぜると、 走査が途中で止まった app で seed が省かれる。
+
+| 結果 | Step 3 の扱い |
+|---|---|
+| 1 件以上 | seed 経路を入れる |
+| 0 件 (全 import を確認済) | seed 経路を入れない |
+| 未確認 (上限到達 / 解決不能な import) | **seed 経路を入れ、 生成 test の冒頭に未確認だった旨を書く** |
+
+0 件で seed を入れないのは、 無条件に mock を挟むと生成 test が実装を一切通らず「pass しているが何も検証していない」 状態になるため。 未確認を 0 件に倒すと、 その安全側の判断が裏返る。
+
+##### seed の仕方は実装を通す方を優先する
+
+| # | 選択 | 条件 |
+|---|---|---|
+| 1 | reset / seed の export を呼ぶ | module がそれを export している |
+| 2 | `vi.resetModules()` + action を動的 import | export は無いが module が副作用を持たない |
+| 3 | `vi.mock` で module ごと差し替える | 1 と 2 が使えない |
+
+**3 は最後**。 module ごと差し替えると、 その module が担う検証 (重複判定 / 権限 / 一意性) が mock 側の実装を測るだけになり、 本番の欠陥を隠したまま security の TC が通る。
+
+3 を採る時は生成 test の冒頭に **差し替えた export 名** と **実装を通っていない TC の ID** を書く。 読み手が pass の範囲を取り違えないため。
+
+##### `Given` の data 部分を seed する
+
+9 column 表の `Given` は env (`cookies` / `headers`) と data (既存 row / fixture) が混ざっている。 **data 側は clear した後に入れ直す**。
+
+clear だけを書くと、 既存 row を前提にする TC (重複検出 / 状態遷移 / 権限) が空 state で走り、 期待値と噛み合わない。 `beforeEach` は state を空に戻すところまでで、 case ごとの前提はそこから積む。
 
 ### Step 3: vitest test の生成
 
 各 9 column 行を以下 template で test ブロックに変換 ...
 
+`{data seam}` の block は Step 2 の判定が「1 件以上」 か「未確認」 の時だけ出す。 「0 件」 なら 2 block とも省き、 `vitest` の import から `beforeEach` / `vi` を外す。
+
 ```ts
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
+{選択 2 では action を it の中で動的 import するので、 この行は出さない}
 import { {ACTION} } from '{ACTION_PATH}';
+
+{data seam / 選択 1 — reset か seed を export している module。 実装をそのまま通す}
+import { {RESET_EXPORT} } from '{STATE_MODULE}';
+
+{data seam / 選択 3 — module ごと差し替える。 state は必ず vi.hoisted に置く}
+const {STATE_NAME} = vi.hoisted(() => ({ {STATE_FIELD}: {STATE_INITIALIZER} }));
+vi.mock('{STATE_MODULE}', () => ({
+  {STATE_MODULE の各 export を {STATE_NAME}.{STATE_FIELD} 経由の実装に差し替える},
+}));
+
+{data seam — 判定が 0 件でない時のみ}
+beforeEach(() => {
+  {選択 1 なら {RESET_EXPORT}();、 選択 2 なら vi.resetModules();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}
+});
 
 describe('{MODULE} server action', () => {
   it('{ID} {Observation}', async () => {
+    {data seam / Given.data がある行のみ — clear の後に入れ直す}
+    {Given.data を 選択 1 なら seed export 呼出、 選択 3 なら {STATE_NAME}.{STATE_FIELD} への書込に展開}
+
+    {data seam / 選択 2 のみ — reset 後の module を掴み直す}
+    const { {ACTION} } = await import('{ACTION_PATH}');
+
     const fd = new FormData();
     {FormData の各 entry を fd.set(key, value) に展開}
     const { result, error, env } = await invokeServerAction({
@@ -103,6 +219,76 @@ describe('{MODULE} server action', () => {
   });
 });
 ```
+
+##### 展開例 (release-smoke が実際に走らせる)
+
+template を選択 3 (module ごと差し替え) で展開した形。 **`tests/release-smoke/tests/nextjs-data-seam.test.ts` がこの block を抜き出して fixture に書き、 Vitest で実行する**。 template を壊すとこの block も壊れ、 test が落ちる。
+
+placeholder のままだと実行できないので、 具体的な module 名で書く。 判定材料は形であって名前ではない。
+
+<!-- kiwa-nextjs:worked-example:start -->
+```ts
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { signup } from './signup.js';
+
+const seam = vi.hoisted(() => ({ users: new Map() }));
+vi.mock('./users.js', () => ({
+  // store を値として返す export。 factory の実行時に seam を参照するので、
+  // vi.hoisted に置いていないとここで初期化前参照になる。
+  store: seam.users,
+  findUserByEmail: async (email) => seam.users.get(email) ?? null,
+  createUser: async (input) => {
+    const user = { id: `u_${seam.users.size + 1}`, email: input.email };
+    seam.users.set(input.email, user);
+    return user;
+  },
+}));
+
+beforeEach(() => {
+  seam.users.clear();
+});
+
+function formData(entries) {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(entries)) fd.set(k, v);
+  return fd;
+}
+
+describe('signup server action', () => {
+  it('T-001 登録できる', async () => {
+    const result = await signup(formData({ email: 'a@b', password: 'abcd1234' }));
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it('T-002 Given の既存 row を seed してから重複を検出する', async () => {
+    // Given の data 部分は clear の後に入れ直す。 clear だけだと空 state で走る。
+    seam.users.set('a@b', { id: 'u_seed', email: 'a@b' });
+    const result = await signup(formData({ email: 'a@b', password: 'abcd1234' }));
+    expect(result).toEqual({ ok: false, error: 'already-registered' });
+  });
+
+  it('T-003 前の case の seed が残っていない', async () => {
+    const result = await signup(formData({ email: 'a@b', password: 'abcd1234' }));
+    expect(result).toMatchObject({ ok: true });
+  });
+});
+```
+<!-- kiwa-nextjs:worked-example:end -->
+
+`vi.hoisted` を外して素の `const seam = { users: new Map() }` にすると `ReferenceError: Cannot access 'seam' before initialization` で **1 件も実行されない**。 `vi.mock` は巻き上げられるので、 factory が走る時点で `seam` はまだ初期化されていない。
+
+分かれ目は **factory の実行時に `seam` を読むかどうか**で、 export の種類ではない。
+
+| 形 | 例 | factory 実行時に読むか |
+|---|---|---|
+| 値として返す | `store: seam.users` | 読む |
+| 値から導く | `size: seam.users.size` / `rows: [...seam.users]` | 読む |
+| 既定値に使う | `limit: seam.config.limit ?? 10` | 読む |
+| 関数本体の中で読む | `find: async (k) => seam.users.get(k)` | 読まない (呼出時まで遅れる) |
+
+上の `store: seam.users` は 1 行目。 `findUserByEmail` は 4 行目で、 `vi.hoisted` が無くても動く。
+
+両方の形が同じ factory に同居するのが普通なので、 **形で場合分けせず常に `vi.hoisted` に置く**。 場合分けすると、 後から export を 1 つ足しただけで test が全滅する。
 
 ### Step 4: test 実行 + 結果取得
 
@@ -190,6 +376,9 @@ it('{ID} {Observation}', async () => {
 });
 ```
 
+
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
+
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.middleware.md`。
 
 ---
@@ -231,6 +420,9 @@ it('{ID} {Observation}', async () => {
   {Signal が "notFound" なら expect(signal?.[NOT_FOUND_SYMBOL]).toBe(true)、 "redirect" なら expect(signal.url).toBe('/login') 等}
 });
 ```
+
+
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc.md`。
 
@@ -292,6 +484,9 @@ it('{ID} {Observation}', async () => {
 | 性能 | slow slot wall time を `performance.now()` で計測、 sequential なら sum、 parallel なら max |
 | 回帰 | Intercepting Routes 既知 bug 再現 URL → expected variant + distance |
 
+
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
+
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.parallel.md`。
 
 ## RSC streaming + Suspense boundary 拡張 (`--layer nextjs-rsc-streaming`、 Issue #558)
@@ -341,5 +536,8 @@ it('{ID} {Observation}', async () => {
 | 入力バリデーション | no component + no dataSource → empty env (`chunks===[]`) |
 | 性能 | streamingTimeout で SLA 上限 enforcement、 `timedOut===true` を assertion |
 | 回帰 | 既知 streaming bug 再現 source → expected chunk 配列 |
+
+
+本 mode も **data seam の確認を省かない**。 対象が import する module 直下の可変 state を § data seam (seed する軸) に従って調べ、 同節の判定と seed の仕方をそのまま適用する。 **条件も手順も本節には書き写さない** = 書き写すと共有節を直した時に取り残される。
 
 出力 path 規約 ... `tests/spec/integration/test-spec-{module}.rsc-streaming.md`。
