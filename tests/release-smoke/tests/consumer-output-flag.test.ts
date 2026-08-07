@@ -233,6 +233,24 @@ describe('the defaults are pinned so they cannot drift silently', () => {
     expect(offenders).toEqual([]);
   });
 
+  it('a consumer serving several layers does not hardcode one of their layer ids', () => {
+    // The path was fixed first and the layer was still pinned: `kiwa-nextjs`
+    // passed `--layer nextjs-server-action` to review for all five modes, so
+    // four of them would be scored against another layer's spec.
+    const nextjsLayers = LAYERS.filter((l) => l.consumer_skill === 'kiwa-nextjs').map((l) => l.id);
+    expect(nextjsLayers).toHaveLength(5);
+
+    const text = read('.claude/skills/kiwa-nextjs/SKILL.md');
+    const declaring = (line: string): boolean =>
+      line.trim().startsWith('|') || line.includes('/kiwa-design --layer');
+    const offenders = text
+      .split('\n')
+      .filter((line) => /kiwa-review/.test(line))
+      .filter((line) => !declaring(line))
+      .filter((line) => nextjsLayers.some((id) => line.includes(`--layer ${id}`)));
+    expect(offenders).toEqual([]);
+  });
+
   it('the two skills with mode suffixes say the suffix is not added to an explicit path', () => {
     // `kiwa-rust` writes `{module}_axum.rs` under `--mode axum`. Applying that
     // to a caller-supplied path would rewrite the name it asked for.
