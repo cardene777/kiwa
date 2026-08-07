@@ -7,6 +7,7 @@ import {
   detectFrom,
   loadSignalTable,
   resolveDetections,
+  applyLang,
   resolveLayers,
   scanManifests,
   stackFileExists,
@@ -19,7 +20,7 @@ export const USAGE = `Usage: kiwa <command> [options]
 Commands:
   init [options]                                            Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
   doctor                                                    Check that anvil is installed
-  layers [--layer L] [--json]                               Print the layers this run applies to
+  layers [--layer L] [--lang C] [--json]                     Print the layers this run applies to
   anvil seed <script> --out <path>                          Run <script> against a fresh anvil and dump state to <path>
   spec-to-test --in <spec.md> --out <test.ts> [--layer L]   Generate a vitest test file from a Layer 1 spec.md
   run --watch [--layer L]...                                Run vitest in watch mode across one or more layers (default unit + api + ui)
@@ -27,6 +28,8 @@ Commands:
 
 layers options:
   --layer L                     Use L instead of the detection. Wins outright.
+  --lang C                      Resolve spec paths for document language C (ISO 639-1).
+                                en and omitting the flag both give the plain path.
   --json                        Emit one record per layer with its consumer skill,
                                 mode and spec path, plus how the list was chosen.
 
@@ -389,6 +392,7 @@ export function exitCodeForLayersError(message: string): number {
  */
 function layersCommand(args: string[], deps: RunCliDeps): number {
   let explicit: string | undefined;
+  let lang: string | undefined;
   let asJson = false;
 
   for (let i = 0; i < args.length; i += 1) {
@@ -400,6 +404,11 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
       i += 1;
     } else if (arg.startsWith('--layer=')) {
       explicit = arg.slice('--layer='.length);
+    } else if (arg === '--lang') {
+      lang = args[i + 1];
+      i += 1;
+    } else if (arg.startsWith('--lang=')) {
+      lang = arg.slice('--lang='.length);
     } else {
       deps.stderr(`ERR layers: unknown option ${arg}\n`);
       return 2;
@@ -408,6 +417,14 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
 
   if (explicit !== undefined && !explicit) {
     deps.stderr('ERR layers: --layer needs a value\n');
+    return 2;
+  }
+
+  // An empty `--lang` is a caller bug, not a request for English. Treating it
+  // as English would hide `--lang "$UNSET_VAR"` and hand back paths the
+  // producer never wrote.
+  if (lang !== undefined && !lang) {
+    deps.stderr('ERR layers: --lang needs a value\n');
     return 2;
   }
 
@@ -423,7 +440,8 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
   for (const warning of resolved.warnings) deps.stderr(`WARN ${warning}\n`);
 
   if (asJson) {
-    deps.stdout(`${JSON.stringify({ source: resolved.source, layers: resolved.layers }, null, 2)}\n`);
+    const layers = applyLang(resolved.layers, lang);
+    deps.stdout(`${JSON.stringify({ source: resolved.source, layers }, null, 2)}\n`);
     return 0;
   }
   for (const layer of resolved.layers) deps.stdout(`${layer.id}\n`);

@@ -61,11 +61,20 @@ kiwa init --detect
 ```bash
 # --layer が与えられていればそのまま渡す。 CLI 側が flag > detected > all の
 # 優先順位を持っているので、 本 skill が先に分岐すると判定が 2 箇所になる。
-kiwa layers --json ${LAYER:+--layer "$LAYER"}
+#
+# --lang も渡す。 返る spec_path が言語込みで解決されるので、 本 skill は suffix の
+# 規約を知らなくてよい。
+kiwa layers --json ${LAYER:+--layer "$LAYER"} ${LANG:+--lang "$LANG"}
 ```
 
 判定を本 skill 側に書かない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 複製すると
 同じ契約が再び散る (#1807 / #1809 / #1810)。
+
+**`spec_path` に suffix を足さない**。 `--lang ja` を渡せば返り値が既に
+`test-spec-{module}.nextjs.ja.md` になっている。 skill 側で足すと二重になる。
+
+`--lang` を Layer 1 と Layer 2 の両方に渡す。 片方だけだと、 Layer 1 が書いた file を Layer 2 が
+探せない (#1855 で実際にそうなっていた)。
 
 `--layer` を渡さずに `source` だけ見て自前で絞ると、 `--layer all` が「全 layer を対象」 では
 なく「絞れなかった」 と同じ扱いになり、 明示指定が効かなくなる。

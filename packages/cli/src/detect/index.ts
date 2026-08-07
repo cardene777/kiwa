@@ -121,6 +121,14 @@ export function writeStackFile(
 }
 
 export { detectFrom, resolve as resolveDetections } from './detect.js';
-export { loadLayerTable, resolveLayers, type LayerRecord, type ResolvedLayers } from './layers.js';
+export {
+  applyLang,
+  loadLayerTable,
+  resolveLayers,
+  withLangSuffix,
+  type DocLang,
+  type LayerRecord,
+  type ResolvedLayers,
+} from './layers.js';
 export { presentManifests, scan as scanManifests, type ManifestPresence } from './scan.js';
 export type { Detection, SignalTable } from './detect.js';

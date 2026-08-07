@@ -4,7 +4,15 @@ import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-import { loadJson, loadLayerTable, outputMap, resolveLayers, strList } from '../src/detect/layers.js';
+import {
+  applyLang,
+  loadJson,
+  loadLayerTable,
+  outputMap,
+  resolveLayers,
+  strList,
+  withLangSuffix,
+} from '../src/detect/layers.js';
 import { signalsFingerprint, type SignalTable } from '../src/detect/detect.js';
 import { loadSignalTable } from '../src/detect/index.js';
 
@@ -1162,5 +1170,76 @@ describe('a hand-edited layers.json degrades predictably', () => {
       'kiwa-auth': ['a.ts', 'b.ts'],
       'kiwa-orm': [],
     });
+  });
+});
+
+/**
+ * `docs/layers.json` declares the English path; `/kiwa-design --lang ja` writes
+ * a different one. Nothing reconciled the two, so a caller that read
+ * `spec_path` looked where the producer had not written (#1855).
+ */
+describe('lang suffix', () => {
+  it('inserts the code before the extension', () => {
+    expect(withLangSuffix('tests/spec/integration/test-spec-{module}.nextjs.md', 'ja')).toBe(
+      'tests/spec/integration/test-spec-{module}.nextjs.ja.md',
+    );
+  });
+
+  it('leaves the path alone for English and for no language', () => {
+    const path = 'tests/spec/unit/test-spec-{module}.md';
+    // Two ways of asking for English have to give the same answer, or a caller
+    // that passes the flag through unconditionally gets a path nobody wrote.
+    expect(withLangSuffix(path, 'en')).toBe(path);
+    expect(withLangSuffix(path, undefined)).toBe(path);
+    expect(withLangSuffix(path, '')).toBe(path);
+  });
+
+  it('goes after the layer suffix', () => {
+    // The two suffixes are orthogonal and the language is always last, so a
+    // consumer can strip it without knowing which layer it came from.
+    expect(withLangSuffix('tests/spec/integration/test-spec-{module}.api.md', 'ja')).toBe(
+      'tests/spec/integration/test-spec-{module}.api.ja.md',
+    );
+  });
+
+  it('appends when the file has no extension', () => {
+    // Not a shape the table uses today. Inserting before a dot that belongs to
+    // a directory would produce `tests/spec.ja/integration/...`.
+    expect(withLangSuffix('tests/spec.d/README', 'ja')).toBe('tests/spec.d/README.ja');
+  });
+
+  it('moves spec_path and nothing else', () => {
+    const [before] = TABLE.filter((l) => l.id === 'api');
+    const [after] = applyLang(TABLE, 'ja').filter((l) => l.id === 'api');
+    expect(before?.spec_path).toBeTruthy();
+    expect(after?.spec_path).toBe(withLangSuffix(before!.spec_path!, 'ja'));
+    // `spec_dir` is a directory and `test_outputs` are generated tests, whose
+    // names do not carry the language (`--lang` sets their comment language).
+    expect(after?.spec_dir).toBe(before?.spec_dir);
+    expect(after?.test_outputs).toEqual(before?.test_outputs);
+  });
+
+  it('keeps a null spec_path null', () => {
+    const withNull = [{ ...TABLE[0]!, spec_path: null }];
+    expect(applyLang(withNull, 'ja')[0]?.spec_path).toBeNull();
+  });
+
+  it('matches the declaration when no language is asked for', () => {
+    // The point of the flag is that omitting it changes nothing. If these
+    // diverged, every caller that does not pass `--lang` would silently move.
+    expect(applyLang(TABLE, undefined)).toEqual(TABLE);
+    expect(applyLang(TABLE, 'en')).toEqual(TABLE);
+  });
+
+  it('applies to every layer that declares a spec_path', () => {
+    // Asserted across the table rather than on one row, so a layer added later
+    // is covered without editing this test.
+    const applied = applyLang(TABLE, 'ja');
+    const declared = TABLE.filter((l) => l.spec_path !== null);
+    expect(declared.length).toBeGreaterThan(20);
+    for (const layer of declared) {
+      const moved = applied.find((l) => l.id === layer.id);
+      expect(moved?.spec_path, `${layer.id} の spec_path が動いていない`).toMatch(/\.ja\.md$/);
+    }
   });
 });

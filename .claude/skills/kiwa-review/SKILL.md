@@ -61,6 +61,10 @@ producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review`) の file 
 ```bash
 LANG_SUFFIX=""
 [ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+
+# spec_path を CLI から受け取る経路では、 上の組み立てを行わない。
+# `kiwa layers --json --lang "$DOC_LANG"` が言語込みで解決済の path を返す。
+# 自前で足すと二重になり、 CLI 側の規約が変わった時に取り残される (#1855)。
 # 使用例: tests/spec/{layer}/test-spec-${MODULE}${LANG_SUFFIX}.md
 ```
 
