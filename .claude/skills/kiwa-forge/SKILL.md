@@ -304,6 +304,7 @@ Step 5d で test-passed marker 作成成功後、 生成 test の品質を独立
 
 review 結果:
 - PASS (weighted_score >= 7.0) → user に summary + report path を return
+- CONDITIONAL (未生成 TC あり) → 未検証の観点と次の手を summary に載せて先へ進む (`skills/kiwa-review/SKILL.md` § Step 4)
 - FAIL critical なし → review 指摘 (追加 test 提案 / assertion 抽象化箇所) を表示、 user に「修正して再生成 / そのまま完了」 を選択
 - FAIL critical あり → spec TC 大幅実装漏れ or assertion 信頼性無し、 user に「test 再生成必須」 警告
 

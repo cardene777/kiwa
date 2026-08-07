@@ -832,6 +832,7 @@ Step 5 完了後、 生成 spec の品質を独立 review する。 `/kiwa-revie
 
 review 結果:
 - PASS (weighted_score >= 7.0) → user に結果 summary + report path を return、 Layer 2 (`/kiwa-forge` 等) への進行を推奨
+- CONDITIONAL (未生成 TC あり) → 未検証の観点と次の手を summary に載せて先へ進む (`skills/kiwa-review/SKILL.md` § Step 4)
 - FAIL critical なし → review 指摘を user に表示、 「指摘反映して再生成 / そのまま Layer 2 へ進む」 を AskUserQuestion で選択
 - FAIL critical あり → spec に critical 欠陥 (観点漏れ / 抽象表現過多 / 優先度判定ミス)、 user に「spec 修正 → 再 design / 無視して継続」 を選択
 

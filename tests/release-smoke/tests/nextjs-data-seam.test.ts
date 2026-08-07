@@ -1,5 +1,14 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -661,6 +670,21 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     ).toThrow();
   });
 
+  it('passthrough-export-logic なのに素通しに届かない入力は止まる', () => {
+    // The mirror image of the mocked-export contradiction. Left silent, it
+    // records a test that runs against the mock as "runs against the real
+    // implementation" — the exact false-green the gate exists to prevent.
+    expect(() =>
+      decide({
+        mockedExports: MOCKED,
+        passthroughExports: PASSTHROUGH,
+        cases: [
+          { id: 'T-012', dependsOn: ['createUser'], answeredBy: 'passthrough-export-logic' },
+        ],
+      }),
+    ).toThrow();
+  });
+
   it('dependsOn の書き漏れが unknown を生成側に倒さない', () => {
     // The reach check used to run first, so an empty `dependsOn` landed in
     // "does not touch the mock" and was generated — fail-open (R2R1-F1).
@@ -753,6 +777,14 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     const gate = section(GATE_SECTION);
     expect(gate, '矛盾入力で止まる旨が無い').toMatch(/例外で止める/);
     expect(gate, '判定順の理由が書かれていない').toMatch(/到達の有無より先/);
+    // Both directions, not just the one measured first. Declaring passthrough
+    // while depending only on mocked exports records a mock-backed test as
+    // "runs against the real implementation".
+    for (const value of ['mocked-export-logic', 'passthrough-export-logic']) {
+      expect(gate, `${value} の矛盾が挙がっていない`).toMatch(
+        new RegExp(`${value}[^。]*届かない`),
+      );
+    }
   });
 
   it('SKILL.md の answeredBy 5 値が script の受理値と一致する', () => {
@@ -863,21 +895,26 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     expect(step4, '呼出元が 3 値を受ける旨が無い').toMatch(/呼出元は 3 値を受ける/);
   });
 
-  it('分岐を持つ呼出元が CONDITIONAL を知っている', () => {
-    // kiwa-hardhat is the caller that enumerates the verdicts explicitly.
-    const hardhat = readFileSync(
-      resolve(REPO_ROOT, '.claude/skills/kiwa-hardhat/SKILL.md'),
-      'utf-8',
-    );
-    // Asserted on the enumeration, not on the word. The verdict list is what a
-    // reader follows; `toContain('CONDITIONAL')` also matched the prose
-    // sentence that was added alongside it.
-    const enumeration = hardhat
-      .split('\n')
-      .filter((line) => /分岐\)/.test(line))
-      .join('\n');
-    expect(enumeration, 'kiwa-hardhat の分岐列挙に CONDITIONAL が無い').toContain('CONDITIONAL');
-    expect(enumeration, '分岐数が 4 になっていない').toContain('4 分岐');
+  it('verdict を列挙する全 skill が CONDITIONAL を知っている', () => {
+    // Found by listing the enumerations rather than by naming the skills. I
+    // updated kiwa-hardhat and missed kiwa-forge, which kiwa-hardhat cites as
+    // its own source ("kiwa-forge と同形式") — naming them one by one is how
+    // the miss happened (#1859 Round 2 retry 2).
+    const skills = readdirSync(resolve(REPO_ROOT, '.claude/skills'));
+    const enumerators: string[] = [];
+    for (const name of skills) {
+      const file = resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md');
+      if (!existsSync(file)) continue;
+      const body = readFileSync(file, 'utf-8');
+      // The enumeration is the list that branches on the review verdict.
+      if (!body.includes('FAIL critical なし')) continue;
+      enumerators.push(name);
+      expect(body, `${name} が verdict を列挙しているが CONDITIONAL を知らない`).toContain(
+        'CONDITIONAL',
+      );
+    }
+    // A guard against the check silently covering nothing.
+    expect(enumerators.length, 'verdict を列挙する skill が見つからない').toBeGreaterThan(2);
   });
 
   it('producer と consumer が同じ 2 行を指している', () => {

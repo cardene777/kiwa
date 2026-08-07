@@ -209,7 +209,7 @@ node .claude/skills/kiwa-nextjs/scripts/decide-generation.mjs '{
 | `seeded-env` | helper が seed した `cookies` / `headers` / `formData` / `args` が決める | 入力の検証で弾く |
 | `unknown` | 決められない | |
 
-`mocked-export-logic` を選びながら `dependsOn` が差し替えた export に届かない入力は、 script が **例外で止める**。 `dependsOn` の書き漏れか `answeredBy` の誤りのどちらかで、 どちらなのかは script に判らない。 生成可否に畳むと、 書き漏れただけで mock 依存の TC が生成される。
+**申告と依存が食い違う入力は script が例外で止める**。 `mocked-export-logic` を選びながら差し替えた export に届かない形と、 `passthrough-export-logic` を選びながら素通しした export に届かない形の 2 つ。 `dependsOn` の書き漏れか `answeredBy` の誤りのどちらかで、 どちらなのかは script に判らない。 生成可否に畳むと、 書き漏れただけで mock 依存の TC が生成される (前者) か、 mock を測る test が「本番実装を通る」 と記録される (後者)。
 
 ###### script が持つ規則
 

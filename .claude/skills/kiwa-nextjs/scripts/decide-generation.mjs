@@ -30,7 +30,7 @@
 
 import { pathToFileURL } from 'node:url';
 
-/** @typedef {'mocked-export-logic' | 'action-branch' | 'seeded-env' | 'unknown'} AnsweredBy */
+/** @typedef {'mocked-export-logic' | 'passthrough-export-logic' | 'action-branch' | 'seeded-env' | 'unknown'} AnsweredBy */
 
 const ANSWERED_BY = new Set([
   'mocked-export-logic',
@@ -43,12 +43,17 @@ const ANSWERED_BY = new Set([
 /**
  * 1 件の TC について生成可否を決める。
  *
- * 判定の順序に意味がある。 差し替えに届かない TC は `answeredBy` を問わず生成してよい
- * (部分 mock で素通しした export しか触らない TC がこれに当たる)。 届く場合だけ、
- * 答えを出すのが誰かで分ける。
+ * 判定の順序に意味がある。
+ *
+ * 1. 未知の `answeredBy` は生成しない
+ * 2. `unknown` は到達の有無より先に見る (後ろに置くと `dependsOn` の書き漏れで生成される)
+ * 3. 申告と依存が食い違う入力は throw する (生成可否に畳むと書き漏れが素通しする)
+ * 4. 差し替えに届かない TC は生成する
+ * 5. 差し替えに届く TC は、 答えを出すのが誰かで分ける
  */
-export function decideCase(tc, mockedExports) {
+export function decideCase(tc, mockedExports, passthroughExports = []) {
   const mocked = new Set(mockedExports);
+  const passthrough = new Set(passthroughExports);
   const dependsOn = tc.dependsOn ?? [];
 
   if (!ANSWERED_BY.has(tc.answeredBy)) {
@@ -86,11 +91,22 @@ export function decideCase(tc, mockedExports) {
   }
 
   // 素通しした export の実装が答えを決めるなら、 それは本番の実装そのもの。
+  //
+  // `mocked-export-logic` と対称に、 申告と依存が食い違う入力は止める。 素通しを申告し
+  // ながら素通し export に届かない形は、 mock の実装を測る test を「本番実装を通る」 と
+  // 記録することになり、 gate が防いでいる false-green そのものになる。
   if (tc.answeredBy === 'passthrough-export-logic') {
+    const viaPassthrough = dependsOn.filter((name) => passthrough.has(name));
+    if (viaPassthrough.length === 0) {
+      throw new Error(
+        `${tc.id}: answeredBy=passthrough-export-logic だが dependsOn が素通しした export に届かない ` +
+          `(dependsOn=[${dependsOn.join(', ')}] / passthroughExports=[${[...passthrough].join(', ')}])`,
+      );
+    }
     return {
       id: tc.id,
       generate: true,
-      reason: '素通しした export の実装が期待値を決める (本番実装を通る)',
+      reason: `素通しした export の実装が期待値を決める (${viaPassthrough.join(', ')}、 本番実装を通る)`,
     };
   }
 
@@ -122,7 +138,9 @@ export function decide(input) {
     );
   }
 
-  const decided = (input.cases ?? []).map((tc) => decideCase(tc, mockedExports));
+  const decided = (input.cases ?? []).map((tc) =>
+    decideCase(tc, mockedExports, passthroughExports),
+  );
   return {
     generated: decided.filter((d) => d.generate),
     omitted: decided.filter((d) => !d.generate),
