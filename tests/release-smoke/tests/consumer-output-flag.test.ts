@@ -194,13 +194,21 @@ describe('a consumer can be told where its input is and what to call it', () => 
     //
     // Scanned over the whole file rather than one section: the statements were
     // 40 and 80 lines apart from the branch that was fixed.
+    // Round 3 found the heading itself still said 生成 (必須) while the body
+    // below it described the skip. Headings are read first, so scanning them
+    // separately is not optional.
+    //
+    // The check is "does any line assert that generation always happens", in
+    // whatever form: 必須 / 必ず, or a literal spec path the caller cannot
+    // redirect. Four rounds went to this one file because each fix addressed
+    // the sentence the reviewer quoted rather than the class.
     const offenders = play
       .split('\n')
       .filter((line) => !line.startsWith('- `--input-spec'))
       .filter(
         (line) =>
-          /必ず Layer 1/.test(line) ||
-          /必ず Layer 1 経由/.test(line) ||
+          /Layer 1[^\n]*(必須|必ず)/.test(line) ||
+          /(必須|必ず)[^\n]*Layer 1/.test(line) ||
           /tests\/spec\/e2e\/test-spec-\{example\}\.md/.test(line),
       );
     expect(offenders).toEqual([]);

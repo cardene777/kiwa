@@ -69,7 +69,7 @@ pnpm install
 - `playwright.config.ts` (webServer + fixture 設定)
 - `tests/prepare-env.ts` (anvil 起動 + contract deploy)
 
-### Step 1.5: Layer 1 経由でテスト仕様書生成 (必須、 Phase E-3 で refactor 済)
+### Step 1.5: Layer 1 のテスト仕様書を用意する (`--input-spec` があれば受け取る、 Phase E-3 で refactor 済)
 
 spec.ts 実装の前に Layer 1 の 9 section + 9 column 仕様書 (SSOT = `docs/SKILL-DESIGN.ja.md`) を用意する。 `--input-spec` で既存 spec を渡された場合はそれを使い、 渡されていない場合だけ `/kiwa-design` を起動して生成する。 独自 template ではなく Layer 1 出力を消費する設計に統一 (旧 template 経路は廃止、 kiwa Phase E-3 refactor)。
 
