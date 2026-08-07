@@ -187,9 +187,23 @@ describe('a consumer can be told where its input is and what to call it', () => 
     const play = read('.claude/skills/kiwa-play/SKILL.md');
     expect(play).toMatch(/`--input-spec` が渡されていれば/);
     expect(play).toMatch(/skip して既存の spec を読む/);
-    // And the generating branch must not name a literal path either, or the
-    // skip is the only thing honouring the argument.
-    expect(play).not.toMatch(/`tests\/spec\/e2e\/test-spec-\{example\}\.md` に Write/);
+
+    // One branch honouring the argument is not enough. Round 2 found the skip
+    // in place while three other lines still said generation was mandatory and
+    // named the path to read — so a reader following the steps ignored it.
+    //
+    // Scanned over the whole file rather than one section: the statements were
+    // 40 and 80 lines apart from the branch that was fixed.
+    const offenders = play
+      .split('\n')
+      .filter((line) => !line.startsWith('- `--input-spec'))
+      .filter(
+        (line) =>
+          /必ず Layer 1/.test(line) ||
+          /必ず Layer 1 経由/.test(line) ||
+          /tests\/spec\/e2e\/test-spec-\{example\}\.md/.test(line),
+      );
+    expect(offenders).toEqual([]);
   });
 
   it('the two skills this change adds state the path the table declares', () => {

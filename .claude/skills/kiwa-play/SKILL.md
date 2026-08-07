@@ -71,7 +71,7 @@ pnpm install
 
 ### Step 1.5: Layer 1 経由でテスト仕様書生成 (必須、 Phase E-3 で refactor 済)
 
-spec.ts 実装の前に必ず Layer 1 skill (`/kiwa-design`) を起動し、 SSOT (`docs/SKILL-DESIGN.ja.md`) 準拠の 9 section + 9 column 仕様書を生成する。 独自 template ではなく Layer 1 出力を消費する設計に統一 (旧 template 経路は廃止、 kiwa Phase E-3 refactor)。
+spec.ts 実装の前に Layer 1 の 9 section + 9 column 仕様書 (SSOT = `docs/SKILL-DESIGN.ja.md`) を用意する。 `--input-spec` で既存 spec を渡された場合はそれを使い、 渡されていない場合だけ `/kiwa-design` を起動して生成する。 独自 template ではなく Layer 1 出力を消費する設計に統一 (旧 template 経路は廃止、 kiwa Phase E-3 refactor)。
 
 #### 1.5.A プロジェクト読込
 
@@ -111,7 +111,7 @@ Layer 1 が以下 9 section の仕様書を解決済み spec path に Write す�
 
 #### 1.5.C 仕様書ベースで実装 (Layer 2 = 本 skill の責務)
 
-Layer 1 出力 `tests/spec/e2e/test-spec-{example}.md` を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
+Layer 1 出力 (解決済み spec path) を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
 
 | Layer 1 column | spec.ts への変換 |
 |---|---|
@@ -129,7 +129,7 @@ Layer 1 出力 `tests/spec/e2e/test-spec-{example}.md` を Read し、 「テス
 
 #### 1.5.D 旧 template との backward-compat
 
-旧 `examples/test-spec-template.md` (独自 8 column) は Phase E-3 以前の test 仕様書を Read する場合のみ参照用に残す。 新規 test 仕様書は **必ず Layer 1 経由で 9 column 表** を生成する。
+旧 `examples/test-spec-template.md` (独自 8 column) は Phase E-3 以前の test 仕様書を Read する場合のみ参照用に残す。 新規 test 仕様書は **Layer 1 経由の 9 column 表** を使う (`--input-spec` で受け取るか、 無ければ生成する)。
 
 ### Step 2: 3 layer 設計
 
