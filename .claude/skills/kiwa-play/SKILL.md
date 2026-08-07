@@ -30,6 +30,8 @@ $ARGUMENTS
 
 ## オプション
 
+- `--module {name}` — spec / test file 名に入る module 名。 `--input-spec` を省略した時の既定 path もこれで決まる
+- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/e2e/test-spec-{module}.md`)。 `/kiwa-design --layer e2e` が書く場所で、 `docs/layers.json` の `spec_path` がその宣言
 - `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa-lab/cli init` を実行し scaffold 生成)
 - `--mode {new|extend|debug}` — `new` (新規 test 設計) / `extend` (既存 test 拡張) / `debug` (flaky / fail 解析)
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
