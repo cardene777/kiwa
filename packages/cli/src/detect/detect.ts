@@ -29,10 +29,29 @@ export interface Signal {
   note?: string;
 }
 
+/**
+ * A signal derived from a package's `peerDependencies` rather than written by
+ * hand, carrying the language it was derived from.
+ *
+ * The language is not decoration. Generated signals are npm names, and npm
+ * names share a namespace with Rust crate names: `redis`, `postgres` and
+ * `testcontainers` all exist in both. Matching is by name (exact, or a `/`
+ * boundary prefix), so without the language a `Cargo.toml` depending on the
+ * `redis` crate matches a signal derived from a TypeScript package and reports
+ * a TypeScript layer.
+ *
+ * Go is unaffected either way, because module paths are
+ * `github.com/redis/go-redis/v9` and match neither form.
+ */
+export interface GeneratedSignal extends Signal {
+  /** The manifest language this signal was derived from. */
+  language: string;
+}
+
 export interface SignalTable {
   manifests: Record<string, string>;
   signals: Record<string, Signal[]>;
-  generated: { signals: Signal[] };
+  generated: { signals: GeneratedSignal[] };
 }
 
 export interface Detection {
@@ -157,7 +176,15 @@ export function detectFrom(
   manifest: string,
   deps: Dependency[],
 ): Detection[] {
-  const signals = [...(table.signals[language] ?? []), ...table.generated.signals];
+  // Generated signals are filtered by the language they were derived from, not
+  // applied to every manifest. An entry without a `language` matches nothing:
+  // the shape is machine-written, so a missing field means the generator is out
+  // of date, and guessing "applies everywhere" is the behaviour this filter
+  // exists to remove.
+  const signals = [
+    ...(table.signals[language] ?? []),
+    ...table.generated.signals.filter((signal) => signal.language === language),
+  ];
   return deps.flatMap((dep) => signals.flatMap((signal) => applySignal(signal, dep, manifest)));
 }
 
