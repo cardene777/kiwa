@@ -48,6 +48,17 @@
     "dependency alone cannot tell rust-axum from rust-tower-http — the tower-http",
     "example depends on axum too.",
     "",
+    "`manifests` maps a filename to the language whose presence it establishes.",
+    "Three of them are also read for dependencies (Cargo.toml, go.mod,",
+    "package.json); the two Solidity entries are not — nothing maps a Solidity",
+    "dependency to a layer, so there is nothing to read. Their presence is still",
+    "the only way to rule the `contract` layer out, and without them every",
+    "TypeScript project was offered a Solidity test layer (measured on five real",
+    "applications).",
+    "",
+    "`hardhat.config.*` is written with a star because the extension varies",
+    "(.js / .ts / .cjs / .mjs). The scanner matches it by prefix.",
+    "",
     "This file only lists what a manifest can show. Detection never installs;",
     "`kiwa init --detect` prints and writes .kiwa/stack.json, and `--apply` is a",
     "separate step. A wrong guess costs a line of output.",
@@ -57,7 +68,9 @@
   "manifests": {
     "Cargo.toml": "rust",
     "go.mod": "go",
-    "package.json": "typescript"
+    "package.json": "typescript",
+    "foundry.toml": "solidity",
+    "hardhat.config.*": "solidity"
   },
   "signals": {
     "rust": [
