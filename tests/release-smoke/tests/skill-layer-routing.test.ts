@@ -645,6 +645,18 @@ describe('the skills carry what the table renders', () => {
     ).not.toThrow();
   });
 
+  it('the generated signals are up to date', () => {
+    // Same shape, other direction: `docs/stack-signals.json` holds a half
+    // derived from six packages' peerDependencies. Adding a peer without
+    // regenerating would leave the library undetectable with nothing saying so.
+    expect(() =>
+      execFileSync('node', ['scripts/rebuild-stack-signals.mjs', '--check'], {
+        cwd: REPO_ROOT,
+        stdio: 'pipe',
+      }),
+    ).not.toThrow();
+  });
+
   it('no skill calls a skill that does not exist', () => {
     // The table covers routing; free prose can still name a skill. #1804 left
     // `/kiwa-visual` in a flow block and a Mermaid node, in two notations the

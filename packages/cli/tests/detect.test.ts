@@ -633,7 +633,70 @@ describe('a Next.js project is detected from the framework it depends on', () =>
     // `dogfood-nextjs-server-action-app` is not — it depends on
     // `@kiwa-lab/nextjs` and nothing else. Naming an example without opening it
     // is how this test first passed against an empty result.
-    expect(detectExample('nextjs-app-router-full')).toEqual(NEXTJS_LAYERS);
+    // `ui` comes with it: the example depends on `react`, which the generated
+    // half names as a weak signal for that layer. Weak because `providers` for
+    // `ui` is empty — nothing in the table declares which of its twenty peers
+    // are subjects, so none are promoted.
+    expect(detectExample('nextjs-app-router-full')).toEqual([...NEXTJS_LAYERS, 'ui'].sort());
+  });
+});
+
+describe('the generated half is written from the packages, not by hand', () => {
+  const generated = TABLE.generated.signals;
+
+  it('names a peer of every transparent package that has a layer', () => {
+    // `dapp` is the exception and the generator says so: no layer declares
+    // `kiwa-dapp` as its consumer, so its peers have nothing to point at.
+    expect(new Set(generated.map((s) => s.layer))).toEqual(
+      new Set(['auth', 'cache', 'job-queue', 'orm-query', 'ui']),
+    );
+  });
+
+  it('never emits the runner as a subject', () => {
+    // `vitest` is a peer of all six and the subject of none.
+    expect(generated.filter((s) => s.match === 'vitest')).toEqual([]);
+  });
+
+  it('promotes a peer to exact only when a layer declares it a provider', () => {
+    // The rest stay weak, which is how `testcontainers` can point at three
+    // layers without claiming any of them: `resolve` drops it the moment
+    // something exact turns up in the same group.
+    const exact = generated.filter((s) => s.strength === 'exact').map((s) => s.match);
+    expect(exact.sort()).toEqual(
+      [
+        '@clerk/backend',
+        'auth0',
+        'better-auth',
+        'bullmq',
+        'inngest',
+        'lucia',
+        'memcached',
+        'next-auth',
+        'redis',
+      ].sort(),
+    );
+  });
+
+  it('matches a provider written differently from its package', () => {
+    // `providers` names the provider and the peer names the package:
+    // `nextauth` against `next-auth`, `clerk` against `@clerk/backend`. Both
+    // pairs have to line up or the exact list above loses two entries.
+    const byMatch = new Map(generated.map((s) => [s.match, s]));
+    expect(byMatch.get('next-auth')?.strength).toBe('exact');
+    expect(byMatch.get('@clerk/backend')?.strength).toBe('exact');
+  });
+
+  it('leaves a tool weak even where it is the only signal for a layer', () => {
+    // `testcontainers` is a peer of cache, orm and queue. Emitting it exact
+    // would have a project that merely runs containers claim three layers.
+    for (const s of generated.filter((x) => x.match === 'testcontainers')) {
+      expect(s.strength).toBe('weak');
+    }
+    expect(generated.filter((x) => x.match === 'testcontainers').length).toBeGreaterThan(1);
+  });
+
+  it('carries the language on every entry', () => {
+    expect(generated.filter((s) => s.language !== 'typescript')).toEqual([]);
   });
 });
 

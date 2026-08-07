@@ -9,10 +9,11 @@
     "",
     "Two kinds of entry, and they are not interchangeable:",
     "",
-    "  generated  Six packages name their target libraries in peerDependencies",
-    "             (auth, orm, cache, queue, ui, dapp). Those lists are the",
-    "             declaration; scripts/rebuild-stack-signals.mjs copies them here",
-    "             and --check fails when a peer is added without regenerating.",
+    "  generated  Five packages name their target libraries in peerDependencies",
+    "             (auth, orm, cache, queue, ui). Those lists are the declaration;",
+    "             scripts/rebuild-stack-signals.mjs copies them here and --check",
+    "             fails when a peer is added without regenerating. `dapp` has the",
+    "             peers but no layer, so it produces nothing.",
     "",
     "  manual     The rest declare only `vitest` or nothing at all. Their adapters",
     "             mock the framework rather than importing it, so there is nothing",
@@ -135,26 +136,322 @@
   },
   "generated": {
     "$comment": [
-      "Filled by scripts/rebuild-stack-signals.mjs from the six transparent",
-      "packages' peerDependencies. Empty until the TypeScript detector lands —",
-      "see the Issue for why that waits: 83 of the 139 JS examples carry no real",
-      "library at all, so a detector there cannot be measured yet.",
+      "Written by scripts/rebuild-stack-signals.mjs from the peerDependencies of the",
+      "transparent packages. `--check` fails when a peer is added without",
+      "regenerating, so a library cannot become undetectable by being forgotten.",
       "",
-      "Every entry here carries a `language`, and applies only to manifests of",
-      "that language. The signals above are already separated by language by the",
-      "key they sit under; these are one flat list, so each states its own.",
+      "Every peer becomes a signal. Sorting them into 'the library under test' and",
+      "'a tool used to test it' needs a judgement the generator cannot make:",
+      "`testcontainers` is a tool for orm and the subject of nothing, while",
+      "`ioredis` is the subject for cache and a tool for job-queue. An exclusion",
+      "list would have to be maintained by hand, which is the drift this file",
+      "exists to remove.",
       "",
-      "It is not decoration. These are npm names, and npm names share a namespace",
-      "with Rust crate names — `redis`, `postgres` and `testcontainers` all exist",
-      "in both. Matching is by name, so without it a Cargo.toml depending on the",
-      "`redis` crate would report the TypeScript `cache` layer. Go is unaffected:",
-      "module paths are `github.com/redis/go-redis/v9` and match neither the",
-      "exact name nor the `/` boundary prefix.",
+      "`strength` carries the distinction instead. Peers are emitted `weak`, and",
+      "`resolve` drops a weak detection once anything `exact` claims its group. A",
+      "peer that docs/layers.json names in `providers` is emitted `exact`, because",
+      "naming it there is the project's own statement that it is a subject.",
       "",
-      "An entry with no `language` matches nothing. A missing field means the",
-      "generator is out of date, and the alternative reading — applies to every",
-      "language — is the behaviour this field exists to remove."
+      "`providers` and the package names are written differently on purpose —",
+      "`nextauth` against `next-auth`, `clerk` against `@clerk/backend`. The",
+      "generator reduces both to letters and digits, and also matches a scoped",
+      "package on its scope alone. Three declared providers reach no peer at all",
+      "(`keydb`, `cloudflare`, `sqs`): they are named as options the layer supports",
+      "and nothing in the repository depends on them yet.",
+      "",
+      "`dapp` is skipped and the generator says so: no layer declares `kiwa-dapp`",
+      "as its consumer, so its peers have nothing to point at.",
+      "",
+      "Every entry carries a `language` and applies only to manifests of that",
+      "language. It is not decoration: these are npm names, and npm names share a",
+      "namespace with Rust crate names — `redis`, `postgres` and `testcontainers`",
+      "all exist in both. An entry with no `language` matches nothing, because a",
+      "missing field means the generator is out of date and 'applies everywhere' is",
+      "the behaviour that field exists to remove."
     ],
-    "signals": []
+    "signals": [
+      {
+        "match": "@angular/core",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@angular/platform-browser-dynamic",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@builder.io/qwik",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@clerk/backend",
+        "layer": "auth",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "@noma.to/qwik-testing-library",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@open-wc/testing-helpers",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@playwright/test",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@prisma/client",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@solidjs/testing-library",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@testcontainers/mysql",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@testcontainers/postgresql",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@testing-library/angular",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@testing-library/react",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@testing-library/svelte",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@testing-library/user-event",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@vue/test-utils",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "auth0",
+        "layer": "auth",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "better-auth",
+        "layer": "auth",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "better-sqlite3",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "bullmq",
+        "layer": "job-queue",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "drizzle-orm",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "inngest",
+        "layer": "job-queue",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "ioredis",
+        "layer": "cache",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "ioredis",
+        "layer": "job-queue",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "jsdom",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "kysely",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "lit",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "lucia",
+        "layer": "auth",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "memcached",
+        "layer": "cache",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "memjs",
+        "layer": "cache",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "miniflare",
+        "layer": "job-queue",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "mysql2",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "next-auth",
+        "layer": "auth",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "pg",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "postgres",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "prisma",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "react",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "react-dom",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "redis",
+        "layer": "cache",
+        "strength": "exact",
+        "language": "typescript"
+      },
+      {
+        "match": "solid-js",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "svelte",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "testcontainers",
+        "layer": "cache",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "testcontainers",
+        "layer": "job-queue",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "testcontainers",
+        "layer": "orm-query",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "vue",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "wrangler",
+        "layer": "job-queue",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "zone.js",
+        "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      }
+    ]
   }
 }
