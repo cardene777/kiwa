@@ -107,16 +107,16 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 | `auth` | `/kiwa-auth` | `{example}/tests/{module}.auth.test.ts` |
 | `job-queue` | `/kiwa-queue` | `{example}/tests/{module}.queue.test.ts` |
 | `cache` | `/kiwa-cache` | `{example}/tests/{module}.cache.test.ts` |
-| `rust-unit` | `/kiwa-rust` | `examples/{example}/tests/{module}.rs` |
-| `rust-integration` | `/kiwa-rust` | `examples/{example}/tests/{module}.rs` |
-| `rust-axum` | `/kiwa-rust` | `examples/{example}/tests/{module}_axum.rs` |
-| `rust-actix-web` | `/kiwa-rust` | `examples/{example}/tests/{module}_actix.rs` |
-| `rust-tower-http` | `/kiwa-rust` | `examples/{example}/tests/{module}_tower_http.rs` |
-| `go-unit` | `/kiwa-go` | `examples/{example}/{module}_test.go` |
-| `go-integration` | `/kiwa-go` | `examples/{example}/integration/{module}_test.go` |
-| `go-gin` | `/kiwa-go` | `examples/{example}/{module}_gin_test.go` |
-| `go-echo` | `/kiwa-go` | `examples/{example}/{module}_echo_test.go` |
-| `go-fiber` | `/kiwa-go` | `examples/{example}/{module}_fiber_test.go` |
+| `rust-unit` | `/kiwa-rust` | `{example}/tests/{module}.rs` |
+| `rust-integration` | `/kiwa-rust` | `{example}/tests/{module}.rs` |
+| `rust-axum` | `/kiwa-rust` | `{example}/tests/{module}_axum.rs` |
+| `rust-actix-web` | `/kiwa-rust` | `{example}/tests/{module}_actix.rs` |
+| `rust-tower-http` | `/kiwa-rust` | `{example}/tests/{module}_tower_http.rs` |
+| `go-unit` | `/kiwa-go` | `{example}/{module}_test.go` |
+| `go-integration` | `/kiwa-go` | `{example}/integration/{module}_test.go` |
+| `go-gin` | `/kiwa-go` | `{example}/{module}_gin_test.go` |
+| `go-echo` | `/kiwa-go` | `{example}/{module}_echo_test.go` |
+| `go-fiber` | `/kiwa-go` | `{example}/{module}_fiber_test.go` |
 
 <!-- kiwa-layers:resolver:end -->
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read

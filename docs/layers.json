@@ -484,7 +484,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/{module}.rs"
+          "{example}/tests/{module}.rs"
         ]
       }
     },
@@ -506,7 +506,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/{module}.rs"
+          "{example}/tests/{module}.rs"
         ]
       }
     },
@@ -526,7 +526,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/{module}_axum.rs"
+          "{example}/tests/{module}_axum.rs"
         ]
       }
     },
@@ -546,7 +546,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/{module}_actix.rs"
+          "{example}/tests/{module}_actix.rs"
         ]
       }
     },
@@ -566,7 +566,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-rust": [
-          "examples/{example}/tests/{module}_tower_http.rs"
+          "{example}/tests/{module}_tower_http.rs"
         ]
       }
     },
@@ -588,7 +588,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/{module}_test.go"
+          "{example}/{module}_test.go"
         ]
       }
     },
@@ -610,7 +610,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/integration/{module}_test.go"
+          "{example}/integration/{module}_test.go"
         ]
       }
     },
@@ -630,7 +630,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/{module}_gin_test.go"
+          "{example}/{module}_gin_test.go"
         ]
       }
     },
@@ -650,7 +650,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/{module}_echo_test.go"
+          "{example}/{module}_echo_test.go"
         ]
       }
     },
@@ -670,7 +670,7 @@
       "selected_by": null,
       "test_outputs": {
         "kiwa-go": [
-          "examples/{example}/{module}_fiber_test.go"
+          "{example}/{module}_fiber_test.go"
         ]
       }
     }

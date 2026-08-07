@@ -51,22 +51,29 @@ $ARGUMENTS
 - `--example {name}` — `examples/{name}/` の Go example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
 - `--coverage-threshold {N}` — `go test -cover` coverage 目標 (default 80%)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
-- `--output {path}` — 生成 test の path (省略時は `examples/{example}/{module}_test.go`、 `--mode` 指定時は suffix 付き)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外。 指定した場合は渡された path をそのまま使い、 suffix を足さない
+- `--output {path}` — 生成 test の path (省略時は `{module}_test.go`、 `--mode` 指定時は suffix 付き)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外。 指定した場合は渡された path をそのまま使い、 suffix を足さない
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip (CI 用)
 
 ## 出力 path 早見
 
 | 観点 | 出力 path |
 |---|---|
-| Go unit test file (go-unit) | `examples/{example}/{module}_test.go` |
-| Go integration test file (go-integration) | `examples/{example}/integration/{module}_test.go` |
-| Go Gin test file (`--mode gin`) | `examples/{example}/{module}_gin_test.go` |
-| Go Echo test file (`--mode echo`) | `examples/{example}/{module}_echo_test.go` |
-| Go Fiber test file (`--mode fiber`) | `examples/{example}/{module}_fiber_test.go` |
+| Go unit test file (go-unit) | `{module}_test.go` |
+| Go integration test file (go-integration) | `integration/{module}_test.go` |
+| Go Gin test file (`--mode gin`) | `{module}_gin_test.go` |
+| Go Echo test file (`--mode echo`) | `{module}_echo_test.go` |
+| Go Fiber test file (`--mode fiber`) | `{module}_fiber_test.go` |
 | coverage report | `tests/reports/go/coverage-report-{module}.{lang}.md` |
 | round 別 coverage | `tests/reports/go/coverage-report-{module}-round-{N}.{lang}.md` |
 
 Go の慣習 ... unit test は同 package (`package {pkg}` の `_test.go`) or `package {pkg}_test` (black-box test、 公開 API のみ)、 integration test は別 sub-package (`package integration_test` の `integration/{module}_test.go`)。 本 skill は go-unit を black-box test (`{pkg}_test` package suffix)、 go-integration を別 sub-dir に分離する default を採る。 web framework mode (`--mode gin` / `--mode echo` / `--mode fiber`) は同 module に対して 3+ framework 並列 test を成立させるため file 名 suffix (`_gin_test.go` / `_echo_test.go` / `_fiber_test.go`) で分離 (`--mode axum` / `--mode actix-web` / `--mode tower-http` 経路の `/kiwa-rust` と同思想)、 package は go-integration と同じ black-box (`{pkg}_test`) 系。
+
+**path の基準**。 表の path は対象 root からの相対で、 kiwa repo 内で `--example {name}` を
+渡した場合は `examples/{name}/` が root になる。 利用者の project で起動した場合は project root。
+
+以前は表に `examples/{example}/` を書いていたが、 それは kiwa repo の layout を skill の宣言に
+埋め込む形で、 利用者の project では成立しなかった。 他の Layer 2 skill は元から対象 root 相対で
+書いており、 それに揃えた。
 
 ## 実行フロー
 
@@ -397,11 +404,11 @@ fasthttp 互換 API (`kiwa_fiber` 経由 re-export、 v0.4 PR #633)。
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が mode / layer 別 test file に Write 済
-  - go-unit ... `examples/{example}/{module}_test.go`
-  - go-integration ... `examples/{example}/integration/{module}_test.go`
-  - go-gin (`--mode gin`) ... `examples/{example}/{module}_gin_test.go`
-  - go-echo (`--mode echo`) ... `examples/{example}/{module}_echo_test.go`
-  - go-fiber (`--mode fiber`) ... `examples/{example}/{module}_fiber_test.go`
+  - go-unit ... `{module}_test.go`
+  - go-integration ... `integration/{module}_test.go`
+  - go-gin (`--mode gin`) ... `{module}_gin_test.go`
+  - go-echo (`--mode echo`) ... `{module}_echo_test.go`
+  - go-fiber (`--mode fiber`) ... `{module}_fiber_test.go`
 - `go test -C examples/{example} ./...` 全 PASS (failure 0 件、 全 mode 共通コマンド)
 - `go test -C examples/{example} -coverprofile=coverage.out ./...` の coverage threshold 達成 (default 80%)
 - `tests/reports/go/coverage-report-{module}.{lang}.md` が 4 section format で Write 済

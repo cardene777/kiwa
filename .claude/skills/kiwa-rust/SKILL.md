@@ -51,21 +51,28 @@ $ARGUMENTS
 - `--example {name}` — `examples/{name}/` の Rust example 名 (省略時は cwd が example 内なら自動推定、 root なら AskUserQuestion)
 - `--coverage-threshold {N}` — cargo llvm-cov coverage 目標 (default 80%、 `cargo llvm-cov` 未 install なら Step 5 で警告のみ出して skip)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
-- `--output {path}` — 生成 test の path (省略時は `examples/{example}/tests/{module}.rs`、 `--mode` 指定時は suffix 付き)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外。 指定した場合は渡された path をそのまま使い、 suffix を足さない
+- `--output {path}` — 生成 test の path (省略時は `tests/{module}.rs`、 `--mode` 指定時は suffix 付き)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外。 指定した場合は渡された path をそのまま使い、 suffix を足さない
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip (CI 用)
 
 ## 出力 path 早見
 
 | 観点 | 出力 path |
 |---|---|
-| Rust test file (rust-unit / rust-integration) | `examples/{example}/tests/{module}.rs` |
-| Rust test file (rust-axum、 `--mode axum`) | `examples/{example}/tests/{module}_axum.rs` |
-| Rust test file (rust-actix-web、 `--mode actix-web`) | `examples/{example}/tests/{module}_actix.rs` |
-| Rust test file (rust-tower-http、 `--mode tower-http`) | `examples/{example}/tests/{module}_tower_http.rs` |
+| Rust test file (rust-unit / rust-integration) | `tests/{module}.rs` |
+| Rust test file (rust-axum、 `--mode axum`) | `tests/{module}_axum.rs` |
+| Rust test file (rust-actix-web、 `--mode actix-web`) | `tests/{module}_actix.rs` |
+| Rust test file (rust-tower-http、 `--mode tower-http`) | `tests/{module}_tower_http.rs` |
 | coverage report | `tests/reports/rust/coverage-report-{module}.{lang}.md` |
 | round 別 coverage | `tests/reports/rust/coverage-report-{module}-round-{N}.{lang}.md` |
 
 cargo の慣習 ... `tests/` 配下は integration test 扱い、 1 file = 1 crate。 unit / integration どちらも本 skill では `tests/{module}.rs` に揃える (`src/` 内 `#[cfg(test)] mod tests` 経路は本 skill scope 外、 module 内 test は人手 maintain)。 web framework mode (`--mode axum` / `--mode actix-web` / `--mode tower-http`) は同 module に対して 3+ framework 並列 test を成立させるため file 名 suffix (`_axum` / `_actix` / `_tower_http`) で分離 (`--mode gin` / `--mode echo` / `--mode fiber` 経路の `/kiwa-go` と同思想)。
+
+**path の基準**。 表の path は対象 root からの相対で、 kiwa repo 内で `--example {name}` を
+渡した場合は `examples/{name}/` が root になる。 利用者の project で起動した場合は project root。
+
+以前は表に `examples/{example}/` を書いていたが、 それは kiwa repo の layout を skill の宣言に
+埋め込む形で、 利用者の project では成立しなかった。 他の Layer 2 skill は元から対象 root 相対で
+書いており、 それに揃えた。
 
 ## 実行フロー
 
@@ -433,10 +440,10 @@ feature dependency ... `tower-http` feature は内部で `axum` feature を暗�
 ## 完了条件
 
 - Layer 1 spec の「自動化すべきテスト」 全 TC が mode / layer 別 test file に Write 済
-  - rust-unit / rust-integration ... `examples/{example}/tests/{module}.rs`
-  - rust-axum (`--mode axum`) ... `examples/{example}/tests/{module}_axum.rs`
-  - rust-actix-web (`--mode actix-web`) ... `examples/{example}/tests/{module}_actix.rs`
-  - rust-tower-http (`--mode tower-http`) ... `examples/{example}/tests/{module}_tower_http.rs`
+  - rust-unit / rust-integration ... `tests/{module}.rs`
+  - rust-axum (`--mode axum`) ... `tests/{module}_axum.rs`
+  - rust-actix-web (`--mode actix-web`) ... `tests/{module}_actix.rs`
+  - rust-tower-http (`--mode tower-http`) ... `tests/{module}_tower_http.rs`
 - 該当 mode の `cargo test` 全 PASS (failure 0 件、 rust-axum / rust-actix-web / rust-tower-http 経路は `--features kiwa/axum` / `--features kiwa/actix-web` / `--features kiwa/tower-http` opt-in が必要、 `tower-http` は内部で `axum` を暗黙有効化)
 - coverage threshold 達成 (default 80%、 `cargo llvm-cov` 未 install 環境では skip + 警告)
 - `tests/reports/rust/coverage-report-{module}.{lang}.md` が 4 section format で Write 済 (coverage skip 時は section 1 のみ「skip 理由」 で fill)

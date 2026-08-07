@@ -58,9 +58,12 @@ describe('the declared output paths carry three different anchors', () => {
       acc[anchor] = (acc[anchor] ?? 0) + 1;
       return acc;
     }, {});
+    // `kiwa-examples` was 10 until #1842 moved the Rust and Go entries to the
+    // target-root form. Nothing declares kiwa's own `examples/` directory now;
+    // the three that remain are kiwa's internal fixtures, which are not a
+    // user's artefact and are skipped rather than substituted.
     expect(counts).toEqual({
-      'project-root': 22,
-      'kiwa-examples': 10,
+      'project-root': 32,
       'kiwa-fixtures': 3,
     });
   });
@@ -79,31 +82,26 @@ describe('the declared output paths carry three different anchors', () => {
           .flat()
           .some((path) => anchorOf(path) === 'project-root'),
     ).map((layer) => layer.id);
-    expect(unreachable.sort()).toEqual(
-      [
-        'go-echo',
-        'go-fiber',
-        'go-gin',
-        'go-integration',
-        'go-unit',
-        'rust-actix-web',
-        'rust-axum',
-        'rust-integration',
-        'rust-tower-http',
-        'rust-unit',
-      ].sort(),
-    );
+    expect(unreachable).toEqual([]);
   });
 });
 
 describe('the entry point states which anchors it can write', () => {
   it('names all three and matches the measured counts', () => {
-    // Prose drifts from data silently. Writing the counts into the skill and
-    // checking them here means adding a path of a new shape breaks the check
-    // rather than the generated output.
-    expect(APP_SKILL).toMatch(/\{example\}\/\.\.\..*\|\s*22\s*\|/);
-    expect(APP_SKILL).toMatch(/examples\/\{example\}\/\.\.\..*\|\s*10\s*\|/);
-    expect(APP_SKILL).toMatch(/tests\/fixtures\/\{example\}\/\.\.\..*\|\s*3\s*\|/);
+    // Derived from the table, not written twice. Checking the skill against
+    // literals let both sides go stale together: #1842 moved ten paths and the
+    // skill still said 10 while the data said 0, with this check green.
+    const counts = allOutputPaths().reduce<Record<string, number>>((acc, entry) => {
+      const anchor = anchorOf(entry.path);
+      acc[anchor] = (acc[anchor] ?? 0) + 1;
+      return acc;
+    }, {});
+    const row = (label: string, n: number): RegExp =>
+      new RegExp(`${label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}.*\\|\\s*${n}\\s*\\|`);
+
+    expect(APP_SKILL).toMatch(row('{example}/...', counts['project-root'] ?? 0));
+    expect(APP_SKILL).toMatch(row('examples/{example}/...', counts['kiwa-examples'] ?? 0));
+    expect(APP_SKILL).toMatch(row('tests/fixtures/{example}/...', counts['kiwa-fixtures'] ?? 0));
   });
 
   it('says it skips the anchors it cannot resolve', () => {
@@ -298,7 +296,6 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     // `cli` / `data` / `orm-query` share a path across three different
     // consumers, which the same overwrite applies to.
     expect(collisions).toEqual([
-      ['examples/{example}/tests/{module}.rs', ['rust-integration', 'rust-unit']],
       ['{example}/test/integration/{module}.test.ts', ['api', 'integration']],
       [
         '{example}/tests/integration/{module}.nextjs.test.ts',
@@ -310,6 +307,9 @@ describe('the entry point passes what the pieces it invokes actually need', () =
           'nextjs-server-action',
         ],
       ],
+      // Deliberate: cargo treats `tests/` as integration tests, one file per
+      // crate, and `kiwa-rust` states it lines both layers up on purpose.
+      ['{example}/tests/{module}.rs', ['rust-integration', 'rust-unit']],
       ['{example}/tests/{module}.test.ts', ['cli', 'data', 'orm-query']],
     ]);
   });

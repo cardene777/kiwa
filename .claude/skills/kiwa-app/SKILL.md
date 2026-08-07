@@ -99,31 +99,19 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"}
 
 | 形 | 件数 | 意味 | 本 skill の扱い |
 |---|---|---|---|
-| `{example}/...` | 22 | project root 起点 | **対象**。 `{example}` を `.` に解決する |
-| `examples/{example}/...` | 10 | kiwa repo の example 配下 | 対象外。 利用者 project に `examples/` は無い |
+| `{example}/...` | 32 | project root 起点 | **対象**。 `{example}` を `.` に解決する |
+| `examples/{example}/...` | 0 | kiwa repo の example 配下 | 対象外。 利用者 project に `examples/` は無い |
 | `tests/fixtures/{example}/...` | 3 | kiwa 内部の fixture | 対象外。 利用者の成果物ではない |
 
 1 つ目を 1 件でも持つ layer が対象になる。 3 layer (`contract` / `e2e`) は 1 つ目と 3 つ目を
 同時に持つが、 これは同じ producer が「利用者側の test」 と「kiwa 側の fixture 複製」 を書く
 形なので異常ではない。 利用者 project では 1 つ目だけを使う。
 
-1 つ目を 1 件も持たない layer は生成先を決められないので飛ばす。 飛ばしたことは報告に残す。
-無言で `examples/tests/...` のような場所に書くより、 書かずに言う方がよい。
+1 つ目を 1 件も持たない layer は生成先を決められないので飛ばす。 現状そのような layer は無い。
 
-### Rust と Go は現状書けない
-
-実測すると 30 layer 中 20 が利用者 project に書け、 書けない 10 は rust 5 + go 5 の全てだった。
-
-| 対象外の layer |
-|---|
-| `rust-unit` / `rust-integration` / `rust-axum` / `rust-actix-web` / `rust-tower-http` |
-| `go-unit` / `go-integration` / `go-gin` / `go-echo` / `go-fiber` |
-
-いずれも `test_outputs` が `examples/{example}/tests/...` の形で kiwa 自身の dir を綴っている。
-`{example}` を置換しても `examples/` の 1 段が残るため、 利用者 project には置けない。
-
-**検出は効いている**。 `Cargo.toml` を持つ project ならこれらの layer は検出され、 Layer 1 の
-spec も生成される。 置けないのは Layer 2 の test file だけで、 報告にそう書く。
+以前は rust 5 + go 5 の計 10 layer が `examples/{example}/...` の形で kiwa 自身の dir を
+綴っており、 置換しても `examples/` の 1 段が残るため利用者 project に置けなかった。 #1842 で
+他の layer と同じ形に揃えたので、 30 layer すべてが対象になる。
 
 `{module}` は `--module` の値に、 `{Contract}` は対象 contract 名に解決する。
 
@@ -185,7 +173,7 @@ path を組み立て直すと suffix が落ち、 5 layer が区別できなく�
 | `{example}/tests/integration/{module}.nextjs.test.ts` | nextjs 5 layer 全て |
 | `{example}/tests/{module}.test.ts` | `cli` / `data` / `orm-query` |
 | `{example}/test/integration/{module}.test.ts` | `api` / `integration` |
-| `examples/{example}/tests/{module}.rs` | `rust-unit` / `rust-integration` |
+| `{example}/tests/{module}.rs` | `rust-unit` / `rust-integration` (cargo の慣習に沿った意図的な同一化) |
 
 順に起動すると後の layer が前の layer の生成物を上書きし、 最後の 1 つしか残らない。
 consumer が違っても同じ (`cli` / `data` / `orm-query` は 3 つとも別 skill)。
