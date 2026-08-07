@@ -114,47 +114,87 @@ seed しないと先行 case の書込が後続 case に残り、 重複検出 /
 | 可変 object リテラル | `const cache: Record<string, T> = {}` |
 
 ```bash
-# action の import 先を列挙する
-grep -oE "from '[^']+'" app/actions/{module}.ts | sed "s/from '//;s/'//"
-
-# 各 import 先の module 直下の可変 state を探す (行頭一致で関数内の宣言を除く)
-grep -nE "^(let |const [a-zA-Z_$]+([:][^=]+)? = (new (Map|Set)|\[\]|\{\}))" lib/users.ts
+# 候補を粗く拾う。 これは絞り込みであって判定ではない
+grep -nE "^[[:space:]]*(export[[:space:]]+)?(let[[:space:]]|const[[:space:]])" lib/users.ts
 ```
 
-列挙が **0 件なら seed 経路を入れない**。 無条件に mock を挟むと、 実装を差し替えた test が「実装を通っていない」 ことに気付けなくなる。
+**grep の結果で 0 件と決めない**。 上の regex は有効な TypeScript の一部しか拾えず、 実際に落ちる形がある。
 
-1 件以上なら Step 3 の template に seed 経路を含める。 差し替え方は module 側の export で決まる。
-
-| module の状態 | seed の仕方 |
+| 落ちる形 | 例 |
 |---|---|
-| reset を export している | それを `beforeEach` で呼ぶ (実装を通す) |
-| していない | `vi.mock` で差し替え、 mock 側の state を `beforeEach` で clear する |
+| factory 経由 | `const pool = createPool()` (右辺が呼出) |
+| 分割代入 | `const { cache } = makeDeps()` |
+| class の static | `class Store { static rows = new Map() }` |
+| 別名 re-export の先 | `export { store } from './inner'` |
 
-seed 経路を入れたことは生成 test の冒頭コメントに書く。 実装ではなく mock を通っている範囲が読み手に見えないと、 pass の意味を取り違える。
+候補を拾った後は **対象 file を Read して確かめる**。 判定材料は「top-level に束縛されているか」 と「その値が可変か」 の 2 点で、 宣言の書き方ではない。
+
+##### 辿る範囲
+
+import graph は無制限に辿らない。
+
+| 項目 | 値 |
+|---|---|
+| 対象 | 相対 import と project の alias (`@/` 等) のみ。 `node_modules` は辿らない |
+| 再訪防止 | 解決後の絶対 path で visited set を持つ (循環 import で止まらなくなる) |
+| 上限 | 深さ 5 または file 50 件のいずれか先に達した方 |
+| 上限に達した時 | **0 件ではなく「未確認」** として扱う |
+
+`export { x } from './y'` の再 export と、 literal 引数の動的 import (`await import('./users')`) は辿る。 変数を渡す動的 import は解決できないため「未確認」 に落とす。
+
+##### 判定は 3 値
+
+**「無い」 と「確かめられなかった」 を分ける**。 混ぜると、 走査が途中で止まった app で seed が省かれる。
+
+| 結果 | Step 3 の扱い |
+|---|---|
+| 1 件以上 | seed 経路を入れる |
+| 0 件 (全 import を確認済) | seed 経路を入れない |
+| 未確認 (上限到達 / 解決不能な import) | **seed 経路を入れ、 生成 test の冒頭に未確認だった旨を書く** |
+
+0 件で seed を入れないのは、 無条件に mock を挟むと生成 test が実装を一切通らず「pass しているが何も検証していない」 状態になるため。 未確認を 0 件に倒すと、 その安全側の判断が裏返る。
+
+##### seed の仕方は実装を通す方を優先する
+
+| # | 選択 | 条件 |
+|---|---|---|
+| 1 | reset / seed の export を呼ぶ | module がそれを export している |
+| 2 | `vi.resetModules()` + action を動的 import | export は無いが module が副作用を持たない |
+| 3 | `vi.mock` で module ごと差し替える | 1 と 2 が使えない |
+
+**3 は最後**。 module ごと差し替えると、 その module が担う検証 (重複判定 / 権限 / 一意性) が mock 側の実装を測るだけになり、 本番の欠陥を隠したまま security の TC が通る。
+
+3 を採る時は生成 test の冒頭に **差し替えた export 名** と **実装を通っていない TC の ID** を書く。 読み手が pass の範囲を取り違えないため。
+
+##### `Given` の data 部分を seed する
+
+9 column 表の `Given` は env (`cookies` / `headers`) と data (既存 row / fixture) が混ざっている。 **data 側は clear した後に入れ直す**。
+
+clear だけを書くと、 既存 row を前提にする TC (重複検出 / 状態遷移 / 権限) が空 state で走り、 期待値と噛み合わない。 `beforeEach` は state を空に戻すところまでで、 case ごとの前提はそこから積む。
 
 ### Step 3: vitest test の生成
 
 各 9 column 行を以下 template で test ブロックに変換 ...
 
-`{data seam}` の block は Step 2 の列挙が 1 件以上の時だけ出す。 0 件なら 3 block とも省き、 `vitest` の import から `beforeEach` / `vi` を外す。
+`{data seam}` の block は Step 2 の判定が「1 件以上」 か「未確認」 の時だけ出す。 「0 件」 なら 2 block とも省き、 `vitest` の import から `beforeEach` / `vi` を外す。
 
 ```ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 import { {ACTION} } from '{ACTION_PATH}';
 
-{data seam / reset を export していない module — mock 側に state を持たせて差し替える}
-const {STATE_NAME} = {STATE_INITIALIZER};
-vi.mock('{STATE_MODULE}', () => ({
-  {STATE_MODULE の export を {STATE_NAME} 経由の実装に差し替える},
-}));
-
-{data seam / reset を export している module — 実装をそのまま通す}
+{data seam / 選択 1 — reset か seed を export している module。 実装をそのまま通す}
 import { {RESET_EXPORT} } from '{STATE_MODULE}';
 
-{data seam — 列挙が 1 件以上の時のみ}
+{data seam / 選択 3 — module ごと差し替える。 state は必ず vi.hoisted に置く}
+const {STATE_NAME} = vi.hoisted(() => ({ {STATE_FIELD}: {STATE_INITIALIZER} }));
+vi.mock('{STATE_MODULE}', () => ({
+  {STATE_MODULE の各 export を {STATE_NAME}.{STATE_FIELD} 経由の実装に差し替える},
+}));
+
+{data seam — 判定が 0 件でない時のみ}
 beforeEach(() => {
-  {reset export があれば {RESET_EXPORT}();、 なければ {STATE_NAME} を clear する}
+  {選択 1 なら {RESET_EXPORT}();、 選択 3 なら {STATE_NAME}.{STATE_FIELD} を空に戻す}
 });
 
 describe('{MODULE} server action', () => {
@@ -172,6 +212,67 @@ describe('{MODULE} server action', () => {
   });
 });
 ```
+
+##### 展開例 (release-smoke が実際に走らせる)
+
+template を選択 3 (module ごと差し替え) で展開した形。 **`tests/release-smoke/tests/nextjs-data-seam.test.ts` がこの block を抜き出して fixture に書き、 Vitest で実行する**。 template を壊すとこの block も壊れ、 test が落ちる。
+
+placeholder のままだと実行できないので、 具体的な module 名で書く。 判定材料は形であって名前ではない。
+
+<!-- kiwa-nextjs:worked-example:start -->
+```ts
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { signup } from './signup.js';
+
+const seam = vi.hoisted(() => ({ users: new Map() }));
+vi.mock('./users.js', () => ({
+  // store を値として返す export。 factory の実行時に seam を参照するので、
+  // vi.hoisted に置いていないとここで初期化前参照になる。
+  store: seam.users,
+  findUserByEmail: async (email) => seam.users.get(email) ?? null,
+  createUser: async (input) => {
+    const user = { id: `u_${seam.users.size + 1}`, email: input.email };
+    seam.users.set(input.email, user);
+    return user;
+  },
+}));
+
+beforeEach(() => {
+  seam.users.clear();
+});
+
+function formData(entries) {
+  const fd = new FormData();
+  for (const [k, v] of Object.entries(entries)) fd.set(k, v);
+  return fd;
+}
+
+describe('signup server action', () => {
+  it('T-001 登録できる', async () => {
+    const result = await signup(formData({ email: 'a@b', password: 'abcd1234' }));
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it('T-002 Given の既存 row を seed してから重複を検出する', async () => {
+    // Given の data 部分は clear の後に入れ直す。 clear だけだと空 state で走る。
+    seam.users.set('a@b', { id: 'u_seed', email: 'a@b' });
+    const result = await signup(formData({ email: 'a@b', password: 'abcd1234' }));
+    expect(result).toEqual({ ok: false, error: 'already-registered' });
+  });
+
+  it('T-003 前の case の seed が残っていない', async () => {
+    const result = await signup(formData({ email: 'a@b', password: 'abcd1234' }));
+    expect(result).toMatchObject({ ok: true });
+  });
+});
+```
+<!-- kiwa-nextjs:worked-example:end -->
+
+`vi.hoisted` を外して素の `const seam = { users: new Map() }` にすると `ReferenceError: Cannot access 'seam' before initialization` で **1 件も実行されない**。 `vi.mock` は巻き上げられるので、 factory が走る時点で `seam` はまだ初期化されていない。
+
+**壊れるのは factory が state を「値として」 返す時だけ**。 上の `store: seam.users` がそれで、 factory の実行時に `seam` を参照する。 `findUserByEmail` のように関数本体の中で参照する形は、 参照が呼出時まで遅れるので `vi.hoisted` が無くても動く。
+
+両方の形が同じ factory に同居するのが普通なので、 **形で場合分けせず常に `vi.hoisted` に置く**。 場合分けすると、 後から export を 1 つ足しただけで test が全滅する。
 
 ### Step 4: test 実行 + 結果取得
 
