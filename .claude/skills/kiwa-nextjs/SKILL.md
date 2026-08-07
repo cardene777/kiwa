@@ -164,7 +164,103 @@ import graph は無制限に辿らない。
 
 **3 は最後**。 module ごと差し替えると、 その module が担う検証 (重複判定 / 権限 / 一意性) が mock 側の実装を測るだけになり、 本番の欠陥を隠したまま security の TC が通る。
 
-3 を採る時は生成 test の冒頭に **差し替えた export 名** と **実装を通っていない TC の ID** を書く。 読み手が pass の範囲を取り違えないため。
+##### 差し替えた module に答えを預けた TC は生成しない
+
+**本節は 5 mode 共通**。
+
+差し替えた module が答えを持つ TC は、 mock を通した pass が **何も証明しない**。 通っているのは mock 側の実装で、 本番の欠陥はそこに現れない。
+
+そういう TC は**生成しない**。 記録だけ残して生成すると、 緑の test が証拠として読まれる。 落ちようのない test は、 無い test より悪い。
+
+###### 判定は script に委ねる
+
+判定を散文で書くと、 適用したかどうかを誰も確かめられない。 **`scripts/decide-generation.mjs` を呼び、 出力の `generate` に従う**。
+
+```bash
+node .claude/skills/kiwa-nextjs/scripts/decide-generation.mjs '{
+  "mockedExports": ["findUserByEmail", "createUser"],
+  "passthroughExports": ["normaliseEmail"],
+  "cases": [
+    {"id": "T-001", "dependsOn": ["createUser"], "answeredBy": "action-branch"}
+  ]
+}'
+```
+
+`{ generated: [...], omitted: [...] }` が返る。 `omitted` がそのまま § 生成しなかった TC を返す の対象になる。
+
+###### script に渡す前に決めること
+
+判断が要るのは入力を作るところまで。 そこから先は機械的で、 判定の一貫性は script が持つ。
+
+| 入力 | 決め方 |
+|---|---|
+| `mockedExports` | `vi.mock` の factory が値を返している export 名 |
+| `passthroughExports` | factory が `importOriginal()` から素通ししている export 名 |
+| `dependsOn` | TC の `Given` / `Then` が到達する export 名 |
+| `answeredBy` | 下表の 4 値から 1 つ |
+
+`answeredBy` は **`Then` の期待値を決めているのが誰か**を表す。
+
+| 値 | 意味 | 例 |
+|---|---|---|
+| `mocked-export-logic` | 差し替えた export の実装そのものが決める | 大文字小文字を無視して重複を見つけるのは module の仕事 |
+| `passthrough-export-logic` | 素通しした export の実装が決める。 本番実装をそのまま通る | 部分 mock で差し替えなかった正規化関数 |
+| `action-branch` | action 自身の分岐が決める。 差し替えた export は入力を供給するだけ | 既存 row があった時に `already-registered` を返すのは action の分岐 |
+| `seeded-env` | helper が seed した `cookies` / `headers` / `formData` / `args` が決める | 入力の検証で弾く |
+| `unknown` | 決められない | |
+
+**申告と依存が食い違う入力は script が例外で止める**。 `mocked-export-logic` を選びながら差し替えた export に届かない形と、 `passthrough-export-logic` を選びながら素通しした export に届かない形の 2 つ。 `dependsOn` の書き漏れか `answeredBy` の誤りのどちらかで、 どちらなのかは script に判らない。 生成可否に畳むと、 書き漏れただけで mock 依存の TC が生成される (前者) か、 mock を測る test が「本番実装を通る」 と記録される (後者)。
+
+###### script が持つ規則
+
+3 点あり、 いずれも散文で書いていた時に外していた。
+
+**差し替えに届かない TC は生成する**。 部分 mock (`importOriginal()` で一部だけ差し替える形) で素通しした export しか触らない TC は、 実装をそのまま通る。 module 単位で落とすと過剰除外になる。
+
+**`action-branch` と `seeded-env` は生成する**。 差し替えた export が入力を供給するだけなら、 test は action 側の振る舞いを測れる。 module 自身の正しさは測れないので、 その旨が `reason` に残る。
+
+初版は「差し替えた module が答えを持つなら生成しない」 とだけ書いており、 action と module が共同で結果を作る TC が「決められない」 に落ちて大量に未生成になった。 正常系も状態遷移も store を通るので、 ほとんど残らない。
+
+**`unknown` は生成しない**。 落ちない test が緑で残るより、 未生成として報告される方がよい。 誤りの向きが違う。
+
+判定は **到達の有無より先に** `unknown` を見る。 後ろに置くと、 `dependsOn` の書き漏れだけで「差し替えに届かない」 に落ちて生成される (fail-open)。
+
+###### 観点名で判定してはいけない
+
+初版は「権限 / 冪等性 / セキュリティ の 3 観点を落とす」 だった。 3 方向すべてで外れる。
+
+| 理由 | 例 |
+|---|---|
+| 同じ観点でも依存が違う | 「権限」 が `headers.authorization` だけを見る TC は mock と無関係 = 生成できる |
+| 観点名は mode ごとに違う | middleware は `auth gate` / `geo block`、 RSC は `notFound` / `props 分岐` で、 5 mode 共通の語彙が無い |
+| 1 TC に複数観点が書かれる | 「権限 / セキュリティ」 のような複合表記を名前一致で捌けない |
+
+これらは**依存が生じやすい観点**ではあるが、 判定の条件ではない。
+
+###### 差し替えたかどうかは生成物から判る
+
+gate が効くのは 選択 3 を採った時だけ。 その判定は申告ではなく、 **生成 test に `vi.mock('<state module>')` があるか**で決まる。
+
+申告に頼ると、 選択 1 と書いて `vi.mock` を書く形が通る。 生成物を見れば食い違いようがない。
+
+factory を読めない形 (動的に組み立てる等) では `mockedExports` を決められないので、 全 export を `mockedExports` として扱う (fail-closed)。
+
+##### 生成しなかった TC を返す
+
+Step 4 の実行結果とは別に、 生成しなかった TC を報告する。 黙って落とすと、 spec の行数と生成された `it` の数が合わない理由が誰にも分からない。
+
+| 項目 | 内容 |
+|---|---|
+| TC ID | spec の 9 column 表の ID |
+| `Observation` | 生成しない判断の根拠になった観点 |
+| module | 実装を通せなかった module の path |
+| 次の手 | その module に reset か seed を export すれば生成できる旨 |
+
+3 を採る時は生成 test の冒頭にも **差し替えた export 名** と **生成しなかった TC の ID** を書く。 報告は流れるが、 生成物は残る。
+
+冒頭に書くのは記録のためだけではない。 Step 6 の `/kiwa-review --mode test-review` は観点別 cover 率を出し、 **各観点 100% を実装漏れの基準にする**。 生成しなかった TC はそのままだと実装漏れとして数えられ、 「mock でもいいから足せ」 という圧力になって gate が元に戻る。
+
+`/kiwa-review` は生成 test 冒頭の `// 未生成:` を読み、 該当 TC を実装漏れと分けて数える (`skills/kiwa-review/SKILL.md` § 2B)。 記録が無いと分けられないので、 **冒頭の 2 行は省略できない**。
 
 ##### `Given` の data 部分を seed する
 
@@ -179,6 +275,10 @@ clear だけを書くと、 既存 row を前提にする TC (重複検出 / 状
 `{data seam}` の block は Step 2 の判定が「1 件以上」 か「未確認」 の時だけ出す。 「0 件」 なら 2 block とも省き、 `vitest` の import から `beforeEach` / `vi` を外す。
 
 ```ts
+{data seam / 選択 3 のみ — 何を差し替え、 何を生成しなかったかを file 冒頭に残す}
+// mock: {差し替えた STATE_MODULE の export 名を列挙}
+// 未生成: {生成しなかった TC の ID を列挙}。 {STATE_MODULE} に reset か seed を export すれば生成できる
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 {選択 2 では action を it の中で動的 import するので、 この行は出さない}
@@ -228,6 +328,9 @@ placeholder のままだと実行できないので、 具体的な module 名�
 
 <!-- kiwa-nextjs:worked-example:start -->
 ```ts
+// mock: store, findUserByEmail, createUser
+// 未生成: T-070, T-071 (セキュリティ / 冪等性)。 ./users.js に reset か seed を export すれば生成できる
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { signup } from './signup.js';
 
@@ -294,12 +397,24 @@ describe('signup server action', () => {
 
 `pnpm vitest run <解決した出力先> --environment node` を起動。 出力先は § mode 別の生成先 で layer ごとに違うので、 生成した path をそのまま渡す。 fail 行を spec の対応 TC ID と紐付けて report する。
 
+**生成しなかった TC を pass 件数と並べて報告する** (§ 生成しなかった TC を返す)。 spec の TC 数と実行された `it` の数は一致しないので、 差の理由を同じ場所に置く。
+
+```
+25 TC 中 22 件を生成、 22 passed。
+生成しなかった 3 件 (選択 3 = ./lib/users.ts を vi.mock で差し替えたため):
+  T-NA-050 冪等性 / T-NA-070 セキュリティ / T-NA-071 セキュリティ
+  → ./lib/users.ts に reset か seed を export すれば生成できる
+```
+
+「22 passed」 だけを返すと、 3 件が最初から無かったように読める。
+
 ### Step 5: result-review 用 metadata の Write
 
 `tests/reports/result/{module}.nextjs.{lang}.md` に以下を Write ...
 
 - 実行日時 (skill 引数で渡された ISO 8601)
 - spec 由来 TC 件数 / pass 件数 / fail 件数
+- **未生成 TC** ... ID / `Observation` / 差し替えた module / 次の手 (§ 生成しなかった TC を返す)。 報告と生成物の冒頭に加えてここにも書くのは、 下流が読むのがこの file だから。 0 件なら「0 件」 と明記する (項目ごと省くと、 gate が働いていない run と区別できない)
 - coverage (v8 で collect、 invokeServerAction の呼出有無で判定可能)
 - 各 fail TC の Then 期待 vs 実際の env state diff
 

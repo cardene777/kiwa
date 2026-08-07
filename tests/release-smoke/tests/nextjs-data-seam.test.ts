@@ -1,5 +1,14 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +22,12 @@ const REPO_ROOT = repoRoot(HERE);
 
 const SKILL = readFileSync(
   resolve(REPO_ROOT, '.claude/skills/kiwa-nextjs/SKILL.md'),
+  'utf-8',
+);
+
+/** The downstream skill that scores the generated test. */
+const REVIEW_SKILL = readFileSync(
+  resolve(REPO_ROOT, '.claude/skills/kiwa-review/SKILL.md'),
   'utf-8',
 );
 
@@ -489,6 +504,8 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       '{ID}': 'T-001',
       '{Observation}': '既存 row を seed して重複を検出する',
       '{STATE_MODULE}': './users.js',
+      '{差し替えた STATE_MODULE の export 名を列挙}': 'store, findUserByEmail, createUser',
+      '{生成しなかった TC の ID を列挙}': 'T-070, T-071 (セキュリティ / 冪等性)',
       '{STATE_NAME}': 'seam',
       '{STATE_FIELD}': 'users',
       '{STATE_INITIALIZER}': 'new Map()',
@@ -564,6 +581,383 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       expect(output).toMatch(/1 passed/);
     },
   );
+
+  // #1858: replacing the module wholesale makes any TC whose expectation the
+  // module decides assert against the mock, so a real defect still passes.
+  //
+  // The rule lives in a script rather than in prose. Two rounds of review found
+  // defects in the prose version that no test could see — first it keyed on
+  // observation names, then it dropped every mixed case into "cannot tell"
+  // (#1859 R1-F1 / R2-F1). Running the script is what makes the rule checkable.
+  const GATE_SECTION = '##### 差し替えた module に答えを預けた TC は生成しない';
+  const DECIDE = resolve(REPO_ROOT, '.claude/skills/kiwa-nextjs/scripts/decide-generation.mjs');
+
+  function decide(input: unknown): { generated: { id: string }[]; omitted: { id: string }[] } {
+    const out = execFileSync('node', [DECIDE, JSON.stringify(input)], {
+      encoding: 'utf-8',
+      stdio: 'pipe',
+    });
+    return JSON.parse(out) as { generated: { id: string }[]; omitted: { id: string }[] };
+  }
+
+  const MOCKED = ['findUserByEmail', 'createUser'];
+  const PASSTHROUGH = ['normaliseEmail'];
+
+  it('差し替えた export の実装が答えを出す TC は生成しない', () => {
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-001', dependsOn: ['findUserByEmail'], answeredBy: 'mocked-export-logic' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-001']);
+  });
+
+  it('action の分岐が答えを出す TC は生成する', () => {
+    // The module supplies the input, the action decides the outcome. Dropping
+    // these was the regression in R2-F1: every normal-path and state-transition
+    // case goes through the store, so almost nothing survived.
+    const { generated } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-002', dependsOn: ['findUserByEmail'], answeredBy: 'action-branch' }],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['T-002']);
+  });
+
+  it('seed した env が答えを出す TC は生成する', () => {
+    const { generated } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-003', dependsOn: [], answeredBy: 'seeded-env' }],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['T-003']);
+  });
+
+  it('判定できない TC は生成しない', () => {
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-004', dependsOn: ['createUser'], answeredBy: 'unknown' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-004']);
+  });
+
+  it('部分 mock で素通しした export しか触らない TC は生成する', () => {
+    // `importOriginal()` passthrough runs the real implementation, so gating by
+    // module rather than by export was over-exclusion (R2-F2).
+    //
+    // The route has its own `answeredBy`. This case used to declare
+    // `mocked-export-logic` while depending only on a passthrough export —
+    // contradictory input that the schema now rejects (R2R1-F1).
+    const { generated } = decide({
+      mockedExports: MOCKED,
+      passthroughExports: PASSTHROUGH,
+      cases: [
+        { id: 'T-005', dependsOn: ['normaliseEmail'], answeredBy: 'passthrough-export-logic' },
+      ],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['T-005']);
+  });
+
+  it('mocked-export-logic なのに差し替えに届かない入力は止まる', () => {
+    // Either `dependsOn` is missing an entry or `answeredBy` is wrong, and the
+    // script cannot tell which. Folding it into a verdict means a forgotten
+    // entry silently generates a mock-dependent TC.
+    expect(() =>
+      decide({
+        mockedExports: MOCKED,
+        passthroughExports: PASSTHROUGH,
+        cases: [
+          { id: 'T-010', dependsOn: ['normaliseEmail'], answeredBy: 'mocked-export-logic' },
+        ],
+      }),
+    ).toThrow();
+  });
+
+  it('passthrough-export-logic なのに素通しに届かない入力は止まる', () => {
+    // The mirror image of the mocked-export contradiction. Left silent, it
+    // records a test that runs against the mock as "runs against the real
+    // implementation" — the exact false-green the gate exists to prevent.
+    expect(() =>
+      decide({
+        mockedExports: MOCKED,
+        passthroughExports: PASSTHROUGH,
+        cases: [
+          { id: 'T-012', dependsOn: ['createUser'], answeredBy: 'passthrough-export-logic' },
+        ],
+      }),
+    ).toThrow();
+  });
+
+  it('dependsOn の書き漏れが unknown を生成側に倒さない', () => {
+    // The reach check used to run first, so an empty `dependsOn` landed in
+    // "does not touch the mock" and was generated — fail-open (R2R1-F1).
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-011', dependsOn: [], answeredBy: 'unknown' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-011']);
+  });
+
+  it('未知の answeredBy は生成しない', () => {
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-006', dependsOn: ['createUser'], answeredBy: 'probably-fine' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-006']);
+  });
+
+  it('同じ export を mocked と passthrough の両方に書いた入力は止まる', () => {
+    // The two lists contradict each other; guessing which wins would make the
+    // decision depend on the reader.
+    expect(() =>
+      decide({
+        mockedExports: ['createUser'],
+        passthroughExports: ['createUser'],
+        cases: [{ id: 'T-007', dependsOn: ['createUser'], answeredBy: 'action-branch' }],
+      }),
+    ).toThrow();
+  });
+
+  it('11 観点を通しても観点名では切られない', () => {
+    // Same observation, different dependency: the outcome follows the
+    // dependency. A name-based gate would split these two the same way.
+    const { generated, omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [
+        { id: 'AUTH-A', dependsOn: [], answeredBy: 'seeded-env' },
+        { id: 'AUTH-B', dependsOn: ['findUserByEmail'], answeredBy: 'mocked-export-logic' },
+      ],
+    });
+    expect(generated.map((g) => g.id)).toEqual(['AUTH-A']);
+    expect(omitted.map((o) => o.id)).toEqual(['AUTH-B']);
+  });
+
+  it('理由が残る', () => {
+    // The report and the file header both quote it, so an empty reason makes
+    // the omission unexplainable.
+    const { generated, omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [
+        { id: 'T-008', dependsOn: ['createUser'], answeredBy: 'action-branch' },
+        { id: 'T-009', dependsOn: ['createUser'], answeredBy: 'mocked-export-logic' },
+      ],
+    });
+    for (const d of [...generated, ...omitted]) {
+      expect((d as { reason?: string }).reason ?? '').not.toBe('');
+    }
+  });
+
+  it('import しても CLI が走らない', () => {
+    // The guard compared basenames, so a different file called
+    // decide-generation.mjs that imported this one triggered `main()` and
+    // exited 64 (measured). Compared by full path now.
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-entry-'));
+    TMP_ROOTS.push(dir);
+    // Same basename as the script, which is what made the old guard misfire.
+    const probe = join(dir, 'decide-generation.mjs');
+    writeFileSync(
+      probe,
+      [
+        `const m = await import(${JSON.stringify(DECIDE)});`,
+        "console.log('imported:', typeof m.decide);",
+      ].join('\n'),
+    );
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ type: 'module' }));
+    const out = execFileSync('node', [probe], { encoding: 'utf-8', stdio: 'pipe' });
+    expect(out).toContain('imported: function');
+  });
+
+  it('SKILL.md が script を呼ぶと書いてある', () => {
+    const gate = section(GATE_SECTION);
+    // A script nobody is told to run is the same as no script.
+    expect(gate).toContain('scripts/decide-generation.mjs');
+    expect(gate, '出力に従う旨が無い').toMatch(/`generate` に従う/);
+  });
+
+  it('SKILL.md が矛盾入力で止まると書いている', () => {
+    // The script throws; the caller has to know that before it writes the
+    // input, or a thrown exception reads as a bug rather than as feedback.
+    const gate = section(GATE_SECTION);
+    expect(gate, '矛盾入力で止まる旨が無い').toMatch(/例外で止める/);
+    expect(gate, '判定順の理由が書かれていない').toMatch(/到達の有無より先/);
+    // Both directions, not just the one measured first. Declaring passthrough
+    // while depending only on mocked exports records a mock-backed test as
+    // "runs against the real implementation".
+    for (const value of ['mocked-export-logic', 'passthrough-export-logic']) {
+      expect(gate, `${value} の矛盾が挙がっていない`).toMatch(
+        new RegExp(`${value}[^。]*届かない`),
+      );
+    }
+  });
+
+  it('SKILL.md の answeredBy 5 値が script の受理値と一致する', () => {
+    const gate = section(GATE_SECTION);
+    const script = readFileSync(DECIDE, 'utf-8');
+    for (const value of [
+      'mocked-export-logic',
+      'passthrough-export-logic',
+      'action-branch',
+      'seeded-env',
+      'unknown',
+    ]) {
+      expect(gate, `SKILL.md に ${value} が無い`).toContain(value);
+      expect(script, `script が ${value} を受理しない`).toContain(`'${value}'`);
+    }
+  });
+
+  it('factory を読めない形は全 export を差し替え扱いにする', () => {
+    // Deciding `mockedExports` is the caller's job, so the fail-closed default
+    // has to be stated where the caller reads it.
+    expect(section(GATE_SECTION)).toMatch(/factory を読めない形[\s\S]*fail-closed/);
+  });
+
+  it('観点名で切ってはいけない理由が 3 つ挙がっている', () => {
+    const gate = section(GATE_SECTION);
+    for (const reason of ['依存が違う', 'mode ごとに違う', '複数観点']) {
+      expect(gate, `理由の列挙に ${reason} が無い`).toContain(reason);
+    }
+  });
+
+  it('4 mode の Observation 語彙が 3 観点名と重ならないことを踏まえている', () => {
+    // Measured: 権限 / 冪等性 / セキュリティ appear 0 times in the four mode
+    // sections. A name-based gate would have been inert there.
+    const modes = SKILL.slice(SKILL.indexOf('## middleware mode'));
+    for (const name of ['権限', '冪等性', 'セキュリティ']) {
+      expect(
+        modes.split(name).length - 1,
+        `${name} が 4 mode 節に現れる (名前一致が成立してしまう)`,
+      ).toBe(0);
+    }
+    expect(section(GATE_SECTION)).toContain('5 mode 共通');
+  });
+
+  it('差し替えたかどうかを申告ではなく生成物で決める', () => {
+    const gate = section(GATE_SECTION);
+    expect(gate).toContain("vi.mock('<state module>')");
+    expect(gate, '申告に頼らない旨が書かれていない').toMatch(/申告/);
+  });
+
+  // The gate drops TCs on purpose. `/kiwa-review --mode test-review` scores
+  // 観点別 cover 率 with "各観点 100%" as the bar, so without a way to tell
+  // intent from omission it reports 実装漏れ for exactly those TCs — and the
+  // obvious fix is to add the mocked tests back, undoing the gate.
+  it('producer が下流との衝突を書いている', () => {
+    const record = section('##### 生成しなかった TC を返す');
+    expect(record, 'cover 率との衝突が書かれていない').toContain('cover 率');
+    expect(record).toContain('kiwa-review');
+  });
+
+  it('producer が Step 5 metadata にも未生成 TC を残す', () => {
+    const step5 = section('### Step 5: result-review 用 metadata の Write');
+    expect(step5, 'metadata に未生成 TC が無い').toContain('未生成 TC');
+    expect(step5).toMatch(/0 件なら/);
+  });
+
+  it('consumer が未生成 TC を実装漏れと分けて数える', () => {
+    expect(REVIEW_SKILL, 'kiwa-review が未生成 TC を知らない').toContain('未生成 TC の扱い');
+    const section2b = REVIEW_SKILL.split('##### 未生成 TC の扱い')[1] ?? '';
+    expect(section2b).toContain('TC ID mapping');
+    expect(section2b).toContain('cover 率');
+    expect(section2b, '未生成 TC を report に残す指示が無い').toMatch(/別枠で列挙|report には/);
+    expect(section2b, 'fail-closed の既定が無い').toMatch(/従来どおり全件|解釈しない/);
+  });
+
+  it('consumer が参照する節名が実在する', () => {
+    // The gate section was renamed mid-PR and the reference went stale (R2-F5).
+    const refs = [...REVIEW_SKILL.matchAll(/§ ([^\n。]+?) にある/g)].map((m) => m[1] ?? '');
+    expect(refs.length, '参照が 1 件も無い').toBeGreaterThan(0);
+    for (const ref of refs) {
+      expect(SKILL, `参照先の節が kiwa-nextjs に無い: ${ref}`).toContain(ref);
+    }
+  });
+
+  it('除外が score の得点にならない', () => {
+    const section2b = REVIEW_SKILL.split('##### 未生成 TC の扱い')[1] ?? '';
+    expect(section2b, '相殺防止が書かれていない').toContain('CONDITIONAL');
+    expect(section2b).toMatch(/PASS にしない/);
+  });
+
+  it('report template の判定値が 3 値になっている', () => {
+    // 2B says CONDITIONAL while the template offered PASS / FAIL only, so the
+    // output contract still allowed a score-driven PASS (R2-F3).
+    expect(REVIEW_SKILL).toContain('✅ PASS / ⚠️ CONDITIONAL / ❌ FAIL');
+    expect(REVIEW_SKILL, 'CONDITIONAL が score より優先すると書かれていない').toMatch(
+      /CONDITIONAL は score より優先/,
+    );
+    // The completion check has to accept the same three values.
+    expect(REVIEW_SKILL).toContain('(PASS / CONDITIONAL / FAIL)');
+  });
+
+  it('chain return が 3 値を定義している', () => {
+    // The template and the completion check took CONDITIONAL, but the chain
+    // return still only described PASS and FAIL — so a caller had no defined
+    // behaviour for a legitimate CONDITIONAL run (R2R1-F2).
+    const step4 = REVIEW_SKILL.split('### Step 4: chain return')[1] ?? '';
+    expect(step4, 'chain return に CONDITIONAL が無い').toContain('CONDITIONAL');
+    expect(step4, 'CONDITIONAL で chain を継続するか書かれていない').toMatch(/chain は継続/);
+    expect(step4, '呼出元が 3 値を受ける旨が無い').toMatch(/呼出元は 3 値を受ける/);
+  });
+
+  it('verdict を列挙する全 skill が CONDITIONAL を知っている', () => {
+    // Found by listing the enumerations rather than by naming the skills. I
+    // updated kiwa-hardhat and missed kiwa-forge, which kiwa-hardhat cites as
+    // its own source ("kiwa-forge と同形式") — naming them one by one is how
+    // the miss happened (#1859 Round 2 retry 2).
+    const skills = readdirSync(resolve(REPO_ROOT, '.claude/skills'));
+    const enumerators: string[] = [];
+    for (const name of skills) {
+      const file = resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md');
+      if (!existsSync(file)) continue;
+      const body = readFileSync(file, 'utf-8');
+      // The enumeration is the list that branches on the review verdict.
+      if (!body.includes('FAIL critical なし')) continue;
+      enumerators.push(name);
+      expect(body, `${name} が verdict を列挙しているが CONDITIONAL を知らない`).toContain(
+        'CONDITIONAL',
+      );
+    }
+    // A guard against the check silently covering nothing.
+    expect(enumerators.length, 'verdict を列挙する skill が見つからない').toBeGreaterThan(2);
+  });
+
+  it('producer と consumer が同じ 2 行を指している', () => {
+    for (const marker of ['// mock:', '// 未生成:']) {
+      expect(stepThreeTemplate(), `producer の template に ${marker} が無い`).toContain(marker);
+      expect(REVIEW_SKILL, `consumer が ${marker} を知らない`).toContain(marker);
+    }
+  });
+
+  it('選択 3 の template が差し替えと未生成を file 冒頭に残す', () => {
+    // The rule without a slot in the template produces nothing (#1856 R2-F1 and
+    // R2-F2 were both this shape). The record has to be in the emitted file,
+    // not only in the run report, because the report scrolls away.
+    const template = stepThreeTemplate();
+    expect(template, 'mock 対象の記録が template に無い').toContain('// mock:');
+    expect(template, '未生成 TC の記録が template に無い').toContain('// 未生成:');
+    expect(template, '次の手が書かれていない').toMatch(/reset か seed を export/);
+  });
+
+  it('展開例が記録 block を実演している', () => {
+    const example = workedExample();
+    expect(example).toMatch(/^\/\/ mock: .+$/m);
+    expect(example).toMatch(/^\/\/ 未生成: .+$/m);
+  });
+
+  it('Step 4 が未生成 TC を pass 件数と並べて報告する', () => {
+    const step4 = section('### Step 4: test 実行 + 結果取得');
+    // Asserted on the instruction, not on the words. The example block below it
+    // also says 生成しなかった and the prose says 一致しない, so either check
+    // stayed green when the instruction itself was replaced.
+    //
+    // The section reference `(§ 生成しなかった TC を返す)` sits on the same line
+    // as the instruction, so matching the phrase and 報告する separately also
+    // passed. The point is that the two numbers go together.
+    expect(step4, '未生成 TC を pass 件数と並べて報告する指示が無い').toMatch(
+      /生成しなかった TC を[^。]*pass 件数[^。]*報告する/,
+    );
+    // The count of `it` blocks and the count of spec rows differ; the reason
+    // belongs next to the number, not somewhere else.
+    expect(step4).toMatch(/一致しない|差の理由/);
+    // The example shows both numbers, so the shape of the report is fixed.
+    expect(step4).toMatch(/\d+ TC 中 \d+ 件を生成/);
+  });
 
   it('選択 3 の展開から mock を外すと落ちる', () => {
     // A relaxed assertion inside generated code still passes, so the outer test

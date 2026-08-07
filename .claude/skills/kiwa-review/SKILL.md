@@ -153,13 +153,36 @@ SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (
 
 | 軸 | 評価内容 | passing 基準 |
 |---|---|---|
-| **TC ID mapping** | spec の全 TC ID が test code に存在 (1:1 mapping)、 spec にない test ID は許容するが flag | spec TC 100% 実装、 余剰 test は別途記載 |
+| **TC ID mapping** | spec の全 TC ID が test code に存在 (1:1 mapping)、 spec にない test ID は許容するが flag。 意図的に生成しなかった TC は下記 § 未生成 TC の扱い に従って除く | spec TC 100% 実装 (未生成 TC を除く)、 余剰 test は別途記載 |
 | **観点 grouping 一致** | test code の describe / コメント (`// 観点 N: {name}`) が spec の観点 grouping と一致 | 全観点 grouping が spec と同名 |
 | **assertion 品質** | spec の「期待結果」 column と test の `expect()` / `assertEq()` が意味的に対応、 truthy 判定 (`toBeTruthy()`) ではなく具体値 assertion | 抽象 assertion (`toBeTruthy` 等) 0 件、 具体値検証 |
-| **観点別 cover 率** | 観点ごとに spec TC が全件実装されているか (例 観点 5 権限が 5 TC 設計、 test に 3 件しかなければ 60%) | 各観点 100% (実装漏れなし) |
+| **観点別 cover 率** | 観点ごとに spec TC が全件実装されているか (例 観点 5 権限が 5 TC 設計、 test に 3 件しかなければ 60%)。 未生成 TC は母数から除く | 各観点 100% (実装漏れなし、 未生成 TC を除く) |
 | **追加すべき test 提案** | spec にも test にも無いが、 contract / UI 実装を見て「この観点 / 機能の test も追加すべき」 と判定 | 提案を report に列挙 (実装漏れと将来 enhancement を区別) |
 
 各軸 0-10 score、 `weighted_score = (mapping 0.3 + grouping 0.15 + assertion 0.25 + cover 0.2 + 提案 0.1)` で総合判定。
+
+##### 未生成 TC の扱い
+
+Layer 2 は spec の TC を全件 test にするとは限らない。 生成しないと判断した TC は、 生成 test の **冒頭 2 行**に残っている。
+
+```
+// mock: store, findUserByEmail, createUser
+// 未生成: T-NA-050, T-NA-070 (冪等性 / セキュリティ)。 ./lib/users.ts に reset か seed を export すれば生成できる
+```
+
+この 2 行があれば、 列挙された TC ID を **実装漏れと分けて数える**。 TC ID mapping の分母からも、 観点別 cover 率の分母からも除く。
+
+**除くだけで済ませない**。 report には「未生成」 として別枠で列挙し、 冒頭行に書かれた次の手 (どの module に何を export すれば生成できるか) をそのまま載せる。 分母から消しただけだと、 検証されていない観点があることが report から消える。
+
+理由は `skills/kiwa-nextjs/SKILL.md` § 差し替えた module に答えを預けた TC は生成しない にある。 module ごと差し替えた test は mock の実装を測るだけなので、 通っても何も証明しない。 それを実装漏れとして数えると「mock でもいいから足せ」 という圧力になり、 落ちようのない test が戻る。
+
+冒頭 2 行が無い test は従来どおり全件を分母に入れる。 記録が無いことを「意図的に生成しなかった」 と解釈しない (fail-closed)。
+
+**除外を score の得点に変えない**。 分母から外すと cover 率は上がる。 未生成 TC を持つ run が、 全件生成した run より高い `weighted_score` を出しうる = gate を通すほど成績が良くなる。
+
+そのため未生成 TC が 1 件でもある場合、 総合判定は PASS にしない。 `CONDITIONAL` として返し、 未検証の観点と次の手を添える。 score は参考値として併記するが、 判定の根拠にしない。
+
+判定を分けるのは、 「全件通った」 と「一部は測っていないが残りは通った」 が別の状態だから。 数字 1 つに畳むと後者が前者に見える。
 
 ### Step 3: report Write
 
@@ -178,9 +201,19 @@ Target: {spec_path} / {test_paths}
 |---|---|---|---|
 | {軸 1} | 8/10 | 0.30 | 2.40 |
 | {軸 2} | ... | ... | ... |
-| **Weighted Score** | **{N.N}/10** | 1.00 | (7.0 以上で PASS) |
+| **Weighted Score** | **{N.N}/10** | 1.00 | (7.0 以上で PASS。 未生成 TC が 1 件でもあれば score に関わらず CONDITIONAL) |
 
-**判定 — ✅ PASS / ❌ FAIL** ({reason})
+**判定 — ✅ PASS / ⚠️ CONDITIONAL / ❌ FAIL** ({reason})
+
+判定は 3 値で、 優先順位がある。
+
+| 条件 | 判定 |
+|---|---|
+| 未解決の指摘がある | ❌ FAIL |
+| 未生成 TC が 1 件以上ある | ⚠️ CONDITIONAL (score に関わらず) |
+| 上記いずれも無く score 7.0 以上 | ✅ PASS |
+
+CONDITIONAL は score より優先する。 score だけで決めると、 未生成 TC を分母から外した分だけ cover 率が上がって PASS に届く = gate を通すほど成績が良くなる。
 
 ## 2. critical / major 指摘
 
@@ -211,7 +244,12 @@ Target: {spec_path} / {test_paths}
 
 他 skill から自動呼出された場合 (例 `/kiwa-design` 完了後の auto call)、 review 結果を呼出元に return:
 - PASS → 呼出元の chain 継続 (次 skill 起動)
+- CONDITIONAL (未生成 TC あり) → 呼出元の chain は継続する。 併せて未検証の観点と次の手 (どの module に何を export すれば生成できるか) を return し、 呼出元は統合 report にそのまま載せる
 - FAIL critical あり → 呼出元に critical 指摘の summary を return、 user に AskUserQuestion で「無視して継続 / spec or test 修正 / chain 中断」を選ばせる
+
+CONDITIONAL で chain を止めないのは、 未生成 TC が **生成器の判断であって欠陥ではない**から。 止めると「mock でもいいから足せ」 に戻る圧力になる。 一方で PASS と同じ扱いにすると未検証の観点が消えるので、 return と report に残す。
+
+**呼出元は 3 値を受ける**。 PASS だけを継続条件にしている呼出元は CONDITIONAL を FAIL と解釈して止まり、 FAIL 以外を継続にしている呼出元は未検証の観点を落とす。 どちらも 3 値契約が end-to-end で成立しない。
 
 `--no-auto-call` 指定時は chain return せず report Write だけで終了。
 
@@ -252,7 +290,7 @@ multiSelect: false
 ## 完了条件
 
 - `tests/reports/review/{mode}-review-{module}.{lang}.md` が 5 section format で Write 済
-- weighted_score が計算されて判定 (PASS / FAIL) 確定
+- weighted_score が計算されて判定 (PASS / CONDITIONAL / FAIL) 確定
 - critical / major 指摘 + 追加 test 提案が列挙
 - 自動呼出時は呼出元への chain return が正しく動作
 
