@@ -4,6 +4,9 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { signalsFingerprint } from '../src/detect/detect.js';
+import { loadSignalTable } from '../src/detect/index.js';
 import * as publicEntry from '../src/index.js';
 import { USAGE, createDefaultDeps, exitCodeForLayersError, runCli, takeFlagValue, type RunCliDeps } from '../src/runCli.js';
 import { InitConflictError, runInit, type InitOptions } from '../src/commands/init.js';
@@ -784,7 +787,13 @@ describe('layers', () => {
     writeFileSync(join(dir, 'Cargo.toml'), '[dependencies]\n');
     if (stack !== null) {
       mkdirSync(join(dir, '.kiwa'), { recursive: true });
-      writeFileSync(join(dir, '.kiwa', 'stack.json'), JSON.stringify(stack));
+      // The reader rejects a recording that cannot say which signal table
+      // produced it, so the fixture stamps the one it will be read against.
+      const body =
+        stack && typeof stack === 'object'
+          ? { signals: signalsFingerprint(loadSignalTable()), ...(stack as Record<string, unknown>) }
+          : stack;
+      writeFileSync(join(dir, '.kiwa', 'stack.json'), JSON.stringify(body));
     }
     return dir;
   }

@@ -13,6 +13,8 @@
  * group, a `weak` one only speaks when nothing exact did.
  */
 
+import { createHash } from 'node:crypto';
+
 import type { Dependency } from './manifests.js';
 
 export type Strength = 'exact' | 'weak';
@@ -52,6 +54,43 @@ export interface SignalTable {
   manifests: Record<string, string>;
   signals: Record<string, Signal[]>;
   generated: { signals: GeneratedSignal[] };
+}
+
+/**
+ * A fingerprint of the parts of the table that decide what gets detected.
+ *
+ * `.kiwa/stack.json` records an answer, and the reader narrows on it. The
+ * staleness check compares the recording against the manifests, which catches
+ * "the project changed" — but not "the table changed". A recording taken before
+ * a signal existed says nothing about the layer that signal names, and reading
+ * its silence as absence removes exactly the layers the signal was added to
+ * find.
+ *
+ * Covers `signals` and `generated.signals` and nothing else. Prose (`$comment`)
+ * and the manifest map do not change which layers a dependency yields, and
+ * invalidating every recording over a reworded comment costs a re-run for
+ * nothing.
+ *
+ * Key order is normalised so that reformatting the file does not read as a
+ * change of meaning.
+ */
+export function signalsFingerprint(table: SignalTable | null): string {
+  if (!table) return '';
+  const canonical = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(canonical);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, canonical(v)]),
+      );
+    }
+    return value;
+  };
+  const body = JSON.stringify(
+    canonical({ signals: table.signals ?? {}, generated: table.generated?.signals ?? [] }),
+  );
+  return createHash('sha256').update(body).digest('hex').slice(0, 16);
 }
 
 export interface Detection {

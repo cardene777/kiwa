@@ -5,6 +5,11 @@ import { mkdtempSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import { loadJson, loadLayerTable, resolveLayers } from '../src/detect/layers.js';
+import { signalsFingerprint, type SignalTable } from '../src/detect/detect.js';
+import { loadSignalTable } from '../src/detect/index.js';
+
+/** The table the CLI actually loads, so fixtures fingerprint what it will read. */
+const SIGNALS = loadSignalTable() as SignalTable;
 
 const TABLE = loadLayerTable();
 
@@ -24,7 +29,19 @@ function fresh(): string {
   return new Date(Date.now() + 60_000).toISOString();
 }
 
-function fixture(files: Record<string, string>, stack: unknown | null): string {
+/**
+ * A project directory with an optional recording.
+ *
+ * The recording is stamped with the fingerprint of the table it will be read
+ * against, because the reader rejects one that cannot say which table produced
+ * it. Tests that inject a table pass it here so the two agree; tests about the
+ * rejection itself put their own `signals` in `stack`, which wins.
+ */
+function fixture(
+  files: Record<string, string>,
+  stack: unknown | null,
+  signalTable: SignalTable | null = SIGNALS,
+): string {
   const root = mkdtempSync(join(tmpdir(), 'kiwa-layers-'));
   for (const [rel, body] of Object.entries(files)) {
     mkdirSync(join(root, rel, '..'), { recursive: true });
@@ -32,7 +49,11 @@ function fixture(files: Record<string, string>, stack: unknown | null): string {
   }
   if (stack !== null) {
     mkdirSync(join(root, '.kiwa'), { recursive: true });
-    writeFileSync(join(root, '.kiwa', 'stack.json'), JSON.stringify(stack, null, 2));
+    const body =
+      stack && typeof stack === 'object' && !Array.isArray(stack)
+        ? { signals: signalsFingerprint(signalTable), ...(stack as Record<string, unknown>) }
+        : stack;
+    writeFileSync(join(root, '.kiwa', 'stack.json'), JSON.stringify(body, null, 2));
   }
   return root;
 }
@@ -696,27 +717,31 @@ describe('a layer is narrowable only when a signal names it', () => {
     strength: 'exact',
   };
 
-  function withEmptyProject<T>(body: (root: string) => T): T {
-    const root = fixture({ 'package.json': '{"name":"app"}' }, {
-      generated_at: fresh(),
-      scanned: [{ manifest: 'package.json', language: 'typescript' }],
-      detected: [],
-    });
+  // The recording is stamped with the injected table's fingerprint, because the
+  // reader rejects one taken with a different table before it narrows anything.
+  function withEmptyProject<T>(signalTable: SignalTable, body: (root: string) => T): T {
+    const root = fixture(
+      { 'package.json': '{"name":"app"}' },
+      {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        detected: [],
+      },
+      signalTable,
+    );
     return withFixture(root, () => body(root));
   }
 
   const ids = (layers: { id: string }[]) => layers.map((l) => l.id);
 
   it('drops a layer the generated half names', () => {
-    withEmptyProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: { typescript: [] },
-          generated: { signals: [{ ...ORM, language: 'typescript' }] },
-        } as never,
-      });
+    const table = {
+      manifests: MANIFESTS,
+      signals: { typescript: [] },
+      generated: { signals: [{ ...ORM, language: 'typescript' }] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
       expect(ids(resolved.layers)).not.toContain('orm-query');
       // Same runtime, same recording, no signal names it.
       expect(ids(resolved.layers)).toContain('unit');
@@ -724,26 +749,26 @@ describe('a layer is narrowable only when a signal names it', () => {
   });
 
   it('drops a layer the hand-written half names', () => {
-    withEmptyProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: { typescript: [ORM] },
-          generated: { signals: [] },
-        } as never,
-      });
+    const table = {
+      manifests: MANIFESTS,
+      signals: { typescript: [ORM] },
+      generated: { signals: [] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
       expect(ids(resolved.layers)).not.toContain('orm-query');
       expect(ids(resolved.layers)).toContain('unit');
     });
   });
 
   it('keeps it when no signal names it', () => {
-    withEmptyProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: { manifests: MANIFESTS, signals: { typescript: [] }, generated: { signals: [] } },
-      });
+    const table: SignalTable = {
+      manifests: MANIFESTS,
+      signals: { typescript: [] },
+      generated: { signals: [] },
+    };
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
       expect(ids(resolved.layers)).toContain('orm-query');
     });
   });
@@ -752,17 +777,15 @@ describe('a layer is narrowable only when a signal names it', () => {
     // `also` is how one dependency implies several layers. Reading only `layer`
     // and `default` would leave those unnarrowable while the signal that names
     // them is right there.
-    withEmptyProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: {
-            typescript: [{ match: 'x', default: 'unit', also: ['orm-query'], strength: 'exact' }],
-          },
-          generated: { signals: [] },
-        } as never,
-      });
+    const table = {
+      manifests: MANIFESTS,
+      signals: {
+        typescript: [{ match: 'x', default: 'unit', also: ['orm-query'], strength: 'exact' }],
+      },
+      generated: { signals: [] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
       expect(ids(resolved.layers)).not.toContain('orm-query');
       expect(ids(resolved.layers)).not.toContain('unit');
       expect(ids(resolved.layers)).toContain('data');
@@ -770,21 +793,118 @@ describe('a layer is narrowable only when a signal names it', () => {
   });
 
   it('counts a layer named only through a feature map', () => {
-    withEmptyProject((root) => {
-      const resolved = resolveLayers({
-        cwd: root,
-        signalTable: {
-          manifests: MANIFESTS,
-          signals: {
-            typescript: [
-              { match: 'x', kind: 'feature', features: { q: 'orm-query' }, strength: 'exact' },
-            ],
-          },
-          generated: { signals: [] },
-        } as never,
-      });
+    const table = {
+      manifests: MANIFESTS,
+      signals: {
+        typescript: [
+          { match: 'x', kind: 'feature', features: { q: 'orm-query' }, strength: 'exact' },
+        ],
+      },
+      generated: { signals: [] },
+    } as never as SignalTable;
+    withEmptyProject(table, (root) => {
+      const resolved = resolveLayers({ cwd: root, signalTable: table });
       expect(ids(resolved.layers)).not.toContain('orm-query');
       expect(ids(resolved.layers)).toContain('unit');
     });
+  });
+});
+
+describe('a recording has to come from the table it is read against', () => {
+  // The staleness check compares the recording to the project, so it cannot see
+  // that the signal table changed underneath. A recording taken before `next`
+  // existed says nothing about the five `nextjs-*` layers, and reading its
+  // silence as absence removes exactly what the signal was added to find.
+  const project = { 'package.json': '{"dependencies":{"next":"^15.0.0"}}' };
+  const recording = {
+    generated_at: fresh(),
+    scanned: [{ manifest: 'package.json', language: 'typescript' }],
+    detected: [],
+  };
+
+  it('falls back when the recording names no table', () => {
+    // What every `.kiwa/stack.json` written before this field looks like.
+    const root = fixture(project, { ...recording, signals: undefined });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/does not record which signal table/);
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(5);
+    });
+  });
+
+  it('says the table was unreadable rather than that it differed', () => {
+    // Without this branch the two cases collapse: a missing table makes the
+    // expected fingerprint empty, which no recorded one equals, so the reader
+    // would report "a different signal table" for a table that is not there.
+    // The outcome is the same either way — the diagnosis is not.
+    const root = fixture(project, recording, null);
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root, signalTable: null });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/signal table could not be read/);
+      expect(resolved.warnings.join(' ')).not.toMatch(/different signal table/);
+    });
+  });
+
+  it('falls back when the recording names a different table', () => {
+    const root = fixture(project, { ...recording, signals: 'deadbeefdeadbeef' });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('all');
+      expect(resolved.warnings.join(' ')).toMatch(/different signal table/);
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(5);
+    });
+  });
+
+  it('uses the recording when the table matches', () => {
+    // The other side of the same check: without this, rejecting everything
+    // would satisfy the two above.
+    const root = fixture(project, recording);
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.source).toBe('detected');
+      expect(resolved.layers.filter((l) => l.id.startsWith('nextjs-'))).toHaveLength(0);
+    });
+  });
+
+  it('is not disturbed by reformatting or reordering the table', () => {
+    // Key order and whitespace do not change which layers a dependency yields.
+    // Invalidating every recording over a reformat costs a re-run for nothing.
+    const reordered: SignalTable = {
+      manifests: SIGNALS.manifests,
+      generated: SIGNALS.generated,
+      signals: Object.fromEntries(Object.entries(SIGNALS.signals).reverse()),
+    };
+    expect(signalsFingerprint(reordered)).toBe(signalsFingerprint(SIGNALS));
+  });
+
+  it('changes when a signal changes', () => {
+    const edited: SignalTable = {
+      ...SIGNALS,
+      signals: { ...SIGNALS.signals, typescript: [] },
+    };
+    expect(signalsFingerprint(edited)).not.toBe(signalsFingerprint(SIGNALS));
+  });
+
+  it('what the writer records is what the reader accepts', async () => {
+    // The two sides derive the fingerprint independently. A test that only
+    // checked the reader would pass with a writer that never wrote one.
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-roundtrip-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"dependencies":{"next":"^15.0.0"}}');
+      writeStackFile(
+        root,
+        [{ layer: 'nextjs-rsc', signal: 'next', manifest: 'package.json', strength: 'exact' }],
+        [{ path: 'package.json', language: 'typescript' }],
+        new Date(Date.now() + 60_000),
+      );
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).not.toMatch(/signal table/);
+      expect(resolved.source).toBe('detected');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

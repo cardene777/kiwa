@@ -8,27 +8,34 @@
  * #1809 / #1810), so the resolution lives here and every caller asks rather
  * than re-deriving it.
  *
- * The central constraint is that **detection is a partial index**. It can speak
- * about 10 of the 30 layers: `docs/stack-signals.json` carries four Rust
- * signals and four Go ones and nothing for TypeScript, while 19 of the layers
- * are TypeScript. JS detection was left out of #1812 deliberately — the corpus
- * to measure it against does not exist — so the gap is a standing property, not
- * a temporary one.
+ * The central constraint is that **detection is a partial index**. It speaks
+ * about 15 of the 30 layers: `docs/stack-signals.json` names all five Rust
+ * layers, all five Go ones, and five of the nineteen TypeScript ones (the
+ * `nextjs-*` set, through `next`). The gap is a standing property, not a
+ * temporary one — most TypeScript layers are not framework-shaped and no single
+ * dependency implies them.
  *
  * That makes "keep only what was detected" wrong. A monorepo with a Next.js
- * frontend beside a Rust service would lose all 19 TypeScript layers, silently,
- * because nothing can detect them. Absence of a signal is not evidence of
- * absence.
+ * frontend beside a Rust service would lose every TypeScript layer, silently,
+ * because nothing can detect most of them. Absence of a signal is not evidence
+ * of absence.
  *
- * So narrowing happens per runtime, and only where the answer is knowable:
+ * So narrowing happens only where the answer is knowable. Which runtimes exist
+ * is asked per runtime; whether a layer can be ruled out is asked **per layer**,
+ * because signal coverage is uneven within a language:
  *
  * | 条件 | 扱い |
  * |---|---|
  * | reader が無い runtime | 全部残す (語れない) |
  * | project に manifest が無い | 除く (不在の証拠) |
  * | manifest はあるが読んでいない | 全部残す (問うていない) |
- * | 読んだが signal が無い | 全部残す (語れない) |
- * | 読んで signal もある | 検出した layer に絞る |
+ * | どの signal も名指ししない layer | 残す (語れない) |
+ * | signal が名指しする layer | 検出されたものだけ残す |
+ *
+ * A recording also has to come from the same signal table that is being read
+ * against, which the staleness check cannot see — it compares the recording to
+ * the project, not to the table. A recording taken before a signal existed
+ * carries no verdict on the layer that signal names.
  *
  * The detection is advisory throughout. It is written to `.kiwa/`, which is
  * gitignored, so its absence is the normal state on a fresh checkout.
@@ -38,7 +45,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { SignalTable } from './detect.js';
+import { signalsFingerprint, type SignalTable } from './detect.js';
 import { presentManifests, type ManifestPresence } from './scan.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -179,6 +186,8 @@ interface StackFile {
   generated_at?: unknown;
   scanned?: unknown;
   detected?: unknown;
+  /** Fingerprint of the signal table that produced the recording. */
+  signals?: unknown;
 }
 
 interface StackEntry {
@@ -219,7 +228,28 @@ function readStackFile(cwd: string): StackFile | null {
  * were built from different tables — and the entries that happen to be
  * recognised are recognised by coincidence, not by agreement.
  */
-function validate(cwd: string, file: StackFile, table: LayerRecord[]): string | null {
+function validate(
+  cwd: string,
+  file: StackFile,
+  table: LayerRecord[],
+  signalTable: SignalTable | null,
+): string | null {
+  // Which table produced the answer, checked before anything reads the answer.
+  //
+  // The rest of this function compares the recording against the project, which
+  // catches "the project changed". It cannot catch "the table changed" — and a
+  // recording taken before a signal existed carries no verdict on the layer that
+  // signal names. Narrowing on its silence removes exactly the layers the signal
+  // was added to find, on a `.kiwa/stack.json` that is otherwise entirely valid.
+  //
+  // Recordings written before this field existed have none, and are rejected.
+  // The file is a cache of a derivation; re-running costs a second.
+  const expected = signalsFingerprint(signalTable);
+  const recorded = str(file.signals);
+  if (!expected) return 'the signal table could not be read';
+  if (!recorded) return 'it does not record which signal table produced it';
+  if (recorded !== expected) return 'it was taken with a different signal table';
+
   const takenAt = str(file.generated_at);
   const taken = takenAt ? Date.parse(takenAt) : Number.NaN;
   if (!Number.isFinite(taken)) return 'it carries no usable timestamp';
@@ -292,7 +322,15 @@ export function resolveLayers(options: {
   // the parts separately lets a recording fail one check, get patched up, and
   // still decide the answer — which is how a snapshot from a different version
   // of the tables ends up narrowing a runtime down to nothing.
-  const rejected = validate(options.cwd, file, table);
+  // Loaded once and used for three questions: whether the recording came from
+  // this table, which languages have a reader, and which layers can be narrowed.
+  // The pair only makes sense against one answer.
+  const signalTable =
+    options.signalTable === undefined
+      ? loadJson<SignalTable>('stack-signals.json')
+      : options.signalTable;
+
+  const rejected = validate(options.cwd, file, table, signalTable);
   if (rejected) {
     warnings.push(`ignored the detection: ${rejected}`);
     return { layers: table, source: 'all', warnings };
@@ -342,12 +380,6 @@ export function resolveLayers(options: {
     ((file.detected ?? []) as StackEntry[]).map((entry) => str(entry.layer)!),
   );
 
-  // Loaded once and handed to both. Two calls read the same file for two
-  // questions about it, and the pair only makes sense against one answer.
-  const signalTable =
-    options.signalTable === undefined
-      ? loadJson<SignalTable>('stack-signals.json')
-      : options.signalTable;
   const readable = readableLanguages(signalTable);
   const speakable = layersWithSignals(signalTable);
 
