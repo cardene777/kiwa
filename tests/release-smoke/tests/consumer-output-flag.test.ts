@@ -153,6 +153,30 @@ describe('adding the option changed nothing about where anything is written', ()
     }
   });
 
+  it('says the paths named later are defaults, not fixed', () => {
+    // Declaring `--output` and then naming a fixed path in every step leaves the
+    // option inert: a reader following the steps writes to the hardcoded path.
+    // Each skill states once that the paths it goes on to name are the defaults.
+    const added = ['kiwa-api', 'kiwa-cli-test', 'kiwa-data', 'kiwa-orm', 'kiwa-rust', 'kiwa-go'];
+    for (const skill of added) {
+      const line = read(`.claude/skills/${skill}/SKILL.md`)
+        .split('\n')
+        .find((l) => l.startsWith('- `--output {path}`'));
+      expect(line).toMatch(/以降の step と早見表/);
+      expect(line).toMatch(/`--output` を渡した場合はそちらが優先/);
+    }
+  });
+
+  it('the skills still name a concrete path in their steps', () => {
+    // The note above is only meaningful because the steps do name paths. If a
+    // skill stopped naming any, the note would be describing nothing.
+    for (const skill of ['kiwa-api', 'kiwa-orm', 'kiwa-rust']) {
+      const text = read(`.claude/skills/${skill}/SKILL.md`);
+      const afterOptions = text.slice(text.indexOf('- `--output {path}`'));
+      expect(afterOptions).toMatch(/\{module\}/);
+    }
+  });
+
   it('the two skills with mode suffixes say the suffix is not added to an explicit path', () => {
     // `kiwa-rust` writes `{module}_axum.rs` under `--mode axum`. Applying that
     // to a caller-supplied path would rewrite the name it asked for.
