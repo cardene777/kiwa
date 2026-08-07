@@ -139,27 +139,33 @@ export function loadLayerTable(): LayerRecord[] {
     }));
 }
 
-/** The languages the signal table can actually say something about. */
-function languagesWithSignals(table: SignalTable | null): Set<string> {
+/**
+ * The layers some signal in the table actually names.
+ *
+ * Asked per layer rather than per language, because signal coverage is uneven
+ * within a language. Rust and Go happen to be complete — every one of their
+ * five layers is named — so for them the two questions have the same answer.
+ * TypeScript is not: one signal (`next`) names five of its nineteen layers.
+ *
+ * Asking per language would let evidence about those five license dropping the
+ * other fourteen, which no signal could have detected. The caller narrows on
+ * "detected or not", and that only means something for a layer the table could
+ * have detected in the first place.
+ *
+ * Both halves count. A layer named only by a generated signal is still a layer
+ * the table can speak about.
+ */
+function layersWithSignals(table: SignalTable | null): Set<string> {
   const out = new Set<string>();
   if (!table) return out;
-  for (const [language, signals] of Object.entries(table.signals ?? {})) {
-    if (Array.isArray(signals) && signals.length) out.add(language);
-  }
-  // The generated half speaks for its own language too. Reading only the
-  // hand-written half leaves a language covered entirely by generated signals
-  // "unspeakable", and the caller then keeps every layer of that runtime
-  // regardless of what was detected — narrowing that silently does nothing.
-  // TypeScript is exactly that shape: its hand-written list is empty and its
-  // signals come from six packages' peerDependencies.
-  //
-  // The `typeof` check keeps the set typed against a malformed file; it cannot
-  // change the answer. A missing or empty `language` would add a key that no
-  // runtime name equals, and the caller has already returned for a layer whose
-  // runtime is empty. Mutating it away leaves every test passing, which is the
-  // measurement, not an oversight.
-  for (const signal of table.generated?.signals ?? []) {
-    if (typeof signal?.language === 'string') out.add(signal.language);
+  const lists = [...Object.values(table.signals ?? {}), table.generated?.signals ?? []];
+  for (const list of lists) {
+    for (const signal of list ?? []) {
+      if (signal?.layer) out.add(signal.layer);
+      if (signal?.default) out.add(signal.default);
+      for (const layer of signal?.also ?? []) out.add(layer);
+      for (const layer of Object.values(signal?.features ?? {})) out.add(layer);
+    }
   }
   return out;
 }
@@ -343,7 +349,7 @@ export function resolveLayers(options: {
       ? loadJson<SignalTable>('stack-signals.json')
       : options.signalTable;
   const readable = readableLanguages(signalTable);
-  const speakable = languagesWithSignals(signalTable);
+  const speakable = layersWithSignals(signalTable);
 
   const excluded = new Set<string>();
   const unread = new Set<string>();
@@ -373,9 +379,10 @@ export function resolveLayers(options: {
     }
     // Present but never opened, so nothing was asked and nothing was answered.
     if (!read.has(runtime)) return true;
-    // Opened, but the table has no signals for the language, so "nothing
-    // detected" carries no information. TypeScript is here today.
-    if (!speakable.has(runtime)) return true;
+    // Opened, but no signal names this layer, so "nothing detected" carries no
+    // information about it. Fourteen of the nineteen TypeScript layers are here
+    // today: `next` names the five `nextjs-*` ones and nothing names the rest.
+    if (!speakable.has(layer.id)) return true;
     return detected.has(layer.id);
   });
 

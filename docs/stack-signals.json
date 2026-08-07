@@ -14,10 +14,26 @@
     "             declaration; scripts/rebuild-stack-signals.mjs copies them here",
     "             and --check fails when a peer is added without regenerating.",
     "",
-    "  manual     The rest declare only `vitest` or nothing at all — nextjs, edge,",
-    "             hono, fresh, solidjs, and the ai-realtime four plus component.",
-    "             Their adapters mock the framework rather than importing it, so",
-    "             there is nothing to read. Eleven packages, written by hand.",
+    "  manual     The rest declare only `vitest` or nothing at all. Their adapters",
+    "             mock the framework rather than importing it, so there is nothing",
+    "             here to read — but the project being tested depends on the",
+    "             framework directly, and that is what gets read. Written by hand",
+    "             for that reason, not because the layers are less real.",
+    "",
+    "Counting the manual side by hand got it wrong twice, so it is stated by",
+    "measurement instead. Nineteen packages carry no dependency beyond `vitest`.",
+    "Ten TypeScript layers belong to them: the five `nextjs-*`, `edge-handler`,",
+    "`e2e`, `unit`, `data` and `cli`. The remaining opaque packages — hono, fresh,",
+    "solidjs, component — have no layer at all, so there is nothing to point a",
+    "signal at.",
+    "",
+    "Only `next` is written so far. It is the one with evidence: 18 of the 26",
+    "`*nextjs*` examples depend on it, and one more outside that naming",
+    "(`dogfood-dapp-e2e-reorg`). The `*edge*`, `*hono*`, `*solid*` and",
+    "`*fresh*` examples carry no real dependency between them, so a signal for",
+    "those would be a guess with nothing to check it against. `unit`, `data`,",
+    "`cli` and `e2e` are not framework-shaped and no single dependency implies",
+    "them.",
     "",
     "The boundary is not arbitrary: it lines up with the categories in",
     "docs/libraries.json. Services are transparent, frameworks and ai-realtime are",
@@ -102,7 +118,20 @@
         "strength": "exact"
       }
     ],
-    "typescript": []
+    "typescript": [
+      {
+        "match": "next",
+        "default": "nextjs-rsc",
+        "strength": "exact",
+        "note": "The adapter mocks Next.js rather than importing it, so nothing in this repository's packages names `next` — but a project using Next.js depends on it directly, which is what this file reads. `exact` because the dependency settles that the project is a Next.js one. Which of the five layers applies is a separate question a manifest cannot answer: server actions, middleware, RSC, parallel routes and streaming are distinguished by file layout, not by dependencies. All five are therefore implied together, and `default` holding `nextjs-rsc` is not a claim that it is the likeliest — the resolver treats `default` and `also` alike here, since no asserted signal exists in the group to drop them.",
+        "also": [
+          "nextjs-server-action",
+          "nextjs-middleware",
+          "nextjs-parallel-route",
+          "nextjs-rsc-streaming"
+        ]
+      }
+    ]
   },
   "generated": {
     "$comment": [
