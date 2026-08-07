@@ -33,6 +33,7 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名
 - `--input-spec {path}` — spec path (省略時は `tests/spec/integration/test-spec-{module}.data.md`)
+- `--output {path}` — 生成 test の path (省略時は `tests/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
 - `--no-review` — kiwa-review 自動呼出を skip
 
 ## 出力 path 早見
