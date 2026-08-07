@@ -9,14 +9,38 @@ import { repoRoot } from './repo-root.js';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TESTS_DIR = resolve(repoRoot(HERE), 'tests', 'release-smoke', 'tests');
 
-/** Does this file build a path from its own location? */
-function inScope(body: string): boolean {
-  return /(resolve|join)\(\s*HERE\b/.test(body) || usesHelper(body);
+/** Strip comments so a mention in prose is not read as code. */
+function code(body: string): string {
+  return body.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
 }
 
-/** Does it get the repository root the one supported way? */
+/**
+ * Does this file work out where it is?
+ *
+ * Asked at the source rather than at the use. Looking for `resolve(HERE` missed
+ * `const START = HERE; resolve(START, '..', ...)` — the same counting through
+ * one more name. Every file that needs its own location gets it the one way
+ * Node offers, so that is what to look for.
+ */
+function inScope(body: string): boolean {
+  return /dirname\(\s*fileURLToPath\(\s*import\.meta\.url\s*\)\s*\)/.test(code(body));
+}
+
+/**
+ * Does it get the repository root the one supported way?
+ *
+ * The import and the call have to agree on the name. Checking for a fixed
+ * `repoRoot(` and the module path separately let a file import the helper,
+ * leave `repoRoot(HERE)` in a comment, and count directories in the code.
+ */
 function usesHelper(body: string): boolean {
-  return /repoRoot\(HERE\)/.test(body) && /from '\.\/repo-root\.js'/.test(body);
+  const source = code(body);
+  const imported = /import\s*\{[^}]*\brepoRoot\b(?:\s+as\s+(\w+))?[^}]*\}\s*from\s*'\.\/repo-root\.js'/.exec(
+    source,
+  );
+  if (!imported) return false;
+  const name = imported[1] ?? 'repoRoot';
+  return new RegExp(`\\b${name}\\(\\s*HERE\\s*\\)`).test(source);
 }
 
 describe('repoRoot finds the same place from either layout', () => {
@@ -89,6 +113,37 @@ describe('the guard picks its targets without reading names', () => {
     expect(usesHelper('const ROOT = repoRoot(HERE);')).toBe(false);
   });
 
+  it('catches a file that counts directories through another name', () => {
+    // `resolve(HERE` was the shape being looked for, so one intermediate name
+    // put the same counting outside the check.
+    const body = [
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      'const START = HERE;',
+      "const PROJECT_DIR = resolve(START, '..', '..', '..', '..');",
+    ].join('\n');
+    expect(inScope(body)).toBe(true);
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('does not count an import plus a mention as use', () => {
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      '// was: repoRoot(HERE)',
+      "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+    ].join('\n');
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('accepts the helper under an alias', () => {
+    const body = [
+      "import { repoRoot as findRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      'const ROOT = findRoot(HERE);',
+    ].join('\n');
+    expect(usesHelper(body)).toBe(true);
+  });
+
   it('leaves alone a file that never builds a path from its own location', () => {
     expect(inScope("import { x } from './y.js';\nconst a = 1;")).toBe(false);
   });
@@ -96,6 +151,7 @@ describe('the guard picks its targets without reading names', () => {
   it('accepts the helper as the only way in scope', () => {
     const body = [
       "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
       'const ROOT = repoRoot(HERE);',
     ].join('\n');
     expect(inScope(body)).toBe(true);
