@@ -164,7 +164,35 @@ import graph は無制限に辿らない。
 
 **3 は最後**。 module ごと差し替えると、 その module が担う検証 (重複判定 / 権限 / 一意性) が mock 側の実装を測るだけになり、 本番の欠陥を隠したまま security の TC が通る。
 
-3 を採る時は生成 test の冒頭に **差し替えた export 名** と **実装を通っていない TC の ID** を書く。 読み手が pass の範囲を取り違えないため。
+##### 選択 3 では観点によって生成しない
+
+差し替えた module が答えを持つ観点は、 mock を通した pass が **何も証明しない**。 通っているのは mock 側の実装で、 本番の欠陥はそこに現れない。
+
+そういう TC は**生成しない**。 記録だけ残して生成すると、 緑の test が証拠として読まれる。
+
+| `Observation` | 選択 1 / 選択 2 | 選択 3 |
+|---|---|---|
+| 権限 | 生成する | **生成しない** |
+| 冪等性 | 生成する | **生成しない** |
+| セキュリティ | 生成する | **生成しない** |
+| 上記以外の 8 観点 | 生成する | 生成する |
+
+3 観点を選ぶのは、 いずれも **「2 回目以降どうなるか」 か「誰が何をできるか」** を data 層が決めるため。 正常系 / 異常系 / 境界値 / 入力バリデーションは action 自身の分岐が答えを持つので、 mock でも実装を測れる。
+
+止めるのは 選択 3 の時だけで、 skill 全体を止めるわけではない。 同じ spec でも module が reset を export していれば (選択 1) 3 観点とも生成される。 **module の書き方が test の射程を決める**という関係が、 生成物の側に出る。
+
+##### 生成しなかった TC を返す
+
+Step 4 の実行結果とは別に、 生成しなかった TC を報告する。 黙って落とすと、 spec の行数と生成された `it` の数が合わない理由が誰にも分からない。
+
+| 項目 | 内容 |
+|---|---|
+| TC ID | spec の 9 column 表の ID |
+| `Observation` | 生成しない判断の根拠になった観点 |
+| module | 実装を通せなかった module の path |
+| 次の手 | その module に reset か seed を export すれば生成できる旨 |
+
+3 を採る時は生成 test の冒頭にも **差し替えた export 名** と **生成しなかった TC の ID** を書く。 報告は流れるが、 生成物は残る。
 
 ##### `Given` の data 部分を seed する
 
@@ -179,6 +207,10 @@ clear だけを書くと、 既存 row を前提にする TC (重複検出 / 状
 `{data seam}` の block は Step 2 の判定が「1 件以上」 か「未確認」 の時だけ出す。 「0 件」 なら 2 block とも省き、 `vitest` の import から `beforeEach` / `vi` を外す。
 
 ```ts
+{data seam / 選択 3 のみ — 何を差し替え、 何を生成しなかったかを file 冒頭に残す}
+// mock: {差し替えた STATE_MODULE の export 名を列挙}
+// 未生成: {生成しなかった TC の ID を列挙}。 {STATE_MODULE} に reset か seed を export すれば生成できる
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
 {選択 2 では action を it の中で動的 import するので、 この行は出さない}
@@ -228,6 +260,9 @@ placeholder のままだと実行できないので、 具体的な module 名�
 
 <!-- kiwa-nextjs:worked-example:start -->
 ```ts
+// mock: store, findUserByEmail, createUser
+// 未生成: T-070, T-071 (セキュリティ / 冪等性)。 ./users.js に reset か seed を export すれば生成できる
+
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { signup } from './signup.js';
 
@@ -293,6 +328,17 @@ describe('signup server action', () => {
 ### Step 4: test 実行 + 結果取得
 
 `pnpm vitest run <解決した出力先> --environment node` を起動。 出力先は § mode 別の生成先 で layer ごとに違うので、 生成した path をそのまま渡す。 fail 行を spec の対応 TC ID と紐付けて report する。
+
+**生成しなかった TC を pass 件数と並べて報告する** (§ 生成しなかった TC を返す)。 spec の TC 数と実行された `it` の数は一致しないので、 差の理由を同じ場所に置く。
+
+```
+25 TC 中 22 件を生成、 22 passed。
+生成しなかった 3 件 (選択 3 = ./lib/users.ts を vi.mock で差し替えたため):
+  T-NA-050 冪等性 / T-NA-070 セキュリティ / T-NA-071 セキュリティ
+  → ./lib/users.ts に reset か seed を export すれば生成できる
+```
+
+「22 passed」 だけを返すと、 3 件が最初から無かったように読める。
 
 ### Step 5: result-review 用 metadata の Write
 

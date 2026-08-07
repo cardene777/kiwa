@@ -489,6 +489,8 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       '{ID}': 'T-001',
       '{Observation}': '既存 row を seed して重複を検出する',
       '{STATE_MODULE}': './users.js',
+      '{差し替えた STATE_MODULE の export 名を列挙}': 'store, findUserByEmail, createUser',
+      '{生成しなかった TC の ID を列挙}': 'T-070, T-071 (セキュリティ / 冪等性)',
       '{STATE_NAME}': 'seam',
       '{STATE_FIELD}': 'users',
       '{STATE_INITIALIZER}': 'new Map()',
@@ -564,6 +566,151 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       expect(output).toMatch(/1 passed/);
     },
   );
+
+  // #1858: replacing the module wholesale makes the security / 権限 / 冪等性
+  // cases assert against the mock, so a real defect in that module still
+  // passes. Those rows are not generated at all under 選択 3 — a green test is
+  // read as evidence, and one that cannot fail is worse than an absent one.
+  const GATED_OBSERVATIONS = ['権限', '冪等性', 'セキュリティ'];
+
+  const GATE_SECTION = '##### 選択 3 では観点によって生成しない';
+
+  /** The `Observation` values Step 2 says 選択 3 must not generate. */
+  function gatedObservations(): string[] {
+    // Scoped to the gate's own table. Reading the whole data-seam section also
+    // picked up the reporting table's `Observation` row, which says what the
+    // reason column means — not which observations are gated.
+    const rows = section(GATE_SECTION)
+      .split('\n')
+      .filter((line) => line.startsWith('|') && line.includes('生成しない'));
+    // Read from the table rather than listed here, so changing the table
+    // changes what the test requires.
+    return rows.map((line) => (line.split('|')[1] ?? '').trim()).filter((s) => s !== '');
+  }
+
+  it('生成しない観点が 3 つ、 表から読める', () => {
+    expect(gatedObservations().sort()).toEqual([...GATED_OBSERVATIONS].sort());
+  });
+
+  it('選択 3 以外は 8 観点をすべて生成すると書いてある', () => {
+    const row = section(GATE_SECTION)
+      .split('\n')
+      .find((line) => line.startsWith('|') && line.includes('上記以外'));
+    expect(row, '「上記以外の 8 観点」 の行が無い').toBeTruthy();
+    // Both columns say generate — the gate is on the observation, not on 選択 3
+    // as a whole.
+    const cells = (row ?? '').split('|').map((c) => c.trim());
+    expect(cells.filter((c) => c === '生成する')).toHaveLength(2);
+  });
+
+  it('選択 1 / 選択 2 では 3 観点とも生成すると書いてある', () => {
+    for (const obs of GATED_OBSERVATIONS) {
+      const row = section(GATE_SECTION)
+        .split('\n')
+        .find((line) => line.startsWith(`| ${obs} `));
+      expect(row, `${obs} の行が無い`).toBeTruthy();
+      const cells = (row ?? '').split('|').map((c) => c.trim());
+      // cells = ['', Observation, 選択1/2, 選択3, '']
+      expect(cells[2], `${obs} が 選択 1 / 選択 2 で生成されない`).toBe('生成する');
+      expect(cells[3], `${obs} が 選択 3 で生成されてしまう`).toContain('生成しない');
+    }
+  });
+
+  /**
+   * Apply the gate to a spec table using the rule read from SKILL.md.
+   *
+   * The generator is the skill, not code, so release-smoke cannot watch it
+   * obey. What it can check is that the rule is unambiguous enough to apply
+   * mechanically and that changing the table changes the outcome.
+   */
+  function applyGate(
+    rows: { id: string; observation: string }[],
+    route: Route,
+  ): { generated: string[]; omitted: string[] } {
+    const gated = route === 'mock' ? gatedObservations() : [];
+    const generated: string[] = [];
+    const omitted: string[] = [];
+    for (const row of rows) {
+      (gated.includes(row.observation) ? omitted : generated).push(row.id);
+    }
+    return { generated, omitted };
+  }
+
+  // One row per observation `/kiwa-design` emits, so a change to the gated set
+  // shows up as a different split rather than passing silently.
+  const SPEC_ROWS = [
+    { id: 'T-001', observation: '正常系' },
+    { id: 'T-002', observation: '異常系' },
+    { id: 'T-003', observation: '境界値' },
+    { id: 'T-004', observation: '状態遷移' },
+    { id: 'T-005', observation: '権限' },
+    { id: 'T-006', observation: '入力バリデーション' },
+    { id: 'T-007', observation: '冪等性' },
+    { id: 'T-008', observation: '並行処理' },
+    { id: 'T-009', observation: '性能' },
+    { id: 'T-010', observation: 'セキュリティ' },
+    { id: 'T-011', observation: '回帰' },
+  ];
+
+  it('選択 3 では 3 観点の TC が落ち、 8 観点が残る', () => {
+    const { generated, omitted } = applyGate(SPEC_ROWS, 'mock');
+    expect(omitted).toEqual(['T-005', 'T-007', 'T-010']);
+    expect(generated).toHaveLength(8);
+  });
+
+  it.each(['reset', 'resetModules'] as Route[])(
+    '%s では 11 観点すべてが残る',
+    (route) => {
+      // The same spec, a different module: what the module exports decides how
+      // far the tests reach. That relationship is the point of the gate.
+      const { generated, omitted } = applyGate(SPEC_ROWS, route);
+      expect(omitted).toEqual([]);
+      expect(generated).toHaveLength(SPEC_ROWS.length);
+    },
+  );
+
+  it('落とす観点は 11 観点の中にある名前で書かれている', () => {
+    // A gated name that no spec ever emits would silently gate nothing.
+    const known = SPEC_ROWS.map((r) => r.observation);
+    for (const obs of gatedObservations()) {
+      expect(known, `${obs} は /kiwa-design が出さない観点名`).toContain(obs);
+    }
+  });
+
+  it('選択 3 の template が差し替えと未生成を file 冒頭に残す', () => {
+    // The rule without a slot in the template produces nothing (#1856 R2-F1 and
+    // R2-F2 were both this shape). The record has to be in the emitted file,
+    // not only in the run report, because the report scrolls away.
+    const template = stepThreeTemplate();
+    expect(template, 'mock 対象の記録が template に無い').toContain('// mock:');
+    expect(template, '未生成 TC の記録が template に無い').toContain('// 未生成:');
+    expect(template, '次の手が書かれていない').toMatch(/reset か seed を export/);
+  });
+
+  it('展開例が記録 block を実演している', () => {
+    const example = workedExample();
+    expect(example).toMatch(/^\/\/ mock: .+$/m);
+    expect(example).toMatch(/^\/\/ 未生成: .+$/m);
+  });
+
+  it('Step 4 が未生成 TC を pass 件数と並べて報告する', () => {
+    const step4 = section('### Step 4: test 実行 + 結果取得');
+    // Asserted on the instruction, not on the words. The example block below it
+    // also says 生成しなかった and the prose says 一致しない, so either check
+    // stayed green when the instruction itself was replaced.
+    //
+    // The section reference `(§ 生成しなかった TC を返す)` sits on the same line
+    // as the instruction, so matching the phrase and 報告する separately also
+    // passed. The point is that the two numbers go together.
+    expect(step4, '未生成 TC を pass 件数と並べて報告する指示が無い').toMatch(
+      /生成しなかった TC を[^。]*pass 件数[^。]*報告する/,
+    );
+    // The count of `it` blocks and the count of spec rows differ; the reason
+    // belongs next to the number, not somewhere else.
+    expect(step4).toMatch(/一致しない|差の理由/);
+    // The example shows both numbers, so the shape of the report is fixed.
+    expect(step4).toMatch(/\d+ TC 中 \d+ 件を生成/);
+  });
 
   it('選択 3 の展開から mock を外すと落ちる', () => {
     // A relaxed assertion inside generated code still passes, so the outer test
