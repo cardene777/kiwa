@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -633,23 +633,63 @@ describe('a Next.js project is detected from the framework it depends on', () =>
     // `dogfood-nextjs-server-action-app` is not — it depends on
     // `@kiwa-lab/nextjs` and nothing else. Naming an example without opening it
     // is how this test first passed against an empty result.
-    // `ui` comes with it: the example depends on `react`, which the generated
-    // half names as a weak signal for that layer. Weak because `providers` for
-    // `ui` is empty — nothing in the table declares which of its twenty peers
-    // are subjects, so none are promoted.
-    expect(detectExample('nextjs-app-router-full')).toEqual([...NEXTJS_LAYERS, 'ui'].sort());
+    // Two more come with it, both weak: `react` names `ui` and
+    // `@playwright/test` names `e2e-generic`. Weak because neither layer
+    // declares `providers`, so nothing in the table says which of their peers
+    // are subjects rather than tools.
+    //
+    // Listed rather than derived: the point of this test is the example, and a
+    // derived expectation would restate the generator instead of checking it.
+    expect(detectExample('nextjs-app-router-full')).toEqual(
+      [...NEXTJS_LAYERS, 'e2e-generic', 'ui'].sort(),
+    );
   });
 });
 
 describe('the generated half is written from the packages, not by hand', () => {
   const generated = TABLE.generated.signals;
 
-  it('names a peer of every transparent package that has a layer', () => {
-    // `dapp` is the exception and the generator says so: no layer declares
-    // `kiwa-dapp` as its consumer, so its peers have nothing to point at.
-    expect(new Set(generated.map((s) => s.layer))).toEqual(
-      new Set(['auth', 'cache', 'job-queue', 'orm-query', 'ui']),
+  const LAYER_TABLE = JSON.parse(readFileSync(resolve(REPO_ROOT, 'docs/layers.json'), 'utf-8')) as {
+    layers: { id: string; consumer_skill: string; providers?: string[] }[];
+  };
+
+  /** Every `@kiwa-lab/*` package with the peers it declares, minus the runner. */
+  const PACKAGES = readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => resolve(REPO_ROOT, 'packages', e.name, 'package.json'))
+    .filter((p) => existsSync(p))
+    .map((p) => JSON.parse(readFileSync(p, 'utf-8')) as { name?: string; peerDependencies?: Record<string, string> })
+    .filter((pkg) => (pkg.name ?? '').startsWith('@kiwa-lab/'))
+    .map((pkg) => ({
+      name: pkg.name!.slice('@kiwa-lab/'.length),
+      peers: Object.keys(pkg.peerDependencies ?? {}).filter((peer) => peer !== 'vitest'),
+    }));
+
+  it('covers every package that declares a peer and owns a layer', () => {
+    // Derived, not listed. The first version of the generator carried a fixed
+    // list of six package names and missed `a11y`, `api` and `e2e` — three
+    // packages with real peers whose libraries were simply undetectable, with
+    // nothing failing to say so.
+    const owned = new Set(LAYER_TABLE.layers.map((l) => l.consumer_skill));
+    const expected = new Set(
+      PACKAGES.filter((p) => p.peers.length && owned.has(`kiwa-${p.name}`)).flatMap((p) =>
+        LAYER_TABLE.layers.filter((l) => l.consumer_skill === `kiwa-${p.name}`).map((l) => l.id),
+      ),
     );
+    expect(new Set(generated.map((s) => s.layer))).toEqual(expected);
+    expect(expected.size).toBeGreaterThan(5);
+  });
+
+  it('says which package it skipped and why', () => {
+    // `dapp` declares peers and owns no layer. Producing nothing for it is
+    // correct; producing nothing silently is not, because that reads the same
+    // as a package with no peers.
+    const withoutLayer = PACKAGES.filter(
+      (p) =>
+        p.peers.length && !LAYER_TABLE.layers.some((l) => l.consumer_skill === `kiwa-${p.name}`),
+    ).map((p) => p.name);
+    expect(withoutLayer).toEqual(['dapp']);
+    expect(generated.filter((s) => s.match === 'viem')).toEqual([]);
   });
 
   it('never emits the runner as a subject', () => {

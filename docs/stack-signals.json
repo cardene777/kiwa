@@ -208,6 +208,12 @@
       },
       {
         "match": "@playwright/test",
+        "layer": "e2e-generic",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "@playwright/test",
         "layer": "ui",
         "strength": "weak",
         "language": "typescript"
@@ -273,6 +279,12 @@
         "language": "typescript"
       },
       {
+        "match": "axe-core",
+        "layer": "a11y",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
         "match": "better-auth",
         "layer": "auth",
         "strength": "exact",
@@ -316,6 +328,12 @@
       },
       {
         "match": "jsdom",
+        "layer": "a11y",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "jsdom",
         "layer": "ui",
         "strength": "weak",
         "language": "typescript"
@@ -353,6 +371,18 @@
       {
         "match": "miniflare",
         "layer": "job-queue",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "msw",
+        "layer": "api",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "msw",
+        "layer": "integration",
         "strength": "weak",
         "language": "typescript"
       },
@@ -407,6 +437,18 @@
       {
         "match": "solid-js",
         "layer": "ui",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "supertest",
+        "layer": "api",
+        "strength": "weak",
+        "language": "typescript"
+      },
+      {
+        "match": "supertest",
+        "layer": "integration",
         "strength": "weak",
         "language": "typescript"
       },

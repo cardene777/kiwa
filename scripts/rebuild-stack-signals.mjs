@@ -35,15 +35,6 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..');
 
-/**
- * Packages whose `peerDependencies` name real libraries.
- *
- * The rest declare only `vitest` or nothing: their adapters mock the framework
- * rather than importing it, so there is nothing here to read. Those layers are
- * covered by the hand-written half of the table.
- */
-const TRANSPARENT = ['auth', 'orm', 'cache', 'queue', 'ui', 'dapp'];
-
 /** Present in every package as the runner, never as a subject. */
 const RUNNER = 'vitest';
 
@@ -71,16 +62,33 @@ function providerForms(pkg) {
   return forms;
 }
 
-/** Which package directory holds `@kiwa-lab/{name}`. */
-function packageDir(name) {
+/**
+ * Every `@kiwa-lab/*` package, as `{ name, dir, peers }`.
+ *
+ * Read from disk rather than listed here. A fixed list has to be edited when a
+ * package starts declaring a peer, and nothing fails when it is not: the
+ * library simply stays undetectable. Three packages (`a11y`, `api`, `e2e`) were
+ * missing from the first version of this file for exactly that reason.
+ */
+function transparentPackages() {
   const packages = join(REPO_ROOT, 'packages');
+  const found = [];
   for (const entry of readdirSync(packages, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const manifest = join(packages, entry.name, 'package.json');
     if (!existsSync(manifest)) continue;
-    if (read(manifest).name === `@kiwa-lab/${name}`) return join(packages, entry.name);
+    const pkg = read(manifest);
+    const scoped = /^@kiwa-lab\/(.+)$/.exec(pkg.name ?? '');
+    if (!scoped) continue;
+    const peers = Object.keys(pkg.peerDependencies ?? {})
+      .filter((peer) => peer !== RUNNER)
+      .sort();
+    // A package declaring nothing beyond the runner is opaque: its adapter
+    // mocks the framework rather than importing it, so there is nothing here
+    // to read. Those layers are covered by the hand-written half.
+    if (peers.length) found.push({ name: scoped[1], peers });
   }
-  return null;
+  return found.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function build() {
@@ -88,12 +96,7 @@ function build() {
   const signals = [];
   const skipped = [];
 
-  for (const name of TRANSPARENT) {
-    const dir = packageDir(name);
-    if (!dir) {
-      skipped.push(`${name}: no package under packages/`);
-      continue;
-    }
+  for (const { name, peers } of transparentPackages()) {
     // The layer this package backs. `consumer_skill` is the link, and a package
     // with no layer has nothing for a signal to point at.
     const owned = layers.filter((layer) => layer.consumer_skill === `kiwa-${name}`);
@@ -102,9 +105,6 @@ function build() {
       continue;
     }
     const declared = new Set(owned.flatMap((layer) => layer.providers ?? []).map(normalise));
-    const peers = Object.keys(read(join(dir, 'package.json')).peerDependencies ?? {})
-      .filter((peer) => peer !== RUNNER)
-      .sort();
 
     for (const peer of peers) {
       const exact = providerForms(peer).some((form) => declared.has(form));
