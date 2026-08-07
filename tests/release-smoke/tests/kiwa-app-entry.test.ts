@@ -174,3 +174,89 @@ describe('the entry point refuses to generate on an unnarrowed answer', () => {
     expect(LAYERS.length).toBeGreaterThan(25);
   });
 });
+
+describe('the entry point passes what the pieces it invokes actually need', () => {
+  // The checks above read the skill against `layers.json`. These read it against
+  // the *other skills* it starts, which is where the first review found three
+  // defects that prose self-consistency could not see.
+  const skillText = (name: string): string => read(`.claude/skills/${name}/SKILL.md`);
+
+  const multiLayerConsumers = (): [string, string[]][] => {
+    const byConsumer = new Map<string, string[]>();
+    for (const layer of LAYERS) {
+      byConsumer.set(layer.consumer_skill, [
+        ...(byConsumer.get(layer.consumer_skill) ?? []),
+        layer.id,
+      ]);
+    }
+    return [...byConsumer].filter(([, ids]) => ids.length > 1);
+  };
+
+  it('four consumers serve more than one layer, so the layer has to travel', () => {
+    // `kiwa-nextjs` converts five different things. Invoked with `--module`
+    // alone it gets the same call five times and cannot tell which to write.
+    const multi = multiLayerConsumers();
+    expect(multi.map(([skill]) => skill).sort()).toEqual([
+      'kiwa-api',
+      'kiwa-go',
+      'kiwa-nextjs',
+      'kiwa-rust',
+    ]);
+  });
+
+  it('hands the layer id to Layer 2, not only to Layer 1', () => {
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    const layer2Line = step4.split('\n').find((line) => line.includes('{consumer_skill}'));
+    expect(layer2Line).toBeDefined();
+    expect(layer2Line).toContain('--layer');
+  });
+
+  it('every consumer it hands --layer to documents that flag', () => {
+    // Passing a flag nobody accepts is the same failure as passing none.
+    const undocumented = multiLayerConsumers()
+      .map(([skill]) => skill)
+      .filter((skill) => !skillText(skill).includes('--layer'));
+    expect(undocumented).toEqual([]);
+  });
+
+  it('passes --layer through to the CLI rather than branching on it first', () => {
+    // The CLI owns flag > detected > all. Branching here makes `--layer all`
+    // indistinguishable from "could not narrow", which is the opposite answer.
+    // Scoped to the command line. `/kiwa layers --json.*--layer/s` matched the
+    // prose two paragraphs below and passed with the flag removed from the
+    // command — the fifth time this session that a `.` spanning newlines found
+    // an unrelated mention.
+    const step2 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 2'), APP_SKILL.indexOf('## Step 3'));
+    const invocation = step2.split('\n').find((line) => line.trim().startsWith('kiwa layers'));
+    expect(invocation).toBeDefined();
+    expect(invocation).toContain('--layer');
+    expect(APP_SKILL).toContain('--layer L');
+  });
+
+  it('does not claim the skills it starts leave execution to the user', () => {
+    // Measured, not assumed: three of the Layer 2 skills run the tests they
+    // write. A boundary stated without checking is the defect this catches.
+    const runners = ['kiwa-forge', 'kiwa-hardhat', 'kiwa-vitest'].filter((skill) =>
+      /forge test|hardhat test|vitest run/.test(skillText(skill)),
+    );
+    expect(runners).toHaveLength(3);
+
+    const outOfScope = APP_SKILL.slice(APP_SKILL.indexOf('## 責務外'));
+    expect(outOfScope).toMatch(/Layer 2 skill は自分が/);
+    expect(outOfScope).not.toMatch(/走らせるのは利用者の runner/);
+  });
+
+  it('builds the spec path from the declaration rather than reassembling it', () => {
+    // `spec_path` carries a per-layer suffix (`.rsc.md`, `.middleware.md`, …)
+    // and Layer 2 finds its input by that suffix. Rebuilding the path from
+    // `{spec_dir}` drops the suffix and the input stops being found.
+    const suffixes = new Set(
+      LAYERS.filter((l) => l.consumer_skill === 'kiwa-nextjs').map((l) =>
+        (l as unknown as { spec_path: string }).spec_path.replace(/^.*\{module\}/, ''),
+      ),
+    );
+    expect(suffixes.size).toBe(5);
+    expect(APP_SKILL).toContain('spec_path');
+    expect(APP_SKILL).toMatch(/spec_dir.*自前で組み立てない/s);
+  });
+});

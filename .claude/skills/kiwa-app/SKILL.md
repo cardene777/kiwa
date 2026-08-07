@@ -59,11 +59,16 @@ kiwa init --detect
 ## Step 2: 対象 layer を決める
 
 ```bash
-kiwa layers --json
+# --layer が与えられていればそのまま渡す。 CLI 側が flag > detected > all の
+# 優先順位を持っているので、 本 skill が先に分岐すると判定が 2 箇所になる。
+kiwa layers --json ${LAYER:+--layer "$LAYER"}
 ```
 
 判定を本 skill 側に書かない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 複製すると
 同じ契約が再び散る (#1807 / #1809 / #1810)。
+
+`--layer` を渡さずに `source` だけ見て自前で絞ると、 `--layer all` が「全 layer を対象」 では
+なく「絞れなかった」 と同じ扱いになり、 明示指定が効かなくなる。
 
 返る `source` で分岐する。
 
@@ -118,13 +123,25 @@ spec も生成される。 置けないのは Layer 2 の test file だけで、
 対象になった layer それぞれについて、 Layer 1 → Layer 2 の順に起動する。
 
 ```text
-[Layer 1] /kiwa-design --layer {id} --module {module} --lang {lang}
-              ↓ tests/spec/{spec_dir}/test-spec-{module}.*.md
-[Layer 2] /{consumer_skill} --module {module}
+[Layer 1] /kiwa-design --layer {id} --module {module} --lang {lang} [--mode {mode}]
+              ↓ spec_path の {module} を解決した path
+[Layer 2] /{consumer_skill} --layer {id} --module {module} [--mode {mode}]
               ↓ test_outputs の path (置換済)
 ```
 
 `consumer_skill` は `layers[].consumer_skill` が持つ。 対応表を本 skill に書かない。
+
+**`--layer` を Layer 2 にも渡す**。 1 つの consumer_skill が複数の layer を受け持つためで、
+`kiwa-nextjs` は 5 layer (`nextjs-server-action` / `nextjs-middleware` / `nextjs-rsc` /
+`nextjs-parallel-route` / `nextjs-rsc-streaming`) の consumer になっている。 `--module` だけ
+渡すと 5 回同じ起動になり、 どの mode を変換すればよいか決まらない。
+
+`spec_path` は layer ごとに suffix が違う (`.nextjs.md` / `.middleware.md` / `.rsc.md` /
+`.parallel.md` / `.rsc-streaming.md`)。 Layer 2 はこの suffix で入力 spec を見分けるので、
+Layer 1 の出力先も `spec_path` から組む。 `{spec_dir}` を自前で組み立てない。
+
+`mode` を持つ layer (30 中 6) はそれも渡す。 `also_consumed_by` を持つ layer は、 主 consumer の
+後に副次 consumer も同じ引数で起動する。
 
 `providers` / `variants` を持つ layer は `selected_by` が選び方を宣言している。 その宣言に従う
 だけで、 どれを選ぶかは決めない。
@@ -153,8 +170,11 @@ spec も生成される。 置けないのは Layer 2 の test file だけで、
 
 ## 責務外
 
-- **テストの実行** ... 生成までを担い、 走らせるのは利用者の runner。 実行まで抱えると
-  vitest / playwright の設定を推測することになる
+- **テスト実行の指揮** ... 本 skill は実行 step を持たない。 ただし **Layer 2 skill は自分が
+  生成した test を自分で走らせる**。 実測すると `kiwa-forge` は `forge test`、 `kiwa-hardhat` は
+  `npx hardhat test`、 `kiwa-vitest` は `vitest run` を起動する。 本 skill が別途 runner を
+  起動しないという意味であって、 「実行が一切起きない」 という意味ではない。 起動した Layer 2 が
+  test を走らせた場合、 その結果は報告の行に載せる
 - **`layers.json` の解釈** ... layer の宣言を読むのは `kiwa layers` の責務。 本 skill は返って
   きた値を使うだけで、 判定を持たない
 - **provider / variant の選択** ... `selected_by` が宣言する経路に従うだけ
