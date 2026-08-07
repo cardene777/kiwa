@@ -228,7 +228,16 @@ afterAll(() => {
  * do not, which is what pushes them to the later routes.
  */
 function usersModule(route: Route | 'example'): string {
+  // A top-level side effect is what separates 選択 2 from 選択 3. Re-importing
+  // the module (選択 2) runs it again; replacing the module (選択 3) never runs
+  // it at all. Without one, both routes work on the same fixture and the test
+  // proves nothing about when to pick which (#1857 Round 2 retry 2, R2R2-F1).
+  const sideEffect =
+    route === 'resetModules' || route === 'mock'
+      ? ['globalThis.__usersLoads = (globalThis.__usersLoads ?? 0) + 1;']
+      : [];
   const base = [
+    ...sideEffect,
     // Exported as a value as well as through functions. Modules commonly do
     // both, and the two forms behave differently inside a `vi.mock` factory.
     'export const store = new Map();',
@@ -467,7 +476,11 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       '{Given.headers を object に展開}': '{}',
       '{Args を配列に展開}': '[]',
       '{Then を expect(...).toBe(...) 等に展開}':
-        'expect(result).toMatchObject({ ok: true });',
+        [
+          'expect(result).toMatchObject({ ok: true });',
+          '    // 実装を通す経路なので module body が走っている。',
+          '    expect(globalThis.__usersLoads ?? 0).toBeGreaterThan(0);',
+        ].join('\n'),
     },
     mock: {
       '{ACTION}': 'signup',
@@ -499,7 +512,12 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
       '{Given.headers を object に展開}': '{}',
       '{Args を配列に展開}': '[]',
       '{Then を expect(...).toBe(...) 等に展開}':
-        "expect(result).toEqual({ ok: false, error: 'already-registered' });",
+        [
+          "expect(result).toEqual({ ok: false, error: 'already-registered' });",
+          '    // module ごと差し替えたので実装の body は 1 度も走っていない。',
+          '    // 副作用を持つ module ではこれが 選択 3 を選ぶ理由になる。',
+          '    expect(globalThis.__usersLoads ?? 0).toBe(0);',
+        ].join('\n'),
     },
   };
 
@@ -523,11 +541,42 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
         expect(dynamicImport, `${route} 経路に動的 import が混ざっている`).toBe(false);
       }
 
+      // `expect(__usersLoads).toBe(0)` also passes when the module never had a
+      // side effect to begin with, so the fixture's own content is pinned. The
+      // two routes are only distinguishable while it is there.
+      if (route === 'resetModules' || route === 'mock') {
+        expect(usersModule(route), `${route} の fixture に副作用が無い`).toContain(
+          '__usersLoads',
+        );
+        // Pinned as content, not behaviour. The `Then` assertion already fails
+        // first when the route is broken (measured: relaxing these two lines
+        // changes no outcome), so they document which route touches the real
+        // module rather than detecting it. Removing them silently would lose
+        // the only place that distinction is written down.
+        const expected = route === 'mock' ? '.toBe(0)' : '.toBeGreaterThan(0)';
+        expect(code, `${route} の展開に module load の assertion が無い`).toContain(
+          `expect(globalThis.__usersLoads ?? 0)${expected}`,
+        );
+      }
+
       const { ok, output } = runGenerated(code, route);
       expect(ok, `${route} の展開が走らなかった:\n${output}\n--- code ---\n${code}`).toBe(true);
       expect(output).toMatch(/1 passed/);
     },
   );
+
+  it('選択 3 の展開から mock を外すと落ちる', () => {
+    // A relaxed assertion inside generated code still passes, so the outer test
+    // cannot see it weaken. Removing the mock is the failure the assertion is
+    // supposed to catch: the real module body runs, `__usersLoads` becomes 1,
+    // and the seed goes somewhere the action never reads.
+    const code = expandTemplate('mock', ROUTE_VALUES.mock);
+    const withoutMock = code.replace(/vi\.mock\('\.\/users\.js'[\s\S]*?\}\)\);\n/, '');
+    expect(withoutMock, 'mock block が展開結果に無い').not.toBe(code);
+
+    const { ok, output } = runGenerated(withoutMock, 'mock');
+    expect(ok, `mock を外しても通ってしまう:\n${output}`).toBe(false);
+  });
 
   it('展開例が template の data seam 行をすべて実演している', () => {
     // Derived from the template, not listed here. Adding a line to the template
