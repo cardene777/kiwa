@@ -97,7 +97,7 @@ graph TD
 
 kiwa ships in two halves that work together but stand alone:
 
-### 1. Claude Code skills (25 skills, the design + generation half)
+### 1. Claude Code skills (26 skills, the design + generation half)
 
 | Skill | Layer | Role |
 |---|---|---|
@@ -208,7 +208,7 @@ Install the kiwa skill chain as a Claude Code plugin — no clone required, avai
 /reload-plugins                            # activate without restarting the session
 ```
 
-After install, all 25 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
+After install, all 26 skills appear under the `kiwa:` namespace (Claude Code namespaces plugin skills by plugin name). Inside any dApp project, run the individual layers:
 
 ```bash
 # Layer 1 — design tests (output: tests/spec/<layer>/test-spec-<module>.md)
@@ -616,7 +616,7 @@ Reference docs:
 
 |  |  |
 |---|---|
-| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 25 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
+| [`docs/SKILL-DESIGN.md`](./docs/SKILL-DESIGN.md) ⭐ | **SSOT for all 26 skills** (5-step flow, 9-section output, 13 viewpoints, 5 risk criteria) |
 | [`docs/MOCK-DESIGN.md`](./docs/MOCK-DESIGN.md) | Wallet / SDK mock fidelity spec (A/B/C levels, scoring rubric) |
 | [`tests/docs/skill-chain-tutorial.md`](./tests/docs/skill-chain-tutorial.md) ⭐ | **skill chain walkthrough** (retrofit-first) |
 | [`docs/RPC.md`](./docs/RPC.md) | 9 directly-handled RPC + anvil fallback |
