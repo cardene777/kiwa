@@ -127,26 +127,29 @@ describe('the stated default matches what the layer table declares', () => {
     expect(mismatched).toEqual([]);
   });
 
-  it('names the two skills that state the examples path themselves', () => {
+  it('no skill states kiwa\'s own directory as its default', () => {
+    // `kiwa-rust` and `kiwa-go` used to spell `examples/{example}/…`, which is
+    // the kiwa repository's layout written into a skill that also runs in other
+    // people's projects. Every default is now relative to the target root.
     const selfAnchored = producers.filter((skill) => declaredDefault(skill)?.startsWith('examples/'));
-    expect(selfAnchored.sort()).toEqual(['kiwa-go', 'kiwa-rust']);
+    expect(selfAnchored).toEqual([]);
   });
 });
 
-describe('adding the option changed nothing about where anything is written', () => {
-  // The point of keeping every default as it was: this lands on its own without
-  // touching the dogfood path, and the declaration changes come after.
-  it('the layer table is untouched by this change', () => {
-    // Measured against the values in place before the option existed. A default
-    // edited to "tidy it up" would move output for every existing example.
+describe('the defaults are pinned so they cannot drift silently', () => {
+  // `--output` was added without changing any of these (#1845); `#1842` then
+  // changed the two Rust and Go entries deliberately, together with the table.
+  // Pinning them means either kind of edit has to be stated here.
+  it('each default is the value its own docs and the layer table agree on', () => {
     const before: Record<string, string> = {
       'kiwa-api': 'test/integration/{module}.test.ts',
       'kiwa-cli-test': 'tests/{module}.test.ts',
       'kiwa-data': 'tests/{module}.test.ts',
       'kiwa-orm': 'tests/{module}.test.ts',
       'kiwa-nextjs': 'tests/integration/{module}.nextjs.test.ts',
-      'kiwa-rust': 'examples/{example}/tests/{module}.rs',
-      'kiwa-go': 'examples/{example}/{module}_test.go',
+      // Changed by #1842 from `examples/{example}/…` to the target-root form.
+      'kiwa-rust': 'tests/{module}.rs',
+      'kiwa-go': '{module}_test.go',
     };
     for (const [skill, path] of Object.entries(before)) {
       expect(declaredDefault(skill)).toBe(path);
@@ -178,6 +181,19 @@ describe('adding the option changed nothing about where anything is written', ()
       const text = read(`.claude/skills/${skill}/SKILL.md`);
       const afterOptions = text.slice(text.indexOf('- `--output {path}`'));
       expect(afterOptions).toMatch(/\{module\}/);
+    }
+  });
+
+  it('the two polyglot skills say what their paths are relative to', () => {
+    // They used to spell `examples/{example}/…`, which said where the paths were
+    // anchored by including it. Dropping the prefix removes that information, so
+    // the anchor has to be stated instead — otherwise a reader of the table
+    // cannot tell whether `tests/{module}.rs` is the repo root or the example.
+    for (const skill of ['kiwa-rust', 'kiwa-go']) {
+      const text = read(`.claude/skills/${skill}/SKILL.md`);
+      expect(text).toMatch(/\*\*path の基準\*\*/);
+      expect(text).toMatch(/対象 root からの相対/);
+      expect(text).toMatch(/`examples\/\{name\}\/` が root/);
     }
   });
 
