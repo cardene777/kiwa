@@ -244,7 +244,12 @@ CONDITIONAL は score より優先する。 score だけで決めると、 未�
 
 他 skill から自動呼出された場合 (例 `/kiwa-design` 完了後の auto call)、 review 結果を呼出元に return:
 - PASS → 呼出元の chain 継続 (次 skill 起動)
+- CONDITIONAL (未生成 TC あり) → 呼出元の chain は継続する。 併せて未検証の観点と次の手 (どの module に何を export すれば生成できるか) を return し、 呼出元は統合 report にそのまま載せる
 - FAIL critical あり → 呼出元に critical 指摘の summary を return、 user に AskUserQuestion で「無視して継続 / spec or test 修正 / chain 中断」を選ばせる
+
+CONDITIONAL で chain を止めないのは、 未生成 TC が **生成器の判断であって欠陥ではない**から。 止めると「mock でもいいから足せ」 に戻る圧力になる。 一方で PASS と同じ扱いにすると未検証の観点が消えるので、 return と report に残す。
+
+**呼出元は 3 値を受ける**。 PASS だけを継続条件にしている呼出元は CONDITIONAL を FAIL と解釈して止まり、 FAIL 以外を継続にしている呼出元は未検証の観点を落とす。 どちらも 3 値契約が end-to-end で成立しない。
 
 `--no-auto-call` 指定時は chain return せず report Write だけで終了。
 

@@ -204,9 +204,12 @@ node .claude/skills/kiwa-nextjs/scripts/decide-generation.mjs '{
 | 値 | 意味 | 例 |
 |---|---|---|
 | `mocked-export-logic` | 差し替えた export の実装そのものが決める | 大文字小文字を無視して重複を見つけるのは module の仕事 |
+| `passthrough-export-logic` | 素通しした export の実装が決める。 本番実装をそのまま通る | 部分 mock で差し替えなかった正規化関数 |
 | `action-branch` | action 自身の分岐が決める。 差し替えた export は入力を供給するだけ | 既存 row があった時に `already-registered` を返すのは action の分岐 |
 | `seeded-env` | helper が seed した `cookies` / `headers` / `formData` / `args` が決める | 入力の検証で弾く |
 | `unknown` | 決められない | |
+
+`mocked-export-logic` を選びながら `dependsOn` が差し替えた export に届かない入力は、 script が **例外で止める**。 `dependsOn` の書き漏れか `answeredBy` の誤りのどちらかで、 どちらなのかは script に判らない。 生成可否に畳むと、 書き漏れただけで mock 依存の TC が生成される。
 
 ###### script が持つ規則
 
@@ -219,6 +222,8 @@ node .claude/skills/kiwa-nextjs/scripts/decide-generation.mjs '{
 初版は「差し替えた module が答えを持つなら生成しない」 とだけ書いており、 action と module が共同で結果を作る TC が「決められない」 に落ちて大量に未生成になった。 正常系も状態遷移も store を通るので、 ほとんど残らない。
 
 **`unknown` は生成しない**。 落ちない test が緑で残るより、 未生成として報告される方がよい。 誤りの向きが違う。
+
+判定は **到達の有無より先に** `unknown` を見る。 後ろに置くと、 `dependsOn` の書き漏れだけで「差し替えに届かない」 に落ちて生成される (fail-open)。
 
 ###### 観点名で判定してはいけない
 

@@ -20,17 +20,21 @@
  *     ]
  *   }
  *
- * `answeredBy` の 4 値:
- *   mocked-export-logic ... 差し替えた export の実装そのものが期待値を決める
- *   action-branch       ... action 自身の分岐が決める (差し替えた export は入力を供給するだけ)
- *   seeded-env          ... helper が seed した cookies / headers / formData / args が決める
- *   unknown             ... 決められない
+ * `answeredBy` の 5 値:
+ *   mocked-export-logic      ... 差し替えた export の実装そのものが期待値を決める
+ *   passthrough-export-logic ... 素通しした export の実装が決める (本番実装を通る)
+ *   action-branch            ... action 自身の分岐が決める (差し替えた export は入力を供給するだけ)
+ *   seeded-env               ... helper が seed した cookies / headers / formData / args が決める
+ *   unknown                  ... 決められない
  */
+
+import { pathToFileURL } from 'node:url';
 
 /** @typedef {'mocked-export-logic' | 'action-branch' | 'seeded-env' | 'unknown'} AnsweredBy */
 
 const ANSWERED_BY = new Set([
   'mocked-export-logic',
+  'passthrough-export-logic',
   'action-branch',
   'seeded-env',
   'unknown',
@@ -55,17 +59,22 @@ export function decideCase(tc, mockedExports) {
     };
   }
 
-  const reached = dependsOn.filter((name) => mocked.has(name));
-
-  // 差し替えた export に 1 つも届かないなら、 mock は結果に関与しない。
-  // 部分 mock で素通しした export だけを触る TC がここに入る。
-  if (reached.length === 0) {
-    return { id: tc.id, generate: true, reason: '差し替えた export に依存しない' };
+  // 判定不能は到達の有無より先に見る。 後ろに置くと、 dependsOn の書き漏れだけで
+  // 「差し替えに届かない」 に落ちて生成されてしまう (fail-open)。
+  if (tc.answeredBy === 'unknown') {
+    return { id: tc.id, generate: false, reason: '答えを出すのが誰か決められない' };
   }
 
-  if (tc.answeredBy === 'unknown') {
-    // 迷ったら生成しない。 落ちない test が緑で残るより、 未生成として報告される方がよい。
-    return { id: tc.id, generate: false, reason: '答えを出すのが誰か決められない' };
+  const reached = dependsOn.filter((name) => mocked.has(name));
+
+  // 入力の矛盾は生成可否に畳まず、 その場で止める。 「差し替えた export の実装が答えを
+  // 決める」 と申告しながら差し替えた export に届かない形は、 dependsOn の書き漏れか
+  // answeredBy の誤りのどちらかで、 どちらなのかは script には判らない。
+  if (tc.answeredBy === 'mocked-export-logic' && reached.length === 0) {
+    throw new Error(
+      `${tc.id}: answeredBy=mocked-export-logic だが dependsOn が差し替えた export に届かない ` +
+        `(dependsOn=[${dependsOn.join(', ')}] / mockedExports=[${mockedExports.join(', ')}])`,
+    );
   }
 
   if (tc.answeredBy === 'mocked-export-logic') {
@@ -74,6 +83,20 @@ export function decideCase(tc, mockedExports) {
       generate: false,
       reason: `差し替えた export の実装が期待値を決める (${reached.join(', ')})`,
     };
+  }
+
+  // 素通しした export の実装が答えを決めるなら、 それは本番の実装そのもの。
+  if (tc.answeredBy === 'passthrough-export-logic') {
+    return {
+      id: tc.id,
+      generate: true,
+      reason: '素通しした export の実装が期待値を決める (本番実装を通る)',
+    };
+  }
+
+  // 差し替えた export に 1 つも届かないなら、 mock は結果に関与しない。
+  if (reached.length === 0) {
+    return { id: tc.id, generate: true, reason: '差し替えた export に依存しない' };
   }
 
   // action の分岐 / seed した env が答えを出す場合、 差し替えた export は入力を供給する
@@ -128,6 +151,8 @@ function main(argv) {
   }
 }
 
-if (process.argv[1] !== undefined && import.meta.url.endsWith(process.argv[1].split('/').pop() ?? '')) {
+// entry point の判定は path 全体で行う。 basename の比較だと、 同名の別 file が entry の時に
+// import しただけで main() が走る (実測で `usage:` を出して exit 64 になった)。
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main(process.argv);
 }

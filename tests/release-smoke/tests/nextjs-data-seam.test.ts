@@ -632,14 +632,43 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
   it('部分 mock で素通しした export しか触らない TC は生成する', () => {
     // `importOriginal()` passthrough runs the real implementation, so gating by
     // module rather than by export was over-exclusion (R2-F2).
+    //
+    // The route has its own `answeredBy`. This case used to declare
+    // `mocked-export-logic` while depending only on a passthrough export —
+    // contradictory input that the schema now rejects (R2R1-F1).
     const { generated } = decide({
       mockedExports: MOCKED,
       passthroughExports: PASSTHROUGH,
       cases: [
-        { id: 'T-005', dependsOn: ['normaliseEmail'], answeredBy: 'mocked-export-logic' },
+        { id: 'T-005', dependsOn: ['normaliseEmail'], answeredBy: 'passthrough-export-logic' },
       ],
     });
     expect(generated.map((g) => g.id)).toEqual(['T-005']);
+  });
+
+  it('mocked-export-logic なのに差し替えに届かない入力は止まる', () => {
+    // Either `dependsOn` is missing an entry or `answeredBy` is wrong, and the
+    // script cannot tell which. Folding it into a verdict means a forgotten
+    // entry silently generates a mock-dependent TC.
+    expect(() =>
+      decide({
+        mockedExports: MOCKED,
+        passthroughExports: PASSTHROUGH,
+        cases: [
+          { id: 'T-010', dependsOn: ['normaliseEmail'], answeredBy: 'mocked-export-logic' },
+        ],
+      }),
+    ).toThrow();
+  });
+
+  it('dependsOn の書き漏れが unknown を生成側に倒さない', () => {
+    // The reach check used to run first, so an empty `dependsOn` landed in
+    // "does not touch the mock" and was generated — fail-open (R2R1-F1).
+    const { omitted } = decide({
+      mockedExports: MOCKED,
+      cases: [{ id: 'T-011', dependsOn: [], answeredBy: 'unknown' }],
+    });
+    expect(omitted.map((o) => o.id)).toEqual(['T-011']);
   });
 
   it('未知の answeredBy は生成しない', () => {
@@ -691,6 +720,26 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     }
   });
 
+  it('import しても CLI が走らない', () => {
+    // The guard compared basenames, so a different file called
+    // decide-generation.mjs that imported this one triggered `main()` and
+    // exited 64 (measured). Compared by full path now.
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-entry-'));
+    TMP_ROOTS.push(dir);
+    // Same basename as the script, which is what made the old guard misfire.
+    const probe = join(dir, 'decide-generation.mjs');
+    writeFileSync(
+      probe,
+      [
+        `const m = await import(${JSON.stringify(DECIDE)});`,
+        "console.log('imported:', typeof m.decide);",
+      ].join('\n'),
+    );
+    writeFileSync(join(dir, 'package.json'), JSON.stringify({ type: 'module' }));
+    const out = execFileSync('node', [probe], { encoding: 'utf-8', stdio: 'pipe' });
+    expect(out).toContain('imported: function');
+  });
+
   it('SKILL.md が script を呼ぶと書いてある', () => {
     const gate = section(GATE_SECTION);
     // A script nobody is told to run is the same as no script.
@@ -698,10 +747,24 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     expect(gate, '出力に従う旨が無い').toMatch(/`generate` に従う/);
   });
 
-  it('SKILL.md の answeredBy 4 値が script の受理値と一致する', () => {
+  it('SKILL.md が矛盾入力で止まると書いている', () => {
+    // The script throws; the caller has to know that before it writes the
+    // input, or a thrown exception reads as a bug rather than as feedback.
+    const gate = section(GATE_SECTION);
+    expect(gate, '矛盾入力で止まる旨が無い').toMatch(/例外で止める/);
+    expect(gate, '判定順の理由が書かれていない').toMatch(/到達の有無より先/);
+  });
+
+  it('SKILL.md の answeredBy 5 値が script の受理値と一致する', () => {
     const gate = section(GATE_SECTION);
     const script = readFileSync(DECIDE, 'utf-8');
-    for (const value of ['mocked-export-logic', 'action-branch', 'seeded-env', 'unknown']) {
+    for (const value of [
+      'mocked-export-logic',
+      'passthrough-export-logic',
+      'action-branch',
+      'seeded-env',
+      'unknown',
+    ]) {
       expect(gate, `SKILL.md に ${value} が無い`).toContain(value);
       expect(script, `script が ${value} を受理しない`).toContain(`'${value}'`);
     }
@@ -788,6 +851,33 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     );
     // The completion check has to accept the same three values.
     expect(REVIEW_SKILL).toContain('(PASS / CONDITIONAL / FAIL)');
+  });
+
+  it('chain return が 3 値を定義している', () => {
+    // The template and the completion check took CONDITIONAL, but the chain
+    // return still only described PASS and FAIL — so a caller had no defined
+    // behaviour for a legitimate CONDITIONAL run (R2R1-F2).
+    const step4 = REVIEW_SKILL.split('### Step 4: chain return')[1] ?? '';
+    expect(step4, 'chain return に CONDITIONAL が無い').toContain('CONDITIONAL');
+    expect(step4, 'CONDITIONAL で chain を継続するか書かれていない').toMatch(/chain は継続/);
+    expect(step4, '呼出元が 3 値を受ける旨が無い').toMatch(/呼出元は 3 値を受ける/);
+  });
+
+  it('分岐を持つ呼出元が CONDITIONAL を知っている', () => {
+    // kiwa-hardhat is the caller that enumerates the verdicts explicitly.
+    const hardhat = readFileSync(
+      resolve(REPO_ROOT, '.claude/skills/kiwa-hardhat/SKILL.md'),
+      'utf-8',
+    );
+    // Asserted on the enumeration, not on the word. The verdict list is what a
+    // reader follows; `toContain('CONDITIONAL')` also matched the prose
+    // sentence that was added alongside it.
+    const enumeration = hardhat
+      .split('\n')
+      .filter((line) => /分岐\)/.test(line))
+      .join('\n');
+    expect(enumeration, 'kiwa-hardhat の分岐列挙に CONDITIONAL が無い').toContain('CONDITIONAL');
+    expect(enumeration, '分岐数が 4 になっていない').toContain('4 分岐');
   });
 
   it('producer と consumer が同じ 2 行を指している', () => {
