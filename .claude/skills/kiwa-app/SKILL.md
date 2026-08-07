@@ -74,12 +74,24 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"}
 
 | `source` | 意味 | 振る舞い |
 |---|---|---|
-| `flag` | `--layer` で明示された | その layer だけを対象にする |
+| `flag` | `--layer {id}` で明示された | その layer だけを対象にする |
 | `detected` | 検出で絞れた | 返った layer を対象にする |
-| `all` | 検出が無い / 使えない / 絞れなかった | **生成せず理由を報告して終了** |
+| `all` | 下表で分岐 | — |
 
 `all` で全 layer を生成しない。 30 layer 分の spec が出て、 その大半は project と無関係になる。
 「絞れなかった」 は「全部要る」 ではない。
+
+**ただし `source=all` は 2 つの別の答えを 1 語で返す**。 CLI は `--layer all` を受けた時も
+`all` を返すため、 明示指定と fallback が `source` だけでは見分けられない。 見分けるのは
+本 skill 側の引数で、 CLI の返り値ではない。
+
+| 自分が受けた `--layer` | `source` | 振る舞い |
+|---|---|---|
+| `all` | `all` | **全 layer を対象にする** (user が明示した) |
+| 無し | `all` | **生成せず理由を報告して終了** (絞れなかった) |
+
+報告には `kiwa layers --json` が stderr に出した warning をそのまま載せる。 なぜ絞れなかったかは
+そこに書いてある (manifest が無い / 探索が終わらなかった / recording が古い)。
 
 報告には `kiwa layers --json` が stderr に出した warning をそのまま載せる。 なぜ絞れなかったかは
 そこに書いてある (manifest が無い / 探索が終わらなかった / recording が古い)。
@@ -125,23 +137,52 @@ spec も生成される。 置けないのは Layer 2 の test file だけで、
 ```text
 [Layer 1] /kiwa-design --layer {id} --module {module} --lang {lang} [--mode {mode}]
               ↓ spec_path の {module} を解決した path
-[Layer 2] /{consumer_skill} --layer {id} --module {module} [--mode {mode}]
+[Layer 2] /{consumer_skill} {相手が宣言している option 名で spec path を渡す} ...
               ↓ test_outputs の path (置換済)
 ```
 
 `consumer_skill` は `layers[].consumer_skill` が持つ。 対応表を本 skill に書かない。
 
-**`--layer` を Layer 2 にも渡す**。 1 つの consumer_skill が複数の layer を受け持つためで、
-`kiwa-nextjs` は 5 layer (`nextjs-server-action` / `nextjs-middleware` / `nextjs-rsc` /
-`nextjs-parallel-route` / `nextjs-rsc-streaming`) の consumer になっている。 `--module` だけ
-渡すと 5 回同じ起動になり、 どの mode を変換すればよいか決まらない。
+### 起動前に相手の option を読む
 
-`spec_path` は layer ごとに suffix が違う (`.nextjs.md` / `.middleware.md` / `.rsc.md` /
-`.parallel.md` / `.rsc-streaming.md`)。 Layer 2 はこの suffix で入力 spec を見分けるので、
-Layer 1 の出力先も `spec_path` から組む。 `{spec_dir}` を自前で組み立てない。
+**Layer 2 の option 名は skill ごとに違う**。 決め打ちで渡すと、 受け取られないまま既定値で
+動く。 起動前に `.claude/skills/{consumer_skill}/SKILL.md` の `## オプション` 節を読み、
+そこに宣言されている名前で渡す。
 
-`mode` を持つ layer (30 中 6) はそれも渡す。 `also_consumed_by` を持つ layer は、 主 consumer の
-後に副次 consumer も同じ引数で起動する。
+実測した分布。
+
+| option | 宣言している skill 数 | 備考 |
+|---|---|---|
+| `--module` | 15 | `kiwa-play` は持たない |
+| `--input-spec` | 11 | spec path を渡す flag |
+| `--spec-path` | 4 | 同じ役割で名前が違う (`auth` / `cache` / `forge` / `queue`) |
+| `--layer` | **2** | `kiwa-rust` / `kiwa-go` のみ |
+| `--provider` | 3 | `auth` / `cache` / `queue` |
+
+`--layer` を全 consumer に渡してはいけない。 受けるのは 2 skill だけで、 `kiwa-nextjs` は
+持たない。
+
+### 5 layer の見分けは spec path が担う
+
+`kiwa-nextjs` は 5 layer の consumer だが `--layer` を受けない。 見分けるのは
+`--input-spec` に渡す path の suffix で、 layer ごとに違う。
+
+| layer | `spec_path` の suffix |
+|---|---|
+| `nextjs-server-action` | `.nextjs.md` |
+| `nextjs-middleware` | `.middleware.md` |
+| `nextjs-rsc` | `.rsc.md` |
+| `nextjs-parallel-route` | `.parallel.md` |
+| `nextjs-rsc-streaming` | `.rsc-streaming.md` |
+
+つまり `spec_path` を解決して渡すことが、 そのまま layer の指定になる。 `{spec_dir}` から
+path を組み立て直すと suffix が落ち、 5 layer が区別できなくなる。 宣言された `spec_path` を
+そのまま使う。
+
+`mode` を持つ layer (30 中 6) は、 相手が `--mode` を宣言していれば渡す。 `providers` を持つ
+layer は `selected_by` と相手の option 宣言の両方が揃った時だけ渡す。
+
+`also_consumed_by` を持つ layer は、 主 consumer の後に副次 consumer も同じ規則で起動する。
 
 `providers` / `variants` を持つ layer は `selected_by` が選び方を宣言している。 その宣言に従う
 だけで、 どれを選ぶかは決めない。

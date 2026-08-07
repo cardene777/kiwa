@@ -160,103 +160,127 @@ describe('the two orchestrators stay distinct', () => {
   });
 });
 
-describe('the entry point refuses to generate on an unnarrowed answer', () => {
-  it('stops on source=all rather than emitting every layer', () => {
-    // `all` means "could not narrow", not "everything applies". Generating on it
-    // would write 30 layers of spec into a project that asked for its own.
-    // Scoped to the row. A loose `/`all`.*生成せず/s` matched the argument list
-    // ("`all` は全 layer" … "--dry-run 生成せず") 30 lines earlier and passed
-    // with the row rewritten to generate everything.
-    const row = APP_SKILL.split('\n').find((line) => line.startsWith('| `all` |'));
-    expect(row).toBeDefined();
-    expect(row).toMatch(/生成せず/);
-    expect(row).not.toMatch(/全 layer を対象/);
-    expect(LAYERS.length).toBeGreaterThan(25);
-  });
-});
-
 describe('the entry point passes what the pieces it invokes actually need', () => {
-  // The checks above read the skill against `layers.json`. These read it against
-  // the *other skills* it starts, which is where the first review found three
-  // defects that prose self-consistency could not see.
-  const skillText = (name: string): string => read(`.claude/skills/${name}/SKILL.md`);
-
-  const multiLayerConsumers = (): [string, string[]][] => {
-    const byConsumer = new Map<string, string[]>();
-    for (const layer of LAYERS) {
-      byConsumer.set(layer.consumer_skill, [
-        ...(byConsumer.get(layer.consumer_skill) ?? []),
-        layer.id,
-      ]);
+  // These read the skill against the *other skills* it starts. The first two
+  // rounds both found defects here that prose self-consistency could not see —
+  // and the first attempt at these checks was itself vacuous, matching
+  // `/kiwa-review --layer nextjs-server-action` inside another skill's body and
+  // reading it as that skill declaring a `--layer` option of its own.
+  //
+  // So the option list is parsed from the section that declares options, and
+  // nowhere else.
+  function declaredOptions(skill: string): string[] | null {
+    let text: string;
+    try {
+      text = read(`.claude/skills/${skill}/SKILL.md`);
+    } catch {
+      return null;
     }
-    return [...byConsumer].filter(([, ids]) => ids.length > 1);
-  };
+    const head = ['## オプション', '## 引数仕様', '## 引数'].find((h) => text.includes(h));
+    if (!head) return [];
+    const from = text.slice(text.indexOf(head) + 3);
+    const next = from.indexOf('\n## ');
+    const section = next >= 0 ? from.slice(0, next) : from;
+    return [...new Set(section.match(/^- `(--[a-z][a-z-]*)/gm)?.map((m) => m.slice(3)) ?? [])];
+  }
 
-  it('four consumers serve more than one layer, so the layer has to travel', () => {
-    // `kiwa-nextjs` converts five different things. Invoked with `--module`
-    // alone it gets the same call five times and cannot tell which to write.
-    const multi = multiLayerConsumers();
-    expect(multi.map(([skill]) => skill).sort()).toEqual([
-      'kiwa-api',
-      'kiwa-go',
-      'kiwa-nextjs',
-      'kiwa-rust',
+  const consumers = [...new Set(LAYERS.map((l) => l.consumer_skill))].sort();
+  const declaring = (option: string): string[] =>
+    consumers.filter((skill) => declaredOptions(skill)?.includes(option));
+
+  it('only two consumers accept --layer, so it cannot be sent to all of them', () => {
+    // `kiwa-nextjs` serves five layers and does not take `--layer`. Sending it
+    // means the flag is dropped and all five calls look the same.
+    expect(declaring('--layer')).toEqual(['kiwa-go', 'kiwa-rust']);
+  });
+
+  it('the spec path flag is spelled two different ways', () => {
+    // Deciding one name and using it everywhere silently misses four skills.
+    expect(declaring('--input-spec')).toHaveLength(11);
+    expect(declaring('--spec-path').sort()).toEqual([
+      'kiwa-auth',
+      'kiwa-cache',
+      'kiwa-forge',
+      'kiwa-queue',
     ]);
   });
 
-  it('hands the layer id to Layer 2, not only to Layer 1', () => {
+  it('the skill states those counts rather than assuming one shape', () => {
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    expect(step4).toMatch(/`--input-spec`.*\|\s*11\s*\|/);
+    expect(step4).toMatch(/`--spec-path`.*\|\s*4\s*\|/);
+    expect(step4).toMatch(/`--layer`.*\|\s*\*\*2\*\*\s*\|/);
+  });
+
+  it('says to read the consumer declaration instead of deciding the names here', () => {
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    expect(step4).toContain('## オプション');
+    expect(step4).toMatch(/宣言されている名前で渡す/);
+  });
+
+  it('does not send --layer to Layer 2 unconditionally', () => {
     const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
     const layer2Line = step4.split('\n').find((line) => line.includes('{consumer_skill}'));
     expect(layer2Line).toBeDefined();
-    expect(layer2Line).toContain('--layer');
+    expect(layer2Line).not.toContain('--layer');
   });
 
-  it('every consumer it hands --layer to documents that flag', () => {
-    // Passing a flag nobody accepts is the same failure as passing none.
-    const undocumented = multiLayerConsumers()
-      .map(([skill]) => skill)
-      .filter((skill) => !skillText(skill).includes('--layer'));
-    expect(undocumented).toEqual([]);
+  it('names the suffix that actually distinguishes the five Next.js layers', () => {
+    // `kiwa-nextjs` tells them apart by the spec path it is handed, so the
+    // resolved `spec_path` is the selector. Rebuilding it from `spec_dir` drops
+    // the suffix and the distinction with it.
+    const suffixes = LAYERS.filter((l) => l.consumer_skill === 'kiwa-nextjs').map((l) =>
+      (l as unknown as { spec_path: string }).spec_path.replace(/^.*\{module\}/, ''),
+    );
+    expect(new Set(suffixes).size).toBe(5);
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    for (const suffix of suffixes) expect(step4).toContain(suffix);
+    expect(step4).toMatch(/spec_dir.*組み立て直す/s);
+  });
+
+  it('tells an explicit --layer all apart from a fallback all', () => {
+    // The CLI answers `all` for both. Branching on `source` alone makes the
+    // explicit request generate nothing, which is the opposite of what it asked.
+    const step2 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 2'), APP_SKILL.indexOf('## Step 3'));
+    expect(step2).toMatch(/2 つの別の答えを 1 語で返す/);
+    // Two tables now carry an `all` row: the one that reads `source`, and the
+    // one that decides between the two meanings. Both are checked by position
+    // in the branching table rather than by "some row somewhere says this".
+    const branching = step2.slice(step2.indexOf('| 自分が受けた'));
+    const explicit = branching.split('\n').filter((line) => line.startsWith('| `all` |'));
+    expect(explicit).toHaveLength(1);
+    expect(explicit[0]).toMatch(/全 layer を対象にする/);
+    const fallback = branching.split('\n').filter((line) => line.startsWith('| 無し |'));
+    expect(fallback).toHaveLength(1);
+    expect(fallback[0]).toMatch(/生成せず/);
+    // And the reading table hands off rather than deciding on its own.
+    const reading = step2.slice(0, step2.indexOf('| 自分が受けた'));
+    expect(reading.split('\n').filter((l) => l.startsWith('| `all` |'))[0]).toMatch(/下表で分岐/);
+    expect(LAYERS.length).toBeGreaterThan(25);
   });
 
   it('passes --layer through to the CLI rather than branching on it first', () => {
-    // The CLI owns flag > detected > all. Branching here makes `--layer all`
-    // indistinguishable from "could not narrow", which is the opposite answer.
-    // Scoped to the command line. `/kiwa layers --json.*--layer/s` matched the
-    // prose two paragraphs below and passed with the flag removed from the
-    // command — the fifth time this session that a `.` spanning newlines found
-    // an unrelated mention.
     const step2 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 2'), APP_SKILL.indexOf('## Step 3'));
     const invocation = step2.split('\n').find((line) => line.trim().startsWith('kiwa layers'));
     expect(invocation).toBeDefined();
     expect(invocation).toContain('--layer');
-    expect(APP_SKILL).toContain('--layer L');
   });
 
   it('does not claim the skills it starts leave execution to the user', () => {
-    // Measured, not assumed: three of the Layer 2 skills run the tests they
-    // write. A boundary stated without checking is the defect this catches.
     const runners = ['kiwa-forge', 'kiwa-hardhat', 'kiwa-vitest'].filter((skill) =>
-      /forge test|hardhat test|vitest run/.test(skillText(skill)),
+      /forge test|hardhat test|vitest run/.test(read(`.claude/skills/${skill}/SKILL.md`)),
     );
     expect(runners).toHaveLength(3);
-
     const outOfScope = APP_SKILL.slice(APP_SKILL.indexOf('## 責務外'));
     expect(outOfScope).toMatch(/Layer 2 skill は自分が/);
     expect(outOfScope).not.toMatch(/走らせるのは利用者の runner/);
   });
 
-  it('builds the spec path from the declaration rather than reassembling it', () => {
-    // `spec_path` carries a per-layer suffix (`.rsc.md`, `.middleware.md`, …)
-    // and Layer 2 finds its input by that suffix. Rebuilding the path from
-    // `{spec_dir}` drops the suffix and the input stops being found.
-    const suffixes = new Set(
-      LAYERS.filter((l) => l.consumer_skill === 'kiwa-nextjs').map((l) =>
-        (l as unknown as { spec_path: string }).spec_path.replace(/^.*\{module\}/, ''),
-      ),
-    );
-    expect(suffixes.size).toBe(5);
-    expect(APP_SKILL).toContain('spec_path');
-    expect(APP_SKILL).toMatch(/spec_dir.*自前で組み立てない/s);
+  it('one consumer declares no options at all', () => {
+    // `kiwa-edge` has no option section. Reading the declaration means finding
+    // nothing to pass, which is a different outcome from guessing `--module`.
+    expect(consumers.filter((skill) => declaredOptions(skill)?.length === 0)).toEqual([
+      'kiwa-edge',
+    ]);
   });
 });
