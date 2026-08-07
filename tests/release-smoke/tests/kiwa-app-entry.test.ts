@@ -125,8 +125,12 @@ describe('the entry point does not re-derive what the CLI already answers', () =
   });
 
   it('reads the layers through the CLI rather than the table', () => {
+    // Scoped to the step that reads. The skill names `docs/layers.json` once,
+    // in Step 4, to say where a data problem belongs — naming a file is not
+    // reading it, and the unscoped check could not tell the two apart.
     expect(APP_SKILL).toContain('kiwa layers --json');
-    expect(APP_SKILL).not.toContain('docs/layers.json');
+    const step2 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 2'), APP_SKILL.indexOf('## Step 3'));
+    expect(step2).not.toContain('docs/layers.json');
   });
 });
 
@@ -274,6 +278,48 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     const outOfScope = APP_SKILL.slice(APP_SKILL.indexOf('## 責務外'));
     expect(outOfScope).toMatch(/Layer 2 skill は自分が/);
     expect(outOfScope).not.toMatch(/走らせるのは利用者の runner/);
+  });
+
+  it('measures which layer groups collide on their output path', () => {
+    // The five Next.js layers take five different specs and declare one output
+    // between them. Run in sequence each overwrites the last, so four of the
+    // five generations vanish while the run still looks successful.
+    const byOutput = new Map<string, string[]>();
+    for (const layer of LAYERS) {
+      for (const path of Object.values(layer.test_outputs ?? {}).flat()) {
+        byOutput.set(path, [...(byOutput.get(path) ?? []), layer.id]);
+      }
+    }
+    const collisions = [...byOutput]
+      .filter(([, ids]) => ids.length > 1)
+      .map(([path, ids]) => [path, ids.sort()] as const)
+      .sort();
+    // Four groups collide, not one. The Next.js five are the largest, but
+    // `cli` / `data` / `orm-query` share a path across three different
+    // consumers, which the same overwrite applies to.
+    expect(collisions).toEqual([
+      ['examples/{example}/tests/{module}.rs', ['rust-integration', 'rust-unit']],
+      ['{example}/test/integration/{module}.test.ts', ['api', 'integration']],
+      [
+        '{example}/tests/integration/{module}.nextjs.test.ts',
+        [
+          'nextjs-middleware',
+          'nextjs-parallel-route',
+          'nextjs-rsc',
+          'nextjs-rsc-streaming',
+          'nextjs-server-action',
+        ],
+      ],
+      ['{example}/tests/{module}.test.ts', ['cli', 'data', 'orm-query']],
+    ]);
+  });
+
+  it('says what it does when outputs collide, rather than overwriting', () => {
+    const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
+    expect(step4).toMatch(/黙って上書きしない/);
+    // The escape hatch depends on the consumer accepting `--output`.
+    expect(declaredOptions('kiwa-nextjs')).toContain('--output');
+    expect(step4).toContain('--output');
   });
 
   it('one consumer declares no options at all', () => {

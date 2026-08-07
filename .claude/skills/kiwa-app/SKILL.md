@@ -179,6 +179,33 @@ spec も生成される。 置けないのは Layer 2 の test file だけで、
 path を組み立て直すと suffix が落ち、 5 layer が区別できなくなる。 宣言された `spec_path` を
 そのまま使う。
 
+### 出力先が衝突する組がある
+
+**入力は分かれているが出力は分かれていない**。 実測すると 4 group が出力先を共有する。
+
+| 共有される出力先 | 共有する layer |
+|---|---|
+| `{example}/tests/integration/{module}.nextjs.test.ts` | nextjs 5 layer 全て |
+| `{example}/tests/{module}.test.ts` | `cli` / `data` / `orm-query` |
+| `{example}/test/integration/{module}.test.ts` | `api` / `integration` |
+| `examples/{example}/tests/{module}.rs` | `rust-unit` / `rust-integration` |
+
+順に起動すると後の layer が前の layer の生成物を上書きし、 最後の 1 つしか残らない。
+consumer が違っても同じ (`cli` / `data` / `orm-query` は 3 つとも別 skill)。
+
+起動前に、 対象 layer 群の解決済み出力 path を集めて重複を数える。 重複があれば 2 つのうち
+片方を採る。
+
+| 相手が `--output` を宣言している | 振る舞い |
+|---|---|
+| している | `spec_path` の suffix を出力名に写して衝突を解く (`{module}.rsc.test.ts` 等) |
+| していない | その group は先頭 1 件だけ生成し、 残りを飛ばして報告に理由を残す |
+
+**黙って上書きしない**。 5 回起動して 1 file しか残らない状態は、 4 layer 分の生成が失敗したのと
+同じでありながら成功に見える。
+
+出力先を分けるのは本来 `docs/layers.json` 側の宣言で解くべき問題で、 本 skill の回避は暫定。
+
 `mode` を持つ layer (30 中 6) は、 相手が `--mode` を宣言していれば渡す。 `providers` を持つ
 layer は `selected_by` と相手の option 宣言の両方が揃った時だけ渡す。
 
