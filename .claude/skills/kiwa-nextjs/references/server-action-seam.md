@@ -4,6 +4,8 @@ Next.js production code uses `redirect()` / `cookies()` / `revalidatePath()` fro
 
 `@kiwa-lab/nextjs` works around this by requiring the Server Action under test to accept its environment via an **injectable seam** — a parameter or a module-level setter that defaults to the real Next.js bindings in production but can be replaced in tests.
 
+This file covers the **env seam only**. An action also leaks state between test cases when it reads or writes module-level data (an in-memory store, a cache, a connection pool), and no amount of env refactoring fixes that. That axis is handled in the test rather than in the action — see `SKILL.md` § data seam (seed する軸).
+
 ## Pattern A — env parameter (recommended)
 
 The action takes an optional `env` parameter holding `redirect` / `cookies` / `revalidatePath` callables. Production code passes nothing (the parameter defaults to the real Next.js bindings); tests pass a kiwa-friendly env.
