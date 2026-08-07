@@ -5,42 +5,127 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
+import ts from 'typescript';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TESTS_DIR = resolve(repoRoot(HERE), 'tests', 'release-smoke', 'tests');
 
-/** Strip comments so a mention in prose is not read as code. */
-function code(body: string): string {
-  return body.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+/**
+ * Parse a test file so the checks below look at code rather than at text.
+ *
+ * A file that does not parse is not a file this guard can judge. Returning a
+ * partial tree would answer "not in scope" for it, and a file that silently
+ * leaves the check is exactly what this guard exists to prevent.
+ */
+function parse(body: string): ts.SourceFile {
+  const source = ts.createSourceFile('probe.ts', body, ts.ScriptTarget.ESNext, true);
+  const errors = (source as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics ?? [];
+  if (errors.length > 0) throw new Error(`source が構文として読めない (${errors.length} 件)`);
+  return source;
+}
+
+/** Walk every node once. */
+function visit(node: ts.Node, seen: (node: ts.Node) => void): void {
+  seen(node);
+  node.forEachChild((child) => visit(child, seen));
+}
+
+/** Walk, but do not descend into anything that defers execution. */
+function visitOutsideFunctions(node: ts.Node, seen: (node: ts.Node) => void): void {
+  // Checked on the way in, not on the way down. The initializer itself can be
+  // the arrow — `const unused = () => repoRoot(HERE)` — and testing only the
+  // children walks straight into its body.
+  if (ts.isFunctionLike(node)) return;
+  seen(node);
+  node.forEachChild((child) => visitOutsideFunctions(child, seen));
 }
 
 /**
  * Does this file work out where it is?
  *
- * Asked at the source rather than at the use. Looking for `resolve(HERE` missed
- * `const START = HERE; resolve(START, '..', ...)` — the same counting through
- * one more name. Every file that needs its own location gets it the one way
- * Node offers, so that is what to look for.
+ * Asked at `import.meta` and nothing else. A module cannot learn its own path
+ * without it — `fileURLToPath(import.meta.url)`, `new URL('.', import.meta.url)`
+ * and `import.meta.dirname` all go through it — so its presence is the question
+ * and its absence is the answer.
+ *
+ * Matching call shapes was tried three times and broken three times: first by a
+ * different variable name, then by an intermediate assignment, then by aliasing
+ * `fileURLToPath`. Each fix enumerated one more spelling. This stops
+ * enumerating.
+ *
+ * It errs wide. A file mentioning `import.meta` for some other reason is asked
+ * to use the helper it does not need, which fails visibly and is corrected in
+ * one line. The other direction fails silently.
  */
 function inScope(body: string): boolean {
-  return /dirname\(\s*fileURLToPath\(\s*import\.meta\.url\s*\)\s*\)/.test(code(body));
+  let found = false;
+  visit(parse(body), (node) => {
+    if (node.kind === ts.SyntaxKind.MetaProperty) found = true;
+  });
+  return found;
 }
 
 /**
  * Does it get the repository root the one supported way?
  *
- * The import and the call have to agree on the name. Checking for a fixed
- * `repoRoot(` and the module path separately let a file import the helper,
- * leave `repoRoot(HERE)` in a comment, and count directories in the code.
+ * Two things have to line up.
+ *
+ * 1. The helper is imported from `./repo-root.js` (alias allowed)
+ * 2. The root is initialised at module scope by calling that binding
+ *
+ * 2 is what makes 1 mean anything. Matching the name anywhere in the file
+ * accepted one that imported the helper and then declared
+ * `const repoRoot = () => '/'` inside a function, calling the decoy while the
+ * real root was counted by hand.
+ *
+ * A separate shadow check was written for that and then removed: no mutation
+ * could kill it. Restricting the call to module scope already covers it —
+ * an inner declaration cannot change what the module-scope call resolves to,
+ * and redeclaring an import at module scope is not valid TypeScript.
  */
 function usesHelper(body: string): boolean {
-  const source = code(body);
-  const imported = /import\s*\{[^}]*\brepoRoot\b(?:\s+as\s+(\w+))?[^}]*\}\s*from\s*'\.\/repo-root\.js'/.exec(
-    source,
-  );
-  if (!imported) return false;
-  const name = imported[1] ?? 'repoRoot';
-  return new RegExp(`\\b${name}\\(\\s*HERE\\s*\\)`).test(source);
+  const source = parse(body);
+
+  let imported: string | null = null;
+  visit(source, (node) => {
+    if (!ts.isImportDeclaration(node)) return;
+    if (!ts.isStringLiteral(node.moduleSpecifier)) return;
+    if (node.moduleSpecifier.text !== './repo-root.js') return;
+    const bindings = node.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) return;
+    for (const element of bindings.elements) {
+      // `repoRoot as findRoot` puts the original in `propertyName`.
+      if ((element.propertyName?.text ?? element.name.text) === 'repoRoot') {
+        imported = element.name.text;
+      }
+    }
+  });
+  if (imported === null) return false;
+  const helper: string = imported;
+
+  // The root is a module-scope binding initialised by the helper. Restricting
+  // the shape here is what keeps a decoy call somewhere else from counting.
+  let initialised = false;
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      if (!declaration.initializer) continue;
+      // The call may be composed — `resolve(repoRoot(HERE), 'tests')` is a
+      // module-scope initialisation too. What matters is that it runs when the
+      // module loads, which is what keeps a decoy from counting.
+      //
+      // So the walk stops at anything function-like. `const unused = () =>
+      // repoRoot(HERE)` sits at module scope but never runs, and accepting it
+      // is the same silent bypass one syntax over.
+      visitOutsideFunctions(declaration.initializer, (node) => {
+        if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression)) return;
+        if (node.expression.text !== helper) return;
+        const [arg] = node.arguments;
+        if (arg && ts.isIdentifier(arg) && arg.text === 'HERE') initialised = true;
+      });
+    }
+  }
+  return initialised;
 }
 
 describe('repoRoot finds the same place from either layout', () => {
@@ -131,6 +216,125 @@ describe('the guard picks its targets without reading names', () => {
       'const HERE = dirname(fileURLToPath(import.meta.url));',
       '// was: repoRoot(HERE)',
       "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+    ].join('\n');
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('wants the module URL, not any argument', () => {
+    // `dirname(fileURLToPath(x))` resolves whatever `x` names. Only
+    // `import.meta.url` is the file asking where it is.
+    expect(inScope('const D = dirname(fileURLToPath(someOtherUrl));')).toBe(false);
+    expect(inScope('const D = dirname(fileURLToPath(import.meta.url));')).toBe(true);
+  });
+
+  it('is in scope for every way a module can locate itself', () => {
+    // Matching call shapes was broken three times, each time by a spelling the
+    // last fix had not listed. These are the ones review named.
+    for (const body of [
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      'const f = fileURLToPath;\nconst HERE = dirname(f(import.meta.url));',
+      "const HERE = new URL('.', import.meta.url).pathname;",
+      'const HERE = import.meta.dirname;',
+      'const u = import.meta.url;',
+    ]) {
+      expect(inScope(body), body).toBe(true);
+    }
+  });
+
+  it('rejects a decoy that shadows the helper name', () => {
+    // Importing the helper and then declaring something with the same name in
+    // an inner scope let the decoy be called while the real root was counted
+    // by hand. TypeScript allows the shadow, so the compiler does not object.
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+      'function inner() {',
+      "  const repoRoot = () => '/';",
+      '  return repoRoot(HERE);',
+      '}',
+    ].join('\n');
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('rejects a call that only happens inside a function', () => {
+    // The root has to be settled at module scope. A call somewhere in the file
+    // says nothing about what the root was set from.
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+      'function unused() { return repoRoot(HERE); }',
+    ].join('\n');
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('rejects a parameter that shadows HERE', () => {
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      'function f(HERE: string) { return repoRoot(HERE); }',
+      "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+    ].join('\n');
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('rejects a module-scope binding that only defers the call', () => {
+    // It sits at module scope but never runs. Accepting it is the same silent
+    // bypass one syntax over from the decoy inside a function.
+    for (const deferred of [
+      'const unused = () => repoRoot(HERE);',
+      'const unused = function () { return repoRoot(HERE); };',
+      'const unused = { get root() { return repoRoot(HERE); } };',
+    ]) {
+      const body = [
+        "import { repoRoot } from './repo-root.js';",
+        'const HERE = dirname(fileURLToPath(import.meta.url));',
+        deferred,
+        "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+      ].join('\n');
+      expect(usesHelper(body), deferred).toBe(false);
+    }
+  });
+
+  it('accepts the helper composed into a larger expression', () => {
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      "const TESTS = resolve(repoRoot(HERE), 'tests');",
+    ].join('\n');
+    expect(usesHelper(body)).toBe(true);
+  });
+
+  it('refuses a file it cannot parse rather than calling it out of scope', () => {
+    // Answering "not in scope" for an unparseable file lets it leave the check
+    // quietly, which is the shape this guard exists to prevent.
+    expect(() => inScope('const HERE = dirname(fileURLToPath(import.meta.url\n')).toThrow(
+      /構文として読めない/,
+    );
+  });
+
+  it('does not read a URL inside a string as a comment', () => {
+    // The regex form cut everything after `//`, so a file holding a URL lost
+    // the rest of that line. Whether it mattered depended on what came after.
+    const body = [
+      "const docs = 'https://example.com/a//b';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+    ].join('\n');
+    expect(inScope(body), 'URL の // を comment と読まない').toBe(true);
+  });
+
+  it('does not read a self-location call written inside a string', () => {
+    // The other direction: text that looks like the call is not the call.
+    const body = "const note = 'dirname(fileURLToPath(import.meta.url))';";
+    expect(inScope(body)).toBe(false);
+  });
+
+  it('does not read a helper call written inside a string', () => {
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      "const note = 'repoRoot(HERE)';",
     ].join('\n');
     expect(usesHelper(body)).toBe(false);
   });
