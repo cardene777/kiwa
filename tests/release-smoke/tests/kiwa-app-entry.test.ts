@@ -178,9 +178,14 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     } catch {
       return null;
     }
-    const head = ['## オプション', '## 引数仕様', '## 引数'].find((h) => text.includes(h));
-    if (!head) return [];
-    const from = text.slice(text.indexOf(head) + 3);
+    // Matched as a whole line: `includes('## オプション')` also matches
+    // `## オプション (何か)`, so renaming a heading kept its options visible.
+    const lines = text.split('\n');
+    const headIndex = lines.findIndex((line) =>
+      ['## オプション', '## 引数仕様', '## 引数'].includes(line.trim()),
+    );
+    if (headIndex === -1) return [];
+    const from = lines.slice(headIndex + 1).join('\n');
     const next = from.indexOf('\n## ');
     const section = next >= 0 ? from.slice(0, next) : from;
     return [...new Set(section.match(/^- `(--[a-z][a-z-]*)/gm)?.map((m) => m.slice(3)) ?? [])];
@@ -197,8 +202,13 @@ describe('the entry point passes what the pieces it invokes actually need', () =
   });
 
   it('the spec path flag is spelled two different ways', () => {
-    // Deciding one name and using it everywhere silently misses four skills.
-    expect(declaring('--input-spec')).toHaveLength(11);
+    // Deciding one name and using it everywhere silently misses five skills.
+    // The counts moved in #1851, which gave `kiwa-play` and `kiwa-edge` the
+    // `--input-spec` they were missing.
+    expect(declaring('--input-spec')).toHaveLength(13);
+    // `kiwa-hardhat` also declares it but is not in this list: `consumers` is
+    // built from `consumer_skill`, and hardhat reaches `contract` through
+    // `also_consumed_by` instead.
     expect(declaring('--spec-path').sort()).toEqual([
       'kiwa-auth',
       'kiwa-cache',
@@ -208,10 +218,16 @@ describe('the entry point passes what the pieces it invokes actually need', () =
   });
 
   it('the skill states those counts rather than assuming one shape', () => {
+    // Counted from the skills, not written twice. Literals here let the table
+    // and the check go stale together: #1851 moved `--input-spec` from 11 to 13
+    // and both sides kept saying 11 while passing.
     const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
-    expect(step4).toMatch(/`--input-spec`.*\|\s*11\s*\|/);
-    expect(step4).toMatch(/`--spec-path`.*\|\s*4\s*\|/);
-    expect(step4).toMatch(/`--layer`.*\|\s*\*\*2\*\*\s*\|/);
+    const row = (flag: string, n: number): RegExp =>
+      new RegExp(`\`${flag}\`.*?\\|\\s*(?:\\*\\*)?${n}(?:\\*\\*)?\\s*\\|`);
+
+    for (const flag of ['--module', '--input-spec', '--spec-path', '--layer', '--provider']) {
+      expect(step4).toMatch(row(flag, declaring(flag).length));
+    }
   });
 
   it('says to read the consumer declaration instead of deciding the names here', () => {
@@ -346,11 +362,10 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     expect(step4).toMatch(/option も相手ごとに読む/);
   });
 
-  it('one consumer declares no options at all', () => {
-    // `kiwa-edge` has no option section. Reading the declaration means finding
-    // nothing to pass, which is a different outcome from guessing `--module`.
-    expect(consumers.filter((skill) => declaredOptions(skill)?.length === 0)).toEqual([
-      'kiwa-edge',
-    ]);
+  it('every consumer declares at least one option', () => {
+    // `kiwa-edge` had no option section until #1851. Reading a declaration that
+    // does not exist means finding nothing to pass, and the entry point had to
+    // skip the layer rather than guess at flag names.
+    expect(consumers.filter((skill) => declaredOptions(skill)?.length === 0)).toEqual([]);
   });
 });

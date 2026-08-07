@@ -31,9 +31,15 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).lay
  */
 function declaredOptions(skill: string): string[] {
   const text = read(`.claude/skills/${skill}/SKILL.md`);
-  const head = ['## オプション', '## 引数仕様', '## 引数'].find((h) => text.includes(h));
-  if (!head) return [];
-  const from = text.slice(text.indexOf(head) + 3);
+  // Matched as a whole line. `text.includes('## オプション')` also matches
+  // `## オプション (何か)`, which meant renaming the heading kept the options
+  // visible — a mutation that removed the section outright passed.
+  const lines = text.split('\n');
+  const headIndex = lines.findIndex((line) =>
+    ['## オプション', '## 引数仕様', '## 引数'].includes(line.trim()),
+  );
+  if (headIndex === -1) return [];
+  const from = lines.slice(headIndex + 1).join('\n');
   const next = from.indexOf('\n## ');
   const section = next >= 0 ? from.slice(0, next) : from;
   return [...new Set(section.match(/^- `(--[a-z][a-z-]*)/gm)?.map((m) => m.slice(3)) ?? [])];
@@ -103,6 +109,127 @@ describe('a skill that writes test files can be told where to write them', () =>
     const withFlag = producers.filter((skill) => declaredOptions(skill).includes('--output'));
     expect(withFlag).toHaveLength(10);
     expect(withFlag.filter((skill) => !declaredDefault(skill))).toEqual([]);
+  });
+});
+
+describe('a consumer can be told where its input is and what to call it', () => {
+  // `--output` says where the generated test goes. This is the other end: the
+  // entry point has to hand each consumer the Layer 1 spec it converts, and the
+  // module name that spec is keyed by.
+  //
+  // Two consumers had neither until #1851 — `kiwa-play` declared six options
+  // and none of them took a path, `kiwa-edge` had no option section at all.
+  // `/kiwa-app` could detect both layers and generate their specs, then had no
+  // way to say where those specs were.
+  const SPEC_FLAGS = ['--input-spec', '--spec-path'];
+
+  it('every consumer of a layer accepts a spec path and a module name', () => {
+    const withoutSpec: string[] = [];
+    const withoutModule: string[] = [];
+    for (const skill of producers) {
+      const declared = declaredOptions(skill);
+      if (!SPEC_FLAGS.some((flag) => declared.includes(flag))) withoutSpec.push(skill);
+      if (!declared.includes('--module')) withoutModule.push(skill);
+    }
+    expect(withoutSpec).toEqual([]);
+    expect(withoutModule).toEqual([]);
+  });
+
+  it('the spec flag is spelled one of two ways, and no skill declares both', () => {
+    // Not normalised. `--spec-path` predates `--input-spec` and renaming five
+    // skills is a separate change; the entry point reads the declaration, so
+    // both work. What would break it is one skill declaring both, since the
+    // caller would have to guess which one the steps actually read.
+    const byFlag = Object.fromEntries(
+      SPEC_FLAGS.map((flag) => [flag, producers.filter((s) => declaredOptions(s).includes(flag))]),
+    );
+    expect(byFlag['--input-spec']).toHaveLength(13);
+    expect(byFlag['--spec-path']?.sort()).toEqual([
+      'kiwa-auth',
+      'kiwa-cache',
+      'kiwa-forge',
+      'kiwa-hardhat',
+      'kiwa-queue',
+    ]);
+    const both = producers.filter((s) => SPEC_FLAGS.every((f) => declaredOptions(s).includes(f)));
+    expect(both).toEqual([]);
+  });
+
+  it('names the skills whose spec flag states no default', () => {
+    // Eight of eighteen. Not fixed here: the two skills #1851 adds do state
+    // theirs, and going through the other eight is a separate pass over files
+    // this change does not otherwise touch.
+    //
+    // Listed by name so finishing it has to update this, and so a skill added
+    // without a default joins the list rather than the silence.
+    const silent = producers.filter((skill) => {
+      const line = read(`.claude/skills/${skill}/SKILL.md`)
+        .split('\n')
+        .find((l) => SPEC_FLAGS.some((flag) => l.startsWith(`- \`${flag} {path}\``)));
+      return !line || !/(?:省略時は|default) `[^`]+`/.test(line);
+    });
+    expect(silent.sort()).toEqual([
+      'kiwa-auth',
+      'kiwa-cache',
+      'kiwa-cli-test',
+      'kiwa-forge',
+      'kiwa-go',
+      'kiwa-hardhat',
+      'kiwa-queue',
+      'kiwa-rust',
+    ]);
+  });
+
+  it('a skill that also generates its own spec says when to skip that', () => {
+    // Declaring `--input-spec` is inert while the steps regenerate the spec at
+    // a fixed path regardless: the caller's argument is accepted and ignored.
+    // `kiwa-play` is the one that does both, so it has to say which wins.
+    const play = read('.claude/skills/kiwa-play/SKILL.md');
+    expect(play).toMatch(/`--input-spec` が渡されていれば/);
+    expect(play).toMatch(/skip して既存の spec を読む/);
+
+    // One branch honouring the argument is not enough. Round 2 found the skip
+    // in place while three other lines still said generation was mandatory and
+    // named the path to read — so a reader following the steps ignored it.
+    //
+    // Scanned over the whole file rather than one section: the statements were
+    // 40 and 80 lines apart from the branch that was fixed.
+    // Round 3 found the heading itself still said 生成 (必須) while the body
+    // below it described the skip. Headings are read first, so scanning them
+    // separately is not optional.
+    //
+    // The check is "does any line assert that generation always happens", in
+    // whatever form: 必須 / 必ず, or a literal spec path the caller cannot
+    // redirect. Four rounds went to this one file because each fix addressed
+    // the sentence the reviewer quoted rather than the class.
+    const offenders = play
+      .split('\n')
+      .filter((line) => !line.startsWith('- `--input-spec'))
+      .filter(
+        (line) =>
+          /Layer 1[^\n]*(必須|必ず)/.test(line) ||
+          /(必須|必ず)[^\n]*Layer 1/.test(line) ||
+          /tests\/spec\/e2e\/test-spec-\{example\}\.md/.test(line),
+      );
+    expect(offenders).toEqual([]);
+  });
+
+  it('the two skills this change adds state the path the table declares', () => {
+    // A default that is not the declared `spec_path` sends the consumer to a
+    // place the producer never wrote. Compared against the table rather than
+    // against a literal, so changing the declaration breaks this.
+    for (const skill of ['kiwa-play', 'kiwa-edge']) {
+      const line = read(`.claude/skills/${skill}/SKILL.md`)
+        .split('\n')
+        .find((l) => l.startsWith('- `--input-spec {path}`'));
+      expect(line).toBeDefined();
+      const stated = /省略時は `([^`]+)`/.exec(line!)?.[1];
+      const declared = LAYERS.filter((l) => l.consumer_skill === skill).map(
+        (l) => (l as unknown as { spec_path: string }).spec_path,
+      );
+      expect(declared).toHaveLength(1);
+      expect(stated).toBe(declared[0]);
+    }
   });
 });
 

@@ -30,6 +30,8 @@ $ARGUMENTS
 
 ## オプション
 
+- `--module {name}` — spec / test file 名に入る module 名。 `--input-spec` を省略した時の既定 path もこれで決まる
+- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/e2e/test-spec-{module}.md`)。 `/kiwa-design --layer e2e` が書く場所で、 `docs/layers.json` の `spec_path` がその宣言
 - `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa-lab/cli init` を実行し scaffold 生成)
 - `--mode {new|extend|debug}` — `new` (新規 test 設計) / `extend` (既存 test 拡張) / `debug` (flaky / fail 解析)
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
@@ -67,9 +69,9 @@ pnpm install
 - `playwright.config.ts` (webServer + fixture 設定)
 - `tests/prepare-env.ts` (anvil 起動 + contract deploy)
 
-### Step 1.5: Layer 1 経由でテスト仕様書生成 (必須、 Phase E-3 で refactor 済)
+### Step 1.5: Layer 1 のテスト仕様書を用意する (`--input-spec` があれば受け取る、 Phase E-3 で refactor 済)
 
-spec.ts 実装の前に必ず Layer 1 skill (`/kiwa-design`) を起動し、 SSOT (`docs/SKILL-DESIGN.ja.md`) 準拠の 9 section + 9 column 仕様書を生成する。 独自 template ではなく Layer 1 出力を消費する設計に統一 (旧 template 経路は廃止、 kiwa Phase E-3 refactor)。
+spec.ts 実装の前に Layer 1 の 9 section + 9 column 仕様書 (SSOT = `docs/SKILL-DESIGN.ja.md`) を用意する。 `--input-spec` で既存 spec を渡された場合はそれを使い、 渡されていない場合だけ `/kiwa-design` を起動して生成する。 独自 template ではなく Layer 1 出力を消費する設計に統一 (旧 template 経路は廃止、 kiwa Phase E-3 refactor)。
 
 #### 1.5.A プロジェクト読込
 
@@ -84,7 +86,14 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 
 #### 1.5.B Layer 1 (`/kiwa-design`) 起動
 
-以下を Layer 1 に渡し、 `tests/spec/e2e/test-spec-{example}.md` を Write させる。
+**`--input-spec` が渡されていれば、 この step は skip して既存の spec を読む**。 `/kiwa-app` の
+ように Layer 1 を先に起動する caller があり、 そこで生成した spec をここで作り直すと、 caller が
+指定した path ではなく既定 path が使われる = 渡した引数が効かない。
+
+`--input-spec` が無い時 (単独起動 / `/kiwa-test` 経由) だけ以下を実行する。
+
+以下を Layer 1 に渡し、 `--input-spec` 省略時の既定 path (`tests/spec/e2e/test-spec-{module}.md`)
+に Write させる。
 
 ```text
 /kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/}
@@ -96,13 +105,13 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 - scope 境界 (本作業でやらないことを 3-5 個列挙)
 ```
 
-Layer 1 が以下 9 section の仕様書を `tests/spec/e2e/test-spec-{example}.md` に Write する (詳細は `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット):
+Layer 1 が以下 9 section の仕様書を解決済み spec path に Write する (詳細は `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット):
 
 - 対象機能 / 仕様の要約 / 主な品質リスク / 推奨テスト構成 / テスト観点一覧 / テストケース一覧 / 自動化すべきテスト / 手動確認でよいテスト / 不足している仕様
 
 #### 1.5.C 仕様書ベースで実装 (Layer 2 = 本 skill の責務)
 
-Layer 1 出力 `tests/spec/e2e/test-spec-{example}.md` を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
+Layer 1 出力 (解決済み spec path) を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
 
 | Layer 1 column | spec.ts への変換 |
 |---|---|
@@ -120,7 +129,7 @@ Layer 1 出力 `tests/spec/e2e/test-spec-{example}.md` を Read し、 「テス
 
 #### 1.5.D 旧 template との backward-compat
 
-旧 `examples/test-spec-template.md` (独自 8 column) は Phase E-3 以前の test 仕様書を Read する場合のみ参照用に残す。 新規 test 仕様書は **必ず Layer 1 経由で 9 column 表** を生成する。
+旧 `examples/test-spec-template.md` (独自 8 column) は Phase E-3 以前の test 仕様書を Read する場合のみ参照用に残す。 新規 test 仕様書は **Layer 1 経由の 9 column 表** を使う (`--input-spec` で受け取るか、 無ければ生成する)。
 
 ### Step 2: 3 layer 設計
 

@@ -24,6 +24,14 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 - vitest standard 開発環境
 - 出力先 `tests/{module}.edge.test.ts` への Write 権限
 
+## オプション
+
+本 skill は `/kiwa-app` や `/kiwa-test` から起動される。 起動側は spec の場所と module 名を
+渡す必要があるので、 受ける口をここで宣言する。
+
+- `--module {name}` — spec / test file 名に入る module 名。 `--input-spec` を省略した時の既定 path もこれで決まる
+- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/integration/test-spec-{module}.edge.md`)。 `/kiwa-design --layer edge-handler` が書く場所で、 `docs/layers.json` の `spec_path` がその宣言
+
 ## 9 column 拡張表 (`/kiwa-design --layer edge-handler`)
 
 | 項目 | 内容 |
