@@ -937,8 +937,10 @@ describe('the layer table is mirrored, not selected from', () => {
 
   it('carries where each consuming skill writes', () => {
     const nextjs = TABLE.find((l) => l.id === 'nextjs-rsc')!;
+    // `.rsc.md` の spec を読む layer なので出力も `.rsc.test.ts`。 #1844 で
+    // 5 mode が 1 file を奪い合う形を解いた時に変わった。
     expect(nextjs.test_outputs).toEqual({
-      'kiwa-nextjs': ['{example}/tests/integration/{module}.nextjs.test.ts'],
+      'kiwa-nextjs': ['{example}/tests/integration/{module}.rsc.test.ts'],
     });
   });
 

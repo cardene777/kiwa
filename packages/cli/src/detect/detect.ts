@@ -240,7 +240,19 @@ export function resolve(all: Detection[]): Detection[] {
   for (const d of all) {
     if (d.strength === 'weak' && decisive.has(group(d.layer))) continue;
     const existing = kept.get(d.layer);
-    if (!existing || (existing.strength === 'weak' && d.strength === 'exact')) kept.set(d.layer, d);
+    // An asserted detection replaces an implied one for the same layer.
+    //
+    // Without this the first one seen wins, and swapping two lines of a
+    // package.json changes the answer: an implied entry taking the slot leaves
+    // `asserted` empty below, so the loop that drops implied layers drops
+    // nothing and all five `nextjs-*` come back where one was asserted.
+    //
+    // Strength is not compared here. It cannot differ within a surviving layer:
+    // `decisive` is computed from every detection up front, so a group holding
+    // any exact signal loses all of its weak ones at the `continue` above. The
+    // condition this replaced (`existing.strength === 'weak' && d.strength ===
+    // 'exact'`) could therefore never fire — measured, not assumed.
+    if (!existing || (existing.implied && !d.implied)) kept.set(d.layer, d);
   }
 
   // An implied layer is a guess that holds only while nothing else in its group
