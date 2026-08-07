@@ -180,6 +180,18 @@ describe('a consumer can be told where its input is and what to call it', () => 
     ]);
   });
 
+  it('a skill that also generates its own spec says when to skip that', () => {
+    // Declaring `--input-spec` is inert while the steps regenerate the spec at
+    // a fixed path regardless: the caller's argument is accepted and ignored.
+    // `kiwa-play` is the one that does both, so it has to say which wins.
+    const play = read('.claude/skills/kiwa-play/SKILL.md');
+    expect(play).toMatch(/`--input-spec` が渡されていれば/);
+    expect(play).toMatch(/skip して既存の spec を読む/);
+    // And the generating branch must not name a literal path either, or the
+    // skip is the only thing honouring the argument.
+    expect(play).not.toMatch(/`tests\/spec\/e2e\/test-spec-\{example\}\.md` に Write/);
+  });
+
   it('the two skills this change adds state the path the table declares', () => {
     // A default that is not the declared `spec_path` sends the consumer to a
     // place the producer never wrote. Compared against the table rather than

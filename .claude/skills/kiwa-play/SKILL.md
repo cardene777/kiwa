@@ -86,7 +86,14 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 
 #### 1.5.B Layer 1 (`/kiwa-design`) 起動
 
-以下を Layer 1 に渡し、 `tests/spec/e2e/test-spec-{example}.md` を Write させる。
+**`--input-spec` が渡されていれば、 この step は skip して既存の spec を読む**。 `/kiwa-app` の
+ように Layer 1 を先に起動する caller があり、 そこで生成した spec をここで作り直すと、 caller が
+指定した path ではなく既定 path が使われる = 渡した引数が効かない。
+
+`--input-spec` が無い時 (単独起動 / `/kiwa-test` 経由) だけ以下を実行する。
+
+以下を Layer 1 に渡し、 `--input-spec` 省略時の既定 path (`tests/spec/e2e/test-spec-{module}.md`)
+に Write させる。
 
 ```text
 /kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/}
@@ -98,7 +105,7 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 - scope 境界 (本作業でやらないことを 3-5 個列挙)
 ```
 
-Layer 1 が以下 9 section の仕様書を `tests/spec/e2e/test-spec-{example}.md` に Write する (詳細は `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット):
+Layer 1 が以下 9 section の仕様書を解決済み spec path に Write する (詳細は `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット):
 
 - 対象機能 / 仕様の要約 / 主な品質リスク / 推奨テスト構成 / テスト観点一覧 / テストケース一覧 / 自動化すべきテスト / 手動確認でよいテスト / 不足している仕様
 

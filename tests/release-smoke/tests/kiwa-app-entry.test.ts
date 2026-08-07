@@ -218,10 +218,16 @@ describe('the entry point passes what the pieces it invokes actually need', () =
   });
 
   it('the skill states those counts rather than assuming one shape', () => {
+    // Counted from the skills, not written twice. Literals here let the table
+    // and the check go stale together: #1851 moved `--input-spec` from 11 to 13
+    // and both sides kept saying 11 while passing.
     const step4 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 4'), APP_SKILL.indexOf('## Step 5'));
-    expect(step4).toMatch(/`--input-spec`.*\|\s*11\s*\|/);
-    expect(step4).toMatch(/`--spec-path`.*\|\s*4\s*\|/);
-    expect(step4).toMatch(/`--layer`.*\|\s*\*\*2\*\*\s*\|/);
+    const row = (flag: string, n: number): RegExp =>
+      new RegExp(`\`${flag}\`.*?\\|\\s*(?:\\*\\*)?${n}(?:\\*\\*)?\\s*\\|`);
+
+    for (const flag of ['--module', '--input-spec', '--spec-path', '--layer', '--provider']) {
+      expect(step4).toMatch(row(flag, declaring(flag).length));
+    }
   });
 
   it('says to read the consumer declaration instead of deciding the names here', () => {

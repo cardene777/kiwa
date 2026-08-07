@@ -138,14 +138,17 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"}
 
 | option | 宣言している skill 数 | 備考 |
 |---|---|---|
-| `--module` | 15 | `kiwa-play` は持たない |
-| `--input-spec` | 11 | spec path を渡す flag |
+| `--module` | 17 | 全 consumer が受ける |
+| `--input-spec` | 13 | spec path を渡す flag |
 | `--spec-path` | 4 | 同じ役割で名前が違う (`auth` / `cache` / `forge` / `queue`) |
 | `--layer` | **2** | `kiwa-rust` / `kiwa-go` のみ |
 | `--provider` | 3 | `auth` / `cache` / `queue` |
 
 `--layer` を全 consumer に渡してはいけない。 受けるのは 2 skill だけで、 `kiwa-nextjs` は
 持たない。
+
+`--module` は全 consumer が受ける。 `#1851` まで `kiwa-play` と `kiwa-edge` が受けておらず、
+その 2 layer は起動を組み立てられずに飛ばされていた。
 
 ### 5 layer の見分けは spec path が担う
 
