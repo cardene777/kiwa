@@ -99,9 +99,10 @@ describe('narrowing happens per runtime', () => {
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.source).toBe('detected');
-      // `contract` survives because no reader looks for `foundry.toml`, so its
-      // absence was never established.
-      expect(runtimes(resolved.layers)).toEqual({ rust: 1, solidity: 1 });
+      // `contract` goes too now: #1852 registered `foundry.toml` and
+      // `hardhat.config.*`, so Solidity's absence can be established. Before
+      // that it survived every project, having never been looked for.
+      expect(runtimes(resolved.layers)).toEqual({ rust: 1 });
       expect(resolved.layers.map((l) => l.id)).toContain('rust-axum');
     });
   });
@@ -167,6 +168,117 @@ describe('narrowing happens per runtime', () => {
       expect(counts.typescript).toBe(UNDETECTABLE_TS);
       expect(counts.rust).toBe(1);
       expect(counts.go).toBeUndefined();
+    });
+  });
+});
+
+describe('Solidity is looked for, not assumed present', () => {
+  // `contract` was the one layer no project could rule out: nothing looked for
+  // a Solidity manifest, so its absence was never established and every
+  // TypeScript project was offered a Foundry test layer. Measured on five real
+  // Next.js applications before #1852 — all five got it.
+  //
+  // Two build systems count, and neither is read for dependencies: no signal
+  // maps a Solidity dependency to a layer, so presence is the whole question.
+  const seesSolidity = async (files: Record<string, string>): Promise<boolean> => {
+    const { presentManifests } = await import('../src/detect/scan.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-solidity-'));
+    try {
+      for (const [name, body] of Object.entries(files)) writeFileSync(join(root, name), body);
+      return presentManifests(root).manifests.some((m) => m.language === 'solidity');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  };
+
+  it('sees a Foundry project', async () => {
+    expect(await seesSolidity({ 'foundry.toml': '[profile.default]\n' })).toBe(true);
+  });
+
+  it('sees a Hardhat project whatever its config extension is', async () => {
+    // `.js` / `.ts` / `.cjs` / `.mjs` are all in use. Enumerating them in the
+    // scanner would need an edit each time a new one appears.
+    for (const ext of ['js', 'ts', 'cjs', 'mjs']) {
+      expect(await seesSolidity({ [`hardhat.config.${ext}`]: 'module.exports = {}\n' })).toBe(true);
+    }
+  });
+
+  it('does not see a project with neither', async () => {
+    expect(await seesSolidity({ 'package.json': '{"name":"app"}' })).toBe(false);
+  });
+
+  it('does not mistake a similarly named file for the config', async () => {
+    // The match is a prefix, so the boundary is worth pinning: a file merely
+    // starting with `hardhat` is not a Hardhat config.
+    expect(await seesSolidity({ 'hardhat.md': '# notes\n' })).toBe(false);
+    expect(await seesSolidity({ 'foundry.toml.bak': '[profile.default]\n' })).toBe(false);
+  });
+
+  it('drops the contract layer when neither manifest is there', () => {
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"^15"}}' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(0);
+      expect(resolved.warnings.join(' ')).toMatch(/excluded solidity/);
+    });
+  });
+
+  it('does not read a directory as a manifest', async () => {
+    // `existsSync` answers yes for a directory. Probing by name therefore
+    // reported a directory named `Cargo.toml` as a Rust manifest, which kept
+    // Rust's five layers from ever being excluded in that project.
+    //
+    // Measured while checking the Solidity path: the new code walked the
+    // listing and skipped it, the old readers probed by name and did not.
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-dir-manifest-'));
+    try {
+      for (const name of ['Cargo.toml', 'go.mod', 'package.json', 'foundry.toml']) {
+        mkdirSync(join(root, name), { recursive: true });
+      }
+      const { presentManifests } = await import('../src/detect/scan.js');
+      expect(presentManifests(root).manifests).toEqual([]);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('the declaration and the scanner name the same manifests', () => {
+    // `docs/stack-signals.json` declares which filename establishes which
+    // language; `scan.ts` is what actually looks. Two lists for one contract is
+    // the shape every other drift in this area had, so they are compared.
+    //
+    // The Solidity entry is written `hardhat.config.*` in the declaration
+    // because the extension varies; the scanner matches it by prefix. Compared
+    // on the prefix so the star does not have to be a literal filename.
+    const declared = new Set(
+      Object.entries(SIGNALS.manifests ?? {}).map(([name, language]) => `${language}:${name}`),
+    );
+    expect(declared).toContain('solidity:foundry.toml');
+    expect(declared).toContain('solidity:hardhat.config.*');
+    expect(declared).toContain('rust:Cargo.toml');
+    expect(declared).toContain('go:go.mod');
+    expect(declared).toContain('typescript:package.json');
+    expect(declared.size).toBe(5);
+  });
+
+  it('keeps it when a Foundry manifest is there', () => {
+    // The other side: registering the manifest must not make `contract`
+    // unreachable for the projects that actually use it.
+    const root = fixture(
+      { 'package.json': '{"name":"app"}', 'foundry.toml': '[profile.default]\n' },
+      {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        detected: [],
+      },
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.layers.map((l) => l.id)).toContain('contract');
     });
   });
 });
@@ -657,6 +769,9 @@ describe('an unusable recording is not an error', () => {
     // Every layer some signal names has to come back detected, or the recording
     // did narrow and `all` would be the wrong answer. Derived from the table so
     // that adding a signal updates the fixture rather than breaking this.
+    // Solidity joins the runtimes whose absence is establishable, so the
+    // fixture has to carry a `foundry.toml` for `contract` to count as
+    // detected rather than as evidence that narrowing happened.
     const narrowable = (l: { id: string; runtime: string | null }): boolean =>
       l.runtime === 'rust' || l.runtime === 'go' || NAMED_BY_SIGNALS.has(l.id);
     const manifestFor = (l: { id: string; runtime: string | null }): string =>
@@ -665,7 +780,16 @@ describe('an unusable recording is not an error', () => {
     // `next` for the five `nextjs-*`, and one subject each for auth, cache,
     // job-queue, orm-query and ui.
     const deps = '{"dependencies":{"next":"^15","next-auth":"^4","redis":"^4","bullmq":"^5","drizzle-orm":"^0.30","react":"^19"}}';
-    const root = fixture({ 'package.json': deps, 'Cargo.toml': '[dependencies]\n', 'go.mod': 'module x\n' }, {
+    const root = fixture(
+      {
+        'package.json': deps,
+        'Cargo.toml': '[dependencies]\n',
+        'go.mod': 'module x\n',
+        // Present so Solidity is not ruled out; `contract` then has to appear
+        // in the recording like every other narrowable layer.
+        'foundry.toml': '[profile.default]\n',
+      },
+      {
       generated_at: fresh(),
       scanned: [
         { manifest: 'package.json', language: 'typescript' },
@@ -710,10 +834,11 @@ describe('what --detect writes is what the resolver reads', () => {
       expect(resolved.source).toBe('detected');
       expect(resolved.layers.map((l) => l.id)).toContain('rust-axum');
       // The Go layers go because `go.mod` was looked for and not found; the
-      // TypeScript ones go for the same reason. `contract` stays because
-      // nothing looks for `foundry.toml`.
+      // TypeScript ones go for the same reason. `contract` goes with them now
+      // that #1852 looks for `foundry.toml` — before, it was the one layer no
+      // project could ever rule out.
       expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(0);
-      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(1);
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(0);
 
       // Editing the manifest after the fact must send the reader back to the
       // fallback. This is what ties the writer's timestamp to the reader's

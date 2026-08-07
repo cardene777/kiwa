@@ -32,6 +32,29 @@ const READERS: Record<string, { language: string; read: (source: string) => Depe
   'package.json': { language: 'typescript', read: readPackageJson },
 };
 
+/**
+ * Manifests whose presence is checked but whose contents are never read.
+ *
+ * Two different questions live in this file. `scan` asks "what does this
+ * project depend on", which needs a reader. `presentManifests` asks "does this
+ * project contain any Solidity", which needs only a filename.
+ *
+ * Solidity has the second without the first: no signal maps a Solidity
+ * dependency to a layer, so there is nothing to read — but `foundry.toml` and
+ * `hardhat.config.*` say plainly that the language is there. Without them the
+ * `contract` layer can never be ruled out, and every Next.js project is offered
+ * a Solidity test layer (measured on five real applications).
+ *
+ * Two build systems, either of which counts. Hardhat's config carries an
+ * extension that varies, so the match is by prefix; `foundry.toml` is exact.
+ */
+const PRESENCE_ONLY: { language: string; matches: (name: string) => boolean }[] = [
+  {
+    language: 'solidity',
+    matches: (name) => name === 'foundry.toml' || name.startsWith('hardhat.config.'),
+  },
+];
+
 function readManifestsIn(dir: string, root: string, out: ScannedManifest[]): void {
   for (const [name, reader] of Object.entries(READERS)) {
     const full = join(dir, name);
@@ -219,14 +242,12 @@ export function presentManifests(cwd: string, cap: number = VISIT_CAP): Manifest
     }
     budget -= 1;
 
-    for (const [name, reader] of Object.entries(READERS)) {
+    // Relative to the search root, matching what `scan` records, so the two
+    // can be compared without either side normalising the other's paths.
+    const relative = (name: string): string => {
       const full = join(dir, name);
-      if (!existsSync(full)) continue;
-      // Relative to the search root, matching what `scan` records, so the two
-      // can be compared without either side normalising the other's paths.
-      const rel = full.startsWith(root) ? full.slice(root.length + 1) || name : full;
-      found.push({ path: rel, language: reader.language });
-    }
+      return full.startsWith(root) ? full.slice(root.length + 1) || name : full;
+    };
 
     let entries;
     try {
@@ -239,6 +260,25 @@ export function presentManifests(cwd: string, cap: number = VISIT_CAP): Manifest
       missed = true;
       return;
     }
+    // Both kinds are matched against the listing rather than probed by name.
+    // `hardhat.config.*` has an extension this file has no business
+    // enumerating, and the listing already says what is a file.
+    //
+    // That last part is the reason the readers moved here too. Probing with
+    // `existsSync` answers yes for a directory, so a directory named
+    // `Cargo.toml` was reported as a Rust manifest and kept Rust's five layers
+    // from ever being excluded. Measured, not hypothesised.
+    for (const entry of entries) {
+      if (entry.isDirectory()) continue;
+      const reader = READERS[entry.name];
+      if (reader) found.push({ path: relative(entry.name), language: reader.language });
+      for (const kind of PRESENCE_ONLY) {
+        if (kind.matches(entry.name)) {
+          found.push({ path: relative(entry.name), language: kind.language });
+        }
+      }
+    }
+
     for (const entry of entries) {
       if (!entry.isDirectory() || SKIP.has(entry.name) || entry.name.startsWith('.')) continue;
       visit(join(dir, entry.name));
