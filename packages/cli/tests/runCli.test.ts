@@ -843,6 +843,137 @@ describe('layers', () => {
     }
   });
 
+  // #1855: `/kiwa-design --lang ja` writes `test-spec-{module}.nextjs.ja.md`
+  // while the table declares the plain path. Two of the three consumers did not
+  // know the convention, so `--lang ja` sent Layer 2 looking in the wrong place.
+  it('resolves spec paths for --lang', async () => {
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'api', '--lang', 'ja', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: { id: string; spec_path: string }[] };
+      const api = parsed.layers.find((l) => l.id === 'api');
+      expect(api?.spec_path).toBe('tests/spec/integration/test-spec-{module}.api.ja.md');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('leaves spec paths alone without --lang and with --lang en', async () => {
+    // A caller that forwards the flag unconditionally must get the declared
+    // path back for English, or omitting the language becomes a third answer.
+    const dir = project(detection);
+    try {
+      for (const args of [[], ['--lang', 'en']]) {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(['layers', '--layer', 'api', ...args, '--json'], h.deps)).toBe(0);
+        const parsed = JSON.parse(h.out()) as { layers: { id: string; spec_path: string }[] };
+        expect(parsed.layers.find((l) => l.id === 'api')?.spec_path).toBe(
+          'tests/spec/integration/test-spec-{module}.api.md',
+        );
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts --lang=ja as well as --lang ja', async () => {
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'api', '--lang=ja', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: { spec_path: string }[] };
+      expect(parsed.layers[0]?.spec_path).toMatch(/\.api\.ja\.md$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses an empty --lang', async () => {
+    // `--lang "$UNSET"` is a caller bug. Reading it as English would hand back
+    // paths the producer never wrote, with nothing to show something was wrong.
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--lang', '', '--json'], h.deps)).toBe(2);
+      expect(h.err()).toContain('--lang needs a value');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a flag whose value is missing or is the next flag', async () => {
+    // `kiwa layers --layer` used to fall through to the detection and print
+    // every layer with exit 0; `--layer --json` took `--json` as the layer
+    // name. Both are a caller that meant to pass a value (measured).
+    const dir = project(detection);
+    try {
+      const cases: string[][] = [
+        ['layers', '--layer'],
+        ['layers', '--layer', '--json'],
+        ['layers', '--lang'],
+        ['layers', '--lang', '--json'],
+        ['layers', '--lang', '--layer', 'api'],
+      ];
+      for (const args of cases) {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(args, h.deps), `${args.join(' ')} が通った`).toBe(2);
+        expect(h.err()).toMatch(/needs a value/);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('still accepts a value that follows the flag', async () => {
+    // The guard rejects anything starting with `-`, so a real value has to keep
+    // working — otherwise the fix trades one defect for another.
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'api', '--lang', 'ja', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: { spec_path: string }[] };
+      expect(parsed.layers[0]?.spec_path).toMatch(/\.api\.ja\.md$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a --lang that is not an ISO 639-1 code', async () => {
+    // The value ends up in a path the caller opens. Measured before the check:
+    // `--lang ../../etc/passwd` resolved to a path outside the spec directory.
+    const dir = project(detection);
+    try {
+      for (const bad of ['../../etc/passwd', 'a/b', 'JA', 'jpn']) {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(['layers', '--lang', bad, '--json'], h.deps), `${bad} が通った`).toBe(2);
+        expect(h.err()).toContain('ISO 639-1');
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('documents --lang in the usage text', async () => {
+    // A flag the help does not mention is one a caller has to already know
+    // about, which is the state this Issue is fixing.
+    //
+    // Asserted on the options list, not on the word. `--lang` also appears in
+    // the command summary line, so `toContain('--lang')` stayed green while the
+    // options entry was missing and only its continuation line remained — which
+    // is exactly what a botched edit left behind here.
+    const h = harness({ cwd: () => process.cwd() });
+    expect(await runCli(['--help'], h.deps)).toBe(0);
+    const out = h.out();
+    expect(out).toMatch(/^\s+--lang C\s+\S/m);
+    // The continuation line has to have its entry, or the help reads as if it
+    // belongs to the flag above.
+    const lines = out.split('\n');
+    const cont = lines.findIndex((l) => l.includes('en and omitting the flag'));
+    expect(cont).toBeGreaterThan(0);
+    expect(lines[cont - 1], '継続行の直前が --lang の項目でない').toMatch(/--lang C/);
+  });
+
   it('emits the consumer skill and mode with --json', async () => {
     // The caller needs to know which skill to start and with which mode, and
     // making it look that up separately is how the contract drifted before.

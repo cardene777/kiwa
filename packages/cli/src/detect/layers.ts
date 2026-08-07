@@ -203,6 +203,75 @@ export function loadLayerTable(): LayerRecord[] {
 }
 
 /**
+ * A document language code, as `/kiwa-design --lang` accepts it.
+ *
+ * `en` is the default and carries no suffix, so the two ways of asking for
+ * English (`--lang en` and omitting the flag) resolve to the same path.
+ */
+export type DocLang = string | undefined;
+
+/**
+ * ISO 639-1: exactly two lowercase letters.
+ *
+ * The value lands in a path that skills then open, so anything permissive is a
+ * traversal. `--lang ../../etc/passwd` produced
+ * `test-spec-{module}.api.../../etc/passwd.md` before this check (measured).
+ *
+ * Region subtags (`zh-CN`) are refused too. The convention this implements
+ * (`/kiwa-design` § lang suffix 規約) says ISO 639-1, every code in the repo is
+ * two letters, and widening it later is a decision someone can make against a
+ * real need rather than a hole left open in advance.
+ */
+const DOC_LANG_PATTERN = /^[a-z]{2}$/;
+
+/** Whether a code is one the suffix may be built from. */
+export function isValidDocLang(lang: string): boolean {
+  return DOC_LANG_PATTERN.test(lang);
+}
+
+/**
+ * `docs/layers.json` declares the English spec path. `/kiwa-design --lang ja`
+ * writes `test-spec-{module}.nextjs.ja.md` instead, and until #1855 nothing
+ * reconciled the two: the declaration said one thing, the producer wrote
+ * another, and the consumers that read `spec_path` looked in the wrong place.
+ *
+ * Applied here rather than in each skill so that a caller does not have to know
+ * the convention. Two of the three consumers did not, and the one that did
+ * (`kiwa-review`) carried its own copy.
+ *
+ * The suffix goes last, after any layer suffix: `test-spec-foo.api.ja.md`.
+ */
+export function withLangSuffix(path: string, lang: DocLang): string {
+  if (lang === undefined || lang === '' || lang === 'en') return path;
+  // Refused rather than sanitised. A code that is not a code means the caller
+  // passed something it did not mean to, and quietly stripping the bad part
+  // would hand back a path nobody wrote.
+  if (!isValidDocLang(lang)) {
+    throw new Error(`invalid language code: ${JSON.stringify(lang)} (expected ISO 639-1, e.g. ja)`);
+  }
+  // Inserted before the final extension so the file stays a `.md`. Appending
+  // would produce `test-spec-foo.nextjs.md.ja`, which no reader globs for.
+  const dot = path.lastIndexOf('.');
+  if (dot <= path.lastIndexOf('/')) return `${path}.${lang}`;
+  return `${path.slice(0, dot)}.${lang}${path.slice(dot)}`;
+}
+
+/**
+ * The same layers with their spec paths resolved for a document language.
+ *
+ * Only `spec_path` moves. `spec_dir` is a directory, and `test_outputs` are
+ * generated tests whose paths do not carry the language (`--lang` sets the
+ * comment language there, not the file name).
+ */
+export function applyLang(layers: LayerRecord[], lang: DocLang): LayerRecord[] {
+  if (lang === undefined || lang === '' || lang === 'en') return layers;
+  return layers.map((layer) => ({
+    ...layer,
+    spec_path: layer.spec_path === null ? null : withLangSuffix(layer.spec_path, lang),
+  }));
+}
+
+/**
  * The layers some signal in the table actually names.
  *
  * Asked per layer rather than per language, because signal coverage is uneven

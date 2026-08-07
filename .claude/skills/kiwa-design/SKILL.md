@@ -236,6 +236,8 @@ LANG_SUFFIX=""
 
 en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。 layer suffix (`.api` / `.ui` / `.data` / `.cli`) と直交、 lang suffix が常に末尾 (例 `test-spec-foo.api.ja.md`)。
 
+同じ規約を `kiwa layers --json --lang {code}` が実装しており、 返る `spec_path` は言語込みで解決済。 **consumer は自前で組み立てず CLI から受け取る** (`packages/cli/src/detect/layers.ts` の `withLangSuffix`)。 producer 側の本節と CLI の実装が一致することは release-smoke が照合する。
+
 ### Step 1: 入力を整理する
 
 対象機能について以下を列挙する。 欠けている項目は **「不足している仕様」** に bullet で記録し、 skill 側で勝手に補完しない。
