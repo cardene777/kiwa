@@ -5,13 +5,29 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
+import ts from 'typescript';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TESTS_DIR = resolve(repoRoot(HERE), 'tests', 'release-smoke', 'tests');
 
-/** Strip comments so a mention in prose is not read as code. */
-function code(body: string): string {
-  return body.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+/**
+ * Parse a test file so the checks below look at code rather than at text.
+ *
+ * A file that does not parse is not a file this guard can judge. Returning a
+ * partial tree would answer "not in scope" for it, and a file that silently
+ * leaves the check is exactly what this guard exists to prevent.
+ */
+function parse(body: string): ts.SourceFile {
+  const source = ts.createSourceFile('probe.ts', body, ts.ScriptTarget.ESNext, true);
+  const errors = (source as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics ?? [];
+  if (errors.length > 0) throw new Error(`source が構文として読めない (${errors.length} 件)`);
+  return source;
+}
+
+/** Walk every node once. */
+function visit(node: ts.Node, seen: (node: ts.Node) => void): void {
+  seen(node);
+  node.forEachChild((child) => visit(child, seen));
 }
 
 /**
@@ -21,26 +37,60 @@ function code(body: string): string {
  * `const START = HERE; resolve(START, '..', ...)` — the same counting through
  * one more name. Every file that needs its own location gets it the one way
  * Node offers, so that is what to look for.
+ *
+ * Read from the syntax tree. Stripping comments with a regex could not tell a
+ * comment from `'https://example.com'`, so the judgement rested on no file in
+ * the tree happening to contain one.
  */
 function inScope(body: string): boolean {
-  return /dirname\(\s*fileURLToPath\(\s*import\.meta\.url\s*\)\s*\)/.test(code(body));
+  let found = false;
+  visit(parse(body), (node) => {
+    if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression)) return;
+    if (node.expression.text !== 'dirname') return;
+    const [arg] = node.arguments;
+    if (!arg || !ts.isCallExpression(arg) || !ts.isIdentifier(arg.expression)) return;
+    if (arg.expression.text !== 'fileURLToPath') return;
+    const [inner] = arg.arguments;
+    // `import.meta.url` — the only way a module learns its own path.
+    if (inner && ts.isPropertyAccessExpression(inner) && inner.name.text === 'url') found = true;
+  });
+  return found;
 }
 
 /**
  * Does it get the repository root the one supported way?
  *
- * The import and the call have to agree on the name. Checking for a fixed
+ * The import and the call have to be the same binding. Checking for a fixed
  * `repoRoot(` and the module path separately let a file import the helper,
- * leave `repoRoot(HERE)` in a comment, and count directories in the code.
+ * leave `repoRoot(HERE)` in a comment, and count directories in the code — and
+ * rejected an alias import that was doing the right thing.
  */
 function usesHelper(body: string): boolean {
-  const source = code(body);
-  const imported = /import\s*\{[^}]*\brepoRoot\b(?:\s+as\s+(\w+))?[^}]*\}\s*from\s*'\.\/repo-root\.js'/.exec(
-    source,
-  );
-  if (!imported) return false;
-  const name = imported[1] ?? 'repoRoot';
-  return new RegExp(`\\b${name}\\(\\s*HERE\\s*\\)`).test(source);
+  const source = parse(body);
+  let bound: string | null = null;
+
+  visit(source, (node) => {
+    if (!ts.isImportDeclaration(node)) return;
+    if (!ts.isStringLiteral(node.moduleSpecifier)) return;
+    if (node.moduleSpecifier.text !== './repo-root.js') return;
+    const bindings = node.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings)) return;
+    for (const element of bindings.elements) {
+      // `repoRoot as findRoot` puts the original in `propertyName`.
+      const original = element.propertyName?.text ?? element.name.text;
+      if (original === 'repoRoot') bound = element.name.text;
+    }
+  });
+  if (bound === null) return false;
+
+  let called = false;
+  visit(source, (node) => {
+    if (!ts.isCallExpression(node) || !ts.isIdentifier(node.expression)) return;
+    if (node.expression.text !== bound) return;
+    const [arg] = node.arguments;
+    if (arg && ts.isIdentifier(arg) && arg.text === 'HERE') called = true;
+  });
+  return called;
 }
 
 describe('repoRoot finds the same place from either layout', () => {
@@ -131,6 +181,46 @@ describe('the guard picks its targets without reading names', () => {
       'const HERE = dirname(fileURLToPath(import.meta.url));',
       '// was: repoRoot(HERE)',
       "const ROOT = resolve(HERE, '..', '..', '..', '..');",
+    ].join('\n');
+    expect(usesHelper(body)).toBe(false);
+  });
+
+  it('wants the module URL, not any argument', () => {
+    // `dirname(fileURLToPath(x))` resolves whatever `x` names. Only
+    // `import.meta.url` is the file asking where it is.
+    expect(inScope('const D = dirname(fileURLToPath(someOtherUrl));')).toBe(false);
+    expect(inScope('const D = dirname(fileURLToPath(import.meta.url));')).toBe(true);
+  });
+
+  it('refuses a file it cannot parse rather than calling it out of scope', () => {
+    // Answering "not in scope" for an unparseable file lets it leave the check
+    // quietly, which is the shape this guard exists to prevent.
+    expect(() => inScope('const HERE = dirname(fileURLToPath(import.meta.url\n')).toThrow(
+      /構文として読めない/,
+    );
+  });
+
+  it('does not read a URL inside a string as a comment', () => {
+    // The regex form cut everything after `//`, so a file holding a URL lost
+    // the rest of that line. Whether it mattered depended on what came after.
+    const body = [
+      "const docs = 'https://example.com/a//b';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+    ].join('\n');
+    expect(inScope(body), 'URL の // を comment と読まない').toBe(true);
+  });
+
+  it('does not read a self-location call written inside a string', () => {
+    // The other direction: text that looks like the call is not the call.
+    const body = "const note = 'dirname(fileURLToPath(import.meta.url))';";
+    expect(inScope(body)).toBe(false);
+  });
+
+  it('does not read a helper call written inside a string', () => {
+    const body = [
+      "import { repoRoot } from './repo-root.js';",
+      'const HERE = dirname(fileURLToPath(import.meta.url));',
+      "const note = 'repoRoot(HERE)';",
     ].join('\n');
     expect(usesHelper(body)).toBe(false);
   });
