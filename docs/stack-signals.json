@@ -109,7 +109,22 @@
       "Filled by scripts/rebuild-stack-signals.mjs from the six transparent",
       "packages' peerDependencies. Empty until the TypeScript detector lands —",
       "see the Issue for why that waits: 83 of the 139 JS examples carry no real",
-      "library at all, so a detector there cannot be measured yet."
+      "library at all, so a detector there cannot be measured yet.",
+      "",
+      "Every entry here carries a `language`, and applies only to manifests of",
+      "that language. The signals above are already separated by language by the",
+      "key they sit under; these are one flat list, so each states its own.",
+      "",
+      "It is not decoration. These are npm names, and npm names share a namespace",
+      "with Rust crate names — `redis`, `postgres` and `testcontainers` all exist",
+      "in both. Matching is by name, so without it a Cargo.toml depending on the",
+      "`redis` crate would report the TypeScript `cache` layer. Go is unaffected:",
+      "module paths are `github.com/redis/go-redis/v9` and match neither the",
+      "exact name nor the `/` boundary prefix.",
+      "",
+      "An entry with no `language` matches nothing. A missing field means the",
+      "generator is out of date, and the alternative reading — applies to every",
+      "language — is the behaviour this field exists to remove."
     ],
     "signals": []
   }

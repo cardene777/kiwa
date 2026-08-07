@@ -4,7 +4,12 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { detectFrom, resolve as resolvePrecedence, type SignalTable } from '../src/detect/detect.js';
+import {
+  detectFrom,
+  resolve as resolvePrecedence,
+  type GeneratedSignal,
+  type SignalTable,
+} from '../src/detect/detect.js';
 import { readCargoToml, readGoMod, readPackageJson } from '../src/detect/manifests.js';
 import { scan } from '../src/detect/scan.js';
 import { loadSignalTable } from '../src/detect/index.js';
@@ -498,6 +503,71 @@ describe('an implied layer holds only while nothing more specific appears', () =
       { name: 'kiwa-test-rs', features: [], unresolved: true },
     ]);
     expect(resolvePrecedence(all)).toEqual([]);
+  });
+});
+
+describe('a generated signal applies only to the language it came from', () => {
+  // `redis` is the case that forces this: it is a real npm package and a real
+  // Rust crate. A signal derived from the TypeScript `cache` package's
+  // peerDependencies must not answer a Cargo.toml.
+  const withGenerated = (signals: GeneratedSignal[]): SignalTable => ({
+    manifests: TABLE.manifests,
+    signals: { rust: [{ match: 'kiwa-test-rs', default: 'rust-unit', strength: 'exact' }] },
+    generated: { signals },
+  });
+
+  const cacheFromTypescript: GeneratedSignal = {
+    match: 'redis',
+    layer: 'cache',
+    strength: 'exact',
+    language: 'typescript',
+  };
+
+  it('does not answer a manifest in another language', () => {
+    const all = detectFrom(withGenerated([cacheFromTypescript]), 'rust', 'Cargo.toml', [
+      { name: 'redis', features: [] },
+    ]);
+    expect(all).toEqual([]);
+  });
+
+  it('answers a manifest in its own language', () => {
+    const all = detectFrom(withGenerated([cacheFromTypescript]), 'typescript', 'package.json', [
+      { name: 'redis', features: [] },
+    ]);
+    expect(all.map((d) => d.layer)).toEqual(['cache']);
+  });
+
+  it('matches nothing when the entry states no language', () => {
+    // What stale generator output looks like. The alternative reading — a
+    // missing field means "every language" — is the behaviour being removed, so
+    // it is asserted against on both sides rather than left to the type.
+    const stale = { match: 'redis', layer: 'cache', strength: 'exact' } as GeneratedSignal;
+    const table = withGenerated([stale]);
+    const dep = [{ name: 'redis', features: [] }];
+    expect(detectFrom(table, 'rust', 'Cargo.toml', dep)).toEqual([]);
+    expect(detectFrom(table, 'typescript', 'package.json', dep)).toEqual([]);
+  });
+
+  it('leaves the hand-written signals for that language alone', () => {
+    // The filter narrows the generated half only. Narrowing both would make
+    // this test the one that catches it.
+    const all = detectFrom(withGenerated([cacheFromTypescript]), 'rust', 'Cargo.toml', [
+      { name: 'kiwa-test-rs', features: [] },
+    ]);
+    expect(all.map((d) => d.layer)).toEqual(['rust-unit']);
+  });
+
+  it('keeps both halves when the languages agree', () => {
+    const table: SignalTable = {
+      manifests: TABLE.manifests,
+      signals: { typescript: [{ match: 'next', layer: 'nextjs-rsc', strength: 'exact' }] },
+      generated: { signals: [cacheFromTypescript] },
+    };
+    const all = detectFrom(table, 'typescript', 'package.json', [
+      { name: 'next', features: [] },
+      { name: 'redis', features: [] },
+    ]);
+    expect(all.map((d) => d.layer).sort()).toEqual(['cache', 'nextjs-rsc']);
   });
 });
 
