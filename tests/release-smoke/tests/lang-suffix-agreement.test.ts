@@ -83,9 +83,51 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(design).toMatch(/consumer は自前で組み立てず CLI から受け取る/);
   });
 
-  it('consumer が自前で組み立てないと書いている', () => {
+  it('consumer が CLI から path を受け取る', () => {
     const review = read('.claude/skills/kiwa-review/SKILL.md');
-    expect(review, 'CLI 経路の注記が無い').toMatch(/自前で足すと二重になり/);
+    // Asserted on the command it runs, not on prose about the rule. The note
+    // sat next to a `LANG_SUFFIX` block that was still the actual instruction,
+    // so the two paths coexisted and only one of them followed the CLI.
+    expect(review, 'CLI から受け取る経路が無い').toMatch(/kiwa layers --json[^\n]*--lang/);
+    expect(review, '自前で組み立てない旨が無い').toMatch(/自前で組み立てない/);
+  });
+
+  it('consumer が spec path の LANG_SUFFIX を自前で組まない', () => {
+    // The report path still builds its own suffix, which is a different file
+    // (`tests/reports/review/`) and outside what `kiwa layers` resolves. The
+    // spec path is the one that has to come from the CLI.
+    const review = read('.claude/skills/kiwa-review/SKILL.md');
+    const specSuffix = review
+      .split('\n')
+      .filter((line) => line.includes('LANG_SUFFIX') && line.includes('test-spec'));
+    expect(specSuffix, `spec path を自前で組む行が残っている:\n${specSuffix.join('\n')}`).toEqual([]);
+  });
+
+  it('LANG ではなく DOC_LANG を使うと書いてある', () => {
+    // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
+    // makes the CLI refuse the value. Measured (#1860 Round 1, F1).
+    for (const skill of ['kiwa-app', 'kiwa-review']) {
+      const body = read(`.claude/skills/${skill}/SKILL.md`);
+      expect(body, `${skill} が LANG を使わない旨を書いていない`).toMatch(
+        /`LANG` を使わない/,
+      );
+    }
+  });
+
+  it('skill が実際に渡す変数が DOC_LANG である', () => {
+    // Asserted on the command, not on the prose beside it. Reverting the
+    // command to `${LANG:+--lang "$LANG"}` left the warning in place and every
+    // wording check stayed green.
+    const app = read('.claude/skills/kiwa-app/SKILL.md');
+    const invocation = app
+      .split('\n')
+      .filter((line) => line.includes('kiwa layers --json'))
+      .join('\n');
+    expect(invocation, 'kiwa layers の呼出が見つからない').toContain('--lang');
+    expect(invocation, '呼出が DOC_LANG を渡していない').toContain('$DOC_LANG');
+    expect(invocation, '呼出が shell locale の LANG を渡している').not.toMatch(
+      /\$\{LANG[:}]|"\$LANG"/,
+    );
   });
 
   it('入口 skill が --lang を CLI に渡す', () => {

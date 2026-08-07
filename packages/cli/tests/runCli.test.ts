@@ -902,6 +902,58 @@ describe('layers', () => {
     }
   });
 
+  it('refuses a flag whose value is missing or is the next flag', async () => {
+    // `kiwa layers --layer` used to fall through to the detection and print
+    // every layer with exit 0; `--layer --json` took `--json` as the layer
+    // name. Both are a caller that meant to pass a value (measured).
+    const dir = project(detection);
+    try {
+      const cases: string[][] = [
+        ['layers', '--layer'],
+        ['layers', '--layer', '--json'],
+        ['layers', '--lang'],
+        ['layers', '--lang', '--json'],
+        ['layers', '--lang', '--layer', 'api'],
+      ];
+      for (const args of cases) {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(args, h.deps), `${args.join(' ')} が通った`).toBe(2);
+        expect(h.err()).toMatch(/needs a value/);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('still accepts a value that follows the flag', async () => {
+    // The guard rejects anything starting with `-`, so a real value has to keep
+    // working — otherwise the fix trades one defect for another.
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'api', '--lang', 'ja', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: { spec_path: string }[] };
+      expect(parsed.layers[0]?.spec_path).toMatch(/\.api\.ja\.md$/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a --lang that is not an ISO 639-1 code', async () => {
+    // The value ends up in a path the caller opens. Measured before the check:
+    // `--lang ../../etc/passwd` resolved to a path outside the spec directory.
+    const dir = project(detection);
+    try {
+      for (const bad of ['../../etc/passwd', 'a/b', 'JA', 'jpn']) {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(['layers', '--lang', bad, '--json'], h.deps), `${bad} が通った`).toBe(2);
+        expect(h.err()).toContain('ISO 639-1');
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('documents --lang in the usage text', async () => {
     // A flag the help does not mention is one a caller has to already know
     // about, which is the state this Issue is fixing.

@@ -64,7 +64,11 @@ kiwa init --detect
 #
 # --lang も渡す。 返る spec_path が言語込みで解決されるので、 本 skill は suffix の
 # 規約を知らなくてよい。
-kiwa layers --json ${LAYER:+--layer "$LAYER"} ${LANG:+--lang "$LANG"}
+#
+# 変数名は DOC_LANG。 LANG は shell の locale (ja_JP.UTF-8 等) で、 使うと
+# --lang ja_JP.UTF-8 が渡って CLI に拒否される。
+DOC_LANG="${DOC_LANG:-ja}"
+kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 ```
 
 判定を本 skill 側に書かない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 複製すると
@@ -74,7 +78,11 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"} ${LANG:+--lang "$LANG"}
 `test-spec-{module}.nextjs.ja.md` になっている。 skill 側で足すと二重になる。
 
 `--lang` を Layer 1 と Layer 2 の両方に渡す。 片方だけだと、 Layer 1 が書いた file を Layer 2 が
-探せない (#1855 で実際にそうなっていた)。
+探せない (#1855 で実際にそうなっていた)。 3 箇所に渡す値は同じ `$DOC_LANG` で、 引数の
+`--lang` が与えられていればそれ、 無ければ既定の `ja`。
+
+**`LANG` を使わない**。 shell の locale 変数で、 この機体では `ja_JP.UTF-8` が入っている。
+渡すと CLI が ISO 639-1 でないとして拒否する。
 
 `--layer` を渡さずに `source` だけ見て自前で絞ると、 `--layer all` が「全 layer を対象」 では
 なく「絞れなかった」 と同じ扱いになり、 明示指定が効かなくなる。

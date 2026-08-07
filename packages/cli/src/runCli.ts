@@ -8,6 +8,7 @@ import {
   loadSignalTable,
   resolveDetections,
   applyLang,
+  isValidDocLang,
   resolveLayers,
   scanManifests,
   stackFileExists,
@@ -390,6 +391,20 @@ export function exitCodeForLayersError(message: string): number {
  * should not have to distinguish "some detections were stale" from "the command
  * failed".
  */
+/**
+ * The token after a flag, when it is a value rather than the next flag.
+ *
+ * `kiwa layers --layer` used to fall through to the detection and print every
+ * layer with exit 0, and `--layer --json` took `--json` as the layer name. Both
+ * shapes are a caller that meant to pass a value, so both are refused rather
+ * than guessed at.
+ */
+function valueAfter(args: string[], index: number): string | undefined {
+  const next = args[index + 1];
+  if (next === undefined || next.startsWith('-')) return undefined;
+  return next;
+}
+
 function layersCommand(args: string[], deps: RunCliDeps): number {
   let explicit: string | undefined;
   let lang: string | undefined;
@@ -400,12 +415,20 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
     if (arg === '--json') {
       asJson = true;
     } else if (arg === '--layer') {
-      explicit = args[i + 1];
+      explicit = valueAfter(args, i);
+      if (explicit === undefined) {
+        deps.stderr('ERR layers: --layer needs a value\n');
+        return 2;
+      }
       i += 1;
     } else if (arg.startsWith('--layer=')) {
       explicit = arg.slice('--layer='.length);
     } else if (arg === '--lang') {
-      lang = args[i + 1];
+      lang = valueAfter(args, i);
+      if (lang === undefined) {
+        deps.stderr('ERR layers: --lang needs a value\n');
+        return 2;
+      }
       i += 1;
     } else if (arg.startsWith('--lang=')) {
       lang = arg.slice('--lang='.length);
@@ -425,6 +448,13 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
   // producer never wrote.
   if (lang !== undefined && !lang) {
     deps.stderr('ERR layers: --lang needs a value\n');
+    return 2;
+  }
+
+  // The value ends up in a path that the caller opens, so a code that is not a
+  // code is refused here rather than sanitised downstream.
+  if (lang !== undefined && lang !== 'en' && !isValidDocLang(lang)) {
+    deps.stderr(`ERR layers: --lang expects an ISO 639-1 code (two lowercase letters), got ${lang}\n`);
     return 2;
   }
 

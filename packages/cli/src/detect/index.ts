@@ -123,6 +123,7 @@ export function writeStackFile(
 export { detectFrom, resolve as resolveDetections } from './detect.js';
 export {
   applyLang,
+  isValidDocLang,
   loadLayerTable,
   resolveLayers,
   withLangSuffix,

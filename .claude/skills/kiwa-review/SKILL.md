@@ -58,17 +58,21 @@ AskUserQuestion で review report の生成言語を確認。 `--lang {code}` �
 
 producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review`) の file 名規約一致:
 
-```bash
-LANG_SUFFIX=""
-[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+**path は CLI から受け取る。 自前で組み立てない。**
 
-# spec_path を CLI から受け取る経路では、 上の組み立てを行わない。
-# `kiwa layers --json --lang "$DOC_LANG"` が言語込みで解決済の path を返す。
-# 自前で足すと二重になり、 CLI 側の規約が変わった時に取り残される (#1855)。
-# 使用例: tests/spec/{layer}/test-spec-${MODULE}${LANG_SUFFIX}.md
+```bash
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" \
+  | jq -r '.layers[0].spec_path' \
+  | sed "s/{module}/$MODULE/"
 ```
 
-SKILL.md 内の `{lang}.md` 表記は本規約に従って `${LANG_SUFFIX}.md` (en で空 / ja で `.ja` / その他で `.{code}`) に展開される。 input spec 検索時も同規約で path 解決。
+返る `spec_path` は言語込みで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix`)。 en と省略は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}` で、 layer suffix (`.api` 等) とは直交して言語が常に末尾に来る。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。
+
+自前で `LANG_SUFFIX` を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 本 skill が唯一 suffix を知っている consumer だった状態がまさにその結果で、 `--lang ja` を付けると他の consumer が spec を見つけられなかった (#1855)。
+
+SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。
 
 ### Step 1: mode 判定 + 入力読込
 

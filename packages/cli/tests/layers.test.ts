@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyLang,
+  isValidDocLang,
   loadJson,
   loadLayerTable,
   outputMap,
@@ -1241,5 +1242,50 @@ describe('lang suffix', () => {
       const moved = applied.find((l) => l.id === layer.id);
       expect(moved?.spec_path, `${layer.id} の spec_path が動いていない`).toMatch(/\.ja\.md$/);
     }
+  });
+});
+
+/**
+ * The code lands in a path that skills then open, so a permissive value is a
+ * traversal rather than a cosmetic problem.
+ */
+describe('lang code の検証', () => {
+  it('ISO 639-1 の 2 文字を受ける', () => {
+    for (const code of ['ja', 'en', 'zh', 'ko', 'fr']) {
+      expect(isValidDocLang(code), `${code} が拒否された`).toBe(true);
+    }
+  });
+
+  it('path を含む値を拒否する', () => {
+    // Measured before the check: `--lang ../../etc/passwd` produced
+    // `test-spec-{module}.api.../../etc/passwd.md`.
+    for (const code of ['../../etc/passwd', 'a/b', '..', '.', 'a\\b']) {
+      expect(isValidDocLang(code), `${code} が通ってしまう`).toBe(false);
+    }
+  });
+
+  it('2 文字でない値を拒否する', () => {
+    for (const code of ['j', 'jpn', '', 'ja ja', 'ja-JP', '日本語', 'j'.repeat(200)]) {
+      expect(isValidDocLang(code), `${code} が通ってしまう`).toBe(false);
+    }
+  });
+
+  it('大文字を拒否する', () => {
+    // Two spellings of one language would resolve to two paths, and only one
+    // of them is what the producer writes.
+    expect(isValidDocLang('JA')).toBe(false);
+    expect(isValidDocLang('Ja')).toBe(false);
+  });
+
+  it('withLangSuffix が不正な code で throw する', () => {
+    // Refused rather than sanitised: stripping the bad part would hand back a
+    // path nobody wrote, with nothing to show something was wrong.
+    expect(() => withLangSuffix('tests/spec/x.md', '../../etc/passwd')).toThrow(/invalid language/);
+  });
+
+  it('en と省略は検証を通さずそのまま返る', () => {
+    // Both are the no-suffix case, and neither builds a path from the value.
+    expect(withLangSuffix('tests/spec/x.md', 'en')).toBe('tests/spec/x.md');
+    expect(withLangSuffix('tests/spec/x.md', undefined)).toBe('tests/spec/x.md');
   });
 });

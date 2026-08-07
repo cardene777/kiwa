@@ -211,6 +211,25 @@ export function loadLayerTable(): LayerRecord[] {
 export type DocLang = string | undefined;
 
 /**
+ * ISO 639-1: exactly two lowercase letters.
+ *
+ * The value lands in a path that skills then open, so anything permissive is a
+ * traversal. `--lang ../../etc/passwd` produced
+ * `test-spec-{module}.api.../../etc/passwd.md` before this check (measured).
+ *
+ * Region subtags (`zh-CN`) are refused too. The convention this implements
+ * (`/kiwa-design` § lang suffix 規約) says ISO 639-1, every code in the repo is
+ * two letters, and widening it later is a decision someone can make against a
+ * real need rather than a hole left open in advance.
+ */
+const DOC_LANG_PATTERN = /^[a-z]{2}$/;
+
+/** Whether a code is one the suffix may be built from. */
+export function isValidDocLang(lang: string): boolean {
+  return DOC_LANG_PATTERN.test(lang);
+}
+
+/**
  * `docs/layers.json` declares the English spec path. `/kiwa-design --lang ja`
  * writes `test-spec-{module}.nextjs.ja.md` instead, and until #1855 nothing
  * reconciled the two: the declaration said one thing, the producer wrote
@@ -224,6 +243,12 @@ export type DocLang = string | undefined;
  */
 export function withLangSuffix(path: string, lang: DocLang): string {
   if (lang === undefined || lang === '' || lang === 'en') return path;
+  // Refused rather than sanitised. A code that is not a code means the caller
+  // passed something it did not mean to, and quietly stripping the bad part
+  // would hand back a path nobody wrote.
+  if (!isValidDocLang(lang)) {
+    throw new Error(`invalid language code: ${JSON.stringify(lang)} (expected ISO 639-1, e.g. ja)`);
+  }
   // Inserted before the final extension so the file stays a `.md`. Appending
   // would produce `test-spec-foo.nextjs.md.ja`, which no reader globs for.
   const dot = path.lastIndexOf('.');
