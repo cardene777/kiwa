@@ -531,16 +531,17 @@ describe('a Next.js project is detected from the framework it depends on', () =>
     expect(resolvePrecedence(all).every((d) => d.implied)).toBe(true);
   });
 
-  // Characterisation, not endorsement. An asserted signal is meant to drop the
-  // implied ones in its group, and it does — but only when its dependency is
-  // listed first. `resolve` keeps the first entry it sees for a layer and only
-  // replaces a weak one with an exact one, so an implied-exact entry blocks the
-  // asserted-exact entry for the same layer, and the group then looks like it
-  // has nothing asserted at all.
+  // The answer does not depend on the order dependencies are written in.
   //
-  // Reordering two lines of a package.json changes the answer. Tracked
-  // separately; pinned here so a fix shows up as these two disagreeing.
-  describe('the resolver answers differently depending on dependency order', () => {
+  // It used to. `resolve` kept the first entry it saw for a layer and only ever
+  // replaced a weak one with an exact one — a comparison that could never fire,
+  // since a group holding any exact signal loses its weak ones earlier. So an
+  // implied entry arriving first took the slot, `asserted` came out empty, and
+  // the loop that drops implied layers dropped nothing.
+  //
+  // Swapping two lines of a package.json changed which layers came back. Fixed
+  // in #1837 by letting an asserted detection replace an implied one.
+  describe('the resolver answers the same however the dependencies are ordered', () => {
     const asserted: SignalTable = {
       manifests: TABLE.manifests,
       signals: {
@@ -565,9 +566,58 @@ describe('a Next.js project is detected from the framework it depends on', () =>
       expect(detect(['next-safe-action', 'next'])).toEqual(['nextjs-server-action']);
     });
 
-    it('keeps all five when the implying dependency comes first', () => {
-      expect(detect(['next', 'next-safe-action'])).toEqual(NEXTJS_LAYERS);
+    it('drops them just the same when the implying dependency comes first', () => {
+      expect(detect(['next', 'next-safe-action'])).toEqual(['nextjs-server-action']);
     });
+
+    it('gives the same answer for every ordering of three dependencies', () => {
+      // Two entries can agree by accident. Permuting three makes the check
+      // independent of which pair happened to be written first.
+      const names = ['next', 'next-safe-action', '@types/node'];
+      const permutations = [
+        [0, 1, 2],
+        [0, 2, 1],
+        [1, 0, 2],
+        [1, 2, 0],
+        [2, 0, 1],
+        [2, 1, 0],
+      ].map((order) => detect(order.map((i) => names[i]!)));
+      for (const answer of permutations) expect(answer).toEqual(permutations[0]);
+      expect(permutations[0]).toEqual(['nextjs-server-action']);
+    });
+
+    it('keeps the asserted signal as the one it reports', () => {
+      // Replacing the entry has to carry the signal with it, or the report
+      // names the dependency that merely implied the layer.
+      const all = detectFrom(asserted, 'typescript', 'package.json', [
+        { name: 'next', features: [] },
+        { name: 'next-safe-action', features: [] },
+      ]);
+      const kept = resolvePrecedence(all).find((d) => d.layer === 'nextjs-server-action');
+      expect(kept?.signal).toBe('next-safe-action');
+      expect(kept?.implied).toBeUndefined();
+    });
+  });
+
+  it('drops a weak detection outright when its group holds an exact one', () => {
+    // Why strength is not compared when replacing: a group with any exact
+    // signal loses all of its weak ones before `kept` is built, so two entries
+    // for one layer always share a strength.
+    const table: SignalTable = {
+      manifests: TABLE.manifests,
+      signals: {
+        typescript: [
+          { match: 'weakly', layer: 'nextjs-rsc', strength: 'weak' },
+          { match: 'firmly', layer: 'nextjs-middleware', strength: 'exact' },
+        ],
+      },
+      generated: { signals: [] },
+    };
+    const all = detectFrom(table, 'typescript', 'package.json', [
+      { name: 'weakly', features: [] },
+      { name: 'firmly', features: [] },
+    ]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['nextjs-middleware']);
   });
 
   it('does not answer a Cargo.toml that happens to depend on a crate named next', () => {
