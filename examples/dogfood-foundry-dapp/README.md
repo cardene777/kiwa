@@ -16,11 +16,17 @@ test/DogfoodToken.t.sol           -- Foundry Solidity test
 quality-report/                   -- 過去に生成した fidelity snapshot (履歴)
 ```
 
-## 実行
+## 実行 (現状は動かない)
+
+Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く
+remapping も無いため **`forge test` は現状 import 解決に失敗する**。
+
+もとは Rust 側の adapter が `forge` を CLI として起動し、 依存の解決もそちら側で完結していた。
+#1864 でその駆動を削除した結果、 Solidity test を走らせる経路が無くなっている。
+
+動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 別 Issue で扱う。
 
 ```bash
+# 依存を入れた後であればこの形で走る
 forge test --root examples/dogfood-foundry-dapp
 ```
-
-`forge` が PATH に無い host では実行できない。 kiwa 側の graceful skip は Rust harness が
-担っていたため、 現在は Foundry の有無をそのまま前提にする。

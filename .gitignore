@@ -110,12 +110,6 @@ examples/python-todo-poc/**/*.egg-info/
 examples/python-todo-poc/build/
 examples/python-todo-poc/dist/
 
-# Rust workspace (kiwa-rs + examples/rust-cargo-poc)
-# kiwa-rs ships as a library crate so Cargo.lock should not be committed at
-# the workspace root; library users pin their own. We keep target/ out of git
-# to avoid noisy churn from build artifacts.
-target/
-Cargo.lock
 # Lake build artifacts. `.lake/` is never anything but output.
 # `lake-manifest.json` pins a project's dependencies and belongs in a repository
 # that has any; the dogfood specs have none, and `lake build` rewrites it with

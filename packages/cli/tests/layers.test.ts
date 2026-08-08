@@ -157,8 +157,7 @@ describe('narrowing happens per runtime', () => {
       // recording; the rest stay because nothing could have detected them.
       expect(resolved.layers.filter((l) => NAMED_BY_SIGNALS.has(l.id) && l.runtime === 'typescript'))
         .toHaveLength(0);
-      expect(counts.rust).toBeUndefined();
-      expect(counts.go).toBeUndefined();
+      expect(counts.solidity).toBeUndefined();
     });
   });
 
@@ -538,23 +537,31 @@ describe('absence is established by looking', () => {
 
   it('sees a manifest added after the recording was taken', () => {
     // The recording answers for the moment it was taken. Reading which
-    // languages exist from it would miss a `go.mod` added since — and the
+    // languages exist from it would miss a manifest added since — and the
     // staleness check cannot catch that, because it only knows the manifests
     // the recording already named.
+    //
+    // The runtime under test has to have layers in the table, or the assertion
+    // compares an empty set with an empty set and holds however the code
+    // behaves. Solidity is used because its presence is established by the
+    // manifest alone, which is the case this test is about.
+    const solidityLayers = TABLE.filter((l) => l.runtime === 'solidity').length;
+    expect(solidityLayers).toBeGreaterThan(0);
+
     const root = fixture(
-      { 'foundry.toml': '[profile.default]\n', 'services/api/go.mod': 'module x\n' },
+      { 'package.json': '{"name":"app"}', 'services/api/foundry.toml': '[profile.default]\n' },
       {
         generated_at: fresh(),
-        scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
         detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
       },
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'go').length,
-      );
-      expect(resolved.warnings.join('\n')).not.toMatch(/excluded go/);
+      // The recording never named a Solidity manifest, but one exists now, so
+      // Solidity is not excluded.
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(solidityLayers);
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded solidity/);
     });
   });
 
