@@ -42,20 +42,6 @@ export const NATIVE_PACKAGES = [
     manifest: 'kiwa-py/pyproject.toml',
     declares: /^\s*name\s*=\s*["']([^"']+)["']/m,
   },
-  {
-    name: 'kiwa-test-rs',
-    registry: 'crates.io',
-    dir: 'kiwa-rs',
-    manifest: 'kiwa-rs/Cargo.toml',
-    declares: /^\s*name\s*=\s*["']([^"']+)["']/m,
-  },
-  {
-    name: 'kiwa-test-go',
-    registry: 'Go module',
-    dir: 'kiwa-go',
-    manifest: 'kiwa-go/go.mod',
-    declares: /^module\s+\S*?([^/\s]+)\s*$/m,
-  },
 ];
 
 // Search terms that describe what kiwa does. A term equal to a package name must not appear
@@ -86,8 +72,6 @@ export const CONCEPT_KEYWORDS = [
   'monorepo',
   'typescript',
   'python',
-  'rust',
-  'golang',
 ];
 
 // Marketplace tags are a shorter, search-facing subset. Generated for the same reason as
@@ -234,22 +218,30 @@ export function buildMetadata() {
     .join('; ');
   const native = NATIVE_PACKAGES.map((n) => `${n.name} (${n.registry})`).join(', ');
 
+  // 0 件になったら文そのものを出さない。 件数だけを差し替える形にすると
+  // 「0 language-native packages ship separately: .」 という壊れた文になる。
+  const nativeSentence = NATIVE_PACKAGES.length
+    ? ` ${NATIVE_PACKAGES.length === 1 ? 'One language-native package ships' : `${NATIVE_PACKAGES.length} language-native packages ship`} separately: ${native}.`
+    : '';
+
   // `/kiwa-test` is described by the chains it actually runs. Its SKILL.md defines execution
-  // steps for contract, dApp, browser, Rust, and Go only — Next.js ships as the standalone
+  // steps for contract, dApp and browser only — Next.js ships as the standalone
   // /kiwa-nextjs skill and is not wired into the orchestrator.
+  //
+  // The native-package count is derived rather than written, because #1864 removed two of
+  // the three and a literal would have kept advertising them.
   const description = [
     'Test toolchain for application boundaries. One Layer 1 spec generates the test layers a ' +
       'stack actually needs — Solidity contracts, dApp end-to-end, browser end-to-end, HTTP ' +
       'APIs, React components, CLI and file I/O, data pipelines, accessibility, and visual ' +
       'regression.',
-    `${packages.length} npm packages under @kiwa-lab/ cover five areas: ${areas}. ` +
-      `Three language-native packages ship separately: ${native}.`,
+    `${packages.length} npm packages under @kiwa-lab/ cover five areas: ${areas}.${nativeSentence}`,
     `${skills.length} Claude Code skills drive the chain. /kiwa-design writes the spec. ` +
       '/kiwa-forge and /kiwa-hardhat turn it into Foundry and Hardhat contract tests. ' +
       '/kiwa-play covers dApp end-to-end on anvil forks with Playwright and viem. ' +
       '/kiwa-vitest, /kiwa-api, /kiwa-ui, /kiwa-data, /kiwa-cli-test, and /kiwa-e2e cover the ' +
       'remaining layers. /kiwa-review scores spec and test coverage, and /kiwa-test ' +
-      'orchestrates the contract, dApp, browser, Rust, and Go chains.',
+      'orchestrates the contract, dApp and browser chains.',
     'Pre-release. All rights reserved until general availability; see LICENSE.',
   ].join('\n\n');
 
@@ -260,7 +252,11 @@ export function buildMetadata() {
   const marketplaceDescription =
     'kiwa — test toolchain for application boundaries, distributed as a single Claude Code ' +
     `plugin. ${skills.length} skills generate and run the test layers a stack needs, backed ` +
-    `by ${packages.length} npm packages and three language-native packages. Pre-release; ` +
+    `by ${packages.length} npm packages${
+      NATIVE_PACKAGES.length
+        ? ` and ${NATIVE_PACKAGES.length} language-native package${NATIVE_PACKAGES.length === 1 ? '' : 's'}`
+        : ''
+    }. Pre-release; ` +
     'all rights reserved.';
 
   const entryDescription =
@@ -269,8 +265,8 @@ export function buildMetadata() {
     'contract tests with /kiwa-forge and /kiwa-hardhat, drive dApp end-to-end runs on anvil ' +
     'forks with /kiwa-play, cover unit, API, component, data, CLI, and browser layers with ' +
     '/kiwa-vitest, /kiwa-api, /kiwa-ui, /kiwa-data, /kiwa-cli-test, and /kiwa-e2e, review spec ' +
-    'and test coverage with /kiwa-review, and orchestrate the contract, dApp, browser, Rust, ' +
-    'and Go chains with /kiwa-test.';
+    'and test coverage with /kiwa-review, and orchestrate the contract, dApp and browser ' +
+    'chains with /kiwa-test.';
 
   const plugin = {};
   for (const key of PLUGIN_IDENTITY_FIELDS) plugin[key] = existing[key];

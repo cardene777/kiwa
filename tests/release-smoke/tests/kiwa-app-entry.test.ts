@@ -58,20 +58,21 @@ describe('the declared output paths carry three different anchors', () => {
       acc[anchor] = (acc[anchor] ?? 0) + 1;
       return acc;
     }, {});
-    // `kiwa-examples` was 10 until #1842 moved the Rust and Go entries to the
-    // target-root form. Nothing declares kiwa's own `examples/` directory now;
-    // the three that remain are kiwa's internal fixtures, which are not a
-    // user's artefact and are skipped rather than substituted.
+    // Nothing declares kiwa's own `examples/` directory; the three that remain
+    // are kiwa's internal fixtures, which are not a user's artefact and are
+    // skipped rather than substituted.
     expect(counts).toEqual({
-      'project-root': 32,
+      'project-root': 22,
       'kiwa-fixtures': 3,
     });
   });
 
   it('names the layers that cannot be written into somebody else\'s project', () => {
     // A layer is reachable from a user's project when at least one of its
-    // declared paths is anchored there. Ten are not: the Rust and Go layers
-    // spell `examples/{example}/…`, which is kiwa's own directory.
+    // declared paths is anchored there. Ten were not: the Rust and Go layers
+    // spelled `examples/{example}/…`, which is kiwa's own directory. #1842
+    // moved them and #1864 removed those layers, so the answer is now none —
+    // which is what this pins, not the count.
     //
     // Both anchors on one producer is normal — `contract` writes the project's
     // test and kiwa's fixture copy from the same skill — so this asks whether a
@@ -195,17 +196,18 @@ describe('the entry point passes what the pieces it invokes actually need', () =
   const declaring = (option: string): string[] =>
     consumers.filter((skill) => declaredOptions(skill)?.includes(option));
 
-  it('only two consumers accept --layer, so it cannot be sent to all of them', () => {
+  it('no Layer 2 consumer accepts --layer, so it cannot be sent to any of them', () => {
     // `kiwa-nextjs` serves five layers and does not take `--layer`. Sending it
-    // means the flag is dropped and all five calls look the same.
-    expect(declaring('--layer')).toEqual(['kiwa-go', 'kiwa-rust']);
+    // means the flag is dropped and all five calls look the same. #1864 removed
+    // the only two consumers that did take it.
+    expect(declaring('--layer')).toEqual([]);
   });
 
   it('the spec path flag is spelled two different ways', () => {
     // Deciding one name and using it everywhere silently misses five skills.
     // The counts moved in #1851, which gave `kiwa-play` and `kiwa-edge` the
     // `--input-spec` they were missing.
-    expect(declaring('--input-spec')).toHaveLength(13);
+    expect(declaring('--input-spec')).toHaveLength(11);
     // `kiwa-hardhat` also declares it but is not in this list: `consumers` is
     // built from `consumer_skill`, and hardhat reaches `contract` through
     // `also_consumed_by` instead.
@@ -274,7 +276,7 @@ describe('the entry point passes what the pieces it invokes actually need', () =
     // And the reading table hands off rather than deciding on its own.
     const reading = step2.slice(0, step2.indexOf('| 自分が受けた'));
     expect(reading.split('\n').filter((l) => l.startsWith('| `all` |'))[0]).toMatch(/下表で分岐/);
-    expect(LAYERS.length).toBeGreaterThan(25);
+    expect(LAYERS.length).toBeGreaterThanOrEqual(20);
   });
 
   it('passes --layer through to the CLI rather than branching on it first', () => {
@@ -308,16 +310,13 @@ describe('the entry point passes what the pieces it invokes actually need', () =
       .filter(([, ids]) => ids.length > 1)
       .map(([path, ids]) => [path, ids.sort()] as const)
       .sort();
-    // Four groups collide, not one. The Next.js five are the largest, but
-    // `cli` / `data` / `orm-query` share a path across three different
-    // consumers, which the same overwrite applies to.
-    // One group left, and it is deliberate: cargo treats `tests/` as integration
-    // tests, one file per crate, and `kiwa-rust` states it lines both layers up
-    // on purpose. The other three were split in #1844 by writing each layer's
-    // spec suffix into its output name.
-    expect(collisions).toEqual([
-      ['{example}/tests/{module}.rs', ['rust-integration', 'rust-unit']],
-    ]);
+    // None left. Four groups collided once: the Next.js five, and `cli` /
+    // `data` / `orm-query` across three consumers, were split in #1844 by
+    // writing each layer's spec suffix into its output name. The last one was
+    // the two polyglot unit / integration layers, which shared a file because
+    // their runner treats one directory as integration tests — #1864 removed
+    // that language entirely.
+    expect(collisions).toEqual([]);
   });
 
   it('says what it does when outputs collide, rather than overwriting', () => {

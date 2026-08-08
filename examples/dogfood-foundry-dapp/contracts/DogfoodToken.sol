@@ -2,10 +2,9 @@
 pragma solidity ^0.8.20;
 
 /// @title DogfoodToken
-/// @notice Minimal ERC20 used by the v1.11-4 dogfood app to exercise the
-///         kiwa-test-rs Foundry + alloy integration end to end. Not
-///         production-grade — the point is to expose a stable ABI + a
-///         handful of state changes for the fidelity harness to observe.
+/// @notice Minimal ERC20 used by the dogfood app to exercise the Foundry test
+///         path end to end. Not production-grade — the point is to expose a
+///         stable ABI + a handful of state changes for the test to observe.
 contract DogfoodToken {
     string public constant NAME = "DogfoodToken";
     string public constant SYMBOL = "DOG";

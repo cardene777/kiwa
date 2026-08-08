@@ -1,10 +1,10 @@
 ---
 name: kiwa-review
 description: |
-  kiwa skill chain で生成された test 仕様書 (`/kiwa-design` 出力) と test code (`/kiwa-forge` `/kiwa-hardhat` `/kiwa-play` `/kiwa-rust` `/kiwa-go` 出力) を review する skill。
+  kiwa skill chain で生成された test 仕様書 (`/kiwa-design` 出力) と test code (`/kiwa-forge` `/kiwa-hardhat` `/kiwa-play` 出力) を review する skill。
   3 mode — `spec-review` (生成 spec の 11 観点網羅 / 優先度妥当性 / 不足観点を判定) / `test-review` (spec vs 実装 test の整合 / 観点別 cover 率 / 追加すべき test を提案) / `result-review` (test 実行結果 / coverage 数値 / flaky 検出 / 統合 report 全体を集約 review)。
-  v1.4-6 (Issue #581) で polyglot 4 layer (rust-unit / rust-integration / go-unit / go-integration) 対応追加、 v1.5-6 (Issue #597) で polyglot 縦深化 4 layer (rust-axum / rust-actix-web / go-gin / go-echo) 対応追加、 v1.7-6 (Issue #627) で polyglot 継続深化 2 layer (rust-tower-http / go-fiber) 対応追加、 5 言語 (TS / Python / Solidity / Rust / Go) + 6 web framework (axum / actix-web / tower-http / gin / echo / fiber) の spec vs test 整合 review を統一経路で扱う。
-  単体起動 + 他 kiwa skill (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-rust / kiwa-go / kiwa-test) の完了 step から自動呼出。 report は `tests/reports/review/` に Write。
+  3 言語 (TypeScript / Python / Solidity) の spec と test の整合 review を統一経路で扱う。
+  単体起動 + 他 kiwa skill (kiwa-design / kiwa-forge / kiwa-hardhat / kiwa-play / kiwa-test) の完了 step から自動呼出。 report は `tests/reports/review/` に Write。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -31,7 +31,7 @@ $ARGUMENTS
 - `--module {name}` — 対象 module 名 (spec / test file の特定キー)
 <!-- kiwa-layers:review-enum:start -->
 
-- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — review 対象の layer を指定 (default `all`)。
+- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|all}` — review 対象の layer を指定 (default `all`)。
   値は `kiwa-design` の enum と同一で、どちらも `docs/layers.json` から生成される。
 
 <!-- kiwa-layers:review-enum:end -->
@@ -115,16 +115,6 @@ SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。
 | `auth` | `/kiwa-auth` | `{example}/tests/{module}.auth.test.ts` |
 | `job-queue` | `/kiwa-queue` | `{example}/tests/{module}.queue.test.ts` |
 | `cache` | `/kiwa-cache` | `{example}/tests/{module}.cache.test.ts` |
-| `rust-unit` | `/kiwa-rust` | `{example}/tests/{module}.rs` |
-| `rust-integration` | `/kiwa-rust` | `{example}/tests/{module}.rs` |
-| `rust-axum` | `/kiwa-rust` | `{example}/tests/{module}_axum.rs` |
-| `rust-actix-web` | `/kiwa-rust` | `{example}/tests/{module}_actix.rs` |
-| `rust-tower-http` | `/kiwa-rust` | `{example}/tests/{module}_tower_http.rs` |
-| `go-unit` | `/kiwa-go` | `{example}/{module}_test.go` |
-| `go-integration` | `/kiwa-go` | `{example}/integration/{module}_test.go` |
-| `go-gin` | `/kiwa-go` | `{example}/{module}_gin_test.go` |
-| `go-echo` | `/kiwa-go` | `{example}/{module}_echo_test.go` |
-| `go-fiber` | `/kiwa-go` | `{example}/{module}_fiber_test.go` |
 
 <!-- kiwa-layers:resolver:end -->
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read

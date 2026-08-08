@@ -2,7 +2,7 @@
 
 ## 配布物
 
-kiwa は npm の `@kiwa-lab/*` packages、Go、Python、Rust の native adapter、Claude Code plugin で構成されます。runtime package は test code から import する実装です。plugin は `.claude/skills` を配布し、Claude Code から test 設計、生成、review を実行するためのものです。plugin を入れても runtime package は自動で project dependency に追加されません。
+kiwa は npm の `@kiwa-lab/*` packages、Python の native adapter、Claude Code plugin で構成されます。runtime package は test code から import する実装です。plugin は `.claude/skills` を配布し、Claude Code から test 設計、生成、review を実行するためのものです。plugin を入れても runtime package は自動で project dependency に追加されません。
 
 ## skill の名前
 

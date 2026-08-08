@@ -124,10 +124,7 @@ describe('license consistency across every declaring surface', () => {
     // 最初の実装はここを丸ごと見落としていた (grep pattern が .toml を含んでいなかった)。
     const declarations: Array<[string, string]> = [
       ['kiwa-py/pyproject.toml', 'LicenseRef-Proprietary'],
-      ['kiwa-rs/Cargo.toml', 'LicenseRef-Proprietary'],
       ['kiwa-py/README.md', 'All rights reserved'],
-      ['kiwa-rs/README.md', 'All rights reserved'],
-      ['kiwa-go/README.md', 'All rights reserved'],
     ];
 
     for (const [rel, expected] of declarations) {
@@ -143,10 +140,7 @@ describe('license consistency across every declaring surface', () => {
       'README.ja.md',
       'docs/.vitepress/config.mts',
       'kiwa-py/pyproject.toml',
-      'kiwa-rs/Cargo.toml',
       'kiwa-py/README.md',
-      'kiwa-rs/README.md',
-      'kiwa-go/README.md',
     ];
 
     for (const rel of surfaces) {

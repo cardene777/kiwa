@@ -24,8 +24,8 @@ function siteLibraries() {
   const entries = [];
   for (const category of readdirSync(librariesRoot, { withFileTypes: true })) {
     if (!category.isDirectory()) continue;
-    // kiwa-test-go / kiwa-test-py / kiwa-test-rs are standalone native
-    // projects, not the similarly named TypeScript adapter packages.
+    // The native-language projects are standalone, not the similarly named
+    // TypeScript adapter packages.
     if (category.name === 'native-languages') continue;
     const categoryPath = join(librariesRoot, category.name);
     for (const library of readdirSync(categoryPath, { withFileTypes: true })) {

@@ -1,7 +1,7 @@
 ---
 name: docs-generate
 description: |
-  kiwa の 3 系統 API reference (TypeScript typedoc + Rust cargo doc + Solidity forge doc) を一括で `docs/api/{typescript,rust,solidity}/` に生成する local skill。
+  kiwa の 2 系統 API reference (TypeScript typedoc + Solidity forge doc) を一括で `docs/api/{typescript,solidity}/` に生成する local skill。
   CI 全面禁止規約 (`rules/git-workflow.md`) に沿って **local 実行専用**、 GitHub Actions 経路は使わない。
   `--only <lang>` で特定言語のみ再生成、 `--check` で新規追加 API surface の diff 確認、 `--publish` で v1.11-6 の `/docs-publish` skill (VitePress build + gh-pages push) を chain 起動する。
 user_invocable: true
@@ -10,9 +10,9 @@ agent: general-purpose
 allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ---
 
-# /docs-generate — kiwa 3 系統 API reference 一括生成 skill
+# /docs-generate — kiwa 2 系統 API reference 一括生成 skill
 
-v1.11-5 (Issue #685) で追加、 kiwa の 23 TypeScript packages + kiwa-test-rs Rust crate + dogfood-foundry-dapp Solidity contracts を横断して API reference を生成する。 tutorial / migration guide / release-gate SSOT は既存 `docs/tutorials/` `docs/migrations/` `docs/quality/` で完結、 本 skill は「API reference 3 系統」 のみを扱う。
+v1.11-5 (Issue #685) で追加、 kiwa の TypeScript packages + dogfood-foundry-dapp Solidity contracts を横断して API reference を生成する。 tutorial / migration guide / release-gate SSOT は既存 `docs/tutorials/` `docs/migrations/` `docs/quality/` で完結、 本 skill は「API reference 2 系統」 のみを扱う。
 
 ## trigger
 
@@ -24,13 +24,12 @@ v1.11-5 (Issue #685) で追加、 kiwa の 23 TypeScript packages + kiwa-test-rs
 ## 前提
 
 - Node.js ≥ 20 + pnpm on PATH
-- Rust toolchain (cargo) on PATH
 - Foundry CLI (forge) on PATH — Solidity docs 生成時のみ必須、 未 install 時は Solidity 経路 skip
 - `pnpm install` 済 (typedoc は devDependency に既存想定)
 
 ## オプション
 
-- `--only <lang>` — `typescript` / `rust` / `solidity` のいずれかで、 対象言語のみ生成
+- `--only <lang>` — `typescript` / `solidity` のいずれかで、 対象言語のみ生成
 - `--check` — 新規 export を diff 表示のみ (write は skip、 CI 相当)
 - `--publish` — 生成後に `/docs-publish` skill (v1.11-6) を chain 起動
 - `--out <dir>` — 出力先 dir を上書き (default `docs/api/<lang>/`)
@@ -43,11 +42,11 @@ $ARGUMENTS
 
 ### Step 1: 生成 target 判定
 
-`--only` 指定時はそれ、 なければ 3 系統全対象。 各系統で対応 CLI (typedoc / cargo doc / forge doc) の PATH 存在を確認、 不在なら warn + skip。 3 系統全部 skip した場合は「Foundry / Rust / Node のいずれかを install してください」 で abort。
+`--only` 指定時はそれ、 なければ 2 系統全対象。 各系統で対応 CLI (typedoc / forge doc) の PATH 存在を確認、 不在なら warn + skip。 2 系統とも skip した場合は「Foundry / Node のいずれかを install してください」 で abort。
 
 ### Step 2: 出力 dir 準備
 
-`docs/api/typescript/` `docs/api/rust/` `docs/api/solidity/` を rm -rf → mkdir。 `--out` 指定時はその dir 配下に同構造で作成。
+`docs/api/typescript/` `docs/api/solidity/` を rm -rf → mkdir。 `--out` 指定時はその dir 配下に同構造で作成。
 
 ### Step 3: TypeScript typedoc 生成
 
@@ -60,22 +59,7 @@ pnpm dlx typedoc --entryPointStrategy expand --entryPoints "packages/*/src/index
 
 生成完了後、 `docs/api/typescript/index.html` の path を出力に含める。
 
-### Step 4: Rust cargo doc 生成
-
-kiwa-test-rs 単独 (feature 全 opt-in):
-
-```bash
-cargo doc --package kiwa-test-rs --all-features --no-deps --target-dir docs/api/rust-target
-```
-
-cargo doc の出力は `target/doc/kiwa/` になるので、 `docs/api/rust/` に copy + `docs/api/rust-target/` 除去:
-
-```bash
-cp -r docs/api/rust-target/doc/kiwa docs/api/rust/
-rm -rf docs/api/rust-target
-```
-
-### Step 5: Solidity forge doc 生成
+### Step 4: Solidity forge doc 生成
 
 `examples/dogfood-foundry-dapp/` を root に forge doc:
 
@@ -85,17 +69,16 @@ forge doc --root examples/dogfood-foundry-dapp --out docs/api/solidity/dogfood-f
 
 forge doc の出力は markdown なので VitePress で直接 render 可能。
 
-### Step 6: 生成 summary 表示
+### Step 5: 生成 summary 表示
 
 各系統の 出力 path + 生成 file 数を summary で出力:
 
 ```
 ✅ TypeScript typedoc — docs/api/typescript/ (250 HTML files)
-✅ Rust cargo doc — docs/api/rust/ (kiwa module + contract + integration + axum + actix + tower-http)
 ⚠️ Solidity forge doc — skipped (forge CLI not on PATH)
 ```
 
-### Step 7: `--publish` 指定時
+### Step 6: `--publish` 指定時
 
 `/docs-publish` skill (v1.11-6 で追加) を chain 起動、 引数はそのまま渡す。
 
@@ -113,4 +96,4 @@ forge doc の出力は markdown なので VitePress で直接 render 可能。
 
 ## 生成物の git tracking
 
-`docs/api/{typescript,rust,solidity}/` は `.gitignore` で除外済 (v1.11-5 で追加)。 出力は local build 前提、 GitHub Pages 経由 (`/docs-publish`) で公開する。
+`docs/api/{typescript,solidity}/` は `.gitignore` で除外済 (v1.11-5 で追加)。 出力は local build 前提、 GitHub Pages 経由 (`/docs-publish`) で公開する。

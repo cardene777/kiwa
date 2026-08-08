@@ -5,7 +5,7 @@
     "",
     "docs/layers.json answers 'what does this layer need'. This file answers the",
     "question `kiwa init --detect` actually asks, which is the other way round:",
-    "here is a Cargo.toml, which layers apply.",
+    "here is a package.json, which layers apply.",
     "",
     "Two kinds of entry, and they are not interchangeable:",
     "",
@@ -41,20 +41,16 @@
     "opaque.",
     "",
     "Precedence. A signal can point at more than one layer — `ioredis` serves both",
-    "cache and job-queue, `axum` appears in a project whose real subject is",
-    "tower-http. `strength` orders them: an `exact` signal settles the question, a",
-    "`weak` one only applies when no exact signal claimed the same layer group.",
-    "For Rust the exact signal is the kiwa-test-rs feature, because the framework",
-    "dependency alone cannot tell rust-axum from rust-tower-http — the tower-http",
-    "example depends on axum too.",
+    "cache and job-queue. `strength` orders them: an `exact` signal settles the",
+    "question, a `weak` one only applies when no exact signal claimed the same layer",
+    "group.",
     "",
     "`manifests` maps a filename to the language whose presence it establishes.",
-    "Three of them are also read for dependencies (Cargo.toml, go.mod,",
-    "package.json); the two Solidity entries are not — nothing maps a Solidity",
-    "dependency to a layer, so there is nothing to read. Their presence is still",
-    "the only way to rule the `contract` layer out, and without them every",
-    "TypeScript project was offered a Solidity test layer (measured on five real",
-    "applications).",
+    "Only `package.json` is also read for dependencies; the two Solidity entries are",
+    "not — nothing maps a Solidity dependency to a layer, so there is nothing to",
+    "read. Their presence is still the only way to rule the `contract` layer out,",
+    "and without them every TypeScript project was offered a Solidity test layer",
+    "(measured on five real applications).",
     "",
     "`hardhat.config.*` is written with a star because the extension varies",
     "(.js / .ts / .cjs / .mjs). The scanner matches it by prefix.",
@@ -63,75 +59,14 @@
     "`kiwa init --detect` prints and writes .kiwa/stack.json, and `--apply` is a",
     "separate step. A wrong guess costs a line of output.",
     "",
-    "`also` exists because one dependency can imply more than one layer. The adapter package serves the unit and the integration layer alike, and nothing in Cargo.toml or go.mod distinguishes them: rust-cargo-poc has tests/poc.rs and tests/poc_integration.rs and one kiwa-test-rs entry. Reporting only the unit layer would hide half of what the project already tests."
+    "`also` exists because one dependency can imply more than one layer. A single entry in package.json can serve two layers at once — `ioredis` is read by both the cache and the job-queue adapter — and nothing in the manifest distinguishes them. Reporting only one would hide half of what the project already tests."
   ],
   "manifests": {
-    "Cargo.toml": "rust",
-    "go.mod": "go",
     "package.json": "typescript",
     "foundry.toml": "solidity",
     "hardhat.config.*": "solidity"
   },
   "signals": {
-    "rust": [
-      {
-        "match": "kiwa-test-rs",
-        "kind": "feature",
-        "features": {
-          "axum": "rust-axum",
-          "actix-web": "rust-actix-web",
-          "tower-http": "rust-tower-http"
-        },
-        "default": "rust-unit",
-        "strength": "exact",
-        "note": "Presence of the adapter means the unit layer. It may also mean the integration layer — rust-cargo-poc carries tests/poc.rs and tests/poc_integration.rs against one entry — so `also` states that as a fallback the resolver drops once a framework layer appears.",
-        "also": [
-          "rust-integration"
-        ]
-      },
-      {
-        "match": "axum",
-        "layer": "rust-axum",
-        "strength": "weak",
-        "note": "rust-tower-http-poc depends on axum as well, so this only applies when no feature said otherwise."
-      },
-      {
-        "match": "actix-web",
-        "layer": "rust-actix-web",
-        "strength": "weak"
-      },
-      {
-        "match": "tower-http",
-        "layer": "rust-tower-http",
-        "strength": "weak"
-      }
-    ],
-    "go": [
-      {
-        "match": "github.com/cardene777/kiwa-test-go",
-        "strength": "exact",
-        "note": "Presence of the adapter means the unit layer. It may also mean the integration layer — go-testing-poc carries calc_test.go and integration/client_test.go against one module — so `also` states that as a fallback the resolver drops once a framework layer appears.",
-        "default": "go-unit",
-        "also": [
-          "go-integration"
-        ]
-      },
-      {
-        "match": "github.com/gin-gonic/gin",
-        "layer": "go-gin",
-        "strength": "exact"
-      },
-      {
-        "match": "github.com/labstack/echo",
-        "layer": "go-echo",
-        "strength": "exact"
-      },
-      {
-        "match": "github.com/gofiber/fiber",
-        "layer": "go-fiber",
-        "strength": "exact"
-      }
-    ],
     "typescript": [
       {
         "match": "next",
@@ -176,10 +111,10 @@
       "as its consumer, so its peers have nothing to point at.",
       "",
       "Every entry carries a `language` and applies only to manifests of that",
-      "language. It is not decoration: these are npm names, and npm names share a",
-      "namespace with Rust crate names — `redis`, `postgres` and `testcontainers`",
-      "all exist in both. An entry with no `language` matches nothing, because a",
-      "missing field means the generator is out of date and 'applies everywhere' is",
+      "language. It is not decoration: these are npm names, and the same spelling",
+      "exists in other package registries — `redis`, `postgres` and `testcontainers`",
+      "are taken in more than one. An entry with no `language` matches nothing, because",
+      "a missing field means the generator is out of date and 'applies everywhere' is",
       "the behaviour that field exists to remove."
     ],
     "signals": [

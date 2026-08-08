@@ -1,6 +1,7 @@
 /**
- * Release-gate 11-axis contract — matches dogfood-reth-node-test so both dapp
- * paths converge on the same schema. The test forces every axis through the
+ * Release-gate 11-axis contract — shaped to match `dogfood-reth-node-test` so
+ * both dapp paths converged on one schema. #1864 removed that dogfood; the
+ * schema is still what downstream reads. The test forces every axis through the
  * harness at least once so downstream consumers (docs / VitePress / npm
  * publish) have a stable structure to bind to.
  */

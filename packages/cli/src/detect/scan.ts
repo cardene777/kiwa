@@ -8,10 +8,10 @@
  * definition names — one level, declared by the project itself.
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { readCargoToml, readGoMod, readPackageJson, type Dependency } from './manifests.js';
+import { readPackageJson, type Dependency } from './manifests.js';
 
 /** Drop a trailing YAML comment, which `[a, b] # note` would otherwise carry. */
 function stripHash(line: string): string {
@@ -24,11 +24,20 @@ export interface ScannedManifest {
   path: string;
   language: string;
   deps: Dependency[];
+  /**
+   * The mtime this file had when its contents were read, in milliseconds.
+   *
+   * Carried rather than re-derived so the recording's timestamp can describe
+   * *what was read*. Stat-ing again at write time answers a later question, and
+   * an edit landing in between would be covered by a stamp that never saw it.
+   *
+   * `undefined` when the stat failed, which the writer treats as no
+   * information rather than as a zero.
+   */
+  mtimeMs?: number;
 }
 
 const READERS: Record<string, { language: string; read: (source: string) => Dependency[] }> = {
-  'Cargo.toml': { language: 'rust', read: readCargoToml },
-  'go.mod': { language: 'go', read: readGoMod },
   'package.json': { language: 'typescript', read: readPackageJson },
 };
 
@@ -66,7 +75,24 @@ function readManifestsIn(dir: string, root: string, out: ScannedManifest[]): voi
       continue;
     }
     const rel = full.startsWith(root) ? full.slice(root.length + 1) || name : full;
-    out.push({ path: rel, language: reader.language, deps: reader.read(source) });
+    const entry: ScannedManifest = {
+      path: rel,
+      language: reader.language,
+      deps: reader.read(source),
+    };
+    // Taken next to the read, so it describes the contents just parsed. A stat
+    // taken later describes whatever the file became.
+    //
+    // Left unset rather than assigned `undefined` when the stat fails: the
+    // field is optional and `exactOptionalPropertyTypes` is on, so the two are
+    // different types. The writer treats absent as "no information", which is
+    // what a failed stat is.
+    try {
+      entry.mtimeMs = statSync(full).mtimeMs;
+    } catch {
+      // No mtime for this entry.
+    }
+    out.push(entry);
   }
 }
 
@@ -217,15 +243,15 @@ export interface ManifestPresence {
  * because a project excluding a directory from its workspace means it. That is
  * the right basis for reading dependencies.
  *
- * It is the wrong basis for concluding something is absent. "No `go.mod` in the
- * directories a workspace file named" is much weaker than "no `go.mod`", and a
- * Go service in an undeclared `services/api` is invisible to it. Since
- * `resolveLayers` excludes a runtime's layers on absence, the absence has to be
- * established by looking.
+ * It is the wrong basis for concluding something is absent. "No `foundry.toml`
+ * in the directories a workspace file named" is much weaker than "no
+ * `foundry.toml`", and a contract project in an undeclared `services/chain` is
+ * invisible to it. Since `resolveLayers` excludes a runtime's layers on
+ * absence, the absence has to be established by looking.
  *
  * Paths rather than languages, because the same distinction applies one level
- * down: a second Rust crate the workspace does not declare leaves the language
- * set unchanged while carrying a framework nobody read.
+ * down: a second `package.json` the workspace does not declare leaves the
+ * language set unchanged while carrying a framework nobody read.
  *
  * Which is also why the result says whether the looking finished.
  */
@@ -267,7 +293,9 @@ export function presentManifests(cwd: string, cap: number = VISIT_CAP): Manifest
     // That last part is the reason the readers moved here too. Probing with
     // `existsSync` answers yes for a directory, so a directory named
     // `Cargo.toml` was reported as a Rust manifest and kept Rust's five layers
-    // from ever being excluded. Measured, not hypothesised.
+    // from ever being excluded. Measured, not hypothesised — before #1864
+    // removed that reader. The shape is the reader's, not Rust's, so the same
+    // probe would do the same to `package.json`.
     for (const entry of entries) {
       if (entry.isDirectory()) continue;
       const reader = READERS[entry.name];

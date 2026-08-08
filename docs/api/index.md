@@ -13,7 +13,6 @@ kiwa の各 lib API を分類別に列挙。 各 lib page には Overview + Supp
 kiwa は上記の hand-written reference に加えて、 language-native の auto-generated API reference も持つ:
 
 - **TypeScript** — [`/api/typescript/`](./typescript/) covers every `@kiwa-lab/*` package (typedoc output)
-- **Rust** — [`/api/rust/kiwa/`](./rust/kiwa/) covers `kiwa-test-rs` (cargo doc output)
 - **Solidity** — [`/api/solidity/dogfood-foundry-dapp/`](./solidity/dogfood-foundry-dapp/) covers the dogfood Foundry project (forge doc output)
 
 ## test-taxonomy guide
@@ -31,4 +30,4 @@ kiwa は上記の hand-written reference に加えて、 language-native の aut
 claude /docs-generate
 ```
 
-typedoc + cargo doc + forge doc を順次実行、 `docs/api/<language>/` に書出す。
+typedoc + forge doc を順次実行、 `docs/api/<language>/` に書出す。

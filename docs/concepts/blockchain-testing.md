@@ -1,5 +1,7 @@
 # Blockchain testing — chain state / EL client integration / fuzz shrinker / reorg semantics (SSOT)
 
+> **Three of the four axes have no implementation.** #1864 removed the Rust harness, so every `kiwa::contract::*` type and every `cargo` command below describes what v1.18 shipped rather than what is installable now. Axis 4 (reorg) is TypeScript and still runs — see [`@kiwa-lab/dapp`](../libraries/foundation/dapp/) and [Tutorial 27](../tutorials/27-dapp-e2e-reorg). The semantics the other three record are kept because they are what a replacement has to reproduce; see § Test count baseline for where each stands.
+
 kiwa's v1.10 `kiwa::contract::foundry` + `kiwa::contract::alloy` covered the "compile a contract, spawn anvil, drive JSON-RPC" case. v1.18 adds four axes on top of that base — the ones production dApp teams hit once their `forge test` suite is green but production still breaks. This concept doc is the SSOT for those four axes; the tutorials and dogfood apps are the concrete implementations.
 
 ## Axis 1 — Chain state simulation
@@ -122,19 +124,15 @@ All three patterns are pure — they add no runtime overhead beyond the RPC call
 
 ## Test count baseline
 
-The v1.18 dogfood harness ships the following behaviour test counts per axis.
+#1864 removed the Rust harness, which drove axes 1 – 3. What remains is the TypeScript side.
 
-- Axis 1 (chain state) — `dogfood-reth-node-test/tests/scenarios_mock.rs` × 10 + `dogfood-dapp-e2e-reorg/tests/unit/mock-scenarios.test.ts` × 10 = **20 tests**
-- Axis 2 (EL client) — `kiwa-rs/tests/contract_reth.rs` × 11 + `dogfood-reth-node-test/tests/fidelity_report.rs` × 5 = **16 tests**
-- Axis 3 (fuzz shrinker) — `kiwa-rs/tests/contract_foundry_invariant.rs` × 10 + `dogfood-foundry-invariant-fuzz/tests/invariant_mock.rs` × 12 = **22 tests**
 - Axis 4 (reorg) — `dogfood-dapp-e2e-reorg/tests/e2e/reorg-4scenario.spec.ts` × 5 (1 warmup + 4 scenarios) + `dogfood-dapp-e2e-reorg/tests/unit/fidelity-report.test.ts` × 9 = **14 tests**
 
-Every count sits above the 10-test release-gate floor so the 11-axis check passes without special-casing the blockchain surfaces.
+Axes 1 – 3 have no driver at present. The Solidity contracts and the Foundry configuration for
+`dogfood-foundry-dapp` and `dogfood-foundry-invariant-fuzz` are still in the repository; driving
+them from Foundry directly is open work.
 
 ## References
 
-- [Tutorial 25 — Reth node test](../tutorials/25-reth-node-test)
-- [Tutorial 26 — Foundry invariant + fuzz runner](../tutorials/26-foundry-invariant-fuzz)
 - [Tutorial 27 — dApp e2e reorg](../tutorials/27-dapp-e2e-reorg)
 - [Migration v1.17 → v1.18](../migrations/v1.17-to-v1.18)
-- v1.10 baseline — [Rust contract test from zero](../tutorials/03-rust-contract-from-zero)

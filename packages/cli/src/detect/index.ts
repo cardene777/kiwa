@@ -81,7 +81,7 @@ export function stackFileExists(cwd: string): boolean {
 export function writeStackFile(
   cwd: string,
   layers: Detection[],
-  scanned: { path: string; language: string }[] = [],
+  scanned: { path: string; language: string; mtimeMs?: number }[] = [],
   now: Date = new Date(),
 ): string {
   const dir = join(cwd, '.kiwa');
@@ -90,13 +90,32 @@ export function writeStackFile(
   const body = {
     // When the answer was taken. A reader compares it against the manifests to
     // tell a current detection from one that predates an edit — without it,
-    // adding `axum` to Cargo.toml and not re-running leaves the file claiming
-    // the unit layer, and a reader narrowing on that picks the wrong one.
+    // adding `next` to package.json and not re-running leaves the file naming
+    // none of the `nextjs-*` layers, and a reader narrowing on that drops them.
     generated_at: now.toISOString(),
     // Which manifests were read, not just which ones matched. "We read
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.
-    scanned: scanned.map((m) => ({ manifest: m.path, language: m.language })),
+    //
+    // `mtime_ms` is the mtime each file had when `scan` read it, at full
+    // precision, so the reader can ask "is this the same file I read" rather
+    // than "was it touched after some moment". The two are not the same
+    // question, and the second one cannot be answered here: `generated_at` is
+    // an ISO string carrying whole milliseconds while an mtime carries
+    // fractions of one (measured: `1786186801940.7078`), so any comparison
+    // between them has a one-millisecond band where the writer's own output and
+    // an edit made just after it are indistinguishable. Accepting that band
+    // makes `kiwa init --detect` reject what it just wrote; rejecting it lets a
+    // same-millisecond edit through. Recording the value sidesteps the choice.
+    //
+    // Written per entry rather than as one timestamp because that is the
+    // granularity the question has: each manifest is compared against the value
+    // it had, not against a summary of all of them.
+    scanned: scanned.map((m) => ({
+      manifest: m.path,
+      language: m.language,
+      ...(m.mtimeMs === undefined ? {} : { mtime_ms: m.mtimeMs }),
+    })),
     // Which table produced this answer. The staleness check compares the
     // recording against the manifests, which cannot see that the signal table
     // itself changed — and a recording taken before a signal existed says

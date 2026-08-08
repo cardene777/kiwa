@@ -1,43 +1,41 @@
 # dogfood-foundry-dapp
 
-Dogfood app 3 (v1.11-4) — a Solidity ERC20 project driven from Rust through `kiwa-test-rs`'s `contract::foundry` + `contract::alloy` adapters. Provides a real-vs-mock harness that runs against the Foundry CLI when installed (`KIWA_MODE=real`) and against kiwa's graceful skip shape otherwise (`KIWA_MODE=mock`). Feeds behavioural fidelity into `@kiwa-lab/quality-metrics` via a JSON snapshot.
+Solidity の ERC20 project。 `contracts/DogfoodToken.sol` と Foundry の Solidity test を持ち、
+`/kiwa-forge` の対象と `/docs-generate` の `forge doc` 生成元を兼ねる。
+
+もとは Rust 側の adapter から駆動する real-vs-mock harness を持っていたが、 #1864 で Rust
+対応ごと削除した。 残っているのは
+Solidity 側だけで、 test は `forge test` で走らせる。
 
 ## Layout
 
 ```
-Cargo.toml                        -- Rust crate manifest (workspace member)
 foundry.toml                      -- Foundry project descriptor (src/out/test)
 contracts/DogfoodToken.sol        -- ERC20 contract
 test/DogfoodToken.t.sol           -- Foundry Solidity test
-src/lib.rs                        -- adapters (mock + real) + fidelity harness
-tests/
-  e2e_mock_mode.rs                -- 8 mock-mode tests (deterministic)
-  fidelity_report.rs              -- 3 harness tests (real graceful skip)
-  emit_fidelity_report.rs         -- writes quality-report/fidelity-latest.{md,json}
+quality-report/                   -- 過去に生成した fidelity snapshot (履歴)
 ```
 
-## Adapters
+## perf 計測は無い (意図的)
 
-- `MockAdapter` — never invokes the Foundry CLI. Skips `run_forge_test`, parses ABI from an inline JSON blob, returns a deterministic `Provider::Http` / `Signer::LocalWallet`. Baseline for the fidelity diff.
-- `RealAdapter` — uses `FoundryEnv::detect` to decide whether to actually invoke Foundry. When the CLI is missing every CLI-dependent op returns `FOUNDRY_ENV_MISSING`; the encoding + provider / signer ops still work so the harness measures a mixed divergence set.
+`vitest.perf.config.ts` があったが #1864 で削除した。 include していた
+`tests/perf/**/*.perf.ts` は Rust 側 harness と一緒に消えており、 残しても
+`No test files found` で exit 1 になるだけで、 config の存在が計測の存在に見える。
 
-## Run
+計測を戻すなら Foundry から直接駆動する形になる。 `forge test` が動く前提が要るため
+#1868 の後に別途決める。
+
+## 実行 (現状は動かない)
+
+Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く
+remapping も無いため **`forge test` は現状 import 解決に失敗する**。
+
+#1864 で Rust 側の harness を削除した結果、 Solidity test を走らせる経路が無くなった。
+`forge-std` はもとから `lib/` に無く、 Rust 側が代わりに解決していたわけでもない。
+
+動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 #1868 で扱う。
 
 ```bash
-cargo test -p dogfood-foundry-dapp
-cat quality-report/fidelity-latest.md
-```
-
-Optional — when Foundry CLI is available:
-
-```bash
+# 依存を入れた後であればこの形で走る
 forge test --root examples/dogfood-foundry-dapp
 ```
-
-## Related
-
-- v1.10-5 `kiwa::contract::foundry` (feature `contract-foundry`)
-- v1.10-6 `kiwa::contract::alloy` (feature `contract-alloy`)
-- v1.11-1 `@kiwa-lab/quality-metrics`
-- v1.11-2 dogfood-supabase-saas-app / v1.11-3 dogfood-rabbitmq-worker-app (adapter template origin)
-- v1.11 milestone parent [#680](https://github.com/cardene777/kiwa/issues/680), this sub [#684](https://github.com/cardene777/kiwa/issues/684)

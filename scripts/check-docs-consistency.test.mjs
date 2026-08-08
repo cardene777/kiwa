@@ -42,11 +42,11 @@ function definitionSource(categories, exempt) {
 }
 
 // 検査 script が存在を要求する特例文書。package を持たないが置き場所は決まっている。
+// 実 `docs/libraries.json` の `exemptDocuments` と同じ 2 件にしてある。 go / rust も
+// 置いていたが、 #1864 が両文書を消したので、 fixture だけが要求し続ける形になっていた。
 const EXEMPT_LAYOUT = [
   { name: 'kiwa', category: 'foundation' },
-  { name: 'go', category: 'native-languages' },
   { name: 'python', category: 'native-languages' },
-  { name: 'rust', category: 'native-languages' },
 ];
 
 /** 特例文書を fixture に置く。`skip` に挙げた `分類/名前` は置かない。 */
@@ -215,8 +215,8 @@ test('a category mismatch between the sidebar and the directory fails', () => {
 // 外していないと、正常な checkout が毎回落ちる。
 test('the standalone native documents pass without a package', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    // fixture は native-languages の 3 文書を既定で置く。package も sidebar 定義も
-    // 無いが、特例として通ることを確かめる。
+    // fixture は native-languages の 1 文書 (python) を既定で置く。package も
+    // sidebar 定義も無いが、特例として通ることを確かめる。
     const result = runCheck(root);
     assert.equal(result.status, 0, result.stderr);
   });
@@ -226,13 +226,13 @@ test('the standalone native documents pass without a package', () => {
 // 書くため、文書が消えれば link が切れる。
 test('a missing standalone native document fails', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    rmSync(join(root, 'docs', 'libraries', 'native-languages', 'go'), {
+    rmSync(join(root, 'docs', 'libraries', 'native-languages', 'python'), {
       recursive: true,
       force: true,
     });
     const result = runCheck(root);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /native-languages\/go/);
+    assert.match(result.stderr, /native-languages\/python/);
     assert.match(result.stderr, /is missing/);
   });
 });

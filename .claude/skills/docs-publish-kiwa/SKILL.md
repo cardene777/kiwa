@@ -3,7 +3,7 @@ name: docs-publish-kiwa
 description: |
   kiwa docs site (docs/.vitepress/) を VitePress で build して gh-pages branch に push、 GitHub Pages `https://cardene777.github.io/kiwa/` で公開する project-local skill。
   CI 全面禁止規約 (`rules/git-workflow.md`) に沿って **local 実行専用**、 GitHub Actions 経路は使わない。
-  Step 1 で `/docs-generate` を chain 起動して 3 系統 API reference を最新化、 Step 2 で `pnpm docs:build` (VitePress build)、 Step 3 で `git worktree` 経由 gh-pages branch に build output を配置 → commit → push、 Step 4 で `https://cardene777.github.io/kiwa/` の反映確認 (5 分程度)。
+  Step 1 で `/docs-generate` を chain 起動して 2 系統 API reference を最新化、 Step 2 で `pnpm docs:build` (VitePress build)、 Step 3 で `git worktree` 経由 gh-pages branch に build output を配置 → commit → push、 Step 4 で `https://cardene777.github.io/kiwa/` の反映確認 (5 分程度)。
   既存の同名 skill (~/.claude/skills/docs-publish、 汎用 OSS docs 生成) と用途が異なるため `docs-publish-kiwa` として分離。
 user_invocable: true
 context: conversation
@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /docs-publish — kiwa docs site build + GitHub Pages publish skill
 
-v1.11-6 (Issue #686) で追加、 kiwa の 3 系統 API reference (v1.11-5 land 済) + tutorial + migration guide + quality reports + release-gate SSOT を VitePress site として build、 gh-pages branch push で GitHub Pages 公開する。
+v1.11-6 (Issue #686) で追加、 kiwa の 2 系統 API reference (v1.11-5 land 済) + tutorial + migration guide + quality reports + release-gate SSOT を VitePress site として build、 gh-pages branch push で GitHub Pages 公開する。
 
 ## trigger
 
@@ -50,13 +50,13 @@ $ARGUMENTS
 
 ### Step 1: `/docs-generate` chain 起動
 
-`--skip-generate` 未指定時は `/docs-generate` skill (v1.11-5) を chain 起動、 3 系統 API reference (typedoc + cargo doc + forge doc) を `docs/api/{typescript,rust,solidity}/` に生成:
+`--skip-generate` 未指定時は `/docs-generate` skill (v1.11-5) を chain 起動、 2 系統 API reference (typedoc + forge doc) を `docs/api/{typescript,solidity}/` に生成:
 
 ```bash
 claude /docs-generate
 ```
 
-生成完了確認 (`docs/api/typescript/index.html` 存在 + `docs/api/rust/kiwa/index.html` 存在 + `docs/api/solidity/dogfood-foundry-dapp/*.md` 存在)。
+生成完了確認 (`docs/api/typescript/index.html` 存在 + `docs/api/solidity/dogfood-foundry-dapp/*.md` 存在)。
 
 ### Step 2: 生成物の更新と VitePress build
 

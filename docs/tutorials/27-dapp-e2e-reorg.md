@@ -162,12 +162,10 @@ The v1.10 `@kiwa-lab/dapp` package shipped the wallet-injection + `dappE2eTest` 
 - `snapshotChain(client: PublicClient): Promise<Hex>` — thin wrapper that calls `evm_snapshot` through the viem `PublicClient` request path and returns the snapshot id typed as a `Hex`, ready to feed back into `revertChain`.
 - `revertChain(client: PublicClient, snapshotId: Hex): Promise<boolean>` — thin wrapper that calls `evm_revert` and returns anvil's boolean response. A stale id returns `false`, so the assertion `expect(reverted).toBe(true)` catches drift instead of letting the test silently continue.
 
-Both helpers keep the RPC surface open — you can call `debug_setHead` on `reth` through the same viem `client.request({ method, params })` pattern the [reth node test tutorial](./25-reth-node-test) uses. That gives the reorg suite two backing dev chains without changing the assertion shape.
+Both helpers keep the RPC surface open — `client.request({ method, params })` reaches any method the dev chain exposes, so a `reth` node answering `debug_setHead` drives the same suite without changing the assertion shape.
 
 ## Related
 
 - Concept doc — [Blockchain testing (chain state / EL client / fuzz / reorg SSOT)](../concepts/blockchain-testing)
-- Tutorial 25 — [Reth node test (dev chain + reorg + fidelity matrix)](./25-reth-node-test)
-- Tutorial 26 — [Foundry invariant + fuzz runner](./26-foundry-invariant-fuzz)
 - v1.18-1 [#793](https://github.com/cardene777/kiwa/issues/793) — Alloy `contract::alloy::helpers` (the EIP-712 typed-data + Multicall3 + Permit2 primitives this tutorial's follow-up uses to sign in-flight tx envelopes)
 - v1.18-4 [#796](https://github.com/cardene777/kiwa/issues/796) — `dogfood-dapp-e2e-reorg` (the full 5-spec harness this tutorial cuts down to one)

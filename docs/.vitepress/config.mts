@@ -222,7 +222,6 @@ export default defineConfig({
               link: '/tutorials/01-supabase-auth-first-test',
             },
             { text: '02 — RabbitMQ DLX test recipe', link: '/tutorials/02-rabbitmq-dlx-recipe' },
-            { text: '03 — Rust contract test from zero', link: '/tutorials/03-rust-contract-from-zero' },
             { text: '04 — Next.js Server Actions', link: '/tutorials/04-nextjs-server-actions' },
             { text: '05 — Multi-provider auth', link: '/tutorials/05-multi-provider-auth' },
           ],
@@ -248,7 +247,6 @@ export default defineConfig({
           items: [
             { text: '13 — Search mock (Meilisearch / Algolia / Typesense)', link: '/tutorials/13-search' },
             { text: '14 — Telemetry mock (OpenTelemetry / Datadog / Sentry)', link: '/tutorials/14-observability' },
-            { text: '15 — kiwa-test-go v0.5 Iris + Chi', link: '/tutorials/15-go-iris-chi' },
           ],
         },
         {
@@ -276,8 +274,6 @@ export default defineConfig({
         {
           text: 'Blockchain 深化 (v1.18)',
           items: [
-            { text: '25 — Reth node test (dev chain + reorg + fidelity matrix)', link: '/tutorials/25-reth-node-test' },
-            { text: '26 — Foundry invariant + fuzz runner (10 000 runs + shrink parser)', link: '/tutorials/26-foundry-invariant-fuzz' },
             { text: '27 — dApp e2e reorg (snapshot + revert + refetch across 4 scenarios)', link: '/tutorials/27-dapp-e2e-reorg' },
           ],
         },

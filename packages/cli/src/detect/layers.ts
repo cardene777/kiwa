@@ -9,16 +9,16 @@
  * than re-deriving it.
  *
  * The central constraint is that **detection is a partial index**. It speaks
- * about 15 of the 30 layers: `docs/stack-signals.json` names all five Rust
- * layers, all five Go ones, and five of the nineteen TypeScript ones (the
- * `nextjs-*` set, through `next`). The gap is a standing property, not a
- * temporary one — most TypeScript layers are not framework-shaped and no single
- * dependency implies them.
+ * about 14 of the 20 layers: every signal in `docs/stack-signals.json` is a
+ * TypeScript one, and six layers — `unit`, `cli`, `data`, `e2e`,
+ * `edge-handler` and `contract` — are named by none of them. The gap is a
+ * standing property, not a temporary one: those six are not framework-shaped
+ * and no single dependency implies them.
  *
- * That makes "keep only what was detected" wrong. A monorepo with a Next.js
- * frontend beside a Rust service would lose every TypeScript layer, silently,
- * because nothing can detect most of them. Absence of a signal is not evidence
- * of absence.
+ * That makes "keep only what was detected" wrong. A Next.js project matches
+ * `next` and would keep the five `nextjs-*` layers while losing `unit`, `cli`
+ * and `data`, silently, because nothing can detect those. Absence of a signal
+ * is not evidence of absence.
  *
  * So narrowing happens only where the answer is knowable. Which runtimes exist
  * is asked per runtime; whether a layer can be ruled out is asked **per layer**,
@@ -83,6 +83,18 @@ export interface LayerRecord {
   variants: string[];
   /** How a provider or variant gets chosen, in prose. Null when there is no choice. */
   selected_by: string | null;
+  /**
+   * The framework a layer pins, when the layer is one framework's.
+   *
+   * No layer declares it today — the six that did were the Rust and Go
+   * framework layers, and #1864 removed them. The field stays because a caller
+   * cannot tell "this layer pins no framework" from "this build stopped
+   * answering": the first is `null`, the second is an absent key, and the two
+   * demand different code. `kiwa layers --json` has emitted `mode: null` on
+   * every TypeScript and Solidity row since the field existed, so dropping it
+   * would break destructuring and key-presence checks on rows whose value never
+   * changed.
+   */
   mode: string | null;
   /** Where each consuming skill writes, keyed by skill. */
   test_outputs: Record<string, string[]>;
@@ -317,12 +329,12 @@ export function applyLang(
  * The layers some signal in the table actually names.
  *
  * Asked per layer rather than per language, because signal coverage is uneven
- * within a language. Rust and Go happen to be complete — every one of their
- * five layers is named — so for them the two questions have the same answer.
- * TypeScript is not: one signal (`next`) names five of its nineteen layers.
+ * within a language. TypeScript carries both halves at once: signals name 14 of
+ * its 19 layers and say nothing about `unit`, `cli`, `data`, `e2e` or
+ * `edge-handler`.
  *
- * Asking per language would let evidence about those five license dropping the
- * other fourteen, which no signal could have detected. The caller narrows on
+ * Asking per language would let evidence about the 14 license dropping the
+ * other five, which no signal could have detected. The caller narrows on
  * "detected or not", and that only means something for a layer the table could
  * have detected in the first place.
  *
@@ -365,6 +377,8 @@ interface StackEntry {
 interface ScannedEntry {
   manifest?: unknown;
   language?: unknown;
+  /** The mtime the file had when `scan` read it, at full precision. */
+  mtime_ms?: unknown;
 }
 
 /**
@@ -432,8 +446,38 @@ function validate(
 
     const full = join(cwd, manifest);
     if (!existsSync(full)) return `${manifest} no longer exists`;
+    // Absent and malformed are different answers. Absent means the recording
+    // predates the field, which the timestamp comparison below still covers.
+    // Present but unusable (`null`, a string, `NaN`) means the writer put
+    // something there and it did not survive, so nothing about this entry can
+    // be trusted — and falling through to the weaker comparison would let a
+    // recording opt out of the exact one by carrying a broken value.
+    const hasMtime = 'mtime_ms' in entry && entry.mtime_ms !== undefined;
+    if (hasMtime && !(typeof entry.mtime_ms === 'number' && Number.isFinite(entry.mtime_ms))) {
+      return `${manifest} records an unusable mtime`;
+    }
     try {
-      if (statSync(full).mtimeMs > taken) return `${manifest} changed after the detection was taken`;
+      const current = statSync(full).mtimeMs;
+      const read = entry.mtime_ms;
+      if (typeof read === 'number' && Number.isFinite(read)) {
+        // The file's own value, compared to the value it had when it was read.
+        // Different means it is not the file the recording describes, whichever
+        // direction it moved — a restore that moves an mtime backwards changes
+        // the contents just as much as an edit that moves it forward.
+        //
+        // Exact, because both sides are the same measurement of the same file
+        // and no rounding sits between them. That removes the band a comparison
+        // against `generated_at` has: the stamp carries whole milliseconds and
+        // an mtime carries fractions of one, so within one millisecond the two
+        // cannot tell the writer's own output from an edit made just after it.
+        if (current !== read) return `${manifest} changed after the detection was taken`;
+      } else {
+        // The field is absent: recordings written before it existed, and
+        // hand-built ones. The timestamp comparison is all there is, so it
+        // keeps the band described above — strictly newer than the stamp is
+        // stale, with no tolerance in either direction.
+        if (current > taken) return `${manifest} changed after the detection was taken`;
+      }
     } catch {
       return `${manifest} could not be read`;
     }
@@ -504,21 +548,21 @@ export function resolveLayers(options: {
   }
 
   // Which languages the project contains is asked now rather than read from the
-  // recording. A recording answers for the moment it was taken, and a `go.mod`
-  // added since would be missing from it while being present in the project —
-  // the staleness check cannot see that, because it only knows the manifests
-  // the recording already named.
+  // recording. A recording answers for the moment it was taken, and a
+  // `foundry.toml` added since would be missing from it while being present in
+  // the project — the staleness check cannot see that, because it only knows
+  // the manifests the recording already named.
   //
   // This is a different question from `scanned`, which is what detection
-  // actually opened and honours the workspace definition. A Go module in an
-  // undeclared directory is present and unread, and "nothing detected for Go"
-  // is not evidence when Go was never opened.
+  // actually opened and honours the workspace definition. A `package.json` in
+  // an undeclared directory is present and unread, and "nothing detected for
+  // TypeScript" is not evidence when that manifest was never opened.
   const found = options.presence ?? presentManifests(options.cwd);
 
   // An unfinished search can say what it found and nothing about what it did
   // not, so it cannot support narrowing at all — not the exclusions, which rest
-  // on absence, and not the within-language narrowing either, since the crate
-  // that would have widened it may be in the part that went unseen.
+  // on absence, and not the within-language narrowing either, since the
+  // manifest that would have widened it may be in the part that went unseen.
   if (!found.complete) {
     warnings.push('kept every layer: the search for project manifests did not finish');
     return { layers: table, source: 'all', warnings };
@@ -529,13 +573,13 @@ export function resolveLayers(options: {
   const readPaths = new Set(scanned.map((e) => str(e.manifest)!));
 
   // A language being read is not the same as all of its manifests being read.
-  // `scan` follows the workspace definition, so a second Rust crate in an
+  // `scan` follows the workspace definition, so a second `package.json` in an
   // undeclared directory leaves the language set unchanged while carrying a
   // framework nobody looked at — and narrowing to what was detected would drop
-  // the layer that crate actually needs.
+  // the layer that package actually needs.
   const foundPaths = new Set(found.manifests.map((m) => m.path));
   const partiallyRead = new Set([
-    // Found but never opened. The undeclared crate case.
+    // Found but never opened. The undeclared package case.
     ...found.manifests.filter((m) => !readPaths.has(m.path)).map((m) => m.language),
     // Opened but not found — the reverse, and it means the same thing. `scan`
     // follows the workspace definition into places the search declines to go
@@ -560,7 +604,7 @@ export function resolveLayers(options: {
     // A reader exists and found nothing of that language. That is the one case
     // where absence is evidence — but only as strong as the search was. `scan`
     // reads the working directory and one level of declared workspace members,
-    // so a Go service in an undeclared subdirectory is absent to it and present
+    // so a package in an undeclared subdirectory is absent to it and present
     // to the project. The exclusion is still the better default; what it must
     // not be is silent, because the layers simply stop being offered and
     // nothing says why.
@@ -579,8 +623,9 @@ export function resolveLayers(options: {
     // Present but never opened, so nothing was asked and nothing was answered.
     if (!read.has(runtime)) return true;
     // Opened, but no signal names this layer, so "nothing detected" carries no
-    // information about it. Fourteen of the nineteen TypeScript layers are here
-    // today: `next` names the five `nextjs-*` ones and nothing names the rest.
+    // information about it. Five of the nineteen TypeScript layers are here
+    // today — `unit`, `cli`, `data`, `e2e` and `edge-handler` — and signals
+    // name the other fourteen.
     if (!speakable.has(layer.id)) return true;
     return detected.has(layer.id);
   });

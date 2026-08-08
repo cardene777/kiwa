@@ -66,8 +66,6 @@ pnpm -F examples-dogfood-dapp-e2e-reorg fidelity:report
 
 ## Related
 
-- v1.18-1 `kiwa-test-rs v0.5` — the `contract::reth` / `contract::foundry` / `contract::alloy` Rust surface (this dogfood is the TypeScript peer, feeds the same 11-axis payload).
-- v1.18-2 `dogfood-reth-node-test` — Rust dogfood (real vs mock, same JSON schema).
-- v1.18-3 `dogfood-foundry-invariant-fuzz` — Rust invariant / fuzz dogfood.
+- v1.18-3 `dogfood-foundry-invariant-fuzz` — Foundry invariant / fuzz dogfood.
 - v1.11-4 `dogfood-foundry-dapp` — the trace / adapter / fidelity report shape this dogfood mirrors.
 - Milestone parent [#792](https://github.com/cardene777/kiwa/issues/792), this sub [#796](https://github.com/cardene777/kiwa/issues/796).
