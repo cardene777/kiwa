@@ -3,7 +3,6 @@
 Auto-generated API documentation for every language kiwa ships:
 
 - **TypeScript** — `typedoc` output under [`docs/api/typescript/`](./typescript/) covers every `@kiwa-lab/*` package
-- **Rust** — `cargo doc --all-features --no-deps` output under [`docs/api/rust/`](./rust/) covers `kiwa-test-rs`
 - **Solidity** — `forge doc` output under [`docs/api/solidity/`](./solidity/) covers the dogfood Foundry project
 
 ## Regeneration
@@ -20,7 +19,7 @@ To rebuild after a package changes:
 
 ```bash
 pnpm -F @kiwa-lab/<name> build   # keep dist/ current
-claude /docs-generate --only typescript   # or rust / solidity
+claude /docs-generate --only typescript   # or solidity
 ```
 
 ## Layout
@@ -31,7 +30,6 @@ docs/api/
 ├── typescript/          <- typedoc output (gitignored)
 │   ├── index.html
 │   └── modules/…
-├── rust/                <- cargo doc output (gitignored)
 │   └── kiwa/index.html
 └── solidity/            <- forge doc markdown (gitignored)
     └── src/…/DogfoodToken.sol/*.md

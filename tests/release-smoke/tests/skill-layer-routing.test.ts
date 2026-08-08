@@ -121,17 +121,9 @@ describe('docs/layers.json is internally consistent', () => {
 
   it('a layer carries a package or a runtime package, never both', () => {
     const both = LAYERS.filter((l) => l.backing_package && l.backing_runtime_package).map((l) => l.id);
-    // The two were one column until #1810. Ten `rust-*` / `go-*` rows named
-    // `kiwa-test-rs` / `kiwa-test-go` where the reader expected a skill, which
-    // is what let the old check skip them.
+    // The two were one column until #1810, when rows naming a runtime package
+    // where the reader expected a skill let the old check skip them.
     expect(both).toEqual([]);
-  });
-
-  it('every polyglot layer names the runtime package that serves it', () => {
-    const missing = LAYERS.filter(
-      (l) => (l.runtime === 'rust' || l.runtime === 'go') && !l.backing_runtime_package,
-    ).map((l) => l.id);
-    expect(missing).toEqual([]);
   });
 
   it('providers name a flag the consumer actually declares', () => {
@@ -168,12 +160,11 @@ describe('docs/layers.json is internally consistent', () => {
     expect(unexplained).toEqual([]);
   });
 
-  it('a mode belongs only to a layer whose consumer accepts one', () => {
-    // `--mode` is a `kiwa-rust` / `kiwa-go` flag. A mode on any other layer
-    // would render into an enum nothing reads.
-    const stray = LAYERS.filter((l) => l.mode && !['kiwa-rust', 'kiwa-go'].includes(l.consumer_skill)).map(
-      (l) => l.id,
-    );
+  it('no layer declares a mode, because no consumer accepts one', () => {
+    // `--mode` chose a framework helper for the two polyglot consumers. #1864
+    // removed both, so a mode on any layer would render into an enum nothing
+    // reads.
+    const stray = LAYERS.filter((l) => l.mode).map((l) => l.id);
     expect(stray).toEqual([]);
   });
 
@@ -194,11 +185,6 @@ describe('docs/layers.json is internally consistent', () => {
         'e2e',
         'e2e-generic',
         'edge-handler',
-        'go-echo',
-        'go-fiber',
-        'go-gin',
-        'go-integration',
-        'go-unit',
         'integration',
         'job-queue',
         'nextjs-middleware',
@@ -207,11 +193,6 @@ describe('docs/layers.json is internally consistent', () => {
         'nextjs-rsc-streaming',
         'nextjs-server-action',
         'orm-query',
-        'rust-actix-web',
-        'rust-axum',
-        'rust-integration',
-        'rust-tower-http',
-        'rust-unit',
         'ui',
         'unit',
       ].sort(),
@@ -274,9 +255,9 @@ describe('the target values and the Step conditions agree', () => {
       if (!existsSync(file!)) continue;
       const body = readFileSync(file!, 'utf-8');
 
-      // Only references aimed at `kiwa-test`. `--target` is overloaded — in
-      // `kiwa-rust` and `kiwa-go` it names the implementation file under test —
-      // so an unqualified match reads those as target values.
+      // Only references aimed at `kiwa-test`. `--target` has been overloaded by
+      // other skills to name the implementation file under test, so an
+      // unqualified match reads those as target values.
       for (const m of body.matchAll(/kiwa-test[^`\n]*--target ([a-z]+)/g)) {
         if (!declared.has(m[1]!)) offenders.push(`${name}: --target ${m[1]}`);
       }
@@ -301,8 +282,8 @@ describe('the target values and the Step conditions agree', () => {
       }
 
       for (const m of body.matchAll(/--target \{([^}]+)\}/g)) {
-        // An alternation, not a placeholder. `--target {path}` in `kiwa-rust`
-        // names the implementation file, and `--target {target}` in a report
+        // An alternation, not a placeholder. `--target {path}` elsewhere names
+        // the implementation file, and `--target {target}` in a report
         // template is a slot to fill — neither lists values.
         if (!m[1]!.includes('|')) continue;
         for (const value of m[1]!.split(/\\?\|/)) {
@@ -315,13 +296,11 @@ describe('the target values and the Step conditions agree', () => {
   });
 
   it('all covers exactly the layers the table gives it', () => {
-    // The description says web + rust + go. `docs/layers.json` is where that
-    // claim has to hold, since the skills are generated from it.
+    // The description says web. `docs/layers.json` is where that claim has to
+    // hold, since the skills are generated from it.
     const byTarget = (t: string) =>
       LAYERS.filter((l) => (l.targets ?? []).includes(t)).map((l) => l.id);
-    expect(byTarget('all').sort()).toEqual(
-      [...byTarget('web'), ...byTarget('rust'), ...byTarget('go')].sort(),
-    );
+    expect(byTarget('all').sort()).toEqual([...byTarget('web')].sort());
   });
 
   it('both covers exactly contract plus dapp', () => {
@@ -699,8 +678,6 @@ describe('the skills carry what the table renders', () => {
     for (const [rel, region] of [
       ['.claude/skills/kiwa-design/SKILL.md', 'design-enum'],
       ['.claude/skills/kiwa-review/SKILL.md', 'review-enum'],
-      ['.claude/skills/kiwa-rust/SKILL.md', 'rust-enum'],
-      ['.claude/skills/kiwa-go/SKILL.md', 'go-enum'],
     ] as const) {
       const source = read(rel);
       const declarations = [...source.matchAll(/`--layer \{/g)];

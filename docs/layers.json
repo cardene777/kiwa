@@ -9,8 +9,8 @@
     "Four SKILL.md files used to declare the --layer enum independently, and a fifth",
     "place held the routing. Nothing compared them, so deleting a package in #1804",
     "left routing behind, and three inconsistencies survived until #1810 read them",
-    "side by side: contract-rust had a routing row but no enum entry, /kiwa-rust knew",
-    "neither contract-rust nor --provider, and --mode was missing tower-http.",
+    "side by side, where a routing row, an enum entry and a flag disagreed.",
+    "",
     "",
     "scripts/rebuild-layer-routing.mjs renders this file into those skills. Editing",
     "the generated regions by hand is caught by --check. Add a layer here, never",
@@ -20,10 +20,10 @@
     "  consumer_skill   the skill that reads the spec and writes test code. Always a",
     "                   directory under .claude/skills/.",
     "  backing_package  the library the generated test imports. null when the layer",
-    "                   is served by a cargo/go package instead (kiwa-test-rs,",
-    "                   kiwa-test-go), which is what backing_runtime_package names.",
+    "                   is served by a package outside npm instead, which is what",
+    "                   backing_runtime_package names.",
     "                   These were one column until #1810; conflating them is why the",
-    "                   earlier check skipped ten rows.",
+    "                   earlier check skipped rows it should have read.",
     "  test_output      where consumer_skill writes. The contract for /kiwa-review's",
     "                   resolver. Six layers disagreed with their producer and four",
     "                   had no entry at all before this table.",
@@ -31,11 +31,11 @@
     "                   the Step headings, not from the prose describing them; the two",
     "                   disagree today and #1809 decides which one moves.",
     "",
-    "contract-rust is deliberately absent. It had a routing row in kiwa-design and no entry in either enum, and the skill it named (/kiwa-rust) implements neither the layer nor the --provider flag the row advertised. Rendering it into the enum would have advertised an option nothing can serve. #1809 decides whether to implement it or drop the row; until then the table records what works.",
+    "A layer is listed only when the skill it names can actually serve it. A routing row without an enum entry, or an enum entry whose consumer implements neither the layer nor the flag the row advertises, would offer an option nothing can serve. The table records what works.",
     "",
     "providers vs variants: providers are the values a consumer accepts on its own --provider flag, which is only auth, job-queue and cache. variants are alternatives chosen some other way -- contract picks foundry or hardhat through kiwa-test --runner, and orm-query's three ORMs are read out of the spec with no flag at all. They were one column until review asked whether the values were really flags; writing them into providers claimed an interface that does not exist.",
     "",
-    "targets records which --target values actually start a Step, not which ones the prose claims. Step 4r and 4g invoke only rust-unit / rust-integration and go-unit / go-integration; the six framework layers have no Step of their own and so carry no target. Assigning them by runtime, as a first pass did, describes an intent rather than the behaviour.",
+    "targets records which --target values actually start a Step, not which ones the prose claims. Assigning them by runtime, as a first pass did, describes an intent rather than the behaviour.",
     "",
     "test_outputs is keyed by consumer because one layer can have more than one. contract is written by kiwa-forge as *.t.sol and by kiwa-hardhat as *.test.cjs, and a single value silently dropped the Hardhat review path.",
     "",
@@ -463,214 +463,6 @@
       "test_outputs": {
         "kiwa-cache": [
           "{example}/tests/{module}.cache.test.ts"
-        ]
-      }
-    },
-    {
-      "id": "rust-unit",
-      "spec_dir": "unit",
-      "spec_path": "tests/spec/unit/test-spec-{module}.rs.md",
-      "runtime": "rust",
-      "consumer_skill": "kiwa-rust",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-rs",
-      "providers": [],
-      "targets": [
-        "rust",
-        "all"
-      ],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-rust": [
-          "{example}/tests/{module}.rs"
-        ]
-      }
-    },
-    {
-      "id": "rust-integration",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.rs.md",
-      "runtime": "rust",
-      "consumer_skill": "kiwa-rust",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-rs",
-      "providers": [],
-      "targets": [
-        "rust",
-        "all"
-      ],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-rust": [
-          "{example}/tests/{module}.rs"
-        ]
-      }
-    },
-    {
-      "id": "rust-axum",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.rust-axum.md",
-      "runtime": "rust",
-      "consumer_skill": "kiwa-rust",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-rs",
-      "providers": [],
-      "mode": "axum",
-      "targets": [],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-rust": [
-          "{example}/tests/{module}_axum.rs"
-        ]
-      }
-    },
-    {
-      "id": "rust-actix-web",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.rust-actix.md",
-      "runtime": "rust",
-      "consumer_skill": "kiwa-rust",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-rs",
-      "providers": [],
-      "mode": "actix-web",
-      "targets": [],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-rust": [
-          "{example}/tests/{module}_actix.rs"
-        ]
-      }
-    },
-    {
-      "id": "rust-tower-http",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.rust-tower-http.md",
-      "runtime": "rust",
-      "consumer_skill": "kiwa-rust",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-rs",
-      "providers": [],
-      "mode": "tower-http",
-      "targets": [],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-rust": [
-          "{example}/tests/{module}_tower_http.rs"
-        ]
-      }
-    },
-    {
-      "id": "go-unit",
-      "spec_dir": "unit",
-      "spec_path": "tests/spec/unit/test-spec-{module}.go.md",
-      "runtime": "go",
-      "consumer_skill": "kiwa-go",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-go",
-      "providers": [],
-      "targets": [
-        "go",
-        "all"
-      ],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-go": [
-          "{example}/{module}_test.go"
-        ]
-      }
-    },
-    {
-      "id": "go-integration",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.go.md",
-      "runtime": "go",
-      "consumer_skill": "kiwa-go",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-go",
-      "providers": [],
-      "targets": [
-        "go",
-        "all"
-      ],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-go": [
-          "{example}/integration/{module}_test.go"
-        ]
-      }
-    },
-    {
-      "id": "go-gin",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.go-gin.md",
-      "runtime": "go",
-      "consumer_skill": "kiwa-go",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-go",
-      "providers": [],
-      "mode": "gin",
-      "targets": [],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-go": [
-          "{example}/{module}_gin_test.go"
-        ]
-      }
-    },
-    {
-      "id": "go-echo",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.go-echo.md",
-      "runtime": "go",
-      "consumer_skill": "kiwa-go",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-go",
-      "providers": [],
-      "mode": "echo",
-      "targets": [],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-go": [
-          "{example}/{module}_echo_test.go"
-        ]
-      }
-    },
-    {
-      "id": "go-fiber",
-      "spec_dir": "integration",
-      "spec_path": "tests/spec/integration/test-spec-{module}.go-fiber.md",
-      "runtime": "go",
-      "consumer_skill": "kiwa-go",
-      "also_consumed_by": [],
-      "backing_package": null,
-      "backing_runtime_package": "kiwa-test-go",
-      "providers": [],
-      "mode": "fiber",
-      "targets": [],
-      "variants": [],
-      "selected_by": null,
-      "test_outputs": {
-        "kiwa-go": [
-          "{example}/{module}_fiber_test.go"
         ]
       }
     }

@@ -1,0 +1,7 @@
+# `docs/layers.json` の `integration` / `api` / `ui` / `data` / `cli` / `orm-query` /
+# `nextjs-*` / `edge-handler` / `auth` / `job-queue` / `cache` / `a11y` / `e2e-generic`
+# layer が spec_dir としてこの dir を宣言する。
+#
+# #1864 で Rust / Go の spec を消した結果、 この dir の中身が 1 件も無くなった。
+# git は空 dir を追跡しないため、 宣言と実体が食い違って release-smoke の
+# 「every spec_dir exists under the spec root」 が落ちる。

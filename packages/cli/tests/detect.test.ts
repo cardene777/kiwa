@@ -10,7 +10,7 @@ import {
   type GeneratedSignal,
   type SignalTable,
 } from '../src/detect/detect.js';
-import { readCargoToml, readGoMod, readPackageJson } from '../src/detect/manifests.js';
+import { readPackageJson } from '../src/detect/manifests.js';
 import { scan } from '../src/detect/scan.js';
 import { loadSignalTable } from '../src/detect/index.js';
 
@@ -41,14 +41,13 @@ const REPO_ROOT = findRepoRoot();
 const TABLE = loadSignalTable() as SignalTable;
 
 /**
- * Detection measured against the polyglot examples.
+ * Detection measured against the repository's own examples.
  *
- * These are the corpus because they carry both halves: `rust-axum-poc` depends
- * on `axum` for real and declares `kiwa-test-rs = { features = ["axum"] }`,
- * which is the answer. The JS examples cannot serve the same purpose — 83 of
- * the 139 carry nothing but `@types/node`, `typescript` and `vitest`, and
- * `auth-lucia-poc` does not depend on `lucia` at all, because the adapters mock
- * the library rather than importing it.
+ * The JS examples are a weak corpus on their own — most carry nothing but
+ * `@types/node`, `typescript` and `vitest`, and `auth-lucia-poc` does not
+ * depend on `lucia` at all, because the adapters mock the library rather than
+ * importing it. What can be measured against them is the Next.js signal, which
+ * is the one dependency projects declare for real.
  */
 
 function detectExample(name: string): string[] {
@@ -58,220 +57,6 @@ function detectExample(name: string): string[] {
 }
 
 describe('manifest readers', () => {
-  it('reads a Cargo dependency with its features', () => {
-    const deps = readCargoToml(
-      ['[dependencies]', 'axum = { version = "0.8", features = ["json", "tokio"] }'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'axum', features: ['json', 'tokio'] }]);
-  });
-
-  it('reads dev-dependencies as well as dependencies', () => {
-    // `kiwa-test-rs` is a dev dependency, and it is the entry that says which
-    // layer the project tests. Reading only `[dependencies]` would miss it.
-    const deps = readCargoToml(
-      ['[dev-dependencies]', 'kiwa-test-rs = { version = "0.5", features = ["axum"] }'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
-  });
-
-  it('reads a dependency declared as its own table', () => {
-    // `[dev-dependencies.kiwa-test-rs]` is a normal way to write an entry with
-    // several fields, and reading tables by name alone missed it entirely —
-    // taking the framework feature with it.
-    const deps = readCargoToml(
-      ['[dev-dependencies.kiwa-test-rs]', 'version = "0.5"', 'features = ["axum"]'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
-  });
-
-  it('is not thrown off by a bracket inside a string value', () => {
-    // A string can hold an unbalanced bracket, and counting it as nesting made
-    // every entry after it look like a field of an entry still open — so the
-    // dependency that decides the layer was dropped without a trace.
-    const deps = readCargoToml(
-      [
-        '[dev-dependencies]',
-        'weird = { version = "{{{" }',
-        'kiwa-test-rs = { version = "0.5", features = ["axum"] }',
-      ].join('\n'),
-    );
-    expect(deps).toEqual([
-      { name: 'weird', features: [] },
-      { name: 'kiwa-test-rs', features: ['axum'] },
-    ]);
-  });
-
-  it('reads a multi-line string as one delimiter, not three', () => {
-    // `\"\"\"` counted as three separate quotes leaves the reader inside a string
-    // it never left, so the next entry vanished and its features were recorded
-    // against the wrong dependency.
-    const deps = readCargoToml(
-      [
-        '[dev-dependencies]',
-        'weird = { note = \"\"\"a\"b\"\"\" }',
-        'kiwa-test-rs = { features = ["axum"] }',
-      ].join('\n'),
-    );
-    expect(deps).toEqual([
-      { name: 'weird', features: [] },
-      { name: 'kiwa-test-rs', features: ['axum'] },
-    ]);
-  });
-
-  it('marks a workspace-inherited entry as unresolved', () => {
-    // The feature list lives in the workspace root, which this reader does not
-    // open. Recording it as a plain featureless entry let the caller apply the
-    // default layer — a definite answer built from an absent one.
-    const deps = readCargoToml(
-      ['[dev-dependencies]', 'kiwa-test-rs = { workspace = true }'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: [], unresolved: true }]);
-  });
-
-  it('does not mark an entry unresolved once its features are stated', () => {
-    const deps = readCargoToml(
-      ['[dev-dependencies]', 'kiwa-test-rs = { workspace = true, features = ["axum"] }'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'kiwa-test-rs', features: ['axum'] }]);
-  });
-
-  it('skips an indirect entry that carries a trailing comment', () => {
-    // Anchoring the marker to the end of the line read this as a direct
-    // dependency, so a framework the project only holds transitively would be
-    // reported as one it tests.
-    const deps = readGoMod(
-      ['require (', '\tgithub.com/gin-gonic/gin v1.9.0 // indirect // vendored', ')'].join('\n'),
-    );
-    expect(deps).toEqual([]);
-  });
-
-  it('does not read a comment that merely mentions indirect as the marker', () => {
-    // Widening the matcher to fix `// indirect // extra` made any comment
-    // holding the word drop the dependency, which loses a direct one.
-    const deps = readGoMod(
-      ['require (', '\tgithub.com/x/y v1.0.0 // see https://example.com/indirect', ')'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'github.com/x/y', features: [] }]);
-  });
-
-  it('does not mistake "indirectly" for the indirect marker', () => {
-    const deps = readGoMod(
-      ['require (', '\tgithub.com/gin-gonic/gin v1.9.0 // indirectly relevant', ')'].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'github.com/gin-gonic/gin', features: [] }]);
-  });
-
-  it('reads features spread over several lines', () => {
-    const deps = readCargoToml(
-      [
-        '[dependencies]',
-        'axum = {',
-        '  version = "0.8",',
-        '  features = [',
-        '    "json",',
-        '    "tokio"',
-        '  ]',
-        '}',
-      ].join('\n'),
-    );
-    expect(deps).toEqual([{ name: 'axum', features: ['json', 'tokio'] }]);
-  });
-
-  it('keeps entries separate when one spans lines', () => {
-    // The failure this guards against is a multi-line entry swallowing the
-    // next one's features.
-    const deps = readCargoToml(
-      [
-        '[dependencies]',
-        'axum = {',
-        '  version = "0.8"',
-        '}',
-        'kiwa-test-rs = { version = "0.5", features = ["tower-http"] }',
-      ].join('\n'),
-    );
-    expect(deps).toEqual([
-      { name: 'axum', features: [] },
-      { name: 'kiwa-test-rs', features: ['tower-http'] },
-    ]);
-  });
-
-  it('ignores a commented-out Cargo dependency', () => {
-    const deps = readCargoToml(['[dependencies]', '# axum = "0.8"', 'serde = "1"'].join('\n'));
-    expect(deps.map((d) => d.name)).toEqual(['serde']);
-  });
-
-  it('reads go.mod require blocks and single lines', () => {
-    const deps = readGoMod(
-      [
-        'module example.com/x',
-        'require (',
-        '\tgithub.com/gin-gonic/gin v1.12.0',
-        ')',
-        'require github.com/stretchr/testify v1.9.0',
-      ].join('\n'),
-    );
-    expect(deps.map((d) => d.name)).toEqual([
-      'github.com/gin-gonic/gin',
-      'github.com/stretchr/testify',
-    ]);
-  });
-
-  it('skips go.mod replace directives', () => {
-    // Every polyglot example points kiwa-test-go at the in-repo copy. Reading
-    // the replacement would report a filesystem path as a dependency.
-    //
-    // The earlier version of this used a module path on the left of the arrow,
-    // which the require-block reader ignores anyway — so deleting the skip left
-    // it green. A relative path on the left is what actually distinguishes the
-    // two readings, and it is what the examples contain.
-    const deps = readGoMod(
-      [
-        'require (',
-        '\tgithub.com/cardene777/kiwa-test-go v0.2.0',
-        ')',
-        'replace github.com/cardene777/kiwa-test-go => ../../kiwa-go',
-      ].join('\n'),
-    );
-    expect(deps.map((d) => d.name)).toEqual(['github.com/cardene777/kiwa-test-go']);
-  });
-
-  it('does not read a replacement target as a dependency', () => {
-    const deps = readGoMod('replace example.com/a => ./vendor/a');
-    expect(deps).toEqual([]);
-  });
-
-  it('skips indirect dependencies', () => {
-    // `go-gin-poc` carries 29 indirect entries against 2 direct ones. A project
-    // that uses echo can hold gin transitively, and reading indirect entries
-    // would report the framework it does not use.
-    const deps = readGoMod(
-      [
-        'require (',
-        '\tgithub.com/gin-gonic/gin v1.12.0',
-        '\tgithub.com/bytedance/sonic v1.15.0 // indirect',
-        ')',
-      ].join('\n'),
-    );
-    expect(deps.map((d) => d.name)).toEqual(['github.com/gin-gonic/gin']);
-  });
-
-  it('does not read a replace block as dependencies', () => {
-    // The block form is what the guard actually earns its place for: outside a
-    // block these lines are skipped anyway for want of a `require ` prefix.
-    const deps = readGoMod(
-      [
-        'require (',
-        '\tgithub.com/real/dep v1.0.0',
-        ')',
-        'replace (',
-        '\tgithub.com/replaced/one => ../one',
-        '\tgithub.com/replaced/two => ../two',
-        ')',
-      ].join('\n'),
-    );
-    expect(deps.map((d) => d.name)).toEqual(['github.com/real/dep']);
-  });
-
   it('returns nothing for an unparseable package.json', () => {
     // A broken manifest makes detection report nothing, not abort a command the
     // user ran for another reason.
@@ -372,135 +157,144 @@ describe('workspace resolution', () => {
   });
 });
 
-describe('detection against the polyglot corpus', () => {
-  it.each([
-    // The unit and integration layers are what the adapter means when nothing
-    // more specific turned up. `rust-cargo-poc` (tests/poc.rs +
-    // tests/poc_integration.rs) and `go-testing-poc` (calc_test.go +
-    // integration/client_test.go) are those projects. The six framework
-    // projects each name a framework and carry one test file, so they report
-    // that framework alone — which is what AC 71 and AC 72 ask for.
-    ['rust-axum-poc', ['rust-axum']],
-    ['rust-actix-web-poc', ['rust-actix-web']],
-    ['rust-tower-http-poc', ['rust-tower-http']],
-    ['rust-cargo-poc', ['rust-integration', 'rust-unit']],
-    ['go-gin-poc', ['go-gin']],
-    ['go-echo-poc', ['go-echo']],
-    ['go-fiber-poc', ['go-fiber']],
-    ['go-testing-poc', ['go-integration', 'go-unit']],
-  ])('%s detects %j', (name, expected) => {
-    expect(detectExample(name)).toEqual(expected);
-  });
-
-  it('does not report rust-axum for the tower-http example', () => {
-    // The one case dependency names alone get wrong: tower-http wraps an axum
-    // router, so the example depends on both. The feature on kiwa-test-rs is
-    // what settles it.
-    expect(detectExample('rust-tower-http-poc')).not.toContain('rust-axum');
-  });
-});
-
 describe('precedence', () => {
+  /**
+   * A table written for the test rather than the repository's own.
+   *
+   * These cases are about `resolve`, not about which languages kiwa supports.
+   * Pointing them at the real table tied them to the Rust signals, and #1864
+   * broke all five by removing that language. Synthetic layer names keep the
+   * claim readable: the group is the prefix before the first `-`, so
+   * `alpha-one` and `alpha-two` compete while `beta-one` stands apart.
+   */
+  const SYNTH: SignalTable = {
+    manifests: { 'package.json': 'typescript' },
+    signals: {
+      typescript: [
+        { match: 'weak-alpha', layer: 'alpha-one', strength: 'weak' },
+        {
+          match: 'adapter',
+          kind: 'feature',
+          features: { two: 'alpha-two' },
+          default: 'alpha-default',
+          also: ['alpha-implied'],
+          strength: 'exact',
+        },
+      ],
+    },
+    generated: { signals: [] },
+  };
+
   it('an exact signal suppresses a weak one in the same group', () => {
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [
-      { name: 'axum', features: [] },
-      { name: 'kiwa-test-rs', features: ['tower-http'] },
+    const all = detectFrom(SYNTH, 'typescript', 'package.json', [
+      { name: 'weak-alpha', features: [] },
+      { name: 'adapter', features: ['two'] },
     ]);
-    // `also` does not add rust-integration here, because the feature named a
-    // framework layer and that is more specific. What matters for this case is
-    // that the weak rust-axum signal is gone.
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-tower-http']);
+    // `also` does not add alpha-implied here, because the feature named a more
+    // specific layer. What matters is that the weak alpha-one signal is gone.
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['alpha-two']);
   });
 
   it('a weak signal still applies when nothing exact claimed its group', () => {
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [{ name: 'axum', features: [] }]);
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-axum']);
+    const all = detectFrom(SYNTH, 'typescript', 'package.json', [
+      { name: 'weak-alpha', features: [] },
+    ]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['alpha-one']);
   });
 
   it('an exact signal in one group does not suppress a weak one in another', () => {
-    // Grouping by runtime prefix. Every Go signal in the table happens to be
-    // exact, so pairing Rust with Go proves nothing: collapsing the groups
-    // leaves both standing either way. The weak signal has to be in a
-    // different group from the exact one for the grouping to be doing work.
-    const decided = detectFrom(TABLE, 'rust', 'Cargo.toml', [
-      { name: 'kiwa-test-rs', features: ['tower-http'] },
+    // Grouping by prefix. The weak signal has to be in a different group from
+    // the exact one for the grouping to be doing work.
+    const decided = detectFrom(SYNTH, 'typescript', 'package.json', [
+      { name: 'adapter', features: ['two'] },
     ]);
     const weakElsewhere: typeof decided = [
-      { layer: 'go-gin', signal: 'synthetic', manifest: 'go.mod', strength: 'weak' },
+      { layer: 'beta-one', signal: 'synthetic', manifest: 'package.json', strength: 'weak' },
     ];
     expect(resolvePrecedence([...decided, ...weakElsewhere]).map((d) => d.layer)).toEqual([
-      'go-gin',
-      'rust-tower-http',
+      'alpha-two',
+      'beta-one',
     ]);
   });
 
   it('an exact signal suppresses a weak one only within its own group', () => {
-    // The other half of the same claim: the weak Rust signal does disappear.
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [
-      { name: 'axum', features: [] },
-      { name: 'kiwa-test-rs', features: ['tower-http'] },
+    const all = detectFrom(SYNTH, 'typescript', 'package.json', [
+      { name: 'weak-alpha', features: [] },
+      { name: 'adapter', features: ['two'] },
     ]);
     const layers = resolvePrecedence(all).map((d) => d.layer);
-    expect(layers).toContain('rust-tower-http');
-    expect(layers).not.toContain('rust-axum');
+    expect(layers).toContain('alpha-two');
+    expect(layers).not.toContain('alpha-one');
   });
 
   it('reports each layer once even when several signals point at it', () => {
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [
-      { name: 'axum', features: [] },
-      { name: 'kiwa-test-rs', features: ['axum'] },
-    ]);
-    // rust-axum once, not twice — the weak name signal and the exact feature
-    // signal both point at it.
-    const layers = resolvePrecedence(all).map((d) => d.layer);
-    expect(layers.filter((l) => l === 'rust-axum')).toHaveLength(1);
-    expect(layers).toEqual(['rust-axum']);
-  });
-});
-
-describe('an implied layer holds only while nothing more specific appears', () => {
-  it('keeps the integration layer when the adapter is all the manifest says', () => {
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [{ name: 'kiwa-test-rs', features: [] }]);
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-integration', 'rust-unit']);
-  });
-
-  it('drops it once a framework layer is named', () => {
-    // `go-gin-poc` depends on both the adapter and gin, and carries a single
-    // `counter_test.go`. Both the unit and the integration layer are fallbacks
-    // here, and the framework layer is what the project actually names — which
-    // is also what the Rust side already did through its feature list.
-    const all = detectFrom(TABLE, 'go', 'go.mod', [
-      { name: 'github.com/cardene777/kiwa-test-go', features: [] },
-      { name: 'github.com/gin-gonic/gin', features: [] },
-    ]);
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['go-gin']);
-  });
-
-  it('lets the default yield to a framework signal from another dependency', () => {
-    // With the current table this is unobservable: every Rust framework signal
-    // is weak, so it is suppressed before the default is ever compared against
-    // it. A synthetic exact signal makes the intent testable — the default is a
-    // fallback on the feature path too, not an assertion.
     const table: SignalTable = {
-      manifests: TABLE.manifests,
+      manifests: SYNTH.manifests,
       signals: {
-        rust: [
-          { match: 'kiwa-test-rs', kind: 'feature', features: {}, default: 'rust-unit', strength: 'exact' },
-          { match: 'axum', layer: 'rust-axum', strength: 'exact' },
+        typescript: [
+          { match: 'weak-alpha', layer: 'alpha-one', strength: 'weak' },
+          {
+            match: 'adapter',
+            kind: 'feature',
+            features: { one: 'alpha-one' },
+            default: 'alpha-default',
+            strength: 'exact',
+          },
         ],
       },
       generated: { signals: [] },
     };
-    const all = detectFrom(table, 'rust', 'Cargo.toml', [
-      { name: 'kiwa-test-rs', features: [] },
-      { name: 'axum', features: [] },
+    const all = detectFrom(table, 'typescript', 'package.json', [
+      { name: 'weak-alpha', features: [] },
+      { name: 'adapter', features: ['one'] },
     ]);
-    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['rust-axum']);
+    // alpha-one once, not twice — the weak name signal and the exact feature
+    // signal both point at it.
+    const layers = resolvePrecedence(all).map((d) => d.layer);
+    expect(layers.filter((l) => l === 'alpha-one')).toHaveLength(1);
+    expect(layers).toEqual(['alpha-one']);
+  });
+});
+
+describe('an implied layer holds only while nothing more specific appears', () => {
+  const IMPLIED: SignalTable = {
+    manifests: { 'package.json': 'typescript' },
+    signals: {
+      typescript: [
+        {
+          match: 'adapter',
+          kind: 'feature',
+          features: { two: 'alpha-two' },
+          default: 'alpha-default',
+          also: ['alpha-implied'],
+          strength: 'exact',
+        },
+        { match: 'framework', layer: 'alpha-framework', strength: 'exact' },
+      ],
+    },
+    generated: { signals: [] },
+  };
+
+  it('keeps the implied layer when the adapter is all the manifest says', () => {
+    const all = detectFrom(IMPLIED, 'typescript', 'package.json', [
+      { name: 'adapter', features: [] },
+    ]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['alpha-default', 'alpha-implied']);
+  });
+
+  it('drops it once a more specific layer is named', () => {
+    // The adapter alone implies two layers as a fallback. A dependency that
+    // names one layer outright is what the project actually uses.
+    const all = detectFrom(IMPLIED, 'typescript', 'package.json', [
+      { name: 'adapter', features: [] },
+      { name: 'framework', features: [] },
+    ]);
+    expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['alpha-framework']);
   });
 
   it('says nothing at all when the entry inherits from the workspace', () => {
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [
-      { name: 'kiwa-test-rs', features: [], unresolved: true },
+    const all = detectFrom(IMPLIED, 'typescript', 'package.json', [
+      { name: 'adapter', features: [], unresolved: true },
     ]);
     expect(resolvePrecedence(all)).toEqual([]);
   });
@@ -620,8 +414,11 @@ describe('a Next.js project is detected from the framework it depends on', () =>
     expect(resolvePrecedence(all).map((d) => d.layer)).toEqual(['nextjs-middleware']);
   });
 
-  it('does not answer a Cargo.toml that happens to depend on a crate named next', () => {
-    const all = detectFrom(TABLE, 'rust', 'Cargo.toml', [{ name: 'next', features: [] }]);
+  it('does not answer a manifest of another language that names next', () => {
+    // The signal is scoped to the language it was written for. A Solidity
+    // project that happens to declare something spelled `next` is not a
+    // Next.js project.
+    const all = detectFrom(TABLE, 'solidity', 'foundry.toml', [{ name: 'next', features: [] }]);
     expect(all).toEqual([]);
   });
 
@@ -742,11 +539,11 @@ describe('the generated half is written from the packages, not by hand', () => {
 
 describe('a generated signal applies only to the language it came from', () => {
   // `redis` is the case that forces this: it is a real npm package and a real
-  // Rust crate. A signal derived from the TypeScript `cache` package's
-  // peerDependencies must not answer a Cargo.toml.
+  // Solidity project. A signal derived from the TypeScript `cache` package's
+  // peerDependencies must not answer a foundry.toml.
   const withGenerated = (signals: GeneratedSignal[]): SignalTable => ({
     manifests: TABLE.manifests,
-    signals: { rust: [{ match: 'kiwa-test-rs', default: 'rust-unit', strength: 'exact' }] },
+    signals: { solidity: [{ match: 'forge-std', default: 'contract', strength: 'exact' }] },
     generated: { signals },
   });
 
@@ -758,7 +555,7 @@ describe('a generated signal applies only to the language it came from', () => {
   };
 
   it('does not answer a manifest in another language', () => {
-    const all = detectFrom(withGenerated([cacheFromTypescript]), 'rust', 'Cargo.toml', [
+    const all = detectFrom(withGenerated([cacheFromTypescript]), 'solidity', 'foundry.toml', [
       { name: 'redis', features: [] },
     ]);
     expect(all).toEqual([]);
@@ -778,17 +575,17 @@ describe('a generated signal applies only to the language it came from', () => {
     const stale = { match: 'redis', layer: 'cache', strength: 'exact' } as GeneratedSignal;
     const table = withGenerated([stale]);
     const dep = [{ name: 'redis', features: [] }];
-    expect(detectFrom(table, 'rust', 'Cargo.toml', dep)).toEqual([]);
+    expect(detectFrom(table, 'solidity', 'foundry.toml', dep)).toEqual([]);
     expect(detectFrom(table, 'typescript', 'package.json', dep)).toEqual([]);
   });
 
   it('leaves the hand-written signals for that language alone', () => {
     // The filter narrows the generated half only. Narrowing both would make
     // this test the one that catches it.
-    const all = detectFrom(withGenerated([cacheFromTypescript]), 'rust', 'Cargo.toml', [
-      { name: 'kiwa-test-rs', features: [] },
+    const all = detectFrom(withGenerated([cacheFromTypescript]), 'solidity', 'foundry.toml', [
+      { name: 'forge-std', features: [] },
     ]);
-    expect(all.map((d) => d.layer)).toEqual(['rust-unit']);
+    expect(all.map((d) => d.layer)).toEqual(['contract']);
   });
 
   it('keeps both halves when the languages agree', () => {
@@ -826,9 +623,9 @@ describe('the signal table stays unambiguous', () => {
 
 describe('every detected layer exists in docs/layers.json', () => {
   it('no signal points at a layer the table does not define', () => {
-    // #1810 removed `contract-rust` because nothing implemented it. A signal
-    // pointing at a layer that is not in the table would advertise the same
-    // kind of dead option.
+    // #1810 removed a layer because nothing implemented it. A signal pointing
+    // at a layer that is not in the table would advertise the same kind of dead
+    // option.
     const layers = JSON.parse(readFileSync(resolve(REPO_ROOT, 'docs/layers.json'), 'utf-8')) as {
       layers: { id: string }[];
     };

@@ -5,9 +5,9 @@
  * one piece of judgement here is precedence, because a dependency name is not
  * always enough to tell layers apart.
  *
- * `rust-tower-http-poc` depends on `axum` as well as `tower-http` — the
+ * A project can depend on two frameworks where one wraps the other — the
  * middleware wraps an axum router — so reading dependency names alone reports
- * two layers where the project tests one. What settles it is `kiwa-test-rs`'s
+ * two layers where the project tests one. What settles it is the adapter's
  * feature list, which is the project's own statement of what it is testing.
  * Signals carry a `strength` for that reason: an `exact` signal settles its
  * group, a `weak` one only speaks when nothing exact did.
@@ -36,7 +36,7 @@ export interface Signal {
  * hand, carrying the language it was derived from.
  *
  * The language is not decoration. Generated signals are npm names, and npm
- * names share a namespace with Rust crate names: `redis`, `postgres` and
+ * names share a namespace with other registries: `redis`, `postgres` and
  * `testcontainers` all exist in both. Matching is by name (exact, or a `/`
  * boundary prefix), so without the language a `Cargo.toml` depending on the
  * `redis` crate matches a signal derived from a TypeScript package and reports
@@ -111,8 +111,8 @@ export interface Detection {
 /**
  * Signals in the same group compete; signals in different groups do not.
  *
- * The group is the runtime prefix, so `rust-axum` and `rust-tower-http` compete
- * while `rust-unit` and `go-gin` do not. Without this an exact Rust signal
+ * The group is the runtime prefix, so two layers of one runtime compete
+ * while layers of different runtimes do not. Without this an exact signal
  * would suppress a weak Go one in a project that happens to hold both.
  */
 function group(layer: string): string {
@@ -124,9 +124,9 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
   if (dep.name !== signal.match && !dep.name.startsWith(`${signal.match}/`)) return [];
 
   if (signal.kind === 'feature') {
-    // `kiwa-test-rs = { workspace = true }` states the dependency and hides the
+    // A workspace-inherited entry states the dependency and hides the
     // feature list, which is the only thing that says which layer. Falling back
-    // to the default would report `rust-unit` for an axum project — a definite
+    // to the default would report the fallback layer for a framework project —
     // answer built from an absent one.
     if (dep.unresolved) return [];
 
@@ -172,7 +172,7 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
   // mean.
   //
   // Reading `default` as an assertion here made the Go adapter report
-  // `go-unit` beside `go-gin`, while the Rust adapter — whose matched feature
+  // the fallback beside the framework layer, while an adapter whose feature
   // replaces the default — reported the framework layer alone. Same intent,
   // two answers, decided by which mechanism the language happened to use.
   const from = signal.default ?? signal.layer;
@@ -256,8 +256,8 @@ export function resolve(all: Detection[]): Detection[] {
   }
 
   // An implied layer is a guess that holds only while nothing else in its group
-  // says otherwise. `kiwa-test-rs` implies the integration layer because the
-  // plain corpus project (`rust-cargo-poc`) carries both `tests/poc.rs` and
+  // says otherwise. An adapter can imply the integration layer because the
+  // plain corpus project carries both a unit and an integration test file and
   // `tests/poc_integration.rs` — but the framework projects each carry a single
   // test file, so keeping it once a framework layer appeared would report an
   // integration suite that no such project has.

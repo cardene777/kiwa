@@ -1,0 +1,8 @@
+# `docs/layers.json` の `unit` layer が spec_dir としてこの dir を宣言する。
+#
+# #1864 で Rust / Go の spec を消した結果、 この dir の中身が 1 件も無くなった。
+# git は空 dir を追跡しないため、 宣言と実体が食い違って release-smoke の
+# 「every spec_dir exists under the spec root」 が落ちる。
+#
+# TypeScript の `unit` layer は宣言としては生きていて、 利用者 project 側で
+# `/kiwa-design --layer unit` が spec を書き出す先がここになる。

@@ -102,19 +102,24 @@ function withFixture<T>(root: string, body: () => T): T {
 
 describe('narrowing happens per runtime', () => {
   it('drops the runtimes whose manifests are absent and narrows the one that matched', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.source).toBe('detected');
-      // `contract` goes too now: #1852 registered `foundry.toml` and
-      // `hardhat.config.*`, so Solidity's absence can be established. Before
-      // that it survived every project, having never been looked for.
-      expect(runtimes(resolved.layers)).toEqual({ rust: 1 });
-      expect(resolved.layers.map((l) => l.id)).toContain('rust-axum');
+      const ids = resolved.layers.map((l) => l.id);
+      // `contract` goes: #1852 registered `foundry.toml` and `hardhat.config.*`,
+      // so Solidity's absence can be established. Before that it survived every
+      // project, having never been looked for.
+      expect(ids).not.toContain('contract');
+      // The runtime that matched is narrowed rather than dropped: the detected
+      // layer stays and the other four `nextjs-*` ones go.
+      expect(ids).toContain('nextjs-rsc');
+      expect(ids).not.toContain('nextjs-middleware');
+      expect(runtimes(resolved.layers)).toEqual({ typescript: UNDETECTABLE_TS + 1 });
     });
   });
 
@@ -123,15 +128,14 @@ describe('narrowing happens per runtime', () => {
     // members, so a Go service in an undeclared subdirectory is absent to it
     // and present to the project — its five layers stop being offered. The
     // exclusion is the better default; being unable to find out why is not.
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const { warnings } = resolveLayers({ cwd: root });
-      expect(warnings.join('\n')).toMatch(/excluded go: no go manifest/);
-      expect(warnings.join('\n')).toMatch(/excluded typescript: no typescript manifest/);
+      expect(warnings.join('\n')).toMatch(/excluded solidity: no solidity manifest/);
     });
   });
 
@@ -158,27 +162,24 @@ describe('narrowing happens per runtime', () => {
     });
   });
 
-  it('does not let a Rust detection delete the TypeScript half of a monorepo', () => {
-    // The case the first design got wrong: a Rust service beside a JS package
-    // would have lost every TypeScript layer silently. What survives is now
-    // decided by TypeScript's own evidence — the `package.json` here has no
-    // dependencies, so the five `nextjs-*` layers go and the rest stay.
+  it('does not let one runtime delete the TypeScript half of a monorepo', () => {
+    // The case the first design got wrong: a service in another language beside
+    // a JS package would have lost every TypeScript layer silently. What
+    // survives is now decided by TypeScript's own evidence — the `package.json`
+    // here has no dependencies, so the five `nextjs-*` layers go and the rest
+    // stay, while Solidity keeps its one layer on its own manifest.
     const root = fixture(
-      { 'Cargo.toml': '[dependencies]\n', 'package.json': '{"name":"app"}' },
+      { 'foundry.toml': '[profile.default]\n', 'package.json': '{"name":"app"}' },
       {
         generated_at: fresh(),
-        scanned: [
-          { manifest: 'Cargo.toml', language: 'rust' },
-          { manifest: 'package.json', language: 'typescript' },
-        ],
-        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        detected: [],
       },
     );
     withFixture(root, () => {
       const counts = runtimes(resolveLayers({ cwd: root }).layers);
       expect(counts.typescript).toBe(UNDETECTABLE_TS);
-      expect(counts.rust).toBe(1);
-      expect(counts.go).toBeUndefined();
+      expect(counts.solidity).toBe(1);
     });
   });
 });
@@ -270,10 +271,8 @@ describe('Solidity is looked for, not assumed present', () => {
     );
     expect(declared).toContain('solidity:foundry.toml');
     expect(declared).toContain('solidity:hardhat.config.*');
-    expect(declared).toContain('rust:Cargo.toml');
-    expect(declared).toContain('go:go.mod');
     expect(declared).toContain('typescript:package.json');
-    expect(declared.size).toBe(5);
+    expect(declared.size).toBe(3);
   });
 
   it('keeps it when a Foundry manifest is there', () => {
@@ -295,9 +294,9 @@ describe('Solidity is looked for, not assumed present', () => {
 });
 
 describe('absence is established by looking', () => {
-  it('sees a Go module the workspace definition never named', async () => {
+  it('sees a Solidity manifest the workspace definition never named', async () => {
     // The case review flagged and the probe reproduced: root `package.json`,
-    // an undeclared `services/api/go.mod`, and all five Go layers dropped with
+    // an undeclared `services/api/foundry.toml`, and the Solidity layer dropped with
     // no warning. `scan` cannot see it — it reads declared members, honouring
     // `!pkgs/skip`, which is right for reading dependencies and wrong as a
     // basis for concluding a language is absent.
@@ -306,9 +305,9 @@ describe('absence is established by looking', () => {
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'services', 'api'), { recursive: true });
-      writeFileSync(join(root, 'services', 'api', 'go.mod'), 'module x\n');
+      writeFileSync(join(root, 'services', 'api', 'foundry.toml'), '[profile.default]\n');
       expect(presentManifests(root).manifests.map((m) => m.path).sort()).toEqual([
-        join('services', 'api', 'go.mod'),
+        join('services', 'api', 'foundry.toml'),
         'package.json',
       ].sort());
     } finally {
@@ -323,7 +322,7 @@ describe('absence is established by looking', () => {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       for (const noise of ['node_modules/dep', 'target/debug', '.next/cache']) {
         mkdirSync(join(root, noise), { recursive: true });
-        writeFileSync(join(root, noise, 'Cargo.toml'), '[dependencies]\n');
+        writeFileSync(join(root, noise, 'foundry.toml'), '[profile.default]\n');
       }
       expect(presentManifests(root).manifests.map((m) => m.language)).toEqual(['typescript']);
     } finally {
@@ -340,9 +339,9 @@ describe('absence is established by looking', () => {
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'a', 'b', 'c', 'd', 'e'), { recursive: true });
-      writeFileSync(join(root, 'a', 'b', 'c', 'd', 'e', 'go.mod'), 'module x\n');
+      writeFileSync(join(root, 'a', 'b', 'c', 'd', 'e', 'foundry.toml'), '[profile.default]\n');
       const found = presentManifests(root);
-      expect(found.manifests.map((m) => m.language)).toContain('go');
+      expect(found.manifests.map((m) => m.language)).toContain('solidity');
       expect(found.complete).toBe(true);
     } finally {
       rmSync(root, { recursive: true, force: true });
@@ -358,15 +357,15 @@ describe('absence is established by looking', () => {
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(root, 'a', 'b', 'c'), { recursive: true });
-      writeFileSync(join(root, 'a', 'b', 'c', 'go.mod'), 'module x\n');
+      writeFileSync(join(root, 'a', 'b', 'c', 'foundry.toml'), '[profile.default]\n');
 
       const stopped = presentManifests(root, 2);
       expect(stopped.complete).toBe(false);
-      expect(stopped.manifests.map((m) => m.language)).not.toContain('go');
+      expect(stopped.manifests.map((m) => m.language)).not.toContain('solidity');
 
       const finished = presentManifests(root);
       expect(finished.complete).toBe(true);
-      expect(finished.manifests.map((m) => m.language)).toContain('go');
+      expect(finished.manifests.map((m) => m.language)).toContain('solidity');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -382,11 +381,11 @@ describe('absence is established by looking', () => {
     try {
       writeFileSync(join(root, 'package.json'), '{"name":"app"}');
       mkdirSync(join(closed, 'api'), { recursive: true });
-      writeFileSync(join(closed, 'api', 'go.mod'), 'module x\n');
+      writeFileSync(join(closed, 'api', 'foundry.toml'), '[profile.default]\n');
       chmodSync(closed, 0o000);
 
       const result = presentManifests(root);
-      expect(result.manifests.map((m) => m.language)).not.toContain('go');
+      expect(result.manifests.map((m) => m.language)).not.toContain('solidity');
       expect(result.complete).toBe(false);
     } finally {
       try {
@@ -403,15 +402,15 @@ describe('absence is established by looking', () => {
     // not — so it supports neither the exclusions, which rest on absence, nor
     // the within-language narrowing, since the crate that would have widened it
     // may be in the part that went unseen.
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({
         cwd: root,
-        presence: { manifests: [{ path: 'Cargo.toml', language: 'rust' }], complete: false },
+        presence: { manifests: [{ path: 'package.json', language: 'typescript' }], complete: false },
       });
       expect(resolved.source).toBe('all');
       expect(resolved.layers).toHaveLength(TABLE.length);
@@ -426,21 +425,21 @@ describe('absence is established by looking', () => {
     // language set alone cannot see this, because both crates are Rust.
     const root = fixture(
       {
-        'Cargo.toml': '[dependencies]\n',
-        'services/worker/Cargo.toml': '[dependencies]\nactix-web = "4"\n',
+        'foundry.toml': '[profile.default]\n',
+        'services/worker/foundry.toml': '[dependencies]\nactix-web = "4"\n',
       },
       {
         generated_at: fresh(),
-        scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+        scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
       },
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'rust').length,
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'solidity').length,
       );
-      expect(resolved.warnings.join('\n')).toMatch(/services\/worker\/Cargo\.toml was not read by both passes/);
+      expect(resolved.warnings.join('\n')).toMatch(/services\/worker\/foundry\.toml was not read by both passes/);
     });
   });
 
@@ -452,22 +451,22 @@ describe('absence is established by looking', () => {
     // The file has to exist, or the recording is discarded as stale and the
     // fallback would make this pass without the branch under test running.
     const root = fixture(
-      { 'Cargo.toml': '[dependencies]\n', 'vendor/inner/Cargo.toml': '[dependencies]\n' },
+      { 'foundry.toml': '[profile.default]\n', 'vendor/inner/foundry.toml': '[profile.default]\n' },
       {
         generated_at: fresh(),
         scanned: [
-          { manifest: 'Cargo.toml', language: 'rust' },
-          { manifest: 'vendor/inner/Cargo.toml', language: 'rust' },
+          { manifest: 'foundry.toml', language: 'solidity' },
+          { manifest: 'vendor/inner/foundry.toml', language: 'solidity' },
         ],
-        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
       },
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'rust').length,
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'solidity').length,
       );
-      expect(resolved.warnings.join('\n')).toMatch(/vendor\/inner\/Cargo\.toml/);
+      expect(resolved.warnings.join('\n')).toMatch(/vendor\/inner\/foundry\.toml/);
     });
   });
 
@@ -477,20 +476,20 @@ describe('absence is established by looking', () => {
     // absence before disagreement excluded all five layers on a search already
     // known not to cover them.
     const root = fixture(
-      { 'package.json': '{"name":"app"}', 'vendor/inner/Cargo.toml': '[dependencies]\n' },
+      { 'package.json': '{"name":"app"}', 'vendor/inner/foundry.toml': '[profile.default]\n' },
       {
         generated_at: fresh(),
         scanned: [
           { manifest: 'package.json', language: 'typescript' },
-          { manifest: 'vendor/inner/Cargo.toml', language: 'rust' },
+          { manifest: 'vendor/inner/foundry.toml', language: 'solidity' },
         ],
         detected: [],
       },
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'rust').length,
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'solidity').length,
       );
       expect(resolved.warnings.join('\n')).not.toMatch(/excluded rust/);
     });
@@ -499,45 +498,41 @@ describe('absence is established by looking', () => {
   it('still narrows a runtime whose manifests were all read', () => {
     // The other half: an unread manifest is what suspends the narrowing, not
     // the mere possibility of one.
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'rust').map((l) => l.id)).toEqual([
-        'rust-axum',
-      ]);
+      const ids = resolved.layers.map((l) => l.id);
+      expect(ids).toContain('nextjs-rsc');
+      expect(ids).not.toContain('nextjs-middleware');
       expect(resolved.warnings.join('\n')).not.toMatch(/was not read/);
     });
   });
 
   it('suspends only the runtime with the unread manifest', () => {
+    // TypeScript has a manifest the recording never read, so its narrowing is
+    // suspended and every TypeScript layer survives. Solidity was read in full,
+    // so its absence is established and `contract` goes.
     const root = fixture(
       {
-        'Cargo.toml': '[dependencies]\n',
-        'services/worker/Cargo.toml': '[dependencies]\n',
-        'go.mod': 'module x\n',
+        'package.json': '{"name":"app"}',
+        'services/worker/package.json': '{"name":"worker"}',
       },
       {
         generated_at: fresh(),
-        scanned: [
-          { manifest: 'Cargo.toml', language: 'rust' },
-          { manifest: 'go.mod', language: 'go' },
-        ],
-        detected: [
-          { layer: 'rust-axum', manifest: 'Cargo.toml' },
-          { layer: 'go-gin', manifest: 'go.mod' },
-        ],
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
       },
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'rust')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'rust').length,
+      expect(resolved.layers.filter((l) => l.runtime === 'typescript')).toHaveLength(
+        TABLE.filter((l) => l.runtime === 'typescript').length,
       );
-      expect(resolved.layers.filter((l) => l.runtime === 'go').map((l) => l.id)).toEqual(['go-gin']);
+      expect(resolved.layers.map((l) => l.id)).not.toContain('contract');
     });
   });
 
@@ -547,11 +542,11 @@ describe('absence is established by looking', () => {
     // staleness check cannot catch that, because it only knows the manifests
     // the recording already named.
     const root = fixture(
-      { 'Cargo.toml': '[dependencies]\n', 'services/api/go.mod': 'module x\n' },
+      { 'foundry.toml': '[profile.default]\n', 'services/api/go.mod': 'module x\n' },
       {
         generated_at: fresh(),
-        scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-        detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+        scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
       },
     );
     withFixture(root, () => {
@@ -628,9 +623,9 @@ describe('an asset is taken from this package or not at all', () => {
 
 describe('a recording without a usable timestamp is discarded', () => {
   it('falls back when generated_at is absent', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
@@ -642,10 +637,10 @@ describe('a recording without a usable timestamp is discarded', () => {
   it('falls back when generated_at is not a date', () => {
     // Without the check the comparison against it is silently false and every
     // staleness test passes by accident.
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: 'sometime last week',
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       expect(resolveLayers({ cwd: root }).source).toBe('all');
@@ -655,10 +650,10 @@ describe('a recording without a usable timestamp is discarded', () => {
 
 describe('an explicit choice wins', () => {
   it('takes the flag over the detection', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root, explicit: 'contract' });
@@ -675,10 +670,10 @@ describe('an explicit choice wins', () => {
   });
 
   it('treats an explicit all as every layer', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root, explicit: 'all' });
@@ -692,10 +687,10 @@ describe('a recording that no longer describes the project is discarded', () => 
   it('falls back when a scanned manifest was edited afterwards', () => {
     // Adding `axum` to Cargo.toml without re-running detection would otherwise
     // narrow to the layer the project has moved off.
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: new Date(Date.now() - 60_000).toISOString(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-unit', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
@@ -708,8 +703,8 @@ describe('a recording that no longer describes the project is discarded', () => 
   it('falls back when a scanned manifest is gone', () => {
     const root = fixture({}, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
@@ -721,8 +716,8 @@ describe('a recording that no longer describes the project is discarded', () => 
   it('falls back when the recording predates the scanned field', () => {
     // Without it, which languages were looked at is unknown, so no runtime can
     // be excluded on evidence.
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
-      detected: [{ layer: 'rust-axum', manifest: 'Cargo.toml' }],
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
     });
     withFixture(root, () => {
       expect(resolveLayers({ cwd: root }).layers).toHaveLength(TABLE.length);
@@ -732,7 +727,7 @@ describe('a recording that no longer describes the project is discarded', () => 
 
 describe('an unusable recording is not an error', () => {
   it('falls back when there is no file at all', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, null);
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, null);
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.source).toBe('all');
@@ -741,7 +736,7 @@ describe('an unusable recording is not an error', () => {
   });
 
   it('falls back when the file is malformed', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, null);
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, null);
     mkdirSync(join(root, '.kiwa'), { recursive: true });
     writeFileSync(join(root, '.kiwa', 'stack.json'), '{ not json');
     withFixture(root, () => {
@@ -750,12 +745,12 @@ describe('an unusable recording is not an error', () => {
   });
 
   it('discards the whole recording when it names a layer this build does not know', () => {
-    const root = fixture({ 'Cargo.toml': '[dependencies]\n' }, {
+    const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: fresh(),
-      scanned: [{ manifest: 'Cargo.toml', language: 'rust' }],
+      scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
       detected: [
-        { layer: 'rust-axum', manifest: 'Cargo.toml' },
-        { layer: 'rust-from-the-future', manifest: 'Cargo.toml' },
+        { layer: 'nextjs-rsc', manifest: 'package.json' },
+        { layer: 'rust-from-the-future', manifest: 'package.json' },
       ],
     });
     withFixture(root, () => {
@@ -784,9 +779,9 @@ describe('an unusable recording is not an error', () => {
     // fixture has to carry a `foundry.toml` for `contract` to count as
     // detected rather than as evidence that narrowing happened.
     const narrowable = (l: { id: string; runtime: string | null }): boolean =>
-      l.runtime === 'rust' || l.runtime === 'go' || NAMED_BY_SIGNALS.has(l.id);
+      l.runtime === 'solidity' || l.runtime === 'go' || NAMED_BY_SIGNALS.has(l.id);
     const manifestFor = (l: { id: string; runtime: string | null }): string =>
-      l.runtime === 'rust' ? 'Cargo.toml' : l.runtime === 'go' ? 'go.mod' : 'package.json';
+      l.runtime === 'solidity' ? 'Cargo.toml' : l.runtime === 'go' ? 'go.mod' : 'package.json';
     // The dependencies are chosen so every named TypeScript layer is detected:
     // `next` for the five `nextjs-*`, and one subject each for auth, cache,
     // job-queue, orm-query and ui.
@@ -794,7 +789,7 @@ describe('an unusable recording is not an error', () => {
     const root = fixture(
       {
         'package.json': deps,
-        'Cargo.toml': '[dependencies]\n',
+        'foundry.toml': '[profile.default]\n',
         'go.mod': 'module x\n',
         // Present so Solidity is not ruled out; `contract` then has to appear
         // in the recording like every other narrowable layer.
@@ -804,7 +799,7 @@ describe('an unusable recording is not an error', () => {
       generated_at: fresh(),
       scanned: [
         { manifest: 'package.json', language: 'typescript' },
-        { manifest: 'Cargo.toml', language: 'rust' },
+        { manifest: 'foundry.toml', language: 'solidity' },
         { manifest: 'go.mod', language: 'go' },
       ],
       detected: TABLE.filter(narrowable).map((l) => ({ layer: l.id, manifest: manifestFor(l) })),
@@ -826,10 +821,7 @@ describe('what --detect writes is what the resolver reads', () => {
     const { runCli } = await import('../src/runCli.js');
     const dir = mkdtempSync(join(tmpdir(), 'kiwa-roundtrip-'));
     try {
-      writeFileSync(
-        join(dir, 'Cargo.toml'),
-        ['[dev-dependencies]', 'kiwa-test-rs = { version = "0.5", features = ["axum"] }'].join('\n'),
-      );
+      writeFileSync(join(dir, 'package.json'), JSON.stringify({ dependencies: { next: '15' } }));
       const code = await runCli(['init', '--detect'], {
         cwd: () => dir,
         stdout: () => {},
@@ -843,12 +835,12 @@ describe('what --detect writes is what the resolver reads', () => {
 
       const resolved = resolveLayers({ cwd: dir });
       expect(resolved.source).toBe('detected');
-      expect(resolved.layers.map((l) => l.id)).toContain('rust-axum');
-      // The Go layers go because `go.mod` was looked for and not found; the
-      // TypeScript ones go for the same reason. `contract` goes with them now
-      // that #1852 looks for `foundry.toml` — before, it was the one layer no
-      // project could ever rule out.
-      expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(0);
+      expect(resolved.layers.map((l) => l.id)).toContain('nextjs-rsc');
+      // `next` implies all five `nextjs-*` layers, because a manifest cannot
+      // tell them apart — the writer records that and the reader keeps it.
+      // `contract` goes because #1852 looks for `foundry.toml`; before that it
+      // was the one layer no project could ever rule out.
+      expect(resolved.layers.map((l) => l.id)).toContain('nextjs-middleware');
       expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(0);
 
       // Editing the manifest after the fact must send the reader back to the
@@ -856,7 +848,7 @@ describe('what --detect writes is what the resolver reads', () => {
       // staleness check — without it the writer could record an empty one and
       // every other assertion would still pass.
       const later = new Date(Date.now() + 120_000);
-      utimesSync(join(dir, 'Cargo.toml'), later, later);
+      utimesSync(join(dir, 'package.json'), later, later);
       const afterEdit = resolveLayers({ cwd: dir });
       expect(afterEdit.source).toBe('all');
       expect(afterEdit.warnings.join(' ')).toMatch(/changed after/);
@@ -1129,12 +1121,6 @@ describe('the layer table is mirrored, not selected from', () => {
     for (const layer of noProviders) expect(layer.providers).toEqual([]);
   });
 
-  it('leaves a scalar null when it is absent', () => {
-    // `mode` is declared on 6 of the 30. The other 24 have no key at all, and
-    // null says that more plainly than an empty string.
-    const withoutMode = TABLE.filter((l) => l.mode === null);
-    expect(withoutMode.length).toBeGreaterThan(0);
-  });
 });
 
 describe('a hand-edited layers.json degrades predictably', () => {
@@ -1239,7 +1225,7 @@ describe('lang suffix', () => {
     // is covered without editing this test.
     const applied = applyLang(TABLE, 'ja');
     const declared = TABLE.filter((l) => l.spec_path !== null);
-    expect(declared.length).toBeGreaterThan(20);
+    expect(declared.length).toBeGreaterThanOrEqual(20);
     for (const layer of declared) {
       const moved = applied.find((l) => l.id === layer.id);
       expect(moved?.spec_path, `${layer.id} の spec_path が動いていない`).toMatch(/\.ja\.md$/);

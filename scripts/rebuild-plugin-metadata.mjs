@@ -42,20 +42,6 @@ export const NATIVE_PACKAGES = [
     manifest: 'kiwa-py/pyproject.toml',
     declares: /^\s*name\s*=\s*["']([^"']+)["']/m,
   },
-  {
-    name: 'kiwa-test-rs',
-    registry: 'crates.io',
-    dir: 'kiwa-rs',
-    manifest: 'kiwa-rs/Cargo.toml',
-    declares: /^\s*name\s*=\s*["']([^"']+)["']/m,
-  },
-  {
-    name: 'kiwa-test-go',
-    registry: 'Go module',
-    dir: 'kiwa-go',
-    manifest: 'kiwa-go/go.mod',
-    declares: /^module\s+\S*?([^/\s]+)\s*$/m,
-  },
 ];
 
 // Search terms that describe what kiwa does. A term equal to a package name must not appear

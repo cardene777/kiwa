@@ -47,7 +47,7 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
 
   it('宣言のある layer が十分にある', () => {
     // A guard against the checks below silently covering nothing.
-    expect(DECLARED.length).toBeGreaterThan(20);
+    expect(DECLARED.length).toBeGreaterThanOrEqual(20);
   });
 
   it('--lang 省略時は layers.json の宣言と一致する', () => {

@@ -66,19 +66,9 @@
       "label": "kiwa 全体"
     },
     {
-      "name": "go",
-      "category": "native-languages",
-      "label": "kiwa-test-go"
-    },
-    {
       "name": "python",
       "category": "native-languages",
       "label": "kiwa-test-py"
-    },
-    {
-      "name": "rust",
-      "category": "native-languages",
-      "label": "kiwa-test-rs"
     }
   ],
   "standaloneCategory": {

@@ -95,7 +95,7 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 | `detected` | 検出で絞れた | 返った layer を対象にする |
 | `all` | 下表で分岐 | — |
 
-`all` で全 layer を生成しない。 30 layer 分の spec が出て、 その大半は project と無関係になる。
+`all` で全 layer を生成しない。 20 layer 分の spec が出て、 その大半は project と無関係になる。
 「絞れなかった」 は「全部要る」 ではない。
 
 **ただし `source=all` は 2 つの別の答えを 1 語で返す**。 CLI は `--layer all` を受けた時も
@@ -116,19 +116,19 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 
 | 形 | 件数 | 意味 | 本 skill の扱い |
 |---|---|---|---|
-| `{example}/...` | 32 | project root 起点 | **対象**。 `{example}` を `.` に解決する |
+| `{example}/...` | 22 | project root 起点 | **対象**。 `{example}` を `.` に解決する |
 | `examples/{example}/...` | 0 | kiwa repo の example 配下 | 対象外。 利用者 project に `examples/` は無い |
 | `tests/fixtures/{example}/...` | 3 | kiwa 内部の fixture | 対象外。 利用者の成果物ではない |
 
-1 つ目を 1 件でも持つ layer が対象になる。 3 layer (`contract` / `e2e`) は 1 つ目と 3 つ目を
+1 つ目を 1 件でも持つ layer が対象になる。 2 layer (`contract` / `e2e`) は 1 つ目と 3 つ目を
 同時に持つが、 これは同じ producer が「利用者側の test」 と「kiwa 側の fixture 複製」 を書く
 形なので異常ではない。 利用者 project では 1 つ目だけを使う。
 
 1 つ目を 1 件も持たない layer は生成先を決められないので飛ばす。 現状そのような layer は無い。
 
-以前は rust 5 + go 5 の計 10 layer が `examples/{example}/...` の形で kiwa 自身の dir を
-綴っており、 置換しても `examples/` の 1 段が残るため利用者 project に置けなかった。 #1842 で
-他の layer と同じ形に揃えたので、 30 layer すべてが対象になる。
+かつて `examples/{example}/...` の形で kiwa 自身の dir を綴る layer があり、 置換しても
+`examples/` の 1 段が残るため利用者 project に置けなかった。 #1842 で他の layer と同じ形に
+揃えたので、 20 layer すべてが対象になる。
 
 `{module}` は `--module` の値に、 `{Contract}` は対象 contract 名に解決する。
 
@@ -155,14 +155,14 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 
 | option | 宣言している skill 数 | 備考 |
 |---|---|---|
-| `--module` | 17 | 全 consumer が受ける |
-| `--input-spec` | 13 | spec path を渡す flag |
+| `--module` | 15 | 全 consumer が受ける |
+| `--input-spec` | 11 | spec path を渡す flag |
 | `--spec-path` | 4 | 同じ役割で名前が違う (`auth` / `cache` / `forge` / `queue`) |
-| `--layer` | **2** | `kiwa-rust` / `kiwa-go` のみ |
+| `--layer` | **0** | Layer 2 consumer は 1 つも受けない (`kiwa-design` / `kiwa-review` は Layer 2 ではない) |
 | `--provider` | 3 | `auth` / `cache` / `queue` |
 
-`--layer` を全 consumer に渡してはいけない。 受けるのは 2 skill だけで、 `kiwa-nextjs` は
-持たない。
+`--layer` を Layer 2 consumer に渡してはいけない。 受けるのは Layer 1 (`kiwa-design`) と
+review (`kiwa-review`) だけで、 `kiwa-nextjs` をはじめ Layer 2 側は 1 つも持たない。
 
 `--module` は全 consumer が受ける。 `#1851` まで `kiwa-play` と `kiwa-edge` が受けておらず、
 その 2 layer は起動を組み立てられずに飛ばされていた。
@@ -184,20 +184,20 @@ kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 path を組み立て直すと suffix が落ち、 5 layer が区別できなくなる。 宣言された `spec_path` を
 そのまま使う。
 
-### 出力先が衝突する組は 1 つだけ残っている
+### 出力先が衝突する組は残っていない
 
-実測すると出力先を共有するのは 1 group。
+実測すると出力先を共有する layer は 1 組も無い。
 
-| 共有される出力先 | 共有する layer | 性質 |
-|---|---|---|
-| `{example}/tests/{module}.rs` | `rust-unit` / `rust-integration` | **意図的**。 cargo は `tests/` 配下を integration test として扱い 1 file = 1 crate なので、 `kiwa-rust` が両 layer を 1 file に揃えている |
+最後まで残っていたのは polyglot の unit / integration 2 layer で、 その runner が特定 dir を
+integration test として扱う都合で 1 file に揃えていた。 #1864 で当該言語の対応ごと消えたため、
+この組も無くなった。
 
 以前は 4 group あった。 nextjs 5 layer / `api` と `integration` / `cli` と `data` と
 `orm-query` の 3 group は #1844 で分けた。 入力 spec の suffix を出力名に写す形で、
 `{module}.rsc.test.ts` / `{module}.api.test.ts` / `{module}.orm.test.ts` のように分かれる。
 
-残る 1 件は宣言の誤りではないので、 上書きを避ける必要がない。 それでも起動前に解決済み出力
-path の重複は数える = 新しい衝突が入った時に黙って上書きしないため。
+衝突が 0 件でも起動前に解決済み出力 path の重複は数える = 新しい衝突が入った時に黙って
+上書きしないため。
 
 | 相手が `--output` を宣言している | 振る舞い |
 |---|---|
@@ -207,8 +207,8 @@ path の重複は数える = 新しい衝突が入った時に黙って上書き
 **黙って上書きしない**。 5 回起動して 1 file しか残らない状態は、 4 layer 分の生成が失敗したのと
 同じでありながら成功に見える。
 
-`mode` を持つ layer (30 中 6) は、 相手が `--mode` を宣言していれば渡す。 `providers` を持つ
-layer は `selected_by` と相手の option 宣言の両方が揃った時だけ渡す。
+`mode` を持つ layer は現在 1 件も無い (#1864 で framework 別 helper を持つ layer が消えた)。
+`providers` を持つ layer は `selected_by` と相手の option 宣言の両方が揃った時だけ渡す。
 
 `also_consumed_by` を持つ layer は、 主 consumer の後に副次 consumer も同じ規則で起動する。
 実測すると該当は `contract` 1 件で、 主 `kiwa-forge` / 副 `kiwa-hardhat`。

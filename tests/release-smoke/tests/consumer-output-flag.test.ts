@@ -100,14 +100,14 @@ describe('a skill that writes test files can be told where to write them', () =>
       'kiwa-ui',
       'kiwa-vitest',
     ]);
-    expect(producers).toHaveLength(18);
+    expect(producers).toHaveLength(16);
   });
 
   it('every --output that exists states what it falls back to', () => {
     // An option with no stated default is one whose behaviour has to be read
     // out of the implementation, which is the state this replaces.
     const withFlag = producers.filter((skill) => declaredOptions(skill).includes('--output'));
-    expect(withFlag).toHaveLength(10);
+    expect(withFlag).toHaveLength(8);
     expect(withFlag.filter((skill) => !declaredDefault(skill))).toEqual([]);
   });
 });
@@ -143,7 +143,7 @@ describe('a consumer can be told where its input is and what to call it', () => 
     const byFlag = Object.fromEntries(
       SPEC_FLAGS.map((flag) => [flag, producers.filter((s) => declaredOptions(s).includes(flag))]),
     );
-    expect(byFlag['--input-spec']).toHaveLength(13);
+    expect(byFlag['--input-spec']).toHaveLength(11);
     expect(byFlag['--spec-path']?.sort()).toEqual([
       'kiwa-auth',
       'kiwa-cache',
@@ -177,15 +177,13 @@ describe('a consumer can be told where its input is and what to call it', () => 
     });
     // `kiwa-cli-test` left the list in #1861 群 2: its flag now names the
     // section that resolves the default instead of stating nothing at all.
-    // The other seven are群 3-4 and unchanged.
+    // The other five are群 3-4 and unchanged.
     expect(silent.sort()).toEqual([
       'kiwa-auth',
       'kiwa-cache',
       'kiwa-forge',
-      'kiwa-go',
       'kiwa-hardhat',
       'kiwa-queue',
-      'kiwa-rust',
     ]);
   });
 
@@ -264,9 +262,9 @@ describe('the stated default matches what the layer table declares', () => {
   });
 
   it('no skill states kiwa\'s own directory as its default', () => {
-    // `kiwa-rust` and `kiwa-go` used to spell `examples/{example}/…`, which is
-    // the kiwa repository's layout written into a skill that also runs in other
-    // people's projects. Every default is now relative to the target root.
+    // Two skills used to spell `examples/{example}/…`, which is the kiwa
+    // repository's layout written into a skill that also runs in other people's
+    // projects. Every default is now relative to the target root.
     const selfAnchored = producers.filter((skill) => declaredDefault(skill)?.startsWith('examples/'));
     expect(selfAnchored).toEqual([]);
   });
@@ -284,9 +282,6 @@ describe('the defaults are pinned so they cannot drift silently', () => {
       'kiwa-data': 'tests/{module}.data.test.ts',
       'kiwa-orm': 'tests/{module}.orm.test.ts',
       'kiwa-nextjs': 'tests/integration/{module}.nextjs.test.ts',
-      // Changed by #1842 from `examples/{example}/…` to the target-root form.
-      'kiwa-rust': 'tests/{module}.rs',
-      'kiwa-go': '{module}_test.go',
     };
     for (const [skill, path] of Object.entries(before)) {
       expect(declaredDefault(skill)).toBe(path);
@@ -297,7 +292,7 @@ describe('the defaults are pinned so they cannot drift silently', () => {
     // Declaring `--output` and then naming a fixed path in every step leaves the
     // option inert: a reader following the steps writes to the hardcoded path.
     // Each skill states once that the paths it goes on to name are the defaults.
-    const added = ['kiwa-api', 'kiwa-cli-test', 'kiwa-data', 'kiwa-orm', 'kiwa-rust', 'kiwa-go'];
+    const added = ['kiwa-api', 'kiwa-cli-test', 'kiwa-data', 'kiwa-orm'];
     for (const skill of added) {
       const line = read(`.claude/skills/${skill}/SKILL.md`)
         .split('\n')
@@ -314,25 +309,13 @@ describe('the defaults are pinned so they cannot drift silently', () => {
   it('the skills still name a concrete path in their steps', () => {
     // The note above is only meaningful because the steps do name paths. If a
     // skill stopped naming any, the note would be describing nothing.
-    for (const skill of ['kiwa-api', 'kiwa-orm', 'kiwa-rust']) {
+    for (const skill of ['kiwa-api', 'kiwa-orm']) {
       const text = read(`.claude/skills/${skill}/SKILL.md`);
       const afterOptions = text.slice(text.indexOf('- `--output {path}`'));
       expect(afterOptions).toMatch(/\{module\}/);
     }
   });
 
-  it('the two polyglot skills say what their paths are relative to', () => {
-    // They used to spell `examples/{example}/…`, which said where the paths were
-    // anchored by including it. Dropping the prefix removes that information, so
-    // the anchor has to be stated instead — otherwise a reader of the table
-    // cannot tell whether `tests/{module}.rs` is the repo root or the example.
-    for (const skill of ['kiwa-rust', 'kiwa-go']) {
-      const text = read(`.claude/skills/${skill}/SKILL.md`);
-      expect(text).toMatch(/\*\*path の基準\*\*/);
-      expect(text).toMatch(/対象 root からの相対/);
-      expect(text).toMatch(/`examples\/\{name\}\/` が root/);
-    }
-  });
 
   it('a consumer serving several layers does not hardcode one of their paths', () => {
     // Splitting the declarations (#1844) is inert while the steps still name a
@@ -387,14 +370,4 @@ describe('the defaults are pinned so they cannot drift silently', () => {
     expect(offenders).toEqual([]);
   });
 
-  it('the two skills with mode suffixes say the suffix is not added to an explicit path', () => {
-    // `kiwa-rust` writes `{module}_axum.rs` under `--mode axum`. Applying that
-    // to a caller-supplied path would rewrite the name it asked for.
-    for (const skill of ['kiwa-rust', 'kiwa-go']) {
-      const line = read(`.claude/skills/${skill}/SKILL.md`)
-        .split('\n')
-        .find((l) => l.startsWith('- `--output {path}`'));
-      expect(line).toMatch(/suffix を足さない/);
-    }
-  });
 });

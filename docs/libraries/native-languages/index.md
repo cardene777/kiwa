@@ -1,10 +1,10 @@
 # ネイティブ言語
 
-ネイティブ言語ライブラリは、Go、Python、Rust の標準テストランナーへ直接組み込むための test helper です。TypeScript から別言語のアプリケーションを操作する言語アダプターとは異なり、対象言語のテストコードから import して使います。
+ネイティブ言語ライブラリは、Python の標準テストランナーへ直接組み込むための test helper です。TypeScript から別言語のアプリケーションを操作する言語アダプターとは異なり、対象言語のテストコードから import して使います。
 
 ## 言語から選ぶ
 
-Go の `testing` package と Web framework adapter は [kiwa-test-go](./go/) を、pytest fixture と plugin は [kiwa-test-py](./python/) を、cargo test と feature flag は [kiwa-test-rs](./rust/) を選びます。どれもテストごとに状態を作り、外部 network を使わずに request、response、mock の結果を検証します。
+pytest の fixture と plugin は [kiwa-test-py](./python/) を選びます。どれもテストごとに状態を作り、外部 network を使わずに request、response、mock の結果を検証します。
 
 ## 読み進め方
 

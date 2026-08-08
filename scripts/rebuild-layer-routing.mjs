@@ -178,9 +178,8 @@ function renderRoutingTable(layers) {
       : l.variants.length
         ? `${l.variants.map((p) => `\`${p}\``).join(' / ')} (${l.selected_by})`
         : '—';
-    const mode = l.mode ? ` (\`--mode ${l.mode}\`)` : '';
     lines.push(
-      `| \`${l.id}\` | \`${l.spec_path}\` | \`/${l.consumer_skill}\`${mode} | ${l.runtime} | ${providers} |`,
+      `| \`${l.id}\` | \`${l.spec_path}\` | \`/${l.consumer_skill}\` | ${l.runtime} | ${providers} |`,
     );
   }
   lines.push('');
@@ -211,17 +210,6 @@ function renderResolver(layers) {
   return lines.join('\n');
 }
 
-function renderPolyglotEnum(layers, runtime) {
-  const own = layers.filter((l) => l.runtime === runtime);
-  const modes = own.filter((l) => l.mode).map((l) => l.mode);
-  return [
-    '',
-    `- \`--layer {${own.map((l) => l.id).join('|')}}\` — 対象 layer。`,
-    `- \`--mode {${modes.join('|')}}\` — framework 別 helper の選択 (layer が \`--mode\` を持つ時のみ)。`,
-    '',
-  ].join('\n');
-}
-
 const PLAN = [
   {
     rel: '.claude/skills/kiwa-design/SKILL.md',
@@ -236,14 +224,6 @@ const PLAN = [
       { name: 'review-enum', render: renderReviewEnum },
       { name: 'resolver', render: renderResolver },
     ],
-  },
-  {
-    rel: '.claude/skills/kiwa-rust/SKILL.md',
-    regions: [{ name: 'rust-enum', render: (l) => renderPolyglotEnum(l, 'rust') }],
-  },
-  {
-    rel: '.claude/skills/kiwa-go/SKILL.md',
-    regions: [{ name: 'go-enum', render: (l) => renderPolyglotEnum(l, 'go') }],
   },
 ];
 

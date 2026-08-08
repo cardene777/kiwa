@@ -83,7 +83,6 @@ export interface LayerRecord {
   variants: string[];
   /** How a provider or variant gets chosen, in prose. Null when there is no choice. */
   selected_by: string | null;
-  mode: string | null;
   /** Where each consuming skill writes, keyed by skill. */
   test_outputs: Record<string, string[]>;
 }
@@ -197,7 +196,6 @@ export function loadLayerTable(): LayerRecord[] {
       targets: strList(row.targets),
       variants: strList(row.variants),
       selected_by: str(row.selected_by),
-      mode: str(row.mode),
       test_outputs: outputMap(row.test_outputs),
     }));
 }

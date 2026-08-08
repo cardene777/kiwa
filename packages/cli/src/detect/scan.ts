@@ -11,7 +11,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { readCargoToml, readGoMod, readPackageJson, type Dependency } from './manifests.js';
+import { readPackageJson, type Dependency } from './manifests.js';
 
 /** Drop a trailing YAML comment, which `[a, b] # note` would otherwise carry. */
 function stripHash(line: string): string {
@@ -27,8 +27,6 @@ export interface ScannedManifest {
 }
 
 const READERS: Record<string, { language: string; read: (source: string) => Dependency[] }> = {
-  'Cargo.toml': { language: 'rust', read: readCargoToml },
-  'go.mod': { language: 'go', read: readGoMod },
   'package.json': { language: 'typescript', read: readPackageJson },
 };
 

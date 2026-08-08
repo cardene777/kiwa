@@ -43,7 +43,7 @@ $ARGUMENTS
 - `--modules {name1,name2,name3}` — 複数 module を 1 回起動で batch 処理 (Issue #221)、 `--module` と排他、 `,` 区切り、 各 module 名は `[a-z0-9-]+` 制約。 内部実装は Step 1-5 全体を module 単位で順次回し、 module 数 N について N 個の spec を Write、 最後に「contract 間連携」 section を 1 つだけ生成する (詳細は下記 § --modules batch 起動規約 を参照)
 <!-- kiwa-layers:design-enum:start -->
 
-- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|rust-unit|rust-integration|rust-axum|rust-actix-web|rust-tower-http|go-unit|go-integration|go-gin|go-echo|go-fiber|all}` — 想定 test layer を指定 (default `all`)。
+- `--layer {contract|e2e|e2e-generic|a11y|integration|api|ui|data|cli|unit|orm-query|nextjs-server-action|nextjs-middleware|nextjs-rsc|nextjs-parallel-route|nextjs-rsc-streaming|edge-handler|auth|job-queue|cache|all}` — 想定 test layer を指定 (default `all`)。
   各値の出力先と消費 skill は下の routing 表を参照する。
 
 <!-- kiwa-layers:design-enum:end -->
@@ -84,14 +84,14 @@ kiwa layers --json
 そのため生成した spec の冒頭 meta に 1 行残す。
 
 ```
-<!-- kiwa-layers: source=detected layers=rust-axum -->
+<!-- kiwa-layers: source=detected layers=nextjs-rsc -->
 ```
 
 `source=all` の場合も書く。 追跡下の成果物だけを見て、 どの入力が効いたかを追えるようにするため。
 
 ### 絞り込みが効かない範囲
 
-検出は 30 layer 中 15 件しか語れない (`docs/stack-signals.json` の signal が名指しするのは rust 5 / go 5 / nextjs 5)。 残る 15 件 (typescript 14 + `contract`) はどの signal も名指ししていないため絞られない。
+検出は 20 layer 中 5 件しか語れない (`docs/stack-signals.json` の signal が名指しするのは nextjs 5)。 残る 15 件 (typescript 14 + `contract`) はどの signal も名指ししていないため絞られない。
 
 **語れるかどうかは layer ごとに判定される**。 signal の被覆は言語内で一様ではなく、 typescript は 19 layer 中 5 件しか名指しされていない。 言語単位で判定すると、 nextjs 5 件の証拠で残り 14 件まで根拠なく落ちる。
 
@@ -139,16 +139,6 @@ recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む�
 | `auth` | `tests/spec/integration/test-spec-{module}.auth.md` | `/kiwa-auth` | typescript | `nextauth` / `lucia` / `better-auth` / `clerk` / `auth0` |
 | `job-queue` | `tests/spec/integration/test-spec-{module}.queue.md` | `/kiwa-queue` | typescript | `bullmq` / `inngest` / `cloudflare` / `sqs` |
 | `cache` | `tests/spec/integration/test-spec-{module}.cache.md` | `/kiwa-cache` | typescript | `redis` / `memcached` / `keydb` |
-| `rust-unit` | `tests/spec/unit/test-spec-{module}.rs.md` | `/kiwa-rust` | rust | — |
-| `rust-integration` | `tests/spec/integration/test-spec-{module}.rs.md` | `/kiwa-rust` | rust | — |
-| `rust-axum` | `tests/spec/integration/test-spec-{module}.rust-axum.md` | `/kiwa-rust` (`--mode axum`) | rust | — |
-| `rust-actix-web` | `tests/spec/integration/test-spec-{module}.rust-actix.md` | `/kiwa-rust` (`--mode actix-web`) | rust | — |
-| `rust-tower-http` | `tests/spec/integration/test-spec-{module}.rust-tower-http.md` | `/kiwa-rust` (`--mode tower-http`) | rust | — |
-| `go-unit` | `tests/spec/unit/test-spec-{module}.go.md` | `/kiwa-go` | go | — |
-| `go-integration` | `tests/spec/integration/test-spec-{module}.go.md` | `/kiwa-go` | go | — |
-| `go-gin` | `tests/spec/integration/test-spec-{module}.go-gin.md` | `/kiwa-go` (`--mode gin`) | go | — |
-| `go-echo` | `tests/spec/integration/test-spec-{module}.go-echo.md` | `/kiwa-go` (`--mode echo`) | go | — |
-| `go-fiber` | `tests/spec/integration/test-spec-{module}.go-fiber.md` | `/kiwa-go` (`--mode fiber`) | go | — |
 
 <!-- kiwa-layers:routing-table:end -->
 
@@ -575,228 +565,6 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.rsc.md` (`.rsc.md` suffix で RSC test 経路向けと識別)。
 
-#### rust-unit layer 専用 column (Rust cargo test、 Issue #580)
-
-`--layer rust-unit` 指定時は Rust の cargo test セマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-rs` の `kiwa::unit::setup_env` + `assert_kiwa_eq!` / `assert_kiwa_close!` と直接 mapping、 v1.4-1 PR #583 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RS-U-001` 等の連番 |
-| Observation | 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 入力バリデーション / 性能 等) |
-| Given | 前提 (`SetupOpts { mode: Mock, seed: Some(42), label: Some("case".into()) }` / 引数 / 構造体初期化 等) |
-| When | 操作 (`let env = setup_env(opts);` / `let v = my_fn(input);` 等の Rust 関数呼出 + 所有権 move を考慮した式) |
-| Then | 期待 (`assert_kiwa_eq!(env.mode(), Mode::Mock)` / `assert_kiwa_close!(v, 1.0, 1e-6)` / `env.seed() == Some(42)` 等の macro assertion + hint 文字列) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`Mode::Mock` / `Mode::Live`、 `setup_env(SetupOpts { mode, .. })` と 1 対 1) |
-| Target | 対象関数 / 型の identifier (`my_fn` / `MyStruct::new` / `Counter::increment` 等) |
-
-mode column が `mock` = `Mode::Mock` (in-process、 ネットワーク / file IO なし、 deterministic)、 `live` = `Mode::Live` (実 endpoint / 実 file)、 default は `mock`。 `KiwaEnv` は `!Send` で test thread 局所、 `Drop` で `stop()` 自動実行されるため `t.Cleanup` 相当の手書きは不要。
-
-`kiwa-test-rs` の Layer 2 経路が本 9 column を `kiwa::unit::setup_env` 起動と `assert_kiwa_eq!` / `assert_kiwa_close!` 列に機械変換する。
-
-出力 path 規約 は `tests/spec/unit/test-spec-{module}.rs.md` (`.rs.md` suffix で Rust cargo test 経路向けと識別、 既存 `unit` layer (`.md` 無 suffix) と path 衝突なし)。
-
-#### rust-integration layer 専用 column (Rust hyper mock_server、 Issue #580)
-
-`--layer rust-integration` 指定時は Rust の hyper mock_server + reqwest セマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-rs` の `kiwa::integration::mock_server` + request recorder と直接 mapping、 v1.4-2 PR #584 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RS-I-001` 等の連番 |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / timeout / header inject / multi-route / recorder 検証 等) |
-| Given | 前提 (`MockServerOpts::default().with_route(Route::new(HttpMethod::Get, "/items", handler_fn))` 等の route table seed、 timeout 設定、 reqwest::blocking::Client 設定) |
-| When | 操作 (`let server = mock_server(opts);` + `let resp = client.get(&format!("{}/items", server.base_url())).send()?` 等の hyper server URL に向けた HTTP request、 `mock_server` は sync で内部 tokio runtime を持つため caller thread を block しない) |
-| Then | 期待 (`resp.status() == 200` + `server.request_count() == 1` + `server.recorded_requests()[0].method == HttpMethod::Get` 等の status + body + recorder assertion、 `assert_kiwa_eq!` で diff 出力) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = in-memory hyper server、 `live` = 実 endpoint。 `live` は別 fixture 経路で外部 URL 指定、 `mock_server` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/:id` 等)、 reqwest 側 URL は `server.base_url()` で動的解決 |
-
-mode column が `mock` = `kiwa::integration::mock_server` 起動で hyper を in-memory bind、 `live` = 実 endpoint 接続 (reqwest 側で `client.get(LIVE_URL)`、 mock_server 起動なし)。
-
-`kiwa-test-rs` の Layer 2 経路が本 9 column を `mock_server(MockServerOpts::default().with_route(...))` 起動 + reqwest::blocking::Client send + `server.recorded_requests()` 検証列に機械変換する。 `integration` feature は default 有効 (`Cargo.toml` の `default-features = false` で除外可)。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.rs.md` (`.rs.md` suffix で Rust cargo test 経路向けと識別、 既存 `integration` layer (`.md` 無 suffix) と path 衝突なし)。
-
-#### go-unit layer 専用 column (Go testing.T、 Issue #580)
-
-`--layer go-unit` 指定時は Go の `testing.T` セマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-go` の `kiwa.SetupUnitEnv` + `kiwa.AssertEqual` / `kiwa.AssertClose` と直接 mapping、 v1.4-3 PR #585 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-GO-U-001` 等の連番 |
-| Observation | 観点 (正常系 / 異常系 / 境界値 / 状態遷移 / 入力バリデーション / 並行処理 (`t.Parallel()`) 等) |
-| Given | 前提 (`kiwa.UnitOpts{ Mode: kiwa.ModeMock, Seed: kiwa.Seed(42), Label: "case" }` / 引数 / struct 初期化 等) |
-| When | 操作 (`env := kiwa.SetupUnitEnv(t, opts)` / `v := MyFn(input)` 等の Go function 呼出) |
-| Then | 期待 (`kiwa.AssertEqual(t, env.Mode(), kiwa.ModeMock)` / `kiwa.AssertClose(t, v, 1.0, 1e-6)` / `*env.Seed() == uint64(42)` 等の helper assertion + hint string) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`kiwa.ModeMock` / `kiwa.ModeLive`、 `SetupUnitEnv(t, UnitOpts{ Mode, .. })` と 1 対 1) |
-| Target | 対象 function / 型の identifier (`MyFn` / `NewCounter` / `(*Counter).Increment` 等) |
-
-mode column が `mock` = `kiwa.ModeMock` (in-process、 ネットワーク / file IO なし、 deterministic)、 `live` = `kiwa.ModeLive`、 default は `mock`。 `UnitEnv` は cross-goroutine 非対応で test goroutine 局所、 `env.Stop` は `t.Cleanup` 経由で自動実行されるため `defer env.Stop()` 手書きは不要。 monotonic `ID()` は atomic なので `t.Parallel()` 並列 test でも distinct id を受け取る。
-
-`kiwa-test-go` の Layer 2 経路が本 9 column を `kiwa.SetupUnitEnv` 起動と `kiwa.AssertEqual` / `kiwa.AssertClose` 列に機械変換する。
-
-出力 path 規約 は `tests/spec/unit/test-spec-{module}.go.md` (`.go.md` suffix で Go testing.T 経路向けと識別、 既存 `unit` layer (`.md` 無 suffix) / `rust-unit` (`.rs.md`) と path 衝突なし)。
-
-#### go-integration layer 専用 column (Go net/http/httptest MockServer、 Issue #580)
-
-`--layer go-integration` 指定時は Go の `net/http/httptest` セマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-go` の `kiwa.NewMockServer` + request recorder と直接 mapping、 v1.4-4 PR #586 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-GO-I-001` 等の連番 |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / timeout / header inject / multi-route / recorder 検証 等) |
-| Given | 前提 (`kiwa.MockServerOpts{}.WithRoute(kiwa.Route{ Method: kiwa.MethodGet, Path: "/items", Handler: handler_fn })` 等の builder 経由 route table seed、 record buffer 初期化、 `http.Client` 設定) |
-| When | 操作 (`server := kiwa.NewMockServer(t, opts)` + `resp, err := client.Get(server.URL() + "/items")` 等の httptest.Server URL に向けた HTTP request、 `NewMockServer` は `testing.TB` を取るため `*testing.T` / `*testing.B` 両方で動作) |
-| Then | 期待 (`resp.StatusCode == 200` + `server.RequestCount() == 1` + `server.RecordedRequests()[0].Method == kiwa.MethodGet` 等の status + body + recorder assertion、 `kiwa.AssertEqual` で diff 出力) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `httptest.NewServer` 起動、 `live` = 実 endpoint。 `live` は別 fixture 経路で外部 URL 指定、 `NewMockServer` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/{id}` 等)、 http.Client 側 URL は `server.URL()` で動的解決 |
-
-mode column が `mock` = `kiwa.NewMockServer` 起動で `httptest.NewServer` を bind (port は OS 割当)、 `live` = 実 endpoint 接続 (`http.Get(LIVE_URL)`、 NewMockServer 起動なし)。
-
-`kiwa-test-go` の Layer 2 経路が本 9 column を `kiwa.NewMockServer(t, MockServerOpts{}.WithRoute(...))` 起動 + `client.Get`/`Post` send + `server.RecordedRequests()` 検証列に機械変換する。 `t.Cleanup` で port release が自動実行される。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.go.md` (`.go.md` suffix で Go testing.T 経路向けと識別、 既存 `integration` layer (`.md` 無 suffix) / `rust-integration` (`.rs.md`) と path 衝突なし)。
-
-#### rust-axum layer 専用 column (Rust axum Router、 Issue #596)
-
-`--layer rust-axum` 指定時は Rust axum `Router` のセマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-rs` v0.2 の `kiwa::axum::test_app(router)` + `TestApp::request(HttpMethod, path)` chain と直接 mapping、 v1.5-1 PR #599 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RS-AX-001` 等の連番 |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / json body / header inject / extractor / state injection / nested router / middleware layer 等) |
-| Given | 前提 (`Router::new().route("/items", get(handler))` 等の Router 構築、 `App::with_state(...)` での state 注入、 必要なら `crate::integration::mock_server` で external service mock + `base_url()` を Router state に inject) |
-| When | 操作 (`let test = test_app(router); let resp = test.request(HttpMethod::Get, "/items").header("authorization", "Bearer x").json(&body).send();` 等の chain。 path は absolute 必須 (`/items` / `/users/42?limit=10`)、 `oneshot` で `tower::Service` 駆動なので real port 不要) |
-| Then | 期待 (`resp.status() == 200` + `resp.body_str() == "ok"` + `resp.json::<MyDto>()? == expected` + `resp.headers().get("content-type") == Some("application/json")` 等の `TestResponse` assertion、 `assert_kiwa_eq!` で diff 出力) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `test_app` で in-process oneshot、 `live` = 実 endpoint。 `live` は別 fixture 経路で reqwest 直叩き、 `test_app` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/:id` 等)、 Router 側 path matcher と一致 |
-
-mode column が `mock` = `kiwa::axum::test_app` 起動で Router を tokio runtime + `tower::ServiceExt::oneshot` 駆動、 `live` = 実 endpoint 接続 (reqwest 側で `client.get(LIVE_URL)`、 test_app 起動なし)。 `TestApp` は private tokio runtime を持ち caller thread は sync、 Drop で runtime 解放。
-
-`kiwa-test-rs` の Layer 2 経路が本 9 column を `test_app(router)` 起動 + `request(HttpMethod, path).header().body().json().send()` chain + `TestResponse` 検証列に機械変換する。 axum adapter は `axum` feature flag (default 有効) で gate されるため `Cargo.toml` の `default-features = false` で除外可。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.rust-axum.md` (`.rust-axum.md` suffix で kiwa-test-rs axum 経路向けと識別、 既存 `rust-integration` (`.rs.md`) / `integration` (`.md` 無 suffix) と path 衝突なし)。
-
-#### rust-actix-web layer 専用 column (Rust actix-web App、 Issue #596)
-
-`--layer rust-actix-web` 指定時は Rust actix-web `App` のセマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-rs` v0.2 の `kiwa::actix::test_app(factory)` + `TestApp::request(HttpMethod, path)` chain と直接 mapping、 v1.5-2 PR #600 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RS-AX-001` 等の連番 (axum と prefix 衝突するため、 actix は `T-RS-AC-001` を推奨、 module 内で 1 layer のみ採用ならどちらでも可) |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / json body / header inject / Data extractor / scope nesting / middleware (`wrap`) 等) |
-| Given | 前提 (`|| App::new().service(handler)` 等の factory closure、 `App::app_data(web::Data::new(...))` での state 注入、 必要なら `crate::integration::mock_server` で external service mock + `base_url()` を `web::Data` 経由 inject) |
-| When | 操作 (`let test = test_app(|| App::new().service(handler)); let resp = test.request(HttpMethod::Get, "/items").header("authorization", "Bearer x").send();` 等の chain。 `App` は `!Clone` のため factory closure 経由で都度初期化、 `call_service` で actix Service 駆動なので real port 不要) |
-| Then | 期待 (`resp.status() == 200` + `resp.body_str() == "ok"` + `resp.json::<MyDto>()? == expected` + `resp.headers().get("content-type") == Some("application/json")` 等の `TestResponse` assertion、 axum adapter と 1:1 surface) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `test_app` で in-process call_service、 `live` = 実 endpoint。 `live` は別 fixture 経路で reqwest 直叩き、 `test_app` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/{id}` 等)、 actix path matcher と一致 |
-
-mode column が `mock` = `kiwa::actix::test_app` 起動で actix-rt runtime + `init_service` + `call_service` 駆動、 `live` = 実 endpoint 接続 (reqwest 側で `client.get(LIVE_URL)`、 test_app 起動なし)。 `TestApp` は private actix-rt runtime を持ち caller thread は sync、 Drop で runtime + App 解放。 axum adapter の `TestResponse` と surface が 1:1 なため、 同 spec を 2 framework に切替えるときは `use kiwa::actix as web` / `use kiwa::axum as web` 経路で test code 共有可能。
-
-`kiwa-test-rs` の Layer 2 経路が本 9 column を `test_app(|| App::new()...)` 起動 + `request(HttpMethod, path).header().body().send()` chain + `TestResponse` 検証列に機械変換する。 actix adapter は `actix` feature flag (default 有効) で gate されるため `Cargo.toml` の `default-features = false` で除外可。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.rust-actix.md` (`.rust-actix.md` suffix で kiwa-test-rs actix 経路向けと識別、 既存 `rust-axum` (`.rust-axum.md`) / `rust-integration` (`.rs.md`) / `integration` (`.md` 無 suffix) と path 衝突なし)。
-
-#### go-gin layer 専用 column (Go Gin Engine、 Issue #596)
-
-`--layer go-gin` 指定時は Go Gin `*gin.Engine` のセマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-go` v0.2 の `kiwa_gin.NewTestServer(t, engine)` + `srv.Request(method, path)` chain と直接 mapping、 v1.5-3 PR #601 で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-GO-GIN-001` 等の連番 |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / json body / header inject / middleware / route group / param binding / parallel test (`t.Parallel()`) 等) |
-| Given | 前提 (`gin.SetMode(gin.TestMode); engine := gin.New(); engine.GET("/items", handler)` 等の engine 構築、 middleware 登録 (`engine.Use(...)`)、 必要なら v1.4 `kiwa.NewMockServer` で external service mock + base URL を engine state に inject) |
-| When | 操作 (`srv := kiwa_gin.NewTestServer(t, engine); resp := srv.Request(kiwa.MethodGET, "/items").Header("Authorization", "Bearer x").JSON(body).Send()` 等の chain。 `engine.ServeHTTP` を `httptest.NewRecorder` で駆動、 real port なし、 `t.Cleanup` で recorder 自動解放) |
-| Then | 期待 (`resp.StatusCode() == 200` + `resp.BodyString() == "ok"` + 解析 (`var dto MyDto; resp.JSON(&dto)` + `kiwa.AssertEqual(t, dto, expected)`) + `resp.Headers().Get("Content-Type") == "application/json"` 等の `*Response` assertion、 `kiwa.AssertEqual` で diff 出力) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `kiwa_gin.NewTestServer` で in-process ServeHTTP、 `live` = 実 endpoint。 `live` は別 fixture 経路で `http.Client` 直叩き、 `NewTestServer` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/:id` 等)、 Gin path matcher と一致 |
-
-mode column が `mock` = `kiwa_gin.NewTestServer(t, engine)` 起動で `httptest.NewRecorder` + `engine.ServeHTTP` 駆動 (real port なし、 TIME_WAIT flakiness 回避)、 `live` = 実 endpoint 接続 (`http.Client` 経由、 NewTestServer 起動なし)。 `srv.RecordedRequests()` は v1.4 `kiwa.RecordedRequest` shape を re-export するため、 v1.4 mock_server と同じ assertion code が再利用できる。
-
-`kiwa-test-go` の Layer 2 経路が本 9 column を `kiwa_gin.NewTestServer(t, engine)` 起動 + `srv.Request(method, path).Header().Body().JSON().Send()` chain + `*Response` 検証列に機械変換する。 `t.Parallel()` で並列実行する場合は engine を test ごとに新規生成する (engine 自体は thread-safe だが route registration が racy)。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.go-gin.md` (`.go-gin.md` suffix で kiwa-test-go gin 経路向けと識別、 既存 `go-integration` (`.go.md`) / `integration` (`.md` 無 suffix) と path 衝突なし)。
-
-#### go-echo layer 専用 column (Go Echo Instance、 Issue #596)
-
-`--layer go-echo` 指定時は Go Echo `*echo.Echo` のセマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-go` v0.2 の `kiwa_echo.NewTestServer(t, e)` + `srv.Request(method, path)` chain と直接 mapping、 v1.5-4 PR で確定した API surface に追従、 surface は go-gin adapter と 1:1)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-GO-ECHO-001` 等の連番 |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / json body / header inject / middleware / group / param binding / parallel test (`t.Parallel()`) 等) |
-| Given | 前提 (`e := echo.New(); e.GET("/items", handler)` 等の Echo 構築、 middleware 登録 (`e.Use(...)`)、 group (`g := e.Group("/api")`)、 必要なら v1.4 `kiwa.NewMockServer` で external service mock + base URL を context に inject) |
-| When | 操作 (`srv := kiwa_echo.NewTestServer(t, e); resp := srv.Request(kiwa.MethodGET, "/items").Header("Authorization", "Bearer x").JSON(body).Send()` 等の chain。 `e.ServeHTTP` を `httptest.NewRecorder` で駆動、 real port なし、 `t.Cleanup` で recorder 自動解放) |
-| Then | 期待 (`resp.StatusCode() == 200` + `resp.BodyString() == "ok"` + 解析 (`var dto MyDto; resp.JSON(&dto)` + `kiwa.AssertEqual(t, dto, expected)`) + `resp.Headers().Get("Content-Type") == "application/json"` 等の `*Response` assertion、 `kiwa.AssertEqual` で diff 出力、 go-gin adapter と assertion code 完全互換) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `kiwa_echo.NewTestServer` で in-process ServeHTTP、 `live` = 実 endpoint。 `live` は別 fixture 経路で `http.Client` 直叩き、 `NewTestServer` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/:id` 等)、 Echo path matcher (`:param` / `*` glob) と一致 |
-
-mode column が `mock` = `kiwa_echo.NewTestServer(t, e)` 起動で `httptest.NewRecorder` + `e.ServeHTTP` 駆動 (real port なし、 TIME_WAIT flakiness 回避、 Echo 公式 testing docs と同一手法 `https://echo.labstack.com/docs/testing`)、 `live` = 実 endpoint 接続 (`http.Client` 経由、 NewTestServer 起動なし)。 `srv.RecordedRequests()` は v1.4 `kiwa.RecordedRequest` shape を re-export、 go-gin adapter と shape 1:1 で test code 共有 (`use ginAdapter "kiwa-test-go/gin"` / `use echoAdapter "kiwa-test-go/echo"`) 可能。
-
-`kiwa-test-go` の Layer 2 経路が本 9 column を `kiwa_echo.NewTestServer(t, e)` 起動 + `srv.Request(method, path).Header().Body().JSON().Send()` chain + `*Response` 検証列に機械変換する。 `t.Parallel()` で並列実行する場合は Echo instance を test ごとに新規生成する (instance 自体は thread-safe だが route registration が racy、 Gin と同じ制約)。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.go-echo.md` (`.go-echo.md` suffix で kiwa-test-go echo 経路向けと識別、 既存 `go-gin` (`.go-gin.md`) / `go-integration` (`.go.md`) / `integration` (`.md` 無 suffix) と path 衝突なし)。
-
-#### rust-tower-http layer 専用 column (Rust tower-http middleware chain、 Issue #627)
-
-`--layer rust-tower-http` 指定時は Rust tower-http の `ServiceBuilder<...>` middleware chain のセマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-rs` v0.4 の `kiwa::tower_http::test_chain(layers, router)` + 6 middleware helper (`cors` / `trace` / `compression` / `auth` / `rate_limit` / `timeout`) と直接 mapping、 v1.7-1 PR #629 (chain helper) + v1.7-2 PR #630 (6 middleware helper) で確定した API surface に追従)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RS-TH-001` 等の連番 |
-| Observation | 観点 (正常 200 / CORS preflight / gzip 圧縮 / bearer / basic auth gate / rate limit exhaust / timeout 短絡 / trace-id 生成 / body limit / middleware chain ordering 等) |
-| Given | 前提 (`Router::new().route(...)` の base Router、 `ServiceBuilder::new().layer(CorsLayer::permissive()).layer(TraceLayer::new_for_http())` 等の layer stack、 6 helper 経由なら `test_cors(cors_layer(), router)` / `test_compression(router)` / `with_bearer(token)` 等の helper 呼出、 必要なら state / seeded data) |
-| When | 操作 (`let test = test_chain(layers, router); let resp = test.request(HttpMethod::Get, "/path").header(...).send();` 等の chain。 helper 経由なら `let (k, v) = with_bearer(TOKEN); let resp = test.request(...).header(k, v).send();` / `assert_preflight_ok(&test)` / `assert_compressed(&resp)` / `assert_timed_out(&resp)` 等の helper assertion 呼出、 in-process `tower::Service::oneshot` 駆動なので real port 不要) |
-| Then | 期待 (`resp.status() == 200` + `resp.headers().get("access-control-allow-origin") == Some("...")` + `resp.headers().get("content-encoding") == Some("gzip")` + `resp.status() == 408 (Request Timeout)` + `resp.status() == 401 (Unauthorized)` + `resp.status() == 429 (Too Many Requests)` 等の `TestResponse` assertion、 middleware 効果を header / status で観測、 6 helper は本 assertion を専用 API (`assert_preflight_ok` / `assert_compressed` / `assert_timed_out` 等) として提供) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `test_chain` で in-process oneshot、 `live` = 実 endpoint。 `live` は別 fixture 経路で reqwest 直叩き、 `test_chain` の Mode parameter とは独立) |
-| Middleware | 対象 middleware の identifier (`CorsLayer` / `TraceLayer` / `CompressionLayer` / `ValidateRequestHeader` / `RequestBodyLimitLayer` / `TimeoutLayer` / `custom` 等)、 chain 全体を検証する場合は `chain` |
-
-mode column が `mock` = `kiwa::tower_http::test_chain(layers, router)` 起動で `ServiceBuilder` layer stack を axum Router に被せて private tokio runtime + `tower::ServiceExt::oneshot` 駆動、 `live` = 実 endpoint 接続 (reqwest 側で `client.get(LIVE_URL)`、 test_chain 起動なし)。 6 middleware helper (`kiwa::tower_http::{cors,trace,compression,auth,rate_limit,timeout}`) は各 middleware 固有の assertion (preflight OK / gzip 復元 / 401 / 429 / 408 / trace-id 生成) を intent-revealing API として提供、 caller が `ServiceBuilder` chain の生 assertion を書かずに済む。 `TestApp` / `TestResponse` surface は axum adapter と 1:1 (`status()` / `headers()` / `body()` / `body_str()` / `json()`) なので、 middleware 検証 code は axum adapter との切替最小差分で成立。
-
-`kiwa-test-rs` の Layer 2 経路が本 9 column を `test_chain(layers, router)` 起動 + `request(HttpMethod, path).header().body().json().send()` chain + `TestResponse` 検証列 + 6 middleware helper 呼出に機械変換する。 tower-http adapter は `tower-http` feature flag で gate されるため `Cargo.toml` の `default-features = false` で除外可 (`kiwa-test-rs = { path = "...", version = "0.4", features = ["tower-http"] }` で opt-in)、 内部で `axum` feature を暗黙有効化 (chain の base Router が axum 依存のため)。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.rust-tower-http.md` (`.rust-tower-http.md` suffix で kiwa-test-rs tower-http 経路向けと識別、 既存 `rust-axum` (`.rust-axum.md`) / `rust-actix` (`.rust-actix.md`) / `rust-integration` (`.rs.md`) / `integration` (`.md` 無 suffix) と path 衝突なし)。
-
-#### go-fiber layer 専用 column (Go Fiber App、 Issue #627)
-
-`--layer go-fiber` 指定時は Go Fiber v2 `*fiber.App` のセマンティクスを直接表現する **9 column 拡張表** を使う (`kiwa-test-go` v0.4 の `kiwa_fiber.NewTestServer(t, app)` + `srv.Request(method, path)` chain と直接 mapping、 v1.7-4 PR #632 (fiber subpackage) + v1.7-5 PR #633 (fasthttp 互換 API) で確定した API surface に追従、 surface は go-gin / go-echo adapter と 1:1)。
-
-| 項目 | 内容 |
-|---|---|
-| ID | `T-GO-FIBER-001` 等の連番 |
-| Observation | 観点 (正常 200 / 4xx / 5xx / redirect / json body / header inject / middleware / group / param binding / parallel test (`t.Parallel()`) / fasthttp 固有 (context 生存範囲 / body defensive copy) 等) |
-| Given | 前提 (`app := fiber.New(fiber.Config{DisableStartupMessage: true}); app.Get("/items", handler)` 等の App 構築、 middleware 登録 (`app.Use(...)`)、 group (`api := app.Group("/api")`)、 必要なら v1.4 `kiwa.NewMockServer` で external service mock + base URL を context に inject) |
-| When | 操作 (`srv := kiwa_fiber.NewTestServer(t, app); resp := srv.Request(kiwa.MethodGET, "/items").Header("Authorization", "Bearer x").JSON(body).Send()` 等の chain。 内部で Fiber の `*App.Test(*http.Request)` hook (fasthttp base + in-memory net conn) を駆動、 real port なし、 `t.Cleanup` で app 自動解放) |
-| Then | 期待 (`resp.StatusCode() == 200` + `resp.BodyString() == "ok"` + 解析 (`var dto MyDto; resp.JSON(&dto)` + `kiwa.AssertEqual(t, dto, expected)`) + `resp.Headers().Get("Content-Type") == "application/json"` 等の `*Response` assertion、 `kiwa.AssertEqual` で diff 出力、 gin / echo adapter と assertion code 完全互換) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `mock` / `live` (`mock` = `kiwa_fiber.NewTestServer` で in-process `*App.Test`、 `live` = 実 endpoint。 `live` は別 fixture 経路で `http.Client` 直叩き、 `NewTestServer` の Mode parameter とは独立) |
-| Route | request 対象 URL path (`/items` / `/users/:id` 等)、 Fiber path matcher (`:param` / `+wildcard` / `*` glob) と一致 |
-
-mode column が `mock` = `kiwa_fiber.NewTestServer(t, app)` 起動で Fiber `*App.Test(*http.Request)` hook 駆動 (fasthttp base + in-memory net conn、 real port なし、 TIME_WAIT flakiness 回避、 Fiber 公式 testing docs `https://docs.gofiber.io/api/app/#test` と同一手法)、 `live` = 実 endpoint 接続 (`http.Client` 経由、 NewTestServer 起動なし)。 `srv.RecordedRequests()` は v1.4 `kiwa.RecordedRequest` shape を re-export、 go-gin / go-echo adapter と shape 1:1 で test code 共有 (`use ginAdapter "kiwa-test-go/gin"` / `use echoAdapter "kiwa-test-go/echo"` / `use fiberAdapter "kiwa-test-go/fiber"`) 可能。
-
-Fiber 固有の注意点 ... Fiber は fasthttp base のため net/http `httptest.NewRecorder` + `ServeHTTP` shape (Gin / Echo adapter 経路) が使えず、 `*App.Test` を経由する。 handler が `*fiber.Ctx` を扱うので、 body / headers の defensive copy は v1.6 品質固め (`kiwa-test-go` v0.3) で全 adapter で担保済、 assertion 側で body race を気にする必要はない。
-
-`kiwa-test-go` の Layer 2 経路が本 9 column を `kiwa_fiber.NewTestServer(t, app)` 起動 + `srv.Request(method, path).Header().Body().JSON().Send()` chain + `*Response` 検証列に機械変換する。 `t.Parallel()` で並列実行する場合は Fiber App を test ごとに新規生成する (App 自体は thread-safe だが route registration が racy、 Gin / Echo と同じ制約)。
-
-出力 path 規約 は `tests/spec/integration/test-spec-{module}.go-fiber.md` (`.go-fiber.md` suffix で kiwa-test-go fiber 経路向けと識別、 既存 `go-gin` (`.go-gin.md`) / `go-echo` (`.go-echo.md`) / `go-integration` (`.go.md`) / `integration` (`.md` 無 suffix) と path 衝突なし)。
-
 ### Step 5: 優先度付け + 自動化方針
 
 優先度は Step 2 のリスク要約から導出 (skill が勝手に判定しない、 SSOT `docs/SKILL-DESIGN.ja.md` § Step 5 と完全一致):
@@ -877,73 +645,23 @@ Layer 1 出力を Layer 2 skill が消費する経路と引き渡し方は `refe
 | `/kiwa-forge` | `tests/spec/contract/test-spec-{module}.md` | `test/*.t.sol`、 `forge test` 実行 | 境界値 = `forge fuzz` / 状態遷移 = `forge invariant` |
 | `/kiwa-hardhat` | `tests/spec/contract/test-spec-{module}.md` | `test/*.test.ts`、 `npx hardhat test` 実行 | 境界値 = `fast-check` / 並行処理 = `Promise.all` race |
 | `/kiwa-play` (refactored) | `tests/spec/e2e/test-spec-{module}.md` | `tests/*.spec.ts` + `tests/prepare-env.ts` | 正常系 = happy path / セキュリティ = signature 検証 |
-| `kiwa-test-rs` (Rust adapter、 v1.4-1/2) | `tests/spec/unit/test-spec-{module}.rs.md` + `tests/spec/integration/test-spec-{module}.rs.md` | `tests/*.rs` + `cargo test` 実行 | 正常系 = `setup_env` / 境界値 = `assert_kiwa_close!` (許容誤差付き) / 並行処理 = thread 別 `KiwaEnv` (`!Send` で局所化) / mock API = `kiwa::integration::mock_server` + reqwest |
-| `kiwa-test-rs` (Rust axum / actix-web、 v1.5-1/2) | `tests/spec/integration/test-spec-{module}.rust-axum.md` + `tests/spec/integration/test-spec-{module}.rust-actix.md` | `tests/*.rs` + `cargo test` 実行 | 正常系 = `kiwa::axum::test_app(router)` / `kiwa::actix::test_app(\|\| App::new()...)` / 異常系 = 4xx/5xx status / extractor = path param + json body / state injection = `Router::with_state` / `App::app_data(web::Data::new(...))` / middleware = `Router::layer(...)` / `App::wrap(...)` / response 検証 = `TestResponse` (`status` / `json` / `body_str` / `headers`) |
-| `kiwa-test-go` (Go adapter、 v1.4-3/4) | `tests/spec/unit/test-spec-{module}.go.md` + `tests/spec/integration/test-spec-{module}.go.md` | `*_test.go` + `go test ./...` 実行 | 正常系 = `SetupUnitEnv(t, opts)` / 境界値 = `AssertClose` (許容誤差付き) / 並行処理 = `t.Parallel()` + atomic monotonic ID / mock API = `kiwa.NewMockServer` + http.Client |
-| `kiwa-test-go` (Go Gin / Echo、 v1.5-3/4) | `tests/spec/integration/test-spec-{module}.go-gin.md` + `tests/spec/integration/test-spec-{module}.go-echo.md` | `*_test.go` + `go test ./...` 実行 | 正常系 = `kiwa_gin.NewTestServer(t, engine)` / `kiwa_echo.NewTestServer(t, e)` / 異常系 = 4xx/5xx status / middleware = `engine.Use(...)` / `e.Use(...)` / group = `engine.Group(...)` / `e.Group(...)` / param binding = `:param` matcher / response 検証 = `*Response` (`StatusCode` / `Headers` / `Body` / `BodyString` / `JSON`) / recorder = `srv.RecordedRequests()` (v1.4 互換 `kiwa.RecordedRequest` shape) |
-| `kiwa-test-rs` (Rust tower-http、 v1.7-1/2) | `tests/spec/integration/test-spec-{module}.rust-tower-http.md` | `tests/*.rs` + `cargo test --features kiwa/tower-http` 実行 | 正常系 = `kiwa::tower_http::test_chain(layers, router)` / CORS = `kiwa::tower_http::cors::{test_cors, assert_preflight_ok}` / 圧縮 = `kiwa::tower_http::compression::{test_compression, assert_compressed}` / auth = `kiwa::tower_http::auth::{with_bearer, with_basic}` / rate limit = `kiwa::tower_http::rate_limit::exhaust` / timeout = `kiwa::tower_http::timeout::assert_timed_out` / trace = `kiwa::tower_http::trace::assert_trace_id` / response 検証 = `TestResponse` (axum adapter と 1:1 surface) |
-| `kiwa-test-go` (Go Fiber、 v1.7-4/5) | `tests/spec/integration/test-spec-{module}.go-fiber.md` | `*_test.go` + `go test ./...` 実行 | 正常系 = `kiwa_fiber.NewTestServer(t, app)` / 異常系 = 4xx/5xx status / middleware = `app.Use(...)` / group = `app.Group(...)` / param binding = `:param` / `+wildcard` matcher / response 検証 = `*Response` (`StatusCode` / `Headers` / `Body` / `BodyString` / `JSON`、 gin / echo adapter と 1:1) / recorder = `srv.RecordedRequests()` (v1.4 互換 `kiwa.RecordedRequest` shape) / fasthttp base のため `*App.Test(*http.Request)` hook 経由 |
 
 Layer 2 skill は仕様書の「テストケース一覧」表を行単位で読み取り、 観点 → ランナー特化 helper に変換する。
 
-### 5 言語並列 PoC (1 機能 → TS / Python / Solidity / Rust / Go 同時 spec → test 生成、 Issue #580)
+### 3 言語並列 PoC (1 機能 → TS / Python / Solidity 同時 spec → test 生成、 Issue #580)
 
-1 機能を 5 言語並列に spec 化 + test code 化する PoC 経路を、 v1.4-5 で構造的に成立可能化した。 `--modules` batch 起動 + `--layer` 個別指定の組合せで 5 spec を 1 起動で生成し、 各 Layer 2 経路を順次 / 並列に走らせて test code に変換する。
+1 機能を 3 言語並列に spec 化 + test code 化する PoC 経路。 `--modules` batch 起動 + `--layer` 個別指定の組合せで spec を 1 起動で生成し、 各 Layer 2 経路を順次 / 並列に走らせて test code に変換する。
 
 ```bash
-# 例: counter 機能 (initial / increment / decrement) を 5 言語並列 spec 化
+# 例: counter 機能 (initial / increment / decrement) を 3 言語並列 spec 化
 /kiwa-design --module counter --layer unit                   # → tests/spec/unit/test-spec-counter.md         (TS / Vitest)
 /kiwa-design --module counter --layer unit       # Python    # → tests/spec/unit/test-spec-counter.md         (parse_spec 経由で kiwa-test-py が再利用)
 /kiwa-design --module counter --layer contract               # → tests/spec/contract/test-spec-counter.md     (Solidity / Foundry + Hardhat)
-/kiwa-design --module counter --layer rust-unit              # → tests/spec/unit/test-spec-counter.rs.md      (Rust / cargo test)
-/kiwa-design --module counter --layer go-unit                # → tests/spec/unit/test-spec-counter.go.md      (Go / testing.T)
 ```
 
-path suffix 競合なし (`.md` 無 = TS、 `.rs.md` = Rust、 `.go.md` = Go、 `contract/` = Solidity)、 5 spec が同一 `tests/spec/` tree 内で共存する。 Python は既存 `unit` / `api` layer の spec を `kiwa-test-py.parse_spec()` で再利用する経路で、 新 layer 追加なし (v1.0 時点で既に PoC 成立)。 各 Layer 2 skill / adapter は対応 path のみ Read するため、 1 spec の改修が他言語に波及しない。
+path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec が同一 `tests/spec/` tree 内で共存する。 Python は既存 `unit` / `api` layer の spec を `kiwa-test-py.parse_spec()` で再利用する経路で、 新 layer 追加なし (v1.0 時点で既に PoC 成立)。 各 Layer 2 skill / adapter は対応 path のみ Read するため、 1 spec の改修が他言語に波及しない。
 
 `--layer all` (default) は 1 file に全 layer 混在で出力するため Layer 2 連携時は `--layer` を明示推奨。
-
-### 4 web framework 並列 PoC (1 機能 → axum / actix-web / Gin / Echo 同時 spec → test 生成、 Issue #596)
-
-1 つの web API 機能 (例 Counter API ... GET `/counter` / POST `/counter/increment` / POST `/counter/decrement`) を Rust 2 framework (axum / actix-web) + Go 2 framework (Gin / Echo) の 4 framework 並列に spec 化 + test code 化する PoC 経路を、 v1.5-5 で構造的に成立可能化した。 各 framework adapter は in-process driver で port bind なし + TestResponse / `*Response` surface が framework 間で 1:1 揃うため、 1 機能の spec を 4 file に分割して 4 framework の test code を独立生成し、 4 framework で挙動が一致することを 1 spec から駆動できる。
-
-```bash
-# 例: Counter API 機能を 4 web framework 並列 spec 化
-/kiwa-design --module counter-api --layer rust-axum        # → tests/spec/integration/test-spec-counter-api.rust-axum.md  (Rust / axum)
-/kiwa-design --module counter-api --layer rust-actix-web   # → tests/spec/integration/test-spec-counter-api.rust-actix.md (Rust / actix-web)
-/kiwa-design --module counter-api --layer go-gin           # → tests/spec/integration/test-spec-counter-api.go-gin.md     (Go / Gin)
-/kiwa-design --module counter-api --layer go-echo          # → tests/spec/integration/test-spec-counter-api.go-echo.md    (Go / Echo)
-```
-
-path suffix 競合なし (`.rust-axum.md` / `.rust-actix.md` / `.go-gin.md` / `.go-echo.md`)、 4 spec が同一 `tests/spec/integration/` 配下で共存する。 各 Layer 2 (`kiwa-test-rs` axum / `kiwa-test-rs` actix / `kiwa-test-go` gin / `kiwa-test-go` echo) は対応 path のみ Read するため、 1 framework の spec 改修が他 framework に波及しない。
-
-PoC の利点。
-- 1 機能の API contract (path / method / status / body shape / header) を 4 framework で完全一致確認可能 (移行 / 並走運用 / framework 比較 benchmark 用途)
-- `TestResponse` (Rust) と `*Response` (Go) の surface が framework 間で 1:1 なため、 同 spec 表 (9 column) から test code 生成しても assertion 構造が揃う
-- v1.4 polyglot 4 layer (rust-unit / rust-integration / go-unit / go-integration) と組合せて、 「同 1 機能 → 4 言語 / 8 framework」 spec 化が 1 起動で完遂可能
-
-v1.5-6 (Issue #597) で `/kiwa-rust` + `/kiwa-go` Layer 2 skill 側の mode flag (`--mode axum` / `--mode actix-web` / `--mode gin` / `--mode echo`) 経路が追加され、 4 spec → 4 test file 生成が automated された。
-
-### 2 web framework 追加 PoC (rust-tower-http + go-fiber、 Issue #627)
-
-v1.7-6 で 4 web framework (axum / actix-web / Gin / Echo) の polyglot 射程を 2 framework (Rust tower-http middleware chain + Go Fiber) に伸ばした。 v1.5-5 4 framework 並列 PoC の思想を踏襲し、 各 framework adapter は in-process driver で port bind なし + TestResponse / `*Response` surface が framework 間で 1:1 揃うため、 同 spec を Rust 3 framework (axum + actix + tower-http middleware chain) + Go 3 framework (Gin + Echo + Fiber) の 6 framework 並列に spec 化 + test code 化する PoC 経路を成立させる。
-
-```bash
-# 例: 認証付き API 機能 (bearer auth + CORS + rate limit + gzip) を 6 framework 並列 spec 化
-/kiwa-design --module profile-api --layer rust-axum          # → tests/spec/integration/test-spec-profile-api.rust-axum.md       (Rust / axum、 middleware なし base)
-/kiwa-design --module profile-api --layer rust-actix-web     # → tests/spec/integration/test-spec-profile-api.rust-actix.md      (Rust / actix-web)
-/kiwa-design --module profile-api --layer rust-tower-http    # → tests/spec/integration/test-spec-profile-api.rust-tower-http.md (Rust / tower-http middleware chain on axum)
-/kiwa-design --module profile-api --layer go-gin             # → tests/spec/integration/test-spec-profile-api.go-gin.md          (Go / Gin)
-/kiwa-design --module profile-api --layer go-echo            # → tests/spec/integration/test-spec-profile-api.go-echo.md         (Go / Echo)
-/kiwa-design --module profile-api --layer go-fiber           # → tests/spec/integration/test-spec-profile-api.go-fiber.md        (Go / Fiber、 fasthttp base)
-```
-
-path suffix 競合なし (`.rust-axum.md` / `.rust-actix.md` / `.rust-tower-http.md` / `.go-gin.md` / `.go-echo.md` / `.go-fiber.md`)、 6 spec が同一 `tests/spec/integration/` 配下で共存する。 各 Layer 2 (`kiwa-test-rs` axum / actix / tower-http + `kiwa-test-go` gin / echo / fiber) は対応 path のみ Read するため、 1 framework の spec 改修が他 framework に波及しない。
-
-v1.7 PoC の追加利点。
-- Rust tower-http middleware chain 経路は既存 axum adapter の上に `ServiceBuilder<...>` 経由で middleware を積むため、 middleware 独立 test (CORS / auth / rate limit / timeout 等) を axum spec とは別 spec で持てる
-- Go Fiber 経路は fasthttp base の唯一の adapter で、 net/http base (Gin / Echo) と実装内部が違うが `*Response` surface は 1:1 で揃うため spec テンプレは 3 Go framework 共通再利用可能
-- v1.4 polyglot 4 layer + v1.5-5 4 layer + v1.7-6 2 layer を組合せて、 「同 1 機能 → 5 言語 / 10+ framework」 spec 化が 1 起動で完遂可能
 
 ## 完了条件
 
@@ -966,10 +684,6 @@ v1.7 PoC の追加利点。
 - `examples/test-spec-basic-connect.md` — `examples/basic-connect/` ベースの最小サンプル (wallet connect の test 設計)
 - `examples/test-spec-token-gating.md` — `examples/nextjs-token-gating/` ベースの完全な 9 section 出力例 (TC-001 〜 TC-013 を含む)
 - v1.4-5 polyglot PoC (Issue #580、 1 機能 → 5 言語並列 spec 経路の最小サンプル):
-  - `tests/spec/unit/test-spec-counter.rs.md` — Rust cargo test (`--layer rust-unit`、 9 column 拡張表 7 TC + Counter::new / Increment / Decrement / Reset / overflow / underflow)
-  - `tests/spec/unit/test-spec-counter.go.md` — Go testing.T (`--layer go-unit`、 9 column 拡張表 8 TC + t.Parallel + signed wrap)
-  - `tests/spec/integration/test-spec-counter-api.rs.md` — Rust hyper mock_server + reqwest (`--layer rust-integration`、 9 column 拡張表 5 TC + recorder 検証)
-  - `tests/spec/integration/test-spec-counter-api.go.md` — Go net/http/httptest + http.Client (`--layer go-integration`、 9 column 拡張表 5 TC + recorder 検証 + t.Parallel multi-route)
 
 ## 関連 link
 
