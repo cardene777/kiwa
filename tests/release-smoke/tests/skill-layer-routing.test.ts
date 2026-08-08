@@ -215,9 +215,11 @@ describe('the target values and the Step conditions agree', () => {
     const out = new Set<string>();
     for (const line of TEST_SKILL.split('\n')) {
       if (!line.startsWith('### Step ')) continue;
-      // The heading carries more than the condition — `(e2e-generic + a11y,
-      // target=web or all)` and `(target=rust or all, Issue #581)` both occur —
-      // so read from `target=` to the first separator rather than to `)`.
+      // The heading carries more than the condition — `(e2e-generic + a11y、
+      // target=web or all)` puts text before it — so read from `target=` to the
+      // first separator rather than to `)`. The comma terminators are for the
+      // form that puts text after it (`(target=rust or all, Issue #581)`, whose
+      // heading #1864 removed); the shape recurs, so they stay in the class.
       const m = /target=([^),、]+)/.exec(line);
       if (!m) continue;
       for (const value of m[1]!.split(/\s+or\s+/)) out.add(value.trim());
@@ -341,8 +343,11 @@ const DECLARATION_FORMS = [
  * is the declaration and no sentence shape applies.
  *
  * Both the path as `docs/layers.json` writes it and the form with the example
- * directory stripped are tried, because producers differ: the Rust table gives
- * the full `examples/{example}/...` path while the prose forms give the tail.
+ * directory stripped are tried, because producers differ: a table can give the
+ * full `examples/{example}/...` path while the prose forms give the tail. The
+ * producers that took the first form were the Rust and Go tables, which #1864
+ * removed; the two forms are still tried because the difference is the table's
+ * against the prose's, not that language's.
  *
  * Limiting to a named section instead was tried and does not work: the shapes
  * sit under different headings (`## 前提`, `## オプション`, `## 出力 path 早見`)

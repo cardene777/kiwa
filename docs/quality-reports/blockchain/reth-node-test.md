@@ -32,7 +32,7 @@ axes       : 11 (blockchain branch — extends the common 7-axis release gate wi
 
 The `divergences` count in the notes section counts every op whose mock path succeeded but whose real path emitted `RETH_ENV_MISSING` — this is the expected shape in a real-mode-skipped baseline. It does not fail the gate; the fidelity ratio measures the mock-covered surface area, which is 100% for the six ops the AC scopes.
 
-## Reproduction
+## Historical reproduction
 
 Common integration path (mock + graceful-skip real).
 

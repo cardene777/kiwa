@@ -69,8 +69,10 @@ describe('the declared output paths carry three different anchors', () => {
 
   it('names the layers that cannot be written into somebody else\'s project', () => {
     // A layer is reachable from a user's project when at least one of its
-    // declared paths is anchored there. Ten are not: the Rust and Go layers
-    // spell `examples/{example}/…`, which is kiwa's own directory.
+    // declared paths is anchored there. Ten were not: the Rust and Go layers
+    // spelled `examples/{example}/…`, which is kiwa's own directory. #1842
+    // moved them and #1864 removed those layers, so the answer is now none —
+    // which is what this pins, not the count.
     //
     // Both anchors on one producer is normal — `contract` writes the project's
     // test and kiwa's fixture copy from the same skill — so this asks whether a

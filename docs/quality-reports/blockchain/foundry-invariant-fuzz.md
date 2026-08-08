@@ -1,6 +1,6 @@
 # Fidelity — dogfood-foundry-invariant-fuzz (v1.18-3)
 
-> **Historical.** #1864 removed the Rust harness that produced this report. The Solidity contracts and `foundry.toml` of `examples/dogfood-foundry-invariant-fuzz` are still in the repository, but the `cargo` commands below name a crate that is gone and the numbers are the measurement taken at v1.18-3. Driving those contracts from Foundry directly is open work ([#1868](https://github.com/cardene777/kiwa/issues/1868)).
+> **Historical.** #1864 removed the Rust harness that produced this report. Nothing below reproduces today — the `cargo` commands name a crate that is gone, and the bare `forge` commands fail at `forge-std` import resolution because the example has no `lib/forge-std`. The Solidity contracts and `foundry.toml` of `examples/dogfood-foundry-invariant-fuzz` are still in the repository and the numbers are the measurement taken at v1.18-3. Driving those contracts from Foundry directly is open work ([#1868](https://github.com/cardene777/kiwa/issues/1868)).
 
 Real-vs-mock behavioural fidelity for the Foundry invariant/fuzz dogfood, produced by `examples/dogfood-foundry-invariant-fuzz/tests/emit_quality_report.rs`. Drives 3 Solidity contract (ERC-20 / Vault / Router) の合計 9 個 invariant を forge 10_000 run + fuzz seed 決定的化 + shrink parser 検証で走らせ、 `@kiwa-lab/quality-metrics` release-gate 11-axis payload に blockchain-native な invariant/fuzz 軸を追加する。
 
@@ -32,7 +32,7 @@ axes       : 11 (blockchain branch — 汎用 7 軸 + invariant 軸 3 + coverage
 
 `divergences` 数は「mock 側が ok / real 側が `FOUNDRY_ENV_MISSING`」 の 4 op を数える。 これは forge 不在 baseline での想定 shape で、 gate は failure ではない。 fidelity ratio は mock 側が全 6 op を cover しているため 100% となる。
 
-## Reproduction
+## Historical reproduction
 
 Common integration path (mock + graceful-skip real)。
 

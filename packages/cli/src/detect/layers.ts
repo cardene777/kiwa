@@ -445,7 +445,24 @@ function validate(
     const full = join(cwd, manifest);
     if (!existsSync(full)) return `${manifest} no longer exists`;
     try {
-      if (statSync(full).mtimeMs > taken) return `${manifest} changed after the detection was taken`;
+      // Compared at the resolution the recording actually has. `generated_at`
+      // is an ISO string, so it carries whole milliseconds; `mtimeMs` carries
+      // fractions of one (measured: `1786186801940.7078`). Comparing them
+      // directly makes a manifest written in the same millisecond as the
+      // recording read as newer than it — 198 times out of 200 in a loop that
+      // writes and stamps back to back.
+      //
+      // That is exactly what `kiwa init --detect` does: it reads the manifest
+      // and stamps the recording, and when the scan between them finishes
+      // inside one millisecond the writer's own output is rejected as stale by
+      // its own reader (intermittent failure of the roundtrip test).
+      //
+      // Flooring keeps "changed after" meaning what it says. Within one
+      // millisecond the recording cannot tell the two apart, so it must not
+      // claim it can.
+      if (Math.floor(statSync(full).mtimeMs) > taken) {
+        return `${manifest} changed after the detection was taken`;
+      }
     } catch {
       return `${manifest} could not be read`;
     }

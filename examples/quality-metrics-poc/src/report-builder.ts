@@ -14,7 +14,7 @@ import {
 
 /**
  * PoC — a small "quality report builder" that a v1.10 provider (auth /
- * queue / cache / contract-rust) would use to publish a
+ * queue / cache) would use to publish a
  * `docs/quality-reports/{package}-{version}.md` file.
  *
  * The builder deliberately keeps every axis as a pure input so tests can

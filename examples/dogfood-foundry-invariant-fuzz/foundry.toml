@@ -1,11 +1,11 @@
 # Foundry project descriptor for the v1.18-3 dogfood invariant/fuzz app.
 #
 # `[profile.default]` — plain `forge test` targets (unit / integration).
-# `[invariant]` — invariant runner budget. Overridden per-invocation by the
-# `FOUNDRY_INVARIANT_RUNS` / `FOUNDRY_INVARIANT_SEED` env vars kiwa's
-# `invariant_run` helper sets (see kiwa-rs/src/contract/foundry/invariant.rs).
-# `[fuzz]` — stateless fuzz test budget. Same `FOUNDRY_FUZZ_RUNS` /
-# `FOUNDRY_FUZZ_SEED` env override contract.
+# `[invariant]` — invariant runner budget. The Rust harness overrode it
+# per-invocation through `FOUNDRY_INVARIANT_RUNS` / `FOUNDRY_INVARIANT_SEED`;
+# #1864 removed that harness, so the values below are what `forge test` uses.
+# `[fuzz]` — stateless fuzz test budget. Same story with `FOUNDRY_FUZZ_RUNS` /
+# `FOUNDRY_FUZZ_SEED`.
 [profile.default]
 src = "contracts"
 out = "out"

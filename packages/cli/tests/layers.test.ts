@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
@@ -125,8 +125,8 @@ describe('narrowing happens per runtime', () => {
 
   it('says which runtimes it excluded and why', () => {
     // `scan` reads the working directory and one level of declared workspace
-    // members, so a Go service in an undeclared subdirectory is absent to it
-    // and present to the project — its five layers stop being offered. The
+    // members, so a contract project in an undeclared subdirectory is absent to
+    // it and present to the project — its layers stop being offered. The
     // exclusion is the better default; being unable to find out why is not.
     const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
       generated_at: fresh(),
@@ -374,9 +374,9 @@ describe('absence is established by looking', () => {
   });
 
   it('does not call a search finished when a directory could not be opened', async () => {
-    // The same mistake as ignoring the budget, in a different guise: the Go
-    // module is there, the search could not see it, and reporting the search as
-    // finished would let the reader exclude all five Go layers.
+    // The same mistake as ignoring the budget, in a different guise: the
+    // manifest is there, the search could not see it, and reporting the search
+    // as finished would let the reader exclude that runtime's layers.
     const { presentManifests } = await import('../src/detect/scan.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-perm-'));
     const closed = join(root, 'services');
@@ -715,6 +715,35 @@ describe('a recording that no longer describes the project is discarded', () => 
     });
   });
 
+  it('keeps a recording stamped in the same millisecond as the manifest it read', () => {
+    // `generated_at` is an ISO string and carries whole milliseconds, while
+    // `mtimeMs` carries fractions of one. Comparing them directly made a
+    // manifest written in the same millisecond read as newer than the
+    // recording, so the writer's own output was rejected by its own reader —
+    // the intermittent failure of the roundtrip test below.
+    //
+    // The stamp is derived from the file rather than from the clock: taking
+    // `Date.now()` would only land in the same millisecond by luck, which is
+    // what made the defect intermittent in the first place.
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, null);
+    const stampedAt = new Date(Math.floor(statSync(join(root, 'package.json')).mtimeMs));
+    mkdirSync(join(root, '.kiwa'), { recursive: true });
+    writeFileSync(
+      join(root, '.kiwa', 'stack.json'),
+      JSON.stringify({
+        signals: signalsFingerprint(SIGNALS),
+        generated_at: stampedAt.toISOString(),
+        scanned: [{ manifest: 'package.json', language: 'typescript' }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
+      }),
+    );
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).not.toMatch(/changed after/);
+      expect(resolved.source).toBe('detected');
+    });
+  });
+
   it('falls back when a scanned manifest is gone', () => {
     const root = fixture({}, {
       generated_at: fresh(),
@@ -765,7 +794,7 @@ describe('an unusable recording is not an error', () => {
       scanned: [{ manifest: 'foundry.toml', language: 'solidity' }],
       detected: [
         { layer: 'nextjs-rsc', manifest: 'package.json' },
-        { layer: 'rust-from-the-future', manifest: 'package.json' },
+        { layer: 'layer-from-the-future', manifest: 'package.json' },
       ],
     });
     withFixture(root, () => {
@@ -777,7 +806,7 @@ describe('an unusable recording is not an error', () => {
       // coincidence. Narrowing on them can take a runtime down to nothing.
       expect(resolved.source).toBe('all');
       expect(resolved.layers).toHaveLength(TABLE.length);
-      expect(resolved.warnings.join(' ')).toMatch(/rust-from-the-future/);
+      expect(resolved.warnings.join(' ')).toMatch(/layer-from-the-future/);
     });
   });
 

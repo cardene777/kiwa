@@ -69,6 +69,11 @@ constraint omission, `VerifiedPublicKeyCallback` permissions, FIDO/U2F presence 
 an infinite loop on large channels, and a server deadlock). No CRITICAL or HIGH advisory
 remains on the Go side.
 
+That paragraph records the 2026-08-01 reading. #1864 removed the five Go modules
+afterwards, so there is no Go side left to scan and the next reading will not carry the
+section at all. It stays because deleting it would change what the snapshot says was
+found.
+
 ## Open
 
 ### `vitest` 2.1.9 — CRITICAL, 1 advisory
