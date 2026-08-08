@@ -21,8 +21,8 @@ quality-report/                   -- 過去に生成した fidelity snapshot (�
 Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く
 remapping も無いため **`forge test` は現状 import 解決に失敗する**。
 
-もとは Rust 側の adapter が `forge` を CLI として起動し、 依存の解決もそちら側で完結していた。
-#1864 でその駆動を削除した結果、 Solidity test を走らせる経路が無くなっている。
+#1864 で Rust 側の harness を削除した結果、 Solidity test を走らせる経路が無くなった。
+`forge-std` はもとから `lib/` に無く、 Rust 側が代わりに解決していたわけでもない。
 
 動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 #1868 で扱う。
 
