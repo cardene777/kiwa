@@ -1302,6 +1302,31 @@ describe('a recording has to come from the table it is read against', () => {
       expect(resolved.source).toBe('detected');
     });
   });
+
+  it('discards a recording whose mtime is present but unusable', () => {
+    // Absent and malformed are different answers. Absent means the recording
+    // predates the field; present-but-broken means the writer put something
+    // there and it did not survive. Letting the second fall through to the
+    // timestamp comparison would hand a recording a way to opt out of the
+    // exact one by carrying a broken value — the weaker check accepts a whole
+    // millisecond that the exact one rejects.
+    for (const mtime of [null, 'yesterday', Number.NaN, {}]) {
+      const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
+        generated_at: fresh(),
+        // `NaN` does not survive JSON, so it arrives as `null` — which is the
+        // shape a writer that stringified a bad value would actually produce.
+        scanned: [{ manifest: 'package.json', language: 'typescript', mtime_ms: mtime }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
+      });
+      withFixture(root, () => {
+        const resolved = resolveLayers({ cwd: root });
+        expect(resolved.warnings.join(' '), `mtime_ms=${JSON.stringify(mtime)}`).toMatch(
+          /unusable mtime/,
+        );
+        expect(resolved.source).toBe('all');
+      });
+    }
+  });
 });
 describe('the layer table is mirrored, not selected from', () => {
   // Projecting a subset makes a second, narrower contract over the same SSOT:

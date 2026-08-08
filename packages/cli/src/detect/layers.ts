@@ -446,6 +446,16 @@ function validate(
 
     const full = join(cwd, manifest);
     if (!existsSync(full)) return `${manifest} no longer exists`;
+    // Absent and malformed are different answers. Absent means the recording
+    // predates the field, which the timestamp comparison below still covers.
+    // Present but unusable (`null`, a string, `NaN`) means the writer put
+    // something there and it did not survive, so nothing about this entry can
+    // be trusted — and falling through to the weaker comparison would let a
+    // recording opt out of the exact one by carrying a broken value.
+    const hasMtime = 'mtime_ms' in entry && entry.mtime_ms !== undefined;
+    if (hasMtime && !(typeof entry.mtime_ms === 'number' && Number.isFinite(entry.mtime_ms))) {
+      return `${manifest} records an unusable mtime`;
+    }
     try {
       const current = statSync(full).mtimeMs;
       const read = entry.mtime_ms;
@@ -462,7 +472,7 @@ function validate(
         // cannot tell the writer's own output from an edit made just after it.
         if (current !== read) return `${manifest} changed after the detection was taken`;
       } else {
-        // No recorded value: recordings written before this field existed, and
+        // The field is absent: recordings written before it existed, and
         // hand-built ones. The timestamp comparison is all there is, so it
         // keeps the band described above — strictly newer than the stamp is
         // stale, with no tolerance in either direction.
