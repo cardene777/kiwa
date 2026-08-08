@@ -95,14 +95,32 @@ export function stackFileExists(cwd: string): boolean {
  * manifest edited after the stamp is still stale — which widening the reader
  * would have given up.
  *
+ * The rounding is capped one millisecond past `now`, and that bound is exact
+ * rather than cautious: a manifest this run read was written before `now`, and
+ * `now` is the same instant truncated down, so `ceil(mtime)` cannot legitimately
+ * exceed `now + 1`. Anything past it did not come from this run's reading —
+ * clock skew, or a file dated into the future — and adopting it would stamp the
+ * recording forward and let genuine edits until then read as current.
+ *
  * A manifest that cannot be read contributes nothing: it is either gone or
  * unreadable, and the reader rejects the recording on that ground by itself.
+ *
+ * What this does not address is the gap between `scan` reading a manifest and
+ * this stamp being taken. An edit landing in that window is covered by the
+ * stamp while its content was never read, so the recording describes something
+ * it did not see. That is a property of validating by timestamp at all and it
+ * predates this function — `generated_at` was the write-time clock, which
+ * covered the same window just as silently. Closing it needs the recording to
+ * carry what it read (a content hash per entry), which is a change to the
+ * `.kiwa/stack.json` schema.
  */
 function stampCovering(cwd: string, scanned: { path: string }[], now: Date): Date {
-  let latest = now.getTime();
+  const nowMs = now.getTime();
+  let latest = nowMs;
   for (const { path } of scanned) {
     try {
-      latest = Math.max(latest, Math.ceil(statSync(join(cwd, path)).mtimeMs));
+      const rounded = Math.ceil(statSync(join(cwd, path)).mtimeMs);
+      if (rounded > latest && rounded <= nowMs + 1) latest = rounded;
     } catch {
       continue;
     }

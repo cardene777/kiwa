@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
@@ -1139,6 +1139,64 @@ describe('a recording has to come from the table it is read against', () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.warnings.join(' ')).not.toMatch(/signal table/);
       expect(resolved.source).toBe('detected');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  /**
+   * The stamp, pinned from the writer's side.
+   *
+   * `narrows on a recording produced by the writer` exercises the same path,
+   * but only fails when the scan between the write and the stamp happens to
+   * finish inside one millisecond — which is what made the defect intermittent
+   * and makes that test unfit for pinning the fix. Both cases below set the
+   * mtime explicitly, so neither depends on how fast the machine is.
+   */
+  it('stamps a value that covers the fractional mtime it read', async () => {
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-'));
+    try {
+      const manifest = join(root, 'package.json');
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
+      // The exact shape that broke it: a whole millisecond plus a fraction,
+      // stamped with that millisecond. `now.toISOString()` alone lands below
+      // the mtime and the reader throws its own writer's output away.
+      const mtimeMs = Math.floor(Date.now()) + 0.7;
+      utimesSync(manifest, mtimeMs / 1000, mtimeMs / 1000);
+      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript' }],
+        new Date(Math.floor(mtimeMs)));
+      const stamped = Date.parse(
+        (JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
+          generated_at: string;
+        }).generated_at,
+      );
+      expect(stamped).toBeGreaterThanOrEqual(statSync(manifest).mtimeMs);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not carry the stamp forward onto a manifest dated in the future', async () => {
+    // Rounding up covers the truncation, which is under a millisecond. A file
+    // dated further ahead than that did not come from this run's reading — a
+    // skewed clock, or a deliberate `touch` — and adopting it would stamp the
+    // recording into the future, where every edit until then reads as current.
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-future-'));
+    try {
+      const manifest = join(root, 'package.json');
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
+      const now = new Date();
+      const ahead = now.getTime() + 60_000;
+      utimesSync(manifest, ahead / 1000, ahead / 1000);
+      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript' }], now);
+      const stamped = Date.parse(
+        (JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
+          generated_at: string;
+        }).generated_at,
+      );
+      expect(stamped).toBeLessThanOrEqual(now.getTime() + 1);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
