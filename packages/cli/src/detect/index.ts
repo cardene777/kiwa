@@ -6,7 +6,7 @@
  * stays a matter of printing.
  */
 
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -79,7 +79,7 @@ export function stackFileExists(cwd: string): boolean {
 }
 
 /**
- * A stamp that covers the manifests this run read.
+ * A stamp that covers the manifests this run read, and nothing later.
  *
  * `generated_at` is an ISO string, so it carries whole milliseconds, while the
  * `mtimeMs` the reader compares it against carries fractions of one (measured:
@@ -95,35 +95,36 @@ export function stackFileExists(cwd: string): boolean {
  * manifest edited after the stamp is still stale — which widening the reader
  * would have given up.
  *
- * The rounding is capped one millisecond past `now`, and that bound is exact
- * rather than cautious: a manifest this run read was written before `now`, and
- * `now` is the same instant truncated down, so `ceil(mtime)` cannot legitimately
- * exceed `now + 1`. Anything past it did not come from this run's reading —
- * clock skew, or a file dated into the future — and adopting it would stamp the
- * recording forward and let genuine edits until then read as current.
+ * **The mtimes come from `scan`, taken beside the read, and are never
+ * re-derived here.** Stat-ing again at write time answers a later question: an
+ * edit landing between the read and the stamp would raise the mtime, the stamp
+ * would round *that* up, and the recording would cover contents it never saw.
+ * Measured at `mtime = now + 0.2ms`: re-stat-ing accepts, the write-time clock
+ * alone rejects — so re-deriving here does not preserve the old behaviour, it
+ * widens the window by up to a millisecond.
  *
- * A manifest that cannot be read contributes nothing: it is either gone or
- * unreadable, and the reader rejects the recording on that ground by itself.
+ * An entry with no mtime contributes nothing. `scan` leaves it unset when the
+ * stat failed, and guessing from a fresh stat is exactly the re-derivation
+ * above; falling back to the clock alone is the conservative answer.
  *
- * What this does not address is the gap between `scan` reading a manifest and
- * this stamp being taken. An edit landing in that window is covered by the
- * stamp while its content was never read, so the recording describes something
- * it did not see. That is a property of validating by timestamp at all and it
- * predates this function — `generated_at` was the write-time clock, which
- * covered the same window just as silently. Closing it needs the recording to
- * carry what it read (a content hash per entry), which is a change to the
- * `.kiwa/stack.json` schema.
+ * The rounding is still capped one millisecond past `now`. Scan-time mtimes
+ * cannot legitimately exceed it (they were taken before `now`, which is the
+ * same instant truncated down), so the cap only rejects clock skew and files
+ * dated into the future, which would otherwise stamp the recording forward.
+ *
+ * What remains uncovered is an edit between the read and the stamp that leaves
+ * the mtime at or below what `scan` saw — i.e. an mtime moved backwards. The
+ * recording would describe contents it did not read. Closing that needs the
+ * recording to carry what it read (a content hash per entry), which is a change
+ * to the `.kiwa/stack.json` schema and is tracked in #1870.
  */
-function stampCovering(cwd: string, scanned: { path: string }[], now: Date): Date {
+function stampCovering(scanned: { mtimeMs?: number }[], now: Date): Date {
   const nowMs = now.getTime();
   let latest = nowMs;
-  for (const { path } of scanned) {
-    try {
-      const rounded = Math.ceil(statSync(join(cwd, path)).mtimeMs);
-      if (rounded > latest && rounded <= nowMs + 1) latest = rounded;
-    } catch {
-      continue;
-    }
+  for (const { mtimeMs } of scanned) {
+    if (mtimeMs === undefined) continue;
+    const rounded = Math.ceil(mtimeMs);
+    if (rounded > latest && rounded <= nowMs + 1) latest = rounded;
   }
   return new Date(latest);
 }
@@ -131,7 +132,7 @@ function stampCovering(cwd: string, scanned: { path: string }[], now: Date): Dat
 export function writeStackFile(
   cwd: string,
   layers: Detection[],
-  scanned: { path: string; language: string }[] = [],
+  scanned: { path: string; language: string; mtimeMs?: number }[] = [],
   now: Date = new Date(),
 ): string {
   const dir = join(cwd, '.kiwa');
@@ -142,7 +143,7 @@ export function writeStackFile(
     // tell a current detection from one that predates an edit — without it,
     // adding `next` to package.json and not re-running leaves the file naming
     // none of the `nextjs-*` layers, and a reader narrowing on that drops them.
-    generated_at: stampCovering(cwd, scanned, now).toISOString(),
+    generated_at: stampCovering(scanned, now).toISOString(),
     // Which manifests were read, not just which ones matched. "We read
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.

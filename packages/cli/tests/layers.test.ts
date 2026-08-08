@@ -1153,6 +1153,15 @@ describe('a recording has to come from the table it is read against', () => {
    * and makes that test unfit for pinning the fix. Both cases below set the
    * mtime explicitly, so neither depends on how fast the machine is.
    */
+  /** `generated_at` as the writer put it, in milliseconds. */
+  function stampOf(root: string): number {
+    return Date.parse(
+      (JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
+        generated_at: string;
+      }).generated_at,
+    );
+  }
+
   it('stamps a value that covers the fractional mtime it read', async () => {
     const { writeStackFile } = await import('../src/detect/index.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-'));
@@ -1164,14 +1173,48 @@ describe('a recording has to come from the table it is read against', () => {
       // the mtime and the reader throws its own writer's output away.
       const mtimeMs = Math.floor(Date.now()) + 0.7;
       utimesSync(manifest, mtimeMs / 1000, mtimeMs / 1000);
-      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript' }],
+      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript', mtimeMs }],
         new Date(Math.floor(mtimeMs)));
-      const stamped = Date.parse(
-        (JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
-          generated_at: string;
-        }).generated_at,
+      expect(stampOf(root)).toBeGreaterThanOrEqual(statSync(manifest).mtimeMs);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not stamp over an edit that landed after the scan read the manifest', async () => {
+    // The counterexample a verifier produced against the previous shape, which
+    // re-stat-ed at write time: with the edit at `now + 0.2 ms`, the write-time
+    // clock alone rejects the recording and a fresh stat rounds the edit up to
+    // `now + 1` and accepts it. Re-deriving the mtime here does not preserve the
+    // old behaviour — it widens the window by up to a millisecond.
+    //
+    // The stamp therefore comes from the mtime `scan` saw beside the read. An
+    // edit after that raises the file's mtime above the stamp and the reader
+    // still calls it stale.
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-toctou-'));
+    try {
+      const manifest = join(root, 'package.json');
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
+      const readAt = Math.floor(Date.now()) - 5;
+      utimesSync(manifest, readAt / 1000, readAt / 1000);
+
+      const now = new Date(readAt + 5);
+      // Between the read and the stamp, the manifest changes.
+      const editedAt = now.getTime() + 0.2;
+      utimesSync(manifest, editedAt / 1000, editedAt / 1000);
+
+      writeStackFile(
+        root,
+        [{ layer: 'nextjs-rsc', signal: 'next', manifest: 'package.json', strength: 'exact' }],
+        // What `scan` saw, not what the file became.
+        [{ path: 'package.json', language: 'typescript', mtimeMs: readAt }],
+        now,
       );
-      expect(stamped).toBeGreaterThanOrEqual(statSync(manifest).mtimeMs);
+      expect(stampOf(root)).toBeLessThan(statSync(manifest).mtimeMs);
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).toMatch(/changed after/);
+      expect(resolved.source).toBe('all');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
@@ -1190,13 +1233,11 @@ describe('a recording has to come from the table it is read against', () => {
       const now = new Date();
       const ahead = now.getTime() + 60_000;
       utimesSync(manifest, ahead / 1000, ahead / 1000);
-      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript' }], now);
-      const stamped = Date.parse(
-        (JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
-          generated_at: string;
-        }).generated_at,
-      );
-      expect(stamped).toBeLessThanOrEqual(now.getTime() + 1);
+      // Passed as what the scan saw, which is how a skewed clock reaches the
+      // writer: `scan` reads the file and records the future mtime it found.
+      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript', mtimeMs: ahead }],
+        now);
+      expect(stampOf(root)).toBeLessThanOrEqual(now.getTime() + 1);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }

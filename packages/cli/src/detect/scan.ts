@@ -8,7 +8,7 @@
  * definition names — one level, declared by the project itself.
  */
 
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { readPackageJson, type Dependency } from './manifests.js';
@@ -24,6 +24,17 @@ export interface ScannedManifest {
   path: string;
   language: string;
   deps: Dependency[];
+  /**
+   * The mtime this file had when its contents were read, in milliseconds.
+   *
+   * Carried rather than re-derived so the recording's timestamp can describe
+   * *what was read*. Stat-ing again at write time answers a later question, and
+   * an edit landing in between would be covered by a stamp that never saw it.
+   *
+   * `undefined` when the stat failed, which the writer treats as no
+   * information rather than as a zero.
+   */
+  mtimeMs?: number;
 }
 
 const READERS: Record<string, { language: string; read: (source: string) => Dependency[] }> = {
@@ -63,8 +74,16 @@ function readManifestsIn(dir: string, root: string, out: ScannedManifest[]): voi
     } catch {
       continue;
     }
+    // Taken next to the read, so it describes the contents just parsed. A stat
+    // taken later describes whatever the file became.
+    let mtimeMs: number | undefined;
+    try {
+      mtimeMs = statSync(full).mtimeMs;
+    } catch {
+      mtimeMs = undefined;
+    }
     const rel = full.startsWith(root) ? full.slice(root.length + 1) || name : full;
-    out.push({ path: rel, language: reader.language, deps: reader.read(source) });
+    out.push({ path: rel, language: reader.language, deps: reader.read(source), mtimeMs });
   }
 }
 
