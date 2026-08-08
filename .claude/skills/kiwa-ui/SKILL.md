@@ -67,12 +67,17 @@ kiwa layers --json --layer ui --lang "$DOC_LANG" --module "$MODULE"
 
 判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
 
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
 | 結果 | 扱い |
 |---|---|
 | exit != 0 | stderr をそのまま user に返して中断 |
 | stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
 | 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
-| その layer の `spec_path` が `null` | その layer は spec を持たない。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
 | 上記いずれでもない | その `spec_path` を使う |
 
 `.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。

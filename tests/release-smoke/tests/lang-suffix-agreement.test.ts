@@ -213,11 +213,26 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
       .split('\n')
       .filter((line) => line.startsWith('|') && !line.startsWith('|---'))
       .slice(1); // header を除く
-    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(5);
+    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(8);
     expect(
       rows.filter((r) => r.includes('中断')).length,
       `${skill} の判定表に中断の行が足りない`,
-    ).toBe(4);
+    ).toBe(7);
+    // Parsing is not validating. A partially broken response parses fine and
+    // then produces a path built from whatever happened to be there.
+    const table = rows.join('\n');
+    for (const shape of ['配列でない', '2 件以上', '{module}']) {
+      expect(table, `${skill} の判定表に「${shape}」 の行が無い`).toContain(shape);
+    }
+    // `null` alone lets an empty string or a number through. The row has to
+    // say what a usable value looks like, not just one way of missing.
+    expect(table, `${skill} が spec_path の型を見ていない`).toMatch(/文字列でない、 または空/);
+    // The distinction is the point of the whole table: parsing succeeds on a
+    // partially broken response, and the rows below only matter if the reader
+    // knows that.
+    expect(blockBody, `${skill} が「読める」 と「形をしている」 を分けていない`).toMatch(
+      /parse できることは/,
+    );
     // Counting rows would call the 30-layer form abnormal. The block also tells
     // callers to resolve all five modes in one call, so the two would contradict.
     expect(blockBody, `${skill} が件数で判定している`).toMatch(/件数ではなく/);
