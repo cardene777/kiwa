@@ -301,12 +301,17 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
    */
   function reviewInvocation(skill: string): string {
     const body = read(`.claude/skills/${skill}/SKILL.md`);
+    // Identified by `--module`: the invocation passes one, while the prose that
+    // explains the cover rate and the 関連 list that names the downstream skill
+    // do not. Joining several candidates let a missing flag on the real line be
+    // satisfied by another (#1863 Round 2).
     const lines = body
       .split('\n')
-      .filter((l) => /`\/kiwa-review[^`]*--(?:mode|layer)/.test(l))
+      .filter((l) => /`\/kiwa-review[^`]*--module/.test(l))
       .filter((l) => !l.includes('同じ layer'));
-    expect(lines.length, `${skill} の review 起動行が見つからない`).toBeGreaterThan(0);
-    return lines.join('\n');
+    expect(lines, `${skill} の review 起動行が 1 行に定まらない:\n${lines.join('\n')}`)
+      .toHaveLength(1);
+    return lines[0] ?? '';
   }
 
   it.each(Object.keys(SKILL_LAYERS))('%s の review 起動が layer と lang を渡す', (skill) => {
@@ -323,7 +328,25 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     const body = read(`.claude/skills/${skill}/SKILL.md`);
     const declared = body.split('\n').filter((l) => l.startsWith('- `--lang '));
     expect(declared.length, `${skill} が --lang を宣言していない`).toBe(1);
-    expect(declared[0], `${skill} の --lang に既定が書かれていない`).toMatch(/省略時/);
+    // The same default across skills, not just "some default". Three policies
+    // coexisted (`--input-spec` から自動判定 / Step 0 で AskUserQuestion /
+    // 起動元の値) and a caller could not tell which applied (#1863 Round 2).
+    expect(declared[0], `${skill} の --lang 既定が揃っていない`).toContain(
+      '省略時は起動元が渡した値、 単体起動なら `ja`',
+    );
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が存在しない option を案内していない', (skill) => {
+    // `/kiwa-test --layer e2e-generic` was written in a 関連 list, but
+    // `kiwa-test` takes no `--layer` (measured: 0 declarations). Pointing at a
+    // flag that does not exist sends the reader to a command that errors.
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const kiwaTest = body.split('\n').filter((l) => l.includes('/kiwa-test'));
+    for (const line of kiwaTest) {
+      expect(line, `${skill} が kiwa-test に --layer を案内している`).not.toMatch(
+        /\/kiwa-test[^`\n]*--layer/,
+      );
+    }
   });
 
   it.each(Object.keys(SKILL_LAYERS))('%s が layer ID を混在させていない', (skill) => {

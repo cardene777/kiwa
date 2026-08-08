@@ -196,4 +196,4 @@ violations 発生時は `reportViolations(results)` で詳細 markdown report �
 - `/kiwa-design --layer a11y` ... 本 skill の上流 (Layer 1 spec 生成)
 - `/kiwa-ui` ... component test (機能側)、 本 skill は accessibility 側で並列
 - `/kiwa-review --layer a11y` ... 本 skill 完了後の review
-- `/kiwa-test --layer a11y` ... 本 skill を含む統合 chain
+- `/kiwa-test` ... 本 skill を含む統合 chain (`--layer` は取らない)

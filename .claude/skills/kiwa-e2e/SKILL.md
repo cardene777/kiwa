@@ -193,4 +193,4 @@ pnpm exec playwright test {module}.spec.ts --reporter=list,json:test-results.jso
 - `/kiwa-design --layer e2e-generic` ... 本 skill の上流 (Layer 1 spec 生成)
 - `/kiwa-play` ... dApp E2E (wallet / anvil 経路) 専用、 本 skill とは domain 分離
 - `/kiwa-review --layer e2e-generic` ... 本 skill 完了後の review
-- `/kiwa-test --layer e2e-generic` ... 本 skill を含む統合 chain
+- `/kiwa-test` ... 本 skill を含む統合 chain (`--layer` は取らない。 example ごとの層構成から起動対象を決める)

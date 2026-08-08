@@ -38,7 +38,7 @@ $ARGUMENTS
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
 - `--target {path}` — 対象実装 file (`src/lib/*.ts` 等、 grep で識別)
 - `--coverage-threshold {N}` — vitest coverage 目標 (default 80%)
-- `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
+- `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip (CI 用)
 
 ## 出力 path 早見

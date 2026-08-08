@@ -37,7 +37,7 @@ $ARGUMENTS
 - `--target {path}` — 対象実装 file (`app/api/*/route.ts` 等、 grep で識別)
 - `--backend {msw|supertest|playwright}` — integration test backend (default `msw` for Next.js App Router、 supertest / playwright も選択可)
 - `--coverage-threshold {N}` — integration coverage threshold (default 100%、 production target のみ評価対象)
-- `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
+- `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--output {path}` — 生成 test の path (省略時は `test/integration/{module}.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
 
 ### layer 別の生成先
