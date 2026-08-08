@@ -107,7 +107,7 @@ kiwa layers --json
 
 recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む側の table が一致しない場合に捨てられる。 signal を足した後の初回は `source=all` に倒れるので、 `kiwa init --detect` を掛け直す。
 
-存在するかどうかは `kiwa layers` を叩いた時点で調べる (記録から読まない)。 検出後に `go.mod` を足した場合もその場で見えるため、 再検出は要らない。
+存在するかどうかは `kiwa layers` を叩いた時点で調べる (記録から読まない)。 検出後に `foundry.toml` を足した場合もその場で見えるため、 再検出は要らない。
 
 除外した runtime は stderr に理由を出す。 意図せず消えている場合は `--layer` を明示すれば回避できる。
 

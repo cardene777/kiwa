@@ -17,6 +17,15 @@ test/invariant/                   -- Foundry invariant test
 quality-report/                   -- 過去に生成した quality snapshot (履歴)
 ```
 
+## perf 計測は無い (意図的)
+
+`vitest.perf.config.ts` があったが #1864 で削除した。 include していた
+`tests/perf/**/*.perf.ts` は Rust 側 harness と一緒に消えており、 残しても
+`No test files found` で exit 1 になるだけで、 config の存在が計測の存在に見える。
+
+計測を戻すなら Foundry から直接駆動する形になる。 `forge test` が動く前提が要るため
+#1868 の後に別途決める。
+
 ## 実行 (現状は動かない)
 
 Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く

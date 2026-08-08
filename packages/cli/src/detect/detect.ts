@@ -35,15 +35,17 @@ export interface Signal {
  * A signal derived from a package's `peerDependencies` rather than written by
  * hand, carrying the language it was derived from.
  *
- * The language is not decoration. Generated signals are npm names, and npm
- * names share a namespace with other registries: `redis`, `postgres` and
- * `testcontainers` all exist in both. Matching is by name (exact, or a `/`
- * boundary prefix), so without the language a `Cargo.toml` depending on the
- * `redis` crate matches a signal derived from a TypeScript package and reports
- * a TypeScript layer.
+ * The language is not decoration, though nothing exercises it today. Matching
+ * is by name (exact, or a `/` boundary prefix) and package names are not unique
+ * across registries — `redis`, `postgres` and `testcontainers` exist in several
+ * — so a manifest read as one language would otherwise match a signal derived
+ * from another and report that language's layer.
  *
- * Go is unaffected either way, because module paths are
- * `github.com/redis/go-redis/v9` and match neither form.
+ * Since #1864 removed the Rust and Go readers there is one reader left
+ * (`package.json`), which makes every signal and every dependency TypeScript
+ * and the comparison always true. It stays because it is what a second reader
+ * would need, and because dropping it makes the day someone adds one the day
+ * the collision returns.
  */
 export interface GeneratedSignal extends Signal {
   /** The manifest language this signal was derived from. */
@@ -112,8 +114,9 @@ export interface Detection {
  * Signals in the same group compete; signals in different groups do not.
  *
  * The group is the runtime prefix, so two layers of one runtime compete
- * while layers of different runtimes do not. Without this an exact signal
- * would suppress a weak Go one in a project that happens to hold both.
+ * while layers of different runtimes do not. Without this an exact signal in
+ * one runtime would suppress a weak signal in another, in a project holding
+ * both.
  */
 function group(layer: string): string {
   const at = layer.indexOf('-');
@@ -171,10 +174,13 @@ function applySignal(signal: Signal, dep: Dependency, manifest: string): Detecti
   // specific turned up; `also` is what the same dependency may additionally
   // mean.
   //
-  // Reading `default` as an assertion here made the Go adapter report
-  // the fallback beside the framework layer, while an adapter whose feature
-  // replaces the default — reported the framework layer alone. Same intent,
-  // two answers, decided by which mechanism the language happened to use.
+  // Reading `default` as an assertion here made the Go adapter report the
+  // fallback layer beside the framework layer, while the Rust adapter — whose
+  // matched feature replaced the default — reported the framework layer alone.
+  // Same intent, two answers, decided by which mechanism the language happened
+  // to use. #1864 removed both adapters, so nothing exercises the difference
+  // now; the rule stays because it is the reading that was right under either
+  // mechanism.
   const from = signal.default ?? signal.layer;
   const out: Detection[] = [];
 
@@ -257,10 +263,10 @@ export function resolve(all: Detection[]): Detection[] {
 
   // An implied layer is a guess that holds only while nothing else in its group
   // says otherwise. An adapter can imply the integration layer because the
-  // plain corpus project carries both a unit and an integration test file and
-  // `tests/poc_integration.rs` — but the framework projects each carry a single
-  // test file, so keeping it once a framework layer appeared would report an
-  // integration suite that no such project has.
+  // plain corpus project carries both a unit and an integration test file — but
+  // the framework projects each carry a single test file, so keeping it once a
+  // framework layer appeared would report an integration suite that no such
+  // project has.
   const asserted = new Map<string, Set<string>>();
   for (const d of kept.values()) {
     if (d.implied) continue;

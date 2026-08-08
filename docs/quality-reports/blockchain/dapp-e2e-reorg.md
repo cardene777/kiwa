@@ -1,6 +1,6 @@
 # Fidelity — dogfood-dapp-e2e-reorg (v1.18-4)
 
-Real-vs-mock behavioural fidelity for the Next.js + viem + wagmi dApp driven by kiwa-play under anvil fork mainnet + reorg simulation, produced by `examples/dogfood-dapp-e2e-reorg/scripts/emit-fidelity-report.ts`. Feeds `@kiwa-lab/quality-metrics` release-gate 11-axis payload with a TypeScript-native blockchain adapter alongside the Rust ones landed in v1.18-2 (`dogfood-reth-node-test`) and v1.18-3 (`dogfood-foundry-invariant-fuzz`).
+Real-vs-mock behavioural fidelity for the Next.js + viem + wagmi dApp driven by kiwa-play under anvil fork mainnet + reorg simulation, produced by `examples/dogfood-dapp-e2e-reorg/scripts/emit-fidelity-report.ts`. Feeds `@kiwa-lab/quality-metrics` release-gate 11-axis payload with a TypeScript-native blockchain adapter. It shared the 11-axis shape with the Rust dogfoods landed in v1.18-2 (`dogfood-reth-node-test`) and v1.18-3 (`dogfood-foundry-invariant-fuzz`); #1864 removed those, and this is the blockchain report that still has a driver.
 
 ## Baseline (real mode skipped — TESTNET_RPC_URL unset)
 

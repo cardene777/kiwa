@@ -24,7 +24,7 @@ spec と test file が生成される。 依存していない layer のテス�
 
 ## 前提
 
-- cwd が対象 project の root (`package.json` / `Cargo.toml` / `go.mod` のいずれかが存在)
+- cwd が対象 project の root (`package.json` が存在)
 - `kiwa` CLI が起動できる (`kiwa --help` が exit 0)
 - 出力先 `tests/spec/` / `tests/reports/app/` および各 layer の `test_outputs` への Write 権限
 

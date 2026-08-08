@@ -245,9 +245,12 @@ describe('Solidity is looked for, not assumed present', () => {
     //
     // Measured while checking the Solidity path: the new code walked the
     // listing and skipped it, the old readers probed by name and did not.
+    // #1864 removed the Rust reader, so the names below are the live ones —
+    // the defect was the probe's, not that language's, and the same directory
+    // trick would do the same to `package.json`.
     const root = mkdtempSync(join(tmpdir(), 'kiwa-dir-manifest-'));
     try {
-      for (const name of ['Cargo.toml', 'go.mod', 'package.json', 'foundry.toml']) {
+      for (const name of ['package.json', 'foundry.toml', 'hardhat.config.ts']) {
         mkdirSync(join(root, name), { recursive: true });
       }
       const { presentManifests } = await import('../src/detect/scan.js');
@@ -418,14 +421,14 @@ describe('absence is established by looking', () => {
   });
 
   it('does not narrow a runtime whose manifests were not all read', () => {
-    // `scan` follows the workspace definition, so an undeclared second crate is
-    // never opened. Its framework could be anything, and narrowing to what the
-    // declared crate said would drop the layer the undeclared one needs — the
-    // language set alone cannot see this, because both crates are Rust.
+    // `scan` follows the workspace definition, so an undeclared second project
+    // is never opened. Its build system could be anything, and narrowing to
+    // what the declared one said would drop the layer the undeclared one needs
+    // — the language set alone cannot see this, because both are Solidity.
     const root = fixture(
       {
         'foundry.toml': '[profile.default]\n',
-        'services/worker/foundry.toml': '[dependencies]\nactix-web = "4"\n',
+        'services/worker/foundry.toml': '[profile.default]\nsrc = "contracts"\n',
       },
       {
         generated_at: fresh(),
@@ -470,10 +473,10 @@ describe('absence is established by looking', () => {
   });
 
   it('keeps a runtime whose only manifest sits where the search does not go', () => {
-    // The sharper form of the same disagreement: with no Rust manifest visible
-    // to the search, the runtime is absent from `present` altogether. Testing
-    // absence before disagreement excluded all five layers on a search already
-    // known not to cover them.
+    // The sharper form of the same disagreement: with no Solidity manifest
+    // visible to the search, the runtime is absent from `present` altogether.
+    // Testing absence before disagreement excluded its layers on a search
+    // already known not to cover them.
     const root = fixture(
       { 'package.json': '{"name":"app"}', 'vendor/inner/foundry.toml': '[profile.default]\n' },
       {
@@ -697,7 +700,7 @@ describe('an explicit choice wins', () => {
 
 describe('a recording that no longer describes the project is discarded', () => {
   it('falls back when a scanned manifest was edited afterwards', () => {
-    // Adding `axum` to Cargo.toml without re-running detection would otherwise
+    // Editing `foundry.toml` without re-running detection would otherwise
     // narrow to the layer the project has moved off.
     const root = fixture({ 'foundry.toml': '[profile.default]\n' }, {
       generated_at: new Date(Date.now() - 60_000).toISOString(),
@@ -801,8 +804,6 @@ describe('an unusable recording is not an error', () => {
     const root = fixture(
       {
         'package.json': deps,
-        'foundry.toml': '[profile.default]\n',
-        'go.mod': 'module x\n',
         // Present so Solidity is not ruled out; `contract` then has to appear
         // in the recording like every other narrowable layer.
         'foundry.toml': '[profile.default]\n',
@@ -812,7 +813,6 @@ describe('an unusable recording is not an error', () => {
       scanned: [
         { manifest: 'package.json', language: 'typescript' },
         { manifest: 'foundry.toml', language: 'solidity' },
-        { manifest: 'go.mod', language: 'go' },
       ],
       detected: TABLE.filter(narrowable).map((l) => ({ layer: l.id, manifest: manifestFor(l) })),
     });
@@ -875,7 +875,7 @@ describe('a layer is narrowable only when a signal names it', () => {
   // some signal could have detected. Coverage is uneven within a language, so
   // the question is asked per layer: `orm-query` here is named and absent, so
   // it goes; the layers nothing names stay regardless.
-  const MANIFESTS = { 'Cargo.toml': 'rust', 'go.mod': 'go', 'package.json': 'typescript' };
+  const MANIFESTS = { 'package.json': 'typescript' };
   const ORM: Record<string, unknown> = {
     match: 'drizzle-orm',
     layer: 'orm-query',
@@ -1131,6 +1131,20 @@ describe('the layer table is mirrored, not selected from', () => {
     const noProviders = TABLE.filter((l) => !l.providers.length);
     expect(noProviders.length).toBeGreaterThan(0);
     for (const layer of noProviders) expect(layer.providers).toEqual([]);
+  });
+
+  it('carries mode from the file, on a column no layer fills today', () => {
+    // #1864 removed the six layers that had a value here, and the field went
+    // with them. Every other row was already null, so the removal changed no
+    // value — only whether the key arrives, which is what a caller reads.
+    //
+    // Compared against the file rather than against `null`, so the projection
+    // has to read `row.mode`. Asserting the constant would pass just as well on
+    // a hard-coded null and stop being a check the day a layer declares one.
+    for (const row of raw.layers) {
+      const layer = TABLE.find((l) => l.id === row.id)!;
+      expect(layer.mode, `${String(row.id)} の mode`).toBe(row.mode ?? null);
+    }
   });
 
 });

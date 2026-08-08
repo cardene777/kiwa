@@ -102,5 +102,4 @@ pnpm test
 
 ## Next steps
 
-- The [Foundry contract test tutorial](./03-rust-contract-from-zero.md) covers the Rust polyglot side.
 - The advanced adapter also supports quorum queues, federation, delayed message plugin — see [`packages/queue/README.md`](../../packages/queue/README.md).

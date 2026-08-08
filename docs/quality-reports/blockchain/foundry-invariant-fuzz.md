@@ -1,5 +1,7 @@
 # Fidelity — dogfood-foundry-invariant-fuzz (v1.18-3)
 
+> **Historical.** #1864 removed the Rust harness that produced this report. The Solidity contracts and `foundry.toml` of `examples/dogfood-foundry-invariant-fuzz` are still in the repository, but the `cargo` commands below name a crate that is gone and the numbers are the measurement taken at v1.18-3. Driving those contracts from Foundry directly is open work ([#1868](https://github.com/cardene777/kiwa/issues/1868)).
+
 Real-vs-mock behavioural fidelity for the Foundry invariant/fuzz dogfood, produced by `examples/dogfood-foundry-invariant-fuzz/tests/emit_quality_report.rs`. Drives 3 Solidity contract (ERC-20 / Vault / Router) の合計 9 個 invariant を forge 10_000 run + fuzz seed 決定的化 + shrink parser 検証で走らせ、 `@kiwa-lab/quality-metrics` release-gate 11-axis payload に blockchain-native な invariant/fuzz 軸を追加する。
 
 ## Baseline (real mode skipped — no `forge` on PATH)

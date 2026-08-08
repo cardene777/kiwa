@@ -516,11 +516,11 @@ function doctorCommand(deps: RunCliDeps): number {
 /**
  * Report which layers the project's own dependencies point at.
  *
- * Detection is opt-in and does not scaffold. A project that is a Rust service
- * or a Next.js app has had the same dApp files written into it since v0.1, and
- * the fix for that is not to guess harder by default — it is to say what was
- * found and let the caller act on it. `--detect` prints and records; nothing
- * else changes unless the caller asks separately.
+ * Detection is opt-in and does not scaffold. Every project has had the same
+ * dApp files written into it since v0.1, whatever it actually is, and the fix
+ * for that is not to guess harder by default — it is to say what was found and
+ * let the caller act on it. `--detect` prints and records; nothing else changes
+ * unless the caller asks separately.
  */
 function detectCommand(deps: RunCliDeps): number {
   const cwd = deps.cwd();
@@ -528,7 +528,10 @@ function detectCommand(deps: RunCliDeps): number {
 
   if (!manifests.length) {
     deps.stdout('No manifest found.\n');
-    deps.stdout('Looked for: Cargo.toml, go.mod, package.json (here and in workspace members)\n');
+    // Names the one manifest a reader exists for. Listing `Cargo.toml` and
+    // `go.mod` outlived their readers (#1864) and told the caller their project
+    // had been read and found empty, when it had never been opened.
+    deps.stdout('Looked for: package.json (here and in workspace members)\n');
     // A previous run's answer must not survive a run that found no basis for
     // it, so an existing file is emptied. A project that never had one keeps
     // none — the AC asks for a read-only look, and creating `.kiwa/stack.json`
@@ -547,8 +550,8 @@ function detectCommand(deps: RunCliDeps): number {
 
   if (!layers.length) {
     // No fallback to the dApp scaffold. Detecting nothing is information, and
-    // silently producing Playwright files for a Go service is what this command
-    // exists to stop.
+    // silently producing Playwright files for a project that tests no dApp is
+    // what this command exists to stop.
     //
     // The empty result still gets written. A previous run's file would
     // otherwise survive a dependency removal and keep telling the skills about

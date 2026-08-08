@@ -822,8 +822,8 @@ describe('layers', () => {
     const dir = project(detection);
     try {
       const h = harness({ cwd: () => dir });
-      // Named directly: the fixture has only a `Cargo.toml`, so the TypeScript
-      // layers are excluded from a detected run for want of a manifest.
+      // Named directly: a signal names `auth`, and the fixture's recording
+      // detected only `nextjs-rsc`, so a detected run narrows `auth` away.
       expect(await runCli(['layers', '--layer', 'auth', '--json'], h.deps)).toBe(0);
       const parsed = JSON.parse(h.out()) as { layers: Record<string, unknown>[] };
       const auth = parsed.layers.find((l) => l.id === 'auth');
@@ -838,6 +838,36 @@ describe('layers', () => {
       expect(auth).toHaveProperty('variants');
       expect(auth).toHaveProperty('also_consumed_by');
       expect(auth).toHaveProperty('backing_runtime_package');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // #1864 removed the six layers that carried a `mode`, and with them the field
+  // — which is a different change from the one it looked like. `mode` was null
+  // on every TypeScript and Solidity row before that commit and null on every
+  // row after it, so no value moved; what moved was whether the key arrives.
+  // A caller destructuring `{ mode }` gets `undefined` instead of `null`, and
+  // one checking `'mode' in layer` flips answer, on rows nothing happened to.
+  //
+  // Asserted on the serialised output rather than on `loadLayerTable()`.
+  // `JSON.stringify` drops a key whose value is `undefined` and keeps one whose
+  // value is `null`, so a projection that produced `undefined` would satisfy
+  // every in-process check and still emit the JSON this test exists to pin.
+  it('keeps mode on rows that declare no mode, rather than dropping the key', async () => {
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'all', '--json'], h.deps)).toBe(0);
+      const serialised = h.out();
+      const parsed = JSON.parse(serialised) as { layers: Record<string, unknown>[] };
+      expect(parsed.layers.length).toBeGreaterThan(0);
+      for (const layer of parsed.layers) {
+        // Present in the text, so this fails on `undefined` as well as on removal.
+        expect(Object.keys(layer), `${String(layer.id)} が mode を落とした`).toContain('mode');
+        expect(layer.mode, `${String(layer.id)} の mode`).toBeNull();
+      }
+      expect(serialised).toContain('"mode": null');
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -110,9 +110,10 @@ const V1_17_PAGES = [
 // v1.12 / v1.13 / v1.16 / v1.17 anchor phrase pattern. Each phrase is a
 // substring the rendered VitePress <main> will always include (checked
 // against the actual page headings + body text — not frontmatter titles).
+// Tutorials 25 and 26 drove the Rust harness and were removed with it in
+// #1864. They are not listed as pages that used to exist — this array is what
+// the site must serve now, and a path whose source file is gone can only fail.
 const V1_18_PAGES = [
-  { path: '/tutorials/25-reth-node-test', title: 'Reth node test' },
-  { path: '/tutorials/26-foundry-invariant-fuzz', title: 'Foundry invariant + fuzz runner' },
   { path: '/tutorials/27-dapp-e2e-reorg', title: 'dApp e2e reorg' },
   { path: '/concepts/blockchain-testing', title: 'Blockchain testing' },
   { path: '/migrations/v1.17-to-v1.18', title: 'v1.17 → v1.18' },

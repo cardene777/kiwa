@@ -4,8 +4,9 @@
  * coverage % + latency samples into the 11-axis release gate, and emits a
  * JSON + Markdown quality report.
  *
- * The 11 axes match the Rust dogfood (dogfood-reth-node-test) so both dapp
- * paths converge on the same schema.
+ * The 11 axes were chosen to match the Rust dogfood (`dogfood-reth-node-test`)
+ * so both dapp paths converged on one schema. #1864 removed that dogfood; the
+ * schema stays because `@kiwa-lab/quality-metrics` reads it.
  */
 
 import type { ReorgOp, TraceEvent } from '../adapters/interface.js';

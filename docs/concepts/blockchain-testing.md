@@ -1,5 +1,7 @@
 # Blockchain testing — chain state / EL client integration / fuzz shrinker / reorg semantics (SSOT)
 
+> **Three of the four axes have no implementation.** #1864 removed the Rust harness, so every `kiwa::contract::*` type and every `cargo` command below describes what v1.18 shipped rather than what is installable now. Axis 4 (reorg) is TypeScript and still runs — see [`@kiwa-lab/dapp`](../libraries/foundation/dapp/) and [Tutorial 27](../tutorials/27-dapp-e2e-reorg). The semantics the other three record are kept because they are what a replacement has to reproduce; see § Test count baseline for where each stands.
+
 kiwa's v1.10 `kiwa::contract::foundry` + `kiwa::contract::alloy` covered the "compile a contract, spawn anvil, drive JSON-RPC" case. v1.18 adds four axes on top of that base — the ones production dApp teams hit once their `forge test` suite is green but production still breaks. This concept doc is the SSOT for those four axes; the tutorials and dogfood apps are the concrete implementations.
 
 ## Axis 1 — Chain state simulation

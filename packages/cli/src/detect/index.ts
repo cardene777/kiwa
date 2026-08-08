@@ -90,8 +90,8 @@ export function writeStackFile(
   const body = {
     // When the answer was taken. A reader compares it against the manifests to
     // tell a current detection from one that predates an edit — without it,
-    // adding `axum` to Cargo.toml and not re-running leaves the file claiming
-    // the unit layer, and a reader narrowing on that picks the wrong one.
+    // adding `next` to package.json and not re-running leaves the file naming
+    // none of the `nextjs-*` layers, and a reader narrowing on that drops them.
     generated_at: now.toISOString(),
     // Which manifests were read, not just which ones matched. "We read
     // package.json and nothing matched" and "there is no package.json" lead to

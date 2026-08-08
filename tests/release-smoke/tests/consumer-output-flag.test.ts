@@ -241,10 +241,10 @@ describe('a consumer can be told where its input is and what to call it', () => 
 });
 
 describe('the stated default matches what the layer table declares', () => {
-  // Two shapes exist today. Most skills state a project-relative path and the
-  // table prefixes `{example}/`; Rust and Go state the `examples/` path itself.
-  // The second shape is why those ten layers cannot be written into somebody
-  // else's project (#1842) — recorded here so that fix has to update this.
+  // Skills state a project-relative path and the table prefixes `{example}/`.
+  // Rust and Go stated the `examples/` path itself, which is why their ten
+  // layers could not be written into somebody else's project (#1842); #1864
+  // removed them, so only the first shape is left.
   const anchored = (skill: string): string[] =>
     LAYERS.flatMap((layer) => layer.test_outputs?.[skill] ?? []);
 

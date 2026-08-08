@@ -215,15 +215,15 @@ export interface ManifestPresence {
  * because a project excluding a directory from its workspace means it. That is
  * the right basis for reading dependencies.
  *
- * It is the wrong basis for concluding something is absent. "No `go.mod` in the
- * directories a workspace file named" is much weaker than "no `go.mod`", and a
- * Go service in an undeclared `services/api` is invisible to it. Since
- * `resolveLayers` excludes a runtime's layers on absence, the absence has to be
- * established by looking.
+ * It is the wrong basis for concluding something is absent. "No `foundry.toml`
+ * in the directories a workspace file named" is much weaker than "no
+ * `foundry.toml`", and a contract project in an undeclared `services/chain` is
+ * invisible to it. Since `resolveLayers` excludes a runtime's layers on
+ * absence, the absence has to be established by looking.
  *
  * Paths rather than languages, because the same distinction applies one level
- * down: a second Rust crate the workspace does not declare leaves the language
- * set unchanged while carrying a framework nobody read.
+ * down: a second `package.json` the workspace does not declare leaves the
+ * language set unchanged while carrying a framework nobody read.
  *
  * Which is also why the result says whether the looking finished.
  */
@@ -265,7 +265,9 @@ export function presentManifests(cwd: string, cap: number = VISIT_CAP): Manifest
     // That last part is the reason the readers moved here too. Probing with
     // `existsSync` answers yes for a directory, so a directory named
     // `Cargo.toml` was reported as a Rust manifest and kept Rust's five layers
-    // from ever being excluded. Measured, not hypothesised.
+    // from ever being excluded. Measured, not hypothesised — before #1864
+    // removed that reader. The shape is the reader's, not Rust's, so the same
+    // probe would do the same to `package.json`.
     for (const entry of entries) {
       if (entry.isDirectory()) continue;
       const reader = READERS[entry.name];
