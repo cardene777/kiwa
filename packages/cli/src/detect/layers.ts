@@ -377,6 +377,8 @@ interface StackEntry {
 interface ScannedEntry {
   manifest?: unknown;
   language?: unknown;
+  /** The mtime the file had when `scan` read it, at full precision. */
+  mtime_ms?: unknown;
 }
 
 /**
@@ -445,14 +447,27 @@ function validate(
     const full = join(cwd, manifest);
     if (!existsSync(full)) return `${manifest} no longer exists`;
     try {
-      // Strictly newer than the stamp is stale, with no tolerance. The stamp
-      // carries whole milliseconds (`generated_at` is an ISO string) while
-      // `mtimeMs` carries fractions of one, so the writer is the side that has
-      // to make the two comparable — it stamps a value that covers the
-      // manifests it read (`writeStackFile`). Widening the comparison here
-      // instead would accept a manifest genuinely edited inside the same
-      // millisecond as the stamp.
-      if (statSync(full).mtimeMs > taken) return `${manifest} changed after the detection was taken`;
+      const current = statSync(full).mtimeMs;
+      const read = entry.mtime_ms;
+      if (typeof read === 'number' && Number.isFinite(read)) {
+        // The file's own value, compared to the value it had when it was read.
+        // Different means it is not the file the recording describes, whichever
+        // direction it moved — a restore that moves an mtime backwards changes
+        // the contents just as much as an edit that moves it forward.
+        //
+        // Exact, because both sides are the same measurement of the same file
+        // and no rounding sits between them. That removes the band a comparison
+        // against `generated_at` has: the stamp carries whole milliseconds and
+        // an mtime carries fractions of one, so within one millisecond the two
+        // cannot tell the writer's own output from an edit made just after it.
+        if (current !== read) return `${manifest} changed after the detection was taken`;
+      } else {
+        // No recorded value: recordings written before this field existed, and
+        // hand-built ones. The timestamp comparison is all there is, so it
+        // keeps the band described above — strictly newer than the stamp is
+        // stale, with no tolerance in either direction.
+        if (current > taken) return `${manifest} changed after the detection was taken`;
+      }
     } catch {
       return `${manifest} could not be read`;
     }

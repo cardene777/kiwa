@@ -74,16 +74,25 @@ function readManifestsIn(dir: string, root: string, out: ScannedManifest[]): voi
     } catch {
       continue;
     }
+    const rel = full.startsWith(root) ? full.slice(root.length + 1) || name : full;
+    const entry: ScannedManifest = {
+      path: rel,
+      language: reader.language,
+      deps: reader.read(source),
+    };
     // Taken next to the read, so it describes the contents just parsed. A stat
     // taken later describes whatever the file became.
-    let mtimeMs: number | undefined;
+    //
+    // Left unset rather than assigned `undefined` when the stat fails: the
+    // field is optional and `exactOptionalPropertyTypes` is on, so the two are
+    // different types. The writer treats absent as "no information", which is
+    // what a failed stat is.
     try {
-      mtimeMs = statSync(full).mtimeMs;
+      entry.mtimeMs = statSync(full).mtimeMs;
     } catch {
-      mtimeMs = undefined;
+      // No mtime for this entry.
     }
-    const rel = full.startsWith(root) ? full.slice(root.length + 1) || name : full;
-    out.push({ path: rel, language: reader.language, deps: reader.read(source), mtimeMs });
+    out.push(entry);
   }
 }
 

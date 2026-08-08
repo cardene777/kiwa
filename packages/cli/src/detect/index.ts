@@ -78,57 +78,6 @@ export function stackFileExists(cwd: string): boolean {
   return existsSync(join(cwd, '.kiwa', 'stack.json'));
 }
 
-/**
- * A stamp that covers the manifests this run read, and nothing later.
- *
- * `generated_at` is an ISO string, so it carries whole milliseconds, while the
- * `mtimeMs` the reader compares it against carries fractions of one (measured:
- * `1786186801940.7078`). Stamping the clock alone therefore produces a value
- * that can sit *below* the mtime of a manifest this run had already read — 198
- * times out of 200 in a loop that writes and stamps back to back — and the
- * reader rejects the writer's own output as stale. `kiwa init --detect` does
- * exactly that sequence, so the roundtrip failed whenever the scan between the
- * two finished inside one millisecond.
- *
- * Rounding the read manifests up to the next whole millisecond fixes it on the
- * side where the truncation happens. The reader keeps a strict comparison, so a
- * manifest edited after the stamp is still stale — which widening the reader
- * would have given up.
- *
- * **The mtimes come from `scan`, taken beside the read, and are never
- * re-derived here.** Stat-ing again at write time answers a later question: an
- * edit landing between the read and the stamp would raise the mtime, the stamp
- * would round *that* up, and the recording would cover contents it never saw.
- * Measured at `mtime = now + 0.2ms`: re-stat-ing accepts, the write-time clock
- * alone rejects — so re-deriving here does not preserve the old behaviour, it
- * widens the window by up to a millisecond.
- *
- * An entry with no mtime contributes nothing. `scan` leaves it unset when the
- * stat failed, and guessing from a fresh stat is exactly the re-derivation
- * above; falling back to the clock alone is the conservative answer.
- *
- * The rounding is still capped one millisecond past `now`. Scan-time mtimes
- * cannot legitimately exceed it (they were taken before `now`, which is the
- * same instant truncated down), so the cap only rejects clock skew and files
- * dated into the future, which would otherwise stamp the recording forward.
- *
- * What remains uncovered is an edit between the read and the stamp that leaves
- * the mtime at or below what `scan` saw — i.e. an mtime moved backwards. The
- * recording would describe contents it did not read. Closing that needs the
- * recording to carry what it read (a content hash per entry), which is a change
- * to the `.kiwa/stack.json` schema and is tracked in #1870.
- */
-function stampCovering(scanned: { mtimeMs?: number }[], now: Date): Date {
-  const nowMs = now.getTime();
-  let latest = nowMs;
-  for (const { mtimeMs } of scanned) {
-    if (mtimeMs === undefined) continue;
-    const rounded = Math.ceil(mtimeMs);
-    if (rounded > latest && rounded <= nowMs + 1) latest = rounded;
-  }
-  return new Date(latest);
-}
-
 export function writeStackFile(
   cwd: string,
   layers: Detection[],
@@ -143,11 +92,30 @@ export function writeStackFile(
     // tell a current detection from one that predates an edit — without it,
     // adding `next` to package.json and not re-running leaves the file naming
     // none of the `nextjs-*` layers, and a reader narrowing on that drops them.
-    generated_at: stampCovering(scanned, now).toISOString(),
+    generated_at: now.toISOString(),
     // Which manifests were read, not just which ones matched. "We read
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.
-    scanned: scanned.map((m) => ({ manifest: m.path, language: m.language })),
+    //
+    // `mtime_ms` is the mtime each file had when `scan` read it, at full
+    // precision, so the reader can ask "is this the same file I read" rather
+    // than "was it touched after some moment". The two are not the same
+    // question, and the second one cannot be answered here: `generated_at` is
+    // an ISO string carrying whole milliseconds while an mtime carries
+    // fractions of one (measured: `1786186801940.7078`), so any comparison
+    // between them has a one-millisecond band where the writer's own output and
+    // an edit made just after it are indistinguishable. Accepting that band
+    // makes `kiwa init --detect` reject what it just wrote; rejecting it lets a
+    // same-millisecond edit through. Recording the value sidesteps the choice.
+    //
+    // Written per entry rather than as one timestamp because that is the
+    // granularity the question has: each manifest is compared against the value
+    // it had, not against a summary of all of them.
+    scanned: scanned.map((m) => ({
+      manifest: m.path,
+      language: m.language,
+      ...(m.mtimeMs === undefined ? {} : { mtime_ms: m.mtimeMs }),
+    })),
     // Which table produced this answer. The staleness check compares the
     // recording against the manifests, which cannot see that the signal table
     // itself changed — and a recording taken before a signal existed says

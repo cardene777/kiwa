@@ -1145,73 +1145,112 @@ describe('a recording has to come from the table it is read against', () => {
   });
 
   /**
-   * The stamp, pinned from the writer's side.
+   * The recorded mtime, from both sides.
    *
-   * `narrows on a recording produced by the writer` exercises the same path,
-   * but only fails when the scan between the write and the stamp happens to
-   * finish inside one millisecond — which is what made the defect intermittent
-   * and makes that test unfit for pinning the fix. Both cases below set the
-   * mtime explicitly, so neither depends on how fast the machine is.
+   * `generated_at` carries whole milliseconds and an mtime carries fractions of
+   * one, so comparing them leaves a one-millisecond band in which the writer's
+   * own output and an edit made just after it are the same value. Every way of
+   * resolving that band picks one of the two to get wrong — measured on three
+   * shapes before this one:
+   *
+   * | 実装 | 自己出力 | 直後の編集 |
+   * |---|---|---|
+   * | `mtimeMs > taken` (`generated_at` = 書込時刻) | 破棄 (flake) | 破棄 |
+   * | `Math.floor(mtimeMs) > taken` | 受理 | **受理** |
+   * | stamp を `ceil(mtime)` に切上げ | 受理 | **受理** |
+   * | 読んだ mtime を記録して一致比較 | 受理 | 破棄 |
+   *
+   * Recording the value asks a different question — "is this the file I read"
+   * rather than "was it touched after some moment" — and that one has an exact
+   * answer. `narrows on a recording produced by the writer` exercises the same
+   * path but only fails when a scan happens to finish inside one millisecond,
+   * so it cannot pin any of this; every case below sets the mtime explicitly.
    */
-  /** `generated_at` as the writer put it, in milliseconds. */
-  function stampOf(root: string): number {
-    return Date.parse(
-      (JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
-        generated_at: string;
-      }).generated_at,
-    );
+  /** The `scanned` entries as the writer put them. */
+  function scannedOf(root: string): { manifest: string; mtime_ms?: number }[] {
+    return (
+      JSON.parse(readFileSync(join(root, '.kiwa', 'stack.json'), 'utf-8')) as {
+        scanned: { manifest: string; mtime_ms?: number }[];
+      }
+    ).scanned;
   }
 
-  it('stamps a value that covers the fractional mtime it read', async () => {
+  it('records the mtime each manifest had when it was read', async () => {
     const { writeStackFile } = await import('../src/detect/index.js');
     const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-'));
     try {
       const manifest = join(root, 'package.json');
       writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
-      // The exact shape that broke it: a whole millisecond plus a fraction,
-      // stamped with that millisecond. `now.toISOString()` alone lands below
-      // the mtime and the reader throws its own writer's output away.
-      const mtimeMs = Math.floor(Date.now()) + 0.7;
-      utimesSync(manifest, mtimeMs / 1000, mtimeMs / 1000);
+      // The shape that broke every timestamp comparison: a whole millisecond
+      // plus a fraction, written in the same millisecond the clock reads.
+      const requested = Math.floor(Date.now()) + 0.7;
+      utimesSync(manifest, requested / 1000, requested / 1000);
+      // Read back rather than reused: the filesystem quantises to microseconds,
+      // so what it stored is not always what was asked for (measured delta
+      // -0.0009765625 ms on one value, exact on another — it depends on the
+      // binary representation). `scan` records what `stat` returns, and so does
+      // this; asserting that the two differ would pin the quantisation rather
+      // than the behaviour.
+      const mtimeMs = statSync(manifest).mtimeMs;
       writeStackFile(root, [], [{ path: 'package.json', language: 'typescript', mtimeMs }],
         new Date(Math.floor(mtimeMs)));
-      expect(stampOf(root)).toBeGreaterThanOrEqual(statSync(manifest).mtimeMs);
+      // The fraction survives the round trip through JSON, which is what makes
+      // the comparison exact rather than merely finer.
+      expect(scannedOf(root)[0]?.mtime_ms).toBe(mtimeMs);
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
   });
 
-  it('does not stamp over an edit that landed after the scan read the manifest', async () => {
-    // The counterexample a verifier produced against the previous shape, which
-    // re-stat-ed at write time: with the edit at `now + 0.2 ms`, the write-time
-    // clock alone rejects the recording and a fresh stat rounds the edit up to
-    // `now + 1` and accepts it. Re-deriving the mtime here does not preserve the
-    // old behaviour — it widens the window by up to a millisecond.
-    //
-    // The stamp therefore comes from the mtime `scan` saw beside the read. An
-    // edit after that raises the file's mtime above the stamp and the reader
-    // still calls it stale.
+  it('accepts its own output when the manifest is the one it read', async () => {
+    // The flake this whole seam produced: `kiwa init --detect` reads a manifest,
+    // writes the recording, and the reader threw it away whenever the two
+    // landed in the same millisecond (measured 198 times out of 200).
     const { writeStackFile } = await import('../src/detect/index.js');
-    const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-toctou-'));
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-selfout-'));
     try {
       const manifest = join(root, 'package.json');
       writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
-      const readAt = Math.floor(Date.now()) - 5;
-      utimesSync(manifest, readAt / 1000, readAt / 1000);
-
-      const now = new Date(readAt + 5);
-      // Between the read and the stamp, the manifest changes.
-      const editedAt = now.getTime() + 0.2;
-      utimesSync(manifest, editedAt / 1000, editedAt / 1000);
-
+      const requested = Math.floor(Date.now()) + 0.7;
+      utimesSync(manifest, requested / 1000, requested / 1000);
+      const mtimeMs = statSync(manifest).mtimeMs;
       writeStackFile(
         root,
         [{ layer: 'nextjs-rsc', signal: 'next', manifest: 'package.json', strength: 'exact' }],
-        // What `scan` saw, not what the file became.
-        [{ path: 'package.json', language: 'typescript', mtimeMs: readAt }],
-        now,
+        [{ path: 'package.json', language: 'typescript', mtimeMs }],
+        new Date(Math.floor(mtimeMs)),
       );
-      expect(stampOf(root)).toBeLessThan(statSync(manifest).mtimeMs);
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).not.toMatch(/changed after/);
+      expect(resolved.source).toBe('detected');
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('discards a recording when the manifest changed inside the same millisecond', async () => {
+    // The counterexample a verifier produced against every stamp-based shape:
+    // the scan reads at `now + 0.7`, the edit lands at `now + 0.8`, and both
+    // round to the same whole millisecond. A stamp cannot separate them; the
+    // recorded value can, because it is the file's own measurement.
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-samems-'));
+    try {
+      const manifest = join(root, 'package.json');
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
+      const now = Math.floor(Date.now());
+      utimesSync(manifest, (now + 0.7) / 1000, (now + 0.7) / 1000);
+      const readAt = statSync(manifest).mtimeMs;
+      writeStackFile(
+        root,
+        [{ layer: 'nextjs-rsc', signal: 'next', manifest: 'package.json', strength: 'exact' }],
+        [{ path: 'package.json', language: 'typescript', mtimeMs: readAt }],
+        new Date(now),
+      );
+      // Between the read and now, inside the same millisecond.
+      const editedAt = now + 0.8;
+      utimesSync(manifest, editedAt / 1000, editedAt / 1000);
+      expect(Math.floor(statSync(manifest).mtimeMs)).toBe(now);
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.warnings.join(' ')).toMatch(/changed after/);
       expect(resolved.source).toBe('all');
@@ -1220,27 +1259,48 @@ describe('a recording has to come from the table it is read against', () => {
     }
   });
 
-  it('does not carry the stamp forward onto a manifest dated in the future', async () => {
-    // Rounding up covers the truncation, which is under a millisecond. A file
-    // dated further ahead than that did not come from this run's reading — a
-    // skewed clock, or a deliberate `touch` — and adopting it would stamp the
-    // recording into the future, where every edit until then reads as current.
+  it('discards a recording when the manifest mtime moved backwards', async () => {
+    // A restore or a deliberate `touch` can lower an mtime. Asking whether the
+    // file was touched *after* a moment misses it entirely; asking whether it
+    // is the same file does not.
     const { writeStackFile } = await import('../src/detect/index.js');
-    const root = mkdtempSync(join(tmpdir(), 'kiwa-stamp-future-'));
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-backwards-'));
     try {
       const manifest = join(root, 'package.json');
       writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
-      const now = new Date();
-      const ahead = now.getTime() + 60_000;
-      utimesSync(manifest, ahead / 1000, ahead / 1000);
-      // Passed as what the scan saw, which is how a skewed clock reaches the
-      // writer: `scan` reads the file and records the future mtime it found.
-      writeStackFile(root, [], [{ path: 'package.json', language: 'typescript', mtimeMs: ahead }],
-        now);
-      expect(stampOf(root)).toBeLessThanOrEqual(now.getTime() + 1);
+      const stampedAt = Math.floor(Date.now());
+      utimesSync(manifest, stampedAt / 1000, stampedAt / 1000);
+      const readAt = statSync(manifest).mtimeMs;
+      writeStackFile(
+        root,
+        [{ layer: 'nextjs-rsc', signal: 'next', manifest: 'package.json', strength: 'exact' }],
+        [{ path: 'package.json', language: 'typescript', mtimeMs: readAt }],
+        new Date(stampedAt),
+      );
+      const rolledBack = stampedAt - 5_000;
+      utimesSync(manifest, rolledBack / 1000, rolledBack / 1000);
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).toMatch(/changed after/);
+      expect(resolved.source).toBe('all');
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  it('falls back to the timestamp for a recording written before mtimes were kept', async () => {
+    // Hand-built recordings and ones from an older build carry no `mtime_ms`.
+    // They keep the comparison they were written for rather than being
+    // discarded, so an upgrade does not invalidate every cache on disk.
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
+      generated_at: fresh(),
+      scanned: [{ manifest: 'package.json', language: 'typescript' }],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
+    });
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).not.toMatch(/changed after/);
+      expect(resolved.source).toBe('detected');
+    });
   });
 });
 describe('the layer table is mirrored, not selected from', () => {
