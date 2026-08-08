@@ -79,9 +79,10 @@ contract ERC20Handler {
 ///
 ///         The runner picks 4 actors and drives them through
 ///         `mint / transfer / burn` up to the configured depth. When the
-///         invariant fails, forge shrinks the sequence + prints the failing
-///         calldata; kiwa's `invariant_run` helper parses that shrink summary
-///         into a `ShrinkResult` for downstream assertion.
+///         invariant fails, forge shrinks the sequence and prints the failing
+///         calldata. A kiwa-side helper used to parse that shrink summary for
+///         downstream assertion; #1864 removed it, so the summary is read from
+///         forge's own output.
 contract InvariantERC20 is Test {
     ERC20 public token;
     ERC20Handler public handler;

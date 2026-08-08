@@ -6,7 +6,7 @@
  * stays a matter of printing.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -78,6 +78,38 @@ export function stackFileExists(cwd: string): boolean {
   return existsSync(join(cwd, '.kiwa', 'stack.json'));
 }
 
+/**
+ * A stamp that covers the manifests this run read.
+ *
+ * `generated_at` is an ISO string, so it carries whole milliseconds, while the
+ * `mtimeMs` the reader compares it against carries fractions of one (measured:
+ * `1786186801940.7078`). Stamping the clock alone therefore produces a value
+ * that can sit *below* the mtime of a manifest this run had already read — 198
+ * times out of 200 in a loop that writes and stamps back to back — and the
+ * reader rejects the writer's own output as stale. `kiwa init --detect` does
+ * exactly that sequence, so the roundtrip failed whenever the scan between the
+ * two finished inside one millisecond.
+ *
+ * Rounding the read manifests up to the next whole millisecond fixes it on the
+ * side where the truncation happens. The reader keeps a strict comparison, so a
+ * manifest edited after the stamp is still stale — which widening the reader
+ * would have given up.
+ *
+ * A manifest that cannot be read contributes nothing: it is either gone or
+ * unreadable, and the reader rejects the recording on that ground by itself.
+ */
+function stampCovering(cwd: string, scanned: { path: string }[], now: Date): Date {
+  let latest = now.getTime();
+  for (const { path } of scanned) {
+    try {
+      latest = Math.max(latest, Math.ceil(statSync(join(cwd, path)).mtimeMs));
+    } catch {
+      continue;
+    }
+  }
+  return new Date(latest);
+}
+
 export function writeStackFile(
   cwd: string,
   layers: Detection[],
@@ -92,7 +124,7 @@ export function writeStackFile(
     // tell a current detection from one that predates an edit — without it,
     // adding `next` to package.json and not re-running leaves the file naming
     // none of the `nextjs-*` layers, and a reader narrowing on that drops them.
-    generated_at: now.toISOString(),
+    generated_at: stampCovering(cwd, scanned, now).toISOString(),
     // Which manifests were read, not just which ones matched. "We read
     // package.json and nothing matched" and "there is no package.json" lead to
     // opposite conclusions, and recording only hits cannot tell them apart.

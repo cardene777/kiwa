@@ -4,8 +4,9 @@
  * Each scenario drives the Next.js + wagmi UI through a state change, uses the
  * anvil evm_snapshot / evm_revert primitives to simulate a reorg, and asserts
  * the dApp reconverges within the 1.5 s refetch window. The suite is the
- * dogfood harness for kiwa-play + kiwa::contract::alloy — every op the tests
- * observe is one the fidelity report diffs mock vs real on.
+ * dogfood harness for kiwa-play + `@kiwa-lab/dapp` — every op the tests
+ * observe is one the fidelity report diffs mock vs real on. It also covered
+ * `kiwa::contract::alloy` until #1864 removed the Rust side.
  *
  * Scenarios
  *   S1: pending tx → reorg → dropped (getTransactionReceipt returns null)

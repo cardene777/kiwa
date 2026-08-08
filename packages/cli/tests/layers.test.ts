@@ -715,32 +715,71 @@ describe('a recording that no longer describes the project is discarded', () => 
     });
   });
 
-  it('keeps a recording stamped in the same millisecond as the manifest it read', () => {
-    // `generated_at` is an ISO string and carries whole milliseconds, while
-    // `mtimeMs` carries fractions of one. Comparing them directly made a
-    // manifest written in the same millisecond read as newer than the
-    // recording, so the writer's own output was rejected by its own reader —
-    // the intermittent failure of the roundtrip test below.
-    //
-    // The stamp is derived from the file rather than from the clock: taking
-    // `Date.now()` would only land in the same millisecond by luck, which is
-    // what made the defect intermittent in the first place.
-    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, null);
-    const stampedAt = new Date(Math.floor(statSync(join(root, 'package.json')).mtimeMs));
+  /**
+   * The sub-millisecond seam, from both sides.
+   *
+   * `generated_at` is an ISO string and carries whole milliseconds, while the
+   * `mtimeMs` it is compared against carries fractions of one. The two cases
+   * that seam produces pull in opposite directions, so both are pinned:
+   *
+   * | 状況 | 期待 |
+   * |---|---|
+   * | 読んだ manifest と同じ ms に stamp した (writer 自身の出力) | 受理 |
+   * | stamp より後の ms に編集された | 破棄 |
+   *
+   * Fixing this by widening the reader (`Math.floor(mtimeMs) > taken`) passes
+   * the first and fails the second: a manifest edited 0.8 ms after the stamp
+   * floors down onto it and reads as current. The writer rounds the manifests
+   * it read up instead, so the reader keeps a strict comparison.
+   *
+   * `utimesSync` sets fractional mtimes exactly on this filesystem (requested
+   * `…061.8`, read back `…061.8`), so the second case is reachable rather than
+   * hypothetical.
+   */
+  function recordingStampedAt(root: string, generatedAt: Date): void {
     mkdirSync(join(root, '.kiwa'), { recursive: true });
     writeFileSync(
       join(root, '.kiwa', 'stack.json'),
       JSON.stringify({
         signals: signalsFingerprint(SIGNALS),
-        generated_at: stampedAt.toISOString(),
+        generated_at: generatedAt.toISOString(),
         scanned: [{ manifest: 'package.json', language: 'typescript' }],
         detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
       }),
     );
+  }
+
+  it('keeps a recording whose stamp covers the manifest it read', () => {
+    // What `writeStackFile` produces: the stamp is the manifest's mtime rounded
+    // up to the next whole millisecond. Derived from the file rather than the
+    // clock, because taking `Date.now()` would only land in the same
+    // millisecond by luck — which is what made the defect intermittent.
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, null);
+    const mtime = statSync(join(root, 'package.json')).mtimeMs;
+    recordingStampedAt(root, new Date(Math.ceil(mtime)));
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
       expect(resolved.warnings.join(' ')).not.toMatch(/changed after/);
       expect(resolved.source).toBe('detected');
+    });
+  });
+
+  it('discards a recording when the manifest was edited less than a millisecond after the stamp', () => {
+    // The direction a reader-side tolerance gives up. The edit lands inside the
+    // millisecond the stamp names, so flooring the mtime makes it equal to the
+    // stamp and `>` no longer fires.
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, null);
+    const manifest = join(root, 'package.json');
+    const stampedAt = new Date(Math.ceil(statSync(manifest).mtimeMs));
+    recordingStampedAt(root, stampedAt);
+    const editedAt = stampedAt.getTime() + 0.8;
+    utimesSync(manifest, editedAt / 1000, editedAt / 1000);
+    // The filesystem has to keep the fraction, or this pins nothing.
+    expect(statSync(manifest).mtimeMs).toBeGreaterThan(stampedAt.getTime());
+    withFixture(root, () => {
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).toMatch(/changed after/);
+      expect(resolved.source).toBe('all');
     });
   });
 

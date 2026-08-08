@@ -215,8 +215,8 @@ test('a category mismatch between the sidebar and the directory fails', () => {
 // 外していないと、正常な checkout が毎回落ちる。
 test('the standalone native documents pass without a package', () => {
   withFixture([{ name: 'core' }], ({ root }) => {
-    // fixture は native-languages の 3 文書を既定で置く。package も sidebar 定義も
-    // 無いが、特例として通ることを確かめる。
+    // fixture は native-languages の 1 文書 (python) を既定で置く。package も
+    // sidebar 定義も無いが、特例として通ることを確かめる。
     const result = runCheck(root);
     assert.equal(result.status, 0, result.stderr);
   });
