@@ -218,6 +218,12 @@ export function buildMetadata() {
     .join('; ');
   const native = NATIVE_PACKAGES.map((n) => `${n.name} (${n.registry})`).join(', ');
 
+  // 0 件になったら文そのものを出さない。 件数だけを差し替える形にすると
+  // 「0 language-native packages ship separately: .」 という壊れた文になる。
+  const nativeSentence = NATIVE_PACKAGES.length
+    ? ` ${NATIVE_PACKAGES.length === 1 ? 'One language-native package ships' : `${NATIVE_PACKAGES.length} language-native packages ship`} separately: ${native}.`
+    : '';
+
   // `/kiwa-test` is described by the chains it actually runs. Its SKILL.md defines execution
   // steps for contract, dApp and browser only — Next.js ships as the standalone
   // /kiwa-nextjs skill and is not wired into the orchestrator.
@@ -229,8 +235,7 @@ export function buildMetadata() {
       'stack actually needs — Solidity contracts, dApp end-to-end, browser end-to-end, HTTP ' +
       'APIs, React components, CLI and file I/O, data pipelines, accessibility, and visual ' +
       'regression.',
-    `${packages.length} npm packages under @kiwa-lab/ cover five areas: ${areas}. ` +
-      `${NATIVE_PACKAGES.length === 1 ? 'One language-native package ships' : `${NATIVE_PACKAGES.length} language-native packages ship`} separately: ${native}.`,
+    `${packages.length} npm packages under @kiwa-lab/ cover five areas: ${areas}.${nativeSentence}`,
     `${skills.length} Claude Code skills drive the chain. /kiwa-design writes the spec. ` +
       '/kiwa-forge and /kiwa-hardhat turn it into Foundry and Hardhat contract tests. ' +
       '/kiwa-play covers dApp end-to-end on anvil forks with Playwright and viem. ' +
@@ -247,8 +252,11 @@ export function buildMetadata() {
   const marketplaceDescription =
     'kiwa — test toolchain for application boundaries, distributed as a single Claude Code ' +
     `plugin. ${skills.length} skills generate and run the test layers a stack needs, backed ` +
-    `by ${packages.length} npm packages and ${NATIVE_PACKAGES.length} language-native ` +
-    'package. Pre-release; ' +
+    `by ${packages.length} npm packages${
+      NATIVE_PACKAGES.length
+        ? ` and ${NATIVE_PACKAGES.length} language-native package${NATIVE_PACKAGES.length === 1 ? '' : 's'}`
+        : ''
+    }. Pre-release; ` +
     'all rights reserved.';
 
   const entryDescription =

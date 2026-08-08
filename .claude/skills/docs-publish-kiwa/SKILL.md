@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 # /docs-publish — kiwa docs site build + GitHub Pages publish skill
 
-v1.11-6 (Issue #686) で追加、 kiwa の 3 系統 API reference (v1.11-5 land 済) + tutorial + migration guide + quality reports + release-gate SSOT を VitePress site として build、 gh-pages branch push で GitHub Pages 公開する。
+v1.11-6 (Issue #686) で追加、 kiwa の 2 系統 API reference (v1.11-5 land 済) + tutorial + migration guide + quality reports + release-gate SSOT を VitePress site として build、 gh-pages branch push で GitHub Pages 公開する。
 
 ## trigger
 

@@ -10,9 +10,9 @@ agent: general-purpose
 allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ---
 
-# /docs-generate — kiwa 3 系統 API reference 一括生成 skill
+# /docs-generate — kiwa 2 系統 API reference 一括生成 skill
 
-v1.11-5 (Issue #685) で追加、 kiwa の TypeScript packages + dogfood-foundry-dapp Solidity contracts を横断して API reference を生成する。 tutorial / migration guide / release-gate SSOT は既存 `docs/tutorials/` `docs/migrations/` `docs/quality/` で完結、 本 skill は「API reference 3 系統」 のみを扱う。
+v1.11-5 (Issue #685) で追加、 kiwa の TypeScript packages + dogfood-foundry-dapp Solidity contracts を横断して API reference を生成する。 tutorial / migration guide / release-gate SSOT は既存 `docs/tutorials/` `docs/migrations/` `docs/quality/` で完結、 本 skill は「API reference 2 系統」 のみを扱う。
 
 ## trigger
 

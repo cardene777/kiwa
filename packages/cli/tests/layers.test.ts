@@ -566,8 +566,14 @@ describe('absence is established by looking', () => {
   });
 
   it('keeps a runtime the project turns out to contain', () => {
+    // The runtime under test has to have layers in the table, or the assertion
+    // compares an empty set with an empty set and holds however the code
+    // behaves (Round 2 Finding 3).
+    const solidityLayers = TABLE.filter((l) => l.runtime === 'solidity').length;
+    expect(solidityLayers).toBeGreaterThan(0);
+
     const root = fixture(
-      { 'package.json': '{"name":"app"}', 'services/api/go.mod': 'module x\n' },
+      { 'package.json': '{"name":"app"}', 'services/api/foundry.toml': '[profile.default]\n' },
       {
         generated_at: fresh(),
         scanned: [{ manifest: 'package.json', language: 'typescript' }],
@@ -576,10 +582,8 @@ describe('absence is established by looking', () => {
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'go')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'go').length,
-      );
-      expect(resolved.warnings.join('\n')).not.toMatch(/excluded go/);
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(solidityLayers);
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded solidity/);
     });
   });
 
@@ -786,9 +790,9 @@ describe('an unusable recording is not an error', () => {
     // fixture has to carry a `foundry.toml` for `contract` to count as
     // detected rather than as evidence that narrowing happened.
     const narrowable = (l: { id: string; runtime: string | null }): boolean =>
-      l.runtime === 'solidity' || l.runtime === 'go' || NAMED_BY_SIGNALS.has(l.id);
+      l.runtime === 'solidity' || NAMED_BY_SIGNALS.has(l.id);
     const manifestFor = (l: { id: string; runtime: string | null }): string =>
-      l.runtime === 'solidity' ? 'Cargo.toml' : l.runtime === 'go' ? 'go.mod' : 'package.json';
+      l.runtime === 'solidity' ? 'foundry.toml' : 'package.json';
     // The dependencies are chosen so every named TypeScript layer is detected:
     // `next` for the five `nextjs-*`, and one subject each for auth, cache,
     // job-queue, orm-query and ui.

@@ -13,7 +13,7 @@ The three generators are wired into a single local skill:
 claude /docs-generate
 ```
 
-The skill runs typedoc + cargo doc + forge doc in sequence and writes each language's output under `docs/api/<language>/`. Because the outputs are large (typedoc alone is ~30 MiB across 23 packages), the actual HTML lives outside git — the `docs/api/` directories are placeholders + `.gitignore`-controlled.
+The skill runs typedoc + forge doc in sequence and writes each language's output under `docs/api/<language>/`. Because the outputs are large (typedoc alone is ~30 MiB across the TypeScript packages), the actual HTML lives outside git — the `docs/api/` directories are placeholders + `.gitignore`-controlled.
 
 To rebuild after a package changes:
 

@@ -30,4 +30,4 @@ kiwa は上記の hand-written reference に加えて、 language-native の aut
 claude /docs-generate
 ```
 
-typedoc + cargo doc + forge doc を順次実行、 `docs/api/<language>/` に書出す。
+typedoc + forge doc を順次実行、 `docs/api/<language>/` に書出す。
