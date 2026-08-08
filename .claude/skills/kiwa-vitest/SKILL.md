@@ -35,7 +35,7 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致)
-- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/unit/test-spec-{module}.md`)
+- `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
 - `--target {path}` — 対象実装 file (`src/lib/*.ts` 等、 grep で識別)
 - `--coverage-threshold {N}` — vitest coverage 目標 (default 80%)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は Step 0 で AskUserQuestion)
@@ -49,6 +49,51 @@ $ARGUMENTS
 | coverage report | `tests/reports/unit/coverage-report-{module}.{lang}.md` |
 | round 別 coverage | `tests/reports/unit/coverage-report-{module}-round-{N}.{lang}.md` |
 
+### 入力 spec の path は CLI から受け取る
+
+`--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill が扱う layer は `unit` の 1 つ。
+
+```bash
+kiwa layers --json --layer unit --lang "$DOC_LANG" --module "$MODULE"
+```
+
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
+
+`$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
+| 結果 | 扱い |
+|---|---|
+| exit != 0 | stderr をそのまま user に返して中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値を下流に渡す
+
+Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
+
+本 SKILL.md 内の spec path 表記は説明のための例示で、 解決の指示ではない。
+
 ## 実行フロー
 
 5 段階を順に通る。 各 step は対応する section を上記 path に append する。 飛ばし / 順序入れ替えは禁止。
@@ -60,7 +105,7 @@ AskUserQuestion で coverage report の生成言語を user に確認する。 `
 
 ### Step 1: Layer 1 spec 読込
 
-`tests/spec/unit/test-spec-{module}.md` を Read、 9 column 表から TC 行を全件抽出。 各 TC の (テストレベル / 観点 / 前提 / 入力 / 操作 / 期待結果) を Vitest 文法に対応付ける map を内部で作る。
+§ 入力 spec の path は CLI から受け取る で解決した path を Read、 9 column 表から TC 行を全件抽出。 各 TC の (テストレベル / 観点 / 前提 / 入力 / 操作 / 期待結果) を Vitest 文法に対応付ける map を内部で作る。
 
 ### Step 2: 対象実装 file 確認
 

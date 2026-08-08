@@ -175,10 +175,12 @@ describe('a consumer can be told where its input is and what to call it', () => 
       const pointsAtSection = /省略時は[^、]*§[^、]+で解決/.test(line);
       return !statesLiteral && !pointsAtSection;
     });
+    // `kiwa-cli-test` left the list in #1861 群 2: its flag now names the
+    // section that resolves the default instead of stating nothing at all.
+    // The other seven are群 3-4 and unchanged.
     expect(silent.sort()).toEqual([
       'kiwa-auth',
       'kiwa-cache',
-      'kiwa-cli-test',
       'kiwa-forge',
       'kiwa-go',
       'kiwa-hardhat',
