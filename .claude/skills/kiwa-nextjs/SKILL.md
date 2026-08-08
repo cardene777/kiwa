@@ -84,12 +84,17 @@ kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 
 **exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
 
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
 | 結果 | 扱い |
 |---|---|
-| exit 0 かつ `layers` が 1 件 | その `spec_path` を使う |
 | exit != 0 | stderr をそのまま user に返して中断 |
-| exit 0 だが `layers` が 0 件 | layer 名が誤り。 中断 |
-| `spec_path` が `null` | その layer は spec を持たない。 中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| その layer の `spec_path` が `null` | その layer は spec を持たない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
 
 `jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
 

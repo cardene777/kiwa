@@ -201,14 +201,27 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // Asserted on the decision table, not on the section. The prose above it and
     // the table below say the same words, so either check alone stayed green
     // when the instruction itself was replaced.
-    const rows = resolverBlock(skill)
+    // Scoped to the table's own subsection. The mode-to-layer table above it
+    // also has rows mentioning layer ids, and counting both made the check
+    // depend on how many modes a skill happens to have.
+    const blockBody = resolverBlock(skill);
+    const tableStart = blockBody.indexOf('#### 解決に失敗したら止める');
+    expect(tableStart, `${skill} に失敗時の節が無い`).toBeGreaterThan(-1);
+    const tableEnd = blockBody.indexOf('####', tableStart + 1);
+    const rows = blockBody
+      .slice(tableStart, tableEnd === -1 ? undefined : tableEnd)
       .split('\n')
-      .filter((line) => line.startsWith('|') && /exit|spec_path/.test(line));
-    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(4);
+      .filter((line) => line.startsWith('|') && !line.startsWith('|---'))
+      .slice(1); // header を除く
+    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(5);
     expect(
       rows.filter((r) => r.includes('中断')).length,
       `${skill} の判定表に中断の行が足りない`,
-    ).toBe(3);
+    ).toBe(4);
+    // Counting rows would call the 30-layer form abnormal. The block also tells
+    // callers to resolve all five modes in one call, so the two would contradict.
+    expect(blockBody, `${skill} が件数で判定している`).toMatch(/件数ではなく/);
+    expect(blockBody, `${skill} に絞り込みの手順が無い`).toContain('select(.id ==');
   });
 
   it.each(Object.keys(SKILL_LAYERS))('%s が曖昧な時に推測しないと書いている', (skill) => {
