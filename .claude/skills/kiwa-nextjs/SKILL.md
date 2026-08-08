@@ -50,7 +50,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 以前は 5 layer とも `{module}.nextjs.test.ts` に書いており、 順に起動すると最後の 1 つしか
 残らなかった。 入力は suffix で分かれているのに出力が分かれていない形だった。
-- `--lang {ja|en|<ISO 639-1>}` — 生成 test 内コメント言語 (省略時は `--input-spec` から自動判定)
+- `--lang {ja|en|<ISO 639-1>}` — 生成 test 内コメント言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--no-review` — Step 6 の `/kiwa-review` 自動呼出を skip
 
 ### 入力 spec の path は CLI から受け取る
@@ -478,7 +478,7 @@ describe('signup server action', () => {
 
 ### Step 6: kiwa-review 自動呼出
 
-`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer <起動時の layer> --module {module} --test-path <解決した出力先>` を起動して 11 観点の cover 率を判定する。 5 mode それぞれ別の layer / 別の生成先なので、 `nextjs-server-action` に固定すると他 4 mode の review が別 layer の spec と突き合わされる。
+`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer <起動時の layer> --module {module} --test-path <解決した出力先> --lang $DOC_LANG` を起動して 11 観点の cover 率を判定する。 5 mode それぞれ別の layer / 別の生成先なので、 `nextjs-server-action` に固定すると他 4 mode の review が別 layer の spec と突き合わされる。
 
 ## 11 観点 → invokeServerAction mapping
 

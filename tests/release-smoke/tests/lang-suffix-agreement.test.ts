@@ -129,7 +129,21 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
    * A skill is added here when its group lands. What the check itself asserts
    * is derived from the file, so adding a name is the only edit needed.
    */
-  const MIGRATED = ['kiwa-app', 'kiwa-review', 'kiwa-nextjs', 'kiwa-api', 'kiwa-ui'];
+  const MIGRATED = [
+    // #1860
+    'kiwa-app',
+    'kiwa-review',
+    // #1861 群 1
+    'kiwa-nextjs',
+    'kiwa-api',
+    'kiwa-ui',
+    // #1861 群 2
+    'kiwa-vitest',
+    'kiwa-e2e',
+    'kiwa-a11y',
+    'kiwa-data',
+    'kiwa-cli-test',
+  ];
 
   it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
     // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
@@ -170,6 +184,11 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     ],
     'kiwa-api': ['integration', 'api'],
     'kiwa-ui': ['ui'],
+    'kiwa-vitest': ['unit'],
+    'kiwa-e2e': ['e2e-generic'],
+    'kiwa-a11y': ['a11y'],
+    'kiwa-data': ['data'],
+    'kiwa-cli-test': ['cli'],
   };
 
   /** The resolution block of a migrated Layer 2 skill. */
@@ -273,6 +292,84 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     );
   });
 
+  /**
+   * The line that actually starts `/kiwa-review`, not prose that mentions it.
+   *
+   * Identified by carrying `--mode` or `--layer`: the prose in `kiwa-nextjs`
+   * says "Step 6 の `/kiwa-review --mode test-review` は..." while explaining
+   * the cover rate, and picking the first mention read that as the invocation.
+   */
+  function reviewInvocation(skill: string): string {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    // Identified by `--module`: the invocation passes one, while the prose that
+    // explains the cover rate and the 関連 list that names the downstream skill
+    // do not. Joining several candidates let a missing flag on the real line be
+    // satisfied by another (#1863 Round 2).
+    const lines = body
+      .split('\n')
+      .filter((l) => /`\/kiwa-review[^`]*--module/.test(l))
+      .filter((l) => !l.includes('同じ layer'));
+    expect(lines, `${skill} の review 起動行が 1 行に定まらない:\n${lines.join('\n')}`)
+      .toHaveLength(1);
+    return lines[0] ?? '';
+  }
+
+  it.each(Object.keys(SKILL_LAYERS))('%s の review 起動が layer と lang を渡す', (skill) => {
+    // Resolving the spec for one layer and language, then reviewing against
+    // another, compares the generated test to a different input (#1863 F2).
+    const invocation = reviewInvocation(skill);
+    expect(invocation, `${skill} の review 起動に --layer が無い`).toContain('--layer');
+    expect(invocation, `${skill} の review 起動に --lang が無い`).toContain('--lang');
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が --lang を option として宣言している', (skill) => {
+    // Using `$DOC_LANG` without declaring the flag leaves callers no way to set
+    // it, and no stated default when they do not (#1863 F2).
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const declared = body.split('\n').filter((l) => l.startsWith('- `--lang '));
+    expect(declared.length, `${skill} が --lang を宣言していない`).toBe(1);
+    // The same default across skills, not just "some default". Three policies
+    // coexisted (`--input-spec` から自動判定 / Step 0 で AskUserQuestion /
+    // 起動元の値) and a caller could not tell which applied (#1863 Round 2).
+    expect(declared[0], `${skill} の --lang 既定が揃っていない`).toContain(
+      '省略時は起動元が渡した値、 単体起動なら `ja`',
+    );
+    // The option and the step that reads it have to agree. `kiwa-api` and
+    // `kiwa-vitest` declared the unified default while Step 0 still asked with
+    // AskUserQuestion when the flag was absent (#1863 Round 2 retry).
+    const step0 = body.split('\n').filter((l) => l.includes('文書生成言語'));
+    if (step0.length > 0) {
+      const section = body.slice(body.indexOf(step0[0] ?? ''));
+      const head = section.slice(0, section.indexOf('\n### ', 1));
+      expect(head, `${skill} の Step 0 が既定と矛盾する`).not.toContain('AskUserQuestion で');
+    }
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が存在しない option を案内していない', (skill) => {
+    // `/kiwa-test --layer e2e-generic` was written in a 関連 list, but
+    // `kiwa-test` takes no `--layer` (measured: 0 declarations). Pointing at a
+    // flag that does not exist sends the reader to a command that errors.
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const kiwaTest = body.split('\n').filter((l) => l.includes('/kiwa-test'));
+    for (const line of kiwaTest) {
+      expect(line, `${skill} が kiwa-test に --layer を案内している`).not.toMatch(
+        /\/kiwa-test[^`\n]*--layer/,
+      );
+    }
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が layer ID を混在させていない', (skill) => {
+    // `kiwa-e2e` resolved `e2e-generic` while its upstream, review and chain
+    // lines still said `e2e` — a different layer with a different spec dir
+    // (`tests/spec/e2e/` vs `tests/spec/integration/`), measured (#1863 F1).
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const expected = new Set(SKILL_LAYERS[skill] ?? []);
+    const named = [...body.matchAll(/--layer ([a-z][a-z0-9-]*)/g)].map((m) => m[1] ?? '');
+    for (const layer of named) {
+      expect(expected.has(layer), `${skill} が別 layer (${layer}) を指している`).toBe(true);
+    }
+  });
+
   it.each(Object.keys(SKILL_LAYERS))('%s が解決した値を下流 review に渡すと書いている', (skill) => {
     // Reviewing a different spec than the one generated from is the same drift
     // in the other direction (#1862 Round 1, F2).
@@ -281,12 +378,28 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
   });
 
   it.each(Object.keys(SKILL_LAYERS))('%s が扱う layer を block が名指ししている', (skill) => {
-    const body = read(`.claude/skills/${skill}/SKILL.md`);
-    const start = body.indexOf('### 入力 spec の path は CLI から受け取る');
-    expect(start, `${skill} に解決 block が無い`).toBeGreaterThan(-1);
-    const blockBody = body.slice(start, body.indexOf('## 実行フロー', start));
+    const blockBody = resolverBlock(skill);
     for (const layer of SKILL_LAYERS[skill] ?? []) {
       expect(blockBody, `${skill} の block が ${layer} を名指ししていない`).toContain(layer);
+    }
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s の command が別 layer を指していない', (skill) => {
+    // Containment alone passes when the command names a different layer and the
+    // right one appears in prose. Swapping `--layer a11y` for `--layer ui` in
+    // kiwa-a11y went unnoticed that way (measured).
+    const expected = SKILL_LAYERS[skill] ?? [];
+    // Scoped to the command block. The prose names layers too (`kiwa-api`
+    // explains which `/kiwa-design --layer` produced the spec), and a
+    // section-wide scan reads those as the command's own target.
+    const command = [...resolverBlock(skill).matchAll(/```bash\n([\s\S]*?)```/g)]
+      .map((m) => m[1] ?? '')
+      .join('\n');
+    const named = [...command.matchAll(/--layer (\S+)/g)]
+      .map((m) => m[1] ?? '')
+      .filter((l) => !l.startsWith('"')); // `--layer "$LAYER"` は表で解決する形
+    for (const layer of named) {
+      expect(expected, `${skill} の command が ${layer} を指している`).toContain(layer);
     }
   });
 
@@ -319,9 +432,9 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
   });
 
   it('移行済 skill の数が Issue の群と一致する', () => {
-    // A guard against the list drifting: group 1 is three skills plus the two
-    // moved in #1860.
-    expect(MIGRATED).toHaveLength(5);
+    // A guard against the list drifting: two from #1860, three in group 1,
+    // five in group 2.
+    expect(MIGRATED).toHaveLength(10);
   });
 
   it('未移行の skill が残っていることを記録する', () => {
