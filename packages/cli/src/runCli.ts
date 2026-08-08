@@ -9,6 +9,7 @@ import {
   resolveDetections,
   applyLang,
   isValidDocLang,
+  isValidModule,
   resolveLayers,
   scanManifests,
   stackFileExists,
@@ -21,7 +22,7 @@ export const USAGE = `Usage: kiwa <command> [options]
 Commands:
   init [options]                                            Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json
   doctor                                                    Check that anvil is installed
-  layers [--layer L] [--lang C] [--json]                     Print the layers this run applies to
+  layers [--layer L] [--lang C] [--module M] [--json]        Print the layers this run applies to
   anvil seed <script> --out <path>                          Run <script> against a fresh anvil and dump state to <path>
   spec-to-test --in <spec.md> --out <test.ts> [--layer L]   Generate a vitest test file from a Layer 1 spec.md
   run --watch [--layer L]...                                Run vitest in watch mode across one or more layers (default unit + api + ui)
@@ -31,6 +32,8 @@ layers options:
   --layer L                     Use L instead of the detection. Wins outright.
   --lang C                      Resolve spec paths for document language C (ISO 639-1).
                                 en and omitting the flag both give the plain path.
+  --module M                    Substitute M for the {module} placeholder in spec paths.
+                                [a-z0-9-], 1-32 chars. Refused otherwise.
   --json                        Emit one record per layer with its consumer skill,
                                 mode and spec path, plus how the list was chosen.
 
@@ -408,6 +411,7 @@ function valueAfter(args: string[], index: number): string | undefined {
 function layersCommand(args: string[], deps: RunCliDeps): number {
   let explicit: string | undefined;
   let lang: string | undefined;
+  let moduleName: string | undefined;
   let asJson = false;
 
   for (let i = 0; i < args.length; i += 1) {
@@ -432,6 +436,15 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
       i += 1;
     } else if (arg.startsWith('--lang=')) {
       lang = arg.slice('--lang='.length);
+    } else if (arg === '--module') {
+      moduleName = valueAfter(args, i);
+      if (moduleName === undefined) {
+        deps.stderr('ERR layers: --module needs a value\n');
+        return 2;
+      }
+      i += 1;
+    } else if (arg.startsWith('--module=')) {
+      moduleName = arg.slice('--module='.length);
     } else {
       deps.stderr(`ERR layers: unknown option ${arg}\n`);
       return 2;
@@ -458,6 +471,14 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
     return 2;
   }
 
+  // Same reasoning: a module carrying a separator makes the path point outside
+  // the spec directory. Substituting here keeps the guard in one place instead
+  // of in a `sed` copied into every consumer.
+  if (moduleName !== undefined && !isValidModule(moduleName)) {
+    deps.stderr(`ERR layers: --module expects [a-z0-9-] (1-32 chars), got ${moduleName}\n`);
+    return 2;
+  }
+
   let resolved: ReturnType<typeof resolveLayers>;
   try {
     resolved = resolveLayers({ cwd: deps.cwd(), explicit });
@@ -470,7 +491,7 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
   for (const warning of resolved.warnings) deps.stderr(`WARN ${warning}\n`);
 
   if (asJson) {
-    const layers = applyLang(resolved.layers, lang);
+    const layers = applyLang(resolved.layers, lang, moduleName);
     deps.stdout(`${JSON.stringify({ source: resolved.source, layers }, null, 2)}\n`);
     return 0;
   }

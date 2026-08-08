@@ -954,6 +954,50 @@ describe('layers', () => {
     }
   });
 
+  it('substitutes --module into the spec path', async () => {
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(
+        await runCli(['layers', '--layer', 'api', '--lang', 'ja', '--module', 'signup', '--json'], h.deps),
+      ).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: { spec_path: string }[] };
+      expect(parsed.layers[0]?.spec_path).toBe(
+        'tests/spec/integration/test-spec-signup.api.ja.md',
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a --module that is not a module name', async () => {
+    // A separator makes the path point outside the spec directory. Measured
+    // through the `sed` this replaced: `test-spec-../../etc/passwd.ui.md`.
+    const dir = project(detection);
+    try {
+      for (const bad of ['../../etc/passwd', 'a/b', 'Signup', 'sign_up']) {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(['layers', '--module', bad, '--json'], h.deps), `${bad} が通った`).toBe(2);
+        expect(h.err()).toContain('--module expects');
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('leaves the placeholder when --module is omitted', async () => {
+    // The table's own form. A caller that wants the template back has to get it.
+    const dir = project(detection);
+    try {
+      const h = harness({ cwd: () => dir });
+      expect(await runCli(['layers', '--layer', 'api', '--json'], h.deps)).toBe(0);
+      const parsed = JSON.parse(h.out()) as { layers: { spec_path: string }[] };
+      expect(parsed.layers[0]?.spec_path).toContain('{module}');
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('documents --lang in the usage text', async () => {
     // A flag the help does not mention is one a caller has to already know
     // about, which is the state this Issue is fixing.

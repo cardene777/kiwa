@@ -7,12 +7,14 @@ import { describe, expect, it } from 'vitest';
 import {
   applyLang,
   isValidDocLang,
+  isValidModule,
   loadJson,
   loadLayerTable,
   outputMap,
   resolveLayers,
   strList,
   withLangSuffix,
+  withModule,
 } from '../src/detect/layers.js';
 import { signalsFingerprint, type SignalTable } from '../src/detect/detect.js';
 import { loadSignalTable } from '../src/detect/index.js';
@@ -1287,5 +1289,58 @@ describe('lang code の検証', () => {
     // Both are the no-suffix case, and neither builds a path from the value.
     expect(withLangSuffix('tests/spec/x.md', 'en')).toBe('tests/spec/x.md');
     expect(withLangSuffix('tests/spec/x.md', undefined)).toBe('tests/spec/x.md');
+  });
+});
+
+/**
+ * `{module}` used to be substituted by a `sed` inside every consumer skill.
+ * A name carrying a separator turned `test-spec-{module}.ui.md` into
+ * `test-spec-../../etc/passwd.ui.md` (measured), and each copy of the `sed`
+ * would have needed the same guard.
+ */
+describe('module 名の置換', () => {
+  it('placeholder を置き換える', () => {
+    expect(withModule('tests/spec/integration/test-spec-{module}.ui.md', 'signup')).toBe(
+      'tests/spec/integration/test-spec-signup.ui.md',
+    );
+  });
+
+  it('placeholder が複数あっても全部置き換える', () => {
+    expect(withModule('{module}/x/{module}.md', 'a')).toBe('a/x/a.md');
+  });
+
+  it('path を含む名前を拒否する', () => {
+    for (const bad of ['../../etc/passwd', 'a/b', '..', 'a\\b']) {
+      expect(isValidModule(bad), `${bad} が通ってしまう`).toBe(false);
+      expect(() => withModule('test-spec-{module}.md', bad)).toThrow(/invalid module/);
+    }
+  });
+
+  it('大文字と記号を拒否する', () => {
+    // The declaration is `[a-z0-9-]` (`/kiwa-design` § --modules batch 起動規約).
+    for (const bad of ['Signup', 'sign_up', 'sign up', 'sign.up', '', 'a'.repeat(33)]) {
+      expect(isValidModule(bad), `${bad} が通ってしまう`).toBe(false);
+    }
+  });
+
+  it('宣言どおりの名前を受ける', () => {
+    for (const ok of ['signup', 'sign-up', 'a', 'a1', '0', 'a'.repeat(32)]) {
+      expect(isValidModule(ok), `${ok} が拒否された`).toBe(true);
+    }
+  });
+
+  it('applyLang が lang と module の両方を適用する', () => {
+    const [api] = applyLang(TABLE, 'ja', 'signup').filter((l) => l.id === 'api');
+    expect(api?.spec_path).toBe('tests/spec/integration/test-spec-signup.api.ja.md');
+  });
+
+  it('applyLang が module だけでも適用する', () => {
+    // A caller that wants English still needs the placeholder filled.
+    const [api] = applyLang(TABLE, undefined, 'signup').filter((l) => l.id === 'api');
+    expect(api?.spec_path).toBe('tests/spec/integration/test-spec-signup.api.md');
+  });
+
+  it('どちらも無ければ table をそのまま返す', () => {
+    expect(applyLang(TABLE, undefined, undefined)).toEqual(TABLE);
   });
 });

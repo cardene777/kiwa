@@ -32,7 +32,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 ## オプション
 
 - `--module {name}` — spec / test の module 名キー (1 起動 = 1 module)
-- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/integration/test-spec-{module}.nextjs.md`)
+- `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
 - `--output {path}` — 生成 test の path (省略時は `tests/integration/{module}.nextjs.test.ts`)
 
 ### mode 別の生成先
@@ -53,11 +53,69 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 - `--lang {ja|en|<ISO 639-1>}` — 生成 test 内コメント言語 (省略時は `--input-spec` から自動判定)
 - `--no-review` — Step 6 の `/kiwa-review` 自動呼出を skip
 
+### 入力 spec の path は CLI から受け取る
+
+`--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill は 5 mode = 5 layer を扱うので、 **どの mode で起動されたかが layer を決める**。
+
+| mode | layer |
+|---|---|
+| Server Actions | `nextjs-server-action` |
+| middleware | `nextjs-middleware` |
+| RSC | `nextjs-rsc` |
+| Parallel Routes | `nextjs-parallel-route` |
+| RSC streaming | `nextjs-rsc-streaming` |
+
+```bash
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+```
+
+`$LAYER` は起動元 (`/kiwa-app` 等) が指定した mode から決まる。 **単体起動で判らない時は user に確認する**。 推測で 1 つ目を選ぶと、 別 mode の spec を読んで別 helper 向けの test を生成する。
+
+5 mode を順に回す時は `--layer` を省けば全 layer が 1 回で返る。 `.layers[] | select(.id == "...")`
+で必要なものを取り出す。
+
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
+
+`$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
+| 結果 | 扱い |
+|---|---|
+| exit != 0 | stderr をそのまま user に返して中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値を下流に渡す
+
+Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
+
+本 SKILL.md 内の spec path 表記は説明のための例示で、 解決の指示ではない。
+
 ## 実行フロー
 
 ### Step 1: Layer 1 spec の読込 + 9 column 表 parse
 
-`tests/spec/integration/test-spec-{module}.nextjs.md` を Read し、 「テストケース一覧」 section の 9 column 表を行単位で配列に展開する。
+§ 入力 spec の path は CLI から受け取る で解決した path を Read し、 「テストケース一覧」 section の 9 column 表を行単位で配列に展開する。
 
 期待する 9 column (`/kiwa-design --layer nextjs-server-action` の SSOT):
 

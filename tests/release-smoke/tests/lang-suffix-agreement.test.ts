@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -103,17 +103,6 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(specSuffix, `spec path を自前で組む行が残っている:\n${specSuffix.join('\n')}`).toEqual([]);
   });
 
-  it('LANG ではなく DOC_LANG を使うと書いてある', () => {
-    // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
-    // makes the CLI refuse the value. Measured (#1860 Round 1, F1).
-    for (const skill of ['kiwa-app', 'kiwa-review']) {
-      const body = read(`.claude/skills/${skill}/SKILL.md`);
-      expect(body, `${skill} が LANG を使わない旨を書いていない`).toMatch(
-        /`LANG` を使わない/,
-      );
-    }
-  });
-
   it('skill が実際に渡す変数が DOC_LANG である', () => {
     // Asserted on the command, not on the prose beside it. Reverting the
     // command to `${LANG:+--lang "$LANG"}` left the warning in place and every
@@ -128,6 +117,228 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(invocation, '呼出が shell locale の LANG を渡している').not.toMatch(
       /\$\{LANG[:}]|"\$LANG"/,
     );
+  });
+
+  /**
+   * The skills migrated onto the CLI path so far.
+   *
+   * Listed rather than derived, because migration is staged (#1861 moves 20
+   * consumers in four groups) and a derived list would either pass vacuously
+   * before the work or fail for skills nobody has reached yet.
+   *
+   * A skill is added here when its group lands. What the check itself asserts
+   * is derived from the file, so adding a name is the only edit needed.
+   */
+  const MIGRATED = ['kiwa-app', 'kiwa-review', 'kiwa-nextjs', 'kiwa-api', 'kiwa-ui'];
+
+  it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
+    // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
+    // makes the CLI refuse the value. Measured (#1860 Round 1, F1).
+    //
+    // Applied to every migrated skill, not to the two moved first. Naming them
+    // meant a skill migrated later could drop the warning and nothing noticed.
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    expect(body, `${skill} が LANG を使わない旨を書いていない`).toMatch(/`LANG` を使わない/);
+  });
+
+  it.each(MIGRATED)('%s が CLI から spec path を受け取る', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    // Asserted on the command, not on prose about the rule. `kiwa-review` had
+    // a note next to a `LANG_SUFFIX` block that was still the real instruction.
+    const invocation = body
+      .split('\n')
+      .filter((line) => line.includes('kiwa layers --json'))
+      .join('\n');
+    expect(invocation, `${skill} が kiwa layers を呼んでいない`).toContain('--lang');
+  });
+
+  /**
+   * The layers each migrated Layer 2 skill resolves for.
+   *
+   * The CLI call needs a `--layer`, and none of these skills take one as an
+   * argument — the layer follows from which mode the skill was invoked in. A
+   * block that says `--layer "$LAYER"` without saying where `$LAYER` comes
+   * from is not runnable (#1862 Round 1 asked, and it was not there).
+   */
+  const SKILL_LAYERS: Record<string, string[]> = {
+    'kiwa-nextjs': [
+      'nextjs-server-action',
+      'nextjs-middleware',
+      'nextjs-rsc',
+      'nextjs-parallel-route',
+      'nextjs-rsc-streaming',
+    ],
+    'kiwa-api': ['integration', 'api'],
+    'kiwa-ui': ['ui'],
+  };
+
+  /** The resolution block of a migrated Layer 2 skill. */
+  function resolverBlock(skill: string): string {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const start = body.indexOf('### 入力 spec の path は CLI から受け取る');
+    expect(start, `${skill} に解決 block が無い`).toBeGreaterThan(-1);
+    return body.slice(start, body.indexOf('## 実行フロー', start));
+  }
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が sed で module を置換しない', (skill) => {
+    // The `sed` was the traversal: a module carrying a separator turned
+    // `test-spec-{module}.ui.md` into `test-spec-../../etc/passwd.ui.md`
+    // (measured). Substitution moved into the CLI, which validates the name.
+    // Asserted on the command, not on the section. The prose explaining why the
+    // `sed` was removed contains the word, so a section-wide check fails on the
+    // explanation rather than on a real leftover.
+    const command = [...resolverBlock(skill).matchAll(/```bash\n([\s\S]*?)```/g)]
+      .map((m) => m[1] ?? '')
+      .join('\n');
+    expect(command, `${skill} に解決 command が無い`).toContain('kiwa layers');
+    expect(command, `${skill} の command が sed を残している`).not.toContain('sed');
+    expect(command, `${skill} の command が --module を渡していない`).toContain('--module');
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が解決失敗で止まると書いている', (skill) => {
+    // Swallowing the failure means reading an empty path and reporting "no
+    // spec", which hides the real cause (wrong layer / bad module / no CLI).
+    // Asserted on the decision table, not on the section. The prose above it and
+    // the table below say the same words, so either check alone stayed green
+    // when the instruction itself was replaced.
+    // Scoped to the table's own subsection. The mode-to-layer table above it
+    // also has rows mentioning layer ids, and counting both made the check
+    // depend on how many modes a skill happens to have.
+    const blockBody = resolverBlock(skill);
+    const tableStart = blockBody.indexOf('#### 解決に失敗したら止める');
+    expect(tableStart, `${skill} に失敗時の節が無い`).toBeGreaterThan(-1);
+    const tableEnd = blockBody.indexOf('####', tableStart + 1);
+    const rows = blockBody
+      .slice(tableStart, tableEnd === -1 ? undefined : tableEnd)
+      .split('\n')
+      .filter((line) => line.startsWith('|') && !line.startsWith('|---'))
+      .slice(1); // header を除く
+    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(8);
+    expect(
+      rows.filter((r) => r.includes('中断')).length,
+      `${skill} の判定表に中断の行が足りない`,
+    ).toBe(7);
+    // Parsing is not validating. A partially broken response parses fine and
+    // then produces a path built from whatever happened to be there.
+    const table = rows.join('\n');
+    for (const shape of ['配列でない', '2 件以上', '{module}']) {
+      expect(table, `${skill} の判定表に「${shape}」 の行が無い`).toContain(shape);
+    }
+    // `null` alone lets an empty string or a number through. The row has to
+    // say what a usable value looks like, not just one way of missing.
+    expect(table, `${skill} が spec_path の型を見ていない`).toMatch(/文字列でない、 または空/);
+    // The distinction is the point of the whole table: parsing succeeds on a
+    // partially broken response, and the rows below only matter if the reader
+    // knows that.
+    expect(blockBody, `${skill} が「読める」 と「形をしている」 を分けていない`).toMatch(
+      /parse できることは/,
+    );
+    // Counting rows would call the 30-layer form abnormal. The block also tells
+    // callers to resolve all five modes in one call, so the two would contradict.
+    expect(blockBody, `${skill} が件数で判定している`).toMatch(/件数ではなく/);
+    expect(blockBody, `${skill} に絞り込みの手順が無い`).toContain('select(.id ==');
+  });
+
+  it('3 skill の判定表が同一である', () => {
+    // The table is the same contract in three places. Measured identical by
+    // hash today, but nothing kept it that way — a fix applied to one would
+    // leave the other two behind, which is the drift this whole Issue is about.
+    const tables = Object.keys(SKILL_LAYERS).map((skill) => {
+      const blockBody = resolverBlock(skill);
+      const start = blockBody.indexOf('#### 解決に失敗したら止める');
+      const end = blockBody.indexOf('####', start + 1);
+      return blockBody
+        .slice(start, end === -1 ? undefined : end)
+        .split('\n')
+        .filter((line) => line.startsWith('|'))
+        .join('\n');
+    });
+    for (const table of tables.slice(1)) {
+      expect(table, '判定表が skill ごとに違う').toBe(tables[0]);
+    }
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が曖昧な時に推測しないと書いている', (skill) => {
+    // None of these skills take `--layer`, so the layer follows from the mode.
+    // Guessing picks a different spec and generates tests for another helper.
+    if ((SKILL_LAYERS[skill] ?? []).length < 2) return; // 単一 layer なら曖昧さが無い
+    // Asserted on the sentence that gives the instruction. `推測` also appears
+    // in the note about `$MODULE`, so matching the word anywhere in the block
+    // stayed green when the instruction was deleted.
+    const instruction = resolverBlock(skill)
+      .split('\n')
+      .filter((line) => line.includes('user に確認'));
+    expect(instruction.join('\n'), `${skill} に user 確認の指示が無い`).toMatch(
+      /判らない時|判らなければ/,
+    );
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が解決した値を下流 review に渡すと書いている', (skill) => {
+    // Reviewing a different spec than the one generated from is the same drift
+    // in the other direction (#1862 Round 1, F2).
+    const blockBody = resolverBlock(skill);
+    expect(blockBody, `${skill} に下流伝播の指示が無い`).toContain('kiwa-review');
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が扱う layer を block が名指ししている', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const start = body.indexOf('### 入力 spec の path は CLI から受け取る');
+    expect(start, `${skill} に解決 block が無い`).toBeGreaterThan(-1);
+    const blockBody = body.slice(start, body.indexOf('## 実行フロー', start));
+    for (const layer of SKILL_LAYERS[skill] ?? []) {
+      expect(blockBody, `${skill} の block が ${layer} を名指ししていない`).toContain(layer);
+    }
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が名指しする layer が実在する', (skill) => {
+    // A layer the table does not declare would make `kiwa layers --layer` exit
+    // 2, so the block would be unrunnable in a way no wording check sees.
+    const declared = new Set(LAYERS.layers.map((l) => l.id));
+    for (const layer of SKILL_LAYERS[skill] ?? []) {
+      expect(declared.has(layer), `${layer} が docs/layers.json に無い`).toBe(true);
+    }
+  });
+
+  it.each(MIGRATED)('%s が spec path の LANG_SUFFIX を自前で組まない', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    // The report path (`tests/reports/`) builds its own suffix and is outside
+    // what `kiwa layers` resolves, so only the spec path is checked.
+    const offenders = body
+      .split('\n')
+      .filter((line) => line.includes('LANG_SUFFIX') && line.includes('test-spec'));
+    expect(offenders, `自前で組む行が残っている:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it.each(MIGRATED)('%s の --input-spec 既定が固定 path でない', (skill) => {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const option = body.split('\n').find((line) => line.includes('`--input-spec'));
+    if (option === undefined) return; // 入口 skill と review は --input-spec を持たない
+    // A hardcoded default is the English path, so `--lang ja` silently points
+    // at a file the producer did not write (#1855).
+    expect(option, `${skill} の既定が固定 path`).not.toMatch(/省略時は `tests\/spec/);
+  });
+
+  it('移行済 skill の数が Issue の群と一致する', () => {
+    // A guard against the list drifting: group 1 is three skills plus the two
+    // moved in #1860.
+    expect(MIGRATED).toHaveLength(5);
+  });
+
+  it('未移行の skill が残っていることを記録する', () => {
+    // Not a failure — the migration is staged. Asserted so the count moving to
+    // zero is visible rather than something to notice by hand.
+    const skills = readdirSync(resolve(REPO_ROOT, '.claude/skills'));
+    const remaining = skills.filter((name) => {
+      if (MIGRATED.includes(name) || name === 'kiwa-design') return false;
+      try {
+        const body = read(`.claude/skills/${name}/SKILL.md`);
+        return /省略時は `tests\/spec/.test(body);
+      } catch {
+        return false;
+      }
+    });
+    // #1861 群 2-4. Recorded, not required to be empty.
+    expect(remaining.length, `未移行: ${remaining.join(', ')}`).toBeLessThanOrEqual(20);
   });
 
   it('入口 skill が --lang を CLI に渡す', () => {
