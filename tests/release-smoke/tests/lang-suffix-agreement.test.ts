@@ -239,6 +239,25 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(blockBody, `${skill} に絞り込みの手順が無い`).toContain('select(.id ==');
   });
 
+  it('3 skill の判定表が同一である', () => {
+    // The table is the same contract in three places. Measured identical by
+    // hash today, but nothing kept it that way — a fix applied to one would
+    // leave the other two behind, which is the drift this whole Issue is about.
+    const tables = Object.keys(SKILL_LAYERS).map((skill) => {
+      const blockBody = resolverBlock(skill);
+      const start = blockBody.indexOf('#### 解決に失敗したら止める');
+      const end = blockBody.indexOf('####', start + 1);
+      return blockBody
+        .slice(start, end === -1 ? undefined : end)
+        .split('\n')
+        .filter((line) => line.startsWith('|'))
+        .join('\n');
+    });
+    for (const table of tables.slice(1)) {
+      expect(table, '判定表が skill ごとに違う').toBe(tables[0]);
+    }
+  });
+
   it.each(Object.keys(SKILL_LAYERS))('%s が曖昧な時に推測しないと書いている', (skill) => {
     // None of these skills take `--layer`, so the layer follows from the mode.
     // Guessing picks a different spec and generates tests for another helper.
