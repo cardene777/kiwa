@@ -334,6 +334,15 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(declared[0], `${skill} の --lang 既定が揃っていない`).toContain(
       '省略時は起動元が渡した値、 単体起動なら `ja`',
     );
+    // The option and the step that reads it have to agree. `kiwa-api` and
+    // `kiwa-vitest` declared the unified default while Step 0 still asked with
+    // AskUserQuestion when the flag was absent (#1863 Round 2 retry).
+    const step0 = body.split('\n').filter((l) => l.includes('文書生成言語'));
+    if (step0.length > 0) {
+      const section = body.slice(body.indexOf(step0[0] ?? ''));
+      const head = section.slice(0, section.indexOf('\n### ', 1));
+      expect(head, `${skill} の Step 0 が既定と矛盾する`).not.toContain('AskUserQuestion で');
+    }
   });
 
   it.each(Object.keys(SKILL_LAYERS))('%s が存在しない option を案内していない', (skill) => {

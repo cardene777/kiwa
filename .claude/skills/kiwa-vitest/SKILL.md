@@ -98,10 +98,13 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 5 段階を順に通る。 各 step は対応する section を上記 path に append する。 飛ばし / 順序入れ替えは禁止。
 
-### Step 0: 文書生成言語の選択 (skill 起動時 1 回)
+### Step 0: 文書生成言語の決定 (skill 起動時 1 回)
 
-AskUserQuestion で coverage report の生成言語を user に確認する。 `--lang {code}` 引数指定時は skip。
-詳細は `references/doc-language-selection.md` (kiwa-{forge,hardhat,play} 共用 SSOT)。 lang suffix 規約は Issue #341 SSOT (`/kiwa-design` § lang suffix 規約 と整合) ... en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。
+`--lang` が渡っていればそれを使う。 渡っていなければ **起動元が渡した値、 単体起動なら `ja`** を既定にする (option 宣言と同じ規則)。
+
+`/kiwa-app` や `/kiwa-test` から起動される経路では常に値が渡るため、 尋ねる契機は単体起動に限られる。 その場合も既定があるので **AskUserQuestion は出さない** = 既定が決まっている問いを毎回聞くと chain が止まる。
+
+`ja` / `en` 以外を使いたい時だけ `--lang {code}` で明示する。 受理値は ISO 639-1 (2 文字の小文字) で、 CLI が検証する。
 
 ### Step 1: Layer 1 spec 読込
 
