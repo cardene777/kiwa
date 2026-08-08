@@ -292,6 +292,52 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     );
   });
 
+  /**
+   * The line that actually starts `/kiwa-review`, not prose that mentions it.
+   *
+   * Identified by carrying `--mode` or `--layer`: the prose in `kiwa-nextjs`
+   * says "Step 6 の `/kiwa-review --mode test-review` は..." while explaining
+   * the cover rate, and picking the first mention read that as the invocation.
+   */
+  function reviewInvocation(skill: string): string {
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const lines = body
+      .split('\n')
+      .filter((l) => /`\/kiwa-review[^`]*--(?:mode|layer)/.test(l))
+      .filter((l) => !l.includes('同じ layer'));
+    expect(lines.length, `${skill} の review 起動行が見つからない`).toBeGreaterThan(0);
+    return lines.join('\n');
+  }
+
+  it.each(Object.keys(SKILL_LAYERS))('%s の review 起動が layer と lang を渡す', (skill) => {
+    // Resolving the spec for one layer and language, then reviewing against
+    // another, compares the generated test to a different input (#1863 F2).
+    const invocation = reviewInvocation(skill);
+    expect(invocation, `${skill} の review 起動に --layer が無い`).toContain('--layer');
+    expect(invocation, `${skill} の review 起動に --lang が無い`).toContain('--lang');
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が --lang を option として宣言している', (skill) => {
+    // Using `$DOC_LANG` without declaring the flag leaves callers no way to set
+    // it, and no stated default when they do not (#1863 F2).
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const declared = body.split('\n').filter((l) => l.startsWith('- `--lang '));
+    expect(declared.length, `${skill} が --lang を宣言していない`).toBe(1);
+    expect(declared[0], `${skill} の --lang に既定が書かれていない`).toMatch(/省略時/);
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が layer ID を混在させていない', (skill) => {
+    // `kiwa-e2e` resolved `e2e-generic` while its upstream, review and chain
+    // lines still said `e2e` — a different layer with a different spec dir
+    // (`tests/spec/e2e/` vs `tests/spec/integration/`), measured (#1863 F1).
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const expected = new Set(SKILL_LAYERS[skill] ?? []);
+    const named = [...body.matchAll(/--layer ([a-z][a-z0-9-]*)/g)].map((m) => m[1] ?? '');
+    for (const layer of named) {
+      expect(expected.has(layer), `${skill} が別 layer (${layer}) を指している`).toBe(true);
+    }
+  });
+
   it.each(Object.keys(SKILL_LAYERS))('%s が解決した値を下流 review に渡すと書いている', (skill) => {
     // Reviewing a different spec than the one generated from is the same drift
     // in the other direction (#1862 Round 1, F2).

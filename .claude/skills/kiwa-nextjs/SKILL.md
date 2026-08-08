@@ -478,7 +478,7 @@ describe('signup server action', () => {
 
 ### Step 6: kiwa-review 自動呼出
 
-`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer <起動時の layer> --module {module} --test-path <解決した出力先>` を起動して 11 観点の cover 率を判定する。 5 mode それぞれ別の layer / 別の生成先なので、 `nextjs-server-action` に固定すると他 4 mode の review が別 layer の spec と突き合わされる。
+`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer <起動時の layer> --module {module} --test-path <解決した出力先> --lang $DOC_LANG` を起動して 11 観点の cover 率を判定する。 5 mode それぞれ別の layer / 別の生成先なので、 `nextjs-server-action` に固定すると他 4 mode の review が別 layer の spec と突き合わされる。
 
 ## 11 観点 → invokeServerAction mapping
 

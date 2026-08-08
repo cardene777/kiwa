@@ -35,6 +35,7 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致)
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
+- `--lang {ja|en|<ISO 639-1>}` — spec / 生成物の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--target {path}` — 対象 component / page file
 - `--mode {jsdom|playwright}` — 実行経路 (default jsdom、 動的 a11y 確認なら playwright)
 - `--wcag-level {A|AA|AAA}` — WCAG レベル (default AA)
@@ -167,7 +168,7 @@ violations 発生時は `reportViolations(results)` で詳細 markdown report �
 
 ### Step 6: kiwa-review 自動呼出 (option)
 
-`--no-review` 指定がなければ `/kiwa-review --layer a11y --module {module}` を起動して 11 観点の網羅性を判定する。
+`--no-review` 指定がなければ `/kiwa-review --layer a11y --module {module} --lang $DOC_LANG` を起動して 11 観点の網羅性を判定する。
 
 ## Gotchas
 

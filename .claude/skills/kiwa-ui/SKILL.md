@@ -38,6 +38,7 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致)
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
+- `--lang {ja|en|<ISO 639-1>}` — spec / 生成物の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--target {path}` — 対象 component file (`src/components/*.tsx` 等、 grep で識別)
 - `--no-review` — Step 5 の kiwa-review 自動呼出を skip
 
@@ -146,7 +147,7 @@ afterEach(async () => {
 
 ### Step 5: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer ui --test-path tests/{module}.test.tsx` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。
+`/kiwa-review --mode test-review --module {module} --layer ui --test-path tests/{module}.test.tsx --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。
 
 ## 実装例 (実 PoC `examples/react-component-poc/`)
 

@@ -3,7 +3,8 @@ name: kiwa-e2e
 description: |
   Layer 1 spec (`tests/spec/integration/test-spec-{module}.e2e.md`) を汎用 browser E2E test (Playwright + @kiwa-lab/e2e) に変換する Layer 2 E2E test skill。
   dApp E2E (kiwa-play) と区別される非 web3 文脈の汎用 browser e2e (static html / fetch app / SSR app) を担当する。
-  `/kiwa-design --layer e2e` が出力する 9 column 表を `@kiwa-lab/e2e` の `setupE2eEnv` の引数に機械的に変換する。
+  layer ID は `e2e-generic`。 `e2e` は kiwa-play が消費する別 layer で、 spec dir も違う (`tests/spec/e2e/`)。
+  `/kiwa-design --layer e2e-generic` が出力する 9 column 表を `@kiwa-lab/e2e` の `setupE2eEnv` の引数に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -24,7 +25,7 @@ trust boundary 違反検出時は spec 末尾「不足している仕様」 に 
 
 ## 前提
 
-- Layer 1 spec (`tests/spec/integration/test-spec-{module}.e2e.md`) が存在 (`/kiwa-design --layer e2e` で生成)
+- Layer 1 spec (`tests/spec/integration/test-spec-{module}.e2e.md`) が存在 (`/kiwa-design --layer e2e-generic` で生成)
 - 対象 example に `package.json` があり、 `@playwright/test` + `@kiwa-lab/e2e` + `@kiwa-lab/core` が devDependencies で利用可能 (未インストールなら install を強制)
 - 対象 fetch handler / SSR app / static HTML directory が存在
 - 出力先 `tests/e2e/{module}.spec.ts` への Write 権限
@@ -38,6 +39,7 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名 (Layer 1 spec の file 名と一致)
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
+- `--lang {ja|en|<ISO 639-1>}` — spec / 生成物の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--target {path}` — 対象 app file (fetch handler / SSR entry / static HTML directory、 grep で識別)
 - `--mode {static|fetch|node|ssr}` — `setupE2eEnv` の Mode (省略時は spec の Mode column から自動判定)
 - `--browser {chromium|firefox|webkit}` — Playwright browser (default chromium)
@@ -162,7 +164,7 @@ pnpm exec playwright test {module}.spec.ts --reporter=list,json:test-results.jso
 
 ### Step 6: kiwa-review 自動呼出 (option)
 
-`--no-review` 指定がなければ `/kiwa-review --layer e2e --module {module}` を自動起動して 11 観点の網羅性を判定する。
+`--no-review` 指定がなければ `/kiwa-review --layer e2e-generic --module {module} --lang $DOC_LANG` を自動起動して 11 観点の網羅性を判定する。
 網羅率 < 100% (11 観点中 11 達成しない) なら patch suggestion を spec 末尾に追記する。
 
 ## Gotchas
@@ -188,7 +190,7 @@ pnpm exec playwright test {module}.spec.ts --reporter=list,json:test-results.jso
 
 ## 関連 skill
 
-- `/kiwa-design --layer e2e` ... 本 skill の上流 (Layer 1 spec 生成)
+- `/kiwa-design --layer e2e-generic` ... 本 skill の上流 (Layer 1 spec 生成)
 - `/kiwa-play` ... dApp E2E (wallet / anvil 経路) 専用、 本 skill とは domain 分離
-- `/kiwa-review --layer e2e` ... 本 skill 完了後の review
-- `/kiwa-test --layer e2e` ... 本 skill を含む統合 chain
+- `/kiwa-review --layer e2e-generic` ... 本 skill 完了後の review
+- `/kiwa-test --layer e2e-generic` ... 本 skill を含む統合 chain

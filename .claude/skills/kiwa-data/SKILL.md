@@ -33,6 +33,7 @@ $ARGUMENTS
 
 - `--module {name}` — 対象 module 名
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
+- `--lang {ja|en|<ISO 639-1>}` — spec / 生成物の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--output {path}` — 生成 test の path (省略時は `tests/{module}.data.test.ts`)。 以降の step と早見表が示す**生成 test の** path はこの既定値で、 `--output` を渡した場合はそちらが優先される。 coverage report 等の他の出力先は `--output` の対象外
 - `--no-review` — kiwa-review 自動呼出を skip
 
@@ -129,7 +130,7 @@ await expectAtLeastOnce(env.client, body, 3, expect);
 
 ### Step 4: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer data --test-path <解決した出力先>` を内部呼出し、 5 軸判定。 `--test-path` には生成した path をそのまま渡す (既定は `tests/{module}.data.test.ts`)。
+`/kiwa-review --mode test-review --module {module} --layer data --test-path <解決した出力先> --lang $DOC_LANG` を内部呼出し、 5 軸判定。 `--test-path` には生成した path をそのまま渡す (既定は `tests/{module}.data.test.ts`)。
 
 ## 実装例 (実 PoC `examples/queue-poc/`)
 
