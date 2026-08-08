@@ -7,7 +7,7 @@ Auto-generated API documentation for every language kiwa ships:
 
 ## Regeneration
 
-The three generators are wired into a single local skill:
+The two generators are wired into a single local skill:
 
 ```bash
 claude /docs-generate

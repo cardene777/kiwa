@@ -487,10 +487,11 @@ describe('absence is established by looking', () => {
     );
     withFixture(root, () => {
       const resolved = resolveLayers({ cwd: root });
-      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(
-        TABLE.filter((l) => l.runtime === 'solidity').length,
-      );
-      expect(resolved.warnings.join('\n')).not.toMatch(/excluded rust/);
+      // 対象集合が空だと空同士の比較になり、 実装がどう振る舞っても通る。
+      const solidityLayers = TABLE.filter((l) => l.runtime === 'solidity').length;
+      expect(solidityLayers).toBeGreaterThan(0);
+      expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(solidityLayers);
+      expect(resolved.warnings.join('\n')).not.toMatch(/excluded solidity/);
     });
   });
 

@@ -24,7 +24,7 @@ remapping も無いため **`forge test` は現状 import 解決に失敗する*
 もとは Rust 側の adapter が `forge` を CLI として起動し、 依存の解決もそちら側で完結していた。
 #1864 でその駆動を削除した結果、 Solidity test を走らせる経路が無くなっている。
 
-動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 別 Issue で扱う。
+動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 #1868 で扱う。
 
 ```bash
 # 依存を入れた後であればこの形で走る
