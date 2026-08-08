@@ -257,18 +257,60 @@ export function withLangSuffix(path: string, lang: DocLang): string {
 }
 
 /**
+ * A module name, as `/kiwa-design --module` accepts it.
+ *
+ * `[a-z0-9-]+`, 1-32 characters. The declaration lives in `/kiwa-design`
+ * § --modules batch 起動規約; this is the same rule in the one place that
+ * builds the path from it.
+ *
+ * Substituted here rather than by a `sed` in each skill. A module carrying a
+ * separator turned `test-spec-{module}.ui.md` into
+ * `test-spec-../../etc/passwd.ui.md` (measured), and every skill that copied
+ * the `sed` would have needed the same guard.
+ */
+const MODULE_PATTERN = /^[a-z0-9-]{1,32}$/;
+
+/** Whether a name may be substituted into a spec path. */
+export function isValidModule(module: string): boolean {
+  return MODULE_PATTERN.test(module);
+}
+
+/**
+ * Put a module name into the `{module}` placeholder.
+ *
+ * Refused rather than escaped. A name that is not a name means the caller
+ * passed something it did not mean to, and a path built from it points
+ * somewhere nobody wrote.
+ */
+export function withModule(path: string, module: string): string {
+  if (!isValidModule(module)) {
+    throw new Error(
+      `invalid module name: ${JSON.stringify(module)} (expected [a-z0-9-], 1-32 chars)`,
+    );
+  }
+  return path.split('{module}').join(module);
+}
+
+/**
  * The same layers with their spec paths resolved for a document language.
  *
  * Only `spec_path` moves. `spec_dir` is a directory, and `test_outputs` are
  * generated tests whose paths do not carry the language (`--lang` sets the
  * comment language there, not the file name).
  */
-export function applyLang(layers: LayerRecord[], lang: DocLang): LayerRecord[] {
-  if (lang === undefined || lang === '' || lang === 'en') return layers;
-  return layers.map((layer) => ({
-    ...layer,
-    spec_path: layer.spec_path === null ? null : withLangSuffix(layer.spec_path, lang),
-  }));
+export function applyLang(
+  layers: LayerRecord[],
+  lang: DocLang,
+  module?: string,
+): LayerRecord[] {
+  const needsLang = !(lang === undefined || lang === '' || lang === 'en');
+  if (!needsLang && module === undefined) return layers;
+  return layers.map((layer) => {
+    if (layer.spec_path === null) return layer;
+    let path = needsLang ? withLangSuffix(layer.spec_path, lang) : layer.spec_path;
+    if (module !== undefined) path = withModule(path, module);
+    return { ...layer, spec_path: path };
+  });
 }
 
 /**

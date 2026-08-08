@@ -124,9 +124,11 @@ export { detectFrom, resolve as resolveDetections } from './detect.js';
 export {
   applyLang,
   isValidDocLang,
+  isValidModule,
   loadLayerTable,
   resolveLayers,
   withLangSuffix,
+  withModule,
   type DocLang,
   type LayerRecord,
   type ResolvedLayers,

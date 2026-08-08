@@ -49,17 +49,34 @@ $ARGUMENTS
 
 ### 入力 spec の path は CLI から受け取る
 
-`--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。
+`--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill が扱う layer は `ui` の 1 つ。
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" \
-  | jq -r '.layers[0].spec_path' \
-  | sed "s/{module}/$MODULE/"
+kiwa layers --json --layer ui --lang "$DOC_LANG" --module "$MODULE"
 ```
 
-返る `spec_path` は言語込みで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix`)。 en と省略は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}` で、 layer suffix とは直交して言語が常に末尾に来る。
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
 
-`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
+
+`$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+| 結果 | 扱い |
+|---|---|
+| exit 0 かつ `layers` が 1 件 | その `spec_path` を使う |
+| exit != 0 | stderr をそのまま user に返して中断 |
+| exit 0 だが `layers` が 0 件 | layer 名が誤り。 中断 |
+| `spec_path` が `null` | その layer は spec を持たない。 中断 |
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値を下流に渡す
+
+Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
 
 自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
 
