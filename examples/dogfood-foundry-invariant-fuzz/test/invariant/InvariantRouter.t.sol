@@ -139,4 +139,21 @@ contract InvariantRouter is Test {
             "swaps were recorded but the router released no token C"
         );
     }
+
+    /// @notice The campaign has to have swapped at least once.
+    ///
+    ///         Every invariant above, including the one right before this,
+    ///         holds when no swap ever succeeded — the reserves stay seeded and
+    ///         `swapsExecuted` stays 0, which sends that one down its early
+    ///         return. A `swap` that always reverts therefore passes the whole
+    ///         suite (measured), and the handler swallows the revert by design
+    ///         because dust reverts are a legitimate transition.
+    ///
+    ///         Invariant functions cannot make this assertion: they run after
+    ///         the first call too, when nothing has succeeded yet and zero is
+    ///         correct. `afterInvariant` runs once at the end of the campaign,
+    ///         which is the only point where "nothing ever worked" is knowable.
+    function afterInvariant() public view {
+        assertGt(handler.swapsExecuted(), 0, "no swap succeeded in the whole campaign");
+    }
 }

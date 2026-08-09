@@ -143,4 +143,19 @@ contract InvariantVault is Test {
             "totalAssets + withdrawn != deposited"
         );
     }
+
+    /// @notice The campaign has to have deposited at least once.
+    ///
+    ///         The identity above holds at `0 == 0` when nothing ever
+    ///         succeeded, so a `deposit` that always reverts passes it and
+    ///         every other invariant here. The handler swallows the revert by
+    ///         design, because dust reverts are a legitimate transition and it
+    ///         cannot tell them from a total regression.
+    ///
+    ///         Invariant functions cannot make this assertion: they run after
+    ///         the first call too, when nothing has succeeded yet and zero is
+    ///         correct. `afterInvariant` runs once at the end of the campaign.
+    function afterInvariant() public view {
+        assertGt(handler.totalDeposited(), 0, "no deposit succeeded in the whole campaign");
+    }
 }
