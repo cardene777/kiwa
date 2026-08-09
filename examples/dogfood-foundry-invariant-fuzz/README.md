@@ -58,5 +58,21 @@ run 数と seed は `foundry.toml` が決める。 seed を固定しているの
 FOUNDRY_INVARIANT_RUNS=10000 forge test --root examples/dogfood-foundry-invariant-fuzz
 ```
 
+## 失敗した後の再実行
+
+invariant が破れると Foundry は counter-example を `cache/invariant/failures/` に残し、
+**以降の実行はそれを replay する**。 探索をやり直さないので、 実装を直しても
+`replay failure` と出続ける。
+
+```bash
+# 直した後に fresh campaign へ戻す
+find cache/invariant/failures -type f -delete
+```
+
+`forge clean --root examples/dogfood-foundry-invariant-fuzz` では消えない。
+`failure_persist_dir` が `--root` ではなく実行時の working directory を基準に
+解決されるため、 repo root から走らせた分は repo root の `cache/` に落ちる
+(root の `.gitignore` が `/cache/` で除外している)。
+
 10_000 run は v1.18-3 の release gate が使っていた値で、 当時は Rust 側の harness が
 env で渡していた。 #1864 でその harness を消したため、 既定は `foundry.toml` の 256 になる。
