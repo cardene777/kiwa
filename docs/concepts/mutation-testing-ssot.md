@@ -173,9 +173,12 @@ The v1.27 milestone applied the tier gate to every kiwa package.
 | Layer | Packages |
 |---|---|
 | Core (6) | `@kiwa-lab/core` / `api` / `data` / `cli-test` / `cli` / `observability` |
-| Framework | `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `hono` / `auth` |
+| Framework (12) | `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth` |
 | SaaS (11) | `@kiwa-lab/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp` |
 | Test type (5) | `@kiwa-lab/ui` / `a11y` / `visual` / `component` / `e2e` |
+
+The table records the set as it stood at v1.27, not the current inventory.
+`@kiwa-lab/solidjs` and `@kiwa-lab/fresh` were removed later in #1865; the current set lives in the `PACKAGE_TIER` map in `scripts/check-mutation-gates.mjs`.
 
 Every package writes a per-package baseline JSON to `.mutation-baseline/{package}.json`, runs Stryker on every `pnpm test:mutation` invocation, and gates on the tier floor via `assertMutationTier` (in package tests) or `evaluateReleaseGate({ mutationTier })` (at release time). The `PACKAGE_TIER` map in `scripts/check-mutation-gates.mjs` is the runtime SSOT for the tier assignment; the doc table above is the human-readable SSOT.
 

@@ -54,7 +54,7 @@ export default {
 
 Three things to notice.
 
-- The `runOnly.type: 'tag'` filter is the same across every package — `wcag2a` + `wcag2aa` + `wcag21a` + `wcag21aa`. Best-practice rules (`best-practice` tag) are excluded because they surface style suggestions, not conformance failures.
+- The `runOnly.type: 'tag'` filter is the same across every package in the a11y sweep — `wcag2a` + `wcag2aa` + `wcag21a` + `wcag21aa`. Best-practice rules (`best-practice` tag) are excluded because they surface style suggestions, not conformance failures.
 - `thresholds` mirrors the SSOT table for the chosen tier verbatim. Serious / moderate ceilings use the `{ max: N }` shape when the tier allows a non-zero cap; `critical` is always the literal `0`.
 - `baselinePath` is the persisted-report location the runner writes on every invocation. `.a11y-baseline/{package}.json` is the convention; the package name in the path lets a single monorepo-wide sweep resolve overwrites without collisions.
 

@@ -250,9 +250,12 @@ The v1.30 milestone applied the tier gate to every kiwa package. Package tiers a
 | Layer | Packages |
 |---|---|
 | Core (9) | `@kiwa-lab/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants` |
-| Framework | `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `hono` / `auth` |
+| Framework (12) | `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth` |
 | SaaS (11) | `@kiwa-lab/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp` |
 | Test type (5) | `@kiwa-lab/ui` / `a11y` / `visual` / `component` / `e2e` |
+
+The table records the set as it stood at v1.30, not the current inventory.
+`@kiwa-lab/solidjs` and `@kiwa-lab/fresh` were removed later in #1865; the current set lives in § Tier assignment of `docs/quality/a11y-thresholds.md` and in the `A11Y_PACKAGE_TIER` map.
 
 Every package writes a per-package baseline JSON to `.a11y-baseline/{package}.json`, runs the 3-layer harness on every `pnpm test:a11y` invocation, and gates on the tier ceiling via `assertA11yTier` (in package tests) or `evaluateReleaseGate({ a11yTier })` (at release time). The `A11Y_PACKAGE_TIER` map in `scripts/check-a11y-gates.mjs` is the runtime SSOT for the tier assignment; the doc table above is the human-readable SSOT.
 
