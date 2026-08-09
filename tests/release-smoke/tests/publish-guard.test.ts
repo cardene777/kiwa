@@ -64,10 +64,10 @@ describe('publish guard against unresolved workspace: ranges', () => {
     // so pin the shape of the workspace we are actually protecting.
     //
     // 下限は実 package 数に追随させる。 #1785 で 46 -> 31 package になり、 #1803 で
-    // 31 -> 28 (visual / solidstart 削除 + kaname archive) になった。 そのうち
-    // workspace: 依存を持つのは 24 件。 据え置くと、 守る対象が減ったこと自体を
-    // 「guard が壊れた」 と報告してしまう。
-    expect(packagesWithWorkspaceDeps().length).toBeGreaterThanOrEqual(24);
+    // 31 -> 28 (visual / solidstart 削除 + kaname archive)、 #1865 で 28 -> 26
+    // (fresh / solidjs 削除) になった。 そのうち workspace: 依存を持つのは 22 件。
+    // 据え置くと、 守る対象が減ったこと自体を「guard が壊れた」 と報告してしまう。
+    expect(packagesWithWorkspaceDeps().length).toBeGreaterThanOrEqual(22);
   });
 
   it('the guard rejects a non-pnpm user agent', () => {

@@ -33,8 +33,6 @@ const PACKAGES = [
   '@kiwa-lab/a11y',
   '@kiwa-lab/nextjs',
   '@kiwa-lab/edge',
-  '@kiwa-lab/solidjs',
-  '@kiwa-lab/fresh',
   '@kiwa-lab/hono',
 ];
 
@@ -51,8 +49,6 @@ const PKG_DIRS = {
   '@kiwa-lab/a11y': 'packages/a11y',
   '@kiwa-lab/nextjs': 'packages/nextjs',
   '@kiwa-lab/edge': 'packages/edge',
-  '@kiwa-lab/solidjs': 'packages/solidjs',
-  '@kiwa-lab/fresh': 'packages/fresh',
   '@kiwa-lab/hono': 'packages/hono',
 };
 

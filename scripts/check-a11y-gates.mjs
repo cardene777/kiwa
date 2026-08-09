@@ -80,8 +80,6 @@ export const A11Y_PACKAGE_TIER = Object.freeze({
   // Framework tier (SSR / hydration / adapter wrapper).
   '@kiwa-lab/nextjs': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
-  '@kiwa-lab/solidjs': { tier: 'framework' },
-  '@kiwa-lab/fresh': { tier: 'framework' },
   '@kiwa-lab/hono': { tier: 'framework' },
   '@kiwa-lab/auth': { tier: 'framework' },
   // SaaS tier (provider-specific adapter, no DOM — strict 0/0/0).
@@ -121,8 +119,6 @@ const PKG_DIRS = Object.freeze({
   '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
   '@kiwa-lab/nextjs': 'packages/nextjs',
   '@kiwa-lab/edge': 'packages/edge',
-  '@kiwa-lab/solidjs': 'packages/solidjs',
-  '@kiwa-lab/fresh': 'packages/fresh',
   '@kiwa-lab/hono': 'packages/hono',
   '@kiwa-lab/auth': 'packages/auth',
   '@kiwa-lab/ai-llm': 'packages/ai-llm',

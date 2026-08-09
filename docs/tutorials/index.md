@@ -30,8 +30,6 @@ Step-by-step tutorials that take a fresh reader from "no kiwa installed" to a ru
 | 23 | [Alert orchestrator (rule + route + silence + escalation)](./23-alert-orchestrator) | Node.js / vitest | 12 min |
 | 24 | [Trace flame graph (span tree + drill-down + log correlation)](./24-trace-flame-graph) | Node.js / vitest | 12 min |
 | 27 | [dApp e2e reorg (snapshot + revert + refetch across 4 scenarios)](./27-dapp-e2e-reorg) | Node.js / Playwright | 12 min |
-| 28 | [SolidJS Signal + Effect + Resource + Suspense (fine-grained reactivity)](./28-solidjs-signal-app) | Node.js / vitest | 10 min |
-| 29 | [Fresh Islands + Route Handler + Head normalize (Deno partial hydration)](./29-fresh-islands) | Node.js / vitest | 10 min |
 | 30 | [HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](./30-hono-workers-rpc) | Node.js / vitest | 12 min |
 | 34 | [WebAuthn L3 + Passkey (virtual authenticator + attestation + sync fabric)](./34-webauthn-passkey) | Node.js / vitest | 12 min |
 | 35 | [OAuth 2.1 provider (PKCE + DPoP + refresh rotation + revocation)](./35-oauth21-provider) | Node.js / vitest | 12 min |
@@ -82,7 +80,7 @@ Tutorial 27 exercises the reorg helpers in [`@kiwa-lab/dapp`](https://github.com
 
 ## Framework 深化 tutorials (v1.19)
 
-Tutorials 28 – 30 exercise the three new modern web framework adapters — [`@kiwa-lab/solidjs`](https://github.com/cardene777/kiwa/blob/main/packages/solidjs/README.md), [`@kiwa-lab/fresh`](https://github.com/cardene777/kiwa/blob/main/packages/fresh/README.md), and [`@kiwa-lab/hono`](https://github.com/cardene777/kiwa/blob/main/packages/hono/README.md). Each cuts down to a single vitest suite that walks the framework's characteristic runtime contract without booting the real runtime — SolidJS Signal-based fine-grained reactivity + Suspense-shaped resources (`mockSignal` / `mockEffect` / `batch` / `createResourceStub` / `renderWithSuspense`), Deno Fresh Islands architecture + Route Handler + Head normalize (`invokeFreshHandler` / `defineIsland` / `hydrateIslands` / `mergeHead`), and Cloudflare Workers-style HonoJS + hc typed RPC + KV / D1 / R2 mocks (`createHonoApp` / `createRpcClient` / `mockKVNamespace` / `mockD1Database` / `mockR2Bucket`). See [`docs/concepts/modern-web-framework-testing.md`](../concepts/modern-web-framework-testing) for the 4 axes v1.19 adds on top of the v1.14 horizontal framework baseline.
+Tutorial 30 exercises [`@kiwa-lab/hono`](https://github.com/cardene777/kiwa/blob/main/packages/hono/README.md) — Cloudflare Workers-style HonoJS + hc typed RPC + KV / D1 / R2 mocks (`createHonoApp` / `createRpcClient` / `mockKVNamespace` / `mockD1Database` / `mockR2Bucket`), walked without booting the real runtime. Tutorials 28 and 29 covered the SolidJS and Deno Fresh adapters until #1865 removed them. See [`docs/concepts/modern-web-framework-testing.md`](../concepts/modern-web-framework-testing) for the axes v1.19 added on top of the v1.14 horizontal framework baseline.
 
 ## Streaming 深化 tutorials (v1.20)
 

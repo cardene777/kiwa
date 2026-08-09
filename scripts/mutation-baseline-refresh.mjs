@@ -50,8 +50,6 @@ const PACKAGES = {
   '@kiwa-lab/cli': 'packages/cli',
   '@kiwa-lab/nextjs': 'packages/nextjs',
   '@kiwa-lab/edge': 'packages/edge',
-  '@kiwa-lab/solidjs': 'packages/solidjs',
-  '@kiwa-lab/fresh': 'packages/fresh',
   '@kiwa-lab/hono': 'packages/hono',
   // v1.27-3 scope: test-type layer (3 packages).
   '@kiwa-lab/a11y': 'packages/a11y',

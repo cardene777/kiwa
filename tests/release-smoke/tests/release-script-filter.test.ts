@@ -102,10 +102,11 @@ describe('release script filter — systematic root cause pattern SSOT (Issue #9
     // does not fail this line; the per-package assertion is where the real
     // fail-fast happens.
     //
-    // 28 since #1803 dropped `visual` and `solidstart` and moved `kaname` to
-    // `archive/`. The floor tracks the real count, or shrinking the set on
-    // purpose reads as the guard breaking.
-    expect(publishable.length).toBeGreaterThanOrEqual(28);
+    // 26 since #1865 dropped `fresh` and `solidjs`, on top of #1803 dropping
+    // `visual` and `solidstart` and moving `kaname` to `archive/`. The floor
+    // tracks the real count, or shrinking the set on purpose reads as the guard
+    // breaking.
+    expect(publishable.length).toBeGreaterThanOrEqual(26);
   });
 
   it.each(assertable.map((name) => ({ name })))(

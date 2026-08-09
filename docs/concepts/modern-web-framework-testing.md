@@ -1,5 +1,7 @@
 # Modern web framework testing — Signal reactivity / Islands architecture / edge runtime + RPC type-safety (SSOT)
 
+> **Two of the four axes have no implementation.** #1865 removed the SolidJS and Deno Fresh adapters, so every `@kiwa-lab/solidjs` and `@kiwa-lab/fresh` symbol below describes what v1.19 shipped rather than what is installable now. Axis 3 (edge runtime + hc RPC) and Axis 4 (fidelity) still run through [`@kiwa-lab/hono`](../libraries/frameworks/hono/). The semantics the other two record are kept because they are what a replacement would have to reproduce.
+
 kiwa's v1.14 horizontal framework expansion (Next.js / Nuxt / Remix / Astro / Qwik / SvelteKit / SolidStart) covered the request/response mock case for 7 web frameworks. v1.19 adds **four axes on top of that base** — the ones production teams hit once their `Next.js + wagmi` or `Express + fetch` suite is green but the modern web framework introduces a runtime characteristic the existing mocks do not capture. This concept doc is the SSOT for those four axes; the tutorials and dogfood apps are the concrete implementations.
 
 ## Axis 1 — Signal-based fine-grained reactivity (SolidJS)
@@ -79,7 +81,7 @@ The Workers env mocks share the same 6-op surface as the real Workers runtime, s
 
 ## Axis 4 — Fidelity vs cost trade-off (release gate axis)
 
-The 3 dogfood apps (`dogfood-solidjs-signal-app` + `dogfood-fresh-islands` + `dogfood-hono-workers-rpc`) each produce a **fidelity report** that measures the mock behaviour against the real runtime. The report walks the same trace shape through both surfaces and computes a fidelity ratio in `[0, 1]`.
+The dogfood app (`dogfood-hono-workers-rpc`) produces a **fidelity report** that measures the mock behaviour against the real runtime. Two more (`dogfood-solidjs-signal-app` / `dogfood-fresh-islands`) did the same until #1865 removed the SolidJS and Fresh adapters. The report walks the same trace shape through both surfaces and computes a fidelity ratio in `[0, 1]`.
 
 Three properties are load-bearing.
 
@@ -104,10 +106,12 @@ All four patterns are pure — they add no runtime overhead beyond the mock call
 
 The v1.19 dogfood harness ships the following behaviour test counts per axis.
 
-- Axis 1 (Signal reactivity) — `packages/solidjs/tests/signal.test.ts` × 18 + `packages/solidjs/tests/render.test.ts` × 14 + `packages/solidjs/tests/route.test.ts` × 12 = **44 tests**
-- Axis 2 (Islands + partial hydration) — `packages/fresh/tests/route.test.ts` × 26 + `packages/fresh/tests/islands.test.ts` × 16 + `packages/fresh/tests/head.test.ts` × 10 = **52 tests**
+#1865 removed the adapters behind axes 1 and 2, and their test counts with them. What remains is the Hono side.
+
 - Axis 3 (edge runtime + hc RPC + Workers env) — `packages/hono/tests/app.test.ts` × 30 + `packages/hono/tests/rpc.test.ts` × 12 + `packages/hono/tests/workers.test.ts` × 32 = **74 tests**
-- Axis 4 (fidelity ratio) — 3 dogfood apps × 3-5 scenarios each + Layer 3 fidelity walker = **12–15 tests**
+- Axis 4 (fidelity ratio) — `dogfood-hono-workers-rpc` × 3-5 scenarios + Layer 3 fidelity walker
+
+Axes 1 and 2 shipped 44 and 52 tests respectively at v1.19.
 
 Every count sits above the 10-test release-gate floor so the 11-axis check passes without special-casing the modern web framework surfaces.
 

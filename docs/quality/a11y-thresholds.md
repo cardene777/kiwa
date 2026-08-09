@@ -42,8 +42,6 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 | `@kiwa-lab/quality-metrics` | Core | 0 / 0 / 0-3 | Release gate calculator. No DOM. |
 | `@kiwa-lab/nextjs` | Framework | 0 / 0-3 / 0-10 | RSC + Server Actions + Middleware. Serious tolerance for Next router link internals. |
 | `@kiwa-lab/edge` | Framework | 0 / 0-3 / 0-10 | Workers / Deno / Bun edge runtimes with divergent APIs. |
-| `@kiwa-lab/solidjs` | Framework | 0 / 0-3 / 0-10 | Solid signal + resource + SSR. |
-| `@kiwa-lab/fresh` | Framework | 0 / 0-3 / 0-10 | Deno Fresh islands + SSR. |
 | `@kiwa-lab/hono` | Framework | 0 / 0-3 / 0-10 | Hono edge + node adapter. |
 | `@kiwa-lab/auth` | Framework | 0 / 0-3 / 0-10 | NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth. |
 | `@kiwa-lab/ai-llm` | SaaS | 0 / 0 / 0 | Anthropic / OpenAI / Vercel AI SDK / LangChain adapters. No DOM. |

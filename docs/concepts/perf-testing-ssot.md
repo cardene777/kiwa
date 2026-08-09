@@ -127,7 +127,7 @@ The v1.25 milestone applied the 3-layer harness to every kiwa package.
 | Layer | Packages |
 |---|---|
 | core (9) | `@kiwa-lab/core` + `@kiwa-lab/dapp` + `@kiwa-lab/api` + `@kiwa-lab/ui` + `@kiwa-lab/data` + `@kiwa-lab/cli-test` + `@kiwa-lab/observability` + `@kiwa-lab/e2e` + `@kiwa-lab/cli` |
-| framework adapter (5) | `@kiwa-lab/nextjs` + `@kiwa-lab/edge` + `@kiwa-lab/fresh` + `@kiwa-lab/hono` + `@kiwa-lab/solidjs` |
+| framework adapter (3) | `@kiwa-lab/nextjs` + `@kiwa-lab/edge` + `@kiwa-lab/hono` |
 | test type (2) | `@kiwa-lab/a11y` + `@kiwa-lab/component` |
 | SaaS layer (5) | `@kiwa-lab/auth` + `@kiwa-lab/queue` + `@kiwa-lab/cache` + `@kiwa-lab/orm` + `@kiwa-lab/search` |
 

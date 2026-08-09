@@ -125,44 +125,6 @@ describe('@kiwa-lab/edge surface', () => {
   });
 });
 
-describe('@kiwa-lab/solidjs surface', () => {
-  it('exports mockSignal + mockEffect + batch + track + createResourceStub + brand symbols (v0.1.0, Issue #813)', async () => {
-    const mod = await import('@kiwa-lab/solidjs');
-    expect(typeof mod.mockSignal).toBe('function');
-    expect(typeof mod.mockEffect).toBe('function');
-    expect(typeof mod.batch).toBe('function');
-    expect(typeof mod.track).toBe('function');
-    expect(typeof mod.createResourceStub).toBe('function');
-    expect(typeof mod.SIGNAL_SYMBOL).toBe('symbol');
-    expect(typeof mod.EFFECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.RESOURCE_SYMBOL).toBe('symbol');
-  });
-
-  it('exports renderSolid + hydrate + createRoot + h + stringify + findElements (v0.1.0)', async () => {
-    const mod = await import('@kiwa-lab/solidjs');
-    expect(typeof mod.renderSolid).toBe('function');
-    expect(typeof mod.hydrate).toBe('function');
-    expect(typeof mod.createRoot).toBe('function');
-    expect(typeof mod.h).toBe('function');
-    expect(typeof mod.stringify).toBe('function');
-    expect(typeof mod.findElements).toBe('function');
-    expect(typeof mod.SOLID_ELEMENT_SYMBOL).toBe('symbol');
-  });
-
-  it('exports invokeSolidRoute + renderWithSuspense + errorBoundary + redirect + notFound + suspense/error signals (v0.1.0)', async () => {
-    const mod = await import('@kiwa-lab/solidjs');
-    expect(typeof mod.invokeSolidRoute).toBe('function');
-    expect(typeof mod.renderWithSuspense).toBe('function');
-    expect(typeof mod.errorBoundary).toBe('function');
-    expect(typeof mod.redirect).toBe('function');
-    expect(typeof mod.notFound).toBe('function');
-    expect(typeof mod.SOLID_REDIRECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.SOLID_NOT_FOUND_SYMBOL).toBe('symbol');
-    expect(typeof mod.SUSPENSE_BOUNDARY_SYMBOL).toBe('symbol');
-    expect(typeof mod.ERROR_BOUNDARY_SYMBOL).toBe('symbol');
-  });
-});
-
 describe('@kiwa-lab/auth surface', () => {
   it('exports setupNextAuthEnv + createInMemoryAdapter + provider factories (v0.1.0, Issue #637)', async () => {
     const mod = await import('@kiwa-lab/auth');
@@ -185,46 +147,6 @@ describe('@kiwa-lab/auth surface', () => {
     expect(env.providers.github.id).toBe('github');
     expect(env.providers.email.id).toBe('email');
     await env.stop();
-  });
-});
-
-describe('@kiwa-lab/fresh surface', () => {
-  it('exports invokeFreshHandler + defineRoute + redirect + notFound + h + stringify + findNodes (v0.1.0, Issue #814)', async () => {
-    const mod = await import('@kiwa-lab/fresh');
-    expect(typeof mod.invokeFreshHandler).toBe('function');
-    expect(typeof mod.invokeDefineRoute).toBe('function');
-    expect(typeof mod.defineRoute).toBe('function');
-    expect(typeof mod.redirect).toBe('function');
-    expect(typeof mod.notFound).toBe('function');
-    expect(typeof mod.h).toBe('function');
-    expect(typeof mod.stringify).toBe('function');
-    expect(typeof mod.findNodes).toBe('function');
-    expect(typeof mod.FRESH_REDIRECT_SYMBOL).toBe('symbol');
-    expect(typeof mod.FRESH_NOT_FOUND_SYMBOL).toBe('symbol');
-    expect(typeof mod.FRESH_ROUTE_SYMBOL).toBe('symbol');
-  });
-
-  it('exports defineIsland + mountIsland + hydrateIslands + simulateInteraction + islandPlaceholder + brand symbols (v0.1.0)', async () => {
-    const mod = await import('@kiwa-lab/fresh');
-    expect(typeof mod.defineIsland).toBe('function');
-    expect(typeof mod.mountIsland).toBe('function');
-    expect(typeof mod.hydrateIslands).toBe('function');
-    expect(typeof mod.simulateInteraction).toBe('function');
-    expect(typeof mod.islandPlaceholder).toBe('function');
-    expect(typeof mod.isIslandDefinition).toBe('function');
-    expect(typeof mod.isIslandMount).toBe('function');
-    expect(typeof mod.ISLAND_SYMBOL).toBe('symbol');
-    expect(typeof mod.ISLAND_MOUNT_SYMBOL).toBe('symbol');
-  });
-
-  it('exports defineHead + mergeHead + renderHead + extractHead + HEAD_SYMBOL (v0.1.0)', async () => {
-    const mod = await import('@kiwa-lab/fresh');
-    expect(typeof mod.defineHead).toBe('function');
-    expect(typeof mod.mergeHead).toBe('function');
-    expect(typeof mod.renderHead).toBe('function');
-    expect(typeof mod.extractHead).toBe('function');
-    expect(typeof mod.isHeadFragment).toBe('function');
-    expect(typeof mod.HEAD_SYMBOL).toBe('symbol');
   });
 });
 

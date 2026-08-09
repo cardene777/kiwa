@@ -1,6 +1,6 @@
 # Fidelity — dogfood-hono-workers-rpc (v1.19-4)
 
-Real-vs-mock behavioural fidelity for the Cloudflare Workers + Hono + `hc` RPC + middleware chain + KV / D1 / R2 bindings harness driven by `@kiwa-lab/hono` under mock-mode + real-mode env-skip, produced by `examples/dogfood-hono-workers-rpc/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` release-gate 7-axis payload as the third modern-framework dogfood alongside `dogfood-solidjs-signal-app` (v1.19-2, SolidJS Signal reactivity) and `dogfood-fresh-islands` (v1.19-3, Fresh Islands architecture).
+Real-vs-mock behavioural fidelity for the Cloudflare Workers + Hono + `hc` RPC + middleware chain + KV / D1 / R2 bindings harness driven by `@kiwa-lab/hono` under mock-mode + real-mode env-skip, produced by `examples/dogfood-hono-workers-rpc/tests/emit-fidelity-report.test.ts`. Feeds `@kiwa-lab/quality-metrics` release-gate 7-axis payload. It landed as the third modern-framework dogfood alongside `dogfood-solidjs-signal-app` (v1.19-2) and `dogfood-fresh-islands` (v1.19-3); #1865 removed those two, so this is the one that remains.
 
 ## Baseline (real mode skipped — `CF_ACCOUNT_ID` unset)
 
