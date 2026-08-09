@@ -26,17 +26,53 @@ quality-report/                   -- 過去に生成した quality snapshot (履
 計測を戻すなら Foundry から直接駆動する形になる。 `forge test` が動く前提が要るため
 #1868 の後に別途決める。
 
-## 実行 (現状は動かない)
-
-Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く
-remapping も無いため **`forge test` は現状 import 解決に失敗する**。
-
-#1864 で Rust 側の harness を削除した結果、 Solidity test を走らせる経路が無くなった。
-`forge-std` はもとから `lib/` に無く、 Rust 側が代わりに解決していたわけでもない。
-
-動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 #1868 で扱う。
+## 実行
 
 ```bash
-# 依存を入れた後であればこの形で走る
 forge test --root examples/dogfood-foundry-invariant-fuzz
 ```
+
+`forge` が要る。 無い host では `command not found: forge` で止まる。
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+# installer は PATH を shell の設定 file に足すだけで、 実行中の shell には
+# 反映されない。 shell を開き直すか、 絶対 path で呼ぶ
+~/.foundry/bin/foundryup
+```
+
+それ以外の準備は無い。 `lib/forge-std` は repo に入っているので取得も要らない。
+
+10 件の invariant が走る (ERC-20 が 2 / Vault が 4 / Router が 4)。 各 256 run で、
+1 invariant あたり 3840 call を積む。
+
+Vault と Router はそれぞれ 1 件が **handler の ghost 変数と突合する** invariant で、
+残りは vault / router の field 同士の関係式。 後者は「何も起きていない状態」 でも成立する
+ため、 対象の操作を no-op に差し替えても落ちない。 前者がその形を捕まえる。
+
+run 数と seed は `foundry.toml` が決める。 seed を固定しているので、 counter-example が
+出た時に同じ sequence を踏み直せる。 探索を広げたい場合は `runs` を上げる。
+
+```bash
+# その場だけ広げる
+FOUNDRY_INVARIANT_RUNS=10000 forge test --root examples/dogfood-foundry-invariant-fuzz
+```
+
+## 失敗した後の再実行
+
+invariant が破れると Foundry は counter-example を `cache/invariant/failures/` に残し、
+**以降の実行はそれを replay する**。 探索をやり直さないので、 実装を直しても
+`replay failure` と出続ける。
+
+```bash
+# 直した後に fresh campaign へ戻す
+find cache/invariant/failures -type f -delete
+```
+
+`forge clean --root examples/dogfood-foundry-invariant-fuzz` では消えない。
+`failure_persist_dir` が `--root` ではなく実行時の working directory を基準に
+解決されるため、 repo root から走らせた分は repo root の `cache/` に落ちる
+(root の `.gitignore` が `/cache/` で除外している)。
+
+10_000 run は v1.18-3 の release gate が使っていた値で、 当時は Rust 側の harness が
+env で渡していた。 #1864 でその harness を消したため、 既定は `foundry.toml` の 256 になる。

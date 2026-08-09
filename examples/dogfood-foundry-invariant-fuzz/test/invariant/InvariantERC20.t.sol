@@ -118,4 +118,41 @@ contract InvariantERC20 is Test {
             "totalSupply != totalMinted - totalBurned"
         );
     }
+
+    /// @notice `mint` raises total supply and credits the recipient.
+    ///
+    ///         The invariant above catches a `mint` that returns without
+    ///         minting, because the handler records the amount either way. It
+    ///         does not catch one that always reverts: the handler drops the
+    ///         record with it and `0 == 0 - 0` holds (measured).
+    ///
+    ///         Calling `mint` directly catches both, and does not depend on the
+    ///         fuzzer generating a `mint` in the sequence it happens to build —
+    ///         which it does not always do, `mint` being one of three actions.
+    function test_mintRaisesSupplyAndCreditsRecipient() public {
+        address to = address(0xA11CE);
+        uint256 supply = token.totalSupply();
+        uint256 held = token.balanceOf(to);
+
+        token.mint(to, 1_000);
+
+        assertEq(token.totalSupply(), supply + 1_000, "totalSupply did not move");
+        assertEq(token.balanceOf(to), held + 1_000, "recipient was not credited");
+    }
+
+    /// @notice `transfer` moves balance between holders and leaves supply alone.
+    function test_transferMovesBalance() public {
+        address from = address(0xA11CE);
+        address to = address(0xB0B);
+        token.mint(from, 1_000);
+        uint256 supply = token.totalSupply();
+        uint256 heldTo = token.balanceOf(to);
+
+        vm.prank(from);
+        token.transfer(to, 400);
+
+        assertEq(token.balanceOf(from), 600, "sender balance did not drop");
+        assertEq(token.balanceOf(to), heldTo + 400, "recipient balance did not rise");
+        assertEq(token.totalSupply(), supply, "transfer changed total supply");
+    }
 }

@@ -121,3 +121,10 @@ Cargo.lock
 # whatever version of Lake ran. Ignore it there, and nowhere else.
 .lake/
 examples/dogfood-lean-orchestrator-specs-app/specs/lake-manifest.json
+
+# Foundry writes its failure corpus to `failure_persist_dir`, which resolves
+# against the working directory rather than `--root`. Running
+# `forge test --root examples/<name>` from here therefore drops `cache/` at the
+# repository root, outside the `cache/` each example already ignores. Anchored
+# so it only covers the root: the examples' own entries stay theirs.
+/cache/

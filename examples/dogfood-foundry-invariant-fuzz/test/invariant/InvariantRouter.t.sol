@@ -117,4 +117,62 @@ contract InvariantRouter is Test {
         // C to callers, so reserve <= 10 ** 27.
         assertLe(router.reserve(2), 10 ** 27, "router C reserve grew beyond seed");
     }
+
+    /// @notice A swap the handler recorded as successful must have released
+    ///         token C from the router.
+    ///
+    ///         The three invariants above are relations that also hold when
+    ///         nothing happens: B stays seeded, A sums to its mint, and C is
+    ///         `<=` its seed at equality. Replacing `Router.swap` with a body
+    ///         that returns 0 without transferring leaves all three passing
+    ///         (measured), so they say nothing about whether swapping works.
+    ///
+    ///         `swapsExecuted` counts calls that did not revert, which is the
+    ///         handler's record that a swap was supposed to have happened. Held
+    ///         against the reserve, the pair fails exactly when the router
+    ///         claims success and moves nothing.
+    function invariant_recordedSwapsReleasedTokenC() public view {
+        if (handler.swapsExecuted() == 0) return;
+        assertLt(
+            router.reserve(2),
+            10 ** 27,
+            "swaps were recorded but the router released no token C"
+        );
+    }
+
+    /// @notice `swap` pulls token A from the caller and releases token C.
+    ///
+    ///         Every invariant above is a relation that also holds when nothing
+    ///         happens — reserves stay seeded, A sums to its mint, and the
+    ///         recorded-swap check takes its early return at a count of zero.
+    ///         A `swap` that silently returns, or one that always reverts,
+    ///         passes all of them (both measured).
+    ///
+    ///         An `afterInvariant` asserting "at least one swap succeeded" was
+    ///         tried and removed. It reads one run's state rather than the
+    ///         campaign's, and which actions a run contains is up to the
+    ///         fuzzer; the same assertion on `Vault` failed on correct code
+    ///         under seed `0x1111111111111111`. `Router` happened to be safe
+    ///         because `swap` is its only action, but the shape is fragile and
+    ///         is not worth keeping for that reason alone.
+    ///
+    ///         Calling the operation directly does not depend on what the
+    ///         fuzzer generates.
+    function test_swapPullsTokenAAndReleasesTokenC() public {
+        address actor = address(0xA11CE);
+        uint256 heldA = tokenA.balanceOf(actor);
+        uint256 heldC = tokenC.balanceOf(actor);
+        uint256 reserveC = router.reserve(2);
+        assertGt(heldA, 0, "fixture: actor holds no token A");
+
+        vm.prank(actor);
+        uint256 out = router.swap(0, 2, 1_000_000);
+
+        assertGt(out, 0, "swap returned nothing");
+        assertEq(tokenA.balanceOf(actor), heldA - 1_000_000, "token A did not leave the actor");
+        assertEq(router.reserve(0), 1_000_000, "router did not take token A");
+        assertEq(tokenC.balanceOf(actor), heldC + out, "token C did not reach the actor");
+        assertEq(router.reserve(2), reserveC - out, "router did not release token C");
+        assertEq(router.reserve(1), 10 ** 27, "intermediate leg was not unwound");
+    }
 }
