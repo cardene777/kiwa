@@ -6,7 +6,7 @@ kiwa's v1.14 horizontal framework expansion (Next.js / Nuxt / Remix / Astro / Qw
 
 ## Axis 1 — Signal-based fine-grained reactivity (SolidJS)
 
-*Historical — `@kiwa-lab/solidjs` was removed in #1865. The semantics below are what a replacement would have to reproduce; none of the symbols are installable today.*
+*Historical — `@kiwa-lab/solidjs` was removed in #1865. Everything in this section is written in the present tense because it describes what v1.19 shipped; **none of it is installable today**. Read `kiwa surfaces` / `returns` / `the assertion is` as "did", not "does". The semantics are kept because a replacement would have to reproduce them.*
 
 
 React and Solid share the same JSX syntax and the same "component returns a tree" mental model. Everything below that is different — React's Virtual DOM re-renders the whole component on every state change and diffs the tree, while Solid's Signal-based reactivity re-runs **only the closures that read the signal that wrote**.
@@ -33,7 +33,7 @@ The classic React pattern "the component re-renders on every state change and Re
 
 ## Axis 2 — Islands architecture + partial hydration (Fresh)
 
-*Historical — `@kiwa-lab/fresh` was removed in #1865. The semantics below are what a replacement would have to reproduce; none of the symbols are installable today.*
+*Historical — `@kiwa-lab/fresh` was removed in #1865. Everything in this section is written in the present tense because it describes what v1.19 shipped; **none of it is installable today**. Read `kiwa surfaces` / `returns` / `the assertion is` as "did", not "does". The semantics are kept because a replacement would have to reproduce them.*
 
 
 Deno Fresh (Deno.land's SSR framework) diverges from Next.js on one axis that shows up in every non-trivial test — routes render **entirely** on the server and only components explicitly marked as islands ship JavaScript to the client. Next.js hydrates the whole tree; Fresh hydrates only the islands, and each island receives its props through a `data-props` blob serialized into the SSR HTML.
@@ -99,14 +99,15 @@ The `evaluateReleaseGate` 11-axis contract reads the fidelity ratio through the 
 
 ## Assertion patterns
 
-The 4 axes produce four assertion patterns.
+The 4 axes produced four assertion patterns. Two of them belong to axes whose
+adapters #1865 removed, and are marked below; the other two run today.
 
-- **Signal + Effect trace assertions** — every effect re-run appends a `{ readValues }` row to `handle.trace()`, and the assertion is `expect(handle.trace().map((e) => e.readValues[0])).toEqual([1, 2, 3])`. This catches "the effect body captured a stale signal read".
-- **Island hydration assertions** — every `data-island` placeholder that ships from the server matches a hydration mount client-side, and `hydrateIslands` returns `{ hydrated, missing, unregistered }`. The assertion is `expect(missing).toEqual([])` + `expect(unregistered).toEqual([])`. Missing islands → under-mark; unregistered placeholders → over-mark.
+- *(historical)* **Signal + Effect trace assertions** — every effect re-run appends a `{ readValues }` row to `handle.trace()`, and the assertion is `expect(handle.trace().map((e) => e.readValues[0])).toEqual([1, 2, 3])`. This catches "the effect body captured a stale signal read".
+- *(historical)* **Island hydration assertions** — every `data-island` placeholder that ships from the server matches a hydration mount client-side, and `hydrateIslands` returns `{ hydrated, missing, unregistered }`. The assertion is `expect(missing).toEqual([])` + `expect(unregistered).toEqual([])`. Missing islands → under-mark; unregistered placeholders → over-mark.
 - **RPC middleware trace assertions** — every middleware that matches records a `{ kind, pattern }` entry in `result.trace`. The assertion is `expect(trace.map((e) => e.kind)).toEqual(['middleware', 'handler'])`. This catches "the auth middleware silently short-circuited without recording a reason".
 - **Fidelity ratio assertions** — the release gate reads `fidelity.ratio >= 0.7`. Below the threshold the deploy is blocked. Above it the mock is trusted enough to run in unit-test frequency.
 
-All four patterns are pure — they add no runtime overhead beyond the mock call. The test grows one function call per assertion and gains a machine-verifiable contract.
+All four are pure — they add no runtime overhead beyond the mock call. The test grows one function call per assertion and gains a machine-verifiable contract.
 
 ## Test count baseline
 
