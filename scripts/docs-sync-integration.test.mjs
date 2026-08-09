@@ -240,6 +240,65 @@ test('the default run reports drift without writing, and --write updates', () =>
   });
 });
 
+// package を消す PR が索引の link を残す壊れ方。managed block の外は手書きなので、
+// 生成の同期だけを見ていると通ってしまう (#1803 と #1873 が同じ形で通った)。
+test('an index link to a directory that does not exist is reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    assert.equal(runSync(root).status, 0, 'the fixture starts clean');
+
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n消した package は [gone](./gone/) を参照。\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'a dead link must be reported');
+    assert.match(result.stderr, /dead link: docs\/libraries\/foundation\/sample\/index\.md -> \.\/gone\//);
+  });
+});
+
+// 解決規則は VitePress に合わせる。拡張子なしの link と directory link の両方が
+// 通らないと、既存 docs の大半が偽の dead link になる。
+test('links resolve through <path>.md and <path>/index.md', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    mkdirSync(join(docsDirectory, 'nested'), { recursive: true });
+    writeFileSync(join(docsDirectory, 'nested', 'index.md'), '# nested\n');
+    writeFileSync(
+      join(docsDirectory, 'index.md'),
+      '# sample\n\n[拡張子なし](./quickstart) と [directory](./nested/) を辿る。\n',
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs'), '--write'],
+      { encoding: 'utf8' },
+    );
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+
+// 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、
+// 壊れた索引を抱えたまま README が更新され、破れが表に出るのが遅れる。
+test('a dead link stops --write before anything is generated', () => {
+  withFixture(({ root, readmePath }) => {
+    const before = `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`;
+    writeFileSync(readmePath, before);
+
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n[gone](./gone/)\n');
+
+    const result = runSync(root);
+    assert.notEqual(result.status, 0, 'a dead link must stop the write');
+    assert.equal(readFileSync(readmePath, 'utf8'), before, 'the README was not written');
+  });
+});
+
 // 細工された checkout。writeFileSync は link を追うので、guard が無ければ
 // 生成 script は repo の外の file を書き換える。
 test('a README that is a symlink out of the repository is refused', () => {

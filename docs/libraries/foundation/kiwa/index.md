@@ -10,7 +10,7 @@ skill を使う場合は、最初に対象と期待結果を仕様として書�
 
 ## どこから始めるか
 
-まず対象の境界を決めます。HTTP API なら [api](../api/)、画面の操作なら [e2e](../e2e/)、component の入力と表示なら [ui](../ui/)、仕様を起点に設計を整理したい場合は [kaname](../kaname/) が入口です。各ページの Quickstart は最小の test を実行するための手順で、使い方は実装で増えやすい分岐を扱います。
+まず対象の境界を決めます。HTTP API なら [api](../api/)、画面の操作なら [e2e](../e2e/)、component の入力と表示なら [ui](../ui/) が入口です。各ページの Quickstart は最小の test を実行するための手順で、使い方は実装で増えやすい分岐を扱います。
 
 Claude Code で test の設計や生成も行う場合は、先に [kiwa の skill を使う](../../../guides/skills) を読み、plugin を導入してください。skill を使わず package だけを使う場合は、選んだ library の Quickstart から始められます。
 
