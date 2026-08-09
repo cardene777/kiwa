@@ -144,7 +144,7 @@ contract InvariantVault is Test {
         );
     }
 
-    /// @notice The campaign has to have deposited at least once.
+    /// @notice At least one deposit has to have succeeded.
     ///
     ///         The identity above holds at `0 == 0` when nothing ever
     ///         succeeded, so a `deposit` that always reverts passes it and
@@ -154,8 +154,15 @@ contract InvariantVault is Test {
     ///
     ///         Invariant functions cannot make this assertion: they run after
     ///         the first call too, when nothing has succeeded yet and zero is
-    ///         correct. `afterInvariant` runs once at the end of the campaign.
+    ///         correct. `afterInvariant` runs after a sequence, when "not once"
+    ///         is meaningful.
+    ///
+    ///         What it sees is one run's state, not the campaign's — the runner
+    ///         rolls state back between runs. That is enough for the regression
+    ///         this guards, and it holds on working code because `withdraw` is
+    ///         a no-op until shares exist, so a sequence opens with deposits.
+    ///         Measured non-zero across six seeds.
     function afterInvariant() public view {
-        assertGt(handler.totalDeposited(), 0, "no deposit succeeded in the whole campaign");
+        assertGt(handler.totalDeposited(), 0, "no deposit succeeded in this run");
     }
 }

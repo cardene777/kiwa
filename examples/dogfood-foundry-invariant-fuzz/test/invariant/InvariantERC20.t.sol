@@ -118,4 +118,22 @@ contract InvariantERC20 is Test {
             "totalSupply != totalMinted - totalBurned"
         );
     }
+
+    // A `mint` that always reverts is not caught here. The invariant above
+    // catches one that returns without minting — the handler records the
+    // amount either way — but a revert drops the record with it, leaving
+    // `0 == 0 - 0`. Measured: the suite passes with `mint` reverting
+    // unconditionally.
+    //
+    // `Router` and `Vault` close the same hole with `afterInvariant`, which
+    // asserts that at least one call succeeded. That does not work here.
+    // `afterInvariant` observes one run's state (the runner rolls state back
+    // between runs, so the counter reads the same whether `runs` is 1 or 256 —
+    // measured), and `mint` is one of three actions over a depth of 15, so a
+    // run with zero mints is a normal outcome rather than a regression. Under
+    // the pinned seed it is the actual outcome, so the assertion would fail on
+    // correct code.
+    //
+    // Closing it needs the handler to record what it observed rather than what
+    // it called, which is #1872.
 }

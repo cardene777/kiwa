@@ -140,7 +140,7 @@ contract InvariantRouter is Test {
         );
     }
 
-    /// @notice The campaign has to have swapped at least once.
+    /// @notice At least one swap has to have succeeded.
     ///
     ///         Every invariant above, including the one right before this,
     ///         holds when no swap ever succeeded — the reserves stay seeded and
@@ -151,9 +151,20 @@ contract InvariantRouter is Test {
     ///
     ///         Invariant functions cannot make this assertion: they run after
     ///         the first call too, when nothing has succeeded yet and zero is
-    ///         correct. `afterInvariant` runs once at the end of the campaign,
-    ///         which is the only point where "nothing ever worked" is knowable.
+    ///         correct. `afterInvariant` runs after a sequence, when "not once"
+    ///         is meaningful.
+    ///
+    ///         What it sees is one run's state, not the campaign's: the runner
+    ///         rolls state back between runs, and the counter reads the same
+    ///         whether `runs` is 1 or 256 (measured 14 for all three). That is
+    ///         enough for the regression this guards — a `swap` that always
+    ///         reverts scores 0 in every run — and it holds on working code
+    ///         because `swap` is the handler's only action, so a depth-15
+    ///         sequence lands 13-14 successes across every seed tried.
+    ///
+    ///         The same assertion does not transfer to `InvariantERC20`, where
+    ///         `mint` is one of three actions and a run with none is normal.
     function afterInvariant() public view {
-        assertGt(handler.swapsExecuted(), 0, "no swap succeeded in the whole campaign");
+        assertGt(handler.swapsExecuted(), 0, "no swap succeeded in this run");
     }
 }
