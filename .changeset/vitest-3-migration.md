@@ -7,13 +7,11 @@
 "@kiwa-lab/data": major
 "@kiwa-lab/e2e": major
 "@kiwa-lab/edge": major
-"@kiwa-lab/fresh": major
 "@kiwa-lab/hono": major
 "@kiwa-lab/nextjs": major
 "@kiwa-lab/observability": major
 "@kiwa-lab/orm": major
 "@kiwa-lab/queue": major
-"@kiwa-lab/solidjs": major
 "@kiwa-lab/ui": major
 ---
 
@@ -26,7 +24,7 @@ vitest に CRITICAL の勧告 (`GHSA-5xrq-8626-4rwp`、Vitest UI サーバー経
 公開している範囲なので、利用者が 3.1 系を使っていても適合と判定されてしまう。
 
 **利用者への影響。**
-上記 29 package を vitest 2 系または 3.2.5 以前のプロジェクトで使っている場合、peer の解決が外れる。
+上記 14 package を vitest 2 系または 3.2.5 以前のプロジェクトで使っている場合、peer の解決が外れる。
 3.2.6 以上へ上げてから追随してほしい。
 
 repo 内の 226 個の package.json も同時に上げた。

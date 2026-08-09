@@ -126,9 +126,11 @@ const V1_18_PAGES = [
 // against the actual page headings + body text — not frontmatter titles).
 // Coverage adds SolidJS Signal + Fresh Islands + HonoJS Cloudflare Workers
 // as 3 new modern web framework tutorials.
+// Tutorials 28 and 29 documented the SolidJS and Fresh adapters and were
+// removed with them in #1865. They are not listed as pages that used to exist —
+// this array is what the site must serve now, and a path whose source file is
+// gone can only fail.
 const V1_19_PAGES = [
-  { path: '/tutorials/28-solidjs-signal-app', title: 'SolidJS Signal + Effect + Resource + Suspense' },
-  { path: '/tutorials/29-fresh-islands', title: 'Fresh Islands + Route Handler + Head normalize' },
   { path: '/tutorials/30-hono-workers-rpc', title: 'HonoJS + hc RPC type-safe client + Workers env' },
   { path: '/concepts/modern-web-framework-testing', title: 'Modern web framework testing' },
   { path: '/migrations/v1.18-to-v1.19', title: 'v1.18 → v1.19' },

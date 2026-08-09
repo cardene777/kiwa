@@ -3,8 +3,8 @@
 ## Why this file exists
 
 kiwa v1.16 introduced `@kiwa-lab/a11y` (axe-core WCAG 2.1 AA wrapper) as a single test-adapter package.
-v1.30 promotes accessibility from one-package coverage to a 27-package infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
-(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers all 27 published packages including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale.)
+v1.30 promotes accessibility from one-package coverage to a repository-wide infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
+(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers every published package including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale. The count is deliberately not written down: it moved at #1785, #1803 and #1865, and a stale literal reads as the matrix having drifted.)
 
 Every kiwa package publishes an `.axe-config.mjs` that pins its WCAG 2.1 AA rule set + tag filter + `.a11y-baseline/{pkg}.json` output path, and every `test:a11y` script writes a machine-readable baseline that downstream release gates (v1.30-4, 13th axis) can enforce.
 Without a shared threshold rationale, each package would land its own bar and drift for the same reasons the mutation-testing rollout drifted before v1.27 — no documented "why 0 critical here" survives the review that lands the code six weeks later.
@@ -28,7 +28,7 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 `critical > 0` fails the run in every tier.
 `serious` and `moderate` counts are checked against the tier's allowed range.
 
-## Tier assignment — 27-package matrix
+## Tier assignment — package matrix
 
 | Package | Tier | Threshold (critical / serious / moderate) | Reason |
 |---|---|---|---|

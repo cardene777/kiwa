@@ -12,7 +12,7 @@
 // treated as non-publishable and skipped. A short manual allowlist (`NON_PUBLISHED_ALLOWLIST`)
 // is reserved for deliberate exclusions where the `private` flag alone cannot
 // capture the intent (e.g., a package published under a different pipeline);
-// it starts empty because the current 31-package set is all first-party
+// it starts empty because the current package set is all first-party
 // `@kiwa-lab/*` scope.
 //
 // When this test fails, the fix is exactly one of:

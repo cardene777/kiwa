@@ -6,6 +6,9 @@ kiwa's v1.14 horizontal framework expansion (Next.js / Nuxt / Remix / Astro / Qw
 
 ## Axis 1 — Signal-based fine-grained reactivity (SolidJS)
 
+*Historical — `@kiwa-lab/solidjs` was removed in #1865. The semantics below are what a replacement would have to reproduce; none of the symbols are installable today.*
+
+
 React and Solid share the same JSX syntax and the same "component returns a tree" mental model. Everything below that is different — React's Virtual DOM re-renders the whole component on every state change and diffs the tree, while Solid's Signal-based reactivity re-runs **only the closures that read the signal that wrote**.
 
 That divergence matters for tests because Solid bugs look like:
@@ -29,6 +32,9 @@ The classic React pattern "the component re-renders on every state change and Re
 `mockEffect(fn).trace()` records the `readValues` array on every re-run. That means the test asserts on both dimensions — the exact re-run count via `handle.runCount()` and the exact values read via `trace().map((e) => e.readValues)`. Under-subscription surfaces as a missing re-run; over-subscription surfaces as an unexpected re-run row.
 
 ## Axis 2 — Islands architecture + partial hydration (Fresh)
+
+*Historical — `@kiwa-lab/fresh` was removed in #1865. The semantics below are what a replacement would have to reproduce; none of the symbols are installable today.*
+
 
 Deno Fresh (Deno.land's SSR framework) diverges from Next.js on one axis that shows up in every non-trivial test — routes render **entirely** on the server and only components explicitly marked as islands ship JavaScript to the client. Next.js hydrates the whole tree; Fresh hydrates only the islands, and each island receives its props through a `data-props` blob serialized into the SSR HTML.
 
@@ -117,8 +123,8 @@ Every count sits above the 10-test release-gate floor so the 11-axis check passe
 
 ## References
 
-- [Tutorial 28 — SolidJS Signal + Effect + Resource + Suspense](../tutorials/28-solidjs-signal-app)
-- [Tutorial 29 — Fresh Islands + Route Handler + Head normalize](../tutorials/29-fresh-islands)
 - [Tutorial 30 — HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](../tutorials/30-hono-workers-rpc)
 - [Migration v1.18 → v1.19](../migrations/v1.18-to-v1.19)
+
+Tutorials 28 and 29 walked axes 1 and 2. #1865 removed them with the adapters they documented.
 - v1.14 baseline — [Testing Next.js Server Actions with @kiwa-lab/nextjs](../tutorials/04-nextjs-server-actions)

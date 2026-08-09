@@ -660,8 +660,6 @@ kiwa v1.0 ships **complete coverage for the layers below**. The table is exhaust
 | Next.js RSC streaming + Suspense boundary (chunk capture + fallback / resolved 遷移 + error boundary) | ✅ production-ready (v1.1+) | `/kiwa-nextjs` (`--layer nextjs-rsc-streaming`) | `@kiwa-lab/nextjs` v1.1 |
 | Edge runtime (Cloudflare Workers / Vercel Edge / generic fetch handler) | ✅ production-ready (v1.0.0+) | `/kiwa-edge` (`--layer edge-handler`) | `@kiwa-lab/edge` v1.0.0 |
 | Auth (NextAuth v5 / Auth.js — session + 3 provider + database adapter mocks) | ✅ production-ready (v0.1+) | `/kiwa-design` (`--layer auth-nextauth`) | `@kiwa-lab/auth` v0.1.0 |
-| SolidJS Signal + Effect + createResource + Suspense (`@kiwa-lab/solidjs`) | ✅ production-ready (v0.1+, Issue #813) | (test-only helpers) | `@kiwa-lab/solidjs` v0.1.0 |
-| Deno Fresh Islands + Route Handler + Head normalization (`@kiwa-lab/fresh`) | ✅ production-ready (v0.1+, Issue #814) | (test-only helpers) | `@kiwa-lab/fresh` v0.1.0 |
 | HonoJS Cloudflare Workers + hc RPC type-safe client + middleware chain (`@kiwa-lab/hono`) | ✅ production-ready (v0.1+, Issue #815) | (test-only helpers) | `@kiwa-lab/hono` v0.1.0 |
 
 Next.js, Nuxt, SvelteKit, Remix, and Astro **client-side pages** are tested through `/kiwa-ui` (React / Vue / Svelte component layer) plus `/kiwa-e2e` (browser layer). Next.js **API Routes** under `app/api/*/route.ts` are tested through `/kiwa-api` (`examples/nextjs-api-poc/` is a working reference).
