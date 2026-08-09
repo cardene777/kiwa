@@ -3,8 +3,8 @@
 ## Why this file exists
 
 kiwa v1.16 introduced `@kiwa-lab/a11y` (axe-core WCAG 2.1 AA wrapper) as a single test-adapter package.
-v1.30 promotes accessibility from one-package coverage to a 27-package infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
-(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers all 27 published packages including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale.)
+v1.30 promotes accessibility from one-package coverage to a repository-wide infra baseline mirroring the mutation-thresholds SSOT (`docs/quality/mutation-thresholds.md`, v1.27) and the perf-thresholds SSOT (`docs/quality/perf-thresholds.md`, v1.25).
+(The Issue AC calls it "34 packages" — the count is the 33 `@kiwa-lab/*` packages published in v1.29 + `release-invariants`. This SSOT covers the packages listed in § Tier assignment, including `perf-harness` + `quality-metrics` because they are the same publish set and share the same 4-tier rationale. The matrix and `A11Y_PACKAGE_TIER` in `scripts/check-a11y-gates.mjs` cover the same package set. Neither covers the full publish set: `security`, `lean` and `skill-test` sit outside the root a11y sweep, which predates #1865 and is not addressed here. Counts are deliberately not written down: they moved at #1785, #1803 and #1865, and a stale literal reads as the matrix having drifted.)
 
 Every kiwa package publishes an `.axe-config.mjs` that pins its WCAG 2.1 AA rule set + tag filter + `.a11y-baseline/{pkg}.json` output path, and every `test:a11y` script writes a machine-readable baseline that downstream release gates (v1.30-4, 13th axis) can enforce.
 Without a shared threshold rationale, each package would land its own bar and drift for the same reasons the mutation-testing rollout drifted before v1.27 — no documented "why 0 critical here" survives the review that lands the code six weeks later.
@@ -28,7 +28,7 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 `critical > 0` fails the run in every tier.
 `serious` and `moderate` counts are checked against the tier's allowed range.
 
-## Tier assignment — 27-package matrix
+## Tier assignment — package matrix
 
 | Package | Tier | Threshold (critical / serious / moderate) | Reason |
 |---|---|---|---|
@@ -42,8 +42,6 @@ Kill line = `.a11y-baseline/{pkg}.json` reports one violation count per impact.
 | `@kiwa-lab/quality-metrics` | Core | 0 / 0 / 0-3 | Release gate calculator. No DOM. |
 | `@kiwa-lab/nextjs` | Framework | 0 / 0-3 / 0-10 | RSC + Server Actions + Middleware. Serious tolerance for Next router link internals. |
 | `@kiwa-lab/edge` | Framework | 0 / 0-3 / 0-10 | Workers / Deno / Bun edge runtimes with divergent APIs. |
-| `@kiwa-lab/solidjs` | Framework | 0 / 0-3 / 0-10 | Solid signal + resource + SSR. |
-| `@kiwa-lab/fresh` | Framework | 0 / 0-3 / 0-10 | Deno Fresh islands + SSR. |
 | `@kiwa-lab/hono` | Framework | 0 / 0-3 / 0-10 | Hono edge + node adapter. |
 | `@kiwa-lab/auth` | Framework | 0 / 0-3 / 0-10 | NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth. |
 | `@kiwa-lab/ai-llm` | SaaS | 0 / 0 / 0 | Anthropic / OpenAI / Vercel AI SDK / LangChain adapters. No DOM. |

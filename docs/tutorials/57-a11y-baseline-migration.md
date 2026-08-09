@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-The v1.30 milestone (Issue #991) applied `@kiwa-lab/a11y` v1.1 + `@kiwa-lab/quality-metrics` v0.4 tier-aware a11y gates to every kiwa package — the earlier state was one package (`@kiwa-lab/a11y` itself) with a `test:a11y` script, and 34 published packages (33 `@kiwa-lab/*` + `release-invariants`) landed a `.axe-config.mjs` + `.a11y-baseline/{pkg}.json` + `test:a11y` script in the v1.30-1 through v1.30-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 56, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any package gets an a11y baseline + tier gate in under 15 minutes. This is the pattern kiwa's 34 packages already use, spelled out step-by-step.
+The v1.30 milestone (Issue #991) applied `@kiwa-lab/a11y` v1.1 + `@kiwa-lab/quality-metrics` v0.4 tier-aware a11y gates to every kiwa package — the earlier state was one package (`@kiwa-lab/a11y` itself) with a `test:a11y` script, and 34 published packages (33 `@kiwa-lab/*` + `release-invariants`) landed a `.axe-config.mjs` + `.a11y-baseline/{pkg}.json` + `test:a11y` script in the v1.30-1 through v1.30-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 56, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any package gets an a11y baseline + tier gate in under 15 minutes. This is the pattern the sweep established, spelled out step-by-step. The 34 is the count at v1.30; the set has since changed (#1785 / #1803 / #1865), so treat it as the rollout's size rather than the current inventory.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ For a package you are onboarding, pick the tier that best describes the code axe
 | Tier | Ceiling (critical / serious / moderate) | Applies to |
 |---|---|---|
 | Core | 0 / 0 / 0-3 | Pure logic packages with no DOM output. `@kiwa-lab/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants`. |
-| Framework | 0 / 0-3 / 0-10 | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth`. |
+| Framework | 0 / 0-3 / 0-10 | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `hono` / `auth`. |
 | SaaS | 0 / 0 / 0 | Provider-specific adapters that expose no DOM. `@kiwa-lab/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp`. |
 | Test type | 0 / 0-3 / 0-10 | Harness packages with DOM / jsdom / browser fixture noise. `@kiwa-lab/ui` / `a11y` / `visual` / `component` / `e2e`. |
 
@@ -54,13 +54,13 @@ export default {
 
 Three things to notice.
 
-- The `runOnly.type: 'tag'` filter is the same across all 34 packages — `wcag2a` + `wcag2aa` + `wcag21a` + `wcag21aa`. Best-practice rules (`best-practice` tag) are excluded because they surface style suggestions, not conformance failures.
+- The `runOnly.type: 'tag'` filter is the same across every package in the a11y sweep — `wcag2a` + `wcag2aa` + `wcag21a` + `wcag21aa`. Best-practice rules (`best-practice` tag) are excluded because they surface style suggestions, not conformance failures.
 - `thresholds` mirrors the SSOT table for the chosen tier verbatim. Serious / moderate ceilings use the `{ max: N }` shape when the tier allows a non-zero cap; `critical` is always the literal `0`.
 - `baselinePath` is the persisted-report location the runner writes on every invocation. `.a11y-baseline/{package}.json` is the convention; the package name in the path lets a single monorepo-wide sweep resolve overwrites without collisions.
 
 ### 3. Add the `test:a11y` script
 
-`packages/my-package/package.json` — mirror the pattern used across the existing 34 packages.
+`packages/my-package/package.json` — mirror the pattern the existing packages use.
 
 ```json
 {

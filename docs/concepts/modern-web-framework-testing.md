@@ -1,8 +1,13 @@
 # Modern web framework testing — Signal reactivity / Islands architecture / edge runtime + RPC type-safety (SSOT)
 
+> **Two of the four axes have no implementation.** #1865 removed the SolidJS and Deno Fresh adapters, so every `@kiwa-lab/solidjs` and `@kiwa-lab/fresh` symbol below describes what v1.19 shipped rather than what is installable now. Axis 3 (edge runtime + hc RPC) and Axis 4 (fidelity) still run through [`@kiwa-lab/hono`](../libraries/frameworks/hono/). The semantics the other two record are kept because they are what a replacement would have to reproduce.
+
 kiwa's v1.14 horizontal framework expansion (Next.js / Nuxt / Remix / Astro / Qwik / SvelteKit / SolidStart) covered the request/response mock case for 7 web frameworks. v1.19 adds **four axes on top of that base** — the ones production teams hit once their `Next.js + wagmi` or `Express + fetch` suite is green but the modern web framework introduces a runtime characteristic the existing mocks do not capture. This concept doc is the SSOT for those four axes; the tutorials and dogfood apps are the concrete implementations.
 
 ## Axis 1 — Signal-based fine-grained reactivity (SolidJS)
+
+*Historical — `@kiwa-lab/solidjs` was removed in #1865. Everything in this section is written in the present tense because it describes what v1.19 shipped; **none of it is installable today**. Read `kiwa surfaces` / `returns` / `the assertion is` as "did", not "does". The semantics are kept because a replacement would have to reproduce them.*
+
 
 React and Solid share the same JSX syntax and the same "component returns a tree" mental model. Everything below that is different — React's Virtual DOM re-renders the whole component on every state change and diffs the tree, while Solid's Signal-based reactivity re-runs **only the closures that read the signal that wrote**.
 
@@ -27,6 +32,9 @@ The classic React pattern "the component re-renders on every state change and Re
 `mockEffect(fn).trace()` records the `readValues` array on every re-run. That means the test asserts on both dimensions — the exact re-run count via `handle.runCount()` and the exact values read via `trace().map((e) => e.readValues)`. Under-subscription surfaces as a missing re-run; over-subscription surfaces as an unexpected re-run row.
 
 ## Axis 2 — Islands architecture + partial hydration (Fresh)
+
+*Historical — `@kiwa-lab/fresh` was removed in #1865. Everything in this section is written in the present tense because it describes what v1.19 shipped; **none of it is installable today**. Read `kiwa surfaces` / `returns` / `the assertion is` as "did", not "does". The semantics are kept because a replacement would have to reproduce them.*
+
 
 Deno Fresh (Deno.land's SSR framework) diverges from Next.js on one axis that shows up in every non-trivial test — routes render **entirely** on the server and only components explicitly marked as islands ship JavaScript to the client. Next.js hydrates the whole tree; Fresh hydrates only the islands, and each island receives its props through a `data-props` blob serialized into the SSR HTML.
 
@@ -79,7 +87,7 @@ The Workers env mocks share the same 6-op surface as the real Workers runtime, s
 
 ## Axis 4 — Fidelity vs cost trade-off (release gate axis)
 
-The 3 dogfood apps (`dogfood-solidjs-signal-app` + `dogfood-fresh-islands` + `dogfood-hono-workers-rpc`) each produce a **fidelity report** that measures the mock behaviour against the real runtime. The report walks the same trace shape through both surfaces and computes a fidelity ratio in `[0, 1]`.
+The dogfood app (`dogfood-hono-workers-rpc`) produces a **fidelity report** that measures the mock behaviour against the real runtime. Two more (`dogfood-solidjs-signal-app` / `dogfood-fresh-islands`) did the same until #1865 removed the SolidJS and Fresh adapters. The report walks the same trace shape through both surfaces and computes a fidelity ratio in `[0, 1]`.
 
 Three properties are load-bearing.
 
@@ -91,30 +99,33 @@ The `evaluateReleaseGate` 11-axis contract reads the fidelity ratio through the 
 
 ## Assertion patterns
 
-The 4 axes produce four assertion patterns.
+The 4 axes produced four assertion patterns. Two of them belong to axes whose
+adapters #1865 removed, and are marked below; the other two run today.
 
-- **Signal + Effect trace assertions** — every effect re-run appends a `{ readValues }` row to `handle.trace()`, and the assertion is `expect(handle.trace().map((e) => e.readValues[0])).toEqual([1, 2, 3])`. This catches "the effect body captured a stale signal read".
-- **Island hydration assertions** — every `data-island` placeholder that ships from the server matches a hydration mount client-side, and `hydrateIslands` returns `{ hydrated, missing, unregistered }`. The assertion is `expect(missing).toEqual([])` + `expect(unregistered).toEqual([])`. Missing islands → under-mark; unregistered placeholders → over-mark.
+- *(historical)* **Signal + Effect trace assertions** — every effect re-run appends a `{ readValues }` row to `handle.trace()`, and the assertion is `expect(handle.trace().map((e) => e.readValues[0])).toEqual([1, 2, 3])`. This catches "the effect body captured a stale signal read".
+- *(historical)* **Island hydration assertions** — every `data-island` placeholder that ships from the server matches a hydration mount client-side, and `hydrateIslands` returns `{ hydrated, missing, unregistered }`. The assertion is `expect(missing).toEqual([])` + `expect(unregistered).toEqual([])`. Missing islands → under-mark; unregistered placeholders → over-mark.
 - **RPC middleware trace assertions** — every middleware that matches records a `{ kind, pattern }` entry in `result.trace`. The assertion is `expect(trace.map((e) => e.kind)).toEqual(['middleware', 'handler'])`. This catches "the auth middleware silently short-circuited without recording a reason".
 - **Fidelity ratio assertions** — the release gate reads `fidelity.ratio >= 0.7`. Below the threshold the deploy is blocked. Above it the mock is trusted enough to run in unit-test frequency.
 
-All four patterns are pure — they add no runtime overhead beyond the mock call. The test grows one function call per assertion and gains a machine-verifiable contract.
+All four are pure — they add no runtime overhead beyond the mock call. The test grows one function call per assertion and gains a machine-verifiable contract.
 
 ## Test count baseline
 
 The v1.19 dogfood harness ships the following behaviour test counts per axis.
 
-- Axis 1 (Signal reactivity) — `packages/solidjs/tests/signal.test.ts` × 18 + `packages/solidjs/tests/render.test.ts` × 14 + `packages/solidjs/tests/route.test.ts` × 12 = **44 tests**
-- Axis 2 (Islands + partial hydration) — `packages/fresh/tests/route.test.ts` × 26 + `packages/fresh/tests/islands.test.ts` × 16 + `packages/fresh/tests/head.test.ts` × 10 = **52 tests**
+#1865 removed the adapters behind axes 1 and 2, and their test counts with them. What remains is the Hono side.
+
 - Axis 3 (edge runtime + hc RPC + Workers env) — `packages/hono/tests/app.test.ts` × 30 + `packages/hono/tests/rpc.test.ts` × 12 + `packages/hono/tests/workers.test.ts` × 32 = **74 tests**
-- Axis 4 (fidelity ratio) — 3 dogfood apps × 3-5 scenarios each + Layer 3 fidelity walker = **12–15 tests**
+- Axis 4 (fidelity ratio) — `dogfood-hono-workers-rpc` × 3-5 scenarios + Layer 3 fidelity walker
+
+Axes 1 and 2 shipped 44 and 52 tests respectively at v1.19.
 
 Every count sits above the 10-test release-gate floor so the 11-axis check passes without special-casing the modern web framework surfaces.
 
 ## References
 
-- [Tutorial 28 — SolidJS Signal + Effect + Resource + Suspense](../tutorials/28-solidjs-signal-app)
-- [Tutorial 29 — Fresh Islands + Route Handler + Head normalize](../tutorials/29-fresh-islands)
 - [Tutorial 30 — HonoJS + hc RPC type-safe client + Workers env (KV / D1 / R2)](../tutorials/30-hono-workers-rpc)
 - [Migration v1.18 → v1.19](../migrations/v1.18-to-v1.19)
+
+Tutorials 28 and 29 walked axes 1 and 2. #1865 removed them with the adapters they documented.
 - v1.14 baseline — [Testing Next.js Server Actions with @kiwa-lab/nextjs](../tutorials/04-nextjs-server-actions)

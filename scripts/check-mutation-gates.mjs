@@ -71,8 +71,6 @@ export const PACKAGE_TIER = Object.freeze({
   // Framework tier (SSR / hydration / adapter drift).
   '@kiwa-lab/nextjs': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
-  '@kiwa-lab/solidjs': { tier: 'framework' },
-  '@kiwa-lab/fresh': { tier: 'framework' },
   '@kiwa-lab/hono': { tier: 'framework' },
   // auth landed at 68.86 % covered MSI in the v1.27-3 first sweep (adapter.js
   // 65.75 / providers.js 80.70 / session.js 56.76). Held at 65 % — one point
@@ -127,8 +125,6 @@ const PKG_DIRS = {
   // Framework tier.
   '@kiwa-lab/nextjs': 'packages/nextjs',
   '@kiwa-lab/edge': 'packages/edge',
-  '@kiwa-lab/solidjs': 'packages/solidjs',
-  '@kiwa-lab/fresh': 'packages/fresh',
   '@kiwa-lab/hono': 'packages/hono',
   '@kiwa-lab/auth': 'packages/auth',
   // SaaS tier.

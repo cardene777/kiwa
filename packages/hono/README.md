@@ -145,7 +145,7 @@ Brand symbols: `HONO_APP_SYMBOL` / `HONO_CONTEXT_SYMBOL` / `HONO_ROUTE_SYMBOL` /
 - Streaming responses (SSE / chunked) and websockets are out of scope for v0.1; responses are always fully buffered.
 - Real Cloudflare Workers Durable Objects / Queues / Analytics Engine bindings are out of scope; supply a fake object under the same env binding name if a test needs them.
 
-Companion: v1.19-1c of the [kiwa test framework](https://github.com/cardene777/kiwa) — released alongside `@kiwa-lab/solidjs` (#813) + `@kiwa-lab/fresh` (#814) as part of the v1.19 modern framework depth-drive.
+Companion: v1.19-1c of the [kiwa test framework](https://github.com/cardene777/kiwa) — released as part of the v1.19 modern framework depth-drive, alongside `@kiwa-lab/solidjs` (#813) and `@kiwa-lab/fresh` (#814), which #1865 removed.
 
 <!-- kiwa-docs:start -->
 ## Documentation

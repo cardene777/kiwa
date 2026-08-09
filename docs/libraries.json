@@ -22,10 +22,8 @@
       "slug": "frameworks",
       "packages": [
         "edge",
-        "fresh",
         "hono",
-        "nextjs",
-        "solidjs"
+        "nextjs"
       ]
     },
     {
