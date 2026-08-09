@@ -32,12 +32,23 @@ quality-report/                   -- 過去に生成した quality snapshot (履
 forge test --root examples/dogfood-foundry-invariant-fuzz
 ```
 
-`forge` が要る (`curl -L https://foundry.paradigm.xyz | bash && foundryup`)。
-無い host では `command not found: forge` で止まる。 それ以外の準備は無く、
-`lib/forge-std` は repo に入っているので取得も要らない。
+`forge` が要る。 無い host では `command not found: forge` で止まる。
 
-8 件の invariant が走る (ERC-20 が 2 / Vault が 3 / Router が 3)。 各 256 run で、
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+# installer は PATH を shell の設定 file に足すだけで、 実行中の shell には
+# 反映されない。 shell を開き直すか、 絶対 path で呼ぶ
+~/.foundry/bin/foundryup
+```
+
+それ以外の準備は無い。 `lib/forge-std` は repo に入っているので取得も要らない。
+
+10 件の invariant が走る (ERC-20 が 2 / Vault が 4 / Router が 4)。 各 256 run で、
 1 invariant あたり 3840 call を積む。
+
+Vault と Router はそれぞれ 1 件が **handler の ghost 変数と突合する** invariant で、
+残りは vault / router の field 同士の関係式。 後者は「何も起きていない状態」 でも成立する
+ため、 対象の操作を no-op に差し替えても落ちない。 前者がその形を捕まえる。
 
 run 数と seed は `foundry.toml` が決める。 seed を固定しているので、 counter-example が
 出た時に同じ sequence を踏み直せる。 探索を広げたい場合は `runs` を上げる。

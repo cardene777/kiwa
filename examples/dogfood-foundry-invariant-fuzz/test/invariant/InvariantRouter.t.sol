@@ -117,4 +117,26 @@ contract InvariantRouter is Test {
         // C to callers, so reserve <= 10 ** 27.
         assertLe(router.reserve(2), 10 ** 27, "router C reserve grew beyond seed");
     }
+
+    /// @notice A swap the handler recorded as successful must have released
+    ///         token C from the router.
+    ///
+    ///         The three invariants above are relations that also hold when
+    ///         nothing happens: B stays seeded, A sums to its mint, and C is
+    ///         `<=` its seed at equality. Replacing `Router.swap` with a body
+    ///         that returns 0 without transferring leaves all three passing
+    ///         (measured), so they say nothing about whether swapping works.
+    ///
+    ///         `swapsExecuted` counts calls that did not revert, which is the
+    ///         handler's record that a swap was supposed to have happened. Held
+    ///         against the reserve, the pair fails exactly when the router
+    ///         claims success and moves nothing.
+    function invariant_recordedSwapsReleasedTokenC() public view {
+        if (handler.swapsExecuted() == 0) return;
+        assertLt(
+            router.reserve(2),
+            10 ** 27,
+            "swaps were recorded but the router released no token C"
+        );
+    }
 }

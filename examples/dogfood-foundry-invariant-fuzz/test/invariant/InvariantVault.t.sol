@@ -117,4 +117,30 @@ contract InvariantVault is Test {
             assertEq(vault.totalAssets(), 0, "totalShares==0 but totalAssets>0");
         }
     }
+
+    /// @notice What the vault holds equals what the handler saw go in, less
+    ///         what it saw come out.
+    ///
+    ///         The three invariants above are relations between vault fields,
+    ///         and all of them hold at zero — `sum(shares) == totalShares` and
+    ///         `balance == totalAssets` are both `0 == 0`. Replacing
+    ///         `Vault.deposit` with a body that returns 0 without transferring
+    ///         leaves all three passing (measured), so none of them can tell a
+    ///         working vault from one that does nothing.
+    ///
+    ///         The handler's `totalDeposited` / `totalWithdrawn` are the only
+    ///         record of what was supposed to happen: they advance whenever the
+    ///         call did not revert. Comparing them against the vault fails
+    ///         exactly when the vault reports success and moves nothing.
+    ///
+    ///         Written as an addition rather than `deposited - withdrawn` so a
+    ///         vault that paid out more than it took in reports the mismatch
+    ///         here instead of reverting on underflow.
+    function invariant_totalAssetsMatchesNetDeposits() public view {
+        assertEq(
+            vault.totalAssets() + handler.totalWithdrawn(),
+            handler.totalDeposited(),
+            "totalAssets + withdrawn != deposited"
+        );
+    }
 }

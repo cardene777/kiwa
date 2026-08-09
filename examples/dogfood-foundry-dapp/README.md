@@ -31,9 +31,16 @@ quality-report/                   -- 過去に生成した fidelity snapshot (�
 forge test --root examples/dogfood-foundry-dapp
 ```
 
-`forge` が要る (`curl -L https://foundry.paradigm.xyz | bash && foundryup`)。
-無い host では `command not found: forge` で止まる。 それ以外の準備は無く、
-`lib/forge-std` は repo に入っているので取得も要らない。
+`forge` が要る。 無い host では `command not found: forge` で止まる。
+
+```bash
+curl -L https://foundry.paradigm.xyz | bash
+# installer は PATH を shell の設定 file に足すだけで、 実行中の shell には
+# 反映されない。 shell を開き直すか、 絶対 path で呼ぶ
+~/.foundry/bin/foundryup
+```
+
+それ以外の準備は無い。 `lib/forge-std` は repo に入っているので取得も要らない。
 
 3 件の test が走る。
 

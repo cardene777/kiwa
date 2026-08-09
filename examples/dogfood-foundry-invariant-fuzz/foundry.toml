@@ -39,10 +39,14 @@ include_push_bytes = true
 #
 # `[invariant]` has no seed of its own and takes this one, so this single line
 # pins both the stateless fuzz and the invariant runner. `forge config` echoes
-# it only under `[fuzz]`, so the invariant half was checked by running instead:
-# the same seed twice gives byte-identical output, and a different seed gives
-# different output, which is what says the value reaches the runner rather than
-# being carried and ignored.
+# it only under `[fuzz]`, so the invariant half was checked by running instead.
+#
+# What was compared is the per-selector call counts `-vv` prints (the
+# `VaultHandler | deposit | 1865` rows), sorted and with durations stripped.
+# Those come from the action generator, so they answer whether the seed reached
+# it. Comparing raw output does not: it carries wall-clock and CPU times that
+# differ every run, and forge prints the suites in whatever order they finish.
+# Same seed reproduces the counts exactly; a different seed changes them.
 #
 # The cost is that a fixed seed explores the same sequences every time, so runs
 # stop accumulating coverage. Raising `runs` is the way to widen the search;
