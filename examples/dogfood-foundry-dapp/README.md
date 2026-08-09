@@ -25,17 +25,18 @@ quality-report/                   -- 過去に生成した fidelity snapshot (�
 計測を戻すなら Foundry から直接駆動する形になる。 `forge test` が動く前提が要るため
 #1868 の後に別途決める。
 
-## 実行 (現状は動かない)
-
-Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く
-remapping も無いため **`forge test` は現状 import 解決に失敗する**。
-
-#1864 で Rust 側の harness を削除した結果、 Solidity test を走らせる経路が無くなった。
-`forge-std` はもとから `lib/` に無く、 Rust 側が代わりに解決していたわけでもない。
-
-動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 #1868 で扱う。
+## 実行
 
 ```bash
-# 依存を入れた後であればこの形で走る
 forge test --root examples/dogfood-foundry-dapp
 ```
+
+`forge` が要る (`curl -L https://foundry.paradigm.xyz | bash && foundryup`)。
+無い host では `command not found: forge` で止まる。 それ以外の準備は無く、
+`lib/forge-std` は repo に入っているので取得も要らない。
+
+3 件の test が走る。
+
+`forge-std` を vendoring しているのは、 #1864 で Rust 側の harness を削除した結果
+Solidity test を走らせる経路が無くなり、 #1868 で入れ直したため。 取得 step を挟むと
+「checkout しただけでは走らない」 状態に戻るので、 repo に置いて解決している。

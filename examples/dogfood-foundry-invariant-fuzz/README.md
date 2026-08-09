@@ -26,17 +26,26 @@ quality-report/                   -- 過去に生成した quality snapshot (履
 計測を戻すなら Foundry から直接駆動する形になる。 `forge test` が動く前提が要るため
 #1868 の後に別途決める。
 
-## 実行 (現状は動かない)
-
-Solidity test は `forge-std/Test.sol` を import するが、 `lib/` に `forge-std` が無く
-remapping も無いため **`forge test` は現状 import 解決に失敗する**。
-
-#1864 で Rust 側の harness を削除した結果、 Solidity test を走らせる経路が無くなった。
-`forge-std` はもとから `lib/` に無く、 Rust 側が代わりに解決していたわけでもない。
-
-動かすには `forge-std` を `lib/` に固定して remapping を通す必要がある。 #1868 で扱う。
+## 実行
 
 ```bash
-# 依存を入れた後であればこの形で走る
 forge test --root examples/dogfood-foundry-invariant-fuzz
 ```
+
+`forge` が要る (`curl -L https://foundry.paradigm.xyz | bash && foundryup`)。
+無い host では `command not found: forge` で止まる。 それ以外の準備は無く、
+`lib/forge-std` は repo に入っているので取得も要らない。
+
+8 件の invariant が走る (ERC-20 が 2 / Vault が 3 / Router が 3)。 各 256 run で、
+1 invariant あたり 3840 call を積む。
+
+run 数と seed は `foundry.toml` が決める。 seed を固定しているので、 counter-example が
+出た時に同じ sequence を踏み直せる。 探索を広げたい場合は `runs` を上げる。
+
+```bash
+# その場だけ広げる
+FOUNDRY_INVARIANT_RUNS=10000 forge test --root examples/dogfood-foundry-invariant-fuzz
+```
+
+10_000 run は v1.18-3 の release gate が使っていた値で、 当時は Rust 側の harness が
+env で渡していた。 #1864 でその harness を消したため、 既定は `foundry.toml` の 256 になる。

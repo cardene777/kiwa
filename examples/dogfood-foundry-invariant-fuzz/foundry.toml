@@ -14,6 +14,10 @@ test = "test"
 solc = "0.8.20"
 optimizer = true
 optimizer_runs = 200
+# Stated rather than inferred, for the reason `dogfood-foundry-dapp` gives.
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+]
 
 [invariant]
 # The budget `forge test` uses. The v1.18-3 release gate ran 10_000 by having
@@ -28,10 +32,23 @@ include_storage = true
 include_push_bytes = true
 
 [fuzz]
-# Same story. The `seed` field is deliberately left out so `forge test` picks a
-# fresh seed each iteration; the harness that pinned `FOUNDRY_FUZZ_SEED` for
-# determinism is gone, so runs are not reproducible until something replaces it
-# (#1868).
+# Pinned so a failure can be reproduced. Without it every run explores a
+# different sequence, and a counter-example found once cannot be re-run — which
+# is the state #1864 left behind when it removed the harness that set
+# `FOUNDRY_FUZZ_SEED`. The value is the one that harness used.
+#
+# `[invariant]` has no seed of its own and takes this one, so this single line
+# pins both the stateless fuzz and the invariant runner. `forge config` echoes
+# it only under `[fuzz]`, so the invariant half was checked by running instead:
+# the same seed twice gives byte-identical output, and a different seed gives
+# different output, which is what says the value reaches the runner rather than
+# being carried and ignored.
+#
+# The cost is that a fixed seed explores the same sequences every time, so runs
+# stop accumulating coverage. Raising `runs` is the way to widen the search;
+# leaving the seed free would widen it too, but only by giving up the ability to
+# reproduce anything it finds.
+seed = "0xdeadbeefcafebabe"
 runs = 256
 max_test_rejects = 65536
 dictionary_weight = 40

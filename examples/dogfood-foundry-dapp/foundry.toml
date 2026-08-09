@@ -8,3 +8,10 @@ test = "test"
 solc = "0.8.20"
 optimizer = true
 optimizer_runs = 200
+# Stated rather than inferred. `libs` lets Foundry guess a remapping from the
+# directory layout, and the guess is right here — but it is a guess, and it
+# changes with the layout. The tests import `forge-std/Test.sol`, so the path
+# that resolves it is part of what makes them runnable and is written down.
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+]
