@@ -140,31 +140,39 @@ contract InvariantRouter is Test {
         );
     }
 
-    /// @notice At least one swap has to have succeeded.
+    /// @notice `swap` pulls token A from the caller and releases token C.
     ///
-    ///         Every invariant above, including the one right before this,
-    ///         holds when no swap ever succeeded — the reserves stay seeded and
-    ///         `swapsExecuted` stays 0, which sends that one down its early
-    ///         return. A `swap` that always reverts therefore passes the whole
-    ///         suite (measured), and the handler swallows the revert by design
-    ///         because dust reverts are a legitimate transition.
+    ///         Every invariant above is a relation that also holds when nothing
+    ///         happens — reserves stay seeded, A sums to its mint, and the
+    ///         recorded-swap check takes its early return at a count of zero.
+    ///         A `swap` that silently returns, or one that always reverts,
+    ///         passes all of them (both measured).
     ///
-    ///         Invariant functions cannot make this assertion: they run after
-    ///         the first call too, when nothing has succeeded yet and zero is
-    ///         correct. `afterInvariant` runs after a sequence, when "not once"
-    ///         is meaningful.
+    ///         An `afterInvariant` asserting "at least one swap succeeded" was
+    ///         tried and removed. It reads one run's state rather than the
+    ///         campaign's, and which actions a run contains is up to the
+    ///         fuzzer; the same assertion on `Vault` failed on correct code
+    ///         under seed `0x1111111111111111`. `Router` happened to be safe
+    ///         because `swap` is its only action, but the shape is fragile and
+    ///         is not worth keeping for that reason alone.
     ///
-    ///         What it sees is one run's state, not the campaign's: the runner
-    ///         rolls state back between runs, and the counter reads the same
-    ///         whether `runs` is 1 or 256 (measured 14 for all three). That is
-    ///         enough for the regression this guards — a `swap` that always
-    ///         reverts scores 0 in every run — and it holds on working code
-    ///         because `swap` is the handler's only action, so a depth-15
-    ///         sequence lands 13-14 successes across every seed tried.
-    ///
-    ///         The same assertion does not transfer to `InvariantERC20`, where
-    ///         `mint` is one of three actions and a run with none is normal.
-    function afterInvariant() public view {
-        assertGt(handler.swapsExecuted(), 0, "no swap succeeded in this run");
+    ///         Calling the operation directly does not depend on what the
+    ///         fuzzer generates.
+    function test_swapPullsTokenAAndReleasesTokenC() public {
+        address actor = address(0xA11CE);
+        uint256 heldA = tokenA.balanceOf(actor);
+        uint256 heldC = tokenC.balanceOf(actor);
+        uint256 reserveC = router.reserve(2);
+        assertGt(heldA, 0, "fixture: actor holds no token A");
+
+        vm.prank(actor);
+        uint256 out = router.swap(0, 2, 1_000_000);
+
+        assertGt(out, 0, "swap returned nothing");
+        assertEq(tokenA.balanceOf(actor), heldA - 1_000_000, "token A did not leave the actor");
+        assertEq(router.reserve(0), 1_000_000, "router did not take token A");
+        assertEq(tokenC.balanceOf(actor), heldC + out, "token C did not reach the actor");
+        assertEq(router.reserve(2), reserveC - out, "router did not release token C");
+        assertEq(router.reserve(1), 10 ** 27, "intermediate leg was not unwound");
     }
 }

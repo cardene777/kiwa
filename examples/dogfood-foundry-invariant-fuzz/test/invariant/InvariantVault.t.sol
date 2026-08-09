@@ -144,25 +144,51 @@ contract InvariantVault is Test {
         );
     }
 
-    /// @notice At least one deposit has to have succeeded.
+    /// @notice `deposit` moves assets in and mints shares for them.
     ///
-    ///         The identity above holds at `0 == 0` when nothing ever
-    ///         succeeded, so a `deposit` that always reverts passes it and
-    ///         every other invariant here. The handler swallows the revert by
-    ///         design, because dust reverts are a legitimate transition and it
-    ///         cannot tell them from a total regression.
+    ///         Every invariant above is a relation that also holds when nothing
+    ///         happens, so a `deposit` that silently returns, or one that always
+    ///         reverts, passes all of them (both measured).
     ///
-    ///         Invariant functions cannot make this assertion: they run after
-    ///         the first call too, when nothing has succeeded yet and zero is
-    ///         correct. `afterInvariant` runs after a sequence, when "not once"
-    ///         is meaningful.
+    ///         An `afterInvariant` asserting "at least one deposit succeeded"
+    ///         was tried and removed. It reads one run's state — the runner
+    ///         rolls back between runs, so the counter is the same whether
+    ///         `runs` is 1 or 256 — and which actions a run happens to contain
+    ///         is up to the fuzzer. A run of nothing but `withdraw` calls is a
+    ///         legitimate outcome, and seed `0x1111111111111111` produces one,
+    ///         which failed the assertion on correct code.
     ///
-    ///         What it sees is one run's state, not the campaign's — the runner
-    ///         rolls state back between runs. That is enough for the regression
-    ///         this guards, and it holds on working code because `withdraw` is
-    ///         a no-op until shares exist, so a sequence opens with deposits.
-    ///         Measured non-zero across six seeds.
-    function afterInvariant() public view {
-        assertGt(handler.totalDeposited(), 0, "no deposit succeeded in this run");
+    ///         Calling the operation directly does not depend on what the
+    ///         fuzzer generates. This is where "does deposit work at all"
+    ///         belongs; the invariants stay for the properties.
+    function test_depositMovesAssetsAndMintsShares() public {
+        address actor = address(0xA11CE);
+        uint256 before = asset.balanceOf(actor);
+        assertGt(before, 0, "fixture: actor holds no assets");
+
+        vm.prank(actor);
+        uint256 minted = vault.deposit(1_000);
+
+        assertEq(asset.balanceOf(actor), before - 1_000, "assets did not leave the actor");
+        assertEq(asset.balanceOf(address(vault)), 1_000, "assets did not reach the vault");
+        assertEq(vault.totalAssets(), 1_000, "totalAssets did not move");
+        assertGt(minted, 0, "no shares minted");
+        assertEq(vault.shares(actor), minted, "shares not credited to the depositor");
+    }
+
+    /// @notice `withdraw` returns assets and burns the shares it paid for.
+    function test_withdrawReturnsAssetsAndBurnsShares() public {
+        address actor = address(0xA11CE);
+        vm.prank(actor);
+        uint256 minted = vault.deposit(1_000);
+
+        uint256 heldBefore = asset.balanceOf(actor);
+        vm.prank(actor);
+        uint256 returned = vault.withdraw(minted);
+
+        assertGt(returned, 0, "withdraw returned nothing");
+        assertEq(asset.balanceOf(actor), heldBefore + returned, "assets did not reach the actor");
+        assertEq(vault.shares(actor), 0, "shares were not burned");
+        assertEq(vault.totalAssets(), 1_000 - returned, "totalAssets did not move");
     }
 }
