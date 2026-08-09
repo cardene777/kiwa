@@ -250,7 +250,7 @@ The v1.30 milestone applied the tier gate to every kiwa package. Package tiers a
 | Layer | Packages |
 |---|---|
 | Core (9) | `@kiwa-lab/core` / `api` / `data` / `cli-test` / `cli` / `observability` / `perf-harness` / `quality-metrics` / `release-invariants` |
-| Framework (12) | `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth` |
+| Framework | `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `hono` / `auth` |
 | SaaS (11) | `@kiwa-lab/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp` |
 | Test type (5) | `@kiwa-lab/ui` / `a11y` / `visual` / `component` / `e2e` |
 

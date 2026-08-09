@@ -2,7 +2,7 @@
 
 ## What you'll build
 
-The v1.27 milestone (Issue #955) applied `@kiwa-lab/quality-metrics` v0.3 tier-aware mutation gates to every kiwa package — 22 packages already had a `stryker.config.mjs` from earlier milestones, and 11 new packages were added in the v1.27-1 through v1.27-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 50, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any pure package gets a mutation baseline + tier gate in under 15 minutes. This is the pattern kiwa's 33 packages already use, spelled out step-by-step.
+The v1.27 milestone (Issue #955) applied `@kiwa-lab/quality-metrics` v0.3 tier-aware mutation gates to every kiwa package — 22 packages already had a `stryker.config.mjs` from earlier milestones, and 11 new packages were added in the v1.27-1 through v1.27-3 sweep. This tutorial captures the exact recipe you follow when a new package (or a fork of the monorepo) needs to join the sweep — the same primitives from tutorial 50, wired up through the 4-tier threshold SSOT so a core / framework / SaaS / test-type package each get a per-tier floor in one pass. Follow the 6 steps below and any pure package gets a mutation baseline + tier gate in under 15 minutes. This is the pattern the sweep established, spelled out step-by-step. The 33 is the count at v1.27; the set has since changed (#1785 / #1803 / #1865), so treat it as the rollout's size rather than the current inventory.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ For a package you are onboarding, pick the tier that best describes the code Str
 | Tier | Kill-rate floor (`high`) | Applies to |
 |---|---|---|
 | Core | 80 % | Pure logic packages with deterministic tests. `@kiwa-lab/core` / `data` / `cli-test` / `observability` / `cli`. |
-| Framework | 70 % | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `solidjs` / `fresh` / `hono` / `auth`. |
+| Framework | 70 % | SSR / hydration / RSC / adapter-wrapper layers. `@kiwa-lab/nextjs` / `nuxt` / `sveltekit` / `remix` / `astro` / `solidstart` / `qwikcity` / `edge` / `hono` / `auth`. |
 | SaaS | 65 % | Provider-specific adapters where mocks approximate a live external API. `@kiwa-lab/ai-llm` / `payment` / `queue` / `cache` / `streaming` / `realtime` / `mcp` / `agent` / `search` / `orm` / `dapp`. |
 | Test type | 60 % | Harness packages with DOM / measurement noise. `@kiwa-lab/ui` / `a11y` / `visual` / `component` / `e2e`. |
 
@@ -61,7 +61,7 @@ Three things to notice.
 
 ### 3. Add the `test:mutation` script
 
-`packages/my-package/package.json` — mirror the pattern used across the existing 33 packages.
+`packages/my-package/package.json` — mirror the pattern the existing packages use.
 
 ```json
 {
