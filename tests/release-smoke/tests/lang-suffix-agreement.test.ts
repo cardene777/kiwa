@@ -840,18 +840,28 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
   });
 
-  it('kiwa-observe が --layer の必須を条件付きで書いていない', () => {
+  it('kiwa-observe の --layer と --spec を同時に語る行が pin されている', () => {
     // The declaration said "always required" while a sentence 12 lines below
-    // still read as "required when `--spec` is also absent" — two readings of
-    // the same rule, and the looser one leaves `--out` unresolvable (#1895
-    // Round 2 F1).
-    const body = read('.claude/skills/kiwa-observe/SKILL.md');
-    const conditional = body
+    // read as "required when `--spec` is also absent" — two readings of the
+    // same rule, and the looser one leaves `--out` unresolvable (#1895 Round 2).
+    //
+    // Pinned as an exact set rather than matched by pattern. A pattern for one
+    // phrasing (`--layer` が無く…も無い) passes on the next one
+    // (`--spec` 未指定時は `--layer` 必須), which is the same contract with the
+    // same defect (#1895 Round 3, measured).
+    //
+    // **A failure here is not a defect by itself.** It means a line carrying
+    // this contract was added or reworded: re-read it, confirm `--layer` is
+    // still unconditional, and update the list.
+    const pinned = [
+      '`--layer` は `--spec` と `--out` の両方を明示した時でも必須にする。 **dashboard は「どの層を観測したか」 が本文と file 名の両方に要る**ためで、 `--spec` だけ省略時必須にすると `--out` の既定が解決できない組合せ (`--spec` と `--test` を渡して `--out` を省く) が残る。',
+      '**`--layer` が無ければ推測せず user に確認する**。 `--spec` を渡されていても同じで、 layer は spec の場所を決める以外に dashboard の本文と file 名にも要る (§ オプション)。',
+    ];
+    const actual = read('.claude/skills/kiwa-observe/SKILL.md')
       .split('\n')
-      .filter((l) => l.includes('--layer'))
-      .filter((l) => /`--layer` が無く[^\n]*も無い/.test(l));
-    expect(conditional, `--layer の必須が条件付きで残っている:\n${conditional.join('\n')}`).toEqual(
-      [],
+      .filter((l) => l.includes('--layer') && l.includes('--spec'));
+    expect(actual, '--layer と --spec の契約行が変わった。 内容を読み直して pin を更新する').toEqual(
+      pinned,
     );
   });
 
