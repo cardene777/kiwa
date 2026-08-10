@@ -119,41 +119,37 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     );
   });
 
+  /** Skill directories under `.claude/skills/`, whatever they happen to be. */
+  function skillNames(): string[] {
+    return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => {
+        try {
+          read(`.claude/skills/${name}/SKILL.md`);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .sort();
+  }
+
   /**
-   * The skills migrated onto the CLI path so far.
+   * The skills that ask the CLI for their spec path.
    *
-   * Listed rather than derived, because migration is staged (#1861 moves 20
-   * consumers in four groups) and a derived list would either pass vacuously
-   * before the work or fail for skills nobody has reached yet.
+   * Derived from the files. It was a hand-written list while #1861 moved the
+   * consumers in groups, because a derived list would have passed vacuously
+   * before the work; now that the migration is complete, naming them means a
+   * skill added later joins the silence rather than the checks below.
    *
-   * A skill is added here when its group lands. What the check itself asserts
-   * is derived from the file, so adding a name is the only edit needed.
+   * `kiwa-design` is the producer. It writes the spec rather than reading one,
+   * and the convention it implements is what the CLI mirrors, so it is not a
+   * consumer and does not resolve.
    */
-  const MIGRATED = [
-    // #1860
-    'kiwa-app',
-    'kiwa-review',
-    // #1861 群 1
-    'kiwa-nextjs',
-    'kiwa-api',
-    'kiwa-ui',
-    // #1861 群 2
-    'kiwa-vitest',
-    'kiwa-e2e',
-    'kiwa-a11y',
-    'kiwa-data',
-    'kiwa-cli-test',
-    // #1861 群 3
-    'kiwa-forge',
-    'kiwa-hardhat',
-    'kiwa-play',
-    // #1861 群 4
-    'kiwa-orm',
-    'kiwa-edge',
-    'kiwa-auth',
-    'kiwa-queue',
-    'kiwa-cache',
-  ];
+  const MIGRATED = skillNames().filter(
+    (name) => name !== 'kiwa-design' && read(`.claude/skills/${name}/SKILL.md`).includes('kiwa layers --json'),
+  );
 
   it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
     // `LANG` is the shell locale (`ja_JP.UTF-8` on this machine), so passing it
@@ -177,37 +173,36 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
   });
 
   /**
-   * The layers each migrated Layer 2 skill resolves for.
+   * The layers each Layer 2 skill resolves for, read from the table.
    *
    * The CLI call needs a `--layer`, and none of these skills take one as an
    * argument — the layer follows from which mode the skill was invoked in. A
    * block that says `--layer "$LAYER"` without saying where `$LAYER` comes
    * from is not runnable (#1862 Round 1 asked, and it was not there).
+   *
+   * Derived from `docs/layers.json` rather than listed. A hand-written copy of
+   * the table drifts from it, which is the defect the whole layer contract
+   * exists to prevent (#1807 / #1809 / #1810), and it left `kiwa-hardhat`
+   * unchecked once already because it reaches `contract` through
+   * `also_consumed_by` (#1891 Round 1).
+   *
+   * Skills the table names no layer for — the entry point `kiwa-app`, the
+   * reviewer `kiwa-review`, the orchestrator `kiwa-test`, the Layer 3
+   * `kiwa-observe` — are outside these checks by construction: they take the
+   * layer as an argument or resolve several, so "the layer this skill is for"
+   * is not a property they have.
    */
-  const SKILL_LAYERS: Record<string, string[]> = {
-    'kiwa-nextjs': [
-      'nextjs-server-action',
-      'nextjs-middleware',
-      'nextjs-rsc',
-      'nextjs-parallel-route',
-      'nextjs-rsc-streaming',
-    ],
-    'kiwa-api': ['integration', 'api'],
-    'kiwa-ui': ['ui'],
-    'kiwa-vitest': ['unit'],
-    'kiwa-e2e': ['e2e-generic'],
-    'kiwa-a11y': ['a11y'],
-    'kiwa-data': ['data'],
-    'kiwa-cli-test': ['cli'],
-    'kiwa-forge': ['contract'],
-    'kiwa-hardhat': ['contract'],
-    'kiwa-play': ['e2e'],
-    'kiwa-orm': ['orm-query'],
-    'kiwa-edge': ['edge-handler'],
-    'kiwa-auth': ['auth'],
-    'kiwa-queue': ['job-queue'],
-    'kiwa-cache': ['cache'],
-  };
+  const SKILL_LAYERS: Record<string, string[]> = LAYERS.layers.reduce<Record<string, string[]>>(
+    (acc, layer) => {
+      const row = layer as unknown as { consumer_skill: string | null; also_consumed_by?: string[] };
+      for (const skill of [row.consumer_skill, ...(row.also_consumed_by ?? [])]) {
+        if (!skill) continue;
+        (acc[skill] ??= []).push(layer.id);
+      }
+      return acc;
+    },
+    {},
+  );
 
   /**
    * The resolution block of a migrated Layer 2 skill.
@@ -493,27 +488,85 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(option, `${skill} の既定が固定 path`).not.toMatch(/省略時は `tests\/spec/);
   });
 
-  it('移行済 skill の数が Issue の群と一致する', () => {
-    // A guard against the list drifting: two from #1860, three in group 1,
-    // five in group 2, three in group 3, five in group 4.
-    expect(MIGRATED).toHaveLength(18);
+  it('検査対象が空になっていない', () => {
+    // `MIGRATED` and `SKILL_LAYERS` are both derived now, so a bug in the
+    // derivation (a renamed directory, a moved heading, a table field) empties
+    // them and every `it.each` above silently covers nothing.
+    //
+    // The floor is the count at the time #1861 finished, not an exact number:
+    // adding a skill should not fail this, removing one should.
+    expect(MIGRATED.length, `対象 skill: ${MIGRATED.join(', ')}`).toBeGreaterThanOrEqual(20);
+    expect(Object.keys(SKILL_LAYERS).length).toBeGreaterThanOrEqual(13);
   });
 
-  it('未移行の skill が残っていることを記録する', () => {
-    // Not a failure — the migration is staged. Asserted so the count moving to
-    // zero is visible rather than something to notice by hand.
-    const skills = readdirSync(resolve(REPO_ROOT, '.claude/skills'));
-    const remaining = skills.filter((name) => {
-      if (MIGRATED.includes(name) || name === 'kiwa-design') return false;
-      try {
-        const body = read(`.claude/skills/${name}/SKILL.md`);
-        return /省略時は `tests\/spec/.test(body);
-      } catch {
-        return false;
-      }
+  it('layer の consumer が全員 CLI から受け取る', () => {
+    // Derived from the table on both sides. A layer added with a consumer that
+    // never resolves would otherwise be found only when somebody ran it with
+    // `--lang ja` and got "spec が無い".
+    const missing = Object.keys(SKILL_LAYERS).filter((skill) => !MIGRATED.includes(skill));
+    expect(missing, `CLI から受け取らない consumer: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  /**
+   * Lines that build a spec path instead of asking for one.
+   *
+   * Four shapes, each one a defect that actually shipped:
+   *
+   * | # | 形 | 由来 |
+   * |---|---|---|
+   * | 1 | `--input-spec` 等の既定に固定 path を書く | #1855 — 英語の path なので `--lang ja` で producer が書かない file を指す |
+   * | 2 | `LANG_SUFFIX` を持つ行で spec path を組む | #1860 — CLI と 2 経路になり、 規約が変わると取り残される |
+   * | 3 | `test-spec-` を shell 変数で組む | #1861 群 5 — `kiwa-test` の Step 2.5 が spec の存在確認をこの形でやっていた |
+   * | 4 | option 宣言行に spec path を書く | #1861 群 3-4 — `--module {name}` の説明に「`tests/spec/…` を Read」 と併記する形 |
+   *
+   * Shape 4 needs the line to be an option declaration. `--input-spec` にも
+   * `省略時は` にも当たらない形で 5 skill が持っていた一方、 同じ path を本文で
+   * 説明する行は多く、 substring だけで見ると後者まで巻き込む。
+   *
+   * Prose that *mentions* a path is not an offender. Every migrated skill keeps
+   * `tests/spec/…/test-spec-{module}.foo.md` in its frontmatter and 前提 as a
+   * description of what it reads, and its resolution block says outright that
+   * such notation is illustrative. Banning the substring would force those to
+   * be deleted and take the reader's only statement of what the file looks
+   * like with them.
+   *
+   * Measured against the tree as it stood before the migration (`28a6981ec`):
+   * 19 lines across 16 skills. Against the tree this change produces: 0.
+   */
+  function selfAssembledLines(body: string): string[] {
+    return body.split('\n').filter((line) => {
+      if (/省略時は `tests\/spec/.test(line)) return true;
+      if (line.includes('LANG_SUFFIX') && line.includes('tests/spec')) return true;
+      if (/test-spec-[^`\n]*(\$\{|\$[A-Z_])/.test(line)) return true;
+      if (line.startsWith('- `--') && line.includes('tests/spec')) return true;
+      return false;
     });
-    // #1861 群 2-4. Recorded, not required to be empty.
-    expect(remaining.length, `未移行: ${remaining.join(', ')}`).toBeLessThanOrEqual(20);
+  }
+
+  it('自前で spec path を組む skill が 0 件である', () => {
+    // The sweep #1861 asks for: walks `.claude/skills/` rather than naming
+    // consumers, so a skill added after this lands is covered without editing
+    // the check. Naming them is what let `kiwa-hardhat` and `kiwa-play` sit
+    // unchecked through two earlier passes.
+    //
+    // `kiwa-design` is excluded as the producer: it writes the spec, so the
+    // convention has to be stated somewhere and that somewhere is its own file.
+    const offenders = skillNames()
+      .filter((name) => name !== 'kiwa-design')
+      .flatMap((name) =>
+        selfAssembledLines(read(`.claude/skills/${name}/SKILL.md`)).map(
+          (line) => `${name}: ${line.trim()}`,
+        ),
+      );
+    expect(offenders, `自前で組む行が残っている:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it('producer だけが規約を持つ', () => {
+    // The other half. Excluding `kiwa-design` from the sweep is only sound if
+    // it is the one file that states the convention — if it stopped, the
+    // sweep would pass with the rule written down nowhere.
+    const design = read('.claude/skills/kiwa-design/SKILL.md');
+    expect(selfAssembledLines(design).length, 'producer が規約を持たない').toBeGreaterThan(0);
   });
 
   it('入口 skill が --lang を CLI に渡す', () => {
