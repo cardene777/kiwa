@@ -8,6 +8,7 @@
  * definition names — one level, declared by the project itself.
  */
 
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
@@ -35,6 +36,33 @@ export interface ScannedManifest {
    * information rather than as a zero.
    */
   mtimeMs?: number;
+  /**
+   * Hash of the source string this entry's dependencies were parsed from.
+   *
+   * mtime answers "when did this last change", which leaves a window: `scan`
+   * reads the manifest, an edit lands, and `writeStackFile` stamps the mtime the
+   * file has *after* the edit. The recording then claims to describe contents it
+   * never saw. A hash of what was read closes that window because it cannot be
+   * taken from anything else.
+   *
+   * `undefined` only for entries built before this field existed. `scan` always
+   * sets it — the source string is in hand at that point, so there is no failure
+   * mode to leave it out for.
+   */
+  contentHash?: string;
+}
+
+/**
+ * Hash used to say "this is the content we read".
+ *
+ * SHA-256 over the raw source. Not a cryptographic requirement — the value only
+ * has to change when the file changes, and nothing here defends against a
+ * crafted collision (an attacker who can edit the manifest can edit the
+ * recording next to it). Chosen over a cheaper checksum because the cost is
+ * irrelevant at this size and the collision question stops being worth asking.
+ */
+function hashSource(source: string): string {
+  return createHash('sha256').update(source).digest('hex');
 }
 
 const READERS: Record<string, { language: string; read: (source: string) => Dependency[] }> = {
@@ -79,9 +107,17 @@ function readManifestsIn(dir: string, root: string, out: ScannedManifest[]): voi
       path: rel,
       language: reader.language,
       deps: reader.read(source),
+      // Derived from the string that was just parsed, not from a re-read. This
+      // is the only value that answers "what did we read" — mtime answers "when
+      // did it last change", which cannot distinguish an edit made between the
+      // read and the write from the writer's own output.
+      contentHash: hashSource(source),
     };
     // Taken next to the read, so it describes the contents just parsed. A stat
     // taken later describes whatever the file became.
+    //
+    // Kept alongside the hash rather than replaced by it: a recording written by
+    // an older version has no hash, and the reader falls back to this.
     //
     // Left unset rather than assigned `undefined` when the stat fails: the
     // field is optional and `exactOptionalPropertyTypes` is on, so the two are
