@@ -217,30 +217,53 @@ function isDirectory(path) {
 }
 
 /**
- * docs/libraries 配下の link を検査し、解決しないものを列挙する。
+ * link が解決しない理由。呼出側が「どの壊れ方か」 で絞れるようにする。
+ *
+ * 文字列だけを返していた間、呼出側が `existsSync` で分類をやり直しており、
+ * 本 module が持つ大文字小文字の厳密判定と repo 境界がその再判定で失われていた
+ * (実測で case 違いの link が「解決する」 と誤判定された)。分類は本 module に持たせ、
+ * 呼出側は理由で絞るだけにする。
+ */
+export const LINK_FAILURE = Object.freeze({
+  /** repo のどこにも実体が無い。 */
+  MISSING: 'missing',
+  /** 実体はあるが docs/ の外。GitHub では開けるが公開 site には出ない。 */
+  OUTSIDE_DOCS: 'outside-docs',
+  /** directory はあるが index.md が無い。公開後 404 になる。 */
+  DIRECTORY_WITHOUT_INDEX: 'directory-without-index',
+});
+
+/**
+ * 報告 1 行の形。並べ替えの key もこれを使い、報告順と並べ替え順を一致させる。
+ */
+const reportLine = ({ file, target }) => `dead link: ${file} -> ${target}`;
+
+/**
+ * link を 1 つずつ解決し、解決しないものを理由付きで列挙する。
  *
  * 解決規則は VitePress に合わせる。末尾 slash と directory は `index.md` を要求し、
  * 拡張子なしは `<path>.md` を見る。directory が在るだけでは解決とみなさない
  * (`index.md` の無い directory への link は公開後 404 になる)。
  *
  * @param {{repositoryRoot: string, docsRoot: string, scanRoot: string}} roots
- * @returns {string[]} 解決しない link の説明行。空配列なら破れ無し。
+ * @returns {{file: string, target: string, reason: string}[]} 解決しない link。
  */
-export function deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
+export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   const existsCaseExact = makeExistsCaseExact(repositoryRoot);
-  const dead = [];
+  const found = [];
 
-  const resolves = (fromDirectory, target) => {
+  /** 解決すれば null、しなければ LINK_FAILURE のいずれかを返す。 */
+  const failureOf = (fromDirectory, target) => {
     const [pathPart] = target.split(/[#?]/);
     // 同一 file 内の anchor だけの link。anchor の実在検証は別の関心。
-    if (!pathPart) return true;
+    if (!pathPart) return null;
 
     // 生成側は directory 名を percent encode して埋めるので、戻してから実体を見る。
     let decoded = pathPart;
     try {
       decoded = decodeURIComponent(pathPart);
     } catch {
-      // 壊れた escape は生の文字列で照合する。解決できなければ dead になる。
+      // 壊れた escape は生の文字列で照合する。解決できなければ missing になる。
     }
 
     // site 絶対 path は docs/ を根とする。VitePress は docs/public/ の中身を site root へ
@@ -250,20 +273,41 @@ export function deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
       ? [join(docsRoot, decoded), join(docsRoot, 'public', decoded)]
       : [join(fromDirectory, decoded)];
 
+    // 候補は最大 2 つ。1 つでも docs/ の中で解決すれば成功、そうでなければ
+    // 見つかった中で最も具体的な失敗理由を返す。
+    let failure = LINK_FAILURE.MISSING;
+    const worse = (reason) => {
+      // MISSING より OUTSIDE_DOCS、それより DIRECTORY_WITHOUT_INDEX の方が情報が多い。
+      const rank = {
+        [LINK_FAILURE.MISSING]: 0,
+        [LINK_FAILURE.OUTSIDE_DOCS]: 1,
+        [LINK_FAILURE.DIRECTORY_WITHOUT_INDEX]: 2,
+      };
+      if (rank[reason] > rank[failure]) failure = reason;
+    };
+
     for (const absolute of candidates) {
       // 公開されるのは docs/ の中だけ。repo 内でも外に出た link は解決とみなさない。
+      // ただし「repo に実体はある」 ことは呼出側が知りたいので理由に残す。
       const fromDocs = relative(docsRoot, absolute);
-      if (fromDocs === '..' || fromDocs.startsWith(`..${sep}`)) continue;
+      const insideDocs = !(fromDocs === '..' || fromDocs.startsWith(`..${sep}`));
 
-      if (decoded.endsWith('/')) {
-        if (existsCaseExact(join(absolute, 'index.md'))) return true;
+      const asPage = decoded.endsWith('/')
+        ? existsCaseExact(join(absolute, 'index.md'))
+        : existsCaseExact(`${absolute}.md`) ||
+          existsCaseExact(join(absolute, 'index.md')) ||
+          (existsCaseExact(absolute) && !isDirectory(absolute));
+
+      if (asPage) {
+        if (insideDocs) return null;
+        worse(LINK_FAILURE.OUTSIDE_DOCS);
         continue;
       }
-      if (existsCaseExact(`${absolute}.md`)) return true;
-      if (existsCaseExact(join(absolute, 'index.md'))) return true;
-      if (existsCaseExact(absolute) && !isDirectory(absolute)) return true;
+      if (existsCaseExact(absolute)) {
+        worse(insideDocs ? LINK_FAILURE.DIRECTORY_WITHOUT_INDEX : LINK_FAILURE.OUTSIDE_DOCS);
+      }
     }
-    return false;
+    return failure;
   };
 
   const walk = (directory) => {
@@ -278,12 +322,37 @@ export function deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
       const content = readFileSync(entryPath, 'utf8');
       for (const target of linkTargets(content)) {
         if (isExternal(target)) continue;
-        if (resolves(dirname(entryPath), target)) continue;
-        dead.push(`dead link: ${relative(repositoryRoot, entryPath)} -> ${target}`);
+        const reason = failureOf(dirname(entryPath), target);
+        if (!reason) continue;
+        found.push({ file: relative(repositoryRoot, entryPath), target, reason });
       }
     }
   };
 
   walk(scanRoot);
-  return dead.sort();
+  // 並びは報告文字列そのものの code unit 順で固定する。
+  //
+  // `localeCompare` は ICU の照合順に従うため、大文字を含む path で並びが変わり
+  // 環境によっても揺れる。区切りを変えた key (`file + ' ' + target`) も使えない
+  // = 報告文字列は ` -> ` で繋ぐため、空白を含む file 名で 2 つの順序が割れる
+  // (`a.md -> zzz` と `a.md b.md -> ./y` で逆転する。実測で確認した)。
+  return found.sort((a, b) => {
+    const left = reportLine(a);
+    const right = reportLine(b);
+    if (left < right) return -1;
+    return left > right ? 1 : 0;
+  });
+}
+
+/**
+ * 解決しない link を 1 行の説明文で列挙する。
+ *
+ * 理由で絞りたい呼出側は `classifyDocumentLinks` を使う。こちらは生成 script が
+ * stderr へ出すための整形版。
+ *
+ * @param {{repositoryRoot: string, docsRoot: string, scanRoot: string}} roots
+ * @returns {string[]} 解決しない link の説明行。空配列なら破れ無し。
+ */
+export function deadDocumentLinks(roots) {
+  return classifyDocumentLinks(roots).map(reportLine);
 }

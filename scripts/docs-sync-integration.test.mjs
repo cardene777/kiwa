@@ -24,7 +24,12 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { deadDocumentLinks, unsupportedLinkSyntax } from './docs-link-check.mjs';
+import {
+  LINK_FAILURE,
+  classifyDocumentLinks,
+  deadDocumentLinks,
+  unsupportedLinkSyntax,
+} from './docs-link-check.mjs';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 const START = '<!-- kiwa-docs:start -->';
@@ -642,6 +647,105 @@ test('the real docs/libraries tree has no dead links', () => {
     scanRoot: join(repositoryRoot, 'docs', 'libraries'),
   });
   assert.deepEqual(dead, [], dead.join('\n'));
+});
+
+// `docs/libraries` の外はまだ `pnpm docs:links` の走査範囲に入っていない (#1877)。
+// 範囲を広げるには「GitHub 前提の doc か公開 site 前提か」 の境界を決める必要があり、
+// それを待つ間も **参照先が repo のどこにも無い link** だけは再発させない。
+//
+// 分類は checker 側が返す (`LINK_FAILURE`)。ここで `existsSync` を使って判定し直すと、
+// checker が持つ大文字小文字の厳密判定と repo 境界がその再判定で失われる (実測で
+// case 違いの link が「解決する」 と誤判定され、test が見逃した)。
+//
+// `docs/api/{typescript,solidity}/` は生成物で、checkout に無いのが正常。target を
+// 部分一致で除外すると `./typescript-typo/` のような実際の破れまで見逃すため、
+// 生成される既知の target だけを完全一致で外す。
+const GENERATED_API_TARGETS = new Set([
+  './typescript/',
+  './solidity/',
+  './solidity/dogfood-foundry-dapp/',
+]);
+
+test('no link in docs points at a path that exists nowhere in the repository', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+
+  const missing = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
+    .filter(({ reason }) => reason === LINK_FAILURE.MISSING)
+    .filter(
+      ({ file, target }) =>
+        !(/^docs\/api\/(README|index)\.md$/.test(file) && GENERATED_API_TARGETS.has(target)),
+    )
+    .map(({ file, target }) => `${file} -> ${target}`);
+
+  assert.deepEqual(missing, [], missing.join('\n'));
+});
+
+// 報告の並びは code unit 順に固定する。`localeCompare` は ICU の照合順に従うため、
+// 大文字を含む path で並びが変わり、環境によっても揺れる。stderr の diff を読む側が
+// 実行ごとに違う順序を見ることになる。
+test('dead links are reported in code unit order', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // 大文字と小文字が混じる file 名でないと 2 つの並べ方が同じ結果になる。
+    for (const name of ['Zeta.md', 'alpha.md', 'Beta.md']) {
+      writeFileSync(join(docsDirectory, name), `# ${name}\n\n[x](./gone-${name})\n`);
+    }
+
+    const dead = deadDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+
+    assert.deepEqual(dead, [...dead].sort(), 'code unit 順であること');
+    assert.notDeepEqual(
+      [...dead].sort(),
+      [...dead].sort((a, b) => a.localeCompare(b)),
+      'fixture が 2 つの並べ方を区別できていること',
+    );
+  });
+});
+
+// 並べ替えの key は報告文字列そのものでないといけない。区切りを変えた key
+// (`file + ' ' + target`) は、空白を含む file 名で報告順と逆転する。
+test('the sort key matches the reported line even for file names with spaces', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // `a.md` の target は `-` より後ろの文字で始める必要がある。`./x` のように
+    // `.` で始めると 2 つの key が同じ順序を返し、test が識別力を失う。
+    writeFileSync(join(docsDirectory, 'a.md'), '# a\n\n[x](zzz)\n');
+    writeFileSync(join(docsDirectory, 'a.md b.md'), '# b\n\n[y](./gone)\n');
+
+    const dead = deadDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+
+    assert.deepEqual(dead, [...dead].sort(), '報告順と code unit 順が一致すること');
+
+    // 旧 key を再現し、この fixture が 2 つの並べ方を区別できることを示す。
+    const byOldKey = [...dead].sort((left, right) => {
+      const key = (line) => line.replace(/^dead link: /, '').replace(' -> ', ' ');
+      return key(left) < key(right) ? -1 : key(left) > key(right) ? 1 : 0;
+    });
+    assert.notDeepEqual(byOldKey, [...dead].sort(), 'fixture が旧 key と新 key を区別できていること');
+  });
+});
+
+// 解析できない記法が現れると、その link は解決の検査自体を受けない。上の test は
+// 「checker が読めた link」 しか見ないので、読めない記法が増えると黙って覆う範囲が
+// 狭まる。docs 全体で未対応記法を 0 に保ち、増えた時に気付けるようにする。
+test('no file in docs uses link syntax the checker cannot parse', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const found = unsupportedLinkSyntax({
+    repositoryRoot,
+    scanRoot: join(repositoryRoot, 'docs'),
+  });
+  assert.deepEqual(found, [], found.join('\n'));
 });
 
 // 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、

@@ -65,7 +65,7 @@ test('accountsChanged event が page 側 handler を発火する', async ({ page
 });
 ```
 
-This follows the same idea as `T-E2E-006` in [examples/basic-connect/tests/connect.spec.ts](../examples/basic-connect/tests/connect.spec.ts).
+This follows the same idea as `T-E2E-006` in [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts).
 
 ## How to synchronize with handlers
 
@@ -136,4 +136,4 @@ If you want to handle multiple wallets, acquire them through EIP-6963 instead of
 - [EIP-1193 events](https://eips.ethereum.org/EIPS/eip-1193#events)
 - [RPC.md](./RPC.md)
 - [ERRORS.md](./ERRORS.md)
-- [examples/basic-connect/tests/connect.spec.ts](../examples/basic-connect/tests/connect.spec.ts)
+- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts)

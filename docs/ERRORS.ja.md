@@ -127,7 +127,7 @@ try {
 
 この方式なら Playwright の `page.evaluate()` をまたいでも、
 `err.code === 4200` のような assertion を page 側で書けます。
-実例は [examples/basic-connect/tests/connect.spec.ts](../examples/basic-connect/tests/connect.spec.ts) の
+実例は [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts) の
 `T-E2E-007` を参照してください。
 
 ## event と error の関係
@@ -145,4 +145,4 @@ test では timeout message を合わせて確認するのが実用的です。
 - [EIP-1193 provider errors](https://eips.ethereum.org/EIPS/eip-1193#provider-errors)
 - [RPC.md](./RPC.md)
 - [EVENTS.md](./EVENTS.md)
-- [examples/basic-connect/tests/connect.spec.ts](../examples/basic-connect/tests/connect.spec.ts)
+- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts)

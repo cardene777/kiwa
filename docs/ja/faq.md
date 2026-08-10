@@ -40,7 +40,7 @@ anvil は default 8545 共有のため、複数 example の並列実行は不可
 ## Q6: wagmi v2 / RainbowKit v2 ではなく ConnectKit / Reown を使いたい
 
 A: kiwa は EIP-1193 / EIP-6963 標準に準拠しているため、いずれの wallet picker でも動作します。
-特定 picker の test 対応は `examples/basic-connect/tests/eip6963.spec.ts` を参考にしてください。
+特定 picker の test 対応は `tests/fixtures/basic-connect/e2e-test/eip6963.spec.ts` を参考にしてください。
 
 ## Q7: contract deploy が遅い
 
