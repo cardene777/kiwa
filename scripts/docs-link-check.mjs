@@ -234,6 +234,11 @@ export const LINK_FAILURE = Object.freeze({
 });
 
 /**
+ * 報告 1 行の形。並べ替えの key もこれを使い、報告順と並べ替え順を一致させる。
+ */
+const reportLine = ({ file, target }) => `dead link: ${file} -> ${target}`;
+
+/**
  * link を 1 つずつ解決し、解決しないものを理由付きで列挙する。
  *
  * 解決規則は VitePress に合わせる。末尾 slash と directory は `index.md` を要求し、
@@ -325,11 +330,15 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   };
 
   walk(scanRoot);
-  // 並びは code unit 順で固定する。`localeCompare` は ICU の照合順に従うため、
-  // 大文字を含む path の並びが既定の `.sort()` と変わり、環境によっても揺れる。
+  // 並びは報告文字列そのものの code unit 順で固定する。
+  //
+  // `localeCompare` は ICU の照合順に従うため、大文字を含む path で並びが変わり
+  // 環境によっても揺れる。区切りを変えた key (`file + ' ' + target`) も使えない
+  // = 報告文字列は ` -> ` で繋ぐため、空白を含む file 名で 2 つの順序が割れる
+  // (`a.md -> zzz` と `a.md b.md -> ./y` で逆転する。実測で確認した)。
   return found.sort((a, b) => {
-    const left = `${a.file} ${a.target}`;
-    const right = `${b.file} ${b.target}`;
+    const left = reportLine(a);
+    const right = reportLine(b);
     if (left < right) return -1;
     return left > right ? 1 : 0;
   });
@@ -345,5 +354,5 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
  * @returns {string[]} 解決しない link の説明行。空配列なら破れ無し。
  */
 export function deadDocumentLinks(roots) {
-  return classifyDocumentLinks(roots).map(({ file, target }) => `dead link: ${file} -> ${target}`);
+  return classifyDocumentLinks(roots).map(reportLine);
 }

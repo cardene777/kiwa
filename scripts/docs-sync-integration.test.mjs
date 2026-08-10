@@ -708,6 +708,34 @@ test('dead links are reported in code unit order', () => {
   });
 });
 
+// 並べ替えの key は報告文字列そのものでないといけない。区切りを変えた key
+// (`file + ' ' + target`) は、空白を含む file 名で報告順と逆転する。
+test('the sort key matches the reported line even for file names with spaces', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // `a.md` の target は `-` より後ろの文字で始める必要がある。`./x` のように
+    // `.` で始めると 2 つの key が同じ順序を返し、test が識別力を失う。
+    writeFileSync(join(docsDirectory, 'a.md'), '# a\n\n[x](zzz)\n');
+    writeFileSync(join(docsDirectory, 'a.md b.md'), '# b\n\n[y](./gone)\n');
+
+    const dead = deadDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+
+    assert.deepEqual(dead, [...dead].sort(), '報告順と code unit 順が一致すること');
+
+    // 旧 key を再現し、この fixture が 2 つの並べ方を区別できることを示す。
+    const byOldKey = [...dead].sort((left, right) => {
+      const key = (line) => line.replace(/^dead link: /, '').replace(' -> ', ' ');
+      return key(left) < key(right) ? -1 : key(left) > key(right) ? 1 : 0;
+    });
+    assert.notDeepEqual(byOldKey, [...dead].sort(), 'fixture が旧 key と新 key を区別できていること');
+  });
+});
+
 // 解析できない記法が現れると、その link は解決の検査自体を受けない。上の test は
 // 「checker が読めた link」 しか見ないので、読めない記法が増えると黙って覆う範囲が
 // 狭まる。docs 全体で未対応記法を 0 に保ち、増えた時に気付けるようにする。
