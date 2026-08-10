@@ -443,9 +443,14 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // Both spellings. `--spec-path` predates `--input-spec` and five skills
     // still use it, so looking only for the newer name skipped `kiwa-forge`
     // and `kiwa-hardhat` entirely (Round 1 F1).
+    //
+    // Anchored to the declaration line. A substring match picks up prose that
+    // mentions the flag — `kiwa-play` describes `--module` in terms of
+    // `--input-spec` two lines earlier — and then asserts on the prose while
+    // the real declaration goes unchecked (Round 2 F1, measured).
     const option = body
       .split('\n')
-      .find((line) => ['`--input-spec', '`--spec-path'].some((flag) => line.includes(flag)));
+      .find((line) => /^- `--(?:input-spec|spec-path) \{path\}`/.test(line));
     if (option === undefined) return; // 入口 skill と review は spec flag を持たない
     // A hardcoded default is the English path, so `--lang ja` silently points
     // at a file the producer did not write (#1855).
