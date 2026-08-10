@@ -41,6 +41,7 @@
  * gitignored, so its absence is the normal state on a fresh checkout.
  */
 
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -379,6 +380,8 @@ interface ScannedEntry {
   language?: unknown;
   /** The mtime the file had when `scan` read it, at full precision. */
   mtime_ms?: unknown;
+  /** SHA-256 of the source `scan` parsed, hashed at the read. */
+  content_sha256?: unknown;
 }
 
 /**
@@ -456,6 +459,40 @@ function validate(
     if (hasMtime && !(typeof entry.mtime_ms === 'number' && Number.isFinite(entry.mtime_ms))) {
       return `${manifest} records an unusable mtime`;
     }
+
+    // Same distinction as the mtime field above: absent means the recording
+    // predates it, malformed means the writer put something there that did not
+    // survive.
+    const hasHash = 'content_sha256' in entry && entry.content_sha256 !== undefined;
+    if (hasHash && !(typeof entry.content_sha256 === 'string' && /^[0-9a-f]{64}$/.test(entry.content_sha256))) {
+      return `${manifest} records an unusable content hash`;
+    }
+
+    // The hash answers "is this the content the detection was derived from",
+    // which is the question being asked. mtime answers "did this change since
+    // some moment", and the two differ in the window between `scan` reading the
+    // file and the writer stamping it — an edit landing there is invisible to
+    // mtime because the stamp is taken after it.
+    //
+    // Checked before the mtime comparison and returning outright, rather than
+    // falling through: a recording that carries a matching hash needs no weaker
+    // evidence, and one that carries a mismatching hash is already known to be
+    // describing different content. Running both would let a touched-but-
+    // unchanged file (`touch package.json`) fail on mtime after the hash said it
+    // is the same content.
+    if (typeof entry.content_sha256 === 'string') {
+      let source: string;
+      try {
+        source = readFileSync(full, 'utf-8');
+      } catch {
+        return `${manifest} could not be read`;
+      }
+      if (createHash('sha256').update(source).digest('hex') !== entry.content_sha256) {
+        return `${manifest} changed after the detection was taken`;
+      }
+      continue;
+    }
+
     try {
       const current = statSync(full).mtimeMs;
       const read = entry.mtime_ms;

@@ -924,11 +924,18 @@ describe('what --detect writes is what the resolver reads', () => {
       expect(resolved.layers.filter((l) => l.runtime === 'solidity')).toHaveLength(0);
 
       // Editing the manifest after the fact must send the reader back to the
-      // fallback. This is what ties the writer's timestamp to the reader's
+      // fallback. This is what ties the writer's record to the reader's
       // staleness check — without it the writer could record an empty one and
       // every other assertion would still pass.
-      const later = new Date(Date.now() + 120_000);
-      utimesSync(join(dir, 'package.json'), later, later);
+      //
+      // A real edit, not `utimes`. The recording carries the hash of what was
+      // read, so moving the mtime alone no longer makes it stale — that is the
+      // point of the hash, and asserting the old behaviour here would pin the
+      // window this check exists to close.
+      writeFileSync(
+        join(dir, 'package.json'),
+        JSON.stringify({ dependencies: { next: '^15.0.0', vitest: '^3.0.0' } }),
+      );
       const afterEdit = resolveLayers({ cwd: dir });
       expect(afterEdit.source).toBe('all');
       expect(afterEdit.warnings.join(' ')).toMatch(/changed after/);
@@ -1285,6 +1292,131 @@ describe('a recording has to come from the table it is read against', () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  /**
+   * The window mtime cannot close.
+   *
+   * `scan` reads the manifest, an edit lands, and the writer stamps the mtime
+   * the file has *after* the edit. The recording then describes contents it
+   * never saw, and every comparison built on mtime accepts it — measured before
+   * the hash existed: `mtime 1786190893972.399` against `taken 1786190893974`
+   * was accepted although the read happened first.
+   *
+   * The hash is taken from the string `scan` parsed, so it cannot be produced by
+   * anything the writer sees later.
+   */
+  it('discards a recording whose manifest changed between the scan and the write', async () => {
+    const { scan } = await import('../src/detect/scan.js');
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-window-'));
+    try {
+      const manifest = join(root, 'package.json');
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
+      const scanned = scan(root);
+
+      // The edit lands here — after the read, before the write.
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0","vitest":"^3.0.0"}}');
+
+      writeStackFile(root, [{ layer: 'nextjs-rsc', manifest: 'package.json' } as never], scanned);
+      withFixture(root, () => {
+        const resolved = resolveLayers({ cwd: root });
+        expect(resolved.warnings.join(' ')).toMatch(/changed after the detection was taken/);
+        expect(resolved.source).toBe('all');
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts a recording whose manifest did not change', async () => {
+    // The other direction. A hash that rejects everything is not a check.
+    const { scan } = await import('../src/detect/scan.js');
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-window-ok-'));
+    try {
+      writeFileSync(join(root, 'package.json'), '{"dependencies":{"next":"^15.0.0"}}');
+      const scanned = scan(root);
+      writeStackFile(root, [{ layer: 'nextjs-rsc', manifest: 'package.json' } as never], scanned);
+      withFixture(root, () => {
+        const resolved = resolveLayers({ cwd: root });
+        expect(resolved.warnings.join(' ')).not.toMatch(/changed after/);
+        expect(resolved.source).toBe('detected');
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('accepts a manifest that was touched but not edited', async () => {
+    // What the hash buys over mtime, stated as behaviour: `touch package.json`
+    // moves the mtime without changing the content, and the detection is still
+    // derived from what the file says. Running the mtime comparison after a
+    // matching hash would discard this.
+    const { scan } = await import('../src/detect/scan.js');
+    const { writeStackFile } = await import('../src/detect/index.js');
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-touch-'));
+    try {
+      const manifest = join(root, 'package.json');
+      writeFileSync(manifest, '{"dependencies":{"next":"^15.0.0"}}');
+      const scanned = scan(root);
+      writeStackFile(root, [{ layer: 'nextjs-rsc', manifest: 'package.json' } as never], scanned);
+
+      const later = Date.now() + 5_000;
+      utimesSync(manifest, later / 1000, later / 1000);
+
+      withFixture(root, () => {
+        const resolved = resolveLayers({ cwd: root });
+        expect(resolved.warnings.join(' ')).not.toMatch(/changed after/);
+        expect(resolved.source).toBe('detected');
+      });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('discards a recording whose content hash is present but unusable', () => {
+    // Same distinction the mtime field draws. Absent means the recording
+    // predates the field; present-but-broken means the writer put something
+    // there that did not survive. Falling through to the mtime comparison would
+    // let a recording opt out of the exact check by carrying a broken value.
+    for (const hash of [null, 42, '', 'not-a-hash', 'ABC123', 'a'.repeat(63)]) {
+      const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
+        generated_at: fresh(),
+        scanned: [{ manifest: 'package.json', language: 'typescript', content_sha256: hash }],
+        detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
+      });
+      withFixture(root, () => {
+        const resolved = resolveLayers({ cwd: root });
+        expect(resolved.warnings.join(' '), `content_sha256=${JSON.stringify(hash)}`).toMatch(
+          /unusable content hash/,
+        );
+        expect(resolved.source).toBe('all');
+      });
+    }
+  });
+
+  it('falls back to the mtime for a recording written before hashes were kept', () => {
+    // An upgrade must not invalidate every cache on disk. A recording with an
+    // mtime and no hash keeps the comparison it was written for.
+    const root = fixture({ 'package.json': '{"dependencies":{"next":"15"}}' }, {
+      generated_at: fresh(),
+      scanned: [
+        {
+          manifest: 'package.json',
+          language: 'typescript',
+          mtime_ms: statSync(join(process.cwd(), 'package.json')).mtimeMs,
+        },
+      ],
+      detected: [{ layer: 'nextjs-rsc', manifest: 'package.json' }],
+    });
+    withFixture(root, () => {
+      // The mtime is deliberately another file's, so the comparison runs and
+      // rejects. What is pinned is that the mtime path is still reached.
+      const resolved = resolveLayers({ cwd: root });
+      expect(resolved.warnings.join(' ')).toMatch(/changed after the detection was taken/);
+      expect(resolved.warnings.join(' ')).not.toMatch(/content hash/);
+    });
   });
 
   it('falls back to the timestamp for a recording written before mtimes were kept', async () => {

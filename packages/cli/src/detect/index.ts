@@ -81,7 +81,7 @@ export function stackFileExists(cwd: string): boolean {
 export function writeStackFile(
   cwd: string,
   layers: Detection[],
-  scanned: { path: string; language: string; mtimeMs?: number }[] = [],
+  scanned: { path: string; language: string; mtimeMs?: number; contentHash?: string }[] = [],
   now: Date = new Date(),
 ): string {
   const dir = join(cwd, '.kiwa');
@@ -111,10 +111,20 @@ export function writeStackFile(
     // Written per entry rather than as one timestamp because that is the
     // granularity the question has: each manifest is compared against the value
     // it had, not against a summary of all of them.
+    // `content_sha256` is what `scan` read, hashed at the read. mtime cannot
+    // answer that question: `scan` reads the manifest, an edit lands, and a stat
+    // taken here stamps the mtime the file has *after* the edit — the recording
+    // then claims to describe contents it never saw. Measured before this field
+    // existed: `mtime 1786190893972.399` against `taken 1786190893974` was
+    // accepted, though the read happened before the edit.
+    //
+    // Passed through from `scan` rather than derived here. Reading the file
+    // again at write time would reproduce the same window one layer down.
     scanned: scanned.map((m) => ({
       manifest: m.path,
       language: m.language,
       ...(m.mtimeMs === undefined ? {} : { mtime_ms: m.mtimeMs }),
+      ...(m.contentHash === undefined ? {} : { content_sha256: m.contentHash }),
     })),
     // Which table produced this answer. The staleness check compares the
     // recording against the manifests, which cannot see that the signal table
