@@ -27,25 +27,74 @@ $ARGUMENTS
 
 ## オプション
 
-- `--module {name}` — Layer 1 spec の module 名 (`tests/spec/integration/test-spec-{name}.cache.md` を Read)
+- `--module {name}` — Layer 1 spec の module 名。 path は § 入力 spec の path は CLI から受け取る で解決する
 - `--spec-path {path}` — Layer 1 spec の path を明示 (`--module` の代替)
 - `--provider {redis|memcached|keydb}` — cache provider 選択 (default `redis` = v1.8-6 setupCacheEnv、 v1.9-5 で `memcached`、 v1.9-6 で `keydb` 追加)
 - `--mode {in-memory|stub|testcontainers|auto}` — backend 選択 (default `auto` = 高速 backend (Redis=in-memory、 Memcached/KeyDB=stub) を優先し、 spec が testcontainers を要求する TC のみ切替)
 - `--client {ioredis|node-redis|memjs|memcached}` — testcontainers mode 時の client 選択 (default provider 依存 — redis/keydb=`ioredis`、 memcached=`memjs`)
 - `--output {path}` — test file 出力先 (default `tests/{module}.cache.test.ts`)
-- `--lang {ja|en|<ISO 639-1>}` — report 生成言語
+- `--lang {ja|en|<ISO 639-1>}` — spec の言語と report の生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--no-run` — `vitest` 実行を skip (Write のみ)
 - `--no-review` — Step 4 の kiwa-review 自動呼出 (test-review) を skip
 
+### 入力 spec の path は CLI から受け取る
+
+`--spec-path` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill が扱う layer は `cache` の 1 つ。
+
+```bash
+kiwa layers --json --layer cache --lang "$DOC_LANG" --module "$MODULE"
+```
+
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
+
+`$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+`--provider` / `--mode` / `--client` は spec の中身の選択で、 path には影響しない。 3 provider は 1 つの `cache` layer が持つ選択肢で、 spec は provider ごとに分かれない。
+
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
+| 結果 | 扱い |
+|---|---|
+| exit != 0 | stderr をそのまま user に返して中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値を下流に渡す
+
+Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
+
+本 SKILL.md 内の spec path 表記は説明のための例示で、 解決の指示ではない。
+
 ## 実行フロー
 
-### Step 0: 文書生成言語 (skill 起動時 1 回)
+### Step 0: 文書生成言語の決定 (skill 起動時 1 回)
 
-AskUserQuestion で言語確認、 `--lang` 指定時 skip。
+`--lang` が渡っていればそれを使う。 渡っていなければ **起動元が渡した値、 単体起動なら `ja`** を既定にする (option 宣言と同じ規則)。
+
+`/kiwa-app` から起動される経路では常に値が渡るため、 尋ねる契機は単体起動に限られる。 その場合も既定があるので **AskUserQuestion は出さない** = 既定が決まっている問いを毎回聞くと chain が止まる。
 
 ### Step 1: Layer 1 spec 読込 + provider / backend / client 判定
 
-`tests/spec/integration/test-spec-{module}.cache.md` を Read、 各 TC の 「対象 provider」 (v1.9-6 追加) + 「対象 mode」 + 「対象 client」 column から `redis` vs `memcached` vs `keydb`、 fast backend (Redis=in-memory、 Memcached/KeyDB=stub) vs testcontainers、 client 選択を判定。
+`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の 「対象 provider」 (v1.9-6 追加) + 「対象 mode」 + 「対象 client」 column から `redis` vs `memcached` vs `keydb`、 fast backend (Redis=in-memory、 Memcached/KeyDB=stub) vs testcontainers、 client 選択を判定。
 
 ### Step 2: test code 生成 (provider 別 factory)
 
@@ -98,7 +147,7 @@ describe("{module} — cache pub/sub", () => {
 
 ### Step 4: /kiwa-review test-review 自動呼出
 
-`--no-review` 未指定なら `/kiwa-review --mode test-review --layer cache --module {module}` を chain 呼出。
+`--no-review` 未指定なら `/kiwa-review --mode test-review --layer cache --module {module} --lang $DOC_LANG` を chain 呼出。
 
 ## 完了条件
 

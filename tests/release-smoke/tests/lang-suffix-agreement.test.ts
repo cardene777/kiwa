@@ -147,6 +147,12 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-forge',
     'kiwa-hardhat',
     'kiwa-play',
+    // #1861 群 4
+    'kiwa-orm',
+    'kiwa-edge',
+    'kiwa-auth',
+    'kiwa-queue',
+    'kiwa-cache',
   ];
 
   it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
@@ -196,6 +202,11 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-forge': ['contract'],
     'kiwa-hardhat': ['contract'],
     'kiwa-play': ['e2e'],
+    'kiwa-orm': ['orm-query'],
+    'kiwa-edge': ['edge-handler'],
+    'kiwa-auth': ['auth'],
+    'kiwa-queue': ['job-queue'],
+    'kiwa-cache': ['cache'],
   };
 
   /**
@@ -459,8 +470,8 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
 
   it('移行済 skill の数が Issue の群と一致する', () => {
     // A guard against the list drifting: two from #1860, three in group 1,
-    // five in group 2, three in group 3.
-    expect(MIGRATED).toHaveLength(13);
+    // five in group 2, three in group 3, five in group 4.
+    expect(MIGRATED).toHaveLength(18);
   });
 
   it('未移行の skill が残っていることを記録する', () => {
