@@ -138,19 +138,16 @@ function main() {
   // 切れた link は生成では直せないので、--write の有無に関わらず止める。
   // 書く前に返すのは、生成物の同期と docs の破れを同じ run で混ぜないため。
   //
-  // 対象は docs/libraries 配下に限る。docs/migrations と docs/api にも切れた link が
-  // あるが、原因が別 (存在しない tutorial への参照) で、履歴面を書き換えない方針との
-  // 兼ね合いを個別に決める必要がある。
+  // 対象は docs/ 全体。以前は docs/libraries に絞っていたが、その外の 207 件を
+  // #1877 で片付けた後は止まる対象が 0 件になり、絞る理由が無くなった。統合 test が
+  // 既に docs/ 全体を見ているので、範囲を揃えないと同じ検査が 2 経路で食い違う。
   //
   // 解釈できない記法も同じ扱いにする。検査できないものを黙って通すと、覆っていない
   // 範囲が「破れ無し」 として報告される。
+  const docsRoot = join(repositoryRoot, 'docs');
   const dead = [
-    ...deadDocumentLinks({
-      repositoryRoot,
-      docsRoot: join(repositoryRoot, 'docs'),
-      scanRoot: librariesRoot,
-    }),
-    ...unsupportedLinkSyntax({ repositoryRoot, scanRoot: librariesRoot }),
+    ...deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot }),
+    ...unsupportedLinkSyntax({ repositoryRoot, scanRoot: docsRoot }),
   ];
   if (dead.length > 0) {
     console.error(dead.join('\n'));

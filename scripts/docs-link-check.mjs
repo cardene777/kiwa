@@ -569,14 +569,20 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
 }
 
 /**
- * 解決しない link を 1 行の説明文で列挙する。
+ * 破れた link を 1 行の説明文で列挙する。
  *
  * 理由で絞りたい呼出側は `classifyDocumentLinks` を使う。こちらは生成 script が
  * stderr へ出すための整形版。
  *
+ * `generated` は除く。build すれば在るものを「破れ」 として止めると、checkout 直後は
+ * 常に落ちる gate になる (実測で `docs/` 全体へ広げた時に 4 件で止まった)。
+ * 生成物かどうかを確かめたい呼出側は `classifyDocumentLinks` で理由を見る。
+ *
  * @param {{repositoryRoot: string, docsRoot: string, scanRoot: string}} roots
- * @returns {string[]} 解決しない link の説明行。空配列なら破れ無し。
+ * @returns {string[]} 破れた link の説明行。空配列なら破れ無し。
  */
 export function deadDocumentLinks(roots) {
-  return classifyDocumentLinks(roots).map(reportLine);
+  return classifyDocumentLinks(roots)
+    .filter(({ reason }) => reason !== LINK_FAILURE.GENERATED)
+    .map(reportLine);
 }

@@ -1109,6 +1109,42 @@ test('no file in docs uses link syntax the checker cannot parse', () => {
   assert.deepEqual(found, [], found.join('\n'));
 });
 
+// 生成 script の走査範囲が `docs/` 全体であること。`docs/libraries` に絞っていると、
+// その外の破れが gate を通り抜ける。統合 test は既に `docs/` 全体を見ているので、
+// 範囲を揃えないと同じ検査が 2 経路で食い違う。
+test('the generator scans the whole docs tree, not just libraries', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    // `docs/libraries` の外に破れを置く。絞った範囲では検出されない位置。
+    const outsideLibraries = join(root, 'docs', 'guides');
+    mkdirSync(outsideLibraries, { recursive: true });
+    writeFileSync(join(outsideLibraries, 'index.md'), '# guides\n\n[消えた](./gone.md)\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'libraries の外の破れも止める');
+    assert.match(result.stderr, /docs\/guides\/index\.md -> \.\/gone\.md/);
+  });
+});
+
+// 生成物は build すれば在るので、生成 script を止めない。止めると checkout 直後は
+// 常に落ちる gate になる (実測で `docs/` 全体へ広げた時に 4 件で止まった)。
+test('generated targets do not stop the generator', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const apiDirectory = join(root, 'docs', 'api');
+    mkdirSync(apiDirectory, { recursive: true });
+    writeFileSync(join(apiDirectory, '.gitignore'), 'typescript/\n');
+    writeFileSync(join(apiDirectory, 'index.md'), '# api\n\n[生成物](./typescript/)\n');
+
+    const result = runSync(root);
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+
 // 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、
 // 壊れた索引を抱えたまま README が更新され、破れが表に出るのが遅れる。
 test('a dead link stops --write before anything is generated', () => {
