@@ -4,6 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { deadDocumentLinks } from './docs-link-check.mjs';
 import {
   DocsSyncError,
   linkPath,
@@ -133,66 +134,18 @@ function readInsideRepo(path, label, fallback) {
   return readFileSync(resolveReadPath(path, repositoryRoot, label), 'utf8');
 }
 
-/**
- * docs/libraries 配下の相対 link のうち、解決先が無いものを列挙する。
- *
- * package を消した PR が索引の link を残す壊れ方を捕まえる。managed block の外は
- * 手書きなので、生成の同期だけを見ていても検出できない (#1803 と #1873 が同じ形で
- * 通過した)。解決規則は VitePress に合わせ、path そのもの / `<path>.md` /
- * `<path>/index.md` のいずれかが在れば解決とみなす。
- *
- * 対象は docs/libraries 配下に限る。docs/migrations と docs/api にも切れた link が
- * あるが、原因が別 (存在しない tutorial への参照) で、履歴面を書き換えない方針との
- * 兼ね合いを個別に決める必要がある。
- */
-function deadRelativeLinks() {
-  const dead = [];
-
-  const walk = (directory) => {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      const entryPath = join(directory, entry.name);
-      if (entry.isDirectory()) {
-        walk(entryPath);
-        continue;
-      }
-      if (!entry.name.endsWith('.md')) continue;
-
-      const label = relative(repositoryRoot, entryPath);
-      const content = readFileSync(resolveReadPath(entryPath, repositoryRoot, label), 'utf8');
-      for (const match of content.matchAll(/\]\(([^)\s]+)\)/g)) {
-        const target = match[1];
-        // 相対 link だけを見る。外部 URL、site 絶対 path、同一 file 内 anchor は対象外。
-        if (!target.startsWith('.')) continue;
-        const [pathPart] = target.split(/[#?]/);
-        if (!pathPart) continue;
-        // 生成側は directory 名を percent encode して埋めるので、戻してから実体を見る。
-        let decoded = pathPart;
-        try {
-          decoded = decodeURIComponent(pathPart);
-        } catch {
-          // 壊れた escape は生の文字列で照合する。解決できなければ下で dead になる。
-        }
-        const resolved = join(dirname(entryPath), decoded);
-        if (
-          existsSync(resolved) ||
-          existsSync(`${resolved}.md`) ||
-          existsSync(join(resolved, 'index.md'))
-        ) {
-          continue;
-        }
-        dead.push(`dead link: ${label} -> ${target}`);
-      }
-    }
-  };
-
-  walk(librariesRoot);
-  return dead.sort();
-}
-
 function main() {
   // 切れた link は生成では直せないので、--write の有無に関わらず止める。
   // 書く前に返すのは、生成物の同期と docs の破れを同じ run で混ぜないため。
-  const dead = deadRelativeLinks();
+  //
+  // 対象は docs/libraries 配下に限る。docs/migrations と docs/api にも切れた link が
+  // あるが、原因が別 (存在しない tutorial への参照) で、履歴面を書き換えない方針との
+  // 兼ね合いを個別に決める必要がある。
+  const dead = deadDocumentLinks({
+    repositoryRoot,
+    docsRoot: join(repositoryRoot, 'docs'),
+    scanRoot: librariesRoot,
+  });
   if (dead.length > 0) {
     console.error(dead.join('\n'));
     process.exitCode = 1;

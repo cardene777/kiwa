@@ -24,6 +24,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { deadDocumentLinks } from './docs-link-check.mjs';
+
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 const START = '<!-- kiwa-docs:start -->';
 const END = '<!-- kiwa-docs:end -->';
@@ -39,7 +41,7 @@ function withFixture(body, packageNames = ['sample']) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), 'docs-sync-integration-')));
   try {
     mkdirSync(join(root, 'scripts'), { recursive: true });
-    for (const file of ['docs-sync-safety.mjs', 'sync-library-doc-links.mjs']) {
+    for (const file of ['docs-sync-safety.mjs', 'docs-link-check.mjs', 'sync-library-doc-links.mjs']) {
       copyFileSync(join(scriptsDirectory, file), join(root, 'scripts', file));
     }
 
@@ -281,6 +283,147 @@ test('links resolve through <path>.md and <path>/index.md', () => {
     );
     assert.equal(result.status, 0, result.stderr);
   });
+});
+
+// 1 記法だけを見ていると、別記法で書いた壊れた link がそのまま通る。実測で 4 形が
+// 素通りしていた (title 付き / angle-bracket / reference 定義 / 生 HTML の a タグ)。
+for (const [label, markdown] of [
+  ['title 付き inline', '[x](./gone/ "題")'],
+  ['angle-bracket', '[x](<./gone/>)'],
+  ['reference 定義', '[x]: ./gone/'],
+  ['生 HTML の a タグ', '<a href="./gone/">x</a>'],
+  ['image', '![x](./gone.png)'],
+]) {
+  test(`a dead link written as ${label} is reported`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+      writeFileSync(indexPath, `# sample\n\n${markdown}\n`);
+
+      const result = spawnSync(
+        process.execPath,
+        [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+        { encoding: 'utf8' },
+      );
+      assert.notEqual(result.status, 0, `${label} must be reported`);
+      assert.match(result.stderr, /dead link/);
+    });
+  });
+}
+
+// code block の中の type 注釈は link ではない。落とさないと API reference が
+// 丸ごと誤検出になる (`[k: string]: unknown;` が reference 定義と同じ形)。
+test('type annotations inside code fences are not links', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(
+      indexPath,
+      '# sample\n\n```ts\ntype R = {\n  [k: string]: unknown;\n};\n```\n\n`[k: string]: unknown;` も同じ。\n',
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs'), '--write'],
+      { encoding: 'utf8' },
+    );
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+
+// site 絶対 path は docs/ を根に解く。相対 link だけを見ていると、同じ壊れ方が
+// 別記法で通る (実測で docs/libraries に 1 件現存していた)。
+test('a site absolute link is resolved against docs/', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+
+    writeFileSync(indexPath, '# sample\n\n[生きている](/libraries/foundation/sample/)\n');
+    assert.equal(runSync(root).status, 0, '実在する site 絶対 link は通る');
+
+    writeFileSync(indexPath, '# sample\n\n[消えた](/libraries/foundation/gone/)\n');
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, '壊れた site 絶対 link は報告される');
+    assert.match(result.stderr, /libraries\/foundation\/gone/);
+  });
+});
+
+// macOS の APFS は既定で case-insensitive なので、existsSync は大小文字違いを通す。
+// 公開先は case-sensitive なため、手元で通って公開後に 404 になる。
+test('a link whose case does not match the real file is reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n[大文字](./Quickstart)\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'case 違いは報告される');
+    assert.match(result.stderr, /Quickstart/);
+  });
+});
+
+// directory が在るだけでは解決しない。index.md が無い directory への link は
+// 公開後 404 になる。
+test('a directory without index.md is reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    mkdirSync(join(docsDirectory, 'empty'), { recursive: true });
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[空](./empty/)\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'index.md の無い directory は報告される');
+    assert.match(result.stderr, /empty/);
+  });
+});
+
+// docs/ の外へ出る link は公開されない。percent encode した `..` で境界を越える形も
+// 同じ経路で塞ぐ。
+test('a link that escapes docs/ is reported even when the target exists', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    // 上り 4 段で repo root に出る。実在する file を指すので、境界検査が無ければ通る。
+    const escape = '%2e%2e/%2e%2e/%2e%2e/%2e%2e/packages/sample/package.json';
+    assert.equal(
+      existsSync(join(root, 'packages', 'sample', 'package.json')),
+      true,
+      '境界検査だけが落とす形にするため、target は実在していること',
+    );
+    writeFileSync(indexPath, `# sample\n\n[外](${escape})\n`);
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'docs/ の外は実在しても報告される');
+    assert.match(result.stderr, /dead link/);
+  });
+});
+
+// 検査が実 checkout を走査しなければ、fixture が全て通っても main は壊れたまま入る。
+// docs:gen:test は pnpm test に含まれるので、ここに置くと標準 sweep で走る。
+test('the real docs/libraries tree has no dead links', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const dead = deadDocumentLinks({
+    repositoryRoot,
+    docsRoot: join(repositoryRoot, 'docs'),
+    scanRoot: join(repositoryRoot, 'docs', 'libraries'),
+  });
+  assert.deepEqual(dead, [], dead.join('\n'));
 });
 
 // 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、

@@ -25,4 +25,4 @@ scenario は、購読後に届く event 列を固定します。たとえば「r
 
 ## 読み進める
 
-[はじめる](./quickstart) では Supabase の broadcast を購読して、保存した test file を実行します。[使い方](./how-to) では四つの provider の event delivery を一つの recipe として確認します。設定、公開 API、fidelity report を調べるときは [リファレンス](./reference) を参照してください。永続イベントの broker は [Streaming](/libraries/ai-realtime/streaming/)、実行履歴は [Observability](/libraries/ai-realtime/observability/) を使います。
+[はじめる](./quickstart) では Supabase の broadcast を購読して、保存した test file を実行します。[使い方](./how-to) では四つの provider の event delivery を一つの recipe として確認します。設定、公開 API、fidelity report を調べるときは [リファレンス](./reference) を参照してください。実行履歴は [Observability](/libraries/ai-realtime/observability/) を使います。
