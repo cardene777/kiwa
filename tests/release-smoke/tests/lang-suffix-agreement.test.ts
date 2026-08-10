@@ -739,3 +739,77 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(app, 'suffix を足さない旨が無い').toMatch(/suffix を足さない/);
   });
 });
+
+describe('Layer 3 の観測が chain から起動される (#1894)', () => {
+  /** Skills that start `/kiwa-observe`, found by walking rather than by name. */
+  function observeCallers(): { skill: string; block: string }[] {
+    return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
+      .filter((e) => e.isDirectory() && e.name !== 'kiwa-observe')
+      .flatMap((e) => {
+        let body: string;
+        try {
+          body = read(`.claude/skills/${e.name}/SKILL.md`);
+        } catch {
+          return [];
+        }
+        // Code blocks only. Prose mentions the skill when explaining the chain,
+        // and reading those as invocations would count the flow diagram.
+        const blocks = [...body.matchAll(/```(?:text|bash)\n([\s\S]*?)```/g)]
+          .map((m) => m[1] ?? '')
+          .filter((b) => b.includes('/kiwa-observe'));
+        return blocks.map((block) => ({ skill: e.name, block }));
+      });
+  }
+
+  it('kiwa-observe を起動する skill が 1 件以上ある', () => {
+    // `kiwa-observe` was reachable only by hand: nothing in `.claude/skills/`
+    // named it. #1861 群 5 then made `--layer` required when `--spec` is
+    // omitted, so the argument it needs had no one to pass it.
+    const callers = observeCallers();
+    expect(callers.map((c) => c.skill), 'kiwa-observe を起動する skill が無い').not.toEqual([]);
+  });
+
+  it('起動行が 5 引数すべてを渡す', () => {
+    // Each one is a value the caller knows and the callee cannot guess.
+    // `--layer` decides which spec to compare against, `--test` which files
+    // were actually run, `--out` keeps one layer from overwriting the next.
+    for (const { skill, block } of observeCallers()) {
+      for (const flag of ['--module', '--layer', '--lang', '--test', '--out']) {
+        expect(block, `${skill} の kiwa-observe 起動が ${flag} を渡していない`).toContain(flag);
+      }
+    }
+  });
+
+  it('kiwa-observe が渡される 5 引数を宣言している', () => {
+    // The other end of the same contract. A caller passing a flag the callee
+    // does not declare is accepted and ignored, which is how `--input-spec`
+    // behaved before #1851.
+    const declared = read('.claude/skills/kiwa-observe/SKILL.md')
+      .split('\n')
+      .filter((l) => l.startsWith('- `--'))
+      .join('\n');
+    for (const flag of ['--module', '--layer', '--lang', '--test', '--out']) {
+      expect(declared, `kiwa-observe が ${flag} を宣言していない`).toContain(flag);
+    }
+  });
+
+  it('kiwa-observe の既定が推測でない', () => {
+    // `--spec` said "guess from --module" until #1861 群 5, `--test` until
+    // #1894. Both resolve from the same `kiwa layers` response now.
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    const guessing = body
+      .split('\n')
+      .filter((l) => l.startsWith('- `--'))
+      .filter((l) => l.includes('推測'));
+    expect(guessing, `推測に頼る option が残っている:\n${guessing.join('\n')}`).toEqual([]);
+  });
+
+  it('kiwa-observe の --out 既定が layer を含む', () => {
+    // Without it, resolving four layers in a row leaves one dashboard.
+    const option = read('.claude/skills/kiwa-observe/SKILL.md')
+      .split('\n')
+      .find((l) => l.startsWith('- `--out '));
+    expect(option, '--out の宣言が無い').toBeDefined();
+    expect(option, '--out の既定が layer を含まない').toContain('{layer}');
+  });
+});
