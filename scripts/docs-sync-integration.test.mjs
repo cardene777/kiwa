@@ -289,9 +289,13 @@ test('links resolve through <path>.md and <path>/index.md', () => {
 // 素通りしていた (title 付き / angle-bracket / reference 定義 / 生 HTML の a タグ)。
 for (const [label, markdown] of [
   ['title 付き inline', '[x](./gone/ "題")'],
+  ['single-quote title', "[x](./gone/ '題')"],
+  ['括弧 title', '[x](./gone/ (題))'],
   ['angle-bracket', '[x](<./gone/>)'],
   ['reference 定義', '[x]: ./gone/'],
   ['生 HTML の a タグ', '<a href="./gone/">x</a>'],
+  ['引用符なしの href', '<a href=./gone/>x</a>'],
+  ['img の src', '<img src="./gone.png" alt="x">'],
   ['image', '![x](./gone.png)'],
 ]) {
   test(`a dead link written as ${label} is reported`, () => {
@@ -331,6 +335,76 @@ test('type annotations inside code fences are not links', () => {
   });
 });
 
+// CommonMark では 4 space 字下げの ``` は fence ではない。開始とみなすと、後続の
+// 本物の fence と対にされて間の正当な link が消える (dead link を見逃す向きの壊れ方)。
+test('an indented pseudo fence does not swallow links that follow it', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(
+      indexPath,
+      ['# sample', '', '    ```', '', '[消えた](./gone/)', '', '```ts', 'const a = 1;', '```', ''].join('\n'),
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, '字下げ ``` の後ろの dead link は報告される');
+    assert.match(result.stderr, /gone/);
+  });
+});
+
+// repo 内の symlink (docs/public/images) は実在の構成なので通す。repo の外を指す
+// symlink は readdirSync と statSync が追ってしまうため、実体を見て落とす。
+test('a symlink pointing outside the repository does not resolve', () => {
+  withFixture(({ root, readmePath }) => {
+    const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+    try {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      writeFileSync(join(outsideDirectory, 'victim.md'), '# victim\n');
+
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      symlinkSync(outsideDirectory, join(docsDirectory, 'outside'));
+      writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[外](./outside/victim)\n');
+
+      const result = spawnSync(
+        process.execPath,
+        [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+        { encoding: 'utf8' },
+      );
+      assert.notEqual(result.status, 0, 'repo 外への symlink は解決しない');
+      assert.match(result.stderr, /victim/);
+    } finally {
+      rmSync(outsideDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+// repo 内を指す symlink は通す。落とすと docs/public/images 経由の参照が全て
+// 偽陽性になる。
+test('a symlink that stays inside the repository resolves', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+
+    const assets = join(root, 'assets');
+    mkdirSync(assets, { recursive: true });
+    writeFileSync(join(assets, 'note.md'), '# note\n');
+
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    symlinkSync(assets, join(docsDirectory, 'linked'));
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[中](./linked/note)\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs'), '--write'],
+      { encoding: 'utf8' },
+    );
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+
 // site 絶対 path は docs/ を根に解く。相対 link だけを見ていると、同じ壊れ方が
 // 別記法で通る (実測で docs/libraries に 1 件現存していた)。
 test('a site absolute link is resolved against docs/', () => {
@@ -340,6 +414,13 @@ test('a site absolute link is resolved against docs/', () => {
 
     writeFileSync(indexPath, '# sample\n\n[生きている](/libraries/foundation/sample/)\n');
     assert.equal(runSync(root).status, 0, '実在する site 絶対 link は通る');
+
+    // VitePress は docs/public/ の中身を site root へ出す。docs/ 直下だけを見ると
+    // 画像への site 絶対 link が全て偽陽性になる。
+    mkdirSync(join(root, 'docs', 'public', 'images'), { recursive: true });
+    writeFileSync(join(root, 'docs', 'public', 'images', 'x.png'), 'png');
+    writeFileSync(indexPath, '# sample\n\n<img src="/images/x.png" alt="x">\n');
+    assert.equal(runSync(root).status, 0, 'public/ 経由の site 絶対 link は通る');
 
     writeFileSync(indexPath, '# sample\n\n[消えた](/libraries/foundation/gone/)\n');
     const result = spawnSync(
