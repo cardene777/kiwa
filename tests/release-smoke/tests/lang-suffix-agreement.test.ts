@@ -741,8 +741,15 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
 });
 
 describe('Layer 3 の観測が chain から起動される (#1894)', () => {
-  /** Skills that start `/kiwa-observe`, found by walking rather than by name. */
-  function observeCallers(): { skill: string; block: string }[] {
+  /**
+   * The lines that actually start `/kiwa-observe`, found by walking.
+   *
+   * The invocation line itself, not the block it sits in. A block-wide search
+   * is satisfied by a comment or a sentence that happens to name the flag,
+   * which is how three rounds of #1893 went (Round 3 and Round 4 both).
+   * Continuations are folded so a wrapped invocation reads as one line.
+   */
+  function observeInvocations(): { skill: string; line: string }[] {
     return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
       .filter((e) => e.isDirectory() && e.name !== 'kiwa-observe')
       .flatMap((e) => {
@@ -752,64 +759,106 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
         } catch {
           return [];
         }
-        // Code blocks only. Prose mentions the skill when explaining the chain,
+        // Code blocks only. Prose names the skill when explaining the chain,
         // and reading those as invocations would count the flow diagram.
-        const blocks = [...body.matchAll(/```(?:text|bash)\n([\s\S]*?)```/g)]
+        return [...body.matchAll(/```(?:text|bash)\n([\s\S]*?)```/g)]
           .map((m) => m[1] ?? '')
-          .filter((b) => b.includes('/kiwa-observe'));
-        return blocks.map((block) => ({ skill: e.name, block }));
+          .join('\n')
+          .replace(/\\\n\s*/g, ' ') // 継続行を 1 論理行に畳む
+          .split('\n')
+          .filter((line) => !line.trim().startsWith('#'))
+          .filter((line) => /(^|\s)\/kiwa-observe(\s|$)/.test(line))
+          .map((line) => ({ skill: e.name, line }));
       });
   }
 
   it('kiwa-observe を起動する skill が 1 件以上ある', () => {
     // `kiwa-observe` was reachable only by hand: nothing in `.claude/skills/`
-    // named it. #1861 群 5 then made `--layer` required when `--spec` is
-    // omitted, so the argument it needs had no one to pass it.
-    const callers = observeCallers();
+    // named it. #1861 群 5 then made `--layer` required, so the argument it
+    // needs had no one to pass it.
+    const callers = observeInvocations();
     expect(callers.map((c) => c.skill), 'kiwa-observe を起動する skill が無い').not.toEqual([]);
   });
 
-  it('起動行が 5 引数すべてを渡す', () => {
-    // Each one is a value the caller knows and the callee cannot guess.
-    // `--layer` decides which spec to compare against, `--test` which files
-    // were actually run, `--out` keeps one layer from overwriting the next.
-    for (const { skill, block } of observeCallers()) {
-      for (const flag of ['--module', '--layer', '--lang', '--test', '--out']) {
-        expect(block, `${skill} の kiwa-observe 起動が ${flag} を渡していない`).toContain(flag);
+  it('起動行が 6 引数すべてを渡す', () => {
+    // Each one is a value the caller knows and the callee cannot derive.
+    // `--layer` decides which spec to compare against, `--producer` which of
+    // two `test_outputs` keys to read (only `contract` has two), `--test` which
+    // files were actually run, `--out` keeps one layer from overwriting the
+    // next. Asserted on the invocation line, not the block.
+    const invocations = observeInvocations();
+    expect(invocations.length, '起動行が 0 件').toBeGreaterThan(0);
+    for (const { skill, line } of invocations) {
+      for (const flag of ['--module', '--layer', '--lang', '--producer', '--test', '--out']) {
+        expect(line, `${skill} の kiwa-observe 起動が ${flag} を渡していない`).toContain(flag);
       }
     }
   });
 
-  it('kiwa-observe が渡される 5 引数を宣言している', () => {
-    // The other end of the same contract. A caller passing a flag the callee
-    // does not declare is accepted and ignored, which is how `--input-spec`
-    // behaved before #1851.
-    const declared = read('.claude/skills/kiwa-observe/SKILL.md')
-      .split('\n')
-      .filter((l) => l.startsWith('- `--'))
-      .join('\n');
-    for (const flag of ['--module', '--layer', '--lang', '--test', '--out']) {
-      expect(declared, `kiwa-observe が ${flag} を宣言していない`).toContain(flag);
+  it('起動行が {$VAR} 形式の変数展開を書いていない', () => {
+    // `{$DOC_LANG}` is not a shell expansion: it leaves `{ja}` in the file
+    // name, so the path in the report and the file on disk disagree.
+    for (const { skill, line } of observeInvocations()) {
+      expect(line, `${skill} の起動行が {$VAR} を書いている`).not.toMatch(/\{\$[A-Za-z_]/);
     }
   });
 
-  it('kiwa-observe の既定が推測でない', () => {
-    // `--spec` said "guess from --module" until #1861 群 5, `--test` until
-    // #1894. Both resolve from the same `kiwa layers` response now.
-    const body = read('.claude/skills/kiwa-observe/SKILL.md');
-    const guessing = body
-      .split('\n')
-      .filter((l) => l.startsWith('- `--'))
-      .filter((l) => l.includes('推測'));
-    expect(guessing, `推測に頼る option が残っている:\n${guessing.join('\n')}`).toEqual([]);
+  it('kiwa-observe が渡される 6 引数を宣言している', () => {
+    // The other end of the same contract. A caller passing a flag the callee
+    // does not declare is accepted and ignored, which is how `--input-spec`
+    // behaved before #1851. Matched on the declaration's own line so a flag
+    // named only in prose does not satisfy it.
+    const lines = read('.claude/skills/kiwa-observe/SKILL.md').split('\n');
+    for (const flag of ['--module', '--layer', '--lang', '--producer', '--test', '--out']) {
+      const declared = lines.filter((l) => l.startsWith(`- \`${flag} `) || l.startsWith(`- \`${flag}\``));
+      expect(declared.length, `kiwa-observe が ${flag} を宣言していない`).toBe(1);
+    }
   });
 
-  it('kiwa-observe の --out 既定が layer を含む', () => {
-    // Without it, resolving four layers in a row leaves one dashboard.
+  it('kiwa-observe の --test 既定が test_outputs を名指しする', () => {
+    // Stated positively. "does not say 推測" is satisfied by deleting the
+    // sentence, which leaves the default undefined rather than resolved
+    // (#1895 Round 1 F7).
+    const option = read('.claude/skills/kiwa-observe/SKILL.md')
+      .split('\n')
+      .find((l) => l.startsWith('- `--test '));
+    expect(option, '--test の宣言が無い').toBeDefined();
+    expect(option, '--test の既定が test_outputs を名指ししていない').toContain('test_outputs');
+    expect(option, '--test の既定が推測に戻っている').not.toContain('推測');
+  });
+
+  it('kiwa-observe の --out 既定が exact な template である', () => {
+    // The exact string, not just "contains {layer}". A default of
+    // `dashboard-{layer}.md` would satisfy a containment check while dropping
+    // the module and the language from the name.
     const option = read('.claude/skills/kiwa-observe/SKILL.md')
       .split('\n')
       .find((l) => l.startsWith('- `--out '));
     expect(option, '--out の宣言が無い').toBeDefined();
-    expect(option, '--out の既定が layer を含まない').toContain('{layer}');
+    expect(option, '--out の既定が想定の形でない').toContain(
+      'tests/reports/observe/dashboard-{module}-{layer}.{lang}.md',
+    );
+  });
+
+  it('kiwa-observe が producer の鍵を consumer_skill から引かない', () => {
+    // `contract` declares `kiwa-forge` as `consumer_skill` and `kiwa-hardhat`
+    // in `also_consumed_by`. Deriving the `test_outputs` key from
+    // `consumer_skill` looks at the Foundry output even when Hardhat ran, and
+    // resolves to zero matches (#1895 Round 1 F3).
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    expect(body, 'consumer_skill を鍵に使わない旨が無い').toMatch(
+      /`consumer_skill` を鍵として使わない/,
+    );
+  });
+
+  it('鍵が 2 つある layer は contract だけである', () => {
+    // The premise the resolution rule rests on. If another layer grew a second
+    // producer, `--producer` would become required in more places and the
+    // caller's table would be incomplete.
+    const multi = LAYERS.layers
+      .map((l) => l as unknown as { id: string; test_outputs?: Record<string, string[]> })
+      .filter((l) => Object.keys(l.test_outputs ?? {}).length > 1)
+      .map((l) => l.id);
+    expect(multi, '鍵が 2 つ以上ある layer が contract 以外にある').toEqual(['contract']);
   });
 });

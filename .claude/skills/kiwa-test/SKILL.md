@@ -388,6 +388,8 @@ Total duration: {sec} 秒
 | coverage report (contract) | tests/reports/contract/coverage-report-{example}.{lang}.md | auto loop 結果 |
 | review report (spec / test) | tests/reports/review/{spec\|test}-review-{example}.{lang}.md | reviewer 判定 |
 | observe dashboard (layer ごと) | tests/reports/observe/dashboard-{example}-{layer}.{lang}.md | Step 5a 出力。 失敗した layer は path の代わりに理由を書く |
+| observe dashboard (contract, foundry) | tests/reports/observe/dashboard-{example}-contract-foundry.{lang}.md | `$RUNNER` が `foundry` / `both` の時 |
+| observe dashboard (contract, hardhat) | tests/reports/observe/dashboard-{example}-contract-hardhat.{lang}.md | `$RUNNER` が `hardhat` / `both` の時 |
 
 ## 3. critical / major 指摘 (review 集約)
 
@@ -416,25 +418,35 @@ Total duration: {sec} 秒
 
 `--no-review` ではなく **`--no-observe` 未指定なら**、 Step 2.5 で決めた `$LAYERS` の各 layer について `/kiwa-observe` を起動し、 flaky と spec coverage gap の dashboard を書く。
 
-Step 5b (result-review) の **前** に置く。 result-review は「flaky 兆候」 を判定軸に持つため、 観測を先に済ませて dashboard を判定材料に渡す。
+Step 5b (result-review) の **前** に置く。 result-review は統合 report を Read し、 その Section 2 に本 step が書いた dashboard の path が載る。 後に置くと、 result-review が読む時点で dashboard がまだ無い。
+
+`contract` 以外の layer は 1 回起動する。
 
 ```text
-/kiwa-observe --module {example} --layer {layer} --lang $DOC_LANG \
-  --test {test_outputs から解決した path} \
-  --out tests/reports/observe/dashboard-{example}-{layer}.{$DOC_LANG}.md
+/kiwa-observe --module {example} --layer {layer} --lang ${DOC_LANG} --producer {producer} --test {解決した path} --out tests/reports/observe/dashboard-{example}-{layer}.${DOC_LANG}.md
 ```
 
 `--layer` は `$LAYERS` の各値をそのまま渡す。 Step 2.5 で `--target` から解決した同じ list で、 ここで組み直さない = 2 箇所で解決すると target の解釈が割れる。
 
-`--test` は `kiwa layers --json` の `test_outputs` から、 その layer の `consumer_skill` の鍵の下にある `tests/fixtures/` 以外の値を渡す。 **`kiwa-observe` 側も同じ既定を持つが、 明示して渡す** = `contract` は `kiwa-forge` と `kiwa-hardhat` の 2 つが別々の成果物を書くため、 `$RUNNER` でどちらを観測するかが決まるのは呼出側だけ。
+`--producer` は `test_outputs` の鍵。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つに定まる。
 
-| `$RUNNER` | `contract` layer で観測する成果物 |
-|---|---|
-| `foundry` | `kiwa-forge` の `.t.sol` |
-| `hardhat` | `kiwa-hardhat` の `.test.ts` |
-| `both` | 2 回起動する (`--out` の名前に runner を足して分ける) |
+`--test` は `kiwa layers --json` の `test_outputs` から、 選んだ鍵の下の `tests/fixtures/` 以外の値を渡す。 **`kiwa-observe` 側も同じ既定を持つが、 明示して渡す** = どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ呼出側だけ。
 
-`--out` に layer を含める。 含めないと 4 layer 続けて走らせた時に最後の 1 枚しか残らない。
+#### `contract` layer は `$RUNNER` で分岐する
+
+`contract` の `consumer_skill` は常に `kiwa-forge` で、 `kiwa-hardhat` は `also_consumed_by` 側にある。 **`consumer_skill` から producer を決めない** = Hardhat で走らせた時も Foundry の `.t.sol` を観測しようとして 0 件 match になる。
+
+| `$RUNNER` | `--producer` | 観測する成果物 | `--out` |
+|---|---|---|---|
+| `foundry` | `kiwa-forge` | `{example}/test/*.t.sol` | `tests/reports/observe/dashboard-{example}-contract-foundry.${DOC_LANG}.md` |
+| `hardhat` | `kiwa-hardhat` | `{example}/test/*.test.ts` | `tests/reports/observe/dashboard-{example}-contract-hardhat.${DOC_LANG}.md` |
+| `both` | 上 2 行を順に実行 (2 回起動) | 両方 | 上 2 行の path (別 file になる) |
+
+**`contract` は runner を `--out` に足す**。 既定の `dashboard-{example}-contract.{lang}.md` は layer までしか区別しないため、 `both` で 2 回起動すると 2 枚目が 1 枚目を上書きする。
+
+`contract` 以外は `--out` に runner を足さない。 鍵が 1 つなので layer だけで一意になる。
+
+`${DOC_LANG}` と書く。 `{$DOC_LANG}` は shell の変数展開にならず、 `{ja}` が file 名に残る。
 
 **Step 5.5 (fixtures 退避) の前に置く**。 退避後は `tests/fixtures/` にも複製ができるが、 観測すべきは実際に走った方で、 両方あると `--test` の解決が 2 択になる。
 
