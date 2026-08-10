@@ -40,7 +40,7 @@ Anvil shares port 8545 by default, so parallel runs across examples are not supp
 ## Q6: I want to use ConnectKit / Reown instead of wagmi v2 + RainbowKit v2
 
 A: kiwa conforms to EIP-1193 / EIP-6963 standards, so it works with any wallet picker.
-For specific picker testing, see `examples/basic-connect/tests/eip6963.spec.ts`.
+For specific picker testing, see `tests/fixtures/basic-connect/e2e-test/eip6963.spec.ts`.
 
 ## Q7: Contract deploys are slow
 

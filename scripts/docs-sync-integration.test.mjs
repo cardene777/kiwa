@@ -644,6 +644,44 @@ test('the real docs/libraries tree has no dead links', () => {
   assert.deepEqual(dead, [], dead.join('\n'));
 });
 
+// `docs/libraries` の外はまだ `pnpm docs:links` の走査範囲に入っていない (#1877)。
+// 範囲を広げるには「GitHub 前提の doc か公開 site 前提か」 の境界を決める必要があり、
+// それを待つ間も **参照先が repo のどこにも無い link** だけは再発させない。
+//
+// 判定を 3 つに分ける。repo 内に実在するが `docs/` の外を指すもの (GitHub では開ける)、
+// dir はあるが `index.md` が無いもの、どこにも無いもの。最後だけを 0 に保つ。
+test('no link in docs points at a path that exists nowhere in the repository', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+  const dead = deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot });
+
+  const missing = [];
+  for (const line of dead) {
+    const match = line.match(/^dead link: (.+?) -> (.+)$/);
+    const [, file, target] = match;
+    // 生成物 (`docs/api/{typescript,solidity}/`) は checkout に無いのが正常。
+    if (/^docs\/api\/(README|index)\.md$/.test(file) && /(typescript|solidity)/.test(target)) {
+      continue;
+    }
+    const [pathPart] = target.split(/[#?]/);
+    let decoded = pathPart;
+    try {
+      decoded = decodeURIComponent(pathPart);
+    } catch {
+      // 壊れた escape は生の文字列で照合する。
+    }
+    const absolute = decoded.startsWith('/')
+      ? join(docsRoot, decoded)
+      : join(repositoryRoot, dirname(file), decoded);
+    if (existsSync(absolute)) continue;
+    if (existsSync(`${absolute}.md`)) continue;
+    if (existsSync(join(absolute, 'index.md'))) continue;
+    missing.push(`${file} -> ${target}`);
+  }
+
+  assert.deepEqual(missing, [], missing.join('\n'));
+});
+
 // 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、
 // 壊れた索引を抱えたまま README が更新され、破れが表に出るのが遅れる。
 test('a dead link stops --write before anything is generated', () => {
