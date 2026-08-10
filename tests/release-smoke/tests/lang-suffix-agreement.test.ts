@@ -147,6 +147,12 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-forge',
     'kiwa-hardhat',
     'kiwa-play',
+    // #1861 群 4
+    'kiwa-orm',
+    'kiwa-edge',
+    'kiwa-auth',
+    'kiwa-queue',
+    'kiwa-cache',
   ];
 
   it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
@@ -196,6 +202,11 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-forge': ['contract'],
     'kiwa-hardhat': ['contract'],
     'kiwa-play': ['e2e'],
+    'kiwa-orm': ['orm-query'],
+    'kiwa-edge': ['edge-handler'],
+    'kiwa-auth': ['auth'],
+    'kiwa-queue': ['job-queue'],
+    'kiwa-cache': ['cache'],
   };
 
   /**
@@ -338,6 +349,31 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(invocation, `${skill} の review 起動に --lang が無い`).toContain('--lang');
   });
 
+  it.each(Object.keys(SKILL_LAYERS))('%s の review 起動が --no-review に従う', (skill) => {
+    // Declaring an off switch and then giving an unconditional instruction
+    // leaves the LLM two readings, and the one it picks runs a review in CI
+    // that was explicitly turned off (#1861 群 4 Round 1 F1).
+    //
+    // Asserted on the invocation line rather than on prose nearby: `kiwa-orm`
+    // stated the skip in its option list while the only instruction that
+    // starts the review said nothing about it, 40 lines apart.
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    const declared = body.split('\n').some((l) => l.startsWith('- `--no-review`'));
+    if (!declared) return; // off switch が無い skill は条件を書きようがない
+    expect(reviewInvocation(skill), `${skill} の review 起動が無条件`).toContain('--no-review');
+  });
+
+  it.each(Object.keys(SKILL_LAYERS))('%s が review 起動を持つなら off switch も持つ', (skill) => {
+    // The other direction. Adding an invocation to a skill that never had one
+    // — which 群 4 did for `kiwa-orm` and `kiwa-edge` — takes away the caller's
+    // ability to skip it unless the flag is added in the same change.
+    const body = read(`.claude/skills/${skill}/SKILL.md`);
+    expect(
+      body.split('\n').some((l) => l.startsWith('- `--no-review`')),
+      `${skill} が review を起動するのに --no-review を宣言していない`,
+    ).toBe(true);
+  });
+
   it.each(Object.keys(SKILL_LAYERS))('%s が --lang を option として宣言している', (skill) => {
     // Using `$DOC_LANG` without declaring the flag leaves callers no way to set
     // it, and no stated default when they do not (#1863 F2).
@@ -459,8 +495,8 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
 
   it('移行済 skill の数が Issue の群と一致する', () => {
     // A guard against the list drifting: two from #1860, three in group 1,
-    // five in group 2, three in group 3.
-    expect(MIGRATED).toHaveLength(13);
+    // five in group 2, three in group 3, five in group 4.
+    expect(MIGRATED).toHaveLength(18);
   });
 
   it('未移行の skill が残っていることを記録する', () => {
