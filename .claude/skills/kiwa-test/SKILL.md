@@ -187,10 +187,30 @@ retrofit walkthrough は examples 側を空 dir 状態から開始するため�
 # spec の path は § 入力 spec の path は CLI から受け取る で解決する。
 # ここで組み立てない = 組み立てると producer と別の規約になり、 存在するのに
 # 「無い」 と判定して上書き確認を出さないまま再生成する。
+case "$TARGET" in
+  contract) LAYERS="contract" ;;
+  dapp)     LAYERS="e2e" ;;
+  web)      LAYERS="e2e-generic a11y" ;;
+  both)     LAYERS="contract e2e" ;;
+  all)      LAYERS="contract e2e e2e-generic a11y" ;;
+  *) echo "ERROR: 未知の --target: $TARGET"; exit 1 ;;
+esac
+
 SPECS=()
-for LAYER in $(target_layers "$TARGET"); do   # 表 § 入力 spec の path は CLI から受け取る
-  SPECS+=("$(kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE" \
-    | jq -r '.layers[] | select(.id == "'"$LAYER"'") | .spec_path')")
+for LAYER in $LAYERS; do
+  # exit code / 形 / 一意性を分けて見る (§ 解決に失敗したら止める)。
+  # pipe で jq に直接繋がない = pipefail 無しでは CLI が落ちても exit 0 になり、
+  # 空 path が「spec 無し」 と区別できなくなる。
+  OUT=$(kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE") \
+    || { echo "ERROR: kiwa layers が失敗 (layer=$LAYER)"; exit 1; }
+  HITS=$(printf '%s' "$OUT" | jq -r --arg id "$LAYER" '[.layers[]? | select(.id == $id)] | length') \
+    || { echo "ERROR: kiwa layers の出力を JSON として読めない"; exit 1; }
+  [ "$HITS" = "1" ] || { echo "ERROR: layer $LAYER が $HITS 件 (1 件でない)"; exit 1; }
+  SPEC=$(printf '%s' "$OUT" | jq -r --arg id "$LAYER" '.layers[] | select(.id == $id) | .spec_path // ""')
+  case "$SPEC" in
+    ""|*"{module}"*) echo "ERROR: layer $LAYER の spec_path が未解決: '$SPEC'"; exit 1 ;;
+  esac
+  SPECS+=("$SPEC")
 done
 
 EXISTING=()
@@ -199,11 +219,11 @@ EXISTING=()
 [ "$TARGET" != "contract" ] && [ -d "examples/$EXAMPLE/tests" ] && [ -n "$(ls -A examples/$EXAMPLE/tests 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/tests")
 # spec 既存 check (解決済 path をそのまま見る)
 for SPEC in "${SPECS[@]}"; do
-  [ -n "$SPEC" ] && [ -f "$SPEC" ] && EXISTING+=("$SPEC")
+  [ -f "$SPEC" ] && EXISTING+=("$SPEC")
 done
 ```
 
-`kiwa layers` が非 0 で終わったら **その場で中断する** (§ 解決に失敗したら止める)。 握り潰して空 path のまま進むと、 spec が存在するのに「無い」 と判定して上書き確認を出さず、 user の spec を黙って作り直す。
+**解決に失敗したら中断する**。 握り潰して空 path のまま進むと、 spec が存在するのに「無い」 と判定して上書き確認を出さず、 user の spec を黙って作り直す。 `$TARGET` の分岐に既定を置かないのも同じ理由で、 未知の値が「layer 0 件」 に落ちると全 spec が見えなくなる。
 
 既存 file / dir 検出時は AskUserQuestion で 3 択:
 

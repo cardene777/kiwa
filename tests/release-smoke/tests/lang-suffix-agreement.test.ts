@@ -89,7 +89,10 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // sat next to a `LANG_SUFFIX` block that was still the actual instruction,
     // so the two paths coexisted and only one of them followed the CLI.
     expect(review, 'CLI から受け取る経路が無い').toMatch(/kiwa layers --json[^\n]*--lang/);
-    expect(review, '自前で組み立てない旨が無い').toMatch(/自前で組み立てない/);
+    // Both endings. #1860 wrote `自前で組み立てない` while the block the other
+    // 18 skills share says `自前で組み立てず`; requiring only the first would
+    // fail the moment `kiwa-review` adopted the shared wording (#1893).
+    expect(review, '自前で組み立てない旨が無い').toMatch(/自前で組み立て(ない|ず)/);
   });
 
   it('consumer が spec path の LANG_SUFFIX を自前で組まない', () => {
@@ -159,6 +162,48 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // meant a skill migrated later could drop the warning and nothing noticed.
     const body = read(`.claude/skills/${skill}/SKILL.md`);
     expect(body, `${skill} が LANG を使わない旨を書いていない`).toMatch(/`LANG` を使わない/);
+  });
+
+  /** The bash blocks a skill declares, concatenated. */
+  function bashBlocks(skill: string): string {
+    return [...read(`.claude/skills/${skill}/SKILL.md`).matchAll(/```bash\n([\s\S]*?)```/g)]
+      .map((m) => m[1] ?? '')
+      .join('\n');
+  }
+
+  it.each(MIGRATED)('%s が CLI の応答を sed で加工しない', (skill) => {
+    // `kiwa-review` piped the response into `sed "s/{module}/$MODULE/"` and
+    // survived every check for two passes: the `sed` bans were scoped to the
+    // skills the layer table names, and it is not one of them (#1893 Round 1).
+    //
+    // The substitution is the traversal — a module carrying a separator turns
+    // `test-spec-{module}.api.md` into `test-spec-../../etc/passwd.api.md`.
+    // Applied to every skill that calls the CLI, whatever the table says.
+    const blocks = bashBlocks(skill)
+      .split('\n')
+      .filter((line) => line.includes('kiwa layers') || line.trim().startsWith('|'));
+    expect(blocks.join('\n'), `${skill} が CLI 応答を sed に通している`).not.toContain('sed');
+  });
+
+  it.each(MIGRATED)('%s が shell 断片に未定義の関数を置かない', (skill) => {
+    // A `for LAYER in $(target_layers "$TARGET")` that nothing defines exits
+    // the loop zero times and the snippet still succeeds, so the spec check it
+    // guards silently covers nothing (#1893 Round 1 F1, measured in bash).
+    //
+    // Checked as "every command substitution calls something the block or the
+    // environment defines", approximated by requiring the callee to appear
+    // elsewhere in the block as an assignment, a function, or a known binary.
+    const block = bashBlocks(skill);
+    const KNOWN = new Set([
+      'kiwa', 'jq', 'git', 'ls', 'cat', 'echo', 'printf', 'date', 'basename',
+      'dirname', 'pnpm', 'npx', 'node', 'grep', 'sed', 'awk', 'head', 'tail',
+      'wc', 'find', 'mktemp', 'command', 'sort', 'uniq',
+    ]);
+    const called = [...block.matchAll(/\$\(\s*([a-z_][a-z0-9_]*)\b/gi)].map((m) => m[1] ?? '');
+    const undefinedCalls = called.filter(
+      (name) => !KNOWN.has(name) && !new RegExp(`(^|\\n)\\s*(function\\s+)?${name}\\s*(\\(\\)|=)`).test(block),
+    );
+    expect(undefinedCalls, `${skill} が未定義の ${undefinedCalls.join(', ')} を呼んでいる`).toEqual([]);
   });
 
   it.each(MIGRATED)('%s が CLI から spec path を受け取る', (skill) => {
