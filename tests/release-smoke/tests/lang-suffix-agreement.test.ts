@@ -840,6 +840,21 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
   });
 
+  it('kiwa-observe が --layer の必須を条件付きで書いていない', () => {
+    // The declaration said "always required" while a sentence 12 lines below
+    // still read as "required when `--spec` is also absent" — two readings of
+    // the same rule, and the looser one leaves `--out` unresolvable (#1895
+    // Round 2 F1).
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    const conditional = body
+      .split('\n')
+      .filter((l) => l.includes('--layer'))
+      .filter((l) => /`--layer` が無く[^\n]*も無い/.test(l));
+    expect(conditional, `--layer の必須が条件付きで残っている:\n${conditional.join('\n')}`).toEqual(
+      [],
+    );
+  });
+
   it('kiwa-observe が producer の鍵を consumer_skill から引かない', () => {
     // `contract` declares `kiwa-forge` as `consumer_skill` and `kiwa-hardhat`
     // in `also_consumed_by`. Deriving the `test_outputs` key from
