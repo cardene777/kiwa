@@ -207,11 +207,18 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
    * The response is served by a stub `kiwa` placed first on `PATH`, so the
    * snippet runs exactly as written — no substitution, no re-implementation.
    */
-  function runResolution(snippet: string, response: string): number {
+  function runResolution(snippet: string, response: string, cliStatus = 0): number {
     const dir = mkdtempSync(join(tmpdir(), 'kiwa-resolve-'));
     try {
       const stub = join(dir, 'kiwa');
-      writeFileSync(stub, `#!/bin/sh\ncat <<'KIWA_JSON'\n${response}\nKIWA_JSON\n`, { mode: 0o755 });
+      // The exit status is a parameter because the decision table's first row
+      // is about status, not shape. With the stub fixed at 0, deleting
+      // `|| { ...; exit 1; }` from the snippet went undetected (#1893 Round 5).
+      writeFileSync(
+        stub,
+        `#!/bin/sh\ncat <<'KIWA_JSON'\n${response}\nKIWA_JSON\nexit ${cliStatus}\n`,
+        { mode: 0o755 },
+      );
       const script = [
         `export PATH=${JSON.stringify(dir)}:$PATH`,
         'TARGET=contract',
@@ -280,7 +287,18 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     for (const [label, response] of BROKEN_RESPONSES) {
       expect(runResolution(snippet, response), `${skill} が「${label}」 で止まらない`).not.toBe(0);
     }
-  });
+    // The table's first row. Shape cannot express it: the response is valid and
+    // the command still failed, which is what an uninstalled CLI or a bad
+    // `--module` looks like.
+    expect(
+      runResolution(snippet, VALID_RESPONSE, 2),
+      `${skill} が「exit != 0」 で止まらない`,
+    ).not.toBe(0);
+    // 11 bash processes, each with its own temp dir. Stated here rather than
+    // left to the runner's flag: `pnpm test` passes `--testTimeout 30000` but a
+    // bare `vitest run` uses 5000 and this took 5.5s on the machine it was
+    // written on, so the check would fail depending on how it was invoked.
+  }, 60_000);
 
   it.each(MIGRATED)('%s が shell 断片に未定義の関数を置かない', (skill) => {
     // A `for LAYER in $(target_layers "$TARGET")` that nothing defines exits
