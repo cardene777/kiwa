@@ -180,6 +180,8 @@ provider が空の場合、または setup 時に登録していない provider 
 | <code v-pre>dynamicClientRegistration: software&#95;statement signature verification failed</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L269) |
 | <code v-pre>software&#95;statement: expected 3 dot-separated segments, got $&#123;parts.length&#125;</code> | [packages/auth/src/oidc/dcr.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/dcr.ts#L92) |
 | <code v-pre>createDiscoveryEndpoint: metadata.issuer "$&#123;metadata.issuer&#125;" must match endpoint issuer "$&#123;issuer&#125;" (OIDC Discovery §4.3)</code> | [packages/auth/src/oidc/discovery.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/discovery.ts#L82) |
+| <code v-pre>id&#95;token: no signing key registered for kid "$&#123;kid&#125;"</code> | [packages/auth/src/oidc/id-token.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L244) |
+| <code v-pre>jwks: $&#123;member&#125; is unavailable on a fetched JWKS document</code> | [packages/auth/src/oidc/id-token.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/id-token.ts#L404) |
 | <code v-pre>performBLEHandshake: sessionId is empty — cannot correlate BLE advertisement with QR payload</code> | [packages/auth/src/passkey/caBLE/ble-handshake.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/ble-handshake.ts#L47) |
 | <code v-pre>migrateCredential: cannot migrate credential over unestablished tunnel "$&#123;tunnel.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L35) |
 | <code v-pre>migrateCredential: cannot migrate credential over closed tunnel "$&#123;tunnel.sessionId&#125;"</code> | [packages/auth/src/passkey/caBLE/hybrid-transport.ts](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/passkey/caBLE/hybrid-transport.ts#L40) |
@@ -352,7 +354,7 @@ provider が空の場合、または setup 時に登録していない provider 
 | [oauth21/types.ts](./api/oauth21__types) | 0 | 19 |
 | [oidc/dcr.ts](./api/oidc__dcr) | 4 | 0 |
 | [oidc/discovery.ts](./api/oidc__discovery) | 1 | 0 |
-| [oidc/id-token.ts](./api/oidc__id-token) | 3 | 0 |
+| [oidc/id-token.ts](./api/oidc__id-token) | 4 | 0 |
 | [oidc/jwks.ts](./api/oidc__jwks) | 2 | 0 |
 | [oidc/setup-oidc-env.ts](./api/oidc__setup-oidc-env) | 2 | 0 |
 | [oidc/types.ts](./api/oidc__types) | 0 | 18 |

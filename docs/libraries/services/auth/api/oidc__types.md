@@ -16,7 +16,7 @@ title: "@kiwa-lab/auth oidc__types の API 契約"
 
 #### <code v-pre>ClientRegistrationRequest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L61) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L63) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 OpenID Connect Dynamic Client Registration request per RFC 7591 §2. Fields the mock validates: `redirect_uris` (mandatory, non-empty), `grant_types` (must be OAuth 2.1 allowlist), `token_endpoint_auth_method` (must be an advertised method). `client_name` is treated as opaque metadata.
 
@@ -40,7 +40,7 @@ export interface ClientRegistrationRequest {
 
 #### <code v-pre>ClientRegistrationResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L83) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L85) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Response body from `/register` (RFC 7591 §3). Real deployments assign a random `client_id` and (for confidential clients) a `client_secret`; the mock returns deterministic ids from a monotonic counter for reproducible tests.
 
@@ -59,7 +59,7 @@ export interface ClientRegistrationResponse {
 
 #### <code v-pre>DiscoveryEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L48) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L50) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Discovery endpoint handle. `fetch()` returns the OP metadata as a plain object — a real HTTP client would parse the JSON body but the mock skips the encoding trip so tests can assert on the fields directly.
 
@@ -73,7 +73,7 @@ export interface DiscoveryEndpoint {
 
 #### <code v-pre>IdToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L184) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L200) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Compact-serialized id_token JWT (`header.payload.signature`). The mock exposes the parsed claims so tests can assert without decoding the JWT.
 
@@ -91,7 +91,7 @@ export interface IdToken {
 
 #### <code v-pre>IdTokenClaims</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L154) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L170) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 id_token claim shape per OpenID Connect Core 1.0 §2. `iss` / `sub` / `aud` / `exp` / `iat` are mandatory. The optional claims are the ones the mock validates on `verifyIdToken` — extending this shape requires teaching the verifier about new claims.
 
@@ -125,7 +125,7 @@ export interface IdTokenClaims {
 
 #### <code v-pre>JwksDocument</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L127) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L134) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 JWKS document returned by `/jwks`. Real deployments return `{keys: [...]}` per RFC 7517 §5; the mock mirrors that shape verbatim.
 
@@ -137,7 +137,7 @@ export interface JwksDocument {
 
 #### <code v-pre>JwksEndpoint</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L136) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L143) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 JWKS endpoint handle. Exposes `fetch()` (returns the current key set), `rotate()` (mint a new active key, retire the old one with a retention window), and `activeKey()` (peek the current signing key).
 
@@ -152,12 +152,21 @@ export interface JwksEndpoint {
      * Test-only inspection.
      */
     allKeys(): readonly JwksKey[];
+    /**
+     * Private half of the keypair behind `kid`, for signing. Returns
+     * `undefined` once the kid has aged out of the retention window.
+     *
+     * The private key never appears in `fetch()` / `allKeys()` — those return
+     * the public JWKS document an RP would download. Signing is the only
+     * caller.
+     */
+    signingKeyFor(kid: string): KeyObject | undefined;
 }
 ```
 
 #### <code v-pre>JwksKey</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L100) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L102) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 JWKS entry. Keys are opaque records — the mock signs id_tokens with an HMAC-style signature keyed by `kid`, so `n` / `e` / `x` / `y` are placeholders that let a real client parse the JWK without cracking the cryptographic invariants.
 
@@ -168,7 +177,12 @@ export interface JwksKey {
     alg: 'RS256' | 'ES256';
     /** Key type. `RSA` for `RS256`, `EC` for `ES256`. */
     kty: 'RSA' | 'EC';
-    /** Public exponent (RS256). Base64url-encoded placeholder. */
+    /**
+     * RSA modulus and public exponent (RS256), base64url-encoded per RFC 7518
+     * §6.3.1. These are the real public half of the signing keypair — an RP can
+     * feed them to `crypto.createPublicKey({ format: 'jwk' })` and verify a
+     * signature the mock produced.
+     */
     n?: string;
     e?: string;
     /** EC curve params (ES256). */
@@ -188,7 +202,7 @@ export interface JwksKey {
 
 #### <code v-pre>OidcTestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L353) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L369) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 `setupOidcEnv` return shape. Composes the OAuth 2.1 mock AS with OIDC discovery / DCR / JWKS / id_token / federation helpers.
 
@@ -237,7 +251,7 @@ export interface OidcTestEnv extends TestEnvBase<'mock'> {
 
 #### <code v-pre>OpenIdProviderMetadata</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L20) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L22) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 OpenID Provider metadata returned by the Discovery endpoint (`.well-known/openid-configuration`). Fields follow OpenID Connect Discovery 1.0 §3. The mock returns the minimum set that a Relying Party (RP) needs to complete the Authorization Code + PKCE flow that OIDC layers on top of OAuth 2.1. `issuer` MUST match the URL used to fetch the document (spec §4.3). The mock derives every other URL from it so a test can compare with a single string mismatch check.
 
@@ -268,7 +282,7 @@ export interface OpenIdProviderMetadata {
 
 #### <code v-pre>ResolveTrustChainInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L434) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L450) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Input to `resolveTrustChain`. The caller supplies the leaf entity's statement + a set of intermediate statements + the trusted anchor. The mock walks from leaf to anchor following the `iss` / `sub` linkage.
 
@@ -284,7 +298,7 @@ export interface ResolveTrustChainInput {
 
 #### <code v-pre>SetupOidcEnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L398) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L414) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Options accepted by `setupOidcEnv`. Extends the OAuth 2.1 options with OIDC-specific settings.
 
@@ -323,7 +337,7 @@ export interface SetupOidcEnvOptions {
 
 #### <code v-pre>SignIdTokenInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L198) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L214) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Input to `signIdToken`. The signer builds a full JWT from these fields plus the currently-active JWKS key.
 
@@ -350,7 +364,7 @@ export interface SignIdTokenInput {
 
 #### <code v-pre>TrustAnchor</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L259) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L275) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Trust chain node in an OpenID Federation 1.0 trust chain. The mock represents each node as a plain object rather than a signed Entity Configuration JWT — the point is to prove the chain-walk logic, not the signature cryptography.
 
@@ -373,7 +387,7 @@ export interface TrustAnchor {
 
 #### <code v-pre>TrustChainReasonCode</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L311) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L327) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Structured discriminator for `TrustChainResult.reason`. Downstream wrappers (dogfood-oidc-federation の `classifyFederationReason` 等) が reason string の substring match で failure axis を判定する fragile 依存を除去するため、 underlying resolver 側で 5 種の failure axis を tag 付けする。 `broken_link` — chain step が previous step の `iss` を describe しない (walker が該当 intermediate を見つけられず exhausted、 または cycle 検出前に exhaust)、 `cycle` — walker が既訪 entity を再訪、 `expired_intermediate` — intermediate statement の `exp &lt;= now`、 `expired_leaf` — leaf statement の `exp &lt;= now`、 `anchor_mismatch` — chain 到達点の `iss` が指定 trust anchor と一致しない。
 
@@ -383,7 +397,7 @@ export type TrustChainReasonCode = 'broken_link' | 'cycle' | 'expired_intermedia
 
 #### <code v-pre>TrustChainResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L336) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L352) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Trust chain returned by `resolveTrustChain`. The chain is ordered from the leaf (index 0) to the trust anchor (last index). `valid` false always carries a `reason` + `reason_code` — the `reason_code` は failure axis を pin する structured tag、 `reason` は human-readable diagnostic string。
 
@@ -404,7 +418,7 @@ export interface TrustChainResult {
 
 #### <code v-pre>VerifyIdTokenOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L225) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L241) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Options accepted by `verifyIdToken`. The verifier refuses on any mismatch — `expectedIssuer` / `expectedAudience` are mandatory in practice (the mock types them as required to remind callers). `expectedNonce` / `expectedAccessToken` / `expectedCode` are optional because not every flow carries them, but if the token has the corresponding claim the verifier checks it against the expectation.
 
@@ -430,7 +444,7 @@ export interface VerifyIdTokenOptions {
 
 #### <code v-pre>VerifyIdTokenResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L247) <code v-pre>packages/auth/src/oidc/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oidc/types.ts#L263) <code v-pre>packages/auth/src/oidc/types.ts</code>
 
 Verify result. `valid` false always carries a `reason` so tests can pin failure modes without regexing the exception message.
 
