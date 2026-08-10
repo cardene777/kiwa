@@ -1,6 +1,7 @@
-import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
@@ -185,38 +186,99 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(blocks.join('\n'), `${skill} が CLI 応答を sed に通している`).not.toContain('sed');
   });
 
-  it.each(MIGRATED)('%s が spec_path を取り出す時に型を見る', (skill) => {
-    // `.layers[]?` silently turns a non-array response into zero hits and
-    // `.spec_path // ""` lets a numeric one through as "42"; both are rows the
-    // decision table calls abort conditions, and both were accepted by the
-    // snippet that implemented it (#1893 Round 2, measured).
-    //
-    // `jq -e` is the checkable proxy: it exits non-zero when the filter yields
-    // false or nothing, which is what a type check has to do here. Applied only
-    // to blocks that actually extract the path — prose that quotes the filter
-    // is not an implementation.
-    //
-    // Comment lines are stripped first. Removing both checks left the sentence
-    // explaining them (`# 文字列かつ非空を jq -e に判定させ…`) and the check
-    // stayed green on the explanation of the thing that was deleted (measured).
-    //
-    // Asserted on the extracting command itself, not on the block. The same
-    // block holds a second `jq -e` that checks `layers` is an array, so a
-    // block-wide search stayed green when only the `spec_path` guard was
-    // reverted — R2-F1 could come back undetected (#1893 Round 3, measured).
-    const logicalLines = bashBlocks(skill)
-      .split('\n')
-      .filter((line) => !line.trim().startsWith('#'))
-      .join('\n')
-      .replace(/\\\n\s*/g, ' ') // 継続行を 1 論理行に畳む
-      .split('\n');
-    const extracting = logicalLines.filter((line) => line.includes('.spec_path'));
-    if (extracting.length === 0) return; // 取り出していない skill は対象外
-    for (const line of extracting) {
-      expect(line, `${skill} の spec_path 取り出しが jq -e を使っていない`).toMatch(/jq\s+-\S*e/);
-      expect(line, `${skill} の spec_path 取り出しが文字列判定を持たない`).toContain(
-        'type == "string"',
-      );
+  /**
+   * The one bash block in a skill that resolves a spec path, ready to run.
+   *
+   * Identified by extracting `.spec_path`, which is what the resolution does.
+   * Requiring exactly one keeps the runner pointed at a single subject.
+   */
+  function resolutionSnippet(skill: string): string | null {
+    const blocks = [...read(`.claude/skills/${skill}/SKILL.md`).matchAll(/```bash\n([\s\S]*?)```/g)]
+      .map((m) => m[1] ?? '')
+      .filter((b) => b.includes('.spec_path'));
+    if (blocks.length === 0) return null;
+    expect(blocks, `${skill} の解決 block が 1 つに定まらない`).toHaveLength(1);
+    return blocks[0] ?? null;
+  }
+
+  /**
+   * Run a resolution snippet against one CLI response and report its exit code.
+   *
+   * The response is served by a stub `kiwa` placed first on `PATH`, so the
+   * snippet runs exactly as written — no substitution, no re-implementation.
+   */
+  function runResolution(snippet: string, response: string): number {
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-resolve-'));
+    try {
+      const stub = join(dir, 'kiwa');
+      writeFileSync(stub, `#!/bin/sh\ncat <<'KIWA_JSON'\n${response}\nKIWA_JSON\n`, { mode: 0o755 });
+      const script = [
+        `export PATH=${JSON.stringify(dir)}:$PATH`,
+        'TARGET=contract',
+        'EXAMPLE=nft',
+        'DOC_LANG=ja',
+        snippet,
+        'exit 0', // ここに到達 = snippet が応答を受理した
+      ].join('\n');
+      return spawnSync('bash', ['-c', script], { cwd: dir, encoding: 'utf-8' }).status ?? -1;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * Every abort row of the decision table, as a response that triggers it.
+   *
+   * The table is prose the LLM reads; these are the same rows as behaviour.
+   */
+  const BROKEN_RESPONSES: [string, string][] = [
+    ['stdout が JSON として読めない', 'not json at all'],
+    ['`layers` が配列でない', '{"layers":{"id":"contract"}}'],
+    // The shape the array guard exists for. With `.layers[]?` an object of
+    // objects iterates its values, finds one matching `id`, and resolves — the
+    // table calls it an abort and it would be accepted. The flatter
+    // `{"layers":{"id":...}}` above aborts either way, because indexing a
+    // string errors out, so it does not pin the guard on its own (measured).
+    [
+      '`layers` が object of objects',
+      '{"layers":{"contract":{"id":"contract","spec_path":"x.md"}}}',
+    ],
+    ['必要な `id` が `layers` に無い', '{"layers":[{"id":"e2e","spec_path":"x.md"}]}'],
+    [
+      '同じ `id` が 2 件以上ある',
+      '{"layers":[{"id":"contract","spec_path":"a.md"},{"id":"contract","spec_path":"b.md"}]}',
+    ],
+    ['`spec_path` が文字列でない', '{"layers":[{"id":"contract","spec_path":42}]}'],
+    ['`spec_path` が null', '{"layers":[{"id":"contract","spec_path":null}]}'],
+    ['`spec_path` が空', '{"layers":[{"id":"contract","spec_path":""}]}'],
+    [
+      '`spec_path` に `{module}` が残っている',
+      '{"layers":[{"id":"contract","spec_path":"tests/spec/contract/test-spec-{module}.md"}]}',
+    ],
+  ];
+
+  const VALID_RESPONSE =
+    '{"layers":[{"id":"contract","spec_path":"tests/spec/contract/test-spec-nft.ja.md"}]}';
+
+  it.each(MIGRATED)('%s の解決 snippet が壊れた応答で止まる', (skill) => {
+    // Executed, not pattern-matched. Three rounds went to text proxies that
+    // each had a way through — a `jq -e` elsewhere in the block satisfied a
+    // block-wide search (Round 3), and a trailing `# jq -e 'type == "string"'`
+    // satisfied a line-wide one (Round 4). Running the snippet cannot be
+    // satisfied by a token that does not execute.
+    const snippet = resolutionSnippet(skill);
+    if (snippet === null) return; // 解決を bash で書いていない skill は対象外
+
+    // `jq` is what the snippet uses. Absent, the check cannot answer, so it
+    // fails rather than passing silently.
+    expect(
+      spawnSync('sh', ['-c', 'command -v jq'], { encoding: 'utf-8' }).status,
+      'jq が無いため snippet を実行できない',
+    ).toBe(0);
+
+    expect(runResolution(snippet, VALID_RESPONSE), `${skill} が正常な応答を受理しない`).toBe(0);
+    for (const [label, response] of BROKEN_RESPONSES) {
+      expect(runResolution(snippet, response), `${skill} が「${label}」 で止まらない`).not.toBe(0);
     }
   });
 
