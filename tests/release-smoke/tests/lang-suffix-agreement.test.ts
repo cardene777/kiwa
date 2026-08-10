@@ -199,12 +199,25 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // Comment lines are stripped first. Removing both checks left the sentence
     // explaining them (`# 文字列かつ非空を jq -e に判定させ…`) and the check
     // stayed green on the explanation of the thing that was deleted (measured).
-    const commands = bashBlocks(skill)
+    //
+    // Asserted on the extracting command itself, not on the block. The same
+    // block holds a second `jq -e` that checks `layers` is an array, so a
+    // block-wide search stayed green when only the `spec_path` guard was
+    // reverted — R2-F1 could come back undetected (#1893 Round 3, measured).
+    const logicalLines = bashBlocks(skill)
       .split('\n')
       .filter((line) => !line.trim().startsWith('#'))
-      .join('\n');
-    if (!commands.includes('.spec_path')) return; // 取り出していない skill は対象外
-    expect(commands, `${skill} が型を見ずに spec_path を取り出している`).toContain('jq -e');
+      .join('\n')
+      .replace(/\\\n\s*/g, ' ') // 継続行を 1 論理行に畳む
+      .split('\n');
+    const extracting = logicalLines.filter((line) => line.includes('.spec_path'));
+    if (extracting.length === 0) return; // 取り出していない skill は対象外
+    for (const line of extracting) {
+      expect(line, `${skill} の spec_path 取り出しが jq -e を使っていない`).toMatch(/jq\s+-\S*e/);
+      expect(line, `${skill} の spec_path 取り出しが文字列判定を持たない`).toContain(
+        'type == "string"',
+      );
+    }
   });
 
   it.each(MIGRATED)('%s が shell 断片に未定義の関数を置かない', (skill) => {
