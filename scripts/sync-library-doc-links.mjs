@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { deadDocumentLinks } from './docs-link-check.mjs';
+import { deadDocumentLinks, unsupportedLinkSyntax } from './docs-link-check.mjs';
 import {
   DocsSyncError,
   linkPath,
@@ -141,11 +141,17 @@ function main() {
   // 対象は docs/libraries 配下に限る。docs/migrations と docs/api にも切れた link が
   // あるが、原因が別 (存在しない tutorial への参照) で、履歴面を書き換えない方針との
   // 兼ね合いを個別に決める必要がある。
-  const dead = deadDocumentLinks({
-    repositoryRoot,
-    docsRoot: join(repositoryRoot, 'docs'),
-    scanRoot: librariesRoot,
-  });
+  //
+  // 解釈できない記法も同じ扱いにする。検査できないものを黙って通すと、覆っていない
+  // 範囲が「破れ無し」 として報告される。
+  const dead = [
+    ...deadDocumentLinks({
+      repositoryRoot,
+      docsRoot: join(repositoryRoot, 'docs'),
+      scanRoot: librariesRoot,
+    }),
+    ...unsupportedLinkSyntax({ repositoryRoot, scanRoot: librariesRoot }),
+  ];
   if (dead.length > 0) {
     console.error(dead.join('\n'));
     process.exitCode = 1;

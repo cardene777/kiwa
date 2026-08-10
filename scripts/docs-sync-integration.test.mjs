@@ -24,7 +24,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { deadDocumentLinks } from './docs-link-check.mjs';
+import { deadDocumentLinks, unsupportedLinkSyntax } from './docs-link-check.mjs';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 const START = '<!-- kiwa-docs:start -->';
@@ -288,14 +288,9 @@ test('links resolve through <path>.md and <path>/index.md', () => {
 // 1 記法だけを見ていると、別記法で書いた壊れた link がそのまま通る。実測で 4 形が
 // 素通りしていた (title 付き / angle-bracket / reference 定義 / 生 HTML の a タグ)。
 for (const [label, markdown] of [
-  ['title 付き inline', '[x](./gone/ "題")'],
-  ['single-quote title', "[x](./gone/ '題')"],
-  ['括弧 title', '[x](./gone/ (題))'],
   ['angle-bracket', '[x](<./gone/>)'],
-  ['reference 定義', '[x]: ./gone/'],
-  ['生 HTML の a タグ', '<a href="./gone/">x</a>'],
-  ['引用符なしの href', '<a href=./gone/>x</a>'],
   ['img の src', '<img src="./gone.png" alt="x">'],
+  ['引用符なしの img src', '<img src=./gone.png alt="x">'],
   ['image', '![x](./gone.png)'],
 ]) {
   test(`a dead link written as ${label} is reported`, () => {
@@ -335,43 +330,90 @@ test('type annotations inside code fences are not links', () => {
   });
 });
 
-// HTML の属性は要素ごとに意味が違う。要素名と属性名を直積で見ると、link ではない
-// 属性値を dead link として報告し、正当な docs を止める。
-for (const [label, markdown] of [
-  ['img の data-src', '<img data-src="./gone.png" src="/images/ok.png" alt="x">'],
-  ['a の src', '<a src="./gone.png">x</a>'],
-  ['img の href', '<img href="./gone.png" src="/images/ok.png" alt="x">'],
-]) {
-  test(`${label} is not treated as a link`, () => {
-    withFixture(({ root, readmePath }) => {
-      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
-      mkdirSync(join(root, 'docs', 'public', 'images'), { recursive: true });
-      writeFileSync(join(root, 'docs', 'public', 'images', 'ok.png'), 'png');
-      const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
-      writeFileSync(indexPath, `# sample\n\n${markdown}\n`);
+// 属性名の境界が緩いと、link ではない属性値を dead link として報告し、正当な docs を
+// 止める。`data-src` は `src` ではない。
+test('a data-src attribute is not treated as a link', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    mkdirSync(join(root, 'docs', 'public', 'images'), { recursive: true });
+    writeFileSync(join(root, 'docs', 'public', 'images', 'ok.png'), 'png');
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(
+      indexPath,
+      '# sample\n\n<img data-src="./gone.png" src="/images/ok.png" alt="x">\n',
+    );
 
-      const result = runSync(root);
-      assert.equal(result.status, 0, result.stderr);
-    });
+    assert.equal(runSync(root).status, 0);
   });
-}
+});
 
-// 引用符の中の `>` は tag の終端ではない。終端とみなすと、後続の href を読まずに
+// 引用符の中の `>` は tag の終端ではない。終端とみなすと、後続の src を読まずに
 // 走査が止まり、実在する dead link を見逃す。
-test('a quoted attribute containing > does not hide the href that follows', () => {
+test('a quoted attribute containing > does not hide the src that follows', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
     const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
-    writeFileSync(indexPath, '# sample\n\n<a title="a>b" href="./gone/">x</a>\n');
+    writeFileSync(indexPath, '# sample\n\n<img alt="a>b" src="./gone.png">\n');
 
     const result = spawnSync(
       process.execPath,
       [join(root, 'scripts', 'sync-library-doc-links.mjs')],
       { encoding: 'utf8' },
     );
-    assert.notEqual(result.status, 0, '後続の href は読まれる');
+    assert.notEqual(result.status, 0, '後続の src は読まれる');
     assert.match(result.stderr, /gone/);
   });
+});
+
+// 解析範囲を絞った代償を機械で見える形にする。未対応の記法が書かれたら、検査できない
+// ことを報告して止める。黙って素通りさせない。
+for (const [label, markdown] of [
+  ['title 付き inline link', '[x](./real "題")'],
+  ['reference 定義', '[x]: ./real'],
+  ['生 HTML の a タグ', '<a href="./real">x</a>'],
+]) {
+  test(`${label} is reported as unsupported syntax`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+      // 解決先は実在する。落ちる理由が「解決しない」 ではなく「解析できない」 こと。
+      writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n${markdown}\n`);
+
+      const result = spawnSync(
+        process.execPath,
+        [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+        { encoding: 'utf8' },
+      );
+      assert.notEqual(result.status, 0, `${label} は未対応として報告される`);
+      assert.match(result.stderr, /unsupported link syntax/);
+    });
+  });
+}
+
+// 未対応記法の検出も code block の中を見ない。見ると API reference が丸ごと落ちる。
+test('unsupported syntax inside a code fence is ignored', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(
+      indexPath,
+      ['# sample', '', '```html', '<a href="./x">y</a>', '```', '', '```ts', 'type R = {', '  [k: string]: unknown;', '};', '```', ''].join('\n'),
+    );
+
+    assert.equal(runSync(root).status, 0);
+  });
+});
+
+// 実 checkout に未対応記法が無いことを標準 sweep で確かめる。現れたら検査を広げるか
+// 記法を直すかを選ぶ。
+test('the real docs/libraries tree uses no unsupported link syntax', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const found = unsupportedLinkSyntax({
+    repositoryRoot,
+    scanRoot: join(repositoryRoot, 'docs', 'libraries'),
+  });
+  assert.deepEqual(found, [], found.join('\n'));
 });
 
 // CommonMark では 4 space 字下げの ``` は fence ではない。開始とみなすと、後続の

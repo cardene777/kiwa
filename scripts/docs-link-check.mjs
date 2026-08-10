@@ -47,41 +47,80 @@ function stripCode(content) {
 // `(...)`) を許す。title 記法を 1 形しか見ないと、別記法で書いた壊れた link が通る。
 const INLINE_LINK =
   /!?\[[^\]]*\]\(\s*(?:<([^>\n]*)>|([^)\s]+))(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g;
-// reference 定義 (`[label]: ./path`)。字下げは 3 space まで。
-const REFERENCE_LINK = /^ {0,3}\[[^\]]+\]:\s*<?([^\s<>]+)>?/gm;
-// 生 HTML。VitePress は markdown 中の HTML をそのまま出すため、引用符なしの属性値も届く。
+// 生 HTML の img。VitePress は markdown 中の HTML をそのまま出す。
 //
 // tag 全体を取ってから属性を読む 2 段にする。1 本の正規表現で要素名と属性名を並べると
-// 3 つの誤りが同時に起きる。要素と属性が直積になって `<a src>` と `<img href>` を link と
-// 誤認する、属性名の境界が緩く `data-src` を `src` として拾う、`[^>]*?` が引用符の中の
-// `>` で止まって後続の href を見逃す (4 形とも実測で再現した)。
+// 属性名の境界が緩くなって `data-src` を `src` として拾い、`[^>]*?` が引用区間の `>` で
+// 止まって後続の属性を見逃す (どちらも実測で再現した)。
 //
 // tag の中身は引用区間を先に食うので、属性値に `>` があっても tag の終端を取り違えない。
-const HTML_TAG = /<(a|img)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+const IMG_TAG = /<img\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
 const HTML_ATTRIBUTE =
   /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
-// 要素ごとに、link として意味を持つ属性は 1 つだけ。
-const LINK_ATTRIBUTE = { a: 'href', img: 'src' };
+
+/**
+ * 本 checker が解釈できない link 記法。
+ *
+ * 対象 corpus (docs/libraries) に 1 件も無いことを確かめた上で対応を外している。
+ * 覆おうとした間、正規表現解析の欠陥が review 3 round 続けて出た一方、実際に壊れる
+ * link は素の inline link と img だけだった。
+ *
+ * 外した代わりに、これらが現れたら test が落ちる (§ unsupportedLinkSyntax)。黙って
+ * 見逃す状態は作らない。現れた時に checker を広げるか記法を直すかを選ぶ。
+ */
+const UNSUPPORTED_SYNTAX = [
+  { label: 'title 付き inline link', pattern: /\]\([^)\s]+\s+["'(]/ },
+  { label: 'reference 定義', pattern: /^ {0,3}\[[^\]]+\]:\s*\S/m },
+  { label: '生 HTML の a タグ', pattern: /<a\b[^>]*\bhref\s*=/i },
+];
 
 /**
  * markdown と HTML の link destination を列挙する。
  *
- * 1 記法だけを見ると、別記法で書いた壊れた link がそのまま通る。実測で title 付き
- * inline (3 形) / angle-bracket / reference 定義 / 生 HTML の a と img が素通りしていた。
+ * 覆うのは inline link (素の形と angle-bracket) と `<img src>` の 2 つ。それ以外の
+ * 記法は UNSUPPORTED_SYNTAX が別経路で検知する。
  */
 function linkTargets(raw) {
   const content = stripCode(raw);
   const targets = [];
   for (const match of content.matchAll(INLINE_LINK)) targets.push(match[1] ?? match[2]);
-  for (const match of content.matchAll(REFERENCE_LINK)) targets.push(match[1]);
-  for (const tag of content.matchAll(HTML_TAG)) {
-    const wanted = LINK_ATTRIBUTE[tag[1].toLowerCase()];
-    for (const attribute of tag[2].matchAll(HTML_ATTRIBUTE)) {
-      if (attribute[1].toLowerCase() !== wanted) continue;
+  for (const tag of content.matchAll(IMG_TAG)) {
+    for (const attribute of tag[1].matchAll(HTML_ATTRIBUTE)) {
+      if (attribute[1].toLowerCase() !== 'src') continue;
       targets.push(attribute[2] ?? attribute[3] ?? attribute[4]);
     }
   }
   return targets.filter(Boolean);
+}
+
+/**
+ * checker が解釈できない link 記法が書かれた file を列挙する。
+ *
+ * 解析範囲を絞った代償を機械で見える形にする経路。返りが空でなくなったら、checker を
+ * 広げるか、その記法を使わないかを決める。
+ *
+ * @param {{repositoryRoot: string, scanRoot: string}} roots
+ * @returns {string[]} 記法と file を示す説明行。空配列なら未対応記法なし。
+ */
+export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
+  const found = [];
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const entryPath = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith('.md')) continue;
+      const content = stripCode(readFileSync(entryPath, 'utf8'));
+      for (const { label, pattern } of UNSUPPORTED_SYNTAX) {
+        if (!pattern.test(content)) continue;
+        found.push(`unsupported link syntax (${label}): ${relative(repositoryRoot, entryPath)}`);
+      }
+    }
+  };
+  walk(scanRoot);
+  return found.sort();
 }
 
 /** scheme 付き (http: / mailto:) と protocol-relative は repo の外なので見ない。 */
