@@ -142,8 +142,11 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 以下を Layer 1 に渡す。 Layer 1 も同じ CLI で書き先を解決するため、 ここで path を指定しない = 指定すると
 producer と consumer が別々に組み立てる 2 経路に戻る。
 
+**`--lang $DOC_LANG` を渡す**。 省くと Layer 1 が自分の既定言語で書き、 本 skill は `$DOC_LANG` で
+解決した path を読むため、 両者が別の file を指す (#1855 と同じ形)。
+
 ```text
-/kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/}
+/kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/} --lang $DOC_LANG
 
 入力情報:
 - 対象 dApp = {example 名} (1-2 文で機能要約)

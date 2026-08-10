@@ -112,7 +112,7 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 | 自動化対象 | `## 自動化すべきテスト` (優先度順) |
 | 手動確認テスト | `## 手動確認でよいテスト` (skip 対象) |
 
-spec が存在しない場合は「Layer 1 spec が未生成、 `/kiwa-design --layer contract --module {name}` を先に起動」と return してエラー停止 (Step 2 へ進まない)。
+spec が存在しない場合は「Layer 1 spec が未生成、 `/kiwa-design --layer contract --module {name} --lang $DOC_LANG` を先に起動」と return してエラー停止 (Step 2 へ進まない)。
 
 ### Step 2: contract 実体確認
 

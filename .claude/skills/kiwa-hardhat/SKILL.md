@@ -111,7 +111,7 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 | 優先度別ケース一覧 | `## テストケース一覧` の 9 column 表 |
 | 観点別 grouping | `### 観点 N: {name}` サブセクション |
 
-spec が存在しない場合は「Layer 1 spec が未生成、 `/kiwa-design --layer contract --module {name}` を先に起動」と return してエラー停止。
+spec が存在しない場合は「Layer 1 spec が未生成、 `/kiwa-design --layer contract --module {name} --lang $DOC_LANG` を先に起動」と return してエラー停止。
 
 ### Step 2: contract 実体確認
 
