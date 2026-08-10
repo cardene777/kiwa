@@ -840,7 +840,7 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
   });
 
-  it('kiwa-observe の --layer と --spec を同時に語る行が pin されている', () => {
+  it('kiwa-observe の --layer / --spec を語る行が pin されている', () => {
     // The declaration said "always required" while a sentence 12 lines below
     // read as "required when `--spec` is also absent" — two readings of the
     // same rule, and the looser one leaves `--out` unresolvable (#1895 Round 2).
@@ -850,19 +850,33 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     // (`--spec` 未指定時は `--layer` 必須), which is the same contract with the
     // same defect (#1895 Round 3, measured).
     //
+    // The union of both flags, not their intersection. Requiring both on one
+    // line watches only two-sided phrasings, and the contract can be weakened
+    // from one side alone — `` `--layer` は対象 spec path が無い場合だけ必須 ``
+    // mentions no `--spec` at all and reintroduces the condition (#1895
+    // Round 4, measured).
+    //
     // **A failure here is not a defect by itself.** It means a line carrying
-    // this contract was added or reworded: re-read it, confirm `--layer` is
-    // still unconditional, and update the list.
+    // this contract was added, reworded or removed: re-read it, confirm
+    // `--layer` is still unconditional, and update the list. Do not update the
+    // list to match without reading the line.
     const pinned = [
+      '- `--layer {id}` — 対象 layer (**常に必須**)',
+      '- `--spec {path}` — spec markdown path (省略時は § 入力 spec の path は CLI から受け取る で解決)',
       '`--layer` は `--spec` と `--out` の両方を明示した時でも必須にする。 **dashboard は「どの層を観測したか」 が本文と file 名の両方に要る**ためで、 `--spec` だけ省略時必須にすると `--out` の既定が解決できない組合せ (`--spec` と `--test` を渡して `--out` を省く) が残る。',
+      '`--spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。',
+      'kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"',
+      '本 skill は Layer 3 で、 Layer 2 のように扱う layer が決まっていない。 **どの layer の spec と突き合わせるかは `--layer` で受け取る**。 `docs/layers.json` が宣言する id をそのまま渡す。',
       '**`--layer` が無ければ推測せず user に確認する**。 `--spec` を渡されていても同じで、 layer は spec の場所を決める以外に dashboard の本文と file 名にも要る (§ オプション)。',
+      '判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。',
     ];
     const actual = read('.claude/skills/kiwa-observe/SKILL.md')
       .split('\n')
-      .filter((l) => l.includes('--layer') && l.includes('--spec'));
-    expect(actual, '--layer と --spec の契約行が変わった。 内容を読み直して pin を更新する').toEqual(
-      pinned,
-    );
+      .filter((l) => l.includes('--layer') || l.includes('--spec'));
+    expect(
+      actual,
+      '--layer / --spec の契約行が変わった。 内容を読み直して pin を更新する',
+    ).toEqual(pinned);
   });
 
   it('kiwa-observe が producer の鍵を consumer_skill から引かない', () => {
