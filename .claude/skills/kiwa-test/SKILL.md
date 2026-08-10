@@ -31,7 +31,7 @@ $ARGUMENTS
 - `--target {contract|dapp|web|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `both` は contract + dapp、 `all` は web を起動する (contract / dapp は `both` で起動する。 内訳は各 Step の起動条件が SSOT で、 surface 数は数えない)
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
-- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0 で AskUserQuestion、 全子 skill に伝播)
+- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`。 全子 skill に伝播)
 - `--no-review` — 子 skill の review step (kiwa-review) を skip (全子 skill に `--no-review` を渡す)
 - `--no-coverage-loop` — coverage auto loop を skip (kiwa-forge / kiwa-hardhat の auto loop を 1 round で終わる)
 - `--no-codex` — kiwa-play の Codex 委譲を skip (test 件数 1-2 のみ推奨)
@@ -41,31 +41,70 @@ $ARGUMENTS
 
 ## 実行フロー
 
-### Step 0: 文書生成言語の選択 (skill 起動時 1 回)
+### Step 0: 文書生成言語の決定 (skill 起動時 1 回)
 
-AskUserQuestion で文書生成言語を user に確認。 `--lang {code}` 引数指定時は skip。 詳細仕様は `references/doc-language-selection.md`。
+`--lang` が渡っていればそれを使う。 渡っていなければ **起動元が渡した値、 単体起動なら `ja`** を既定にする (option 宣言と同じ規則)。
+
+本 skill は入口なので単体起動が主だが、 そこにも既定があるので **AskUserQuestion は出さない** = 既定が決まっている問いを毎回聞くと chain が止まる。
 
 確定後 `$DOC_LANG` を全子 skill に `--lang $DOC_LANG` で渡す。
 
-#### lang suffix 規約 (SSOT)
+### 入力 spec の path は CLI から受け取る
 
-producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review` 等) の file 名規約一致 (Issue #341):
+**自前で組み立てず `kiwa layers` に訊く**。 本 skill は orchestrator で、 target ごとに扱う layer が変わる。
 
-| `$DOC_LANG` | suffix | 例 (spec file) | 例 (report file) |
-|---|---|---|---|
-| `en` (default) | (なし) | `test-spec-foo.md` | `result-review-foo.md` |
-| `ja` | `.ja` | `test-spec-foo.ja.md` | `result-review-foo.ja.md` |
-| その他 (`zh` / `ko` 等) | `.{code}` | `test-spec-foo.zh.md` | `result-review-foo.zh.md` |
-
-実装で参照する変数 `LANG_SUFFIX`:
+| `--target` | 解決する layer |
+|---|---|
+| `contract` | `contract` |
+| `dapp` | `e2e` |
+| `web` | `e2e-generic` / `a11y` |
+| `both` | `contract` / `e2e` |
+| `all` | `contract` / `e2e` / `e2e-generic` / `a11y` |
 
 ```bash
-LANG_SUFFIX=""
-[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
-# 使用例: tests/spec/contract/test-spec-${EXAMPLE}${LANG_SUFFIX}.md
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE"
 ```
 
-本 SKILL.md 内の `{lang}.md` placeholder 表記は本規約に従って `${LANG_SUFFIX}.md` に展開される。
+`--layer` は省いて 1 度に全件受け取ってもよい。 その場合は返った配列から必要な `id` を選ぶ。
+
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まず、 言語 suffix を作る変数も組まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
+
+`$EXAMPLE` は skill 引数の `--example`。 必須で、 推測しない。
+
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
+| 結果 | 扱い |
+|---|---|
+| exit != 0 | stderr をそのまま user に返して中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値を下流に渡す
+
+子 skill を起動する時、 **同じ `--lang` を渡す**。 渡さないと子が別の言語で解決し、 本 skill が確認した file と子が読む file が食い違う。
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
+
+**report path は本節の対象外**。 `tests/reports/` 配下は `kiwa layers` が解決する先ではなく、 別の場所の別の規約で決まる。 本 SKILL.md では `{lang}` placeholder のまま表記する。
+
+本 SKILL.md 内の spec path 表記は説明のための例示で、 解決の指示ではない。
 
 ### Step 1a: runner 自動判断 (skill 起動時 1 回、 contract 関連 target のみ)
 
@@ -145,18 +184,54 @@ retrofit walkthrough は examples 側を空 dir 状態から開始するため�
 
 ```bash
 # 検出ロジック
-# lang suffix 規約 (kiwa-design SSOT 一致): en は suffix なし、 ja は ".ja"、 その他 ISO 639-1 は ".{code}"
-LANG_SUFFIX=""
-[ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
+# spec の path は § 入力 spec の path は CLI から受け取る で解決する。
+# ここで組み立てない = 組み立てると producer と別の規約になり、 存在するのに
+# 「無い」 と判定して上書き確認を出さないまま再生成する。
+case "$TARGET" in
+  contract) LAYERS="contract" ;;
+  dapp)     LAYERS="e2e" ;;
+  web)      LAYERS="e2e-generic a11y" ;;
+  both)     LAYERS="contract e2e" ;;
+  all)      LAYERS="contract e2e e2e-generic a11y" ;;
+  *) echo "ERROR: 未知の --target: $TARGET"; exit 1 ;;
+esac
+
+SPECS=()
+for LAYER in $LAYERS; do
+  # exit code / 形 / 一意性を分けて見る (§ 解決に失敗したら止める)。
+  # pipe で jq に直接繋がない = pipefail 無しでは CLI が落ちても exit 0 になり、
+  # 空 path が「spec 無し」 と区別できなくなる。
+  OUT=$(kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE") \
+    || { echo "ERROR: kiwa layers が失敗 (layer=$LAYER)"; exit 1; }
+  # 型を先に見る。 `.layers[]?` は配列でない応答を黙って 0 件に潰すため、
+  # 壊れた応答が「spec 無し」 と区別できなくなる。
+  printf '%s' "$OUT" | jq -e '(.layers | type) == "array"' >/dev/null 2>&1 \
+    || { echo "ERROR: layers が配列でない (応答が壊れている)"; exit 1; }
+  HITS=$(printf '%s' "$OUT" | jq -r --arg id "$LAYER" '[.layers[] | select(.id == $id)] | length') \
+    || { echo "ERROR: kiwa layers の出力を JSON として読めない"; exit 1; }
+  [ "$HITS" = "1" ] || { echo "ERROR: layer $LAYER が $HITS 件 (1 件でない)"; exit 1; }
+  # `// ""` は型を見ないので数値の spec_path が "42" として通る。
+  # 文字列かつ非空を jq -e に判定させ、 落ちたら中断する。
+  SPEC=$(printf '%s' "$OUT" | jq -er --arg id "$LAYER" \
+    '.layers[] | select(.id == $id) | .spec_path | select(type == "string" and . != "")') \
+    || { echo "ERROR: layer $LAYER の spec_path が文字列でないか空"; exit 1; }
+  case "$SPEC" in
+    *"{module}"*) echo "ERROR: layer $LAYER の spec_path が未解決: '$SPEC'"; exit 1 ;;
+  esac
+  SPECS+=("$SPEC")
+done
 
 EXISTING=()
 [ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/test" ] && [ -n "$(ls -A examples/$EXAMPLE/test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/test")
 [ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/hardhat-test" ] && [ -n "$(ls -A examples/$EXAMPLE/hardhat-test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/hardhat-test")
 [ "$TARGET" != "contract" ] && [ -d "examples/$EXAMPLE/tests" ] && [ -n "$(ls -A examples/$EXAMPLE/tests 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/tests")
-# spec 既存 check (lang suffix 規約)
-[ -f "tests/spec/contract/test-spec-${EXAMPLE}${LANG_SUFFIX}.md" ] && EXISTING+=("tests/spec/contract/test-spec-${EXAMPLE}${LANG_SUFFIX}.md")
-[ -f "tests/spec/e2e/test-spec-${EXAMPLE}${LANG_SUFFIX}.md" ] && EXISTING+=("tests/spec/e2e/test-spec-${EXAMPLE}${LANG_SUFFIX}.md")
+# spec 既存 check (解決済 path をそのまま見る)
+for SPEC in "${SPECS[@]}"; do
+  [ -f "$SPEC" ] && EXISTING+=("$SPEC")
+done
 ```
+
+**解決に失敗したら中断する**。 握り潰して空 path のまま進むと、 spec が存在するのに「無い」 と判定して上書き確認を出さず、 user の spec を黙って作り直す。 `$TARGET` の分岐に既定を置かないのも同じ理由で、 未知の値が「layer 0 件」 に落ちると全 spec が見えなくなる。
 
 既存 file / dir 検出時は AskUserQuestion で 3 択:
 

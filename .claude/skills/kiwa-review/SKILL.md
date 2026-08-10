@@ -54,25 +54,50 @@ AskUserQuestion で review report の生成言語を確認。 `--lang {code}` �
 - en → `tests/reports/review/{mode}-review-{module}.md`
 - その他 → `tests/reports/review/{mode}-review-{module}.{lang_code}.md`
 
-#### lang suffix 規約 (SSOT)
+### 入力 spec の path は CLI から受け取る
 
-producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review`) の file 名規約一致:
-
-**path は CLI から受け取る。 自前で組み立てない。**
+`--spec-path` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill は `--layer` を引数で受けるため、 対象 layer はその値をそのまま渡す。
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" \
-  | jq -r '.layers[0].spec_path' \
-  | sed "s/{module}/$MODULE/"
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 ```
 
-返る `spec_path` は言語込みで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix`)。 en と省略は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}` で、 layer suffix (`.api` 等) とは直交して言語が常に末尾に来る。
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
 
 `$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。
 
-自前で `LANG_SUFFIX` を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 本 skill が唯一 suffix を知っている consumer だった状態がまさにその結果で、 `--lang ja` を付けると他の consumer が spec を見つけられなかった (#1855)。
+`$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
 
-SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
+| 結果 | 扱い |
+|---|---|
+| exit != 0 | stderr をそのまま user に返して中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。 **`.layers[0]` を取らない** = `--layer` を省いた応答では別 layer の 1 件目が返る。
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値の扱い
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 本 skill が唯一 suffix を知っている consumer だった状態がまさにその結果で、 `--lang ja` を付けると他の consumer が spec を見つけられなかった (#1855)。
+
+**report path は本節の対象外**。 `tests/reports/review/` 配下は `kiwa layers` が解決する先ではなく、 別の場所の別の規約で決まる。
+
+SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。 spec path 表記は説明のための例示で、 解決の指示ではない。
 
 ### Step 1: mode 判定 + 入力読込
 
