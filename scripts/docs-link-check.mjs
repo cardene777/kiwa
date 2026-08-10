@@ -69,6 +69,20 @@ const INLINE_LINK_OPENER = /\]\(/g;
 const REFERENCE_DEFINITION =
   /^ {0,3}\[[^\]]+\]:[ \t]*(?:<[^>\n]*>|\S+)[ \t]*(?:"[^"]*"|'[^']*'|\([^)]*\))?[ \t]*$/gm;
 
+// VitePress は markdown 中の Vue 記法を解釈し、いずれも `<a href="...">` に render する。
+// destination が式なので静的には解けず、checker は素通ししてしまう (3 形とも実測で確認)。
+// 解析しようとせず未対応として報告する = 実在しない記法のために解析器を広げると、
+// 広げた code 自体が欠陥を生む (PR #1875 で 2 round 溶かした)。
+// 拾うのは 2 形。`a` / `component` の bind された `href` (`:href` / `v-bind:href`) と、
+// `component` の `is` (静的 / bind の両方)。`<component is="a" href="...">` は
+// anchor に化けるため、`is` は bind されていなくても対象にする。
+//
+// 素の `<a href>` はここでは拾わない = 既存の「生 HTML の a タグ」 判定が覆っており、
+// 両方で拾うと同じ 1 件が 2 度報告される。属性名の前に空白を要求するので、
+// `data-island` のように `is` を含む別の属性名には一致しない。
+const VUE_BOUND_ANCHOR =
+  /<(?:a|component)\b[^>]*?\s(?::|v-bind:)href\s*=|<component\b[^>]*?\s(?::|v-bind:)?is\s*=/i;
+
 /** 位置 index が、extractor が消費した区間のどれかに入るか。 */
 function isCovered(spans, index) {
   return spans.some(([start, end]) => index >= start && index < end);
@@ -134,6 +148,9 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
     for (const _ of content.matchAll(REFERENCE_DEFINITION)) {
       reasons.add('reference 定義');
       break;
+    }
+    if (VUE_BOUND_ANCHOR.test(content)) {
+      reasons.add('Vue 記法の anchor');
     }
     return reasons;
   };

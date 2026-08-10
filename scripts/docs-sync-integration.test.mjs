@@ -388,6 +388,14 @@ for (const [label, markdown] of [
   ['生 HTML の a タグ', '<a href="./real">x</a>'],
   ['生 HTML の a タグ (引用符なし)', '<a href=./real>x</a>'],
   ['生 HTML の a タグ (属性値に > を含む)', '<a title="a>b" href=./real>x</a>'],
+  // VitePress は markdown 中の Vue 記法を解釈し、いずれも `<a href="...">` に render
+  // する。destination が式なので静的には解けず、素通りすると `index.md` の無い dir への
+  // 404 が全 test 通過で main に入る。
+  ['Vue の :href 短縮形', `<a :href="'./real'">x</a>`],
+  ['Vue の v-bind:href', `<a v-bind:href="'./real'">x</a>`],
+  ['Vue の :href (属性順が逆)', '<a class="k" :href="url">x</a>'],
+  ['component の is', '<component is="a" href="./real">x</component>'],
+  ['component の :is', '<component :is="tag" href="./real">x</component>'],
 ]) {
   test(`${label} is reported as unsupported syntax`, () => {
     withFixture(({ root, readmePath }) => {
@@ -408,6 +416,24 @@ for (const [label, markdown] of [
   });
 }
 
+// 同じ 1 件を 2 つの理由で報告しない。素の `<a href>` は「生 HTML の a タグ」 が
+// 覆っており、Vue 判定でも拾うと stderr に同じ file が 2 行出る。
+test('a plain anchor is reported once, not by two rules', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n<a href="./real">x</a>\n');
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(found.length, 1, found.join('\n'));
+    assert.match(found[0], /生 HTML の a タグ/);
+  });
+});
+
 // 逆向き。正当な記述を未対応と誤判定すると、書けるはずの docs が書けなくなる。
 for (const [label, markdown] of [
   ['素の inline link', '[x](./real)'],
@@ -420,6 +446,10 @@ for (const [label, markdown] of [
   // 正当な docs を止める。
   ['a タグの data-href', '<a data-href="./x">y</a>'],
   ['img の data-href', '<img data-href="./x" src="/images/ok.png" alt="x">'],
+  // `is` を含む別の属性名。属性名の前に空白を要求しないと巻き込む。
+  ['img の data-island', '<img data-island="a" src="/images/ok.png" alt="x">'],
+  // 本文に `:href` という語が出るだけの文。tag の中にないものは対象外。
+  ['本文中の :href という語', 'CSS の :href 疑似クラスについて'],
 ]) {
   test(`${label} is not reported as unsupported syntax`, () => {
     withFixture(({ root, readmePath }) => {
