@@ -32,6 +32,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 - `--module {name}` — spec / test file 名に入る module 名。 `--input-spec` を省略した時の path はこれを CLI に渡して解決する
 - `--input-spec {path}` — Layer 1 spec の path (省略時は § 入力 spec の path は CLI から受け取る で解決)。 `/kiwa-design --layer edge-handler` が書く場所で、 `docs/layers.json` の `spec_path` がその宣言
 - `--lang {ja|en|<ISO 639-1>}` — spec の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
+- `--no-review` — 生成後の kiwa-review 自動呼出を skip (CI / 自動化用)
 
 ### 入力 spec の path は CLI から受け取る
 
@@ -74,7 +75,7 @@ Cloudflare Workers / Vercel Edge / 汎用 ESM fetch handler の違いは spec �
 
 #### 解決した値を下流に渡す
 
-生成後に `/kiwa-review --mode test-review --layer edge-handler --module {module} --lang $DOC_LANG` を呼ぶ。
+`--no-review` 未指定なら、 生成後に `/kiwa-review --mode test-review --layer edge-handler --module {module} --lang $DOC_LANG` を呼ぶ。
 
 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
 

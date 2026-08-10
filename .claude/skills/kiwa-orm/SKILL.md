@@ -79,7 +79,7 @@ drizzle / prisma / kysely の 3 種は spec の中身から読み取る選択で
 
 #### 解決した値を下流に渡す
 
-生成後に `/kiwa-review --mode test-review --layer orm-query --module {module} --lang $DOC_LANG` を呼ぶ。
+`--no-review` 未指定なら、 生成後に `/kiwa-review --mode test-review --layer orm-query --module {module} --lang $DOC_LANG` を呼ぶ。
 
 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
 
