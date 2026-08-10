@@ -67,4 +67,4 @@ expect(announcements).toEqual(expect.arrayContaining(['io.metamask', 'io.rabby']
 ## Related
 
 - [Concepts: EIP-6963 Multi-Wallet](../concepts/eip-6963.md)
-- [examples/basic-connect](../../../examples/basic-connect)
+- [examples/basic-connect](https://github.com/cardene777/kiwa/tree/main/examples/basic-connect)

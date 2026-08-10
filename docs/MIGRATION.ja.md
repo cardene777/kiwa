@@ -75,7 +75,7 @@ v0.1.0 は kiwa の最初の public release です。
 - **依存方針**: `viem` と `@playwright/test` を peer / dev dependency 前提で扱います
 
 既存 code の置き換え手順はありません。
-これから導入する場合は [README.md](../README.md) の Quickstart を起点にしてください。
+これから導入する場合は [README.md](https://github.com/cardene777/kiwa/blob/main/README.md) の Quickstart を起点にしてください。
 
 ## 将来 entry の書き方
 
@@ -99,7 +99,7 @@ breaking change を入れるときは、新しい entry をこの section より
 
 ## 関連
 
-- [README.md](../README.md)
+- [README.md](https://github.com/cardene777/kiwa/blob/main/README.md)
 - [RELEASING.md](./RELEASING.md)
 - [GitHub Releases](https://github.com/cardene777/kiwa/releases)
 - [Issue tracker](https://github.com/cardene777/kiwa/issues)

@@ -176,5 +176,5 @@ Phase 順は実装難易度ではなく **利用者数** で決める。 WalletC
 ## 関連
 
 - [`docs/COMPARISON.md`](./COMPARISON.md) — Synpress / wallet-mock との使い分け
-- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性パターン 9 種 + self-check
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性パターン 9 種 + self-check
 - [`docs/ja/cookbook/smart-wallet-aa.md`](./ja/cookbook/smart-wallet-aa.md) — 既存 AA (ERC-4337) test pattern

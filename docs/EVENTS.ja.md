@@ -65,7 +65,7 @@ test('accountsChanged event が page 側 handler を発火する', async ({ page
 });
 ```
 
-この流れは [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts) の
+この流れは [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](https://github.com/cardene777/kiwa/blob/main/tests/fixtures/basic-connect/e2e-test/connect.spec.ts) の
 `T-E2E-006` と同じ考え方です。
 
 ## handler と同期を取る考え方
@@ -137,4 +137,4 @@ legacy provider 互換性を維持するためで、複数 wallet を `window.et
 - [EIP-1193 events](https://eips.ethereum.org/EIPS/eip-1193#events)
 - [RPC.md](./RPC.md)
 - [ERRORS.md](./ERRORS.md)
-- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts)
+- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](https://github.com/cardene777/kiwa/blob/main/tests/fixtures/basic-connect/e2e-test/connect.spec.ts)

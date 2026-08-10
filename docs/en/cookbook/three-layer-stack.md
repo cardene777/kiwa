@@ -18,9 +18,9 @@ If you only need contract correctness, run Foundry alone. If you only need UX, r
 
 | Example | Contract | Foundry lane | Hardhat lane | Playwright lane |
 |---|---|---|---|---|
-| [`tests/fixtures/mint-nft`](../../../tests/fixtures/mint-nft/) | `MintNft.sol` (ERC721 + Enumerable + royalty) | `contract-test/MintNft.t.sol` (27/27) | `hardhat-test/MintNft.test.cjs` (24/24) | `e2e-test/mint.spec.ts` (8/8) |
-| [`tests/fixtures/defi-swap`](../../../tests/fixtures/defi-swap/) | `SimpleSwap.sol` + `Erc20.sol` (1:1 swap pool with slippage protection) | `contract-test/SwapTokens.t.sol` (17/17) | `hardhat-test/SwapTokens.test.cjs` (23/23) | `e2e-test/swap.spec.ts` (7/7) |
-| [`tests/fixtures/nextjs-token-gating`](../../../tests/fixtures/nextjs-token-gating/) | `GatedContent.sol` (NFT-gated access + timed grant) | `contract-test/GatedContent.t.sol` (20/20) | `hardhat-test/GatedContent.test.cjs` (23/23) | `e2e-test/gating.spec.ts` (8/8) |
+| [`tests/fixtures/mint-nft`](https://github.com/cardene777/kiwa/tree/main/tests/fixtures/mint-nft) | `MintNft.sol` (ERC721 + Enumerable + royalty) | `contract-test/MintNft.t.sol` (27/27) | `hardhat-test/MintNft.test.cjs` (24/24) | `e2e-test/mint.spec.ts` (8/8) |
+| [`tests/fixtures/defi-swap`](https://github.com/cardene777/kiwa/tree/main/tests/fixtures/defi-swap) | `SimpleSwap.sol` + `Erc20.sol` (1:1 swap pool with slippage protection) | `contract-test/SwapTokens.t.sol` (17/17) | `hardhat-test/SwapTokens.test.cjs` (23/23) | `e2e-test/swap.spec.ts` (7/7) |
+| [`tests/fixtures/nextjs-token-gating`](https://github.com/cardene777/kiwa/tree/main/tests/fixtures/nextjs-token-gating) | `GatedContent.sol` (NFT-gated access + timed grant) | `contract-test/GatedContent.t.sol` (20/20) | `hardhat-test/GatedContent.test.cjs` (23/23) | `e2e-test/gating.spec.ts` (8/8) |
 
 Run any lane directly from its fixture directory.
 
@@ -45,7 +45,7 @@ The shared Layer 1 spec (`tests/spec/contract/test-spec-<name>.md` and `tests/sp
 - `/kiwa-hardhat` translates the same table into Hardhat helpers (`expect(...).to.be.reverted`, `fast-check`, `time.increaseTo`).
 - `/kiwa-play` translates the spec's e2e TC table into Playwright + `@kiwa-lab/dapp` fixture helpers (`getByTestId`, `walletClient.signTypedData`).
 
-The viewpoint × runner mapping table in [`viewpoints-catalog.md`](../../../.claude/skills/kiwa-design/references/viewpoints-catalog.md) lists each translation per viewpoint, so a contributor can predict what the generated test will look like before invoking Layer 2.
+The viewpoint × runner mapping table in [`viewpoints-catalog.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-design/references/viewpoints-catalog.md) lists each translation per viewpoint, so a contributor can predict what the generated test will look like before invoking Layer 2.
 
 ## How to add a fourth contract to this stack
 
@@ -59,11 +59,11 @@ Pick any contract under `examples/<name>/contracts/`, then walk the skill chain 
 
 If the contract uses time-dependent logic (vesting, voting deadlines), prefer Foundry for the contract lane — `vm.warp` is the simplest way to test boundary times. If the contract emits many events that the UI needs to react to, prefer Playwright for the e2e lane so you can assert against the UI directly via `getByTestId`.
 
-For runner-specific limitations, the spec captures them under [`runner 差異`](../../../.claude/skills/kiwa-design/references/output-skeleton.md) bullets so the contributor does not chase coverage on a branch that one runner cannot reach.
+For runner-specific limitations, the spec captures them under [`runner 差異`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-design/references/output-skeleton.md) bullets so the contributor does not chase coverage on a branch that one runner cannot reach.
 
 ## Related
 
-- [`tests/docs/skill-chain-tutorial.md`](../../../tests/docs/skill-chain-tutorial.md) — Full skill-chain flow from spec to test
-- [`tests/docs/run-contract-tests.md`](../../../tests/docs/run-contract-tests.md) — Contract side procedure (Foundry + Hardhat)
-- [`tests/docs/run-dapp-e2e-tests.md`](../../../tests/docs/run-dapp-e2e-tests.md) — dApp e2e procedure (Playwright)
+- [`tests/docs/skill-chain-tutorial.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/skill-chain-tutorial.md) — Full skill-chain flow from spec to test
+- [`tests/docs/run-contract-tests.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/run-contract-tests.md) — Contract side procedure (Foundry + Hardhat)
+- [`tests/docs/run-dapp-e2e-tests.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/run-dapp-e2e-tests.md) — dApp e2e procedure (Playwright)
 - [`docs/EXAMPLE-FIXTURES.md`](../../EXAMPLE-FIXTURES.md) — Which examples have a completed fixture

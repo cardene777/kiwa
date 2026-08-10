@@ -127,7 +127,7 @@ try {
 
 With this approach, even across Playwright `page.evaluate()`,
 you can write page-side assertions such as `err.code === 4200`.
-For a concrete example, see `T-E2E-007` in [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts).
+For a concrete example, see `T-E2E-007` in [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](https://github.com/cardene777/kiwa/blob/main/tests/fixtures/basic-connect/e2e-test/connect.spec.ts).
 
 ## Relationship between events and errors
 
@@ -144,4 +144,4 @@ so in tests it is practical to assert the timeout message as well.
 - [EIP-1193 provider errors](https://eips.ethereum.org/EIPS/eip-1193#provider-errors)
 - [RPC.md](./RPC.md)
 - [EVENTS.md](./EVENTS.md)
-- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts)
+- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](https://github.com/cardene777/kiwa/blob/main/tests/fixtures/basic-connect/e2e-test/connect.spec.ts)

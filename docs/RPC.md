@@ -202,4 +202,4 @@ These are never forwarded to anvil and always return `4200`.
 - [viem local account docs](https://viem.sh/docs/accounts/local/privateKeyToAccount.html)
 - [EVENTS.md](./EVENTS.md)
 - [ERRORS.md](./ERRORS.md)
-- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](../tests/fixtures/basic-connect/e2e-test/connect.spec.ts)
+- [tests/fixtures/basic-connect/e2e-test/connect.spec.ts](https://github.com/cardene777/kiwa/blob/main/tests/fixtures/basic-connect/e2e-test/connect.spec.ts)

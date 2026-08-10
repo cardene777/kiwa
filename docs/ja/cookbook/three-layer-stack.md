@@ -18,9 +18,9 @@ contract correctness だけなら Foundry 単独で十分、 UX だけなら Pla
 
 | Example | Contract | Foundry lane | Hardhat lane | Playwright lane |
 |---|---|---|---|---|
-| [`tests/fixtures/mint-nft`](../../../tests/fixtures/mint-nft/) | `MintNft.sol` (ERC721 + Enumerable + royalty) | `contract-test/MintNft.t.sol` (27/27) | `hardhat-test/MintNft.test.cjs` (24/24) | `e2e-test/mint.spec.ts` (8/8) |
-| [`tests/fixtures/defi-swap`](../../../tests/fixtures/defi-swap/) | `SimpleSwap.sol` + `Erc20.sol` (1:1 swap pool with slippage protection) | `contract-test/SwapTokens.t.sol` (17/17) | `hardhat-test/SwapTokens.test.cjs` (23/23) | `e2e-test/swap.spec.ts` (7/7) |
-| [`tests/fixtures/nextjs-token-gating`](../../../tests/fixtures/nextjs-token-gating/) | `GatedContent.sol` (NFT-gated access + timed grant) | `contract-test/GatedContent.t.sol` (20/20) | `hardhat-test/GatedContent.test.cjs` (23/23) | `e2e-test/gating.spec.ts` (8/8) |
+| [`tests/fixtures/mint-nft`](https://github.com/cardene777/kiwa/tree/main/tests/fixtures/mint-nft) | `MintNft.sol` (ERC721 + Enumerable + royalty) | `contract-test/MintNft.t.sol` (27/27) | `hardhat-test/MintNft.test.cjs` (24/24) | `e2e-test/mint.spec.ts` (8/8) |
+| [`tests/fixtures/defi-swap`](https://github.com/cardene777/kiwa/tree/main/tests/fixtures/defi-swap) | `SimpleSwap.sol` + `Erc20.sol` (1:1 swap pool with slippage protection) | `contract-test/SwapTokens.t.sol` (17/17) | `hardhat-test/SwapTokens.test.cjs` (23/23) | `e2e-test/swap.spec.ts` (7/7) |
+| [`tests/fixtures/nextjs-token-gating`](https://github.com/cardene777/kiwa/tree/main/tests/fixtures/nextjs-token-gating) | `GatedContent.sol` (NFT-gated access + timed grant) | `contract-test/GatedContent.t.sol` (20/20) | `hardhat-test/GatedContent.test.cjs` (23/23) | `e2e-test/gating.spec.ts` (8/8) |
 
 各 lane は fixture dir から直接実行できる。
 
@@ -45,7 +45,7 @@ pnpm --dir tests/fixtures/<name> test:e2e
 - `/kiwa-hardhat` は同表を Hardhat helper (`expect(...).to.be.reverted`、 `fast-check`、 `time.increaseTo`) に変換
 - `/kiwa-play` は e2e TC 表を Playwright + `@kiwa-lab/dapp` fixture helper (`getByTestId`、 `walletClient.signTypedData`) に変換
 
-観点 × runner マッピング表は [`viewpoints-catalog.md`](../../../.claude/skills/kiwa-design/references/viewpoints-catalog.md) に列挙されており、 contributor は Layer 2 起動前にどんな test code が生成されるかを予測できる。
+観点 × runner マッピング表は [`viewpoints-catalog.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-design/references/viewpoints-catalog.md) に列挙されており、 contributor は Layer 2 起動前にどんな test code が生成されるかを予測できる。
 
 ## 4 つ目の contract をこの stack に追加するには
 
@@ -59,11 +59,11 @@ pnpm --dir tests/fixtures/<name> test:e2e
 
 時刻依存ロジック (vesting / 投票 deadline) を持つ contract なら、 contract lane は Foundry を優先する (`vm.warp` で境界時刻を素直に test できる)。 UI が反応する event を多発する contract なら、 e2e lane を Playwright 優先で `getByTestId` 直接 assertion に倒す。
 
-runner 固有の制約は spec の [`runner 差異`](../../../.claude/skills/kiwa-design/references/output-skeleton.md) bullet に記録される、 contributor は片方の runner で到達不能な branch を追わなくて済む。
+runner 固有の制約は spec の [`runner 差異`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-design/references/output-skeleton.md) bullet に記録される、 contributor は片方の runner で到達不能な branch を追わなくて済む。
 
 ## 関連
 
-- [`tests/docs/skill-chain-tutorial.ja.md`](../../../tests/docs/skill-chain-tutorial.ja.md) — spec から test までの full flow
-- [`tests/docs/run-contract-tests.ja.md`](../../../tests/docs/run-contract-tests.ja.md) — contract 側手順 (Foundry + Hardhat)
-- [`tests/docs/run-dapp-e2e-tests.ja.md`](../../../tests/docs/run-dapp-e2e-tests.ja.md) — dApp e2e 手順 (Playwright)
+- [`tests/docs/skill-chain-tutorial.ja.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/skill-chain-tutorial.ja.md) — spec から test までの full flow
+- [`tests/docs/run-contract-tests.ja.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/run-contract-tests.ja.md) — contract 側手順 (Foundry + Hardhat)
+- [`tests/docs/run-dapp-e2e-tests.ja.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/run-dapp-e2e-tests.ja.md) — dApp e2e 手順 (Playwright)
 - [`docs/EXAMPLE-FIXTURES.ja.md`](../../EXAMPLE-FIXTURES.ja.md) — どの example が完成形 fixture を持つか

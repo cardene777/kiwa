@@ -167,4 +167,4 @@ No competitor in either axis covers all four layers (contract + unit + integrati
 - [Claude Code spec-driven development](https://www.augmentcode.com/guides/claude-code-spec-driven-development)
 - [Foundry anvil docs](https://book.getfoundry.sh/anvil/)
 - [RPC.md](./RPC.md)
-- [README.md](../README.md)
+- [README.md](https://github.com/cardene777/kiwa/blob/main/README.md)

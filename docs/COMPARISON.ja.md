@@ -165,4 +165,4 @@ transport 差し替えの自由度が主目的なら wallet-mock の方が設計
 - [Claude Code spec-driven development](https://www.augmentcode.com/guides/claude-code-spec-driven-development)
 - [Foundry anvil docs](https://book.getfoundry.sh/anvil/)
 - [RPC.md](./RPC.md)
-- [README.md](../README.md)
+- [README.md](https://github.com/cardene777/kiwa/blob/main/README.md)

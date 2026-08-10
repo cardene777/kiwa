@@ -172,4 +172,4 @@ You should see 3 passing tests — one per provider.
 ## Next steps
 
 - The Supabase Auth provider (v1.10-1) fits the same interface — try adding it as a fourth adapter.
-- For multi-provider queue matrices see [`packages/queue/README.md`](../../packages/queue/README.md) (BullMQ / Inngest / SQS / Cloudflare / RabbitMQ).
+- For multi-provider queue matrices see [`packages/queue/README.md`](https://github.com/cardene777/kiwa/blob/main/packages/queue/README.md) (BullMQ / Inngest / SQS / Cloudflare / RabbitMQ).

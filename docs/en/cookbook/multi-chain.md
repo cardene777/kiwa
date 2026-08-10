@@ -64,5 +64,5 @@ test('lock on L1 then mint on L2', async ({ page, dappE2e }) => {
 ## Related
 
 - [API: startAnvil chainId option](../api/start-anvil.md)
-- [examples/nextjs-bridge](../../../examples/nextjs-bridge)
-- [examples/nextjs-multi-chain](../../../examples/nextjs-multi-chain)
+- [examples/nextjs-bridge](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-bridge)
+- [examples/nextjs-multi-chain](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-multi-chain)

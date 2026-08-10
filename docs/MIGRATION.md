@@ -75,7 +75,7 @@ As a result, there is effectively no migration work for existing users.
 - **Dependency policy**: `viem` and `@playwright/test` are treated as peer / dev dependencies
 
 There are no replacement steps for existing code.
-If you are adopting it from now, start with the Quickstart in [README.md](../README.md).
+If you are adopting it from now, start with the Quickstart in [README.md](https://github.com/cardene777/kiwa/blob/main/README.md).
 
 ## How to write future entries
 
@@ -99,7 +99,7 @@ When introducing a breaking change, add a new entry above this section.
 
 ## Related
 
-- [README.md](../README.md)
+- [README.md](https://github.com/cardene777/kiwa/blob/main/README.md)
 - [RELEASING.md](./RELEASING.md)
 - [GitHub Releases](https://github.com/cardene777/kiwa/releases)
 - [Issue tracker](https://github.com/cardene777/kiwa/issues)

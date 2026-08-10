@@ -97,7 +97,7 @@ pnpm test
 
 `examples/nextjs-wagmi-rainbow` は本 cookbook の 4 file をそのまま実装した動く reference。 内部 `tests/prepare-env.ts` で `MintNft` を deploy し、 `NEXT_PUBLIC_MINT_NFT_ADDRESS` を Next.js dApp に渡している。
 
-詳細は [examples/nextjs-wagmi-rainbow/README.ja.md](../../../examples/nextjs-wagmi-rainbow/README.ja.md)。
+詳細は [examples/nextjs-wagmi-rainbow/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.ja.md)。
 
 ## 関連
 

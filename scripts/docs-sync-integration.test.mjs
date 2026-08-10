@@ -15,13 +15,15 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   realpathSync,
   rmSync,
+  statSync,
   symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
@@ -679,6 +681,66 @@ test('no link in docs points at a path that exists nowhere in the repository', (
     .map(({ file, target }) => `${file} -> ${target}`);
 
   assert.deepEqual(missing, [], missing.join('\n'));
+});
+
+// `docs/` の外を相対 link で指すと、公開 site で必ず 404 になる。VitePress は
+// `../examples/foo/README.md` を `./../examples/foo/README` に書き換えて出力するが、
+// 公開先は docs/ を root とするため `examples/` は存在しない (`ignoreDeadLinks: true`
+// のため build も警告を出さない)。GitHub の絶対 URL なら公開 site からも GitHub からも
+// 開ける。
+test('no link in docs escapes the published tree with a relative path', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+
+  const escaping = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
+    .filter(({ reason }) => reason === LINK_FAILURE.OUTSIDE_DOCS)
+    .map(({ file, target }) => `${file} -> ${target}`);
+
+  assert.deepEqual(escaping, [], escaping.join('\n'));
+});
+
+// 絶対 URL に置き換えた参照先が repo に実在すること。相対 link と違って checker は
+// 外部 URL を検査しないため、置き換えた先が消えても気付けない。自 repo を指す URL に
+// 限り、path に解いて実体を確かめる。
+test('github blob urls in docs point at paths that exist', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+  const pattern = /https:\/\/github\.com\/cardene777\/kiwa\/(blob|tree)\/main\/([^)\s"'<>]+)/g;
+  const broken = [];
+
+  const walk = (directory) => {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const entryPath = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+        continue;
+      }
+      if (!entry.name.endsWith('.md')) continue;
+
+      const content = readFileSync(entryPath, 'utf8');
+      for (const [, kind, rawPath] of content.matchAll(pattern)) {
+        let decoded = rawPath.split(/[#?]/)[0];
+        try {
+          decoded = decodeURIComponent(decoded);
+        } catch {
+          // 壊れた escape はそのまま照合する。
+        }
+        const absolute = join(repositoryRoot, decoded);
+        const label = `${relative(repositoryRoot, entryPath)} -> ${kind}/main/${rawPath}`;
+        if (!existsSync(absolute)) {
+          broken.push(`${label} (参照先が無い)`);
+          continue;
+        }
+        // dir は tree、file は blob。取り違えると GitHub 側で redirect になる。
+        if (statSync(absolute).isDirectory() !== (kind === 'tree')) {
+          broken.push(`${label} (blob と tree の取り違え)`);
+        }
+      }
+    }
+  };
+
+  walk(docsRoot);
+  assert.deepEqual(broken, [], broken.join('\n'));
 });
 
 // 報告の並びは code unit 順に固定する。`localeCompare` は ICU の照合順に従うため、

@@ -102,4 +102,4 @@ pnpm test
 
 ## Next steps
 
-- The advanced adapter also supports quorum queues, federation, delayed message plugin — see [`packages/queue/README.md`](../../packages/queue/README.md).
+- The advanced adapter also supports quorum queues, federation, delayed message plugin — see [`packages/queue/README.md`](https://github.com/cardene777/kiwa/blob/main/packages/queue/README.md).

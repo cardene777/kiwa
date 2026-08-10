@@ -38,7 +38,7 @@ The decision is made per example, not as a sweep.
 
 ## Related
 
-- [tests/docs/README.md](../tests/docs/README.md) — entry point for the skill-chain test docs
-- [tests/docs/retrofit-existing-dapp.md](../tests/docs/retrofit-existing-dapp.md) — walkthrough for the contract-bearing examples
-- [examples/mint-nft/README.md](../examples/mint-nft/README.md) — reference shape of the "workbench + finished fixture" split
+- [tests/docs/README.md](https://github.com/cardene777/kiwa/blob/main/tests/docs/README.md) — entry point for the skill-chain test docs
+- [tests/docs/retrofit-existing-dapp.md](https://github.com/cardene777/kiwa/blob/main/tests/docs/retrofit-existing-dapp.md) — walkthrough for the contract-bearing examples
+- [examples/mint-nft/README.md](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.md) — reference shape of the "workbench + finished fixture" split
 - [docs/COMPARISON.md](./COMPARISON.md) — how kiwa positions itself versus Synpress / dappwright / wallet-mock

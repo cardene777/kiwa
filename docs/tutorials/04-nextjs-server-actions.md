@@ -116,4 +116,4 @@ pnpm test
 ## Next steps
 
 - [Multi-provider auth](./05-multi-provider-auth.md) shows how to plug NextAuth + Clerk + Auth0 into the same action.
-- The App Router variants of the harness cover middleware, RSC, and RSC streaming — see [`@kiwa-lab/nextjs`](../../packages/nextjs/README.md).
+- The App Router variants of the harness cover middleware, RSC, and RSC streaming — see [`@kiwa-lab/nextjs`](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/README.md).

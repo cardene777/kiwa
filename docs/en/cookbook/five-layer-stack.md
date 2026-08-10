@@ -48,6 +48,6 @@ After both Layer 2 skills converge to their coverage targets, the feature has fi
 ## Related
 
 - [`three-layer-stack.md`](./three-layer-stack.md) — Contract-only three-layer stack
-- [`tests/docs/skill-chain-tutorial.md`](../../../tests/docs/skill-chain-tutorial.md) — Full skill-chain flow
-- [`.claude/skills/kiwa-vitest/SKILL.md`](../../../.claude/skills/kiwa-vitest/SKILL.md) — Unit layer skill spec
-- [`.claude/skills/kiwa-api/SKILL.md`](../../../.claude/skills/kiwa-api/SKILL.md) — Integration layer skill spec
+- [`tests/docs/skill-chain-tutorial.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/skill-chain-tutorial.md) — Full skill-chain flow
+- [`.claude/skills/kiwa-vitest/SKILL.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-vitest/SKILL.md) — Unit layer skill spec
+- [`.claude/skills/kiwa-api/SKILL.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-api/SKILL.md) — Integration layer skill spec
