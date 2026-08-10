@@ -325,7 +325,14 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   };
 
   walk(scanRoot);
-  return found.sort((a, b) => `${a.file} ${a.target}`.localeCompare(`${b.file} ${b.target}`));
+  // 並びは code unit 順で固定する。`localeCompare` は ICU の照合順に従うため、
+  // 大文字を含む path の並びが既定の `.sort()` と変わり、環境によっても揺れる。
+  return found.sort((a, b) => {
+    const left = `${a.file} ${a.target}`;
+    const right = `${b.file} ${b.target}`;
+    if (left < right) return -1;
+    return left > right ? 1 : 0;
+  });
 }
 
 /**

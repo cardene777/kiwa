@@ -681,6 +681,33 @@ test('no link in docs points at a path that exists nowhere in the repository', (
   assert.deepEqual(missing, [], missing.join('\n'));
 });
 
+// 報告の並びは code unit 順に固定する。`localeCompare` は ICU の照合順に従うため、
+// 大文字を含む path で並びが変わり、環境によっても揺れる。stderr の diff を読む側が
+// 実行ごとに違う順序を見ることになる。
+test('dead links are reported in code unit order', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // 大文字と小文字が混じる file 名でないと 2 つの並べ方が同じ結果になる。
+    for (const name of ['Zeta.md', 'alpha.md', 'Beta.md']) {
+      writeFileSync(join(docsDirectory, name), `# ${name}\n\n[x](./gone-${name})\n`);
+    }
+
+    const dead = deadDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+
+    assert.deepEqual(dead, [...dead].sort(), 'code unit 順であること');
+    assert.notDeepEqual(
+      [...dead].sort(),
+      [...dead].sort((a, b) => a.localeCompare(b)),
+      'fixture が 2 つの並べ方を区別できていること',
+    );
+  });
+});
+
 // 解析できない記法が現れると、その link は解決の検査自体を受けない。上の test は
 // 「checker が読めた link」 しか見ないので、読めない記法が増えると黙って覆う範囲が
 // 狭まる。docs 全体で未対応記法を 0 に保ち、増えた時に気付けるようにする。
