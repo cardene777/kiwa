@@ -335,6 +335,45 @@ test('type annotations inside code fences are not links', () => {
   });
 });
 
+// HTML の属性は要素ごとに意味が違う。要素名と属性名を直積で見ると、link ではない
+// 属性値を dead link として報告し、正当な docs を止める。
+for (const [label, markdown] of [
+  ['img の data-src', '<img data-src="./gone.png" src="/images/ok.png" alt="x">'],
+  ['a の src', '<a src="./gone.png">x</a>'],
+  ['img の href', '<img href="./gone.png" src="/images/ok.png" alt="x">'],
+]) {
+  test(`${label} is not treated as a link`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      mkdirSync(join(root, 'docs', 'public', 'images'), { recursive: true });
+      writeFileSync(join(root, 'docs', 'public', 'images', 'ok.png'), 'png');
+      const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+      writeFileSync(indexPath, `# sample\n\n${markdown}\n`);
+
+      const result = runSync(root);
+      assert.equal(result.status, 0, result.stderr);
+    });
+  });
+}
+
+// 引用符の中の `>` は tag の終端ではない。終端とみなすと、後続の href を読まずに
+// 走査が止まり、実在する dead link を見逃す。
+test('a quoted attribute containing > does not hide the href that follows', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n<a title="a>b" href="./gone/">x</a>\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, '後続の href は読まれる');
+    assert.match(result.stderr, /gone/);
+  });
+});
+
 // CommonMark では 4 space 字下げの ``` は fence ではない。開始とみなすと、後続の
 // 本物の fence と対にされて間の正当な link が消える (dead link を見逃す向きの壊れ方)。
 test('an indented pseudo fence does not swallow links that follow it', () => {

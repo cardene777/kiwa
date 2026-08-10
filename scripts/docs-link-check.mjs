@@ -50,8 +50,18 @@ const INLINE_LINK =
 // reference 定義 (`[label]: ./path`)。字下げは 3 space まで。
 const REFERENCE_LINK = /^ {0,3}\[[^\]]+\]:\s*<?([^\s<>]+)>?/gm;
 // 生 HTML。VitePress は markdown 中の HTML をそのまま出すため、引用符なしの属性値も届く。
+//
+// tag 全体を取ってから属性を読む 2 段にする。1 本の正規表現で要素名と属性名を並べると
+// 3 つの誤りが同時に起きる。要素と属性が直積になって `<a src>` と `<img href>` を link と
+// 誤認する、属性名の境界が緩く `data-src` を `src` として拾う、`[^>]*?` が引用符の中の
+// `>` で止まって後続の href を見逃す (4 形とも実測で再現した)。
+//
+// tag の中身は引用区間を先に食うので、属性値に `>` があっても tag の終端を取り違えない。
+const HTML_TAG = /<(a|img)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
 const HTML_ATTRIBUTE =
-  /<(?:a|img)\b[^>]*?\b(?:href|src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi;
+  /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
+// 要素ごとに、link として意味を持つ属性は 1 つだけ。
+const LINK_ATTRIBUTE = { a: 'href', img: 'src' };
 
 /**
  * markdown と HTML の link destination を列挙する。
@@ -64,8 +74,12 @@ function linkTargets(raw) {
   const targets = [];
   for (const match of content.matchAll(INLINE_LINK)) targets.push(match[1] ?? match[2]);
   for (const match of content.matchAll(REFERENCE_LINK)) targets.push(match[1]);
-  for (const match of content.matchAll(HTML_ATTRIBUTE)) {
-    targets.push(match[1] ?? match[2] ?? match[3]);
+  for (const tag of content.matchAll(HTML_TAG)) {
+    const wanted = LINK_ATTRIBUTE[tag[1].toLowerCase()];
+    for (const attribute of tag[2].matchAll(HTML_ATTRIBUTE)) {
+      if (attribute[1].toLowerCase() !== wanted) continue;
+      targets.push(attribute[2] ?? attribute[3] ?? attribute[4]);
+    }
   }
   return targets.filter(Boolean);
 }
