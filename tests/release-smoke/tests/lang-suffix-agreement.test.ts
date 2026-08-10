@@ -185,6 +185,28 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(blocks.join('\n'), `${skill} が CLI 応答を sed に通している`).not.toContain('sed');
   });
 
+  it.each(MIGRATED)('%s が spec_path を取り出す時に型を見る', (skill) => {
+    // `.layers[]?` silently turns a non-array response into zero hits and
+    // `.spec_path // ""` lets a numeric one through as "42"; both are rows the
+    // decision table calls abort conditions, and both were accepted by the
+    // snippet that implemented it (#1893 Round 2, measured).
+    //
+    // `jq -e` is the checkable proxy: it exits non-zero when the filter yields
+    // false or nothing, which is what a type check has to do here. Applied only
+    // to blocks that actually extract the path — prose that quotes the filter
+    // is not an implementation.
+    //
+    // Comment lines are stripped first. Removing both checks left the sentence
+    // explaining them (`# 文字列かつ非空を jq -e に判定させ…`) and the check
+    // stayed green on the explanation of the thing that was deleted (measured).
+    const commands = bashBlocks(skill)
+      .split('\n')
+      .filter((line) => !line.trim().startsWith('#'))
+      .join('\n');
+    if (!commands.includes('.spec_path')) return; // 取り出していない skill は対象外
+    expect(commands, `${skill} が型を見ずに spec_path を取り出している`).toContain('jq -e');
+  });
+
   it.each(MIGRATED)('%s が shell 断片に未定義の関数を置かない', (skill) => {
     // A `for LAYER in $(target_layers "$TARGET")` that nothing defines exits
     // the loop zero times and the snippet still succeeds, so the spec check it

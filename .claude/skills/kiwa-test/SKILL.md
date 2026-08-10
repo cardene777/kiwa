@@ -203,12 +203,20 @@ for LAYER in $LAYERS; do
   # 空 path が「spec 無し」 と区別できなくなる。
   OUT=$(kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE") \
     || { echo "ERROR: kiwa layers が失敗 (layer=$LAYER)"; exit 1; }
-  HITS=$(printf '%s' "$OUT" | jq -r --arg id "$LAYER" '[.layers[]? | select(.id == $id)] | length') \
+  # 型を先に見る。 `.layers[]?` は配列でない応答を黙って 0 件に潰すため、
+  # 壊れた応答が「spec 無し」 と区別できなくなる。
+  printf '%s' "$OUT" | jq -e '(.layers | type) == "array"' >/dev/null 2>&1 \
+    || { echo "ERROR: layers が配列でない (応答が壊れている)"; exit 1; }
+  HITS=$(printf '%s' "$OUT" | jq -r --arg id "$LAYER" '[.layers[] | select(.id == $id)] | length') \
     || { echo "ERROR: kiwa layers の出力を JSON として読めない"; exit 1; }
   [ "$HITS" = "1" ] || { echo "ERROR: layer $LAYER が $HITS 件 (1 件でない)"; exit 1; }
-  SPEC=$(printf '%s' "$OUT" | jq -r --arg id "$LAYER" '.layers[] | select(.id == $id) | .spec_path // ""')
+  # `// ""` は型を見ないので数値の spec_path が "42" として通る。
+  # 文字列かつ非空を jq -e に判定させ、 落ちたら中断する。
+  SPEC=$(printf '%s' "$OUT" | jq -er --arg id "$LAYER" \
+    '.layers[] | select(.id == $id) | .spec_path | select(type == "string" and . != "")') \
+    || { echo "ERROR: layer $LAYER の spec_path が文字列でないか空"; exit 1; }
   case "$SPEC" in
-    ""|*"{module}"*) echo "ERROR: layer $LAYER の spec_path が未解決: '$SPEC'"; exit 1 ;;
+    *"{module}"*) echo "ERROR: layer $LAYER の spec_path が未解決: '$SPEC'"; exit 1 ;;
   esac
   SPECS+=("$SPEC")
 done
