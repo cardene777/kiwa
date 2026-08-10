@@ -839,6 +839,55 @@ test('a file link is not covered by a directory declaration', () => {
   });
 });
 
+// symlink の `.gitignore` は読まない。docs の外に置いた file から生成先を宣言でき、
+// 任意の dead link を生成物として隠せる (実測で再現した)。
+test('a symlinked gitignore does not declare generated directories', () => {
+  withFixture(({ root, readmePath }) => {
+    const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+    try {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      writeFileSync(join(outsideDirectory, 'evil-gitignore'), 'gone/\n');
+
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      symlinkSync(join(outsideDirectory, 'evil-gitignore'), join(docsDirectory, '.gitignore'));
+      writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[消えた](./gone/page)\n');
+
+      const failures = classifyDocumentLinks({
+        repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
+        scanRoot: join(root, 'docs', 'libraries'),
+      });
+      assert.equal(failures.length, 1, JSON.stringify(failures));
+      assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+    } finally {
+      rmSync(outsideDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+// 宣言先が docs/ の外へ出る形は採らない。symlink で外へ向けると、docs の外の path を
+// 指す link が生成物として通る (実測で再現した)。
+test('a generated declaration pointing outside docs is not honored', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    mkdirSync(join(root, 'secret'), { recursive: true });
+    writeFileSync(join(root, 'secret', 'page.md'), '# secret\n');
+
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    symlinkSync(join(root, 'secret'), join(docsDirectory, 'built'));
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[外](./built/gone)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+  });
+});
+
 // 宣言した directory の配下も生成物として扱う。typedoc は tree を丸ごと作るため、
 // `docs/api/typescript/index.html` のような深い link も同じ扱いになる。
 test('a path under a declared generated directory is generated', () => {

@@ -294,6 +294,9 @@ function collectGeneratedDirectories(docsRoot) {
         continue;
       }
       if (entry.name !== '.gitignore') continue;
+      // symlink の `.gitignore` は読まない。docs の外に置いた file から生成先を
+      // 宣言できてしまい、任意の dead link を生成物として隠せる (実測で再現した)。
+      if (entry.isSymbolicLink()) continue;
 
       let content;
       try {
@@ -319,7 +322,22 @@ function collectGeneratedDirectories(docsRoot) {
         // 先頭 slash は「この .gitignore からの相対」 の意味。
         const relativeTarget = line.replace(/^\//, '').replace(/\/$/, '');
         if (!relativeTarget || relativeTarget.split('/').includes('..')) continue;
-        generated.add(join(directory, relativeTarget));
+
+        const target = join(directory, relativeTarget);
+        // 宣言先が docs/ の外に出る形は採らない。symlink 経由で外へ向けると、
+        // docs の外の path を指す link が生成物として通る (実測で再現した)。
+        // 実体があれば canonical path で、無ければ字面で確かめる (生成前は
+        // 実体が無いのが正常なので、解決できないこと自体は理由にしない)。
+        let canonical = target;
+        try {
+          canonical = realpathSync(target);
+        } catch {
+          // 未生成。字面のまま判定する。
+        }
+        const fromDocs = relative(docsRoot, canonical);
+        if (fromDocs === '..' || fromDocs.startsWith(`..${sep}`)) continue;
+
+        generated.add(target);
       }
     }
   };
