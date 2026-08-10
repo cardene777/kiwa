@@ -15,6 +15,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  linkSync,
   readdirSync,
   realpathSync,
   rmSync,
@@ -738,28 +739,233 @@ test('the real docs/libraries tree has no dead links', () => {
 // checker が持つ大文字小文字の厳密判定と repo 境界がその再判定で失われる (実測で
 // case 違いの link が「解決する」 と誤判定され、test が見逃した)。
 //
-// `docs/api/{typescript,solidity}/` は生成物で、checkout に無いのが正常。target を
-// 部分一致で除外すると `./typescript-typo/` のような実際の破れまで見逃すため、
-// 生成される既知の target だけを完全一致で外す。
-const GENERATED_API_TARGETS = new Set([
-  './typescript/',
-  './solidity/',
-  './solidity/dogfood-foundry-dapp/',
-]);
-
+// 生成物 (`docs/api/{typescript,solidity}/`) は checker が `.gitignore` を引いて
+// `generated` に分ける。ここで target 名を列挙して除外すると、判定材料が実態ではなく
+// 人が書いた一覧になり、生成先が増減するたびに手で直すことになる。
 test('no link in docs points at a path that exists nowhere in the repository', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const docsRoot = join(repositoryRoot, 'docs');
 
   const missing = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
     .filter(({ reason }) => reason === LINK_FAILURE.MISSING)
-    .filter(
-      ({ file, target }) =>
-        !(/^docs\/api\/(README|index)\.md$/.test(file) && GENERATED_API_TARGETS.has(target)),
-    )
     .map(({ file, target }) => `${file} -> ${target}`);
 
   assert.deepEqual(missing, [], missing.join('\n'));
+});
+
+// 生成物への link は `generated` に分類され、`missing` には現れない。分類が消えると
+// 上の test が 4 件の生成物 link で落ちるため、両方向を 1 つの test で押さえる。
+test('links to generated api output are classified as generated', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+
+  const generated = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
+    .filter(({ reason }) => reason === LINK_FAILURE.GENERATED)
+    .map(({ file, target }) => `${file} -> ${target}`);
+
+  // 実 repo の `docs/api/.gitignore` が持つ 2 entry から 4 件出る。
+  assert.deepEqual(generated.sort(), [
+    'docs/api/README.md -> ./solidity/',
+    'docs/api/README.md -> ./typescript/',
+    'docs/api/index.md -> ./solidity/dogfood-foundry-dapp/',
+    'docs/api/index.md -> ./typescript/',
+  ]);
+});
+
+// 生成先かどうかと、実在するかは別。宣言があっても実体があれば通常どおり解決する
+// (生成済みの checkout で検査した時に落とさない)。
+test('a declared generated directory that actually exists still resolves', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    mkdirSync(join(docsDirectory, 'built'), { recursive: true });
+    writeFileSync(join(docsDirectory, 'built', 'index.md'), '# built\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[生成済み](./built/)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.deepEqual(failures, [], JSON.stringify(failures));
+  });
+});
+
+// 判定材料は directory の宣言だけ。広い ignore 規則で全ての破れが生成物に化けると、
+// `.gitignore` に 1 行足すだけで検査が空洞化する (実測で再現した)。
+// link は各規則が「もし採用されたら」 一致する形にする。規則と無関係な link だと
+// 判定に届かず、条件を外す変異を素通りさせる (実測で 2 件が捕まらなかった)。
+for (const [label, gitignore, target] of [
+  ['すべてを無視する規則', '*\n', './gone.md'],
+  ['docs 全体を無視する規則', 'docs/\n', './gone.md'],
+  ['glob を含む dir 規則', 'gen-*/\n', './gen-out/page'],
+  ['file を指す規則', 'gone.md\n', './gone.md'],
+  ['否定の規則', '!gone/\n', './gone/page'],
+]) {
+  test(`a broken link is still missing with ${label}`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      writeFileSync(join(docsDirectory, '.gitignore'), gitignore);
+      writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n[消えた](${target})\n`);
+
+      const failures = classifyDocumentLinks({
+        repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
+        scanRoot: join(root, 'docs', 'libraries'),
+      });
+      assert.equal(failures.length, 1, JSON.stringify(failures));
+      assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+    });
+  });
+}
+
+// directory 宣言に対する file link は生成物ではない。`built/` は directory だけを
+// 指すので、`./built.md` が解決しないのは通常の破れ。
+test('a file link is not covered by a directory declaration', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[明示 file](./built.md)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+  });
+});
+
+// symlink の `.gitignore` は読まない。docs の外に置いた file から生成先を宣言でき、
+// 任意の dead link を生成物として隠せる (実測で再現した)。
+test('a symlinked gitignore does not declare generated directories', () => {
+  withFixture(({ root, readmePath }) => {
+    const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+    try {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      writeFileSync(join(outsideDirectory, 'evil-gitignore'), 'gone/\n');
+
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      symlinkSync(join(outsideDirectory, 'evil-gitignore'), join(docsDirectory, '.gitignore'));
+      writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[消えた](./gone/page)\n');
+
+      const failures = classifyDocumentLinks({
+        repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
+        scanRoot: join(root, 'docs', 'libraries'),
+      });
+      assert.equal(failures.length, 1, JSON.stringify(failures));
+      assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+    } finally {
+      rmSync(outsideDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+// 宣言先が docs/ の外へ出る形は採らない。symlink で外へ向けると、docs の外の path を
+// 指す link が生成物として通る (実測で再現した)。
+test('a generated declaration pointing outside docs is not honored', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    mkdirSync(join(root, 'secret'), { recursive: true });
+    writeFileSync(join(root, 'secret', 'page.md'), '# secret\n');
+
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    symlinkSync(join(root, 'secret'), join(docsDirectory, 'built'));
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[外](./built/gone)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+  });
+});
+
+// 境界の検証は「解決できる範囲まで実体で確かめる」 形でないと守れない。full path に
+// `realpathSync` を 1 度呼ぶだけだと、生成前は失敗が正常なので字面に倒す退路が要り、
+// その退路を使って 4 形が素通りする (いずれも実測で再現した)。
+for (const [label, build] of [
+  [
+    '親 symlink が docs の外を指す',
+    ({ docsDirectory, outsideDirectory }) => {
+      symlinkSync(outsideDirectory, join(docsDirectory, 'wrap'));
+      writeFileSync(join(docsDirectory, '.gitignore'), 'wrap/built/\n');
+      return './wrap/built/page';
+    },
+  ],
+  [
+    'dangling symlink が外を指す',
+    ({ docsDirectory, outsideDirectory }) => {
+      symlinkSync(join(outsideDirectory, 'nope'), join(docsDirectory, 'built'));
+      writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+      return './built/page';
+    },
+  ],
+  [
+    '循環 symlink',
+    ({ docsDirectory }) => {
+      symlinkSync(join(docsDirectory, 'loop'), join(docsDirectory, 'loop'));
+      writeFileSync(join(docsDirectory, '.gitignore'), 'loop/\n');
+      return './loop/page';
+    },
+  ],
+  [
+    'hardlink の .gitignore',
+    ({ docsDirectory, outsideDirectory }) => {
+      writeFileSync(join(outsideDirectory, 'evil'), 'gone/\n');
+      linkSync(join(outsideDirectory, 'evil'), join(docsDirectory, '.gitignore'));
+      return './gone/page';
+    },
+  ],
+]) {
+  test(`a declaration reached through ${label} is not honored`, () => {
+    withFixture(({ root, readmePath }) => {
+      const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+      try {
+        writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+        const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+        const target = build({ docsDirectory, outsideDirectory });
+        writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n[link](${target})\n`);
+
+        const failures = classifyDocumentLinks({
+          repositoryRoot: root,
+          docsRoot: join(root, 'docs'),
+          scanRoot: join(root, 'docs', 'libraries'),
+        });
+        assert.equal(failures.length, 1, JSON.stringify(failures));
+        assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+      } finally {
+        rmSync(outsideDirectory, { recursive: true, force: true });
+      }
+    });
+  });
+}
+
+// 宣言した directory の配下も生成物として扱う。typedoc は tree を丸ごと作るため、
+// `docs/api/typescript/index.html` のような深い link も同じ扱いになる。
+test('a path under a declared generated directory is generated', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[深い先](./built/nested/page)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.GENERATED);
+  });
 });
 
 // `docs/` の外を相対 link で指すと、公開 site で必ず 404 になる。VitePress は

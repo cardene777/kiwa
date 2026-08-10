@@ -259,6 +259,165 @@ function isDirectory(path) {
 }
 
 /**
+ * 生成物として扱う directory を `docs/**\/.gitignore` から集める。
+ *
+ * 生成物 (`docs/api/typescript/` 等) は checkout に無いのが正常なので、解決しない
+ * ことを破れとして報告しない。判定材料を呼出側の hardcode ではなく repo 内の宣言に
+ * 置くのは、生成先が増減するたびに手で直すことになり、直し忘れが実際の破れの見逃しか
+ * 正常の停止に倒れるため。
+ *
+ * `git check-ignore` は使わない。ignore 規則は「生成物」 を意味しないので、
+ * `*` や `docs/` のような広い規則を 1 行足すだけで全ての破れが生成物に化ける
+ * (実測で再現した)。ここで見るのは **directory を名指しする entry だけ** で、
+ * `docs/` 配下の `.gitignore` に限る。
+ *
+ * 対象を directory 宣言に絞るのは、生成されるのが typedoc / forge doc の出力 tree
+ * だから。`*.log` のような file pattern は生成物の入口にならない。
+ *
+ * @param {string} docsRoot
+ * @returns {Set<string>} 生成先 directory の絶対 path
+ */
+/**
+ * path が `docs/` の中に収まるかを、解決できる範囲まで実体で確かめる。
+ *
+ * `realpathSync` を full path に 1 度だけ呼ぶ形では守れない。生成前は実体が無いのが
+ * 正常なので失敗を字面に倒す必要があり、その退路を使えば **外を指す親 symlink の
+ * 配下** / dangling / 循環 が全て素通りする (4 形とも実測で再現した)。
+ *
+ * 存在する ancestor までを canonical にし、残りの未生成 suffix だけ字面で継ぐ。
+ * 途中の解決が ENOENT 以外 (循環 / 権限) で失敗したら通さない = 判定できないものを
+ * 「中にある」 側に倒さない。
+ */
+function isInsideDocs(docsRoot, target) {
+  let canonicalDocsRoot;
+  try {
+    canonicalDocsRoot = realpathSync(docsRoot);
+  } catch {
+    return false;
+  }
+
+  const segments = relative(docsRoot, target).split(sep).filter(Boolean);
+  let resolved = canonicalDocsRoot;
+
+  for (const segment of segments) {
+    if (segment === '..') return false;
+    const next = join(resolved, segment);
+
+    // 実体の有無より先に、その名前が symlink かを見る。dangling symlink は
+    // `realpathSync` が未生成と同じ ENOENT を返すため、解決の失敗だけでは
+    // 「まだ無い」 と「外を指す壊れた link」 を区別できない (実測で素通りした)。
+    let link = null;
+    try {
+      link = lstatSync(next);
+    } catch (error) {
+      // ここから先は実体が無い。字面で継いで最後に境界だけ見る。
+      if (error?.code === 'ENOENT') {
+        resolved = next;
+        continue;
+      }
+      return false;
+    }
+    // symlink は解決先を確かめられない限り通さない (dangling / 外向きの両方)。
+    if (link.isSymbolicLink()) {
+      try {
+        resolved = realpathSync(next);
+      } catch {
+        return false;
+      }
+      const fromRootAfterLink = relative(canonicalDocsRoot, resolved);
+      if (fromRootAfterLink === '..' || fromRootAfterLink.startsWith(`..${sep}`)) return false;
+      continue;
+    }
+
+    // ここから下は symlink ではない段。外へ出る手段が無いので、通常は解決も境界検査も
+    // 結果を変えない (上の symlink 分岐を外すと落ちる形が 2 つ増えることを変異試験で
+    // 確認した = この 2 つは symlink 判定に覆われた冗長な防御)。
+    // 判定できない失敗を字面に倒さない意図を残すために置いている。
+    try {
+      resolved = realpathSync(next);
+    } catch (error) {
+      if (error?.code === 'ENOENT') {
+        resolved = next;
+        continue;
+      }
+      // 循環 (ELOOP) / 権限 (EACCES) 等は判定できない。通さない。
+      return false;
+    }
+    const fromRoot = relative(canonicalDocsRoot, resolved);
+    if (fromRoot === '..' || fromRoot.startsWith(`..${sep}`)) return false;
+  }
+
+  const fromRoot = relative(canonicalDocsRoot, resolved);
+  return !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
+}
+
+function collectGeneratedDirectories(docsRoot) {
+  const generated = new Set();
+
+  const walk = (directory) => {
+    let entries;
+    try {
+      entries = readdirSync(directory, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const entryPath = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+        continue;
+      }
+      if (entry.name !== '.gitignore') continue;
+      // symlink と hardlink の `.gitignore` は読まない。docs の外に置いた file から
+      // 生成先を宣言できてしまい、任意の dead link を生成物として隠せる (実測で再現)。
+      // hardlink は link 数で判定する = 実体が 2 箇所以上から参照されている形。
+      if (entry.isSymbolicLink()) continue;
+      try {
+        if (lstatSync(entryPath).nlink > 1) continue;
+      } catch {
+        continue;
+      }
+
+      let content;
+      try {
+        content = readFileSync(entryPath, 'utf8');
+      } catch {
+        continue;
+      }
+      for (const rawLine of content.split('\n')) {
+        const line = rawLine.trim();
+        // 空行 / comment は対象外。
+        if (!line) continue;
+        if (line.startsWith('#')) continue;
+        // 否定 (`!`) は「無視しない」 宣言なので生成物を示さない。
+        //
+        // この行と次の glob 除外は **外しても挙動が変わらない** (変異試験で確認)。
+        // `!gone/` や `gen-*/` はそのまま文字列として登録されるだけで、実 path とは
+        // 一致しないため。意図を code に残すために書いており、覆う test は無い。
+        if (line.startsWith('!')) continue;
+        // directory を名指しする entry だけを見る。末尾 slash が dir の目印。
+        if (!line.endsWith('/')) continue;
+        // glob を含む entry は対象を特定できないので採らない。
+        if (/[*?[\]]/.test(line)) continue;
+        // 先頭 slash は「この .gitignore からの相対」 の意味。
+        const relativeTarget = line.replace(/^\//, '').replace(/\/$/, '');
+        if (!relativeTarget || relativeTarget.split('/').includes('..')) continue;
+
+        const target = join(directory, relativeTarget);
+        // 宣言先が docs/ の外に出る形は採らない。symlink 経由で外へ向けると、
+        // docs の外の path を指す link が生成物として通る (実測で再現した)。
+        if (!isInsideDocs(docsRoot, target)) continue;
+
+        generated.add(target);
+      }
+    }
+  };
+
+  walk(docsRoot);
+  return generated;
+}
+
+/**
  * link が解決しない理由。呼出側が「どの壊れ方か」 で絞れるようにする。
  *
  * 文字列だけを返していた間、呼出側が `existsSync` で分類をやり直しており、
@@ -273,6 +432,11 @@ export const LINK_FAILURE = Object.freeze({
   OUTSIDE_DOCS: 'outside-docs',
   /** directory はあるが index.md が無い。公開後 404 になる。 */
   DIRECTORY_WITHOUT_INDEX: 'directory-without-index',
+  /**
+   * git の無視対象を指す。`pnpm docs:api-reference` が生成するため checkout には
+   * 無いのが正常で、破れではない。build 後の公開 site には存在する。
+   */
+  GENERATED: 'generated',
 });
 
 /**
@@ -292,7 +456,17 @@ const reportLine = ({ file, target }) => `dead link: ${file} -> ${target}`;
  */
 export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   const existsCaseExact = makeExistsCaseExact(repositoryRoot);
+  const generatedDirectories = collectGeneratedDirectories(docsRoot);
   const found = [];
+
+  /** 生成先 directory 自身か、その配下か。 */
+  const isGenerated = (absolutePath) => {
+    for (const generated of generatedDirectories) {
+      if (absolutePath === generated) return true;
+      if (absolutePath.startsWith(`${generated}${sep}`)) return true;
+    }
+    return false;
+  };
 
   /** 解決すれば null、しなければ LINK_FAILURE のいずれかを返す。 */
   const failureOf = (fromDirectory, target) => {
@@ -319,11 +493,13 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
     // 見つかった中で最も具体的な失敗理由を返す。
     let failure = LINK_FAILURE.MISSING;
     const worse = (reason) => {
-      // MISSING より OUTSIDE_DOCS、それより DIRECTORY_WITHOUT_INDEX の方が情報が多い。
+      // MISSING より情報が多い理由で上書きする。GENERATED を最上位に置くのは、
+      // 「build すれば在る」 が「どこにも無い」 より確度の高い説明だから。
       const rank = {
         [LINK_FAILURE.MISSING]: 0,
         [LINK_FAILURE.OUTSIDE_DOCS]: 1,
         [LINK_FAILURE.DIRECTORY_WITHOUT_INDEX]: 2,
+        [LINK_FAILURE.GENERATED]: 3,
       };
       if (rank[reason] > rank[failure]) failure = reason;
     };
@@ -347,6 +523,12 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
       }
       if (existsCaseExact(absolute)) {
         worse(insideDocs ? LINK_FAILURE.DIRECTORY_WITHOUT_INDEX : LINK_FAILURE.OUTSIDE_DOCS);
+        continue;
+      }
+      // 実体が無い時だけ、生成物かを見る。実在する path は上の判定が既に扱っており、
+      // 生成先かどうかは解決の可否に関係しない。
+      if (insideDocs && isGenerated(absolute)) {
+        worse(LINK_FAILURE.GENERATED);
       }
     }
     return failure;
