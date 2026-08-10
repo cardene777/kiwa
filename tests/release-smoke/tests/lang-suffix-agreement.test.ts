@@ -143,6 +143,10 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-a11y',
     'kiwa-data',
     'kiwa-cli-test',
+    // #1861 群 3
+    'kiwa-forge',
+    'kiwa-hardhat',
+    'kiwa-play',
   ];
 
   it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
@@ -189,14 +193,26 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-a11y': ['a11y'],
     'kiwa-data': ['data'],
     'kiwa-cli-test': ['cli'],
+    'kiwa-forge': ['contract'],
+    'kiwa-hardhat': ['contract'],
+    'kiwa-play': ['e2e'],
   };
 
-  /** The resolution block of a migrated Layer 2 skill. */
+  /**
+   * The resolution block of a migrated Layer 2 skill.
+   *
+   * Ends at the next top-level heading rather than at `## 実行フロー` by name.
+   * Not every skill has that section — `kiwa-orm` and `kiwa-edge` go straight
+   * from the options to a template — and `indexOf` returning -1 there would
+   * slice to one character before the end of the file, pulling every later
+   * code block into the block being checked.
+   */
   function resolverBlock(skill: string): string {
     const body = read(`.claude/skills/${skill}/SKILL.md`);
     const start = body.indexOf('### 入力 spec の path は CLI から受け取る');
     expect(start, `${skill} に解決 block が無い`).toBeGreaterThan(-1);
-    return body.slice(start, body.indexOf('## 実行フロー', start));
+    const end = body.indexOf('\n## ', start);
+    return body.slice(start, end === -1 ? undefined : end);
   }
 
   it.each(Object.keys(SKILL_LAYERS))('%s が sed で module を置換しない', (skill) => {
@@ -422,10 +438,20 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(offenders, `自前で組む行が残っている:\n${offenders.join('\n')}`).toEqual([]);
   });
 
-  it.each(MIGRATED)('%s の --input-spec 既定が固定 path でない', (skill) => {
+  it.each(MIGRATED)('%s の spec flag 既定が固定 path でない', (skill) => {
     const body = read(`.claude/skills/${skill}/SKILL.md`);
-    const option = body.split('\n').find((line) => line.includes('`--input-spec'));
-    if (option === undefined) return; // 入口 skill と review は --input-spec を持たない
+    // Both spellings. `--spec-path` predates `--input-spec` and five skills
+    // still use it, so looking only for the newer name skipped `kiwa-forge`
+    // and `kiwa-hardhat` entirely (Round 1 F1).
+    //
+    // Anchored to the declaration line. A substring match picks up prose that
+    // mentions the flag — `kiwa-play` describes `--module` in terms of
+    // `--input-spec` two lines earlier — and then asserts on the prose while
+    // the real declaration goes unchecked (Round 2 F1, measured).
+    const option = body
+      .split('\n')
+      .find((line) => /^- `--(?:input-spec|spec-path) \{path\}`/.test(line));
+    if (option === undefined) return; // 入口 skill と review は spec flag を持たない
     // A hardcoded default is the English path, so `--lang ja` silently points
     // at a file the producer did not write (#1855).
     expect(option, `${skill} の既定が固定 path`).not.toMatch(/省略時は `tests\/spec/);
@@ -433,8 +459,8 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
 
   it('移行済 skill の数が Issue の群と一致する', () => {
     // A guard against the list drifting: two from #1860, three in group 1,
-    // five in group 2.
-    expect(MIGRATED).toHaveLength(10);
+    // five in group 2, three in group 3.
+    expect(MIGRATED).toHaveLength(13);
   });
 
   it('未移行の skill が残っていることを記録する', () => {

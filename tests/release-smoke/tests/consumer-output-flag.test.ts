@@ -123,6 +123,51 @@ describe('a consumer can be told where its input is and what to call it', () => 
   // way to say where those specs were.
   const SPEC_FLAGS = ['--input-spec', '--spec-path'];
 
+  /**
+   * The spec paths the table declares for a skill, from both ways it can be named.
+   *
+   * A layer names one consumer in `consumer_skill` and any others in
+   * `also_consumed_by`. Reading only the first leaves `kiwa-hardhat` — which
+   * reaches `contract` through the second — with nothing to compare against
+   * (Round 1 F1). Deduplicated, so a skill reading several layers that declare
+   * the same path still resolves to one expected value.
+   */
+  function declaredSpecPaths(skill: string): string[] {
+    return [
+      ...new Set(
+        LAYERS.filter(
+          (l) => l.consumer_skill === skill || (l.also_consumed_by ?? []).includes(skill),
+        ).map((l) => (l as unknown as { spec_path: string }).spec_path),
+      ),
+    ];
+  }
+
+  /**
+   * Skills whose stated literal default disagrees with the table.
+   *
+   * Takes the reader so a caller can hand in a modified body. Asserting that
+   * `declaredSpecPaths` is non-empty would pass again the moment the skip rule
+   * returns; injecting a wrong literal and requiring it to surface does not.
+   */
+  function literalMismatches(
+    skills: string[],
+    reader: (skill: string) => string = (skill) => read(`.claude/skills/${skill}/SKILL.md`),
+  ): string[] {
+    const mismatched: string[] = [];
+    for (const skill of skills) {
+      const line = reader(skill)
+        .split('\n')
+        .find((l) => SPEC_FLAGS.some((flag) => l.startsWith(`- \`${flag} {path}\``)));
+      if (!line) continue;
+      const stated = /省略時は `([^`]+)`/.exec(line)?.[1];
+      if (stated === undefined) continue; // 節を指す形は § で解決する
+      const declared = declaredSpecPaths(skill);
+      if (declared.length !== 1) continue; // 表が 1 件に定めない skill は対象外
+      if (stated !== declared[0]) mismatched.push(`${skill}: ${stated} vs ${declared[0]}`);
+    }
+    return mismatched;
+  }
+
   it('every consumer of a layer accepts a spec path and a module name', () => {
     const withoutSpec: string[] = [];
     const withoutModule: string[] = [];
@@ -221,22 +266,56 @@ describe('a consumer can be told where its input is and what to call it', () => 
     expect(offenders).toEqual([]);
   });
 
-  it('the two skills this change adds state the path the table declares', () => {
+  it('literal で既定を書く consumer が表の宣言と一致する', () => {
     // A default that is not the declared `spec_path` sends the consumer to a
     // place the producer never wrote. Compared against the table rather than
     // against a literal, so changing the declaration breaks this.
-    for (const skill of ['kiwa-play', 'kiwa-edge']) {
-      const line = read(`.claude/skills/${skill}/SKILL.md`)
+    //
+    // Applied to whoever still writes a literal, rather than to two names.
+    // #1851 named `kiwa-play` and `kiwa-edge` because they were the two it
+    // added; #1861 moves skills off literals one group at a time, so a名指し
+    // list turns into a failure the moment a named skill migrates while the
+    // skills that kept their literal go unchecked.
+    const mismatched = literalMismatches(producers);
+    expect(mismatched).toEqual([]);
+  });
+
+  it('also_consumed_by の consumer も literal 照合に載る', () => {
+    // `kiwa-hardhat` reaches `contract` through `also_consumed_by`, never through
+    // `consumer_skill`. Deriving the expected path from `consumer_skill` alone
+    // left it with an empty `declared`, and the skip-when-not-one rule then
+    // waved it through — so writing a wrong literal into it was undetectable
+    // (Round 1 F1).
+    //
+    // The regression is written as an injection rather than as a name check:
+    // asserting `declared` is non-empty passes again the moment the skip rule
+    // comes back.
+    const body = read('.claude/skills/kiwa-hardhat/SKILL.md');
+    const broken = body.replace(
+      /^(- `--spec-path \{path\}` — .*)$/m,
+      '$1 (省略時は `tests/spec/contract/test-spec-{module}.WRONG.md`)',
+    );
+    expect(broken, '注入する対象の行が見つからない').not.toBe(body);
+    const found = literalMismatches(['kiwa-hardhat'], (skill) =>
+      skill === 'kiwa-hardhat' ? broken : read(`.claude/skills/${skill}/SKILL.md`),
+    );
+    expect(found, '誤った literal を注入しても検出されない').toHaveLength(1);
+    expect(found[0]).toContain('WRONG');
+  });
+
+  it('節を指す consumer にその節が実在する', () => {
+    // Pointing at a section that does not exist reads as "somewhere else
+    // explains it" and leaves the caller with nothing. The literal form is
+    // checked above; this is the other half of the same property.
+    const dangling = producers.filter((skill) => {
+      const body = read(`.claude/skills/${skill}/SKILL.md`);
+      const line = body
         .split('\n')
-        .find((l) => l.startsWith('- `--input-spec {path}`'));
-      expect(line).toBeDefined();
-      const stated = /省略時は `([^`]+)`/.exec(line!)?.[1];
-      const declared = LAYERS.filter((l) => l.consumer_skill === skill).map(
-        (l) => (l as unknown as { spec_path: string }).spec_path,
-      );
-      expect(declared).toHaveLength(1);
-      expect(stated).toBe(declared[0]);
-    }
+        .find((l) => SPEC_FLAGS.some((flag) => l.startsWith(`- \`${flag} {path}\``)));
+      if (!line || !/省略時は[^、]*§[^、]+で解決/.test(line)) return false;
+      return !body.includes('### 入力 spec の path は CLI から受け取る');
+    });
+    expect(dangling).toEqual([]);
   });
 });
 
