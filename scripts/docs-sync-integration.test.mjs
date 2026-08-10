@@ -861,14 +861,16 @@ test('a symlinked gitignore does not declare generated directories', () => {
       writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
       writeFileSync(join(outsideDirectory, 'evil-gitignore'), 'gone/\n');
 
-      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      // trusted root に置く。docs/libraries に置くと isTrusted で先に落ち、
+      // 目的の guard (symlink の .gitignore 拒否) に届かない。
+      const docsDirectory = generatedRoot(root);
       symlinkSync(join(outsideDirectory, 'evil-gitignore'), join(docsDirectory, '.gitignore'));
       writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[消えた](./gone/page)\n');
 
       const failures = classifyDocumentLinks({
         repositoryRoot: root,
         docsRoot: join(root, 'docs'),
-        scanRoot: join(root, 'docs', 'libraries'),
+        scanRoot: join(root, 'docs'),
       });
       assert.equal(failures.length, 1, JSON.stringify(failures));
       assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -886,7 +888,9 @@ test('a generated declaration pointing outside docs is not honored', () => {
     mkdirSync(join(root, 'secret'), { recursive: true });
     writeFileSync(join(root, 'secret', 'page.md'), '# secret\n');
 
-    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // trusted root に置く。docs/libraries に置くと isTrusted で先に落ち、
+    // 目的の guard (宣言先の docs 境界) に届かない。
+    const docsDirectory = generatedRoot(root);
     symlinkSync(join(root, 'secret'), join(docsDirectory, 'built'));
     writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
     writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[外](./built/gone)\n');
@@ -894,7 +898,7 @@ test('a generated declaration pointing outside docs is not honored', () => {
     const failures = classifyDocumentLinks({
       repositoryRoot: root,
       docsRoot: join(root, 'docs'),
-      scanRoot: join(root, 'docs', 'libraries'),
+      scanRoot: join(root, 'docs'),
     });
     assert.equal(failures.length, 1, JSON.stringify(failures));
     assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -1178,15 +1182,66 @@ test('a symlinked markdown source is not read', () => {
       const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
       symlinkSync(join(outsideDirectory, 'secret.md'), join(docsDirectory, 'external.md'));
 
+      // 中身は読まないので、外部 file の link destination は報告に出ない。
       const dead = deadDocumentLinks({
         repositoryRoot: root,
         docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs'),
       });
       assert.deepEqual(dead, [], dead.join('\n'));
+
+      // ただし読まなかったことは黙らない。検査できない file として報告する。
+      const found = unsupportedLinkSyntax({
+        repositoryRoot: root,
+        scanRoot: join(root, 'docs'),
+      });
+      assert.equal(found.length, 1, found.join('\n'));
+      assert.match(found[0], /symlink の markdown/);
+      assert.doesNotMatch(found[0], /leaked-target-name/, '中身は報告に出さない');
     } finally {
       rmSync(outsideDirectory, { recursive: true, force: true });
     }
+  });
+});
+
+// repo の外を指す symlink directory へは降りないので、配下の markdown が 1 件も
+// 検査されない。黙って通すと、その配下だけで壊れる link が gate を通る。
+test('a symlinked source directory pointing outside the repo is reported as unchecked', () => {
+  withFixture(({ root, readmePath }) => {
+    const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+    try {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      writeFileSync(join(outsideDirectory, 'page.md'), '# page\n\n[壊れた](./gone)\n');
+      symlinkSync(outsideDirectory, join(root, 'docs', 'alias'));
+
+      const found = unsupportedLinkSyntax({
+        repositoryRoot: root,
+        scanRoot: join(root, 'docs'),
+      });
+      assert.equal(found.length, 1, found.join('\n'));
+      assert.match(found[0], /symlink の directory/);
+    } finally {
+      rmSync(outsideDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+// repo の中に留まる symlink directory は報告しない。`docs/public/images` のように
+// 実運用で使われており、実体側が同じ repo にあるので検査から漏れない。
+test('a symlinked source directory inside the repo is not reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const real = join(root, 'docs', 'real');
+    mkdirSync(real, { recursive: true });
+    writeFileSync(join(real, 'page.md'), '# page\n\n[隣](./sibling)\n');
+    writeFileSync(join(real, 'sibling.md'), '# sibling\n');
+    symlinkSync(real, join(root, 'docs', 'alias'));
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      scanRoot: join(root, 'docs'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
   });
 });
 

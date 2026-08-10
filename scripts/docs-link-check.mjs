@@ -129,6 +129,18 @@ function shouldWalk(entry) {
   return entry.isDirectory() && !entry.isSymbolicLink() && !SKIPPED_DIRECTORIES.has(entry.name);
 }
 
+/** symlink の解決先が repo の中に留まるか。解決できない形は「外」 に倒す。 */
+function isInsideRepository(repositoryRoot, path) {
+  let canonical;
+  try {
+    canonical = realpathSync(path);
+  } catch {
+    return false;
+  }
+  const fromRoot = relative(repositoryRoot, canonical);
+  return !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
+}
+
 /**
  * source として読んでよい markdown か。
  *
@@ -137,8 +149,10 @@ function shouldWalk(entry) {
  * 広げた後は、細工した checkout が runner 上の読める file を読ませて内容由来の文字列を
  * log へ出せる (実測で再現した)。
  *
- * repo 内を指す symlink も読まない。実体が repo 内にあるなら、その実体自身が走査対象に
- * なる = 同じ file を 2 度読むだけで、通す理由が無い。
+ * repo 内を指す symlink も読まない。alias 側の相対 link は実体側と解決先が変わるため
+ * (`real/page.md` の `./sibling` は `alias/page.md` からは解決しない)、実体を読んで
+ * 済ませることはできない。読めない以上、黙って通さず「検査できない」 と報告する
+ * (§ symlinkedSourceFiles)。
  */
 function isReadableSource(entry) {
   return entry.isFile() && !entry.isSymbolicLink();
@@ -214,6 +228,25 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
   const walk = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
+      // symlink は種別より先に見る。`readdirSync` の Dirent は symlink に対して
+      // `isDirectory()` も `isFile()` も false を返すため (実測)、種別で分岐した後では
+      // どちらの枝にも入らず素通りする。
+      if (entry.isSymbolicLink()) {
+        // repo の外を指す symlink だけを報告する。中身を読まない以上その配下の link は
+        // 1 つも検査されず、黙って通すと alias 経路だけで壊れる link が gate を通る。
+        //
+        // repo 内に留まる symlink は報告しない。`docs/public/images` のように実運用で
+        // 使われており、実体側が同じ repo の中にあるので検査から漏れない。
+        if (isInsideRepository(repositoryRoot, entryPath)) continue;
+        const kind = isDirectory(entryPath) ? 'directory' : 'markdown';
+        // markdown でない file symlink (画像等) は link を持たないので報告しない。
+        if (kind === 'directory' || entry.name.endsWith('.md')) {
+          found.push(
+            `unsupported link syntax (symlink の ${kind}): ${relative(repositoryRoot, entryPath)}`,
+          );
+        }
+        continue;
+      }
       if (entry.isDirectory()) {
         if (shouldWalk(entry)) walk(entryPath);
         continue;
