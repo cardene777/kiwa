@@ -221,22 +221,46 @@ describe('a consumer can be told where its input is and what to call it', () => 
     expect(offenders).toEqual([]);
   });
 
-  it('the two skills this change adds state the path the table declares', () => {
+  it('literal で既定を書く consumer が表の宣言と一致する', () => {
     // A default that is not the declared `spec_path` sends the consumer to a
     // place the producer never wrote. Compared against the table rather than
     // against a literal, so changing the declaration breaks this.
-    for (const skill of ['kiwa-play', 'kiwa-edge']) {
+    //
+    // Applied to whoever still writes a literal, rather than to two names.
+    // #1851 named `kiwa-play` and `kiwa-edge` because they were the two it
+    // added; #1861 moves skills off literals one group at a time, so a名指し
+    // list turns into a failure the moment a named skill migrates while the
+    // skills that kept their literal go unchecked.
+    const mismatched: string[] = [];
+    for (const skill of producers) {
       const line = read(`.claude/skills/${skill}/SKILL.md`)
         .split('\n')
-        .find((l) => l.startsWith('- `--input-spec {path}`'));
-      expect(line).toBeDefined();
-      const stated = /省略時は `([^`]+)`/.exec(line!)?.[1];
+        .find((l) => SPEC_FLAGS.some((flag) => l.startsWith(`- \`${flag} {path}\``)));
+      if (!line) continue;
+      const stated = /省略時は `([^`]+)`/.exec(line)?.[1];
+      if (stated === undefined) continue; // 節を指す形は § で解決する
       const declared = LAYERS.filter((l) => l.consumer_skill === skill).map(
         (l) => (l as unknown as { spec_path: string }).spec_path,
       );
-      expect(declared).toHaveLength(1);
-      expect(stated).toBe(declared[0]);
+      if (declared.length !== 1) continue; // 表が 1 件に定めない skill は対象外
+      if (stated !== declared[0]) mismatched.push(`${skill}: ${stated} vs ${declared[0]}`);
     }
+    expect(mismatched).toEqual([]);
+  });
+
+  it('節を指す consumer にその節が実在する', () => {
+    // Pointing at a section that does not exist reads as "somewhere else
+    // explains it" and leaves the caller with nothing. The literal form is
+    // checked above; this is the other half of the same property.
+    const dangling = producers.filter((skill) => {
+      const body = read(`.claude/skills/${skill}/SKILL.md`);
+      const line = body
+        .split('\n')
+        .find((l) => SPEC_FLAGS.some((flag) => l.startsWith(`- \`${flag} {path}\``)));
+      if (!line || !/省略時は[^、]*§[^、]+で解決/.test(line)) return false;
+      return !body.includes('### 入力 spec の path は CLI から受け取る');
+    });
+    expect(dangling).toEqual([]);
   });
 });
 

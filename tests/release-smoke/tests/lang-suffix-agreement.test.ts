@@ -143,6 +143,10 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-a11y',
     'kiwa-data',
     'kiwa-cli-test',
+    // #1861 群 3
+    'kiwa-forge',
+    'kiwa-hardhat',
+    'kiwa-play',
   ];
 
   it.each(MIGRATED)('%s が LANG ではなく DOC_LANG を使うと書いている', (skill) => {
@@ -189,14 +193,26 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     'kiwa-a11y': ['a11y'],
     'kiwa-data': ['data'],
     'kiwa-cli-test': ['cli'],
+    'kiwa-forge': ['contract'],
+    'kiwa-hardhat': ['contract'],
+    'kiwa-play': ['e2e'],
   };
 
-  /** The resolution block of a migrated Layer 2 skill. */
+  /**
+   * The resolution block of a migrated Layer 2 skill.
+   *
+   * Ends at the next top-level heading rather than at `## 実行フロー` by name.
+   * Not every skill has that section — `kiwa-orm` and `kiwa-edge` go straight
+   * from the options to a template — and `indexOf` returning -1 there would
+   * slice to one character before the end of the file, pulling every later
+   * code block into the block being checked.
+   */
   function resolverBlock(skill: string): string {
     const body = read(`.claude/skills/${skill}/SKILL.md`);
     const start = body.indexOf('### 入力 spec の path は CLI から受け取る');
     expect(start, `${skill} に解決 block が無い`).toBeGreaterThan(-1);
-    return body.slice(start, body.indexOf('## 実行フロー', start));
+    const end = body.indexOf('\n## ', start);
+    return body.slice(start, end === -1 ? undefined : end);
   }
 
   it.each(Object.keys(SKILL_LAYERS))('%s が sed で module を置換しない', (skill) => {
@@ -433,8 +449,8 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
 
   it('移行済 skill の数が Issue の群と一致する', () => {
     // A guard against the list drifting: two from #1860, three in group 1,
-    // five in group 2.
-    expect(MIGRATED).toHaveLength(10);
+    // five in group 2, three in group 3.
+    expect(MIGRATED).toHaveLength(13);
   });
 
   it('未移行の skill が残っていることを記録する', () => {

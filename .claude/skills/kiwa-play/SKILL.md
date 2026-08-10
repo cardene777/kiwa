@@ -30,24 +30,71 @@ $ARGUMENTS
 
 ## オプション
 
-- `--module {name}` — spec / test file 名に入る module 名。 `--input-spec` を省略した時の既定 path もこれで決まる
-- `--input-spec {path}` — Layer 1 spec の path (省略時は `tests/spec/e2e/test-spec-{module}.md`)。 `/kiwa-design --layer e2e` が書く場所で、 `docs/layers.json` の `spec_path` がその宣言
+- `--module {name}` — spec / test file 名に入る module 名。 `--input-spec` を省略した時の path はこれを CLI に渡して解決する
+- `--input-spec {path}` — Layer 1 spec の path (省略時は § 入力 spec の path は CLI から受け取る で解決)。 `/kiwa-design --layer e2e` が書く場所で、 `docs/layers.json` の `spec_path` がその宣言
 - `--init` — 新規 dApp プロジェクトに kiwa を導入 (`pnpm dlx @kiwa-lab/cli init` を実行し scaffold 生成)
 - `--mode {new|extend|debug}` — `new` (新規 test 設計) / `extend` (既存 test 拡張) / `debug` (flaky / fail 解析)
 - `--rounds {N}` — N round 連続 PASS 検証 (flaky 0 件確認、 デフォルト 1)
-- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は Step 0a で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
+- `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--no-codex` — Codex 委譲をスキップして単独で進行 (test 件数 1-2 のみ推奨)
 - `--no-review` — Step 9 の kiwa-review 自動呼出 (test-review) を skip (CI / 自動化用)
 
+### 入力 spec の path は CLI から受け取る
+
+`--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill が扱う layer は `e2e` の 1 つ。
+
+```bash
+kiwa layers --json --layer e2e --lang "$DOC_LANG" --module "$MODULE"
+```
+
+`e2e` は dApp 向けで spec dir は `tests/spec/e2e/`。 `e2e-generic` (`/kiwa-e2e` が消費する汎用 browser layer) は別 layer で spec dir も違うため、 取り違えると別 skill 向けの spec を読む。
+
+返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
+
+`$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
+
+`$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+#### 解決に失敗したら止める
+
+**exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。
+
+判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。
+
+**「読める」 と「期待した形をしている」 を分ける**。 JSON として parse できることは、 中身が使える形だと言っていない。
+
+| 結果 | 扱い |
+|---|---|
+| exit != 0 | stderr をそのまま user に返して中断 |
+| stdout が JSON として読めない | 中断 (CLI 未 install / 別 command の出力) |
+| `layers` が配列でない | 中断 (応答が壊れている) |
+| 必要な `id` が `layers` に無い | layer 名が誤り。 中断 |
+| 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
+| その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
+| `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
+| 上記いずれでもない | その `spec_path` を使う |
+
+`.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
+
+`jq` が無い環境では `--json` の出力をそのまま読む。 `jq` は整形の手段であって、 解決の一部ではない。
+
+#### 解決した値を下流に渡す
+
+Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lang` を渡す**。 渡さないと review が別の spec を読み、 生成した test と突き合わせる相手が変わる。
+
+自前で suffix を組むと 2 経路になり、 CLI 側の規約が変わった時に取り残される。 `--lang ja` を付けると Layer 1 が書いた file を Layer 2 が探せなかったのがこの形 (#1855 / #1861)。
+
+本 SKILL.md 内の spec path 表記は説明のための例示で、 解決の指示ではない。
+
 ## 実行フロー
 
-### Step 0a: 文書生成言語の選択 (skill 起動時 1 回)
+### Step 0a: 文書生成言語の決定 (skill 起動時 1 回)
 
-AskUserQuestion で spec / report 等の文書生成言語を user に確認する。 `--lang {code}` 引数指定時は skip。
+`--lang` が渡っていればそれを使う。 渡っていなければ **起動元が渡した値、 単体起動なら `ja`** を既定にする (option 宣言と同じ規則)。
 
-選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様は `references/doc-language-selection.md` を Read。
+`/kiwa-app` や `/kiwa-test` から起動される経路では常に値が渡るため、 尋ねる契機は単体起動に限られる。 その場合も既定があるので **AskUserQuestion は出さない** = 既定が決まっている問いを毎回聞くと chain が止まる。
 
-確定後の言語 `$DOC_LANG` は以降の文書生成 step (Layer 1 経由 spec 生成 / spec.ts 内コメント言語 / 将来の report 出力) で参照する。 lang suffix 規約は Issue #341 SSOT (`/kiwa-design` § lang suffix 規約) に従う ... en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。
+確定後の言語 `$DOC_LANG` は以降の文書生成 step (Layer 1 経由 spec 生成 / spec.ts 内コメント言語 / 将来の report 出力) と入力 spec の解決で参照する。 lang suffix 規約は CLI が実装しており (`withLangSuffix`)、 skill 側では組み立てない。
 
 ### Step 0: kiwa セットアップ判定
 
@@ -92,8 +139,8 @@ grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
 
 `--input-spec` が無い時 (単独起動 / `/kiwa-test` 経由) だけ以下を実行する。
 
-以下を Layer 1 に渡し、 `--input-spec` 省略時の既定 path (`tests/spec/e2e/test-spec-{module}.md`)
-に Write させる。
+以下を Layer 1 に渡す。 Layer 1 も同じ CLI で書き先を解決するため、 ここで path を指定しない = 指定すると
+producer と consumer が別々に組み立てる 2 経路に戻る。
 
 ```text
 /kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/}
@@ -270,7 +317,7 @@ flaky 検証は 4 round 連続 PASS で固定。
 
 ### Step 9: kiwa-review 自動呼出 (test-review mode)
 
-Step 7 (4 round 連続 PASS) 完了後、 生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --test-path tests/*.spec.ts` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
+Step 7 (4 round 連続 PASS) 完了後、 生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer e2e --lang $DOC_LANG --test-path tests/*.spec.ts` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
 
 呼出例:
 ```text
