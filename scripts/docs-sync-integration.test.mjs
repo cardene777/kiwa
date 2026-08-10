@@ -396,6 +396,10 @@ for (const [label, markdown] of [
   ['Vue の :href (属性順が逆)', '<a class="k" :href="url">x</a>'],
   ['component の is', '<component is="a" href="./real">x</component>'],
   ['component の :is', '<component :is="tag" href="./real">x</component>'],
+  // 属性名が実行時に決まる形。href になりうるので解析できない。
+  ['Vue の dynamic argument', `<a :[attr]="'./real'">x</a>`],
+  // 属性値の中に `>` があっても tag の終端を取り違えず、後続の bound href に届く。
+  ['引用属性の > より後ろの bound href', `<a title="a>b" :href="'./real'">x</a>`],
 ]) {
   test(`${label} is reported as unsupported syntax`, () => {
     withFixture(({ root, readmePath }) => {
@@ -431,6 +435,51 @@ test('a plain anchor is reported once, not by two rules', () => {
     });
     assert.equal(found.length, 1, found.join('\n'));
     assert.match(found[0], /生 HTML の a タグ/);
+  });
+});
+
+// 属性値の中の `:href=` は属性ではない。属性名だけを拾う形にすると値の中を除外
+// できず、空白を境界にしても防げない (`title="see :href=y"` で実測、誤検知した)。
+// 値を引用区間ごと食う形にして初めて外れる。
+for (const [label, markdown] of [
+  ['引用符の直後に密着', '<a title=":href=x" href="./real">y</a>'],
+  ['値の中に空白を挟む', '<a title="see :href=y" href="./real">z</a>'],
+]) {
+  test(`a colon-prefixed string inside an attribute value is not a binding (${label})`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+      writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n${markdown}\n`);
+
+      const found = unsupportedLinkSyntax({
+        repositoryRoot: root,
+        scanRoot: join(root, 'docs', 'libraries'),
+      });
+      // 「生 HTML の a タグ」 だけが出る。Vue 判定は反応しない。
+      assert.equal(found.length, 1, found.join('\n'));
+      assert.match(found[0], /生 HTML の a タグ/);
+    });
+  });
+}
+
+// `component` の属性値に `:is=` を含む形。a タグと違い「生 HTML の a タグ」 判定が
+// 無いので、誤検知すると報告が 0 件から 1 件に変わる。
+test('a colon-prefixed string inside a component attribute value is not a binding', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+    writeFileSync(
+      join(docsDirectory, 'index.md'),
+      '# sample\n\n<component alt="see :is=b" href="./real">z</component>\n',
+    );
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
   });
 });
 

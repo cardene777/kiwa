@@ -70,18 +70,43 @@ const REFERENCE_DEFINITION =
   /^ {0,3}\[[^\]]+\]:[ \t]*(?:<[^>\n]*>|\S+)[ \t]*(?:"[^"]*"|'[^']*'|\([^)]*\))?[ \t]*$/gm;
 
 // VitePress は markdown 中の Vue 記法を解釈し、いずれも `<a href="...">` に render する。
-// destination が式なので静的には解けず、checker は素通ししてしまう (3 形とも実測で確認)。
+// destination が式なので静的には解けず、checker は素通ししてしまう (実測で確認)。
 // 解析しようとせず未対応として報告する = 実在しない記法のために解析器を広げると、
 // 広げた code 自体が欠陥を生む (PR #1875 で 2 round 溶かした)。
-// 拾うのは 2 形。`a` / `component` の bind された `href` (`:href` / `v-bind:href`) と、
-// `component` の `is` (静的 / bind の両方)。`<component is="a" href="...">` は
-// anchor に化けるため、`is` は bind されていなくても対象にする。
-//
-// 素の `<a href>` はここでは拾わない = 既存の「生 HTML の a タグ」 判定が覆っており、
-// 両方で拾うと同じ 1 件が 2 度報告される。属性名の前に空白を要求するので、
-// `data-island` のように `is` を含む別の属性名には一致しない。
-const VUE_BOUND_ANCHOR =
-  /<(?:a|component)\b[^>]*?\s(?::|v-bind:)href\s*=|<component\b[^>]*?\s(?::|v-bind:)?is\s*=/i;
+const VUE_ANCHOR_TAG = /<(a|component)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+// 属性名と、その値 (引用区間を含む) をまとめて食う。値を食わずに名前だけ拾うと、
+// 属性値の中の `:href=` を属性と誤認する。空白を境界にしても防げない = 値の中に
+// 空白を挟んで `:href=` と書ける (`title="see :href=y"` で実測、誤検知した)。
+const HTML_ATTRIBUTE_PAIR =
+  /([^\s=/>]+)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)|([^\s=/>]+)/g;
+
+/**
+ * Vue の binding で destination が決まる anchor か。
+ *
+ * 拾うのは 2 種。`a` / `component` の bind された `href` と、`component` の `is`
+ * (静的 / bind の両方)。`<component is="a" href="...">` は anchor に化けるため、
+ * `is` は bind されていなくても対象にする。
+ *
+ * dynamic argument (`:[attr]`) も拾う = 属性名が実行時に決まる以上、`href` になりうる。
+ *
+ * 素の `<a href>` はここでは拾わない = 既存の「生 HTML の a タグ」 判定が覆っており、
+ * 両方で拾うと同じ 1 件が 2 度報告される。
+ */
+function hasVueBoundAnchor(content) {
+  for (const [, tagName, attributes] of content.matchAll(VUE_ANCHOR_TAG)) {
+    const isComponent = tagName.toLowerCase() === 'component';
+    for (const [, namedWithValue, namedAlone] of attributes.matchAll(HTML_ATTRIBUTE_PAIR)) {
+      const name = (namedWithValue ?? namedAlone ?? '').toLowerCase();
+      const isBound = name.startsWith(':') || name.startsWith('v-bind:');
+      const plainName = name.replace(/^(?::|v-bind:)/, '');
+      // 属性名が実行時に決まる形。href になりうるので解析できない。
+      if (isBound && plainName.startsWith('[')) return true;
+      if (isBound && plainName === 'href') return true;
+      if (isComponent && plainName === 'is') return true;
+    }
+  }
+  return false;
+}
 
 /** 位置 index が、extractor が消費した区間のどれかに入るか。 */
 function isCovered(spans, index) {
@@ -149,7 +174,7 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
       reasons.add('reference 定義');
       break;
     }
-    if (VUE_BOUND_ANCHOR.test(content)) {
+    if (hasVueBoundAnchor(content)) {
       reasons.add('Vue 記法の anchor');
     }
     return reasons;
