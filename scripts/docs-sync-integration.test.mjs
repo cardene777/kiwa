@@ -699,6 +699,20 @@ test('no link in docs escapes the published tree with a relative path', () => {
   assert.deepEqual(escaping, [], escaping.join('\n'));
 });
 
+// dir を指す link は VitePress が `<dir>/index.md` に解決する。`index.md` を持たない
+// dir を指すと公開後 404 になる (`docs/announcements/` の各 version dir が該当した)。
+// dir が実在することと link が解決することは別で、前者だけ見ると気付けない。
+test('no link in docs points at a directory without an index', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+
+  const indexless = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
+    .filter(({ reason }) => reason === LINK_FAILURE.DIRECTORY_WITHOUT_INDEX)
+    .map(({ file, target }) => `${file} -> ${target}`);
+
+  assert.deepEqual(indexless, [], indexless.join('\n'));
+});
+
 // 絶対 URL に置き換えた参照先が repo に実在すること。相対 link と違って checker は
 // 外部 URL を検査しないため、置き換えた先が消えても気付けない。自 repo を指す URL に
 // 限り、path に解いて実体を確かめる。
