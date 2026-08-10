@@ -15,6 +15,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  linkSync,
   readdirSync,
   realpathSync,
   rmSync,
@@ -887,6 +888,66 @@ test('a generated declaration pointing outside docs is not honored', () => {
     assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
   });
 });
+
+// 境界の検証は「解決できる範囲まで実体で確かめる」 形でないと守れない。full path に
+// `realpathSync` を 1 度呼ぶだけだと、生成前は失敗が正常なので字面に倒す退路が要り、
+// その退路を使って 4 形が素通りする (いずれも実測で再現した)。
+for (const [label, build] of [
+  [
+    '親 symlink が docs の外を指す',
+    ({ docsDirectory, outsideDirectory }) => {
+      symlinkSync(outsideDirectory, join(docsDirectory, 'wrap'));
+      writeFileSync(join(docsDirectory, '.gitignore'), 'wrap/built/\n');
+      return './wrap/built/page';
+    },
+  ],
+  [
+    'dangling symlink が外を指す',
+    ({ docsDirectory, outsideDirectory }) => {
+      symlinkSync(join(outsideDirectory, 'nope'), join(docsDirectory, 'built'));
+      writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+      return './built/page';
+    },
+  ],
+  [
+    '循環 symlink',
+    ({ docsDirectory }) => {
+      symlinkSync(join(docsDirectory, 'loop'), join(docsDirectory, 'loop'));
+      writeFileSync(join(docsDirectory, '.gitignore'), 'loop/\n');
+      return './loop/page';
+    },
+  ],
+  [
+    'hardlink の .gitignore',
+    ({ docsDirectory, outsideDirectory }) => {
+      writeFileSync(join(outsideDirectory, 'evil'), 'gone/\n');
+      linkSync(join(outsideDirectory, 'evil'), join(docsDirectory, '.gitignore'));
+      return './gone/page';
+    },
+  ],
+]) {
+  test(`a declaration reached through ${label} is not honored`, () => {
+    withFixture(({ root, readmePath }) => {
+      const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+      try {
+        writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+        const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+        const target = build({ docsDirectory, outsideDirectory });
+        writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n[link](${target})\n`);
+
+        const failures = classifyDocumentLinks({
+          repositoryRoot: root,
+          docsRoot: join(root, 'docs'),
+          scanRoot: join(root, 'docs', 'libraries'),
+        });
+        assert.equal(failures.length, 1, JSON.stringify(failures));
+        assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+      } finally {
+        rmSync(outsideDirectory, { recursive: true, force: true });
+      }
+    });
+  });
+}
 
 // 宣言した directory の配下も生成物として扱う。typedoc は tree を丸ごと作るため、
 // `docs/api/typescript/index.html` のような深い link も同じ扱いになる。

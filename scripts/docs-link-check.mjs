@@ -277,6 +277,80 @@ function isDirectory(path) {
  * @param {string} docsRoot
  * @returns {Set<string>} 生成先 directory の絶対 path
  */
+/**
+ * path が `docs/` の中に収まるかを、解決できる範囲まで実体で確かめる。
+ *
+ * `realpathSync` を full path に 1 度だけ呼ぶ形では守れない。生成前は実体が無いのが
+ * 正常なので失敗を字面に倒す必要があり、その退路を使えば **外を指す親 symlink の
+ * 配下** / dangling / 循環 が全て素通りする (4 形とも実測で再現した)。
+ *
+ * 存在する ancestor までを canonical にし、残りの未生成 suffix だけ字面で継ぐ。
+ * 途中の解決が ENOENT 以外 (循環 / 権限) で失敗したら通さない = 判定できないものを
+ * 「中にある」 側に倒さない。
+ */
+function isInsideDocs(docsRoot, target) {
+  let canonicalDocsRoot;
+  try {
+    canonicalDocsRoot = realpathSync(docsRoot);
+  } catch {
+    return false;
+  }
+
+  const segments = relative(docsRoot, target).split(sep).filter(Boolean);
+  let resolved = canonicalDocsRoot;
+
+  for (const segment of segments) {
+    if (segment === '..') return false;
+    const next = join(resolved, segment);
+
+    // 実体の有無より先に、その名前が symlink かを見る。dangling symlink は
+    // `realpathSync` が未生成と同じ ENOENT を返すため、解決の失敗だけでは
+    // 「まだ無い」 と「外を指す壊れた link」 を区別できない (実測で素通りした)。
+    let link = null;
+    try {
+      link = lstatSync(next);
+    } catch (error) {
+      // ここから先は実体が無い。字面で継いで最後に境界だけ見る。
+      if (error?.code === 'ENOENT') {
+        resolved = next;
+        continue;
+      }
+      return false;
+    }
+    // symlink は解決先を確かめられない限り通さない (dangling / 外向きの両方)。
+    if (link.isSymbolicLink()) {
+      try {
+        resolved = realpathSync(next);
+      } catch {
+        return false;
+      }
+      const fromRootAfterLink = relative(canonicalDocsRoot, resolved);
+      if (fromRootAfterLink === '..' || fromRootAfterLink.startsWith(`..${sep}`)) return false;
+      continue;
+    }
+
+    // ここから下は symlink ではない段。外へ出る手段が無いので、通常は解決も境界検査も
+    // 結果を変えない (上の symlink 分岐を外すと落ちる形が 2 つ増えることを変異試験で
+    // 確認した = この 2 つは symlink 判定に覆われた冗長な防御)。
+    // 判定できない失敗を字面に倒さない意図を残すために置いている。
+    try {
+      resolved = realpathSync(next);
+    } catch (error) {
+      if (error?.code === 'ENOENT') {
+        resolved = next;
+        continue;
+      }
+      // 循環 (ELOOP) / 権限 (EACCES) 等は判定できない。通さない。
+      return false;
+    }
+    const fromRoot = relative(canonicalDocsRoot, resolved);
+    if (fromRoot === '..' || fromRoot.startsWith(`..${sep}`)) return false;
+  }
+
+  const fromRoot = relative(canonicalDocsRoot, resolved);
+  return !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
+}
+
 function collectGeneratedDirectories(docsRoot) {
   const generated = new Set();
 
@@ -294,9 +368,15 @@ function collectGeneratedDirectories(docsRoot) {
         continue;
       }
       if (entry.name !== '.gitignore') continue;
-      // symlink の `.gitignore` は読まない。docs の外に置いた file から生成先を
-      // 宣言できてしまい、任意の dead link を生成物として隠せる (実測で再現した)。
+      // symlink と hardlink の `.gitignore` は読まない。docs の外に置いた file から
+      // 生成先を宣言できてしまい、任意の dead link を生成物として隠せる (実測で再現)。
+      // hardlink は link 数で判定する = 実体が 2 箇所以上から参照されている形。
       if (entry.isSymbolicLink()) continue;
+      try {
+        if (lstatSync(entryPath).nlink > 1) continue;
+      } catch {
+        continue;
+      }
 
       let content;
       try {
@@ -326,16 +406,7 @@ function collectGeneratedDirectories(docsRoot) {
         const target = join(directory, relativeTarget);
         // 宣言先が docs/ の外に出る形は採らない。symlink 経由で外へ向けると、
         // docs の外の path を指す link が生成物として通る (実測で再現した)。
-        // 実体があれば canonical path で、無ければ字面で確かめる (生成前は
-        // 実体が無いのが正常なので、解決できないこと自体は理由にしない)。
-        let canonical = target;
-        try {
-          canonical = realpathSync(target);
-        } catch {
-          // 未生成。字面のまま判定する。
-        }
-        const fromDocs = relative(docsRoot, canonical);
-        if (fromDocs === '..' || fromDocs.startsWith(`..${sep}`)) continue;
+        if (!isInsideDocs(docsRoot, target)) continue;
 
         generated.add(target);
       }
