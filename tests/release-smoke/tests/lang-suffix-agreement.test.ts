@@ -438,10 +438,15 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(offenders, `自前で組む行が残っている:\n${offenders.join('\n')}`).toEqual([]);
   });
 
-  it.each(MIGRATED)('%s の --input-spec 既定が固定 path でない', (skill) => {
+  it.each(MIGRATED)('%s の spec flag 既定が固定 path でない', (skill) => {
     const body = read(`.claude/skills/${skill}/SKILL.md`);
-    const option = body.split('\n').find((line) => line.includes('`--input-spec'));
-    if (option === undefined) return; // 入口 skill と review は --input-spec を持たない
+    // Both spellings. `--spec-path` predates `--input-spec` and five skills
+    // still use it, so looking only for the newer name skipped `kiwa-forge`
+    // and `kiwa-hardhat` entirely (Round 1 F1).
+    const option = body
+      .split('\n')
+      .find((line) => ['`--input-spec', '`--spec-path'].some((flag) => line.includes(flag)));
+    if (option === undefined) return; // 入口 skill と review は spec flag を持たない
     // A hardcoded default is the English path, so `--lang ja` silently points
     // at a file the producer did not write (#1855).
     expect(option, `${skill} の既定が固定 path`).not.toMatch(/省略時は `tests\/spec/);
