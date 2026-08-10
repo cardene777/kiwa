@@ -771,9 +771,9 @@ test('links to generated api output are classified as generated', () => {
   ]);
 });
 
-// 無視対象かどうかと、実在するかは別。gitignore に載っていても実体があれば
-// 通常どおり解決する (生成済みの checkout で検査した時に落とさない)。
-test('an ignored path that actually exists still resolves', () => {
+// 生成先かどうかと、実在するかは別。宣言があっても実体があれば通常どおり解決する
+// (生成済みの checkout で検査した時に落とさない)。
+test('a declared generated directory that actually exists still resolves', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
     const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
@@ -791,15 +791,43 @@ test('an ignored path that actually exists still resolves', () => {
   });
 });
 
-// git を引けない環境では `missing` に倒す。判定できないものを「無視してよい」 側に
-// 倒すと、実際の破れを生成物として見逃す。
-test('a missing path stays missing when git cannot be consulted', () => {
-  // fixture は git repo ではない。`git check-ignore` は 128 を返す。
+// 判定材料は directory の宣言だけ。広い ignore 規則で全ての破れが生成物に化けると、
+// `.gitignore` に 1 行足すだけで検査が空洞化する (実測で再現した)。
+// link は各規則が「もし採用されたら」 一致する形にする。規則と無関係な link だと
+// 判定に届かず、条件を外す変異を素通りさせる (実測で 2 件が捕まらなかった)。
+for (const [label, gitignore, target] of [
+  ['すべてを無視する規則', '*\n', './gone.md'],
+  ['docs 全体を無視する規則', 'docs/\n', './gone.md'],
+  ['glob を含む dir 規則', 'gen-*/\n', './gen-out/page'],
+  ['file を指す規則', 'gone.md\n', './gone.md'],
+  ['否定の規則', '!gone/\n', './gone/page'],
+]) {
+  test(`a broken link is still missing with ${label}`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      writeFileSync(join(docsDirectory, '.gitignore'), gitignore);
+      writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n[消えた](${target})\n`);
+
+      const failures = classifyDocumentLinks({
+        repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
+        scanRoot: join(root, 'docs', 'libraries'),
+      });
+      assert.equal(failures.length, 1, JSON.stringify(failures));
+      assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+    });
+  });
+}
+
+// directory 宣言に対する file link は生成物ではない。`built/` は directory だけを
+// 指すので、`./built.md` が解決しないのは通常の破れ。
+test('a file link is not covered by a directory declaration', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
     const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
-    writeFileSync(join(docsDirectory, '.gitignore'), 'gone/\n');
-    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[消えた](./gone/)\n');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[明示 file](./built.md)\n');
 
     const failures = classifyDocumentLinks({
       repositoryRoot: root,
@@ -808,6 +836,25 @@ test('a missing path stays missing when git cannot be consulted', () => {
     });
     assert.equal(failures.length, 1, JSON.stringify(failures));
     assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+  });
+});
+
+// 宣言した directory の配下も生成物として扱う。typedoc は tree を丸ごと作るため、
+// `docs/api/typescript/index.html` のような深い link も同じ扱いになる。
+test('a path under a declared generated directory is generated', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[深い先](./built/nested/page)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.GENERATED);
   });
 });
 

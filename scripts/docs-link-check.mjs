@@ -3,7 +3,6 @@
 // package を消した PR が索引の link を残す壊れ方を捕まえる (#1803 と #1873 が同じ形で
 // 通過した)。生成物の同期を見る sync-library-doc-links.mjs とは別の関心なので module を
 // 分け、生成 script と test の両方から同じ実装を呼ぶ。
-import { spawnSync } from 'node:child_process';
 import { lstatSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
@@ -260,50 +259,73 @@ function isDirectory(path) {
 }
 
 /**
- * git の無視対象かを引く。生成物 (`docs/api/typescript/` 等) は checkout に無いのが
- * 正常なので、解決しないことを破れとして報告しない。
+ * 生成物として扱う directory を `docs/**\/.gitignore` から集める。
  *
- * 判定材料を `.gitignore` に置くのは、呼出側が target 名を hardcode すると生成先が
- * 増減するたびに手で直すことになり、直し忘れが実際の破れの見逃しか正常の停止に
- * 倒れるため。git に引かせれば実態と一致する。
+ * 生成物 (`docs/api/typescript/` 等) は checkout に無いのが正常なので、解決しない
+ * ことを破れとして報告しない。判定材料を呼出側の hardcode ではなく repo 内の宣言に
+ * 置くのは、生成先が増減するたびに手で直すことになり、直し忘れが実際の破れの見逃しか
+ * 正常の停止に倒れるため。
  *
- * git を引けない環境 (git 不在 / repo でない) では false を返し、従来どおり
- * `missing` に倒す = 判定できないものを「無視してよい」 側に倒さない。
+ * `git check-ignore` は使わない。ignore 規則は「生成物」 を意味しないので、
+ * `*` や `docs/` のような広い規則を 1 行足すだけで全ての破れが生成物に化ける
+ * (実測で再現した)。ここで見るのは **directory を名指しする entry だけ** で、
+ * `docs/` 配下の `.gitignore` に限る。
+ *
+ * 対象を directory 宣言に絞るのは、生成されるのが typedoc / forge doc の出力 tree
+ * だから。`*.log` のような file pattern は生成物の入口にならない。
+ *
+ * @param {string} docsRoot
+ * @returns {Set<string>} 生成先 directory の絶対 path
  */
-function makeIsGitIgnored(repositoryRoot) {
-  const cache = new Map();
-  return (absolutePath) => {
-    const rel = relative(repositoryRoot, absolutePath);
-    if (rel === '' || rel.startsWith('..')) return false;
-    if (cache.has(rel)) return cache.get(rel);
+function collectGeneratedDirectories(docsRoot) {
+  const generated = new Set();
 
-    let ignored = false;
+  const walk = (directory) => {
+    let entries;
     try {
-      // 末尾 slash あり / なしの両方を引く。`.gitignore` の `typescript/` は dir に
-      // しか一致せず、git は **実在しない path を dir と判定できない** ため、slash 無し
-      // では対象外が返る (実測)。生成物は存在しない時に判定するので slash 付きが要る。
-      //
-      // `--no-index` は index に載っている path でも ignore 規則で判定させる。
-      // `-q` は出力を捨てて exit code だけを見る (0 = 無視対象、1 = 対象外、
-      // それ以外 (128 等) は判定不能)。
-      for (const candidate of [rel, `${rel}/`]) {
-        const result = spawnSync(
-          'git',
-          ['-C', repositoryRoot, 'check-ignore', '-q', '--no-index', candidate],
-          { encoding: 'utf8' },
-        );
-        if (result.status === 0) {
-          ignored = true;
-          break;
-        }
-      }
+      entries = readdirSync(directory, { withFileTypes: true });
     } catch {
-      // git を起動できない。判定不能として無視対象ではない側に倒す。
+      return;
     }
+    for (const entry of entries) {
+      const entryPath = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+        continue;
+      }
+      if (entry.name !== '.gitignore') continue;
 
-    cache.set(rel, ignored);
-    return ignored;
+      let content;
+      try {
+        content = readFileSync(entryPath, 'utf8');
+      } catch {
+        continue;
+      }
+      for (const rawLine of content.split('\n')) {
+        const line = rawLine.trim();
+        // 空行 / comment は対象外。
+        if (!line) continue;
+        if (line.startsWith('#')) continue;
+        // 否定 (`!`) は「無視しない」 宣言なので生成物を示さない。
+        //
+        // この行と次の glob 除外は **外しても挙動が変わらない** (変異試験で確認)。
+        // `!gone/` や `gen-*/` はそのまま文字列として登録されるだけで、実 path とは
+        // 一致しないため。意図を code に残すために書いており、覆う test は無い。
+        if (line.startsWith('!')) continue;
+        // directory を名指しする entry だけを見る。末尾 slash が dir の目印。
+        if (!line.endsWith('/')) continue;
+        // glob を含む entry は対象を特定できないので採らない。
+        if (/[*?[\]]/.test(line)) continue;
+        // 先頭 slash は「この .gitignore からの相対」 の意味。
+        const relativeTarget = line.replace(/^\//, '').replace(/\/$/, '');
+        if (!relativeTarget || relativeTarget.split('/').includes('..')) continue;
+        generated.add(join(directory, relativeTarget));
+      }
+    }
   };
+
+  walk(docsRoot);
+  return generated;
 }
 
 /**
@@ -345,8 +367,17 @@ const reportLine = ({ file, target }) => `dead link: ${file} -> ${target}`;
  */
 export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   const existsCaseExact = makeExistsCaseExact(repositoryRoot);
-  const isGitIgnored = makeIsGitIgnored(repositoryRoot);
+  const generatedDirectories = collectGeneratedDirectories(docsRoot);
   const found = [];
+
+  /** 生成先 directory 自身か、その配下か。 */
+  const isGenerated = (absolutePath) => {
+    for (const generated of generatedDirectories) {
+      if (absolutePath === generated) return true;
+      if (absolutePath.startsWith(`${generated}${sep}`)) return true;
+    }
+    return false;
+  };
 
   /** 解決すれば null、しなければ LINK_FAILURE のいずれかを返す。 */
   const failureOf = (fromDirectory, target) => {
@@ -406,8 +437,8 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
         continue;
       }
       // 実体が無い時だけ、生成物かを見る。実在する path は上の判定が既に扱っており、
-      // 無視対象かどうかは解決の可否に関係しない。
-      if (insideDocs && isGitIgnored(absolute)) {
+      // 生成先かどうかは解決の可否に関係しない。
+      if (insideDocs && isGenerated(absolute)) {
         worse(LINK_FAILURE.GENERATED);
       }
     }
