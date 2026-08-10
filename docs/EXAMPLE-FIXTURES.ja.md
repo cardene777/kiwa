@@ -38,7 +38,7 @@ e2e only example を理解 / 拡張したい場合は、 `tests/*.spec.ts` を�
 
 ## 関連
 
-- [tests/docs/README.ja.md](../tests/docs/README.ja.md) — skill chain test docs の入口
-- [tests/docs/retrofit-existing-dapp.ja.md](../tests/docs/retrofit-existing-dapp.ja.md) — contract 持ち example の walkthrough
-- [examples/mint-nft/README.ja.md](../examples/mint-nft/README.ja.md) — workbench + 完成形 fixture の参考構造
+- [tests/docs/README.ja.md](https://github.com/cardene777/kiwa/blob/main/tests/docs/README.ja.md) — skill chain test docs の入口
+- [tests/docs/retrofit-existing-dapp.ja.md](https://github.com/cardene777/kiwa/blob/main/tests/docs/retrofit-existing-dapp.ja.md) — contract 持ち example の walkthrough
+- [examples/mint-nft/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.ja.md) — workbench + 完成形 fixture の参考構造
 - [docs/COMPARISON.ja.md](./COMPARISON.ja.md) — kiwa の Synpress / dappwright / wallet-mock との立ち位置

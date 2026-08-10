@@ -105,5 +105,5 @@ kiwa-design skill が出力する 9 column markdown table と一致 — [`/kiwa-
 
 ## 関連
 
-- Package: [`kiwa-test-py`](../../../kiwa-py/README.md)
-- TS 版: [`@kiwa-lab/core`](../../../packages/core/README.md)
+- Package: [`kiwa-test-py`](https://github.com/cardene777/kiwa/blob/main/kiwa-py/README.md)
+- TS 版: [`@kiwa-lab/core`](https://github.com/cardene777/kiwa/blob/main/packages/core/README.md)

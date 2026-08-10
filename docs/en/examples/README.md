@@ -19,9 +19,9 @@ For when you want to write contract tests next to Playwright e2e or kick the tir
 
 | Example | What you can try | Lanes |
 |---|---|---|
-| [mint-nft](../../../examples/mint-nft/README.md) | ERC721 + ERC2981 royalty / Enumerable / supportsInterface | Playwright + Foundry + Hardhat |
-| [defi-swap](../../../examples/defi-swap/README.md) | ERC20 + 1:1 swap pool + slippage protection + token-specific approval | Playwright + Foundry + Hardhat |
-| [nft-marketplace](../../../examples/nft-marketplace/README.md) | ERC721 + composite marketplace (listing + offer + royalty payout + offer invalidation) | Playwright + Foundry + Hardhat |
+| [mint-nft](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.md) | ERC721 + ERC2981 royalty / Enumerable / supportsInterface | Playwright + Foundry + Hardhat |
+| [defi-swap](https://github.com/cardene777/kiwa/blob/main/examples/defi-swap/README.md) | ERC20 + 1:1 swap pool + slippage protection + token-specific approval | Playwright + Foundry + Hardhat |
+| [nft-marketplace](https://github.com/cardene777/kiwa/blob/main/examples/nft-marketplace/README.md) | ERC721 + composite marketplace (listing + offer + royalty payout + offer invalidation) | Playwright + Foundry + Hardhat |
 
 ## dApp lane (Next.js + wagmi + framework integration)
 
@@ -29,23 +29,23 @@ For exercising the framework-integration flow (`anvil + forge build + forge crea
 
 | Example | What you can try | README |
 |---|---|---|
-| [basic-connect](../../../examples/basic-connect/README.md) | A single inline HTML page for connect / sign / sendTx / EIP-6963 multi-wallet | Ready |
-| [nextjs-wagmi-rainbow](../../../examples/nextjs-wagmi-rainbow/README.md) | Next.js + wagmi + RainbowKit, mint flow through useAccount / useReadContract / useWriteContract | Ready |
-| [nextjs-aa-erc4337](../../../examples/nextjs-aa-erc4337/README.md) | Full ERC-4337 v0.7 Account Abstraction (EntryPoint + Smart Account) | Ready |
-| [nextjs-aa-smart-account](../../../examples/nextjs-aa-smart-account/README.md) | Simplified Smart Account (Paymaster / TokenSpender / guardian / ERC-1271) | Ready |
-| [nextjs-bridge](../../../examples/nextjs-bridge/README.md) | L1 ↔ L2 bridge (two anvils + lock/mint/burn/unlock) | Ready |
-| [nextjs-dao-vote](../../../examples/nextjs-dao-vote/README.md) | DAO vote contract + execute target | Ready |
-| [nextjs-ens-resolver](../../../examples/nextjs-ens-resolver/README.md) | ENS-style name → address resolver | Ready |
-| [nextjs-erc1155-game](../../../examples/nextjs-erc1155-game/README.md) | ERC1155 game items (inventory / burn) | Ready |
-| [nextjs-event-history](../../../examples/nextjs-event-history/README.md) | Event emit / getLogs / history rendering | Ready |
-| [nextjs-lending](../../../examples/nextjs-lending/README.md) | Lending pool + price oracle + liquidation | Ready |
-| [nextjs-multi-chain](../../../examples/nextjs-multi-chain/README.md) | 3-chain anvil cluster + chain switch | Ready |
-| [nextjs-permit-swap](../../../examples/nextjs-permit-swap/README.md) | EIP-2612 permit + gasless swap | Ready |
-| [nextjs-staking](../../../examples/nextjs-staking/README.md) | Staking + reward accrual + withdraw | Ready |
-| [nextjs-token-gating](../../../examples/nextjs-token-gating/README.md) | Gated content + timed grant (F-1 wave 1 Hardhat lane) | Ready |
-| [nextjs-vesting](../../../examples/nextjs-vesting/README.md) | Token vesting schedule + cliff / linear claim | Ready |
-| [nextjs-zk-verifier](../../../examples/nextjs-zk-verifier/README.md) | zk-proof commitment / range verifier | Ready |
-| [vite-react-wagmi](../../../examples/vite-react-wagmi/README.md) | Vite 5 + React 18 + wagmi v2 SPA | Ready |
+| [basic-connect](https://github.com/cardene777/kiwa/blob/main/examples/basic-connect/README.md) | A single inline HTML page for connect / sign / sendTx / EIP-6963 multi-wallet | Ready |
+| [nextjs-wagmi-rainbow](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.md) | Next.js + wagmi + RainbowKit, mint flow through useAccount / useReadContract / useWriteContract | Ready |
+| [nextjs-aa-erc4337](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-aa-erc4337/README.md) | Full ERC-4337 v0.7 Account Abstraction (EntryPoint + Smart Account) | Ready |
+| [nextjs-aa-smart-account](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-aa-smart-account/README.md) | Simplified Smart Account (Paymaster / TokenSpender / guardian / ERC-1271) | Ready |
+| [nextjs-bridge](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-bridge/README.md) | L1 ↔ L2 bridge (two anvils + lock/mint/burn/unlock) | Ready |
+| [nextjs-dao-vote](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-dao-vote/README.md) | DAO vote contract + execute target | Ready |
+| [nextjs-ens-resolver](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-ens-resolver/README.md) | ENS-style name → address resolver | Ready |
+| [nextjs-erc1155-game](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-erc1155-game/README.md) | ERC1155 game items (inventory / burn) | Ready |
+| [nextjs-event-history](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-event-history/README.md) | Event emit / getLogs / history rendering | Ready |
+| [nextjs-lending](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-lending/README.md) | Lending pool + price oracle + liquidation | Ready |
+| [nextjs-multi-chain](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-multi-chain/README.md) | 3-chain anvil cluster + chain switch | Ready |
+| [nextjs-permit-swap](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-permit-swap/README.md) | EIP-2612 permit + gasless swap | Ready |
+| [nextjs-staking](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-staking/README.md) | Staking + reward accrual + withdraw | Ready |
+| [nextjs-token-gating](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-token-gating/README.md) | Gated content + timed grant (F-1 wave 1 Hardhat lane) | Ready |
+| [nextjs-vesting](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-vesting/README.md) | Token vesting schedule + cliff / linear claim | Ready |
+| [nextjs-zk-verifier](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-zk-verifier/README.md) | zk-proof commitment / range verifier | Ready |
+| [vite-react-wagmi](https://github.com/cardene777/kiwa/blob/main/examples/vite-react-wagmi/README.md) | Vite 5 + React 18 + wagmi v2 SPA | Ready |
 
 All 20 examples now ship with bilingual READMEs (`README.md` + `README.ja.md`).
 
@@ -53,17 +53,17 @@ All 20 examples now ship with bilingual READMEs (`README.md` + `README.ja.md`).
 
 | Feature you want to try | Recommended example |
 |---|---|
-| Connect / sign / sendTx basics | [basic-connect](../../../examples/basic-connect/README.md) |
-| EIP-6963 multi-wallet | [basic-connect](../../../examples/basic-connect/README.md) |
-| Foundry build → forge create → ABI loading | [mint-nft](../../../examples/mint-nft/README.md) |
-| ERC20 approve + auto swap | [defi-swap](../../../examples/defi-swap/README.md) |
-| Token-specific approval policy / limits | [defi-swap](../../../examples/defi-swap/README.md) |
-| Hardhat `.test.cjs` + 80%+ coverage in front of you | [mint-nft](../../../examples/mint-nft/README.md) / [defi-swap](../../../examples/defi-swap/README.md) / [nft-marketplace](../../../examples/nft-marketplace/README.md) |
-| ERC2981 royalty auto-split | [nft-marketplace](../../../examples/nft-marketplace/README.md) |
-| `time.increase` for deadline expiry | [nft-marketplace](../../../examples/nft-marketplace/README.md) |
-| wagmi `useAccount` / `useReadContract` | [nextjs-wagmi-rainbow](../../../examples/nextjs-wagmi-rainbow/README.md) |
-| Playwright globalSetup + `dappE2eTest` extend | [nextjs-wagmi-rainbow](../../../examples/nextjs-wagmi-rainbow/README.md) |
-| Mirror of `kiwa init --with-deploy` output | [nextjs-wagmi-rainbow](../../../examples/nextjs-wagmi-rainbow/README.md) |
+| Connect / sign / sendTx basics | [basic-connect](https://github.com/cardene777/kiwa/blob/main/examples/basic-connect/README.md) |
+| EIP-6963 multi-wallet | [basic-connect](https://github.com/cardene777/kiwa/blob/main/examples/basic-connect/README.md) |
+| Foundry build → forge create → ABI loading | [mint-nft](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.md) |
+| ERC20 approve + auto swap | [defi-swap](https://github.com/cardene777/kiwa/blob/main/examples/defi-swap/README.md) |
+| Token-specific approval policy / limits | [defi-swap](https://github.com/cardene777/kiwa/blob/main/examples/defi-swap/README.md) |
+| Hardhat `.test.cjs` + 80%+ coverage in front of you | [mint-nft](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.md) / [defi-swap](https://github.com/cardene777/kiwa/blob/main/examples/defi-swap/README.md) / [nft-marketplace](https://github.com/cardene777/kiwa/blob/main/examples/nft-marketplace/README.md) |
+| ERC2981 royalty auto-split | [nft-marketplace](https://github.com/cardene777/kiwa/blob/main/examples/nft-marketplace/README.md) |
+| `time.increase` for deadline expiry | [nft-marketplace](https://github.com/cardene777/kiwa/blob/main/examples/nft-marketplace/README.md) |
+| wagmi `useAccount` / `useReadContract` | [nextjs-wagmi-rainbow](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.md) |
+| Playwright globalSetup + `dappE2eTest` extend | [nextjs-wagmi-rainbow](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.md) |
+| Mirror of `kiwa init --with-deploy` output | [nextjs-wagmi-rainbow](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.md) |
 
 ## Related docs
 

@@ -30,7 +30,7 @@ What to watch for.
 - Sign click → `personal_sign` → viem `verifyMessage` round-trip
 - `dappE2e.waitForRpcIdle()` drains pending RPCs before assertions
 
-More in [examples/basic-connect/README.md](../../../examples/basic-connect/README.md).
+More in [examples/basic-connect/README.md](https://github.com/cardene777/kiwa/blob/main/examples/basic-connect/README.md).
 
 ## Stage 2 — mint-nft (~10 min)
 
@@ -58,7 +58,7 @@ What to watch for.
 - Hardhat coverage reports four metrics — Stmts / Branch / Funcs / Lines
 - `forge create` deploy wired into the Playwright fixture
 
-More in [examples/mint-nft/README.md](../../../examples/mint-nft/README.md).
+More in [examples/mint-nft/README.md](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.md).
 
 ## Stage 3 — defi-swap (~15 min)
 
@@ -84,7 +84,7 @@ What to watch for.
 - Liquidity overflow returns `InsufficientLiquidity` with arg info
 - `expectBalanceChange` helper writes balance-delta assertions
 
-More in [examples/defi-swap/README.md](../../../examples/defi-swap/README.md).
+More in [examples/defi-swap/README.md](https://github.com/cardene777/kiwa/blob/main/examples/defi-swap/README.md).
 
 ## Stage 4 — nextjs-wagmi-rainbow (~15 min)
 
@@ -111,7 +111,7 @@ What to watch for.
 
 `kiwa init --with-deploy <foundry-path>` produces the same four-file shape (CLI option in PR #195).
 
-More in [examples/nextjs-wagmi-rainbow/README.md](../../../examples/nextjs-wagmi-rainbow/README.md).
+More in [examples/nextjs-wagmi-rainbow/README.md](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.md).
 
 ## Stage 5 — nft-marketplace (~20 min)
 
@@ -138,7 +138,7 @@ What to watch for.
 - Hardhat `time.increase` lets you trip `OfferExpired` past the deadline
 - Multi-account test pattern across four wallets
 
-More in [examples/nft-marketplace/README.md](../../../examples/nft-marketplace/README.md).
+More in [examples/nft-marketplace/README.md](https://github.com/cardene777/kiwa/blob/main/examples/nft-marketplace/README.md).
 
 ## Where to go next
 

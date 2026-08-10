@@ -105,5 +105,5 @@ Same 9-column markdown table the kiwa-design skill produces — see [`/kiwa-desi
 
 ## Related
 
-- Package: [`kiwa-test-py`](../../../kiwa-py/README.md)
-- TypeScript counterpart: [`@kiwa-lab/core`](../../../packages/core/README.md)
+- Package: [`kiwa-test-py`](https://github.com/cardene777/kiwa/blob/main/kiwa-py/README.md)
+- TypeScript counterpart: [`@kiwa-lab/core`](https://github.com/cardene777/kiwa/blob/main/packages/core/README.md)

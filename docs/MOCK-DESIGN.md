@@ -176,5 +176,5 @@ Phases are sequenced based on user-base size, not difficulty. WalletConnect v2 s
 ## See also
 
 - [`docs/COMPARISON.md`](./COMPARISON.md) — How kiwa compares with Synpress / wallet-mock
-- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 9 false-positive patterns + self-check
 - [`docs/en/cookbook/smart-wallet-aa.md`](./en/cookbook/smart-wallet-aa.md) — Existing AA (ERC-4337) test pattern

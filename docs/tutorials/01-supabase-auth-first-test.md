@@ -96,4 +96,4 @@ You should see one passing test in under 500ms.
 ## Next steps
 
 - Try [RabbitMQ DLX test recipe](./02-rabbitmq-dlx-recipe.md) for the queue side.
-- The Supabase advanced adapter ([`setupSupabaseAdvancedEnv`](../../packages/auth/README.md)) adds RLS + MFA + SSO + SIWE.
+- The Supabase advanced adapter ([`setupSupabaseAdvancedEnv`](https://github.com/cardene777/kiwa/blob/main/packages/auth/README.md)) adds RLS + MFA + SSO + SIWE.

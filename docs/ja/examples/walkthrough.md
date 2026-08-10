@@ -30,7 +30,7 @@ pnpm -F examples-basic-connect test
 - Sign button click → `personal_sign` → viem `verifyMessage` で検証
 - `dappE2e.waitForRpcIdle()` が pending RPC を待ってから assertion が走る pattern
 
-詳細は [examples/basic-connect/README.ja.md](../../../examples/basic-connect/README.ja.md)。
+詳細は [examples/basic-connect/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/basic-connect/README.ja.md)。
 
 ## Stage 2 — mint-nft (約 10 分)
 
@@ -58,7 +58,7 @@ pnpm -F examples-mint-nft test:hardhat:coverage
 - Hardhat coverage で Stmts / Branch / Funcs / Lines の 4 metric が出る
 - `forge create` 経由の deploy が Playwright fixture と組み合わせて動く
 
-詳細は [examples/mint-nft/README.ja.md](../../../examples/mint-nft/README.ja.md)。
+詳細は [examples/mint-nft/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/mint-nft/README.ja.md)。
 
 ## Stage 3 — defi-swap (約 15 分)
 
@@ -84,7 +84,7 @@ pnpm -F examples-defi-swap test:hardhat:coverage
 - pool 流動性超過時の InsufficientLiquidity が引数情報付きで返る
 - `expectBalanceChange` helper で balance 差分 assertion が書ける
 
-詳細は [examples/defi-swap/README.ja.md](../../../examples/defi-swap/README.ja.md)。
+詳細は [examples/defi-swap/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/defi-swap/README.ja.md)。
 
 ## Stage 4 — nextjs-wagmi-rainbow (約 15 分)
 
@@ -111,7 +111,7 @@ pnpm -F examples-nextjs-wagmi-rainbow test
 
 `kiwa init --with-deploy <foundry-path>` で同じ 4 file が自動生成される (CLI option PR #195)。
 
-詳細は [examples/nextjs-wagmi-rainbow/README.ja.md](../../../examples/nextjs-wagmi-rainbow/README.ja.md)。
+詳細は [examples/nextjs-wagmi-rainbow/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.ja.md)。
 
 ## Stage 5 — nft-marketplace (約 20 分)
 
@@ -138,7 +138,7 @@ pnpm -F examples-nft-marketplace test:hardhat:coverage
 - Hardhat `time.increase` で deadline 過ぎた offer を `OfferExpired` で revert
 - 4 wallet の multi-account test pattern
 
-詳細は [examples/nft-marketplace/README.ja.md](../../../examples/nft-marketplace/README.ja.md)。
+詳細は [examples/nft-marketplace/README.ja.md](https://github.com/cardene777/kiwa/blob/main/examples/nft-marketplace/README.ja.md)。
 
 ## 次に試す方向
 

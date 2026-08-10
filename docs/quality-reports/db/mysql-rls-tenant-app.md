@@ -1,7 +1,7 @@
 # MySQL RLS + Multi-Tenant SaaS — Quality Report (v1.26-3)
 
-Dogfood: [`examples/dogfood-mysql-rls-tenant-app`](../../../examples/dogfood-mysql-rls-tenant-app/).
-Package under exercise: [`@kiwa-lab/orm`](../../../packages/orm/) (v0.9)
+Dogfood: [`examples/dogfood-mysql-rls-tenant-app`](https://github.com/cardene777/kiwa/tree/main/examples/dogfood-mysql-rls-tenant-app).
+Package under exercise: [`@kiwa-lab/orm`](https://github.com/cardene777/kiwa/tree/main/packages/orm) (v0.9)
 RLS axis.
 
 ## Scope

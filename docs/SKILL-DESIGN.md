@@ -221,5 +221,5 @@ Phases are sequenced D → A → B style: spec → most valuable skill (Layer 1)
 ## See also
 
 - [`docs/MOCK-DESIGN.md`](./MOCK-DESIGN.md) — Wallet / SDK mock fidelity spec (related concept for "what to fake")
-- [`.claude/skills/kiwa-play/SKILL.md`](../.claude/skills/kiwa-play/SKILL.md) — Existing e2e skill that already follows part of this flow
-- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — Self-check checklist for false positives
+- [`.claude/skills/kiwa-play/SKILL.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-play/SKILL.md) — Existing e2e skill that already follows part of this flow
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — Self-check checklist for false positives

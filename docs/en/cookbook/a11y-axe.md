@@ -93,5 +93,5 @@ const results = await runAxe({
 
 ## Related
 
-- Package: [`@kiwa-lab/a11y`](../../../packages/a11y/README.md)
+- Package: [`@kiwa-lab/a11y`](https://github.com/cardene777/kiwa/blob/main/packages/a11y/README.md)
 - axe-core rule catalogue: https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md

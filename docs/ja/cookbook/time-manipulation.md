@@ -92,4 +92,4 @@ test.describe('Vesting', () => {
 ## Related
 
 - [API: waitForChainState](../api/wait-for-chain-state.md)
-- [examples/nextjs-vesting](../../../examples/nextjs-vesting)
+- [examples/nextjs-vesting](https://github.com/cardene777/kiwa/tree/main/examples/nextjs-vesting)

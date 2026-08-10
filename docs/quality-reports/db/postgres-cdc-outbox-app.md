@@ -1,7 +1,7 @@
 # Postgres CDC + Outbox App — Quality Report (v1.26-2)
 
-Dogfood: [`examples/dogfood-postgres-cdc-outbox-app`](../../../examples/dogfood-postgres-cdc-outbox-app/).
-Package under exercise: [`@kiwa-lab/orm`](../../../packages/orm/) (v0.9).
+Dogfood: [`examples/dogfood-postgres-cdc-outbox-app`](https://github.com/cardene777/kiwa/tree/main/examples/dogfood-postgres-cdc-outbox-app).
+Package under exercise: [`@kiwa-lab/orm`](https://github.com/cardene777/kiwa/tree/main/packages/orm) (v0.9).
 
 ## Scope
 

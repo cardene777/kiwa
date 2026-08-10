@@ -1,7 +1,7 @@
 # pgvector Vector Search + Hybrid Ranking + Embedding Cache — Quality Report (v1.26-4)
 
-Dogfood: [`examples/dogfood-vector-search-app`](../../../examples/dogfood-vector-search-app/).
-Package under exercise: [`@kiwa-lab/orm`](../../../packages/orm/) (v0.9)
+Dogfood: [`examples/dogfood-vector-search-app`](https://github.com/cardene777/kiwa/tree/main/examples/dogfood-vector-search-app).
+Package under exercise: [`@kiwa-lab/orm`](https://github.com/cardene777/kiwa/tree/main/packages/orm) (v0.9)
 vector-store axis.
 
 ## Scope

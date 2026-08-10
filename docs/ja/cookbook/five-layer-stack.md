@@ -48,6 +48,6 @@ Layer 1 spec は依然として単一 SSOT。 `/kiwa-design --layer all` (or 各
 ## 関連
 
 - [`three-layer-stack.ja.md`](./three-layer-stack.md) — contract 中心 3 layer 並立
-- [`tests/docs/skill-chain-tutorial.ja.md`](../../../tests/docs/skill-chain-tutorial.ja.md) — skill chain full flow
-- [`.claude/skills/kiwa-vitest/SKILL.md`](../../../.claude/skills/kiwa-vitest/SKILL.md) — unit layer skill 仕様
-- [`.claude/skills/kiwa-api/SKILL.md`](../../../.claude/skills/kiwa-api/SKILL.md) — integration layer skill 仕様
+- [`tests/docs/skill-chain-tutorial.ja.md`](https://github.com/cardene777/kiwa/blob/main/tests/docs/skill-chain-tutorial.ja.md) — skill chain full flow
+- [`.claude/skills/kiwa-vitest/SKILL.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-vitest/SKILL.md) — unit layer skill 仕様
+- [`.claude/skills/kiwa-api/SKILL.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-api/SKILL.md) — integration layer skill 仕様

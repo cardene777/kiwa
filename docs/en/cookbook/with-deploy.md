@@ -97,7 +97,7 @@ What happens inside.
 
 `examples/nextjs-wagmi-rainbow` implements the same four-file shape as a working reference. Internally `tests/prepare-env.ts` deploys `MintNft` and exposes `NEXT_PUBLIC_MINT_NFT_ADDRESS` to the Next.js dApp.
 
-See [examples/nextjs-wagmi-rainbow/README.md](../../../examples/nextjs-wagmi-rainbow/README.md) for details.
+See [examples/nextjs-wagmi-rainbow/README.md](https://github.com/cardene777/kiwa/blob/main/examples/nextjs-wagmi-rainbow/README.md) for details.
 
 ## Related
 

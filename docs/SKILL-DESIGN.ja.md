@@ -221,5 +221,5 @@ Phase は D → A → B 段階: 仕様書 → 最も価値ある skill (Layer 1)
 ## 関連
 
 - [`docs/MOCK-DESIGN.md`](./MOCK-DESIGN.md) — wallet / SDK mock 精度仕様 (「何を fake するか」の関連概念)
-- [`.claude/skills/kiwa-play/SKILL.md`](../.claude/skills/kiwa-play/SKILL.md) — 既存 e2e skill (既にこの flow の一部に従っている)
-- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](../.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性 self-check
+- [`.claude/skills/kiwa-play/SKILL.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-play/SKILL.md) — 既存 e2e skill (既にこの flow の一部に従っている)
+- [`.claude/skills/kiwa-play/references/adversarial-pitfalls.md`](https://github.com/cardene777/kiwa/blob/main/.claude/skills/kiwa-play/references/adversarial-pitfalls.md) — 偽陽性 self-check
