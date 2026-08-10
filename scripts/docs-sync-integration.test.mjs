@@ -738,28 +738,77 @@ test('the real docs/libraries tree has no dead links', () => {
 // checker が持つ大文字小文字の厳密判定と repo 境界がその再判定で失われる (実測で
 // case 違いの link が「解決する」 と誤判定され、test が見逃した)。
 //
-// `docs/api/{typescript,solidity}/` は生成物で、checkout に無いのが正常。target を
-// 部分一致で除外すると `./typescript-typo/` のような実際の破れまで見逃すため、
-// 生成される既知の target だけを完全一致で外す。
-const GENERATED_API_TARGETS = new Set([
-  './typescript/',
-  './solidity/',
-  './solidity/dogfood-foundry-dapp/',
-]);
-
+// 生成物 (`docs/api/{typescript,solidity}/`) は checker が `.gitignore` を引いて
+// `generated` に分ける。ここで target 名を列挙して除外すると、判定材料が実態ではなく
+// 人が書いた一覧になり、生成先が増減するたびに手で直すことになる。
 test('no link in docs points at a path that exists nowhere in the repository', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const docsRoot = join(repositoryRoot, 'docs');
 
   const missing = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
     .filter(({ reason }) => reason === LINK_FAILURE.MISSING)
-    .filter(
-      ({ file, target }) =>
-        !(/^docs\/api\/(README|index)\.md$/.test(file) && GENERATED_API_TARGETS.has(target)),
-    )
     .map(({ file, target }) => `${file} -> ${target}`);
 
   assert.deepEqual(missing, [], missing.join('\n'));
+});
+
+// 生成物への link は `generated` に分類され、`missing` には現れない。分類が消えると
+// 上の test が 4 件の生成物 link で落ちるため、両方向を 1 つの test で押さえる。
+test('links to generated api output are classified as generated', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const docsRoot = join(repositoryRoot, 'docs');
+
+  const generated = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
+    .filter(({ reason }) => reason === LINK_FAILURE.GENERATED)
+    .map(({ file, target }) => `${file} -> ${target}`);
+
+  // 実 repo の `docs/api/.gitignore` が持つ 2 entry から 4 件出る。
+  assert.deepEqual(generated.sort(), [
+    'docs/api/README.md -> ./solidity/',
+    'docs/api/README.md -> ./typescript/',
+    'docs/api/index.md -> ./solidity/dogfood-foundry-dapp/',
+    'docs/api/index.md -> ./typescript/',
+  ]);
+});
+
+// 無視対象かどうかと、実在するかは別。gitignore に載っていても実体があれば
+// 通常どおり解決する (生成済みの checkout で検査した時に落とさない)。
+test('an ignored path that actually exists still resolves', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
+    mkdirSync(join(docsDirectory, 'built'), { recursive: true });
+    writeFileSync(join(docsDirectory, 'built', 'index.md'), '# built\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[生成済み](./built/)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.deepEqual(failures, [], JSON.stringify(failures));
+  });
+});
+
+// git を引けない環境では `missing` に倒す。判定できないものを「無視してよい」 側に
+// 倒すと、実際の破れを生成物として見逃す。
+test('a missing path stays missing when git cannot be consulted', () => {
+  // fixture は git repo ではない。`git check-ignore` は 128 を返す。
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'gone/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[消えた](./gone/)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+  });
 });
 
 // `docs/` の外を相対 link で指すと、公開 site で必ず 404 になる。VitePress は

@@ -3,6 +3,7 @@
 // package を消した PR が索引の link を残す壊れ方を捕まえる (#1803 と #1873 が同じ形で
 // 通過した)。生成物の同期を見る sync-library-doc-links.mjs とは別の関心なので module を
 // 分け、生成 script と test の両方から同じ実装を呼ぶ。
+import { spawnSync } from 'node:child_process';
 import { lstatSync, readdirSync, readFileSync, realpathSync, statSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
@@ -259,6 +260,53 @@ function isDirectory(path) {
 }
 
 /**
+ * git の無視対象かを引く。生成物 (`docs/api/typescript/` 等) は checkout に無いのが
+ * 正常なので、解決しないことを破れとして報告しない。
+ *
+ * 判定材料を `.gitignore` に置くのは、呼出側が target 名を hardcode すると生成先が
+ * 増減するたびに手で直すことになり、直し忘れが実際の破れの見逃しか正常の停止に
+ * 倒れるため。git に引かせれば実態と一致する。
+ *
+ * git を引けない環境 (git 不在 / repo でない) では false を返し、従来どおり
+ * `missing` に倒す = 判定できないものを「無視してよい」 側に倒さない。
+ */
+function makeIsGitIgnored(repositoryRoot) {
+  const cache = new Map();
+  return (absolutePath) => {
+    const rel = relative(repositoryRoot, absolutePath);
+    if (rel === '' || rel.startsWith('..')) return false;
+    if (cache.has(rel)) return cache.get(rel);
+
+    let ignored = false;
+    try {
+      // 末尾 slash あり / なしの両方を引く。`.gitignore` の `typescript/` は dir に
+      // しか一致せず、git は **実在しない path を dir と判定できない** ため、slash 無し
+      // では対象外が返る (実測)。生成物は存在しない時に判定するので slash 付きが要る。
+      //
+      // `--no-index` は index に載っている path でも ignore 規則で判定させる。
+      // `-q` は出力を捨てて exit code だけを見る (0 = 無視対象、1 = 対象外、
+      // それ以外 (128 等) は判定不能)。
+      for (const candidate of [rel, `${rel}/`]) {
+        const result = spawnSync(
+          'git',
+          ['-C', repositoryRoot, 'check-ignore', '-q', '--no-index', candidate],
+          { encoding: 'utf8' },
+        );
+        if (result.status === 0) {
+          ignored = true;
+          break;
+        }
+      }
+    } catch {
+      // git を起動できない。判定不能として無視対象ではない側に倒す。
+    }
+
+    cache.set(rel, ignored);
+    return ignored;
+  };
+}
+
+/**
  * link が解決しない理由。呼出側が「どの壊れ方か」 で絞れるようにする。
  *
  * 文字列だけを返していた間、呼出側が `existsSync` で分類をやり直しており、
@@ -273,6 +321,11 @@ export const LINK_FAILURE = Object.freeze({
   OUTSIDE_DOCS: 'outside-docs',
   /** directory はあるが index.md が無い。公開後 404 になる。 */
   DIRECTORY_WITHOUT_INDEX: 'directory-without-index',
+  /**
+   * git の無視対象を指す。`pnpm docs:api-reference` が生成するため checkout には
+   * 無いのが正常で、破れではない。build 後の公開 site には存在する。
+   */
+  GENERATED: 'generated',
 });
 
 /**
@@ -292,6 +345,7 @@ const reportLine = ({ file, target }) => `dead link: ${file} -> ${target}`;
  */
 export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   const existsCaseExact = makeExistsCaseExact(repositoryRoot);
+  const isGitIgnored = makeIsGitIgnored(repositoryRoot);
   const found = [];
 
   /** 解決すれば null、しなければ LINK_FAILURE のいずれかを返す。 */
@@ -319,11 +373,13 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
     // 見つかった中で最も具体的な失敗理由を返す。
     let failure = LINK_FAILURE.MISSING;
     const worse = (reason) => {
-      // MISSING より OUTSIDE_DOCS、それより DIRECTORY_WITHOUT_INDEX の方が情報が多い。
+      // MISSING より情報が多い理由で上書きする。GENERATED を最上位に置くのは、
+      // 「build すれば在る」 が「どこにも無い」 より確度の高い説明だから。
       const rank = {
         [LINK_FAILURE.MISSING]: 0,
         [LINK_FAILURE.OUTSIDE_DOCS]: 1,
         [LINK_FAILURE.DIRECTORY_WITHOUT_INDEX]: 2,
+        [LINK_FAILURE.GENERATED]: 3,
       };
       if (rank[reason] > rank[failure]) failure = reason;
     };
@@ -347,6 +403,12 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
       }
       if (existsCaseExact(absolute)) {
         worse(insideDocs ? LINK_FAILURE.DIRECTORY_WITHOUT_INDEX : LINK_FAILURE.OUTSIDE_DOCS);
+        continue;
+      }
+      // 実体が無い時だけ、生成物かを見る。実在する path は上の判定が既に扱っており、
+      // 無視対象かどうかは解決の可否に関係しない。
+      if (insideDocs && isGitIgnored(absolute)) {
+        worse(LINK_FAILURE.GENERATED);
       }
     }
     return failure;
