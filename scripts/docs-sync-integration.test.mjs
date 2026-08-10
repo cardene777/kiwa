@@ -83,6 +83,18 @@ function withFixture(body, packageNames = ['sample']) {
   }
 }
 
+/**
+ * 生成先の宣言を受け付ける root (`docs/api`) を作って返す。
+ *
+ * checker は任意の場所の `.gitignore` を信じない = 宣言できるのは generator が
+ * 書き出す root だけ。生成物判定の test はここに fixture を置く。
+ */
+function generatedRoot(root) {
+  const directory = join(root, 'docs', 'api');
+  mkdirSync(directory, { recursive: true });
+  return directory;
+}
+
 /** fixture の中で生成 script を起動する。--write を渡すので、通れば file が変わる。 */
 function runSync(root) {
   return spawnSync(process.execPath, [join(root, 'scripts', 'sync-library-doc-links.mjs'), '--write'], {
@@ -777,7 +789,7 @@ test('links to generated api output are classified as generated', () => {
 test('a declared generated directory that actually exists still resolves', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
-    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    const docsDirectory = generatedRoot(root);
     writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
     mkdirSync(join(docsDirectory, 'built'), { recursive: true });
     writeFileSync(join(docsDirectory, 'built', 'index.md'), '# built\n');
@@ -786,7 +798,7 @@ test('a declared generated directory that actually exists still resolves', () =>
     const failures = classifyDocumentLinks({
       repositoryRoot: root,
       docsRoot: join(root, 'docs'),
-      scanRoot: join(root, 'docs', 'libraries'),
+      scanRoot: join(root, 'docs'),
     });
     assert.deepEqual(failures, [], JSON.stringify(failures));
   });
@@ -806,14 +818,14 @@ for (const [label, gitignore, target] of [
   test(`a broken link is still missing with ${label}`, () => {
     withFixture(({ root, readmePath }) => {
       writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
-      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      const docsDirectory = generatedRoot(root);
       writeFileSync(join(docsDirectory, '.gitignore'), gitignore);
       writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n[消えた](${target})\n`);
 
       const failures = classifyDocumentLinks({
         repositoryRoot: root,
         docsRoot: join(root, 'docs'),
-        scanRoot: join(root, 'docs', 'libraries'),
+        scanRoot: join(root, 'docs'),
       });
       assert.equal(failures.length, 1, JSON.stringify(failures));
       assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -826,14 +838,14 @@ for (const [label, gitignore, target] of [
 test('a file link is not covered by a directory declaration', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
-    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    const docsDirectory = generatedRoot(root);
     writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
     writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[明示 file](./built.md)\n');
 
     const failures = classifyDocumentLinks({
       repositoryRoot: root,
       docsRoot: join(root, 'docs'),
-      scanRoot: join(root, 'docs', 'libraries'),
+      scanRoot: join(root, 'docs'),
     });
     assert.equal(failures.length, 1, JSON.stringify(failures));
     assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -849,14 +861,16 @@ test('a symlinked gitignore does not declare generated directories', () => {
       writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
       writeFileSync(join(outsideDirectory, 'evil-gitignore'), 'gone/\n');
 
-      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      // trusted root に置く。docs/libraries に置くと isTrusted で先に落ち、
+      // 目的の guard (symlink の .gitignore 拒否) に届かない。
+      const docsDirectory = generatedRoot(root);
       symlinkSync(join(outsideDirectory, 'evil-gitignore'), join(docsDirectory, '.gitignore'));
       writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[消えた](./gone/page)\n');
 
       const failures = classifyDocumentLinks({
         repositoryRoot: root,
         docsRoot: join(root, 'docs'),
-        scanRoot: join(root, 'docs', 'libraries'),
+        scanRoot: join(root, 'docs'),
       });
       assert.equal(failures.length, 1, JSON.stringify(failures));
       assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -874,7 +888,9 @@ test('a generated declaration pointing outside docs is not honored', () => {
     mkdirSync(join(root, 'secret'), { recursive: true });
     writeFileSync(join(root, 'secret', 'page.md'), '# secret\n');
 
-    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // trusted root に置く。docs/libraries に置くと isTrusted で先に落ち、
+    // 目的の guard (宣言先の docs 境界) に届かない。
+    const docsDirectory = generatedRoot(root);
     symlinkSync(join(root, 'secret'), join(docsDirectory, 'built'));
     writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
     writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[外](./built/gone)\n');
@@ -882,7 +898,7 @@ test('a generated declaration pointing outside docs is not honored', () => {
     const failures = classifyDocumentLinks({
       repositoryRoot: root,
       docsRoot: join(root, 'docs'),
-      scanRoot: join(root, 'docs', 'libraries'),
+      scanRoot: join(root, 'docs'),
     });
     assert.equal(failures.length, 1, JSON.stringify(failures));
     assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -931,14 +947,14 @@ for (const [label, build] of [
       const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
       try {
         writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
-        const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+        const docsDirectory = generatedRoot(root);
         const target = build({ docsDirectory, outsideDirectory });
         writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n[link](${target})\n`);
 
         const failures = classifyDocumentLinks({
           repositoryRoot: root,
           docsRoot: join(root, 'docs'),
-          scanRoot: join(root, 'docs', 'libraries'),
+          scanRoot: join(root, 'docs'),
         });
         assert.equal(failures.length, 1, JSON.stringify(failures));
         assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
@@ -954,14 +970,14 @@ for (const [label, build] of [
 test('a path under a declared generated directory is generated', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
-    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    const docsDirectory = generatedRoot(root);
     writeFileSync(join(docsDirectory, '.gitignore'), 'built/\n');
     writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[深い先](./built/nested/page)\n');
 
     const failures = classifyDocumentLinks({
       repositoryRoot: root,
       docsRoot: join(root, 'docs'),
-      scanRoot: join(root, 'docs', 'libraries'),
+      scanRoot: join(root, 'docs'),
     });
     assert.equal(failures.length, 1, JSON.stringify(failures));
     assert.equal(failures[0].reason, LINK_FAILURE.GENERATED);
@@ -1107,6 +1123,160 @@ test('no file in docs uses link syntax the checker cannot parse', () => {
     scanRoot: join(repositoryRoot, 'docs'),
   });
   assert.deepEqual(found, [], found.join('\n'));
+});
+
+// 生成 script の走査範囲が `docs/` 全体であること。`docs/libraries` に絞っていると、
+// その外の破れが gate を通り抜ける。統合 test は既に `docs/` 全体を見ているので、
+// 範囲を揃えないと同じ検査が 2 経路で食い違う。
+test('the generator scans the whole docs tree, not just libraries', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    // `docs/libraries` の外に破れを置く。絞った範囲では検出されない位置。
+    const outsideLibraries = join(root, 'docs', 'guides');
+    mkdirSync(outsideLibraries, { recursive: true });
+    writeFileSync(join(outsideLibraries, 'index.md'), '# guides\n\n[消えた](./gone.md)\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, 'libraries の外の破れも止める');
+    assert.match(result.stderr, /docs\/guides\/index\.md -> \.\/gone\.md/);
+  });
+});
+
+// 生成先の宣言を受け付けるのは generator が書き出す root だけ。任意の場所を信じると、
+// `.gitignore` に 1 行足して該当 dir を参照するだけで本物の欠損 link を隠せる
+// (実測で再現した)。
+test('a generated declaration outside the trusted root is not honored', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    // `docs/api` の外に宣言を置く。
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, '.gitignore'), 'gone/\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[本物の欠損](./gone/page)\n');
+
+    const failures = classifyDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs'),
+    });
+    assert.equal(failures.length, 1, JSON.stringify(failures));
+    assert.equal(failures[0].reason, LINK_FAILURE.MISSING);
+  });
+});
+
+// symlink の `.md` は読まない。docs に repo 外を指す symlink を置くだけで、その中身の
+// link destination が dead link の報告として stderr に出る (実測で再現した)。
+test('a symlinked markdown source is not read', () => {
+  withFixture(({ root, readmePath }) => {
+    const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+    try {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      writeFileSync(
+        join(outsideDirectory, 'secret.md'),
+        '# secret\n\n[漏洩](/leaked-target-name)\n',
+      );
+
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      symlinkSync(join(outsideDirectory, 'secret.md'), join(docsDirectory, 'external.md'));
+
+      // 中身は読まないので、外部 file の link destination は報告に出ない。
+      const dead = deadDocumentLinks({
+        repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
+        scanRoot: join(root, 'docs'),
+      });
+      assert.deepEqual(dead, [], dead.join('\n'));
+
+      // ただし読まなかったことは黙らない。検査できない file として報告する。
+      const found = unsupportedLinkSyntax({
+        repositoryRoot: root,
+        scanRoot: join(root, 'docs'),
+      });
+      assert.equal(found.length, 1, found.join('\n'));
+      assert.match(found[0], /symlink の markdown/);
+      assert.doesNotMatch(found[0], /leaked-target-name/, '中身は報告に出さない');
+    } finally {
+      rmSync(outsideDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+// repo の外を指す symlink directory へは降りないので、配下の markdown が 1 件も
+// 検査されない。黙って通すと、その配下だけで壊れる link が gate を通る。
+test('a symlinked source directory pointing outside the repo is reported as unchecked', () => {
+  withFixture(({ root, readmePath }) => {
+    const outsideDirectory = realpathSync(mkdtempSync(join(tmpdir(), 'docs-link-outside-')));
+    try {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      writeFileSync(join(outsideDirectory, 'page.md'), '# page\n\n[壊れた](./gone)\n');
+      symlinkSync(outsideDirectory, join(root, 'docs', 'alias'));
+
+      const found = unsupportedLinkSyntax({
+        repositoryRoot: root,
+        scanRoot: join(root, 'docs'),
+      });
+      assert.equal(found.length, 1, found.join('\n'));
+      assert.match(found[0], /symlink の directory/);
+    } finally {
+      rmSync(outsideDirectory, { recursive: true, force: true });
+    }
+  });
+});
+
+// repo の中に留まる symlink directory は報告しない。`docs/public/images` のように
+// 実運用で使われており、実体側が同じ repo にあるので検査から漏れない。
+test('a symlinked source directory inside the repo is not reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const real = join(root, 'docs', 'real');
+    mkdirSync(real, { recursive: true });
+    writeFileSync(join(real, 'page.md'), '# page\n\n[隣](./sibling)\n');
+    writeFileSync(join(real, 'sibling.md'), '# sibling\n');
+    symlinkSync(real, join(root, 'docs', 'alias'));
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      scanRoot: join(root, 'docs'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
+  });
+});
+
+// `.vitepress` は VitePress の作業領域で source markdown を持たない。降りると
+// build 出力を走査することになり、生成済み checkout かどうかで cost が変わる。
+test('the vitepress work directory is not walked', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    // build 出力に見立てた壊れた link。降りれば検出され、降りなければ検出されない。
+    const distDirectory = join(root, 'docs', '.vitepress', 'dist');
+    mkdirSync(distDirectory, { recursive: true });
+    writeFileSync(join(distDirectory, 'page.md'), '# dist\n\n[壊れた](./gone.md)\n');
+
+    const dead = deadDocumentLinks({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs'),
+    });
+    assert.deepEqual(dead, [], dead.join('\n'));
+  });
+});
+
+// 生成物は build すれば在るので、生成 script を止めない。止めると checkout 直後は
+// 常に落ちる gate になる (実測で `docs/` 全体へ広げた時に 4 件で止まった)。
+test('generated targets do not stop the generator', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const apiDirectory = join(root, 'docs', 'api');
+    mkdirSync(apiDirectory, { recursive: true });
+    writeFileSync(join(apiDirectory, '.gitignore'), 'typescript/\n');
+    writeFileSync(join(apiDirectory, 'index.md'), '# api\n\n[生成物](./typescript/)\n');
+
+    const result = runSync(root);
+    assert.equal(result.status, 0, result.stderr);
+  });
 });
 
 // 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、

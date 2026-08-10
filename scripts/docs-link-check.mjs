@@ -114,6 +114,51 @@ function isCovered(spans, index) {
 }
 
 /**
+ * 走査から外す directory 名。
+ *
+ * `.vitepress` は VitePress の作業領域で、`cache/` と `dist/` に build 出力が入る。
+ * source markdown は 1 件も無い一方 4065 entry あり、走査 cost の 6 割以上を占める
+ * (実測)。生成済み checkout かどうかで cost が変わるのも避けたい。
+ *
+ * config (`config.mts`) と theme は `.md` ではないので、除いても検査対象は減らない。
+ */
+const SKIPPED_DIRECTORIES = new Set(['.vitepress', 'node_modules']);
+
+/** その directory へ降りるか。 */
+function shouldWalk(entry) {
+  return entry.isDirectory() && !entry.isSymbolicLink() && !SKIPPED_DIRECTORIES.has(entry.name);
+}
+
+/** symlink の解決先が repo の中に留まるか。解決できない形は「外」 に倒す。 */
+function isInsideRepository(repositoryRoot, path) {
+  let canonical;
+  try {
+    canonical = realpathSync(path);
+  } catch {
+    return false;
+  }
+  const fromRoot = relative(repositoryRoot, canonical);
+  return !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
+}
+
+/**
+ * source として読んでよい markdown か。
+ *
+ * symlink の `.md` は読まない。docs に repo 外を指す symlink を置くだけで、その中身の
+ * link destination が dead link の報告として stderr に出る = 走査範囲を `docs/` 全体へ
+ * 広げた後は、細工した checkout が runner 上の読める file を読ませて内容由来の文字列を
+ * log へ出せる (実測で再現した)。
+ *
+ * repo 内を指す symlink も読まない。alias 側の相対 link は実体側と解決先が変わるため
+ * (`real/page.md` の `./sibling` は `alias/page.md` からは解決しない)、実体を読んで
+ * 済ませることはできない。読めない以上、黙って通さず「検査できない」 と報告する
+ * (§ symlinkedSourceFiles)。
+ */
+function isReadableSource(entry) {
+  return entry.isFile() && !entry.isSymbolicLink();
+}
+
+/**
  * markdown と HTML の link destination を列挙する。
  *
  * 覆うのは inline link (素の形と angle-bracket) と `<img src>` の 2 つ。それ以外の
@@ -183,11 +228,31 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
   const walk = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
+      // symlink は種別より先に見る。`readdirSync` の Dirent は symlink に対して
+      // `isDirectory()` も `isFile()` も false を返すため (実測)、種別で分岐した後では
+      // どちらの枝にも入らず素通りする。
+      if (entry.isSymbolicLink()) {
+        // repo の外を指す symlink だけを報告する。中身を読まない以上その配下の link は
+        // 1 つも検査されず、黙って通すと alias 経路だけで壊れる link が gate を通る。
+        //
+        // repo 内に留まる symlink は報告しない。`docs/public/images` のように実運用で
+        // 使われており、実体側が同じ repo の中にあるので検査から漏れない。
+        if (isInsideRepository(repositoryRoot, entryPath)) continue;
+        const kind = isDirectory(entryPath) ? 'directory' : 'markdown';
+        // markdown でない file symlink (画像等) は link を持たないので報告しない。
+        if (kind === 'directory' || entry.name.endsWith('.md')) {
+          found.push(
+            `unsupported link syntax (symlink の ${kind}): ${relative(repositoryRoot, entryPath)}`,
+          );
+        }
+        continue;
+      }
       if (entry.isDirectory()) {
-        walk(entryPath);
+        if (shouldWalk(entry)) walk(entryPath);
         continue;
       }
       if (!entry.name.endsWith('.md')) continue;
+      if (!isReadableSource(entry)) continue;
       const content = stripCode(readFileSync(entryPath, 'utf8'));
       for (const label of reasonsFor(content)) {
         found.push(`unsupported link syntax (${label}): ${relative(repositoryRoot, entryPath)}`);
@@ -351,8 +416,24 @@ function isInsideDocs(docsRoot, target) {
   return !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
 }
 
+/**
+ * 生成先の宣言を受け付ける directory。
+ *
+ * 任意の `docs/**\/.gitignore` を信じると、`gone/` の 1 行を足して `./gone/page` を
+ * 参照するだけで本物の欠損 link を gate から隠せる (実測で再現した)。宣言できる場所を
+ * 実際の generator が書き出す root に限る。
+ *
+ * 現状の generator は `/docs-generate` skill で、`docs/api/typescript` と
+ * `docs/api/solidity` に出力する。生成先が増えたらここに 1 行足す = 宣言の場所を
+ * 増やす判断が review を通る形にする。
+ */
+const GENERATED_DECLARATION_ROOTS = ['api'];
+
 function collectGeneratedDirectories(docsRoot) {
   const generated = new Set();
+  const trustedRoots = GENERATED_DECLARATION_ROOTS.map((name) => join(docsRoot, name));
+  const isTrusted = (directory) =>
+    trustedRoots.some((root) => directory === root || directory.startsWith(`${root}${sep}`));
 
   const walk = (directory) => {
     let entries;
@@ -364,10 +445,13 @@ function collectGeneratedDirectories(docsRoot) {
     for (const entry of entries) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) {
-        walk(entryPath);
+        if (shouldWalk(entry)) walk(entryPath);
         continue;
       }
       if (entry.name !== '.gitignore') continue;
+      // 宣言を受け付けるのは generator が書き出す root だけ。任意の場所を信じると
+      // 1 行足すだけで欠損 link を隠せる。
+      if (!isTrusted(directory)) continue;
       // symlink と hardlink の `.gitignore` は読まない。docs の外に置いた file から
       // 生成先を宣言できてしまい、任意の dead link を生成物として隠せる (実測で再現)。
       // hardlink は link 数で判定する = 実体が 2 箇所以上から参照されている形。
@@ -538,10 +622,11 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) {
-        walk(entryPath);
+        if (shouldWalk(entry)) walk(entryPath);
         continue;
       }
       if (!entry.name.endsWith('.md')) continue;
+      if (!isReadableSource(entry)) continue;
 
       const content = readFileSync(entryPath, 'utf8');
       for (const target of linkTargets(content)) {
@@ -569,14 +654,20 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
 }
 
 /**
- * 解決しない link を 1 行の説明文で列挙する。
+ * 破れた link を 1 行の説明文で列挙する。
  *
  * 理由で絞りたい呼出側は `classifyDocumentLinks` を使う。こちらは生成 script が
  * stderr へ出すための整形版。
  *
+ * `generated` は除く。build すれば在るものを「破れ」 として止めると、checkout 直後は
+ * 常に落ちる gate になる (実測で `docs/` 全体へ広げた時に 4 件で止まった)。
+ * 生成物かどうかを確かめたい呼出側は `classifyDocumentLinks` で理由を見る。
+ *
  * @param {{repositoryRoot: string, docsRoot: string, scanRoot: string}} roots
- * @returns {string[]} 解決しない link の説明行。空配列なら破れ無し。
+ * @returns {string[]} 破れた link の説明行。空配列なら破れ無し。
  */
 export function deadDocumentLinks(roots) {
-  return classifyDocumentLinks(roots).map(reportLine);
+  return classifyDocumentLinks(roots)
+    .filter(({ reason }) => reason !== LINK_FAILURE.GENERATED)
+    .map(reportLine);
 }
