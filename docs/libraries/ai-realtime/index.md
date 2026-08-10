@@ -8,7 +8,7 @@ AI とリアルタイムカテゴリは、非決定的な応答、外部ツー�
 
 ## 検索と配信を確認する
 
-keyword と filter を含む検索結果は [Search](./search/) を使います。WebSocket や realtime channel の接続、再接続、presence は [Realtime](./realtime/) を参照してください。Kafka、NATS、schema registry。画像比較と visual regression は [Visual](./visual/) を選びます。
+keyword と filter を含む検索結果は [Search](./search/) を使います。WebSocket や realtime channel の接続、再接続、presence は [Realtime](./realtime/) を参照してください。
 
 ## 実サービスへ戻す判断
 

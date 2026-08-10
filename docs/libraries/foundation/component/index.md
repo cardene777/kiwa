@@ -18,4 +18,4 @@ story の args からどの状態を作るか、操作で何が変わるか、�
 
 一つの story から始め、まず args が canvas に反映されることを確認します。次に play function を通して操作の成否を assertion し、a11y heuristic が検出する範囲を理解します。最後に同じ markup を baseline と比較し、変更されたときだけ review します。いずれも test ごとに registry と visual mock を作り直すと、別の story の listener や baseline が混ざりません。
 
-[Quickstart](./quickstart) では最小の story test を実行します。[使い方](./how-to) では play、a11y、visual review を同じ test file で扱います。公開 API と mock の制約は [リファレンス](./reference) にまとめています。実 framework の部品を確認する場合は [ui](../ui/)、仕様とのレイアウト差分は [design check](../design-check/)、ページ全体の browser 挙動は [e2e](../e2e/) を参照してください。
+[Quickstart](./quickstart) では最小の story test を実行します。[使い方](./how-to) では play、a11y、visual review を同じ test file で扱います。公開 API と mock の制約は [リファレンス](./reference) にまとめています。実 framework の部品を確認する場合は [ui](../ui/)、ページ全体の browser 挙動は [e2e](../e2e/) を参照してください。
