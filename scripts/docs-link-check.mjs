@@ -43,11 +43,13 @@ function stripCode(content) {
   return stripped.join('\n').replace(/`[^`\n]*`/g, '');
 }
 
-// inline と image。angle-bracket destination と、3 形の title (`"..."` / `'...'` /
-// `(...)`) を許す。title 記法を 1 形しか見ないと、別記法で書いた壊れた link が通る。
-const INLINE_LINK =
-  /!?\[[^\]]*\]\(\s*(?:<([^>\n]*)>|([^)\s]+))(?:\s+(?:"[^"]*"|'[^']*'|\([^)]*\)))?\s*\)/g;
-// 生 HTML の img。VitePress は markdown 中の HTML をそのまま出す。
+// inline link と image。destination は素の形と angle-bracket の 2 つ。
+//
+// title (`"..."` / `'...'` / `(...)`) は対象 corpus に 1 件も無いため覆わない。
+// 覆おうとした間、正規表現解析の欠陥が review 3 round 続けて出た一方、実際に壊れる
+// link は素の inline link と img だけだった。
+const INLINE_LINK = /!?\[[^\]]*\]\(\s*(?:<([^>\n]*)>|([^)\s]+))\s*\)/g;
+// 生 HTML。VitePress は markdown 中の HTML をそのまま出す。
 //
 // tag 全体を取ってから属性を読む 2 段にする。1 本の正規表現で要素名と属性名を並べると
 // 属性名の境界が緩くなって `data-src` を `src` として拾い、`[^>]*?` が引用区間の `>` で
@@ -55,24 +57,22 @@ const INLINE_LINK =
 //
 // tag の中身は引用区間を先に食うので、属性値に `>` があっても tag の終端を取り違えない。
 const IMG_TAG = /<img\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+const A_TAG = /<a\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
 const HTML_ATTRIBUTE =
   /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
 
-/**
- * 本 checker が解釈できない link 記法。
- *
- * 対象 corpus (docs/libraries) に 1 件も無いことを確かめた上で対応を外している。
- * 覆おうとした間、正規表現解析の欠陥が review 3 round 続けて出た一方、実際に壊れる
- * link は素の inline link と img だけだった。
- *
- * 外した代わりに、これらが現れたら test が落ちる (§ unsupportedLinkSyntax)。黙って
- * 見逃す状態は作らない。現れた時に checker を広げるか記法を直すかを選ぶ。
- */
-const UNSUPPORTED_SYNTAX = [
-  { label: 'title 付き inline link', pattern: /\]\([^)\s]+\s+["'(]/ },
-  { label: 'reference 定義', pattern: /^ {0,3}\[[^\]]+\]:\s*\S/m },
-  { label: '生 HTML の a タグ', pattern: /<a\b[^>]*\bhref\s*=/i },
-];
+// inline link の目印。extractor が消費できなかったものを未対応として拾うために使う。
+const INLINE_LINK_OPENER = /\]\(/g;
+// reference 定義 (`[label]: destination "title"`)。destination の後に本文が続く行は
+// CommonMark では定義にならないので、行末までを条件にする。これを緩めると
+// `[note]: this is ordinary prose` のような普通の文が定義として誤検知される。
+const REFERENCE_DEFINITION =
+  /^ {0,3}\[[^\]]+\]:[ \t]*(?:<[^>\n]*>|\S+)[ \t]*(?:"[^"]*"|'[^']*'|\([^)]*\))?[ \t]*$/gm;
+
+/** 位置 index が、extractor が消費した区間のどれかに入るか。 */
+function isCovered(spans, index) {
+  return spans.some(([start, end]) => index >= start && index < end);
+}
 
 /**
  * markdown と HTML の link destination を列挙する。
@@ -99,11 +99,45 @@ function linkTargets(raw) {
  * 解析範囲を絞った代償を機械で見える形にする経路。返りが空でなくなったら、checker を
  * 広げるか、その記法を使わないかを決める。
  *
+ * 未対応の形を列挙しない。列挙すると、書き方が 1 つ増えるたびに穴が開き、
+ * 「検査していないのに破れ無しと報告する」 状態に落ちる (実測で title の空白位置違いと
+ * 引用区間を跨ぐ `<a>` が両方とも漏れた)。代わりに **extractor が消費できなかった
+ * link 形** を残余として拾う。取りこぼす方向ではなく、多めに報告する方向に倒れる。
+ *
  * @param {{repositoryRoot: string, scanRoot: string}} roots
  * @returns {string[]} 記法と file を示す説明行。空配列なら未対応記法なし。
  */
 export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
   const found = [];
+
+  const reasonsFor = (content) => {
+    const spans = [];
+    for (const match of content.matchAll(INLINE_LINK)) {
+      spans.push([match.index, match.index + match[0].length]);
+    }
+    for (const match of content.matchAll(IMG_TAG)) {
+      spans.push([match.index, match.index + match[0].length]);
+    }
+
+    const reasons = new Set();
+    for (const match of content.matchAll(INLINE_LINK_OPENER)) {
+      if (isCovered(spans, match.index)) continue;
+      reasons.add('解析できない inline link');
+    }
+    for (const tag of content.matchAll(A_TAG)) {
+      for (const attribute of tag[1].matchAll(HTML_ATTRIBUTE)) {
+        if (attribute[1].toLowerCase() !== 'href') continue;
+        reasons.add('生 HTML の a タグ');
+        break;
+      }
+    }
+    for (const _ of content.matchAll(REFERENCE_DEFINITION)) {
+      reasons.add('reference 定義');
+      break;
+    }
+    return reasons;
+  };
+
   const walk = (directory) => {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
@@ -113,8 +147,7 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
       }
       if (!entry.name.endsWith('.md')) continue;
       const content = stripCode(readFileSync(entryPath, 'utf8'));
-      for (const { label, pattern } of UNSUPPORTED_SYNTAX) {
-        if (!pattern.test(content)) continue;
+      for (const label of reasonsFor(content)) {
         found.push(`unsupported link syntax (${label}): ${relative(repositoryRoot, entryPath)}`);
       }
     }

@@ -367,10 +367,20 @@ test('a quoted attribute containing > does not hide the src that follows', () =>
 
 // 解析範囲を絞った代償を機械で見える形にする。未対応の記法が書かれたら、検査できない
 // ことを報告して止める。黙って素通りさせない。
+//
+// 未対応の形を列挙せず、extractor が消費できなかった link 形を残余で拾う。列挙すると
+// 書き方が 1 つ増えるたびに穴が開く (title の空白位置違いと引用区間を跨ぐ `<a>` が
+// 実測で両方とも漏れた)。
 for (const [label, markdown] of [
-  ['title 付き inline link', '[x](./real "題")'],
+  ['title 付き inline link (二重引用)', '[x](./real "題")'],
+  ['title 付き inline link (単引用)', "[x](./real '題')"],
+  ['title 付き inline link (括弧)', '[x](./real (題))'],
+  ['開き括弧の後に空白がある title 付き', '[x]( ./real "題")'],
   ['reference 定義', '[x]: ./real'],
+  ['reference 定義 (title 付き)', '[x]: ./real "題"'],
   ['生 HTML の a タグ', '<a href="./real">x</a>'],
+  ['生 HTML の a タグ (引用符なし)', '<a href=./real>x</a>'],
+  ['生 HTML の a タグ (属性値に > を含む)', '<a title="a>b" href=./real>x</a>'],
 ]) {
   test(`${label} is reported as unsupported syntax`, () => {
     withFixture(({ root, readmePath }) => {
@@ -390,6 +400,52 @@ for (const [label, markdown] of [
     });
   });
 }
+
+// 逆向き。正当な記述を未対応と誤判定すると、書けるはずの docs が書けなくなる。
+for (const [label, markdown] of [
+  ['素の inline link', '[x](./real)'],
+  ['括弧の内側に空白がある inline link', '[x]( ./real )'],
+  ['angle-bracket destination', '[x](<./real>)'],
+  ['reference 風の普通の文', '[note]: this is ordinary prose'],
+  ['a で始まる別 tag', '<abbr title="x">y</abbr>'],
+  ['href を持たない a タグ', '<a name="anchor"></a>'],
+  // 属性名を部分一致で見ると data-href を href として拾い、link ではない属性値で
+  // 正当な docs を止める。
+  ['a タグの data-href', '<a data-href="./x">y</a>'],
+  ['img の data-href', '<img data-href="./x" src="/images/ok.png" alt="x">'],
+]) {
+  test(`${label} is not reported as unsupported syntax`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      mkdirSync(join(root, 'docs', 'public', 'images'), { recursive: true });
+      writeFileSync(join(root, 'docs', 'public', 'images', 'ok.png'), 'png');
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+      writeFileSync(join(docsDirectory, 'index.md'), `# sample\n\n${markdown}\n`);
+
+      const result = runSync(root);
+      assert.equal(result.status, 0, result.stderr);
+    });
+  });
+}
+
+// 括弧の内側の空白は CommonMark で正当なので、destination は取れていなければならない。
+// 「未対応と報告しない」 だけでは、黙って検査を飛ばす形と区別が付かない。
+test('a link with spaces inside the parentheses is still resolved', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n[x]( ./gone )\n');
+
+    const result = spawnSync(
+      process.execPath,
+      [join(root, 'scripts', 'sync-library-doc-links.mjs')],
+      { encoding: 'utf8' },
+    );
+    assert.notEqual(result.status, 0, '壊れていれば dead として報告される');
+    assert.match(result.stderr, /dead link/);
+  });
+});
 
 // 未対応記法の検出も code block の中を見ない。見ると API reference が丸ごと落ちる。
 test('unsupported syntax inside a code fence is ignored', () => {
