@@ -24,7 +24,12 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { deadDocumentLinks, unsupportedLinkSyntax } from './docs-link-check.mjs';
+import {
+  LINK_FAILURE,
+  classifyDocumentLinks,
+  deadDocumentLinks,
+  unsupportedLinkSyntax,
+} from './docs-link-check.mjs';
 
 const scriptsDirectory = dirname(fileURLToPath(import.meta.url));
 const START = '<!-- kiwa-docs:start -->';
@@ -648,38 +653,44 @@ test('the real docs/libraries tree has no dead links', () => {
 // 範囲を広げるには「GitHub 前提の doc か公開 site 前提か」 の境界を決める必要があり、
 // それを待つ間も **参照先が repo のどこにも無い link** だけは再発させない。
 //
-// 判定を 3 つに分ける。repo 内に実在するが `docs/` の外を指すもの (GitHub では開ける)、
-// dir はあるが `index.md` が無いもの、どこにも無いもの。最後だけを 0 に保つ。
+// 分類は checker 側が返す (`LINK_FAILURE`)。ここで `existsSync` を使って判定し直すと、
+// checker が持つ大文字小文字の厳密判定と repo 境界がその再判定で失われる (実測で
+// case 違いの link が「解決する」 と誤判定され、test が見逃した)。
+//
+// `docs/api/{typescript,solidity}/` は生成物で、checkout に無いのが正常。target を
+// 部分一致で除外すると `./typescript-typo/` のような実際の破れまで見逃すため、
+// 生成される既知の target だけを完全一致で外す。
+const GENERATED_API_TARGETS = new Set([
+  './typescript/',
+  './solidity/',
+  './solidity/dogfood-foundry-dapp/',
+]);
+
 test('no link in docs points at a path that exists nowhere in the repository', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const docsRoot = join(repositoryRoot, 'docs');
-  const dead = deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot });
 
-  const missing = [];
-  for (const line of dead) {
-    const match = line.match(/^dead link: (.+?) -> (.+)$/);
-    const [, file, target] = match;
-    // 生成物 (`docs/api/{typescript,solidity}/`) は checkout に無いのが正常。
-    if (/^docs\/api\/(README|index)\.md$/.test(file) && /(typescript|solidity)/.test(target)) {
-      continue;
-    }
-    const [pathPart] = target.split(/[#?]/);
-    let decoded = pathPart;
-    try {
-      decoded = decodeURIComponent(pathPart);
-    } catch {
-      // 壊れた escape は生の文字列で照合する。
-    }
-    const absolute = decoded.startsWith('/')
-      ? join(docsRoot, decoded)
-      : join(repositoryRoot, dirname(file), decoded);
-    if (existsSync(absolute)) continue;
-    if (existsSync(`${absolute}.md`)) continue;
-    if (existsSync(join(absolute, 'index.md'))) continue;
-    missing.push(`${file} -> ${target}`);
-  }
+  const missing = classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot })
+    .filter(({ reason }) => reason === LINK_FAILURE.MISSING)
+    .filter(
+      ({ file, target }) =>
+        !(/^docs\/api\/(README|index)\.md$/.test(file) && GENERATED_API_TARGETS.has(target)),
+    )
+    .map(({ file, target }) => `${file} -> ${target}`);
 
   assert.deepEqual(missing, [], missing.join('\n'));
+});
+
+// 解析できない記法が現れると、その link は解決の検査自体を受けない。上の test は
+// 「checker が読めた link」 しか見ないので、読めない記法が増えると黙って覆う範囲が
+// 狭まる。docs 全体で未対応記法を 0 に保ち、増えた時に気付けるようにする。
+test('no file in docs uses link syntax the checker cannot parse', () => {
+  const repositoryRoot = join(scriptsDirectory, '..');
+  const found = unsupportedLinkSyntax({
+    repositoryRoot,
+    scanRoot: join(repositoryRoot, 'docs'),
+  });
+  assert.deepEqual(found, [], found.join('\n'));
 });
 
 // 切れた link がある間は 1 file も書かない。生成物の同期だけ先に進むと、
