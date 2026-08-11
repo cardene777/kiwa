@@ -156,6 +156,7 @@ SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。 spe
   - spec-review report: `tests/reports/review/spec-review-{example}.{lang}.md`
   - test-review report: `tests/reports/review/test-review-{example}.{lang}.md`
 - test 実行結果数値 (passing / failing / skipped / 各 round timing / flaky 指標)
+- observe dashboard (`tests/reports/observe/dashboard-{example}-{layer}.{lang}.md`) を統合 report の Section 2 に載っている分だけ Read。 `/kiwa-test` Step 5a が layer ごとに書く。 **Section 2 が「observe 失敗」 や「observe skip」 と書いている行は読まない** = file が無い。 dashboard が 1 枚も無い場合も軸 3 (flaky 兆候) は従来どおり実行結果数値から判定する
 - spec file の 「不足している仕様」 section (後追い項目の存在 check)
 
 ### Step 2: review 実行 (mode 別)

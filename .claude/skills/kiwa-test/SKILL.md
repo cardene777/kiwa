@@ -33,6 +33,7 @@ $ARGUMENTS
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
 - `--lang {ja|en|<ISO 639-1>}` — 文書生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`。 全子 skill に伝播)
 - `--no-review` — 子 skill の review step (kiwa-review) を skip (全子 skill に `--no-review` を渡す)
+- `--no-observe` — Step 5a の kiwa-observe 自動呼出を skip (CI / 自動化用)
 - `--no-coverage-loop` — coverage auto loop を skip (kiwa-forge / kiwa-hardhat の auto loop を 1 round で終わる)
 - `--no-codex` — kiwa-play の Codex 委譲を skip (test 件数 1-2 のみ推奨)
 - `--rounds {N}` — Playwright 4 round 連続 PASS 検証の round 数 (default 4、 kiwa-play に伝播)
@@ -386,6 +387,9 @@ Total duration: {sec} 秒
 | Playwright spec (退避済) | tests/fixtures/{example}/e2e-test/{example}.spec.ts | Layer 2 出力 → Step 5.5 で退避 |
 | coverage report (contract) | tests/reports/contract/coverage-report-{example}.{lang}.md | auto loop 結果 |
 | review report (spec / test) | tests/reports/review/{spec\|test}-review-{example}.{lang}.md | reviewer 判定 |
+| observe dashboard (layer ごと) | tests/reports/observe/dashboard-{example}-{layer}.{lang}.md | Step 5a 出力。 失敗した layer は path の代わりに理由を書く |
+| observe dashboard (contract, foundry) | tests/reports/observe/dashboard-{example}-contract-foundry.{lang}.md | `$RUNNER` が `foundry` / `both` の時 |
+| observe dashboard (contract, hardhat) | tests/reports/observe/dashboard-{example}-contract-hardhat.{lang}.md | `$RUNNER` が `hardhat` / `both` の時 |
 
 ## 3. critical / major 指摘 (review 集約)
 
@@ -409,6 +413,54 @@ Total duration: {sec} 秒
 - test-review (Foundry / Hardhat / Playwright): `tests/reports/review/test-review-{example}-{tool}.{lang}.md`
 - coverage report: `tests/reports/contract/coverage-report-{example}.{lang}.md` / `tests/reports/e2e/coverage-report-{example}.{lang}.md`
 ```
+
+### Step 5a: kiwa-observe 自動呼出 (layer ごとに 1 枚)
+
+`--no-review` ではなく **`--no-observe` 未指定なら**、 Step 2.5 で決めた `$LAYERS` の各 layer について `/kiwa-observe` を起動し、 flaky と spec coverage gap の dashboard を書く。
+
+Step 5b (result-review) の **前** に置く。 result-review は統合 report を Read し、 その Section 2 に本 step が書いた dashboard の path が載る。 後に置くと、 result-review が読む時点で dashboard がまだ無い。
+
+`contract` 以外の layer は 1 回起動する。
+
+```text
+/kiwa-observe --module {example} --layer {layer} --lang ${DOC_LANG} --producer {producer} --test {解決した path} --out tests/reports/observe/dashboard-{example}-{layer}.${DOC_LANG}.md
+```
+
+`--layer` は `$LAYERS` の各値をそのまま渡す。 Step 2.5 で `--target` から解決した同じ list で、 ここで組み直さない = 2 箇所で解決すると target の解釈が割れる。
+
+`--producer` は `test_outputs` の鍵。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つに定まる。
+
+`--test` は `kiwa layers --json` の `test_outputs` から、 選んだ鍵の下の `tests/fixtures/` 以外の値を渡す。 **`kiwa-observe` 側も同じ既定を持つが、 明示して渡す** = どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ呼出側だけ。
+
+#### `contract` layer は `$RUNNER` で分岐する
+
+`contract` の `consumer_skill` は常に `kiwa-forge` で、 `kiwa-hardhat` は `also_consumed_by` 側にある。 **`consumer_skill` から producer を決めない** = Hardhat で走らせた時も Foundry の `.t.sol` を観測しようとして 0 件 match になる。
+
+| `$RUNNER` | `--producer` | 観測する成果物 | `--out` |
+|---|---|---|---|
+| `foundry` | `kiwa-forge` | `{example}/test/*.t.sol` | `tests/reports/observe/dashboard-{example}-contract-foundry.${DOC_LANG}.md` |
+| `hardhat` | `kiwa-hardhat` | `{example}/test/*.test.ts` | `tests/reports/observe/dashboard-{example}-contract-hardhat.${DOC_LANG}.md` |
+| `both` | 上 2 行を順に実行 (2 回起動) | 両方 | 上 2 行の path (別 file になる) |
+
+**`contract` は runner を `--out` に足す**。 既定の `dashboard-{example}-contract.{lang}.md` は layer までしか区別しないため、 `both` で 2 回起動すると 2 枚目が 1 枚目を上書きする。
+
+`contract` 以外は `--out` に runner を足さない。 鍵が 1 つなので layer だけで一意になる。
+
+`${DOC_LANG}` と書く。 `{$DOC_LANG}` は shell の変数展開にならず、 `{ja}` が file 名に残る。
+
+**Step 5.5 (fixtures 退避) の前に置く**。 退避後は `tests/fixtures/` にも複製ができるが、 観測すべきは実際に走った方で、 両方あると `--test` の解決が 2 択になる。
+
+#### 失敗しても chain を止めない
+
+観測は判定ではないので、 起動に失敗した layer はその layer だけ飛ばして次へ進む。
+
+**飛ばした layer は統合 report の行に理由付きで残す**。 黙って飛ばすと dashboard が無いことと観測して gap が 0 だったことが区別できない。
+
+| 結果 | 扱い |
+|---|---|
+| dashboard を書けた | Section 2 に path を載せる |
+| `kiwa-observe` が非 0 で終わった | Section 2 に「observe 失敗: {stderr 要約}」 を載せて次の layer へ |
+| `--no-observe` 指定 | Section 2 に「observe skip (--no-observe)」 を 1 行載せる |
 
 ### Step 5.5: 生成 test を tests/fixtures/{example}/ に永続化 (退避)
 
@@ -619,7 +671,8 @@ graph TD
     R5 --> E
     RW2 --> E
     RW4 --> E
-    E --> M["Step 5.5 fixtures 退避<br>(git mv examples/ → tests/fixtures/)"]
+    E --> O["/kiwa-observe (Step 5a)<br>layer ごとに dashboard 1 枚"]
+    O --> M["Step 5.5 fixtures 退避<br>(git mv examples/ → tests/fixtures/)"]
     M --> R6["/kiwa-review --mode result-review (Step 5b)"]
     R6 -->|PASS| F["Step 6 user に summary return"]
     R6 -->|FAIL| L["Step 5c auto-fix loop"]
