@@ -998,10 +998,10 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     // それは #1899 に分けた。
     const resolve2 = (pattern: string, example: string): string => {
       if (pattern.startsWith('tests/fixtures/')) {
-        return pattern.replace('{example}', example);
+        return resolveExample(pattern, example);
       }
       // 生成先は `examples/` 起点。 repo root 相対にすると存在しない path になる。
-      return `examples/${pattern.replace('{example}', example)}`;
+      return `examples/${resolveExample(pattern, example)}`;
     };
     // shell を使わない。 pattern を `bash -c` の command 文字列へ補間すると、
     // 空白 / `;` / `$()` / backtick / 先頭 dash を含む値が shell 構文として
