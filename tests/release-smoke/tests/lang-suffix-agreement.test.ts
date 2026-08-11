@@ -1094,13 +1094,74 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
       all.some((p) => p.includes('{ts,tsx}')),
       'brace 形の pattern が表から消えた',
     ).toBe(true);
+    // 到達確認だけ。 `regexes.length > 0` は `expandBraces` が必ず 1 件以上
+    // 返すため恒真で、 正しさの根拠にはならない (#1898 Round 5)。
     for (const p of all) {
-      const { regexes } = patternToMatchers(p.replace('{example}', 'x'));
-      // 展開できた regex が 1 本以上あり、 `{` を literal として抱えていない。
-      expect(regexes.length, `${p} が regex に変換されない`).toBeGreaterThan(0);
-      for (const re of regexes) {
-        expect(re.source, `${p} の regex に brace が残っている`).not.toContain('\\{');
-      }
+      expect(() => patternToMatchers(p.replace('{example}', 'x')), `${p} で例外`).not.toThrow();
+    }
+  });
+
+  /**
+   * 構文 class ごとの matcher 契約。
+   *
+   * `dir` と「一致すべき名前」 と「一致してはいけない名前」 を直接 assert する。
+   * compile できることだけを見る形は、 wildcard / literal escape / dir 分割を
+   * 壊す変更を素通しする (#1898 Round 5)。
+   *
+   * 5 class は `docs/layers.json` の 25 pattern に現れる形を代表させたもの。
+   */
+  const MATCHER_CASES: {
+    label: string;
+    pattern: string;
+    dir: string;
+    hit: string[];
+    miss: string[];
+  }[] = [
+    {
+      label: 'basename の * (contract 生成先)',
+      pattern: 'x/test/*.t.sol',
+      dir: 'x/test',
+      hit: ['MintNft.t.sol', '.t.sol'],
+      miss: ['MintNft.t.solx', 'MintNft.test.ts'],
+    },
+    {
+      label: '{Contract} → * (contract 退避先)',
+      pattern: 'tests/fixtures/x/contract-test/{Contract}.t.sol',
+      dir: 'tests/fixtures/x/contract-test',
+      hit: ['Foo.t.sol'],
+      miss: ['Foo.t.sol.bak', 'Foo.test.cjs'],
+    },
+    {
+      label: '{module} → * + suffix (orm)',
+      pattern: 'x/tests/{module}.orm.test.ts',
+      dir: 'x/tests',
+      hit: ['signup.orm.test.ts'],
+      miss: ['signup.test.ts', 'signup.orm.test.tsx'],
+    },
+    {
+      label: 'brace alternative (unit)',
+      pattern: 'x/test/unit/{module}.test.{ts,tsx}',
+      dir: 'x/test/unit',
+      hit: ['signup.test.ts', 'signup.test.tsx'],
+      miss: ['signup.test.js', 'signup.spec.ts'],
+    },
+    {
+      label: 'literal の dot が escape される',
+      pattern: 'x/tests/{module}.edge.test.ts',
+      dir: 'x/tests',
+      hit: ['a.edge.test.ts'],
+      miss: ['axedgextestxts'],
+    },
+  ];
+
+  it.each(MATCHER_CASES)('$label の matcher が dir と名前を正しく決める', (c) => {
+    const { dir, regexes } = patternToMatchers(c.pattern);
+    expect(dir, `${c.pattern} の dir`).toBe(c.dir);
+    for (const name of c.hit) {
+      expect(regexes.some((re) => re.test(name)), `${name} に一致しない`).toBe(true);
+    }
+    for (const name of c.miss) {
+      expect(regexes.some((re) => re.test(name)), `${name} に一致してしまう`).toBe(false);
     }
   });
 
