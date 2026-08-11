@@ -159,6 +159,25 @@ describe('renderDashboard', () => {
     expect(render(unparsed)).not.toBe(render(matched));
   });
 
+  // 未解析の警告は gap の有無から独立。 test 側に既知形式の id があると、 一致判定に
+  // 入らないため警告が消えていた (#1910 Round 1)。 読めていない以上、 その id を extra と
+  // 断定もできない。
+  it('T-OBS-DSH-012d 未解析で test 側に id がある時も警告を出す', () => {
+    const gap: SpecCoverageGap = {
+      module: 'items',
+      layer: 'contract',
+      missingTcIds: [],
+      extraTcIds: ['T-API-001'],
+      specCaseCount: 0,
+    };
+    const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
+    expect(out).toContain('spec から case を 1 件も読めなかった');
+    // extra と断定しない。 id 自体は手がかりとして残す。
+    expect(out).not.toContain('Extra TC IDs');
+    expect(out).toContain('extra とは断定できない');
+    expect(out).toContain('T-API-001');
+  });
+
   // 件数を本文に出す。 出さないと「一致」 が何件に対する一致か読み手に判らない。
   it('T-OBS-DSH-012c 一致の時は spec の case 件数を出す', () => {
     const gap: SpecCoverageGap = {
@@ -192,7 +211,9 @@ describe('renderDashboard', () => {
       layer: 'api',
       missingTcIds: [],
       extraTcIds: ['T-EXT-001'],
-      specCaseCount: 0,
+      // spec は読めている。 0 件だと「未解析」 の分岐に入り、 この test の主題
+      // (extra だけが出る) を確かめられない。
+      specCaseCount: 1,
     };
     const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
     expect(out).toContain('Extra TC IDs');
