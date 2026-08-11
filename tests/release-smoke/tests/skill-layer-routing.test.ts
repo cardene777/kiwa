@@ -741,3 +741,200 @@ describe('the skills carry what the table renders', () => {
     expect(outside).toEqual([]);
   });
 });
+
+/**
+ * test-review が test file をどこから知るか (#1902)。
+ *
+ * `kiwa-review` は `docs/layers.json` から生成した 21 行の表を持ち、 test-review
+ * mode の既定でそこから対応 file を選んでいた。 表は生成物なので宣言は drift しない
+ * 一方、 **表が持つのは宣言だけ** で、 2 形のどちらを採るか / placeholder をどう埋めるか /
+ * 起点の外を指す値をどう扱うか / symlink を辿るかは読み手に残っていた。 その判断が
+ * skill の散文にしかなかった間に 2 つの欠陥が 8 round の review を通り抜けている
+ * (#1896)。 解決は #1899 で `kiwa layers --producer --project-root` に寄せた。
+ */
+describe('test-review の test path が CLI 経路に閉じている', () => {
+  /**
+   * `/kiwa-review --mode test-review` を **起動する** 行。
+   *
+   * 責務境界の節や本文の言及と分ける必要がある (`- 下流 ... /kiwa-review --mode
+   * test-review --layer auth` は起動ではない)。 実起動は必ず `--module` を渡すので、
+   * それを持つ行だけを取る。 code block だけに絞る形は使えない = 実際の起動指示の
+   * 多くが本文の backtick 内にある。
+   */
+  /** 1 本の markdown から起動 command を取り出す (fixture でも回せる pure helper)。 */
+  function extractInvocations(body: string): string[] {
+    return body
+      .split('\n')
+      .map((line) => /\/kiwa-review[^`]*/.exec(line)?.[0] ?? '')
+      .filter((command) => command.includes('--module'))
+      .map((command) => command.trim());
+  }
+
+  /**
+   * `--mode` の値。 空白区切りと `=` 区切りを 1 箇所で吸収する。
+   *
+   * 分類と必須検査が別々の literal を持つと、 表記を変えただけで「mode 無し」 と
+   * 「test-review でない」 の両方に化ける (Round 2 F3)。
+   *
+   * **値は 3 つの literal に閉じ、 終端まで見る**。 `[a-z-]+` で受けると
+   * `--mode=test-review.invalid` の有効 prefix を mode として取り、 CLI が拒否する
+   * 起動 command が必須検査も test-review 分類も通る (Round 3 F3)。 未知値と
+   * 次 flag も同じ理由で `null` に落とす = mode を名乗れていない起動は、 名乗って
+   * いないものとして扱う。
+   */
+  function modeOf(command: string): string | null {
+    const parsed = /--mode[ =](spec-review|test-review|result-review)(?![A-Za-z0-9._-])/.exec(
+      command,
+    );
+    return parsed?.[1] ?? null;
+  }
+
+  function invocations(): { skill: string; command: string }[] {
+    return [...skillDirs()]
+      .filter((name) => name !== 'kiwa-review')
+      .flatMap((name) => {
+        const rel = `.claude/skills/${name}/SKILL.md`;
+        if (!existsSync(resolve(REPO_ROOT, rel))) return [];
+        return extractInvocations(read(rel)).map((command) => ({ skill: name, command }));
+      });
+  }
+
+  /** The subset that asks for a test review. */
+  function testReviews(): { skill: string; command: string }[] {
+    return invocations().filter(({ command }) => modeOf(command) === 'test-review');
+  }
+
+  it('抽出が起動と言及を見分ける', () => {
+    // 抽出が空集合へ壊れると、 下の検査はすべて何も見ずに緑になる。 repo の別概念
+    // (`--no-review` の宣言等) を生存確認に使うと、 その概念の設計変更で偽陽性に
+    // なる (Round 2 F5)。 helper 自体に fixture を当てる。
+    const fixture = [
+      '`--no-review` 未指定なら `/kiwa-review --mode test-review --layer auth --module {m} --producer kiwa-auth --project-root .` を呼ぶ。',
+      '- 下流 ... `/kiwa-review --mode test-review --layer auth` (test 品質 review)',
+      '本文で `/kiwa-review --mode test-review` に触れるだけの行。',
+      '```text',
+      '/kiwa-review --mode=result-review --module {example} --lang $DOC_LANG',
+      '```',
+    ].join('\n');
+    const found = extractInvocations(fixture);
+    expect(found, '起動行だけを取れていない').toEqual([
+      '/kiwa-review --mode test-review --layer auth --module {m} --producer kiwa-auth --project-root .',
+      '/kiwa-review --mode=result-review --module {example} --lang $DOC_LANG',
+    ]);
+    expect(modeOf(found[0]!), '空白区切りの mode').toBe('test-review');
+    expect(modeOf(found[1]!), '= 区切りの mode').toBe('result-review');
+
+    // 値の終端まで見る。 有効 prefix を持つ malformed 値 / 未知値 / 次 flag は
+    // すべて「mode を名乗っていない」 に倒す (Round 3 F3)。
+    for (const broken of [
+      '/kiwa-review --mode=test-review.invalid --module {m}',
+      '/kiwa-review --mode=test-reviewer --module {m}',
+      '/kiwa-review --mode bogus --module {m}',
+      '/kiwa-review --mode --layer auth --module {m}',
+    ]) {
+      expect(modeOf(broken), `${broken} を mode として受けている`).toBeNull();
+    }
+    expect(invocations().length, '実 skill から 1 件も抽出できない').toBeGreaterThan(0);
+  });
+
+  it('起動行が mode を名乗る', () => {
+    // `--mode` は kiwa-review の必須引数。 省いた起動は mode 未指定で止まるうえ、
+    // test-review 用の検査からも外れる = 契約を書き換えても気付けない。 実測で
+    // `kiwa-e2e` と `kiwa-a11y` の 2 件が `--mode` を持たないまま残っていた
+    // (PR #1904 Round 1 F1)。
+    const missing = invocations()
+      .filter(({ command }) => modeOf(command) === null)
+      .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
+    expect(missing, `--mode を渡していない起動行:\n${missing.join('\n')}`).toEqual([]);
+  });
+
+  it('起動行が --test-path か (--producer と --project-root) のどちらかを渡す', () => {
+    // `--test-path` は明示 override で、 渡した path はそのまま Read される。
+    // 省略した時の既定が CLI なので、 省略するなら CLI が要求する 2 値を渡す。
+    // どちらも無い起動は、 review 側が自分で解決するしかない状態を作る。
+    //
+    // 判定は **起動 command の部分だけ** を見る。 行全体で見ると、 同じ行に置いた
+    // 説明文 (「`--producer` と `--project-root` は ... のために要る」) が flag 名を
+    // 含むため、 command から外しても緑のままになる (変異試験で実測)。
+    const missing = testReviews()
+      .filter(({ command }) => !command.includes('--test-path'))
+      .filter(({ command }) => !(command.includes('--producer') && command.includes('--project-root')))
+      .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
+    expect(missing, `--producer / --project-root を渡していない起動行:\n${missing.join('\n')}`).toEqual(
+      [],
+    );
+  });
+
+  it('--test-path に pattern を渡さない', () => {
+    // pattern は宣言であって、 生成した file の名前ではない。 skill に写すと
+    // `docs/layers.json` と 2 箇所になり、 2 形のうち片方しか見ない形に戻る
+    // (`--test-path test/*.t.sol` は退避後は 0 件になる)。 明示 override は
+    // 「いま書いた file」 を渡す時のためにある。
+    const copied = testReviews()
+      .map(({ skill, command }) => {
+        const value = /--test-path\s+(\S+)/.exec(command)?.[1];
+        return value && /[*{]/.test(value) ? `${skill}: --test-path ${value}` : null;
+      })
+      .filter((entry): entry is string => entry !== null);
+    expect(copied, `宣言を写した --test-path:\n${copied.join('\n')}`).toEqual([]);
+  });
+
+  it('kiwa-review が 2 値を宣言し、 既定が test_paths を名指しする', () => {
+    const lines = read('.claude/skills/kiwa-review/SKILL.md').split('\n');
+    for (const flag of ['--producer', '--project-root']) {
+      const declared = lines.filter((l) => l.startsWith(`- \`${flag} `));
+      expect(declared.length, `kiwa-review が ${flag} を宣言していない`).toBe(1);
+    }
+    const testPath = lines.find((l) => l.startsWith('- `--test-path '));
+    expect(testPath, '--test-path の宣言が無い').toBeDefined();
+    expect(testPath, '--test-path の既定が test_paths を名指ししていない').toContain('test_paths');
+  });
+
+  it('kiwa-review が test 出力先を列挙しない', () => {
+    // 表を消しても、 `## 前提` のような別の節に「対応 test file は
+    // `examples/{X}/test/` または `tests/fixtures/{X}/...` に存在」 と書いてあれば
+    // 同じ知識が残る。 実測でその 1 行が残っており、 表の検査は通っていた
+    // (PR #1904 Round 1 F2)。
+    //
+    // 出力先の layout を名指しする token を禁じる。 `{example}/...` は
+    // `--project-root` の宣言で起点の形として出るため、 dir を続けた形だけを見る。
+    // 禁止する形は **表から導く**。 綴りを 2 つ書き並べる形だと、 同じ layout を
+    // 別表記で書くだけで戻せる (`tests/fixtures` の末尾 slash 無し /
+    // `examples/{X}/test/` の placeholder 違い、 Round 2 F4 で実測)。
+    //
+    // 表の各宣言から「placeholder の次の segment」 を集めると、 test が置かれる
+    // dir 名 (`test` / `tests` / `contract-test` / `hardhat-test` / `e2e-test`) が
+    // そのまま出る。 層が増えれば禁止対象も自動で増える。
+    const testDirs = new Set(
+      LAYERS.flatMap((l) => Object.values(l.test_outputs ?? {}).flat())
+        .map((path) => path.replace(/^tests\/fixtures\//, '').split('/')[1])
+        .filter((segment): segment is string => !!segment && !/[{*]/.test(segment)),
+    );
+    expect(testDirs.size, '表から test dir を導けない').toBeGreaterThan(0);
+    const dirAlternation = [...testDirs].map((d) => d.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    const patterns = [
+      // 退避先。 末尾 slash の有無と前後の境界を問わない。
+      /(?:^|[^a-z0-9_/])tests\/fixtures(?![a-z0-9_-])/i,
+      // kiwa 自身の example dir を起点に書く形 (placeholder 名は問わない)。
+      /(?:^|[^a-z0-9_/])examples\/\{[A-Za-z_]+\}\//,
+      // placeholder の直後に test dir が続く形。 `{example}/...` の起点宣言は
+      // dir が続かないため当たらない。
+      new RegExp(`\\{[A-Za-z_]+\\}/(?:${dirAlternation})(?![a-z0-9_-])`),
+    ];
+    const source = read('.claude/skills/kiwa-review/SKILL.md');
+    const naming = source
+      .split('\n')
+      .filter((line) => patterns.some((pattern) => pattern.test(line)))
+      .map((line) => line.trim().slice(0, 120));
+    expect(naming, `test 出力先を名指ししている行:\n${naming.join('\n')}`).toEqual([]);
+  });
+
+  it('kiwa-review が test 出力先の対応表を持たない', () => {
+    // 生成領域ごと消した。 表が「対応 test file」 を並べている限り、 注意書きを
+    // 添えても実行の指示として読まれる (PR #1900 Round 1 F3 で実測)。
+    const source = read('.claude/skills/kiwa-review/SKILL.md');
+    expect(source, 'resolver 領域が残っている').not.toContain('kiwa-layers:resolver');
+    const rows = [...source.matchAll(/^\| `[a-z0-9-]+` \| `\/kiwa-[a-z0-9-]+` \|/gm)].map((m) => m[0]!);
+    expect(rows, `layer × 書き手 の表が残っている:\n${rows.join('\n')}`).toEqual([]);
+  });
+});

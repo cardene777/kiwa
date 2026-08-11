@@ -173,7 +173,7 @@ report 4 section (`tests/reports/integration/coverage-report-{module}.md`)。
 
 ### Step 6: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer integration --test-path test/integration/*.test.ts --lang $DOC_LANG` を内部呼出し、 5 軸判定。 `--no-review` で skip 可能。
+`/kiwa-review --mode test-review --module {module} --layer integration --producer kiwa-api --project-root . --lang $DOC_LANG` を内部呼出し、 5 軸判定。 **test path を pattern で渡さない** = 宣言は `docs/layers.json` にあり、 2 形のどちらが実在するかは `kiwa layers` が決める (#1902)。 `--no-review` で skip 可能。
 
 ## anvil 実走経路 (mock / 実 anvil / 3rd-party HTTP 経路の切り分け)
 
