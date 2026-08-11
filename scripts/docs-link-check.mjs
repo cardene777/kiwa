@@ -48,7 +48,21 @@ function stripCode(content) {
 // title (`"..."` / `'...'` / `(...)`) は対象 corpus に 1 件も無いため覆わない。
 // 覆おうとした間、正規表現解析の欠陥が review 3 round 続けて出た一方、実際に壊れる
 // link は素の inline link と img だけだった。
-const INLINE_LINK = /!?\[[^\]]*\]\(\s*(?:<([^>\n]*)>|([^)\s]+))\s*\)/g;
+//
+// 素の destination は **釣り合った括弧を含められる** (CommonMark)。`[^)\s]+` で取ると
+// `[x](./a(b).md)` の destination を `./a(b` と読み、実在する `a(b).md` を dead と
+// 報告する。逆に `[x](./foo](bar))` は `[x](./foo](bar)` までを消費区間として覆うため、
+// 残余の `](` も検出されず未対応としても報告されない = 検査していない範囲を検査済みと
+// して通す (#1876 でどちらも実測)。
+//
+// 入れ子は 2 段まで。`(` を任意深度で釣り合わせる形は正規表現では書けず、対象 corpus に
+// 括弧を含む destination は 0 件なので、2 段で足りないことが起きたら未対応として報告
+// される側に倒れる (残余方式が拾う)。
+const BALANCED_DESTINATION = /(?:[^()\s]|\((?:[^()\s]|\([^()\s]*\))*\))+/;
+const INLINE_LINK = new RegExp(
+  `!?\\[[^\\]]*\\]\\(\\s*(?:<([^>\\n]*)>|(${BALANCED_DESTINATION.source}))\\s*\\)`,
+  'g',
+);
 // 生 HTML。VitePress は markdown 中の HTML をそのまま出す。
 //
 // tag 全体を取ってから属性を読む 2 段にする。1 本の正規表現で要素名と属性名を並べると
@@ -73,7 +87,11 @@ const REFERENCE_DEFINITION =
 // destination が式なので静的には解けず、checker は素通ししてしまう (実測で確認)。
 // 解析しようとせず未対応として報告する = 実在しない記法のために解析器を広げると、
 // 広げた code 自体が欠陥を生む (PR #1875 で 2 round 溶かした)。
-const VUE_ANCHOR_TAG = /<(a|component)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+//
+// 名前の終端は `\b` では取れない。`<a-b>` の `a` の直後は `-` で単語境界が成立するため、
+// custom element を anchor として拾って正当な記述を止める (#1884 で実測)。名前に続けられる
+// 文字を否定先読みで外す = `<a>` / `<a href>` は通り、`<a-b>` / `<abbr>` は外れる。
+const VUE_ANCHOR_TAG = /<(a|component)(?![-\w:])((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
 // 属性名と、その値 (引用区間を含む) をまとめて食う。値を食わずに名前だけ拾うと、
 // 属性値の中の `:href=` を属性と誤認する。空白を境界にしても防げない = 値の中に
 // 空白を挟んで `:href=` と書ける (`title="see :href=y"` で実測、誤検知した)。
@@ -98,7 +116,11 @@ function hasVueBoundAnchor(content) {
     for (const [, namedWithValue, namedAlone] of attributes.matchAll(HTML_ATTRIBUTE_PAIR)) {
       const name = (namedWithValue ?? namedAlone ?? '').toLowerCase();
       const isBound = name.startsWith(':') || name.startsWith('v-bind:');
-      const plainName = name.replace(/^(?::|v-bind:)/, '');
+      // object 形式 (`v-bind="{ href: url }"`) は属性名に href を持たない。中身を静的に
+      // 解くのは方針外 (#1882) なので、href を含みうる形として検知側に倒す。
+      if (name === 'v-bind') return true;
+      // modifier 付き (`:href.prop`) も同じ binding。名前の完全一致で見ると外れる。
+      const plainName = name.replace(/^(?::|v-bind:)/, '').split('.')[0];
       // 属性名が実行時に決まる形。href になりうるので解析できない。
       if (isBound && plainName.startsWith('[')) return true;
       if (isBound && plainName === 'href') return true;
@@ -122,23 +144,45 @@ function isCovered(spans, index) {
  *
  * config (`config.mts`) と theme は `.md` ではないので、除いても検査対象は減らない。
  */
-const SKIPPED_DIRECTORIES = new Set(['.vitepress', 'node_modules']);
+// `public` は VitePress が中身をそのまま配る静的資産の置き場で、markdown は page として
+// render されない。実測でも `docs/public` 配下の `.md` は 0 件。走査対象にすると
+// `docs/public/images -> <repo>/images` (実運用の symlink) が「走査範囲の外を指す」 として
+// 報告される = 画像しか無い先を検査できないと言うことになる (#1888)。
+const SKIPPED_DIRECTORIES = new Set(['.vitepress', 'node_modules', 'public']);
 
 /** その directory へ降りるか。 */
 function shouldWalk(entry) {
   return entry.isDirectory() && !entry.isSymbolicLink() && !SKIPPED_DIRECTORIES.has(entry.name);
 }
 
-/** symlink の解決先が repo の中に留まるか。解決できない形は「外」 に倒す。 */
-function isInsideRepository(repositoryRoot, path) {
+/** path が root と同じか、その配下にあるか。 */
+function isInside(root, path) {
+  const fromRoot = relative(root, path);
+  return fromRoot === '' || !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
+}
+
+/**
+ * symlink の解決先が走査範囲に留まるか。
+ *
+ * 見るのは repo 境界ではなく **scanRoot 境界**。repo の中でも走査範囲の外を指す symlink
+ * (`docs/alias -> <repo>/packages`) は、その配下の markdown が 1 度も読まれない。repo 内
+ * であることは「実体側が別経路で検査される」 保証にならない = 検査するのは scanRoot
+ * 配下だけだからで、境界を repo に置いていた間この形が無報告で通っていた (#1888)。
+ *
+ * 解決できない形 (dangling / 循環) は `'unresolvable'` を返す。`isDirectory()` は
+ * どちらにも false を返すため、種別で分岐すると markdown 判定にも directory 判定にも
+ * 入らず素通りする (実測)。
+ *
+ * @returns {'inside' | 'outside' | 'unresolvable'}
+ */
+function symlinkScope(scanRoot, path) {
   let canonical;
   try {
     canonical = realpathSync(path);
   } catch {
-    return false;
+    return 'unresolvable';
   }
-  const fromRoot = relative(repositoryRoot, canonical);
-  return !(fromRoot === '..' || fromRoot.startsWith(`..${sep}`));
+  return isInside(realpathSync(scanRoot), canonical) ? 'inside' : 'outside';
 }
 
 /**
@@ -232,12 +276,20 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
       // `isDirectory()` も `isFile()` も false を返すため (実測)、種別で分岐した後では
       // どちらの枝にも入らず素通りする。
       if (entry.isSymbolicLink()) {
-        // repo の外を指す symlink だけを報告する。中身を読まない以上その配下の link は
+        // 走査範囲の外を指す symlink を報告する。中身を読まない以上その配下の link は
         // 1 つも検査されず、黙って通すと alias 経路だけで壊れる link が gate を通る。
         //
-        // repo 内に留まる symlink は報告しない。`docs/public/images` のように実運用で
-        // 使われており、実体側が同じ repo の中にあるので検査から漏れない。
-        if (isInsideRepository(repositoryRoot, entryPath)) continue;
+        // 走査範囲に留まる symlink は報告しない。実体側が同じ走査で読まれるため検査から
+        // 漏れない。
+        const scope = symlinkScope(scanRoot, entryPath);
+        if (scope === 'inside') continue;
+        if (scope === 'unresolvable') {
+          // 解決できない = 中身があるかも判らない。dangling も循環もここに来る。
+          found.push(
+            `unsupported link syntax (解決できない symlink): ${relative(repositoryRoot, entryPath)}`,
+          );
+          continue;
+        }
         const kind = isDirectory(entryPath) ? 'directory' : 'markdown';
         // markdown でない file symlink (画像等) は link を持たないので報告しない。
         if (kind === 'directory' || entry.name.endsWith('.md')) {
