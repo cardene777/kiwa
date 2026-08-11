@@ -36,8 +36,9 @@ $ARGUMENTS
 - `--layer {id}` — 対象 layer (**常に必須**。 無ければ推測せず user に確認する)
 - `--lang {ja|en|<ISO 639-1>}` — spec の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--spec {path}` — spec markdown path (省略時は § 入力 spec の path は CLI から受け取る で解決)
-- `--test {path}` — test code path。 glob 可、 複数回指定可 (省略時は同節で `test_outputs` から解決)
-- `--producer {skill}` — `--test` を解決する時に見る `test_outputs` の鍵 (省略時は同節の規則で決める)
+- `--test {path}` — test code path。 glob 可、 複数回指定可 (省略時は `kiwa layers` が返す `test_paths.files` を使う)
+- `--producer {skill}` — `kiwa layers --producer` にそのまま渡す `test_outputs` の鍵 (鍵が 2 つある layer では省略不可)
+- `--project-root {path}` — 生成先 (`{example}/...`) の起点。 `kiwa layers --project-root` にそのまま渡す (省略時は cwd)
 - `--vitest-json {path}` — 既存 vitest JSON 出力 (省略時は試走)
 - `--out {path}` — dashboard 出力先 (省略時は `tests/reports/observe/dashboard-{module}-{layer}.{lang}.md`)
 
@@ -63,82 +64,39 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 
 `$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
 
-#### test code の path も同じ応答から取る
+#### test code の path も同じ CLI が返す
 
-`--test` を省略した時、 **同じ応答の `test_outputs` から取る**。 `--module` から推測しない = 推測は spec path で 1 度直した経路 (#1861) と同じ形で、 生成先の宣言は `docs/layers.json` にあり CLI がそれを返している。
+`--test` を省略した時、 **同じ呼出に `--producer` と `--project-root` を足して `test_paths` を受け取る**。 skill 側で組み立てない。
 
-解決は 5 段で、 **順序が意味を持つ**。
+```bash
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
+  --producer "$PRODUCER" --project-root "$PROJECT_ROOT"
+```
 
-##### 1. 鍵を 1 つ選ぶ
+返る `test_paths` の中身。
 
-`test_outputs` は **producer skill ごとに鍵が分かれる**。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つ。
-
-| 鍵の数 | 選び方 |
+| field | 内容 |
 |---|---|
-| 1 つ | その鍵を使う |
-| 2 つ以上 | `--producer` の値を使う。 **無ければ中断する** |
+| `producer` | 実際に読んだ `test_outputs` の鍵 |
+| `anchor` | `project` (生成先) / `fixtures` (退避先) / `null` (どちらも 0 件) |
+| `patterns` | 探した先。 0 件だった時に「どこを見たか」 を user に返すために使う |
+| `files` | 読む file の全件。 そのまま `TEST_PATHS` に入れる |
 
-**`consumer_skill` を鍵として使わない**。 `contract` の `consumer_skill` は常に `kiwa-forge` で、 `kiwa-hardhat` は `also_consumed_by` 側にある。 `consumer_skill` で引くと、 Hardhat で走らせた時も Foundry の `.t.sol` を観測しようとして 0 件 match になる。
+**skill 側で glob しない**。 `files` は既に match した実 file で、 生成先と退避先のどちらを採るか、 placeholder をどう埋めるか、 起点の外を指す宣言をどう扱うかも CLI が決めている (`packages/cli/src/detect/layers.ts` の `resolveTestPaths`)。
 
-どちらを観測するかを知っているのは呼出側だけなので、 `--producer` で受ける。
+**match した file を全て読んで連結する** = `analyzeSpecCoverage` は test code を 1 つの文字列として受けるため、 先頭 1 件だけ読むと残りの test が gap に出る。
 
-##### 2. 2 形のうち存在する方を採る
+この解決を本 file が 5 段の手順として持っていた間、 2 つの欠陥が 8 round の review を通り抜けた (#1896)。 退避済 example では必ず 0 件になる規則と、 `{example}` を repo root 相対に解決して存在しない path を作る規則で、 どちらも markdown の review では見えない。 CLI へ寄せて 4 状態 (生成先のみ / 退避先のみ / 両方 / どちらも無し) の test で塞いだ (#1899)。
 
-選んだ鍵の配列には **同じ test の移動前と移動後** が並ぶ。 `docs/layers.json` の `$comment` がその理由の SSOT で、 `/kiwa-test` の Step 5.5 が `examples/` から `tests/fixtures/` へ移すため、 同じ test は **移動が走ったかで 2 箇所のどちらかにある**。
+`$PRODUCER` は skill 引数の `--producer`。 鍵が 2 つある layer は実測で `contract` の 1 つだけで、 そこでは CLI が省略を拒否する。 **`consumer_skill` を鍵として使わない**。 `contract` の `consumer_skill` は常に `kiwa-forge` で、 `kiwa-hardhat` は `also_consumed_by` 側にある。 `consumer_skill` で引くと、 Hardhat で走らせた時も Foundry の `.t.sol` を観測しようとして 0 件 match になる。 CLI も同じ理由で fallback を持たないので、 どちらを観測するかを知っている呼出側が `--producer` で渡す。
 
-| 形 | 例 | いつ存在するか |
-|---|---|---|
-| 生成先 | `{example}/test/*.t.sol` | 移動前 (同一 chain 内で Step 5.5 に到達する前) |
-| 退避先 | `tests/fixtures/{example}/contract-test/{Contract}.t.sol` | 移動後 (既存 example に再実行する時) |
+`$PROJECT_ROOT` は skill 引数の `--project-root`。 `{example}/...` の起点で、 `/kiwa-test` は `examples/{example}`、 `/kiwa-app` は利用者 project の root を渡す。 省略時は cwd。
 
-**片方を落とさない**。 落とすと、 その状態に無い側を選んだ時に必ず 0 件 match で中断する。 実測すると `mint-nft` は移動済で、 生成先だけを採る規則では 0 件、 退避先を含めると 1 件だった (#1896)。
+**cwd と同じ値を渡した時、 CLI は `tests/fixtures/...` を候補にしない**。 そこは kiwa repo 内部の場所で、 利用者 project にたまたま同名の dir があるとそちらを読むことになる。
 
-優先順位は 1 つだけ。 **両方が存在する時は生成先を採る** = 同一 chain 内ではそちらが実際に走ったもので、 退避先はまだ前回の複製が残っているだけのことがある。
+単体起動で起点が判らない時は **`--test` を明示して渡してもらう**。 推測すると、 存在しない dir を探して「観測対象が無い」 と報告することになる (#1896 で実測)。
 
-##### 3. 残った pattern を全て使う
-
-**1 つ選ばない**。 `a11y` は `{module}.test.tsx` と `{module}.spec.ts` の 2 pattern を宣言しており、 片方だけ取ると実在する test が coverage gap として誤検出される (実測で該当は `a11y` の 1 layer)。
-
-##### 4. placeholder を解決して安全性を確かめる
-
-`{module}` は `$MODULE` に、 `{Contract}` は対象 contract 名に解決する。 決まらなければ `*` にする。
-
-**`{example}` の基準は呼出側が持つ**。 起点が 2 種類あり、 同じ「root」 という語で呼ぶと取り違える。
-
-| 起点 | 指す先 |
-|---|---|
-| `KIWA_REPO_ROOT` | kiwa repo 自身の root。 `tests/fixtures/` はここの下にしか無い |
-| `TARGET_PROJECT_ROOT` | 観測対象の project root。 `/kiwa-test` では `examples/{example}`、 `/kiwa-app` では利用者 project の root |
-
-2 形の解決先。
-
-| 呼出側 | 生成先 (`{example}/...`) | 退避先 (`tests/fixtures/...`) |
-|---|---|---|
-| `/kiwa-test` | `TARGET_PROJECT_ROOT` = `examples/{example}` | `KIWA_REPO_ROOT` 起点で解決する |
-| `/kiwa-app` | `TARGET_PROJECT_ROOT` = 利用者 project の root | **候補から外す** |
-
-**`/kiwa-app` では退避先を候補にしない**。 `tests/fixtures/` は kiwa repo 内部の場所で、 利用者 project には存在しない。 そこを候補に残すと、 利用者 project にたまたま同名の dir があった時にそちらを読む。
-
-前段の安全性確認 (§ 4) は **その形の起点** に対して行う。 生成先は `TARGET_PROJECT_ROOT` 配下、 退避先は `KIWA_REPO_ROOT` 配下に収まることを確かめる。 1 つの root で両方を見ると、 どちらかが必ず「外を指す」 と誤判定される。
-
-単体起動で基準が判らない時は **`--test` を明示して渡してもらう**。 推測すると、 存在しない dir を glob して「観測対象が無い」 と報告することになる (#1896 で実測)。
-
-解決後、 **project root 配下に収まることを確かめる**。 収まらない値は落とす。
-
-| 条件 | 扱い |
-|---|---|
-| 絶対 path で始まる | 落とす |
-| `..` を含む | 落とす |
-| 正規化して **その形の起点** の外を指す | 落とす |
-| 上記いずれでもない | 使う |
-
-`test_outputs` は宣言なので通常は project 相対だが、 **誤記や改変でこの前提は崩れる**。 崩れた時に読むのは観測対象でない file になる。
-
-##### 5. glob して連結する
-
-各 pattern を glob し、 結果を flatten して重複を除く。 **match した file を全て読んで連結する** = `analyzeSpecCoverage` は test code を 1 つの文字列として受けるため、 先頭 1 件だけ読むと残りの test が gap に出る。
-
-全 pattern 合わせて 0 件 match は中断する (観測対象が無い)。
+**`--test` は CLI を通らない**。 起点の外を指す値の拒否も、 symlink を辿らない照合も、 matcher 構文の検査も `kiwa layers` 側にあるため、 明示した path はそのまま Read される。 渡す値の妥当性は渡した側が持つ = **推測した値を `--test` に入れて検査を省く経路として使わない**。 起点が判るなら `--project-root` を渡して CLI に解決させる。
 
 #### 解決に失敗したら止める
 
@@ -157,12 +115,10 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 | 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
 | その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
 | `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
-| `test_outputs` の鍵が 2 つ以上あり `--producer` が無い | どちらを観測するか決められない。 中断 |
-| `--producer` の値が `test_outputs` の鍵に無い | 同上。 中断 |
-| 鍵の下の配列が空 | 観測対象を決められない。 中断 |
-| 安全性の確認で全 pattern が落ちた | 同上。 中断 |
-| 生成先と退避先の **両方** が 0 件 match | 観測対象が存在しない。 中断 |
-| 上記いずれでもない | その `spec_path` と `test_outputs` を使う |
+| `test_paths.files` が空 | 観測対象が存在しない。 中断。 理由に `test_paths.patterns` を添える |
+| 上記いずれでもない | その `spec_path` と `test_paths.files` を使う |
+
+鍵の選択 (`--producer` の要否 / 宣言に無い鍵) と起点の妥当性 (`--project-root` が無い dir / cwd の外) は CLI が非 0 で返すため、 1 行目の exit code 判定で捕まる。 skill 側で二重に判定しない。
 
 `.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
 

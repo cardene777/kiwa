@@ -154,13 +154,17 @@ export {
   applyLang,
   isValidDocLang,
   isValidModule,
+  LayerPathError,
   loadLayerTable,
   resolveLayers,
+  resolveTestPaths,
   withLangSuffix,
   withModule,
   type DocLang,
   type LayerRecord,
   type ResolvedLayers,
+  type TestAnchor,
+  type TestPathResolution,
 } from './layers.js';
 export { presentManifests, scan as scanManifests, type ManifestPresence } from './scan.js';
 export type { Detection, SignalTable } from './detect.js';

@@ -14,7 +14,7 @@ title: "@kiwa-lab/cli runCli の API 契約"
 
 #### <code v-pre>createDefaultDeps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L99) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L108) <code v-pre>packages/cli/src/runCli.ts</code>
 
 Dependencies backed by the current node process, used by the `kiwa` executable.
 
@@ -24,7 +24,7 @@ export declare function createDefaultDeps(): RunCliDeps;
 
 #### <code v-pre>runCli</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L672) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L756) <code v-pre>packages/cli/src/runCli.ts</code>
 
 Runs one `kiwa` invocation and resolves with the process exit code. `argv` excludes the node binary and the script path (`process.argv.slice(2)`). The function never terminates the process and never rejects: unexpected failures are reported on stderr as `ERR &lt;message&gt;` and resolve with 1.
 
@@ -34,7 +34,7 @@ export declare function runCli(argv: string[], deps: RunCliDeps): Promise<number
 
 #### <code v-pre>takeFlagValue</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L122) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L131) <code v-pre>packages/cli/src/runCli.ts</code>
 
 Reads the value of `--flag value` or `--flag=value` from `argv`. Returns undefined when the flag is absent, and throws when the flag is present but the following token is missing or is itself a flag.
 
@@ -44,19 +44,19 @@ export declare function takeFlagValue(argv: string[], flag: string): string | un
 
 #### <code v-pre>USAGE</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L20) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L22) <code v-pre>packages/cli/src/runCli.ts</code>
 
 Usage text printed by `--help` / `-h` and appended to the unknown-command error.
 
 ```ts
-export declare const USAGE = "Usage: kiwa <command> [options]\n\nCommands:\n  init [options]                                            Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json\n  doctor                                                    Check that anvil is installed\n  layers [--layer L] [--lang C] [--module M] [--json]        Print the layers this run applies to\n  anvil seed <script> --out <path>                          Run <script> against a fresh anvil and dump state to <path>\n  spec-to-test --in <spec.md> --out <test.ts> [--layer L]   Generate a vitest test file from a Layer 1 spec.md\n  run --watch [--layer L]...                                Run vitest in watch mode across one or more layers (default unit + api + ui)\n  --help, -h                                                Show this message\n\nlayers options:\n  --layer L                     Use L instead of the detection. Wins outright.\n  --lang C                      Resolve spec paths for document language C (ISO 639-1).\n                                en and omitting the flag both give the plain path.\n  --module M                    Substitute M for the {module} placeholder in spec paths.\n                                [a-z0-9-], 1-32 chars. Refused otherwise.\n  --json                        Emit one record per layer with its consumer skill,\n                                mode and spec path, plus how the list was chosen.\n\ninit options:\n  --detect                      Report which kiwa layers the project's dependencies point at,\n                                write .kiwa/stack.json, and scaffold nothing. Other init\n                                options do not apply and are refused.\n  --force                       Overwrite existing files instead of failing on conflict\n  --testDir <path>              Place generated spec under <path> instead of e2e/ (relative)\n  --config-suffix <name>        Generate playwright.<name>.config.ts instead of playwright.config.ts\n  --script-key <key>            package.json scripts key for the generated playwright command (default test:e2e)\n  --with-deploy <foundry-path>  Also generate tests/{prepare-env,global-setup,global-teardown,fixture}.ts\n                                pointing at the given Foundry project (relative to cwd)\n\nanvil seed options:\n  --out <path>      Path to write state json (anvil --dump-state). Required.\n  --chain-id <n>    Override chain id (default 31337).\n  --port <n>        Bind anvil to specific port (default: random free port).\n\nspec-to-test options:\n  --in <path>       Layer 1 spec markdown file. Required.\n  --out <path>      Output vitest test file. Required.\n  --layer <name>    Override layer (api / ui / data / cli). Default: inferred from spec meta.\n\nrun --watch options:\n  --layer <name>   Layer to watch (repeat to add more): unit / api / ui / data / cli / e2e (default unit api ui).\n  --dry-run        Print the commands that would be spawned without launching them.\n";
+export declare const USAGE = "Usage: kiwa <command> [options]\n\nCommands:\n  init [options]                                            Scaffold e2e/connect.spec.ts + playwright.config.ts + tsconfig.json + package.json\n  doctor                                                    Check that anvil is installed\n  layers [--layer L] [--lang C] [--module M] [--json]        Print the layers this run applies to\n  anvil seed <script> --out <path>                          Run <script> against a fresh anvil and dump state to <path>\n  spec-to-test --in <spec.md> --out <test.ts> [--layer L]   Generate a vitest test file from a Layer 1 spec.md\n  run --watch [--layer L]...                                Run vitest in watch mode across one or more layers (default unit + api + ui)\n  --help, -h                                                Show this message\n\nlayers options:\n  --layer L                     Use L instead of the detection. Wins outright.\n  --lang C                      Resolve spec paths for document language C (ISO 639-1).\n                                en and omitting the flag both give the plain path.\n  --module M                    Substitute M for the {module} placeholder in spec paths.\n                                [a-z0-9-], 1-32 chars. Refused otherwise.\n  --producer S                  Which test_outputs key to resolve test paths from.\n                                Needed only where a layer declares two (contract).\n  --project-root R              Where {example}/... is anchored, relative to the working\n                                directory (default: the working directory itself).\n                                tests/fixtures/... is offered only when the two differ.\n  --json                        Emit one record per layer with its consumer skill,\n                                mode and spec path, plus how the list was chosen.\n                                --producer and --project-root add test_paths, and both\n                                need --json and a single --layer.\n\ninit options:\n  --detect                      Report which kiwa layers the project's dependencies point at,\n                                write .kiwa/stack.json, and scaffold nothing. Other init\n                                options do not apply and are refused.\n  --force                       Overwrite existing files instead of failing on conflict\n  --testDir <path>              Place generated spec under <path> instead of e2e/ (relative)\n  --config-suffix <name>        Generate playwright.<name>.config.ts instead of playwright.config.ts\n  --script-key <key>            package.json scripts key for the generated playwright command (default test:e2e)\n  --with-deploy <foundry-path>  Also generate tests/{prepare-env,global-setup,global-teardown,fixture}.ts\n                                pointing at the given Foundry project (relative to cwd)\n\nanvil seed options:\n  --out <path>      Path to write state json (anvil --dump-state). Required.\n  --chain-id <n>    Override chain id (default 31337).\n  --port <n>        Bind anvil to specific port (default: random free port).\n\nspec-to-test options:\n  --in <path>       Layer 1 spec markdown file. Required.\n  --out <path>      Output vitest test file. Required.\n  --layer <name>    Override layer (api / ui / data / cli). Default: inferred from spec meta.\n\nrun --watch options:\n  --layer <name>   Layer to watch (repeat to add more): unit / api / ui / data / cli / e2e (default unit api ui).\n  --dry-run        Print the commands that would be spawned without launching them.\n";
 ```
 
 ### 型
 
 #### <code v-pre>RunCliDeps</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L81) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L90) <code v-pre>packages/cli/src/runCli.ts</code>
 
 Every side effect `runCli` performs. `bin.ts` passes the process-backed implementations; tests pass fakes so that argv parsing, command routing and exit codes can be exercised without spawning subprocesses, touching the network or terminating the test process.
 
@@ -81,7 +81,7 @@ export interface RunCliDeps {
 
 #### <code v-pre>SpecToTestSummary</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L67) <code v-pre>packages/cli/src/runCli.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L76) <code v-pre>packages/cli/src/runCli.ts</code>
 
 What `spec-to-test` reports back after writing the generated test file.
 

@@ -42,8 +42,8 @@
  */
 
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, statSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync, type Dirent } from 'node:fs';
+import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { signalsFingerprint, type SignalTable } from './detect.js';
@@ -324,6 +324,381 @@ export function applyLang(
     if (module !== undefined) path = withModule(path, module);
     return { ...layer, spec_path: path };
   });
+}
+
+/**
+ * Where a declared `test_outputs` path is anchored.
+ *
+ * The field mixes two layouts under one placeholder. `{example}/…` is anchored
+ * at the project being worked on — the example directory when `/kiwa-test`
+ * drives it, the user's own root when `/kiwa-app` does. Every other shape names
+ * kiwa's own layout (`tests/fixtures/{example}/…` today), which exists only
+ * inside this repository.
+ *
+ * The two hold the same test before and after `/kiwa-test` Step 5.5 moves it
+ * out of `examples/`, so which one exists depends on whether that move has run.
+ * That is a property of the working tree, not of the caller, which is why the
+ * choice is made here by looking rather than by a rule each skill carries.
+ */
+export type TestAnchor = 'project' | 'fixtures';
+
+/**
+ * The test paths for one layer and one producer, resolved against the tree.
+ *
+ * `patterns` is every candidate that survived, in declaration order, and stays
+ * populated when nothing matched: a caller that has to report "no tests here"
+ * can say where it looked. `files` is what the winning anchor actually matched,
+ * and `anchor` says which one won — `null` when neither did, which is a normal
+ * state (nothing generated yet), not a failure.
+ */
+export interface TestPathResolution {
+  /** The `test_outputs` key the paths came from. */
+  producer: string;
+  /** Which of the two anchors decided the answer. */
+  anchor: TestAnchor | null;
+  /** Every candidate considered, relative to the working directory. */
+  patterns: string[];
+  /** The files the winning anchor matched, relative to the working directory. */
+  files: string[];
+}
+
+/**
+ * A resolution that cannot be completed, split by whose problem it is.
+ *
+ * `request` is the caller naming something unreal — a producer the layer does
+ * not declare, a project root outside the tree. `declaration` is
+ * `docs/layers.json` carrying a path that cannot be resolved at all. They get
+ * different exit codes for the same reason `unknown layer` does: "you asked for
+ * something that is not there" and "this install is broken" send a caller to
+ * different places.
+ */
+export class LayerPathError extends Error {
+  kind: 'request' | 'declaration';
+
+  constructor(message: string, kind: 'request' | 'declaration') {
+    super(message);
+    this.name = 'LayerPathError';
+    this.kind = kind;
+  }
+}
+
+/**
+ * `a{x,y}b` → `axb` / `ayb`, one level deep.
+ *
+ * The one pattern of the 25 that uses it is `{module}.test.{ts,tsx}`. Escaping
+ * the braces as literals instead makes both `.test.ts` and `.test.tsx` match
+ * nothing, which reads as "no tests" rather than as a broken matcher.
+ *
+ * A `{word}` with no comma is a placeholder, not an alternative, and is left
+ * alone here — `resolvePlaceholders` has already refused any it does not know.
+ */
+function expandBraces(segment: string): string[] {
+  const brace = /\{([^{}]*,[^{}]*)\}/.exec(segment);
+  if (!brace) return [segment];
+  const [whole, inner] = brace;
+  const head = segment.slice(0, brace.index);
+  const tail = segment.slice(brace.index + whole.length);
+  return (inner ?? '').split(',').flatMap((alt) => expandBraces(`${head}${alt}${tail}`));
+}
+
+/**
+ * One path segment as a matcher. `*` spans a name, never a separator.
+ *
+ * The class is belt-and-braces: `matchFiles` tests one directory entry at a
+ * time and an entry name cannot contain `/`, so widening it to `.*` changes no
+ * answer (measured — every case still passes). It stays because the guarantee
+ * lives in the caller's shape, and a rewrite that matched against a joined path
+ * would silently start reaching into subdirectories.
+ */
+function segmentMatcher(segment: string): RegExp {
+  const source = segment.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '[^/]*' : `\\${c}`));
+  return new RegExp(`^${source}$`);
+}
+
+/**
+ * The files under `root` that `pattern` names.
+ *
+ * Every segment is matched against a directory listing rather than joined as a
+ * literal, so a path only comes back spelled exactly as it is on disk. Joining
+ * literals and testing existence would accept `Test/` for `test/` on a
+ * case-insensitive filesystem, which macOS gives by default.
+ *
+ * **Symlinks are not followed**, for entries and for directories alike. The
+ * containment checks in `resolvePlaceholders` are lexical, and a symlink is the
+ * one way a matched path can leave the root after they have passed.
+ *
+ * `fs.globSync` is not used: it landed in Node 22 and this package declares
+ * `engines.node >= 20.9.0`, where importing it fails outright.
+ */
+function matchFiles(root: string, pattern: string): string[] {
+  const segments = pattern.split('/').filter((segment) => segment !== '' && segment !== '.');
+  if (!segments.length) return [];
+  let current = [''];
+  for (const [index, segment] of segments.entries()) {
+    const last = index === segments.length - 1;
+    const matchers = expandBraces(segment).map(segmentMatcher);
+    const next: string[] = [];
+    for (const dir of current) {
+      let entries: Dirent[];
+      try {
+        entries = readdirSync(join(root, dir), { withFileTypes: true });
+      } catch {
+        continue; // A directory that is not there holds no matches.
+      }
+      for (const entry of entries) {
+        if (!matchers.some((matcher) => matcher.test(entry.name))) continue;
+        if (last ? !entry.isFile() : !entry.isDirectory()) continue;
+        next.push(dir ? `${dir}/${entry.name}` : entry.name);
+      }
+    }
+    if (!next.length) return [];
+    current = next;
+  }
+  return current;
+}
+
+/**
+ * Characters the matcher reads as syntax rather than as part of a name.
+ *
+ * `*` spans a name and `{a,b}` picks between alternatives. A value substituted
+ * into a pattern has to be a name, so one carrying these would be read as the
+ * pattern's own syntax.
+ */
+const MATCHER_SYNTAX = /[*{},]/;
+
+/**
+ * A declared pattern with its placeholders filled in.
+ *
+ * `{module}` and `{Contract}` become `*` when the caller has no value for them,
+ * because both name part of a file rather than a directory and a wildcard is
+ * what "any of them" means to the matcher. `--module` is validated by
+ * `isValidModule` before it arrives, so nothing it carries can cross a segment.
+ *
+ * **Substitution happens in one pass**. Replacing one placeholder at a time
+ * feeds each value back into the scan for the next: a directory literally named
+ * `{module}` arrives as `{example}`'s value and is then replaced again, so the
+ * pattern ends up naming a file nobody asked for (measured).
+ *
+ * The value that becomes `{example}` is a directory name the caller chose, so
+ * it is checked for matcher syntax rather than escaped — the same posture as
+ * `isValidModule`. Escaping instead would mean the matcher has to understand
+ * escapes, and a value that is not a name means the caller passed something it
+ * did not mean to. Measured before this check: a project directory named `app*`
+ * resolved to the fixtures of `app-one` and `app-two`, neither of which is the
+ * project.
+ *
+ * A placeholder this does not know is refused rather than left literal. Leaving
+ * it makes the matcher look for a file with braces in its name, which matches
+ * nothing and reads exactly like "no tests were generated".
+ */
+function resolvePlaceholders(pattern: string, example: string, module: string | undefined): string {
+  if (pattern.includes('{example}') && MATCHER_SYNTAX.test(example)) {
+    throw new LayerPathError(
+      `project directory name is not usable as {example}: ${JSON.stringify(example)} (must not contain * { } ,)`,
+      'request',
+    );
+  }
+  const values: Record<string, string> = {
+    example,
+    module: module ?? '*',
+    Contract: '*',
+  };
+  const filled = pattern.replace(
+    /\{(example|module|Contract)\}/g,
+    (_whole, name: string) => values[name]!,
+  );
+  // `{ts,tsx}` is an alternative, not a placeholder; the comma tells them apart.
+  const unknown = /\{([^{},]*)\}/.exec(filled);
+  if (unknown) {
+    throw new LayerPathError(
+      `test_outputs declares an unknown placeholder ${unknown[0]} in ${pattern}`,
+      'declaration',
+    );
+  }
+  return filled;
+}
+
+/**
+ * A path with every symlink on it resolved, or the path itself when it cannot
+ * be resolved (it does not exist yet, or a component is unreadable).
+ *
+ * Falling back rather than throwing keeps "this is not there" a single answer:
+ * the caller's next check reports it as a missing project root, which is what
+ * it is.
+ */
+function canonical(path: string): string {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
+}
+
+/** Whether `child` is `parent` or sits under it, comparing normalised paths. */
+function within(parent: string, child: string): boolean {
+  if (child === parent) return true;
+  return child.startsWith(parent.endsWith('/') ? parent : `${parent}/`);
+}
+
+/**
+ * The test paths one producer writes for one layer, decided against the tree.
+ *
+ * This is the resolution that used to live in `kiwa-observe`'s SKILL.md as five
+ * numbered steps. Two of its defects survived eight rounds of review there
+ * (#1896): the rule that dropped `tests/fixtures/` matched nothing on every
+ * example that had already been moved, and `{example}` resolved relative to the
+ * repository root, naming a directory that does not exist. Neither is
+ * expressible as a documentation review; both are a single assertion here.
+ *
+ * The caller supplies what only it knows. Which producer ran (`contract` is
+ * written by `kiwa-forge` as `.t.sol` and by `kiwa-hardhat` as `.test.cjs`) and
+ * where the project sits (`examples/{example}` under `/kiwa-test`, the working
+ * directory under `/kiwa-app`).
+ */
+export function resolveTestPaths(
+  layer: LayerRecord,
+  options: {
+    cwd: string;
+    /** Where `{example}/…` is anchored, relative to `cwd`. Defaults to `cwd`. */
+    projectRoot?: string | undefined;
+    /** The `test_outputs` key. Required only when the layer declares two. */
+    producer?: string | undefined;
+    /** Fills `{module}`. Anything else becomes `*`. */
+    module?: string | undefined;
+  },
+): TestPathResolution {
+  const keys = Object.keys(layer.test_outputs);
+  if (!keys.length) {
+    throw new LayerPathError(`${layer.id} declares no test_outputs`, 'declaration');
+  }
+
+  // The key is never derived from `consumer_skill`. `contract` declares
+  // `kiwa-forge` there and carries `kiwa-hardhat` in `also_consumed_by`, so
+  // deriving it looks at the Foundry output even when Hardhat ran — zero
+  // matches, reported as "no tests" (#1895 Round 1 F3).
+  let producer: string;
+  if (options.producer !== undefined) {
+    if (!keys.includes(options.producer)) {
+      throw new LayerPathError(
+        `${layer.id} has no producer "${options.producer}" (declares ${keys.join(', ')})`,
+        'request',
+      );
+    }
+    producer = options.producer;
+  } else if (keys.length > 1) {
+    throw new LayerPathError(
+      `${layer.id} declares ${keys.length} producers (${keys.join(', ')}); pass --producer to choose one`,
+      'request',
+    );
+  } else {
+    producer = keys[0]!;
+  }
+
+  // Checked here as well as at the flag, so the guarantee the anchor check
+  // below rests on ("nothing the caller passes can cross a segment") is local.
+  // Without it a separator in the module turns a table defect and a caller
+  // defect into the same message.
+  if (options.module !== undefined && !isValidModule(options.module)) {
+    throw new LayerPathError(
+      `invalid module name: ${JSON.stringify(options.module)} (expected [a-z0-9-], 1-32 chars)`,
+      'request',
+    );
+  }
+
+  // Compared after resolving symlinks, on both sides.
+  //
+  // `resolve` only normalises text, so a symlinked directory inside the working
+  // directory passes a lexical containment check and then sends `statSync` and
+  // `readdirSync` somewhere else entirely. Measured: `app -> ../outside` as
+  // `--project-root app` returned `app/test/Secret.t.sol`, a file the working
+  // directory does not contain, and the caller reads that relative path.
+  //
+  // Both sides, because the working directory is itself often reached through a
+  // symlink (`/tmp` is `/private/tmp` on macOS) and comparing one canonical
+  // path against one textual path makes every legitimate case look like an
+  // escape.
+  const cwd = canonical(resolve(options.cwd));
+  const projectRoot = canonical(resolve(cwd, options.projectRoot ?? '.'));
+  if (!within(cwd, projectRoot)) {
+    throw new LayerPathError(
+      `project root is outside the working directory: ${options.projectRoot}`,
+      'request',
+    );
+  }
+  // Refused rather than reported as "nothing matched". A project root that is
+  // not there is the shape of #1896's second defect, and an empty answer is
+  // indistinguishable from a tree where no test has been generated yet.
+  let isDirectory = false;
+  try {
+    isDirectory = statSync(projectRoot).isDirectory();
+  } catch {
+    isDirectory = false; // Absent and unreadable are the same answer here.
+  }
+  if (!isDirectory) {
+    throw new LayerPathError(
+      `project root is not a directory: ${options.projectRoot ?? '.'}`,
+      'request',
+    );
+  }
+
+  // A key with nothing under it says the producer writes somewhere and does not
+  // say where. Reporting it as "no tests matched" would send the caller looking
+  // at the tree for a defect that is in the table.
+  const declarations = layer.test_outputs[producer] ?? [];
+  if (!declarations.length) {
+    throw new LayerPathError(`${layer.id} declares no paths for ${producer}`, 'declaration');
+  }
+
+  // `{example}` outside the leading segment is the example's own name, which is
+  // what the project directory is called.
+  const example = basename(projectRoot);
+  const patterns: string[] = [];
+  const matched: Record<TestAnchor, string[]> = { project: [], fixtures: [] };
+
+  for (const declared of declarations) {
+    const anchor: TestAnchor = declared.startsWith('{example}/') ? 'project' : 'fixtures';
+    // The repo's own layout has no meaning outside the repo. Under `/kiwa-app`
+    // the project *is* the working directory, so `tests/fixtures/…` would name
+    // a directory in somebody else's project — and a project that happens to
+    // have one would be read as if it were kiwa's.
+    if (anchor === 'fixtures' && projectRoot === cwd) continue;
+
+    const root = anchor === 'project' ? projectRoot : cwd;
+    const relative = anchor === 'project' ? declared.slice('{example}/'.length) : declared;
+    const filled = resolvePlaceholders(relative, example, options.module);
+
+    // A declaration that leaves its own anchor cannot be resolved at all: the
+    // caller would read a file that is not the one being observed. `--module`
+    // cannot produce either shape, so both mean the table itself is wrong.
+    if (isAbsolute(filled) || filled.split('/').includes('..')) {
+      throw new LayerPathError(
+        `test_outputs declares a path outside its anchor: ${declared}`,
+        'declaration',
+      );
+    }
+
+    const display = anchor === 'project' ? relativeTo(cwd, join(projectRoot, filled)) : filled;
+    patterns.push(display);
+    for (const hit of matchFiles(root, filled)) {
+      matched[anchor].push(anchor === 'project' ? relativeTo(cwd, join(root, hit)) : hit);
+    }
+  }
+
+  // When both matched, the generated side is the one that just ran; the
+  // fixtures copy can be left over from an earlier round.
+  const anchor: TestAnchor | null = matched.project.length
+    ? 'project'
+    : matched.fixtures.length
+      ? 'fixtures'
+      : null;
+  const files = anchor ? [...new Set(matched[anchor])].sort() : [];
+  return { producer, anchor, patterns, files };
+}
+
+/** A path under `from`, spelled relative to it with `/` separators. */
+function relativeTo(from: string, target: string): string {
+  const rest = target === from ? '' : target.slice(from.endsWith('/') ? from.length : from.length + 1);
+  return rest === '' ? '.' : rest;
 }
 
 /**
