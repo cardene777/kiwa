@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -740,6 +740,71 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
   });
 });
 
+/**
+ * `a{x,y}b` → `axb` / `ayb`。 入れ子は扱わない (`docs/layers.json` に無い)。
+ */
+function expandBraces(pattern: string): string[] {
+  const m = /\{([^{}]*)\}/.exec(pattern);
+  if (!m) return [pattern];
+  const [whole, inner] = m;
+  const head = pattern.slice(0, m.index);
+  const tail = pattern.slice(m.index + whole.length);
+  return (inner ?? '').split(',').flatMap((alt) => expandBraces(`${head}${alt}${tail}`));
+}
+
+/**
+ * `base` からの相対 pattern に一致する file 数。
+ *
+ * shell を使わない。 pattern を `bash -c` の command 文字列へ補間すると、
+ * 空白 / `;` / `$()` / backtick / 先頭 dash を含む値が shell 構文として解釈
+ * される (#1898 Round 1 F5)。
+ *
+ * `fs.globSync` も使わない。 Node 22 で追加された API で、 repo は
+ * `engines.node` に `>=20.9.0` を宣言している。 Node 20 では import 時点で
+ * 落ち、 本 file の全 case が実行前に失敗する (#1898 Round 2 F2)。
+ *
+ * 対象 pattern は `dir/basename` の 2 段で `*` は basename にしか出ない
+ * (`docs/layers.json` の 25 形すべてを実測)。
+ */
+/**
+ * `{example}` を解決する唯一の経路。
+ *
+ * `replaceAll`。 `e2e` の退避先は `tests/fixtures/{example}/e2e-test/{example}.spec.ts`
+ * と 2 度書くため、 先頭 1 つだけ置換すると basename に `{example}` が残り、
+ * `expandBraces` が literal `example` に変えて別 pattern を検査する
+ * (#1898 Round 6 / Round 7)。
+ */
+function resolveExample(pattern: string, example: string): string {
+  return pattern.replaceAll('{example}', example);
+}
+
+function patternToMatchers(pattern: string): { dir: string; regexes: RegExp[] } {
+  const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
+  const slash = expanded.lastIndexOf('/');
+  const dir = slash === -1 ? '.' : expanded.slice(0, slash);
+  const baseName = slash === -1 ? expanded : expanded.slice(slash + 1);
+  // brace alternative を先に展開する。 escape だけ掛けると `{ts,tsx}` が
+  // literal 一致になり、 `.test.ts` も `.test.tsx` も 0 件になる (#1898 Round 3)。
+  const regexes = expandBraces(baseName).map(
+    (v) =>
+      new RegExp(`^${v.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '.*' : `\\${c}`))}$`),
+  );
+  return { dir, regexes };
+}
+
+function countIn(pattern: string, base: string): number {
+  // 変換を先に済ませる。 `readdirSync` を先に呼ぶと、 dir が無い pattern は
+  // 早期 return して変換経路に 1 度も到達しない (#1898 Round 4)。
+  const { dir, regexes } = patternToMatchers(pattern);
+  let names: string[];
+  try {
+    names = readdirSync(resolve(base, dir));
+  } catch {
+    return 0; // dir が無い = 0 件
+  }
+  return names.filter((n) => regexes.some((re) => re.test(n))).length;
+}
+
 describe('Layer 3 の観測が chain から起動される (#1894)', () => {
   /**
    * The lines that actually start `/kiwa-observe`, found by walking.
@@ -911,6 +976,233 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     expect(body, 'consumer_skill を鍵に使わない旨が無い').toMatch(
       /`consumer_skill` を鍵として使わない/,
     );
+  });
+
+  it('test_outputs の 2 形が実 example のどちらかで必ず解決する', () => {
+    // The two forms are the same test before and after `/kiwa-test` Step 5.5
+    // moves it from `examples/` into `tests/fixtures/`, so exactly one of them
+    // exists at any moment (`docs/layers.json` の `$comment` が SSOT).
+    //
+    // #1895 kept only the first and called the second "a copy made after the
+    // run". Measured on `mint-nft`, which is already moved: the first form
+    // matched 0 files and the second matched 1, so the resolution aborted for
+    // every existing example (#1896).
+    //
+    // Run against the repository rather than asserted on prose: this is the
+    // defect a documentation review could not see.
+    //
+    // **これが確かめるのは「2 形のどちらかが実在する」 ことだけ**。 resolver は
+    // skill の markdown にしかなく、 ここにあるのはその再実装なので、 両方存在時に
+    // 生成先を優先する契約も、 実行側が片方を捨てる変更も検出しない (#1898
+    // Round 1 F3)。 塞ぐには解決を CLI へ寄せて実装を 1 つにする必要があり、
+    // それは #1899 に分けた。
+    const resolve2 = (pattern: string, example: string): string => {
+      if (pattern.startsWith('tests/fixtures/')) {
+        return resolveExample(pattern, example);
+      }
+      // 生成先は `examples/` 起点。 repo root 相対にすると存在しない path になる。
+      return `examples/${resolveExample(pattern, example)}`;
+    };
+    // shell を使わない。 pattern を `bash -c` の command 文字列へ補間すると、
+    // 空白 / `;` / `$()` / backtick / 先頭 dash を含む値が shell 構文として
+    // 解釈される (#1898 Round 1 F5)。
+    //
+    // `fs.globSync` も使わない。 Node 22 で追加された API で、 repo は
+    // `engines.node` に `>=20.9.0` を宣言している。 Node 20 では import 時点で
+    // 落ち、 本 file の全 case が実行前に失敗する (#1898 Round 2 F2)。
+    //
+    const globCount = (pattern: string): number => countIn(pattern, REPO_ROOT);
+
+    // `contract` は 2 形を持ち、 かつ実 fixture が repo にある layer。
+    const contract = LAYERS.layers.find((l) => l.id === 'contract') as unknown as {
+      test_outputs: Record<string, string[]>;
+    };
+    const patterns = contract.test_outputs['kiwa-forge'] ?? [];
+    expect(patterns.length, 'contract/kiwa-forge が 2 形を宣言していない').toBe(2);
+
+    const example = 'mint-nft'; // tests/fixtures に実体がある
+    const counts = patterns.map((p) => globCount(resolve2(p, example)));
+    expect(
+      counts.reduce((a, b) => a + b, 0),
+      `${example} でどちらの形も 0 件 match: ${patterns.join(' / ')}`,
+    ).toBeGreaterThan(0);
+  });
+
+  it('kiwa-observe が analyzeSpecCoverage に module と layer を渡す', () => {
+    // Omitting them makes the analyser fall back to `module: ""` and
+    // `layer: "unit"`, so a `contract` observation is recorded as a unit one —
+    // the identity the whole `--layer` wiring exists to carry (#1896, measured
+    // by running the script against `mint-nft`).
+    const call = read('.claude/skills/kiwa-observe/SKILL.md')
+      .replace(/\n\s*/g, ' ') // 折返しを畳む
+      .match(/analyzeSpecCoverage\(\{[^}]*\}/);
+    expect(call, 'analyzeSpecCoverage の呼出が見つからない').not.toBeNull();
+    expect(call?.[0], 'module を渡していない').toContain('module');
+    expect(call?.[0], 'defaultLayer を渡していない').toContain('defaultLayer');
+  });
+
+  it('kiwa-observe が renderDashboard に表示用の gaps を渡す', () => {
+    // `defaultLayer` accepts 8 of the 20 layers, so the other 12 come back with
+    // the analyser's default (`unit`) and `renderDashboard` prints that in the
+    // `### module (layer)` heading. Measured: with `a11y` the old path rendered
+    // `### mint-nft (unit)` and the new one renders `### mint-nft (a11y)`
+    // (#1898 Round 2 F1).
+    //
+    // Asserted on the argument, not on the comment beside it: assigning the
+    // real layer to a variable and not using it is exactly what shipped.
+    const call = read('.claude/skills/kiwa-observe/SKILL.md')
+      .split('\n')
+      .filter((l) => l.includes('renderDashboard(') && !l.trim().startsWith('//'));
+    expect(call, 'renderDashboard の呼出が 1 行に定まらない').toHaveLength(1);
+    expect(call[0], 'renderDashboard が解析側の gaps をそのまま受けている').toContain(
+      'gaps: displayGaps',
+    );
+  });
+
+  it('kiwa-observe が空の解析結果を gap 0 件と書かない', () => {
+    // `analyzeSpecCoverage` reads `T-XXX-NNN` ids; a spec written with
+    // `TC-NNN` yields zero on both sides, which renders identically to full
+    // coverage. Measured on `test-spec-mint-nft.ja.md` (#1896).
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    expect(body, '空の結果と gap 0 件の区別が書かれていない').toMatch(
+      /解析できなかった/,
+    );
+  });
+
+  it('brace 形の pattern が両 variant を数える', () => {
+    // `{example}/test/unit/{module}.test.{ts,tsx}` is the one pattern of 25
+    // with a brace alternative. Escaping it as a literal made `.test.ts` and
+    // `.test.tsx` both count 0 — latent today because the helper is only
+    // handed the two `contract` patterns (#1898 Round 3).
+    expect(expandBraces('x.test.{ts,tsx}'), 'brace が展開されない').toEqual([
+      'x.test.ts',
+      'x.test.tsx',
+    ]);
+
+    // 実 file で数える。 展開だけ正しくても照合側が literal なら 0 件になる。
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-brace-'));
+    try {
+      mkdirSync(join(dir, 'unit'), { recursive: true });
+      writeFileSync(join(dir, 'unit', 'signup.test.ts'), '');
+      writeFileSync(join(dir, 'unit', 'signup.test.tsx'), '');
+      writeFileSync(join(dir, 'unit', 'signup.test.js'), ''); // 対象外
+      expect(countIn('unit/{module}.test.{ts,tsx}', dir), 'brace 形が両 variant を数えない').toBe(
+        2,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+
+    // 25 pattern の変換経路を直接見る。 `countIn` 越しに流すと、 repo に
+    // 無い dir で `readdirSync` の catch に落ち、 regex の compile に 1 件も
+    // 到達しない (#1898 Round 4)。
+    const all = LAYERS.layers.flatMap((l) =>
+      Object.values(
+        (l as unknown as { test_outputs?: Record<string, string[]> }).test_outputs ?? {},
+      ).flat(),
+    );
+    expect(all.length, '表の pattern 件数が減った').toBeGreaterThanOrEqual(25);
+    expect(
+      all.some((p) => p.includes('{ts,tsx}')),
+      'brace 形の pattern が表から消えた',
+    ).toBe(true);
+    // 到達確認だけ。 `regexes.length > 0` は `expandBraces` が必ず 1 件以上
+    // 返すため恒真で、 正しさの根拠にはならない (#1898 Round 5)。
+    for (const p of all) {
+      const resolved = resolveExample(p, 'x');
+      expect(resolved, `${p} に placeholder が残っている`).not.toContain('{example}');
+      expect(() => patternToMatchers(resolved), `${p} で例外`).not.toThrow();
+    }
+  });
+
+  /**
+   * 構文 class ごとの matcher 契約。
+   *
+   * `dir` と「一致すべき名前」 と「一致してはいけない名前」 を直接 assert する。
+   * compile できることだけを見る形は、 wildcard / literal escape / dir 分割を
+   * 壊す変更を素通しする (#1898 Round 5)。
+   *
+   * 5 class は `docs/layers.json` の 25 pattern に現れる形を代表させたもの。
+   */
+  const MATCHER_CASES: {
+    label: string;
+    pattern: string;
+    dir: string;
+    hit: string[];
+    miss: string[];
+  }[] = [
+    {
+      label: 'basename の * (contract 生成先)',
+      pattern: 'x/test/*.t.sol',
+      dir: 'x/test',
+      hit: ['MintNft.t.sol', '.t.sol'],
+      miss: ['MintNft.t.solx', 'MintNft.test.ts'],
+    },
+    {
+      label: '{Contract} → * (contract 退避先)',
+      pattern: 'tests/fixtures/x/contract-test/{Contract}.t.sol',
+      dir: 'tests/fixtures/x/contract-test',
+      hit: ['Foo.t.sol'],
+      miss: ['Foo.t.sol.bak', 'Foo.test.cjs'],
+    },
+    {
+      label: '{module} → * + suffix (orm)',
+      pattern: 'x/tests/{module}.orm.test.ts',
+      dir: 'x/tests',
+      hit: ['signup.orm.test.ts'],
+      miss: ['signup.test.ts', 'signup.orm.test.tsx'],
+    },
+    {
+      label: 'brace alternative (unit)',
+      pattern: 'x/test/unit/{module}.test.{ts,tsx}',
+      dir: 'x/test/unit',
+      hit: ['signup.test.ts', 'signup.test.tsx'],
+      miss: ['signup.test.js', 'signup.spec.ts'],
+    },
+    {
+      label: 'literal の dot が escape される',
+      pattern: 'x/tests/{module}.edge.test.ts',
+      dir: 'x/tests',
+      hit: ['a.edge.test.ts'],
+      miss: ['axedgextestxts'],
+    },
+    {
+      // raw manifest 形のまま持ち、 置換を helper に通す。 置換後の形を
+      // hardcode すると `resolveExample` を 1 度も通らず、 `replaceAll` を
+      // `replace` に戻しても緑のままになる (#1898 Round 7)。
+      label: 'wildcard を持たない exact basename (e2e 退避先)',
+      pattern: 'tests/fixtures/{example}/e2e-test/{example}.spec.ts',
+      dir: 'tests/fixtures/x/e2e-test',
+      hit: ['x.spec.ts'],
+      // `prefixx.spec.ts` は開始 anchor が無いと通る。 `example.spec.ts` は
+      // 2 つ目の `{example}` が置換されず literal `example` になった時に通る。
+      // どちらも wildcard を持つ 4 class では区別が付かない (#1898 Round 6)。
+      miss: ['prefixx.spec.ts', 'example.spec.ts', 'x.spec.ts.bak'],
+    },
+  ];
+
+  it.each(MATCHER_CASES)('$label の matcher が dir と名前を正しく決める', (c) => {
+    const resolved = resolveExample(c.pattern, 'x');
+    expect(resolved, `${c.pattern} に placeholder が残っている`).not.toContain('{example}');
+    const { dir, regexes } = patternToMatchers(resolved);
+    expect(dir, `${c.pattern} の dir`).toBe(c.dir);
+    for (const name of c.hit) {
+      expect(regexes.some((re) => re.test(name)), `${name} に一致しない`).toBe(true);
+    }
+    for (const name of c.miss) {
+      expect(regexes.some((re) => re.test(name)), `${name} に一致してしまう`).toBe(false);
+    }
+  });
+
+  it('kiwa-observe が 2 形の片方を落とす規則を書いていない', () => {
+    // The rule that caused #1896. Stated as an absence because the positive
+    // form ("存在する方を採る") can be written many ways, while the defect has
+    // one shape: dropping `tests/fixtures/` unconditionally.
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    const dropping = body
+      .split('\n')
+      .filter((l) => l.includes('tests/fixtures/') && /落と(す|し)/.test(l));
+    expect(dropping, `2 形の片方を落とす記述が残っている:\n${dropping.join('\n')}`).toEqual([]);
   });
 
   it('鍵が 2 つある layer は contract だけである', () => {

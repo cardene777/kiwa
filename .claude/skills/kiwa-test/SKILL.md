@@ -430,7 +430,18 @@ Step 5b (result-review) の **前** に置く。 result-review は統合 report 
 
 `--producer` は `test_outputs` の鍵。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つに定まる。
 
-`--test` は `kiwa layers --json` の `test_outputs` から、 選んだ鍵の下の `tests/fixtures/` 以外の値を渡す。 **`kiwa-observe` 側も同じ既定を持つが、 明示して渡す** = どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ呼出側だけ。
+`--test` は `kiwa layers --json` の `test_outputs` から、 選んだ鍵の下の値を **起点を解決してから** 渡す。 **`kiwa-observe` 側も同じ既定を持つが、 明示して渡す** = どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ呼出側だけで、 `{example}` の起点を知っているのも呼出側だけ。
+
+配列には同じ test の移動前と移動後が並ぶ。 **両方を解決して、 存在する方を渡す**。
+
+| 形 | 本 skill での解決 | いつ存在するか |
+|---|---|---|
+| 生成先 (`{example}/...`) | `examples/{example}/...` | Step 5.5 に到達する前 (同一 chain 内) |
+| 退避先 (`tests/fixtures/{example}/...`) | そのまま (repo root 起点) | 既に退避済の example に再実行する時 |
+
+**生成先の起点は `examples/`**。 `{example}` をそのまま module 名に置くと repo root からの相対になり、 `mint-nft/test/*.t.sol` のような存在しない path になる (#1896 で実測)。
+
+両方存在する時は生成先を渡す。 両方 0 件なら observe を飛ばして理由を report に残す。
 
 #### `contract` layer は `$RUNNER` で分岐する
 
