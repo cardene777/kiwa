@@ -96,6 +96,8 @@ kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
 
 単体起動で起点が判らない時は **`--test` を明示して渡してもらう**。 推測すると、 存在しない dir を探して「観測対象が無い」 と報告することになる (#1896 で実測)。
 
+**`--test` は CLI を通らない**。 起点の外を指す値の拒否も、 symlink を辿らない照合も、 matcher 構文の検査も `kiwa layers` 側にあるため、 明示した path はそのまま Read される。 渡す値の妥当性は渡した側が持つ = **推測した値を `--test` に入れて検査を省く経路として使わない**。 起点が判るなら `--project-root` を渡して CLI に解決させる。
+
 #### 解決に失敗したら止める
 
 **exit code を見る。 0 でなければ中断して user に返す**。 pipeline で握り潰すと、 空 path を Read しようとして「spec が無い」 と報告することになり、 本当の原因 (layer 名の誤り / 不正な module / CLI 未 install) が消える。

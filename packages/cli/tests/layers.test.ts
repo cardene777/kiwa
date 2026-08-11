@@ -2059,6 +2059,99 @@ describe('test_outputs から test path を解決する', () => {
     });
   });
 
+  it('symlink で cwd の外へ出る project root を拒否する', () => {
+    // `resolve` は文字列を正規化するだけなので、 cwd 内の symlink dir は字面の
+    // containment を通り、 その後の `statSync` / `readdirSync` が外を見る。
+    // 実測 = `app -> ../outside` を `--project-root app` に渡すと、 cwd が
+    // 持たない `app/test/Secret.t.sol` が files に返り、 呼出側はその相対 path を
+    // Read する (PR #1900 Round 1 F1)。
+    const root = tree(['cwd/x', 'outside/test/Secret.t.sol']);
+    withFixture(root, () => {
+      symlinkSync(join(root, 'outside'), join(root, 'cwd', 'app'));
+      expect(() =>
+        resolveTestPaths(layerWith(CONTRACT), {
+          cwd: join(root, 'cwd'),
+          producer: 'kiwa-forge',
+          projectRoot: 'app',
+        }),
+      ).toThrow(/outside the working directory/);
+    });
+  });
+
+  it('cwd の内側を指す symlink は通す', () => {
+    // 「symlink を全部拒否する」 のではなく「外へ出るものを拒否する」。 両側を
+    // 解決してから比べるため、 cwd 自体が symlink 越しでも (macOS の `/tmp` は
+    // `/private/tmp`) 正当な形が escape に見えない。
+    const root = tree(['cwd/real/test/Foo.t.sol']);
+    withFixture(root, () => {
+      symlinkSync(join(root, 'cwd', 'real'), join(root, 'cwd', 'app'));
+      const resolved = resolveTestPaths(layerWith(CONTRACT), {
+        cwd: join(root, 'cwd'),
+        producer: 'kiwa-forge',
+        projectRoot: 'app',
+      });
+      expect(resolved.anchor).toBe('project');
+      expect(resolved.files).toEqual(['real/test/Foo.t.sol']);
+    });
+  });
+
+  it('matcher 構文を含む project 名を {example} に埋めない', () => {
+    // 埋めると caller が渡した literal が pattern 自身の構文として読み直される。
+    // 実測 = `examples/app*` を起点にすると `tests/fixtures/app-one` と
+    // `tests/fixtures/app-two` の両方が返った (PR #1900 Round 1 F2)。
+    const root = tree([
+      'examples/app*/x',
+      'tests/fixtures/app-one/contract-test/One.t.sol',
+      'tests/fixtures/app-two/contract-test/Two.t.sol',
+    ]);
+    withFixture(root, () => {
+      let thrown: unknown;
+      try {
+        resolveTestPaths(layerWith(CONTRACT), {
+          cwd: root,
+          producer: 'kiwa-forge',
+          projectRoot: 'examples/app*',
+        });
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(LayerPathError);
+      expect((thrown as LayerPathError).kind).toBe('request');
+      expect((thrown as Error).message).toMatch(/not usable as \{example\}/);
+    });
+  });
+
+  it('placeholder を 1 度に埋めて値を再解釈しない', () => {
+    // 1 つずつ置換すると、 埋めた値が次の placeholder の走査対象になる。
+    // `{module}` という名前の dir が `{example}` の値として入り、 module 値
+    // (無ければ `*`) にもう一度化ける。
+    const root = tree(['examples/{module}/x', 'tests/fixtures/signup/contract-test/A.t.sol']);
+    withFixture(root, () => {
+      expect(() =>
+        resolveTestPaths(layerWith(CONTRACT), {
+          cwd: root,
+          producer: 'kiwa-forge',
+          projectRoot: 'examples/{module}',
+          module: 'signup',
+        }),
+      ).toThrow(/not usable as \{example\}/);
+    });
+  });
+
+  it('起点として消える {example} には構文の検査をかけない', () => {
+    // 生成先の `{example}/` は project root そのものとして消えるため、 名前が
+    // pattern に入らない。 `/kiwa-app` 経路で利用者の dir 名を理由に拒否すると、
+    // 実際には安全な呼出が通らなくなる。
+    const root = tree(['app*/test/Foo.t.sol']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(layerWith({ 'kiwa-forge': ['{example}/test/*.t.sol'] }), {
+        cwd: root,
+        projectRoot: 'app*',
+      });
+      expect(resolved.files).toEqual(['app*/test/Foo.t.sol']);
+    });
+  });
+
   it('存在しない project root を 0 件ではなく error にする', () => {
     // The shape of #1896's second defect. An empty answer cannot be told apart
     // from a tree where nothing has been generated yet.

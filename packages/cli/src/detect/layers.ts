@@ -42,7 +42,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync, statSync, type Dirent } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync, statSync, type Dirent } from 'node:fs';
 import { basename, dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -458,6 +458,15 @@ function matchFiles(root: string, pattern: string): string[] {
 }
 
 /**
+ * Characters the matcher reads as syntax rather than as part of a name.
+ *
+ * `*` spans a name and `{a,b}` picks between alternatives. A value substituted
+ * into a pattern has to be a name, so one carrying these would be read as the
+ * pattern's own syntax.
+ */
+const MATCHER_SYNTAX = /[*{},]/;
+
+/**
  * A declared pattern with its placeholders filled in.
  *
  * `{module}` and `{Contract}` become `*` when the caller has no value for them,
@@ -465,18 +474,39 @@ function matchFiles(root: string, pattern: string): string[] {
  * what "any of them" means to the matcher. `--module` is validated by
  * `isValidModule` before it arrives, so nothing it carries can cross a segment.
  *
+ * **Substitution happens in one pass**. Replacing one placeholder at a time
+ * feeds each value back into the scan for the next: a directory literally named
+ * `{module}` arrives as `{example}`'s value and is then replaced again, so the
+ * pattern ends up naming a file nobody asked for (measured).
+ *
+ * The value that becomes `{example}` is a directory name the caller chose, so
+ * it is checked for matcher syntax rather than escaped — the same posture as
+ * `isValidModule`. Escaping instead would mean the matcher has to understand
+ * escapes, and a value that is not a name means the caller passed something it
+ * did not mean to. Measured before this check: a project directory named `app*`
+ * resolved to the fixtures of `app-one` and `app-two`, neither of which is the
+ * project.
+ *
  * A placeholder this does not know is refused rather than left literal. Leaving
  * it makes the matcher look for a file with braces in its name, which matches
  * nothing and reads exactly like "no tests were generated".
  */
 function resolvePlaceholders(pattern: string, example: string, module: string | undefined): string {
-  const filled = pattern
-    .split('{example}')
-    .join(example)
-    .split('{module}')
-    .join(module ?? '*')
-    .split('{Contract}')
-    .join('*');
+  if (pattern.includes('{example}') && MATCHER_SYNTAX.test(example)) {
+    throw new LayerPathError(
+      `project directory name is not usable as {example}: ${JSON.stringify(example)} (must not contain * { } ,)`,
+      'request',
+    );
+  }
+  const values: Record<string, string> = {
+    example,
+    module: module ?? '*',
+    Contract: '*',
+  };
+  const filled = pattern.replace(
+    /\{(example|module|Contract)\}/g,
+    (_whole, name: string) => values[name]!,
+  );
   // `{ts,tsx}` is an alternative, not a placeholder; the comma tells them apart.
   const unknown = /\{([^{},]*)\}/.exec(filled);
   if (unknown) {
@@ -486,6 +516,22 @@ function resolvePlaceholders(pattern: string, example: string, module: string | 
     );
   }
   return filled;
+}
+
+/**
+ * A path with every symlink on it resolved, or the path itself when it cannot
+ * be resolved (it does not exist yet, or a component is unreadable).
+ *
+ * Falling back rather than throwing keeps "this is not there" a single answer:
+ * the caller's next check reports it as a missing project root, which is what
+ * it is.
+ */
+function canonical(path: string): string {
+  try {
+    return realpathSync(path);
+  } catch {
+    return path;
+  }
 }
 
 /** Whether `child` is `parent` or sits under it, comparing normalised paths. */
@@ -559,8 +605,20 @@ export function resolveTestPaths(
     );
   }
 
-  const cwd = resolve(options.cwd);
-  const projectRoot = resolve(cwd, options.projectRoot ?? '.');
+  // Compared after resolving symlinks, on both sides.
+  //
+  // `resolve` only normalises text, so a symlinked directory inside the working
+  // directory passes a lexical containment check and then sends `statSync` and
+  // `readdirSync` somewhere else entirely. Measured: `app -> ../outside` as
+  // `--project-root app` returned `app/test/Secret.t.sol`, a file the working
+  // directory does not contain, and the caller reads that relative path.
+  //
+  // Both sides, because the working directory is itself often reached through a
+  // symlink (`/tmp` is `/private/tmp` on macOS) and comparing one canonical
+  // path against one textual path makes every legitimate case look like an
+  // escape.
+  const cwd = canonical(resolve(options.cwd));
+  const projectRoot = canonical(resolve(cwd, options.projectRoot ?? '.'));
   if (!within(cwd, projectRoot)) {
     throw new LayerPathError(
       `project root is outside the working directory: ${options.projectRoot}`,

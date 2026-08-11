@@ -83,7 +83,7 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 | <code v-pre>layers.json not found</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L196) |
 | <code v-pre>invalid language code: $&#123;JSON.stringify(lang)&#125; (expected ISO 639-1, e.g. ja)</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L263) |
 | <code v-pre>invalid module name: $&#123;JSON.stringify(module)&#125; (expected &#91;a-z0-9-&#93;, 1-32 chars)</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L300) |
-| <code v-pre>unknown layer: $&#123;options.explicit&#125;</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L878) |
+| <code v-pre>unknown layer: $&#123;options.explicit&#125;</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L936) |
 | <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L138) |
 | <code v-pre>not found</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L589) |
 
