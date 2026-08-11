@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -1001,6 +1001,81 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     expect(resolved.patterns, '生成先が examples/ 起点でない').toContain(
       'examples/mint-nft/test/*.t.sol',
     );
+  });
+
+  it('退避先の宣言が実 fixture と食い違わない', () => {
+    // `e2e` は `tests/fixtures/{example}/e2e-test/{example}.spec.ts` を宣言して
+    // いたが、 Step 5.5 は git mv で dir を移すだけで rename しないため、 実体の
+    // basename は生成側が付けた名前 (`mint-nft` は `mint.spec.ts`) になる。
+    // 5 fixture すべてで 0 件 match となり、 「この example に e2e test が無い」
+    // と読めていた (#1901)。
+    //
+    // **生成先を空にした temp project root を使う**。 `examples/{example}` を
+    // 渡すと、 生成物がある状態では CLI が生成先を採るため、 退避先の宣言が
+    // 壊れていても気付けない。 起点を空 dir にすれば答えは退避先の宣言だけで
+    // 決まる。
+    // 宣言は `docs/layers.json` から読み、 一致は CLI が見る。 CLI が読むのは
+    // build が package の隣に copy した写しなので、 2 つがずれていると別々の
+    // 宣言を突き合わせることになり、 失敗 message も嘘になる。 先に同一性を
+    // 確かめる (実測 = 変異試験で rebuild を忘れ、 壊した宣言のまま緑になった)。
+    expect(
+      readFileSync(resolve(REPO_ROOT, 'packages/cli/dist/layers.json'), 'utf-8'),
+      'CLI が同梱する layers.json が docs/layers.json と違う (build が古い)',
+    ).toBe(read('docs/layers.json'));
+
+    const declarations = LAYERS.layers.flatMap((layer) =>
+      Object.entries(
+        (layer as unknown as { test_outputs?: Record<string, string[]> }).test_outputs ?? {},
+      ).flatMap(([producer, paths]) =>
+        (paths ?? [])
+          .filter((pattern) => !pattern.startsWith('{example}/'))
+          .map((pattern) => ({ layer: layer.id, producer, pattern })),
+      ),
+    );
+    expect(declarations.length, '退避先を宣言する layer が 0 件').toBeGreaterThan(0);
+
+    const examples = readdirSync(resolve(REPO_ROOT, 'tests/fixtures'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name);
+    expect(examples.length, 'fixture example が 0 件').toBeGreaterThan(0);
+
+    // repo 内に置く = CLI は project root が cwd 配下であることを要求する。
+    const probeBase = mkdtempSync(resolve(REPO_ROOT, '.context', 'fixture-probe-'));
+    const exercised = new Set<string>();
+    try {
+      for (const example of examples) {
+        const probe = resolve(probeBase, example);
+        mkdirSync(probe, { recursive: true });
+        const projectRoot = probe.slice(REPO_ROOT.length + 1);
+        for (const declaration of declarations) {
+          // 宣言の dir 部分だけを取り出して実在を確かめる。 一致そのものは CLI が
+          // 見るので、 ここでは「この example がその layer の成果物を持つか」 だけ
+          // を判定する (持たない example を失敗にしない)。
+          const resolved = declaration.pattern.replaceAll('{example}', example);
+          const dir = resolve(REPO_ROOT, resolved.slice(0, resolved.lastIndexOf('/')));
+          if (!existsSync(dir)) continue;
+          const entries = readdirSync(dir, { withFileTypes: true }).filter((e) => e.isFile());
+          if (!entries.length) continue;
+
+          const paths = testPaths(declaration.layer, declaration.producer, projectRoot);
+          expect(
+            paths.files.length,
+            `${declaration.layer}/${declaration.producer} が ${example} で 0 件 match: ` +
+              `宣言 ${declaration.pattern} / 実体 ${entries.map((e) => e.name).join(', ')}`,
+          ).toBeGreaterThan(0);
+          exercised.add(`${declaration.layer}/${declaration.producer}`);
+        }
+      }
+    } finally {
+      rmSync(probeBase, { recursive: true, force: true });
+    }
+
+    // 走査が何も見ずに通っていないこと。 宣言ごとに 1 回以上は実 fixture に
+    // 当たっている必要がある。
+    expect(
+      [...exercised].sort(),
+      '退避先を宣言しているのに実 fixture で 1 度も検査されていない layer がある',
+    ).toEqual([...new Set(declarations.map((d) => `${d.layer}/${d.producer}`))].sort());
   });
 
   it('/kiwa-app 経路では tests/fixtures/ が候補に入らない', () => {

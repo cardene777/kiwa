@@ -44,7 +44,9 @@
     "",
     "test_outputs is keyed by consumer because one layer can have more than one. contract is written by kiwa-forge as *.t.sol and by kiwa-hardhat as *.test.cjs, and a single value silently dropped the Hardhat review path.",
     "",
-    "Each consumer's output is a list because Step 5.5 moves generated tests from examples/ into tests/fixtures/, so the same test lives in one of two places depending on whether that move has run. The original resolver carried both and the first version of this table kept only the first, which would have made review miss every test already moved."
+    "Each consumer's output is a list because Step 5.5 moves generated tests from examples/ into tests/fixtures/, so the same test lives in one of two places depending on whether that move has run. The original resolver carried both and the first version of this table kept only the first, which would have made review miss every test already moved.",
+    "",
+    "The moved form keeps the name the generator gave the file -- Step 5.5 is a git mv into another directory, not a rename. So its basename is whatever the producer wrote and cannot be derived from the example. e2e declared tests/fixtures/{example}/e2e-test/{example}.spec.ts and matched zero files in all five fixtures (mint-nft holds mint.spec.ts, defi-swap holds swap.spec.ts), which read as 'this example has no e2e test' rather than as a wrong declaration. A moved form names the basename with a wildcard unless the producer is known to derive it from the example."
   ],
   "specRoot": "tests/spec",
   "layers": [
@@ -101,7 +103,7 @@
       "test_outputs": {
         "kiwa-play": [
           "{example}/tests/*.spec.ts",
-          "tests/fixtures/{example}/e2e-test/{example}.spec.ts"
+          "tests/fixtures/{example}/e2e-test/*.spec.ts"
         ]
       }
     },
