@@ -741,3 +741,94 @@ describe('the skills carry what the table renders', () => {
     expect(outside).toEqual([]);
   });
 });
+
+/**
+ * test-review が test file をどこから知るか (#1902)。
+ *
+ * `kiwa-review` は `docs/layers.json` から生成した 21 行の表を持ち、 test-review
+ * mode の既定でそこから対応 file を選んでいた。 表は生成物なので宣言は drift しない
+ * 一方、 **表が持つのは宣言だけ** で、 2 形のどちらを採るか / placeholder をどう埋めるか /
+ * 起点の外を指す値をどう扱うか / symlink を辿るかは読み手に残っていた。 その判断が
+ * skill の散文にしかなかった間に 2 つの欠陥が 8 round の review を通り抜けている
+ * (#1896)。 解決は #1899 で `kiwa layers --producer --project-root` に寄せた。
+ */
+describe('test-review の test path が CLI 経路に閉じている', () => {
+  /**
+   * `/kiwa-review --mode test-review` を **起動する** 行。
+   *
+   * 責務境界の節や本文の言及と分ける必要がある (`- 下流 ... /kiwa-review --mode
+   * test-review --layer auth` は起動ではない)。 実起動は必ず `--module` を渡すので、
+   * それを持つ行だけを取る。 code block だけに絞る形は使えない = 実際の起動指示の
+   * 多くが本文の backtick 内にある。
+   */
+  function invocations(): { skill: string; command: string }[] {
+    return [...skillDirs()]
+      .filter((name) => name !== 'kiwa-review')
+      .flatMap((name) => {
+        const rel = `.claude/skills/${name}/SKILL.md`;
+        if (!existsSync(resolve(REPO_ROOT, rel))) return [];
+        return read(rel)
+          .split('\n')
+          .map((line) => /\/kiwa-review --mode test-review[^`]*/.exec(line)?.[0] ?? '')
+          .filter((command) => command.includes('--module'))
+          .map((command) => ({ skill: name, command: command.trim() }));
+      });
+  }
+
+  it('起動行が 1 件も無いということはない', () => {
+    // 下の 2 検査は起動行の集合に対して回る。 抽出が壊れて 0 件になると、 どちらも
+    // 何も見ずに緑になる。
+    expect(invocations().length, 'test-review の起動行が抽出できない').toBeGreaterThanOrEqual(10);
+  });
+
+  it('起動行が --test-path か (--producer と --project-root) のどちらかを渡す', () => {
+    // `--test-path` は明示 override で、 渡した path はそのまま Read される。
+    // 省略した時の既定が CLI なので、 省略するなら CLI が要求する 2 値を渡す。
+    // どちらも無い起動は、 review 側が自分で解決するしかない状態を作る。
+    //
+    // 判定は **起動 command の部分だけ** を見る。 行全体で見ると、 同じ行に置いた
+    // 説明文 (「`--producer` と `--project-root` は ... のために要る」) が flag 名を
+    // 含むため、 command から外しても緑のままになる (変異試験で実測)。
+    const missing = invocations()
+      .filter(({ command }) => !command.includes('--test-path'))
+      .filter(({ command }) => !(command.includes('--producer') && command.includes('--project-root')))
+      .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
+    expect(missing, `--producer / --project-root を渡していない起動行:\n${missing.join('\n')}`).toEqual(
+      [],
+    );
+  });
+
+  it('--test-path に pattern を渡さない', () => {
+    // pattern は宣言であって、 生成した file の名前ではない。 skill に写すと
+    // `docs/layers.json` と 2 箇所になり、 2 形のうち片方しか見ない形に戻る
+    // (`--test-path test/*.t.sol` は退避後は 0 件になる)。 明示 override は
+    // 「いま書いた file」 を渡す時のためにある。
+    const copied = invocations()
+      .map(({ skill, command }) => {
+        const value = /--test-path\s+(\S+)/.exec(command)?.[1];
+        return value && /[*{]/.test(value) ? `${skill}: --test-path ${value}` : null;
+      })
+      .filter((entry): entry is string => entry !== null);
+    expect(copied, `宣言を写した --test-path:\n${copied.join('\n')}`).toEqual([]);
+  });
+
+  it('kiwa-review が 2 値を宣言し、 既定が test_paths を名指しする', () => {
+    const lines = read('.claude/skills/kiwa-review/SKILL.md').split('\n');
+    for (const flag of ['--producer', '--project-root']) {
+      const declared = lines.filter((l) => l.startsWith(`- \`${flag} `));
+      expect(declared.length, `kiwa-review が ${flag} を宣言していない`).toBe(1);
+    }
+    const testPath = lines.find((l) => l.startsWith('- `--test-path '));
+    expect(testPath, '--test-path の宣言が無い').toBeDefined();
+    expect(testPath, '--test-path の既定が test_paths を名指ししていない').toContain('test_paths');
+  });
+
+  it('kiwa-review が test 出力先の対応表を持たない', () => {
+    // 生成領域ごと消した。 表が「対応 test file」 を並べている限り、 注意書きを
+    // 添えても実行の指示として読まれる (PR #1900 Round 1 F3 で実測)。
+    const source = read('.claude/skills/kiwa-review/SKILL.md');
+    expect(source, 'resolver 領域が残っている').not.toContain('kiwa-layers:resolver');
+    const rows = [...source.matchAll(/^\| `[a-z0-9-]+` \| `\/kiwa-[a-z0-9-]+` \|/gm)].map((m) => m[0]!);
+    expect(rows, `layer × 書き手 の表が残っている:\n${rows.join('\n')}`).toEqual([]);
+  });
+});

@@ -342,11 +342,11 @@ round 別 report は `coverage-report-{module}-round-{N}.md` として累積保�
 
 ### Step 6: kiwa-review 自動呼出 (test-review mode)
 
-Step 5d で test-passed marker 作成成功後、 `--no-review` 未指定なら生成 test の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer contract --lang $DOC_LANG --test-path test/*.t.sol` を内部呼出し、 spec vs test 整合 / 観点別 cover 率 / 追加 test 提案 を 5 軸で判定。
+Step 5d で test-passed marker 作成成功後、 `--no-review` 未指定なら生成 test の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root .` を内部呼出し、 spec vs test 整合 / 観点別 cover 率 / 追加 test 提案 を 5 軸で判定。
 
 呼出例:
 ```text
-/kiwa-review --mode test-review --module nft-marketplace --layer contract --lang $DOC_LANG
+/kiwa-review --mode test-review --module nft-marketplace --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root .
 ```
 
 review 結果:

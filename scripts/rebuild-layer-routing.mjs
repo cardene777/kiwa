@@ -195,21 +195,14 @@ function renderReviewEnum(layers) {
   ].join('\n');
 }
 
-function renderResolver(layers) {
-  // Keyed by consumer: `contract` is written by two skills in two shapes, and a
-  // single column dropped the Hardhat path entirely.
-  const lines = ['', '| layer | 書き手 | 対応 test file |', '|---|---|---|'];
-  for (const l of layers) {
-    for (const [skill, outs] of Object.entries(l.test_outputs)) {
-      // Two places, because Step 5.5 moves generated tests from examples/ into
-      // tests/fixtures/. Review has to look in both.
-      lines.push(`| \`${l.id}\` | \`/${skill}\` | ${outs.map((o) => `\`${o}\``).join(' または ')} |`);
-    }
-  }
-  lines.push('');
-  return lines.join('\n');
-}
-
+// `kiwa-review` used to carry a `resolver` region here: one row per layer and
+// producer, listing the declared output paths. It was rendered from this table,
+// so the declaration never drifted — but a declaration is not a resolution.
+// Which of the two forms exists, how the placeholders are filled, what happens
+// to a path that leaves its anchor, whether a symlink is followed: all of that
+// stayed with the reader. #1899 moved it into `kiwa layers --producer
+// --project-root`, and #1902 removed the table so the review path asks the same
+// command every other consumer asks.
 const PLAN = [
   {
     rel: '.claude/skills/kiwa-design/SKILL.md',
@@ -220,10 +213,7 @@ const PLAN = [
   },
   {
     rel: '.claude/skills/kiwa-review/SKILL.md',
-    regions: [
-      { name: 'review-enum', render: renderReviewEnum },
-      { name: 'resolver', render: renderResolver },
-    ],
+    regions: [{ name: 'review-enum', render: renderReviewEnum }],
   },
 ];
 

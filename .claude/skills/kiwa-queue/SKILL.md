@@ -127,7 +127,7 @@ describe("{module} — queue happy path", () => {
 
 ### Step 4: /kiwa-review test-review 自動呼出
 
-`--no-review` 未指定なら `/kiwa-review --mode test-review --layer job-queue --module {module} --lang $DOC_LANG` を chain 呼出。
+`--no-review` 未指定なら `/kiwa-review --mode test-review --layer job-queue --module {module} --lang $DOC_LANG --producer kiwa-queue --project-root .` を chain 呼出。 `--producer` と `--project-root` は review 側が test file を `kiwa layers` に訊くために要る (#1902)。
 
 ## 完了条件
 

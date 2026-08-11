@@ -320,11 +320,11 @@ flaky 検証は 4 round 連続 PASS で固定。
 
 ### Step 9: kiwa-review 自動呼出 (test-review mode)
 
-Step 7 (4 round 連続 PASS) 完了後、 `--no-review` 未指定なら生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer e2e --lang $DOC_LANG --test-path tests/*.spec.ts` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
+Step 7 (4 round 連続 PASS) 完了後、 `--no-review` 未指定なら生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root .` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
 
 呼出例:
 ```text
-/kiwa-review --mode test-review --module token-gating --layer e2e --lang $DOC_LANG
+/kiwa-review --mode test-review --module token-gating --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root .
 ```
 
 review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 report 出力先: `tests/reports/review/test-review-{module}.{$DOC_LANG}.md`。

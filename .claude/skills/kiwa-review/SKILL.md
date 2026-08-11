@@ -36,7 +36,9 @@ $ARGUMENTS
 
 <!-- kiwa-layers:review-enum:end -->
 - `--spec-path {path}` — spec file path を明示指定 (`--module` の代替)
-- `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 default は spec から推定)
+- `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 省略時は `kiwa layers` が返す `test_paths.files` を使う)
+- `--producer {skill}` — `kiwa layers --producer` にそのまま渡す `test_outputs` の鍵 (test-review mode で `--test-path` を省く時は必須、 鍵が 2 つある layer では省略不可)
+- `--project-root {path}` — 生成先 (`{example}/...`) の起点。 `kiwa layers --project-root` にそのまま渡す (省略時は cwd)
 - `--lang {ja|en|<ISO 639-1>}` — report 生成言語 (省略時は Step 0 で AskUserQuestion、 詳細 `references/doc-language-selection.md`)
 - `--no-auto-call` — 他 skill からの自動呼出ではなく単体起動として動作 (chain effect 抑制)
 - `--no-issue-create` — result-review 軸 5 = 0 検出時の自動 Issue 化 AskUserQuestion を skip (CI / 自動化用、 改善 3 / Issue #226)
@@ -99,6 +101,34 @@ kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 
 SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。 spec path 表記は説明のための例示で、 解決の指示ではない。
 
+### test code の path も CLI から受け取る
+
+test-review mode で `--test-path` を省略した時、 **同じ呼出に `--producer` と `--project-root` を足して `test_paths` を受け取る**。 表から自分で選ばない。
+
+```bash
+kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
+  --producer "$PRODUCER" --project-root "$PROJECT_ROOT"
+```
+
+返る `test_paths` の中身。
+
+| field | 内容 |
+|---|---|
+| `producer` | 実際に読んだ `test_outputs` の鍵 |
+| `anchor` | `project` (生成先) / `fixtures` (退避先) / `null` (どちらも 0 件) |
+| `patterns` | 探した先。 0 件だった時に「どこを見たか」 を report に残すために使う |
+| `files` | review 対象の test file 全件 |
+
+**本 file に対応表を持たない**。 以前は `docs/layers.json` から生成した 21 行の表を持っていたが、 表が持つのは宣言だけで、 2 形のどちらを採るか / placeholder をどう埋めるか / 起点の外を指す値をどう扱うか / symlink を辿るかは呼出側の判断に残っていた。 その判断が skill の散文にしか無かった間に 2 つの欠陥が 8 round の review を通り抜けている (#1896)。 解決は `packages/cli/src/detect/layers.ts` の `resolveTestPaths` 1 箇所に閉じ、 本 skill は返った値を使う (#1899 / #1902)。
+
+`$PRODUCER` は skill 引数の `--producer`。 どの生成元の成果物を review するかを知っているのは呼出側だけで、 **`consumer_skill` から引かない** = `contract` の `consumer_skill` は常に `kiwa-forge` で `kiwa-hardhat` は `also_consumed_by` 側にあり、 Hardhat の test を review する時も Foundry の `.t.sol` を探して 0 件になる。
+
+`$PROJECT_ROOT` は skill 引数の `--project-root`。 Layer 2 skill は対象 project を cwd にして本 skill を呼ぶため、 通常は `.`。 省略時も cwd。
+
+**`--test-path` は CLI を通らない**。 起点の外を指す値の拒否も、 symlink を辿らない照合も、 matcher 構文の検査も `kiwa layers` 側にあるため、 明示した path はそのまま Read される。 生成直後の exact path を渡す時に使い、 **推測した値を入れて検査を省く経路として使わない**。
+
+失敗時の扱いは § 解決に失敗したら止める と同じ。 加えて `test_paths.files` が空なら中断し、 理由に `test_paths.patterns` を添える (観測対象が無いことと、 探す先が誤っていることを report で区別する)。
+
 ### Step 1: mode 判定 + 入力読込
 
 `--mode` 引数で 3 分岐。 spec-review / test-review / result-review いずれかを必ず実行 (mode 未指定時はエラー停止 + AskUserQuestion で確認)。
@@ -113,35 +143,7 @@ SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。 spe
 
 入力:
 - spec file を Read
-- 対応 test file は下表で特定する (`docs/layers.json` から生成)。
-
-<!-- kiwa-layers:resolver:start -->
-
-| layer | 書き手 | 対応 test file |
-|---|---|---|
-| `contract` | `/kiwa-forge` | `{example}/test/*.t.sol` または `tests/fixtures/{example}/contract-test/{Contract}.t.sol` |
-| `contract` | `/kiwa-hardhat` | `{example}/test/*.test.ts` または `tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs` |
-| `e2e` | `/kiwa-play` | `{example}/tests/*.spec.ts` または `tests/fixtures/{example}/e2e-test/*.spec.ts` |
-| `e2e-generic` | `/kiwa-e2e` | `{example}/tests/e2e/{module}.spec.ts` |
-| `a11y` | `/kiwa-a11y` | `{example}/tests/a11y/{module}.test.tsx` または `{example}/tests/a11y/{module}.spec.ts` |
-| `integration` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
-| `api` | `/kiwa-api` | `{example}/test/integration/{module}.api.test.ts` |
-| `ui` | `/kiwa-ui` | `{example}/tests/{module}.test.tsx` |
-| `data` | `/kiwa-data` | `{example}/tests/{module}.data.test.ts` |
-| `cli` | `/kiwa-cli-test` | `{example}/tests/{module}.cli.test.ts` |
-| `unit` | `/kiwa-vitest` | `{example}/test/unit/{module}.test.{ts,tsx}` |
-| `orm-query` | `/kiwa-orm` | `{example}/tests/{module}.orm.test.ts` |
-| `nextjs-server-action` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.nextjs.test.ts` |
-| `nextjs-middleware` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.middleware.test.ts` |
-| `nextjs-rsc` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.rsc.test.ts` |
-| `nextjs-parallel-route` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.parallel.test.ts` |
-| `nextjs-rsc-streaming` | `/kiwa-nextjs` | `{example}/tests/integration/{module}.rsc-streaming.test.ts` |
-| `edge-handler` | `/kiwa-edge` | `{example}/tests/{module}.edge.test.ts` |
-| `auth` | `/kiwa-auth` | `{example}/tests/{module}.auth.test.ts` |
-| `job-queue` | `/kiwa-queue` | `{example}/tests/{module}.queue.test.ts` |
-| `cache` | `/kiwa-cache` | `{example}/tests/{module}.cache.test.ts` |
-
-<!-- kiwa-layers:resolver:end -->
+- 対応 test file は **`kiwa layers` に訊く**。 § test code の path も CLI から受け取る で解決する。
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read
 - 新 3 layer 専用観点の追加 SSOT
   - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Action + Expected) を Layer 2 mapping と照合

@@ -147,7 +147,7 @@ afterEach(async () => {
 
 ### Step 5: kiwa-review 自動呼出 (test-review mode)
 
-`/kiwa-review --mode test-review --module {module} --layer ui --test-path tests/{module}.test.tsx --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。
+`/kiwa-review --mode test-review --module {module} --layer ui --producer kiwa-ui --project-root . --lang $DOC_LANG` を内部呼出し、 spec vs test 整合 + 観点別 cover 率 + 追加 test 提案を 5 軸判定。 `--no-review` で skip 可能。
 
 ## 実装例 (実 PoC `examples/react-component-poc/`)
 
