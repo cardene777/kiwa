@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { globSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -925,6 +925,12 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     //
     // Run against the repository rather than asserted on prose: this is the
     // defect a documentation review could not see.
+    //
+    // **これが確かめるのは「2 形のどちらかが実在する」 ことだけ**。 resolver は
+    // skill の markdown にしかなく、 ここにあるのはその再実装なので、 両方存在時に
+    // 生成先を優先する契約も、 実行側が片方を捨てる変更も検出しない (#1898
+    // Round 1 F3)。 塞ぐには解決を CLI へ寄せて実装を 1 つにする必要があり、
+    // それは #1899 に分けた。
     const resolve2 = (pattern: string, example: string): string => {
       if (pattern.startsWith('tests/fixtures/')) {
         return pattern.replace('{example}', example);
@@ -932,13 +938,17 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
       // 生成先は `examples/` 起点。 repo root 相対にすると存在しない path になる。
       return `examples/${pattern.replace('{example}', example)}`;
     };
+    // Node の glob を使う。 pattern を `bash -c` の command 文字列へ補間すると、
+    // 空白 / `;` / `$()` / backtick / 先頭 dash を含む値が shell 構文として
+    // 解釈される。 bash 不在や glob dialect 差で stdout が 0 になると、
+    // 原因を隠した偽の成功にもなる (#1898 Round 1 F5)。
     const globCount = (pattern: string): number => {
       const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
-      const r = spawnSync('bash', ['-c', `ls ${expanded} 2>/dev/null | wc -l`], {
-        cwd: REPO_ROOT,
-        encoding: 'utf-8',
-      });
-      return Number((r.stdout ?? '0').trim());
+      try {
+        return globSync(expanded, { cwd: REPO_ROOT }).length;
+      } catch {
+        return 0;
+      }
     };
 
     // `contract` は 2 形を持ち、 かつ実 fixture が repo にある layer。

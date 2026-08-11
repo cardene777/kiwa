@@ -103,14 +103,23 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 
 `{module}` は `$MODULE` に、 `{Contract}` は対象 contract 名に解決する。 決まらなければ `*` にする。
 
-**`{example}` の基準は呼出側が持つ**。 2 形で起点が違い、 生成先は `--target` の作業 dir 起点、 退避先は project root 起点になる。
+**`{example}` の基準は呼出側が持つ**。 起点が 2 種類あり、 同じ「root」 という語で呼ぶと取り違える。
 
-| 呼出側 | 生成先の起点 | 例 |
+| 起点 | 指す先 |
+|---|---|
+| `KIWA_REPO_ROOT` | kiwa repo 自身の root。 `tests/fixtures/` はここの下にしか無い |
+| `TARGET_PROJECT_ROOT` | 観測対象の project root。 `/kiwa-test` では `examples/{example}`、 `/kiwa-app` では利用者 project の root |
+
+2 形の解決先。
+
+| 呼出側 | 生成先 (`{example}/...`) | 退避先 (`tests/fixtures/...`) |
 |---|---|---|
-| `/kiwa-test` (kiwa repo の `examples/` を回す) | `examples/{example}` | `examples/mint-nft/test/*.t.sol` |
-| `/kiwa-app` (利用者 project) | project root (`.`) | `test/*.t.sol` |
+| `/kiwa-test` | `TARGET_PROJECT_ROOT` = `examples/{example}` | `KIWA_REPO_ROOT` 起点で解決する |
+| `/kiwa-app` | `TARGET_PROJECT_ROOT` = 利用者 project の root | **候補から外す** |
 
-退避先 (`tests/fixtures/...`) は kiwa repo 内部の場所なので、 どちらの呼出側でも project root 起点で `{example}` を `$MODULE` に解決する。
+**`/kiwa-app` では退避先を候補にしない**。 `tests/fixtures/` は kiwa repo 内部の場所で、 利用者 project には存在しない。 そこを候補に残すと、 利用者 project にたまたま同名の dir があった時にそちらを読む。
+
+前段の安全性確認 (§ 4) は **その形の起点** に対して行う。 生成先は `TARGET_PROJECT_ROOT` 配下、 退避先は `KIWA_REPO_ROOT` 配下に収まることを確かめる。 1 つの root で両方を見ると、 どちらかが必ず「外を指す」 と誤判定される。
 
 単体起動で基準が判らない時は **`--test` を明示して渡してもらう**。 推測すると、 存在しない dir を glob して「観測対象が無い」 と報告することになる (#1896 で実測)。
 
@@ -120,7 +129,7 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 |---|---|
 | 絶対 path で始まる | 落とす |
 | `..` を含む | 落とす |
-| 正規化して project root の外を指す | 落とす |
+| 正規化して **その形の起点** の外を指す | 落とす |
 | 上記いずれでもない | 使う |
 
 `test_outputs` は宣言なので通常は project 相対だが、 **誤記や改変でこの前提は崩れる**。 崩れた時に読むのは観測対象でない file になる。
@@ -203,12 +212,24 @@ const specMd = await readFile(SPEC_PATH, 'utf8');
 // TEST_PATHS は解決した glob が match した全 file。 1 件だけ読むと、 残りの
 // test が「spec にあるが test が無い」 として gap に出る。
 const testCode = (await Promise.all(TEST_PATHS.map((p) => readFile(p, 'utf8')))).join('\n');
-// MODULE と LAYER を渡す。 省くと spec 側から読めなかった時に module が空文字、
-// layer が既定の `unit` になり、 どの層を観測した dashboard か判らなくなる
-// (実測 = contract layer の観測が `layer: unit` と記録された、 #1896)。
+// MODULE を渡す。 省くと spec 側から読めなかった時に module が空文字になり、
+// どの module の dashboard か判らなくなる (実測、 #1896)。
+//
+// defaultLayer は 8 値しか受けない。 docs/layers.json の 20 layer のうち
+// 12 は渡せないので、 allowlist に入る時だけ渡す。 型に合わない値を渡すと
+// 解析側が落ちる。
+const ANALYSER_LAYERS = ['contract', 'unit', 'integration', 'e2e', 'api', 'ui', 'data', 'cli'];
 const gaps = [
-  analyzeSpecCoverage({ specMarkdown: specMd, testCode, module: MODULE, defaultLayer: LAYER }),
+  analyzeSpecCoverage({
+    specMarkdown: specMd,
+    testCode,
+    module: MODULE,
+    ...(ANALYSER_LAYERS.includes(LAYER) ? { defaultLayer: LAYER } : {}),
+  }),
 ];
+// 元の layer は常に dashboard 本文に載せる。 gaps[0].layer は解析側の値で、
+// 渡せなかった 12 layer では既定の `unit` のままになる。
+const observedLayer = LAYER;
 
 const dashboard = renderDashboard({ history, flaky, gaps });
 await mkdir(dirname(OUT_PATH), { recursive: true });
@@ -216,7 +237,14 @@ await writeFile(OUT_PATH, dashboard, 'utf8');
 console.log(`dashboard written to ${OUT_PATH}`);
 ```
 
-`LAYER` に渡せるのは `analyzeSpecCoverage` の `defaultLayer` が受ける 8 値 (`contract` / `unit` / `integration` / `e2e` / `api` / `ui` / `data` / `cli`) だけ。 `docs/layers.json` の 20 layer はこれより多いので、 **受けない値なら渡さず、 dashboard の本文に layer 名を書く**。 型に合わない値を渡すと解析側が落ちる。
+`defaultLayer` が受けるのは 8 値 (`contract` / `unit` / `integration` / `e2e` / `api` / `ui` / `data` / `cli`) だけで、 `docs/layers.json` は 20 layer を宣言する。 **差の 12 layer では `defaultLayer` を渡さない**。 型に合わない値を渡すと解析側が落ちる。
+
+渡せなかった時 `gaps[0].layer` は既定の `unit` になる。 したがって **dashboard の本文には常に `--layer` の値をそのまま書く**。 解析側の値を表示に使うと、 12 layer の観測が全て `unit` と表示される。
+
+| `--layer` の値 | `defaultLayer` | dashboard 本文の表示 |
+|---|---|---|
+| 8 値のいずれか | 渡す | `--layer` の値 |
+| 残り 12 | 渡さない | `--layer` の値 (解析側は `unit` のまま) |
 
 #### 空の結果と「gap が無い」 を混同しない
 
