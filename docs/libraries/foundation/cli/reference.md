@@ -78,14 +78,14 @@ JavaScript から同じ計画を扱う場合は `runInit`、`runSpecToTest`、`r
 | <code v-pre>spec-to-test: input not found: $&#123;inPath&#125;</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L307) |
 | <code v-pre>spec-to-test: unsupported layer "$&#123;layer&#125;". Supported: api, ui, data, cli.</code> | [packages/cli/src/commands/spec-to-test.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/commands/spec-to-test.ts#L319) |
 | <code v-pre>stack-signals.json not found</code> | [packages/cli/src/detect/index.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/index.ts#L43) |
-| <code v-pre>$&#123;path&#125; could not be read</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L159) |
-| <code v-pre>$&#123;path&#125; is not valid JSON</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L164) |
-| <code v-pre>layers.json not found</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L195) |
-| <code v-pre>invalid language code: $&#123;JSON.stringify(lang)&#125; (expected ISO 639-1, e.g. ja)</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L262) |
-| <code v-pre>invalid module name: $&#123;JSON.stringify(module)&#125; (expected &#91;a-z0-9-&#93;, 1-32 chars)</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L299) |
-| <code v-pre>unknown layer: $&#123;options.explicit&#125;</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L524) |
-| <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L129) |
-| <code v-pre>not found</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L505) |
+| <code v-pre>$&#123;path&#125; could not be read</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L160) |
+| <code v-pre>$&#123;path&#125; is not valid JSON</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L165) |
+| <code v-pre>layers.json not found</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L196) |
+| <code v-pre>invalid language code: $&#123;JSON.stringify(lang)&#125; (expected ISO 639-1, e.g. ja)</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L263) |
+| <code v-pre>invalid module name: $&#123;JSON.stringify(module)&#125; (expected &#91;a-z0-9-&#93;, 1-32 chars)</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L300) |
+| <code v-pre>unknown layer: $&#123;options.explicit&#125;</code> | [packages/cli/src/detect/layers.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/detect/layers.ts#L878) |
+| <code v-pre>kiwa init: $&#123;flag&#125; requires a value</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L138) |
+| <code v-pre>not found</code> | [packages/cli/src/runCli.ts](https://github.com/cardene777/kiwa/blob/main/packages/cli/src/runCli.ts#L589) |
 
 ## API 契約
 

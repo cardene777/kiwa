@@ -423,35 +423,30 @@ Step 5b (result-review) の **前** に置く。 result-review は統合 report 
 `contract` 以外の layer は 1 回起動する。
 
 ```text
-/kiwa-observe --module {example} --layer {layer} --lang ${DOC_LANG} --producer {producer} --test {解決した path} --out tests/reports/observe/dashboard-{example}-{layer}.${DOC_LANG}.md
+/kiwa-observe --module {example} --layer {layer} --lang ${DOC_LANG} --producer {producer} --project-root examples/{example} --out tests/reports/observe/dashboard-{example}-{layer}.${DOC_LANG}.md
 ```
 
 `--layer` は `$LAYERS` の各値をそのまま渡す。 Step 2.5 で `--target` から解決した同じ list で、 ここで組み直さない = 2 箇所で解決すると target の解釈が割れる。
 
-`--producer` は `test_outputs` の鍵。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つに定まる。
+`--producer` は `test_outputs` の鍵。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つに定まる。 どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ本 skill だけなので、 明示して渡す。
 
-`--test` は `kiwa layers --json` の `test_outputs` から、 選んだ鍵の下の値を **起点を解決してから** 渡す。 **`kiwa-observe` 側も同じ既定を持つが、 明示して渡す** = どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ呼出側だけで、 `{example}` の起点を知っているのも呼出側だけ。
+**`--project-root` は `examples/{example}`**。 `{example}/...` の起点で、 これを知っているのも本 skill だけ。 `{example}` をそのまま置くと repo root からの相対になり、 `mint-nft/test/*.t.sol` のような存在しない path になる (#1896 で実測)。
 
-配列には同じ test の移動前と移動後が並ぶ。 **両方を解決して、 存在する方を渡す**。
+**test path 自体は解決しない**。 生成先 (`examples/{example}/...`) と退避先 (`tests/fixtures/{example}/...`) のどちらを採るかは `kiwa layers --producer --project-root` が実在で決めて `test_paths` に返す (#1899)。 本 skill が 2 形を並べて選ぶと、 同じ規約が `kiwa-observe` 側と 2 箇所になる。
 
-| 形 | 本 skill での解決 | いつ存在するか |
-|---|---|---|
-| 生成先 (`{example}/...`) | `examples/{example}/...` | Step 5.5 に到達する前 (同一 chain 内) |
-| 退避先 (`tests/fixtures/{example}/...`) | そのまま (repo root 起点) | 既に退避済の example に再実行する時 |
-
-**生成先の起点は `examples/`**。 `{example}` をそのまま module 名に置くと repo root からの相対になり、 `mint-nft/test/*.t.sol` のような存在しない path になる (#1896 で実測)。
-
-両方存在する時は生成先を渡す。 両方 0 件なら observe を飛ばして理由を report に残す。
+観測対象が 1 件も無い場合は `kiwa-observe` が非 0 で終わるので、 下表の失敗経路で report に理由が残る。
 
 #### `contract` layer は `$RUNNER` で分岐する
 
 `contract` の `consumer_skill` は常に `kiwa-forge` で、 `kiwa-hardhat` は `also_consumed_by` 側にある。 **`consumer_skill` から producer を決めない** = Hardhat で走らせた時も Foundry の `.t.sol` を観測しようとして 0 件 match になる。
 
-| `$RUNNER` | `--producer` | 観測する成果物 | `--out` |
-|---|---|---|---|
-| `foundry` | `kiwa-forge` | `{example}/test/*.t.sol` | `tests/reports/observe/dashboard-{example}-contract-foundry.${DOC_LANG}.md` |
-| `hardhat` | `kiwa-hardhat` | `{example}/test/*.test.ts` | `tests/reports/observe/dashboard-{example}-contract-hardhat.${DOC_LANG}.md` |
-| `both` | 上 2 行を順に実行 (2 回起動) | 両方 | 上 2 行の path (別 file になる) |
+| `$RUNNER` | `--producer` | `--out` |
+|---|---|---|
+| `foundry` | `kiwa-forge` | `tests/reports/observe/dashboard-{example}-contract-foundry.${DOC_LANG}.md` |
+| `hardhat` | `kiwa-hardhat` | `tests/reports/observe/dashboard-{example}-contract-hardhat.${DOC_LANG}.md` |
+| `both` | 上 2 行を順に実行 (2 回起動) | 上 2 行の path (別 file になる) |
+
+**どの file を観測するかは書かない**。 鍵ごとの成果物は `docs/layers.json` の `test_outputs` が宣言し、 `kiwa layers` が実在で解決する。 ここに写すと同じ宣言が 2 箇所になる。
 
 **`contract` は runner を `--out` に足す**。 既定の `dashboard-{example}-contract.{lang}.md` は layer までしか区別しないため、 `both` で 2 回起動すると 2 枚目が 1 枚目を上書きする。
 

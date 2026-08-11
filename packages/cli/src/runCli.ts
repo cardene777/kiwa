@@ -10,7 +10,9 @@ import {
   applyLang,
   isValidDocLang,
   isValidModule,
+  LayerPathError,
   resolveLayers,
+  resolveTestPaths,
   scanManifests,
   stackFileExists,
   writeStackFile,
@@ -34,8 +36,15 @@ layers options:
                                 en and omitting the flag both give the plain path.
   --module M                    Substitute M for the {module} placeholder in spec paths.
                                 [a-z0-9-], 1-32 chars. Refused otherwise.
+  --producer S                  Which test_outputs key to resolve test paths from.
+                                Needed only where a layer declares two (contract).
+  --project-root R              Where {example}/... is anchored, relative to the working
+                                directory (default: the working directory itself).
+                                tests/fixtures/... is offered only when the two differ.
   --json                        Emit one record per layer with its consumer skill,
                                 mode and spec path, plus how the list was chosen.
+                                --producer and --project-root add test_paths, and both
+                                need --json and a single --layer.
 
 init options:
   --detect                      Report which kiwa layers the project's dependencies point at,
@@ -384,6 +393,17 @@ export function exitCodeForLayersError(message: string): number {
 }
 
 /**
+ * The same split for a test path that could not be resolved.
+ *
+ * A caller naming a producer the layer does not declare gets 2; a
+ * `docs/layers.json` that declares an unresolvable path gets 1, because a
+ * caller cannot fix that by changing what it asked for.
+ */
+export function exitCodeForLayerPathError(error: unknown): number {
+  return error instanceof LayerPathError && error.kind === 'declaration' ? 1 : 2;
+}
+
+/**
  * Print the layers this run applies to.
  *
  * Read-only by design. Skills call it to learn what to work on, so it must be
@@ -412,6 +432,8 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
   let explicit: string | undefined;
   let lang: string | undefined;
   let moduleName: string | undefined;
+  let producer: string | undefined;
+  let projectRoot: string | undefined;
   let asJson = false;
 
   for (let i = 0; i < args.length; i += 1) {
@@ -445,6 +467,24 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
       i += 1;
     } else if (arg.startsWith('--module=')) {
       moduleName = arg.slice('--module='.length);
+    } else if (arg === '--producer') {
+      producer = valueAfter(args, i);
+      if (producer === undefined) {
+        deps.stderr('ERR layers: --producer needs a value\n');
+        return 2;
+      }
+      i += 1;
+    } else if (arg.startsWith('--producer=')) {
+      producer = arg.slice('--producer='.length);
+    } else if (arg === '--project-root') {
+      projectRoot = valueAfter(args, i);
+      if (projectRoot === undefined) {
+        deps.stderr('ERR layers: --project-root needs a value\n');
+        return 2;
+      }
+      i += 1;
+    } else if (arg.startsWith('--project-root=')) {
+      projectRoot = arg.slice('--project-root='.length);
     } else {
       deps.stderr(`ERR layers: unknown option ${arg}\n`);
       return 2;
@@ -479,6 +519,32 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
     return 2;
   }
 
+  if (producer !== undefined && !producer) {
+    deps.stderr('ERR layers: --producer needs a value\n');
+    return 2;
+  }
+  if (projectRoot !== undefined && !projectRoot) {
+    deps.stderr('ERR layers: --project-root needs a value\n');
+    return 2;
+  }
+
+  // Test paths are resolved per layer and per producer, so the pair of flags
+  // only means something against one named layer. Accepting them alongside a
+  // list would answer for the layers that happen to declare the key and stay
+  // silent about the rest, which reads as "no tests" for a typo.
+  const wantsTestPaths = producer !== undefined || projectRoot !== undefined;
+  if (wantsTestPaths && (explicit === undefined || explicit === 'all')) {
+    deps.stderr('ERR layers: --producer and --project-root need --layer <id>\n');
+    return 2;
+  }
+  // Refused rather than ignored: the plain output is one layer id per line and
+  // has nowhere to put the answer, so a caller that passed the flags would get
+  // a successful run that resolved nothing.
+  if (wantsTestPaths && !asJson) {
+    deps.stderr('ERR layers: --producer and --project-root need --json\n');
+    return 2;
+  }
+
   let resolved: ReturnType<typeof resolveLayers>;
   try {
     resolved = resolveLayers({ cwd: deps.cwd(), explicit });
@@ -491,7 +557,25 @@ function layersCommand(args: string[], deps: RunCliDeps): number {
   for (const warning of resolved.warnings) deps.stderr(`WARN ${warning}\n`);
 
   if (asJson) {
-    const layers = applyLang(resolved.layers, lang, moduleName);
+    const withLang = applyLang(resolved.layers, lang, moduleName);
+    let layers: unknown[] = withLang;
+    if (wantsTestPaths) {
+      try {
+        // Read from the declaration rather than from the projection above:
+        // `applyLang` rewrites `spec_path` and leaves `test_outputs` alone, so
+        // the two answer from the same field either way.
+        const testPaths = resolveTestPaths(resolved.layers[0]!, {
+          cwd: deps.cwd(),
+          producer,
+          projectRoot,
+          module: moduleName,
+        });
+        layers = withLang.map((layer) => ({ ...layer, test_paths: testPaths }));
+      } catch (error) {
+        deps.stderr(`ERR layers: ${(error as Error).message}\n`);
+        return exitCodeForLayerPathError(error);
+      }
+    }
     deps.stdout(`${JSON.stringify({ source: resolved.source, layers }, null, 2)}\n`);
     return 0;
   }

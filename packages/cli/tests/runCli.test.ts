@@ -6,9 +6,17 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { signalsFingerprint } from '../src/detect/detect.js';
-import { loadSignalTable } from '../src/detect/index.js';
+import { LayerPathError, loadSignalTable } from '../src/detect/index.js';
 import * as publicEntry from '../src/index.js';
-import { USAGE, createDefaultDeps, exitCodeForLayersError, runCli, takeFlagValue, type RunCliDeps } from '../src/runCli.js';
+import {
+  USAGE,
+  createDefaultDeps,
+  exitCodeForLayerPathError,
+  exitCodeForLayersError,
+  runCli,
+  takeFlagValue,
+  type RunCliDeps,
+} from '../src/runCli.js';
 import { InitConflictError, runInit, type InitOptions } from '../src/commands/init.js';
 import { runAnvilSeed, type AnvilSeedOptions } from '../src/commands/anvil-seed.js';
 import { runSpecToTest, type SpecToTestOptions } from '../src/commands/spec-to-test.js';
@@ -1125,5 +1133,193 @@ describe('layers', () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  /**
+   * Test paths, resolved by the command rather than by each skill's prose.
+   *
+   * `kiwa-observe` carried the resolution as five numbered steps, and two of
+   * its defects survived eight rounds of review there (#1896 / #1899). What the
+   * skills consume is this command's output, so the checks run through it.
+   */
+  describe('test paths', () => {
+    /** A project with a generated test and its moved copy, both present. */
+    function withTests(): string {
+      const dir = project(null);
+      for (const rel of [
+        'examples/mint-nft/test/MintNft.t.sol',
+        'tests/fixtures/mint-nft/contract-test/MintNft.t.sol',
+      ]) {
+        mkdirSync(join(dir, rel, '..'), { recursive: true });
+        writeFileSync(join(dir, rel), '');
+      }
+      return dir;
+    }
+
+    it('resolves test_paths for --producer and --project-root', async () => {
+      const dir = withTests();
+      try {
+        const h = harness({ cwd: () => dir });
+        expect(
+          await runCli(
+            ['layers', '--json', '--layer', 'contract', '--producer', 'kiwa-forge', '--project-root', 'examples/mint-nft'],
+            h.deps,
+          ),
+        ).toBe(0);
+        const parsed = JSON.parse(h.out()) as {
+          layers: { id: string; test_paths: { producer: string; anchor: string | null; patterns: string[]; files: string[] } }[];
+        };
+        expect(parsed.layers).toHaveLength(1);
+        expect(parsed.layers[0]?.test_paths).toEqual({
+          producer: 'kiwa-forge',
+          anchor: 'project',
+          patterns: [
+            'examples/mint-nft/test/*.t.sol',
+            'tests/fixtures/mint-nft/contract-test/*.t.sol',
+          ],
+          files: ['examples/mint-nft/test/MintNft.t.sol'],
+        });
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('accepts the = form of both flags', async () => {
+      const dir = withTests();
+      try {
+        const h = harness({ cwd: () => dir });
+        expect(
+          await runCli(
+            ['layers', '--json', '--layer', 'contract', '--producer=kiwa-forge', '--project-root=examples/mint-nft'],
+            h.deps,
+          ),
+        ).toBe(0);
+        const parsed = JSON.parse(h.out()) as { layers: { test_paths: { files: string[] } }[] };
+        expect(parsed.layers[0]?.test_paths.files).toEqual([
+          'examples/mint-nft/test/MintNft.t.sol',
+        ]);
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('leaves test_paths out when neither flag is passed', async () => {
+      // Every existing caller asks for spec paths only, and adding a key that
+      // globs the tree on every call would make a read of the table depend on
+      // what happens to be generated.
+      const dir = withTests();
+      try {
+        const h = harness({ cwd: () => dir });
+        expect(await runCli(['layers', '--json', '--layer', 'contract'], h.deps)).toBe(0);
+        const parsed = JSON.parse(h.out()) as { layers: Record<string, unknown>[] };
+        expect(Object.keys(parsed.layers[0]!)).not.toContain('test_paths');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('refuses the flags without a single --layer', async () => {
+      // The resolution is per layer and per producer. Answering for the layers
+      // that happen to declare the key and staying silent about the rest reads
+      // as "no tests" for what is actually a typo.
+      const dir = withTests();
+      try {
+        for (const args of [
+          ['layers', '--json', '--producer', 'kiwa-forge'],
+          ['layers', '--json', '--layer', 'all', '--producer', 'kiwa-forge'],
+          ['layers', '--json', '--project-root', 'examples/mint-nft'],
+        ]) {
+          const h = harness({ cwd: () => dir });
+          expect(await runCli(args, h.deps), args.join(' ')).toBe(2);
+          expect(h.err()).toContain('need --layer');
+        }
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('refuses the flags without --json', async () => {
+      // The plain output is one layer id per line and has nowhere to put the
+      // answer, so accepting them would resolve nothing and still exit 0.
+      const dir = withTests();
+      try {
+        const h = harness({ cwd: () => dir });
+        expect(
+          await runCli(['layers', '--layer', 'contract', '--producer', 'kiwa-forge'], h.deps),
+        ).toBe(2);
+        expect(h.err()).toContain('need --json');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('refuses an empty or missing value for either flag', async () => {
+      const dir = withTests();
+      try {
+        for (const args of [
+          ['layers', '--json', '--layer', 'contract', '--producer', ''],
+          ['layers', '--json', '--layer', 'contract', '--producer'],
+          ['layers', '--json', '--layer', 'contract', '--producer', '--project-root', 'x'],
+          ['layers', '--json', '--layer', 'contract', '--project-root', ''],
+          ['layers', '--json', '--layer', 'contract', '--project-root'],
+        ]) {
+          const h = harness({ cwd: () => dir });
+          expect(await runCli(args, h.deps), args.join(' ')).toBe(2);
+          expect(h.err()).toMatch(/needs a value/);
+        }
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('refuses a producer the layer does not declare', async () => {
+      const dir = withTests();
+      try {
+        const h = harness({ cwd: () => dir });
+        expect(
+          await runCli(
+            ['layers', '--json', '--layer', 'contract', '--producer', 'kiwa-nope', '--project-root', 'examples/mint-nft'],
+            h.deps,
+          ),
+        ).toBe(2);
+        expect(h.err()).toContain('has no producer "kiwa-nope"');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('refuses a project root that is not there', async () => {
+      // #1896 の 2 つ目と同じ形。 0 件で返すと「まだ生成していない」 と区別が
+      // 付かず、 誤った起点が観測対象なしとして報告される。
+      const dir = withTests();
+      try {
+        const h = harness({ cwd: () => dir });
+        expect(
+          await runCli(
+            ['layers', '--json', '--layer', 'contract', '--producer', 'kiwa-forge', '--project-root', 'examples/typo'],
+            h.deps,
+          ),
+        ).toBe(2);
+        expect(h.err()).toContain('not a directory');
+      } finally {
+        rmSync(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('separates a caller typo from an unresolvable declaration', () => {
+      // Same split as `unknown layer`: a caller can fix the first by asking for
+      // something else and cannot fix the second at all.
+      expect(exitCodeForLayerPathError(new LayerPathError('x', 'request'))).toBe(2);
+      expect(exitCodeForLayerPathError(new LayerPathError('x', 'declaration'))).toBe(1);
+      expect(exitCodeForLayerPathError(new Error('x'))).toBe(2);
+    });
+
+    it('documents both flags in the usage text', async () => {
+      const h = harness({ cwd: () => process.cwd() });
+      expect(await runCli(['--help'], h.deps)).toBe(0);
+      const out = h.out();
+      expect(out).toMatch(/^\s+--producer S\s+\S/m);
+      expect(out).toMatch(/^\s+--project-root R\s+\S/m);
+    });
   });
 });

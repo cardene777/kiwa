@@ -1,4 +1,4 @@
-import { chmodSync, mkdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdtempSync } from 'node:fs';
@@ -8,13 +8,16 @@ import {
   applyLang,
   isValidDocLang,
   isValidModule,
+  LayerPathError,
   loadJson,
   loadLayerTable,
   outputMap,
   resolveLayers,
+  resolveTestPaths,
   strList,
   withLangSuffix,
   withModule,
+  type LayerRecord,
 } from '../src/detect/layers.js';
 import { signalsFingerprint, type SignalTable } from '../src/detect/detect.js';
 import { loadSignalTable } from '../src/detect/index.js';
@@ -1738,5 +1741,436 @@ describe('module 名の置換', () => {
 
   it('どちらも無ければ table をそのまま返す', () => {
     expect(applyLang(TABLE, undefined, undefined)).toEqual(TABLE);
+  });
+});
+
+/**
+ * The resolution `kiwa-observe` used to carry as five numbered steps in prose.
+ *
+ * Two of its defects survived eight rounds of review there (#1896): the rule
+ * that dropped `tests/fixtures/` matched nothing on every example that had
+ * already been moved, and `{example}` resolved against the repository root,
+ * naming a directory that does not exist. Both are one assertion here (#1899).
+ */
+describe('test_outputs から test path を解決する', () => {
+  /** A layer row carrying the one field the resolution reads. */
+  function layerWith(outputs: Record<string, string[]>, id = 'sample'): LayerRecord {
+    return {
+      id,
+      spec_dir: null,
+      spec_path: null,
+      runtime: null,
+      // Set deliberately: the key must never be derived from it (#1895 F3).
+      consumer_skill: 'kiwa-forge',
+      also_consumed_by: [],
+      backing_package: null,
+      backing_runtime_package: null,
+      providers: [],
+      targets: [],
+      variants: [],
+      selected_by: null,
+      mode: null,
+      test_outputs: outputs,
+    };
+  }
+
+  /** A working tree holding the named files, each empty. */
+  function tree(files: string[]): string {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-test-paths-'));
+    for (const rel of files) {
+      mkdirSync(join(root, rel, '..'), { recursive: true });
+      writeFileSync(join(root, rel), '');
+    }
+    return root;
+  }
+
+  // `contract` as the table declares it: the same test before and after
+  // `/kiwa-test` Step 5.5 moves it out of `examples/`.
+  const CONTRACT = {
+    'kiwa-forge': [
+      '{example}/test/*.t.sol',
+      'tests/fixtures/{example}/contract-test/{Contract}.t.sol',
+    ],
+  };
+  const GENERATED = 'examples/mint-nft/test/MintNft.t.sol';
+  const MOVED = 'tests/fixtures/mint-nft/contract-test/MintNft.t.sol';
+  /** Enough for the project root to exist when neither form has been written. */
+  const EMPTY_PROJECT = 'examples/mint-nft/foundry.toml';
+
+  function resolveIn(files: string[]) {
+    const root = tree(files);
+    return withFixture(root, () =>
+      resolveTestPaths(layerWith(CONTRACT), {
+        cwd: root,
+        producer: 'kiwa-forge',
+        projectRoot: 'examples/mint-nft',
+      }),
+    );
+  }
+
+  it('生成先だけがある時はそれを返す', () => {
+    const resolved = resolveIn([GENERATED]);
+    expect(resolved.anchor).toBe('project');
+    expect(resolved.files).toEqual([GENERATED]);
+  });
+
+  it('退避先だけがある時はそれを返す', () => {
+    // The state every existing example is in. The rule shipped in #1895 kept
+    // only the generated form, which matched 0 files here and aborted.
+    const resolved = resolveIn([EMPTY_PROJECT, MOVED]);
+    expect(resolved.anchor).toBe('fixtures');
+    expect(resolved.files).toEqual([MOVED]);
+  });
+
+  it('両方ある時は生成先を採る', () => {
+    // Same chain: the generated one is what just ran, and the fixtures copy can
+    // be a leftover from an earlier round.
+    const resolved = resolveIn([GENERATED, MOVED]);
+    expect(resolved.anchor).toBe('project');
+    expect(resolved.files).toEqual([GENERATED]);
+  });
+
+  it('どちらも無い時は anchor を null にして探した先を残す', () => {
+    // Not an error: nothing generated yet is a normal state. The caller has to
+    // be able to say where it looked, so the patterns stay.
+    const resolved = resolveIn([EMPTY_PROJECT]);
+    expect(resolved.anchor).toBeNull();
+    expect(resolved.files).toEqual([]);
+    expect(resolved.patterns).toEqual([
+      'examples/mint-nft/test/*.t.sol',
+      'tests/fixtures/mint-nft/contract-test/*.t.sol',
+    ]);
+  });
+
+  it('{example} を project root に解決する', () => {
+    // #1896 の 2 つ目。 repo root 相対にすると `mint-nft/test/*.t.sol` という
+    // 存在しない path になり、 観測対象が無いと報告される。
+    const resolved = resolveIn([GENERATED]);
+    expect(resolved.patterns[0]).toBe('examples/mint-nft/test/*.t.sol');
+    expect(resolved.patterns[0]).not.toBe('mint-nft/test/*.t.sol');
+  });
+
+  it('同じ anchor の pattern を全部使う', () => {
+    // `a11y` declares two, and taking only the first reports the tests written
+    // under the other one as coverage gaps.
+    const root = tree(['app/tests/a11y/signup.test.tsx', 'app/tests/a11y/signup.spec.ts']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(
+        layerWith({
+          'kiwa-a11y': [
+            '{example}/tests/a11y/{module}.test.tsx',
+            '{example}/tests/a11y/{module}.spec.ts',
+          ],
+        }),
+        { cwd: root, projectRoot: 'app', module: 'signup' },
+      );
+      expect(resolved.files).toEqual([
+        'app/tests/a11y/signup.spec.ts',
+        'app/tests/a11y/signup.test.tsx',
+      ]);
+    });
+  });
+
+  it('brace 形が両方の拡張子を数える', () => {
+    // `{module}.test.{ts,tsx}` is the one pattern of the 25 with an
+    // alternative. Escaping it as a literal makes both variants match nothing,
+    // which reads exactly like "no tests" (#1898 Round 3).
+    const root = tree([
+      'app/test/unit/signup.test.ts',
+      'app/test/unit/signup.test.tsx',
+      'app/test/unit/signup.test.js',
+    ]);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(
+        layerWith({ 'kiwa-vitest': ['{example}/test/unit/{module}.test.{ts,tsx}'] }),
+        { cwd: root, projectRoot: 'app', module: 'signup' },
+      );
+      expect(resolved.files).toEqual([
+        'app/test/unit/signup.test.ts',
+        'app/test/unit/signup.test.tsx',
+      ]);
+    });
+  });
+
+  it('--module が無い {module} は * になる', () => {
+    const root = tree(['app/tests/signup.orm.test.ts', 'app/tests/login.orm.test.ts']);
+    withFixture(root, () => {
+      const all = resolveTestPaths(layerWith({ 'kiwa-orm': ['{example}/tests/{module}.orm.test.ts'] }), {
+        cwd: root,
+        projectRoot: 'app',
+      });
+      expect(all.files).toEqual(['app/tests/login.orm.test.ts', 'app/tests/signup.orm.test.ts']);
+      const one = resolveTestPaths(layerWith({ 'kiwa-orm': ['{example}/tests/{module}.orm.test.ts'] }), {
+        cwd: root,
+        projectRoot: 'app',
+        module: 'signup',
+      });
+      expect(one.files).toEqual(['app/tests/signup.orm.test.ts']);
+    });
+  });
+
+  it('literal の dot を wildcard として扱わない', () => {
+    // `{module}.edge.test.ts` unescaped matches `axedgextestxts` as well.
+    const root = tree(['app/tests/a.edge.test.ts', 'app/tests/axedgextestxts']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(
+        layerWith({ 'kiwa-edge': ['{example}/tests/{module}.edge.test.ts'] }),
+        { cwd: root, projectRoot: 'app' },
+      );
+      expect(resolved.files).toEqual(['app/tests/a.edge.test.ts']);
+    });
+  });
+
+  it('* が名前の中で閉じる', () => {
+    // `*.t.sol` must not reach into a subdirectory. A matcher built with `.*`
+    // and run against a joined path would take `sub/Foo.t.sol`.
+    const root = tree(['app/test/Foo.t.sol', 'app/test/sub/Bar.t.sol']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(layerWith({ 'kiwa-forge': ['{example}/test/*.t.sol'] }), {
+        cwd: root,
+        projectRoot: 'app',
+      });
+      expect(resolved.files).toEqual(['app/test/Foo.t.sol']);
+    });
+  });
+
+  it('大文字違いの dir を一致させない', () => {
+    // macOS is case-insensitive by default, so joining literals and testing
+    // existence accepts `Test/` for `test/` and hands back a path spelled
+    // differently from the one on disk.
+    const root = tree(['app/Test/Foo.t.sol']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(layerWith({ 'kiwa-forge': ['{example}/test/*.t.sol'] }), {
+        cwd: root,
+        projectRoot: 'app',
+      });
+      expect(resolved.files).toEqual([]);
+    });
+  });
+
+  it('symlink を辿らない', () => {
+    // The containment checks are lexical, so a symlink is the one way a matched
+    // path leaves the root after they have passed.
+    const root = tree(['app/test/Real.t.sol', 'outside/Secret.t.sol']);
+    withFixture(root, () => {
+      symlinkSync(join(root, 'outside', 'Secret.t.sol'), join(root, 'app', 'test', 'Link.t.sol'));
+      const resolved = resolveTestPaths(layerWith({ 'kiwa-forge': ['{example}/test/*.t.sol'] }), {
+        cwd: root,
+        projectRoot: 'app',
+      });
+      expect(resolved.files).toEqual(['app/test/Real.t.sol']);
+    });
+  });
+
+  it('project root が cwd と同じ時は退避先を候補にしない', () => {
+    // The `/kiwa-app` route. `tests/fixtures/` is kiwa's own layout; a user's
+    // project that happens to have one would be read as if it were kiwa's.
+    const root = tree(['tests/fixtures/app/contract-test/Foo.t.sol']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(layerWith(CONTRACT), {
+        cwd: root,
+        producer: 'kiwa-forge',
+        projectRoot: '.',
+      });
+      expect(resolved.patterns).toEqual(['test/*.t.sol']);
+      expect(resolved.files).toEqual([]);
+    });
+  });
+
+  it('鍵が 2 つある layer で --producer が無ければ拒否する', () => {
+    // Never falls back to `consumer_skill`: `contract` names `kiwa-forge`
+    // there and carries `kiwa-hardhat` in `also_consumed_by`, so a Hardhat run
+    // would be measured against the Foundry output (#1895 Round 1 F3).
+    const contract = TABLE.find((l) => l.id === 'contract')!;
+    expect(contract.consumer_skill).toBe('kiwa-forge');
+    expect(Object.keys(contract.test_outputs)).toHaveLength(2);
+    const root = tree(['examples/mint-nft/foundry.toml']);
+    withFixture(root, () => {
+      expect(() =>
+        resolveTestPaths(contract, { cwd: root, projectRoot: 'examples/mint-nft' }),
+      ).toThrow(/pass --producer/);
+    });
+  });
+
+  it('宣言に無い --producer を拒否する', () => {
+    const root = tree(['examples/mint-nft/foundry.toml']);
+    withFixture(root, () => {
+      let thrown: unknown;
+      try {
+        resolveTestPaths(layerWith(CONTRACT), {
+          cwd: root,
+          producer: 'kiwa-hardhat',
+          projectRoot: 'examples/mint-nft',
+        });
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(LayerPathError);
+      expect((thrown as LayerPathError).kind).toBe('request');
+      expect((thrown as Error).message).toMatch(/has no producer "kiwa-hardhat"/);
+    });
+  });
+
+  it('鍵が 1 つなら --producer を要らない', () => {
+    const root = tree(['app/tests/signup.cache.test.ts']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(
+        layerWith({ 'kiwa-cache': ['{example}/tests/{module}.cache.test.ts'] }),
+        { cwd: root, projectRoot: 'app' },
+      );
+      expect(resolved.producer).toBe('kiwa-cache');
+      expect(resolved.files).toEqual(['app/tests/signup.cache.test.ts']);
+    });
+  });
+
+  it('separator を含む module を request error にする', () => {
+    // The flag validates it too. Checked here as well so a table defect and a
+    // caller defect do not arrive as the same message: without it the path
+    // lands in the anchor check and is reported as `docs/layers.json` being
+    // wrong.
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      let thrown: unknown;
+      try {
+        resolveTestPaths(layerWith({ 'kiwa-orm': ['{example}/tests/{module}.orm.test.ts'] }), {
+          cwd: root,
+          projectRoot: 'app',
+          module: '../../etc/passwd',
+        });
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(LayerPathError);
+      expect((thrown as LayerPathError).kind).toBe('request');
+      expect((thrown as Error).message).toMatch(/invalid module name/);
+    });
+  });
+
+  it('cwd の外を指す project root を拒否する', () => {
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      expect(() =>
+        resolveTestPaths(layerWith(CONTRACT), {
+          cwd: root,
+          producer: 'kiwa-forge',
+          projectRoot: '../elsewhere',
+        }),
+      ).toThrow(/outside the working directory/);
+    });
+  });
+
+  it('存在しない project root を 0 件ではなく error にする', () => {
+    // The shape of #1896's second defect. An empty answer cannot be told apart
+    // from a tree where nothing has been generated yet.
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      expect(() =>
+        resolveTestPaths(layerWith(CONTRACT), {
+          cwd: root,
+          producer: 'kiwa-forge',
+          projectRoot: 'examples/typo',
+        }),
+      ).toThrow(/not a directory/);
+    });
+  });
+
+  it('anchor の外を指す宣言を declaration error にする', () => {
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      for (const bad of ['/etc/passwd', '{example}/../../etc/passwd']) {
+        let thrown: unknown;
+        try {
+          resolveTestPaths(layerWith({ 'kiwa-forge': [bad] }), { cwd: root, projectRoot: 'app' });
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown, `${bad} が通った`).toBeInstanceOf(LayerPathError);
+        expect((thrown as LayerPathError).kind).toBe('declaration');
+      }
+    });
+  });
+
+  it('知らない placeholder を literal のまま使わない', () => {
+    // Left literal it looks for a file with braces in its name, matches
+    // nothing, and reads as "no tests were generated".
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      expect(() =>
+        resolveTestPaths(layerWith({ 'kiwa-forge': ['{example}/test/{Suite}.t.sol'] }), {
+          cwd: root,
+          projectRoot: 'app',
+        }),
+      ).toThrow(/unknown placeholder \{Suite\}/);
+    });
+  });
+
+  it('test_outputs を持たない layer を declaration error にする', () => {
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      expect(() => resolveTestPaths(layerWith({}), { cwd: root, projectRoot: 'app' })).toThrow(
+        /declares no test_outputs/,
+      );
+    });
+  });
+
+  it('鍵の下が空の宣言を 0 件 match と区別する', () => {
+    // The producer writes somewhere and the table does not say where. Reporting
+    // it as "nothing matched" sends the caller to the tree for a defect that is
+    // in the declaration.
+    const root = tree(['app/x']);
+    withFixture(root, () => {
+      let thrown: unknown;
+      try {
+        resolveTestPaths(layerWith({ 'kiwa-forge': [] }), { cwd: root, projectRoot: 'app' });
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(LayerPathError);
+      expect((thrown as LayerPathError).kind).toBe('declaration');
+      expect((thrown as Error).message).toMatch(/declares no paths for kiwa-forge/);
+    });
+  });
+
+  it('候補が全て kiwa 側の宣言でも declaration error にしない', () => {
+    // The `/kiwa-app` route with a producer that only writes kiwa's fixture
+    // copy. Nothing is left to look at, and that is a property of where the
+    // project sits, not of the table.
+    const root = tree(['x']);
+    withFixture(root, () => {
+      const resolved = resolveTestPaths(
+        layerWith({ 'kiwa-forge': ['tests/fixtures/{example}/contract-test/{Contract}.t.sol'] }),
+        { cwd: root, projectRoot: '.' },
+      );
+      expect(resolved.patterns).toEqual([]);
+      expect(resolved.anchor).toBeNull();
+    });
+  });
+
+  it('表の 25 pattern が placeholder を残さずに解決する', () => {
+    // Every declared pattern, resolved through the real path. A placeholder
+    // left in one is a pattern that can only match nothing.
+    const root = tree(['examples/mint-nft/foundry.toml']);
+    withFixture(root, () => {
+      let count = 0;
+      for (const layer of TABLE) {
+        for (const producer of Object.keys(layer.test_outputs)) {
+          const resolved = resolveTestPaths(layer, {
+            cwd: root,
+            producer,
+            projectRoot: 'examples/mint-nft',
+            module: 'signup',
+          });
+          for (const pattern of resolved.patterns) {
+            count += 1;
+            for (const placeholder of ['{example}', '{module}', '{Contract}']) {
+              expect(pattern, `${layer.id}/${producer} に ${placeholder} が残っている`).not.toContain(
+                placeholder,
+              );
+            }
+          }
+        }
+      }
+      expect(count, '表の pattern 件数が減った').toBeGreaterThanOrEqual(25);
+    });
   });
 });
