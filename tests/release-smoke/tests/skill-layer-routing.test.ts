@@ -775,9 +775,18 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
    *
    * 分類と必須検査が別々の literal を持つと、 表記を変えただけで「mode 無し」 と
    * 「test-review でない」 の両方に化ける (Round 2 F3)。
+   *
+   * **値は 3 つの literal に閉じ、 終端まで見る**。 `[a-z-]+` で受けると
+   * `--mode=test-review.invalid` の有効 prefix を mode として取り、 CLI が拒否する
+   * 起動 command が必須検査も test-review 分類も通る (Round 3 F3)。 未知値と
+   * 次 flag も同じ理由で `null` に落とす = mode を名乗れていない起動は、 名乗って
+   * いないものとして扱う。
    */
   function modeOf(command: string): string | null {
-    return /--mode[ =]([a-z-]+)/.exec(command)?.[1] ?? null;
+    const parsed = /--mode[ =](spec-review|test-review|result-review)(?![A-Za-z0-9._-])/.exec(
+      command,
+    );
+    return parsed?.[1] ?? null;
   }
 
   function invocations(): { skill: string; command: string }[] {
@@ -814,6 +823,17 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     ]);
     expect(modeOf(found[0]!), '空白区切りの mode').toBe('test-review');
     expect(modeOf(found[1]!), '= 区切りの mode').toBe('result-review');
+
+    // 値の終端まで見る。 有効 prefix を持つ malformed 値 / 未知値 / 次 flag は
+    // すべて「mode を名乗っていない」 に倒す (Round 3 F3)。
+    for (const broken of [
+      '/kiwa-review --mode=test-review.invalid --module {m}',
+      '/kiwa-review --mode=test-reviewer --module {m}',
+      '/kiwa-review --mode bogus --module {m}',
+      '/kiwa-review --mode --layer auth --module {m}',
+    ]) {
+      expect(modeOf(broken), `${broken} を mode として受けている`).toBeNull();
+    }
     expect(invocations().length, '実 skill から 1 件も抽出できない').toBeGreaterThan(0);
   });
 
@@ -822,9 +842,8 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     // test-review 用の検査からも外れる = 契約を書き換えても気付けない。 実測で
     // `kiwa-e2e` と `kiwa-a11y` の 2 件が `--mode` を持たないまま残っていた
     // (PR #1904 Round 1 F1)。
-    const modes = new Set(['spec-review', 'test-review', 'result-review']);
     const missing = invocations()
-      .filter(({ command }) => !modes.has(modeOf(command) ?? ''))
+      .filter(({ command }) => modeOf(command) === null)
       .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
     expect(missing, `--mode を渡していない起動行:\n${missing.join('\n')}`).toEqual([]);
   });
