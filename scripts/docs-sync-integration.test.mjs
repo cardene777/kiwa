@@ -413,6 +413,11 @@ for (const [label, markdown] of [
   ['Vue の dynamic argument', `<a :[attr]="'./real'">x</a>`],
   // 属性値の中に `>` があっても tag の終端を取り違えず、後続の bound href に届く。
   ['引用属性の > より後ろの bound href', `<a title="a>b" :href="'./real'">x</a>`],
+  // object 形式。属性名に href を持たないため、名前の一致だけを見ると外れる。中身を
+  // 静的に解くのは方針外なので、href を含みうる形として検知側に倒す (#1884)。
+  ['Vue の v-bind (object 形式)', `<a v-bind="{ href: './real' }">x</a>`],
+  // modifier 付き。`href.prop` は完全一致では外れる (#1884)。
+  ['Vue の :href.prop', `<a :href.prop="'./real'">x</a>`],
 ]) {
   test(`${label} is reported as unsupported syntax`, () => {
     withFixture(({ root, readmePath }) => {
@@ -444,6 +449,7 @@ test('a plain anchor is reported once, not by two rules', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.equal(found.length, 1, found.join('\n'));
@@ -467,6 +473,7 @@ for (const [label, markdown] of [
 
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs', 'libraries'),
       });
       // 「生 HTML の a タグ」 だけが出る。Vue 判定は反応しない。
@@ -490,6 +497,7 @@ test('a colon-prefixed string inside a component attribute value is not a bindin
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.deepEqual(found, [], found.join('\n'));
@@ -512,6 +520,10 @@ for (const [label, markdown] of [
   ['img の data-island', '<img data-island="a" src="/images/ok.png" alt="x">'],
   // 本文に `:href` という語が出るだけの文。tag の中にないものは対象外。
   ['本文中の :href という語', 'CSS の :href 疑似クラスについて'],
+  // custom element。`\b` は `a` の直後の `-` を単語境界とみなすため anchor として
+  // 拾っていた。`<a>` ではないので通す (#1884)。
+  ['ハイフンを含む custom element', `<a-b :href="url">x</a-b>`],
+  ['a で始まる長い tag', '<article :data-x="v">y</article>'],
 ]) {
   test(`${label} is not reported as unsupported syntax`, () => {
     withFixture(({ root, readmePath }) => {
@@ -566,6 +578,7 @@ test('the real docs/libraries tree uses no unsupported link syntax', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const found = unsupportedLinkSyntax({
     repositoryRoot,
+    docsRoot: join(repositoryRoot, 'docs'),
     scanRoot: join(repositoryRoot, 'docs', 'libraries'),
   });
   assert.deepEqual(found, [], found.join('\n'));
@@ -618,26 +631,214 @@ test('a symlink pointing outside the repository does not resolve', () => {
   });
 });
 
-// repo 内を指す symlink は通す。落とすと docs/public/images 経由の参照が全て
+// 走査範囲に留まる symlink は通す。落とすと、同じ走査で実体側も読まれる形まで
 // 偽陽性になる。
-test('a symlink that stays inside the repository resolves', () => {
+test('a symlink that stays inside the scan root resolves', () => {
   withFixture(({ root, readmePath }) => {
     writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
 
-    const assets = join(root, 'assets');
-    mkdirSync(assets, { recursive: true });
-    writeFileSync(join(assets, 'note.md'), '# note\n');
+    // 実体を走査範囲の中に置く。範囲の外に置くと、その配下は 1 度も読まれない
+    // (それが下の 'points outside the scan root' が報告する形)。
+    const inside = join(root, 'docs', 'libraries', 'foundation', 'shared-notes');
+    mkdirSync(inside, { recursive: true });
+    writeFileSync(join(inside, 'note.md'), '# note\n');
 
     const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
-    symlinkSync(assets, join(docsDirectory, 'linked'));
+    symlinkSync(inside, join(docsDirectory, 'linked'));
     writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[中](./linked/note)\n');
 
-    const result = spawnSync(
-      process.execPath,
-      [join(root, 'scripts', 'sync-library-doc-links.mjs'), '--write'],
-      { encoding: 'utf8' },
-    );
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
+  });
+});
+
+// repo の中でも走査範囲の外を指す symlink は報告する。その配下の markdown は 1 度も
+// 読まれないため、alias 経路だけで壊れた link が gate を通る。repo 境界で見ていた間、
+// この形が無報告で通っていた (#1888)。
+test('a symlink that points outside the scan root is reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+
+    const outsideScan = join(root, 'packages', 'sample');
+    writeFileSync(join(outsideScan, 'note.md'), '# note\n');
+
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    symlinkSync(outsideScan, join(docsDirectory, 'alias'));
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(found.length, 1, found.join('\n'));
+    assert.match(found[0], /symlink の directory/);
+    assert.match(found[0], /alias/);
+  });
+});
+
+// 境界は scanRoot に置く。docs 全体や repo 全体に置くと、渡した scanRoot の外を指す
+// symlink が「範囲内」 と判定され、その配下が 1 度も読まれないまま通る。production は
+// scanRoot に `docs` を渡すが、関数は受け取った範囲で答えなければならない (#1888)。
+test('the boundary is the scan root, not its parent', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+
+    // scanRoot (`docs/libraries`) の外だが `docs` の中。
+    const siblingOfScanRoot = join(root, 'docs', 'guide');
+    mkdirSync(siblingOfScanRoot, { recursive: true });
+    writeFileSync(join(siblingOfScanRoot, 'note.md'), '# note\n');
+
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    symlinkSync(siblingOfScanRoot, join(docsDirectory, 'alias'));
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.equal(found.length, 1, found.join('\n'));
+    assert.match(found[0], /symlink の directory/);
+  });
+});
+
+// 解決できない symlink。`isDirectory()` は dangling にも循環にも false を返すため、
+// 種別で分岐すると markdown 判定にも directory 判定にも入らず素通りする (#1888)。
+for (const [label, make] of [
+  [
+    '拡張子なしの dangling',
+    (docsDirectory) => symlinkSync(join(docsDirectory, 'nowhere'), join(docsDirectory, 'alias')),
+  ],
+  [
+    '循環',
+    (docsDirectory) => symlinkSync(join(docsDirectory, 'loop'), join(docsDirectory, 'loop')),
+  ],
+]) {
+  test(`a symlink that cannot be resolved is reported (${label})`, () => {
+    withFixture(({ root, readmePath }) => {
+      writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+      const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+      make(docsDirectory);
+
+      const found = unsupportedLinkSyntax({
+        repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
+        scanRoot: join(root, 'docs', 'libraries'),
+      });
+      assert.equal(found.length, 1, found.join('\n'));
+      assert.match(found[0], /解決できない symlink/);
+    });
+  });
+}
+
+// `docs/public` は VitePress が中身をそのまま配る静的資産の置き場で、markdown を page
+// として render しない。走査対象にすると実運用の `public/images -> <repo>/images` が
+// 「走査範囲の外を指す」 として報告される (#1888)。
+test('a symlink under docs/public is not reported', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+
+    const images = join(root, 'images');
+    mkdirSync(images, { recursive: true });
+    writeFileSync(join(images, 'ok.png'), 'png');
+    mkdirSync(join(root, 'docs', 'public'), { recursive: true });
+    symlinkSync(images, join(root, 'docs', 'public', 'images'));
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
+  });
+});
+
+// `public` の除外は名前ではなく path で見る。名前で全階層を外すと、通常の page dir を
+// `public` と名付けるだけで配下の link が検査を 1 度も通らずに gate を抜ける
+// (PR #1907 Round 1)。
+test('a nested directory named public is still checked', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const nested = join(root, 'docs', 'libraries', 'foundation', 'sample', 'public');
+    mkdirSync(nested, { recursive: true });
+    // docsRoot 直下の public は除外される側。両方あっても nested だけが検査される。
+    mkdirSync(join(root, 'docs', 'public'), { recursive: true });
+    writeFileSync(join(root, 'docs', 'public', 'index.md'), '# assets\n\n[x](./gone)\n');
+    writeFileSync(join(nested, 'index.md'), '# nested\n\n<a href="./real">x</a>\n');
+    writeFileSync(join(nested, 'real.md'), '# real\n');
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs'),
+    });
+    // nested 側だけが報告される。docsRoot 直下の public は静的資産の置き場なので通す。
+    assert.equal(found.length, 1, found.join('\n'));
+    assert.match(found[0], /生 HTML の a タグ/);
+    assert.match(found[0], /sample\/public/);
+  });
+});
+
+// tag 名の境界は a タグ判定にも要る。`VUE_ANCHOR_TAG` だけ直すと、Vue 判定は通るのに
+// 「生 HTML の a タグ」 で落ちる (PR #1907 Round 1)。
+test('static href を持つ custom element is not reported as unsupported syntax', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n<a-b href="./real">x</a-b>\n');
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
+  });
+});
+
+// img 側は報告ではなく link 抽出に効く。実在する先で測ると、誤って抽出しても
+// 「解決した」 だけで差が出ない。存在しない先を置いて、抽出したかどうかを見る。
+test('a custom element starting with img does not contribute a link', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n<img-x src="./gone">\n');
+
+    const result = runSync(root);
     assert.equal(result.status, 0, result.stderr);
+  });
+});
+
+// destination に釣り合った括弧を含む形。`[^)\s]+` で取ると `./a(b` で切れ、実在する
+// file を dead と報告する (#1876)。
+test('a destination containing balanced parentheses resolves', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, 'a(b).md'), '# a(b)\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[x](./a(b).md)\n');
+
+    const result = runSync(root);
+    assert.equal(result.status, 0, result.stderr);
+  });
+});
+
+// 切り詰めた path に実 file がある形。消費区間が `[x](./foo](bar)` までを覆うため
+// 残余の `](` も検出されず、検査していない範囲が検査済みとして通っていた (#1876)。
+test('a destination containing "](", with the truncated path on disk, does not slip through', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    // 切り詰められた側の実 file。これがあると「解決した」 ように見える。
+    writeFileSync(join(docsDirectory, 'foo](bar'), 'x');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n[x](./foo](bar))\n');
+
+    const result = runSync(root);
+    assert.notEqual(result.status, 0, '素通りしている');
   });
 });
 
@@ -1120,6 +1321,7 @@ test('no file in docs uses link syntax the checker cannot parse', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const found = unsupportedLinkSyntax({
     repositoryRoot,
+    docsRoot: join(repositoryRoot, 'docs'),
     scanRoot: join(repositoryRoot, 'docs'),
   });
   assert.deepEqual(found, [], found.join('\n'));
@@ -1193,6 +1395,7 @@ test('a symlinked markdown source is not read', () => {
       // ただし読まなかったことは黙らない。検査できない file として報告する。
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs'),
       });
       assert.equal(found.length, 1, found.join('\n'));
@@ -1216,6 +1419,7 @@ test('a symlinked source directory pointing outside the repo is reported as unch
 
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs'),
       });
       assert.equal(found.length, 1, found.join('\n'));
@@ -1239,6 +1443,7 @@ test('a symlinked source directory inside the repo is not reported', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs'),
     });
     assert.deepEqual(found, [], found.join('\n'));

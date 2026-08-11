@@ -147,7 +147,7 @@ function main() {
   const docsRoot = join(repositoryRoot, 'docs');
   const dead = [
     ...deadDocumentLinks({ repositoryRoot, docsRoot, scanRoot: docsRoot }),
-    ...unsupportedLinkSyntax({ repositoryRoot, scanRoot: docsRoot }),
+    ...unsupportedLinkSyntax({ repositoryRoot, docsRoot, scanRoot: docsRoot }),
   ];
   if (dead.length > 0) {
     console.error(dead.join('\n'));
