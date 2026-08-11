@@ -766,24 +766,31 @@ function expandBraces(pattern: string): string[] {
  * 対象 pattern は `dir/basename` の 2 段で `*` は basename にしか出ない
  * (`docs/layers.json` の 25 形すべてを実測)。
  */
-function countIn(pattern: string, base: string): number {
+function patternToMatchers(pattern: string): { dir: string; regexes: RegExp[] } {
   const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
   const slash = expanded.lastIndexOf('/');
   const dir = slash === -1 ? '.' : expanded.slice(0, slash);
   const baseName = slash === -1 ? expanded : expanded.slice(slash + 1);
+  // brace alternative を先に展開する。 escape だけ掛けると `{ts,tsx}` が
+  // literal 一致になり、 `.test.ts` も `.test.tsx` も 0 件になる (#1898 Round 3)。
+  const regexes = expandBraces(baseName).map(
+    (v) =>
+      new RegExp(`^${v.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '.*' : `\\${c}`))}$`),
+  );
+  return { dir, regexes };
+}
+
+function countIn(pattern: string, base: string): number {
+  // 変換を先に済ませる。 `readdirSync` を先に呼ぶと、 dir が無い pattern は
+  // 早期 return して変換経路に 1 度も到達しない (#1898 Round 4)。
+  const { dir, regexes } = patternToMatchers(pattern);
   let names: string[];
   try {
     names = readdirSync(resolve(base, dir));
   } catch {
     return 0; // dir が無い = 0 件
   }
-  // brace alternative を先に展開する。 escape だけ掛けると `{ts,tsx}` が
-  // literal 一致になり、 `.test.ts` も `.test.tsx` も 0 件になる (#1898 Round 3)。
-  const res = expandBraces(baseName).map(
-    (v) =>
-      new RegExp(`^${v.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '.*' : `\\${c}`))}$`),
-  );
-  return names.filter((n) => res.some((re) => re.test(n))).length;
+  return names.filter((n) => regexes.some((re) => re.test(n))).length;
 }
 
 describe('Layer 3 の観測が chain から起動される (#1894)', () => {
@@ -1074,19 +1081,26 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
       rmSync(dir, { recursive: true, force: true });
     }
 
-    // 25 pattern を構文単位で流す。 例外を出さないこと。
+    // 25 pattern の変換経路を直接見る。 `countIn` 越しに流すと、 repo に
+    // 無い dir で `readdirSync` の catch に落ち、 regex の compile に 1 件も
+    // 到達しない (#1898 Round 4)。
     const all = LAYERS.layers.flatMap((l) =>
       Object.values(
         (l as unknown as { test_outputs?: Record<string, string[]> }).test_outputs ?? {},
       ).flat(),
     );
-    expect(all.length, 'pattern が集まらない').toBeGreaterThanOrEqual(20);
+    expect(all.length, '表の pattern 件数が減った').toBeGreaterThanOrEqual(25);
     expect(
       all.some((p) => p.includes('{ts,tsx}')),
       'brace 形の pattern が表から消えた',
     ).toBe(true);
     for (const p of all) {
-      expect(() => countIn(p.replace('{example}', 'x'), REPO_ROOT), `${p} で例外`).not.toThrow();
+      const { regexes } = patternToMatchers(p.replace('{example}', 'x'));
+      // 展開できた regex が 1 本以上あり、 `{` を literal として抱えていない。
+      expect(regexes.length, `${p} が regex に変換されない`).toBeGreaterThan(0);
+      for (const re of regexes) {
+        expect(re.source, `${p} の regex に brace が残っている`).not.toContain('\\{');
+      }
     }
   });
 
