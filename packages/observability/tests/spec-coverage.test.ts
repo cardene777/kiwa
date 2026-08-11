@@ -138,6 +138,25 @@ describe('analyzeSpecCoverage は 9 column 表の spec を読む (#1897)', () =>
     expect(exact.extraTcIds).toEqual([]);
   });
 
+  it('spec から読めた case 件数を返す', () => {
+    // 2 つの id 配列だけでは「解析できて一致」 と「1 件も解析できなかった」 が
+    // 区別できない。 件数は読み手が区別するための唯一の材料 (#1910)。
+    const parsed = analyzeSpecCoverage({ specMarkdown: jaSpec, testCode: '' });
+    expect(parsed.specCaseCount).toBe(3);
+
+    const unparsed = analyzeSpecCoverage({ specMarkdown: '# 表の無い spec\n', testCode: '' });
+    expect(unparsed.specCaseCount).toBe(0);
+    expect(unparsed.missingTcIds, '読めていないのに gap が出ている').toEqual([]);
+  });
+
+  it('同じ id を 2 度書いた spec を 1 件と数える', () => {
+    // 突き合わせは一意な id に対して行うため、 分母も一意な件数にする。
+    const duplicated = jaSpec.replace('| TC-002 |', '| TC-001 |');
+    const gap = analyzeSpecCoverage({ specMarkdown: duplicated, testCode: '' });
+    expect(gap.specCaseCount).toBe(2);
+    expect(gap.missingTcIds).toEqual(['TC-001', 'TC-003']);
+  });
+
   it('英語 header の spec が退行しない', () => {
     // 別名を足しただけで、 既存の形は同じ答えを返す。
     const gap = analyzeSpecCoverage({ specMarkdown: spec, testCode: "it('T-API-002', () => {});" });

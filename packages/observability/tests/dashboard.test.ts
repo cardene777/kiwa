@@ -57,6 +57,7 @@ describe('renderDashboard', () => {
     const gap: SpecCoverageGap = {
       module: 'items',
       layer: 'api',
+      specCaseCount: 3,
       missingTcIds: ['T-API-001', 'T-API-002'],
       extraTcIds: ['T-API-999'],
     };
@@ -130,9 +131,64 @@ describe('renderDashboard', () => {
       layer: 'api',
       missingTcIds: [],
       extraTcIds: [],
+      // 解析できた上での一致。 0 件だと別の文言になる (#1910)。
+      specCaseCount: 3,
     };
     const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
     expect(out).toContain('spec と test が完全に一致');
+  });
+
+  // 「解析できた上での一致」 と「1 件も解析できなかった」 を分ける。 両方とも
+  // missing / extra が空になるため、 件数を見ないと同じ文字列になる (#1910 で実測)。
+  it('T-OBS-DSH-012b spec から 1 件も読めなかった時は一致と書かない', () => {
+    const unparsed: SpecCoverageGap = {
+      module: 'items',
+      layer: 'contract',
+      missingTcIds: [],
+      extraTcIds: [],
+      specCaseCount: 0,
+    };
+    const matched: SpecCoverageGap = { ...unparsed, specCaseCount: 32 };
+    const render = (gap: SpecCoverageGap): string =>
+      renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
+
+    expect(render(unparsed)).toContain('spec から case を 1 件も読めなかった');
+    expect(render(unparsed)).not.toContain('完全に一致');
+    expect(render(matched)).toContain('完全に一致');
+    // 同じ文字列を出さない。 これが #1896 で誰も気付かなかった形。
+    expect(render(unparsed)).not.toBe(render(matched));
+  });
+
+  // 未解析の警告は gap の有無から独立。 test 側に既知形式の id があると、 一致判定に
+  // 入らないため警告が消えていた (#1910 Round 1)。 読めていない以上、 その id を extra と
+  // 断定もできない。
+  it('T-OBS-DSH-012d 未解析で test 側に id がある時も警告を出す', () => {
+    const gap: SpecCoverageGap = {
+      module: 'items',
+      layer: 'contract',
+      missingTcIds: [],
+      extraTcIds: ['T-API-001'],
+      specCaseCount: 0,
+    };
+    const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
+    expect(out).toContain('spec から case を 1 件も読めなかった');
+    // extra と断定しない。 id 自体は手がかりとして残す。
+    expect(out).not.toContain('Extra TC IDs');
+    expect(out).toContain('extra とは断定できない');
+    expect(out).toContain('T-API-001');
+  });
+
+  // 件数を本文に出す。 出さないと「一致」 が何件に対する一致か読み手に判らない。
+  it('T-OBS-DSH-012c 一致の時は spec の case 件数を出す', () => {
+    const gap: SpecCoverageGap = {
+      module: 'items',
+      layer: 'contract',
+      missingTcIds: [],
+      extraTcIds: [],
+      specCaseCount: 32,
+    };
+    const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
+    expect(out).toContain('32 件');
   });
 
   it('T-OBS-DSH-013 gap with missing only - shows missing section', () => {
@@ -141,6 +197,7 @@ describe('renderDashboard', () => {
       layer: 'api',
       missingTcIds: ['T-MIS-001'],
       extraTcIds: [],
+      specCaseCount: 1,
     };
     const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
     expect(out).toContain('Missing TC IDs');
@@ -154,6 +211,9 @@ describe('renderDashboard', () => {
       layer: 'api',
       missingTcIds: [],
       extraTcIds: ['T-EXT-001'],
+      // spec は読めている。 0 件だと「未解析」 の分岐に入り、 この test の主題
+      // (extra だけが出る) を確かめられない。
+      specCaseCount: 1,
     };
     const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [gap] });
     expect(out).toContain('Extra TC IDs');
@@ -163,8 +223,8 @@ describe('renderDashboard', () => {
 
   it('T-OBS-DSH-015 multiple gaps - each rendered as separate section', () => {
     const gaps: SpecCoverageGap[] = [
-      { module: 'a', layer: 'api', missingTcIds: [], extraTcIds: [] },
-      { module: 'b', layer: 'ui', missingTcIds: [], extraTcIds: [] },
+      { module: 'a', layer: 'api', missingTcIds: [], extraTcIds: [], specCaseCount: 2 },
+      { module: 'b', layer: 'ui', missingTcIds: [], extraTcIds: [], specCaseCount: 2 },
     ];
     const out = renderDashboard({ history: { records: [] }, flaky: [], gaps });
     expect(out).toContain('### a (api)');

@@ -80,6 +80,21 @@ export function renderDashboard(input: DashboardInput): string {
     for (const gap of input.gaps) {
       lines.push(`### ${gap.module} (${gap.layer})`);
       lines.push('');
+      // 未解析の警告は gap の有無から独立して出す。 一致した時だけ出す形にすると、
+      // spec を読めていないのに test 側に既知形式の id があった場合に警告が消え、
+      // 「Extra TC IDs」 だけが並ぶ = 読み手は parser / spec 形式の問題に気付けない
+      // (#1910 Round 1)。 読めていない以上、 その id を extra と断定もできない。
+      if (gap.specCaseCount === 0) {
+        lines.push('spec から case を 1 件も読めなかった。 gap の有無は判定していない.');
+        lines.push('');
+        if (gap.extraTcIds.length > 0) {
+          lines.push('test 側で見つかった ID (spec を読めていないため extra とは断定できない).');
+          lines.push('');
+          for (const id of gap.extraTcIds) lines.push(`- ${id}`);
+          lines.push('');
+        }
+        continue;
+      }
       if (gap.missingTcIds.length > 0) {
         lines.push('Missing TC IDs (spec にあるが test にない).');
         lines.push('');
@@ -93,7 +108,9 @@ export function renderDashboard(input: DashboardInput): string {
         lines.push('');
       }
       if (gap.missingTcIds.length === 0 && gap.extraTcIds.length === 0) {
-        lines.push('spec と test が完全に一致.');
+        // ここへ来るのは case を 1 件以上読めた時だけ (0 件は上で return 済)。
+        // 件数を添えるのは、 何件に対する一致かが本文から読めるようにするため。
+        lines.push(`spec と test が完全に一致 (spec の case ${gap.specCaseCount} 件).`);
         lines.push('');
       }
     }
