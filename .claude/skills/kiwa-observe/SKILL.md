@@ -33,7 +33,7 @@ $ARGUMENTS
 ## オプション
 
 - `--module {name}` — coverage gap 解析対象 module
-- `--layer {id}` — 対象 layer (**常に必須**)
+- `--layer {id}` — 対象 layer (**常に必須**。 無ければ推測せず user に確認する)
 - `--lang {ja|en|<ISO 639-1>}` — spec の言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--spec {path}` — spec markdown path (省略時は § 入力 spec の path は CLI から受け取る で解決)
 - `--test {path}` — test code path。 glob 可、 複数回指定可 (省略時は同節で `test_outputs` から解決)
@@ -41,9 +41,9 @@ $ARGUMENTS
 - `--vitest-json {path}` — 既存 vitest JSON 出力 (省略時は試走)
 - `--out {path}` — dashboard 出力先 (省略時は `tests/reports/observe/dashboard-{module}-{layer}.{lang}.md`)
 
-layer は spec の場所を決めるだけでなく、 dashboard の本文と file 名の両方に入る。 だから `--spec` と `--out` を明示した起動でも要る。
+layer は spec の場所を決めるだけでなく、 dashboard の本文と file 名の両方に入る。
 
-**必須かどうかを本文で言い直さない**。 上の宣言が唯一の SSOT で、 2 箇所に書くと片方だけ条件付きに書き換わって食い違う (#1895 Round 2 で実際に起きた)。
+**`--layer` をいつ渡すかは上の宣言だけが定める**。 本文で言い直さない = 2 箇所に書くと片方だけ条件付きに書き換わって食い違う (#1895 Round 2 で実際に起きた)。
 
 ### 入力 spec の path は CLI から受け取る
 
@@ -55,9 +55,7 @@ kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 
 本 skill は Layer 3 で、 Layer 2 のように扱う layer が決まっていない。 **どの layer の spec と突き合わせるかは `--layer` で受け取る**。 `docs/layers.json` が宣言する id をそのまま渡す。
 
-**`--layer` が無ければ推測せず user に確認する**。 `--spec` を渡されていても同じで、 layer は spec の場所を決める以外に dashboard の本文と file 名にも要る (§ オプション)。
-
-layer が違えば spec dir も suffix も違うため、 別 layer の spec を読んで coverage gap を計算すると「仕様に無い test がある」 と「test が無い仕様がある」 が両方まとめて誤検出になる。
+layer が違えば spec dir も suffix も違うため、 別 layer の spec を読んで coverage gap を計算すると「仕様に無い test がある」 と「test が無い仕様がある」 が両方まとめて誤検出になる。 取り違えの害が大きいので、 渡され方は § オプション の宣言に従う。
 
 返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
 

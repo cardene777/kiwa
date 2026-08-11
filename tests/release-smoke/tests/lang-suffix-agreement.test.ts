@@ -857,27 +857,41 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
    * 従って層を分ける。 ただし #1893 と違い実行できる対象が無い (markdown の契約文
    * そのものが対象) ため、 実行層へ移すのではなく **重複を消して 1 箇所にする**。
    *
-   * したがって検査は 2 つに絞る。 宣言行が「常に必須」 と言っていること、 そして
-   * 必須性を述べる行がそれ以外に無いこと。 重複が無ければ、 食い違う 2 つ目の
-   * 読み方も生まれない。
+   * したがって検査は 2 つに絞る。 宣言行が「常に必須」 と欠落時の扱いの両方を言って
+   * いること、 そして `必須` を `--layer` と同じ行に書く箇所がそれ以外に無いこと。
    *
-   * **覆えていない範囲**。 flag 名を 1 度も書かない日本語表現 (「層の指定」)、
-   * 表の cell、 別 file からの参照は検出しない。 これは受容する境界で、 塞ごうと
-   * して 3 round 失敗した。
+   * **これは「重複が無い」 ことの証明ではない**。 `必要` と書く / flag 名を書かずに
+   * 「層の指定」 と書く / 表の cell に書く / 別 file から参照する、 のいずれも検出
+   * しない。 塞ごうとして 3 round 失敗した範囲で、 **review が見る境界** として残す。
+   * 検査が担うのは「同じ語で 2 度書く」 という最も起きやすい 1 形だけ。
    */
-  it('kiwa-observe の --layer 必須が宣言行だけに書かれている', () => {
+  it('kiwa-observe の --layer 契約が宣言行に集約されている', () => {
     const lines = read('.claude/skills/kiwa-observe/SKILL.md').split('\n');
 
     const declaration = lines.filter((l) => l.startsWith('- `--layer '));
     expect(declaration, '--layer の宣言行が 1 行に定まらない').toHaveLength(1);
+    // 必須性と欠落時の扱いの両方。 片方が本文に残ると、 そちらだけ書き換わって
+    // 宣言と食い違う (Round 2 / Round 6 で実際にそうなった)。
     expect(declaration[0], '--layer の宣言が「常に必須」 でない').toContain('**常に必須**');
+    expect(declaration[0], '--layer の欠落時の扱いが宣言に無い').toContain('user に確認');
 
-    // 必須性を述べる行 = `--layer` と 必須 を同じ行に持つもの。 宣言行だけが該当する
-    // 状態を保つ = 2 つ目があると、 そこが条件付きに書き換わっても宣言は無傷のまま
-    // 食い違いだけが残る (Round 2 で実際にそうなった)。
     const stating = lines.filter((l) => l.includes('--layer') && l.includes('必須'));
     expect(stating, `--layer の必須性が 2 箇所以上で述べられている:\n${stating.join('\n')}`).toEqual(
       declaration,
+    );
+  });
+
+  it('kiwa-observe の --spec 宣言が 1 行あり CLI 解決を指す', () => {
+    // Lost when the 8-line union pin came out: deleting the `--spec`
+    // declaration passed all 371 cases (#1895 Round 6). Restored as its own
+    // positive check rather than by widening the `--layer` one, so the two
+    // contracts fail separately.
+    const declaration = read('.claude/skills/kiwa-observe/SKILL.md')
+      .split('\n')
+      .filter((l) => l.startsWith('- `--spec '));
+    expect(declaration, '--spec の宣言行が 1 行に定まらない').toHaveLength(1);
+    expect(declaration[0], '--spec の既定が解決節を指していない').toMatch(
+      /省略時は[^、]*§[^、]+で解決/,
     );
   });
 
