@@ -70,8 +70,13 @@ const INLINE_LINK = new RegExp(
 // 止まって後続の属性を見逃す (どちらも実測で再現した)。
 //
 // tag の中身は引用区間を先に食うので、属性値に `>` があっても tag の終端を取り違えない。
-const IMG_TAG = /<img\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
-const A_TAG = /<a\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+//
+// 名前の終端は `\b` では取れない。`<a-b>` の `a` の直後は `-` で単語境界が成立するため、
+// static な href を持つ custom element を「生 HTML の a タグ」 として止める。同じ形が
+// `<img-x src>` にもある。VUE_ANCHOR_TAG だけを直すと、Vue 判定は通るのに a タグ判定で
+// 落ちる (PR #1907 Round 1 で実測)。
+const IMG_TAG = /<img(?![-\w:])((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+const A_TAG = /<a(?![-\w:])((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
 const HTML_ATTRIBUTE =
   /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/g;
 
@@ -144,15 +149,29 @@ function isCovered(spans, index) {
  *
  * config (`config.mts`) と theme は `.md` ではないので、除いても検査対象は減らない。
  */
-// `public` は VitePress が中身をそのまま配る静的資産の置き場で、markdown は page として
-// render されない。実測でも `docs/public` 配下の `.md` は 0 件。走査対象にすると
-// `docs/public/images -> <repo>/images` (実運用の symlink) が「走査範囲の外を指す」 として
-// 報告される = 画像しか無い先を検査できないと言うことになる (#1888)。
-const SKIPPED_DIRECTORIES = new Set(['.vitepress', 'node_modules', 'public']);
+const SKIPPED_DIRECTORIES = new Set(['.vitepress', 'node_modules']);
+
+/**
+ * VitePress が中身をそのまま配る静的資産の置き場。
+ *
+ * markdown を page として render しないので、link 検査の対象にしない。実測でも
+ * `docs/public` 配下の `.md` は 0 件。対象にすると `docs/public/images -> <repo>/images`
+ * (実運用の symlink) が「走査範囲の外を指す」 として報告される = 画像しか無い先を
+ * 検査できないと言うことになる (#1888)。
+ *
+ * **名前ではなく path で見る**。`public` という名前を全階層で外すと、`docs/guide/public/`
+ * のような通常の page dir まで 3 つの walk から外れ、そこに置いた link が検査を 1 度も
+ * 通らずに gate を抜ける (PR #1907 Round 1 で指摘)。外すのは docsRoot 直下の 1 つだけ。
+ */
+function staticAssetRoot(docsRoot) {
+  return join(docsRoot, 'public');
+}
 
 /** その directory へ降りるか。 */
-function shouldWalk(entry) {
-  return entry.isDirectory() && !entry.isSymbolicLink() && !SKIPPED_DIRECTORIES.has(entry.name);
+function shouldWalk(entry, entryPath, staticRoot) {
+  if (!entry.isDirectory() || entry.isSymbolicLink()) return false;
+  if (SKIPPED_DIRECTORIES.has(entry.name)) return false;
+  return entryPath !== staticRoot;
 }
 
 /** path が root と同じか、その配下にあるか。 */
@@ -232,11 +251,12 @@ function linkTargets(raw) {
  * 引用区間を跨ぐ `<a>` が両方とも漏れた)。代わりに **extractor が消費できなかった
  * link 形** を残余として拾う。取りこぼす方向ではなく、多めに報告する方向に倒れる。
  *
- * @param {{repositoryRoot: string, scanRoot: string}} roots
+ * @param {{repositoryRoot: string, docsRoot: string, scanRoot: string}} roots
  * @returns {string[]} 記法と file を示す説明行。空配列なら未対応記法なし。
  */
-export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
+export function unsupportedLinkSyntax({ repositoryRoot, docsRoot, scanRoot }) {
   const found = [];
+  const staticRoot = staticAssetRoot(docsRoot);
 
   const reasonsFor = (content) => {
     const spans = [];
@@ -300,7 +320,7 @@ export function unsupportedLinkSyntax({ repositoryRoot, scanRoot }) {
         continue;
       }
       if (entry.isDirectory()) {
-        if (shouldWalk(entry)) walk(entryPath);
+        if (shouldWalk(entry, entryPath, staticRoot)) walk(entryPath);
         continue;
       }
       if (!entry.name.endsWith('.md')) continue;
@@ -484,6 +504,7 @@ const GENERATED_DECLARATION_ROOTS = ['api'];
 function collectGeneratedDirectories(docsRoot) {
   const generated = new Set();
   const trustedRoots = GENERATED_DECLARATION_ROOTS.map((name) => join(docsRoot, name));
+  const staticRoot = staticAssetRoot(docsRoot);
   const isTrusted = (directory) =>
     trustedRoots.some((root) => directory === root || directory.startsWith(`${root}${sep}`));
 
@@ -497,7 +518,7 @@ function collectGeneratedDirectories(docsRoot) {
     for (const entry of entries) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) {
-        if (shouldWalk(entry)) walk(entryPath);
+        if (shouldWalk(entry, entryPath, staticRoot)) walk(entryPath);
         continue;
       }
       if (entry.name !== '.gitignore') continue;
@@ -593,6 +614,7 @@ const reportLine = ({ file, target }) => `dead link: ${file} -> ${target}`;
 export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
   const existsCaseExact = makeExistsCaseExact(repositoryRoot);
   const generatedDirectories = collectGeneratedDirectories(docsRoot);
+  const staticRoot = staticAssetRoot(docsRoot);
   const found = [];
 
   /** 生成先 directory 自身か、その配下か。 */
@@ -674,7 +696,7 @@ export function classifyDocumentLinks({ repositoryRoot, docsRoot, scanRoot }) {
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       const entryPath = join(directory, entry.name);
       if (entry.isDirectory()) {
-        if (shouldWalk(entry)) walk(entryPath);
+        if (shouldWalk(entry, entryPath, staticRoot)) walk(entryPath);
         continue;
       }
       if (!entry.name.endsWith('.md')) continue;

@@ -449,6 +449,7 @@ test('a plain anchor is reported once, not by two rules', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.equal(found.length, 1, found.join('\n'));
@@ -472,6 +473,7 @@ for (const [label, markdown] of [
 
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs', 'libraries'),
       });
       // 「生 HTML の a タグ」 だけが出る。Vue 判定は反応しない。
@@ -495,6 +497,7 @@ test('a colon-prefixed string inside a component attribute value is not a bindin
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.deepEqual(found, [], found.join('\n'));
@@ -575,6 +578,7 @@ test('the real docs/libraries tree uses no unsupported link syntax', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const found = unsupportedLinkSyntax({
     repositoryRoot,
+    docsRoot: join(repositoryRoot, 'docs'),
     scanRoot: join(repositoryRoot, 'docs', 'libraries'),
   });
   assert.deepEqual(found, [], found.join('\n'));
@@ -645,6 +649,7 @@ test('a symlink that stays inside the scan root resolves', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.deepEqual(found, [], found.join('\n'));
@@ -666,6 +671,7 @@ test('a symlink that points outside the scan root is reported', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.equal(found.length, 1, found.join('\n'));
@@ -691,6 +697,7 @@ test('the boundary is the scan root, not its parent', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs', 'libraries'),
     });
     assert.equal(found.length, 1, found.join('\n'));
@@ -718,6 +725,7 @@ for (const [label, make] of [
 
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs', 'libraries'),
       });
       assert.equal(found.length, 1, found.join('\n'));
@@ -741,9 +749,67 @@ test('a symlink under docs/public is not reported', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs'),
     });
     assert.deepEqual(found, [], found.join('\n'));
+  });
+});
+
+// `public` の除外は名前ではなく path で見る。名前で全階層を外すと、通常の page dir を
+// `public` と名付けるだけで配下の link が検査を 1 度も通らずに gate を抜ける
+// (PR #1907 Round 1)。
+test('a nested directory named public is still checked', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const nested = join(root, 'docs', 'libraries', 'foundation', 'sample', 'public');
+    mkdirSync(nested, { recursive: true });
+    // docsRoot 直下の public は除外される側。両方あっても nested だけが検査される。
+    mkdirSync(join(root, 'docs', 'public'), { recursive: true });
+    writeFileSync(join(root, 'docs', 'public', 'index.md'), '# assets\n\n[x](./gone)\n');
+    writeFileSync(join(nested, 'index.md'), '# nested\n\n<a href="./real">x</a>\n');
+    writeFileSync(join(nested, 'real.md'), '# real\n');
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs'),
+    });
+    // nested 側だけが報告される。docsRoot 直下の public は静的資産の置き場なので通す。
+    assert.equal(found.length, 1, found.join('\n'));
+    assert.match(found[0], /生 HTML の a タグ/);
+    assert.match(found[0], /sample\/public/);
+  });
+});
+
+// tag 名の境界は a タグ判定にも要る。`VUE_ANCHOR_TAG` だけ直すと、Vue 判定は通るのに
+// 「生 HTML の a タグ」 で落ちる (PR #1907 Round 1)。
+test('static href を持つ custom element is not reported as unsupported syntax', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const docsDirectory = join(root, 'docs', 'libraries', 'foundation', 'sample');
+    writeFileSync(join(docsDirectory, 'real.md'), '# real\n');
+    writeFileSync(join(docsDirectory, 'index.md'), '# sample\n\n<a-b href="./real">x</a-b>\n');
+
+    const found = unsupportedLinkSyntax({
+      repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
+      scanRoot: join(root, 'docs', 'libraries'),
+    });
+    assert.deepEqual(found, [], found.join('\n'));
+  });
+});
+
+// img 側は報告ではなく link 抽出に効く。実在する先で測ると、誤って抽出しても
+// 「解決した」 だけで差が出ない。存在しない先を置いて、抽出したかどうかを見る。
+test('a custom element starting with img does not contribute a link', () => {
+  withFixture(({ root, readmePath }) => {
+    writeFileSync(readmePath, `# @kiwa-lab/sample\n\n${HAND_WRITTEN}`);
+    const indexPath = join(root, 'docs', 'libraries', 'foundation', 'sample', 'index.md');
+    writeFileSync(indexPath, '# sample\n\n<img-x src="./gone">\n');
+
+    const result = runSync(root);
+    assert.equal(result.status, 0, result.stderr);
   });
 });
 
@@ -1255,6 +1321,7 @@ test('no file in docs uses link syntax the checker cannot parse', () => {
   const repositoryRoot = join(scriptsDirectory, '..');
   const found = unsupportedLinkSyntax({
     repositoryRoot,
+    docsRoot: join(repositoryRoot, 'docs'),
     scanRoot: join(repositoryRoot, 'docs'),
   });
   assert.deepEqual(found, [], found.join('\n'));
@@ -1328,6 +1395,7 @@ test('a symlinked markdown source is not read', () => {
       // ただし読まなかったことは黙らない。検査できない file として報告する。
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs'),
       });
       assert.equal(found.length, 1, found.join('\n'));
@@ -1351,6 +1419,7 @@ test('a symlinked source directory pointing outside the repo is reported as unch
 
       const found = unsupportedLinkSyntax({
         repositoryRoot: root,
+        docsRoot: join(root, 'docs'),
         scanRoot: join(root, 'docs'),
       });
       assert.equal(found.length, 1, found.join('\n'));
@@ -1374,6 +1443,7 @@ test('a symlinked source directory inside the repo is not reported', () => {
 
     const found = unsupportedLinkSyntax({
       repositoryRoot: root,
+      docsRoot: join(root, 'docs'),
       scanRoot: join(root, 'docs'),
     });
     assert.deepEqual(found, [], found.join('\n'));
