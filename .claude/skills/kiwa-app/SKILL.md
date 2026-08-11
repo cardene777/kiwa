@@ -25,11 +25,39 @@ spec と test file が生成される。 依存していない layer のテス�
 ## 前提
 
 - cwd が対象 project の root (`package.json` が存在)
-- `kiwa` CLI が起動できる (`kiwa --help` が exit 0)
+- `@kiwa-lab/cli` が対象 project に install 済で、 § CLI の起動形 の `$KIWA` で起動できる
+  (`$KIWA --help` が exit 0)
 - 出力先 `tests/spec/` / `tests/reports/app/` および各 layer の `test_outputs` への Write 権限
 
 kiwa repo の中で起動してもよいが、 その場合の対象は repo 自身であって `examples/` ではない。
 `examples/` を回したい場合は `/kiwa-test --example {name}` を使う。
+
+## CLI の起動形
+
+**素の `kiwa` は使わない**。 install した CLI は `node_modules/.bin/` に置かれ、 この場所は
+`PATH` の探索対象ではない。 素の名前で叩けるのは global install した環境だけで、 local
+install しかない project では `command not found` になる (#1908)。
+
+引き方は package manager で違うため、 本 skill は起動形を変数に持つ。
+
+```bash
+# 既定は npx。 npm は Node に同梱され、 local の node_modules/.bin を先に引く。
+# --no を付けるのは、 未 install の時に registry から拾って走らせないため
+# (別 version が黙って動くより、 落ちて install を促す方がよい)。
+KIWA="${KIWA:-npx --no kiwa}"
+```
+
+| package manager | `KIWA` に入れる形 |
+|---|---|
+| npm / pnpm / yarn (node_modules 有) / bun | `npx --no kiwa` (既定のまま) |
+| pnpm を明示したい場合 | `pnpm exec kiwa` |
+| yarn Plug'n'Play (node_modules 無) | `yarn kiwa` |
+| global install 済 | `kiwa` |
+
+`$KIWA` は引用しない。 既定値が 2 語以上なので、 引用すると 1 語の command 名として扱われる。
+
+**kiwa repo の中の skill は `pnpm exec kiwa` を直に書く** (この repo は pnpm workspace で、
+起動形が 1 つに定まるため)。 本 skill だけが利用者 project で動くので、 ここだけ変数を持つ。
 
 ## 引数仕様
 
@@ -68,7 +96,8 @@ kiwa init --detect
 # 変数名は DOC_LANG。 LANG は shell の locale (ja_JP.UTF-8 等) で、 使うと
 # --lang ja_JP.UTF-8 が渡って CLI に拒否される。
 DOC_LANG="${DOC_LANG:-ja}"
-pnpm exec kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
+KIWA="${KIWA:-npx --no kiwa}"
+$KIWA layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 ```
 
 判定を本 skill 側に書かない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 複製すると
