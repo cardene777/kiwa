@@ -1097,7 +1097,10 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     // 到達確認だけ。 `regexes.length > 0` は `expandBraces` が必ず 1 件以上
     // 返すため恒真で、 正しさの根拠にはならない (#1898 Round 5)。
     for (const p of all) {
-      expect(() => patternToMatchers(p.replace('{example}', 'x')), `${p} で例外`).not.toThrow();
+      // `replaceAll`。 `replace` は先頭 1 つしか置換せず、 basename に残った
+      // `{example}` を `expandBraces` が literal `example` に変えるため、
+      // 例外にならないまま別 pattern を検査することになる (#1898 Round 6)。
+      expect(() => patternToMatchers(p.replaceAll('{example}', 'x')), `${p} で例外`).not.toThrow();
     }
   });
 
@@ -1151,6 +1154,16 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
       dir: 'x/tests',
       hit: ['a.edge.test.ts'],
       miss: ['axedgextestxts'],
+    },
+    {
+      label: 'wildcard を持たない exact basename (e2e 退避先)',
+      pattern: 'tests/fixtures/x/e2e-test/x.spec.ts',
+      dir: 'tests/fixtures/x/e2e-test',
+      hit: ['x.spec.ts'],
+      // `prefixx.spec.ts` は開始 anchor が無いと通る。 `example.spec.ts` は
+      // `{example}` の置換漏れを literal に変えた時に通る。 どちらも
+      // wildcard を持つ 4 class では区別が付かない (#1898 Round 6)。
+      miss: ['prefixx.spec.ts', 'example.spec.ts', 'x.spec.ts.bak'],
     },
   ];
 
