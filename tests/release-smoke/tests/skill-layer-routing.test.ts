@@ -769,16 +769,52 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
         if (!existsSync(resolve(REPO_ROOT, rel))) return [];
         return read(rel)
           .split('\n')
-          .map((line) => /\/kiwa-review --mode test-review[^`]*/.exec(line)?.[0] ?? '')
+          .map((line) => /\/kiwa-review[^`]*/.exec(line)?.[0] ?? '')
           .filter((command) => command.includes('--module'))
           .map((command) => ({ skill: name, command: command.trim() }));
       });
   }
 
-  it('起動行が 1 件も無いということはない', () => {
-    // 下の 2 検査は起動行の集合に対して回る。 抽出が壊れて 0 件になると、 どちらも
-    // 何も見ずに緑になる。
-    expect(invocations().length, 'test-review の起動行が抽出できない').toBeGreaterThanOrEqual(10);
+  /** The subset that asks for a test review. */
+  function testReviews(): { skill: string; command: string }[] {
+    return invocations().filter(({ command }) => command.includes('--mode test-review'));
+  }
+
+  it('--no-review を宣言する skill は起動行を 1 つ以上持つ', () => {
+    // 下の検査は起動行の集合に対して回るため、 抽出が壊れて 0 件になると何も見ずに
+    // 緑になる。 件数の下限を数字で置くと、 skill が減った時に嘘になる一方、 増えた時は
+    // 素通りする。
+    //
+    // 代わりに **別の理由で存在する宣言** と対応させる。 `--no-review` は「review の
+    // 自動呼出を止める」 flag なので、 宣言する skill は必ず review を起動する。
+    const declaring = [...skillDirs()]
+      .filter((name) => name !== 'kiwa-review')
+      .filter((name) => {
+        const rel = `.claude/skills/${name}/SKILL.md`;
+        return (
+          existsSync(resolve(REPO_ROOT, rel)) &&
+          read(rel).split('\n').some((line) => line.startsWith('- `--no-review`'))
+        );
+      });
+    expect(declaring.length, '--no-review を宣言する skill が無い').toBeGreaterThan(0);
+
+    const seen = new Set(invocations().map(({ skill }) => skill));
+    const silent = declaring.filter((name) => !seen.has(name));
+    expect(silent, `--no-review を宣言しているのに起動行が見つからない:\n${silent.join('\n')}`).toEqual(
+      [],
+    );
+  });
+
+  it('起動行が mode を名乗る', () => {
+    // `--mode` は kiwa-review の必須引数。 省いた起動は mode 未指定で止まるうえ、
+    // test-review 用の検査からも外れる = 契約を書き換えても気付けない。 実測で
+    // `kiwa-e2e` と `kiwa-a11y` の 2 件が `--mode` を持たないまま残っていた
+    // (PR #1904 Round 1 F1)。
+    const modes = ['spec-review', 'test-review', 'result-review'];
+    const missing = invocations()
+      .filter(({ command }) => !modes.some((mode) => command.includes(`--mode ${mode}`)))
+      .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
+    expect(missing, `--mode を渡していない起動行:\n${missing.join('\n')}`).toEqual([]);
   });
 
   it('起動行が --test-path か (--producer と --project-root) のどちらかを渡す', () => {
@@ -789,7 +825,7 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     // 判定は **起動 command の部分だけ** を見る。 行全体で見ると、 同じ行に置いた
     // 説明文 (「`--producer` と `--project-root` は ... のために要る」) が flag 名を
     // 含むため、 command から外しても緑のままになる (変異試験で実測)。
-    const missing = invocations()
+    const missing = testReviews()
       .filter(({ command }) => !command.includes('--test-path'))
       .filter(({ command }) => !(command.includes('--producer') && command.includes('--project-root')))
       .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
@@ -803,7 +839,7 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     // `docs/layers.json` と 2 箇所になり、 2 形のうち片方しか見ない形に戻る
     // (`--test-path test/*.t.sol` は退避後は 0 件になる)。 明示 override は
     // 「いま書いた file」 を渡す時のためにある。
-    const copied = invocations()
+    const copied = testReviews()
       .map(({ skill, command }) => {
         const value = /--test-path\s+(\S+)/.exec(command)?.[1];
         return value && /[*{]/.test(value) ? `${skill}: --test-path ${value}` : null;
@@ -821,6 +857,22 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     const testPath = lines.find((l) => l.startsWith('- `--test-path '));
     expect(testPath, '--test-path の宣言が無い').toBeDefined();
     expect(testPath, '--test-path の既定が test_paths を名指ししていない').toContain('test_paths');
+  });
+
+  it('kiwa-review が test 出力先を列挙しない', () => {
+    // 表を消しても、 `## 前提` のような別の節に「対応 test file は
+    // `examples/{X}/test/` または `tests/fixtures/{X}/...` に存在」 と書いてあれば
+    // 同じ知識が残る。 実測でその 1 行が残っており、 表の検査は通っていた
+    // (PR #1904 Round 1 F2)。
+    //
+    // 出力先の layout を名指しする token を禁じる。 `{example}/...` は
+    // `--project-root` の宣言で起点の形として出るため、 dir を続けた形だけを見る。
+    const source = read('.claude/skills/kiwa-review/SKILL.md');
+    const naming = source
+      .split('\n')
+      .filter((line) => line.includes('tests/fixtures/') || /\{example\}\/[a-z]/.test(line))
+      .map((line) => line.trim().slice(0, 120));
+    expect(naming, `test 出力先を名指ししている行:\n${naming.join('\n')}`).toEqual([]);
   });
 
   it('kiwa-review が test 出力先の対応表を持たない', () => {

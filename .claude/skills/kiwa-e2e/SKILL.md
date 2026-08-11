@@ -164,7 +164,7 @@ pnpm exec playwright test {module}.spec.ts --reporter=list,json:test-results.jso
 
 ### Step 6: kiwa-review 自動呼出 (option)
 
-`--no-review` 指定がなければ `/kiwa-review --layer e2e-generic --module {module} --lang $DOC_LANG` を自動起動して 11 観点の網羅性を判定する。
+`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer e2e-generic --module {module} --lang $DOC_LANG --producer kiwa-e2e --project-root .` を自動起動して 11 観点の網羅性を判定する。 `--mode` は kiwa-review の必須引数で、 省くと mode 未指定として止まる。 `--producer` と `--project-root` は review 側が test file を `kiwa layers` に訊くために要る (#1902)。
 網羅率 < 100% (11 観点中 11 達成しない) なら patch suggestion を spec 末尾に追記する。
 
 ## Gotchas

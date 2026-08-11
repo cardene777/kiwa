@@ -168,7 +168,7 @@ violations 発生時は `reportViolations(results)` で詳細 markdown report �
 
 ### Step 6: kiwa-review 自動呼出 (option)
 
-`--no-review` 指定がなければ `/kiwa-review --layer a11y --module {module} --lang $DOC_LANG` を起動して 11 観点の網羅性を判定する。
+`--no-review` 指定がなければ `/kiwa-review --mode test-review --layer a11y --module {module} --lang $DOC_LANG --producer kiwa-a11y --project-root .` を起動して 11 観点の網羅性を判定する。 `--mode` は kiwa-review の必須引数で、 省くと mode 未指定として止まる。 `--producer` と `--project-root` は review 側が test file を `kiwa layers` に訊くために要る (#1902)。
 
 ## Gotchas
 

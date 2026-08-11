@@ -18,7 +18,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write
 ## 前提
 
 - 対象 spec が `tests/spec/{layer}/test-spec-{module}.{lang}.md` に存在 (`/kiwa-design` で生成済)
-- test-review mode の場合は 対応 test file が `examples/{X}/test/` `examples/{X}/hardhat-test/` `examples/{X}/tests/` または `tests/fixtures/{X}/...` に存在
+- test-review mode の場合は 対応 test file が存在。 どこを見るかは `kiwa layers` が返すため本 file では列挙しない (§ test code の path も CLI から受け取る)
 - 出力先 `tests/reports/review/` への Write 権限
 
 ## ユーザーのリクエスト
