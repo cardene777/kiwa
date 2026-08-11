@@ -118,6 +118,26 @@ describe('analyzeSpecCoverage は 9 column 表の spec を読む (#1897)', () =>
     expect(gap.extraTcIds).toEqual(['TC-E99']);
   });
 
+  it('separator を挟んだ長い id の一部一致を実装済みと読まない', () => {
+    // `\b` は `.` と `/` を境界として扱うため、 `TC-001` が `TC-001.2` の中に
+    // 一致する。 別 case の id を「実装済み」 と読み、 かつ discovery 側は
+    // `TC-001.2` から `TC-001` を切り出して余剰と数えていた (PR #1905 Round 1)。
+    const dotted = analyzeSpecCoverage({ specMarkdown: jaSpec, testCode: 'TC-001.2 TC-002 TC-003' });
+    expect(dotted.missingTcIds, 'TC-001.2 を TC-001 の実装と読んでいる').toEqual(['TC-001']);
+    expect(dotted.extraTcIds, 'TC-001.2 から TC-001 を切り出している').toEqual([]);
+
+    const slashed = analyzeSpecCoverage({
+      specMarkdown: jaSpec.replace(/TC-00/g, 'TC/00'),
+      testCode: 'X/TC/001 TC/002 TC/003',
+    });
+    expect(slashed.missingTcIds, 'X/TC/001 を TC/001 の実装と読んでいる').toEqual(['TC/001']);
+
+    // 正確な一致は従来どおり通る。 境界を広げた副作用で実装済みを見落とさない。
+    const exact = analyzeSpecCoverage({ specMarkdown: jaSpec, testCode: 'TC-001 TC-002 TC-003' });
+    expect(exact.missingTcIds).toEqual([]);
+    expect(exact.extraTcIds).toEqual([]);
+  });
+
   it('英語 header の spec が退行しない', () => {
     // 別名を足しただけで、 既存の形は同じ答えを返す。
     const gap = analyzeSpecCoverage({ specMarkdown: spec, testCode: "it('T-API-002', () => {});" });
