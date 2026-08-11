@@ -761,48 +761,60 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
    * それを持つ行だけを取る。 code block だけに絞る形は使えない = 実際の起動指示の
    * 多くが本文の backtick 内にある。
    */
+  /** 1 本の markdown から起動 command を取り出す (fixture でも回せる pure helper)。 */
+  function extractInvocations(body: string): string[] {
+    return body
+      .split('\n')
+      .map((line) => /\/kiwa-review[^`]*/.exec(line)?.[0] ?? '')
+      .filter((command) => command.includes('--module'))
+      .map((command) => command.trim());
+  }
+
+  /**
+   * `--mode` の値。 空白区切りと `=` 区切りを 1 箇所で吸収する。
+   *
+   * 分類と必須検査が別々の literal を持つと、 表記を変えただけで「mode 無し」 と
+   * 「test-review でない」 の両方に化ける (Round 2 F3)。
+   */
+  function modeOf(command: string): string | null {
+    return /--mode[ =]([a-z-]+)/.exec(command)?.[1] ?? null;
+  }
+
   function invocations(): { skill: string; command: string }[] {
     return [...skillDirs()]
       .filter((name) => name !== 'kiwa-review')
       .flatMap((name) => {
         const rel = `.claude/skills/${name}/SKILL.md`;
         if (!existsSync(resolve(REPO_ROOT, rel))) return [];
-        return read(rel)
-          .split('\n')
-          .map((line) => /\/kiwa-review[^`]*/.exec(line)?.[0] ?? '')
-          .filter((command) => command.includes('--module'))
-          .map((command) => ({ skill: name, command: command.trim() }));
+        return extractInvocations(read(rel)).map((command) => ({ skill: name, command }));
       });
   }
 
   /** The subset that asks for a test review. */
   function testReviews(): { skill: string; command: string }[] {
-    return invocations().filter(({ command }) => command.includes('--mode test-review'));
+    return invocations().filter(({ command }) => modeOf(command) === 'test-review');
   }
 
-  it('--no-review を宣言する skill は起動行を 1 つ以上持つ', () => {
-    // 下の検査は起動行の集合に対して回るため、 抽出が壊れて 0 件になると何も見ずに
-    // 緑になる。 件数の下限を数字で置くと、 skill が減った時に嘘になる一方、 増えた時は
-    // 素通りする。
-    //
-    // 代わりに **別の理由で存在する宣言** と対応させる。 `--no-review` は「review の
-    // 自動呼出を止める」 flag なので、 宣言する skill は必ず review を起動する。
-    const declaring = [...skillDirs()]
-      .filter((name) => name !== 'kiwa-review')
-      .filter((name) => {
-        const rel = `.claude/skills/${name}/SKILL.md`;
-        return (
-          existsSync(resolve(REPO_ROOT, rel)) &&
-          read(rel).split('\n').some((line) => line.startsWith('- `--no-review`'))
-        );
-      });
-    expect(declaring.length, '--no-review を宣言する skill が無い').toBeGreaterThan(0);
-
-    const seen = new Set(invocations().map(({ skill }) => skill));
-    const silent = declaring.filter((name) => !seen.has(name));
-    expect(silent, `--no-review を宣言しているのに起動行が見つからない:\n${silent.join('\n')}`).toEqual(
-      [],
-    );
+  it('抽出が起動と言及を見分ける', () => {
+    // 抽出が空集合へ壊れると、 下の検査はすべて何も見ずに緑になる。 repo の別概念
+    // (`--no-review` の宣言等) を生存確認に使うと、 その概念の設計変更で偽陽性に
+    // なる (Round 2 F5)。 helper 自体に fixture を当てる。
+    const fixture = [
+      '`--no-review` 未指定なら `/kiwa-review --mode test-review --layer auth --module {m} --producer kiwa-auth --project-root .` を呼ぶ。',
+      '- 下流 ... `/kiwa-review --mode test-review --layer auth` (test 品質 review)',
+      '本文で `/kiwa-review --mode test-review` に触れるだけの行。',
+      '```text',
+      '/kiwa-review --mode=result-review --module {example} --lang $DOC_LANG',
+      '```',
+    ].join('\n');
+    const found = extractInvocations(fixture);
+    expect(found, '起動行だけを取れていない').toEqual([
+      '/kiwa-review --mode test-review --layer auth --module {m} --producer kiwa-auth --project-root .',
+      '/kiwa-review --mode=result-review --module {example} --lang $DOC_LANG',
+    ]);
+    expect(modeOf(found[0]!), '空白区切りの mode').toBe('test-review');
+    expect(modeOf(found[1]!), '= 区切りの mode').toBe('result-review');
+    expect(invocations().length, '実 skill から 1 件も抽出できない').toBeGreaterThan(0);
   });
 
   it('起動行が mode を名乗る', () => {
@@ -810,9 +822,9 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     // test-review 用の検査からも外れる = 契約を書き換えても気付けない。 実測で
     // `kiwa-e2e` と `kiwa-a11y` の 2 件が `--mode` を持たないまま残っていた
     // (PR #1904 Round 1 F1)。
-    const modes = ['spec-review', 'test-review', 'result-review'];
+    const modes = new Set(['spec-review', 'test-review', 'result-review']);
     const missing = invocations()
-      .filter(({ command }) => !modes.some((mode) => command.includes(`--mode ${mode}`)))
+      .filter(({ command }) => !modes.has(modeOf(command) ?? ''))
       .map(({ skill, command }) => `${skill}: ${command.slice(0, 120)}`);
     expect(missing, `--mode を渡していない起動行:\n${missing.join('\n')}`).toEqual([]);
   });
@@ -867,10 +879,33 @@ describe('test-review の test path が CLI 経路に閉じている', () => {
     //
     // 出力先の layout を名指しする token を禁じる。 `{example}/...` は
     // `--project-root` の宣言で起点の形として出るため、 dir を続けた形だけを見る。
+    // 禁止する形は **表から導く**。 綴りを 2 つ書き並べる形だと、 同じ layout を
+    // 別表記で書くだけで戻せる (`tests/fixtures` の末尾 slash 無し /
+    // `examples/{X}/test/` の placeholder 違い、 Round 2 F4 で実測)。
+    //
+    // 表の各宣言から「placeholder の次の segment」 を集めると、 test が置かれる
+    // dir 名 (`test` / `tests` / `contract-test` / `hardhat-test` / `e2e-test`) が
+    // そのまま出る。 層が増えれば禁止対象も自動で増える。
+    const testDirs = new Set(
+      LAYERS.flatMap((l) => Object.values(l.test_outputs ?? {}).flat())
+        .map((path) => path.replace(/^tests\/fixtures\//, '').split('/')[1])
+        .filter((segment): segment is string => !!segment && !/[{*]/.test(segment)),
+    );
+    expect(testDirs.size, '表から test dir を導けない').toBeGreaterThan(0);
+    const dirAlternation = [...testDirs].map((d) => d.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    const patterns = [
+      // 退避先。 末尾 slash の有無と前後の境界を問わない。
+      /(?:^|[^a-z0-9_/])tests\/fixtures(?![a-z0-9_-])/i,
+      // kiwa 自身の example dir を起点に書く形 (placeholder 名は問わない)。
+      /(?:^|[^a-z0-9_/])examples\/\{[A-Za-z_]+\}\//,
+      // placeholder の直後に test dir が続く形。 `{example}/...` の起点宣言は
+      // dir が続かないため当たらない。
+      new RegExp(`\\{[A-Za-z_]+\\}/(?:${dirAlternation})(?![a-z0-9_-])`),
+    ];
     const source = read('.claude/skills/kiwa-review/SKILL.md');
     const naming = source
       .split('\n')
-      .filter((line) => line.includes('tests/fixtures/') || /\{example\}\/[a-z]/.test(line))
+      .filter((line) => patterns.some((pattern) => pattern.test(line)))
       .map((line) => line.trim().slice(0, 120));
     expect(naming, `test 出力先を名指ししている行:\n${naming.join('\n')}`).toEqual([]);
   });
