@@ -121,7 +121,7 @@ SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。 spe
 |---|---|---|
 | `contract` | `/kiwa-forge` | `{example}/test/*.t.sol` または `tests/fixtures/{example}/contract-test/{Contract}.t.sol` |
 | `contract` | `/kiwa-hardhat` | `{example}/test/*.test.ts` または `tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs` |
-| `e2e` | `/kiwa-play` | `{example}/tests/*.spec.ts` または `tests/fixtures/{example}/e2e-test/{example}.spec.ts` |
+| `e2e` | `/kiwa-play` | `{example}/tests/*.spec.ts` または `tests/fixtures/{example}/e2e-test/*.spec.ts` |
 | `e2e-generic` | `/kiwa-e2e` | `{example}/tests/e2e/{module}.spec.ts` |
 | `a11y` | `/kiwa-a11y` | `{example}/tests/a11y/{module}.test.tsx` または `{example}/tests/a11y/{module}.spec.ts` |
 | `integration` | `/kiwa-api` | `{example}/test/integration/{module}.test.ts` |
