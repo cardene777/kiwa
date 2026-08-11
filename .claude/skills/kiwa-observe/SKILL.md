@@ -82,14 +82,18 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 
 どちらを観測するかを知っているのは呼出側だけなので、 `--producer` で受ける。
 
-##### 2. fixture 側を落とす
+##### 2. 2 形のうち存在する方を採る
 
-選んだ鍵の配列から **`tests/fixtures/` で始まる値を落とす**。
+選んだ鍵の配列には **同じ test の移動前と移動後** が並ぶ。 `docs/layers.json` の `$comment` がその理由の SSOT で、 `/kiwa-test` の Step 5.5 が `examples/` から `tests/fixtures/` へ移すため、 同じ test は **移動が走ったかで 2 箇所のどちらかにある**。
 
-| 形 | 例 | 扱い |
+| 形 | 例 | いつ存在するか |
 |---|---|---|
-| project 起点 | `{example}/test/*.t.sol` | **使う**。 実際に走った test |
-| kiwa 内部の fixture | `tests/fixtures/{example}/contract-test/{Contract}.t.sol` | 落とす。 実行後に複製されたもの |
+| 生成先 | `{example}/test/*.t.sol` | 移動前 (同一 chain 内で Step 5.5 に到達する前) |
+| 退避先 | `tests/fixtures/{example}/contract-test/{Contract}.t.sol` | 移動後 (既存 example に再実行する時) |
+
+**片方を落とさない**。 落とすと、 その状態に無い側を選んだ時に必ず 0 件 match で中断する。 実測すると `mint-nft` は移動済で、 生成先だけを採る規則では 0 件、 退避先を含めると 1 件だった (#1896)。
+
+優先順位は 1 つだけ。 **両方が存在する時は生成先を採る** = 同一 chain 内ではそちらが実際に走ったもので、 退避先はまだ前回の複製が残っているだけのことがある。
 
 ##### 3. 残った pattern を全て使う
 
@@ -97,7 +101,18 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 
 ##### 4. placeholder を解決して安全性を確かめる
 
-`{example}` と `{module}` は `$MODULE` に、 `{Contract}` は対象 contract 名に解決する。 決まらなければ `*` にする。
+`{module}` は `$MODULE` に、 `{Contract}` は対象 contract 名に解決する。 決まらなければ `*` にする。
+
+**`{example}` の基準は呼出側が持つ**。 2 形で起点が違い、 生成先は `--target` の作業 dir 起点、 退避先は project root 起点になる。
+
+| 呼出側 | 生成先の起点 | 例 |
+|---|---|---|
+| `/kiwa-test` (kiwa repo の `examples/` を回す) | `examples/{example}` | `examples/mint-nft/test/*.t.sol` |
+| `/kiwa-app` (利用者 project) | project root (`.`) | `test/*.t.sol` |
+
+退避先 (`tests/fixtures/...`) は kiwa repo 内部の場所なので、 どちらの呼出側でも project root 起点で `{example}` を `$MODULE` に解決する。
+
+単体起動で基準が判らない時は **`--test` を明示して渡してもらう**。 推測すると、 存在しない dir を glob して「観測対象が無い」 と報告することになる (#1896 で実測)。
 
 解決後、 **project root 配下に収まることを確かめる**。 収まらない値は落とす。
 
@@ -135,9 +150,9 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 | `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
 | `test_outputs` の鍵が 2 つ以上あり `--producer` が無い | どちらを観測するか決められない。 中断 |
 | `--producer` の値が `test_outputs` の鍵に無い | 同上。 中断 |
-| 鍵の下に `tests/fixtures/` 以外の値が無い | 観測対象を決められない。 中断 |
+| 鍵の下の配列が空 | 観測対象を決められない。 中断 |
 | 安全性の確認で全 pattern が落ちた | 同上。 中断 |
-| 解決した pattern が合計 0 件 match | 観測対象が存在しない。 中断 |
+| 生成先と退避先の **両方** が 0 件 match | 観測対象が存在しない。 中断 |
 | 上記いずれでもない | その `spec_path` と `test_outputs` を使う |
 
 `.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
@@ -188,13 +203,28 @@ const specMd = await readFile(SPEC_PATH, 'utf8');
 // TEST_PATHS は解決した glob が match した全 file。 1 件だけ読むと、 残りの
 // test が「spec にあるが test が無い」 として gap に出る。
 const testCode = (await Promise.all(TEST_PATHS.map((p) => readFile(p, 'utf8')))).join('\n');
-const gaps = [analyzeSpecCoverage({ specMarkdown: specMd, testCode })];
+// MODULE と LAYER を渡す。 省くと spec 側から読めなかった時に module が空文字、
+// layer が既定の `unit` になり、 どの層を観測した dashboard か判らなくなる
+// (実測 = contract layer の観測が `layer: unit` と記録された、 #1896)。
+const gaps = [
+  analyzeSpecCoverage({ specMarkdown: specMd, testCode, module: MODULE, defaultLayer: LAYER }),
+];
 
 const dashboard = renderDashboard({ history, flaky, gaps });
 await mkdir(dirname(OUT_PATH), { recursive: true });
 await writeFile(OUT_PATH, dashboard, 'utf8');
 console.log(`dashboard written to ${OUT_PATH}`);
 ```
+
+`LAYER` に渡せるのは `analyzeSpecCoverage` の `defaultLayer` が受ける 8 値 (`contract` / `unit` / `integration` / `e2e` / `api` / `ui` / `data` / `cli`) だけ。 `docs/layers.json` の 20 layer はこれより多いので、 **受けない値なら渡さず、 dashboard の本文に layer 名を書く**。 型に合わない値を渡すと解析側が落ちる。
+
+#### 空の結果と「gap が無い」 を混同しない
+
+`analyzeSpecCoverage` は spec の case 表から `T-XXX-NNN` 形式の ID を読む。 **読めない spec では `missingTcIds` も `extraTcIds` も空になり、 「gap 0 件」 と区別が付かない**。
+
+実測すると `tests/spec/contract/test-spec-mint-nft.ja.md` は `TC-001` 形式で、 解析側は 0 件と返した (#1896)。
+
+したがって **spec の case 件数が 0 なら、 dashboard に「解析できなかった」 と書く**。 「gap 無し」 と書かない。
 
 ### Step 2: 結果サマリを user に提示
 

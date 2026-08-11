@@ -913,6 +913,83 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
   });
 
+  it('test_outputs の 2 形が実 example のどちらかで必ず解決する', () => {
+    // The two forms are the same test before and after `/kiwa-test` Step 5.5
+    // moves it from `examples/` into `tests/fixtures/`, so exactly one of them
+    // exists at any moment (`docs/layers.json` の `$comment` が SSOT).
+    //
+    // #1895 kept only the first and called the second "a copy made after the
+    // run". Measured on `mint-nft`, which is already moved: the first form
+    // matched 0 files and the second matched 1, so the resolution aborted for
+    // every existing example (#1896).
+    //
+    // Run against the repository rather than asserted on prose: this is the
+    // defect a documentation review could not see.
+    const resolve2 = (pattern: string, example: string): string => {
+      if (pattern.startsWith('tests/fixtures/')) {
+        return pattern.replace('{example}', example);
+      }
+      // 生成先は `examples/` 起点。 repo root 相対にすると存在しない path になる。
+      return `examples/${pattern.replace('{example}', example)}`;
+    };
+    const globCount = (pattern: string): number => {
+      const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
+      const r = spawnSync('bash', ['-c', `ls ${expanded} 2>/dev/null | wc -l`], {
+        cwd: REPO_ROOT,
+        encoding: 'utf-8',
+      });
+      return Number((r.stdout ?? '0').trim());
+    };
+
+    // `contract` は 2 形を持ち、 かつ実 fixture が repo にある layer。
+    const contract = LAYERS.layers.find((l) => l.id === 'contract') as unknown as {
+      test_outputs: Record<string, string[]>;
+    };
+    const patterns = contract.test_outputs['kiwa-forge'] ?? [];
+    expect(patterns.length, 'contract/kiwa-forge が 2 形を宣言していない').toBe(2);
+
+    const example = 'mint-nft'; // tests/fixtures に実体がある
+    const counts = patterns.map((p) => globCount(resolve2(p, example)));
+    expect(
+      counts.reduce((a, b) => a + b, 0),
+      `${example} でどちらの形も 0 件 match: ${patterns.join(' / ')}`,
+    ).toBeGreaterThan(0);
+  });
+
+  it('kiwa-observe が analyzeSpecCoverage に module と layer を渡す', () => {
+    // Omitting them makes the analyser fall back to `module: ""` and
+    // `layer: "unit"`, so a `contract` observation is recorded as a unit one —
+    // the identity the whole `--layer` wiring exists to carry (#1896, measured
+    // by running the script against `mint-nft`).
+    const call = read('.claude/skills/kiwa-observe/SKILL.md')
+      .replace(/\n\s*/g, ' ') // 折返しを畳む
+      .match(/analyzeSpecCoverage\(\{[^}]*\}/);
+    expect(call, 'analyzeSpecCoverage の呼出が見つからない').not.toBeNull();
+    expect(call?.[0], 'module を渡していない').toContain('module');
+    expect(call?.[0], 'defaultLayer を渡していない').toContain('defaultLayer');
+  });
+
+  it('kiwa-observe が空の解析結果を gap 0 件と書かない', () => {
+    // `analyzeSpecCoverage` reads `T-XXX-NNN` ids; a spec written with
+    // `TC-NNN` yields zero on both sides, which renders identically to full
+    // coverage. Measured on `test-spec-mint-nft.ja.md` (#1896).
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    expect(body, '空の結果と gap 0 件の区別が書かれていない').toMatch(
+      /解析できなかった/,
+    );
+  });
+
+  it('kiwa-observe が 2 形の片方を落とす規則を書いていない', () => {
+    // The rule that caused #1896. Stated as an absence because the positive
+    // form ("存在する方を採る") can be written many ways, while the defect has
+    // one shape: dropping `tests/fixtures/` unconditionally.
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    const dropping = body
+      .split('\n')
+      .filter((l) => l.includes('tests/fixtures/') && /落と(す|し)/.test(l));
+    expect(dropping, `2 形の片方を落とす記述が残っている:\n${dropping.join('\n')}`).toEqual([]);
+  });
+
   it('鍵が 2 つある layer は contract だけである', () => {
     // The premise the resolution rule rests on. If another layer grew a second
     // producer, `--producer` would become required in more places and the
