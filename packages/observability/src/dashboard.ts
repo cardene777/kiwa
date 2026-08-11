@@ -93,7 +93,14 @@ export function renderDashboard(input: DashboardInput): string {
         lines.push('');
       }
       if (gap.missingTcIds.length === 0 && gap.extraTcIds.length === 0) {
-        lines.push('spec と test が完全に一致.');
+        // 0 件は「gap が無い」 ではなく「突き合わせが成立していない」。 spec から
+        // case を 1 件も読めなければ、 test 側に何があっても両方空になる (#1910)。
+        // 同じ文字列で報告すると、 完全に cover された状態と見分けが付かない。
+        lines.push(
+          gap.specCaseCount > 0
+            ? `spec と test が完全に一致 (spec の case ${gap.specCaseCount} 件).`
+            : 'spec から case を 1 件も読めなかった。 gap の有無は判定していない.',
+        );
         lines.push('');
       }
     }

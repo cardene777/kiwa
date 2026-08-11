@@ -97,5 +97,8 @@ export function analyzeSpecCoverage(opts: AnalyzeSpecCoverageOptions): SpecCover
     layer: spec.layer,
     missingTcIds,
     extraTcIds,
+    // 重複を除いた件数。 同じ id が 2 度書かれた spec でも、 突き合わせの分母は
+    // 一意な id の数になる。
+    specCaseCount: specTcIds.size,
   };
 }

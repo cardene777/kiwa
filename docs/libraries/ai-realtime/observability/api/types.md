@@ -16,7 +16,7 @@ title: "@kiwa-lab/observability types の API 契約"
 
 #### <code v-pre>DashboardInput</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/types.ts#L32) <code v-pre>packages/observability/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/types.ts#L41) <code v-pre>packages/observability/src/types.ts</code>
 
 ```ts
 export interface DashboardInput {
@@ -62,6 +62,15 @@ export interface SpecCoverageGap {
     layer: string;
     missingTcIds: string[];
     extraTcIds: string[];
+    /**
+     * spec から読めた case の件数。
+     *
+     * 2 つの id 配列だけでは「解析できた上で一致した」 と「1 件も解析できなかった」 が
+     * 区別できない。 どちらも両方空になり、 dashboard は同じ文字列を出す (実測、 #1910)。
+     * 件数は読み手が区別するための唯一の材料で、 0 件は gap が無いことではなく
+     * 突き合わせが成立していないことを意味する。
+     */
+    specCaseCount: number;
 }
 ```
 
