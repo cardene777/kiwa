@@ -766,6 +766,18 @@ function expandBraces(pattern: string): string[] {
  * 対象 pattern は `dir/basename` の 2 段で `*` は basename にしか出ない
  * (`docs/layers.json` の 25 形すべてを実測)。
  */
+/**
+ * `{example}` を解決する唯一の経路。
+ *
+ * `replaceAll`。 `e2e` の退避先は `tests/fixtures/{example}/e2e-test/{example}.spec.ts`
+ * と 2 度書くため、 先頭 1 つだけ置換すると basename に `{example}` が残り、
+ * `expandBraces` が literal `example` に変えて別 pattern を検査する
+ * (#1898 Round 6 / Round 7)。
+ */
+function resolveExample(pattern: string, example: string): string {
+  return pattern.replaceAll('{example}', example);
+}
+
 function patternToMatchers(pattern: string): { dir: string; regexes: RegExp[] } {
   const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
   const slash = expanded.lastIndexOf('/');
@@ -1097,10 +1109,9 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     // 到達確認だけ。 `regexes.length > 0` は `expandBraces` が必ず 1 件以上
     // 返すため恒真で、 正しさの根拠にはならない (#1898 Round 5)。
     for (const p of all) {
-      // `replaceAll`。 `replace` は先頭 1 つしか置換せず、 basename に残った
-      // `{example}` を `expandBraces` が literal `example` に変えるため、
-      // 例外にならないまま別 pattern を検査することになる (#1898 Round 6)。
-      expect(() => patternToMatchers(p.replaceAll('{example}', 'x')), `${p} で例外`).not.toThrow();
+      const resolved = resolveExample(p, 'x');
+      expect(resolved, `${p} に placeholder が残っている`).not.toContain('{example}');
+      expect(() => patternToMatchers(resolved), `${p} で例外`).not.toThrow();
     }
   });
 
@@ -1156,19 +1167,24 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
       miss: ['axedgextestxts'],
     },
     {
+      // raw manifest 形のまま持ち、 置換を helper に通す。 置換後の形を
+      // hardcode すると `resolveExample` を 1 度も通らず、 `replaceAll` を
+      // `replace` に戻しても緑のままになる (#1898 Round 7)。
       label: 'wildcard を持たない exact basename (e2e 退避先)',
-      pattern: 'tests/fixtures/x/e2e-test/x.spec.ts',
+      pattern: 'tests/fixtures/{example}/e2e-test/{example}.spec.ts',
       dir: 'tests/fixtures/x/e2e-test',
       hit: ['x.spec.ts'],
       // `prefixx.spec.ts` は開始 anchor が無いと通る。 `example.spec.ts` は
-      // `{example}` の置換漏れを literal に変えた時に通る。 どちらも
-      // wildcard を持つ 4 class では区別が付かない (#1898 Round 6)。
+      // 2 つ目の `{example}` が置換されず literal `example` になった時に通る。
+      // どちらも wildcard を持つ 4 class では区別が付かない (#1898 Round 6)。
       miss: ['prefixx.spec.ts', 'example.spec.ts', 'x.spec.ts.bak'],
     },
   ];
 
   it.each(MATCHER_CASES)('$label の matcher が dir と名前を正しく決める', (c) => {
-    const { dir, regexes } = patternToMatchers(c.pattern);
+    const resolved = resolveExample(c.pattern, 'x');
+    expect(resolved, `${c.pattern} に placeholder が残っている`).not.toContain('{example}');
+    const { dir, regexes } = patternToMatchers(resolved);
     expect(dir, `${c.pattern} の dir`).toBe(c.dir);
     for (const name of c.hit) {
       expect(regexes.some((re) => re.test(name)), `${name} に一致しない`).toBe(true);
