@@ -308,3 +308,109 @@ prose paragraph without pipe
     expect(doc.cases[0]?.automation).toBe('no');
   });
 });
+
+/**
+ * 実 spec の形。
+ *
+ * `/kiwa-design` は per-layer 表 (`api` / `ui` / `data` / `cli`) を英語 header
+ * で、 一般 9 column 表 (`contract` と `e2e` が使う) を日本語 header で書く。
+ * parser は前者しか知らず、 かつ file 内で最初の表を case 表とみなしていたため、
+ * `tests/spec/` の 9 spec すべてで case 0 件を返していた (#1897)。
+ */
+describe('parseSpec は 9 column 表 (日本語 header) を読む', () => {
+  const jaTable = (id: string): string =>
+    `| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
+|---|---|---|---|---|---|---|---|---|
+| ${id} | unit | 正常系 | deploy 済 | to=alice | mint(alice) | alice が 1 枚保有 | P0 | yes |
+`;
+
+  it('T-PARSE-036 日本語 header を canonical column に対応させる', () => {
+    const doc = parseSpec(jaTable('TC-001'));
+    expect(doc.warnings).toEqual([]);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]).toMatchObject({
+      id: 'TC-001',
+      observation: '正常系',
+      given: 'deploy 済',
+      when: 'mint(alice)',
+      then: 'alice が 1 枚保有',
+      priority: 'P0',
+      automation: 'yes',
+    });
+  });
+
+  it('T-PARSE-037 テスト ID の内部空白の有無を問わない', () => {
+    // label は手書きの markdown table にあり、 空白は表記の選択でしかない。
+    const doc = parseSpec(jaTable('TC-001').replace('テスト ID', 'テストID'));
+    expect(doc.cases[0]?.id).toBe('TC-001');
+  });
+
+  it('T-PARSE-038 case 表の前にある別の表を case 表と取り違えない', () => {
+    // 実 spec は contract の関数一覧から始まる。 先頭の表を取る形では、 case 表を
+    // 持つ document に対して「必要 column が無い」 と報告していた。
+    const md = `| symbol | kind |
+|---|---|
+| \`mint(address to)\` | function |
+
+${jaTable('TC-001')}`;
+    const doc = parseSpec(md);
+    expect(doc.warnings).toEqual([]);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]?.id).toBe('TC-001');
+  });
+
+  it('T-PARSE-039 観点ごとに分かれた表を全部読む', () => {
+    // 「観点ごとにグループ化」 は `/kiwa-design` の指示で、 case 表は 1 つではない。
+    // 実 spec の `mint-nft` は 32 case を 10 表に分けている。
+    const md = `${jaTable('TC-001')}
+### 異常系
+
+${jaTable('TC-002')}
+### 境界値
+
+${jaTable('TC-003')}`;
+    const doc = parseSpec(md);
+    expect(doc.cases.map((c) => c.id)).toEqual(['TC-001', 'TC-002', 'TC-003']);
+  });
+
+  it('T-PARSE-040 表ごとに column 位置を読み直す', () => {
+    // 2 つ目の表が別の順序で書かれていても、 1 つ目の index で読まない。
+    const md = `${jaTable('TC-001')}
+| テスト観点 | テスト ID | 前提条件 | 操作手順 | 期待結果 |
+|---|---|---|---|---|
+| 異常系 | TC-002 | deploy 済 | mint(0x0) | revert する |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases.map((c) => c.id)).toEqual(['TC-001', 'TC-002']);
+    expect(doc.cases[1]?.then).toBe('revert する');
+  });
+
+  it('T-PARSE-041 case 表が 1 つも無い時は不足 column を報告する', () => {
+    // 「表が 1 つも無い」 と「表はあるが case 表ではない」 は書き手にとって別の話。
+    const md = `| symbol | kind |
+|---|---|
+| \`mint(address to)\` | function |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toEqual([]);
+    expect(doc.warnings[0]).toContain('required columns missing');
+    expect(doc.warnings[0]).toContain('id');
+  });
+
+  it('T-PARSE-042 表が 1 つも無い時は従来どおり報告する', () => {
+    const doc = parseSpec('# spec\n\n本文だけ。\n');
+    expect(doc.warnings).toEqual(['no test case table found']);
+  });
+
+  it('T-PARSE-043 英語 header が退行しない', () => {
+    const md = `| ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
+|---|---|---|---|---|---|---|---|---|
+| T-API-001 | a | b | c | d | P0 | yes | live | /api/items |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]?.id).toBe('T-API-001');
+    expect(doc.cases[0]?.mode).toBe('live');
+    expect(doc.cases[0]?.route).toBe('/api/items');
+  });
+});

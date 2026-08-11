@@ -14,7 +14,7 @@ title: "@kiwa-lab/core parser の API 契約"
 
 #### <code v-pre>parseSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L74) <code v-pre>packages/core/src/parser.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L170) <code v-pre>packages/core/src/parser.ts</code>
 
 ```ts
 export declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDoc;
@@ -24,7 +24,7 @@ export declare function parseSpec(markdown: string, opts?: ParseOptions): SpecDo
 
 #### <code v-pre>ParseOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L69) <code v-pre>packages/core/src/parser.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/parser.ts#L165) <code v-pre>packages/core/src/parser.ts</code>
 
 ```ts
 export interface ParseOptions {

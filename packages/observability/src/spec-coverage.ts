@@ -1,7 +1,32 @@
 import { parseSpec } from '@kiwa-lab/core';
 import type { SpecCoverageGap } from './types.js';
 
-const TC_REGEX = /\bT-[A-Z0-9]+-\d+\b/g;
+/**
+ * The case id shapes a generated test can carry.
+ *
+ * Two are in the contract, by layer. `/kiwa-design` writes `T-API-001` style
+ * ids in the per-layer tables (`api` / `ui` / `data` / `cli`) and `TC-001` style
+ * ids in the general 9-column table, which is what `contract` and `e2e` use.
+ * The letter-prefixed variant (`TC-E001`) appears in the e2e specs.
+ *
+ * Only the `extra` direction needs to discover ids this way. `missing` asks
+ * whether each id the spec declares appears in the test, which needs no shape
+ * at all — see `mentions`.
+ */
+const TC_REGEX = /\b(?:T-[A-Z0-9]+-\d+|TC-[A-Z0-9]*\d+)\b/g;
+
+/**
+ * Whether the test code names this case id.
+ *
+ * Matched as a whole token so `TC-001` does not answer for `TC-0012`, and
+ * without assuming a shape so an id the spec invents still resolves. The spec
+ * is the authority on what its ids look like; the analyser only has to find
+ * them.
+ */
+function mentions(testCode: string, id: string): boolean {
+  const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?<![A-Za-z0-9_-])${escaped}(?![A-Za-z0-9_-])`).test(testCode);
+}
 
 export interface AnalyzeSpecCoverageOptions {
   specMarkdown: string;
@@ -33,7 +58,11 @@ export function analyzeSpecCoverage(opts: AnalyzeSpecCoverageOptions): SpecCover
   const missingTcIds: string[] = [];
   const extraTcIds: string[] = [];
   for (const id of specTcIds) {
-    if (!testTcIds.has(id)) missingTcIds.push(id);
+    // Asked against the text, not against the discovered set: an id the shape
+    // above does not know is still one the spec declared, and reporting it as
+    // missing because the discovery regex could not see it would be a defect of
+    // the analyser reported as a gap in the tests.
+    if (!mentions(opts.testCode, id)) missingTcIds.push(id);
   }
   for (const id of testTcIds) {
     if (!specTcIds.has(id)) extraTcIds.push(id);
