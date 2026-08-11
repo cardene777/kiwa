@@ -227,11 +227,12 @@ const gaps = [
     ...(ANALYSER_LAYERS.includes(LAYER) ? { defaultLayer: LAYER } : {}),
   }),
 ];
-// 元の layer は常に dashboard 本文に載せる。 gaps[0].layer は解析側の値で、
-// 渡せなかった 12 layer では既定の `unit` のままになる。
-const observedLayer = LAYER;
+// 表示に使う layer を差し替える。 renderDashboard は gaps[].layer を
+// `### module (layer)` に出すため、 解析側の値のままだと allowlist 外の
+// 12 layer が全て `unit` と表示される (#1898 Round 2)。
+const displayGaps = gaps.map((g) => ({ ...g, layer: LAYER }));
 
-const dashboard = renderDashboard({ history, flaky, gaps });
+const dashboard = renderDashboard({ history, flaky, gaps: displayGaps });
 await mkdir(dirname(OUT_PATH), { recursive: true });
 await writeFile(OUT_PATH, dashboard, 'utf8');
 console.log(`dashboard written to ${OUT_PATH}`);

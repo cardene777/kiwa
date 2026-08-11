@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { globSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -938,16 +938,29 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
       // 生成先は `examples/` 起点。 repo root 相対にすると存在しない path になる。
       return `examples/${pattern.replace('{example}', example)}`;
     };
-    // Node の glob を使う。 pattern を `bash -c` の command 文字列へ補間すると、
+    // shell を使わない。 pattern を `bash -c` の command 文字列へ補間すると、
     // 空白 / `;` / `$()` / backtick / 先頭 dash を含む値が shell 構文として
-    // 解釈される。 bash 不在や glob dialect 差で stdout が 0 になると、
-    // 原因を隠した偽の成功にもなる (#1898 Round 1 F5)。
+    // 解釈される (#1898 Round 1 F5)。
+    //
+    // `fs.globSync` も使わない。 Node 22 で追加された API で、 repo は
+    // `engines.node` に `>=20.9.0` を宣言している。 Node 20 では import 時点で
+    // 落ち、 本 file の全 case が実行前に失敗する (#1898 Round 2 F2)。
+    //
+    // 対象 pattern は `dir/basename` の 2 段で `*` は basename にしか出ない
+    // (`docs/layers.json` の 25 形すべてを実測)。 `readdirSync` で足りる。
     const globCount = (pattern: string): number => {
       const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
+      const slash = expanded.lastIndexOf('/');
+      const dir = slash === -1 ? '.' : expanded.slice(0, slash);
+      const base = slash === -1 ? expanded : expanded.slice(slash + 1);
+      // `*` 以外の正規表現 metacharacter を literal として扱う。
+      const re = new RegExp(
+        `^${base.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '.*' : `\\${c}`))}$`,
+      );
       try {
-        return globSync(expanded, { cwd: REPO_ROOT }).length;
+        return readdirSync(resolve(REPO_ROOT, dir)).filter((n) => re.test(n)).length;
       } catch {
-        return 0;
+        return 0; // dir が無い = 0 件
       }
     };
 
@@ -977,6 +990,24 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     expect(call, 'analyzeSpecCoverage の呼出が見つからない').not.toBeNull();
     expect(call?.[0], 'module を渡していない').toContain('module');
     expect(call?.[0], 'defaultLayer を渡していない').toContain('defaultLayer');
+  });
+
+  it('kiwa-observe が renderDashboard に表示用の gaps を渡す', () => {
+    // `defaultLayer` accepts 8 of the 20 layers, so the other 12 come back with
+    // the analyser's default (`unit`) and `renderDashboard` prints that in the
+    // `### module (layer)` heading. Measured: with `a11y` the old path rendered
+    // `### mint-nft (unit)` and the new one renders `### mint-nft (a11y)`
+    // (#1898 Round 2 F1).
+    //
+    // Asserted on the argument, not on the comment beside it: assigning the
+    // real layer to a variable and not using it is exactly what shipped.
+    const call = read('.claude/skills/kiwa-observe/SKILL.md')
+      .split('\n')
+      .filter((l) => l.includes('renderDashboard(') && !l.trim().startsWith('//'));
+    expect(call, 'renderDashboard の呼出が 1 行に定まらない').toHaveLength(1);
+    expect(call[0], 'renderDashboard が解析側の gaps をそのまま受けている').toContain(
+      'gaps: displayGaps',
+    );
   });
 
   it('kiwa-observe が空の解析結果を gap 0 件と書かない', () => {
