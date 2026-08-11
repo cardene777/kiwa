@@ -27,8 +27,26 @@ const SCHEMA_PATH = resolve(process.cwd(), 'prisma', 'schema.prisma');
 let dockerAvailable = false;
 /** file 内で共有する container。 docker が無い間は null。 */
 let shared: OrmTestEnvLivePrismaMysql<PrismaClient> | null = null;
-/** 専用 env を使う test が後始末を任せる先。 */
-let dedicated: OrmTestEnvLivePrismaMysql<PrismaClient> | null = null;
+/**
+ * 専用 env を使う test の後始末先。
+ *
+ * test の中で `finally` を書く形だと 2 つ漏れる。 2 つ目の生成が失敗した時に 1 つ目が
+ * 止まらない (生成は `try` の外にある) のと、 1 つ目の `stop()` が失敗した時に 2 つ目に
+ * 到達しない。 どちらも container が残る (PR #1906 Round 1)。
+ *
+ * 生成した直後に `track` へ載せ、 後始末は `afterEach` が引き受ける。 自分で止めた env は
+ * `release` で外す = `stop()` は container を止めるので 2 度呼べない。
+ */
+let dedicated: OrmTestEnvLivePrismaMysql<PrismaClient>[] = [];
+
+function track(env: OrmTestEnvLivePrismaMysql<PrismaClient>): OrmTestEnvLivePrismaMysql<PrismaClient> {
+  dedicated.push(env);
+  return env;
+}
+
+function release(env: OrmTestEnvLivePrismaMysql<PrismaClient>): void {
+  dedicated = dedicated.filter((tracked) => tracked !== env);
+}
 
 async function newEnv(): Promise<OrmTestEnvLivePrismaMysql<PrismaClient>> {
   return setupOrmEnv({
@@ -72,11 +90,15 @@ async function resetTables(env: OrmTestEnvLivePrismaMysql<PrismaClient>): Promis
 }
 
 afterEach(async () => {
-  if (dedicated) {
-    await dedicated.stop();
-    dedicated = null;
-  }
+  const envs = dedicated;
+  dedicated = [];
+  // 1 つが失敗しても残りを止める。 逐次 await だと最初の失敗で残りが leak する。
+  const stopped = await Promise.allSettled(envs.map((env) => env.stop()));
   if (shared) await resetTables(shared);
+  // 握り潰さない。 止まらなかったことは container が残ったことなので、 hook の失敗として
+  // 出す (vitest は test 本体の失敗とは別に報告するため、 元の失敗を隠さない)。
+  const failed = stopped.find((result) => result.status === 'rejected');
+  if (failed) throw (failed as PromiseRejectedResult).reason;
 }, 60_000);
 
 describe('UsersRepository via @kiwa-lab/orm (prisma + testcontainers mysql)', () => {
@@ -131,29 +153,25 @@ describe('UsersRepository via @kiwa-lab/orm (prisma + testcontainers mysql)', ()
   // 起動を含むため共有側より大きい。
   it('T-PM-005: parallel envs are isolated (different containers + URIs)', async () => {
     if (!dockerAvailable) return;
-    const envA = await newEnv();
-    const envB = await newEnv();
-    try {
-      await envA.client.user.create({ data: { email: 'a@x', displayName: 'Alice in A' } });
-      await envB.client.user.create({ data: { email: 'a@x', displayName: 'Alice in B' } });
-      const a = await envA.client.user.findUniqueOrThrow({ where: { email: 'a@x' } });
-      const b = await envB.client.user.findUniqueOrThrow({ where: { email: 'a@x' } });
-      expect(a.displayName).toBe('Alice in A');
-      expect(b.displayName).toBe('Alice in B');
-      expect(envA.connectionUri).not.toBe(envB.connectionUri);
-      // 共有 container とも別であること。 2 つが互いに別なだけでは、 共有を
-      // 使い回している形と区別が付かない。
-      if (shared) expect(envA.connectionUri).not.toBe(shared.connectionUri);
-    } finally {
-      await envA.stop();
-      await envB.stop();
-    }
+    const envA = track(await newEnv());
+    const envB = track(await newEnv());
+    await envA.client.user.create({ data: { email: 'a@x', displayName: 'Alice in A' } });
+    await envB.client.user.create({ data: { email: 'a@x', displayName: 'Alice in B' } });
+    const a = await envA.client.user.findUniqueOrThrow({ where: { email: 'a@x' } });
+    const b = await envB.client.user.findUniqueOrThrow({ where: { email: 'a@x' } });
+    expect(a.displayName).toBe('Alice in A');
+    expect(b.displayName).toBe('Alice in B');
+    expect(envA.connectionUri).not.toBe(envB.connectionUri);
+    // 共有 container とも別であること。 2 つが互いに別なだけでは、 共有を
+    // 使い回している形と区別が付かない。
+    if (shared) expect(envA.connectionUri).not.toBe(shared.connectionUri);
   }, 360_000);
 
   it('T-PM-006: stop() disconnects PrismaClient + tears down container', async () => {
     if (!dockerAvailable) return;
-    const local = await newEnv();
+    const local = track(await newEnv());
     await local.stop();
+    release(local); // 自分で止めたので afterEach は触らない。
     // 切断後の query は reject。
     await expect(local.client.user.findMany()).rejects.toBeDefined();
   }, 240_000);
@@ -165,7 +183,7 @@ describe('UsersRepository via @kiwa-lab/orm (prisma + testcontainers mysql)', ()
 
   it('T-PM-008: seed callback runs before tests see env', async () => {
     if (!dockerAvailable) return;
-    dedicated = await setupOrmEnv({
+    const seeded = track(await setupOrmEnv({
       mode: 'live',
       orm: 'prisma',
       dialect: 'mysql',
@@ -174,8 +192,8 @@ describe('UsersRepository via @kiwa-lab/orm (prisma + testcontainers mysql)', ()
       seed: async (client) => {
         await client.user.create({ data: { email: 'seeded@example.com', displayName: 'Seed' } });
       },
-    });
-    const found = await dedicated.client.user.findUnique({ where: { email: 'seeded@example.com' } });
+    }));
+    const found = await seeded.client.user.findUnique({ where: { email: 'seeded@example.com' } });
     expect(found?.displayName).toBe('Seed');
   }, 240_000);
 });
