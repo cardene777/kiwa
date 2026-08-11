@@ -840,43 +840,45 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
   });
 
-  it('kiwa-observe の --layer / --spec を語る行が pin されている', () => {
-    // The declaration said "always required" while a sentence 12 lines below
-    // read as "required when `--spec` is also absent" — two readings of the
-    // same rule, and the looser one leaves `--out` unresolvable (#1895 Round 2).
-    //
-    // Pinned as an exact set rather than matched by pattern. A pattern for one
-    // phrasing (`--layer` が無く…も無い) passes on the next one
-    // (`--spec` 未指定時は `--layer` 必須), which is the same contract with the
-    // same defect (#1895 Round 3, measured).
-    //
-    // The union of both flags, not their intersection. Requiring both on one
-    // line watches only two-sided phrasings, and the contract can be weakened
-    // from one side alone — `` `--layer` は対象 spec path が無い場合だけ必須 ``
-    // mentions no `--spec` at all and reintroduces the condition (#1895
-    // Round 4, measured).
-    //
-    // **A failure here is not a defect by itself.** It means a line carrying
-    // this contract was added, reworded or removed: re-read it, confirm
-    // `--layer` is still unconditional, and update the list. Do not update the
-    // list to match without reading the line.
-    const pinned = [
-      '- `--layer {id}` — 対象 layer (**常に必須**)',
-      '- `--spec {path}` — spec markdown path (省略時は § 入力 spec の path は CLI から受け取る で解決)',
-      '`--layer` は `--spec` と `--out` の両方を明示した時でも必須にする。 **dashboard は「どの層を観測したか」 が本文と file 名の両方に要る**ためで、 `--spec` だけ省略時必須にすると `--out` の既定が解決できない組合せ (`--spec` と `--test` を渡して `--out` を省く) が残る。',
-      '`--spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。',
-      'kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"',
-      '本 skill は Layer 3 で、 Layer 2 のように扱う layer が決まっていない。 **どの layer の spec と突き合わせるかは `--layer` で受け取る**。 `docs/layers.json` が宣言する id をそのまま渡す。',
-      '**`--layer` が無ければ推測せず user に確認する**。 `--spec` を渡されていても同じで、 layer は spec の場所を決める以外に dashboard の本文と file 名にも要る (§ オプション)。',
-      '判定は **件数ではなく「必要な layer が取れたか」**で行う。 `--layer` を省くと 30 件返るので、 件数で判定すると全 layer を一度に解決する経路が「異常」 に落ちる。',
-    ];
-    const actual = read('.claude/skills/kiwa-observe/SKILL.md')
-      .split('\n')
-      .filter((l) => l.includes('--layer') || l.includes('--spec'));
-    expect(
-      actual,
-      '--layer / --spec の契約行が変わった。 内容を読み直して pin を更新する',
-    ).toEqual(pinned);
+  /**
+   * `--layer` の必須性は宣言行 1 つだけが述べる。
+   *
+   * #1895 の Round 2-5 が同じ場所を 4 度指している。 宣言が「常に必須」 と言う
+   * 一方で本文が条件付きに読める形が残り、 塞ぐたびに別の言い方で戻った。
+   *
+   * | round | 塞いだ形 | 次に通った形 |
+   * |---|---|---|
+   * | 2 | 条件付きの本文を書き換え | 同じ契約を別の語順で書く |
+   * | 3 | 語順 pattern で検出 | 片側の flag だけで書く |
+   * | 4 | 両 flag の union を pin | flag 名を 1 度も書かずに書く |
+   *
+   * **静的な文字列走査ではこの契約を囲い切れない**。 3 round 続けて同じ root cause
+   * だったので、 `rules/quality.md § 契約完備性 checklist § 責務境界` の SPLIT に
+   * 従って層を分ける。 ただし #1893 と違い実行できる対象が無い (markdown の契約文
+   * そのものが対象) ため、 実行層へ移すのではなく **重複を消して 1 箇所にする**。
+   *
+   * したがって検査は 2 つに絞る。 宣言行が「常に必須」 と言っていること、 そして
+   * 必須性を述べる行がそれ以外に無いこと。 重複が無ければ、 食い違う 2 つ目の
+   * 読み方も生まれない。
+   *
+   * **覆えていない範囲**。 flag 名を 1 度も書かない日本語表現 (「層の指定」)、
+   * 表の cell、 別 file からの参照は検出しない。 これは受容する境界で、 塞ごうと
+   * して 3 round 失敗した。
+   */
+  it('kiwa-observe の --layer 必須が宣言行だけに書かれている', () => {
+    const lines = read('.claude/skills/kiwa-observe/SKILL.md').split('\n');
+
+    const declaration = lines.filter((l) => l.startsWith('- `--layer '));
+    expect(declaration, '--layer の宣言行が 1 行に定まらない').toHaveLength(1);
+    expect(declaration[0], '--layer の宣言が「常に必須」 でない').toContain('**常に必須**');
+
+    // 必須性を述べる行 = `--layer` と 必須 を同じ行に持つもの。 宣言行だけが該当する
+    // 状態を保つ = 2 つ目があると、 そこが条件付きに書き換わっても宣言は無傷のまま
+    // 食い違いだけが残る (Round 2 で実際にそうなった)。
+    const stating = lines.filter((l) => l.includes('--layer') && l.includes('必須'));
+    expect(stating, `--layer の必須性が 2 箇所以上で述べられている:\n${stating.join('\n')}`).toEqual(
+      declaration,
+    );
   });
 
   it('kiwa-observe が producer の鍵を consumer_skill から引かない', () => {

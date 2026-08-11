@@ -41,7 +41,9 @@ $ARGUMENTS
 - `--vitest-json {path}` — 既存 vitest JSON 出力 (省略時は試走)
 - `--out {path}` — dashboard 出力先 (省略時は `tests/reports/observe/dashboard-{module}-{layer}.{lang}.md`)
 
-`--layer` は `--spec` と `--out` の両方を明示した時でも必須にする。 **dashboard は「どの層を観測したか」 が本文と file 名の両方に要る**ためで、 `--spec` だけ省略時必須にすると `--out` の既定が解決できない組合せ (`--spec` と `--test` を渡して `--out` を省く) が残る。
+layer は spec の場所を決めるだけでなく、 dashboard の本文と file 名の両方に入る。 だから `--spec` と `--out` を明示した起動でも要る。
+
+**必須かどうかを本文で言い直さない**。 上の宣言が唯一の SSOT で、 2 箇所に書くと片方だけ条件付きに書き換わって食い違う (#1895 Round 2 で実際に起きた)。
 
 ### 入力 spec の path は CLI から受け取る
 
