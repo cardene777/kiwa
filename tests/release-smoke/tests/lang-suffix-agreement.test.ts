@@ -1,5 +1,5 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -740,6 +740,52 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
   });
 });
 
+/**
+ * `a{x,y}b` → `axb` / `ayb`。 入れ子は扱わない (`docs/layers.json` に無い)。
+ */
+function expandBraces(pattern: string): string[] {
+  const m = /\{([^{}]*)\}/.exec(pattern);
+  if (!m) return [pattern];
+  const [whole, inner] = m;
+  const head = pattern.slice(0, m.index);
+  const tail = pattern.slice(m.index + whole.length);
+  return (inner ?? '').split(',').flatMap((alt) => expandBraces(`${head}${alt}${tail}`));
+}
+
+/**
+ * `base` からの相対 pattern に一致する file 数。
+ *
+ * shell を使わない。 pattern を `bash -c` の command 文字列へ補間すると、
+ * 空白 / `;` / `$()` / backtick / 先頭 dash を含む値が shell 構文として解釈
+ * される (#1898 Round 1 F5)。
+ *
+ * `fs.globSync` も使わない。 Node 22 で追加された API で、 repo は
+ * `engines.node` に `>=20.9.0` を宣言している。 Node 20 では import 時点で
+ * 落ち、 本 file の全 case が実行前に失敗する (#1898 Round 2 F2)。
+ *
+ * 対象 pattern は `dir/basename` の 2 段で `*` は basename にしか出ない
+ * (`docs/layers.json` の 25 形すべてを実測)。
+ */
+function countIn(pattern: string, base: string): number {
+  const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
+  const slash = expanded.lastIndexOf('/');
+  const dir = slash === -1 ? '.' : expanded.slice(0, slash);
+  const baseName = slash === -1 ? expanded : expanded.slice(slash + 1);
+  let names: string[];
+  try {
+    names = readdirSync(resolve(base, dir));
+  } catch {
+    return 0; // dir が無い = 0 件
+  }
+  // brace alternative を先に展開する。 escape だけ掛けると `{ts,tsx}` が
+  // literal 一致になり、 `.test.ts` も `.test.tsx` も 0 件になる (#1898 Round 3)。
+  const res = expandBraces(baseName).map(
+    (v) =>
+      new RegExp(`^${v.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '.*' : `\\${c}`))}$`),
+  );
+  return names.filter((n) => res.some((re) => re.test(n))).length;
+}
+
 describe('Layer 3 の観測が chain から起動される (#1894)', () => {
   /**
    * The lines that actually start `/kiwa-observe`, found by walking.
@@ -946,23 +992,7 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     // `engines.node` に `>=20.9.0` を宣言している。 Node 20 では import 時点で
     // 落ち、 本 file の全 case が実行前に失敗する (#1898 Round 2 F2)。
     //
-    // 対象 pattern は `dir/basename` の 2 段で `*` は basename にしか出ない
-    // (`docs/layers.json` の 25 形すべてを実測)。 `readdirSync` で足りる。
-    const globCount = (pattern: string): number => {
-      const expanded = pattern.replace(/\{Contract\}|\{module\}/g, '*');
-      const slash = expanded.lastIndexOf('/');
-      const dir = slash === -1 ? '.' : expanded.slice(0, slash);
-      const base = slash === -1 ? expanded : expanded.slice(slash + 1);
-      // `*` 以外の正規表現 metacharacter を literal として扱う。
-      const re = new RegExp(
-        `^${base.replace(/[.*+?^${}()|[\]\\]/g, (c) => (c === '*' ? '.*' : `\\${c}`))}$`,
-      );
-      try {
-        return readdirSync(resolve(REPO_ROOT, dir)).filter((n) => re.test(n)).length;
-      } catch {
-        return 0; // dir が無い = 0 件
-      }
-    };
+    const globCount = (pattern: string): number => countIn(pattern, REPO_ROOT);
 
     // `contract` は 2 形を持ち、 かつ実 fixture が repo にある layer。
     const contract = LAYERS.layers.find((l) => l.id === 'contract') as unknown as {
@@ -1018,6 +1048,46 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     expect(body, '空の結果と gap 0 件の区別が書かれていない').toMatch(
       /解析できなかった/,
     );
+  });
+
+  it('brace 形の pattern が両 variant を数える', () => {
+    // `{example}/test/unit/{module}.test.{ts,tsx}` is the one pattern of 25
+    // with a brace alternative. Escaping it as a literal made `.test.ts` and
+    // `.test.tsx` both count 0 — latent today because the helper is only
+    // handed the two `contract` patterns (#1898 Round 3).
+    expect(expandBraces('x.test.{ts,tsx}'), 'brace が展開されない').toEqual([
+      'x.test.ts',
+      'x.test.tsx',
+    ]);
+
+    // 実 file で数える。 展開だけ正しくても照合側が literal なら 0 件になる。
+    const dir = mkdtempSync(join(tmpdir(), 'kiwa-brace-'));
+    try {
+      mkdirSync(join(dir, 'unit'), { recursive: true });
+      writeFileSync(join(dir, 'unit', 'signup.test.ts'), '');
+      writeFileSync(join(dir, 'unit', 'signup.test.tsx'), '');
+      writeFileSync(join(dir, 'unit', 'signup.test.js'), ''); // 対象外
+      expect(countIn('unit/{module}.test.{ts,tsx}', dir), 'brace 形が両 variant を数えない').toBe(
+        2,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+
+    // 25 pattern を構文単位で流す。 例外を出さないこと。
+    const all = LAYERS.layers.flatMap((l) =>
+      Object.values(
+        (l as unknown as { test_outputs?: Record<string, string[]> }).test_outputs ?? {},
+      ).flat(),
+    );
+    expect(all.length, 'pattern が集まらない').toBeGreaterThanOrEqual(20);
+    expect(
+      all.some((p) => p.includes('{ts,tsx}')),
+      'brace 形の pattern が表から消えた',
+    ).toBe(true);
+    for (const p of all) {
+      expect(() => countIn(p.replace('{example}', 'x'), REPO_ROOT), `${p} で例外`).not.toThrow();
+    }
   });
 
   it('kiwa-observe が 2 形の片方を落とす規則を書いていない', () => {
