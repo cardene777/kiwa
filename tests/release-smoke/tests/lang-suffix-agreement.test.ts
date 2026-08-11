@@ -1034,13 +1034,32 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
     expect(declarations.length, '退避先を宣言する layer が 0 件').toBeGreaterThan(0);
 
+    // 1 producer につき退避先は 1 本、 を前提として固定する。
+    //
+    // CLI は producer 配下の pattern をまとめて解決して 1 つの `files` を返すため、
+    // 同じ producer に 2 本目を足すと、 壊れた新しい宣言でも既存の宣言が match した
+    // 結果で緑になる。 per-pattern の結果を返す口が無い以上、 前提が崩れたことを
+    // ここで赤くするのが唯一の検出経路になる (2 本目が要る時は resolver 側に
+    // per-pattern の返却を足すか、 専用の検査を書く)。
+    const producerIds = declarations.map(({ layer, producer }) => `${layer}/${producer}`);
+    expect(
+      new Set(producerIds).size,
+      '同じ layer/producer が退避先を 2 本以上宣言している (union で個別 match を識別できない)',
+    ).toBe(declarations.length);
+
     const examples = readdirSync(resolve(REPO_ROOT, 'tests/fixtures'), { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
     expect(examples.length, 'fixture example が 0 件').toBeGreaterThan(0);
 
     // repo 内に置く = CLI は project root が cwd 配下であることを要求する。
-    const probeBase = mkdtempSync(resolve(REPO_ROOT, '.context', 'fixture-probe-'));
+    //
+    // 親を明示的に作る。 `.context/` は gitignore 対象で tracked entry を持たない
+    // ため、 clean checkout には存在せず `mkdtempSync` が ENOENT で落ちる。 手元は
+    // 別の経路が作った `.context/` があるので緑になり、 差が clone 直後だけに出る。
+    const probeParent = resolve(REPO_ROOT, '.context');
+    mkdirSync(probeParent, { recursive: true });
+    const probeBase = mkdtempSync(resolve(probeParent, 'fixture-probe-'));
     const exercised = new Set<string>();
     try {
       for (const example of examples) {
@@ -1063,7 +1082,7 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
             `${declaration.layer}/${declaration.producer} が ${example} で 0 件 match: ` +
               `宣言 ${declaration.pattern} / 実体 ${entries.map((e) => e.name).join(', ')}`,
           ).toBeGreaterThan(0);
-          exercised.add(`${declaration.layer}/${declaration.producer}`);
+          exercised.add(`${declaration.layer}/${declaration.producer} :: ${declaration.pattern}`);
         }
       }
     } finally {
@@ -1071,11 +1090,14 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     }
 
     // 走査が何も見ずに通っていないこと。 宣言ごとに 1 回以上は実 fixture に
-    // 当たっている必要がある。
+    // 当たっている必要がある。 記録は pattern まで含める = layer/producer 単位に
+    // 畳むと、 同じ pair の別宣言が 1 度検査されただけで全部を満たしたことになる。
     expect(
       [...exercised].sort(),
-      '退避先を宣言しているのに実 fixture で 1 度も検査されていない layer がある',
-    ).toEqual([...new Set(declarations.map((d) => `${d.layer}/${d.producer}`))].sort());
+      '退避先を宣言しているのに実 fixture で 1 度も検査されていない宣言がある',
+    ).toEqual(
+      declarations.map((d) => `${d.layer}/${d.producer} :: ${d.pattern}`).sort(),
+    );
   });
 
   it('/kiwa-app 経路では tests/fixtures/ が候補に入らない', () => {
