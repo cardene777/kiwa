@@ -63,7 +63,7 @@ $ARGUMENTS
 | `all` | `contract` / `e2e` / `e2e-generic` / `a11y` |
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE"
 ```
 
 `--layer` は省いて 1 度に全件受け取ってもよい。 その場合は返った配列から必要な `id` を選ぶ。
@@ -202,7 +202,7 @@ for LAYER in $LAYERS; do
   # exit code / 形 / 一意性を分けて見る (§ 解決に失敗したら止める)。
   # pipe で jq に直接繋がない = pipefail 無しでは CLI が落ちても exit 0 になり、
   # 空 path が「spec 無し」 と区別できなくなる。
-  OUT=$(kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE") \
+  OUT=$(pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE") \
     || { echo "ERROR: kiwa layers が失敗 (layer=$LAYER)"; exit 1; }
   # 型を先に見る。 `.layers[]?` は配列でない応答を黙って 0 件に潰すため、
   # 壊れた応答が「spec 無し」 と区別できなくなる。

@@ -66,7 +66,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 | RSC streaming | `nextjs-rsc-streaming` |
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 `$LAYER` は起動元 (`/kiwa-app` 等) が指定した mode から決まる。 **単体起動で判らない時は user に確認する**。 推測で 1 つ目を選ぶと、 別 mode の spec を読んで別 helper 向けの test を生成する。

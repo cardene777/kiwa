@@ -219,6 +219,11 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
         `#!/bin/sh\ncat <<'KIWA_JSON'\n${response}\nKIWA_JSON\nexit ${cliStatus}\n`,
         { mode: 0o755 },
       );
+      // #1908 以降、 snippet は `pnpm exec kiwa` で起動する。 `pnpm exec` は package の
+      // 中でしか走らない (外だと `ERR_PNPM_RECURSIVE_EXEC_NO_PACKAGE` で止まり、 stub に
+      // 届く前に終わる) ので、 temp dir を package にしておく。 stub は PATH 経由で
+      // 引かれる = snippet は書かれたまま走り、 応答だけが差し替わる。
+      writeFileSync(join(dir, 'package.json'), '{"name":"kiwa-resolve-fixture","private":true}\n');
       const script = [
         `export PATH=${JSON.stringify(dir)}:$PATH`,
         'TARGET=contract',

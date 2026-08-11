@@ -68,7 +68,7 @@ kiwa init --detect
 # 変数名は DOC_LANG。 LANG は shell の locale (ja_JP.UTF-8 等) で、 使うと
 # --lang ja_JP.UTF-8 が渡って CLI に拒否される。
 DOC_LANG="${DOC_LANG:-ja}"
-kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
+pnpm exec kiwa layers --json ${LAYER:+--layer "$LAYER"} --lang "$DOC_LANG"
 ```
 
 判定を本 skill 側に書かない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 複製すると

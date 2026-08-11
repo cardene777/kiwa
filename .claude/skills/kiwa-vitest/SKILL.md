@@ -54,7 +54,7 @@ $ARGUMENTS
 `--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill が扱う layer は `unit` の 1 つ。
 
 ```bash
-kiwa layers --json --layer unit --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer unit --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。

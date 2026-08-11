@@ -51,7 +51,7 @@ layer は spec の場所を決めるだけでなく、 dashboard の本文と fi
 `--spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 本 skill は Layer 3 で、 Layer 2 のように扱う layer が決まっていない。 **どの layer の spec と突き合わせるかは `--layer` で受け取る**。 `docs/layers.json` が宣言する id をそのまま渡す。
@@ -69,7 +69,7 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 `--test` を省略した時、 **同じ呼出に `--producer` と `--project-root` を足して `test_paths` を受け取る**。 skill 側で組み立てない。
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
   --producer "$PRODUCER" --project-root "$PROJECT_ROOT"
 ```
 

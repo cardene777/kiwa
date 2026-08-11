@@ -57,7 +57,7 @@ $ARGUMENTS
 `--layer` を指定せずに起動した場合、 **`kiwa layers --json` を 1 回実行して対象 layer を決める**。 SKILL.md 側でこの判定を書き下さない。 優先順位と陳腐化の判定は CLI 側 1 箇所に閉じており、 ここに複製すると同じ契約が再び散る。
 
 ```bash
-kiwa layers --json
+pnpm exec kiwa layers --json
 ```
 
 返る形は `{ "source": "flag|detected|all", "layers": [...] }` で、 `layers[]` の各要素は `docs/layers.json` の宣言をそのまま持つ。 field を選んで渡していないので、 宣言されているものは全て読める。
