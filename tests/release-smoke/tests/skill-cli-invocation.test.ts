@@ -86,9 +86,13 @@ interface Invocation {
  * (`kiwa-nextjs` の JSON payload)。 行ごとに状態を捨てると、 閉じ引用符だけの行
  * (`}'`) を「開いた」 と読み、 その後ろに続く command を落とす。
  */
-function stripQuoted(line: string, initial: string | null = null): { code: string; open: string | null } {
+function stripQuoted(
+  line: string,
+  initial: string | null = null,
+): { code: string; open: string | null; continues: boolean } {
   let out = '';
   let quote = initial;
+  let continues = false;
   /** 直前に out へ足した 1 文字が escape 由来か (= 語の一部で、 operator ではない)。 */
   let escaped = false;
   for (let i = 0; i < line.length; i += 1) {
@@ -101,10 +105,12 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
       // `\kiwa layers` (alias を迂回する正当な形) を見失う (Round 6 R6-1)。
       // operator でないことは out の中身ではなく escaped で覚える。
       if (ch === '\\') {
-        // 行末の `\` は escape ではなく行継続。 呼出側がこれを見て論理行に繋ぐので
-        // そのまま残す。
+        // 行末の `\` は escape ではなく行継続。 **その事実をここで確定して返す**。
+        // code の末尾文字から呼出側が推し量る形にすると、 escape された literal
+        // backslash (`a\\` の 2 文字目) を継続と誤読し、 次行の起動を前行の
+        // launcher で分類する (Round 7 R7-1)。
         if (i === line.length - 1) {
-          out += ch;
+          continues = true;
           break;
         }
         out += line[i + 1]!;
@@ -143,7 +149,7 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
     }
     if (ch === quote) quote = null;
   }
-  return { code: out, open: quote };
+  return { code: out, open: quote, continues };
 }
 
 /**
@@ -257,8 +263,8 @@ function invocationsIn(body: string, skill: string): Invocation[] {
     quote = stripped.open;
 
     // 行継続は論理行に繋ぐ。 `kiwa \` 改行 `layers` を 1 つの起動として読む。
-    const continues = /\\$/.test(stripped.code.trimEnd());
-    const piece = stripped.code.replace(/\\\s*$/, ' ');
+    const continues = stripped.continues;
+    const piece = continues ? `${stripped.code} ` : stripped.code;
     const start = pending ?? { line: i + 1, text: raw.trim(), code: '' };
     const merged = {
       line: start.line,
@@ -482,6 +488,17 @@ describe('fence の中の起動行だけを取る', () => {
     expect(invocationsIn(alias, 'x').map((i) => i.form)).toEqual(['bare']);
     // escape した `#` は comment にならない (語の一部)。
     expect(stripQuoted('echo a\\#b && kiwa layers').code).toBe('echo a#b && kiwa layers');
+  });
+
+  it('行末の escaped backslash を行継続と読まない', () => {
+    // `a\\` の 2 文字目は literal backslash で、 行はそこで終わる。 継続と読むと
+    // 次行が前行に繋がり、 独立した素の起動が前行の launcher で分類される
+    // (Round 7 R7-1)。 継続かどうかは末尾文字から推し量らず、 解析側が返す。
+    expect(stripQuoted('echo a\\\\').continues, 'escaped backslash を継続と読んでいる').toBe(false);
+    expect(stripQuoted('pnpm exec kiwa layers \\').continues, '行継続を読めていない').toBe(true);
+
+    const fixture = ['```bash', 'pnpm exec \\\\', 'kiwa layers --json', '```'].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => [i.line, i.form])).toEqual([[3, 'bare']]);
   });
 
   it('fence の終わりで引用が開いたままなら落ちる', () => {
