@@ -219,11 +219,49 @@ import {
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
+/**
+ * 過去の run を読む。 **壊れていたら止める**。
+ *
+ * 空から数え直すと、 判定に届かない状態が「まだ 3 回に達していない」 と区別できず、
+ * 毎回そう見える (#1909 / #1910 と同じ「静かな緑」)。 file を 1 つ消せば復旧できるので、
+ * 止めても行き止まりにならない。
+ */
+async function readHistory(path) {
+  let raw;
+  try {
+    raw = await readFile(path, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return { records: [] }; // 初回。 これは正常
+    throw err;
+  }
+  const parsed = JSON.parse(raw); // 壊れていれば throw して止まる
+  if (!Array.isArray(parsed.records)) {
+    throw new Error(`history が壊れている (records が配列でない): ${path}`);
+  }
+  return parsed;
+}
+
 // 読み先は § Step 0 の VITEST_JSON 規則で決める (--vitest-json があればその値、
 // 無ければ Step 0 が --root の下に書いた path)。
 const report = JSON.parse(await readFile(VITEST_JSON, 'utf8'));
-const records = fromVitestJson(report, { runId: process.env.GIT_SHA ?? 'local' });
-const history = collectRunHistory({ records, maxPerTest: 20 });
+
+// runId は **run ごとに一意** にする。 GIT_SHA だと同じ commit で 3 回走らせても同じ値に
+// なり、 重複除去の鍵として使えない = flaky を見たい時こそ機能しない (#1918)。
+const runId = String(report.startTime ?? Date.now());
+const records = fromVitestJson(report, { runId });
+
+// 過去の run を読む。 これが無いと同じ test の run は常に 1 回で、 minRuns に届かず
+// flaky は永久に判定されない (#1918)。
+const HISTORY_PATH = `${PROJECT_ROOT}/tests/reports/observe/history-${MODULE}-${LAYER}.json`;
+const previous = await readHistory(HISTORY_PATH);
+
+// 同じ report を 2 度観測しても 2 run にしない (`--vitest-json` で再利用する経路がある)。
+const seen = new Set(previous.records.map((r) => `${r.testId}\u0000${r.runId}`));
+const fresh = records.filter((r) => !seen.has(`${r.testId}\u0000${r.runId}`));
+
+const history = collectRunHistory({ history: previous, records: fresh, maxPerTest: 20 });
+await mkdir(dirname(HISTORY_PATH), { recursive: true });
+await writeFile(HISTORY_PATH, JSON.stringify(history), 'utf8');
 // minRuns は detectFlaky と renderDashboard の両方に渡す。 表示側が「判定した上で
 // 無い」 と「判定していない」 を分けるのに同じ値を要る (#1909)。
 const FLAKY_MIN_RUNS = 3;
@@ -272,6 +310,29 @@ console.log(`dashboard written to ${OUT_PATH}`);
 |---|---|---|
 | 8 値のいずれか | 渡す | `--layer` の値 |
 | 残り 12 | 渡さない | `--layer` の値 (解析側は `unit` のまま) |
+
+#### run 履歴は観測対象ごとに持ち越す
+
+flaky は 1 回の run では判定できない。 `detectFlaky` は同じ test の run が `minRuns` (既定 3)
+に届いて初めて判定するため、 **history を持ち越さないと永久に「判定していない」 になる** (#1918)。
+
+| 項目 | 値 |
+|---|---|
+| 置き場所 | `$PROJECT_ROOT/tests/reports/observe/history-{module}-{layer}.json` |
+| 分け方 | module と layer ごと。 混ぜると別の test の run が同じ id で数えられる |
+| 上限 | `maxPerTest: 20` (FIFO)。 古い run から落ちる |
+| 初回 (file なし) | 空から始める。 これは正常 |
+| **壊れている時** | **止める**。 空から数え直さない |
+
+壊れた時に空へ倒すと、 判定に届かない状態が「まだ 3 回に達していない」 と区別できず、 毎回
+そう見える (#1909 / #1910 と同じ「静かな緑」)。 file を 1 つ消せば復旧できるので、 止めても
+行き止まりにならない。
+
+`runId` は run ごとに一意にする。 `GIT_SHA` だと同じ commit で 3 回走らせても同じ値になり、
+**flaky を見たい時こそ** 重複除去の鍵として使えない。 vitest report の `startTime` を使う。
+
+同じ report を 2 度観測しても 2 run に数えない (`--vitest-json` で再利用する経路がある)。
+`(testId, runId)` が既に history にある record は足さない。
 
 #### 空の結果と「gap が無い」 を混同しない
 
