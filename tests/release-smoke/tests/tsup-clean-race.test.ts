@@ -578,21 +578,35 @@ describe('tsup clean と並列 test の race (#1741)', () => {
       // build は X の dist に触れない。 むしろ #1741 の実際の状況 (並列 build) に近づく。
       const targets = [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS];
       let next = 0;
+      // 最初の失敗。 これを立てた後は新しい target を取らない (Round 1 r1-f1)。
+      let failure: unknown = null;
       const runner = async (): Promise<void> => {
         for (;;) {
+          // **runner は reject しない**。 reject させて `Promise.all` で受けると、 先着 1 件で
+          // 外側が `finally` に進む一方、 残りの runner は共有 `next` から target を取り続ける
+          // = teardown 後に build と `probes` 更新が続く。 失敗を記録して抜け、 全 runner の
+          // 完了を待ってから元の error を投げ直す。
+          if (failure !== null) return;
           const index = next;
           next += 1;
           if (index >= targets.length) return;
           const name = targets[index]!;
           const startedAt = Date.now();
-          const probe = await probeBuild(name);
-          probes.set(name, probe);
-          recordProbe(name, probe, Date.now() - startedAt);
+          try {
+            const probe = await probeBuild(name);
+            probes.set(name, probe);
+            recordProbe(name, probe, Date.now() - startedAt);
+          } catch (thrown) {
+            failure ??= thrown;
+            return;
+          }
         }
       };
       await Promise.all(
         Array.from({ length: Math.min(BUILD_CONCURRENCY, targets.length) }, () => runner()),
       );
+      // 実行中だった build は上の await で回収済。 その上で最初の error を投げる。
+      if (failure !== null) throw failure;
     } finally {
       clearInterval(timer);
     }
