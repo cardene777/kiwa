@@ -58,11 +58,18 @@ export function renderDashboard(input: DashboardInput): string {
 
   lines.push('## Flaky tests');
   lines.push('');
+  // **渡された検出結果が優先される**。 eligibility はこちらで導き直す推定なので、
+  // 呼出側が `detectFlaky` に別の `minRuns` を渡していると食い違う。 推定を先に見ると
+  // **実際に検出した flaky を隠す** (`minRuns: 2` で検出した test が、 既定 3 の
+  // 再判定で「判定していない」 に化けた。 Round 1 F1、 実 consumer で再現)。
+  //
+  // 検出結果が空の時だけ、 それが「判定した上で 0 件」 か「判定していない」 かを
+  // eligibility で分ける。
   const eligibility = flakyEligibility({
     history: input.history,
     ...(input.flakyMinRuns === undefined ? {} : { minRuns: input.flakyMinRuns }),
   });
-  if (eligibility.eligible === 0) {
+  if (input.flaky.length === 0 && eligibility.eligible === 0) {
     // **「flaky が無い」 と書かない**。 `detectFlaky` は minRuns に届かない test を
     // 飛ばすので、 1 回しか走っていない history では必ず空になる。 空を「無い」 と
     // 読むと、 判定できていない状態が「安定している」 と読まれる (#1909)。

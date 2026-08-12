@@ -36,7 +36,9 @@ describe('full-stack observability', () => {
     const testCode = `it('T-API-001', () => {}); it('T-API-002', () => {});`;
     const gaps = [analyzeSpecCoverage({ specMarkdown, testCode })];
 
-    const dashboard = renderDashboard({ history, flaky, gaps });
+    // 検出に使った minRuns を表示にも渡す。 渡さないと表示側は既定 (3) で
+    // 判定の有無を導き直し、 文言が実際の判定とずれる (#1909)。
+    const dashboard = renderDashboard({ history, flaky, gaps, flakyMinRuns: 2 });
     expect(dashboard).toContain('# kiwa observability dashboard');
     expect(dashboard).toContain('| total records | 8 |');
     expect(dashboard).toContain('T-API-002');

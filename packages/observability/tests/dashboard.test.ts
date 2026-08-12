@@ -358,6 +358,19 @@ describe('renderDashboard が判定していないことを判定結果と混同
     expect(out).toContain('| T-A |');
   });
 
+  it('検出済みの flaky を再判定で隠さない', () => {
+    // 呼出側が `minRuns: 2` で検出し、 表示側に同じ値を渡さなかった形。 表示側の
+    // 再判定 (既定 3) を先に見ると、 **実際に検出した flaky が「判定していない」 に
+    // 化ける** (Round 1 F1、 examples/full-stack-poc で再現)。 渡された結果が優先。
+    const history = runs('T-A', ['passed', 'failed']);
+    const flaky = detectFlaky({ history, minRuns: 2, threshold: 0.1 });
+    expect(flaky.map((f) => f.testId), '前提: minRuns 2 なら検出される').toEqual(['T-A']);
+
+    const out = renderDashboard({ history, flaky, gaps: [] });
+    expect(out).toContain('| T-A |');
+    expect(out).not.toContain('flaky は判定していない');
+  });
+
   it('minRuns を変えた時に表示が追随する', () => {
     // 呼出側が `detectFlaky` に別の値を渡したなら、 表示にも同じ値を渡す。
     const history = runs('T-A', ['passed', 'failed']);
