@@ -157,7 +157,14 @@ pnpm exec vitest run --root "$PROJECT_ROOT" --passWithNoTests \
 そこで止まる。 JSON 自体は 0 件の形で書かれるため、 続行して dashboard に「実行結果を
 1 件も受け取っていない」 と書かせる。
 
-`--vitest-json` 引数指定時は既存 file を再利用する。
+`--vitest-json` 引数指定時は **Step 0 を走らせず**、 渡された path をそのまま読む。 読み先は
+1 箇所に決める = Step 0 が書く先と Step 1 が読む先が別々に決まると、 前 run の結果を読んで
+「観測した」 ことになる。
+
+```text
+VITEST_JSON = --vitest-json が渡っていればその値
+              渡っていなければ $PROJECT_ROOT/tests/reports/vitest-results.json
+```
 
 #### 絞らないと観測対象の外を集める
 
@@ -212,8 +219,9 @@ import {
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
-// Step 0 は --root に絞って走らせたので、 出力は PROJECT_ROOT の下にある。
-const report = JSON.parse(await readFile(`${PROJECT_ROOT}/tests/reports/vitest-results.json`, 'utf8'));
+// 読み先は § Step 0 の VITEST_JSON 規則で決める (--vitest-json があればその値、
+// 無ければ Step 0 が --root の下に書いた path)。
+const report = JSON.parse(await readFile(VITEST_JSON, 'utf8'));
 const records = fromVitestJson(report, { runId: process.env.GIT_SHA ?? 'local' });
 const history = collectRunHistory({ records, maxPerTest: 20 });
 // minRuns は detectFlaky と renderDashboard の両方に渡す。 表示側が「判定した上で
