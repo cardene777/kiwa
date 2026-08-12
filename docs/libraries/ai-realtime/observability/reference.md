@@ -217,7 +217,7 @@ buildRealDriverConfig はendpointとtimeoutの設定値を作るhelperです。K
 | [dashboard.ts](./api/dashboard) | 1 | 0 |
 | [dashboard-mock.ts](./api/dashboard-mock) | 2 | 7 |
 | [fixtures.ts](./api/fixtures) | 13 | 0 |
-| [flaky.ts](./api/flaky) | 1 | 1 |
+| [flaky.ts](./api/flaky) | 3 | 2 |
 | [index.ts](./api/index) | 1 | 0 |
 | [log-correlation.ts](./api/log-correlation) | 2 | 2 |
 | [real-driver.ts](./api/real-driver) | 5 | 2 |

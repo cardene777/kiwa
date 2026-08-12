@@ -15,7 +15,13 @@ export {
   type VitestStyleReport,
   type VitestStyleTestResult,
 } from './collect.js';
-export { detectFlaky, type DetectFlakyOptions } from './flaky.js';
+export {
+  DEFAULT_FLAKY_MIN_RUNS,
+  detectFlaky,
+  flakyEligibility,
+  type DetectFlakyOptions,
+  type FlakyEligibility,
+} from './flaky.js';
 export { analyzeSpecCoverage, type AnalyzeSpecCoverageOptions } from './spec-coverage.js';
 export { renderDashboard } from './dashboard.js';
 export {

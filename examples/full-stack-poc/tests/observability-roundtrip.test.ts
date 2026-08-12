@@ -79,7 +79,9 @@ describe('observability pipeline round-trip', () => {
     const gaps = [analyzeSpecCoverage({ specMarkdown: SPEC_MARKDOWN, testCode: TEST_CODE })];
     expect(gaps[0]?.missingTcIds).toEqual(['T-API-004']);
 
-    const dashboard = renderDashboard({ history, flaky, gaps });
+    // 検出に使った minRuns を表示にも渡す。 渡さないと表示側は既定 (3) で
+    // 判定の有無を導き直し、 文言が実際の判定とずれる (#1909)。
+    const dashboard = renderDashboard({ history, flaky, gaps, flakyMinRuns: 2 });
     expect(dashboard).toContain('# kiwa observability dashboard');
     expect(dashboard).toContain('## Summary');
     expect(dashboard).toContain('## Flaky tests');

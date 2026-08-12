@@ -146,6 +146,20 @@ pnpm exec vitest run --reporter=json --outputFile=tests/reports/vitest-results.j
 
 `--vitest-json` 引数指定時は既存 file を再利用する。
 
+#### runner が vitest でない layer
+
+`contract` の runner は Foundry (`forge test`) か Hardhat で、 vitest ではない。 その project に
+vitest の設定は無く、 **run record は 0 件になる**。 それ自体は異常ではないので観測を止めない =
+spec coverage は runner に依存せず (spec markdown と test code の突き合わせ)、 contract でも
+機能する。
+
+record 0 件は dashboard 側が「実行結果を 1 件も受け取っていない」 と書く。 **`pass rate` は
+出さない** (#1909 以前は 0 件でも `100.0%` と出ており、 走らせていない状態と全部通った状態が
+同じ表示だった)。
+
+flaky も同じ。 chain は history を持ち越さないため run は常に 1 回で、 `minRuns` に届く test は
+**どの layer でも無い**。 dashboard は「判定していない」 と書く = 「flaky が無い」 とは書かない。
+
 ### Step 1: dashboard 生成 script を生成
 
 ```ts
@@ -162,7 +176,10 @@ import { dirname } from 'node:path';
 const report = JSON.parse(await readFile('tests/reports/vitest-results.json', 'utf8'));
 const records = fromVitestJson(report, { runId: process.env.GIT_SHA ?? 'local' });
 const history = collectRunHistory({ records, maxPerTest: 20 });
-const flaky = detectFlaky({ history, minRuns: 3, threshold: 0.1 });
+// minRuns は detectFlaky と renderDashboard の両方に渡す。 表示側が「判定した上で
+// 無い」 と「判定していない」 を分けるのに同じ値を要る (#1909)。
+const FLAKY_MIN_RUNS = 3;
+const flaky = detectFlaky({ history, minRuns: FLAKY_MIN_RUNS, threshold: 0.1 });
 
 const specMd = await readFile(SPEC_PATH, 'utf8');
 // TEST_PATHS は解決した glob が match した全 file。 1 件だけ読むと、 残りの
@@ -188,7 +205,12 @@ const gaps = [
 // 12 layer が全て `unit` と表示される (#1898 Round 2)。
 const displayGaps = gaps.map((g) => ({ ...g, layer: LAYER }));
 
-const dashboard = renderDashboard({ history, flaky, gaps: displayGaps });
+const dashboard = renderDashboard({
+  history,
+  flaky,
+  gaps: displayGaps,
+  flakyMinRuns: FLAKY_MIN_RUNS,
+});
 await mkdir(dirname(OUT_PATH), { recursive: true });
 await writeFile(OUT_PATH, dashboard, 'utf8');
 console.log(`dashboard written to ${OUT_PATH}`);

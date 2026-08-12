@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   detectFlaky,
+  flakyEligibility,
   renderDashboard,
   type RunHistory,
   type SpecCoverageGap,
@@ -19,7 +20,10 @@ describe('renderDashboard', () => {
       gaps: [],
     });
     expect(out).toContain('# kiwa observability dashboard');
-    expect(out).toContain('No flaky tests detected');
+    // record が 1 件も無い時に「flaky は無い」 とは書かない (#1909)。 判定に要る
+    // run 数に届いていないので、 判定していないことを書く。
+    expect(out).toContain('flaky は判定していない');
+    expect(out).not.toContain('No flaky tests detected');
     expect(out).toContain('No spec coverage gaps detected');
   });
 
@@ -87,10 +91,13 @@ describe('renderDashboard', () => {
     expect(out).toContain('| pass rate | 0.0% |');
   });
 
-  it('T-OBS-DSH-007 pass rate defaults to 100% when no pass/fail (only skipped)', () => {
+  it('T-OBS-DSH-007 pass rate is n/a when no pass/fail (only skipped)', () => {
+    // 既定を 100% にすると、 1 件も判定していない状態が「全部通った」 と同じ
+    // 表示になる (#1909)。 分母が 0 なら計算していないと書く。
     const history: RunHistory = { records: [rec('T-A', 'skipped')] };
     const out = renderDashboard({ history, flaky: [], gaps: [] });
-    expect(out).toContain('| pass rate | 100.0% |');
+    expect(out).toContain('| pass rate | n/a |');
+    expect(out).toContain('pass / fail の record が無い');
   });
 
   it('T-OBS-DSH-008 markdown header structure', () => {
@@ -251,9 +258,15 @@ describe('renderDashboard', () => {
     expect(out).toContain('| metric | covered | total | pct |');
   });
 
-  it('T-OBS-DSH-018 "No flaky tests detected." literal when flaky is empty', () => {
-    const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [] });
+  it('T-OBS-DSH-018 "No flaky tests detected." literal when judged and flaky is empty', () => {
+    // 判定した上で 0 件だった場合の文言。 判定材料が要るので、 同じ test の run を
+    // minRuns 分与える。 record 0 件で同じ文言を出すのが #1909 の欠陥だった。
+    const history: RunHistory = {
+      records: [rec('T-A', 'passed'), rec('T-A', 'passed'), rec('T-A', 'passed')],
+    };
+    const out = renderDashboard({ history, flaky: [], gaps: [] });
     expect(out).toContain('No flaky tests detected.');
+    expect(out).toContain('(1 test を判定)');
   });
 
   it('T-OBS-DSH-019 "No spec coverage gaps detected." literal when gaps is empty', () => {
@@ -265,5 +278,119 @@ describe('renderDashboard', () => {
     const result = renderDashboard({ history: { records: [] }, flaky: [], gaps: [] });
     expect(typeof result).toBe('string');
     expect(result.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * 「判定していない」 と「判定した上で無い」 の区別 (#1909)。
+ *
+ * contract layer の runner は Foundry / Hardhat で vitest ではないため、 観測は
+ * record 0 件で回る。 それが `pass rate 100.0%` と `No flaky tests detected.` に
+ * なっていた = 走らせていない状態と、 走らせて全部通った状態が同じ表示になる。
+ *
+ * 同じ形が vitest 系 layer にもある。 chain は history を持ち越さないので 1 run
+ * しか無く、 `detectFlaky` の `minRuns` (既定 3) に **どの test も届かない**。
+ * つまり flaky の行は、 どの layer でも一度も判定の結果ではなかった。
+ */
+describe('renderDashboard が判定していないことを判定結果と混同しない', () => {
+  /** 同じ testId を n 回走らせた history。 */
+  function runs(testId: string, statuses: ('passed' | 'failed' | 'skipped')[]): RunHistory {
+    return { records: statuses.map((s) => rec(testId, s)) };
+  }
+
+  it('record 0 件で pass rate を出さない', () => {
+    const out = renderDashboard({ history: { records: [] }, flaky: [], gaps: [] });
+    expect(out).toContain('| pass rate | n/a |');
+    expect(out).not.toContain('| pass rate | 100.0% |');
+    expect(out).toContain('test の実行結果を 1 件も受け取っていない');
+  });
+
+  it('record 0 件と全 pass が同じ表示にならない', () => {
+    // #1909 が踏んだ形。 2 つを並べて、 render 結果が一致しないことを直接見る。
+    const empty = renderDashboard({ history: { records: [] }, flaky: [], gaps: [] });
+    const allPassed = renderDashboard({
+      history: runs('T-A', ['passed', 'passed', 'passed']),
+      flaky: [],
+      gaps: [],
+    });
+    expect(empty).not.toBe(allPassed);
+    expect(allPassed).toContain('| pass rate | 100.0% |');
+  });
+
+  it('1 run しか無ければ flaky を判定していないと書く', () => {
+    // chain が毎回この形になる。 history を持ち越さないため run は 1 回で、
+    // minRuns 3 にどの test も届かない。
+    const out = renderDashboard({
+      history: { records: [rec('T-A', 'passed'), rec('T-B', 'failed')] },
+      flaky: [],
+      gaps: [],
+    });
+    expect(out).toContain('flaky は判定していない');
+    expect(out).toContain('run が 3 回要るが、 最大 1 回しか無い');
+    expect(out).not.toContain('No flaky tests detected');
+  });
+
+  it('minRuns に届いた test があれば判定したと書く', () => {
+    const out = renderDashboard({ history: runs('T-A', ['passed', 'passed', 'passed']), flaky: [], gaps: [] });
+    expect(out).toContain('No flaky tests detected. (1 test を判定)');
+  });
+
+  it('判定対象の数え方が detectFlaky と揃っている', () => {
+    // 表示と検出が別々に数えると、 「判定した」 と書きながら検出は飛ばしている
+    // 状態になる。 skipped を数えない規則も含めて同じ helper を通す。
+    const history: RunHistory = {
+      records: [
+        rec('T-A', 'passed'),
+        rec('T-A', 'failed'),
+        rec('T-A', 'passed'),
+        rec('T-B', 'skipped'),
+        rec('T-B', 'skipped'),
+        rec('T-B', 'skipped'),
+      ],
+    };
+    const eligibility = flakyEligibility({ history });
+    expect(eligibility.eligible, 'skipped だけの test を判定対象に数えている').toBe(1);
+    expect(eligibility.maxRuns).toBe(3);
+
+    const flaky = detectFlaky({ history });
+    const out = renderDashboard({ history, flaky, gaps: [] });
+    expect(flaky.map((f) => f.testId)).toEqual(['T-A']);
+    expect(out).toContain('| T-A |');
+  });
+
+  it('検出済みの flaky を再判定で隠さない', () => {
+    // 呼出側が `minRuns: 2` で検出し、 表示側に同じ値を渡さなかった形。 表示側の
+    // 再判定 (既定 3) を先に見ると、 **実際に検出した flaky が「判定していない」 に
+    // 化ける** (Round 1 F1、 examples/full-stack-poc で再現)。 渡された結果が優先。
+    const history = runs('T-A', ['passed', 'failed']);
+    const flaky = detectFlaky({ history, minRuns: 2, threshold: 0.1 });
+    expect(flaky.map((f) => f.testId), '前提: minRuns 2 なら検出される').toEqual(['T-A']);
+
+    const out = renderDashboard({ history, flaky, gaps: [] });
+    expect(out).toContain('| T-A |');
+    expect(out).not.toContain('flaky は判定していない');
+  });
+
+  it('minRuns を変えた時に表示が追随する', () => {
+    // 呼出側が `detectFlaky` に別の値を渡したなら、 表示にも同じ値を渡す。
+    const history = runs('T-A', ['passed', 'failed']);
+    const strict = renderDashboard({ history, flaky: [], gaps: [], flakyMinRuns: 3 });
+    const loose = renderDashboard({
+      history,
+      flaky: detectFlaky({ history, minRuns: 2 }),
+      gaps: [],
+      flakyMinRuns: 2,
+    });
+    expect(strict).toContain('flaky は判定していない');
+    expect(loose).not.toContain('flaky は判定していない');
+    expect(loose).toContain('| T-A |');
+  });
+
+  it('skip のみの run は pass rate を出さず、 record 0 件とも区別する', () => {
+    const skipped = renderDashboard({ history: runs('T-A', ['skipped']), flaky: [], gaps: [] });
+    expect(skipped).toContain('| pass rate | n/a |');
+    expect(skipped).toContain('pass / fail の record が無い');
+    expect(skipped).not.toContain('test の実行結果を 1 件も受け取っていない');
+    expect(skipped).toContain('| total records | 1 |');
   });
 });
