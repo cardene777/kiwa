@@ -82,7 +82,11 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
       // apostrophe (`don't` 等) が引用を開いたことになり、 状態を持ち回る以上
       // **その後ろの行がまとめて引用の中に見える**。 語頭の `#` だけを comment と
       // みなす (POSIX)。 語中の `#` は URL fragment などで現れる。
-      if (ch === '#' && (out === '' || /\s$/.test(out))) break;
+      //
+      // 語頭は「空白の後」 だけではない。 shell の operator (`;` `|` `&` `(` `<` `>`)
+      // の直後も新しい語の頭で、 `echo x;# don't` は comment になる。 空白だけに
+      // 限ると、 この形の apostrophe が状態を汚す (Round 3 F2)。
+      if (ch === '#' && (out === '' || /[\s;|&()<>]$/.test(out))) break;
       if (ch === '"' || ch === "'") {
         quote = ch;
         continue;
@@ -108,15 +112,26 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
  * `kiwa-app` Step 1 の `kiwa init --detect` がそうだった (Round 2 F1-a)。 一覧を
  * ここに書き写すと CLI が増やした時に追随しないので、 usage 文字列から取る。
  */
-function subcommands(): string[] {
-  const source = read('packages/cli/src/runCli.ts');
+function subcommandsIn(source: string): string[] {
   const usage = /export const USAGE = `([\s\S]*?)`;/.exec(source);
   expect(usage, 'CLI の USAGE を読めない').not.toBeNull();
   const commands = /Commands:\n([\s\S]*?)\n\n/.exec(usage![1]!);
   expect(commands, 'USAGE に Commands 節が無い').not.toBeNull();
-  const names = [...commands![1]!.matchAll(/^ {2}([a-z][a-z-]*)/gm)].map((m) => m[1]!);
-  expect(names.length, 'subcommand を 1 つも読めない').toBeGreaterThan(3);
-  return [...new Set(names)];
+  const documented = [...new Set([...commands![1]!.matchAll(/^ {2}([a-z][a-z-]*)/gm)].map((m) => m[1]!))];
+
+  // **件数の下限では足りない**。 usage の書式が変わって一部しか取れない時、 下限は
+  // 通ってしまい、 取りこぼした subcommand が素の起動のまま検査を抜ける (Round 3 F1)。
+  // 独立した 2 つ目の出所と突き合わせる = CLI が実際に分岐している command 名。
+  // 片方だけ増減すれば食い違うので、 部分抽出はここで落ちる。
+  const dispatched = [...new Set([...source.matchAll(/cmd === '([a-z][a-z-]*)'/g)].map((m) => m[1]!))];
+  expect([...documented].sort(), 'usage と dispatch の subcommand が食い違う').toEqual(
+    [...dispatched].sort(),
+  );
+  return documented;
+}
+
+function subcommands(): string[] {
+  return subcommandsIn(read('packages/cli/src/runCli.ts'));
 }
 
 /** 語の間の空白を問わない形にした launcher pattern。 */
@@ -226,6 +241,43 @@ function invocations(): Invocation[] {
   return skillFiles().flatMap(({ skill, rel }) => invocationsIn(read(rel), skill));
 }
 
+
+describe('subcommand 一覧を 2 つの出所で突き合わせる', () => {
+  /** usage と dispatch を持つ最小の source。 */
+  function fixture(usage: string[], dispatch: string[]): string {
+    return [
+      'export const USAGE = `Usage: kiwa <command> [options]',
+      '',
+      'Commands:',
+      ...usage.map((name) => `  ${name} [options]        なにか`),
+      '',
+      'options:',
+      '`;',
+      ...dispatch.map((name) => `  if (cmd === '${name}') { return 0; }`),
+    ].join('\n');
+  }
+
+  it('両方が同じなら一覧を返す', () => {
+    expect(subcommandsIn(fixture(['init', 'layers'], ['init', 'layers']))).toEqual(['init', 'layers']);
+  });
+
+  it('usage が取りこぼした時に落ちる', () => {
+    // 件数の下限では通ってしまう形。 取りこぼした subcommand は素の起動のまま
+    // 検査を抜けるので、 2 つ目の出所と突き合わせて落とす (Round 3 F1)。
+    expect(() => subcommandsIn(fixture(['init'], ['init', 'layers']))).toThrow();
+  });
+
+  it('dispatch にだけある command でも落ちる', () => {
+    // 逆向き。 usage に書き忘れた command も食い違いとして扱う。
+    expect(() => subcommandsIn(fixture(['init', 'layers', 'doctor'], ['init', 'layers']))).toThrow();
+  });
+
+  it('実 CLI の一覧を読めている', () => {
+    // fixture だけだと、 実 file の書式が変わった時に気付けない。
+    expect(subcommands()).toContain('layers');
+    expect(subcommands()).toContain('init');
+  });
+});
 
 describe('fence の中の起動行だけを取る', () => {
   it('本文の言及を起動行として数えない', () => {
@@ -341,6 +393,21 @@ describe('fence の中の起動行だけを取る', () => {
     expect(stripQuoted('curl https://x/y#frag && kiwa layers').code).toBe(
       'curl https://x/y#frag && kiwa layers',
     );
+    // 変数展開の `$#` も語中。
+    expect(stripQuoted('test $# -gt 0').code).toBe('test $# -gt 0');
+  });
+
+  it('operator の直後の # も comment として読む', () => {
+    // 語頭は空白の後だけではない。 `;` `|` `&` `(` の直後も新しい語の頭で、
+    // ここを外すと apostrophe が引用状態を汚す (Round 3 F2)。
+    const fixture = [
+      '```bash',
+      "echo x;# don't use the bare name",
+      'pnpm exec kiwa layers --json',
+      '```',
+    ].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => i.line)).toEqual([3]);
+    expect(stripQuoted("true &&# it's fine").code).toBe('true &&');
   });
 
   it('入れ子の fence で閉じ位置を取り違えない', () => {
