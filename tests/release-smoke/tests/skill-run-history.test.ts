@@ -40,17 +40,23 @@ function stepOneScript(): string {
 }
 
 /** vitest reporter が出す形の最小 JSON。 */
-function report(startTime: number, statuses: Record<string, 'passed' | 'failed'>): string {
+function report(
+  startTime: number | null,
+  statuses: Record<string, 'passed' | 'failed'>,
+  repeatIds = false,
+): string {
+  const results = Object.entries(statuses).map(([id, status]) => ({
+    fullName: `${id} sample`,
+    status,
+    duration: 1,
+  }));
   return JSON.stringify({
-    startTime,
+    ...(startTime === null ? {} : { startTime }),
     testResults: [
       {
         testFilePath: 'tests/unit/sample.test.ts',
-        assertionResults: Object.entries(statuses).map(([id, status]) => ({
-          fullName: `${id} sample`,
-          status,
-          duration: 1,
-        })),
+        // 同じ run に同じ testId が 2 度出る形 (retry / 同名 test)。
+        assertionResults: repeatIds ? [...results, ...results] : results,
       },
     ],
   });
@@ -75,9 +81,14 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
   }
 
   /** 1 回分の観測を回し、 dashboard を返す。 */
-  function observe(project: string, startTime: number, statuses: Record<string, 'passed' | 'failed'>): string {
-    const vitestJson = resolve(project, `report-${startTime}.json`);
-    writeFileSync(vitestJson, report(startTime, statuses), 'utf-8');
+  function observe(
+    project: string,
+    startTime: number | null,
+    statuses: Record<string, 'passed' | 'failed'>,
+    opts: { producer?: string; repeatIds?: boolean } = {},
+  ): string {
+    const vitestJson = resolve(project, `report-${startTime ?? 'no-start'}.json`);
+    writeFileSync(vitestJson, report(startTime, statuses, opts.repeatIds ?? false), 'utf-8');
     const out = resolve(project, 'dashboard.md');
     const header = [
       `const PROJECT_ROOT = ${JSON.stringify(project)};`,
@@ -85,7 +96,9 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
       `const SPEC_PATH = ${JSON.stringify(resolve(REPO_ROOT, 'tests/spec/contract/test-spec-mint-nft.ja.md'))};`,
       `const TEST_PATHS = [${JSON.stringify(resolve(REPO_ROOT, 'tests/fixtures/mint-nft/contract-test/MintNft.t.sol'))}];`,
       `const MODULE = 'mint-nft';`,
-      `const LAYER = 'contract';`,
+      // report は vitest reporter の形なので、 layer / producer も vitest 系で揃える。
+      `const LAYER = 'unit';`,
+      `const PRODUCER = ${JSON.stringify(opts.producer ?? 'kiwa-vitest')};`,
       `const OUT_PATH = ${JSON.stringify(out)};`,
       '',
     ].join('\n');
@@ -139,12 +152,53 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
     expect(again, '同じ run を 2 回数えている').toContain('最大 1 回しか無い');
   });
 
+  it('Summary はこの run を数える (累積で埋めない)', () => {
+    // 累積を Summary に渡すと、 この run が 0 件でも過去の record で pass rate が出て、
+    // 走らせていない状態が成功に見える (#1909 で禁じた形、 Round 1 F1)。
+    const project = newProject();
+    observe(project, 10_000, { 'T-E-001': 'passed' });
+    const empty = observe(project, 11_000, {});
+    expect(empty, 'この run が 0 件なのに pass rate を出している').toContain('| pass rate | n/a |');
+    expect(empty).toContain('| total records | 0 |');
+  });
+
+  it('startTime が無い report を 2 度観測しても 2 run に数えない', () => {
+    // 時刻で代用すると観測のたびに別 run になり、 1 run が 2 run に化ける (Round 1 F2)。
+    const project = newProject();
+    observe(project, null, { 'T-F-001': 'passed' });
+    const again = observe(project, null, { 'T-F-001': 'passed' });
+    expect(again, '同じ report を 2 run と数えている').toContain('最大 1 回しか無い');
+  });
+
+  it('同じ run に同じ testId が 2 度出ても 1 run と数える', () => {
+    // retry / 同名 test。 畳まないと 1 run が複数 run として数えられる (Round 1 F3)。
+    const project = newProject();
+    const only = observe(project, 12_000, { 'T-G-001': 'passed' }, { repeatIds: true });
+    expect(only, '1 run を複数 run と数えている').toContain('最大 1 回しか無い');
+  });
+
+  it('producer が違えば history を分ける', () => {
+    // `contract` は forge と hardhat の 2 producer を持つ。 混ぜると別の成果物の run が
+    // 同じ testId で数えられる (Round 1 F5)。
+    const project = newProject();
+    observe(project, 13_000, { 'T-H-001': 'passed' }, { producer: 'kiwa-forge' });
+    observe(project, 14_000, { 'T-H-001': 'passed' }, { producer: 'kiwa-forge' });
+    const other = observe(project, 15_000, { 'T-H-001': 'passed' }, { producer: 'kiwa-hardhat' });
+    expect(other, '別 producer の run を数えている').toContain('最大 1 回しか無い');
+  });
+
+  it('file 名に使えない module / layer を拒む', () => {
+    // path に埋める値。 separator を含む形で起点の外に書けないようにする (Round 1 F4)。
+    const project = newProject();
+    expect(() => observe(project, 16_000, { 'T-I-001': 'passed' }, { producer: '../escape' })).toThrow();
+  });
+
   it('history が壊れている時は黙って空から数え直さない', () => {
     // 空へ倒すと、 判定に届かない状態が「まだ 3 回に達していない」 と区別できず毎回そう
     // 見える (#1909 / #1910 と同じ「静かな緑」)。
     const project = newProject();
     observe(project, 8000, { 'T-D-001': 'passed' }); // history を作る
-    const historyPath = resolve(project, 'tests/reports/observe/history-mint-nft-contract.json');
+    const historyPath = resolve(project, 'tests/reports/observe/history-mint-nft-unit-kiwa-vitest.json');
     writeFileSync(historyPath, '{ broken', 'utf-8');
     expect(() => observe(project, 9000, { 'T-D-001': 'passed' })).toThrow();
   });

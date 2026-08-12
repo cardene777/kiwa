@@ -66,7 +66,7 @@ export function renderDashboard(input: DashboardInput): string {
   // 検出結果が空の時だけ、 それが「判定した上で 0 件」 か「判定していない」 かを
   // eligibility で分ける。
   const eligibility = flakyEligibility({
-    history: input.history,
+    history: input.flakyHistory ?? input.history,
     ...(input.flakyMinRuns === undefined ? {} : { minRuns: input.flakyMinRuns }),
   });
   if (input.flaky.length === 0 && eligibility.eligible === 0) {

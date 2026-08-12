@@ -25,6 +25,17 @@ export interface DashboardInput {
     gaps: SpecCoverageGap[];
     coverage?: import('./coverage.js').CoverageSummary;
     /**
+     * flaky の判定に使った history (累積)。
+     *
+     * `history` は **この run** を表し、 Summary はそれを数える。 累積を Summary に渡すと、
+     * この run が 0 件でも過去の record だけで `pass rate` が出て、 走らせていない状態が
+     * 成功に見える (#1909 で禁じた形)。
+     *
+     * 一方 flaky は 1 run では判定できないため、 判定材料は累積側で数える。 省略時は
+     * `history` を使う (単発の呼出はこれまでどおり動く)。
+     */
+    flakyHistory?: RunHistory;
+    /**
      * `detectFlaky` に渡したのと同じ `minRuns`。
      *
      * 表示が「判定した上で無い」 と「判定していない」 を分けるのに要る。 省くと
