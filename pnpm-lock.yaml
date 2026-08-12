@@ -37,6 +37,9 @@ importers:
       '@kiwa-lab/cli':
         specifier: workspace:*
         version: link:packages/cli
+      '@kiwa-lab/observability':
+        specifier: workspace:*
+        version: link:packages/observability
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.60.0
