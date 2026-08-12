@@ -162,6 +162,15 @@ flaky も同じ。 chain は history を持ち越さないため run は常に 1
 
 ### Step 1: dashboard 生成 script を生成
 
+**script は repo の中に書く**。 置き場所は `<repo>/.context/scratch/` (git 追跡外)。
+
+Node は import を **script file の場所** から解決する (cwd ではない)。 repo の外 (harness の
+scratchpad 等) に書くと、 repo の `node_modules` に届かず 1 行目で
+`ERR_MODULE_NOT_FOUND: Cannot find package '@kiwa-lab/observability'` になる (#1915 で実測)。
+
+`@kiwa-lab/observability` は repo root が devDependency として宣言しているので、 repo 内の
+script なら解決できる。
+
 ```ts
 import {
   analyzeSpecCoverage,
