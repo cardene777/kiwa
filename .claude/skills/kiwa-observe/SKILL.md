@@ -262,15 +262,23 @@ async function readHistory(path) {
 
 // 読み先は § Step 0 の VITEST_JSON 規則で決める (--vitest-json があればその値、
 // 無ければ Step 0 が --root の下に書いた path)。
-const report = JSON.parse(await readFile(VITEST_JSON, 'utf8'));
+const reportRaw = await readFile(VITEST_JSON, 'utf8');
+const report = JSON.parse(reportRaw);
 
 // runId は **run ごとに一意で、 同じ report からは常に同じ値** にする。 GIT_SHA だと同じ
 // commit で 3 回走らせても同じ値になり、 flaky を見たい時こそ重複除去が効かない。 逆に
 // Date.now() だと同じ report を 2 度観測するたびに別 run になり、 1 run が 2 run に化ける。
 // startTime が無い report は中身の hash を使う (#1918)。
+// vitest の reporter は常に startTime を出す (実測)。 fallback は vitest 以外が作った
+// JSON 用で、 **file の中身が同じなら同じ id** という保証しか持たない。 意味が同じで
+// 表記が違う report (property 順 / 空白) は別 id になる。
+//
+// 意味で正規化する案は採らない。 結果が同じ 2 つの run が同じ id になり、 3 回走らせても
+// 1 run に畳まれて **flaky が永久に判定されない** = 直そうとしている欠陥そのものに戻る
+// (Round 2 F1 への回答)。
 const runId = report.startTime
   ? String(report.startTime)
-  : createHash('sha1').update(JSON.stringify(report)).digest('hex').slice(0, 12);
+  : createHash('sha1').update(reportRaw).digest('hex').slice(0, 12);
 const records = fromVitestJson(report, { runId });
 
 // 過去の run を読む。 これが無いと同じ test の run は常に 1 回で、 minRuns に届かず
@@ -293,13 +301,15 @@ const previous = await readHistory(HISTORY_PATH);
 // 同じ run の中に同じ testId が 2 度出る形 (retry / 同名 test) も 1 件に畳む = 畳まないと
 // 1 run が複数 run として数えられる。
 const key = (r) => `${r.testId}\u0000${r.runId}`;
-const seen = new Set(previous.records.map(key));
-const fresh = [];
+const recorded = new Set(previous.records.map(key));
+// 同じ run の中に同じ testId が 2 度出る形 (retry) は **後の結果を採る**。 先頭を残すと
+// retry の最終結果が落ちて、 直った test を失敗として数える (Round 2 F2)。
+const byKey = new Map();
 for (const rec of records) {
-  if (seen.has(key(rec))) continue;
-  seen.add(key(rec));
-  fresh.push(rec);
+  if (recorded.has(key(rec))) continue; // 既に history にある run
+  byKey.set(key(rec), rec);
 }
+const fresh = [...byKey.values()];
 
 const history = collectRunHistory({ history: previous, records: fresh, maxPerTest: 20 });
 await mkdir(dirname(HISTORY_PATH), { recursive: true });

@@ -69,6 +69,14 @@ export function renderDashboard(input: DashboardInput): string {
     history: input.flakyHistory ?? input.history,
     ...(input.flakyMinRuns === undefined ? {} : { minRuns: input.flakyMinRuns }),
   });
+  if (input.flakyHistory && input.flakyHistory !== input.history) {
+    // Summary は この run、 flaky は累積を見る。 期間が違うことを書かないと、 Summary の
+    // 件数と flaky の run 数が食い違って見える (#1918 Round 2 F3)。
+    lines.push(
+      `判定は累積 ${input.flakyHistory.records.length} record に対して行う (Summary はこの run)。`,
+    );
+    lines.push('');
+  }
   if (input.flaky.length === 0 && eligibility.eligible === 0) {
     // **「flaky が無い」 と書かない**。 `detectFlaky` は minRuns に届かない test を
     // 飛ばすので、 1 回しか走っていない history では必ず空になる。 空を「無い」 と

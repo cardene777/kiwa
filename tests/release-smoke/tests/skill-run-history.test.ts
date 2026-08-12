@@ -44,19 +44,25 @@ function report(
   startTime: number | null,
   statuses: Record<string, 'passed' | 'failed'>,
   repeatIds = false,
+  retryOf?: 'passed' | 'failed',
 ): string {
   const results = Object.entries(statuses).map(([id, status]) => ({
     fullName: `${id} sample`,
     status,
     duration: 1,
   }));
+  // retry = 同じ testId が先に別の結果で出る形。 最終結果は後ろ。
+  const withRetry =
+    retryOf === undefined
+      ? results
+      : [...results.map((r) => ({ ...r, status: retryOf })), ...results];
   return JSON.stringify({
     ...(startTime === null ? {} : { startTime }),
     testResults: [
       {
         testFilePath: 'tests/unit/sample.test.ts',
         // 同じ run に同じ testId が 2 度出る形 (retry / 同名 test)。
-        assertionResults: repeatIds ? [...results, ...results] : results,
+        assertionResults: repeatIds ? [...withRetry, ...withRetry] : withRetry,
       },
     ],
   });
@@ -85,10 +91,14 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
     project: string,
     startTime: number | null,
     statuses: Record<string, 'passed' | 'failed'>,
-    opts: { producer?: string; repeatIds?: boolean } = {},
+    opts: { producer?: string; repeatIds?: boolean; retryOf?: 'passed' | 'failed' } = {},
   ): string {
     const vitestJson = resolve(project, `report-${startTime ?? 'no-start'}.json`);
-    writeFileSync(vitestJson, report(startTime, statuses, opts.repeatIds ?? false), 'utf-8');
+    writeFileSync(
+      vitestJson,
+      report(startTime, statuses, opts.repeatIds ?? false, opts.retryOf),
+      'utf-8',
+    );
     const out = resolve(project, 'dashboard.md');
     const header = [
       `const PROJECT_ROOT = ${JSON.stringify(project)};`,
@@ -164,6 +174,11 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
 
   it('startTime が無い report を 2 度観測しても 2 run に数えない', () => {
     // 時刻で代用すると観測のたびに別 run になり、 1 run が 2 run に化ける (Round 1 F2)。
+    //
+    // 保証するのは **file の中身が同じなら同じ id** まで。 意味で正規化すると、 結果が
+    // 同じ 2 run が 1 run に畳まれて flaky が永久に判定されない (Round 2 F1 への回答)。
+    // したがって hash の入力を raw text から parse 後の object に変えても、 この検査は
+    // 通る = その 2 つは本検査にとって等価な実装。
     const project = newProject();
     observe(project, null, { 'T-F-001': 'passed' });
     const again = observe(project, null, { 'T-F-001': 'passed' });
@@ -185,6 +200,28 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
     observe(project, 14_000, { 'T-H-001': 'passed' }, { producer: 'kiwa-forge' });
     const other = observe(project, 15_000, { 'T-H-001': 'passed' }, { producer: 'kiwa-hardhat' });
     expect(other, '別 producer の run を数えている').toContain('最大 1 回しか無い');
+  });
+
+  it('retry の最終結果を採る (先頭ではなく後)', () => {
+    // 同じ run に同じ testId が pass と fail で並ぶ形。 先頭を残すと、 直った test を
+    // 失敗として数える (Round 2 F2)。
+    const project = newProject();
+    const id = 'T-J-001';
+    // 1 run 目 = fail → pass の retry。 最終結果は pass。
+    observe(project, 17_000, { [id]: 'passed' }, { retryOf: 'failed' });
+    observe(project, 18_000, { [id]: 'passed' });
+    const third = observe(project, 19_000, { [id]: 'passed' });
+    // 最終結果を採っていれば 3 run とも pass = flaky ではない。
+    expect(third, 'retry の先頭 (失敗) を採っている').toContain('No flaky tests detected.');
+  });
+
+  it('判定の対象期間を dashboard に書く', () => {
+    // Summary は この run、 flaky は累積。 期間が違うことを書かないと、 件数が食い違って
+    // 見える (Round 2 F3)。
+    const project = newProject();
+    observe(project, 20_000, { 'T-K-001': 'passed' });
+    const second = observe(project, 21_000, { 'T-K-001': 'passed' });
+    expect(second, '判定の対象期間を書いていない').toMatch(/判定は累積 \d+ record に対して行う/);
   });
 
   it('file 名に使えない module / layer を拒む', () => {
