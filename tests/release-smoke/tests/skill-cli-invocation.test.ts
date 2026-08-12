@@ -32,6 +32,20 @@ function read(rel: string): string {
  * ここでは 3 つを見る。 各 skill がその文脈の起動形で書いていること、 起動行が
  * 消えていないこと、 そして **その形が実際に走ること**。 3 番目が要点で、 1 番目
  * だけなら綴りが揃った動かない command で通ってしまう。
+ *
+ * ## 受け付ける文法 (契約)
+ *
+ * 読むのは fenced code block の中で、 **command 名と subcommand が同じ論理行に
+ * 並ぶ** 形だけ。 引用の中と comment の中は読まない。 行継続は 1 論理行に繋ぐ。
+ *
+ * 読まない形を先に宣言する。 `sh -c '...'` / `eval` / 変数間接参照 (`"$CMD" layers`) /
+ * backtick command substitution の中。 shell を完全に解析する道は取らない = 静的
+ * 解析は収束せず、 lexical な隅を 1 つ塞ぐたびに別の隅が開く (本 PR の review が
+ * 5 round でこれを実測した)。
+ *
+ * **代わりに、 読み方が外れた時に黙って通さない**。 fence の終わりで引用が開いた
+ * ままなら、 その block は読めていないので検査ごと落とす。 取りこぼしを静かな
+ * 緑にしない、 が境界の引き方。
  */
 
 /** kiwa repo の中で走る skill が使う起動形。 */
@@ -78,6 +92,21 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i]!;
     if (quote === null) {
+      // 引用の外の backslash は次の 1 文字を語の一部にする。 `echo a\;#frag` の `;`
+      // は operator ではないので、 続く `#` も語頭ではない (Round 5 R5-1)。 escape
+      // した文字を out に残すと直前文字の判定が operator に化けるため、 語の一部で
+      // あることを示す印として `x` を置く。
+      if (ch === '\\') {
+        // 行末の `\` は escape ではなく行継続。 呼出側がこれを見て論理行に繋ぐので
+        // そのまま残す。
+        if (i === line.length - 1) {
+          out += ch;
+          break;
+        }
+        out += 'x';
+        i += 1;
+        continue;
+      }
       // 引用の外の `#` は行末までの comment。 落とさないと、 comment 中の
       // apostrophe (`don't` 等) が引用を開いたことになり、 状態を持ち回る以上
       // **その後ろの行がまとめて引用の中に見える**。 語頭の `#` だけを comment と
@@ -185,6 +214,7 @@ function invocationsIn(body: string, skill: string): Invocation[] {
   const pattern = occurrence();
   const found: Invocation[] = [];
   let fence: string | null = null;
+  let fenceLine = 0;
   let quote: string | null = null;
   /** 行継続 (`\` 終端) で繋いでいる途中の論理行。 */
   let pending: { line: number; text: string; code: string } | null = null;
@@ -195,6 +225,7 @@ function invocationsIn(body: string, skill: string): Invocation[] {
       const run = marker[1]!;
       if (fence === null) {
         fence = run[0]!.repeat(run.length);
+        fenceLine = i + 1;
         quote = null;
         pending = null;
         return;
@@ -202,6 +233,11 @@ function invocationsIn(body: string, skill: string): Invocation[] {
       // 閉じ fence は開いたものと同じ文字で、 同じ長さ以上で、 info string を
       // 持たない。 内側のより長い fence が外側を閉じない。
       if (run[0] === fence[0] && run.length >= fence.length && raw.trim() === run) {
+        // fence を閉じる時点で引用が開いたままなら、 **この block の読み方が
+        // どこかで外れている**。 そのまま黙って進むと、 開いた引用の後ろにある
+        // 起動がすべて見えないまま検査が緑になる (Round 5 R5-2 の backtick 内
+        // comment が実際にこの形)。 静かな取りこぼしにせず、 その場で落とす。
+        expect(quote, `${skill}: fence (${fenceLine}-${i + 1} 行) の引用が閉じていない`).toBeNull();
         fence = null;
         quote = null;
         pending = null;
@@ -419,6 +455,31 @@ describe('fence の中の起動行だけを取る', () => {
     expect(stripQuoted('echo ${#VAR} && pnpm exec kiwa layers').code).toBe(
       'echo ${#VAR} && pnpm exec kiwa layers',
     );
+  });
+
+  it('backslash で escape した operator を語の区切りと読まない', () => {
+    // `echo a\;#frag` の `;` は escape されていて operator ではない = 続く `#` も
+    // 語頭ではない。 直前 1 文字だけを見ると operator と読み、 後ろの起動を落とす
+    // (Round 5 R5-1)。
+    const fixture = [
+      '```bash',
+      'echo a\\;#frag && pnpm exec kiwa layers --json',
+      '```',
+    ].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['repo']);
+  });
+
+  it('fence の終わりで引用が開いたままなら落ちる', () => {
+    // backtick 内の comment (`` `# don't` ``) のように、 読み方が外れる形は
+    // 塞ぎ切れない。 塞げないこと自体は受け入れるが、 **黙って後続を隠す** のは
+    // 受け入れない。 開いたまま fence が閉じたらその場で落とす (Round 5 R5-2)。
+    const fixture = [
+      '```bash',
+      "echo `# don't`",
+      'pnpm exec kiwa layers --json',
+      '```',
+    ].join('\n');
+    expect(() => invocationsIn(fixture, 'x')).toThrow();
   });
 
   it('substitution の閉じ括弧を語の区切りと読まない', () => {
