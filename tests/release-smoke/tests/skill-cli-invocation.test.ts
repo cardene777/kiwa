@@ -83,10 +83,15 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
       // **その後ろの行がまとめて引用の中に見える**。 語頭の `#` だけを comment と
       // みなす (POSIX)。 語中の `#` は URL fragment などで現れる。
       //
-      // 語頭は「空白の後」 だけではない。 shell の operator (`;` `|` `&` `(` `<` `>`)
-      // の直後も新しい語の頭で、 `echo x;# don't` は comment になる。 空白だけに
-      // 限ると、 この形の apostrophe が状態を汚す (Round 3 F2)。
-      if (ch === '#' && (out === '' || /[\s;|&()<>]$/.test(out))) break;
+      // 語頭は「空白の後」 だけではない。 `;` `&` `|` の直後も新しい語の頭で、
+      // `echo x;# don't` は comment になる (Round 3 F2)。
+      //
+      // 足すのは **引用の外で必ず operator になる文字** だけに限る。 `)` を入れると
+      // `$(printf y)#frag` の `#` を comment の頭と読むが、 shell はこれを 1 語として
+      // 扱う (`y#frag` を出力、 bash / zsh で実測)。 comment を過剰に検出する側の
+      // 誤りは **実在する起動行を落とす** = この検査が防ぎたい失敗そのものなので、
+      // 曖昧な文字は入れない (`(` `)` `<` `>`、 Round 4 R4-1)。
+      if (ch === '#' && (out === '' || /[\s;|&]$/.test(out))) break;
       if (ch === '"' || ch === "'") {
         quote = ch;
         continue;
@@ -408,6 +413,25 @@ describe('fence の中の起動行だけを取る', () => {
     ].join('\n');
     expect(invocationsIn(fixture, 'x').map((i) => i.line)).toEqual([3]);
     expect(stripQuoted("true &&# it's fine").code).toBe('true &&');
+
+    // `{` は operator に**入れない**。 入れると `${#VAR}` の `#` を comment の頭と
+    // 読み、 行の残りを落とす。 shell では `{` の直後は語頭ではない。
+    expect(stripQuoted('echo ${#VAR} && pnpm exec kiwa layers').code).toBe(
+      'echo ${#VAR} && pnpm exec kiwa layers',
+    );
+  });
+
+  it('substitution の閉じ括弧を語の区切りと読まない', () => {
+    // `$(printf y)#frag` は shell では 1 語 (`y#frag` を出力、 bash / zsh で実測)。
+    // `)` を comment 境界に入れると、 この後ろにある起動を丸ごと落とす = 検査が
+    // 防ぎたい失敗そのものを検査自身が起こす (Round 4 R4-1)。
+    const fixture = [
+      '```bash',
+      'echo $(printf y)#frag && pnpm exec kiwa layers --json',
+      'echo $((1))#frag && npx --no kiwa init --detect',
+      '```',
+    ].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['repo', 'user']);
   });
 
   it('入れ子の fence で閉じ位置を取り違えない', () => {
