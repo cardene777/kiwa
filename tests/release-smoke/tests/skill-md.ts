@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,6 +26,34 @@ export function read(rel: string): string {
 
 export function skillBody(skill: string): string {
   return read(`.claude/skills/${skill}/SKILL.md`);
+}
+
+/**
+ * `.claude/skills` 直下の dir 名 (SKILL.md の有無を問わない、 #1922)。
+ *
+ * 列挙そのものは 5 file が個別に書いていた。 **求める集合は 3 通りに割れる** ため、 1 つの
+ * 関数に畳まず 2 つの primitive を出して呼出側が選ぶ形にする。
+ *
+ * | 呼出側が欲しい集合 | 使う関数 |
+ * |---|---|
+ * | dir 全件 | `skillDirNames()` |
+ * | SKILL.md を持つもの | `skillsWithSkillMd()` |
+ * | SKILL.md を持たないもの | `skillDirNames()` から `skillsWithSkillMd()` を引く |
+ *
+ * 3 つ目は「manifest を持たない skill を検出する」 検査が使う = 集合を 1 つに畳むと、
+ * その検査が見たい対象が消える。
+ */
+export function skillDirNames(): string[] {
+  return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .map((e) => e.name);
+}
+
+/** `.claude/skills` 直下のうち SKILL.md を持つ dir 名。 */
+export function skillsWithSkillMd(): string[] {
+  return skillDirNames().filter((name) =>
+    existsSync(resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md')),
+  );
 }
 
 /**

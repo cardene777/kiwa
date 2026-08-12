@@ -29,6 +29,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
+import { skillDirNames, skillsWithSkillMd } from './skill-md.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 // `.vitest-dist/tests/{this}` → 4 levels up = repo root.
@@ -133,12 +134,10 @@ describe('plugin metadata names', () => {
   it('counts only skill directories that hold a SKILL.md', () => {
     // A directory left behind after SKILL.md is deleted is not a skill. Review removed
     // kiwa-play/SKILL.md and the count stayed at 29 with the metadata still advertising it.
-    const withoutManifest = readdirSync(resolve(REPO_ROOT, '.claude/skills'), {
-      withFileTypes: true,
-    })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .filter((name) => !existsSync(resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md')));
+    // 全 dir から SKILL.md を持つものを引く = 本検査が見たいのは「残された空 dir」 で、
+    // 列挙を「SKILL.md を持つもの」 に畳むと対象そのものが消える (#1922)。
+    const withManifest = new Set(skillsWithSkillMd());
+    const withoutManifest = skillDirNames().filter((name) => !withManifest.has(name));
 
     expect(
       built.skills.filter((s) => withoutManifest.includes(s)),

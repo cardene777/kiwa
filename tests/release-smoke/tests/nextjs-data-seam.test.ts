@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
+import { skillBody, skillsWithSkillMd } from './skill-md.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -900,12 +901,9 @@ describe('kiwa-nextjs は data seam を検出して seed する', () => {
     // updated kiwa-hardhat and missed kiwa-forge, which kiwa-hardhat cites as
     // its own source ("kiwa-forge と同形式") — naming them one by one is how
     // the miss happened (#1859 Round 2 retry 2).
-    const skills = readdirSync(resolve(REPO_ROOT, '.claude/skills'));
     const enumerators: string[] = [];
-    for (const name of skills) {
-      const file = resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md');
-      if (!existsSync(file)) continue;
-      const body = readFileSync(file, 'utf-8');
+    for (const name of skillsWithSkillMd()) {
+      const body = skillBody(name);
       // The enumeration is the list that branches on the review verdict.
       if (!body.includes('FAIL critical なし')) continue;
       enumerators.push(name);

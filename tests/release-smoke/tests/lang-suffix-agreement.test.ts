@@ -1,19 +1,18 @@
-import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync, spawn, spawnSync } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { repoRoot } from './repo-root.js';
-
-const HERE = dirname(fileURLToPath(import.meta.url));
-
-const REPO_ROOT = repoRoot(HERE);
-
-function read(rel: string): string {
-  return readFileSync(resolve(REPO_ROOT, rel), 'utf-8');
-}
+import { REPO_ROOT, read, skillDirNames, skillsWithSkillMd } from './skill-md.js';
 
 const LAYERS = JSON.parse(read('docs/layers.json')) as {
   layers: { id: string; spec_path: string | null }[];
@@ -160,20 +159,9 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     );
   });
 
-  /** Skill directories under `.claude/skills/`, whatever they happen to be. */
+  /** Skill directories under `.claude/skills/` that carry a `SKILL.md`. */
   function skillNames(): string[] {
-    return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .filter((name) => {
-        try {
-          read(`.claude/skills/${name}/SKILL.md`);
-          return true;
-        } catch {
-          return false;
-        }
-      })
-      .sort();
+    return [...skillsWithSkillMd()].sort();
   }
 
   /**
@@ -243,8 +231,12 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
    *
    * The response is served by a stub `kiwa` placed first on `PATH`, so the
    * snippet runs exactly as written — no substitution, no re-implementation.
+   *
+   * **非同期にして呼出側が並列に回せるようにする** (#1922)。 1 呼出が `pnpm exec` を挟むため
+   * 0.3 秒前後かかり、 11 応答を直列に流すと 1 skill だけで 3 秒 (負荷時 10.5 秒) を占めていた。
+   * 応答どうしは独立で、 それぞれ専用の temp dir と stub を持つため互いに踏まない。
    */
-  function runResolution(snippet: string, response: string, cliStatus = 0): number {
+  async function runResolution(snippet: string, response: string, cliStatus = 0): Promise<number> {
     const dir = mkdtempSync(join(tmpdir(), 'kiwa-resolve-'));
     try {
       const stub = join(dir, 'kiwa');
@@ -269,7 +261,20 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
         snippet,
         'exit 0', // ここに到達 = snippet が応答を受理した
       ].join('\n');
-      return spawnSync('bash', ['-c', script], { cwd: dir, encoding: 'utf-8' }).status ?? -1;
+      return await new Promise<number>((settle, fail) => {
+        const child = spawn('bash', ['-c', script], { cwd: dir });
+        // **起動できなかったことを exit status に畳まない** (Round 1 R1-F1)。 壊れた応答に
+        // 対する検査は「0 でない」 を期待するため、 起動失敗を -1 に倒すと **snippet を 1 度も
+        // 走らせずに緑になる**。 11 起動を同時に投げる以上 `EAGAIN` / `EMFILE` は現実的で、
+        // 並列化はこの失敗の確率を上げる側に働く。
+        //
+        // 直列だった頃の `spawnSync().status ?? -1` も同じ穴を持っていた (spawn 失敗時は
+        // status が null)。 起動の失敗は検査の失敗として投げる。
+        child.on('error', (err) => fail(new Error(`bash を起動できない: ${err.message}`)));
+        // signal で落ちた場合は code が null になる。 こちらは -1 に倒す = 実際に走った上で
+        // 異常終了したので、 「0 でない」 の期待に対して正しい。
+        child.on('close', (code) => settle(code ?? -1));
+      });
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
@@ -309,7 +314,7 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
   const VALID_RESPONSE =
     '{"layers":[{"id":"contract","spec_path":"tests/spec/contract/test-spec-nft.ja.md"}]}';
 
-  it.each(MIGRATED)('%s の解決 snippet が壊れた応答で止まる', (skill) => {
+  it.each(MIGRATED)('%s の解決 snippet が壊れた応答で止まる', async (skill) => {
     // Executed, not pattern-matched. Three rounds went to text proxies that
     // each had a way through — a `jq -e` elsewhere in the block satisfied a
     // block-wide search (Round 3), and a trailing `# jq -e 'type == "string"'`
@@ -325,21 +330,27 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
       'jq が無いため snippet を実行できない',
     ).toBe(0);
 
-    expect(runResolution(snippet, VALID_RESPONSE), `${skill} が正常な応答を受理しない`).toBe(0);
-    for (const [label, response] of BROKEN_RESPONSES) {
-      expect(runResolution(snippet, response), `${skill} が「${label}」 で止まらない`).not.toBe(0);
-    }
-    // The table's first row. Shape cannot express it: the response is valid and
-    // the command still failed, which is what an uninstalled CLI or a bad
-    // `--module` looks like.
-    expect(
+    // 11 bash processes、 それぞれ専用の temp dir を持つ。 **まとめて起動する** = 応答どうしは
+    // 独立で、 直列に流す理由が無い (#1922、 直列時は 1 skill で 3 秒 / 負荷時 10.5 秒)。
+    //
+    // 結果は応答ごとに保持する。 まとめて 1 つの真偽に畳むと、 どの応答で止まらなかったかが
+    // 判らず直せない。
+    const [accepted, refused, statusFailure] = await Promise.all([
+      runResolution(snippet, VALID_RESPONSE),
+      Promise.all(BROKEN_RESPONSES.map(([, response]) => runResolution(snippet, response))),
+      // The table's first row. Shape cannot express it: the response is valid and
+      // the command still failed, which is what an uninstalled CLI or a bad
+      // `--module` looks like.
       runResolution(snippet, VALID_RESPONSE, 2),
-      `${skill} が「exit != 0」 で止まらない`,
-    ).not.toBe(0);
-    // 11 bash processes, each with its own temp dir. Stated here rather than
-    // left to the runner's flag: `pnpm test` passes `--testTimeout 30000` but a
-    // bare `vitest run` uses 5000 and this took 5.5s on the machine it was
-    // written on, so the check would fail depending on how it was invoked.
+    ]);
+
+    expect(accepted, `${skill} が正常な応答を受理しない`).toBe(0);
+    BROKEN_RESPONSES.forEach(([label], i) => {
+      expect(refused[i], `${skill} が「${label}」 で止まらない`).not.toBe(0);
+    });
+    expect(statusFailure, `${skill} が「exit != 0」 で止まらない`).not.toBe(0);
+    // timeout は runner の flag に委ねない: `pnpm test` は `--testTimeout 30000` を渡すが
+    // 素の `vitest run` は 5000 で、 呼ばれ方によって落ちる。
   }, 60_000);
 
   it.each(MIGRATED)('%s が shell 断片に未定義の関数を置かない', (skill) => {
@@ -824,8 +835,9 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
    * Continuations are folded so a wrapped invocation reads as one line.
    */
   function observeInvocations(): { skill: string; line: string }[] {
-    return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
-      .filter((e) => e.isDirectory() && e.name !== 'kiwa-observe')
+    return skillDirNames()
+      .filter((name) => name !== 'kiwa-observe')
+      .map((name) => ({ name }))
       .flatMap((e) => {
         let body: string;
         try {
