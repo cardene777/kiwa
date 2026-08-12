@@ -578,6 +578,16 @@ describe('その起動形が実際に走る', () => {
     );
 
     // 挟まない形が npx に取られることも併せて示す。 これが変わったら注意書きの前提が変わる。
+    //
+    // **否定の assertion の前に、 起動できたことを別に固定する** (Round 1 R1-F1)。 起動が
+    // 失敗すると stdout は空になり、 空文字は「CLI の usage を含まない」 を満たす = npx が
+    // 壊れていても緑になる。 実測で、 launcher を存在しない binary に差し替えても 41 件すべてが
+    // 通った。 直前の refactor で `execFileSync` の throw を握って `{ stdout: '', error }` に
+    // 変えた時に入った穴で、 握る前は throw がそのまま test を落としていた。
+    expect(out.helpWithoutSeparator.error, '-- を挟まない形が走らない').toBeNull();
+    // 空 stdout でも否定は満たされるため、 「何かを出した」 ことも要る。 npm の help 文言
+    // そのものは見ない = npm の版で変わる語に検査を縛らない。
+    expect(out.helpWithoutSeparator.stdout.trim(), 'npx が何も出力していない').not.toBe('');
     expect(out.helpWithoutSeparator.stdout, 'npx が --help を取らなくなっている').not.toContain(
       'Usage: kiwa <command>',
     );
