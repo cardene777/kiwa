@@ -14,7 +14,7 @@ title: "@kiwa-lab/observability dashboard の API 契約"
 
 #### <code v-pre>renderDashboard</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/dashboard.ts#L29) <code v-pre>packages/observability/src/dashboard.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/dashboard.ts#L33) <code v-pre>packages/observability/src/dashboard.ts</code>
 
 ```ts
 export declare function renderDashboard(input: DashboardInput): string;

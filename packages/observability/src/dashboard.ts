@@ -1,3 +1,4 @@
+import { flakyEligibility } from './flaky.js';
 import type { DashboardInput } from './types.js';
 
 function summarize(input: DashboardInput): {
@@ -5,7 +6,8 @@ function summarize(input: DashboardInput): {
   passes: number;
   failures: number;
   skipped: number;
-  passRate: number;
+  /** pass / fail の record が 1 件も無ければ null = 計算していない。 */
+  passRate: number | null;
 } {
   let passes = 0;
   let failures = 0;
@@ -22,7 +24,9 @@ function summarize(input: DashboardInput): {
     passes,
     failures,
     skipped,
-    passRate: denom > 0 ? passes / denom : 1,
+    // 分母が 0 の時に 1 を返さない。 record 0 件 (runner が繋がっていない) と、
+    // skip しか無い run と、 全部通った run が同じ `100.0%` になっていた (#1909)。
+    passRate: denom > 0 ? passes / denom : null,
   };
 }
 
@@ -39,13 +43,34 @@ export function renderDashboard(input: DashboardInput): string {
   lines.push(`| passes | ${summary.passes} |`);
   lines.push(`| failures | ${summary.failures} |`);
   lines.push(`| skipped | ${summary.skipped} |`);
-  lines.push(`| pass rate | ${(summary.passRate * 100).toFixed(1)}% |`);
+  lines.push(
+    `| pass rate | ${summary.passRate === null ? 'n/a' : `${(summary.passRate * 100).toFixed(1)}%`} |`,
+  );
   lines.push('');
+  if (summary.passRate === null) {
+    lines.push(
+      summary.totalRecords === 0
+        ? 'test の実行結果を 1 件も受け取っていない。 この run で何が通ったかは判定していない.'
+        : 'pass / fail の record が無い (skip のみ)。 pass rate は計算していない.',
+    );
+    lines.push('');
+  }
 
   lines.push('## Flaky tests');
   lines.push('');
-  if (input.flaky.length === 0) {
-    lines.push('No flaky tests detected.');
+  const eligibility = flakyEligibility({
+    history: input.history,
+    ...(input.flakyMinRuns === undefined ? {} : { minRuns: input.flakyMinRuns }),
+  });
+  if (eligibility.eligible === 0) {
+    // **「flaky が無い」 と書かない**。 `detectFlaky` は minRuns に届かない test を
+    // 飛ばすので、 1 回しか走っていない history では必ず空になる。 空を「無い」 と
+    // 読むと、 判定できていない状態が「安定している」 と読まれる (#1909)。
+    lines.push(
+      `flaky は判定していない。 判定には同じ test の run が ${eligibility.minRuns} 回要るが、 最大 ${eligibility.maxRuns} 回しか無い.`,
+    );
+  } else if (input.flaky.length === 0) {
+    lines.push(`No flaky tests detected. (${eligibility.eligible} test を判定)`);
   } else {
     lines.push(`| testId | failure rate | runs (pass / fail) | name |`);
     lines.push(`|---|---|---|---|`);

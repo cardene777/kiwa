@@ -43,4 +43,12 @@ export interface DashboardInput {
   flaky: FlakyTest[];
   gaps: SpecCoverageGap[];
   coverage?: import('./coverage.js').CoverageSummary;
+  /**
+   * `detectFlaky` に渡したのと同じ `minRuns`。
+   *
+   * 表示が「判定した上で無い」 と「判定していない」 を分けるのに要る。 省くと
+   * `detectFlaky` と同じ既定 (`DEFAULT_FLAKY_MIN_RUNS`) を使う = 呼出側が既定の
+   * ままなら渡さなくても一致する。 **別の値を渡した時は必ずここにも渡す**。
+   */
+  flakyMinRuns?: number;
 }

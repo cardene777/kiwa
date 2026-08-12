@@ -41,6 +41,29 @@ function specPath(layer: string, lang?: string): string | null {
 }
 
 /**
+ * `renderDashboard(` の呼出全体を、 括弧の対応で切り出す。
+ *
+ * 行で切ると引数が増えた時に落ちる。 呼出が 1 つに定まることも併せて確かめる =
+ * 2 つあると、 どちらを見て判定したのか決まらない。
+ */
+function renderDashboardCall(body: string): string {
+  const starts = [...body.matchAll(/renderDashboard\(/g)]
+    .map((m) => m.index!)
+    .filter((at) => !/^\s*\/\//.test(body.slice(body.lastIndexOf('\n', at) + 1, at)));
+  expect(starts, 'renderDashboard の呼出が 1 箇所に定まらない').toHaveLength(1);
+  const open = starts[0]! + 'renderDashboard('.length;
+  let depth = 1;
+  for (let i = open; i < body.length; i += 1) {
+    if (body[i] === '(') depth += 1;
+    else if (body[i] === ')') {
+      depth -= 1;
+      if (depth === 0) return body.slice(open, i);
+    }
+  }
+  throw new Error('renderDashboard の呼出が閉じていない');
+}
+
+/**
  * skill が CLI を起動している行 (本文の言及を除く)。
  *
  * 起動形は文脈で 2 つある (#1908)。 repo の中で走る skill は `pnpm exec kiwa`、
@@ -1151,11 +1174,11 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     //
     // Asserted on the argument, not on the comment beside it: assigning the
     // real layer to a variable and not using it is exactly what shipped.
-    const call = read('.claude/skills/kiwa-observe/SKILL.md')
-      .split('\n')
-      .filter((l) => l.includes('renderDashboard(') && !l.trim().startsWith('//'));
-    expect(call, 'renderDashboard の呼出が 1 行に定まらない').toHaveLength(1);
-    expect(call[0], 'renderDashboard が解析側の gaps をそのまま受けている').toContain(
+    // 引数が増えて呼出が複数行になったため、 括弧の対応を追って呼出全体を取る
+    // (#1909 で `flakyMinRuns` が加わった)。 1 行前提のままだと、 整形しただけで
+    // 落ちる = 中身は正しいのに検査が赤くなる。
+    const call = renderDashboardCall(read('.claude/skills/kiwa-observe/SKILL.md'));
+    expect(call, 'renderDashboard が解析側の gaps をそのまま受けている').toContain(
       'gaps: displayGaps',
     );
   });
