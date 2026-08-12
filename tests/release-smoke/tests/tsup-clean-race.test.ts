@@ -190,6 +190,25 @@ const LAG_SAMPLE_INTERVAL_MS = 200;
  */
 const LOOP_LAG_LIMIT_MS = 10_000;
 
+/**
+ * 同時に走らせる probe build の数 (#1924)。
+ *
+ * 上限を置く理由は event loop lag。 build は CPU を食うため、 全 26 件を同時に投げると本
+ * process が CPU を取れず、 `LOOP_LAG_LIMIT_MS` の検査が実装ではなく検査の重さで落ちる。
+ *
+ * **非数値 / 0 以下は落とす**。 既定へ倒すと、 環境変数の誤りが「なぜか遅い」 として黙って
+ * 残る。 `Number('')` が 0 になる形も同じ扱い。
+ */
+const BUILD_CONCURRENCY = ((): number => {
+  const raw = process.env.TSUP_PROBE_CONCURRENCY;
+  if (raw === undefined || raw === '') return 4;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`TSUP_PROBE_CONCURRENCY は 1 以上の整数である必要がある: ${raw}`);
+  }
+  return parsed;
+})();
+
 /** build を回している間の event loop の遅れ (ms)。 */
 const loopLagSamplesMs: number[] = [];
 
@@ -545,12 +564,49 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     timer.unref();
 
     try {
-      for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
-        const startedAt = Date.now();
-        const probe = await probeBuild(name);
-        probes.set(name, probe);
-        recordProbe(name, probe, Date.now() - startedAt);
-      }
+      // **本数を絞って同時に走らせる** (#1924)。 26 件を直列に流すと 1 件 1.24 秒がそのまま
+      // 積み上がり、 file 全体の 32.6 秒のうち 32.3 秒を beforeAll が占めていた (27 件の test
+      // 本体は合計 330ms)。
+      //
+      // 上限を置くのは event loop lag のため。 build は CPU を食うので、 全件を同時に投げると
+      // 本 process が CPU を取れず lag が跳ね、 #1763 で固定した「event loop を掴んだままに
+      // しない」 検査が **実装ではなく検査の重さ** で落ちる。 論理 12 core に対して 4 を既定に
+      // する。
+      //
+      // 並列にしても probe の意味は変わらない。 見ているのは「packages/X を build した時に
+      // packages/X/dist の目印が消えないか」 で、 `--filter` は依存を巻き込まないため他 package の
+      // build は X の dist に触れない。 むしろ #1741 の実際の状況 (並列 build) に近づく。
+      const targets = [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS];
+      let next = 0;
+      // 最初の失敗。 これを立てた後は新しい target を取らない (Round 1 r1-f1)。
+      let failure: unknown = null;
+      const runner = async (): Promise<void> => {
+        for (;;) {
+          // **runner は reject しない**。 reject させて `Promise.all` で受けると、 先着 1 件で
+          // 外側が `finally` に進む一方、 残りの runner は共有 `next` から target を取り続ける
+          // = teardown 後に build と `probes` 更新が続く。 失敗を記録して抜け、 全 runner の
+          // 完了を待ってから元の error を投げ直す。
+          if (failure !== null) return;
+          const index = next;
+          next += 1;
+          if (index >= targets.length) return;
+          const name = targets[index]!;
+          const startedAt = Date.now();
+          try {
+            const probe = await probeBuild(name);
+            probes.set(name, probe);
+            recordProbe(name, probe, Date.now() - startedAt);
+          } catch (thrown) {
+            failure ??= thrown;
+            return;
+          }
+        }
+      };
+      await Promise.all(
+        Array.from({ length: Math.min(BUILD_CONCURRENCY, targets.length) }, () => runner()),
+      );
+      // 実行中だった build は上の await で回収済。 その上で最初の error を投げる。
+      if (failure !== null) throw failure;
     } finally {
       clearInterval(timer);
     }
