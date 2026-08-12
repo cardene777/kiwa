@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-import { REPO_ROOT, read, rootDependencies } from './skill-md.js';
+import { REPO_ROOT, read, rootDependencies, skillsWithSkillMd } from './skill-md.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -260,10 +260,10 @@ export function invocationsIn(body: string, skill: string): Invocation[] {
 }
 
 function skillFiles(): { skill: string; rel: string }[] {
-  return readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
-    .filter((e) => e.isDirectory())
-    .map((e) => ({ skill: e.name, rel: `.claude/skills/${e.name}/SKILL.md` }))
-    .filter(({ rel }) => existsSync(resolve(REPO_ROOT, rel)));
+  return skillsWithSkillMd().map((skill) => ({
+    skill,
+    rel: `.claude/skills/${skill}/SKILL.md`,
+  }));
 }
 
 let invocationCache: Invocation[] | null = null;

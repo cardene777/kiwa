@@ -1,18 +1,9 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { repoRoot } from './repo-root.js';
-
-const HERE = dirname(fileURLToPath(import.meta.url));
-
-const REPO_ROOT = repoRoot(HERE);
-
-function read(rel: string): string {
-  return readFileSync(resolve(REPO_ROOT, rel), 'utf-8');
-}
+import { REPO_ROOT, read, skillDirNames, skillsWithSkillMd } from './skill-md.js';
 
 /**
  * The layer contract, checked against the filesystem it names.
@@ -49,11 +40,7 @@ const table = JSON.parse(read('docs/layers.json')) as { specRoot: string; layers
 const LAYERS = table.layers;
 
 function skillDirs(): Set<string> {
-  return new Set(
-    readdirSync(resolve(REPO_ROOT, '.claude/skills'), { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name),
-  );
+  return new Set(skillDirNames());
 }
 
 describe('docs/layers.json resolves against the repository', () => {
@@ -246,7 +233,7 @@ describe('the target values and the Step conditions agree', () => {
     // stopped existing. `kiwa-nextjs` did exactly that.
     const declared = new Set(declaredTargets());
     const offenders: string[] = [];
-    const files = readdirSync(resolve(REPO_ROOT, '.claude/skills')).map((name) => [
+    const files = skillsWithSkillMd().map((name) => [
       name,
       resolve(REPO_ROOT, '.claude/skills', name, 'SKILL.md'),
     ]);
