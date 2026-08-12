@@ -31,30 +31,38 @@ function read(rel: string): string {
  */
 
 /**
- * script の置き場所を定める 1 行 (契約)。
+ * Step 1 の前置き全体 (契約)。
  *
- * 語の集合ではなく **文そのもの** を固定する。 `.context/scratch/` と「script file の
- * 場所」 という語を残したまま「repo の外に書く」 と反転させても、 token を数える検査は
- * 通ってしまう (Round 1 F1)。 言い換えを許さない代わりに、 反転を確実に落とす。
+ * 1 行だけを固定しても足りない。 契約行の **後ろ** に「ただし harness 利用時は repo の
+ * 外に書く」 と足せば、 先頭行は一致したまま指示が反転する (Round 2 R2-F1)。 例外 /
+ * 限定 / 否定を語で拾う形は wordlist の追いかけっこになるため、 **節そのものを固定する**。
  *
- * 書き換える時はここと SKILL.md を同時に直す = 置き場所の変更は設計上の行為なので、
- * 差分に出る方がよい。
+ * 代償として言い換えも落ちる。 置き場所とその理由は契約なので、 変えるならここと
+ * SKILL.md を同時に直して差分に出す。
  */
-const PLACEMENT_DIRECTIVE =
-  '**script は repo の中に書く**。 置き場所は `<repo>/.context/scratch/` (git 追跡外)。';
+const PLACEMENT_PREAMBLE = [
+  '**script は repo の中に書く**。 置き場所は `<repo>/.context/scratch/` (git 追跡外)。',
+  '',
+  'Node は import を **script file の場所** から解決する (cwd ではない)。 repo の外 (harness の',
+  'scratchpad 等) に書くと、 repo の `node_modules` に届かず 1 行目で',
+  "`ERR_MODULE_NOT_FOUND: Cannot find package '@kiwa-lab/observability'` になる (#1915 で実測)。",
+  '',
+  '`@kiwa-lab/observability` は repo root が devDependency として宣言しているので、 repo 内の',
+  'script なら解決できる。',
+].join('\n');
 
 /**
- * Step 1 の heading 直下にある指示行。
+ * Step 1 の heading と code fence の間にある本文。
  *
- * **位置も契約に含める**。 file のどこかにあればよい形にすると、 heading の直下に別の
- * 指示を置いて実質的に上書きできる。 読み手が最初に見る場所に置く。
+ * **範囲を fence までにする**。 先頭 1 行だけを見ると、 その後ろに置いた例外が見えない。
  */
-function placementDirective(body: string): string | null {
+function placementPreamble(body: string): string | null {
   const at = body.indexOf('### Step 1');
   if (at === -1) return null;
-  const rest = body.slice(at).split('\n').slice(1);
-  const first = rest.find((line) => line.trim().length > 0);
-  return first === undefined ? null : first.trim();
+  const fence = body.indexOf('```ts', at);
+  if (fence === -1) return null;
+  const lines = body.slice(at, fence).split('\n');
+  return lines.slice(1).join('\n').trim();
 }
 
 /** Step 1 の code fence。 */
@@ -133,38 +141,35 @@ describe('kiwa-observe の Step 1 script が起動場所で解決する', () => 
     expect(Object.keys({ ...root.dependencies, ...root.devDependencies })).toContain(specifier);
   });
 
-  it('script の置き場所が指示として書かれている', () => {
+  it('置き場所の節が契約どおり', () => {
     // 宣言だけでは足りない。 Node は import 元 file の場所から解決するので、 repo の
     // 外 (harness の scratchpad 等) に書くと同じ `ERR_MODULE_NOT_FOUND` に戻る。
     //
-    // **語の有無では確かめられない**。 `.context/scratch/` と「script file の場所」 を
-    // 残したまま「repo の外に書く」 と書き換えても、 token を数える検査は通る
-    // (Round 1 F1)。 指示そのものを 1 行の契約として固定する。
-    expect(placementDirective(read('.claude/skills/kiwa-observe/SKILL.md'))).toBe(PLACEMENT_DIRECTIVE);
+    // **語の有無でも、 先頭 1 行でも確かめられない**。 語を残して反転させる形 (Round 1 F1)
+    // と、 契約行の後ろに例外を足す形 (Round 2 R2-F1) が通ってしまう。 節そのものを固定する。
+    expect(placementPreamble(read('.claude/skills/kiwa-observe/SKILL.md'))).toBe(PLACEMENT_PREAMBLE);
   });
 
-  it('反転した指示を受け付けない', () => {
-    // 検査の識別力を helper 自身に当てて確かめる。 実 file を壊さずに、 通ってはいけない
-    // 形を並べる。
+  it('指示を打ち消す形を受け付けない', () => {
+    // 検査の識別力を helper 自身に当てて確かめる。 実 file を壊さずに、 通っては
+    // いけない形を並べる。
     const heading = '### Step 1: dashboard 生成 script を生成\n\n';
-    const inverted = [
-      // 反転 (repo の外に書く)。 token は両方残る。
-      `${heading}**script は repo の外に書く**。 置き場所は harness の scratchpad。 Node は script file の場所から解決する。\n`,
-      // 否定を足した形。
-      `${heading}**script は repo の中に書かない**。 置き場所は \`<repo>/.context/scratch/\` (git 追跡外)。\n`,
-      // 指示が heading の直下に無い形 (別の話が先に来る)。
-      `${heading}まず spec を読む。\n\n${PLACEMENT_DIRECTIVE}\n`,
-      // 指示ごと消した形。
-      `${heading}Node は import を解決する。\n`,
+    const fence = '\n\n```ts\nimport {} from \'x\';\n```\n';
+    const rejected: [string, string][] = [
+      ['反転 (語は残す)', PLACEMENT_PREAMBLE.replace('repo の中に書く', 'repo の外に書く')],
+      ['否定を足す', PLACEMENT_PREAMBLE.replace('repo の中に書く', 'repo の中に書かない')],
+      ['契約行の後ろに例外', `${PLACEMENT_PREAMBLE}\n\nただし harness 利用時は repo の外に書く。`],
+      ['契約行の後ろで原則化', `${PLACEMENT_PREAMBLE}\n\n上記は原則にすぎない。`],
+      ['契約行より前に別の指示', `まず script を temp dir に書く。\n\n${PLACEMENT_PREAMBLE}`],
+      ['節ごと削除', 'Node は import を解決する。'],
     ];
-    for (const body of inverted) {
-      expect(placementDirective(body), `受け付けてはいけない形を通している:\n${body}`).not.toBe(
-        PLACEMENT_DIRECTIVE,
-      );
+    for (const [label, preamble] of rejected) {
+      expect(
+        placementPreamble(`${heading}${preamble}${fence}`),
+        `受け付けてはいけない形を通している: ${label}`,
+      ).not.toBe(PLACEMENT_PREAMBLE);
     }
     // 正方向は通る (fixture 側の生存確認)。
-    expect(placementDirective(`${heading}${PLACEMENT_DIRECTIVE}\n\n続きの説明。\n`)).toBe(
-      PLACEMENT_DIRECTIVE,
-    );
+    expect(placementPreamble(`${heading}${PLACEMENT_PREAMBLE}${fence}`)).toBe(PLACEMENT_PREAMBLE);
   });
 });
