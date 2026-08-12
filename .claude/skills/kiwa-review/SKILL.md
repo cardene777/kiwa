@@ -61,7 +61,7 @@ AskUserQuestion で review report の生成言語を確認。 `--lang {code}` �
 `--spec-path` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill は `--layer` を引数で受けるため、 対象 layer はその値をそのまま渡す。
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 返る `spec_path` は言語と module 名まで解決済 (`packages/cli/src/detect/layers.ts` の `withLangSuffix` / `withModule`)。 skill 側で `sed` を挟まない = module 名に separator が入ると path が spec directory の外を指す (`test-spec-../../etc/passwd.ui.md` を実測)。 CLI が `[a-z0-9-]` 1-32 字を強制して弾く。
@@ -106,7 +106,7 @@ SKILL.md 内の `{lang}.md` 表記は上の解決結果に読み替える。 spe
 test-review mode で `--test-path` を省略した時、 **同じ呼出に `--producer` と `--project-root` を足して `test_paths` を受け取る**。 表から自分で選ばない。
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
   --producer "$PRODUCER" --project-root "$PROJECT_ROOT"
 ```
 

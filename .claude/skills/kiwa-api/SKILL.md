@@ -69,7 +69,7 @@ $ARGUMENTS
 | `/kiwa-design --layer api` の出力 | `api` | 9 column に Mode / Route がある |
 
 ```bash
-kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 **どちらか判らない時は user に確認する**。 推測で選ぶと、 別 layer の spec を読んで 9 column の

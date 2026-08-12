@@ -40,6 +40,23 @@ function specPath(layer: string, lang?: string): string | null {
   return parsed.layers.find((l) => l.id === layer)?.spec_path ?? null;
 }
 
+/**
+ * skill が CLI を起動している行 (本文の言及を除く)。
+ *
+ * 起動形は文脈で 2 つある (#1908)。 repo の中で走る skill は `pnpm exec kiwa`、
+ * 利用者 project で走る `kiwa-app` は package manager が判らないので `$KIWA`。
+ * command 名で拾うと片方しか取れないため、 subcommand で拾う。
+ *
+ * 本文の言及は inline code に入る (「`kiwa layers --json` が返した layer」) ので、
+ * backtick を持つ行を落とす。 起動行は fence の中にあり backtick を持たない。
+ */
+function cliInvocations(body: string): string {
+  return body
+    .split('\n')
+    .filter((line) => line.includes('layers --json') && !line.includes('`'))
+    .join('\n');
+}
+
 describe('spec path の言語解決が producer と CLI で一致する', () => {
   // `/kiwa-design --lang ja` writes `test-spec-{module}.nextjs.ja.md`; the table
   // declares the plain path. Nothing reconciled the two, and two of the three
@@ -112,10 +129,7 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // command to `${LANG:+--lang "$LANG"}` left the warning in place and every
     // wording check stayed green.
     const app = read('.claude/skills/kiwa-app/SKILL.md');
-    const invocation = app
-      .split('\n')
-      .filter((line) => line.includes('kiwa layers --json'))
-      .join('\n');
+    const invocation = cliInvocations(app);
     expect(invocation, 'kiwa layers の呼出が見つからない').toContain('--lang');
     expect(invocation, '呼出が DOC_LANG を渡していない').toContain('$DOC_LANG');
     expect(invocation, '呼出が shell locale の LANG を渡している').not.toMatch(
@@ -219,6 +233,11 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
         `#!/bin/sh\ncat <<'KIWA_JSON'\n${response}\nKIWA_JSON\nexit ${cliStatus}\n`,
         { mode: 0o755 },
       );
+      // #1908 以降、 snippet は `pnpm exec kiwa` で起動する。 `pnpm exec` は package の
+      // 中でしか走らない (外だと `ERR_PNPM_RECURSIVE_EXEC_NO_PACKAGE` で止まり、 stub に
+      // 届く前に終わる) ので、 temp dir を package にしておく。 stub は PATH 経由で
+      // 引かれる = snippet は書かれたまま走り、 応答だけが差し替わる。
+      writeFileSync(join(dir, 'package.json'), '{"name":"kiwa-resolve-fixture","private":true}\n');
       const script = [
         `export PATH=${JSON.stringify(dir)}:$PATH`,
         'TARGET=contract',
@@ -325,10 +344,7 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     const body = read(`.claude/skills/${skill}/SKILL.md`);
     // Asserted on the command, not on prose about the rule. `kiwa-review` had
     // a note next to a `LANG_SUFFIX` block that was still the real instruction.
-    const invocation = body
-      .split('\n')
-      .filter((line) => line.includes('kiwa layers --json'))
-      .join('\n');
+    const invocation = cliInvocations(body);
     expect(invocation, `${skill} が kiwa layers を呼んでいない`).toContain('--lang');
   });
 
@@ -733,8 +749,8 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // Passing it to Layer 1 and Layer 2 but not to `kiwa layers` leaves the
     // spec path unresolved, which is the original defect.
     const app = read('.claude/skills/kiwa-app/SKILL.md');
-    expect(app, 'kiwa layers に --lang を渡していない').toMatch(
-      /kiwa layers --json[^\n]*--lang/,
+    expect(cliInvocations(app), 'kiwa layers に --lang を渡していない').toMatch(
+      /layers --json[^\n]*--lang/,
     );
     expect(app, 'suffix を足さない旨が無い').toMatch(/suffix を足さない/);
   });

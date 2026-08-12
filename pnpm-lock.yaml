@@ -34,6 +34,9 @@ importers:
       '@changesets/cli':
         specifier: ^2.27.10
         version: 2.31.0(@types/node@22.19.19)
+      '@kiwa-lab/cli':
+        specifier: workspace:*
+        version: link:packages/cli
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.60.0
@@ -20530,13 +20533,13 @@ snapshots:
       '@remotion/timeline-utils': 4.0.475
       '@rspack/core': 1.7.11(@swc/helpers@0.5.15)
       '@rspack/plugin-react-refresh': 1.6.1(react-refresh@0.18.0)
-      css-loader: 7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.15))(webpack@5.105.0(postcss@8.5.18))
+      css-loader: 7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.15))(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.18))
       esbuild: 0.28.0
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-refresh: 0.18.0
       remotion: 4.0.475(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      style-loader: 4.0.0(webpack@5.105.0(postcss@8.5.18))
+      style-loader: 4.0.0(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.18))
       webpack: 5.105.0(esbuild@0.28.0)(postcss@8.5.18)
     transitivePeerDependencies:
       - '@minify-html/node'
@@ -24347,7 +24350,7 @@ snapshots:
     dependencies:
       postcss: 8.5.18
 
-  css-loader@7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.15))(webpack@5.105.0(postcss@8.5.18)):
+  css-loader@7.1.4(@rspack/core@1.7.11(@swc/helpers@0.5.15))(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.18)):
     dependencies:
       icss-utils: 5.1.0(postcss@8.5.18)
       postcss: 8.5.18
@@ -24359,7 +24362,7 @@ snapshots:
       semver: 7.8.5
     optionalDependencies:
       '@rspack/core': 1.7.11(@swc/helpers@0.5.15)
-      webpack: 5.105.0(postcss@8.5.18)
+      webpack: 5.105.0(esbuild@0.28.0)(postcss@8.5.18)
 
   css-select@5.2.2:
     dependencies:
@@ -28826,9 +28829,9 @@ snapshots:
 
   structured-clone-es@2.0.0: {}
 
-  style-loader@4.0.0(webpack@5.105.0(postcss@8.5.18)):
+  style-loader@4.0.0(webpack@5.105.0(esbuild@0.28.0)(postcss@8.5.18)):
     dependencies:
-      webpack: 5.105.0(postcss@8.5.18)
+      webpack: 5.105.0(esbuild@0.28.0)(postcss@8.5.18)
 
   styled-jsx@5.1.1(react@18.3.1):
     dependencies:
@@ -29055,7 +29058,7 @@ snapshots:
       jest-worker: 27.5.1
       schema-utils: 4.3.3
       terser: 5.48.0
-      webpack: 5.105.0(postcss@8.5.18)
+      webpack: 5.105.0(esbuild@0.28.0)(postcss@8.5.18)
     optionalDependencies:
       esbuild: 0.28.0
       postcss: 8.5.18
@@ -30097,47 +30100,6 @@ snapshots:
       - postcss
       - uglify-js
     optional: true
-
-  webpack@5.105.0(postcss@8.5.18):
-    dependencies:
-      '@types/eslint-scope': 3.7.7
-      '@types/estree': 1.0.9
-      '@types/json-schema': 7.0.15
-      '@webassemblyjs/ast': 1.14.1
-      '@webassemblyjs/wasm-edit': 1.14.1
-      '@webassemblyjs/wasm-parser': 1.14.1
-      acorn: 8.16.0
-      acorn-import-phases: 1.0.4(acorn@8.16.0)
-      browserslist: 4.28.2
-      chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.23.0
-      es-module-lexer: 2.1.0
-      eslint-scope: 5.1.1
-      events: 3.3.0
-      glob-to-regexp: 0.4.1
-      graceful-fs: 4.2.11
-      json-parse-even-better-errors: 2.3.1
-      loader-runner: 4.3.2
-      mime-types: 2.1.35
-      neo-async: 2.6.2
-      schema-utils: 4.3.3
-      tapable: 2.3.3
-      terser-webpack-plugin: 5.6.1(esbuild@0.28.0)(postcss@8.5.18)(webpack@5.105.0(postcss@8.5.18))
-      watchpack: 2.5.1
-      webpack-sources: 3.5.0
-    transitivePeerDependencies:
-      - '@minify-html/node'
-      - '@swc/core'
-      - '@swc/css'
-      - '@swc/html'
-      - clean-css
-      - cssnano
-      - csso
-      - esbuild
-      - html-minifier-terser
-      - lightningcss
-      - postcss
-      - uglify-js
 
   whatwg-encoding@3.1.1:
     dependencies:

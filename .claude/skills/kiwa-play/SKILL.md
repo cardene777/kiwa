@@ -44,7 +44,7 @@ $ARGUMENTS
 `--input-spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。 本 skill が扱う layer は `e2e` の 1 つ。
 
 ```bash
-kiwa layers --json --layer e2e --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer e2e --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 `e2e` は dApp 向けで spec dir は `tests/spec/e2e/`。 `e2e-generic` (`/kiwa-e2e` が消費する汎用 browser layer) は別 layer で spec dir も違うため、 取り違えると別 skill 向けの spec を読む。
