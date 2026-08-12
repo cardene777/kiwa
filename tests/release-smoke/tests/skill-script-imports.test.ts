@@ -30,6 +30,33 @@ function read(rel: string): string {
  * なる。 SKILL.md がその置き場所を書いていることも併せて検査する。
  */
 
+/**
+ * script の置き場所を定める 1 行 (契約)。
+ *
+ * 語の集合ではなく **文そのもの** を固定する。 `.context/scratch/` と「script file の
+ * 場所」 という語を残したまま「repo の外に書く」 と反転させても、 token を数える検査は
+ * 通ってしまう (Round 1 F1)。 言い換えを許さない代わりに、 反転を確実に落とす。
+ *
+ * 書き換える時はここと SKILL.md を同時に直す = 置き場所の変更は設計上の行為なので、
+ * 差分に出る方がよい。
+ */
+const PLACEMENT_DIRECTIVE =
+  '**script は repo の中に書く**。 置き場所は `<repo>/.context/scratch/` (git 追跡外)。';
+
+/**
+ * Step 1 の heading 直下にある指示行。
+ *
+ * **位置も契約に含める**。 file のどこかにあればよい形にすると、 heading の直下に別の
+ * 指示を置いて実質的に上書きできる。 読み手が最初に見る場所に置く。
+ */
+function placementDirective(body: string): string | null {
+  const at = body.indexOf('### Step 1');
+  if (at === -1) return null;
+  const rest = body.slice(at).split('\n').slice(1);
+  const first = rest.find((line) => line.trim().length > 0);
+  return first === undefined ? null : first.trim();
+}
+
 /** Step 1 の code fence。 */
 function stepOneScript(): string {
   const body = read('.claude/skills/kiwa-observe/SKILL.md');
@@ -106,12 +133,38 @@ describe('kiwa-observe の Step 1 script が起動場所で解決する', () => 
     expect(Object.keys({ ...root.dependencies, ...root.devDependencies })).toContain(specifier);
   });
 
-  it('script の置き場所が repo の中だと書いてある', () => {
+  it('script の置き場所が指示として書かれている', () => {
     // 宣言だけでは足りない。 Node は import 元 file の場所から解決するので、 repo の
     // 外 (harness の scratchpad 等) に書くと同じ `ERR_MODULE_NOT_FOUND` に戻る。
-    const body = read('.claude/skills/kiwa-observe/SKILL.md');
-    const stepOne = body.slice(body.indexOf('### Step 1'), body.indexOf('```ts'));
-    expect(stepOne, '置き場所を書いていない').toContain('.context/scratch/');
-    expect(stepOne, 'なぜ repo の中なのかを書いていない').toMatch(/script file の場所/);
+    //
+    // **語の有無では確かめられない**。 `.context/scratch/` と「script file の場所」 を
+    // 残したまま「repo の外に書く」 と書き換えても、 token を数える検査は通る
+    // (Round 1 F1)。 指示そのものを 1 行の契約として固定する。
+    expect(placementDirective(read('.claude/skills/kiwa-observe/SKILL.md'))).toBe(PLACEMENT_DIRECTIVE);
+  });
+
+  it('反転した指示を受け付けない', () => {
+    // 検査の識別力を helper 自身に当てて確かめる。 実 file を壊さずに、 通ってはいけない
+    // 形を並べる。
+    const heading = '### Step 1: dashboard 生成 script を生成\n\n';
+    const inverted = [
+      // 反転 (repo の外に書く)。 token は両方残る。
+      `${heading}**script は repo の外に書く**。 置き場所は harness の scratchpad。 Node は script file の場所から解決する。\n`,
+      // 否定を足した形。
+      `${heading}**script は repo の中に書かない**。 置き場所は \`<repo>/.context/scratch/\` (git 追跡外)。\n`,
+      // 指示が heading の直下に無い形 (別の話が先に来る)。
+      `${heading}まず spec を読む。\n\n${PLACEMENT_DIRECTIVE}\n`,
+      // 指示ごと消した形。
+      `${heading}Node は import を解決する。\n`,
+    ];
+    for (const body of inverted) {
+      expect(placementDirective(body), `受け付けてはいけない形を通している:\n${body}`).not.toBe(
+        PLACEMENT_DIRECTIVE,
+      );
+    }
+    // 正方向は通る (fixture 側の生存確認)。
+    expect(placementDirective(`${heading}${PLACEMENT_DIRECTIVE}\n\n続きの説明。\n`)).toBe(
+      PLACEMENT_DIRECTIVE,
+    );
   });
 });
