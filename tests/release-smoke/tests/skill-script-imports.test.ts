@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -30,45 +31,51 @@ function read(rel: string): string {
  * なる。 SKILL.md がその置き場所を書いていることも併せて検査する。
  */
 
-/**
- * Step 1 の前置き全体 (契約)。
- *
- * 1 行だけを固定しても足りない。 契約行の **後ろ** に「ただし harness 利用時は repo の
- * 外に書く」 と足せば、 先頭行は一致したまま指示が反転する (Round 2 R2-F1)。 例外 /
- * 限定 / 否定を語で拾う形は wordlist の追いかけっこになるため、 **節そのものを固定する**。
- *
- * 代償として言い換えも落ちる。 置き場所とその理由は契約なので、 変えるならここと
- * SKILL.md を同時に直して差分に出す。
- */
-const PLACEMENT_PREAMBLE = [
-  '**script は repo の中に書く**。 置き場所は `<repo>/.context/scratch/` (git 追跡外)。',
-  '',
-  'Node は import を **script file の場所** から解決する (cwd ではない)。 repo の外 (harness の',
-  'scratchpad 等) に書くと、 repo の `node_modules` に届かず 1 行目で',
-  "`ERR_MODULE_NOT_FOUND: Cannot find package '@kiwa-lab/observability'` になる (#1915 で実測)。",
-  '',
-  '`@kiwa-lab/observability` は repo root が devDependency として宣言しているので、 repo 内の',
-  'script なら解決できる。',
-].join('\n');
+/** 行頭に固定した Step 1 の heading。 本文中の言及を開始位置と取り違えない (Round 3 U1)。 */
+const STEP_ONE_HEADING = /^### Step 1\b/m;
+
+function stepOneAt(body: string): number {
+  return body.search(STEP_ONE_HEADING);
+}
 
 /**
- * Step 1 の heading と code fence の間にある本文。
+ * 置き場所に言及する行を **file 全体から** 拾う正規表現。
  *
- * **範囲を fence までにする**。 先頭 1 行だけを見ると、 その後ろに置いた例外が見えない。
+ * 領域を区切ると、 その外に打ち消しを置ける。 Round 2 は契約行の後ろ、 Round 3 は
+ * fence の後ろ / fence 内 comment / Step 1 より前が抜けていた。 区切りを広げ続ける
+ * 代わりに、 **file のどこであれ置き場所に触れる行は宣言と一致していること** を要求する。
  */
-function placementPreamble(body: string): string | null {
-  const at = body.indexOf('### Step 1');
-  if (at === -1) return null;
-  const fence = body.indexOf('```ts', at);
-  if (fence === -1) return null;
-  const lines = body.slice(at, fence).split('\n');
-  return lines.slice(1).join('\n').trim();
+const PLACEMENT_MENTION = /repo の中に書く|repo の外|scratchpad|\.context\/scratch\//;
+
+/**
+ * 置き場所を語る行の全件 (契約)。
+ *
+ * この 3 行以外に置き場所へ触れる行があってはならない。 増えた行が指示でも例外でも、
+ * まず差分に出る。
+ *
+ * **覆えていない形**。 場所を名指ししない打ち消し (「上記は原則にすぎない」 等) は
+ * 拾えない。 自然文の否定を機械で網羅する道は取らない = 本 PR の review が 3 round
+ * かけて、 区切りを広げるたびに別の抜け道が出ることを実測した。 実際の欠陥 (import が
+ * 解決しない) は § その形が実際に走る の実行検査が押さえており、 本検査は「指示が
+ * 書き換わったら気付く」 ための guard として置く。
+ */
+const PLACEMENT_STATEMENTS = [
+  '**script は repo の中に書く**。 置き場所は `<repo>/.context/scratch/` (git 追跡外)。',
+  'Node は import を **script file の場所** から解決する (cwd ではない)。 repo の外 (harness の',
+  'scratchpad 等) に書くと、 repo の `node_modules` に届かず 1 行目で',
+];
+
+function placementStatements(body: string): string[] {
+  return body
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => PLACEMENT_MENTION.test(line));
 }
 
 /** Step 1 の code fence。 */
 function stepOneScript(): string {
   const body = read('.claude/skills/kiwa-observe/SKILL.md');
-  const start = body.indexOf('### Step 1');
+  const start = stepOneAt(body);
   expect(start, 'Step 1 が見つからない').toBeGreaterThan(-1);
   const fence = /```ts\n([\s\S]*?)```/.exec(body.slice(start));
   expect(fence, 'Step 1 に ts の code fence が無い').not.toBeNull();
@@ -141,35 +148,61 @@ describe('kiwa-observe の Step 1 script が起動場所で解決する', () => 
     expect(Object.keys({ ...root.dependencies, ...root.devDependencies })).toContain(specifier);
   });
 
-  it('置き場所の節が契約どおり', () => {
+  it('置き場所を語る行が宣言と一致する', () => {
     // 宣言だけでは足りない。 Node は import 元 file の場所から解決するので、 repo の
     // 外 (harness の scratchpad 等) に書くと同じ `ERR_MODULE_NOT_FOUND` に戻る。
     //
-    // **語の有無でも、 先頭 1 行でも確かめられない**。 語を残して反転させる形 (Round 1 F1)
-    // と、 契約行の後ろに例外を足す形 (Round 2 R2-F1) が通ってしまう。 節そのものを固定する。
-    expect(placementPreamble(read('.claude/skills/kiwa-observe/SKILL.md'))).toBe(PLACEMENT_PREAMBLE);
+    // **区切った領域の中だけを見ない**。 語の有無 (Round 1) / 先頭 1 行 (Round 2) /
+    // heading から fence まで (Round 3) と広げるたびに、 その外に打ち消しを置けた。
+    // file 全体で「置き場所に触れる行」 を数え、 宣言と一致することを要求する。
+    expect(placementStatements(read('.claude/skills/kiwa-observe/SKILL.md'))).toEqual(
+      PLACEMENT_STATEMENTS,
+    );
   });
 
-  it('指示を打ち消す形を受け付けない', () => {
-    // 検査の識別力を helper 自身に当てて確かめる。 実 file を壊さずに、 通っては
-    // いけない形を並べる。
-    const heading = '### Step 1: dashboard 生成 script を生成\n\n';
-    const fence = '\n\n```ts\nimport {} from \'x\';\n```\n';
-    const rejected: [string, string][] = [
-      ['反転 (語は残す)', PLACEMENT_PREAMBLE.replace('repo の中に書く', 'repo の外に書く')],
-      ['否定を足す', PLACEMENT_PREAMBLE.replace('repo の中に書く', 'repo の中に書かない')],
-      ['契約行の後ろに例外', `${PLACEMENT_PREAMBLE}\n\nただし harness 利用時は repo の外に書く。`],
-      ['契約行の後ろで原則化', `${PLACEMENT_PREAMBLE}\n\n上記は原則にすぎない。`],
-      ['契約行より前に別の指示', `まず script を temp dir に書く。\n\n${PLACEMENT_PREAMBLE}`],
-      ['節ごと削除', 'Node は import を解決する。'],
+  it('どの位置に置いた打ち消しも拾う', () => {
+    // 検査の識別力を helper 自身に当てて確かめる。 Round 2 / Round 3 が指摘した
+    // 「境界の外」 を全て並べる。
+    const body = read('.claude/skills/kiwa-observe/SKILL.md');
+    const injections: [string, string][] = [
+      ['Step 1 より前', `ただし script は repo の外に書く。\n${body}`],
+      ['契約行の直後', body.replace(PLACEMENT_STATEMENTS[0]!, `${PLACEMENT_STATEMENTS[0]!}\n\nただし harness では repo の外に書く。`)],
+      ['fence の中の comment', body.replace('```ts\nimport {', '```ts\n// 実際は harness の scratchpad に書く\nimport {')],
+      ['fence より後ろ', `${body}\n\n補足 = script は \`.context/scratch/\` でなくてもよい。`],
+      ['file 末尾', `${body}\n\nscratchpad に書いてもよい。`],
     ];
-    for (const [label, preamble] of rejected) {
-      expect(
-        placementPreamble(`${heading}${preamble}${fence}`),
-        `受け付けてはいけない形を通している: ${label}`,
-      ).not.toBe(PLACEMENT_PREAMBLE);
+    for (const [label, mutated] of injections) {
+      expect(placementStatements(mutated), `打ち消しを拾えていない: ${label}`).not.toEqual(
+        PLACEMENT_STATEMENTS,
+      );
     }
-    // 正方向は通る (fixture 側の生存確認)。
-    expect(placementPreamble(`${heading}${PLACEMENT_PREAMBLE}${fence}`)).toBe(PLACEMENT_PREAMBLE);
+    // 反転と削除も落ちる。
+    expect(placementStatements(body.replace('repo の中に書く', 'repo の外に書く'))).not.toEqual(
+      PLACEMENT_STATEMENTS,
+    );
+    expect(placementStatements(body.replace(PLACEMENT_STATEMENTS[0]!, ''))).not.toEqual(
+      PLACEMENT_STATEMENTS,
+    );
+  });
+
+  it('repo の外に置いた script は解決しない', () => {
+    // 指示が **なぜ** 要るかを実行で押さえる。 prose の検査は書き換えを検知するだけで、
+    // 指示が今も効いている根拠にはならない。 package manager や Node の解決規則が
+    // 変わって repo 外でも解決するようになったら、 この検査が落ちて指示を見直せる。
+    const outside = resolve(tmpdir(), `kiwa-observe-outside-${process.pid}.mjs`);
+    try {
+      writeFileSync(outside, `import '${specifier}';\n`, 'utf-8');
+      let failed = false;
+      try {
+        execFileSync('node', [outside], { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' });
+      } catch (err) {
+        failed = String((err as { stderr?: string }).stderr ?? '').includes('ERR_MODULE_NOT_FOUND');
+      }
+      expect(failed, 'repo 外の script が解決してしまう = 置き場所の指示が不要になっている').toBe(
+        true,
+      );
+    } finally {
+      rmSync(outside, { force: true });
+    }
   });
 });
