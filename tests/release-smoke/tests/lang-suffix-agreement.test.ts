@@ -261,12 +261,19 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
         snippet,
         'exit 0', // ここに到達 = snippet が応答を受理した
       ].join('\n');
-      // signal で落ちた場合は code が null になる。 `spawnSync().status ?? -1` と同じく
-      // -1 に倒す = 「0 でない」 を期待する検査が signal 死を成功と読まない。
-      return await new Promise<number>((settle) => {
+      return await new Promise<number>((settle, fail) => {
         const child = spawn('bash', ['-c', script], { cwd: dir });
+        // **起動できなかったことを exit status に畳まない** (Round 1 R1-F1)。 壊れた応答に
+        // 対する検査は「0 でない」 を期待するため、 起動失敗を -1 に倒すと **snippet を 1 度も
+        // 走らせずに緑になる**。 11 起動を同時に投げる以上 `EAGAIN` / `EMFILE` は現実的で、
+        // 並列化はこの失敗の確率を上げる側に働く。
+        //
+        // 直列だった頃の `spawnSync().status ?? -1` も同じ穴を持っていた (spawn 失敗時は
+        // status が null)。 起動の失敗は検査の失敗として投げる。
+        child.on('error', (err) => fail(new Error(`bash を起動できない: ${err.message}`)));
+        // signal で落ちた場合は code が null になる。 こちらは -1 に倒す = 実際に走った上で
+        // 異常終了したので、 「0 でない」 の期待に対して正しい。
         child.on('close', (code) => settle(code ?? -1));
-        child.on('error', () => settle(-1));
       });
     } finally {
       rmSync(dir, { recursive: true, force: true });
