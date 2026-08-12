@@ -190,6 +190,25 @@ const LAG_SAMPLE_INTERVAL_MS = 200;
  */
 const LOOP_LAG_LIMIT_MS = 10_000;
 
+/**
+ * 同時に走らせる probe build の数 (#1924)。
+ *
+ * 上限を置く理由は event loop lag。 build は CPU を食うため、 全 26 件を同時に投げると本
+ * process が CPU を取れず、 `LOOP_LAG_LIMIT_MS` の検査が実装ではなく検査の重さで落ちる。
+ *
+ * **非数値 / 0 以下は落とす**。 既定へ倒すと、 環境変数の誤りが「なぜか遅い」 として黙って
+ * 残る。 `Number('')` が 0 になる形も同じ扱い。
+ */
+const BUILD_CONCURRENCY = ((): number => {
+  const raw = process.env.TSUP_PROBE_CONCURRENCY;
+  if (raw === undefined || raw === '') return 4;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`TSUP_PROBE_CONCURRENCY は 1 以上の整数である必要がある: ${raw}`);
+  }
+  return parsed;
+})();
+
 /** build を回している間の event loop の遅れ (ms)。 */
 const loopLagSamplesMs: number[] = [];
 
@@ -545,12 +564,35 @@ describe('tsup clean と並列 test の race (#1741)', () => {
     timer.unref();
 
     try {
-      for (const name of [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS]) {
-        const startedAt = Date.now();
-        const probe = await probeBuild(name);
-        probes.set(name, probe);
-        recordProbe(name, probe, Date.now() - startedAt);
-      }
+      // **本数を絞って同時に走らせる** (#1924)。 26 件を直列に流すと 1 件 1.24 秒がそのまま
+      // 積み上がり、 file 全体の 32.6 秒のうち 32.3 秒を beforeAll が占めていた (27 件の test
+      // 本体は合計 330ms)。
+      //
+      // 上限を置くのは event loop lag のため。 build は CPU を食うので、 全件を同時に投げると
+      // 本 process が CPU を取れず lag が跳ね、 #1763 で固定した「event loop を掴んだままに
+      // しない」 検査が **実装ではなく検査の重さ** で落ちる。 論理 12 core に対して 4 を既定に
+      // する。
+      //
+      // 並列にしても probe の意味は変わらない。 見ているのは「packages/X を build した時に
+      // packages/X/dist の目印が消えないか」 で、 `--filter` は依存を巻き込まないため他 package の
+      // build は X の dist に触れない。 むしろ #1741 の実際の状況 (並列 build) に近づく。
+      const targets = [...FIXED_OUTPUT_TARGETS, ...CHUNK_OUTPUT_TARGETS];
+      let next = 0;
+      const runner = async (): Promise<void> => {
+        for (;;) {
+          const index = next;
+          next += 1;
+          if (index >= targets.length) return;
+          const name = targets[index]!;
+          const startedAt = Date.now();
+          const probe = await probeBuild(name);
+          probes.set(name, probe);
+          recordProbe(name, probe, Date.now() - startedAt);
+        }
+      };
+      await Promise.all(
+        Array.from({ length: Math.min(BUILD_CONCURRENCY, targets.length) }, () => runner()),
+      );
     } finally {
       clearInterval(timer);
     }
