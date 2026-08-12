@@ -89,13 +89,17 @@ interface Invocation {
 function stripQuoted(line: string, initial: string | null = null): { code: string; open: string | null } {
   let out = '';
   let quote = initial;
+  /** 直前に out へ足した 1 文字が escape 由来か (= 語の一部で、 operator ではない)。 */
+  let escaped = false;
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i]!;
     if (quote === null) {
       // 引用の外の backslash は次の 1 文字を語の一部にする。 `echo a\;#frag` の `;`
-      // は operator ではないので、 続く `#` も語頭ではない (Round 5 R5-1)。 escape
-      // した文字を out に残すと直前文字の判定が operator に化けるため、 語の一部で
-      // あることを示す印として `x` を置く。
+      // は operator ではないので、 続く `#` も語頭ではない (Round 5 R5-1)。
+      //
+      // **文字そのものは残す**。 別の文字に置き換えると command 名を壊し、
+      // `\kiwa layers` (alias を迂回する正当な形) を見失う (Round 6 R6-1)。
+      // operator でないことは out の中身ではなく escaped で覚える。
       if (ch === '\\') {
         // 行末の `\` は escape ではなく行継続。 呼出側がこれを見て論理行に繋ぐので
         // そのまま残す。
@@ -103,7 +107,8 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
           out += ch;
           break;
         }
-        out += 'x';
+        out += line[i + 1]!;
+        escaped = true;
         i += 1;
         continue;
       }
@@ -120,7 +125,8 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
       // 扱う (`y#frag` を出力、 bash / zsh で実測)。 comment を過剰に検出する側の
       // 誤りは **実在する起動行を落とす** = この検査が防ぎたい失敗そのものなので、
       // 曖昧な文字は入れない (`(` `)` `<` `>`、 Round 4 R4-1)。
-      if (ch === '#' && (out === '' || /[\s;|&]$/.test(out))) break;
+      if (ch === '#' && !escaped && (out === '' || /[\s;|&]$/.test(out))) break;
+      escaped = false;
       if (ch === '"' || ch === "'") {
         quote = ch;
         continue;
@@ -128,6 +134,7 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
       out += ch;
       continue;
     }
+    escaped = false;
     // 二重引用符の中では backslash が次の 1 文字を escape する = `\"` は閉じない。
     // 単一引用符の中に escape は無い。
     if (quote === '"' && ch === '\\') {
@@ -467,6 +474,14 @@ describe('fence の中の起動行だけを取る', () => {
       '```',
     ].join('\n');
     expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['repo']);
+
+    // escape した文字は **そのまま残す**。 別の文字に置き換えると command 名が
+    // 壊れ、 `\kiwa` (alias を迂回する正当な形) が起動として見えなくなる
+    // (Round 6 R6-1)。
+    const alias = ['```bash', '\\kiwa layers --json', '```'].join('\n');
+    expect(invocationsIn(alias, 'x').map((i) => i.form)).toEqual(['bare']);
+    // escape した `#` は comment にならない (語の一部)。
+    expect(stripQuoted('echo a\\#b && kiwa layers').code).toBe('echo a#b && kiwa layers');
   });
 
   it('fence の終わりで引用が開いたままなら落ちる', () => {
