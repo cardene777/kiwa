@@ -282,12 +282,12 @@ describe('the entry point passes what the pieces it invokes actually need', () =
   it('passes --layer through to the CLI rather than branching on it first', () => {
     const step2 = APP_SKILL.slice(APP_SKILL.indexOf('## Step 2'), APP_SKILL.indexOf('## Step 3'));
     // #1908 で起動形が変わった (`node_modules/.bin` は PATH に無く、 素の `kiwa` は
-    // 解決できない)。 本 skill は利用者 project で走るため package manager を固定
-    // できず、 起動形を `$KIWA` に持つ (既定は § CLI の起動形 が宣言する)。 起動行を
-    // 探す条件もその形に従う。
+    // 解決できない)。 本 skill は利用者 project で走るため pnpm を要求できず、
+    // Node 同梱の npm から local の bin を引く (§ CLI の起動形)。 起動行を探す条件も
+    // その形に従う。
     const invocation = step2
       .split('\n')
-      .find((line) => /^\s*\$\{?KIWA\}?[ \t]+layers\b/.test(line));
+      .find((line) => /^\s*npx[ \t]+--no[ \t]+kiwa[ \t]+layers\b/.test(line));
     expect(invocation).toBeDefined();
     expect(invocation).toContain('--layer');
   });

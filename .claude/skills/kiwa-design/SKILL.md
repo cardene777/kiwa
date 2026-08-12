@@ -105,7 +105,7 @@ pnpm exec kiwa layers --json
 | どの signal も名指ししない layer | 残す (語れない) |
 | signal が名指しする layer | 検出されたものだけ残す |
 
-recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む側の table が一致しない場合に捨てられる。 signal を足した後の初回は `source=all` に倒れるので、 `kiwa init --detect` を掛け直す。
+recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む側の table が一致しない場合に捨てられる。 signal を足した後の初回は `source=all` に倒れるので、 `pnpm exec kiwa init --detect` を掛け直す。
 
 存在するかどうかは `kiwa layers` を叩いた時点で調べる (記録から読まない)。 検出後に `foundry.toml` を足した場合もその場で見えるため、 再検出は要らない。
 

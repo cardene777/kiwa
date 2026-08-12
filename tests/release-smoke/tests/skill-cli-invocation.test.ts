@@ -26,21 +26,31 @@ function read(rel: string): string {
  * ない。 素の名前で叩けるのは global install した環境だけ。
  *
  * **起動形は 2 つある**。 kiwa repo の中で走る skill は pnpm workspace に居るので
- * `pnpm exec kiwa` に定まる。 `kiwa-app` だけは利用者 project で走るため、 相手の
- * package manager が判らない = 起動形を変数に持ち、 既定を skill 自身が宣言する。
+ * `pnpm exec kiwa` に定まる。 `kiwa-app` だけは利用者 project で走り、 相手の package
+ * manager が判らないので Node 同梱の npm から local の bin を引く (`npx --no kiwa`)。
  *
  * ここでは 3 つを見る。 各 skill がその文脈の起動形で書いていること、 起動行が
- * 消えていないこと、 そして **宣言された形が実際に走ること**。 3 番目が要点で、
- * 1 番目だけなら綴りが揃った動かない command で通ってしまう。
+ * 消えていないこと、 そして **その形が実際に走ること**。 3 番目が要点で、 1 番目
+ * だけなら綴りが揃った動かない command で通ってしまう。
  */
 
 /** kiwa repo の中で走る skill が使う起動形。 */
 const REPO_LAUNCHER = ['pnpm', 'exec', 'kiwa'];
 
-/** 利用者 project で走る skill。 起動形は変数で、 既定は SKILL.md が宣言する。 */
+/**
+ * 利用者 project で走る skill が使う起動形。
+ *
+ * npm は Node に同梱されるので相手に別途 install させずに済み、 local の
+ * `node_modules/.bin` を先に引く。 変数に入れて `$KIWA layers` と書く形は採らない =
+ * 2 語以上を引用せずに展開する挙動が shell で割れる (bash は分割し、 zsh は分割
+ * しないため `command not found: npx --no kiwa` になる。 macOS の既定 shell は zsh)。
+ */
+const USER_LAUNCHER = ['npx', '--no', 'kiwa'];
+
+/** 利用者 project で走る skill。 */
 const USER_PROJECT_SKILL = 'kiwa-app';
 
-type Form = 'repo' | 'variable' | 'bare';
+type Form = 'repo' | 'user' | 'bare';
 
 interface Invocation {
   skill: string;
@@ -68,6 +78,11 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
   for (let i = 0; i < line.length; i += 1) {
     const ch = line[i]!;
     if (quote === null) {
+      // 引用の外の `#` は行末までの comment。 落とさないと、 comment 中の
+      // apostrophe (`don't` 等) が引用を開いたことになり、 状態を持ち回る以上
+      // **その後ろの行がまとめて引用の中に見える**。 語頭の `#` だけを comment と
+      // みなす (POSIX)。 語中の `#` は URL fragment などで現れる。
+      if (ch === '#' && (out === '' || /\s$/.test(out))) break;
       if (ch === '"' || ch === "'") {
         quote = ch;
         continue;
@@ -87,17 +102,50 @@ function stripQuoted(line: string, initial: string | null = null): { code: strin
 }
 
 /**
- * CLI の `layers` を起動している箇所と、 その起動形。
+ * CLI が受け付ける subcommand を、 CLI 自身の usage から読む。
  *
- * 受け付ける文法は 3 つで、 いずれも **command 名と `layers` が同じ論理行に並ぶ**
- * 形に限る。 `sh -c '...'` / `eval` / 変数間接参照 (`"$CMD" layers`) は読まない =
- * 静的な shell 解析は収束しないため、 文法を宣言して境界を明示する側を採る。
+ * `layers` だけを見ていると、 同じ file の別 subcommand が素のまま残る。 実測で
+ * `kiwa-app` Step 1 の `kiwa init --detect` がそうだった (Round 2 F1-a)。 一覧を
+ * ここに書き写すと CLI が増やした時に追随しないので、 usage 文字列から取る。
  */
-const OCCURRENCE = /(pnpm exec kiwa|\$\{?KIWA\}?|\bkiwa\b)[ \t]+layers\b/g;
+function subcommands(): string[] {
+  const source = read('packages/cli/src/runCli.ts');
+  const usage = /export const USAGE = `([\s\S]*?)`;/.exec(source);
+  expect(usage, 'CLI の USAGE を読めない').not.toBeNull();
+  const commands = /Commands:\n([\s\S]*?)\n\n/.exec(usage![1]!);
+  expect(commands, 'USAGE に Commands 節が無い').not.toBeNull();
+  const names = [...commands![1]!.matchAll(/^ {2}([a-z][a-z-]*)/gm)].map((m) => m[1]!);
+  expect(names.length, 'subcommand を 1 つも読めない').toBeGreaterThan(3);
+  return [...new Set(names)];
+}
+
+/** 語の間の空白を問わない形にした launcher pattern。 */
+function launcherPattern(launcher: string[]): string {
+  return launcher.map((token) => token.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')).join('[ \\t]+');
+}
+
+/**
+ * CLI を起動している箇所を拾う pattern と、 その起動形。
+ *
+ * 受け付ける文法は **command 名と subcommand が同じ論理行に並ぶ** 形に限る。
+ * `sh -c '...'` / `eval` / 変数間接参照 (`"$CMD" layers`) は読まない = 静的な shell
+ * 解析は収束しないため、 文法を宣言して境界を明示する側を採る。
+ *
+ * 空白は launcher の内側でも問わない。 `pnpm  exec  kiwa` は shell では同じ command
+ * で、 単一空白だけを認めると **正しい行を素の起動と誤判定する** (Round 2 F2-b)。
+ */
+function occurrence(): RegExp {
+  const subs = subcommands().join('|');
+  return new RegExp(
+    `(${launcherPattern(REPO_LAUNCHER)}|${launcherPattern(USER_LAUNCHER)}|\\bkiwa\\b)[ \\t]+(?:${subs})\\b`,
+    'g',
+  );
+}
 
 function formOf(launcher: string): Form {
-  if (launcher === REPO_LAUNCHER.join(' ')) return 'repo';
-  if (launcher.startsWith('$')) return 'variable';
+  const tokens = launcher.trim().split(/[ \t]+/);
+  if (tokens.join(' ') === REPO_LAUNCHER.join(' ')) return 'repo';
+  if (tokens.join(' ') === USER_LAUNCHER.join(' ')) return 'user';
   return 'bare';
 }
 
@@ -114,6 +162,7 @@ function formOf(launcher: string): Form {
  * 捕まらない。
  */
 function invocationsIn(body: string, skill: string): Invocation[] {
+  const pattern = occurrence();
   const found: Invocation[] = [];
   let fence: string | null = null;
   let quote: string | null = null;
@@ -159,7 +208,7 @@ function invocationsIn(body: string, skill: string): Invocation[] {
     }
     pending = null;
 
-    for (const m of merged.code.matchAll(OCCURRENCE)) {
+    for (const m of merged.code.matchAll(pattern)) {
       found.push({ skill, line: merged.line, text: merged.text, form: formOf(m[1]!) });
     }
   });
@@ -177,47 +226,6 @@ function invocations(): Invocation[] {
   return skillFiles().flatMap(({ skill, rel }) => invocationsIn(read(rel), skill));
 }
 
-/** 変数に既定を入れる宣言 (`KIWA="${KIWA:-...}"`) の、 既定値の側。 */
-const DECLARATION = /KIWA="\$\{KIWA:-([^"}]+)\}"/g;
-
-/**
- * `kiwa-app` が宣言する既定の起動形を、 その宣言から読む。
- *
- * 宣言は 1 箇所ではない。 § CLI の起動形 が説明として持ち、 Step 2 の block も
- * 自分で持つ (block は単体で実行され、 env は次の実行に持ち越されない)。 複数ある
- * 以上、 **全部が同じ値であること** を要求する = 片方だけ直すと 2 つの既定が並ぶ。
- */
-function declaredUserLauncher(): string[] {
-  const declared = [...read(`.claude/skills/${USER_PROJECT_SKILL}/SKILL.md`).matchAll(DECLARATION)].map(
-    (m) => m[1]!.trim(),
-  );
-  expect(declared.length, `${USER_PROJECT_SKILL} が KIWA の既定を宣言していない`).toBeGreaterThan(0);
-  expect([...new Set(declared)], `既定が 1 つに定まらない: ${declared.join(' / ')}`).toHaveLength(1);
-  return declared[0]!.split(/\s+/);
-}
-
-/** fence ごとの中身 (先頭行の 1-origin 行番号つき)。 */
-function fences(body: string): { line: number; body: string }[] {
-  const out: { line: number; body: string }[] = [];
-  let open: { line: number; marker: string; lines: string[] } | null = null;
-  body.split('\n').forEach((raw, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(raw);
-    if (marker) {
-      const run = marker[1]!;
-      if (open === null) {
-        open = { line: i + 2, marker: run[0]!.repeat(run.length), lines: [] };
-        return;
-      }
-      if (run[0] === open.marker[0] && run.length >= open.marker.length && raw.trim() === run) {
-        out.push({ line: open.line, body: open.lines.join('\n') });
-        open = null;
-        return;
-      }
-    }
-    if (open !== null) open.lines.push(raw);
-  });
-  return out;
-}
 
 describe('fence の中の起動行だけを取る', () => {
   it('本文の言及を起動行として数えない', () => {
@@ -296,9 +304,43 @@ describe('fence の中の起動行だけを取る', () => {
     expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['bare', 'bare']);
   });
 
-  it('変数経由の起動形を variable として読む', () => {
-    const fixture = ['```bash', '$KIWA layers --json', '${KIWA} layers --json', '```'].join('\n');
-    expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['variable', 'variable']);
+  it('launcher の内側の空白も問わない', () => {
+    // `pnpm  exec  kiwa` は shell では同じ command。 単一空白だけを認めると、
+    // 正しい行を素の起動と誤判定する (Round 2 F2-b)。
+    const fixture = [
+      '```bash',
+      'pnpm  exec\tkiwa layers --json',
+      'npx --no  kiwa layers --json',
+      '```',
+    ].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['repo', 'user']);
+  });
+
+  it('layers 以外の subcommand も起動として読む', () => {
+    // `layers` だけを見ていた間、 同じ file の `kiwa init --detect` が素のまま
+    // 残っていた (Round 2 F1-a)。 subcommand 一覧は CLI の usage から取る。
+    const fixture = ['```bash', 'kiwa init --detect', 'npx --no kiwa init --detect', '```'].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => i.form)).toEqual(['bare', 'user']);
+  });
+
+  it('comment 中の apostrophe が後続行を飲まない', () => {
+    // 引用状態を持ち回る以上、 comment の `'` を引用開始と読むと **fence の残り
+    // 全部** が引用の中に見える (Round 2 F2-a)。 引用の外の `#` は行末までの
+    // comment として落とす。
+    const fixture = [
+      '```bash',
+      "# don't use the bare name here",
+      'pnpm exec kiwa layers --json',
+      '```',
+    ].join('\n');
+    expect(invocationsIn(fixture, 'x').map((i) => i.line)).toEqual([3]);
+  });
+
+  it('語中の # を comment と読まない', () => {
+    // URL fragment などで現れる。 POSIX でも comment は語頭の `#` だけ。
+    expect(stripQuoted('curl https://x/y#frag && kiwa layers').code).toBe(
+      'curl https://x/y#frag && kiwa layers',
+    );
   });
 
   it('入れ子の fence で閉じ位置を取り違えない', () => {
@@ -332,26 +374,24 @@ describe('skill が書いている起動形が文脈に合っている', () => {
     expect(wrong, `launcher を通らない起動行:\n${wrong.join('\n')}`).toEqual([]);
   });
 
-  it('利用者 project で走る skill は package manager を固定しない', () => {
-    // `pnpm exec` を直に書くと、 npm / yarn / bun の project で止まる。 起動形は
-    // 変数に持ち、 既定を skill 自身が宣言する。
+  it('利用者 project で走る skill は pnpm を要求しない', () => {
+    // `pnpm exec` を直に書くと、 npm / yarn / bun の project で止まる。 相手の
+    // package manager は判らないので、 Node 同梱の npm から local の bin を引く。
     const wrong = invocations()
-      .filter(({ skill, form }) => skill === USER_PROJECT_SKILL && form !== 'variable')
+      .filter(({ skill, form }) => skill === USER_PROJECT_SKILL && form !== 'user')
       .map(({ line, text }) => `${USER_PROJECT_SKILL}:${line}: ${text.slice(0, 100)}`);
-    expect(wrong, `package manager を固定した起動行:\n${wrong.join('\n')}`).toEqual([]);
-    // 宣言が無ければ変数は空で展開され、 `layers ...` が command として走る。
-    expect(declaredUserLauncher().length).toBeGreaterThan(0);
+    expect(wrong, `文脈に合わない起動行:\n${wrong.join('\n')}`).toEqual([]);
   });
 
-  it('変数で起動する block は同じ block で既定を宣言する', () => {
-    // block は単体で実行され、 env は次の実行に持ち越されない。 別の節にある宣言に
-    // 頼ると、 その block だけを実行した時に空で展開されて `layers ...` が command
-    // として走る。 実測で、 宣言を 1 箇所消しても他の検査は全て緑のままだった。
-    const naked = fences(read(`.claude/skills/${USER_PROJECT_SKILL}/SKILL.md`))
-      .filter(({ body }) => /\$\{?KIWA\}?[ \t]+layers\b/.test(body))
-      .filter(({ body }) => !new RegExp(DECLARATION.source).test(body))
-      .map(({ line }) => `${USER_PROJECT_SKILL}:${line}`);
-    expect(naked, `既定を宣言せずに $KIWA を使う block:\n${naked.join('\n')}`).toEqual([]);
+  it('利用者 project 向けの skill が起動形を本文でも宣言する', () => {
+    // block の形だけだと、 読み手は「なぜ npx なのか」 と「引けない時どうするか」 を
+    // 知る手立てが無い。 節を持ち、 置き換え表と `--` の注意を添える。
+    const body = read(`.claude/skills/${USER_PROJECT_SKILL}/SKILL.md`);
+    expect(body, '§ CLI の起動形 が無い').toContain('## CLI の起動形');
+    expect(body, '起動形を本文で名指ししていない').toContain(`\`${USER_LAUNCHER.join(' ')}\``);
+    expect(body, 'flag だけを渡す時の -- 境界に触れていない').toContain(
+      `${USER_LAUNCHER.join(' ')} -- --help`,
+    );
   });
 
   it('起動行の数が宣言どおり', () => {
@@ -364,7 +404,8 @@ describe('skill が書いている起動形が文脈に合っている', () => {
     expect(counted).toEqual({
       'kiwa-a11y': 1,
       'kiwa-api': 1,
-      'kiwa-app': 1,
+      // Step 1 の `init --detect` と Step 2 の `layers` で 2 件。
+      'kiwa-app': 2,
       'kiwa-auth': 1,
       'kiwa-cache': 1,
       'kiwa-cli-test': 1,
@@ -412,12 +453,23 @@ describe('その起動形が実際に走る', () => {
     expect(run(REPO_LAUNCHER, ['layers', '--layer', 'contract'], cwd).trim()).toBe('contract');
   });
 
-  it('利用者 project 向けの既定も走る', () => {
-    // `kiwa-app` が宣言している既定を、 宣言から読んでそのまま走らせる。 これが
+  it('利用者 project 向けの起動形も走る', () => {
     // 確かめるのは「pnpm を要求せずに local の bin を引けること」 まで。 npm /
     // yarn / bun それぞれの project を作って回す検査は持っていない。
-    const out = run(declaredUserLauncher(), ['layers', '--layer', 'contract'], REPO_ROOT);
-    expect(out.trim()).toBe('contract');
+    expect(run(USER_LAUNCHER, ['layers', '--layer', 'contract'], REPO_ROOT).trim()).toBe('contract');
+  });
+
+  it('前提の確認が CLI に届く', () => {
+    // `npx --no kiwa --help` は `--help` を npx 自身が取り、 **CLI が入っていなくても**
+    // npx の usage を出して exit 0 になる (実測)。 前提の確認としては必ず成功する =
+    // install 漏れを見逃す。 `--` を挟んだ形が CLI に届くことを固定する。
+    const reached = run(USER_LAUNCHER, ['--', '--help'], REPO_ROOT);
+    expect(reached, 'CLI の usage が返っていない').toContain('Usage: kiwa <command>');
+
+    // 挟まない形が npx に取られることも併せて示す。 これが変わったら注意書きの
+    // 前提が変わる。
+    const swallowed = run(USER_LAUNCHER, ['--help'], REPO_ROOT);
+    expect(swallowed, 'npx が --help を取らなくなっている').not.toContain('Usage: kiwa <command>');
   });
 });
 
