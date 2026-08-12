@@ -215,6 +215,20 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
     expect(third, 'retry の先頭 (失敗) を採っている').toContain('No flaky tests detected.');
   });
 
+  it('Summary も retry の最終結果を数える', () => {
+    // 畳み込みを history 側だけに掛けると、 Summary が両 attempt を数えて pass rate 50% と
+    // 出る = その run の最終結果を表さない (Round 3 F2-R3)。
+    const project = newProject();
+    const failThenPass = observe(project, 22_000, { 'T-L-001': 'passed' }, { retryOf: 'failed' });
+    expect(failThenPass, 'Summary が retry の両方を数えている').toContain('| total records | 1 |');
+    expect(failThenPass).toContain('| pass rate | 100.0% |');
+
+    const project2 = newProject();
+    const passThenFail = observe(project2, 23_000, { 'T-M-001': 'failed' }, { retryOf: 'passed' });
+    expect(passThenFail).toContain('| total records | 1 |');
+    expect(passThenFail, '悪化した retry の最終結果を採っていない').toContain('| pass rate | 0.0% |');
+  });
+
   it('判定の対象期間を dashboard に書く', () => {
     // Summary は この run、 flaky は累積。 期間が違うことを書かないと、 件数が食い違って
     // 見える (Round 2 F3)。

@@ -302,14 +302,17 @@ const previous = await readHistory(HISTORY_PATH);
 // 1 run が複数 run として数えられる。
 const key = (r) => `${r.testId}\u0000${r.runId}`;
 const recorded = new Set(previous.records.map(key));
+
 // 同じ run の中に同じ testId が 2 度出る形 (retry) は **後の結果を採る**。 先頭を残すと
 // retry の最終結果が落ちて、 直った test を失敗として数える (Round 2 F2)。
-const byKey = new Map();
-for (const rec of records) {
-  if (recorded.has(key(rec))) continue; // 既に history にある run
-  byKey.set(key(rec), rec);
-}
-const fresh = [...byKey.values()];
+//
+// 畳み込みは **Summary と history の共通入力** にする。 history 側だけに掛けると、
+// Summary が両 attempt を数えて pass rate 50% と出る = その run の最終結果を表さない
+// (Round 3 F2-R3)。 Map は同じ key で後勝ちし、 挿入順を保つ。
+const current = [...new Map(records.map((r) => [key(r), r])).values()];
+
+// 既に history にある run は足さない (`--vitest-json` で同じ report を再利用する経路)。
+const fresh = current.filter((r) => !recorded.has(key(r)));
 
 const history = collectRunHistory({ history: previous, records: fresh, maxPerTest: 20 });
 await mkdir(dirname(HISTORY_PATH), { recursive: true });
@@ -347,7 +350,7 @@ const displayGaps = gaps.map((g) => ({ ...g, layer: LAYER }));
 // pass rate が出て、 走らせていない状態が成功に見える (#1909 で禁じた形)。 flaky の判定
 // 材料だけ累積側を渡す。
 const dashboard = renderDashboard({
-  history: { records },
+  history: { records: current },
   flakyHistory: history,
   flaky,
   gaps: displayGaps,
