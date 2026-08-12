@@ -140,16 +140,46 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 
 ### Step 0: vitest を JSON で走らせる
 
+**観測対象の project に範囲を絞る**。 絞る先は `--project-root` と同じ値で、 これは観測対象の
+起点として既に受け取っている。
+
 ```bash
-pnpm exec vitest run --reporter=json --outputFile=tests/reports/vitest-results.json
+pnpm exec vitest run --root "$PROJECT_ROOT" --passWithNoTests \
+  --reporter=json --outputFile=tests/reports/vitest-results.json
 ```
 
+`--outputFile` は **`--root` からの相対** で解決される。 repo root からの相対で書くと
+`$PROJECT_ROOT/$PROJECT_ROOT/tests/...` に書かれる (実測)。 Step 1 は
+`$PROJECT_ROOT/tests/reports/vitest-results.json` を読む。
+
+**`--passWithNoTests` を外さない**。 vitest は test file が 1 件も無いと **exit 1** で終わる
+(実測)。 runner が vitest でない layer では 0 件が正常なので、 それを失敗にすると観測が
+そこで止まる。 JSON 自体は 0 件の形で書かれるため、 続行して dashboard に「実行結果を
+1 件も受け取っていない」 と書かせる。
+
 `--vitest-json` 引数指定時は既存 file を再利用する。
+
+#### 絞らないと観測対象の外を集める
+
+chain は本 skill を repo root から起動する (`/kiwa-test` Step 5a が `--project-root examples/{example}`
+を渡す)。 そこで範囲を絞らずに vitest を走らせると、 **monorepo 全体から test を集める**。
+
+実測すると repo root では 332 件を収集し、 その後 `tests/fixtures/*/hardhat-test/*.cjs` を読み込んで
+`HardhatError: HH1: You are not inside a Hardhat project.` で停止する (#1914)。
+
+**失敗するより、 失敗しない方が危ない**。 集まるのは別 package の test なので、 dashboard の
+Summary が観測対象ではないものの pass / fail を報告することになる。 #1909 で直した「表示が実態を
+表さない」 形が別経路で戻る。
+
+`--root` を渡した時の収集は、 その project の vitest 設定が決める。 実測では
+`examples/dogfood-dapp-e2e-reorg` が `tests/unit/**/*.test.ts` だけを集め、 同居する Playwright の
+`*.spec.ts` は拾わなかった。
 
 #### runner が vitest でない layer
 
 `contract` の runner は Foundry (`forge test`) か Hardhat で、 vitest ではない。 その project に
-vitest の設定は無く、 **run record は 0 件になる**。 それ自体は異常ではないので観測を止めない =
+vitest の設定は無く、 範囲を絞った run は **record 0 件** を返す (`--passWithNoTests` を付けて
+exit 0、 実測)。 それ自体は異常ではないので観測を止めない =
 spec coverage は runner に依存せず (spec markdown と test code の突き合わせ)、 contract でも
 機能する。
 
@@ -182,7 +212,8 @@ import {
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
-const report = JSON.parse(await readFile('tests/reports/vitest-results.json', 'utf8'));
+// Step 0 は --root に絞って走らせたので、 出力は PROJECT_ROOT の下にある。
+const report = JSON.parse(await readFile(`${PROJECT_ROOT}/tests/reports/vitest-results.json`, 'utf8'));
 const records = fromVitestJson(report, { runId: process.env.GIT_SHA ?? 'local' });
 const history = collectRunHistory({ records, maxPerTest: 20 });
 // minRuns は detectFlaky と renderDashboard の両方に渡す。 表示側が「判定した上で
