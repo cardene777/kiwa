@@ -217,13 +217,106 @@ import {
   renderDashboard,
 } from '@kiwa-lab/observability';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { dirname } from 'node:path';
+
+/**
+ * 過去の run を読む。 **壊れていたら止める**。
+ *
+ * 空から数え直すと、 判定に届かない状態が「まだ 3 回に達していない」 と区別できず、
+ * 毎回そう見える (#1909 / #1910 と同じ「静かな緑」)。 file を 1 つ消せば復旧できるので、
+ * 止めても行き止まりにならない。
+ */
+async function readHistory(path) {
+  let raw;
+  try {
+    raw = await readFile(path, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return { records: [] }; // 初回。 これは正常
+    throw err;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    // 素の SyntaxError には file 名が入らない。 どの file を消せばよいか判らないと、
+    // 「止める」 が行き止まりになる。
+    throw new Error(`history が JSON として読めない: ${path} (${err.message})`);
+  }
+  if (!Array.isArray(parsed?.records)) {
+    throw new Error(`history が壊れている (records が配列でない): ${path}`);
+  }
+  // 要素の形も見る。 配列でありさえすればよいとすると、 中身が壊れた history が
+  // そのまま判定材料になる。
+  const broken = parsed.records.find(
+    (r) =>
+      typeof r?.testId !== 'string' ||
+      typeof r?.runId !== 'string' ||
+      typeof r?.status !== 'string',
+  );
+  if (broken) {
+    throw new Error(`history の record が壊れている: ${path} (${JSON.stringify(broken)})`);
+  }
+  return parsed;
+}
 
 // 読み先は § Step 0 の VITEST_JSON 規則で決める (--vitest-json があればその値、
 // 無ければ Step 0 が --root の下に書いた path)。
-const report = JSON.parse(await readFile(VITEST_JSON, 'utf8'));
-const records = fromVitestJson(report, { runId: process.env.GIT_SHA ?? 'local' });
-const history = collectRunHistory({ records, maxPerTest: 20 });
+const reportRaw = await readFile(VITEST_JSON, 'utf8');
+const report = JSON.parse(reportRaw);
+
+// runId は **run ごとに一意で、 同じ report からは常に同じ値** にする。 GIT_SHA だと同じ
+// commit で 3 回走らせても同じ値になり、 flaky を見たい時こそ重複除去が効かない。 逆に
+// Date.now() だと同じ report を 2 度観測するたびに別 run になり、 1 run が 2 run に化ける。
+// startTime が無い report は中身の hash を使う (#1918)。
+// vitest の reporter は常に startTime を出す (実測)。 fallback は vitest 以外が作った
+// JSON 用で、 **file の中身が同じなら同じ id** という保証しか持たない。 意味が同じで
+// 表記が違う report (property 順 / 空白) は別 id になる。
+//
+// 意味で正規化する案は採らない。 結果が同じ 2 つの run が同じ id になり、 3 回走らせても
+// 1 run に畳まれて **flaky が永久に判定されない** = 直そうとしている欠陥そのものに戻る
+// (Round 2 F1 への回答)。
+const runId = report.startTime
+  ? String(report.startTime)
+  : createHash('sha1').update(reportRaw).digest('hex').slice(0, 12);
+const records = fromVitestJson(report, { runId });
+
+// 過去の run を読む。 これが無いと同じ test の run は常に 1 回で、 minRuns に届かず
+// flaky は永久に判定されない (#1918)。
+//
+// **path に入る値を検証する**。 MODULE / LAYER をそのまま埋めると、 separator を含む値で
+// 起点の外に書ける。 CLI が弾くのは spec path 経路だけで、 ここは通らない。
+for (const [name, value] of [['MODULE', MODULE], ['LAYER', LAYER], ['PRODUCER', PRODUCER ?? '']]) {
+  if (value && !/^[a-z0-9-]{1,64}$/.test(value)) {
+    throw new Error(`${name} が history の file 名に使えない形: ${value}`);
+  }
+}
+// producer が 2 つある layer (contract の forge / hardhat) は別の成果物を観測するので、
+// history も分ける。 混ぜると別 producer の run が同じ testId で数えられる。
+const HISTORY_KEY = [MODULE, LAYER, PRODUCER].filter(Boolean).join('-');
+const HISTORY_PATH = `${PROJECT_ROOT}/tests/reports/observe/history-${HISTORY_KEY}.json`;
+const previous = await readHistory(HISTORY_PATH);
+
+// 同じ report を 2 度観測しても 2 run にしない (`--vitest-json` で再利用する経路がある)。
+// 同じ run の中に同じ testId が 2 度出る形 (retry / 同名 test) も 1 件に畳む = 畳まないと
+// 1 run が複数 run として数えられる。
+const key = (r) => `${r.testId}\u0000${r.runId}`;
+const recorded = new Set(previous.records.map(key));
+
+// 同じ run の中に同じ testId が 2 度出る形 (retry) は **後の結果を採る**。 先頭を残すと
+// retry の最終結果が落ちて、 直った test を失敗として数える (Round 2 F2)。
+//
+// 畳み込みは **Summary と history の共通入力** にする。 history 側だけに掛けると、
+// Summary が両 attempt を数えて pass rate 50% と出る = その run の最終結果を表さない
+// (Round 3 F2-R3)。 Map は同じ key で後勝ちし、 挿入順を保つ。
+const current = [...new Map(records.map((r) => [key(r), r])).values()];
+
+// 既に history にある run は足さない (`--vitest-json` で同じ report を再利用する経路)。
+const fresh = current.filter((r) => !recorded.has(key(r)));
+
+const history = collectRunHistory({ history: previous, records: fresh, maxPerTest: 20 });
+await mkdir(dirname(HISTORY_PATH), { recursive: true });
+await writeFile(HISTORY_PATH, JSON.stringify(history), 'utf8');
 // minRuns は detectFlaky と renderDashboard の両方に渡す。 表示側が「判定した上で
 // 無い」 と「判定していない」 を分けるのに同じ値を要る (#1909)。
 const FLAKY_MIN_RUNS = 3;
@@ -253,8 +346,12 @@ const gaps = [
 // 12 layer が全て `unit` と表示される (#1898 Round 2)。
 const displayGaps = gaps.map((g) => ({ ...g, layer: LAYER }));
 
+// Summary は **この run** を数える。 累積を渡すと、 この run が 0 件でも過去の record で
+// pass rate が出て、 走らせていない状態が成功に見える (#1909 で禁じた形)。 flaky の判定
+// 材料だけ累積側を渡す。
 const dashboard = renderDashboard({
-  history,
+  history: { records: current },
+  flakyHistory: history,
   flaky,
   gaps: displayGaps,
   flakyMinRuns: FLAKY_MIN_RUNS,
@@ -272,6 +369,40 @@ console.log(`dashboard written to ${OUT_PATH}`);
 |---|---|---|
 | 8 値のいずれか | 渡す | `--layer` の値 |
 | 残り 12 | 渡さない | `--layer` の値 (解析側は `unit` のまま) |
+
+#### run 履歴は観測対象ごとに持ち越す
+
+flaky は 1 回の run では判定できない。 `detectFlaky` は同じ test の run が `minRuns` (既定 3)
+に届いて初めて判定するため、 **history を持ち越さないと永久に「判定していない」 になる** (#1918)。
+
+| 項目 | 値 |
+|---|---|
+| 置き場所 | `$PROJECT_ROOT/tests/reports/observe/history-{module}-{layer}[-{producer}].json` |
+| 分け方 | module / layer / producer ごと。 混ぜると別の成果物の run が同じ id で数えられる (`contract` は forge と hardhat の 2 producer を持つ) |
+| file 名に入る値 | `[a-z0-9-]{1,64}` を強制。 separator を含む値で起点の外に書けないようにする |
+| 上限 | `maxPerTest: 20` (FIFO)。 古い run から落ちる |
+| 初回 (file なし) | 空から始める。 これは正常 |
+| **壊れている時** | **止める**。 空から数え直さない。 message に file path を出す |
+
+**Summary は「この run」、 flaky の判定材料は「累積」**。 累積を Summary に渡すと、 この run が
+0 件でも過去の record で `pass rate` が出て、 走らせていない状態が成功に見える (#1909 で禁じた
+形)。 `renderDashboard` は `history` を Summary に、 `flakyHistory` を判定材料に使う。
+
+**上限は test ごと**。 廃止された testId の record は残り続ける (試験数 × 20 で頭打ちになるが、
+test を消しても減らない)。 実害が出た時点で別途扱う。
+
+壊れた時に空へ倒すと、 判定に届かない状態が「まだ 3 回に達していない」 と区別できず、 毎回
+そう見える (#1909 / #1910 と同じ「静かな緑」)。 file を 1 つ消せば復旧できるので、 止めても
+行き止まりにならない。
+
+`runId` は **run ごとに一意で、 同じ report からは常に同じ値** にする。 `GIT_SHA` だと同じ
+commit で 3 回走らせても同じ値になり、 **flaky を見たい時こそ** 重複除去が効かない。 逆に
+`Date.now()` だと同じ report を 2 度観測するたびに別 run になり、 1 run が 2 run に化ける。
+vitest report の `startTime` を使い、 無い report は中身の hash を使う。
+
+同じ report を 2 度観測しても 2 run に数えない (`--vitest-json` で再利用する経路がある)。
+`(testId, runId)` が既に history にある record は足さない。 **同じ run の中に同じ testId が
+2 度出る形** (retry / 同名 test) も 1 件に畳む = 畳まないと 1 run が複数 run として数えられる。
 
 #### 空の結果と「gap が無い」 を混同しない
 
