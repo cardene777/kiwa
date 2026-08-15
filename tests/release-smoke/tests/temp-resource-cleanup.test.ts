@@ -44,6 +44,49 @@ function isFsSpecifier(text: string): boolean {
   return /^(node:)?fs(\/promises)?$/.test(text);
 }
 
+/** `module.require` / `module['require']` のように、`module` を receiver に持つ形か。 */
+function isModuleRequire(callee: ts.Expression): boolean {
+  const onModule = (expr: ts.Expression): boolean => ts.isIdentifier(expr) && expr.text === 'module';
+  if (ts.isPropertyAccessExpression(callee)) {
+    return onModule(callee.expression) && callee.name.text === 'require';
+  }
+  if (ts.isElementAccessExpression(callee)) {
+    const key = callee.argumentExpression;
+    return onModule(callee.expression) && ts.isStringLiteral(key) && key.text === 'require';
+  }
+  return false;
+}
+
+/**
+ * module を取り出す呼出の callee か。
+ *
+ * 受けるのは取得側の構文が一意に決まる形だけ。 `createRequire(...)` を変数へ詰め替えて
+ * から呼ぶ形は provenance の解決が要るため対象外で、これは Round 5 で切り離した receiver
+ * 解決と同じ境界にある。
+ */
+function isModuleLoaderCallee(callee: ts.Expression): boolean {
+  // `require('fs')`
+  if (ts.isIdentifier(callee) && callee.text === 'require') return true;
+  // `import('fs')`
+  if (callee.kind === ts.SyntaxKind.ImportKeyword) return true;
+  // `module.require('fs')` / `module['require']('fs')`
+  if (isModuleRequire(callee)) return true;
+  // `createRequire(import.meta.url)('fs')`
+  if (ts.isCallExpression(callee) && ts.isIdentifier(callee.expression)) {
+    if (callee.expression.text === 'createRequire') return true;
+  }
+  // `process.getBuiltinModule('fs')`
+  if (
+    ts.isPropertyAccessExpression(callee) &&
+    ts.isIdentifier(callee.expression) &&
+    callee.expression.text === 'process' &&
+    callee.name.text === 'getBuiltinModule'
+  ) {
+    return true;
+  }
+  return false;
+}
+
 /**
  * 判定は 1 つの規則に縮めてある。
  *
@@ -94,21 +137,16 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
       touchesFs = true;
     }
 
-    // `require('fs')` / `module.require('fs')` / `import('fs')`。
+    // module を取り出す呼出。
     //
     // **callee を確かめる** = 第 1 引数が `'fs'` の任意の呼出を fs access とみなすと
-    // `makeClient('fs')` が引っかかる (#1927 Round 5)。 一方 `require` は素の識別子とも
-    // property とも書けるため、両方を受ける (#1927 Round 6)。
+    // `makeClient('fs')` が引っかかる (#1927 Round 5)。 逆に `require` を property 名だけで
+    // 見ると `schema.require('fs')` まで拾う (#1927 Round 7)。 受けるのは、取得側の構文が
+    // 一意に決まる形だけに限る。
     if (ts.isCallExpression(node)) {
-      const callee = node.expression;
-      const isRequire =
-        (ts.isIdentifier(callee) && callee.text === 'require') ||
-        (ts.isPropertyAccessExpression(callee) && callee.name.text === 'require');
-      const isDynamicImport = callee.kind === ts.SyntaxKind.ImportKeyword;
       const arg = node.arguments[0];
-      if ((isRequire || isDynamicImport) && arg && ts.isStringLiteral(arg) && isFsSpecifier(arg.text)) {
-        touchesFs = true;
-      }
+      const looksLikeFsArg = arg !== undefined && ts.isStringLiteral(arg) && isFsSpecifier(arg.text);
+      if (looksLikeFsArg && isModuleLoaderCallee(node.expression)) touchesFs = true;
     }
 
     // 名前としての参照。 comment と文字列は Identifier にならないため自然に外れる。
@@ -232,6 +270,12 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("import fs = require('node:fs');\nfs.mkdtempSync(x);")).toBe(
       'direct mkdtemp',
     );
+    // module を取り出す他の形も、取得側の構文が一意なら受ける (#1927 Round 7)。
+    expect(violationOf("module['require']('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
+    expect(violationOf("createRequire(import.meta.url)('fs').mkdtempSync(x);")).toBe(
+      'direct mkdtemp',
+    );
+    expect(violationOf("process.getBuiltinModule('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
   });
 
   it('検出規則が正当な code を誤検出しない', () => {
@@ -248,6 +292,8 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf('await client.mkdtempSync(x);')).toBeNull();
     // 第 1 引数が 'fs' なだけの呼出を fs access とみなさない (#1927 Round 5)。
     expect(violationOf("const x = makeClient('fs'); x.mkdtempSync(y);")).toBeNull();
+    // property 名が `require` なだけの呼出も同様 (#1927 Round 7)。
+    expect(violationOf("schema.require('fs'); client.mkdtempSync(x);")).toBeNull();
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
