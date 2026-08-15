@@ -74,7 +74,9 @@ function isScopeNode(node: ts.Node): boolean {
     ts.isForInStatement(node) ||
     ts.isCatchClause(node) ||
     ts.isClassDeclaration(node) ||
-    ts.isClassExpression(node)
+    ts.isClassExpression(node) ||
+    // class の static block は独立した scope で、`var` もここに閉じる。
+    ts.isClassStaticBlockDeclaration(node)
   );
 }
 
@@ -95,7 +97,8 @@ function isFunctionScopeNode(node: ts.Node): boolean {
     ts.isConstructorDeclaration(node) ||
     ts.isGetAccessorDeclaration(node) ||
     ts.isSetAccessorDeclaration(node) ||
-    ts.isModuleBlock(node)
+    ts.isModuleBlock(node) ||
+    ts.isClassStaticBlockDeclaration(node)
   );
 }
 
@@ -599,6 +602,17 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     // 式の内側では shadow として効く。
     expect(
       violationOf("const f = function require() { return require('fs').mkdtempSync(x); };"),
+    ).toBeNull();
+  });
+
+  it('class の static block が var を外へ漏らさない (#1929 Round 3)', () => {
+    // static block は独立した scope。 外へ漏らすと、外側の ambient loader が隠れる。
+    expect(
+      violationOf("class C { static { var require = custom; } }\nrequire('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+    // static block の内側では shadow として効く。
+    expect(
+      violationOf("class C { static { var require = custom; require('fs').mkdtempSync(x); } }"),
     ).toBeNull();
   });
 
