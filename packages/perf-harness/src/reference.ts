@@ -24,10 +24,10 @@
  * | 2ms の演算 | 16 → **8%** | 12 → 175% | 4 → 172% |
  * | `JSON.parse(JSON.stringify(…))` | 20 → **10%** | 200 → 124% | 61 → 67% |
  */
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createManagedTempDir, type ManagedTempDir } from '@kiwa-lab/core';
 import type { PerfReferenceKind } from './types.js';
 
 /**
@@ -95,13 +95,17 @@ export function referenceOpName(kind: PerfReferenceKind): string {
  * 基準 op 一式を作る。 temp dir は fs 系の基準が最初に要求された時にだけ掘る。
  */
 export function createReferenceOps(): PerfReferenceSet {
+  let managed: ManagedTempDir | null = null;
   let dir: string | null = null;
   let readPath: string | null = null;
   let writePath: string | null = null;
 
   const ensureDir = (): string => {
-    if (dir === null) dir = mkdtempSync(join(tmpdir(), 'kiwa-perf-reference-'));
-    return dir;
+    if (managed === null) {
+      managed = createManagedTempDir({ label: 'perf-reference' });
+      dir = managed.path;
+    }
+    return dir as string;
   };
 
   const ensureReadPath = (): string => {
@@ -177,8 +181,9 @@ export function createReferenceOps(): PerfReferenceSet {
       return dir;
     },
     dispose(): void {
-      if (dir !== null) {
-        rmSync(dir, { recursive: true, force: true });
+      if (managed !== null) {
+        managed.dispose();
+        managed = null;
         dir = null;
         readPath = null;
         writePath = null;

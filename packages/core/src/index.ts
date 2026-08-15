@@ -9,3 +9,8 @@ export type {
 } from './types.js';
 export { parseSpec, type ParseOptions } from './parser.js';
 export { createPool, type PoolFactoryOptions } from './pool.js';
+export {
+  createManagedTempDir,
+  type ManagedTempDir,
+  type ManagedTempDirOptions,
+} from './temp.js';

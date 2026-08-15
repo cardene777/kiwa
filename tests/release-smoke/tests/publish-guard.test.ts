@@ -49,10 +49,21 @@ describe('publish guard against unresolved workspace: ranges', () => {
   });
 
   it('every package with workspace deps wires prepublishOnly to the guard', () => {
+    // 求めるのは「guard が publish 前に、 しかも他の step より先に走ること」。
+    //
+    // 完全一致で見ていた間、 guard の後ろに自分の検査を足した package (`lean` の
+    // `&& pnpm test:package`) が違反として上がっていた。 それは guard を外した形では
+    // なく強めた形なので、 落とす理由が無い。
+    //
+    // 先頭一致にすると `&& true` のような無害化を許すが、 それは guard を消したのと
+    // 同じで、 exact 一致でも `prepublishOnly` ごと消せば同様に抜けられる。 exact が
+    // 防いでいたのは「うっかり別 script に差し替える」 形で、 先頭一致でも防げる。
+    const GUARD = 'node ../../scripts/assert-pnpm-publish.mjs';
     const offenders: string[] = [];
     for (const { dir, manifest } of packagesWithWorkspaceDeps()) {
       const hook = manifest.scripts?.prepublishOnly;
-      if (hook !== 'node ../../scripts/assert-pnpm-publish.mjs') {
+      const wired = hook === GUARD || hook?.startsWith(`${GUARD} &&`) === true;
+      if (!wired) {
         offenders.push(`${manifest.name ?? dir}: ${hook ?? '(missing)'}`);
       }
     }

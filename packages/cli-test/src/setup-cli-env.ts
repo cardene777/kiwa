@@ -1,15 +1,13 @@
 import { spawn } from 'node:child_process';
 import {
-  mkdtemp,
   mkdir,
   readFile as fsReadFile,
   readdir,
-  rm,
   stat,
   writeFile as fsWriteFile,
 } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { createManagedTempDir } from '@kiwa-lab/core';
 import type {
   CliRunOptions,
   CliRunResult,
@@ -18,6 +16,18 @@ import type {
 } from './types.js';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
+
+/**
+ * 利用者が渡す `prefix` を、名前空間の中で使える label に均す。
+ *
+ * 従来の既定は `kiwa-cli-` で、これがそのまま dir 名の先頭に付いていた。 名前空間を
+ * 前置する形に変わったため、二重に `kiwa-` が並ばないよう剥がす。 末尾の `-` も
+ * 区切りが重なるだけなので落とす。
+ */
+function toTempLabel(prefix: string | undefined): string {
+  const raw = (prefix ?? 'kiwa-cli-').replace(/^kiwa-/, '').replace(/-+$/, '');
+  return raw === '' ? 'cli' : raw;
+}
 
 async function ensureDir(path: string): Promise<void> {
   await mkdir(path, { recursive: true });
@@ -104,8 +114,10 @@ async function runCliImpl(
 }
 
 export async function setupCliEnv(opts: SetupCliEnvOptions = {}): Promise<CliTestEnv> {
-  const prefix = opts.prefix ?? 'kiwa-cli-';
-  const tempDir = await mkdtemp(join(tmpdir(), prefix));
+  // `prefix` は名前空間の中の識別子として扱う。 回収は `kiwa-` に一致する dir だけを
+  // 対象にするため、 任意の prefix を素通しすると異常終了時に回収されない dir ができる。
+  const managed = createManagedTempDir({ label: toTempLabel(opts.prefix) });
+  const tempDir = managed.path;
   const baseEnv: Record<string, string> = {
     ...Object.fromEntries(
       Object.entries(process.env).filter((entry): entry is [string, string] => entry[1] !== undefined),
@@ -147,7 +159,7 @@ export async function setupCliEnv(opts: SetupCliEnvOptions = {}): Promise<CliTes
       }
     },
     stop: async () => {
-      await rm(tempDir, { recursive: true, force: true });
+      managed.dispose();
     },
   };
   return env;

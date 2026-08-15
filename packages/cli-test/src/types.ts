@@ -5,7 +5,13 @@ export interface SetupCliEnvOptions {
   seedFiles?: Record<string, string | Buffer>;
   /** Optional env overrides applied to every runCli invocation */
   env?: Record<string, string>;
-  /** Optional subdir name within OS tempdir (default "kiwa-cli-") */
+  /**
+   * Label placed inside the `kiwa-` temp namespace (default "cli").
+   *
+   * The directory is always created under the namespace so that orphans left by an
+   * abnormal exit are reclaimed on the next run. A leading `kiwa-` and trailing
+   * dashes are stripped, so `"kiwa-cli-"` and `"cli"` produce the same label.
+   */
   prefix?: string;
 }
 

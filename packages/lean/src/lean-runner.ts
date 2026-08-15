@@ -8,10 +8,10 @@
  */
 
 import { execFile, execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { promisify } from 'node:util';
+import { createManagedTempDir, type ManagedTempDir } from '@kiwa-lab/core';
 import { UsageError } from './errors.js';
 
 const execFileAsync = promisify(execFile);
@@ -248,14 +248,23 @@ export async function runLeanSourceAsync(
   }
 }
 
+/** Scratch directories still held by a run, keyed by their path so teardown can find them. */
+const scratchHandles = new Map<string, ManagedTempDir>();
+
 /** A directory holding the source, and a `lean-toolchain` when one was asked for. */
 function createScratch(source: string, opts: LeanRunOptions): { rootDir: string; filePath: string } {
   const { workDir, leanToolchain } = opts;
   let rootDir: string;
   try {
-    rootDir = mkdtempSync(join(workDir ?? tmpdir(), 'kiwa-lean-'));
+    // `exactOptionalPropertyTypes` の下では `root: undefined` を渡せない。 未指定は
+    // key ごと落として core 側の既定 (`os.tmpdir()`) に委ねる。
+    const managed = createManagedTempDir(
+      workDir === undefined ? { label: 'lean' } : { label: 'lean', root: workDir },
+    );
+    rootDir = managed.path;
+    scratchHandles.set(rootDir, managed);
   } catch (error) {
-    // `ENOENT: mkdtemp '/nope/kiwa-lean-'` names a path the caller never wrote
+    // `ENOENT: mkdtemp '/nope/kiwa-lean-…'` names a path the caller never wrote
     // and does not say which option produced it.
     throw new UsageError(
       `workDir ${JSON.stringify(workDir)} is not a directory Lean's scratch files can be ` +
@@ -271,11 +280,11 @@ function createScratch(source: string, opts: LeanRunOptions): { rootDir: string;
 }
 
 function removeScratch(rootDir: string): void {
-  try {
-    rmSync(rootDir, { recursive: true, force: true });
-  } catch {
-    // best-effort cleanup; ignore
-  }
+  const managed = scratchHandles.get(rootDir);
+  scratchHandles.delete(rootDir);
+  // `dispose` swallows its own failures; an unknown path means the run never got
+  // as far as creating one.
+  managed?.dispose();
 }
 
 function succeeded(stdout: string, filePath: string): LeanRun {

@@ -13,6 +13,38 @@ const SLEEP_BUFFER = new Int32Array(new SharedArrayBuffer(4));
 const reservedPorts = new Set<number>();
 let portAllocationQueue = Promise.resolve();
 
+/**
+ * anvil children this process started and has not stopped yet.
+ *
+ * A spawned child outlives its parent on POSIX. Without this, a test run that
+ * crashes or is interrupted leaves anvil holding its port, and the next run
+ * either picks a different port or trips over the stale one.
+ *
+ * `detached` children are excluded on purpose — the caller asked for a process
+ * that survives, and `e2e-prepare-env` reclaims those from its pid file.
+ */
+const liveChildren = new Set<ChildProcess>();
+let parentExitHookInstalled = false;
+
+function trackForParentExit(child: ChildProcess): void {
+  liveChildren.add(child);
+  child.once('exit', () => liveChildren.delete(child));
+  if (parentExitHookInstalled) return;
+  parentExitHookInstalled = true;
+  // `exit` runs synchronous work only, so this sends the signal and does not
+  // wait for the child to go. Signals are not intercepted: adding a `SIGINT`
+  // listener would suppress Node's default termination and make Ctrl-C stop
+  // working for anyone using the library.
+  process.on('exit', () => {
+    for (const tracked of liveChildren) safeKill(tracked);
+    liveChildren.clear();
+  });
+}
+
+function untrackForParentExit(child: ChildProcess): void {
+  liveChildren.delete(child);
+}
+
 export interface AnvilHandle {
   port: number;
   pid: number;
@@ -143,11 +175,16 @@ export async function startAnvilProcess(
     if (ready) {
       if (opts.detached === true && child.pid !== undefined) {
         child.unref();
+      } else {
+        trackForParentExit(child);
       }
       return {
         port,
         pid: child.pid ?? -1,
-        stop: () => stopProcess(child, port),
+        stop: () => {
+          untrackForParentExit(child);
+          return stopProcess(child, port);
+        },
       };
     }
 
