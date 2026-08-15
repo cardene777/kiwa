@@ -107,28 +107,123 @@ function collectSourceFiles(dir: string, out: string[] = []): string[] {
  * 説明する comment が書けなくなる (この file 自身がそう)。 文字列 literal は残す =
  * `require('node:fs')` の引数は literal なので、 落とすと検出できない。
  */
-function stripComments(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
-}
-
 /**
- * 文字列 literal の中身を落とす。
+ * source から「実行される部分」 だけを取り出す。
  *
- * 検出規則そのものを説明する source (この file がそう) は、 文字列に `import { mkdtemp }
- * from 'node:fs'` を持つ。 中身を残すと、 説明を書いただけで違反になる。
+ * regex を重ねる形では収束しなかった (#1927 の Round 2 / Round 3)。 comment を先に消すと
+ * 文字列の中の `//` が行を食い、 文字列を丸ごと消すと template の `${fs.mkdtempSync(x)}` が
+ * 消え、 正規表現 literal に書いた検出規則が違反として上がる。 いずれも「前の処理が次の
+ * 処理の入力を壊す」 形で、 順番を変えても別の穴が開く。
  *
- * **import / require の指定子は残す**。 module 名は文字列 literal なので、 丸ごと落とすと
- * 何も検出できなくなる。 `from` / `require(` / `import(` の直後だけを残す。
+ * 1 度の走査で状態を持つと、 これらは同じ 1 つの判定に畳める。
+ *
+ * - comment (行 / block) は落とす
+ * - 文字列 literal は中身を落とす。 ただし module 指定子として使われる位置 (`from` /
+ *   `require(` / `import(` の直後) だけは残す = 落とすと何も検出できなくなる
+ * - template literal は literal 部分を落とし、 `${...}` の中は残す = そこは実行される
+ * - 正規表現 literal は落とす。 検出規則を書いた source を違反にしないため
+ *
+ * 除算との区別は直前の意味のある文字で行う。 値が来られない位置の `/` を正規表現の
+ * 開始とみなす、 という通常の heuristic。
  */
-function stripStringLiterals(source: string): string {
-  return source.replace(
-    /(from\s*|require\s*\(\s*|import\s*\(\s*)?(['"`])(?:\\.|(?!\2)[\s\S])*\2/g,
-    (match, keyword: string | undefined) => (keyword === undefined ? '""' : match),
-  );
+function extractCode(source: string): string {
+  const out: string[] = [];
+  let i = 0;
+  /** 直前に出力した意味のある文字。 正規表現か除算かの判定に使う。 */
+  let prev = '';
+  /** 文字列の中身を残すか。 `from` / `require(` / `import(` の直後だけ true。 */
+  const keepsSpecifier = (): boolean => /(\bfrom|\brequire\s*\(|\bimport\s*\()\s*$/.test(out.join(''));
+
+  const isRegexPosition = (): boolean => prev === '' || '([{,;=:!&|?+-*%~^<>'.includes(prev);
+
+  while (i < source.length) {
+    const ch = source[i] ?? '';
+    const next = source[i + 1] ?? '';
+
+    if (ch === '/' && next === '/') {
+      while (i < source.length && source[i] !== '\n') i += 1;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      i += 2;
+      while (i < source.length && !(source[i] === '*' && source[i + 1] === '/')) i += 1;
+      i += 2;
+      out.push(' ');
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      const keep = keepsSpecifier();
+      const start = i;
+      i += 1;
+      while (i < source.length && source[i] !== ch) {
+        if (source[i] === '\\') i += 1;
+        i += 1;
+      }
+      i += 1;
+      out.push(keep ? source.slice(start, i) : `${ch}${ch}`);
+      prev = ch;
+      continue;
+    }
+    if (ch === '`') {
+      i += 1;
+      while (i < source.length && source[i] !== '`') {
+        if (source[i] === '\\') {
+          i += 2;
+          continue;
+        }
+        if (source[i] === '$' && source[i + 1] === '{') {
+          // 展開式は実行される。 中身をそのまま残す。
+          i += 2;
+          let depth = 1;
+          const exprStart = i;
+          while (i < source.length && depth > 0) {
+            if (source[i] === '{') depth += 1;
+            else if (source[i] === '}') depth -= 1;
+            if (depth > 0) i += 1;
+          }
+          out.push(` ${source.slice(exprStart, i)} `);
+          i += 1;
+          continue;
+        }
+        i += 1;
+      }
+      i += 1;
+      prev = '`';
+      continue;
+    }
+    if (ch === '/' && isRegexPosition()) {
+      i += 1;
+      let inClass = false;
+      while (i < source.length) {
+        const c = source[i];
+        if (c === '\\') {
+          i += 2;
+          continue;
+        }
+        if (c === '[') inClass = true;
+        else if (c === ']') inClass = false;
+        else if (c === '/' && !inClass) break;
+        else if (c === '\n') break;
+        i += 1;
+      }
+      i += 1;
+      // flags
+      while (i < source.length && /[a-z]/.test(source[i] ?? '')) i += 1;
+      out.push(' ');
+      prev = ' ';
+      continue;
+    }
+
+    out.push(ch);
+    if (!/\s/.test(ch)) prev = ch;
+    i += 1;
+  }
+
+  return out.join('');
 }
 
 function violationOf(source: string): string | null {
-  const code = stripStringLiterals(stripComments(source));
+  const code = extractCode(source);
   const mentionsMkdtemp = MKDTEMP_MENTION.test(code);
   const touchesFs = FS_MODULE_ACCESS.test(code);
   for (const { label, re } of PATTERNS) {
@@ -208,6 +303,25 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("const { readFile } = require('node:fs/promises');")).toBeNull();
     // fs と無関係な object の同名 method。
     expect(violationOf('await client.mkdtempSync(x);')).toBeNull();
+    // 正規表現 literal に検出規則を書いただけ (#1927 Round 3)。
+    expect(violationOf('const re = /import { mkdtempSync } from "node:fs"/;')).toBeNull();
+    // 文字列の中の `//` が後続の行を食わない (#1927 Round 3)。
+    expect(violationOf("const url = 'https://example.com';\nconst x = 1;")).toBeNull();
+  });
+
+  it('文字列を消しても template の展開式は残す', () => {
+    // `${...}` の中は実行される。 literal ごと落とすと直接呼出を見逃す (#1927 Round 3)。
+    expect(
+      violationOf("import * as fs from 'node:fs';\nconst p = `${fs.mkdtempSync(x)}`;"),
+    ).toBe('member call');
+  });
+
+  it('文字列の中の // が後続の import を隠さない', () => {
+    // comment 除去を先に走らせると、 文字列内の `//` が行末まで食い、
+    // その後ろにある本物の import が消えていた (#1927 Round 3)。
+    expect(
+      violationOf("const url = 'https://example.com'; import { mkdtempSync } from 'node:fs';"),
+    ).toBe('named import');
   });
 
   it('packages の src と scripts が mkdtemp を直接使わない', () => {

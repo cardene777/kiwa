@@ -89,15 +89,15 @@ interface DecodedName {
 }
 
 /**
- * PID の上限。 これを超える値は OS が割り当てないため、 自分たちが書いた名前ではない。
+ * `mkdtemp` が prefix の後ろに足す乱数。 現状 6 文字で、 長くなる方向には許容する。
  *
- * Linux の `pid_max` は既定 4194304、 macOS は 99998。 大きい方に合わせて弾く値を決める。
- * 上限を持たないと、 `process.kill` が範囲外で投げる error を「居ない」 と読む経路に
- * 偽装名を流し込める。
+ * **PID に上限は置かない**。 上限を OS 固有の値 (Linux の `pid_max` 等) で決めると、
+ * それを超える PID を持つ環境 (Windows の PID は DWORD) で自分たちが作った名前を
+ * decode できなくなり、 その環境だけ回収が永久に効かない。
+ *
+ * 範囲外の値は `ownerAlive` が受ける。 `process.kill` は範囲外で `ESRCH` 以外を投げ、
+ * そちらは「居る」 側に倒れるため、 偽装名が削除まで進むことはない。
  */
-const PID_MAX = 4_194_304;
-
-/** `mkdtemp` が prefix の後ろに足す乱数。 現状 6 文字で、 長くなる方向には許容する。 */
 const MKDTEMP_SUFFIX = /^[A-Za-z0-9]{6,}$/;
 
 /** 10 進の正準表記か。 `0x10` / ` 12 ` / `012` / `1e3` を弾く。 */
@@ -136,7 +136,7 @@ function decodeName(name: string): DecodedName | null {
   const pid = Number(pidText);
   if (!Number.isSafeInteger(createdAt) || createdAt <= 0) return null;
   if (!isCanonicalDecimal(createdAtText, createdAt)) return null;
-  if (!Number.isSafeInteger(pid) || pid <= 0 || pid > PID_MAX) return null;
+  if (!Number.isSafeInteger(pid) || pid <= 0) return null;
   if (!isCanonicalDecimal(pidText, pid)) return null;
 
   return { createdAt, pid };

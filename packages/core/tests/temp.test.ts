@@ -81,6 +81,18 @@ describe('createManagedTempDir', () => {
     expect(dir.path.startsWith(join(root, 'kiwa-'))).toBe(true);
   });
 
+  it('掘った dir 名が回収側の規約と一致する', () => {
+    // encode と decode が別々に変わると、 自分で作った dir を回収できなくなる。
+    // PID の上限を機械側で決めないため、 形だけを固定する (#1927 Round 3)。
+    const root = makeRoot();
+    const dir = create(root, { label: 'round-trip' });
+    const name = dir.path.slice(root.length + 1);
+    const match = /^kiwa-(.+)-(\d+)-(\d+)-([A-Za-z0-9]{6,})$/.exec(name);
+    expect(match, `${name} が規約に一致しない`).not.toBeNull();
+    expect(match?.[1]).toBe('round-trip');
+    expect(Number(match?.[3])).toBe(process.pid);
+  });
+
   it('dispose で消え、 2 度呼んでも例外にならない', () => {
     const root = makeRoot();
     const dir = create(root);
@@ -201,7 +213,8 @@ describe('createManagedTempDir', () => {
     const forged = [
       // label が空
       join(root, `kiwa--${old}-1234-aaaaaa`),
-      // PID が OS の範囲外
+      // PID が実在し得ない大きさ。 名前としては読めるが、`process.kill` が `ESRCH` 以外を
+      // 投げるため「居ないと確認できていない」 側に落ちて残る。
       join(root, `kiwa-x-${old}-999999999999999-aaaaaa`),
       // 時刻が 10 進の正準表記でない
       join(root, `kiwa-x-0x${old.toString(16)}-1234-aaaaaa`),
