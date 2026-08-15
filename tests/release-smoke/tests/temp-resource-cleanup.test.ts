@@ -343,31 +343,52 @@ function scanSource(
    * 追えない範囲 = 変数への詰め替え (`const f = eval; f(code)`)。 到達可能性の解析が要り、
    * loader 側の receiver 解決と同じ境界にある。
    */
-  const isDynamicCodeCallee = (expr: ts.Expression): boolean => {
-    // `(eval)(...)` の括弧を剥がす。
+  /** 括弧と comma を剥がして実体の式を取り出す。 receiver 側にも同じ処理が要る。 */
+  const unwrap = (expr: ts.Expression): ts.Expression => {
     let target = expr;
-    while (ts.isParenthesizedExpression(target)) target = target.expression;
-    // `(0, eval)(...)` は comma の最後の operand が実体。
-    while (
-      ts.isBinaryExpression(target) &&
-      target.operatorToken.kind === ts.SyntaxKind.CommaToken
-    ) {
-      target = target.right;
-      while (ts.isParenthesizedExpression(target)) target = target.expression;
+    for (;;) {
+      if (ts.isParenthesizedExpression(target)) {
+        target = target.expression;
+        continue;
+      }
+      // `(0, eval)` は comma の最後の operand が実体。
+      if (ts.isBinaryExpression(target) && target.operatorToken.kind === ts.SyntaxKind.CommaToken) {
+        target = target.right;
+        continue;
+      }
+      return target;
     }
+  };
 
-    const isName = (name: string): boolean => name === 'eval' || name === 'Function';
-    if (ts.isIdentifier(target)) return isName(target.text) && isAmbient(target.text);
-    // `globalThis.eval(...)`
-    if (
-      ts.isPropertyAccessExpression(target) &&
-      ts.isIdentifier(target.expression) &&
-      target.expression.text === 'globalThis' &&
-      isAmbient('globalThis')
-    ) {
-      return isName(target.name.text);
-    }
-    return false;
+  const isDynamicCodeName = (name: string): boolean => name === 'eval' || name === 'Function';
+
+  /** `globalThis.eval` / `(globalThis).eval` の形か。 receiver も剥がす (#1932 Round 3)。 */
+  const dynamicCodeMemberName = (target: ts.Expression): string | null => {
+    if (!ts.isPropertyAccessExpression(target)) return null;
+    const receiver = unwrap(target.expression);
+    if (!ts.isIdentifier(receiver) || receiver.text !== 'globalThis') return null;
+    if (!isAmbient('globalThis')) return null;
+    return target.name.text;
+  };
+
+  const isDynamicCodeCallee = (expr: ts.Expression): boolean => {
+    const target = unwrap(expr);
+    if (ts.isIdentifier(target)) return isDynamicCodeName(target.text) && isAmbient(target.text);
+    const member = dynamicCodeMemberName(target);
+    return member !== null && isDynamicCodeName(member);
+  };
+
+  /**
+   * tagged template で code を実行する callee か。
+   *
+   * **`eval` は対象外** (#1932 Round 3)。 tag として呼ばれると第 1 引数が
+   * `TemplateStringsArray` になり、`eval` は文字列以外をそのまま返すため code を実行しない。
+   * `Function` は constructor 経由で実行するため対象。
+   */
+  const isDynamicCodeTag = (expr: ts.Expression): boolean => {
+    const target = unwrap(expr);
+    if (ts.isIdentifier(target)) return target.text === 'Function' && isAmbient('Function');
+    return dynamicCodeMemberName(target) === 'Function';
   };
 
   /**
@@ -436,8 +457,8 @@ function scanSource(
     if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
       if (isDynamicCodeCallee(node.expression)) unresolvable = true;
     }
-    // `` Function`...` `` の tagged template も同じ経路。
-    if (ts.isTaggedTemplateExpression(node) && isDynamicCodeCallee(node.tag)) unresolvable = true;
+    // `` Function`...` `` の tagged template も同じ経路 (`eval` は tag では実行しない)。
+    if (ts.isTaggedTemplateExpression(node) && isDynamicCodeTag(node.tag)) unresolvable = true;
 
     // 関数は評価の順序で見える束縛が変わる (#1931 SC-1 / SC-2)。
     //
@@ -856,6 +877,12 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(un("(0, eval)(\"x\");")).toBe(true);
     expect(un("globalThis.eval(\"x\");")).toBe(true);
     expect(un("Function\`x\`;")).toBe(true);
+    // receiver 側の括弧も剥がす (#1932 Round 3)。
+    expect(un("(globalThis).eval(\"x\");")).toBe(true);
+    expect(un("new (globalThis).Function(\"x\");")).toBe(true);
+    expect(un("((0, (eval)))(\"x\");")).toBe(true);
+    // `eval` は tag として呼ぶと code を実行しない (#1932 Round 3)。
+    expect(un("eval\`x\`;")).toBe(false);
     // **実際に同名を shadow した形** を固定する。 これが無いと `isAmbient` を外す変異を
     // 検知できない (#1932 Round 2)。
     expect(un("const eval = custom;\neval(\"x\");")).toBe(false);
