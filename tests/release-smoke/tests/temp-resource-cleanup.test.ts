@@ -44,47 +44,171 @@ function isFsSpecifier(text: string): boolean {
   return /^(node:)?fs(\/promises)?$/.test(text);
 }
 
-/** `module.require` / `module['require']` のように、`module` を receiver に持つ形か。 */
-function isModuleRequire(callee: ts.Expression): boolean {
-  const onModule = (expr: ts.Expression): boolean => ts.isIdentifier(expr) && expr.text === 'module';
-  if (ts.isPropertyAccessExpression(callee)) {
-    return onModule(callee.expression) && callee.name.text === 'require';
-  }
-  if (ts.isElementAccessExpression(callee)) {
-    const key = callee.argumentExpression;
-    return onModule(callee.expression) && ts.isStringLiteral(key) && key.text === 'require';
-  }
-  return false;
+/**
+ * 束縛の種類。 `createRequire` だけは「`node:module` から来た」 ことまで覚える。
+ */
+type BindingKind = 'value' | 'createRequire';
+
+/**
+ * 新しい scope を開く node か。
+ *
+ * **file 全体で宣言を畳んではいけない** (#1929 review)。 畳むと、無関係な引数や
+ * `for (const module of ...)` が 1 つあるだけで、その file 全体で ambient loader の検出が
+ * 無効化される。 見逃す方向とはいえ、直接呼出が通る迂回になる。
+ */
+function isScopeNode(node: ts.Node): boolean {
+  return (
+    ts.isSourceFile(node) ||
+    ts.isBlock(node) ||
+    ts.isModuleBlock(node) ||
+    ts.isCaseBlock(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node) ||
+    ts.isForStatement(node) ||
+    ts.isForOfStatement(node) ||
+    ts.isForInStatement(node) ||
+    ts.isCatchClause(node) ||
+    ts.isClassDeclaration(node) ||
+    ts.isClassExpression(node) ||
+    // class の static block は独立した scope で、`var` もここに閉じる。
+    ts.isClassStaticBlockDeclaration(node)
+  );
 }
 
 /**
- * module を取り出す呼出の callee か。
+ * `var` を受け止める scope か (関数と file)。
  *
- * 受けるのは取得側の構文が一意に決まる形だけ。 `createRequire(...)` を変数へ詰め替えて
- * から呼ぶ形は provenance の解決が要るため対象外で、これは Round 5 で切り離した receiver
- * 解決と同じ境界にある。
+ * `var` は block ではなく関数へ巻き上がる。 block scope として扱うと、
+ * `function f() { { var require = custom; } require('fs') }` の shadow を見落として
+ * ambient loader と誤判定する (#1929 Round 2)。
  */
-function isModuleLoaderCallee(callee: ts.Expression): boolean {
-  // `require('fs')`
-  if (ts.isIdentifier(callee) && callee.text === 'require') return true;
-  // `import('fs')`
-  if (callee.kind === ts.SyntaxKind.ImportKeyword) return true;
-  // `module.require('fs')` / `module['require']('fs')`
-  if (isModuleRequire(callee)) return true;
-  // `createRequire(import.meta.url)('fs')`
-  if (ts.isCallExpression(callee) && ts.isIdentifier(callee.expression)) {
-    if (callee.expression.text === 'createRequire') return true;
+function isFunctionScopeNode(node: ts.Node): boolean {
+  return (
+    ts.isSourceFile(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node) ||
+    ts.isModuleBlock(node) ||
+    ts.isClassStaticBlockDeclaration(node)
+  );
+}
+
+/** その変数宣言が `var` か (`let` / `const` は block scoped)。 */
+function isVarDeclaration(node: ts.VariableDeclaration): boolean {
+  const list = node.parent;
+  if (list === undefined || !ts.isVariableDeclarationList(list)) return false;
+  return (list.flags & ts.NodeFlags.BlockScoped) === 0;
+}
+
+/** binding pattern を含めて、宣言された名前を集める。 */
+function collectBindingName(name: ts.BindingName, out: Map<string, BindingKind>): void {
+  if (ts.isIdentifier(name)) {
+    out.set(name.text, 'value');
+    return;
   }
-  // `process.getBuiltinModule('fs')`
+  for (const element of name.elements) {
+    if (ts.isBindingElement(element)) collectBindingName(element.name, out);
+  }
+}
+
+/**
+ * その scope が **直接** 持つ value 束縛を集める。 入れ子の scope には降りない。
+ *
+ * **型だけの宣言は入れない** (#1929 review)。 型 namespace と value namespace は別なので、
+ * `import type { X as require }` があっても ambient な `require` は生きている。 入れると
+ * 直接呼出を通す迂回になる。
+ */
+function collectScopeBindings(scope: ts.Node): Map<string, BindingKind> {
+  const out = new Map<string, BindingKind>();
+
+  const declare = (node: ts.Node): void => {
+    if (ts.isParameter(node)) collectBindingName(node.name, out);
+    if (ts.isBindingElement(node)) collectBindingName(node.name, out);
+
+    // value を作る宣言形。 `interface` / `type` は value を作らないので入れない。
+    //
+    // **関数式 / class 式は入れない** (#1929 Round 2)。 名前が束縛されるのは式自身の内側
+    // だけで、親 scope からは見えない。 親に登録すると `const f = function require() {}` が
+    // 外側の ambient `require` を隠し、検出が無効化される。
+    if (
+      (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isEnumDeclaration(node)) &&
+      node.name &&
+      ts.isIdentifier(node.name)
+    ) {
+      out.set(node.name.text, 'value');
+    }
+    if (ts.isModuleDeclaration(node) && ts.isIdentifier(node.name)) out.set(node.name.text, 'value');
+
+    if (ts.isImportEqualsDeclaration(node) && !node.isTypeOnly) out.set(node.name.text, 'value');
+
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      const clause = node.importClause;
+      if (clause && !clause.isTypeOnly) {
+        const fromModule = /^(node:)?module$/.test(node.moduleSpecifier.text);
+        if (clause.name) out.set(clause.name.text, 'value');
+        const bindings = clause.namedBindings;
+        if (bindings && ts.isNamespaceImport(bindings)) out.set(bindings.name.text, 'value');
+        if (bindings && ts.isNamedImports(bindings)) {
+          for (const element of bindings.elements) {
+            if (element.isTypeOnly) continue;
+            const imported = element.propertyName?.text ?? element.name.text;
+            const kind: BindingKind =
+              fromModule && imported === 'createRequire' ? 'createRequire' : 'value';
+            out.set(element.name.text, kind);
+          }
+        }
+      }
+    }
+  };
+
+  // 名前付き関数式 / class 式は、自身の名前を **自分の scope に** 持つ。
+  if ((ts.isFunctionExpression(scope) || ts.isClassExpression(scope)) && scope.name) {
+    out.set(scope.name.text, 'value');
+  }
+
+  // scope 自身が持つ宣言 (引数 / catch の変数 / for の初期化子) を先に拾う。
+  if (ts.isCatchClause(scope) && scope.variableDeclaration) declare(scope.variableDeclaration);
+  const withParams = scope as ts.SignatureDeclarationBase;
+  if (Array.isArray(withParams.parameters)) for (const p of withParams.parameters) declare(p);
   if (
-    ts.isPropertyAccessExpression(callee) &&
-    ts.isIdentifier(callee.expression) &&
-    callee.expression.text === 'process' &&
-    callee.name.text === 'getBuiltinModule'
+    (ts.isForStatement(scope) || ts.isForOfStatement(scope) || ts.isForInStatement(scope)) &&
+    scope.initializer &&
+    ts.isVariableDeclarationList(scope.initializer)
   ) {
-    return true;
+    for (const d of scope.initializer.declarations) declare(d);
   }
-  return false;
+
+  // 直下の statement が作る宣言を拾う。 入れ子の scope には降りない。
+  //
+  // `var` はここでは拾わない = block ではなく関数へ巻き上がるため、下の関数 scope 側で拾う。
+  const walkShallow = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node) && !isVarDeclaration(node)) collectBindingName(node.name, out);
+    declare(node);
+    if (node !== scope && isScopeNode(node)) return;
+    ts.forEachChild(node, walkShallow);
+  };
+  ts.forEachChild(scope, walkShallow);
+
+  // 関数 scope は、入れ子 block を越えて `var` を拾う。 停止するのは入れ子の関数だけ。
+  if (isFunctionScopeNode(scope)) {
+    const walkVars = (node: ts.Node): void => {
+      if (ts.isVariableDeclaration(node) && isVarDeclaration(node)) collectBindingName(node.name, out);
+      if (node !== scope && isFunctionScopeNode(node)) return;
+      ts.forEachChild(node, walkVars);
+    };
+    ts.forEachChild(scope, walkVars);
+  }
+
+  return out;
 }
 
 /**
@@ -119,8 +243,76 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
   const parseErrors = (sourceFile as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics
     ?.length ?? 0;
 
+  // scope stack。 innermost が末尾。
+  //
+  // **宣言の収集は遅延させる**。 走査対象の大半は loader 呼出を持たず、その file では
+  // scope の中身を 1 度も参照しない。 先に集めると走査時間が倍になる (実測)。
+  const scopes: Array<{ node: ts.Node; bindings?: Map<string, BindingKind> }> = [];
+
+  const bindingsOf = (scope: { node: ts.Node; bindings?: Map<string, BindingKind> }) => {
+    scope.bindings ??= collectScopeBindings(scope.node);
+    return scope.bindings;
+  };
+
+  /** その名前が、どこかの scope で宣言されているか。 されていれば ambient ではない。 */
+  const lookup = (name: string): BindingKind | undefined => {
+    for (let i = scopes.length - 1; i >= 0; i -= 1) {
+      const scope = scopes[i];
+      if (scope === undefined) continue;
+      const found = bindingsOf(scope).get(name);
+      if (found !== undefined) return found;
+    }
+    return undefined;
+  };
+
+  /** ambient な global (`require` / `module` / `process`) として使える名前か。 */
+  const isAmbient = (name: string): boolean => lookup(name) === undefined;
+
+  /** `node:module` の `createRequire` を指す名前か。 内側 scope の shadow を尊重する。 */
+  const isCreateRequire = (name: string): boolean => lookup(name) === 'createRequire';
+
   let touchesFs = false;
   let referencesMkdtemp = false;
+
+  /** `module.require` / `module['require']` の形か。 */
+  const isModuleRequire = (callee: ts.Expression): boolean => {
+    const onModule = (expr: ts.Expression): boolean =>
+      ts.isIdentifier(expr) && expr.text === 'module' && isAmbient('module');
+    if (ts.isPropertyAccessExpression(callee)) {
+      return onModule(callee.expression) && callee.name.text === 'require';
+    }
+    if (ts.isElementAccessExpression(callee)) {
+      const key = callee.argumentExpression;
+      return onModule(callee.expression) && ts.isStringLiteral(key) && key.text === 'require';
+    }
+    return false;
+  };
+
+  /**
+   * module を取り出す呼出の callee か。
+   *
+   * 受けるのは取得側の構文が一意に決まり、**かつその名前が呼出位置で期待どおりの束縛を
+   * 持つ** 形だけ。 `createRequire(...)` を変数へ詰め替えてから呼ぶ形は到達可能性の解析が
+   * 要るため対象外。
+   */
+  const isModuleLoaderCallee = (callee: ts.Expression): boolean => {
+    if (ts.isIdentifier(callee) && callee.text === 'require') return isAmbient('require');
+    if (callee.kind === ts.SyntaxKind.ImportKeyword) return true;
+    if (isModuleRequire(callee)) return true;
+    if (ts.isCallExpression(callee) && ts.isIdentifier(callee.expression)) {
+      if (isCreateRequire(callee.expression.text)) return true;
+    }
+    if (
+      ts.isPropertyAccessExpression(callee) &&
+      ts.isIdentifier(callee.expression) &&
+      callee.expression.text === 'process' &&
+      isAmbient('process') &&
+      callee.name.text === 'getBuiltinModule'
+    ) {
+      return true;
+    }
+    return false;
+  };
 
   const visit = (node: ts.Node): void => {
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
@@ -152,7 +344,12 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
     // 名前としての参照。 comment と文字列は Identifier にならないため自然に外れる。
     if (ts.isIdentifier(node) && MKDTEMP_NAMES.has(node.text)) referencesMkdtemp = true;
 
+    // scope を作る node を stack に積んでから中へ入る。 宣言の中身は参照された時に集める。
+    // scope 単位でまとめて集めるので、宣言より前で使う形 (巻き上げ) も取りこぼさない。
+    const opensScope = isScopeNode(node);
+    if (opensScope) scopes.push({ node });
     ts.forEachChild(node, visit);
+    if (opensScope) scopes.pop();
   };
 
   visit(sourceFile);
@@ -272,9 +469,12 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     );
     // module を取り出す他の形も、取得側の構文が一意なら受ける (#1927 Round 7)。
     expect(violationOf("module['require']('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
-    expect(violationOf("createRequire(import.meta.url)('fs').mkdtempSync(x);")).toBe(
-      'direct mkdtemp',
-    );
+    expect(
+      violationOf(
+        "import { createRequire } from 'node:module';\n" +
+          "createRequire(import.meta.url)('fs').mkdtempSync(x);",
+      ),
+    ).toBe('direct mkdtemp');
     expect(violationOf("process.getBuiltinModule('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
   });
 
@@ -294,6 +494,126 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("const x = makeClient('fs'); x.mkdtempSync(y);")).toBeNull();
     // property 名が `require` なだけの呼出も同様 (#1927 Round 7)。
     expect(violationOf("schema.require('fs'); client.mkdtempSync(x);")).toBeNull();
+  });
+
+  it('名前が一致するだけの loader を fs 取得とみなさない (#1928)', () => {
+    // `createRequire` は `node:module` から来た名前だけを受ける。
+    expect(
+      violationOf(
+        "function createRequire(u) { return () => client; }\n" +
+          "createRequire(import.meta.url)('fs').mkdtempSync(x);",
+      ),
+    ).toBeNull();
+    // `module` を宣言し直している file では、それが Node の module とは限らない。
+    expect(violationOf("const module = shim;\nmodule.require('fs').mkdtempSync(x);")).toBeNull();
+    // `process` も同様。
+    expect(
+      violationOf("const process = fake;\nprocess.getBuiltinModule('fs').mkdtempSync(x);"),
+    ).toBeNull();
+    // `require` を宣言し直している形。
+    expect(violationOf("const require = load;\nrequire('fs').mkdtempSync(x);")).toBeNull();
+    // 分割代入や引数で宣言した場合も拾う。
+    expect(
+      violationOf("function f({ module }) { module.require('fs').mkdtempSync(x); }"),
+    ).toBeNull();
+  });
+
+  it('別 scope の宣言が ambient loader の検出を無効化しない (#1929 review)', () => {
+    // file 全体で宣言を畳むと、無関係な引数が 1 つあるだけで検出が止まる。
+    expect(
+      violationOf(
+        "function unrelated(require) { return require; }\n" +
+          "const fs = require('node:fs');\nfs.mkdtempSync(x);",
+      ),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf(
+        "for (const module of list) { use(module); }\n" +
+          "module.require('fs').mkdtempSync(x);",
+      ),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf(
+        "try { a(); } catch (process) { log(process); }\n" +
+          "process.getBuiltinModule('fs').mkdtempSync(x);",
+      ),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('型だけの import は value の shadow にならない (#1929 review)', () => {
+    // 型 namespace と value namespace は別なので、ambient な loader は生きている。
+    expect(
+      violationOf("import type { Require as require } from './t.js';\nrequire('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf("import { type Require as require } from './t.js';\nrequire('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('内側 scope の shadow を尊重する (#1929 review)', () => {
+    // import した `createRequire` を内側で shadow したら、それは Node の loader ではない。
+    expect(
+      violationOf(
+        "import { createRequire } from 'node:module';\n" +
+          "function f(createRequire) { return createRequire(url)('fs').mkdtempSync(x); }",
+      ),
+    ).toBeNull();
+    // 逆に、内側で shadow していない呼出は検出する。
+    expect(
+      violationOf(
+        "import { createRequire } from 'node:module';\n" +
+          "function f() { return createRequire(url)('fs').mkdtempSync(x); }",
+      ),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('value を作る宣言形を shadow として扱う (#1929 review)', () => {
+    // `namespace` / `enum` / named class は value を作る。
+    expect(violationOf("namespace module { export const x = 1; }\nmodule.require('fs').mkdtempSync(y);")).toBeNull();
+    expect(violationOf("enum process { a }\nprocess.getBuiltinModule('fs').mkdtempSync(y);")).toBeNull();
+    // `interface` / `type` は value を作らないので shadow にならない。
+    expect(violationOf("interface module { x: 1 }\nmodule.require('fs').mkdtempSync(y);")).toBe(
+      'direct mkdtemp',
+    );
+  });
+
+  it('var の巻き上げを関数 scope として扱う (#1929 Round 2)', () => {
+    // `var` は block ではなく関数へ巻き上がる。 block scope 扱いだと shadow を見落とす。
+    expect(
+      violationOf("function f() { { var require = custom; } return require('fs').mkdtempSync(x); }"),
+    ).toBeNull();
+    expect(
+      violationOf("function f() { for (;;) { var module = shim; } module.require('fs').mkdtempSync(x); }"),
+    ).toBeNull();
+    // 別の関数の `var` は巻き上がってこない。
+    expect(
+      violationOf("function g() { var require = custom; }\nrequire('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('名前付き関数式 / class 式の名前が親 scope に漏れない (#1929 Round 2)', () => {
+    // 名前が束縛されるのは式自身の内側だけ。 親に漏らすと検出が無効化される。
+    expect(violationOf("const f = function require() {};\nrequire('fs').mkdtempSync(x);")).toBe(
+      'direct mkdtemp',
+    );
+    expect(
+      violationOf("const C = class process {};\nprocess.getBuiltinModule('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+    // 式の内側では shadow として効く。
+    expect(
+      violationOf("const f = function require() { return require('fs').mkdtempSync(x); };"),
+    ).toBeNull();
+  });
+
+  it('class の static block が var を外へ漏らさない (#1929 Round 3)', () => {
+    // static block は独立した scope。 外へ漏らすと、外側の ambient loader が隠れる。
+    expect(
+      violationOf("class C { static { var require = custom; } }\nrequire('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+    // static block の内側では shadow として効く。
+    expect(
+      violationOf("class C { static { var require = custom; require('fs').mkdtempSync(x); } }"),
+    ).toBeNull();
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
