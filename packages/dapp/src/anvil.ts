@@ -28,7 +28,12 @@ let parentExitHookInstalled = false;
 
 function trackForParentExit(child: ChildProcess): void {
   liveChildren.add(child);
-  child.once('exit', () => liveChildren.delete(child));
+  // `exit` だけでは外れない形がある。 `anvil` が PATH に無い時 (`ENOENT`) は `error` と
+  // `close` しか発火せず、 追跡が残り続ける。 起動に失敗した呼出を繰り返すと、
+  // 終了済の `ChildProcess` と listener がプロセスの寿命ぶん溜まる。
+  const forget = () => liveChildren.delete(child);
+  child.once('exit', forget);
+  child.once('close', forget);
   if (parentExitHookInstalled) return;
   parentExitHookInstalled = true;
   // `exit` runs synchronous work only, so this sends the signal and does not

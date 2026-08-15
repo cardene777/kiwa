@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { isAbsolute, join, relative } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   createManagedTempDir,
@@ -178,8 +178,71 @@ describe('createManagedTempDir', () => {
 
   it('相対 root を渡しても絶対 path を返す', () => {
     const root = makeRoot();
-    const dir = create(root);
-    expect(dir.path.startsWith('/')).toBe(true);
+    // **実際に相対 path を渡す**。 絶対 path を渡すと絶対化の経路を 1 度も通らない。
+    const relativeRoot = relative(process.cwd(), root);
+    expect(isAbsolute(relativeRoot)).toBe(false);
+
+    const dir = create(relativeRoot);
+
+    expect(isAbsolute(dir.path)).toBe(true);
+    expect(dir.path.startsWith(root)).toBe(true);
+  });
+
+  it('末尾に区切りを持つ root でも掘れる', () => {
+    const root = makeRoot();
+    // `root + sep` の前方一致で判定していた間、 区切りが重なって root 外と誤判定した。
+    const dir = create(`${root}/`);
+    expect(existsSync(dir.path)).toBe(true);
+  });
+
+  it('生成し得ない名前は、 時刻が古くても消さない', () => {
+    const root = makeRoot();
+    const old = Date.now() - 25 * HOUR;
+    const forged = [
+      // label が空
+      join(root, `kiwa--${old}-1234-aaaaaa`),
+      // PID が OS の範囲外
+      join(root, `kiwa-x-${old}-999999999999999-aaaaaa`),
+      // 時刻が 10 進の正準表記でない
+      join(root, `kiwa-x-0x${old.toString(16)}-1234-aaaaaa`),
+      // 乱数部が mkdtemp の形でない
+      join(root, `kiwa-x-${old}-1234-x`),
+      // label に使えない文字
+      join(root, `kiwa-a.b-${old}-1234-aaaaaa`),
+    ];
+    for (const path of forged) {
+      mkdirSync(path);
+      writeFileSync(join(path, 'keep.txt'), 'x');
+    }
+
+    create(root);
+
+    for (const path of forged) {
+      expect(existsSync(join(path, 'keep.txt')), `${path} が消えている`).toBe(true);
+    }
+  });
+
+  it('居ないと確認できない PID の dir は残す', () => {
+    const root = makeRoot();
+    // PID 1 は存在するが、 通常 user からは signal を送れず `EPERM` になる。
+    // 「確かめられなかった」 を「居ない」 と読むと、 ここが消える。
+    const owned = seedManaged(root, 'root-owned', Date.now() - 25 * HOUR, 1);
+
+    create(root);
+
+    expect(existsSync(owned)).toBe(true);
+  });
+
+  it('別々の root は互いの走査状態を共有しない', () => {
+    const rootA = makeRoot();
+    const rootB = makeRoot();
+    const staleB = seedManaged(rootB, 'b', Date.now() - 25 * HOUR, deadPid());
+
+    create(rootA);
+    // A を走査しても B は未走査のまま。 B への作成で B が回収される。
+    expect(existsSync(staleB)).toBe(true);
+    create(rootB);
+    expect(existsSync(staleB)).toBe(false);
   });
 
   it('回収の走査は root ごとに 1 度で、 2 度目の作成では走らない', () => {

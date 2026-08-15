@@ -40,8 +40,12 @@ const IMPLEMENTATION = 'core/src/temp.ts';
  * 追える範囲を広げる方向でしか塞げない領域なので、 実在した形を順に足していく。
  */
 const PATTERNS: ReadonlyArray<{ label: string; re: RegExp }> = [
-  // `import { mkdtemp } from 'node:fs'` / `... from 'node:fs/promises'`
-  { label: 'named import', re: /import\s*\{[^}]*\bmkdtemp(Sync)?\b[^}]*\}\s*from\s*['"]node:fs(\/promises)?['"]/ },
+  // `import { mkdtemp } from 'node:fs'` / `... from 'fs/promises'`
+  // bare `fs` も受ける = `node:` 付きだけを見ていると `from 'fs'` が素通りする。
+  {
+    label: 'named import',
+    re: /import\s*\{[^}]*\bmkdtemp(Sync)?\b[^}]*\}\s*from\s*['"](node:)?fs(\/promises)?['"]/,
+  },
   // `require('node:fs').mkdtempSync` / `const { mkdtemp } = require('fs')`
   { label: 'require', re: /require\s*\(\s*['"](node:)?fs(\/promises)?['"]\s*\)/ },
   // `await import('node:fs')`
@@ -50,9 +54,16 @@ const PATTERNS: ReadonlyArray<{ label: string; re: RegExp }> = [
   { label: 'member call', re: /\.\s*mkdtemp(Sync)?\s*\(/ },
 ];
 
-/** `require` と dynamic import は fs を取るだけでは違反にならない。 呼出が要る。 */
-const CALL_REQUIRED = new Set(['require', 'dynamic import']);
+/**
+ * fs を取るだけでは違反にならない形。 `mkdtemp` の言及が別に要る。
+ *
+ * `member call` もここに入れる。 `.mkdtempSync(` は receiver を見ないため、 fs と
+ * 無関係な object の同名 method まで拾う。 receiver を binding まで追うには字句解析が
+ * 要るので、 **同じ file が fs を取っていること** を条件にして絞る。
+ */
+const FS_ACCESS_REQUIRED = new Set(['require', 'dynamic import', 'member call']);
 const MKDTEMP_MENTION = /\bmkdtemp(Sync)?\b/;
+const FS_MODULE_ACCESS = /(from\s*['"]|require\s*\(\s*['"]|import\s*\(\s*['"])(node:)?fs(\/promises)?['"]/;
 
 /** 走査する拡張子。 実行される source すべて。 */
 const SOURCE_EXTENSIONS = ['.ts', '.mts', '.cts', '.tsx', '.js', '.mjs', '.cjs'];
@@ -100,13 +111,31 @@ function stripComments(source: string): string {
   return source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 }
 
+/**
+ * 文字列 literal の中身を落とす。
+ *
+ * 検出規則そのものを説明する source (この file がそう) は、 文字列に `import { mkdtemp }
+ * from 'node:fs'` を持つ。 中身を残すと、 説明を書いただけで違反になる。
+ *
+ * **import / require の指定子は残す**。 module 名は文字列 literal なので、 丸ごと落とすと
+ * 何も検出できなくなる。 `from` / `require(` / `import(` の直後だけを残す。
+ */
+function stripStringLiterals(source: string): string {
+  return source.replace(
+    /(from\s*|require\s*\(\s*|import\s*\(\s*)?(['"`])(?:\\.|(?!\2)[\s\S])*\2/g,
+    (match, keyword: string | undefined) => (keyword === undefined ? '""' : match),
+  );
+}
+
 function violationOf(source: string): string | null {
-  const code = stripComments(source);
+  const code = stripStringLiterals(stripComments(source));
   const mentionsMkdtemp = MKDTEMP_MENTION.test(code);
+  const touchesFs = FS_MODULE_ACCESS.test(code);
   for (const { label, re } of PATTERNS) {
     if (!re.test(code)) continue;
-    // fs を取るだけの形は、 `mkdtemp` を実際に使っていなければ違反ではない。
-    if (CALL_REQUIRED.has(label) && !mentionsMkdtemp) continue;
+    // fs を取るだけの形と、 receiver を追えない member call は、 その file が
+    // 実際に `mkdtemp` を使い、 かつ fs を取っている時にだけ違反とみなす。
+    if (FS_ACCESS_REQUIRED.has(label) && !(mentionsMkdtemp && touchesFs)) continue;
     return label;
   }
   return null;
@@ -164,9 +193,21 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("const { mkdtemp } = require('node:fs/promises');")).toBe('require');
     expect(violationOf("const fs = await import('fs'); fs.mkdtempSync(x);")).not.toBeNull();
     expect(violationOf("import * as fs from 'node:fs'; fs.mkdtempSync(x);")).toBe('member call');
-    // comment と、 fs を mkdtemp 以外で使う形は違反にしない。
+    // `node:` の付かない bare 指定子も検出する。
+    expect(violationOf("import { mkdtempSync } from 'fs';")).toBe('named import');
+    expect(violationOf("const { mkdtemp } = require('fs/promises');")).toBe('require');
+  });
+
+  it('検出規則が正当な code を誤検出しない', () => {
+    // comment に書いただけ。
     expect(violationOf('// mkdtemp を直接呼ばない')).toBeNull();
+    expect(violationOf('/* import { mkdtempSync } from "node:fs" は禁止 */')).toBeNull();
+    // 文字列 literal に規則を書いただけ (この test file 自身がその形)。
+    expect(violationOf('const rule = "import { mkdtempSync } from \'node:fs\'";')).toBeNull();
+    // fs を mkdtemp 以外で使う形。
     expect(violationOf("const { readFile } = require('node:fs/promises');")).toBeNull();
+    // fs と無関係な object の同名 method。
+    expect(violationOf('await client.mkdtempSync(x);')).toBeNull();
   });
 
   it('packages の src と scripts が mkdtemp を直接使わない', () => {

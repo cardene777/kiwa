@@ -1,6 +1,6 @@
 import { mkdtempSync, lstatSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { isAbsolute, join, resolve, sep } from 'node:path';
+import { isAbsolute, join, relative, resolve } from 'node:path';
 
 /**
  * 全 adapter が共有する temp dir の名前空間。
@@ -89,11 +89,31 @@ interface DecodedName {
 }
 
 /**
- * dir 名から作成時刻と PID を読む。 この形で無ければ null。
+ * PID の上限。 これを超える値は OS が割り当てないため、 自分たちが書いた名前ではない。
  *
- * `kiwa-<label>-<epochMs>-<pid>-<mkdtemp の乱数>`。 `mkdtemp` は prefix の直後に乱数を
- * 足すため乱数は最後の segment に入る。 label 自体が `-` を含みうるので、 後ろから
- * 数えて位置を決める。
+ * Linux の `pid_max` は既定 4194304、 macOS は 99998。 大きい方に合わせて弾く値を決める。
+ * 上限を持たないと、 `process.kill` が範囲外で投げる error を「居ない」 と読む経路に
+ * 偽装名を流し込める。
+ */
+const PID_MAX = 4_194_304;
+
+/** `mkdtemp` が prefix の後ろに足す乱数。 現状 6 文字で、 長くなる方向には許容する。 */
+const MKDTEMP_SUFFIX = /^[A-Za-z0-9]{6,}$/;
+
+/** 10 進の正準表記か。 `0x10` / ` 12 ` / `012` / `1e3` を弾く。 */
+function isCanonicalDecimal(text: string, value: number): boolean {
+  return String(value) === text;
+}
+
+/**
+ * dir 名から作成時刻と PID を読む。 **自分たちが書いた形と厳密に一致する時だけ** 返す。
+ *
+ * `kiwa-<label>-<epochMs>-<pid>-<mkdtemp の乱数>`。 label 自体が `-` を含みうるので、
+ * 後ろから数えて位置を決める。
+ *
+ * 数値として読めるだけでは足りない。 `Number` は `0x10` も ` 12 ` も受けるため、
+ * 「生成し得ない名前」 が通ると他者の dir を削除対象に引き込む。 label ・ 時刻 ・
+ * PID ・ 乱数のすべてを、 こちらが書ける形かで検証する。
  *
  * **null を返した entry は消さない**。 名前を読めないことは「自分たちが作っていない」
  * ことを意味する。 利用者が `$TMPDIR` に置いた `kiwa-cache` のような dir がここに来る。
@@ -103,18 +123,32 @@ function decodeName(name: string): DecodedName | null {
   const segments = name.split('-');
   // kiwa / label(1 つ以上) / ts / pid / rand
   if (segments.length < 5) return null;
-  const createdAt = Number(segments[segments.length - 3]);
-  const pid = Number(segments[segments.length - 2]);
+
+  const suffix = segments[segments.length - 1] ?? '';
+  const pidText = segments[segments.length - 2] ?? '';
+  const createdAtText = segments[segments.length - 3] ?? '';
+  const label = segments.slice(1, segments.length - 3).join('-');
+
+  if (!MKDTEMP_SUFFIX.test(suffix)) return null;
+  if (!LABEL_PATTERN.test(label)) return null;
+
+  const createdAt = Number(createdAtText);
+  const pid = Number(pidText);
   if (!Number.isSafeInteger(createdAt) || createdAt <= 0) return null;
-  if (!Number.isSafeInteger(pid) || pid <= 0) return null;
+  if (!isCanonicalDecimal(createdAtText, createdAt)) return null;
+  if (!Number.isSafeInteger(pid) || pid <= 0 || pid > PID_MAX) return null;
+  if (!isCanonicalDecimal(pidText, pid)) return null;
+
   return { createdAt, pid };
 }
 
 /**
  * その PID のプロセスが今も居るか。
  *
- * 居るなら年齢に関わらず残す。 PID は再利用されるため「居る」 が誤ることはあるが、
- * 誤る方向は **残す** 側なので、 稼働中の dir を消す事故にはならない。
+ * **居ないと言い切れる時だけ false を返す**。 `ESRCH` (そんなプロセスは無い) 以外の
+ * error は「確かめられなかった」 であって「居ない」 ではない。 `EPERM` は別 user の
+ * プロセスが居る証拠だし、 引数が範囲外なら判定自体が成立していない。 どちらも
+ * 残す側に倒す = 削除は「居ないと確認できた」 場合に限る。
  */
 function ownerAlive(pid: number): boolean {
   if (pid === process.pid) return true;
@@ -122,8 +156,7 @@ function ownerAlive(pid: number): boolean {
     process.kill(pid, 0);
     return true;
   } catch (error) {
-    // EPERM = 別 user のプロセスが同じ PID を持っている。 居ることは確かなので残す。
-    return (error as NodeJS.ErrnoException).code === 'EPERM';
+    return (error as NodeJS.ErrnoException).code !== 'ESRCH';
   }
 }
 
@@ -215,8 +248,11 @@ export function createManagedTempDir(opts: ManagedTempDirOptions = {}): ManagedT
 
   // 相対 path のまま保持すると、 呼出側が `chdir` した後の `dispose` と exit hook が
   // 別の場所の同名 dir を消しうる。 掘る前に絶対化する。
-  const rawRoot = opts.root ?? tmpdir();
-  const root = isAbsolute(rawRoot) ? rawRoot : resolve(rawRoot);
+  //
+  // `resolve` は絶対 path も通す。 末尾の区切りを落として正準形にするため、 絶対
+  // かどうかで分岐しない = `/tmp/x/` をそのまま保持すると、 後段の containment 判定が
+  // 区切りの重なりで誤る。
+  const root = resolve(opts.root ?? tmpdir());
 
   const thresholdMs = Math.max(opts.reclaimAfterMs ?? DEFAULT_RECLAIM_AFTER_MS, RECLAIM_FLOOR_MS);
   const now = Date.now();
@@ -229,7 +265,11 @@ export function createManagedTempDir(opts: ManagedTempDirOptions = {}): ManagedT
   const path = mkdtempSync(join(root, encodePrefix(label, now)));
   // `mkdtemp` の戻り値が root の外に出ていないことを確かめる。 label は検証済だが、
   // 判定を名前の形だけに委ねず、 実際に掘れた場所で裏を取る。
-  if (!path.startsWith(root + sep)) {
+  //
+  // 文字列の前方一致では測れない。 `root` が `/` の時に区切りが重なり、 正当な path を
+  // 外と判定する。 `relative` なら区切りの表記に依らず「上に出たか」 だけを見られる。
+  const inside = relative(root, path);
+  if (inside === '' || inside.startsWith('..') || isAbsolute(inside)) {
     try {
       rmSync(path, { recursive: true, force: true });
     } catch {
