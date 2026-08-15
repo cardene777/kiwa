@@ -18,6 +18,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
@@ -30,40 +31,27 @@ const PACKAGES_DIR = resolve(REPO_ROOT, 'packages');
 const IMPLEMENTATION = 'core/src/temp.ts';
 
 /**
- * `mkdtemp` の入手経路を拾う。
+ * `mkdtemp` の入手経路を、TypeScript の parser が作る AST で判定する。
  *
- * import 名は変えられる (`import { mkdtemp as mk }`) ので呼出側だけでは漏れる。 一方
- * `node:fs` を namespace で取る形 (`import * as fs`) や `require` / dynamic import では
- * import 行に `mkdtemp` が現れない。 そこで **入手と呼出の両方** を見る。
+ * **手書きの走査はやめた** (#1927 の Round 2 / 3 / 4)。 comment ・ 文字列 ・ template の
+ * 展開式 ・ 正規表現 literal ・ 除算との区別を自前で扱う形は 3 round 連続で fix 由来の
+ * 欠陥を出し、 severity が下がらなかった。 `rules/quality.md § Round 収束判定` の暴走
+ * signal (同一 root cause 3 連続 / 同じ箇所を 3 round / 検証済 scope が広がらない) が
+ * 揃ったため、 round を重ねずに設計へ戻している。
  *
- * 静的解析なので、 変数に詰め替える形 (`const f = fs['mkdtemp' + '']`) までは追えない。
- * 追える範囲を広げる方向でしか塞げない領域なので、 実在した形を順に足していく。
+ * parser に委ねると、 これらの区別は言語仕様の側が持つ。 判定に残るのは「どの node を
+ * 違反とみなすか」 だけになる。
+ *
+ * 追えない範囲は変わらず残る。 変数への詰め替え (`const f = fs.mkdtempSync; f(x)`) と
+ * 計算した property 名 (`fs['mkdtemp' + 'Sync']`) は、 到達可能性の解析が要るため
+ * 対象外。 この境界は意図的で、 塞ぐなら別 layer (実行時の検査) の仕事になる。
  */
-const PATTERNS: ReadonlyArray<{ label: string; re: RegExp }> = [
-  // `import { mkdtemp } from 'node:fs'` / `... from 'fs/promises'`
-  // bare `fs` も受ける = `node:` 付きだけを見ていると `from 'fs'` が素通りする。
-  {
-    label: 'named import',
-    re: /import\s*\{[^}]*\bmkdtemp(Sync)?\b[^}]*\}\s*from\s*['"](node:)?fs(\/promises)?['"]/,
-  },
-  // `require('node:fs').mkdtempSync` / `const { mkdtemp } = require('fs')`
-  { label: 'require', re: /require\s*\(\s*['"](node:)?fs(\/promises)?['"]\s*\)/ },
-  // `await import('node:fs')`
-  { label: 'dynamic import', re: /import\s*\(\s*['"](node:)?fs(\/promises)?['"]\s*\)/ },
-  // `fs.mkdtempSync(...)` — namespace / default import 経由の呼出
-  { label: 'member call', re: /\.\s*mkdtemp(Sync)?\s*\(/ },
-];
+const MKDTEMP_NAMES = new Set(['mkdtemp', 'mkdtempSync']);
 
-/**
- * fs を取るだけでは違反にならない形。 `mkdtemp` の言及が別に要る。
- *
- * `member call` もここに入れる。 `.mkdtempSync(` は receiver を見ないため、 fs と
- * 無関係な object の同名 method まで拾う。 receiver を binding まで追うには字句解析が
- * 要るので、 **同じ file が fs を取っていること** を条件にして絞る。
- */
-const FS_ACCESS_REQUIRED = new Set(['require', 'dynamic import', 'member call']);
-const MKDTEMP_MENTION = /\bmkdtemp(Sync)?\b/;
-const FS_MODULE_ACCESS = /(from\s*['"]|require\s*\(\s*['"]|import\s*\(\s*['"])(node:)?fs(\/promises)?['"]/;
+/** `node:fs` / `fs` / それぞれの `/promises`。 */
+function isFsSpecifier(text: string): boolean {
+  return /^(node:)?fs(\/promises)?$/.test(text);
+}
 
 /** 走査する拡張子。 実行される source すべて。 */
 const SOURCE_EXTENSIONS = ['.ts', '.mts', '.cts', '.tsx', '.js', '.mjs', '.cjs'];
@@ -107,132 +95,96 @@ function collectSourceFiles(dir: string, out: string[] = []): string[] {
  * 説明する comment が書けなくなる (この file 自身がそう)。 文字列 literal は残す =
  * `require('node:fs')` の引数は literal なので、 落とすと検出できない。
  */
-/**
- * source から「実行される部分」 だけを取り出す。
- *
- * regex を重ねる形では収束しなかった (#1927 の Round 2 / Round 3)。 comment を先に消すと
- * 文字列の中の `//` が行を食い、 文字列を丸ごと消すと template の `${fs.mkdtempSync(x)}` が
- * 消え、 正規表現 literal に書いた検出規則が違反として上がる。 いずれも「前の処理が次の
- * 処理の入力を壊す」 形で、 順番を変えても別の穴が開く。
- *
- * 1 度の走査で状態を持つと、 これらは同じ 1 つの判定に畳める。
- *
- * - comment (行 / block) は落とす
- * - 文字列 literal は中身を落とす。 ただし module 指定子として使われる位置 (`from` /
- *   `require(` / `import(` の直後) だけは残す = 落とすと何も検出できなくなる
- * - template literal は literal 部分を落とし、 `${...}` の中は残す = そこは実行される
- * - 正規表現 literal は落とす。 検出規則を書いた source を違反にしないため
- *
- * 除算との区別は直前の意味のある文字で行う。 値が来られない位置の `/` を正規表現の
- * 開始とみなす、 という通常の heuristic。
- */
-function extractCode(source: string): string {
-  const out: string[] = [];
-  let i = 0;
-  /** 直前に出力した意味のある文字。 正規表現か除算かの判定に使う。 */
-  let prev = '';
-  /** 文字列の中身を残すか。 `from` / `require(` / `import(` の直後だけ true。 */
-  const keepsSpecifier = (): boolean => /(\bfrom|\brequire\s*\(|\bimport\s*\()\s*$/.test(out.join(''));
-
-  const isRegexPosition = (): boolean => prev === '' || '([{,;=:!&|?+-*%~^<>'.includes(prev);
-
-  while (i < source.length) {
-    const ch = source[i] ?? '';
-    const next = source[i + 1] ?? '';
-
-    if (ch === '/' && next === '/') {
-      while (i < source.length && source[i] !== '\n') i += 1;
-      continue;
-    }
-    if (ch === '/' && next === '*') {
-      i += 2;
-      while (i < source.length && !(source[i] === '*' && source[i + 1] === '/')) i += 1;
-      i += 2;
-      out.push(' ');
-      continue;
-    }
-    if (ch === '"' || ch === "'") {
-      const keep = keepsSpecifier();
-      const start = i;
-      i += 1;
-      while (i < source.length && source[i] !== ch) {
-        if (source[i] === '\\') i += 1;
-        i += 1;
-      }
-      i += 1;
-      out.push(keep ? source.slice(start, i) : `${ch}${ch}`);
-      prev = ch;
-      continue;
-    }
-    if (ch === '`') {
-      i += 1;
-      while (i < source.length && source[i] !== '`') {
-        if (source[i] === '\\') {
-          i += 2;
-          continue;
-        }
-        if (source[i] === '$' && source[i + 1] === '{') {
-          // 展開式は実行される。 中身をそのまま残す。
-          i += 2;
-          let depth = 1;
-          const exprStart = i;
-          while (i < source.length && depth > 0) {
-            if (source[i] === '{') depth += 1;
-            else if (source[i] === '}') depth -= 1;
-            if (depth > 0) i += 1;
-          }
-          out.push(` ${source.slice(exprStart, i)} `);
-          i += 1;
-          continue;
-        }
-        i += 1;
-      }
-      i += 1;
-      prev = '`';
-      continue;
-    }
-    if (ch === '/' && isRegexPosition()) {
-      i += 1;
-      let inClass = false;
-      while (i < source.length) {
-        const c = source[i];
-        if (c === '\\') {
-          i += 2;
-          continue;
-        }
-        if (c === '[') inClass = true;
-        else if (c === ']') inClass = false;
-        else if (c === '/' && !inClass) break;
-        else if (c === '\n') break;
-        i += 1;
-      }
-      i += 1;
-      // flags
-      while (i < source.length && /[a-z]/.test(source[i] ?? '')) i += 1;
-      out.push(' ');
-      prev = ' ';
-      continue;
-    }
-
-    out.push(ch);
-    if (!/\s/.test(ch)) prev = ch;
-    i += 1;
-  }
-
-  return out.join('');
-}
-
 function violationOf(source: string): string | null {
-  const code = extractCode(source);
-  const mentionsMkdtemp = MKDTEMP_MENTION.test(code);
-  const touchesFs = FS_MODULE_ACCESS.test(code);
-  for (const { label, re } of PATTERNS) {
-    if (!re.test(code)) continue;
-    // fs を取るだけの形と、 receiver を追えない member call は、 その file が
-    // 実際に `mkdtemp` を使い、 かつ fs を取っている時にだけ違反とみなす。
-    if (FS_ACCESS_REQUIRED.has(label) && !(mentionsMkdtemp && touchesFs)) continue;
-    return label;
+  const sourceFile = ts.createSourceFile(
+    'probe.ts',
+    source,
+    ts.ScriptTarget.Latest,
+    /* setParentNodes */ true,
+  );
+
+  /** fs を名前空間 / 既定 import で束ねた識別子。 member call の receiver 判定に使う。 */
+  const fsBindings = new Set<string>();
+  let touchesFs = false;
+  let usesMkdtempName = false;
+  let namedImport = false;
+  const memberCalls: ts.PropertyAccessExpression[] = [];
+
+  const visit = (node: ts.Node): void => {
+    // `import ... from 'node:fs'`
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      if (isFsSpecifier(node.moduleSpecifier.text)) {
+        touchesFs = true;
+        const bindings = node.importClause?.namedBindings;
+        if (bindings && ts.isNamedImports(bindings)) {
+          for (const element of bindings.elements) {
+            // `import { mkdtemp as mk }` は `propertyName` 側が元の名前。
+            const imported = element.propertyName?.text ?? element.name.text;
+            if (MKDTEMP_NAMES.has(imported)) namedImport = true;
+          }
+        }
+        if (bindings && ts.isNamespaceImport(bindings)) fsBindings.add(bindings.name.text);
+        if (node.importClause?.name) fsBindings.add(node.importClause.name.text);
+      }
+    }
+
+    // `require('node:fs')` / `await import('fs')`
+    if (ts.isCallExpression(node)) {
+      const isRequire = ts.isIdentifier(node.expression) && node.expression.text === 'require';
+      const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const arg = node.arguments[0];
+      if ((isRequire || isDynamicImport) && arg && ts.isStringLiteral(arg) && isFsSpecifier(arg.text)) {
+        touchesFs = true;
+      }
+    }
+
+    // `const { mkdtemp } = require('fs')` / `const fs = require('fs')`
+    if (ts.isVariableDeclaration(node) && node.initializer) {
+      const init = ts.isAwaitExpression(node.initializer)
+        ? node.initializer.expression
+        : node.initializer;
+      const fromFs =
+        ts.isCallExpression(init) &&
+        init.arguments[0] !== undefined &&
+        ts.isStringLiteral(init.arguments[0]) &&
+        isFsSpecifier(init.arguments[0].text);
+      if (fromFs) {
+        if (ts.isIdentifier(node.name)) fsBindings.add(node.name.text);
+        if (ts.isObjectBindingPattern(node.name)) {
+          for (const element of node.name.elements) {
+            const bound = element.propertyName ?? element.name;
+            if (ts.isIdentifier(bound) && MKDTEMP_NAMES.has(bound.text)) usesMkdtempName = true;
+          }
+        }
+      }
+    }
+
+    // `fs.mkdtempSync(...)` — receiver が fs の binding である時だけ違反にする。
+    if (ts.isPropertyAccessExpression(node) && MKDTEMP_NAMES.has(node.name.text)) {
+      memberCalls.push(node);
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+
+  if (namedImport) return 'named import';
+
+  for (const access of memberCalls) {
+    // `require('fs').mkdtempSync(...)` のように receiver が式そのものの形も受ける。
+    const receiver = access.expression;
+    const receiverIsFsBinding = ts.isIdentifier(receiver) && fsBindings.has(receiver.text);
+    const receiverIsFsCall =
+      ts.isCallExpression(receiver) &&
+      receiver.arguments[0] !== undefined &&
+      ts.isStringLiteral(receiver.arguments[0]) &&
+      isFsSpecifier(receiver.arguments[0].text);
+    if (receiverIsFsBinding || receiverIsFsCall) return 'member call';
   }
+
+  if (usesMkdtempName && touchesFs) return 'require';
+
   return null;
 }
 
@@ -307,6 +259,23 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf('const re = /import { mkdtempSync } from "node:fs"/;')).toBeNull();
     // 文字列の中の `//` が後続の行を食わない (#1927 Round 3)。
     expect(violationOf("const url = 'https://example.com';\nconst x = 1;")).toBeNull();
+  });
+
+  it('正規表現と除算の区別が文脈で決まる', () => {
+    // 手書きの走査は直前 1 文字で判定していたため、この 2 形を取り違えた (#1927 Round 4)。
+    expect(violationOf('function f() { return /import { mkdtempSync } from "node:fs"/; }')).toBeNull();
+    expect(
+      violationOf("let x = 1, y = 2; x++ / y; import { mkdtempSync } from 'node:fs';"),
+    ).toBe('named import');
+  });
+
+  it('template の入れ子と展開式内の文字列で判定が崩れない', () => {
+    // `${}` を波括弧の数だけで切ると、文字列内の `}` で式が終わった扱いになる (#1927 Round 4)。
+    expect(
+      violationOf('import * as fs from "node:fs";\nconst p = `${"}"; fs.mkdtempSync(x)}`;'),
+    ).toBe('member call');
+    // 入れ子 template の literal 部分は実行されない。
+    expect(violationOf('const s = `${`fs.mkdtempSync(x)`}`;')).toBeNull();
   });
 
   it('文字列を消しても template の展開式は残す', () => {

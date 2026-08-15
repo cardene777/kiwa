@@ -91,6 +91,12 @@ describe('createManagedTempDir', () => {
     expect(match, `${name} が規約に一致しない`).not.toBeNull();
     expect(match?.[1]).toBe('round-trip');
     expect(Number(match?.[3])).toBe(process.pid);
+    // **正準表記であることまで見る**。 decode 側は `String(Number(x)) === x` を要求する
+    // ため、先頭 0 を付ける等の変異は encode だけ通って回収が効かなくなる (#1927 Round 4)。
+    for (const group of [match?.[2], match?.[3]]) {
+      expect(group, '数値部が空').toBeDefined();
+      expect(String(Number(group)), `${group} が 10 進の正準表記でない`).toBe(group);
+    }
   });
 
   it('dispose で消え、 2 度呼んでも例外にならない', () => {
