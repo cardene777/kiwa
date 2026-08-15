@@ -15,6 +15,9 @@
 // 対象外。
 //   - `packages/core/src/temp.ts` = 名前空間の実装そのもの。 ここだけが直接呼ぶ
 //   - test file = 一時 dir の寿命が test 内で閉じており、 runner が後始末する
+//   - enum member の scope (#1931 SC-5) = member 名が loader を隠す形は enum initializer の
+//     中でしか起きず、その呼出は型検査で落ちる。 走査対象は型検査を通るため到達しない。
+//     識別力のある検査を作れないため、機構ごと持たない
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -76,7 +79,10 @@ function isScopeNode(node: ts.Node): boolean {
     ts.isClassDeclaration(node) ||
     ts.isClassExpression(node) ||
     // class の static block は独立した scope で、`var` もここに閉じる。
-    ts.isClassStaticBlockDeclaration(node)
+    ts.isClassStaticBlockDeclaration(node) ||
+    // namespace は segment ごとに scope を作る。 境界にしないと `namespace A.require {}` の
+    // 内側 segment が外側に登録される (#1931 SC-3)。
+    ts.isModuleDeclaration(node)
   );
 }
 
@@ -100,6 +106,37 @@ function isFunctionScopeNode(node: ts.Node): boolean {
     ts.isModuleBlock(node) ||
     ts.isClassStaticBlockDeclaration(node)
   );
+}
+
+/** 関数系 node か (評価の順序で見える束縛が変わる形)。 */
+function isFunctionLikeNode(node: ts.Node): boolean {
+  return (
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node)
+  );
+}
+
+/**
+ * parameter だけの束縛。 parameter の初期化子はここまでしか見えない (#1931 SC-1)。
+ *
+ * `function f(x = require('fs')) { var require = custom; }` の初期化子は、body の `var` では
+ * なく外側の `require` を見る。 1 つの scope に畳むと逆になる。
+ */
+function collectParameterBindings(scope: ts.Node): Map<string, BindingKind> {
+  const out = new Map<string, BindingKind>();
+  if ((ts.isFunctionExpression(scope) || ts.isClassExpression(scope)) && scope.name) {
+    out.set(scope.name.text, 'value');
+  }
+  const withParams = scope as ts.SignatureDeclarationBase;
+  if (Array.isArray(withParams.parameters)) {
+    for (const p of withParams.parameters) collectBindingName(p.name, out);
+  }
+  return out;
 }
 
 /** その変数宣言が `var` か (`let` / `const` は block scoped)。 */
@@ -234,7 +271,10 @@ function collectScopeBindings(scope: ts.Node): Map<string, BindingKind> {
  * 参照が文字列に化けるため捕まらない。 到達可能性の解析が要る領域で、 塞ぐなら実行時の
  * 検査という別 layer の仕事になる。
  */
-function scanSource(source: string, fileName: string): { violation: boolean; parseErrors: number } {
+function scanSource(
+  source: string,
+  fileName: string,
+): { violation: boolean; parseErrors: number; unresolvable: boolean } {
   // **実 file 名で parse する**。 `.tsx` を `.ts` として読むと JSX が構文誤りになり、
   // member access が AST から消えて「違反 0 件」 に化ける (#1927 Round 5)。
   const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true);
@@ -273,6 +313,8 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
 
   let touchesFs = false;
   let referencesMkdtemp = false;
+  // `with` を含む file は loader 名を解決できない (#1931 SC-4)。
+  let unresolvable = false;
 
   /** `module.require` / `module['require']` の形か。 */
   const isModuleRequire = (callee: ts.Expression): boolean => {
@@ -344,6 +386,22 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
     // 名前としての参照。 comment と文字列は Identifier にならないため自然に外れる。
     if (ts.isIdentifier(node) && MKDTEMP_NAMES.has(node.text)) referencesMkdtemp = true;
 
+    // `with` は Object Environment Record を作る。 何が束縛されるかは実行時にしか決まらず、
+    // loader 名の解決が成立しない。 静かに誤判定するより、解析できないことを報せる。
+    if (ts.isWithStatement(node)) unresolvable = true;
+
+    // 関数は評価の順序で見える束縛が変わる (#1931 SC-1 / SC-2)。
+    //
+    //   decorator と computed name  外側 scope で評価される
+    //   parameter の初期化子        parameter だけが見える
+    //   body                        parameter + body の宣言が見える
+    //
+    // 1 つの scope に畳むと、body の `var` が初期化子から見えてしまう。
+    if (isFunctionLikeNode(node)) {
+      visitFunctionLike(node);
+      return;
+    }
+
     // scope を作る node を stack に積んでから中へ入る。 宣言の中身は参照された時に集める。
     // scope 単位でまとめて集めるので、宣言より前で使う形 (巻き上げ) も取りこぼさない。
     const opensScope = isScopeNode(node);
@@ -352,9 +410,43 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
     if (opensScope) scopes.pop();
   };
 
+  /**
+   * 関数系 node を評価の順序どおりに辿る。
+   *
+   * decorator と computed name は関数の外で評価されるため、関数 scope を積む前に見る。
+   * parameter の初期化子は parameter scope だけを見て、body の宣言は見ない。
+   */
+  function visitFunctionLike(node: ts.Node): void {
+    const decl = node as ts.FunctionLikeDeclarationBase & {
+      modifiers?: ts.NodeArray<ts.ModifierLike>;
+      name?: ts.PropertyName;
+    };
+
+    // 外側 scope で評価される部分。
+    if (decl.modifiers) for (const m of decl.modifiers) if (ts.isDecorator(m)) visit(m);
+    if (decl.name && ts.isComputedPropertyName(decl.name)) visit(decl.name);
+
+    // parameter scope。 初期化子はここまでしか見えない。
+    scopes.push({ node, bindings: collectParameterBindings(node) });
+    if (decl.parameters) {
+      for (const p of decl.parameters) {
+        if (p.modifiers) for (const m of p.modifiers) if (ts.isDecorator(m)) visit(m);
+        if (p.initializer) visit(p.initializer);
+      }
+    }
+
+    // body scope。 parameter に加えて body の宣言が見える。
+    if (decl.body) {
+      scopes.push({ node });
+      visit(decl.body);
+      scopes.pop();
+    }
+    scopes.pop();
+  }
+
   visit(sourceFile);
 
-  return { violation: touchesFs && referencesMkdtemp, parseErrors };
+  return { violation: touchesFs && referencesMkdtemp, parseErrors, unresolvable };
 }
 
 /** 走査する拡張子。 実行される source すべて。 */
@@ -398,14 +490,15 @@ function violationOf(source: string, fileName = 'probe.ts'): string | null {
   return violation ? 'direct mkdtemp' : null;
 }
 
-function findDirectMkdtempUsage(): { offenders: string[]; unparsed: string[] } {
+function findDirectMkdtempUsage(): { offenders: string[]; unparsed: string[]; unresolvable: string[] } {
   const offenders: string[] = [];
   const unparsed: string[] = [];
+  const unresolvable: string[] = [];
   let packageNames: string[];
   try {
     packageNames = readdirSync(PACKAGES_DIR);
   } catch {
-    return { offenders, unparsed };
+    return { offenders, unparsed, unresolvable };
   }
 
   for (const name of packageNames) {
@@ -413,14 +506,15 @@ function findDirectMkdtempUsage(): { offenders: string[]; unparsed: string[] } {
       for (const file of collectSourceFiles(join(PACKAGES_DIR, name, subdir))) {
         const rel = relative(PACKAGES_DIR, file);
         if (rel === IMPLEMENTATION) continue;
-        const { violation, parseErrors } = scanSource(readFileSync(file, 'utf8'), file);
-        // parse できない file を素通しすると、 検査していないのに緑になる。
-        if (parseErrors > 0) unparsed.push(rel);
-        if (violation) offenders.push(rel);
+        const result = scanSource(readFileSync(file, 'utf8'), file);
+        // parse できない file / 解析できない file を素通しすると、 検査していないのに緑になる。
+        if (result.parseErrors > 0) unparsed.push(rel);
+        if (result.unresolvable) unresolvable.push(rel);
+        if (result.violation) offenders.push(rel);
       }
     }
   }
-  return { offenders, unparsed };
+  return { offenders, unparsed, unresolvable };
 }
 
 describe('一時 dir は core の名前空間を通す (#1926)', () => {
@@ -616,6 +710,42 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     ).toBeNull();
   });
 
+  it('parameter の初期化子は body の var を見ない (#1931 SC-1)', () => {
+    // 初期化子は parameter scope までしか見えない。 body の `var` は評価時点で未束縛。
+    expect(
+      violationOf("function f(x = require('fs').mkdtempSync(y)) { var require = custom; }"),
+    ).toBe('direct mkdtemp');
+    // parameter どうしの shadow は効く。
+    expect(
+      violationOf("function f(require, x = require('fs').mkdtempSync(y)) {}"),
+    ).toBeNull();
+  });
+
+  it('decorator と computed name は外側 scope で評価される (#1931 SC-2)', () => {
+    expect(
+      violationOf("class C { [require('fs').mkdtempSync(y)](require) {} }"),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf("class C { @dec(require('fs').mkdtempSync(y)) m(require) {} }"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('dotted namespace の内側 segment が外へ漏れない (#1931 SC-3)', () => {
+    expect(violationOf("namespace A.require {}\nrequire('fs').mkdtempSync(y);")).toBe(
+      'direct mkdtemp',
+    );
+    // 最外 segment は外から見えるので shadow として効く。
+    expect(violationOf("namespace require {}\nrequire('fs').mkdtempSync(y);")).toBeNull();
+  });
+
+  it('with を含む file は解析不能として報せる (#1931 SC-4)', () => {
+    // Object Environment Record の中身は実行時にしか決まらない。 静かに誤判定しない。
+    expect(scanSource("with (o) { require('fs').mkdtempSync(y); }", 'probe.ts').unresolvable).toBe(
+      true,
+    );
+    expect(scanSource("const x = 1;", 'probe.ts').unresolvable).toBe(false);
+  });
+
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
     // 判定そのものは識別子の有無で決まるため、`.ts` として読んでも検出はできる。
     // file 名が効くのは parse 誤りの側で、誤りが出ると「走査した file をすべて parse
@@ -629,10 +759,14 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf(source, 'probe.tsx')).toBe('direct mkdtemp');
   });
 
-  it('走査した file をすべて parse できている', () => {
-    // parse に失敗した file を素通しすると、 検査していないのに緑になる。
-    const { unparsed } = findDirectMkdtempUsage();
+  it('走査した file をすべて解析できている', () => {
+    // parse も loader 解決もできない file を素通しすると、 検査していないのに緑になる。
+    const { unparsed, unresolvable } = findDirectMkdtempUsage();
     expect(unparsed, `parse できない file がある:\n${unparsed.join('\n')}`).toEqual([]);
+    expect(
+      unresolvable,
+      `loader 名を解決できない file がある (with を含む):\n${unresolvable.join('\n')}`,
+    ).toEqual([]);
   });
 
   it('packages の src と scripts が mkdtemp を直接使わない', () => {
