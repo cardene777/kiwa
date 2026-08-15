@@ -30,14 +30,35 @@ const PACKAGES_DIR = resolve(REPO_ROOT, 'packages');
 const IMPLEMENTATION = 'core/src/temp.ts';
 
 /**
- * `mkdtemp` の呼出を拾う。
+ * `mkdtemp` の入手経路を拾う。
  *
- * import 名を変えられる (`import { mkdtemp as mk }`) ため、 呼出側だけを見ても漏れる。
- * `node:fs` 系から `mkdtemp` を import する行そのものを対象にする。 import しなければ
- * 呼べないので、 名前を変えても捕まる。
+ * import 名は変えられる (`import { mkdtemp as mk }`) ので呼出側だけでは漏れる。 一方
+ * `node:fs` を namespace で取る形 (`import * as fs`) や `require` / dynamic import では
+ * import 行に `mkdtemp` が現れない。 そこで **入手と呼出の両方** を見る。
+ *
+ * 静的解析なので、 変数に詰め替える形 (`const f = fs['mkdtemp' + '']`) までは追えない。
+ * 追える範囲を広げる方向でしか塞げない領域なので、 実在した形を順に足していく。
  */
-const FS_IMPORT = /from\s+['"]node:fs(\/promises)?['"]/;
-const MKDTEMP_BINDING = /\bmkdtemp(Sync)?\b/;
+const PATTERNS: ReadonlyArray<{ label: string; re: RegExp }> = [
+  // `import { mkdtemp } from 'node:fs'` / `... from 'node:fs/promises'`
+  { label: 'named import', re: /import\s*\{[^}]*\bmkdtemp(Sync)?\b[^}]*\}\s*from\s*['"]node:fs(\/promises)?['"]/ },
+  // `require('node:fs').mkdtempSync` / `const { mkdtemp } = require('fs')`
+  { label: 'require', re: /require\s*\(\s*['"](node:)?fs(\/promises)?['"]\s*\)/ },
+  // `await import('node:fs')`
+  { label: 'dynamic import', re: /import\s*\(\s*['"](node:)?fs(\/promises)?['"]\s*\)/ },
+  // `fs.mkdtempSync(...)` — namespace / default import 経由の呼出
+  { label: 'member call', re: /\.\s*mkdtemp(Sync)?\s*\(/ },
+];
+
+/** `require` と dynamic import は fs を取るだけでは違反にならない。 呼出が要る。 */
+const CALL_REQUIRED = new Set(['require', 'dynamic import']);
+const MKDTEMP_MENTION = /\bmkdtemp(Sync)?\b/;
+
+/** 走査する拡張子。 実行される source すべて。 */
+const SOURCE_EXTENSIONS = ['.ts', '.mts', '.cts', '.tsx', '.js', '.mjs', '.cjs'];
+
+/** `packages/<name>/` 直下で走査する dir。 */
+const SCANNED_SUBDIRS = ['src', 'scripts'];
 
 // `packages/<name>/src` 配下の `.ts` を集める (test file は除く)。
 // 注 = block comment に `packages/*` と `/src` を続けて書くと comment が途中で閉じる。
@@ -61,7 +82,7 @@ function collectSourceFiles(dir: string, out: string[] = []): string[] {
       collectSourceFiles(full, out);
       continue;
     }
-    if (!entry.endsWith('.ts')) continue;
+    if (!SOURCE_EXTENSIONS.some((ext) => entry.endsWith(ext))) continue;
     if (entry.includes('.test.') || entry.includes('.spec.')) continue;
     out.push(full);
   }
@@ -69,20 +90,29 @@ function collectSourceFiles(dir: string, out: string[] = []): string[] {
 }
 
 /**
- * import 文だけを取り出す。
+ * comment を落とす。
  *
  * 本文の comment に `mkdtemp` と書いただけで落とすと、 なぜ直接呼んではいけないかを
- * 説明する comment が書けなくなる (この file 自身がそう)。
+ * 説明する comment が書けなくなる (この file 自身がそう)。 文字列 literal は残す =
+ * `require('node:fs')` の引数は literal なので、 落とすと検出できない。
  */
-function importLines(source: string): string[] {
-  const lines: string[] = [];
-  const pattern = /import[\s\S]*?from\s+['"][^'"]+['"]/g;
-  const matches = source.match(pattern);
-  if (matches) lines.push(...matches);
-  return lines;
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
 }
 
-function findDirectMkdtempImports(): string[] {
+function violationOf(source: string): string | null {
+  const code = stripComments(source);
+  const mentionsMkdtemp = MKDTEMP_MENTION.test(code);
+  for (const { label, re } of PATTERNS) {
+    if (!re.test(code)) continue;
+    // fs を取るだけの形は、 `mkdtemp` を実際に使っていなければ違反ではない。
+    if (CALL_REQUIRED.has(label) && !mentionsMkdtemp) continue;
+    return label;
+  }
+  return null;
+}
+
+function findDirectMkdtempUsage(): string[] {
   const offenders: string[] = [];
   let packageNames: string[];
   try {
@@ -92,16 +122,12 @@ function findDirectMkdtempImports(): string[] {
   }
 
   for (const name of packageNames) {
-    const srcDir = join(PACKAGES_DIR, name, 'src');
-    for (const file of collectSourceFiles(srcDir)) {
-      const rel = relative(PACKAGES_DIR, file);
-      if (rel === IMPLEMENTATION) continue;
-      const source = readFileSync(file, 'utf8');
-      for (const statement of importLines(source)) {
-        if (FS_IMPORT.test(statement) && MKDTEMP_BINDING.test(statement)) {
-          offenders.push(rel);
-          break;
-        }
+    for (const subdir of SCANNED_SUBDIRS) {
+      for (const file of collectSourceFiles(join(PACKAGES_DIR, name, subdir))) {
+        const rel = relative(PACKAGES_DIR, file);
+        if (rel === IMPLEMENTATION) continue;
+        const label = violationOf(readFileSync(file, 'utf8'));
+        if (label !== null) offenders.push(`${rel} (${label})`);
       }
     }
   }
@@ -113,9 +139,18 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     // 拾えていない状態で「違反 0 件」 になると、 検査していないのに緑になる。
     // #1821 で実際に踏んだ形なので、 分母が非空であることを先に固定する。
     const total = readdirSync(PACKAGES_DIR).flatMap((name) =>
-      collectSourceFiles(join(PACKAGES_DIR, name, 'src')),
+      SCANNED_SUBDIRS.flatMap((subdir) => collectSourceFiles(join(PACKAGES_DIR, name, subdir))),
     );
     expect(total.length).toBeGreaterThan(100);
+  });
+
+  it('scripts 配下も走査に入っている', () => {
+    // `src` だけを見ていた間、 `perf-harness/scripts/reference-op-probe.mjs` の
+    // 直接呼出が検査を素通りしていた (#1927 review)。
+    const scripts = readdirSync(PACKAGES_DIR).flatMap((name) =>
+      collectSourceFiles(join(PACKAGES_DIR, name, 'scripts')),
+    );
+    expect(scripts.length).toBeGreaterThan(0);
   });
 
   it('名前空間の実装が実在する', () => {
@@ -123,11 +158,22 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(() => readFileSync(join(PACKAGES_DIR, IMPLEMENTATION), 'utf8')).not.toThrow();
   });
 
-  it('packages/*/src が node:fs の mkdtemp を直接 import しない', () => {
-    const offenders = findDirectMkdtempImports();
+  it('検出規則が 4 経路すべてを拾う', () => {
+    // 規則を緩めた時にここが落ちる。 実 file を用意せず、 規則そのものを固定する。
+    expect(violationOf("import { mkdtempSync } from 'node:fs';")).toBe('named import');
+    expect(violationOf("const { mkdtemp } = require('node:fs/promises');")).toBe('require');
+    expect(violationOf("const fs = await import('fs'); fs.mkdtempSync(x);")).not.toBeNull();
+    expect(violationOf("import * as fs from 'node:fs'; fs.mkdtempSync(x);")).toBe('member call');
+    // comment と、 fs を mkdtemp 以外で使う形は違反にしない。
+    expect(violationOf('// mkdtemp を直接呼ばない')).toBeNull();
+    expect(violationOf("const { readFile } = require('node:fs/promises');")).toBeNull();
+  });
+
+  it('packages の src と scripts が mkdtemp を直接使わない', () => {
+    const offenders = findDirectMkdtempUsage();
     expect(
       offenders,
-      `直接 mkdtemp を import している file がある。 @kiwa-lab/core の createManagedTempDir に置き換える:\n` +
+      `直接 mkdtemp を使っている file がある。 @kiwa-lab/core の createManagedTempDir に置き換える:\n` +
         offenders.map((path) => `  packages/${path}`).join('\n'),
     ).toEqual([]);
   });

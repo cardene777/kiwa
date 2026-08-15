@@ -18,14 +18,20 @@ import type {
 const DEFAULT_TIMEOUT_MS = 10_000;
 
 /**
- * 利用者が渡す `prefix` を、名前空間の中で使える label に均す。
+ * `label` (新) と `prefix` (旧) を、名前空間の中で使える label に均す。
  *
- * 従来の既定は `kiwa-cli-` で、これがそのまま dir 名の先頭に付いていた。 名前空間を
- * 前置する形に変わったため、二重に `kiwa-` が並ばないよう剥がす。 末尾の `-` も
- * 区切りが重なるだけなので落とす。
+ * 旧 `prefix` は dir 名の先頭にそのまま付いていた。 回収は `kiwa-` 名前空間に一致する
+ * dir しか対象にできないため、任意の prefix を素通しすると、その dir だけ異常終了時に
+ * 回収されない。 名前空間を前置する形に変え、二重に `kiwa-` が並ばないよう剥がす。
+ * 末尾の `-` も区切りが重なるだけなので落とす。
+ *
+ * 検証は core 側 (`createManagedTempDir`) が行う。 ここで弾くと、同じ規則が 2 箇所に
+ * 分かれて片方だけ変わる。
  */
-function toTempLabel(prefix: string | undefined): string {
-  const raw = (prefix ?? 'kiwa-cli-').replace(/^kiwa-/, '').replace(/-+$/, '');
+function toTempLabel(opts: SetupCliEnvOptions): string {
+  const raw = (opts.label ?? opts.prefix ?? 'kiwa-cli-')
+    .replace(/^kiwa-/, '')
+    .replace(/-+$/, '');
   return raw === '' ? 'cli' : raw;
 }
 
@@ -116,7 +122,7 @@ async function runCliImpl(
 export async function setupCliEnv(opts: SetupCliEnvOptions = {}): Promise<CliTestEnv> {
   // `prefix` は名前空間の中の識別子として扱う。 回収は `kiwa-` に一致する dir だけを
   // 対象にするため、 任意の prefix を素通しすると異常終了時に回収されない dir ができる。
-  const managed = createManagedTempDir({ label: toTempLabel(opts.prefix) });
+  const managed = createManagedTempDir({ label: toTempLabel(opts) });
   const tempDir = managed.path;
   const baseEnv: Record<string, string> = {
     ...Object.fromEntries(

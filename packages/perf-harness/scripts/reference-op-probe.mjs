@@ -19,9 +19,10 @@
  * 素の値が動くなら、 その候補は分母として働いている。
  */
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
-import { cpus, tmpdir } from 'node:os';
+import { cpus } from 'node:os';
+import { createManagedTempDir } from '@kiwa-lab/core';
 import { join } from 'node:path';
 
 const PASSES = 8;
@@ -227,16 +228,17 @@ if (mode === 'load') {
     }
   }
 } else if (mode === 'pass') {
-  const dir = mkdtempSync(join(tmpdir(), 'kiwa-refprobe-'));
+  const managed = createManagedTempDir({ label: 'refprobe' });
   try {
-    process.stdout.write(`${JSON.stringify(await runPass(dir))}\n`);
+    process.stdout.write(`${JSON.stringify(await runPass(managed.path))}\n`);
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    managed.dispose();
   }
 } else {
   const scriptPath = new URL(import.meta.url).pathname;
   const loaderCount = Math.max(1, Math.floor(cpus().length / 2));
-  const loadDir = mkdtempSync(join(tmpdir(), 'kiwa-refprobe-load-'));
+  const loadManaged = createManagedTempDir({ label: 'refprobe-load' });
+  const loadDir = loadManaged.path;
   const passes = [];
 
   try {
@@ -261,7 +263,7 @@ if (mode === 'load') {
       process.stderr.write(`pass ${pass + 1}/${PASSES} (${loaded ? 'loaded' : 'idle'}) done\n`);
     }
   } finally {
-    rmSync(loadDir, { recursive: true, force: true });
+    loadManaged.dispose();
   }
 
   const at = (pass, target, reference) => pass.pairs[`${target}|${reference}`];

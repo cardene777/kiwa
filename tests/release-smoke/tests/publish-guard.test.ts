@@ -49,21 +49,23 @@ describe('publish guard against unresolved workspace: ranges', () => {
   });
 
   it('every package with workspace deps wires prepublishOnly to the guard', () => {
-    // 求めるのは「guard が publish 前に、 しかも他の step より先に走ること」。
+    // **許す全文を列挙する**。 先頭一致にすると `guard && false || true` が通り、
+    // guard の失敗を成功へ変換できる。 `|| true` を弾く形にしても `; true` や
+    // `&& exit 0` が残り、 shell の意味論を追う戦いになる。
     //
-    // 完全一致で見ていた間、 guard の後ろに自分の検査を足した package (`lean` の
-    // `&& pnpm test:package`) が違反として上がっていた。 それは guard を外した形では
-    // なく強めた形なので、 落とす理由が無い。
-    //
-    // 先頭一致にすると `&& true` のような無害化を許すが、 それは guard を消したのと
-    // 同じで、 exact 一致でも `prepublishOnly` ごと消せば同様に抜けられる。 exact が
-    // 防いでいたのは「うっかり別 script に差し替える」 形で、 先頭一致でも防げる。
+    // 列挙なら、 新しい形を足す時に必ずここを通る。 増やす時は「guard の失敗が
+    // publish の失敗になるか」 を確かめてから 1 行足す。
     const GUARD = 'node ../../scripts/assert-pnpm-publish.mjs';
+    const ALLOWED = new Set([
+      GUARD,
+      // `lean` は guard の後ろに自分の package test を足している。 `&&` なので
+      // guard が落ちれば publish も落ちる。
+      `${GUARD} && pnpm test:package`,
+    ]);
     const offenders: string[] = [];
     for (const { dir, manifest } of packagesWithWorkspaceDeps()) {
       const hook = manifest.scripts?.prepublishOnly;
-      const wired = hook === GUARD || hook?.startsWith(`${GUARD} &&`) === true;
-      if (!wired) {
+      if (hook === undefined || !ALLOWED.has(hook)) {
         offenders.push(`${manifest.name ?? dir}: ${hook ?? '(missing)'}`);
       }
     }

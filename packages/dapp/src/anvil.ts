@@ -41,9 +41,6 @@ function trackForParentExit(child: ChildProcess): void {
   });
 }
 
-function untrackForParentExit(child: ChildProcess): void {
-  liveChildren.delete(child);
-}
 
 export interface AnvilHandle {
   port: number;
@@ -145,6 +142,9 @@ export async function startAnvilProcess(
       stdio: opts.detached === true ? 'ignore' : ['ignore', 'pipe', 'pipe'],
       detached: opts.detached === true,
     });
+    // ready を待つ前に追跡する。 起動途中で Ctrl-C されると、 ready に到達しない
+    // まま anvil だけが残る。
+    if (opts.detached !== true) trackForParentExit(child);
     let fatalError: Error | null = null;
     const onError = (error: Error & { code?: string }) => {
       if (error.code === 'ENOENT') {
@@ -175,16 +175,14 @@ export async function startAnvilProcess(
     if (ready) {
       if (opts.detached === true && child.pid !== undefined) {
         child.unref();
-      } else {
-        trackForParentExit(child);
       }
       return {
         port,
         pid: child.pid ?? -1,
-        stop: () => {
-          untrackForParentExit(child);
-          return stopProcess(child, port);
-        },
+        // 追跡から外すのは `exit` を実際に見た時だけ (`trackForParentExit` が張る)。
+        // `stop` の開始時に外すと、 SIGTERM も SIGKILL も届かず stop が成功扱いで
+        // 返った場合に、 親終了時の止めが二度と走らない。
+        stop: () => stopProcess(child, port),
       };
     }
 
