@@ -78,6 +78,34 @@ function isScopeNode(node: ts.Node): boolean {
   );
 }
 
+/**
+ * `var` を受け止める scope か (関数と file)。
+ *
+ * `var` は block ではなく関数へ巻き上がる。 block scope として扱うと、
+ * `function f() { { var require = custom; } require('fs') }` の shadow を見落として
+ * ambient loader と誤判定する (#1929 Round 2)。
+ */
+function isFunctionScopeNode(node: ts.Node): boolean {
+  return (
+    ts.isSourceFile(node) ||
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node) ||
+    ts.isModuleBlock(node)
+  );
+}
+
+/** その変数宣言が `var` か (`let` / `const` は block scoped)。 */
+function isVarDeclaration(node: ts.VariableDeclaration): boolean {
+  const list = node.parent;
+  if (list === undefined || !ts.isVariableDeclarationList(list)) return false;
+  return (list.flags & ts.NodeFlags.BlockScoped) === 0;
+}
+
 /** binding pattern を含めて、宣言された名前を集める。 */
 function collectBindingName(name: ts.BindingName, out: Map<string, BindingKind>): void {
   if (ts.isIdentifier(name)) {
@@ -100,17 +128,16 @@ function collectScopeBindings(scope: ts.Node): Map<string, BindingKind> {
   const out = new Map<string, BindingKind>();
 
   const declare = (node: ts.Node): void => {
-    if (ts.isVariableDeclaration(node)) collectBindingName(node.name, out);
     if (ts.isParameter(node)) collectBindingName(node.name, out);
     if (ts.isBindingElement(node)) collectBindingName(node.name, out);
 
     // value を作る宣言形。 `interface` / `type` は value を作らないので入れない。
+    //
+    // **関数式 / class 式は入れない** (#1929 Round 2)。 名前が束縛されるのは式自身の内側
+    // だけで、親 scope からは見えない。 親に登録すると `const f = function require() {}` が
+    // 外側の ambient `require` を隠し、検出が無効化される。
     if (
-      (ts.isFunctionDeclaration(node) ||
-        ts.isClassDeclaration(node) ||
-        ts.isClassExpression(node) ||
-        ts.isFunctionExpression(node) ||
-        ts.isEnumDeclaration(node)) &&
+      (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isEnumDeclaration(node)) &&
       node.name &&
       ts.isIdentifier(node.name)
     ) {
@@ -140,6 +167,11 @@ function collectScopeBindings(scope: ts.Node): Map<string, BindingKind> {
     }
   };
 
+  // 名前付き関数式 / class 式は、自身の名前を **自分の scope に** 持つ。
+  if ((ts.isFunctionExpression(scope) || ts.isClassExpression(scope)) && scope.name) {
+    out.set(scope.name.text, 'value');
+  }
+
   // scope 自身が持つ宣言 (引数 / catch の変数 / for の初期化子) を先に拾う。
   if (ts.isCatchClause(scope) && scope.variableDeclaration) declare(scope.variableDeclaration);
   const withParams = scope as ts.SignatureDeclarationBase;
@@ -153,12 +185,25 @@ function collectScopeBindings(scope: ts.Node): Map<string, BindingKind> {
   }
 
   // 直下の statement が作る宣言を拾う。 入れ子の scope には降りない。
+  //
+  // `var` はここでは拾わない = block ではなく関数へ巻き上がるため、下の関数 scope 側で拾う。
   const walkShallow = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node) && !isVarDeclaration(node)) collectBindingName(node.name, out);
     declare(node);
     if (node !== scope && isScopeNode(node)) return;
     ts.forEachChild(node, walkShallow);
   };
   ts.forEachChild(scope, walkShallow);
+
+  // 関数 scope は、入れ子 block を越えて `var` を拾う。 停止するのは入れ子の関数だけ。
+  if (isFunctionScopeNode(scope)) {
+    const walkVars = (node: ts.Node): void => {
+      if (ts.isVariableDeclaration(node) && isVarDeclaration(node)) collectBindingName(node.name, out);
+      if (node !== scope && isFunctionScopeNode(node)) return;
+      ts.forEachChild(node, walkVars);
+    };
+    ts.forEachChild(scope, walkVars);
+  }
 
   return out;
 }
@@ -527,6 +572,34 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("interface module { x: 1 }\nmodule.require('fs').mkdtempSync(y);")).toBe(
       'direct mkdtemp',
     );
+  });
+
+  it('var の巻き上げを関数 scope として扱う (#1929 Round 2)', () => {
+    // `var` は block ではなく関数へ巻き上がる。 block scope 扱いだと shadow を見落とす。
+    expect(
+      violationOf("function f() { { var require = custom; } return require('fs').mkdtempSync(x); }"),
+    ).toBeNull();
+    expect(
+      violationOf("function f() { for (;;) { var module = shim; } module.require('fs').mkdtempSync(x); }"),
+    ).toBeNull();
+    // 別の関数の `var` は巻き上がってこない。
+    expect(
+      violationOf("function g() { var require = custom; }\nrequire('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('名前付き関数式 / class 式の名前が親 scope に漏れない (#1929 Round 2)', () => {
+    // 名前が束縛されるのは式自身の内側だけ。 親に漏らすと検出が無効化される。
+    expect(violationOf("const f = function require() {};\nrequire('fs').mkdtempSync(x);")).toBe(
+      'direct mkdtemp',
+    );
+    expect(
+      violationOf("const C = class process {};\nprocess.getBuiltinModule('fs').mkdtempSync(x);"),
+    ).toBe('direct mkdtemp');
+    // 式の内側では shadow として効く。
+    expect(
+      violationOf("const f = function require() { return require('fs').mkdtempSync(x); };"),
+    ).toBeNull();
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
