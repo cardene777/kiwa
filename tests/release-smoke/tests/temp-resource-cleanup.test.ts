@@ -15,10 +15,13 @@
 // 対象外。
 //   - `packages/core/src/temp.ts` = 名前空間の実装そのもの。 ここだけが直接呼ぶ
 //   - test file = 一時 dir の寿命が test 内で閉じており、 runner が後始末する
-//   - enum member の scope (#1931 SC-5) = **意図的に保守側へ倒している**。 member を shadow
-//     として扱うと、member に loader そのものを詰めた形 (`enum E { p = globalThis.process as any }`
-//     の後に `E.p.getBuiltinModule('fs')`) を見逃す。 扱わなければその形は検出される。
-//     当初「型検査で落ちるため到達不能」 と書いたが誤りで、型を拡張すれば通る (#1932 review)
+//   - enum member の scope (#1931 SC-5) = 扱わない。 **到達する形を示せていない**。
+//     当初「型検査で落ちるため到達不能」 と書いたが誤りで (#1932 Round 1)、次に書いた
+//     「member に loader を詰めた形を見逃す」 も loader の判定規則では検出されない形だった
+//     (#1932 Round 2)。 到達性を根拠にするのは 2 度とも成立しなかったため、根拠にしない。
+//     判っているのは影響の向きだけで、扱わない側は「enum の中の loader 呼出を ambient と
+//     読む」 = 誤検出しうるが見逃さない。 実装するとその逆になる。 誤検出の方が害が小さい
+//     ため扱わないが、実在する形を示せた時点で再検討する
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -332,6 +335,42 @@ function scanSource(
   };
 
   /**
+   * 動的に code を実行する callee か (#1932 Round 2)。
+   *
+   * 裸の識別子だけを見ると、包んだ形で素通りする。 実測で `(eval)(...)` / `(0, eval)(...)` /
+   * `globalThis.eval(...)` の 3 形が通っていた。
+   *
+   * 追えない範囲 = 変数への詰め替え (`const f = eval; f(code)`)。 到達可能性の解析が要り、
+   * loader 側の receiver 解決と同じ境界にある。
+   */
+  const isDynamicCodeCallee = (expr: ts.Expression): boolean => {
+    // `(eval)(...)` の括弧を剥がす。
+    let target = expr;
+    while (ts.isParenthesizedExpression(target)) target = target.expression;
+    // `(0, eval)(...)` は comma の最後の operand が実体。
+    while (
+      ts.isBinaryExpression(target) &&
+      target.operatorToken.kind === ts.SyntaxKind.CommaToken
+    ) {
+      target = target.right;
+      while (ts.isParenthesizedExpression(target)) target = target.expression;
+    }
+
+    const isName = (name: string): boolean => name === 'eval' || name === 'Function';
+    if (ts.isIdentifier(target)) return isName(target.text) && isAmbient(target.text);
+    // `globalThis.eval(...)`
+    if (
+      ts.isPropertyAccessExpression(target) &&
+      ts.isIdentifier(target.expression) &&
+      target.expression.text === 'globalThis' &&
+      isAmbient('globalThis')
+    ) {
+      return isName(target.name.text);
+    }
+    return false;
+  };
+
+  /**
    * module を取り出す呼出の callee か。
    *
    * 受けるのは取得側の構文が一意に決まり、**かつその名前が呼出位置で期待どおりの束縛を
@@ -395,11 +434,10 @@ function scanSource(
     //   `Function`  同上。 constructor 経由で同じことができる
     if (ts.isWithStatement(node)) unresolvable = true;
     if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
-      const callee = node.expression;
-      if (ts.isIdentifier(callee) && (callee.text === 'eval' || callee.text === 'Function')) {
-        if (isAmbient(callee.text)) unresolvable = true;
-      }
+      if (isDynamicCodeCallee(node.expression)) unresolvable = true;
     }
+    // `` Function`...` `` の tagged template も同じ経路。
+    if (ts.isTaggedTemplateExpression(node) && isDynamicCodeCallee(node.tag)) unresolvable = true;
 
     // 関数は評価の順序で見える束縛が変わる (#1931 SC-1 / SC-2)。
     //
@@ -792,6 +830,13 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(
       violationOf("function f({ [require('fs').mkdtempSync('t')]: v } = {}) {}"),
     ).toBe('direct mkdtemp');
+    // rest element の中と、既定値に置いた関数式の本体も辿る (#1932 Round 2)。
+    expect(
+      violationOf("function f([...{ x = require('fs').mkdtempSync('t') }] = []) {}"),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf("function f({ x = (() => require('fs').mkdtempSync('t'))() } = {}) {}"),
+    ).toBe('direct mkdtemp');
   });
 
   it('parameter decorator は関数の外で評価される (#1932 review)', () => {
@@ -802,14 +847,21 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
   });
 
   it('eval と Function を解析不能として報せる (#1932 review)', () => {
+    const un = (src: string) => scanSource(src, 'probe.ts').unresolvable;
     // loader の取得も mkdtemp の参照も文字列に隠れるため、判定が成立しない。
-    expect(scanSource("eval(\"require('fs')\");", 'probe.ts').unresolvable).toBe(true);
-    expect(scanSource("new Function(\"return require('fs')\")();", 'probe.ts').unresolvable).toBe(
-      true,
-    );
-    // 同名を宣言し直した file では ambient ではないので対象外。
-    expect(scanSource("const eval2 = 1; function evalx() {}", 'probe.ts').unresolvable).toBe(false);
-    expect(scanSource("const x = 1;", 'probe.ts').unresolvable).toBe(false);
+    expect(un("eval(\"require('fs')\");")).toBe(true);
+    expect(un("new Function(\"return require('fs')\")();")).toBe(true);
+    // 包んだ形も同じ経路 (#1932 Round 2)。
+    expect(un("(eval)(\"x\");")).toBe(true);
+    expect(un("(0, eval)(\"x\");")).toBe(true);
+    expect(un("globalThis.eval(\"x\");")).toBe(true);
+    expect(un("Function\`x\`;")).toBe(true);
+    // **実際に同名を shadow した形** を固定する。 これが無いと `isAmbient` を外す変異を
+    // 検知できない (#1932 Round 2)。
+    expect(un("const eval = custom;\neval(\"x\");")).toBe(false);
+    expect(un("const Function = custom;\nnew Function(\"x\");")).toBe(false);
+    expect(un("const globalThis = shim;\nglobalThis.eval(\"x\");")).toBe(false);
+    expect(un("const x = 1;")).toBe(false);
   });
 
   it('enum member を shadow として扱わないことで到達形を検出する (#1932 review)', () => {
