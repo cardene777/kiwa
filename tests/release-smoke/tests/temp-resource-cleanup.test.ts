@@ -84,11 +84,27 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
       if (isFsSpecifier(node.moduleSpecifier.text)) touchesFs = true;
     }
 
-    // `require('fs')` / `import('fs')`。 **callee を確かめる** = 第 1 引数が `'fs'` の
-    // 任意の呼出を fs access とみなすと `makeClient('fs')` が引っかかる (#1927 Round 5)。
+    // `import fs = require('node:fs')` (TypeScript の import-equals)。
+    if (
+      ts.isImportEqualsDeclaration(node) &&
+      ts.isExternalModuleReference(node.moduleReference) &&
+      ts.isStringLiteral(node.moduleReference.expression) &&
+      isFsSpecifier(node.moduleReference.expression.text)
+    ) {
+      touchesFs = true;
+    }
+
+    // `require('fs')` / `module.require('fs')` / `import('fs')`。
+    //
+    // **callee を確かめる** = 第 1 引数が `'fs'` の任意の呼出を fs access とみなすと
+    // `makeClient('fs')` が引っかかる (#1927 Round 5)。 一方 `require` は素の識別子とも
+    // property とも書けるため、両方を受ける (#1927 Round 6)。
     if (ts.isCallExpression(node)) {
-      const isRequire = ts.isIdentifier(node.expression) && node.expression.text === 'require';
-      const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const callee = node.expression;
+      const isRequire =
+        (ts.isIdentifier(callee) && callee.text === 'require') ||
+        (ts.isPropertyAccessExpression(callee) && callee.name.text === 'require');
+      const isDynamicImport = callee.kind === ts.SyntaxKind.ImportKeyword;
       const arg = node.arguments[0];
       if ((isRequire || isDynamicImport) && arg && ts.isStringLiteral(arg) && isFsSpecifier(arg.text)) {
         touchesFs = true;
@@ -208,6 +224,12 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("const p = (await import('fs')).mkdtempSync(x);")).toBe('direct mkdtemp');
     // 変数へ詰め替える形も、 名前として参照するため捕まる。
     expect(violationOf("import * as fs from 'fs'; const f = fs.mkdtempSync; f(x);")).toBe(
+      'direct mkdtemp',
+    );
+    // `require` は素の識別子とも property とも書ける (#1927 Round 6)。
+    expect(violationOf("module.require('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
+    // TypeScript の import-equals。
+    expect(violationOf("import fs = require('node:fs');\nfs.mkdtempSync(x);")).toBe(
       'direct mkdtemp',
     );
   });
