@@ -44,9 +44,77 @@ function isFsSpecifier(text: string): boolean {
   return /^(node:)?fs(\/promises)?$/.test(text);
 }
 
+/**
+ * loader の名前が、その file で何に束縛されているか (#1928)。
+ *
+ * 名前の一致だけで loader とみなすと、無関係な `createRequire` 関数や shadow された
+ * `module` / `process` を fs 取得と判定する。
+ *
+ * **型検査器 (`ts.Program`) は使わない**。 tsconfig の解決と `node_modules` の型読込が要り、
+ * release-smoke の 1 軸には重い。 ここで要るのは「この名前がその file で宣言し直されて
+ * いないか」 と「`createRequire` が `node:module` から来ているか」 の 2 点だけで、
+ * どちらも構文から決まる。
+ *
+ * 判定できない側は **loader ではない** に倒す。 軸の目的は新しい直接呼出を書けなくする
+ * ことなので、見逃し (exotic な形を拾えない) より誤検出 (正当な code を止める) の方が
+ * 害が大きい。
+ */
+interface LoaderContext {
+  /** file 内で宣言された名前。 scope の入れ子は畳んである (安全側の粗い近似)。 */
+  declared: ReadonlySet<string>;
+  /** `node:module` から `createRequire` を import している名前。 */
+  createRequireAliases: ReadonlySet<string>;
+}
+
+/** binding pattern を含めて、宣言された名前を集める。 */
+function collectDeclaredName(name: ts.BindingName, out: Set<string>): void {
+  if (ts.isIdentifier(name)) {
+    out.add(name.text);
+    return;
+  }
+  for (const element of name.elements) {
+    if (ts.isBindingElement(element)) collectDeclaredName(element.name, out);
+  }
+}
+
+function buildLoaderContext(sourceFile: ts.SourceFile): LoaderContext {
+  const declared = new Set<string>();
+  const createRequireAliases = new Set<string>();
+
+  const visit = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node) || ts.isParameter(node)) collectDeclaredName(node.name, declared);
+    if ((ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) && node.name) {
+      declared.add(node.name.text);
+    }
+    if (ts.isImportEqualsDeclaration(node)) declared.add(node.name.text);
+
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      const fromModule = /^(node:)?module$/.test(node.moduleSpecifier.text);
+      const clause = node.importClause;
+      if (clause?.name) declared.add(clause.name.text);
+      const bindings = clause?.namedBindings;
+      if (bindings && ts.isNamespaceImport(bindings)) declared.add(bindings.name.text);
+      if (bindings && ts.isNamedImports(bindings)) {
+        for (const element of bindings.elements) {
+          declared.add(element.name.text);
+          const imported = element.propertyName?.text ?? element.name.text;
+          if (fromModule && imported === 'createRequire') createRequireAliases.add(element.name.text);
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return { declared, createRequireAliases };
+}
+
 /** `module.require` / `module['require']` のように、`module` を receiver に持つ形か。 */
-function isModuleRequire(callee: ts.Expression): boolean {
-  const onModule = (expr: ts.Expression): boolean => ts.isIdentifier(expr) && expr.text === 'module';
+function isModuleRequire(callee: ts.Expression, ctx: LoaderContext): boolean {
+  // `module` を宣言し直している file では、それが Node の module とは限らない。
+  const onModule = (expr: ts.Expression): boolean =>
+    ts.isIdentifier(expr) && expr.text === 'module' && !ctx.declared.has('module');
   if (ts.isPropertyAccessExpression(callee)) {
     return onModule(callee.expression) && callee.name.text === 'require';
   }
@@ -60,26 +128,26 @@ function isModuleRequire(callee: ts.Expression): boolean {
 /**
  * module を取り出す呼出の callee か。
  *
- * 受けるのは取得側の構文が一意に決まる形だけ。 `createRequire(...)` を変数へ詰め替えて
- * から呼ぶ形は provenance の解決が要るため対象外で、これは Round 5 で切り離した receiver
- * 解決と同じ境界にある。
+ * 受けるのは取得側の構文が一意に決まり、**かつ名前が期待どおりの束縛を持つ** 形だけ。
+ * `createRequire(...)` を変数へ詰め替えてから呼ぶ形は到達可能性の解析が要るため対象外。
  */
-function isModuleLoaderCallee(callee: ts.Expression): boolean {
-  // `require('fs')`
-  if (ts.isIdentifier(callee) && callee.text === 'require') return true;
+function isModuleLoaderCallee(callee: ts.Expression, ctx: LoaderContext): boolean {
+  // `require('fs')`。 `require` を宣言し直している file では別物の可能性がある。
+  if (ts.isIdentifier(callee) && callee.text === 'require') return !ctx.declared.has('require');
   // `import('fs')`
   if (callee.kind === ts.SyntaxKind.ImportKeyword) return true;
   // `module.require('fs')` / `module['require']('fs')`
-  if (isModuleRequire(callee)) return true;
-  // `createRequire(import.meta.url)('fs')`
+  if (isModuleRequire(callee, ctx)) return true;
+  // `createRequire(import.meta.url)('fs')`。 `node:module` から来た名前だけを受ける。
   if (ts.isCallExpression(callee) && ts.isIdentifier(callee.expression)) {
-    if (callee.expression.text === 'createRequire') return true;
+    if (ctx.createRequireAliases.has(callee.expression.text)) return true;
   }
-  // `process.getBuiltinModule('fs')`
+  // `process.getBuiltinModule('fs')`。 `process` を宣言し直していない時だけ。
   if (
     ts.isPropertyAccessExpression(callee) &&
     ts.isIdentifier(callee.expression) &&
     callee.expression.text === 'process' &&
+    !ctx.declared.has('process') &&
     callee.name.text === 'getBuiltinModule'
   ) {
     return true;
@@ -119,6 +187,7 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
   const parseErrors = (sourceFile as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics
     ?.length ?? 0;
 
+  const loaders = buildLoaderContext(sourceFile);
   let touchesFs = false;
   let referencesMkdtemp = false;
 
@@ -146,7 +215,7 @@ function scanSource(source: string, fileName: string): { violation: boolean; par
     if (ts.isCallExpression(node)) {
       const arg = node.arguments[0];
       const looksLikeFsArg = arg !== undefined && ts.isStringLiteral(arg) && isFsSpecifier(arg.text);
-      if (looksLikeFsArg && isModuleLoaderCallee(node.expression)) touchesFs = true;
+      if (looksLikeFsArg && isModuleLoaderCallee(node.expression, loaders)) touchesFs = true;
     }
 
     // 名前としての参照。 comment と文字列は Identifier にならないため自然に外れる。
@@ -272,9 +341,12 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     );
     // module を取り出す他の形も、取得側の構文が一意なら受ける (#1927 Round 7)。
     expect(violationOf("module['require']('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
-    expect(violationOf("createRequire(import.meta.url)('fs').mkdtempSync(x);")).toBe(
-      'direct mkdtemp',
-    );
+    expect(
+      violationOf(
+        "import { createRequire } from 'node:module';\n" +
+          "createRequire(import.meta.url)('fs').mkdtempSync(x);",
+      ),
+    ).toBe('direct mkdtemp');
     expect(violationOf("process.getBuiltinModule('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
   });
 
@@ -294,6 +366,28 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("const x = makeClient('fs'); x.mkdtempSync(y);")).toBeNull();
     // property 名が `require` なだけの呼出も同様 (#1927 Round 7)。
     expect(violationOf("schema.require('fs'); client.mkdtempSync(x);")).toBeNull();
+  });
+
+  it('名前が一致するだけの loader を fs 取得とみなさない (#1928)', () => {
+    // `createRequire` は `node:module` から来た名前だけを受ける。
+    expect(
+      violationOf(
+        "function createRequire(u) { return () => client; }\n" +
+          "createRequire(import.meta.url)('fs').mkdtempSync(x);",
+      ),
+    ).toBeNull();
+    // `module` を宣言し直している file では、それが Node の module とは限らない。
+    expect(violationOf("const module = shim;\nmodule.require('fs').mkdtempSync(x);")).toBeNull();
+    // `process` も同様。
+    expect(
+      violationOf("const process = fake;\nprocess.getBuiltinModule('fs').mkdtempSync(x);"),
+    ).toBeNull();
+    // `require` を宣言し直している形。
+    expect(violationOf("const require = load;\nrequire('fs').mkdtempSync(x);")).toBeNull();
+    // 分割代入や引数で宣言した場合も拾う。
+    expect(
+      violationOf("function f({ module }) { module.require('fs').mkdtempSync(x); }"),
+    ).toBeNull();
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
