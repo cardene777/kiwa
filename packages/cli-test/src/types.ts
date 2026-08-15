@@ -5,7 +5,25 @@ export interface SetupCliEnvOptions {
   seedFiles?: Record<string, string | Buffer>;
   /** Optional env overrides applied to every runCli invocation */
   env?: Record<string, string>;
-  /** Optional subdir name within OS tempdir (default "kiwa-cli-") */
+  /**
+   * Label placed inside the `kiwa-` temp namespace (default "cli").
+   *
+   * The directory is always created under the namespace, as
+   * `kiwa-<label>-<createdAt>-<pid>-<random>`, so that orphans left by an abnormal
+   * exit are reclaimed on the next run. Only `[A-Za-z0-9_-]` is accepted; a value
+   * containing a path separator throws.
+   */
+  label?: string;
+  /**
+   * @deprecated Use `label`. Kept so existing callers keep working.
+   *
+   * The basename shape changed: a directory is no longer named `<prefix><random>`
+   * but `kiwa-<label>-<createdAt>-<pid>-<random>`. Reclaiming orphans requires the
+   * namespace, so an arbitrary prefix cannot be honoured verbatim. A leading
+   * `kiwa-` and trailing dashes are stripped, so `"kiwa-cli-"` and `"cli"` produce
+   * the same label. Code that reads `env.tempDir` is unaffected; code that matches
+   * on the directory name is not.
+   */
   prefix?: string;
 }
 

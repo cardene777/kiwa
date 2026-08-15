@@ -49,10 +49,23 @@ describe('publish guard against unresolved workspace: ranges', () => {
   });
 
   it('every package with workspace deps wires prepublishOnly to the guard', () => {
+    // **許す全文を列挙する**。 先頭一致にすると `guard && false || true` が通り、
+    // guard の失敗を成功へ変換できる。 `|| true` を弾く形にしても `; true` や
+    // `&& exit 0` が残り、 shell の意味論を追う戦いになる。
+    //
+    // 列挙なら、 新しい形を足す時に必ずここを通る。 増やす時は「guard の失敗が
+    // publish の失敗になるか」 を確かめてから 1 行足す。
+    const GUARD = 'node ../../scripts/assert-pnpm-publish.mjs';
+    const ALLOWED = new Set([
+      GUARD,
+      // `lean` は guard の後ろに自分の package test を足している。 `&&` なので
+      // guard が落ちれば publish も落ちる。
+      `${GUARD} && pnpm test:package`,
+    ]);
     const offenders: string[] = [];
     for (const { dir, manifest } of packagesWithWorkspaceDeps()) {
       const hook = manifest.scripts?.prepublishOnly;
-      if (hook !== 'node ../../scripts/assert-pnpm-publish.mjs') {
+      if (hook === undefined || !ALLOWED.has(hook)) {
         offenders.push(`${manifest.name ?? dir}: ${hook ?? '(missing)'}`);
       }
     }

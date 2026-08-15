@@ -13,6 +13,40 @@ const SLEEP_BUFFER = new Int32Array(new SharedArrayBuffer(4));
 const reservedPorts = new Set<number>();
 let portAllocationQueue = Promise.resolve();
 
+/**
+ * anvil children this process started and has not stopped yet.
+ *
+ * A spawned child outlives its parent on POSIX. Without this, a test run that
+ * crashes or is interrupted leaves anvil holding its port, and the next run
+ * either picks a different port or trips over the stale one.
+ *
+ * `detached` children are excluded on purpose — the caller asked for a process
+ * that survives, and `e2e-prepare-env` reclaims those from its pid file.
+ */
+const liveChildren = new Set<ChildProcess>();
+let parentExitHookInstalled = false;
+
+function trackForParentExit(child: ChildProcess): void {
+  liveChildren.add(child);
+  // `exit` だけでは外れない形がある。 `anvil` が PATH に無い時 (`ENOENT`) は `error` と
+  // `close` しか発火せず、 追跡が残り続ける。 起動に失敗した呼出を繰り返すと、
+  // 終了済の `ChildProcess` と listener がプロセスの寿命ぶん溜まる。
+  const forget = () => liveChildren.delete(child);
+  child.once('exit', forget);
+  child.once('close', forget);
+  if (parentExitHookInstalled) return;
+  parentExitHookInstalled = true;
+  // `exit` runs synchronous work only, so this sends the signal and does not
+  // wait for the child to go. Signals are not intercepted: adding a `SIGINT`
+  // listener would suppress Node's default termination and make Ctrl-C stop
+  // working for anyone using the library.
+  process.on('exit', () => {
+    for (const tracked of liveChildren) safeKill(tracked);
+    liveChildren.clear();
+  });
+}
+
+
 export interface AnvilHandle {
   port: number;
   pid: number;
@@ -113,6 +147,9 @@ export async function startAnvilProcess(
       stdio: opts.detached === true ? 'ignore' : ['ignore', 'pipe', 'pipe'],
       detached: opts.detached === true,
     });
+    // ready を待つ前に追跡する。 起動途中で Ctrl-C されると、 ready に到達しない
+    // まま anvil だけが残る。
+    if (opts.detached !== true) trackForParentExit(child);
     let fatalError: Error | null = null;
     const onError = (error: Error & { code?: string }) => {
       if (error.code === 'ENOENT') {
@@ -147,6 +184,9 @@ export async function startAnvilProcess(
       return {
         port,
         pid: child.pid ?? -1,
+        // 追跡から外すのは `exit` を実際に見た時だけ (`trackForParentExit` が張る)。
+        // `stop` の開始時に外すと、 SIGTERM も SIGKILL も届かず stop が成功扱いで
+        // 返った場合に、 親終了時の止めが二度と走らない。
         stop: () => stopProcess(child, port),
       };
     }

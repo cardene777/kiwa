@@ -223,12 +223,12 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
 async function setupMockPrismaSqlite<TClient>(
   opts: MockPrismaSqliteOptions<TClient>,
 ): Promise<OrmTestEnv<DrizzleSchema, TClient>> {
-  const { mkdtemp, rm } = await import('node:fs/promises');
-  const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
   const { spawnSync } = await import('node:child_process');
+  const { createManagedTempDir } = await import('@kiwa-lab/core');
 
-  const tmpDir = await mkdtemp(join(tmpdir(), 'kiwa-orm-prisma-'));
+  const managed = createManagedTempDir({ label: 'orm-prisma' });
+  const tmpDir = managed.path;
   const dbPath = join(tmpDir, 'test.db');
   const datasourceUrl = `file:${dbPath}`;
   const envName = opts.datasourceUrlEnv ?? 'DATABASE_URL';
@@ -250,7 +250,7 @@ async function setupMockPrismaSqlite<TClient>(
   if (result.status !== 0) {
     if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
     else delete process.env[envName];
-    await rm(tmpDir, { recursive: true, force: true });
+    managed.dispose();
     throw new Error(
       `@kiwa-lab/orm: prisma db push failed (status=${result.status}). stderr=${result.stderr ?? ''} stdout=${result.stdout ?? ''}`,
     );
@@ -281,7 +281,7 @@ async function setupMockPrismaSqlite<TClient>(
       }
       if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
       else delete process.env[envName];
-      await rm(tmpDir, { recursive: true, force: true });
+      managed.dispose();
     },
   };
 }
