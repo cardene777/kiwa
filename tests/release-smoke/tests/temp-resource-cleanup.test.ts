@@ -31,26 +31,79 @@ const PACKAGES_DIR = resolve(REPO_ROOT, 'packages');
 const IMPLEMENTATION = 'core/src/temp.ts';
 
 /**
- * `mkdtemp` の入手経路を、TypeScript の parser が作る AST で判定する。
+ * 判定は TypeScript の parser が作る AST で行う。
  *
- * **手書きの走査はやめた** (#1927 の Round 2 / 3 / 4)。 comment ・ 文字列 ・ template の
- * 展開式 ・ 正規表現 literal ・ 除算との区別を自前で扱う形は 3 round 連続で fix 由来の
- * 欠陥を出し、 severity が下がらなかった。 `rules/quality.md § Round 収束判定` の暴走
- * signal (同一 root cause 3 連続 / 同じ箇所を 3 round / 検証済 scope が広がらない) が
- * 揃ったため、 round を重ねずに設計へ戻している。
- *
- * parser に委ねると、 これらの区別は言語仕様の側が持つ。 判定に残るのは「どの node を
- * 違反とみなすか」 だけになる。
- *
- * 追えない範囲は変わらず残る。 変数への詰め替え (`const f = fs.mkdtempSync; f(x)`) と
- * 計算した property 名 (`fs['mkdtemp' + 'Sync']`) は、 到達可能性の解析が要るため
- * 対象外。 この境界は意図的で、 塞ぐなら別 layer (実行時の検査) の仕事になる。
+ * 手書きの走査 (comment / 文字列 / template / 正規表現 / 除算の区別を自前で扱う形) は
+ * 収束しなかった。 これらの区別は言語仕様の側が持つもので、 こちらで再実装する対象では
+ * ない。
  */
 const MKDTEMP_NAMES = new Set(['mkdtemp', 'mkdtempSync']);
 
 /** `node:fs` / `fs` / それぞれの `/promises`。 */
 function isFsSpecifier(text: string): boolean {
   return /^(node:)?fs(\/promises)?$/.test(text);
+}
+
+/**
+ * 判定は 1 つの規則に縮めてある。
+ *
+ * **「fs module を取っている」 かつ「`mkdtemp` を名前として参照している」 なら違反**。
+ * receiver がどの binding を指すかは追わない。
+ *
+ * 経路ごとに receiver を解決する形は収束しなかった (#1927 の Round 2-5、 MAJOR が
+ * 1 → 2 → 3 → 4 と増えた)。 `(await import('fs')).mkdtempSync()` の unwrap、 scope を
+ * 跨ぐ shadowing、 `makeClient('fs')` の provenance、 JSX の parse と、 receiver を正確に
+ * 解決しようとするたびに別の穴が開いた。 正確な解決には型検査器 (`ts.Program` と symbol
+ * 解決) が要り、 release-smoke の 1 軸が負う重さではない。
+ *
+ * 縮めた規則は receiver を見ないので、 これらの分岐がまとめて消える。
+ *
+ * **受け入れる誤検出**。 fs を別用途で import している file が、 無関係な object の
+ * `mkdtempSync` を呼ぶ形は違反になる。 実在せず、 起きても直し方は自明 (`@kiwa-lab/core`
+ * に寄せるか名前を変える) なので受け入れる。
+ *
+ * **追えない範囲**。 変数への詰め替え (`const f = fs.mkdtempSync; f(x)`) は `mkdtemp` を
+ * 名前として参照するため捕まるが、 計算した property 名 (`fs['mkdtemp' + 'Sync']`) は
+ * 参照が文字列に化けるため捕まらない。 到達可能性の解析が要る領域で、 塞ぐなら実行時の
+ * 検査という別 layer の仕事になる。
+ */
+function scanSource(source: string, fileName: string): { violation: boolean; parseErrors: number } {
+  // **実 file 名で parse する**。 `.tsx` を `.ts` として読むと JSX が構文誤りになり、
+  // member access が AST から消えて「違反 0 件」 に化ける (#1927 Round 5)。
+  const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true);
+
+  // parse できなかった file を素通しすると、 検査していないのに緑になる。
+  const parseErrors = (sourceFile as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics
+    ?.length ?? 0;
+
+  let touchesFs = false;
+  let referencesMkdtemp = false;
+
+  const visit = (node: ts.Node): void => {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      if (isFsSpecifier(node.moduleSpecifier.text)) touchesFs = true;
+    }
+
+    // `require('fs')` / `import('fs')`。 **callee を確かめる** = 第 1 引数が `'fs'` の
+    // 任意の呼出を fs access とみなすと `makeClient('fs')` が引っかかる (#1927 Round 5)。
+    if (ts.isCallExpression(node)) {
+      const isRequire = ts.isIdentifier(node.expression) && node.expression.text === 'require';
+      const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
+      const arg = node.arguments[0];
+      if ((isRequire || isDynamicImport) && arg && ts.isStringLiteral(arg) && isFsSpecifier(arg.text)) {
+        touchesFs = true;
+      }
+    }
+
+    // 名前としての参照。 comment と文字列は Identifier にならないため自然に外れる。
+    if (ts.isIdentifier(node) && MKDTEMP_NAMES.has(node.text)) referencesMkdtemp = true;
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+
+  return { violation: touchesFs && referencesMkdtemp, parseErrors };
 }
 
 /** 走査する拡張子。 実行される source すべて。 */
@@ -88,113 +141,20 @@ function collectSourceFiles(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/**
- * comment を落とす。
- *
- * 本文の comment に `mkdtemp` と書いただけで落とすと、 なぜ直接呼んではいけないかを
- * 説明する comment が書けなくなる (この file 自身がそう)。 文字列 literal は残す =
- * `require('node:fs')` の引数は literal なので、 落とすと検出できない。
- */
-function violationOf(source: string): string | null {
-  const sourceFile = ts.createSourceFile(
-    'probe.ts',
-    source,
-    ts.ScriptTarget.Latest,
-    /* setParentNodes */ true,
-  );
-
-  /** fs を名前空間 / 既定 import で束ねた識別子。 member call の receiver 判定に使う。 */
-  const fsBindings = new Set<string>();
-  let touchesFs = false;
-  let usesMkdtempName = false;
-  let namedImport = false;
-  const memberCalls: ts.PropertyAccessExpression[] = [];
-
-  const visit = (node: ts.Node): void => {
-    // `import ... from 'node:fs'`
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      if (isFsSpecifier(node.moduleSpecifier.text)) {
-        touchesFs = true;
-        const bindings = node.importClause?.namedBindings;
-        if (bindings && ts.isNamedImports(bindings)) {
-          for (const element of bindings.elements) {
-            // `import { mkdtemp as mk }` は `propertyName` 側が元の名前。
-            const imported = element.propertyName?.text ?? element.name.text;
-            if (MKDTEMP_NAMES.has(imported)) namedImport = true;
-          }
-        }
-        if (bindings && ts.isNamespaceImport(bindings)) fsBindings.add(bindings.name.text);
-        if (node.importClause?.name) fsBindings.add(node.importClause.name.text);
-      }
-    }
-
-    // `require('node:fs')` / `await import('fs')`
-    if (ts.isCallExpression(node)) {
-      const isRequire = ts.isIdentifier(node.expression) && node.expression.text === 'require';
-      const isDynamicImport = node.expression.kind === ts.SyntaxKind.ImportKeyword;
-      const arg = node.arguments[0];
-      if ((isRequire || isDynamicImport) && arg && ts.isStringLiteral(arg) && isFsSpecifier(arg.text)) {
-        touchesFs = true;
-      }
-    }
-
-    // `const { mkdtemp } = require('fs')` / `const fs = require('fs')`
-    if (ts.isVariableDeclaration(node) && node.initializer) {
-      const init = ts.isAwaitExpression(node.initializer)
-        ? node.initializer.expression
-        : node.initializer;
-      const fromFs =
-        ts.isCallExpression(init) &&
-        init.arguments[0] !== undefined &&
-        ts.isStringLiteral(init.arguments[0]) &&
-        isFsSpecifier(init.arguments[0].text);
-      if (fromFs) {
-        if (ts.isIdentifier(node.name)) fsBindings.add(node.name.text);
-        if (ts.isObjectBindingPattern(node.name)) {
-          for (const element of node.name.elements) {
-            const bound = element.propertyName ?? element.name;
-            if (ts.isIdentifier(bound) && MKDTEMP_NAMES.has(bound.text)) usesMkdtempName = true;
-          }
-        }
-      }
-    }
-
-    // `fs.mkdtempSync(...)` — receiver が fs の binding である時だけ違反にする。
-    if (ts.isPropertyAccessExpression(node) && MKDTEMP_NAMES.has(node.name.text)) {
-      memberCalls.push(node);
-    }
-
-    ts.forEachChild(node, visit);
-  };
-
-  visit(sourceFile);
-
-  if (namedImport) return 'named import';
-
-  for (const access of memberCalls) {
-    // `require('fs').mkdtempSync(...)` のように receiver が式そのものの形も受ける。
-    const receiver = access.expression;
-    const receiverIsFsBinding = ts.isIdentifier(receiver) && fsBindings.has(receiver.text);
-    const receiverIsFsCall =
-      ts.isCallExpression(receiver) &&
-      receiver.arguments[0] !== undefined &&
-      ts.isStringLiteral(receiver.arguments[0]) &&
-      isFsSpecifier(receiver.arguments[0].text);
-    if (receiverIsFsBinding || receiverIsFsCall) return 'member call';
-  }
-
-  if (usesMkdtempName && touchesFs) return 'require';
-
-  return null;
+/** test から規則そのものを固定するための入口。 file 名は既定で `.ts` 相当。 */
+function violationOf(source: string, fileName = 'probe.ts'): string | null {
+  const { violation } = scanSource(source, fileName);
+  return violation ? 'direct mkdtemp' : null;
 }
 
-function findDirectMkdtempUsage(): string[] {
+function findDirectMkdtempUsage(): { offenders: string[]; unparsed: string[] } {
   const offenders: string[] = [];
+  const unparsed: string[] = [];
   let packageNames: string[];
   try {
     packageNames = readdirSync(PACKAGES_DIR);
   } catch {
-    return offenders;
+    return { offenders, unparsed };
   }
 
   for (const name of packageNames) {
@@ -202,12 +162,14 @@ function findDirectMkdtempUsage(): string[] {
       for (const file of collectSourceFiles(join(PACKAGES_DIR, name, subdir))) {
         const rel = relative(PACKAGES_DIR, file);
         if (rel === IMPLEMENTATION) continue;
-        const label = violationOf(readFileSync(file, 'utf8'));
-        if (label !== null) offenders.push(`${rel} (${label})`);
+        const { violation, parseErrors } = scanSource(readFileSync(file, 'utf8'), file);
+        // parse できない file を素通しすると、 検査していないのに緑になる。
+        if (parseErrors > 0) unparsed.push(rel);
+        if (violation) offenders.push(rel);
       }
     }
   }
-  return offenders;
+  return { offenders, unparsed };
 }
 
 describe('一時 dir は core の名前空間を通す (#1926)', () => {
@@ -234,67 +196,59 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(() => readFileSync(join(PACKAGES_DIR, IMPLEMENTATION), 'utf8')).not.toThrow();
   });
 
-  it('検出規則が 4 経路すべてを拾う', () => {
+  it('検出規則が fs 経由の入手を経路によらず拾う', () => {
     // 規則を緩めた時にここが落ちる。 実 file を用意せず、 規則そのものを固定する。
-    expect(violationOf("import { mkdtempSync } from 'node:fs';")).toBe('named import');
-    expect(violationOf("const { mkdtemp } = require('node:fs/promises');")).toBe('require');
-    expect(violationOf("const fs = await import('fs'); fs.mkdtempSync(x);")).not.toBeNull();
-    expect(violationOf("import * as fs from 'node:fs'; fs.mkdtempSync(x);")).toBe('member call');
-    // `node:` の付かない bare 指定子も検出する。
-    expect(violationOf("import { mkdtempSync } from 'fs';")).toBe('named import');
-    expect(violationOf("const { mkdtemp } = require('fs/promises');")).toBe('require');
+    expect(violationOf("import { mkdtempSync } from 'node:fs';")).toBe('direct mkdtemp');
+    expect(violationOf("import { mkdtemp as mk } from 'fs';")).toBe('direct mkdtemp');
+    expect(violationOf("const { mkdtemp } = require('node:fs/promises');")).toBe('direct mkdtemp');
+    expect(violationOf("import * as fs from 'node:fs'; fs.mkdtempSync(x);")).toBe('direct mkdtemp');
+    expect(violationOf("const fs = require('fs'); fs.mkdtempSync(x);")).toBe('direct mkdtemp');
+    expect(violationOf("require('fs').mkdtempSync(x);")).toBe('direct mkdtemp');
+    // receiver を追わないので、 括弧や await で包まれた形も同じに落ちる (#1927 Round 5)。
+    expect(violationOf("const p = (await import('fs')).mkdtempSync(x);")).toBe('direct mkdtemp');
+    // 変数へ詰め替える形も、 名前として参照するため捕まる。
+    expect(violationOf("import * as fs from 'fs'; const f = fs.mkdtempSync; f(x);")).toBe(
+      'direct mkdtemp',
+    );
   });
 
   it('検出規則が正当な code を誤検出しない', () => {
-    // comment に書いただけ。
+    // comment / 文字列 / template の literal 部分 / 正規表現 literal は Identifier に
+    // ならないため、 parser の側で自然に外れる。
     expect(violationOf('// mkdtemp を直接呼ばない')).toBeNull();
     expect(violationOf('/* import { mkdtempSync } from "node:fs" は禁止 */')).toBeNull();
-    // 文字列 literal に規則を書いただけ (この test file 自身がその形)。
     expect(violationOf('const rule = "import { mkdtempSync } from \'node:fs\'";')).toBeNull();
+    expect(violationOf('const s = `${`fs.mkdtempSync(x)`}`;')).toBeNull();
+    expect(violationOf('const re = /import { mkdtempSync } from "node:fs"/;')).toBeNull();
     // fs を mkdtemp 以外で使う形。
     expect(violationOf("const { readFile } = require('node:fs/promises');")).toBeNull();
-    // fs と無関係な object の同名 method。
+    // fs を取っていない file の同名 method。
     expect(violationOf('await client.mkdtempSync(x);')).toBeNull();
-    // 正規表現 literal に検出規則を書いただけ (#1927 Round 3)。
-    expect(violationOf('const re = /import { mkdtempSync } from "node:fs"/;')).toBeNull();
-    // 文字列の中の `//` が後続の行を食わない (#1927 Round 3)。
-    expect(violationOf("const url = 'https://example.com';\nconst x = 1;")).toBeNull();
+    // 第 1 引数が 'fs' なだけの呼出を fs access とみなさない (#1927 Round 5)。
+    expect(violationOf("const x = makeClient('fs'); x.mkdtempSync(y);")).toBeNull();
   });
 
-  it('正規表現と除算の区別が文脈で決まる', () => {
-    // 手書きの走査は直前 1 文字で判定していたため、この 2 形を取り違えた (#1927 Round 4)。
-    expect(violationOf('function f() { return /import { mkdtempSync } from "node:fs"/; }')).toBeNull();
-    expect(
-      violationOf("let x = 1, y = 2; x++ / y; import { mkdtempSync } from 'node:fs';"),
-    ).toBe('named import');
+  it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
+    // 判定そのものは識別子の有無で決まるため、`.ts` として読んでも検出はできる。
+    // file 名が効くのは parse 誤りの側で、誤りが出ると「走査した file をすべて parse
+    // できている」 が落ちる = 実 repo に `.tsx` が入った瞬間に検査が止まる (#1927 Round 5)。
+    const source = "import * as fs from 'node:fs';\nconst el = <W make={fs.mkdtempSync(x)} />;";
+
+    expect(scanSource(source, 'probe.tsx').parseErrors).toBe(0);
+    expect(scanSource(source, 'probe.ts').parseErrors).toBeGreaterThan(0);
+
+    // どちらで読んでも違反判定は変わらない (規則が receiver を追わないため)。
+    expect(violationOf(source, 'probe.tsx')).toBe('direct mkdtemp');
   });
 
-  it('template の入れ子と展開式内の文字列で判定が崩れない', () => {
-    // `${}` を波括弧の数だけで切ると、文字列内の `}` で式が終わった扱いになる (#1927 Round 4)。
-    expect(
-      violationOf('import * as fs from "node:fs";\nconst p = `${"}"; fs.mkdtempSync(x)}`;'),
-    ).toBe('member call');
-    // 入れ子 template の literal 部分は実行されない。
-    expect(violationOf('const s = `${`fs.mkdtempSync(x)`}`;')).toBeNull();
-  });
-
-  it('文字列を消しても template の展開式は残す', () => {
-    // `${...}` の中は実行される。 literal ごと落とすと直接呼出を見逃す (#1927 Round 3)。
-    expect(
-      violationOf("import * as fs from 'node:fs';\nconst p = `${fs.mkdtempSync(x)}`;"),
-    ).toBe('member call');
-  });
-
-  it('文字列の中の // が後続の import を隠さない', () => {
-    // comment 除去を先に走らせると、 文字列内の `//` が行末まで食い、
-    // その後ろにある本物の import が消えていた (#1927 Round 3)。
-    expect(
-      violationOf("const url = 'https://example.com'; import { mkdtempSync } from 'node:fs';"),
-    ).toBe('named import');
+  it('走査した file をすべて parse できている', () => {
+    // parse に失敗した file を素通しすると、 検査していないのに緑になる。
+    const { unparsed } = findDirectMkdtempUsage();
+    expect(unparsed, `parse できない file がある:\n${unparsed.join('\n')}`).toEqual([]);
   });
 
   it('packages の src と scripts が mkdtemp を直接使わない', () => {
-    const offenders = findDirectMkdtempUsage();
+    const { offenders } = findDirectMkdtempUsage();
     expect(
       offenders,
       `直接 mkdtemp を使っている file がある。 @kiwa-lab/core の createManagedTempDir に置き換える:\n` +
