@@ -15,9 +15,10 @@
 // 対象外。
 //   - `packages/core/src/temp.ts` = 名前空間の実装そのもの。 ここだけが直接呼ぶ
 //   - test file = 一時 dir の寿命が test 内で閉じており、 runner が後始末する
-//   - enum member の scope (#1931 SC-5) = member 名が loader を隠す形は enum initializer の
-//     中でしか起きず、その呼出は型検査で落ちる。 走査対象は型検査を通るため到達しない。
-//     識別力のある検査を作れないため、機構ごと持たない
+//   - enum member の scope (#1931 SC-5) = **意図的に保守側へ倒している**。 member を shadow
+//     として扱うと、member に loader そのものを詰めた形 (`enum E { p = globalThis.process as any }`
+//     の後に `E.p.getBuiltinModule('fs')`) を見逃す。 扱わなければその形は検出される。
+//     当初「型検査で落ちるため到達不能」 と書いたが誤りで、型を拡張すれば通る (#1932 review)
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -386,9 +387,19 @@ function scanSource(
     // 名前としての参照。 comment と文字列は Identifier にならないため自然に外れる。
     if (ts.isIdentifier(node) && MKDTEMP_NAMES.has(node.text)) referencesMkdtemp = true;
 
-    // `with` は Object Environment Record を作る。 何が束縛されるかは実行時にしか決まらず、
-    // loader 名の解決が成立しない。 静かに誤判定するより、解析できないことを報せる。
+    // 静的に追えない実行経路。 loader の取得も `mkdtemp` の参照も文字列に隠れるため、
+    // 判定が成立しない。 静かに誤判定するより、解析できないことを報せる。
+    //
+    //   `with`      Object Environment Record の中身が実行時にしか決まらない
+    //   `eval`      任意の code を文字列から実行する (#1932 review)
+    //   `Function`  同上。 constructor 経由で同じことができる
     if (ts.isWithStatement(node)) unresolvable = true;
+    if (ts.isCallExpression(node) || ts.isNewExpression(node)) {
+      const callee = node.expression;
+      if (ts.isIdentifier(callee) && (callee.text === 'eval' || callee.text === 'Function')) {
+        if (isAmbient(callee.text)) unresolvable = true;
+      }
+    }
 
     // 関数は評価の順序で見える束縛が変わる (#1931 SC-1 / SC-2)。
     //
@@ -426,11 +437,20 @@ function scanSource(
     if (decl.modifiers) for (const m of decl.modifiers) if (ts.isDecorator(m)) visit(m);
     if (decl.name && ts.isComputedPropertyName(decl.name)) visit(decl.name);
 
+    // parameter の decorator も関数の外で評価される (#1932 review)。
+    if (decl.parameters) {
+      for (const p of decl.parameters) {
+        if (p.modifiers) for (const m of p.modifiers) if (ts.isDecorator(m)) visit(m);
+      }
+    }
+
     // parameter scope。 初期化子はここまでしか見えない。
     scopes.push({ node, bindings: collectParameterBindings(node) });
     if (decl.parameters) {
       for (const p of decl.parameters) {
-        if (p.modifiers) for (const m of p.modifiers) if (ts.isDecorator(m)) visit(m);
+        // **binding pattern の中も辿る** (#1932 review)。 `function f({ x = require('fs')... })`
+        // の初期化子と computed key は実行時に評価されるため、辿らないと見逃す。
+        visitBindingName(p.name);
         if (p.initializer) visit(p.initializer);
       }
     }
@@ -442,6 +462,19 @@ function scanSource(
       scopes.pop();
     }
     scopes.pop();
+  }
+
+  /** binding pattern の中の初期化子と computed key を辿る。 名前自体は束縛なので辿らない。 */
+  function visitBindingName(name: ts.BindingName): void {
+    if (ts.isIdentifier(name)) return;
+    for (const element of name.elements) {
+      if (!ts.isBindingElement(element)) continue;
+      if (element.propertyName && ts.isComputedPropertyName(element.propertyName)) {
+        visit(element.propertyName);
+      }
+      visitBindingName(element.name);
+      if (element.initializer) visit(element.initializer);
+    }
   }
 
   visit(sourceFile);
@@ -744,6 +777,49 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
       true,
     );
     expect(scanSource("const x = 1;", 'probe.ts').unresolvable).toBe(false);
+  });
+
+  it('binding pattern の中の初期化子も辿る (#1932 review)', () => {
+    // 分割代入の既定値は実行時に評価される。 独自走査で辿らないと見逃す。
+    expect(
+      violationOf("function f({ x = require('fs').mkdtempSync('t') } = {}) {}"),
+    ).toBe('direct mkdtemp');
+    // 入れ子の binding pattern も辿る。
+    expect(
+      violationOf("function f({ a: { b = require('fs').mkdtempSync('t') } } = { a: {} }) {}"),
+    ).toBe('direct mkdtemp');
+    // computed key も実行時に評価される。
+    expect(
+      violationOf("function f({ [require('fs').mkdtempSync('t')]: v } = {}) {}"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('parameter decorator は関数の外で評価される (#1932 review)', () => {
+    // 別 parameter が `require` を名乗っても、decorator の式はその外で評価される。
+    expect(
+      violationOf("class C { m(@dec(require('fs').mkdtempSync('t')) a, require) {} }"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('eval と Function を解析不能として報せる (#1932 review)', () => {
+    // loader の取得も mkdtemp の参照も文字列に隠れるため、判定が成立しない。
+    expect(scanSource("eval(\"require('fs')\");", 'probe.ts').unresolvable).toBe(true);
+    expect(scanSource("new Function(\"return require('fs')\")();", 'probe.ts').unresolvable).toBe(
+      true,
+    );
+    // 同名を宣言し直した file では ambient ではないので対象外。
+    expect(scanSource("const eval2 = 1; function evalx() {}", 'probe.ts').unresolvable).toBe(false);
+    expect(scanSource("const x = 1;", 'probe.ts').unresolvable).toBe(false);
+  });
+
+  it('enum member を shadow として扱わないことで到達形を検出する (#1932 review)', () => {
+    // member を shadow 扱いにすると、enum の中の loader 呼出が「member を呼んでいる」 と
+    // 読めてしまい見逃す。 扱わなければ ambient として検出される。
+    expect(
+      violationOf(
+        "enum E { process = 1, x = process.getBuiltinModule('fs').mkdtempSync('t') as any }",
+      ),
+    ).toBe('direct mkdtemp');
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
