@@ -52,6 +52,37 @@ function isFsSpecifier(text: string): boolean {
 }
 
 /**
+ * その import が runtime に value を取り込むか (#1930)。
+ *
+ * 型だけの import は runtime に何も取得しない。 取得扱いにすると、`import type { Dirent }`
+ * を置いただけの file が「fs を取っている」 と判定される。
+ *
+ * loader 側 (`require` / `module` / `process` / `createRequire`) は #1929 で type-only を
+ * 除外済で、取得側だけが揃っていなかった。
+ *
+ * **side-effect import (`import 'node:fs'`) は取得扱いにする**。 value を束縛しないが
+ * module は評価される。 判定に迷う形なので、外さない側に倒す。
+ */
+function importsValue(node: ts.ImportDeclaration): boolean {
+  const clause = node.importClause;
+  // `import 'node:fs'` = clause 自体が無い side-effect import。
+  if (clause === undefined) return true;
+  if (clause.isTypeOnly) return false;
+  // 既定 import と名前空間 import は value。
+  if (clause.name) return true;
+  const bindings = clause.namedBindings;
+  if (bindings === undefined) return false;
+  if (ts.isNamespaceImport(bindings)) return true;
+  // named import は、value を 1 つでも取り込むなら取得扱い。
+  //
+  // **空の named import (`import {} from 'node:fs'`) も取得扱い** (#1933 review)。 binding は
+  // 作らないが module は評価されるため、side-effect import と同じ扱いにする。 `some` は空配列で
+  // false を返すので、明示的に分ける。
+  if (bindings.elements.length === 0) return true;
+  return bindings.elements.some((element) => !element.isTypeOnly);
+}
+
+/**
  * 束縛の種類。 `createRequire` だけは「`node:module` から来た」 ことまで覚える。
  */
 type BindingKind = 'value' | 'createRequire';
@@ -419,12 +450,13 @@ function scanSource(
 
   const visit = (node: ts.Node): void => {
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
-      if (isFsSpecifier(node.moduleSpecifier.text)) touchesFs = true;
+      if (isFsSpecifier(node.moduleSpecifier.text) && importsValue(node)) touchesFs = true;
     }
 
     // `import fs = require('node:fs')` (TypeScript の import-equals)。
     if (
       ts.isImportEqualsDeclaration(node) &&
+      !node.isTypeOnly &&
       ts.isExternalModuleReference(node.moduleReference) &&
       ts.isStringLiteral(node.moduleReference.expression) &&
       isFsSpecifier(node.moduleReference.expression.text)
@@ -899,6 +931,41 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
         "enum E { process = 1, x = process.getBuiltinModule('fs').mkdtempSync('t') as any }",
       ),
     ).toBe('direct mkdtemp');
+  });
+
+  it('型だけの fs import を取得扱いしない (#1930)', () => {
+    // 型だけの import は runtime に何も取得しない。
+    expect(
+      violationOf("import type { Dirent } from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBeNull();
+    expect(
+      violationOf("import { type Dirent } from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBeNull();
+    expect(
+      violationOf("import type fs = require('node:fs');\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBeNull();
+  });
+
+  it('value を 1 つでも取り込む fs import は取得扱いのまま (#1930)', () => {
+    // 型と value を混ぜた形。
+    expect(
+      violationOf("import fs, { type Dirent } from 'node:fs';\nfs.mkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf("import { type Dirent, mkdtempSync } from 'node:fs';\nmkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+    // 名前空間 import。
+    expect(violationOf("import * as fs from 'node:fs';\nfs.mkdtempSync('t');")).toBe(
+      'direct mkdtemp',
+    );
+    // side-effect import は value を束縛しないが module は評価されるため取得扱い。
+    expect(violationOf("import 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');")).toBe(
+      'direct mkdtemp',
+    );
+    // 空の named import も module を評価する (#1933 review)。
+    expect(violationOf("import {} from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');")).toBe(
+      'direct mkdtemp',
+    );
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
