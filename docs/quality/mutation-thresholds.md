@@ -74,6 +74,13 @@ The rule has one known blind spot: a file whose only job is a side effect (impor
 calling it, exporting nothing) counts as type-only and stays out of scope. Nothing in the repo is
 shaped that way today. If one appears, name it in `mutate` by hand rather than loosening the rule.
 
+`mutation-scope-report.mjs` decides which bucket a file lands in by stripping the types and looking
+at what survives, rather than by listing the declaration forms that produce runtime values. The
+first version did the latter and missed a different form in each review round — `export { run }`
+split from its declaration, `export default <expr>`, `export namespace`, `export declare function`.
+Whatever reaches the emitted JavaScript is what exists at runtime, so the list has no gaps left to
+find.
+
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
 `runCli.ts`, the list kept pointing at the old shape, and 611 mutants' worth of argument parsing and

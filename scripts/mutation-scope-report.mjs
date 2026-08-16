@@ -40,60 +40,64 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
  * this script, so they need to be checkable without spawning it.
  */
 export function classifySource(source, fileName = 'x.ts') {
-  const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  // Ask the compiler, don't enumerate node kinds.
+  //
+  // The first version walked the TypeScript AST and listed the declarations that
+  // produce runtime values. Every review round found another form it had missed:
+  // `export { run }` split from its declaration, `export default <expr>`,
+  // `export namespace`, then `export declare function`. The list has no natural
+  // end, and each miss silently drops a real implementation file out of scope.
+  //
+  // Stripping the types first removes the question. Whatever survives to the
+  // emitted JavaScript is, by definition, what exists at runtime — `declare`,
+  // `interface`, `type`, and type-only exports are all gone, and nothing new can
+  // appear that the emitter does not know about.
+  const js = ts.transpileModule(source, {
+    fileName,
+    compilerOptions: {
+      module: ts.ModuleKind.ESNext,
+      target: ts.ScriptTarget.ESNext,
+      // Keeps `export {}` markers intact so an empty module stays distinguishable
+      // from one that exports nothing at all.
+      isolatedModules: true,
+      verbatimModuleSyntax: false,
+    },
+  }).outputText;
+
+  const emitted = ts.createSourceFile(
+    `${fileName}.emitted.js`,
+    js,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
 
   let runtimeExports = 0;
   let reExports = 0;
 
-  for (const node of sf.statements) {
-    const exported = ts.canHaveModifiers(node)
-      ? (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword)
-      : false;
-
+  for (const node of emitted.statements) {
     if (ts.isExportDeclaration(node)) {
-      // `export type { X } from` carries no runtime value.
-      if (node.isTypeOnly) continue;
-
-      // No module specifier means `export { run }` — it publishes declarations
-      // from this same file, so it is not a re-export. Counting it as one files
-      // the whole file under "barrel" and drops real implementation out of scope.
-      // The declaration itself carries no `export` modifier in this form, so it
-      // is not counted anywhere else either.
-      if (!node.moduleSpecifier) {
-        const clause = node.exportClause;
-        if (clause && ts.isNamedExports(clause)) {
-          runtimeExports += clause.elements.filter((el) => !el.isTypeOnly).length;
-        }
-        continue;
+      // With a module specifier it forwards another module; without one it
+      // publishes something declared here.
+      if (node.moduleSpecifier) reExports += 1;
+      else if (node.exportClause && ts.isNamedExports(node.exportClause)) {
+        runtimeExports += node.exportClause.elements.length;
       }
-
-      reExports += 1;
       continue;
     }
-    // `export default <expr>` and `export = <expr>`. Both publish a runtime value
-    // and match none of the declaration checks below.
     if (ts.isExportAssignment(node)) {
       runtimeExports += 1;
       continue;
     }
-    if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) continue;
-    // `export namespace Foo {}` builds a real object at runtime. The `declare`
-    // forms do not, so they stay out.
-    if (ts.isModuleDeclaration(node)) {
-      if (exported && !(node.flags & ts.NodeFlags.Ambient)) runtimeExports += 1;
-      continue;
-    }
-    if (
-      ts.isFunctionDeclaration(node) ||
-      ts.isClassDeclaration(node) ||
-      ts.isEnumDeclaration(node)
-    ) {
-      if (exported) runtimeExports += 1;
-      continue;
-    }
-    if (ts.isVariableStatement(node)) {
-      if (exported) runtimeExports += node.declarationList.declarations.length;
-    }
+
+    const exported =
+      ts.canHaveModifiers(node) &&
+      (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+    if (!exported) continue;
+
+    runtimeExports += ts.isVariableStatement(node)
+      ? node.declarationList.declarations.length
+      : 1;
   }
 
   if (runtimeExports > 0) return 'implementation';
@@ -202,6 +206,14 @@ if (listIndex >= 0) {
     process.stdout.write(`# ${target} — outside mutate (${report.uncovered.length} files, ${report.uncoveredLines} lines)\n\n`);
     for (const { file, lines } of report.uncovered) {
       process.stdout.write(`${String(lines).padStart(6)}  ${file}\n`);
+    }
+    // Whoever widens this package reads this view, so the dead entries in its
+    // own config belong here too — the summary alone is easy to miss.
+    if (report.listedWithoutValue.length > 0) {
+      process.stdout.write(`\n# named in mutate but holds no runtime value\n\n`);
+      for (const { file, lines, kind } of report.listedWithoutValue) {
+        process.stdout.write(`${String(lines).padStart(6)}  ${file} (${kind})\n`);
+      }
     }
   }
   process.exit(0);

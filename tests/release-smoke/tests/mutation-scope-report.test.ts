@@ -66,6 +66,8 @@ describe('classifySource — 実行時の値を持つ形', () => {
     // namespace は実行時に object を組む。 型の入れ物と同じ扱いにすると、
     // 中身の実装ごと集計から外れる。
     ['名前空間を公開する', 'export namespace Foo { export const a = 1; }'],
+    ['既定として class を公開する', 'export default class Runner {}'],
+    ['非同期の既定公開', 'export default async function run() {}'],
   ];
 
   for (const [label, source] of cases) {
@@ -121,6 +123,19 @@ describe('classifySource — 実行時の値を持たない形', () => {
   it('宣言だけの名前空間は実行時に何も生まない', () => {
     expect(classifySource('declare module "x" { const a: number; }')).toBe('type-only');
   });
+
+  // declare が付く形は型の宣言でしかない。 公開の形 (function / const / class) ごとに
+  // 個別対応していると漏れるため、3 形すべてを固定する。
+  const declareForms: Array<[string, string]> = [
+    ['関数', 'export declare function run(): void;'],
+    ['定数', 'export declare const A: number;'],
+    ['クラス', 'export declare class C {}'],
+  ];
+  for (const [label, source] of declareForms) {
+    it(`declare つきの${label}は実行時に何も生まない`, () => {
+      expect(classifySource(source), label).toBe('type-only');
+    });
+  }
 });
 
 describe('reportForPackage — mutate に載っているが変異する値が無い file', () => {
@@ -174,6 +189,15 @@ describe('scripts/mutation-scope-report.mjs', () => {
     expect(stdout).toMatch(/^# auth — outside mutate \(\d+ files, \d+ lines\)/);
     // 行数 + path の形が続く。
     expect(stdout).toMatch(/\n\s+\d+ {2}\S+\.ts/);
+  });
+
+  it('--list は mutate の無駄な指定も同じ画面に出す', async () => {
+    // package を広げる人が見るのはこの画面。 集計の最終行にしか出ないと、
+    // 自分の config に載っている死んだ指定に気付けない。
+    const { stdout } = await execFileAsync('node', [SCRIPT, '--list', 'a11y'], { cwd: REPO_ROOT });
+
+    expect(stdout).toContain('# named in mutate but holds no runtime value');
+    expect(stdout).toMatch(/index\.ts \(barrel\)/);
   });
 
   it('知らない package を渡すと 2 で終わる', async () => {
