@@ -61,9 +61,15 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 
 ## What goes in `mutate` (Issue #1944)
 
-**Every implementation file. Nothing else.** A file is out of scope only when it produces no runtime
-value — a barrel that re-exports other modules, or a file that declares nothing but types and
-interfaces. There is no per-file judgement call beyond that test.
+**Every implementation file.** A file is out of scope only when it produces no runtime value, which
+narrows to two shapes:
+
+- a barrel that only re-exports other modules
+- a file that declares nothing but types and interfaces
+
+Everything else belongs in `mutate`. One shape needs naming by hand: a file whose only job is a side
+effect (imports something, calls it, exports nothing) also exports no value, yet it does run.
+Nothing in the repo is shaped that way today.
 
 **This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
 16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
@@ -74,21 +80,19 @@ Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index
 Stryker finds nothing to mutate there — but it makes the list read wider than it is. Drop them when
 you widen that package.
 
-### Deciding which bucket a file is in
+### Telling the shapes apart
 
-Strip the types and look at what survives. Whatever reaches the emitted JavaScript exists at runtime;
-everything else was a type.
+Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
+interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
 
-Do **not** decide by listing the declaration forms that produce runtime values. That approach missed
-a different form in each review round of #1944 — `export { run }` split from its declaration,
-`export default <expr>`, `export namespace`, `export declare function` — and each miss silently drops
-a real implementation file out of scope. The list has no natural end.
+Do **not** decide by listing the declaration forms that produce runtime values. #1944 tried that and
+missed a different form in each review round — `export { run }` split from its declaration,
+`export default <expr>`, `export namespace`, `export declare function`. Each miss silently drops a
+real implementation file out of scope, and the list has no natural end.
 
-Two edges to know. A file that both re-exports and implements counts entirely as implementation, so
-its re-export lines land in the implementation total (442 lines across two files, 0.7%, as of
-#1944 — `cli/detect/index.ts` and `component/fixture.ts`). And a file whose only job is a side effect
-counts as type-only; nothing in the repo is shaped that way today, and if one appears, name it in
-`mutate` by hand rather than loosening the rule.
+A file can be both shapes at once: `cli/detect/index.ts` and `component/fixture.ts` re-export *and*
+implement. Count those as implementation. Their re-export lines then sit inside the implementation
+total (442 lines, 0.7% of it), which matters only when the line count drives an estimate.
 
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
@@ -98,7 +102,8 @@ removes the remembering.
 
 ### The measurement that produced this rule
 
-Classifying every `src` file by syntax (2026-08-17, 21 packages):
+Classified once by hand during #1944 (2026-08-17, 21 packages). Making this repeatable is #1948;
+until it lands, re-derive the numbers the same way if a package's `mutate` changes.
 
 | bucket | lines |
 |---|---|
@@ -116,9 +121,6 @@ current density (6,271 mutants over 10,878 lines, about 0.58 per line) that proj
 near 37,000 mutants. Treat it as an order of magnitude, not a forecast: density varies by package,
 and `a11y` came in at 0.55 per line while `core` sits at 1.42.
 
-These came from a one-off classification run during #1944. Turning it into a repeatable script is
-#1948 — until that lands, re-derive them by hand if a package's `mutate` changes.
-
 ### Expect scores to drop, and do not read that as regression
 
 Adding one 467-line file to `@kiwa-lab/a11y` moved it from 47 to 256 mutants, 95.74 to 82.42, and
@@ -135,7 +137,7 @@ restore the high number by not looking, which is the failure this rule exists to
 **`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads.** The assignment table
 above repeats those numbers for readability, so the two can drift — `@kiwa-lab/a11y` sat at
 60 / 50 / 40 in the table while running at `override: 90` until #1944 corrected the row. When they
-disagree, the script is right.
+disagree, `check-mutation-gates.mjs` is right.
 
 Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
 where a high number was easy to hold. They are not evidence that the widened scope can hold the same
