@@ -106,7 +106,15 @@ class FailingDisconnectClient {
 }
 
 const ENV_KEY = 'DATABASE_URL';
-let previousDatabaseUrl: string | undefined;
+
+/**
+ * 検査が触る環境変数。 既定名と、名前を指定する検査が使う 2 つ。
+ *
+ * 3 つとも同じ形で退避して戻す。 削除だけにすると、元から値が入っていた場合に
+ * 検査がそれを消してしまう (実装は元の値を戻す作りなので、検査側だけ非対称になる)。
+ */
+const MANAGED_ENV_KEYS = [ENV_KEY, 'ORM_TEST_URL', 'ORM_PG_URL'] as const;
+const previousEnv = new Map<string, string | undefined>();
 
 beforeEach(() => {
   __spawnCalls.length = 0;
@@ -114,16 +122,17 @@ beforeEach(() => {
   __containers.length = 0;
   __containerStartFails = false;
   FakePrismaClient.instances.length = 0;
-  previousDatabaseUrl = process.env[ENV_KEY];
+  previousEnv.clear();
+  for (const key of MANAGED_ENV_KEYS) previousEnv.set(key, process.env[key]);
 });
 
 afterEach(() => {
-  if (typeof previousDatabaseUrl === 'string') process.env[ENV_KEY] = previousDatabaseUrl;
-  else delete process.env[ENV_KEY];
-  // 変数名を指定する検査が使う分。 検査が途中で落ちると実装側の後始末に
-  // 到達しないため、ここでも消しておかないと後続の検査へ漏れる。
-  delete process.env.ORM_TEST_URL;
-  delete process.env.ORM_PG_URL;
+  // 検査が途中で落ちると実装側の後始末に到達しないため、ここで戻す。
+  for (const key of MANAGED_ENV_KEYS) {
+    const prev = previousEnv.get(key);
+    if (typeof prev === 'string') process.env[key] = prev;
+    else delete process.env[key];
+  }
 });
 
 /** この経路を起動する。 戻り値は union なので受け側で絞る。 */
