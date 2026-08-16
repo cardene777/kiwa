@@ -69,11 +69,8 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 Everything else belongs in `mutate`. A barrel does execute, but there is nothing in it to get wrong —
 Stryker generates no mutants from a re-export.
 
-The test below asks whether a file exports anything *of its own* — a value it defines, as against a
-name it merely forwards. That stands in for having behaviour, and the two agree everywhere in this
-repo today. They would part company on a file whose only job is a side effect — imports something,
-calls it, exports nothing. It has behaviour and belongs in scope, but the test cannot see it. Name
-those by hand if one appears.
+The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
+§ Telling the shapes apart records where the two come apart.
 
 **This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
 16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
@@ -89,16 +86,18 @@ you widen that package.
 Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
 interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
 
-Then split what remains in two. An export carrying a module specifier (`export * from './a.js'`,
+Then classify what remains. An export carrying a module specifier (`export * from './a.js'`,
 `export { b } from './b.js'`) forwards someone else's value; anything else publishes a value this
 file defines.
 
 - own values present → implementation
 - only forwards → barrel
-- neither → type-only, **or** the side-effect-only file described above, which this test reports as
-  type-only because it has nothing to read
+- neither → type-only
 
-The last line is where the test and the rule diverge. Everywhere else they agree.
+**The last case is the one place this test disagrees with the rule.** A file whose only job is a side
+effect — imports something, calls it, exports nothing — has behaviour and belongs in `mutate`, but
+exports nothing for the test to read, so it lands in type-only. Nothing in the repo is shaped that
+way today; name one by hand if it appears.
 
 Do **not** decide by reading the source and listing which declaration forms produce runtime values.
 #1944 wrote that check and had to extend it in four consecutive review rounds — first for
