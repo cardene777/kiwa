@@ -63,6 +63,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/perf-harness',
       'packages/quality-metrics',
       'packages/lean',
+      'packages/queue',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -79,7 +80,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       // 分かれて書かれており、片方にだけ足すと判定行の数が食い違う。 件数を固定して
       // おくと、対象を増減させる変更が必ずこの検査を通る。
       const judged = stdout.split('\n').filter((line) => line.startsWith('| @kiwa-lab/'));
-      expect(judged).toHaveLength(23);
+      expect(judged).toHaveLength(24);
       expect(judged.filter((line) => !line.includes('✅'))).toEqual([]);
 
       // Issue #1938 で監視下に入れた 10 package。 fixture を用意しても対象一覧に
@@ -95,6 +96,8 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'perf-harness',
         'quality-metrics',
         'lean',
+        // Issue #1939 で追加。 実ドライバ経路を除外せず、代替実装で覆って載せた。
+        'queue',
       ]) {
         expect(stdout, `${pkg} が判定対象に入っていない`).toContain(`| @kiwa-lab/${pkg} |`);
       }
@@ -139,6 +142,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/perf-harness',
         'packages/quality-metrics',
         'packages/lean',
+        'packages/queue',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });

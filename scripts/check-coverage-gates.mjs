@@ -44,6 +44,7 @@ const PACKAGES = [
   '@kiwa-lab/perf-harness',
   '@kiwa-lab/quality-metrics',
   '@kiwa-lab/lean',
+  '@kiwa-lab/queue',
 ];
 
 const PKG_DIRS = {
@@ -70,6 +71,7 @@ const PKG_DIRS = {
   '@kiwa-lab/perf-harness': 'packages/perf-harness',
   '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
   '@kiwa-lab/lean': 'packages/lean',
+  '@kiwa-lab/queue': 'packages/queue',
 };
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the
@@ -79,6 +81,20 @@ const PKG_DIRS = {
 // be exercised inside the package-local tests when the peer is installed.
 // The mutation gate (check-mutation-gates.mjs) catches regressions on the
 // non-branch logic that coverage cannot.
+//
+// That hand-off does NOT hold everywhere, so do not reach for
+// `--coverage.exclude` as a way to "let mutation testing cover it" (Issue
+// #1939). The mutation configs of `orm` and `queue` list a single file each
+// (`expectations.ts` / `sandbox-queue.ts`), i.e. 3.1% and 8.2% of those
+// packages. Excluding a path from coverage there removes it from every gate at
+// once rather than moving it to another one.
+//
+// The peer-dependency wrappers those packages own are reachable without a real
+// backend: `cache/src/testcontainers-cache.ts` has the same shape (dynamic
+// `await import` behind a duck-typed module interface) and sits at 98.91% via
+// in-process fakes in `cache/tests/semantics/coverage-fill.test.ts`. The queue
+// side follows that shape in
+// `queue/tests/semantics/testcontainers-queue-coverage.test.ts`.
 const THRESHOLDS = {
   lines: 90,
   statements: 90,
