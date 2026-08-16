@@ -171,8 +171,8 @@ The scope grows and the score moves, so both belong in the PR body:
 
 - the files added to `mutate`, and for anything left out, which of the two out-of-scope shapes it is
 - the score before and after, from an actual run
-- the run time before and after — scope roughly 5x means the suite gets slower, and the number
-  informs whether the package needs `concurrency` tuning
+- the run time before and after — a package's scope can grow several times over (6x across the repo,
+  more for the ones starting near 3%), so the number informs whether it needs `concurrency` tuning
 - if the score landed below the tier, the tests written to bring it back, or the explicit plan to
   widen in further steps within the same Issue
 
