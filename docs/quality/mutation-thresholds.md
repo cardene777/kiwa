@@ -61,17 +61,18 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 
 ## What goes in `mutate` (Issue #1944)
 
-**Every file that runs.** Two shapes do not, and only those are out of scope:
+**Every file with behaviour of its own.** Two shapes have none, and only those are out of scope:
 
-- a barrel that only re-exports other modules
-- a file that declares nothing but types and interfaces
+- a barrel, which forwards other modules and decides nothing itself
+- a file that declares nothing but types and interfaces, which is gone before anything runs
 
-Everything else belongs in `mutate`.
+Everything else belongs in `mutate`. A barrel does execute, but there is nothing in it to get wrong —
+Stryker generates no mutants from a re-export.
 
-The test below decides membership by what a file *exports*, which is a proxy for what it runs. The
-two coincide everywhere in this repo today. Where they could part company is a file whose only job
-is a side effect — imports something, calls it, exports nothing. It runs, so it is in scope, but the
-test cannot see it. Name those by hand if one appears.
+The test below reads membership off what a file *exports*, as a stand-in for whether it has its own
+behaviour. The two agree everywhere in this repo today. They would part company on a file whose only
+job is a side effect — imports something, calls it, exports nothing. That file has behaviour and
+belongs in scope, but the test cannot see it. Name those by hand if one appears.
 
 **This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
 16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
@@ -105,7 +106,7 @@ scope until someone remembers to add it. #1936 is what that costs: `index.ts` wa
 `runCli.ts`, the list kept pointing at the old shape, and the argument parsing and command routing
 that moved sat outside every gate while the report still read green. Adding the file back produced
 611 mutants — none of which existed while it was out of scope, which is why nothing failed.
-"Every file that runs" removes the remembering.
+"Every file with behaviour of its own" removes the remembering.
 
 ### The measurement that produced this rule
 
