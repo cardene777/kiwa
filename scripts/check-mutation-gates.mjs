@@ -92,9 +92,7 @@ export const PACKAGE_TIER = Object.freeze({
   // 60 % until follow-up fidelity tests raise it back to 65.
   '@kiwa-lab/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
   '@kiwa-lab/search': { tier: 'saas' },
-  // orm landed at 61.84 % covered MSI on `expectations.js`. Held at 60 %
-  // until follow-up query-planner tests raise it back to 65.
-  '@kiwa-lab/orm': { tier: 'saas', override: 60, reason: 'query-planner follow-up raises back to 65.' },
+  '@kiwa-lab/orm': { tier: 'saas' },
   '@kiwa-lab/dapp': { tier: 'saas' },
   // Test-type tier (DOM / measurement noise).
   '@kiwa-lab/ui': { tier: 'test-type' },
