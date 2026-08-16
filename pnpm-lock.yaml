@@ -4754,7 +4754,7 @@ importers:
   packages/skill-test:
     devDependencies:
       '@vitest/coverage-v8':
-        specifier: ^3.2.7
+        specifier: ^3.2.6
         version: 3.2.7(vitest@3.2.7(@types/debug@4.1.13)(@types/node@22.19.19)(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(terser@5.48.0))
       tsup:
         specifier: ^8.3.5
