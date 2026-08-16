@@ -69,10 +69,11 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 Everything else belongs in `mutate`. A barrel does execute, but there is nothing in it to get wrong —
 Stryker generates no mutants from a re-export.
 
-The test below reads membership off what a file *exports*, as a stand-in for whether it has its own
-behaviour. The two agree everywhere in this repo today. They would part company on a file whose only
-job is a side effect — imports something, calls it, exports nothing. That file has behaviour and
-belongs in scope, but the test cannot see it. Name those by hand if one appears.
+The test below asks whether a file exports anything *of its own* — a value it defines, as against a
+name it merely forwards. That stands in for having behaviour, and the two agree everywhere in this
+repo today. They would part company on a file whose only job is a side effect — imports something,
+calls it, exports nothing. It has behaviour and belongs in scope, but the test cannot see it. Name
+those by hand if one appears.
 
 **This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
 16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
@@ -87,6 +88,11 @@ you widen that package.
 
 Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
 interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
+
+Then split what remains in two. An export carrying a module specifier (`export * from './a.js'`,
+`export { b } from './b.js'`) forwards someone else's value; anything else publishes a value this
+file defines. Own values present means implementation. Only forwards means barrel. Neither means
+type-only.
 
 Do **not** decide by reading the source and listing which declaration forms produce runtime values.
 #1944 wrote that check and had to extend it in four consecutive review rounds — first for
