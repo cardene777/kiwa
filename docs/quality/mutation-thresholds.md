@@ -39,7 +39,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
 | `@kiwa-lab/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
-| `@kiwa-lab/a11y` | Test type | 60 / 50 / 40 | axe-core WCAG 2.1 AA — measurement noise + jsdom limits. |
+| `@kiwa-lab/a11y` | Test type | 90 / 80 / 80 (override) | axe-core WCAG 2.1 AA — measurement noise + jsdom limits, but the historical bar already met 90. |
 | `@kiwa-lab/component` | Test type | 60 / 50 / 40 | Storybook + Playwright CT + Chromatic — DOM + visual noise. |
 | `@kiwa-lab/e2e` | Test type | 60 / 50 / 40 | Playwright fixture + test env — browser fixture noise. |
 
@@ -59,9 +59,135 @@ Every `packages/*/stryker.config.mjs` starts with a header comment that names th
 
 The comment is the on-the-spot receipt. This doc is the shared law.
 
+## What goes in `mutate` (Issue #1944)
+
+**Every implementation file.** A file is out of scope only when it produces no runtime value, which
+narrows to two shapes:
+
+- a barrel that only re-exports other modules
+- a file that declares nothing but types and interfaces
+
+Everything else belongs in `mutate`. One shape needs naming by hand: a file whose only job is a side
+effect (imports something, calls it, exports nothing) also exports no value, yet it does run.
+Nothing in the repo is shaped that way today.
+
+**This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
+16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
+mutation gate accordingly — until a package's Issue lands, "passed" covers whatever its config
+happens to list.
+
+Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). Harmless —
+Stryker finds nothing to mutate there — but it makes the list read wider than it is. Drop them when
+you widen that package.
+
+### Telling the shapes apart
+
+Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
+interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
+
+Do **not** decide by reading the source and listing which declaration forms produce runtime values.
+#1944 wrote that check and had to extend it in four consecutive review rounds — first for
+`export { run }` written apart from its declaration, then `export default <expr>`, then
+`export namespace`, then `export declare function`. Each gap silently drops a real implementation
+file out of scope, and there is no point at which the list is provably complete.
+
+A file can be both shapes at once: `cli/detect/index.ts` and `component/fixture.ts` re-export *and*
+implement. Count those as implementation. Their re-export lines then sit inside the implementation
+total (442 lines, 0.7% of it), which matters only when the line count drives an estimate.
+
+The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
+scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
+`runCli.ts`, the list kept pointing at the old shape, and 611 mutants' worth of argument parsing and
+command routing sat outside every gate while the report still read green. "All implementation"
+removes the remembering.
+
+### The measurement that produced this rule
+
+Classified once by hand during #1944 (2026-08-17, 21 packages). Making this repeatable is #1948;
+until it lands, re-derive the numbers the same way if a package's `mutate` changes.
+
+| bucket | lines |
+|---|---|
+| implementation, in `mutate` | 10,878 |
+| implementation, not in `mutate` | 53,875 |
+| barrel | 3,057 |
+| type-only | 704 |
+
+So 16.8% of implementation lines were covered, and the "it's only types" explanation accounts for
+3,761 lines out of 53,875. Per-package coverage ranged from `hono` at 100% to `auth` at 2.7% with no
+written basis for the difference.
+
+Widening to the full set means 64,753 implementation lines against 10,878 today — roughly 6x. At the
+current density (6,271 mutants over 10,878 lines, about 0.58 per line) that projects to somewhere
+near 37,000 mutants. Treat it as an order of magnitude, not a forecast: density varies by package,
+and `a11y` came in at 0.55 per line while `core` sits at 1.42.
+
+### Expect scores to drop, and do not read that as regression
+
+Adding one 467-line file to `@kiwa-lab/a11y` moved it from 47 to 256 mutants, 95.74 to 82.42, and
+9 to 36 seconds. The new file scored 79.43 on its own and diluted the 95.74 that the old, narrower
+scope reported.
+
+Nothing got worse. A range that was never measured became visible. Narrowing the scope back would
+restore the high number by not looking, which is the failure this rule exists to prevent.
+
 ## Overrides
 
-A package may sit one tier stricter than its default (e.g. `@kiwa-lab/api` picks Core-strict 90 / 80 / 80 because its historical bar already met it). Stricter overrides do not need approval — they raise the floor. A looser override requires a one-line justification in the PR body of the change that introduces it, and must not drop below the tier's `break` threshold.
+**Use the tier default.** An override is an exception and needs the reason recorded next to it.
+
+**`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads.** The assignment table
+above repeats those numbers for readability, so the two can drift — `@kiwa-lab/a11y` sat at
+60 / 50 / 40 in the table while running at `override: 90` until #1944 corrected the row. When they
+disagree, `check-mutation-gates.mjs` is right.
+
+Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
+where a high number was easy to hold. They are not evidence that the widened scope can hold the same
+bar, so they return to the tier default as each package's scope grows.
+
+Overrides that *lower* the bar are temporary by construction and must not drop below the tier's
+`break` threshold. Re-evaluate each one when its package's scope widens — `@kiwa-lab/orm` carried
+`override: 60` with a "raises back to 65" note until #1941 covered the 18 mutants that had no test at
+all, at which point the score reached 90.43 and the override was deleted rather than adjusted.
+
+A looser override still requires a one-line justification in the PR body that introduces it.
+
+## Widening a package's scope
+
+One package per PR, sized by how much sits outside `mutate` today. The three groups below exist
+because the work differs in kind, not just in volume: the large group needs its own test-writing
+plan, while the small group is mostly a config edit plus a re-run.
+
+| group | packages | uncovered lines each |
+|---|---|---|
+| large — one Issue each | `auth` (13,975), `orm` (5,032), `queue` (5,000), `observability` (4,996), `ai-llm` (4,759), `realtime` (3,975), `dapp` (3,523) | 3,000+ |
+| medium — one Issue each | `edge` (2,820), `search` (2,191), `cache` (2,096), `cli` (2,059) | 1,000-3,000 |
+| small — one Issue for all | `component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data` | under 1,000 |
+
+`hono` already sits at 100% and needs no Issue.
+
+### What a widening PR has to show
+
+The scope grows and the score moves, so both belong in the PR body:
+
+- the files added to `mutate`, and for anything left out, which of the two out-of-scope shapes it is
+- the score before and after, from an actual run
+- the run time before and after — a package's scope can grow several times over (6x across the repo,
+  more for the ones starting near 3%), so the number informs whether it needs `concurrency` tuning
+- if the score landed below the tier, the tests written to bring it back, or the explicit plan to
+  widen in further steps within the same Issue
+
+A PR that only edits `mutate` and reports a passing gate has not shown the second half of the work.
+
+### When the widened scope drops below the tier
+
+**Write tests. Do not lower the bar.** The score fell because the newly visible code is less well
+tested than the code that was already in scope — that is the finding, not an accident to be
+configured away.
+
+If reaching the tier in one PR is impractical, widen in steps *within that package's Issue*: add a
+subset of files, cover them, land it, repeat. The scope only ever grows, and the threshold stays at
+the tier default throughout. A temporary override with a "raise it back later" note is exactly the
+shape #1941 removed, and it survived four milestones before anyone returned to it.
 
 ## Baseline snapshots
 
