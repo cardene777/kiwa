@@ -39,7 +39,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
 | `@kiwa-lab/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
-| `@kiwa-lab/a11y` | Test type | 60 / 50 / 40 | axe-core WCAG 2.1 AA — measurement noise + jsdom limits. |
+| `@kiwa-lab/a11y` | Test type | 90 / 80 / 80 (override) | axe-core WCAG 2.1 AA — measurement noise + jsdom limits, but the historical bar already met 90. |
 | `@kiwa-lab/component` | Test type | 60 / 50 / 40 | Storybook + Playwright CT + Chromatic — DOM + visual noise. |
 | `@kiwa-lab/e2e` | Test type | 60 / 50 / 40 | Playwright fixture + test env — browser fixture noise. |
 
@@ -64,6 +64,11 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 **Every implementation file. Nothing else.** A file is out of scope only when it produces no runtime
 value — a barrel that re-exports other modules, or a file that declares nothing but types and
 interfaces. There is no per-file judgement call beyond that test.
+
+**This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
+16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
+mutation gate accordingly — until a package's Issue lands, "passed" covers whatever its config
+happens to list.
 
 Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). That is
 harmless — Stryker finds nothing to mutate there — but it makes the list read wider than it is, so
@@ -123,13 +128,9 @@ restore the high number by not looking, which is the failure this rule exists to
 **Use the tier default.** An override is an exception and needs the reason recorded next to it.
 
 **`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads.** The assignment table
-above writes each package's threshold inline, so the two drift: the table gives `@kiwa-lab/a11y`
-60 / 50 / 40 while the script runs it at `override: 90`. When they disagree, the script is right and
-the table is stale.
-
-Fixing that duplication means reducing the table to tier names only, which is a change to rows this
-Issue does not otherwise touch. Until then, read the table for *which tier* a package sits in and the
-script for *what number* it must clear.
+above repeats those numbers for readability, so the two can drift — `@kiwa-lab/a11y` sat at
+60 / 50 / 40 in the table while running at `override: 90` until #1944 corrected the row. When they
+disagree, the script is right.
 
 Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
 where a high number was easy to hold. They are not evidence that the widened scope can hold the same

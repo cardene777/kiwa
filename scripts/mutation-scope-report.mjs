@@ -52,8 +52,9 @@ export function classifySource(source, fileName = 'x.ts') {
   // emitted JavaScript is, by definition, what exists at runtime — `declare`,
   // `interface`, `type`, and type-only exports are all gone, and nothing new can
   // appear that the emitter does not know about.
-  const js = ts.transpileModule(source, {
+  const transpiled = ts.transpileModule(source, {
     fileName,
+    reportDiagnostics: true,
     compilerOptions: {
       module: ts.ModuleKind.ESNext,
       target: ts.ScriptTarget.ESNext,
@@ -62,7 +63,20 @@ export function classifySource(source, fileName = 'x.ts') {
       isolatedModules: true,
       verbatimModuleSyntax: false,
     },
-  }).outputText;
+  });
+
+  // A file that does not parse emits nothing, which would read as "no runtime
+  // value" and quietly drop it from the report. Refuse instead — a broken file is
+  // a fact worth surfacing, not a file with nothing in it.
+  const syntaxErrors = (transpiled.diagnostics ?? []).filter(
+    (d) => d.category === ts.DiagnosticCategory.Error,
+  );
+  if (syntaxErrors.length > 0) {
+    const first = ts.flattenDiagnosticMessageText(syntaxErrors[0].messageText, ' ');
+    throw new Error(`cannot parse ${fileName}: ${first}`);
+  }
+
+  const js = transpiled.outputText;
 
   const emitted = ts.createSourceFile(
     `${fileName}.emitted.js`,
@@ -161,6 +175,14 @@ export function reportForPackage(pkg) {
     else uncovered.push({ file: rel, lines });
   }
 
+  // Entries the config names that no longer exist. `walk` cannot see them, so
+  // without this they vanish — the config looks like it covers a file it does not.
+  const seen = new Set([
+    ...covered.map((e) => e.file),
+    ...listedWithoutValue.map((e) => e.file),
+  ]);
+  const listedButMissing = [...targets].filter((t) => !seen.has(t)).sort();
+
   const sum = (xs) => xs.reduce((s, x) => s + x.lines, 0);
   uncovered.sort((a, b) => b.lines - a.lines);
   return {
@@ -168,6 +190,7 @@ export function reportForPackage(pkg) {
     covered,
     uncovered,
     listedWithoutValue,
+    listedButMissing,
     coveredLines: sum(covered),
     uncoveredLines: sum(uncovered),
     barrelLines,
@@ -269,5 +292,12 @@ if (listedEmpty.length > 0) {
   process.stdout.write(
     `\nnamed in mutate but holds no runtime value: ${listedEmpty.join(', ')}\n`,
   );
+}
+
+const listedMissing = reports.flatMap((r) =>
+  r.listedButMissing.map((f) => `${r.pkg}/${f}`),
+);
+if (listedMissing.length > 0) {
+  process.stdout.write(`\nnamed in mutate but the file is gone: ${listedMissing.join(', ')}\n`);
 }
 }

@@ -138,6 +138,20 @@ describe('classifySource — 実行時の値を持たない形', () => {
   }
 });
 
+describe('classifySource — 読めない file', () => {
+  it('構文が壊れていたら分類せずに止まる', () => {
+    // 出力が空になるため、そのまま数えると「値を持たない file」 と同じ結果になる。
+    // 壊れていることは報告すべき事実で、集計から静かに消してよいものではない。
+    expect(() => classifySource('export function run( {', 'broken.ts')).toThrow(/cannot parse/);
+  });
+
+  it('停止時にどの file かを示す', () => {
+    expect(() => classifySource('const = ;', 'packages/x/src/y.ts')).toThrow(
+      /packages\/x\/src\/y\.ts/,
+    );
+  });
+});
+
 describe('reportForPackage — mutate に載っているが変異する値が無い file', () => {
   it('集計から落とさず別枠で報告する', async () => {
     const { reportForPackage } = await import(pathToFileURL(SCRIPT).href);
@@ -148,6 +162,15 @@ describe('reportForPackage — mutate に載っているが変異する値が無
     expect(report.listedWithoutValue.map((e: { file: string }) => e.file)).toContain('index.ts');
     expect(report.covered.map((e: { file: string }) => e.file)).not.toContain('index.ts');
     expect(report.uncovered.map((e: { file: string }) => e.file)).not.toContain('index.ts');
+  });
+
+  it('config が指す file が消えていれば別枠で報告する', async () => {
+    const { reportForPackage } = await import(pathToFileURL(SCRIPT).href);
+    // 現状は全 config が実在する file を指す。 空であることを固定しておくと、
+    // 将来 file を消して config を直し忘れた時にこの枠へ現れる。
+    for (const pkg of ['a11y', 'core', 'cli']) {
+      expect(reportForPackage(pkg).listedButMissing, pkg).toEqual([]);
+    }
   });
 });
 
