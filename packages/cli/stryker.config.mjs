@@ -5,6 +5,7 @@ export default {
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: { configFile: 'vitest.stryker.config.mjs' },
   mutate: [
+    '.vitest-dist/src/runCli.js',
     '.vitest-dist/src/commands/init.js',
     '.vitest-dist/src/commands/run-watch.js',
     '.vitest-dist/src/commands/spec-to-test.js',
