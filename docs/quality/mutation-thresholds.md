@@ -70,28 +70,25 @@ interfaces. There is no per-file judgement call beyond that test.
 mutation gate accordingly — until a package's Issue lands, "passed" covers whatever its config
 happens to list.
 
-Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). That is
-harmless — Stryker finds nothing to mutate there — but it makes the list read wider than it is, so
-`mutation-scope-report.mjs` calls them out under "named in mutate but holds no runtime value".
-Drop them when you widen that package.
+Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). Harmless —
+Stryker finds nothing to mutate there — but it makes the list read wider than it is. Drop them when
+you widen that package.
 
-The rule has one known blind spot: a file whose only job is a side effect (importing something and
-calling it, exporting nothing) counts as type-only and stays out of scope. Nothing in the repo is
-shaped that way today. If one appears, name it in `mutate` by hand rather than loosening the rule.
+### Deciding which bucket a file is in
 
-`mutation-scope-report.mjs` decides which bucket a file lands in by stripping the types and looking
-at what survives, rather than by listing the declaration forms that produce runtime values. The
-first version did the latter and missed a different form in each review round — `export { run }`
-split from its declaration, `export default <expr>`, `export namespace`, `export declare function`.
-Whatever reaches the emitted JavaScript is what exists at runtime, so the list has no gaps left to
-find.
+Strip the types and look at what survives. Whatever reaches the emitted JavaScript exists at runtime;
+everything else was a type.
 
-A file that both re-exports and implements counts entirely as implementation, so its re-export lines
-land in the implementation total. The report names those files rather than leaving you to guess —
-442 lines across two files, 0.7% of the total as of #1944. Subtract them when the line count drives
-an estimate.
+Do **not** decide by listing the declaration forms that produce runtime values. That approach missed
+a different form in each review round of #1944 — `export { run }` split from its declaration,
+`export default <expr>`, `export namespace`, `export declare function` — and each miss silently drops
+a real implementation file out of scope. The list has no natural end.
 
-One case stays silent: `export = x` reads as type-only. Nothing in this ESM-only repo uses it.
+Two edges to know. A file that both re-exports and implements counts entirely as implementation, so
+its re-export lines land in the implementation total (442 lines across two files, 0.7%, as of
+#1944 — `cli/detect/index.ts` and `component/fixture.ts`). And a file whose only job is a side effect
+counts as type-only; nothing in the repo is shaped that way today, and if one appears, name it in
+`mutate` by hand rather than loosening the rule.
 
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
@@ -119,7 +116,8 @@ current density (6,271 mutants over 10,878 lines, about 0.58 per line) that proj
 near 37,000 mutants. Treat it as an order of magnitude, not a forecast: density varies by package,
 and `a11y` came in at 0.55 per line while `core` sits at 1.42.
 
-Reproduce any of these numbers with `node scripts/mutation-scope-report.mjs`.
+These came from a one-off classification run during #1944. Turning it into a repeatable script is
+#1948 — until that lands, re-derive them by hand if a package's `mutate` changes.
 
 ### Expect scores to drop, and do not read that as regression
 
