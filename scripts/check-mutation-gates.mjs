@@ -92,11 +92,6 @@ export const PACKAGE_TIER = Object.freeze({
   // 60 % until follow-up fidelity tests raise it back to 65.
   '@kiwa-lab/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
   '@kiwa-lab/search': { tier: 'saas' },
-  // Back to the plain saas threshold (Issue #1941). The temporary 60 existed
-  // because 18 mutants in `expectations.ts` had no covering test at all, which
-  // MSI excludes from its denominator but which also meant the prisma / kysely
-  // dispatch was never exercised. Those branches are covered now and the score
-  // moved 61.84 -> 90.43.
   '@kiwa-lab/orm': { tier: 'saas' },
   '@kiwa-lab/dapp': { tier: 'saas' },
   // Test-type tier (DOM / measurement noise).
