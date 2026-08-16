@@ -65,6 +65,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/lean',
       'packages/queue',
       'packages/orm',
+      'packages/skill-test',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -81,7 +82,8 @@ describe('scripts/check-coverage-gates.mjs', () => {
       // 分かれて書かれており、片方にだけ足すと判定行の数が食い違う。 件数を固定して
       // おくと、対象を増減させる変更が必ずこの検査を通る。
       const judged = stdout.split('\n').filter((line) => line.startsWith('| @kiwa-lab/'));
-      expect(judged).toHaveLength(25);
+      // packages/ 配下の全 package が対象。 新しい package を足したらここも増える。
+      expect(judged).toHaveLength(26);
       expect(judged.filter((line) => !line.includes('✅'))).toEqual([]);
 
       // Issue #1938 で監視下に入れた 10 package。 fixture を用意しても対象一覧に
@@ -101,6 +103,8 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'queue',
         // Issue #1941 で追加。 prisma / kysely の分岐を代替実装で覆って載せた。
         'orm',
+        // Issue #1945 で追加。 計測用の依存が入っておらず測れていなかった。
+        'skill-test',
       ]) {
         expect(stdout, `${pkg} が判定対象に入っていない`).toContain(`| @kiwa-lab/${pkg} |`);
       }
@@ -147,6 +151,7 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/lean',
         'packages/queue',
         'packages/orm',
+        'packages/skill-test',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });
