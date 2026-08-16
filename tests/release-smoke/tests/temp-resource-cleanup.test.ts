@@ -83,6 +83,28 @@ function importsValue(node: ts.ImportDeclaration): boolean {
 }
 
 /**
+ * その re-export が runtime に module を評価するか (#1934)。
+ *
+ * `export { x } from 'node:fs'` と `export * from 'node:fs'` は local binding を作らないが、
+ * 対象 module を評価する。 #1930 で side-effect import と空 named import を「binding は
+ * 作らないが module は評価される」 として取得扱いにしたため、re-export だけが不整合だった。
+ *
+ * type-only の除外は import 側と同じ規則。 `export type { X }` と、全要素が type-only の
+ * named re-export は評価しない。
+ */
+function reExportsValue(node: ts.ExportDeclaration): boolean {
+  if (node.isTypeOnly) return false;
+  const clause = node.exportClause;
+  // `export * from 'node:fs'` = clause 自体が無い形。
+  if (clause === undefined) return true;
+  // `export * as ns from 'node:fs'`
+  if (ts.isNamespaceExport(clause)) return true;
+  // 空の named re-export も module は評価される (import 側と同じ扱い)。
+  if (clause.elements.length === 0) return true;
+  return clause.elements.some((element) => !element.isTypeOnly);
+}
+
+/**
  * 束縛の種類。 `createRequire` だけは「`node:module` から来た」 ことまで覚える。
  */
 type BindingKind = 'value' | 'createRequire';
@@ -451,6 +473,17 @@ function scanSource(
   const visit = (node: ts.Node): void => {
     if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
       if (isFsSpecifier(node.moduleSpecifier.text) && importsValue(node)) touchesFs = true;
+    }
+
+    // `export { x } from 'node:fs'` / `export * from 'node:fs'` も module を評価する (#1934)。
+    if (
+      ts.isExportDeclaration(node) &&
+      node.moduleSpecifier !== undefined &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      isFsSpecifier(node.moduleSpecifier.text) &&
+      reExportsValue(node)
+    ) {
+      touchesFs = true;
     }
 
     // `import fs = require('node:fs')` (TypeScript の import-equals)。
@@ -966,6 +999,40 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     expect(violationOf("import {} from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');")).toBe(
       'direct mkdtemp',
     );
+  });
+
+  it('re-export による fs 取得を判定に含める (#1934)', () => {
+    // local binding は作らないが module は評価される。
+    expect(
+      violationOf("export { readFileSync } from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf("export * from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+    expect(
+      violationOf("export * as ns from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+    // 空の named re-export も import 側と同じ扱い。
+    expect(
+      violationOf("export {} from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+    // 型と value の混在は取得扱い。
+    expect(
+      violationOf("export { type Dirent, readFileSync } from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBe('direct mkdtemp');
+  });
+
+  it('型だけの re-export は取得扱いしない (#1934)', () => {
+    expect(
+      violationOf("export type { Dirent } from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBeNull();
+    expect(
+      violationOf("export { type Dirent } from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');"),
+    ).toBeNull();
+    // module specifier を持たない export は再輸出ではない。
+    expect(
+      violationOf("declare const c: any;\nconst readFileSync = 1;\nexport { readFileSync };\nc.mkdtempSync('t');"),
+    ).toBeNull();
   });
 
   it('.tsx は実 file 名で parse され、構文誤りにならない', () => {
