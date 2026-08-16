@@ -8,7 +8,9 @@
 // So the buckets are pinned by fixture, both directions: forms that must be
 // classified as implementation, and forms that must not.
 import { execFile } from 'node:child_process';
-import { dirname, resolve } from 'node:path';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
@@ -165,11 +167,35 @@ describe('reportForPackage — mutate に載っているが変異する値が無
   });
 
   it('config が指す file が消えていれば別枠で報告する', async () => {
-    const { reportForPackage } = await import(pathToFileURL(SCRIPT).href);
-    // 現状は全 config が実在する file を指す。 空であることを固定しておくと、
-    // 将来 file を消して config を直し忘れた時にこの枠へ現れる。
-    for (const pkg of ['a11y', 'core', 'cli']) {
-      expect(reportForPackage(pkg).listedButMissing, pkg).toEqual([]);
+    // 実 repo は全 config が実在する file を指すため、そこを見るだけでは
+    // 「常に空」 を確かめることにしかならない。 消えた指定を持つ repo を
+    // 組んで、報告に現れることを確かめる。
+    const fakeRoot = mkdtempSync(join(tmpdir(), 'kiwa-scope-missing-'));
+    try {
+      mkdirSync(resolve(fakeRoot, 'scripts'), { recursive: true });
+      writeFileSync(
+        resolve(fakeRoot, 'scripts/check-mutation-gates.mjs'),
+        `export const PACKAGE_TIER = Object.freeze({\n  '@kiwa-lab/sample': { tier: 'core' },\n});\n`,
+      );
+
+      const srcDir = resolve(fakeRoot, 'packages/sample/src');
+      mkdirSync(srcDir, { recursive: true });
+      writeFileSync(resolve(srcDir, 'kept.ts'), 'export function run() { return 1; }\n');
+      writeFileSync(
+        resolve(fakeRoot, 'packages/sample/stryker.config.mjs'),
+        `export default {\n  mutate: [\n    '.vitest-dist/src/kept.js',\n    '.vitest-dist/src/gone.js',\n  ],\n};\n`,
+      );
+
+      const { stdout } = await execFileAsync('node', [SCRIPT, '--list', 'sample', '--json'], {
+        cwd: fakeRoot,
+        env: { ...process.env, KIWA_GATE_ROOT: fakeRoot },
+      });
+      const report = JSON.parse(stdout);
+
+      expect(report.listedButMissing).toEqual(['gone.ts']);
+      expect(report.covered.map((e: { file: string }) => e.file)).toEqual(['kept.ts']);
+    } finally {
+      rmSync(fakeRoot, { recursive: true, force: true });
     }
   });
 });
