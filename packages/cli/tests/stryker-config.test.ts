@@ -51,8 +51,11 @@ const PKG_ROOT = packageRoot(HERE);
  * 変異対象に載っているべき `src` 直下 module の名前を返す (拡張子なし)。
  *
  * `bin` は shebang + `runCli` 呼出だけの 6 行で、変異させる判断が無い。
+ * `test:cov` でも計測対象から外している。
+ *
  * `index` は公開 API の再 export で、変異させても意味を持つ分岐が無い。
- * どちらも `test:cov` の coverage exclude でも同じ扱いをしている。
+ * こちらは `test:cov` では外していない (再 export だけなので計測しても 100% になり、
+ * 外す理由が無い)。
  */
 const EXEMPT_MODULES = new Set(['bin', 'index']);
 
