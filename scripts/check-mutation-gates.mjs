@@ -94,7 +94,12 @@ export const PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/search': { tier: 'saas' },
   // orm landed at 61.84 % covered MSI on `expectations.js`. Held at 60 %
   // until follow-up query-planner tests raise it back to 65.
-  '@kiwa-lab/orm': { tier: 'saas', override: 60, reason: 'query-planner follow-up raises back to 65.' },
+  // Back to the plain saas threshold (Issue #1941). The temporary 60 existed
+  // because 18 mutants in `expectations.ts` had no covering test at all, which
+  // MSI excludes from its denominator but which also meant the prisma / kysely
+  // dispatch was never exercised. Those branches are covered now and the score
+  // moved 61.84 -> 90.43.
+  '@kiwa-lab/orm': { tier: 'saas' },
   '@kiwa-lab/dapp': { tier: 'saas' },
   // Test-type tier (DOM / measurement noise).
   '@kiwa-lab/ui': { tier: 'test-type' },

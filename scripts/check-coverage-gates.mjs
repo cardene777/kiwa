@@ -45,6 +45,7 @@ const PACKAGES = [
   '@kiwa-lab/quality-metrics',
   '@kiwa-lab/lean',
   '@kiwa-lab/queue',
+  '@kiwa-lab/orm',
 ];
 
 const PKG_DIRS = {
@@ -72,6 +73,7 @@ const PKG_DIRS = {
   '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
   '@kiwa-lab/lean': 'packages/lean',
   '@kiwa-lab/queue': 'packages/queue',
+  '@kiwa-lab/orm': 'packages/orm',
 };
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the
