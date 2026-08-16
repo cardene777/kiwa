@@ -74,6 +74,11 @@ function importsValue(node: ts.ImportDeclaration): boolean {
   if (bindings === undefined) return false;
   if (ts.isNamespaceImport(bindings)) return true;
   // named import は、value を 1 つでも取り込むなら取得扱い。
+  //
+  // **空の named import (`import {} from 'node:fs'`) も取得扱い** (#1933 review)。 binding は
+  // 作らないが module は評価されるため、side-effect import と同じ扱いにする。 `some` は空配列で
+  // false を返すので、明示的に分ける。
+  if (bindings.elements.length === 0) return true;
   return bindings.elements.some((element) => !element.isTypeOnly);
 }
 
@@ -955,6 +960,10 @@ describe('一時 dir は core の名前空間を通す (#1926)', () => {
     );
     // side-effect import は value を束縛しないが module は評価されるため取得扱い。
     expect(violationOf("import 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');")).toBe(
+      'direct mkdtemp',
+    );
+    // 空の named import も module を評価する (#1933 review)。
+    expect(violationOf("import {} from 'node:fs';\ndeclare const c: any;\nc.mkdtempSync('t');")).toBe(
       'direct mkdtemp',
     );
   });
