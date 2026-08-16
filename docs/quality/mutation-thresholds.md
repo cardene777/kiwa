@@ -59,9 +59,84 @@ Every `packages/*/stryker.config.mjs` starts with a header comment that names th
 
 The comment is the on-the-spot receipt. This doc is the shared law.
 
+## What goes in `mutate` (Issue #1944)
+
+**Every implementation file. Nothing else.** A file is out of scope only when it produces no runtime
+value — a barrel that re-exports other modules, or a file that declares nothing but types and
+interfaces. There is no per-file judgement call beyond that test.
+
+The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
+scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
+`runCli.ts`, the list kept pointing at the old shape, and 611 mutants' worth of argument parsing and
+command routing sat outside every gate while the report still read green. "All implementation"
+removes the remembering.
+
+### The measurement that produced this rule
+
+Classifying every `src` file by syntax (2026-08-17, 21 packages):
+
+| bucket | lines |
+|---|---|
+| implementation, in `mutate` | 10,878 |
+| implementation, not in `mutate` | 53,875 |
+| barrel | 3,104 |
+| type-only | 657 |
+
+So 16.8% of implementation lines were covered, and the "it's only types" explanation accounts for
+3,761 lines out of 53,875. Per-package coverage ranged from `hono` at 100% to `auth` at 2.7% with no
+written basis for the difference.
+
+Widening to the full set is roughly 5x the current scope (55,642 lines) and an estimated 51,000
+mutants, against 6,271 today.
+
+### Expect scores to drop, and do not read that as regression
+
+Adding one 467-line file to `@kiwa-lab/a11y` moved it from 47 to 256 mutants, 95.74 to 82.42, and
+9 to 36 seconds. The new file scored 79.43 on its own and diluted the 95.74 that the old, narrower
+scope reported.
+
+Nothing got worse. A range that was never measured became visible. Narrowing the scope back would
+restore the high number by not looking, which is the failure this rule exists to prevent.
+
 ## Overrides
 
-A package may sit one tier stricter than its default (e.g. `@kiwa-lab/api` picks Core-strict 90 / 80 / 80 because its historical bar already met it). Stricter overrides do not need approval — they raise the floor. A looser override requires a one-line justification in the PR body of the change that introduces it, and must not drop below the tier's `break` threshold.
+**Use the tier default.** An override is an exception and needs the reason recorded next to it.
+
+Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
+where a high number was easy to hold. They are not evidence that the widened scope can hold the same
+bar, so they return to the tier default as each package's scope grows.
+
+Overrides that *lower* the bar are temporary by construction and must not drop below the tier's
+`break` threshold. Re-evaluate each one when its package's scope widens — `@kiwa-lab/orm` carried
+`override: 60` with a "raises back to 65" note until #1941 covered the 18 mutants that had no test at
+all, at which point the score reached 90.43 and the override was deleted rather than adjusted.
+
+A looser override still requires a one-line justification in the PR body that introduces it.
+
+## Widening a package's scope
+
+One package per PR, sized by how much sits outside `mutate` today. The three groups below exist
+because the work differs in kind, not just in volume: the large group needs its own test-writing
+plan, while the small group is mostly a config edit plus a re-run.
+
+| group | packages | uncovered lines each |
+|---|---|---|
+| large — one Issue each | `auth` (13,975), `orm` (5,032), `queue` (5,000), `observability` (4,996), `ai-llm` (4,759), `realtime` (3,975), `dapp` (3,523) | 3,000+ |
+| medium — one Issue each | `edge` (2,820), `search` (2,191), `cache` (2,096), `cli` (2,059) | 1,000-3,000 |
+| small — one Issue for all | `component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data` | under 1,000 |
+
+`hono` already sits at 100% and needs no Issue.
+
+### When the widened scope drops below the tier
+
+**Write tests. Do not lower the bar.** The score fell because the newly visible code is less well
+tested than the code that was already in scope — that is the finding, not an accident to be
+configured away.
+
+If reaching the tier in one PR is impractical, widen in steps *within that package's Issue*: add a
+subset of files, cover them, land it, repeat. The scope only ever grows, and the threshold stays at
+the tier default throughout. A temporary override with a "raise it back later" note is exactly the
+shape #1941 removed, and it survived four milestones before anyone returned to it.
 
 ## Baseline snapshots
 
