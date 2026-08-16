@@ -120,6 +120,10 @@ beforeEach(() => {
 afterEach(() => {
   if (typeof previousDatabaseUrl === 'string') process.env[ENV_KEY] = previousDatabaseUrl;
   else delete process.env[ENV_KEY];
+  // 変数名を指定する検査が使う分。 検査が途中で落ちると実装側の後始末に
+  // 到達しないため、ここでも消しておかないと後続の検査へ漏れる。
+  delete process.env.ORM_TEST_URL;
+  delete process.env.ORM_PG_URL;
 });
 
 /** この経路を起動する。 戻り値は union なので受け側で絞る。 */
@@ -184,8 +188,9 @@ describe('setupOrmEnv — prisma + mock + sqlite の組み立て', () => {
     expect(process.env.ORM_TEST_URL).toBe(env.datasourceUrl);
 
     await env.stop();
-    // 指定した変数も終了時に片付ける。
-    expect(process.env.ORM_TEST_URL).toBeUndefined();
+    // 指定した変数も終了時に片付ける。 確認は key の有無で行う
+    // (値の比較だと、key が残って中身だけ空の状態を見逃す)。
+    expect('ORM_TEST_URL' in process.env).toBe(false);
   });
 
   it('種を渡すと client を受け取って一度だけ呼ばれる', async () => {
@@ -337,7 +342,7 @@ describe('setupOrmEnv — prisma + live + postgres の組み立て', () => {
     expect(__spawnCalls[0]?.opts.env?.ORM_PG_URL).toBe(env.connectionUri);
 
     await env.stop();
-    expect(process.env.ORM_PG_URL).toBeUndefined();
+    expect('ORM_PG_URL' in process.env).toBe(false);
   });
 
   it('種を渡すと client を受け取って呼ばれる', async () => {
