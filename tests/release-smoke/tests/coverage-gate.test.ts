@@ -53,6 +53,16 @@ describe('scripts/check-coverage-gates.mjs', () => {
       'packages/streaming',
       'packages/design-check',
       'packages/email',
+      'packages/auth',
+      'packages/search',
+      'packages/security',
+      'packages/realtime',
+      'packages/cache',
+      'packages/ai-llm',
+      'packages/component',
+      'packages/perf-harness',
+      'packages/quality-metrics',
+      'packages/lean',
     ];
     try {
       const passing = buildSummary({ lines: 95, branches: 85, functions: 95, statements: 95 });
@@ -64,6 +74,30 @@ describe('scripts/check-coverage-gates.mjs', () => {
       const { stdout, stderr } = await execFileAsync('node', [GATE_SCRIPT], { cwd: fakeRoot });
       expect(stderr).toContain('All packages passed coverage thresholds');
       expect(stdout).toMatch(/@kiwa-lab\/core.*✅/);
+
+      // 判定された package を数える。 監視対象は 2 つの表 (PACKAGES と PKG_DIRS) に
+      // 分かれて書かれており、片方にだけ足すと判定行の数が食い違う。 件数を固定して
+      // おくと、対象を増減させる変更が必ずこの検査を通る。
+      const judged = stdout.split('\n').filter((line) => line.startsWith('| @kiwa-lab/'));
+      expect(judged).toHaveLength(23);
+      expect(judged.filter((line) => !line.includes('✅'))).toEqual([]);
+
+      // Issue #1938 で監視下に入れた 10 package。 fixture を用意しても対象一覧に
+      // 載っていなければ判定行は現れない。
+      for (const pkg of [
+        'auth',
+        'search',
+        'security',
+        'realtime',
+        'cache',
+        'ai-llm',
+        'component',
+        'perf-harness',
+        'quality-metrics',
+        'lean',
+      ]) {
+        expect(stdout, `${pkg} が判定対象に入っていない`).toContain(`| @kiwa-lab/${pkg} |`);
+      }
     } finally {
       rmSync(fakeRoot, { recursive: true, force: true });
     }
@@ -95,6 +129,16 @@ describe('scripts/check-coverage-gates.mjs', () => {
         'packages/streaming',
         'packages/design-check',
         'packages/email',
+        'packages/auth',
+        'packages/search',
+        'packages/security',
+        'packages/realtime',
+        'packages/cache',
+        'packages/ai-llm',
+        'packages/component',
+        'packages/perf-harness',
+        'packages/quality-metrics',
+        'packages/lean',
       ]) {
         const covDir = resolve(fakeRoot, dir, 'coverage');
         mkdirSync(covDir, { recursive: true });
