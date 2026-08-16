@@ -86,11 +86,12 @@ split from its declaration, `export default <expr>`, `export namespace`, `export
 Whatever reaches the emitted JavaScript is what exists at runtime, so the list has no gaps left to
 find.
 
-Two limits are worth knowing when reading its numbers. A file that both re-exports and implements
-counts entirely as implementation, so its re-export lines land in the implementation total — two
-files, 442 lines, 0.7% of the total as of #1944 (`cli/detect/index.ts`, `component/fixture.ts`). And
-`export = x` reads as type-only; nothing in this ESM-only repo uses it. Neither changes which files
-belong in `mutate`, only the line counts you plan against.
+A file that both re-exports and implements counts entirely as implementation, so its re-export lines
+land in the implementation total. The report names those files rather than leaving you to guess —
+442 lines across two files, 0.7% of the total as of #1944. Subtract them when the line count drives
+an estimate.
+
+One case stays silent: `export = x` reads as type-only. Nothing in this ESM-only repo uses it.
 
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into

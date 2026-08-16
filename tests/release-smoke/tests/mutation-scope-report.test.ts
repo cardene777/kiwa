@@ -22,7 +22,9 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = repoRoot(HERE);
 const SCRIPT = resolve(REPO_ROOT, 'scripts/mutation-scope-report.mjs');
 
-const { classifySource, parseMutateTargets } = await import(pathToFileURL(SCRIPT).href);
+const { classifySource, classifyDetailed, parseMutateTargets } = await import(
+  pathToFileURL(SCRIPT).href
+);
 
 describe('classifySource — 実行時の値を持つ形', () => {
   const cases: Array<[string, string]> = [
@@ -138,6 +140,42 @@ describe('classifySource — 実行時の値を持たない形', () => {
       expect(classifySource(source), label).toBe('type-only');
     });
   }
+});
+
+describe('classifyDetailed — 実装と再輸出が同居する file', () => {
+  it('実装として数えたうえで同居を印す', () => {
+    // 行数は丸ごと実装に入る。 印が無いと、計画に使う行数のどこまでが
+    // 実際に検査を書く対象なのか読めない。
+    const detail = classifyDetailed(`export * from './a.js';
+       export const V = 1;`);
+
+    expect(detail.kind).toBe('implementation');
+    expect(detail.mixed).toBe(true);
+  });
+
+  it('実装だけの file は印さない', () => {
+    expect(classifyDetailed('export const V = 1;').mixed).toBe(false);
+  });
+
+  it('再輸出だけの file も印さない', () => {
+    const detail = classifyDetailed(`export * from './a.js';`);
+    expect(detail.kind).toBe('barrel');
+    expect(detail.mixed).toBe(false);
+  });
+});
+
+describe('reportForPackage — 同居する file の集計', () => {
+  it('実装に数えたうえで別枠にも出す', async () => {
+    const { reportForPackage } = await import(pathToFileURL(SCRIPT).href);
+    // cli/detect/index.ts が該当する。 covered か uncovered のどちらかに
+    // 入っている (実装として数えられている) ことも併せて確かめる。
+    const report = reportForPackage('cli');
+    const mixedFiles = report.mixed.map((e: { file: string }) => e.file);
+
+    expect(mixedFiles).toContain('detect/index.ts');
+    const counted = [...report.covered, ...report.uncovered].map((e: { file: string }) => e.file);
+    expect(counted).toContain('detect/index.ts');
+  });
 });
 
 describe('classifySource — 読めない file', () => {

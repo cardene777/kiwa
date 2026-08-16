@@ -39,7 +39,7 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
  * Classify one file. Exported for the test — the buckets are the whole point of
  * this script, so they need to be checkable without spawning it.
  */
-export function classifySource(source, fileName = 'x.ts') {
+export function classifyDetailed(source, fileName = 'x.ts') {
   // Ask the compiler, don't enumerate node kinds.
   //
   // The first version walked the TypeScript AST and listed the declarations that
@@ -114,9 +114,18 @@ export function classifySource(source, fileName = 'x.ts') {
       : 1;
   }
 
-  if (runtimeExports > 0) return 'implementation';
-  if (reExports > 0) return 'barrel';
-  return 'type-only';
+  const kind =
+    runtimeExports > 0 ? 'implementation' : reExports > 0 ? 'barrel' : 'type-only';
+
+  // `mixed` marks a file that both implements and forwards. Its whole line count
+  // lands in the implementation total, so anyone planning work off these numbers
+  // is counting some re-export lines as code to test.
+  return { kind, runtimeExports, reExports, mixed: runtimeExports > 0 && reExports > 0 };
+}
+
+/** The bucket alone. Most callers want this. */
+export function classifySource(source, fileName = 'x.ts') {
+  return classifyDetailed(source, fileName).kind;
 }
 
 /** Read the `mutate` array of a stryker config as `src`-relative `.ts` paths. */
@@ -155,6 +164,9 @@ export function reportForPackage(pkg) {
   // they make the list look wider than it is — `a11y` names two files and only one
   // of them can produce a mutant.
   const listedWithoutValue = [];
+  // Files counted as implementation that also forward other modules. Their
+  // re-export lines inflate the implementation total.
+  const mixed = [];
   let barrelLines = 0;
   let typeOnlyLines = 0;
 
@@ -162,7 +174,9 @@ export function reportForPackage(pkg) {
     const rel = file.slice(`${srcDir}/`.length);
     const body = readFileSync(file, 'utf8');
     const lines = body.split('\n').length;
-    const kind = classifySource(body, file);
+    const detail = classifyDetailed(body, file);
+    const kind = detail.kind;
+    if (detail.mixed) mixed.push({ file: rel, lines });
 
     if (kind !== 'implementation') {
       if (kind === 'barrel') barrelLines += lines;
@@ -191,6 +205,8 @@ export function reportForPackage(pkg) {
     uncovered,
     listedWithoutValue,
     listedButMissing,
+    mixed,
+    mixedLines: mixed.reduce((s, e) => s + e.lines, 0),
     coveredLines: sum(covered),
     uncoveredLines: sum(uncovered),
     barrelLines,
@@ -299,5 +315,15 @@ const listedMissing = reports.flatMap((r) =>
 );
 if (listedMissing.length > 0) {
   process.stdout.write(`\nnamed in mutate but the file is gone: ${listedMissing.join(', ')}\n`);
+}
+
+const mixedAll = reports.flatMap((r) => r.mixed.map((e) => `${r.pkg}/${e.file} (${e.lines})`));
+if (mixedAll.length > 0) {
+  const mixedLines = reports.reduce((s, r) => s + r.mixedLines, 0);
+  process.stdout.write(
+    `\nboth implements and re-exports — counted whole as implementation ` +
+      `(${mixedLines} lines, ${((mixedLines / implTotal) * 100).toFixed(1)}% of it): ` +
+      `${mixedAll.join(', ')}\n`,
+  );
 }
 }
