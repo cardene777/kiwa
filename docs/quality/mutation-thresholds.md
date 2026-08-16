@@ -85,10 +85,11 @@ you widen that package.
 Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
 interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
 
-Do **not** decide by listing the declaration forms that produce runtime values. #1944 tried that and
-missed a different form in each review round — `export { run }` split from its declaration,
-`export default <expr>`, `export namespace`, `export declare function`. Each miss silently drops a
-real implementation file out of scope, and the list has no natural end.
+Do **not** decide by reading the source and listing which declaration forms produce runtime values.
+#1944 wrote that check and had to extend it in four consecutive review rounds — first for
+`export { run }` written apart from its declaration, then `export default <expr>`, then
+`export namespace`, then `export declare function`. Each gap silently drops a real implementation
+file out of scope, and there is no point at which the list is provably complete.
 
 A file can be both shapes at once: `cli/detect/index.ts` and `component/fixture.ts` re-export *and*
 implement. Count those as implementation. Their re-export lines then sit inside the implementation
@@ -163,6 +164,19 @@ plan, while the small group is mostly a config edit plus a re-run.
 | small — one Issue for all | `component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data` | under 1,000 |
 
 `hono` already sits at 100% and needs no Issue.
+
+### What a widening PR has to show
+
+The scope grows and the score moves, so both belong in the PR body:
+
+- the files added to `mutate`, and for anything left out, which of the two out-of-scope shapes it is
+- the score before and after, from an actual run
+- the run time before and after — scope roughly 5x means the suite gets slower, and the number
+  informs whether the package needs `concurrency` tuning
+- if the score landed below the tier, the tests written to bring it back, or the explicit plan to
+  widen in further steps within the same Issue
+
+A PR that only edits `mutate` and reports a passing gate has not shown the second half of the work.
 
 ### When the widened scope drops below the tier
 
