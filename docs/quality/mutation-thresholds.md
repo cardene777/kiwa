@@ -91,8 +91,14 @@ interfaces, and `declare` forms leave nothing behind, so whatever remains is wha
 
 Then split what remains in two. An export carrying a module specifier (`export * from './a.js'`,
 `export { b } from './b.js'`) forwards someone else's value; anything else publishes a value this
-file defines. Own values present means implementation. Only forwards means barrel. Neither means
-type-only.
+file defines.
+
+- own values present → implementation
+- only forwards → barrel
+- neither → type-only, **or** the side-effect-only file described above, which this test reports as
+  type-only because it has nothing to read
+
+The last line is where the test and the rule diverge. Everywhere else they agree.
 
 Do **not** decide by reading the source and listing which declaration forms produce runtime values.
 #1944 wrote that check and had to extend it in four consecutive review rounds — first for
