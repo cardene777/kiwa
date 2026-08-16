@@ -34,6 +34,16 @@ const PACKAGES = [
   '@kiwa-lab/nextjs',
   '@kiwa-lab/edge',
   '@kiwa-lab/hono',
+  '@kiwa-lab/auth',
+  '@kiwa-lab/search',
+  '@kiwa-lab/security',
+  '@kiwa-lab/realtime',
+  '@kiwa-lab/cache',
+  '@kiwa-lab/ai-llm',
+  '@kiwa-lab/component',
+  '@kiwa-lab/perf-harness',
+  '@kiwa-lab/quality-metrics',
+  '@kiwa-lab/lean',
 ];
 
 const PKG_DIRS = {
@@ -50,6 +60,16 @@ const PKG_DIRS = {
   '@kiwa-lab/nextjs': 'packages/nextjs',
   '@kiwa-lab/edge': 'packages/edge',
   '@kiwa-lab/hono': 'packages/hono',
+  '@kiwa-lab/auth': 'packages/auth',
+  '@kiwa-lab/search': 'packages/search',
+  '@kiwa-lab/security': 'packages/security',
+  '@kiwa-lab/realtime': 'packages/realtime',
+  '@kiwa-lab/cache': 'packages/cache',
+  '@kiwa-lab/ai-llm': 'packages/ai-llm',
+  '@kiwa-lab/component': 'packages/component',
+  '@kiwa-lab/perf-harness': 'packages/perf-harness',
+  '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
+  '@kiwa-lab/lean': 'packages/lean',
 };
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the
