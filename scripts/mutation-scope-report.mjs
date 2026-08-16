@@ -52,7 +52,28 @@ export function classifySource(source, fileName = 'x.ts') {
 
     if (ts.isExportDeclaration(node)) {
       // `export type { X } from` carries no runtime value.
-      if (!node.isTypeOnly) reExports += 1;
+      if (node.isTypeOnly) continue;
+
+      // No module specifier means `export { run }` — it publishes declarations
+      // from this same file, so it is not a re-export. Counting it as one files
+      // the whole file under "barrel" and drops real implementation out of scope.
+      // The declaration itself carries no `export` modifier in this form, so it
+      // is not counted anywhere else either.
+      if (!node.moduleSpecifier) {
+        const clause = node.exportClause;
+        if (clause && ts.isNamedExports(clause)) {
+          runtimeExports += clause.elements.filter((el) => !el.isTypeOnly).length;
+        }
+        continue;
+      }
+
+      reExports += 1;
+      continue;
+    }
+    // `export default <expr>` and `export = <expr>`. Both publish a runtime value
+    // and match none of the declaration checks below.
+    if (ts.isExportAssignment(node)) {
+      runtimeExports += 1;
       continue;
     }
     if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) continue;

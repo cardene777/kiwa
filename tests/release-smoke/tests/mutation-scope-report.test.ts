@@ -43,6 +43,26 @@ describe('classifySource — 実行時の値を持つ形', () => {
       '1 文で複数を公開する',
       'export const a = 1, b = 2;',
     ],
+    // 以下 4 形は宣言に export が付かない / 宣言そのものが無い。 宣言側だけを
+    // 見ていると実装が再輸出や型のみに落ち、対象外として集計から消える。
+    [
+      '宣言と公開を分けて書く',
+      `function run() {}
+       export { run };`,
+    ],
+    ['既定として関数を公開する', 'export default function run() {}'],
+    [
+      '既定として変数を公開する',
+      `const run = () => 1;
+       export default run;`,
+    ],
+    ['既定として即値を公開する', 'export default { run: () => 1 };'],
+    [
+      '公開する要素の一部だけが型',
+      `function run() {}
+       type X = 1;
+       export { run, type X };`,
+    ],
   ];
 
   for (const [label, source] of cases) {
@@ -77,6 +97,22 @@ describe('classifySource — 実行時の値を持たない形', () => {
 
   it('空 file は type-only', () => {
     expect(classifySource('')).toBe('type-only');
+  });
+
+  it('公開する要素が全て型なら type-only', () => {
+    // `export { type X }` は実行時に何も公開しない。 要素を数えずに
+    // 1 件と扱うと、型だけの file が実装として集計に入る。
+    expect(
+      classifySource(`type X = 1;
+       export { type X };`),
+    ).toBe('type-only');
+  });
+
+  it('型だけを名前で公開する形も type-only', () => {
+    expect(
+      classifySource(`type X = 1;
+       export type { X };`),
+    ).toBe('type-only');
   });
 });
 

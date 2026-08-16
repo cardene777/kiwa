@@ -79,15 +79,19 @@ Classifying every `src` file by syntax (2026-08-17, 21 packages):
 |---|---|
 | implementation, in `mutate` | 10,878 |
 | implementation, not in `mutate` | 53,875 |
-| barrel | 3,104 |
-| type-only | 657 |
+| barrel | 3,057 |
+| type-only | 704 |
 
 So 16.8% of implementation lines were covered, and the "it's only types" explanation accounts for
 3,761 lines out of 53,875. Per-package coverage ranged from `hono` at 100% to `auth` at 2.7% with no
 written basis for the difference.
 
-Widening to the full set is roughly 5x the current scope (55,642 lines) and an estimated 51,000
-mutants, against 6,271 today.
+Widening to the full set means 64,753 implementation lines against 10,878 today — roughly 6x. At the
+current density (6,271 mutants over 10,878 lines, about 0.58 per line) that projects to somewhere
+near 37,000 mutants. Treat it as an order of magnitude, not a forecast: density varies by package,
+and `a11y` came in at 0.55 per line while `core` sits at 1.42.
+
+Reproduce any of these numbers with `node scripts/mutation-scope-report.mjs`.
 
 ### Expect scores to drop, and do not read that as regression
 
@@ -101,6 +105,11 @@ restore the high number by not looking, which is the failure this rule exists to
 ## Overrides
 
 **Use the tier default.** An override is an exception and needs the reason recorded next to it.
+
+The live values are in `scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`), not in the assignment
+table above — that table records which tier a package belongs to, and an override can sit on top of
+it. `@kiwa-lab/a11y` is listed there as Test type 60 / 50 / 40 and currently runs with
+`override: 90`; both are true, and the script is the one the gate reads.
 
 Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
 where a high number was easy to hold. They are not evidence that the widened scope can hold the same
