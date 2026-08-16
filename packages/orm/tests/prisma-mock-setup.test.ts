@@ -123,7 +123,13 @@ beforeEach(() => {
   __containerStartFails = false;
   FakePrismaClient.instances.length = 0;
   previousEnv.clear();
-  for (const key of MANAGED_ENV_KEYS) previousEnv.set(key, process.env[key]);
+  for (const key of MANAGED_ENV_KEYS) {
+    previousEnv.set(key, process.env[key]);
+    // 退避したうえで消しておく。 残したままだと、実装が「元の値を戻す」 経路を
+    // 通った結果として値が復活し、消えたことを見る検査が実行環境次第で落ちる。
+    // 元の値が要る検査は自分で設定する。
+    delete process.env[key];
+  }
 });
 
 afterEach(() => {
