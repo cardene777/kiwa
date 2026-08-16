@@ -77,6 +77,12 @@ export function classifySource(source, fileName = 'x.ts') {
       continue;
     }
     if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) continue;
+    // `export namespace Foo {}` builds a real object at runtime. The `declare`
+    // forms do not, so they stay out.
+    if (ts.isModuleDeclaration(node)) {
+      if (exported && !(node.flags & ts.NodeFlags.Ambient)) runtimeExports += 1;
+      continue;
+    }
     if (
       ts.isFunctionDeclaration(node) ||
       ts.isClassDeclaration(node) ||
@@ -127,6 +133,10 @@ export function reportForPackage(pkg) {
   const targets = new Set(parseMutateTargets(readFileSync(cfgPath, 'utf8')));
   const covered = [];
   const uncovered = [];
+  // Files named in `mutate` that hold nothing to mutate. Harmless to Stryker, but
+  // they make the list look wider than it is — `a11y` names two files and only one
+  // of them can produce a mutant.
+  const listedWithoutValue = [];
   let barrelLines = 0;
   let typeOnlyLines = 0;
 
@@ -136,9 +146,14 @@ export function reportForPackage(pkg) {
     const lines = body.split('\n').length;
     const kind = classifySource(body, file);
 
-    if (kind === 'barrel') barrelLines += lines;
-    else if (kind === 'type-only') typeOnlyLines += lines;
-    else if (targets.has(rel)) covered.push({ file: rel, lines });
+    if (kind !== 'implementation') {
+      if (kind === 'barrel') barrelLines += lines;
+      else typeOnlyLines += lines;
+      if (targets.has(rel)) listedWithoutValue.push({ file: rel, lines, kind });
+      continue;
+    }
+
+    if (targets.has(rel)) covered.push({ file: rel, lines });
     else uncovered.push({ file: rel, lines });
   }
 
@@ -148,6 +163,7 @@ export function reportForPackage(pkg) {
     pkg,
     covered,
     uncovered,
+    listedWithoutValue,
     coveredLines: sum(covered),
     uncoveredLines: sum(uncovered),
     barrelLines,
@@ -233,4 +249,13 @@ process.stdout.write(
 process.stdout.write(
   `barrel + type-only: ${totals.barrel + totals.typeOnly} lines (no runtime value to mutate)\n`,
 );
+
+const listedEmpty = reports.flatMap((r) =>
+  r.listedWithoutValue.map((e) => `${r.pkg}/${e.file} (${e.kind})`),
+);
+if (listedEmpty.length > 0) {
+  process.stdout.write(
+    `\nnamed in mutate but holds no runtime value: ${listedEmpty.join(', ')}\n`,
+  );
+}
 }

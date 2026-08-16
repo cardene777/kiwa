@@ -65,6 +65,15 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 value — a barrel that re-exports other modules, or a file that declares nothing but types and
 interfaces. There is no per-file judgement call beyond that test.
 
+Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). That is
+harmless — Stryker finds nothing to mutate there — but it makes the list read wider than it is, so
+`mutation-scope-report.mjs` calls them out under "named in mutate but holds no runtime value".
+Drop them when you widen that package.
+
+The rule has one known blind spot: a file whose only job is a side effect (importing something and
+calling it, exporting nothing) counts as type-only and stays out of scope. Nothing in the repo is
+shaped that way today. If one appears, name it in `mutate` by hand rather than loosening the rule.
+
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
 `runCli.ts`, the list kept pointing at the old shape, and 611 mutants' worth of argument parsing and
@@ -106,10 +115,14 @@ restore the high number by not looking, which is the failure this rule exists to
 
 **Use the tier default.** An override is an exception and needs the reason recorded next to it.
 
-The live values are in `scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`), not in the assignment
-table above — that table records which tier a package belongs to, and an override can sit on top of
-it. `@kiwa-lab/a11y` is listed there as Test type 60 / 50 / 40 and currently runs with
-`override: 90`; both are true, and the script is the one the gate reads.
+**`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads.** The assignment table
+above writes each package's threshold inline, so the two drift: the table gives `@kiwa-lab/a11y`
+60 / 50 / 40 while the script runs it at `override: 90`. When they disagree, the script is right and
+the table is stale.
+
+Fixing that duplication means reducing the table to tier names only, which is a change to rows this
+Issue does not otherwise touch. Until then, read the table for *which tier* a package sits in and the
+script for *what number* it must clear.
 
 Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
 where a high number was easy to hold. They are not evidence that the widened scope can hold the same

@@ -63,6 +63,9 @@ describe('classifySource — 実行時の値を持つ形', () => {
        type X = 1;
        export { run, type X };`,
     ],
+    // namespace は実行時に object を組む。 型の入れ物と同じ扱いにすると、
+    // 中身の実装ごと集計から外れる。
+    ['名前空間を公開する', 'export namespace Foo { export const a = 1; }'],
   ];
 
   for (const [label, source] of cases) {
@@ -113,6 +116,23 @@ describe('classifySource — 実行時の値を持たない形', () => {
       classifySource(`type X = 1;
        export type { X };`),
     ).toBe('type-only');
+  });
+
+  it('宣言だけの名前空間は実行時に何も生まない', () => {
+    expect(classifySource('declare module "x" { const a: number; }')).toBe('type-only');
+  });
+});
+
+describe('reportForPackage — mutate に載っているが変異する値が無い file', () => {
+  it('集計から落とさず別枠で報告する', async () => {
+    const { reportForPackage } = await import(pathToFileURL(SCRIPT).href);
+    // a11y は index.js を mutate に並べているが、その中身は再輸出だけ。
+    // covered にも uncovered にも入れないと、一覧の 2 件目が黙って消える。
+    const report = reportForPackage('a11y');
+
+    expect(report.listedWithoutValue.map((e: { file: string }) => e.file)).toContain('index.ts');
+    expect(report.covered.map((e: { file: string }) => e.file)).not.toContain('index.ts');
+    expect(report.uncovered.map((e: { file: string }) => e.file)).not.toContain('index.ts');
   });
 });
 
