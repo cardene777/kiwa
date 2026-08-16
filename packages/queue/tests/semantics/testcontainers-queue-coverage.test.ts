@@ -41,6 +41,11 @@ const __closedWorkers: FakeWorker[] = [];
 const __redisClients: FakeRedis[] = [];
 const __containers: FakeContainer[] = [];
 
+/** `queue.add` が実際に受け取った引数。 省略時に何を渡さないかを見るために持つ。 */
+const __addCalls: Array<{ name: string; data: unknown; opts: unknown }> = [];
+/** 後始末で閉じた順序。 stop() が閉じる順そのものを検査するために持つ。 */
+const __closeOrder: string[] = [];
+
 /** `quit()` を失敗させて `disconnect()` への退避経路を通すための切替。 */
 let __quitRejects = false;
 /** `getWaitingCount` 等が返す残数。 drain 待ちの分岐を作るために使う。 */
@@ -62,6 +67,7 @@ class FakeQueue {
     data: unknown,
     opts?: { attempts?: number; delay?: number; jobId?: string },
   ): Promise<{ id?: string; name: string; data: unknown }> {
+    __addCalls.push({ name, data, opts });
     __jobSeq += 1;
     const id = opts?.jobId ?? `job-${__jobSeq}`;
     __jobs.push({ id, name, data, attemptsMade: 0, state: 'wait' });
@@ -70,6 +76,7 @@ class FakeQueue {
 
   async close(): Promise<void> {
     this.closed = true;
+    __closeOrder.push('queue.close');
   }
 
   async getWaitingCount(): Promise<number> {
@@ -128,27 +135,33 @@ class FakeWorker {
   async close(): Promise<void> {
     this.closed = true;
     __closedWorkers.push(this);
+    __closeOrder.push('worker.close');
   }
 }
 
 class FakeRedis {
   disconnected = false;
   quitCalls = 0;
+  /** 生成順。 1 本目が queue 用、2 本目以降が worker 用になる。 */
+  readonly seq: number;
   constructor(
     public readonly url: string,
     public readonly opts: { maxRetriesPerRequest: null },
   ) {
+    this.seq = __redisClients.length;
     __redisClients.push(this);
   }
 
   async quit(): Promise<string> {
     this.quitCalls += 1;
+    __closeOrder.push(`redis.quit#${this.seq}`);
     if (__quitRejects) throw new Error('quit refused');
     return 'OK';
   }
 
   disconnect(): void {
     this.disconnected = true;
+    __closeOrder.push(`redis.disconnect#${this.seq}`);
   }
 }
 
@@ -172,6 +185,7 @@ class FakeContainer {
     return {
       stop: async () => {
         this.stopped = true;
+        __closeOrder.push('container.stop');
       },
       getHost: () => __containerHost,
       getMappedPort: (port: number) => port + 1000,
@@ -215,6 +229,8 @@ beforeEach(() => {
   __closedWorkers.length = 0;
   __redisClients.length = 0;
   __containers.length = 0;
+  __addCalls.length = 0;
+  __closeOrder.length = 0;
   __quitRejects = false;
   __pendingCounts = [];
   __containerHost = 'fake-host';
@@ -290,8 +306,33 @@ describe('createTestcontainersBullMQEnv — job の追加と観測', () => {
     });
     envs.push(env);
 
+    // 比較は toStrictEqual で行う。 toEqual は値が undefined の key を無視するため、
+    // 「渡さない」 と「undefined を渡す」 が区別できない。 ここで見たいのは
+    // 実装の 3 つの if がそれぞれ効いているかなので、その区別が付かないと検査が
+    // 素通りする (実際に `jobOpts.attempts = addOpts?.attempts` へ変異させても
+    // toEqual では落ちなかった)。
+
+    // 3 つとも指定した時は 3 つとも届く。
     const snap = await env.addJob('greet', { to: 'a' }, { attempts: 3, delay: 10, jobId: 'fixed' });
     expect(snap.id).toBe('fixed');
+    expect(__addCalls.at(-1)).toStrictEqual({
+      name: 'greet',
+      data: { to: 'a' },
+      opts: { attempts: 3, delay: 10, jobId: 'fixed' },
+    });
+
+    // 何も指定しなければ key ごと現れない。
+    await env.addJob('plain', { to: 'b' });
+    expect(__addCalls.at(-1)?.opts).toStrictEqual({});
+    expect(Object.keys(__addCalls.at(-1)?.opts as object)).toEqual([]);
+
+    // 一部だけ指定した時は、指定した分だけが届く。
+    await env.addJob('partial', {}, { delay: 5 });
+    expect(__addCalls.at(-1)?.opts).toStrictEqual({ delay: 5 });
+
+    // 0 は「指定した」 として扱う (falsy だが undefined ではない)。
+    await env.addJob('zero', {}, { attempts: 0, delay: 0 });
+    expect(__addCalls.at(-1)?.opts).toStrictEqual({ attempts: 0, delay: 0 });
   });
 
   it('処理が終わった job を assertProcessed が返す', async () => {
@@ -516,11 +557,37 @@ describe('createTestcontainersBullMQEnv — 後始末', () => {
 
     await env.stop();
 
-    expect(__closedWorkers).toHaveLength(1);
+    // 順序そのものを見る。 worker を閉じる前に接続を切ると、処理中の job が
+    // 接続の切れた状態で走り続ける。 container を先に止めると、閉じる途中の
+    // 接続が到達不能な相手を待つ。
+    expect(__closeOrder).toEqual([
+      'worker.close',
+      'redis.quit#1',
+      'queue.close',
+      'redis.quit#0',
+      'container.stop',
+    ]);
     expect(__containers[0]?.stopped).toBe(true);
-    // 接続は queue 用と worker 用の 2 本。 どちらも quit を通る。
+    // 接続は queue 用 (#0) と worker 用 (#1) の 2 本。
     expect(__redisClients).toHaveLength(2);
     expect(__redisClients.every((client) => client.quitCalls === 1)).toBe(true);
+  });
+
+  it('接続先を渡した時は container を閉じる手順が入らない', async () => {
+    const env = await createTestcontainersBullMQEnv({
+      queueName: 'q',
+      redis: { url: 'redis://given:6379' },
+    });
+    env.process(async () => 'ok');
+
+    await env.stop();
+
+    expect(__closeOrder).toEqual([
+      'worker.close',
+      'redis.quit#1',
+      'queue.close',
+      'redis.quit#0',
+    ]);
   });
 
   it('quit が失敗した接続は disconnect に退避する', async () => {
