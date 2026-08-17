@@ -12,9 +12,13 @@
  * package as 3,954 implementation lines, 342 barrel lines (`index.ts` and
  * `semantics/index.ts`), and no type-only file — so the barrels are the whole
  * of what stays off this list, and § What goes in `mutate` says not to name
- * them. `real-driver.js` and `semantics/real-driver.js` carry a `KIWA_MODE=real`
- * env gate; their mutants land as no-coverage, which the covered score leaves
- * out of the denominator rather than counting against the package.
+ * them.
+ *
+ * The two `real-driver.js` files are mutated like any other. Their `KIWA_MODE`
+ * gate selects a driver rather than skipping the module, and the unit suite
+ * exercises the mock side, so their mutants are covered and scored (74 and 86
+ * mutants at 91.89 and 79.07). The package's 13 no-coverage mutants sit
+ * elsewhere — `authorization.js` holds 9 of them.
  */
 export default {
   packageManager: 'pnpm',
