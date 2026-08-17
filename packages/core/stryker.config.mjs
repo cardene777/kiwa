@@ -14,7 +14,11 @@ export default {
   vitest: {
     configFile: 'vitest.stryker.config.mjs',
   },
-  mutate: ['.vitest-dist/src/parser.js', '.vitest-dist/src/pool.js'],
+  mutate: [
+    '.vitest-dist/src/parser.js',
+    '.vitest-dist/src/pool.js',
+    '.vitest-dist/src/temp.js',
+  ],
   thresholds: { high: 80, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],

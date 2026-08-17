@@ -6,11 +6,11 @@
     "low": 50,
     "break": 40
   },
-  "killRate": 95.74,
-  "totalMsi": 95.74,
-  "coveredMsi": 95.74,
-  "killed": 45,
-  "survived": 2,
+  "killRate": 82.42,
+  "totalMsi": 82.42,
+  "coveredMsi": 82.42,
+  "killed": 211,
+  "survived": 45,
   "timeout": 0,
   "noCoverage": 0,
   "error": 0,
@@ -28,8 +28,309 @@
       "column": 106,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 73,
+      "column": 20,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 88,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 90,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 90,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 90,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "runOptions === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 98,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 112,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 122,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 122,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "value === null && typeof value !== 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 122,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 122,
+      "column": 27,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 123,
+      "column": 16,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 125,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 125,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof el.tagName === 'string' || el.nodeType === 1"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 125,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 125,
+      "column": 46,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 161,
+      "column": 9,
+      "mutator": "OptionalChaining",
+      "replacement": "host.appendChild"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 195,
+      "column": 13,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 204,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 232,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 280,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 284,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "existing.nodes -= v.nodes"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 291,
+      "column": 22,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 293,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 294,
+      "column": 55,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 294,
+      "column": 27,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 294,
+      "column": 48,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 294,
+      "column": 65,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 294,
+      "column": 75,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 296,
+      "column": 56,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 296,
+      "column": 72,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 296,
+      "column": 90,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 296,
+      "column": 96,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 299,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 299,
+      "column": 19,
+      "mutator": "LogicalOperator",
+      "replacement": "a != null || IMPACTS.includes(a)"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 299,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 299,
+      "column": 75,
+      "mutator": "UnaryOperator",
+      "replacement": "+1"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 300,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 300,
+      "column": 19,
+      "mutator": "LogicalOperator",
+      "replacement": "b != null || IMPACTS.includes(b)"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 300,
+      "column": 75,
+      "mutator": "UnaryOperator",
+      "replacement": "+1"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 300,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/layer-harness.js",
+      "line": 305,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "rankA < rankB"
     }
   ],
-  "capturedAt": "2026-08-17T04:26:34Z",
-  "note": "Total MSI 95.74% / Covered MSI 95.74% (threshold high=60 / low=50 / break=40)."
+  "capturedAt": "2026-08-17T06:51:11Z",
+  "note": "Total MSI 82.42% / Covered MSI 82.42% (threshold high=60 / low=50 / break=40)."
 }

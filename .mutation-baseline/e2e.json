@@ -6,15 +6,204 @@
     "low": 50,
     "break": 40
   },
-  "killRate": 84.21,
-  "totalMsi": 84.21,
-  "coveredMsi": 84.21,
-  "killed": 32,
-  "survived": 6,
+  "killRate": 75,
+  "totalMsi": 75,
+  "coveredMsi": 76.09,
+  "killed": 105,
+  "survived": 33,
   "timeout": 0,
-  "noCoverage": 0,
-  "error": 0,
+  "noCoverage": 2,
+  "error": 2,
   "mutants": [
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 7,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 10,
+      "column": 32,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 12,
+      "column": 57,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "value !== undefined"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 15,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 15,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 24,
+      "column": 27,
+      "mutator": "LogicalOperator",
+      "replacement": "req.headers.host && 'localhost'"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 25,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "(req.method ?? 'GET').toLowerCase()"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 26,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "method === 'GET' && method === 'HEAD'"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 26,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 26,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 26,
+      "column": 38,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 26,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 26,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 29,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 29,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "body.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 43,
+      "column": 30,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 62,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 63,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 66,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 66,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof address === 'object' && address || typeof address.port === 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 66,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 66,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof address === 'object' || address"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 66,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/http-server.js",
+      "line": 66,
+      "column": 60,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
     {
       "file": ".vitest-dist/src/setup-e2e-env.js",
       "line": 8,
@@ -38,17 +227,17 @@
     },
     {
       "file": ".vitest-dist/src/setup-e2e-env.js",
-      "line": 20,
-      "column": 83,
-      "mutator": "BooleanLiteral",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/setup-e2e-env.js",
       "line": 23,
       "column": 40,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/setup-e2e-env.js",
+      "line": 20,
+      "column": 83,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-e2e-env.js",
@@ -58,6 +247,6 @@
       "replacement": "{}"
     }
   ],
-  "capturedAt": "2026-07-05T11:40:26Z",
-  "note": "Total MSI 84.21% / Covered MSI 84.21% (threshold high=60 / low=50 / break=40)."
+  "capturedAt": "2026-08-17T06:51:11Z",
+  "note": "Total MSI 75.00% / Covered MSI 76.09% (threshold high=60 / low=50 / break=40)."
 }

@@ -401,14 +401,17 @@ describe('the real repository', () => {
     expect(named).toContain('cli/bin.ts');
   });
 
-  it('holds the barrels the configs still name', async () => {
+  it('finds no config naming something with nothing to mutate', async () => {
     const { reportAll } = await loadScript();
     const named = (await reportAll()).listedWithoutValue.map(
       (row: { pkg: string; file: string }) => `${row.pkg}/${row.file}`,
     );
-    // Harmless to Stryker, but they make the list read wider than it is. Drop
-    // them as each package widens; until then the report keeps saying so.
-    expect(named).toContain('api/index.ts');
+    // `api` / `ui` / `a11y` each listed their `index.js` barrel until #1963
+    // widened them and dropped it. Empty is the state to hold: a config naming a
+    // barrel makes its scope read wider than it is. The detection itself is
+    // covered by the fixture case above, so this staying empty is not a check
+    // that passes because nothing looked.
+    expect(named).toEqual([]);
   });
 });
 
@@ -476,9 +479,16 @@ describe('the command line', () => {
   });
 
   it('lists one package with a line count per file', async () => {
-    const { stdout } = await runScript(['--list', 'a11y']);
-    expect(stdout).toContain('a11y — implementation files not in `mutate`');
+    // `observability` still has files outside `mutate`; `a11y` does not since
+    // #1963, and a package with nothing left to list cannot show the row shape.
+    const { stdout } = await runScript(['--list', 'observability']);
+    expect(stdout).toContain('observability — implementation files not in `mutate`');
     expect(stdout).toMatch(/^ {2}\S+\s+[\d,]+$/m);
+  });
+
+  it('says so when a package has nothing left outside `mutate`', async () => {
+    const { stdout } = await runScript(['--list', 'a11y']);
+    expect(stdout).toContain('(none — every implementation file is listed)');
   });
 
   it('exits 2 for a package the gate does not read', async () => {

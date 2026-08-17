@@ -24,13 +24,16 @@ export default {
   // which the package-local test pipeline does not run, so most mutants on them
   // would be "equivalent" by construction. Their contract tests still ship.
   mutate: [
-    '.vitest-dist/src/index.js',
-    '.vitest-dist/src/setup-component-env.js',
-    '.vitest-dist/src/vue.js',
-    '.vitest-dist/src/solid.js',
+    '.vitest-dist/src/angular.js',
+    '.vitest-dist/src/browser.js',
     '.vitest-dist/src/lit.js',
+    '.vitest-dist/src/qwik.js',
+    '.vitest-dist/src/setup-component-env.js',
+    '.vitest-dist/src/solid.js',
+    '.vitest-dist/src/svelte.js',
+    '.vitest-dist/src/vue.js',
   ],
-  thresholds: { high: 90, low: 80, break: 80 },
+  thresholds: { high: 60, low: 50, break: 40 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },

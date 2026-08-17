@@ -17,9 +17,9 @@ export default {
   },
   mutate: [
     '.vitest-dist/src/audit.js',
-    '.vitest-dist/src/index.js',
+    '.vitest-dist/src/layer-harness.js',
   ],
-  thresholds: { high: 90, low: 80, break: 80 },
+  thresholds: { high: 60, low: 50, break: 40 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },

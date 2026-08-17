@@ -64,7 +64,11 @@ export const TIER_THRESHOLD = Object.freeze({
 export const PACKAGE_TIER = Object.freeze({
   // Core tier (pure logic, deterministic tests).
   '@kiwa-lab/core': { tier: 'core' },
-  '@kiwa-lab/api': { tier: 'core', override: 90, reason: 'Core-strict — HTTP request client + MSW bridge, protocol invariants.' },
+  // The 90 came from a scope of 4 files. #1963 widened api to every
+  // implementation file and it measured 88.29 — the doc's rule for a raised
+  // override (§ Overrides: they return to the tier default as scope grows)
+  // applies, so the bar is the Core default again.
+  '@kiwa-lab/api': { tier: 'core' },
   '@kiwa-lab/data': { tier: 'core' },
   '@kiwa-lab/cli-test': { tier: 'core' },
   '@kiwa-lab/observability': { tier: 'core' },
@@ -105,7 +109,11 @@ export const PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/dapp': { tier: 'saas' },
   // Test-type tier (DOM / measurement noise).
   '@kiwa-lab/ui': { tier: 'test-type' },
-  '@kiwa-lab/a11y': { tier: 'test-type', override: 90, reason: 'axe-core WCAG 2.1 AA — protocol invariants, historic high bar.' },
+  // Same story as api, and the doc predicted this one: § Expect scores to drop
+  // records that adding `layer-harness.ts` moves a11y from 95.74 to 82.42.
+  // #1963 added it and measured exactly that. The 90 was a narrow scope's
+  // number, so the bar returns to the Test type default.
+  '@kiwa-lab/a11y': { tier: 'test-type' },
   '@kiwa-lab/component': { tier: 'test-type' },
   '@kiwa-lab/e2e': { tier: 'test-type' },
 });

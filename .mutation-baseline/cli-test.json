@@ -6,86 +6,275 @@
     "low": 60,
     "break": 50
   },
-  "killRate": 89.69,
-  "totalMsi": 89.69,
-  "coveredMsi": 89.69,
-  "killed": 87,
-  "survived": 10,
+  "killRate": 85.08,
+  "totalMsi": 85.08,
+  "coveredMsi": 85.08,
+  "killed": 211,
+  "survived": 37,
   "timeout": 0,
-  "noCoverage": 0,
+  "noCoverage": 1,
   "error": 0,
   "mutants": [
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 32,
+      "line": 18,
+      "column": 47,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 18,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.label && opts.prefix"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 19,
+      "column": 18,
+      "mutator": "Regex",
+      "replacement": "/kiwa-/"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 20,
+      "column": 18,
+      "mutator": "Regex",
+      "replacement": "/-+/"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 20,
+      "column": 18,
+      "mutator": "Regex",
+      "replacement": "/-$/"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 21,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 21,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 21,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "raw !== ''"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 21,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 49,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 45,
+      "line": 62,
       "column": 20,
       "mutator": "ArrayDeclaration",
       "replacement": "[]"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 51,
+      "line": 68,
       "column": 17,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 53,
+      "line": 70,
       "column": 24,
       "mutator": "BooleanLiteral",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 60,
+      "line": 77,
       "column": 17,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 62,
+      "line": 79,
       "column": 24,
       "mutator": "BooleanLiteral",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 67,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 69,
+      "line": 86,
       "column": 24,
       "mutator": "BooleanLiteral",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 89,
+      "line": 108,
       "column": 31,
       "mutator": "MethodExpression",
       "replacement": "Object.entries(process.env)"
     },
     {
       "file": ".vitest-dist/src/setup-cli-env.js",
-      "line": 89,
+      "line": 108,
       "column": 77,
       "mutator": "ConditionalExpression",
       "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/setup-cli-env.js",
+      "line": 84,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 16,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 16,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 21,
+      "column": 24,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 21,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 82,
+      "column": 21,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 82,
+      "column": 50,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('invalid:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 82,
+      "column": 43,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 82,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 83,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 83,
+      "column": 44,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 83,
+      "column": 51,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('terminal:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 83,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 84,
+      "column": 23,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 84,
+      "column": 52,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('event:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 84,
+      "column": 45,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 84,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 88,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly - invalid + terminal"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cli-lifecycle-orchestrator.js",
+      "line": 88,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly + invalid"
     }
   ],
-  "capturedAt": "2026-07-05T11:40:26Z",
-  "note": "Total MSI 89.69% / Covered MSI 89.69% (threshold high=80 / low=60 / break=50)."
+  "capturedAt": "2026-08-17T06:51:11Z",
+  "note": "Total MSI 85.08% / Covered MSI 85.08% (threshold high=80 / low=60 / break=50)."
 }

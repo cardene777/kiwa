@@ -6,7 +6,11 @@ export default {
   vitest: {
     configFile: 'vitest.stryker.config.mjs',
   },
-  mutate: ['.vitest-dist/src/queue.js', '.vitest-dist/src/fake-clock.js'],
+  mutate: [
+    '.vitest-dist/src/expectations.js',
+    '.vitest-dist/src/fake-clock.js',
+    '.vitest-dist/src/queue.js',
+  ],
   thresholds: { high: 80, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
