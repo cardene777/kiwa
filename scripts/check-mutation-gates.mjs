@@ -85,10 +85,15 @@ export const PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/nextjs': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
   '@kiwa-lab/hono': { tier: 'framework' },
-  // auth landed at 68.86 % covered MSI in the v1.27-3 first sweep (adapter.js
-  // 65.75 / providers.js 80.70 / session.js 56.76). Held at 65 % — one point
-  // below tier low — until follow-up session.js tests raise it back to 70.
-  '@kiwa-lab/auth': { tier: 'framework', override: 65, reason: 'session.js 56.76 % — follow-up test raises back to 70.' },
+  // auth carried `override: 65` from the v1.27-3 sweep (68.86 % overall:
+  // adapter.js 65.75 / providers.js 80.70 / session.js 56.76), pinned to
+  // raising session.js. #1973 re-measured the same three files at 75.74 % and
+  // removed it. Per file the move was 76.71 / 86.21 / 57.89 — **session.js
+  // barely changed**; adapter.js and providers.js carry the aggregate the gate
+  // reads. The named follow-up never happened; the bar it protected stopped
+  // needing it. A reason that names one file is a note about intent, not a
+  // condition the gate can check.
+  '@kiwa-lab/auth': { tier: 'framework' },
   // SaaS tier (provider-specific adapters).
   // ai-llm has no baseline in v1.27-3 (scope belongs to v1.27-4 release-gate
   // integration). Threshold left at tier default so the gate stays honest
@@ -101,10 +106,12 @@ export const PACKAGE_TIER = Object.freeze({
   // follow-up it was waiting on had already landed — a re-run of the old scope
   // came in at 68.42 %, above the tier default, before the scope grew at all.
   '@kiwa-lab/cache': { tier: 'saas' },
-  // realtime landed at 62.31 % covered MSI across engine / fidelity / ably
-  // (pusher / socketio / report excluded, see stryker.config.mjs). Held at
-  // 60 % until follow-up fidelity tests raise it back to 65.
-  '@kiwa-lab/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
+  // realtime carried `override: 60` from a 62.31 % sweep across engine /
+  // fidelity / ably (pusher / socketio / report excluded, see
+  // stryker.config.mjs), waiting on follow-up fidelity tests. #1973 re-measured
+  // the same scope at 67.54 % and removed it. The no-coverage count fell from
+  // 86 to 17 over the same period, so the follow-up had landed.
+  '@kiwa-lab/realtime': { tier: 'saas' },
   '@kiwa-lab/search': { tier: 'saas' },
   '@kiwa-lab/orm': { tier: 'saas' },
   '@kiwa-lab/dapp': { tier: 'saas' },

@@ -6,203 +6,21 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 62.05,
-  "totalMsi": 62.05,
-  "coveredMsi": 62.31,
-  "killed": 242,
-  "survived": 147,
-  "timeout": 1,
-  "noCoverage": 86,
+  "killRate": 66.88,
+  "totalMsi": 66.88,
+  "coveredMsi": 67.54,
+  "killed": 307,
+  "survived": 149,
+  "timeout": 3,
+  "noCoverage": 17,
   "error": 0,
   "mutants": [
     {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 3,
-      "column": 51,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 5,
-      "column": 51,
-      "mutator": "MethodExpression",
-      "replacement": "Math.random().toString(36)"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 5,
-      "column": 41,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 3,
-      "column": 39,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 8,
-      "column": 19,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 12,
-      "column": 21,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 23,
-      "column": 20,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 38,
-      "column": 20,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 37,
-      "column": 15,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 39,
-      "column": 18,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 40,
-      "column": 24,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 41,
-      "column": 26,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 42,
-      "column": 29,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 43,
-      "column": 21,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 44,
-      "column": 20,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 45,
-      "column": 21,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 68,
-      "column": 21,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 68,
-      "column": 21,
-      "mutator": "EqualityOperator",
-      "replacement": "history.length >= 200"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 76,
-      "column": 22,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 103,
-      "column": 24,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 132,
-      "column": 27,
+      "file": ".vitest-dist/src/engine.js",
+      "line": 17,
+      "column": 34,
       "mutator": "LogicalOperator",
-      "replacement": "options.limit && 100"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 133,
-      "column": 29,
-      "mutator": "MethodExpression",
-      "replacement": "history"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 151,
-      "column": 15,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 157,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 154,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 157,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "!arr && arr.length === 0"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 157,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "replacement": "config.artificialLatencyMs && 5"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -210,13 +28,6 @@
       "column": 42,
       "mutator": "StringLiteral",
       "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 17,
-      "column": 34,
-      "mutator": "LogicalOperator",
-      "replacement": "config.artificialLatencyMs && 5"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -234,17 +45,17 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 20,
-      "column": 30,
-      "mutator": "LogicalOperator",
-      "replacement": "config.reconnect?.maxAttempts && 5"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 21,
       "column": 35,
       "mutator": "LogicalOperator",
       "replacement": "config.reconnect?.initialBackoffMs && 100"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 20,
+      "column": 30,
+      "mutator": "LogicalOperator",
+      "replacement": "config.reconnect?.maxAttempts && 5"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -283,17 +94,17 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 34,
-      "column": 38,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 41,
       "column": 13,
       "mutator": "LogicalOperator",
       "replacement": "this.connectionState === 'disconnected' && this.connectionState === 'closed'"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 34,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -312,13 +123,6 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 41,
-      "column": 56,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 41,
       "column": 38,
       "mutator": "StringLiteral",
       "replacement": "\"\""
@@ -326,9 +130,9 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 41,
-      "column": 81,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
+      "column": 56,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -339,8 +143,8 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 52,
-      "column": 33,
+      "line": 41,
+      "column": 81,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -381,13 +185,6 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 91,
-      "column": 21,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 84,
       "column": 69,
       "mutator": "StringLiteral",
@@ -411,8 +208,8 @@
       "file": ".vitest-dist/src/engine.js",
       "line": 94,
       "column": 21,
-      "mutator": "EqualityOperator",
-      "replacement": "s.handlers.size !== 0"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -425,8 +222,8 @@
       "file": ".vitest-dist/src/engine.js",
       "line": 94,
       "column": 21,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "EqualityOperator",
+      "replacement": "s.handlers.size !== 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -452,16 +249,16 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 126,
-      "column": 25,
-      "mutator": "MethodExpression",
-      "replacement": "Math.min(0, Date.now() - start)"
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + start"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 126,
-      "column": 37,
-      "mutator": "ArithmeticOperator",
-      "replacement": "Date.now() + start"
+      "column": 25,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(0, Date.now() - start)"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -472,17 +269,17 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 156,
+      "line": 159,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 159,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "line": 191,
+      "column": 45,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -500,22 +297,15 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 191,
-      "column": 45,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 203,
-      "column": 33,
+      "line": 206,
+      "column": 29,
       "mutator": "ArrayDeclaration",
       "replacement": "[\"Stryker was here\"]"
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 206,
-      "column": 29,
+      "line": 203,
+      "column": 33,
       "mutator": "ArrayDeclaration",
       "replacement": "[\"Stryker was here\"]"
     },
@@ -528,58 +318,23 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 228,
-      "column": 45,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 229,
-      "column": 42,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 230,
-      "column": 21,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 211,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 231,
-      "column": 23,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 231,
-      "column": 31,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 244,
-      "column": 37,
+      "line": 218,
+      "column": 38,
       "mutator": "BooleanLiteral",
-      "replacement": "false"
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 256,
       "column": 26,
       "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 244,
+      "column": 37,
+      "mutator": "BooleanLiteral",
       "replacement": "false"
     },
     {
@@ -599,7 +354,42 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 274,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "case 'presence':"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 274,
       "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 274,
+      "column": 30,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 275,
+      "column": 29,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 281,
+      "column": 48,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 281,
+      "column": 56,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -626,6 +416,48 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
+      "line": 308,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "case 'disconnect':"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 308,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 308,
+      "column": 32,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 312,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "case 'reconnect':"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 312,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 312,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
       "line": 318,
       "column": 29,
       "mutator": "BlockStatement",
@@ -648,16 +480,16 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 321,
-      "column": 30,
+      "column": 47,
       "mutator": "ArithmeticOperator",
-      "replacement": "base / jitter"
+      "replacement": "Math.random() * 2 + 1"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 321,
-      "column": 47,
+      "column": 30,
       "mutator": "ArithmeticOperator",
-      "replacement": "Math.random() * 2 + 1"
+      "replacement": "base / jitter"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -706,14 +538,14 @@
       "line": 325,
       "column": 13,
       "mutator": "EqualityOperator",
-      "replacement": "ms < 0"
+      "replacement": "ms > 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 325,
       "column": 13,
       "mutator": "EqualityOperator",
-      "replacement": "ms > 0"
+      "replacement": "ms < 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -752,20 +584,6 @@
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
-      "line": 2,
-      "column": 21,
-      "mutator": "LogicalOperator",
-      "replacement": "input.perScenarioTimeoutMs && 3000"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 13,
-      "column": 27,
-      "mutator": "LogicalOperator",
-      "replacement": "real.at(-1)?.relativeTimeMs && 0"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
       "line": 13,
       "column": 35,
       "mutator": "UnaryOperator",
@@ -773,38 +591,10 @@
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
-      "line": 13,
-      "column": 27,
-      "mutator": "OptionalChaining",
-      "replacement": "real.at(-1).relativeTimeMs"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 14,
-      "column": 27,
-      "mutator": "LogicalOperator",
-      "replacement": "mock.at(-1)?.relativeTimeMs && 0"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
       "line": 14,
       "column": 35,
       "mutator": "UnaryOperator",
       "replacement": "+1"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 14,
-      "column": 27,
-      "mutator": "OptionalChaining",
-      "replacement": "mock.at(-1).relativeTimeMs"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 26,
-      "column": 15,
-      "mutator": "MethodExpression",
-      "replacement": "Math.min(1, records.length)"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -812,6 +602,13 @@
       "column": 34,
       "mutator": "ArithmeticOperator",
       "replacement": "totalReal + totalMock"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 26,
+      "column": 15,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(1, records.length)"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -836,13 +633,6 @@
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
-      "line": 33,
-      "column": 47,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
       "line": 32,
       "column": 57,
       "mutator": "ArithmeticOperator",
@@ -858,9 +648,23 @@
     {
       "file": ".vitest-dist/src/fidelity.js",
       "line": 33,
+      "column": 47,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 33,
       "column": 57,
       "mutator": "ArithmeticOperator",
       "replacement": "s - r.kindOrderMatch"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 2,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "input.perScenarioTimeoutMs && 3000"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -893,6 +697,13 @@
     {
       "file": ".vitest-dist/src/fidelity.js",
       "line": 35,
+      "column": 52,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 35,
       "column": 62,
       "mutator": "ArithmeticOperator",
       "replacement": "s - r.totalDurationDiffMs"
@@ -906,10 +717,10 @@
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
-      "line": 35,
-      "column": 52,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
+      "line": 47,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -928,23 +739,9 @@
     {
       "file": ".vitest-dist/src/fidelity.js",
       "line": 47,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 47,
       "column": 27,
       "mutator": "ConditionalExpression",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 49,
-      "column": 15,
-      "mutator": "MethodExpression",
-      "replacement": "Math.min(a.length, b.length)"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -971,15 +768,15 @@
       "file": ".vitest-dist/src/fidelity.js",
       "line": 52,
       "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "i <= a.length"
+      "mutator": "LogicalOperator",
+      "replacement": "i < a.length || i < b.length"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
       "line": 52,
       "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "i < a.length || i < b.length"
+      "mutator": "EqualityOperator",
+      "replacement": "i <= a.length"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -1000,21 +797,7 @@
       "line": 61,
       "column": 9,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 61,
-      "column": 9,
-      "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 61,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -1022,6 +805,20 @@
       "column": 9,
       "mutator": "LogicalOperator",
       "replacement": "typeof a !== 'object' && typeof b !== 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 61,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 61,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -1039,12 +836,229 @@
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
-      "line": 124,
-      "column": 30,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
+      "line": 75,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 82,
+      "column": 34,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 86,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 89,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 89,
+      "column": 49,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 89,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 93,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 93,
+      "column": 53,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 93,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 97,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 106,
+      "column": 20,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 118,
+      "column": 28,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 118,
+      "column": 28,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() <= deadline"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 5,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 5,
+      "column": 51,
+      "mutator": "MethodExpression",
+      "replacement": "Math.random().toString(36)"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 3,
+      "column": 51,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 3,
+      "column": 39,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 23,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 68,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 68,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "history.length >= 200"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 76,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 106,
+      "column": 24,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 107,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 103,
+      "column": 24,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 107,
+      "column": 28,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 132,
+      "column": 27,
+      "mutator": "LogicalOperator",
+      "replacement": "options.limit && 100"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 133,
+      "column": 29,
+      "mutator": "MethodExpression",
+      "replacement": "history"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 151,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 154,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 157,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 157,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "!arr && arr.length === 0"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
+      "line": 157,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     }
   ],
-  "capturedAt": "2026-07-05T12:02:32Z",
-  "note": "Total MSI 62.05% / Covered MSI 62.31% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-17T10:03:23Z",
+  "note": "Total MSI 66.88% / Covered MSI 67.54% (threshold high=65 / low=55 / break=50)."
 }
