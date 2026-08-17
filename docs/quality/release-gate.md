@@ -36,7 +36,9 @@ v1.11 で確立した共通 7 軸 (Issue #681) に、 v1.12 milestone (Issue #69
 | saas | 65% | ≥ | provider-specific adapter (external API drift 前提) |
 | test-type | 60% | ≥ | DOM / browser noise を含む harness package |
 
-tier 判定 SSOT は `docs/quality/mutation-thresholds.md`。 `evaluateReleaseGate(report, overrides, { mutationTier: 'saas' })` で opt-in、 tier 指定なしで従来の 7 / 11 軸経路を維持する。 per-package looser override (`.mutation-baseline/*.json` の override 値、 例 `@kiwa-lab/auth` = 65 / `@kiwa-lab/cache` = 60) は `context.mutationTierThreshold` で渡す。 legacy `mutation.killRate` axis と本 `mutation.tier` axis は並存 (置換ではない)、 v1.11 consumer の overrides もそのまま機能する。
+tier 判定 SSOT は `docs/quality/mutation-thresholds.md`。 `evaluateReleaseGate(report, overrides, { mutationTier: 'saas' })` で opt-in、 tier 指定なしで従来の 7 / 11 軸経路を維持する。 legacy `mutation.killRate` axis と本 `mutation.tier` axis は並存 (置換ではない)、 v1.11 consumer の overrides もそのまま機能する。
+
+package が tier 既定より緩い bar を持つ場合は `context.mutationTierThreshold` で渡す。 **現在その状態の package は 1 つも無い** = `scripts/check-mutation-gates.mjs` の `PACKAGE_TIER` が SSOT で、 `auth` の 65 と `realtime` の 60 が #1973 で、 `cache` の 60 が #1967 で、 `orm` の 60 が #1941 で撤去された。 本 field に数値を直接渡すと tier 表を迂回するため、 `PACKAGE_TIER` に override を記録した package にだけ使う。
 
 ## 使い方
 
