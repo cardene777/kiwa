@@ -23,11 +23,16 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { isMainModule } from './lib/is-main-module.mjs';
 import { PACKAGE_TIER, TIER_THRESHOLD } from './check-mutation-gates.mjs';
 
-const SCRIPT_ROOT = resolve(new URL('..', import.meta.url).pathname);
+// `fileURLToPath`, not `.pathname`: a `file:` URL keeps percent-encoding, so a
+// checkout under a directory with a space resolves to `…/kiwa%20review/…` and
+// every path built from it misses. `scripts/lib/is-main-module.mjs` records the
+// same trap.
+const SCRIPT_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const DOC = resolve(SCRIPT_ROOT, 'docs/quality/mutation-thresholds.md');
 
 export const BEGIN = '<!-- generated: override-roster -->';
@@ -43,7 +48,10 @@ export const END = '<!-- /generated: override-roster -->';
 export function rosterTable(packageTier, tierThreshold) {
   const rows = Object.entries(packageTier)
     .filter(([, entry]) => entry.override !== undefined)
-    .sort(([a], [b]) => a.localeCompare(b))
+    // Code-unit order, not `localeCompare`: this output is compared byte for
+    // byte by the check, and locale-dependent ordering makes the same map
+    // render differently on two machines.
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([scoped, entry]) => {
       const direction = entry.override < tierThreshold[entry.tier] ? 'looser' : 'stricter';
       const reason = entry.reason ?? '';
