@@ -2,32 +2,172 @@
   "package": "@kiwa-lab/api",
   "tier": "Core",
   "thresholds": {
-    "high": 90,
-    "low": 80,
-    "break": 80
+    "high": 80,
+    "low": 60,
+    "break": 50
   },
-  "killRate": 96.06,
-  "totalMsi": 96.06,
-  "coveredMsi": 96.06,
-  "killed": 122,
-  "survived": 5,
-  "timeout": 0,
-  "noCoverage": 5,
-  "error": 0,
+  "killRate": 83.04,
+  "totalMsi": 83.04,
+  "coveredMsi": 88.29,
+  "killed": 186,
+  "survived": 26,
+  "timeout": 10,
+  "noCoverage": 2,
+  "error": 2,
   "mutants": [
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 7,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 19,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 33,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "(req.method ?? 'GET').toLowerCase()"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "method === 'GET' && method === 'HEAD'"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 34,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 34,
+      "column": 38,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 34,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 37,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 37,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "body.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 43,
+      "column": 30,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 53,
+      "column": 30,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 72,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 73,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 76,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 76,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof address === 'object' && address || typeof address.port === 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 76,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 76,
+      "column": 18,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof address === 'object' || address"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 76,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/live-server.js",
+      "line": 76,
+      "column": 60,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
     {
       "file": ".vitest-dist/src/msw-bridge.js",
       "line": 15,
       "column": 16,
       "mutator": "ArrowFunction",
       "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/setup-api-server.js",
-      "line": 45,
-      "column": 95,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/request-client.js",
@@ -49,8 +189,15 @@
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/setup-api-server.js",
+      "line": 45,
+      "column": 95,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     }
   ],
-  "capturedAt": "2026-07-05T11:40:26Z",
-  "note": "Total MSI 96.06% / Covered MSI 96.06% (threshold high=90 / low=80 / break=80)."
+  "capturedAt": "2026-08-17T06:51:11Z",
+  "note": "Total MSI 83.04% / Covered MSI 88.29% (threshold high=80 / low=60 / break=50)."
 }

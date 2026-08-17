@@ -22,7 +22,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | Package | Tier | Threshold | Reason |
 |---|---|---|---|
 | `@kiwa-lab/core` | Core | 80 / 60 / 50 | Pure parser + pool logic every adapter depends on. |
-| `@kiwa-lab/api` | Core | 90 / 80 / 80 | HTTP request client + MSW bridge — protocol invariants. |
+| `@kiwa-lab/api` | Core | 80 / 60 / 50 | HTTP request client + MSW bridge — protocol invariants. Ran at 90 while only 4 files were mutated; #1963 widened it to every implementation file, measured 88.29, and returned the bar to the tier default. |
 | `@kiwa-lab/data` | Core | 80 / 60 / 50 | Fixture builders + assertion helpers, pure logic. |
 | `@kiwa-lab/cli-test` | Core | 80 / 60 / 50 | CLI expectation runner, pure logic. |
 | `@kiwa-lab/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
@@ -40,7 +40,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
 | `@kiwa-lab/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
-| `@kiwa-lab/a11y` | Test type | 90 / 80 / 80 (override) | axe-core WCAG 2.1 AA — measurement noise + jsdom limits, but the historical bar already met 90. |
+| `@kiwa-lab/a11y` | Test type | 60 / 50 / 40 | axe-core WCAG 2.1 AA — measurement noise + jsdom limits. The historical 90 came from a 67-line scope; #1963 added `layer-harness.ts` and it measured 82.42, exactly what § Expect scores to drop predicted. |
 | `@kiwa-lab/component` | Test type | 60 / 50 / 40 | Storybook + Playwright CT + Chromatic — DOM + visual noise. |
 | `@kiwa-lab/e2e` | Test type | 60 / 50 / 40 | Playwright fixture + test env — browser fixture noise. |
 
@@ -73,15 +73,14 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
-18.5% and each package moves under its own Issue (§ Widening a package's scope). Read a green
-mutation gate accordingly — until a package's Issue lands, "passed" covers whatever its config
-happens to list.
+**This is the target, not the current state.** The repo sits at 26.5%, and each remaining package
+moves under its own Issue (§ Widening a package's scope). Read a green mutation gate accordingly —
+until a package's Issue lands, "passed" covers whatever its config happens to list.
 
-Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). Harmless —
-Stryker finds nothing to mutate there — but it makes the list read wider than it is. Drop them when
-you widen that package; the report lists them under "named in `mutate`, holds no runtime value" until
-you do.
+No config names a barrel any more (`api`, `ui`, and `a11y` each listed their `index.js` until #1963
+widened them). Listing one is harmless — Stryker finds nothing to mutate there — but it makes the
+scope read wider than it is, so drop it when you widen a package. The report lists any that come back
+under "named in `mutate`, holds no runtime value".
 
 ### Telling the shapes apart
 
@@ -148,21 +147,20 @@ re-run it rather than reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 12,655 |
-| implementation, not in `mutate` | 55,698 |
+| implementation, in `mutate` | 18,128 |
+| implementation, not in `mutate` | 50,225 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 18.5% of implementation lines were covered (12,655 of 68,353).
+So 26.5% of implementation lines were covered (18,128 of 68,353).
 
-Everything outside `mutate` totals 59,751 lines, and barrel plus type-only accounts for 4,053 of
-that — the "it's only types" explanation does not cover the gap. Per-package coverage ranged from
-`hono` at 100% to `auth` at 2.0% with no written basis for the difference.
+Everything outside `mutate` totals 54,278 lines, and barrel plus type-only accounts for 4,053 of
+that — the "it's only types" explanation does not cover the gap. Per-package coverage ranges from
+100% (11 packages after #1961 and #1963) to `auth` at 2.0%.
 
-Widening to the full set means 68,353 implementation lines against 12,655 today — roughly 5x. At the
-current density (7,474 mutants over 12,655 lines, about 0.59 per line) that projects to somewhere
-near 40,000 mutants. Treat it as an order of magnitude, not a forecast: density varies by package,
-and `auth` sits at 0.59 per line while `cli` comes in at 0.94.
+Widening to the full set means 68,353 implementation lines against 18,128 today — roughly 4x. At the
+current density (about 0.6 mutants per line) that projects to somewhere near 40,000 mutants. Treat it
+as an order of magnitude, not a forecast: density varies by package.
 
 #1944 classified the same files by hand and published totals 404 lines higher — one per file, from
 counting the empty string after a file's trailing newline as a line. Which bucket each file landed
@@ -186,9 +184,14 @@ above repeats those numbers for readability, so the two can drift — `@kiwa-lab
 60 / 50 / 40 in the table while running at `override: 90` until #1944 corrected the row. When they
 disagree, `check-mutation-gates.mjs` is right.
 
-Overrides that *raise* the bar (`@kiwa-lab/api` 90, `@kiwa-lab/a11y` 90) came from a narrow scope
-where a high number was easy to hold. They are not evidence that the widened scope can hold the same
-bar, so they return to the tier default as each package's scope grows.
+Overrides that *raise* the bar come from a narrow scope where a high number was easy to hold. They
+are not evidence that the widened scope can hold the same bar, so they return to the tier default as
+each package's scope grows.
+
+**Both of the raised overrides this doc used to cite are gone** (#1963). `@kiwa-lab/api` ran at 90
+over 4 files and measured 88.29 once every implementation file was mutated; `@kiwa-lab/a11y` ran at
+90 over 67 lines and measured 82.42 once `layer-harness.ts` joined. Neither package got worse — the
+number that was easy to hold was a number about a small scope. No raised override remains.
 
 Overrides that *lower* the bar are temporary by construction and must not drop below the tier's
 `break` threshold. Re-evaluate each one when its package's scope widens — `@kiwa-lab/orm` carried
@@ -207,9 +210,10 @@ plan, while the small group is mostly a config edit plus a re-run.
 |---|---|---|
 | large — one Issue each | `auth` (13,899), `orm` (5,011), `queue` (4,978), `observability` (4,970), `ai-llm` (4,735), `realtime` (3,950), `dapp` (3,501) | 3,000+ |
 | medium — one Issue each | `edge` (2,802), `search` (2,179), `security` (2,116), `cache` (2,084), `cli` (2,053) | 1,000-3,000 |
-| small — one Issue for all | `component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data` | under 1,000 |
+| small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
-`hono` already sits at 100% and needs no Issue.
+`hono` already sat at 100% and needed no Issue. `cli` widened in #1961 and the small group in
+#1963, so 11 of 22 packages are now at 100%. What remains is the large and medium groups.
 
 `node scripts/mutation-scope-report.mjs --list <package>` prints that package's implementation files
 outside `mutate`, largest first. That list is the input for the checklist below — the numbers in the

@@ -4,7 +4,11 @@ export default {
   testRunnerNodeArgs: ['--max-old-space-size=4096'],
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: { configFile: 'vitest.stryker.config.mjs' },
-  mutate: ['.vitest-dist/src/setup-e2e-env.js'],
+  mutate: [
+    '.vitest-dist/src/browser-bridge.js',
+    '.vitest-dist/src/http-server.js',
+    '.vitest-dist/src/setup-e2e-env.js',
+  ],
   thresholds: { high: 80, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
