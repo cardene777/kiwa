@@ -147,6 +147,11 @@ describe('every package that runs mutation testing is scored', () => {
       expect(PACKAGE_TIER[scoped], `${scoped}: no PACKAGE_TIER entry`).toBeDefined();
       expect(PKG_DIRS[scoped], `${scoped}: no PKG_DIRS entry`).toBe(`packages/${dir}`);
       expect(filters.has(scoped), `${scoped}: absent from root test:mutation`).toBe(true);
+      // The root filter names the package; the package has to own the script it
+      // names. Without this, dropping `test:mutation` from a package leaves the
+      // config, the tier, and the filter in place while pnpm skips it — the
+      // report the gate then reads is whatever the last run left behind.
+      expect(runner.hasScript, `${scoped}: no test:mutation script to run`).toBe(true);
     }
   });
 

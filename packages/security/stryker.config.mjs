@@ -5,6 +5,7 @@
  * secrets-scanning / SBOM / security-headers / fidelity), which are pure logic
  * with deterministic tests. The 4-provider drift sits in `real-driver.ts` and
  * the testcontainers path, and neither is mutated.
+ * Measured at 84.90 % covered MSI over 1,203 mutants (#1951).
  * SSOT: docs/quality/mutation-thresholds.md § Core tier.
  */
 export default {

@@ -72,8 +72,9 @@ export const PACKAGE_TIER = Object.freeze({
   // authorization / WAF / threat-model / secrets-scan / SBOM / headers /
   // fidelity), which are pure logic with deterministic tests. The provider
   // drift its config header cites lives in `real-driver.ts` and the
-  // testcontainers path, and neither is mutated. First measured run: 84.31 %
-  // covered MSI over 1,203 mutants (#1951).
+  // testcontainers path, and neither is mutated. Measured at 84.90 % covered
+  // MSI over 1,203 mutants; two runs landed 84.31 and 84.90 as the timeout
+  // count moved with machine load (#1951).
   '@kiwa-lab/security': { tier: 'core' },
   // Framework tier (SSR / hydration / adapter drift).
   '@kiwa-lab/nextjs': { tier: 'framework' },

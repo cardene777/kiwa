@@ -217,8 +217,10 @@ table above are the same output, summed.
 
 `@kiwa-lab/security` joined the plan in #1951. It had carried a Stryker config since v1.27 that
 nothing scored — no `PACKAGE_TIER` entry, no `PKG_DIRS` entry, and absent from root `test:mutation`,
-so the run never happened and no threshold would have read it if it had. Its first measured run came
-in at 84.31 % covered MSI over 1,203 mutants, which clears the Core bar it now sits at.
+so the run never happened and no threshold would have read it if it had. Measured, it comes in at
+84.90 % covered MSI over 1,203 mutants, which clears the Core bar it now sits at. Two runs landed
+84.31 and 84.90 — the covered score counts timeouts as killed, and the timeout count moves with
+machine load, so read the last digit as noise.
 
 `tests/release-smoke/tests/mutation-gate-coverage.test.ts` keeps that from recurring: every
 `packages/*/stryker.config.mjs` must have a tier, a directory, and a place in the run, or the check
@@ -250,7 +252,9 @@ shape #1941 removed, and it survived four milestones before anyone returned to i
 
 ## Baseline snapshots
 
-Each package writes a per-package baseline JSON to `.mutation-baseline/<pkg>.json` (folder is tracked). The baseline is the last known green mutation report — kill-rate + surviving-mutant list + timestamp. `pnpm test:mutation` compares against the baseline to surface regressions. Baseline refresh happens in-PR when kill-rate improves, and is written by the same PR that raises test coverage — never as a standalone commit.
+Each package writes a per-package baseline JSON to `.mutation-baseline/<pkg>.json` (folder is tracked). The baseline is the last known green mutation report — kill-rate + surviving-mutant list + timestamp. Baseline refresh happens in-PR when kill-rate improves, and is written by the same PR that raises test coverage — never as a standalone commit.
+
+**Nothing compares against it automatically.** The baselines are read by people, through the `git diff` a refresh produces; `pnpm test:mutation` runs Stryker and `check-mutation-gates.mjs` scores the fresh report against the tier threshold, and neither opens the baseline. This doc claimed the comparison happened until #1951 checked. Whether a comparator should exist is open — a score may legitimately fall when a package widens its `mutate` (§ Expect scores to drop), so a monotonic baseline floor would reject the work this plan asks for.
 
 ## 12-axis release gate integration (v1.27-4)
 
