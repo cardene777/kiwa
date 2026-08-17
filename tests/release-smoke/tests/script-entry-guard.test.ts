@@ -40,6 +40,11 @@ function tempDir(prefix: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadHelper = (): Promise<any> => import(pathToFileURL(HELPER).href);
 
+/** Source with comments removed, so a comment quoting the old form is not a hit. */
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+}
+
 /** Every `.mjs` under `scripts/`, including `scripts/lib/`. */
 function scriptFiles(): string[] {
   const found: string[] = [];
@@ -88,19 +93,45 @@ describe('scripts know whether they were run or imported', () => {
     expect(isMainModule(one, pathToFileURL(two).href)).toBe(false);
     // Unresolvable paths err toward "imported": a broken invocation must not
     // run a gate's side effects.
-    expect(isMainModule(join(dir, 'missing.mjs'), pathToFileURL(one).href)).toBe(false);
+    const quiet = () => {};
+    expect(isMainModule(join(dir, 'missing.mjs'), pathToFileURL(one).href, quiet)).toBe(false);
     expect(isMainModule(undefined, pathToFileURL(one).href)).toBe(false);
     expect(isMainModule('', pathToFileURL(one).href)).toBe(false);
   });
 
-  it('leaves no script comparing file:// strings', () => {
-    // The form is easy to write from memory and impossible to notice failing,
-    // so the check is on the shape rather than on any one script.
-    const offenders = scriptFiles().filter((file) => {
-      const source = readFileSync(file, 'utf-8');
-      return /import\.meta\.url\s*===\s*`file:\/\/\$\{process\.argv\[1\]\}`/.test(source);
-    });
+  it('leaves no script deciding this for itself', () => {
+    // Not a search for the broken spelling — that is a list of forms, and the
+    // one written next will be the one not on it. `process.argv[1]` has no use
+    // in these scripts other than the entry check, so the rule is that every
+    // mention of it is the shared helper's.
+    const offenders = scriptFiles()
+      .filter((file) => file !== HELPER)
+      .filter((file) => {
+        const code = stripComments(readFileSync(file, 'utf-8'))
+          .split('isMainModule(process.argv[1], import.meta.url)')
+          .join('');
+        return code.includes('process.argv[1]');
+      });
     expect(offenders.map((file) => file.slice(REPO_ROOT.length + 1))).toEqual([]);
+  });
+
+  it('reports an unresolvable path instead of failing quietly', async () => {
+    const { isMainModule } = await loadHelper();
+    // "Resolved to nothing" is the state that used to look like success. It
+    // still answers "not the main module", but it says so.
+    const messages: string[] = [];
+    expect(
+      isMainModule('/no/such/file.mjs', 'file:///no/such/file.mjs', (m: string) =>
+        messages.push(m),
+      ),
+    ).toBe(false);
+    expect(messages.join('')).toContain('/no/such/file.mjs');
+
+    // The ordinary answers stay silent.
+    messages.length = 0;
+    isMainModule(HELPER, pathToFileURL(HELPER).href, (m: string) => messages.push(m));
+    isMainModule(undefined, pathToFileURL(HELPER).href, (m: string) => messages.push(m));
+    expect(messages).toEqual([]);
   });
 
   it('runs the body when executed and stays quiet when imported', async () => {

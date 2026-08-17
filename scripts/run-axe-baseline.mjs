@@ -33,6 +33,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { isMainModule } from './lib/is-main-module.mjs';
 
 /**
  * Validate an `.axe-config.mjs` default export against the 4-tier SSOT.
@@ -441,7 +442,7 @@ async function main() {
 }
 
 // Only run as CLI when invoked directly (not when imported by tests).
-const isEntry = pathToFileURL(process.argv[1] ?? '').href === import.meta.url;
+const isEntry = isMainModule(process.argv[1], import.meta.url);
 if (isEntry) {
   main().catch((err) => {
     console.error(`[a11y] ${err.stack ?? err.message ?? err}`);

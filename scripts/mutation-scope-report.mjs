@@ -39,6 +39,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import ts from 'typescript';
 
+import { isMainModule } from './lib/is-main-module.mjs';
 import { PACKAGE_TIER } from './check-mutation-gates.mjs';
 
 const SCRIPT_ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -612,7 +613,7 @@ async function main(argv) {
   return 0;
 }
 
-if (pathToFileURL(process.argv[1] ?? '').href === import.meta.url) {
+if (isMainModule(process.argv[1], import.meta.url)) {
   main(process.argv.slice(2))
     .then((code) => process.exit(code))
     .catch((error) => {

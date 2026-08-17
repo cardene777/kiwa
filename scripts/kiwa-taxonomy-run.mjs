@@ -25,6 +25,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 // readFileSync is used by analyzeTestFile
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isMainModule } from './lib/is-main-module.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG_PATH = join(ROOT, 'tests/release-smoke/test-taxonomy.config.json');
@@ -594,7 +595,7 @@ async function main() {
   process.exit(categoryFailed(summary) ? 1 : 0);
 }
 
-const isEntry = pathToFileURL(process.argv[1] ?? '').href === import.meta.url;
+const isEntry = isMainModule(process.argv[1], import.meta.url);
 if (isEntry) {
   main().catch((err) => {
     process.stderr.write(`[taxonomy-run] ${err.stack ?? err.message ?? err}\n`);
