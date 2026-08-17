@@ -95,9 +95,10 @@ describe('assertMutationTier — 4-tier threshold enforcement helper', () => {
   });
 
   it('T-QM-MT-008 accepts a looser per-package override that stays above tier break', () => {
-    // Framework tier default is 70. The auth adapter has an override at 65
-    // (see .mutation-baseline/auth.json). Passing an explicit threshold lets
-    // callers re-use the same helper for override paths.
+    // Framework tier default is 70. Passing an explicit threshold lets a
+    // caller re-use the same helper for a package that records a looser
+    // override. Which packages do is `PACKAGE_TIER`'s business, not this
+    // test's — 65 here is just a value below the tier default.
     const metric = mutationFromCounts({ mutations: 100, killed: 65 });
     expect(() =>
       assertMutationTier({ metric, tier: 'framework', threshold: 65 }),

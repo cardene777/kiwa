@@ -15,13 +15,19 @@
  * **tier + override** SSOT that mirrors `docs/quality/mutation-thresholds.md`
  * and `packages/quality-metrics/src/gate.ts` DEFAULT_MUTATION_TIER_THRESHOLDS.
  * Each package picks a tier (Core 80 / Framework 70 / SaaS 65 / Test type 60)
- * and may declare a looser `override` that must stay above the tier's
- * `break` bar. A stricter override (e.g. `@kiwa-lab/api` = Core-strict 90)
- * just raises the floor.
+ * and may declare an `override`: a looser one must stay above the tier's
+ * `break` bar, a stricter one just raises the floor.
+ *
+ * **An override is a claim about a measurement, in either direction.** A raised
+ * bar is a number about the scope it was measured on; a lowered bar is a debt
+ * with a date on it. Re-measure before adding one, and re-measure the ones
+ * below on a schedule rather than waiting for the work their reason names —
+ * #1941 / #1963 / #1967 / #1973 each deleted one that had been removable for a
+ * while. The entries below are the roster; `docs/quality/mutation-thresholds.md`
+ * § Overrides carries the reasoning.
  *
  * Per-package thresholds follow the 4-tier rationale from
- * `docs/quality/mutation-thresholds.md`:
- * Core-strict 90 / Core 80 / Framework 70 / SaaS 65 / Test-type 60.
+ * `docs/quality/mutation-thresholds.md`.
  * A stricter override raises the floor; a looser override needs a one-line
  * justification in the PR that introduces it.
  *
@@ -85,10 +91,15 @@ export const PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/nextjs': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
   '@kiwa-lab/hono': { tier: 'framework' },
-  // auth landed at 68.86 % covered MSI in the v1.27-3 first sweep (adapter.js
-  // 65.75 / providers.js 80.70 / session.js 56.76). Held at 65 % — one point
-  // below tier low — until follow-up session.js tests raise it back to 70.
-  '@kiwa-lab/auth': { tier: 'framework', override: 65, reason: 'session.js 56.76 % — follow-up test raises back to 70.' },
+  // auth carried `override: 65` from the v1.27-3 sweep (68.86 % overall:
+  // adapter.js 65.75 / providers.js 80.70 / session.js 56.76), pinned to
+  // raising session.js. #1973 re-measured the same three files at 75.74 % and
+  // removed it. Per file the move was 76.71 / 86.21 / 57.89 — **session.js
+  // barely changed**; adapter.js and providers.js carry the aggregate the gate
+  // reads. The named follow-up never happened; the bar it protected stopped
+  // needing it. A reason that names one file is a note about intent, not a
+  // condition the gate can check.
+  '@kiwa-lab/auth': { tier: 'framework' },
   // SaaS tier (provider-specific adapters).
   // ai-llm has no baseline in v1.27-3 (scope belongs to v1.27-4 release-gate
   // integration). Threshold left at tier default so the gate stays honest
@@ -101,10 +112,12 @@ export const PACKAGE_TIER = Object.freeze({
   // follow-up it was waiting on had already landed — a re-run of the old scope
   // came in at 68.42 %, above the tier default, before the scope grew at all.
   '@kiwa-lab/cache': { tier: 'saas' },
-  // realtime landed at 62.31 % covered MSI across engine / fidelity / ably
-  // (pusher / socketio / report excluded, see stryker.config.mjs). Held at
-  // 60 % until follow-up fidelity tests raise it back to 65.
-  '@kiwa-lab/realtime': { tier: 'saas', override: 60, reason: 'fidelity follow-up raises back to 65.' },
+  // realtime carried `override: 60` from a 62.31 % sweep across engine /
+  // fidelity / ably (pusher / socketio / report excluded, see
+  // stryker.config.mjs), waiting on follow-up fidelity tests. #1973 re-measured
+  // the same scope at 67.54 % and removed it. The no-coverage count fell from
+  // 86 to 17 over the same period, so the follow-up had landed.
+  '@kiwa-lab/realtime': { tier: 'saas' },
   '@kiwa-lab/search': { tier: 'saas' },
   '@kiwa-lab/orm': { tier: 'saas' },
   '@kiwa-lab/dapp': { tier: 'saas' },

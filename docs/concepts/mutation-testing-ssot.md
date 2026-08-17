@@ -48,8 +48,12 @@ Kill rate ≥ `high` colours the Stryker HTML report green. Kill rate ≥ `low` 
 
 ### Stricter and looser overrides
 
-- **Stricter override** — a package may raise its floor above the tier default (e.g. `@kiwa-lab/api` = Core-strict 90 / 80 / 80 because its historical bar already met it). Stricter overrides do not need approval — they raise the floor. The `stryker.config.mjs` header comment records the raised value.
-- **Looser override** — a package may sit one point below tier `low` when the baseline sweep lands below the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work, and must **not** drop below the tier's `break` threshold. Two remain today: `@kiwa-lab/auth` at 65 and `@kiwa-lab/realtime` at 60. `orm` lost its 60 in #1941 and `cache` lost its 60 in #1967 — in both cases the follow-up the override was waiting on had already landed, and the override outlived it because nobody re-measured. `scripts/check-mutation-gates.mjs` is what the gate reads; this list is a snapshot of it.
+- **Stricter override** — a package may raise its floor above the tier default. Stricter overrides do not need approval, and the `stryker.config.mjs` header comment records the raised value. `@kiwa-lab/api` held Core-strict 90 until #1963 widened its `mutate` to every implementation file and it measured 88.29; per `docs/quality/mutation-thresholds.md § Overrides`, a raised bar returns to the tier default as scope grows, so it did. None remain.
+- **Looser override** — a package may sit one point below tier `low` when the baseline sweep lands below the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work, and must **not** drop below the tier's `break` threshold.
+
+  **What removes one is re-measuring, not the follow-up landing.** #1941, #1967, and #1973 each deleted a looser override, and in one of them (`auth`) the work its reason named had never happened — the file it pointed at barely moved and two neighbours carried the aggregate the gate reads. A reason naming one file is a note about intent, not a condition the gate checks, so re-measure the package on a schedule rather than waiting for the named work or the next scope change.
+
+`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads, and which packages carry an override is its business alone. `docs/quality/mutation-thresholds.md § Overrides` records the current roster and why each one went; this file deliberately does not repeat it.
 
 ### The `MutationTier` enum
 
@@ -141,13 +145,19 @@ import {
   resolveMutationTier,
 } from '@kiwa-lab/quality-metrics';
 
-const metric = mutationFromCounts({ mutations: 167, killed: 115 });
+const metric = mutationFromCounts({ mutations: 169, killed: 128 });
 assertMutationTier({
   metric,
   tier: resolveMutationTier('Framework'),
-  threshold: 65, // .mutation-baseline/auth.json override
+  // No `threshold`: auth is scored at the Framework default (70). The field is
+  // there for a package carrying a looser override, and no package carries one
+  // today — #1973 removed the last two. Passing a number here bypasses the tier
+  // table, so it belongs with an override recorded in `PACKAGE_TIER`, not on
+  // its own.
 });
 ```
+
+The counts are auth's own (`.mutation-baseline/auth.json`: 128 killed of 169 covered = 75.74 %).
 
 The zero-mutation guard is deliberate. `assertMutationTier` throws when `metric.mutations === 0` with the message `no mutation signal` — an empty test suite would otherwise register as 0/0 = 0 % kill rate and slip past a naïve `>= threshold` check.
 

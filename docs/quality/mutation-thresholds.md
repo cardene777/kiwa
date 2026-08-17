@@ -31,11 +31,11 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
 | `@kiwa-lab/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. #1971 widened it from two files to every implementation file and measured 91.08, second only to `ui` at 91.18 and 21 points clear of its tier. |
 | `@kiwa-lab/hono` | Framework | 70 / 60 / 50 | Hono edge + node adapter drift. |
-| `@kiwa-lab/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. |
+| `@kiwa-lab/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. Ran at `override: 65` until #1973 re-measured it at 75.74 and removed it. |
 | `@kiwa-lab/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
 | `@kiwa-lab/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
 | `@kiwa-lab/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. Ran on `in-memory-cache.js` alone under `override: 60`; #1967 widened it to every implementation file, measured 78.77, and deleted the override. |
-| `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-lab/quality-metrics` (mutation-tested there). |
+| `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. Mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-lab/quality-metrics` (mutation-tested there). Ran at `override: 60` until #1973 re-measured it at 67.54 and removed it. |
 | `@kiwa-lab/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. #1969 widened it from the three adapters plus the engine to every implementation file and measured 79.89. |
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
@@ -205,7 +205,20 @@ and nothing re-read the override. Widening then took it to 78.77 and the overrid
 lowered override that no one re-measures reads as "this package is weak" long after it stopped being
 true, and the gate scores against the lower bar the whole time.
 
+**`PACKAGE_TIER` now carries no override at all, in either direction** (#1973). The last two went
+the same way as `cache`: `@kiwa-lab/auth` was pinned at 65 against a 68.86 sweep and measured 75.74,
+`@kiwa-lab/realtime` was pinned at 60 against 62.31 and measured 67.54. Every package is scored at
+its tier default.
+
+`auth` is the one worth reading twice. Its reason named `session.js` at 56.76 % and said follow-up
+tests would raise it — and `session.js` is still 57.89. What moved was `adapter.js` (76.71) and
+`providers.js` (86.21), which carry the aggregate the gate reads. **The stated condition was never
+met; the bar it protected stopped needing it.** A reason that names one file is a note about intent,
+not a condition the gate can check, so re-measure the package rather than reading the note.
+
 A looser override still requires a one-line justification in the PR body that introduces it.
+Re-measure it before the next milestone rather than leaving it to the next scope change — the three
+removed so far had all been removable for some time before anyone looked.
 
 ## Widening a package's scope
 
@@ -307,7 +320,7 @@ v1.27-4 promotes the mutation kill rate to a first-class 12th axis in the releas
 ```ts
 evaluateReleaseGate(report, thresholdOverrides, {
   mutationTier: 'saas',          // required to enable the 12th axis
-  mutationTierThreshold: 60,     // optional looser override (auth and realtime carry one today)
+  mutationTierThreshold: 60,     // optional looser override; see § Overrides for who has one
 });
 ```
 

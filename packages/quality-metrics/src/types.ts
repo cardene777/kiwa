@@ -384,9 +384,12 @@ export interface ReleaseGateContext {
    */
   mutationTier?: MutationTier;
   /**
-   * Optional per-package looser override for the mutation tier default (e.g.
-   * auth 65 on Framework tier). Documented per-baseline in
-   * `.mutation-baseline/*.json`.
+   * Optional per-package looser override for the mutation tier default.
+   *
+   * Passing a number bypasses the tier table, so pass one only for a package
+   * that records an override in `scripts/check-mutation-gates.mjs`
+   * (`PACKAGE_TIER`) — that map is the SSOT for which packages have one, and
+   * this comment deliberately does not restate its contents.
    */
   mutationTierThreshold?: number;
   /**
