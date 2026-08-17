@@ -22,10 +22,13 @@ export default {
   vitest: {
     configFile: 'vitest.stryker.config.mjs',
   },
-  // Excluded from mutate: svelte / qwik / angular. These adapters require their
-  // framework-specific compilers (Svelte / Qwik optimizer / Angular TestBed)
-  // which the package-local test pipeline does not run, so most mutants on them
-  // would be "equivalent" by construction. Their contract tests still ship.
+  // Every adapter is mutated since #1963. The three that used to be excluded
+  // (svelte / qwik / angular) were left out on the expectation that their
+  // framework compilers do not run here, so their mutants would be equivalent
+  // by construction. Measured, that held for `svelte` only — 17 mutants, all
+  // no-coverage, which cost nothing in the score the gate reads. `qwik` killed
+  // 15 of 15 and `angular` 16 of 17, so the expectation was wrong for both and
+  // excluding them hid 146 lines that the tests do exercise.
   mutate: [
     '.vitest-dist/src/angular.js',
     '.vitest-dist/src/browser.js',
