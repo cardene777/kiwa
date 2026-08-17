@@ -6,7 +6,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { BEGIN, END, replaceBlock, rosterTable } from './sync-override-roster.mjs';
+import { BEGIN, END, cell, replaceBlock, rosterTable } from './sync-override-roster.mjs';
 
 const TIERS = { core: 80, framework: 70, saas: 65, 'test-type': 60 };
 
@@ -36,6 +36,25 @@ test('a package without an override is left out', () => {
   );
   assert.ok(!table.includes('@kiwa-lab/core'));
   assert.ok(table.includes('@kiwa-lab/auth'));
+});
+
+test('a reason cannot break the table out of its columns', () => {
+  // A reason is a sentence someone wrote, so it can carry a pipe or wrap onto a
+  // second line. Either one ends the cell early and every row below renders in
+  // the wrong column.
+  const table = rosterTable(
+    { '@kiwa-lab/x': { tier: 'saas', override: 60, reason: 'a | b\n  second line' } },
+    TIERS,
+  );
+  const rows = table.split('\n');
+  const columns = (row) => row.split(/(?<!\\)\|/).length;
+  assert.equal(columns(rows[2]), columns(rows[0]));
+  assert.match(rows[2], /a \\\| b second line/);
+});
+
+test('cell leaves an ordinary value alone', () => {
+  assert.equal(cell('session.js follow-up'), 'session.js follow-up');
+  assert.equal(cell(65), '65');
 });
 
 test('the block is replaced in place, leaving the surrounding text alone', () => {

@@ -21,12 +21,13 @@
  *   node scripts/sync-override-roster.mjs           # check, exit 1 on drift
  *   node scripts/sync-override-roster.mjs --write   # rewrite the block
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { isMainModule } from './lib/is-main-module.mjs';
 import { PACKAGE_TIER, TIER_THRESHOLD } from './check-mutation-gates.mjs';
+import { prepareWritePath, writeFileAtomic } from './docs-sync-safety.mjs';
 
 // `fileURLToPath`, not `.pathname`: a `file:` URL keeps percent-encoding, so a
 // checkout under a directory with a space resolves to `…/kiwa%20review/…` and
@@ -45,6 +46,18 @@ export const END = '<!-- /generated: override-roster -->';
  * is looser, above is stricter. Storing it would be one more fact that can go
  * stale.
  */
+/**
+ * One table cell.
+ *
+ * `reason` is free text a human wrote next to an override, and a `|` in it ends
+ * the cell early — the row then has more columns than the header and the table
+ * renders wrong from that row down. A newline splits the row in two. Neither is
+ * hypothetical: a reason is a sentence, and sentences carry punctuation.
+ */
+export function cell(value) {
+  return String(value).replace(/\s*\n\s*/g, ' ').replace(/\|/g, '\\|').trim();
+}
+
 export function rosterTable(packageTier, tierThreshold) {
   const rows = Object.entries(packageTier)
     .filter(([, entry]) => entry.override !== undefined)
@@ -54,8 +67,8 @@ export function rosterTable(packageTier, tierThreshold) {
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([scoped, entry]) => {
       const direction = entry.override < tierThreshold[entry.tier] ? 'looser' : 'stricter';
-      const reason = entry.reason ?? '';
-      return `| \`${scoped}\` | ${entry.tier} | ${entry.override} | ${direction} | ${reason} |`;
+      const cells = [`\`${scoped}\``, entry.tier, entry.override, direction, entry.reason ?? ''];
+      return `| ${cells.map(cell).join(' | ')} |`;
     });
   const body = rows.length > 0 ? rows : ['| (none) | — | — | — | — |'];
   return [
@@ -93,7 +106,11 @@ export function run({ write = false, docPath = DOC, log = console } = {}) {
     log.error('Run `node scripts/sync-override-roster.mjs --write` and commit the result.');
     return 1;
   }
-  writeFileSync(docPath, updated);
+  // The neighbouring generator's guards, not a bare write: `prepareWritePath`
+  // refuses a target that resolves outside the repo or through a symlink, and
+  // `writeFileAtomic` replaces the file in one step so a crash cannot leave the
+  // doc half-written. Both live in `docs-sync-safety.mjs` for this reason.
+  writeFileAtomic(prepareWritePath(docPath, SCRIPT_ROOT, 'override roster'), updated);
   log.log('Synchronized the override roster.');
   return 0;
 }
