@@ -85,17 +85,27 @@ export function findUnmutatedModules(modules: string[], mutate: unknown): string
 /**
  * `test:mutation` が変異対象の生成を含むかを返す。 含んでいれば null。
  *
- * 見るのは 2 点で、どちらも欠けると変異 0 件で完走しうる。 生成 command そのものが
- * 無い形と、`stryker run` より後ろに書かれていて実行順として間に合わない形。
+ * 経路が 2 つある。
+ *
+ * **共有 runner** (#1955 以降の既定) = `node ../../scripts/package-mutation.mjs` を呼ぶ形。
+ * 削除 → compile → Stryker の 3 手順は runner の中にあり、その順序と「compile 失敗なら
+ * Stryker を走らせない」 ことは `tests/release-smoke/tests/mutation-gate-coverage.test.ts`
+ * が挙動で検査している。 ここで手順まで見ると同じ契約を 2 箇所で持つことになり、
+ * 一方だけ直した時に drift する。 呼出が canonical であることだけを見る。
+ *
+ * **直接 Stryker を呼ぶ形** (runner から外れた package) = 従来どおり生成 command の
+ * 有無と順序を見る。 どちらも欠けると変異 0 件で完走しうる。
  *
  * shell の完全な解析はしない (`rules/quality.md` が静的 shell 解析の非収束を実測
  * している領域)。 ここで防ぐのは「書き忘れ」 であって、意図的な迂回ではない。
  */
 const BUILD_STEP = 'tsc -p tsconfig.vitest.json';
 const MUTATION_RUN = 'stryker run';
+const SHARED_RUNNER = 'node ../../scripts/package-mutation.mjs';
 
 export function findMissingBuildStep(script: unknown): string | null {
   if (typeof script !== 'string') return 'test:mutation script が無い';
+  if (script.trim() === SHARED_RUNNER) return null;
   const runAt = script.indexOf(MUTATION_RUN);
   if (runAt < 0) return `\`${MUTATION_RUN}\` を含まない`;
   const buildAt = script.indexOf(BUILD_STEP);
@@ -176,6 +186,11 @@ describe('stryker 設定の検査自体 (#1936)', () => {
       ['script が無い', undefined],
       ['文字列でない', ['stryker run']],
       ['そもそも stryker を呼ばない', 'tsc -p tsconfig.vitest.json'],
+      // 共有 runner を「呼ぶように見える」 だけの形は通さない。 canonical な呼出との
+      // 等値で見るので、前後に何か足した形は受理しない。
+      ['runner を呼ぶふりをする', 'echo node ../../scripts/package-mutation.mjs'],
+      ['runner の結果を捨てる', 'node ../../scripts/package-mutation.mjs || true'],
+      ['runner に見える別 file', 'node ../../scripts/package-mutation.mjs.bak'],
     ];
     for (const [label, script] of cases) {
       expect(findMissingBuildStep(script), label).not.toBeNull();
@@ -183,6 +198,10 @@ describe('stryker 設定の検査自体 (#1936)', () => {
   });
 
   it('生成してから走る script は通す', () => {
+    // 共有 runner 経由 (#1955 以降の既定)。 手順は runner の挙動検査が持つ。
+    expect(findMissingBuildStep('node ../../scripts/package-mutation.mjs')).toBeNull();
+    expect(findMissingBuildStep('  node ../../scripts/package-mutation.mjs  ')).toBeNull();
+    // 直接 Stryker を呼ぶ形も、生成が前にあれば通す (runner から外れた package 用)。
     expect(findMissingBuildStep('tsc -p tsconfig.vitest.json && stryker run')).toBeNull();
     expect(
       findMissingBuildStep(
