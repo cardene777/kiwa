@@ -267,16 +267,25 @@ export function docOverrideRoster(text: string): Record<string, number> | null {
   const overrideAt = header.indexOf('override');
   if (packageAt === -1 || overrideAt === -1) return null;
 
+  // Row 1 must be the `|---|` separator. Assuming it without looking would make
+  // a table written without one lose its first data row silently.
+  const separator = tableCells(lines[1] ?? '');
+  if (!separator || separator.length !== header.length) return null;
+  if (!separator.every((cell) => /^:?-+:?$/.test(cell))) return null;
+
   const roster: Record<string, number> = {};
   let dataRows = 0;
-  // Row 0 is the header and row 1 is the `|---|` separator.
+  let sawNone = false;
   for (const line of lines.slice(2)) {
     const cells = tableCells(line);
     // A row with a different column count is not a row this parser understands.
     if (!cells || cells.length !== header.length) return null;
     dataRows += 1;
     const name = cells[packageAt] as string;
-    if (name === '(none)') continue;
+    if (name === '(none)') {
+      sawNone = true;
+      continue;
+    }
     const scoped = /^`(@kiwa-lab\/[a-z0-9-]+)`$/.exec(name);
     if (!scoped) return null;
     const value = /^(\d+)$/.exec(cells[overrideAt] as string);
@@ -284,6 +293,9 @@ export function docOverrideRoster(text: string): Record<string, number> | null {
     roster[scoped[1] as string] = Number(value[1]);
   }
   if (dataRows === 0) return null;
+  // `(none)` says the roster is empty, so it is only true as the sole row.
+  // Skipping it beside real rows would let the table assert both at once.
+  if (sawNone && dataRows !== 1) return null;
   return roster;
 }
 
@@ -732,6 +744,29 @@ describe('the override roster parser (#1975)', () => {
         'override cell carries more than the number',
         withSection(
           '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 % |',
+        ),
+      ],
+      [
+        '(none) sitting beside a real row',
+        withSection(
+          '| package | tier | override |\n|---|---|---|\n| (none) | — | — |\n' +
+            '| `@kiwa-lab/auth` | framework | 65 |',
+        ),
+      ],
+      [
+        '(none) twice',
+        withSection(
+          '| package | tier | override |\n|---|---|---|\n| (none) | — | — |\n| (none) | — | — |',
+        ),
+      ],
+      [
+        'no separator row',
+        withSection('| package | tier | override |\n| `@kiwa-lab/auth` | framework | 65 |'),
+      ],
+      [
+        'separator with the wrong column count',
+        withSection(
+          '| package | tier | override |\n|---|---|\n| `@kiwa-lab/auth` | framework | 65 |',
         ),
       ],
     ];
