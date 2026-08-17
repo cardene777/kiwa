@@ -38,9 +38,9 @@ const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
 /**
  * Packages whose `mutate` covers every implementation file.
  *
- * `hono` was there from the start; `cli` widened in #1961 and the small group in
- * #1963. The list only grows — a package that reached 100% and then dropped a
- * file is the drift #1936 cost 611 unseen mutants for.
+ * `hono` was there from the start; `cli` widened in #1961, the small group in
+ * #1963, and `security` in #1965. The list only grows — a package that reached
+ * 100% and then dropped a file is the drift #1936 cost 611 unseen mutants for.
  */
 const FULLY_WIDENED: readonly string[] = [
   'a11y',
@@ -53,6 +53,7 @@ const FULLY_WIDENED: readonly string[] = [
   'e2e',
   'hono',
   'nextjs',
+  'security',
   'ui',
 ];
 
@@ -475,6 +476,33 @@ describe('every package that runs mutation testing is scored', () => {
         `${pkg}: implementation files dropped out of \`mutate\``,
       ).toEqual([]);
     }
+  });
+
+  it('lists every package that already reached every implementation file', async () => {
+    // The check above reads only the names on the list, so a package widened
+    // without the line being added is guarded by nothing at all — the same
+    // silence, one step earlier. #1965 widened `security` and every check in
+    // this file would still have passed with its line left off.
+    //
+    // The report knows which packages have nothing outside `mutate`, so the
+    // list can be required to be exactly that set. Both directions then fail
+    // loudly: a widened package that shrinks, and a widening that forgets to
+    // say so here.
+    const { reportAll } = await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/mutation-scope-report.mjs')).href
+    );
+    const widened = (await reportAll()).packages
+      .filter((pkg: { uncovered: unknown[] }) => pkg.uncovered.length === 0)
+      .map((pkg: { pkg: string }) => pkg.pkg)
+      .sort();
+
+    expect(
+      widened,
+      'FULLY_WIDENED has to be exactly the packages with nothing outside `mutate`. ' +
+        'A name missing from it means a widening landed unguarded, so add the name. ' +
+        'A name it holds that is absent here means the package shrank, so put the ' +
+        'file back in its stryker.config.mjs',
+    ).toEqual([...FULLY_WIDENED].sort());
   });
 
   it('carries no override that raises a tier bar', async () => {

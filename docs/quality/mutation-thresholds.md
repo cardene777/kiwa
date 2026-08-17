@@ -26,7 +26,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/data` | Core | 80 / 60 / 50 | Fixture builders + assertion helpers, pure logic. |
 | `@kiwa-lab/cli-test` | Core | 80 / 60 / 50 | CLI expectation runner, pure logic. |
 | `@kiwa-lab/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
-| `@kiwa-lab/security` | Core | 80 / 60 / 50 | CSP / rate-limit / authorization / WAF / threat-model / secrets-scan / SBOM / header policy engines — pure logic. Provider drift sits in `real-driver.ts`, which is not mutated. |
+| `@kiwa-lab/security` | Core | 80 / 60 / 50 | v0.1 policy engines (CSP / rate-limit / authorization / WAF / threat-model / secrets-scan / SBOM / headers) plus the v0.2 advanced-II semantics layer — pure logic. #1965 widened it to every implementation file, the env-gated `real-driver.ts` included, and it measured 87.13. |
 | `@kiwa-lab/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. |
 | `@kiwa-lab/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
 | `@kiwa-lab/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. |
@@ -73,7 +73,7 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** The repo sits at 26.5%, and each remaining package
+**This is the target, not the current state.** The repo sits at 29.6%, and each remaining package
 moves under its own Issue (§ Widening a package's scope). Read a green mutation gate accordingly —
 until a package's Issue lands, "passed" covers whatever its config happens to list.
 
@@ -147,20 +147,20 @@ re-run it rather than reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 18,128 |
-| implementation, not in `mutate` | 50,225 |
+| implementation, in `mutate` | 20,244 |
+| implementation, not in `mutate` | 48,109 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 26.5% of implementation lines were covered (18,128 of 68,353).
+So 29.6% of implementation lines were covered (20,244 of 68,353).
 
-Everything outside `mutate` totals 54,278 lines, and barrel plus type-only accounts for 4,053 of
+Everything outside `mutate` totals 52,162 lines, and barrel plus type-only accounts for 4,053 of
 that — the "it's only types" explanation does not cover the gap. Per-package coverage ranges from
-100% (11 packages after #1961 and #1963) to `auth` at 2.0%.
+100% (12 packages after #1961, #1963, and #1965) to `auth` at 2.0%.
 
-Widening to the full set means 68,353 implementation lines against 18,128 today — roughly 4x. At the
-current density (about 0.6 mutants per line) that projects to somewhere near 40,000 mutants. Treat it
-as an order of magnitude, not a forecast: density varies by package.
+Widening to the full set means 68,353 implementation lines against 20,244 today — roughly 3.4x. At
+the current density (about 0.6 mutants per line) that projects to somewhere near 40,000 mutants.
+Treat it as an order of magnitude, not a forecast: density varies by package.
 
 #1944 classified the same files by hand and published totals 404 lines higher — one per file, from
 counting the empty string after a file's trailing newline as a line. Which bucket each file landed
@@ -209,11 +209,18 @@ plan, while the small group is mostly a config edit plus a re-run.
 | group | packages | uncovered lines each |
 |---|---|---|
 | large — one Issue each | `auth` (13,899), `orm` (5,011), `queue` (4,978), `observability` (4,970), `ai-llm` (4,735), `realtime` (3,950), `dapp` (3,501) | 3,000+ |
-| medium — one Issue each | `edge` (2,802), `search` (2,179), `security` (2,116), `cache` (2,084), `cli` (2,053) | 1,000-3,000 |
+| medium — one Issue each | `edge` (2,802), `search` (2,179), `cache` (2,084), ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
 | small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
-`hono` already sat at 100% and needed no Issue. `cli` widened in #1961 and the small group in
-#1963, so 11 of 22 packages are now at 100%. What remains is the large and medium groups.
+`hono` already sat at 100% and needed no Issue. `cli` widened in #1961, the small group in #1963,
+and `security` in #1965, so 12 of 22 packages are now at 100%. What remains is the large group and
+three of the medium group.
+
+`tests/release-smoke/tests/mutation-gate-coverage.test.ts` holds the other half of that sentence in
+`FULLY_WIDENED`, which has to be exactly the packages with nothing left outside `mutate`. A widened
+package that lets a file back out fails it, and so does a widening that lands without adding its
+name — #1965 added the second direction, having found that the first would have passed with
+`security` left off.
 
 `node scripts/mutation-scope-report.mjs --list <package>` prints that package's implementation files
 outside `mutate`, largest first. That list is the input for the checklist below — the numbers in the
@@ -221,10 +228,20 @@ table above are the same output, summed.
 
 `@kiwa-lab/security` joined the plan in #1951. It had carried a Stryker config since v1.27 that
 nothing scored — no `PACKAGE_TIER` entry, no `PKG_DIRS` entry, and absent from root `test:mutation`,
-so the run never happened and no threshold would have read it if it had. Measured, it comes in at
-84.90 % covered MSI over 1,203 mutants, which clears the Core bar it now sits at. Two runs landed
-84.31 and 84.90 — the covered score counts timeouts as killed, and the timeout count moves with
-machine load, so read the last digit as noise.
+so the run never happened and no threshold would have read it if it had. Scored at last, its nine
+policy engines came in at 84.90 % covered MSI over 1,203 mutants. Two runs landed 84.31 and 84.90 —
+the covered score counts timeouts as killed, and the timeout count moves with machine load, so read
+the last digit as noise.
+
+#1965 then widened it to all 22 implementation files: 2,539 mutants at 87.13 % covered MSI, up from
+86.16 on the same day's narrower run. The v0.2 semantics layer it added scores above the v0.1 policy
+engines it joined, so the average rose.
+
+Rising is not the rare case § Expect scores to drop is written against. Of the nine packages #1963
+widened, `component` went 67.78 → 82.99, `nextjs` 80 → 83.95, and `data` 86.93 → 88.13. That section
+is about how to read a *fall*, and the reason it needs saying is that a fall looks like damage while
+a rise does not. Neither direction means anything on its own: both are the average of a different
+set of files, and only the scope being fixed makes two numbers comparable at all.
 
 `tests/release-smoke/tests/mutation-gate-coverage.test.ts` keeps that from recurring: every
 `packages/*/stryker.config.mjs` must have a tier, a directory, and a place in the run, or the check
