@@ -51,11 +51,20 @@ export const END = '<!-- /generated: override-roster -->';
  *
  * `reason` is free text a human wrote next to an override, and a `|` in it ends
  * the cell early — the row then has more columns than the header and the table
- * renders wrong from that row down. A newline splits the row in two. Neither is
- * hypothetical: a reason is a sentence, and sentences carry punctuation.
+ * renders wrong from that row down. A line break splits the row in two. Neither
+ * is hypothetical: a reason is a sentence, and sentences carry punctuation.
+ *
+ * **Backslashes go first.** Escaping the pipe first turns `a\|b` into `a\\|b`,
+ * which renders as a literal backslash followed by a column break — the escape
+ * meant to protect the cell is what breaks it. Escaping the backslash first
+ * gives `a\\\|b`, a backslash and a pipe, both literal.
  */
 export function cell(value) {
-  return String(value).replace(/\s*\n\s*/g, ' ').replace(/\|/g, '\\|').trim();
+  return String(value)
+    .replace(/\s*[\r\n]+\s*/g, ' ')
+    .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
+    .trim();
 }
 
 export function rosterTable(packageTier, tierThreshold) {

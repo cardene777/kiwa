@@ -57,6 +57,26 @@ test('cell leaves an ordinary value alone', () => {
   assert.equal(cell(65), '65');
 });
 
+test('a backslash in the reason does not turn into a column break', () => {
+  // Escaping the pipe before the backslash turns `a\|b` into `a\\|b`, which
+  // renders as a literal backslash and then a real column break — the escape
+  // breaks the cell it was added to protect.
+  assert.equal(cell('a\\|b'), 'a\\\\\\|b');
+  assert.equal(cell('trailing\\'), 'trailing\\\\');
+  const table = rosterTable(
+    { '@kiwa-lab/x': { tier: 'saas', override: 60, reason: 'a\\|b' } },
+    TIERS,
+  );
+  const rows = table.split('\n');
+  const columns = (row) => row.split(/(?<!\\)\|/).length;
+  assert.equal(columns(rows[2]), columns(rows[0]));
+});
+
+test('a carriage return is folded like a newline', () => {
+  assert.equal(cell('first\r\nsecond'), 'first second');
+  assert.equal(cell('first\rsecond'), 'first second');
+});
+
 test('the block is replaced in place, leaving the surrounding text alone', () => {
   const doc = `before\n\n${BEGIN}\nold table\n${END}\n\nafter\n`;
   const out = replaceBlock(doc, 'new table');
