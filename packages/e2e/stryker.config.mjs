@@ -9,7 +9,7 @@ export default {
     '.vitest-dist/src/http-server.js',
     '.vitest-dist/src/setup-e2e-env.js',
   ],
-  thresholds: { high: 60, low: 50, break: 40 },
+  thresholds: { high: 80, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },

@@ -10,7 +10,7 @@ export default {
     '.vitest-dist/src/request-client.js',
     '.vitest-dist/src/setup-api-server.js',
   ],
-  thresholds: { high: 80, low: 60, break: 50 },
+  thresholds: { high: 90, low: 80, break: 80 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },

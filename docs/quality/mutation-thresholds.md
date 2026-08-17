@@ -77,10 +77,10 @@ The test below tells the shapes apart by what a file exports. That is a stand-in
 moves under its own Issue (§ Widening a package's scope). Read a green mutation gate accordingly —
 until a package's Issue lands, "passed" covers whatever its config happens to list.
 
-Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). Harmless —
-Stryker finds nothing to mutate there — but it makes the list read wider than it is. Drop them when
-you widen that package; the report lists them under "named in `mutate`, holds no runtime value" until
-you do.
+No config names a barrel any more (`api`, `ui`, and `a11y` each listed their `index.js` until #1963
+widened them). Listing one is harmless — Stryker finds nothing to mutate there — but it makes the
+scope read wider than it is, so drop it when you widen a package. The report lists any that come back
+under "named in `mutate`, holds no runtime value".
 
 ### Telling the shapes apart
 

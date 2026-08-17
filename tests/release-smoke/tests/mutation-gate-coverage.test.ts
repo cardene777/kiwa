@@ -35,6 +35,27 @@ const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
 // being scored (`packages/foo`, not `foo`). Each entry needs a reason: an
 // unexplained exemption is the state this axis exists to detect.
 // `withoutExemptions` below is what applies it, and it is tested.
+/**
+ * Packages whose `mutate` covers every implementation file.
+ *
+ * `hono` was there from the start; `cli` widened in #1961 and the small group in
+ * #1963. The list only grows — a package that reached 100% and then dropped a
+ * file is the drift #1936 cost 611 unseen mutants for.
+ */
+const FULLY_WIDENED: readonly string[] = [
+  'a11y',
+  'api',
+  'cli',
+  'cli-test',
+  'component',
+  'core',
+  'data',
+  'e2e',
+  'hono',
+  'nextjs',
+  'ui',
+];
+
 const UNSCORED_ALLOWLIST: readonly string[] = [
   // (empty — every package that runs mutation testing is scored by the gate)
 ];
@@ -436,6 +457,39 @@ describe('every package that runs mutation testing is scored', () => {
     // name would run something the gate then has no threshold for.
     expect(() => driver.selectPackages(['nope'])).toThrow(/not scored/);
     expect(driver.selectPackages(['security'])).toEqual(['@kiwa-lab/security']);
+  });
+
+  it('keeps a widened package widened', async () => {
+    // A package that reached every implementation file must not quietly shrink.
+    // Nothing else notices: dropping an entry from `mutate` leaves the gate
+    // green because the remaining files still score well, which is #1936 in a
+    // new shape. Adding a name here is the deliberate act of widening one.
+    const { reportForPackage } = await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/mutation-scope-report.mjs')).href
+    );
+    for (const pkg of FULLY_WIDENED) {
+      const report = await reportForPackage(pkg);
+      expect(report, `${pkg}: no report`).not.toBeNull();
+      expect(
+        report.uncovered.map((row: { file: string }) => row.file),
+        `${pkg}: implementation files dropped out of \`mutate\``,
+      ).toEqual([]);
+    }
+  });
+
+  it('carries no override that raises a tier bar', async () => {
+    const { PACKAGE_TIER, TIER_THRESHOLD } = await loadGate();
+    // #1963 removed the last two (api 90, a11y 90). A raised override is a
+    // number from a narrow scope, and the doc's rule is that it returns to the
+    // tier default as the scope grows — so a new one appearing means either the
+    // rule changed or someone pinned a number the widened scope cannot hold.
+    for (const [scoped, entry] of Object.entries(PACKAGE_TIER as Record<string, TierEntry>)) {
+      if (entry.override === undefined) continue;
+      expect(
+        entry.override,
+        `${scoped}: override raises the ${entry.tier} bar (docs § Overrides)`,
+      ).toBeLessThan(TIER_THRESHOLD[entry.tier] as number);
+    }
   });
 
   it('gives every entry a tier the threshold table knows', async () => {
