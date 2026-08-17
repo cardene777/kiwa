@@ -277,6 +277,9 @@ export function docOverrideRoster(text: string): Record<string, RosterRow> | nul
   const lines = body.split('\n').map((line) => line.trim()).filter((line) => line.startsWith('|'));
   const header = tableCells(lines[0] ?? '');
   if (!header) return null;
+  // A repeated column name makes `indexOf` pick the first silently, so the
+  // header stops being an unambiguous way to locate a cell.
+  if (new Set(header).size !== header.length) return null;
   const packageAt = header.indexOf('package');
   const overrideAt = header.indexOf('override');
   const tierAt = header.indexOf('tier');
@@ -299,6 +302,13 @@ export function docOverrideRoster(text: string): Record<string, RosterRow> | nul
     dataRows += 1;
     const name = cells[packageAt] as string;
     if (name === '(none)') {
+      // Skipping the rest of the row would let `| (none) | saas | 60 | … |`
+      // carry an override that nothing reads. The empty roster is only the
+      // empty roster if the row states nothing else.
+      const placeholder = (index: number) => cells[index] === '—';
+      if (!placeholder(tierAt) || !placeholder(overrideAt) || !placeholder(directionAt)) {
+        return null;
+      }
       sawNone = true;
       continue;
     }
@@ -786,6 +796,17 @@ describe('the override roster parser (#1975)', () => {
         row(`${NONE}\n| \`@kiwa-lab/auth\` | framework | 65 | looser | x |`),
       ],
       ['(none) twice', row(`${NONE}\n${NONE}`)],
+      [
+        '(none) carrying values in the other cells',
+        row('| (none) | saas | 60 | looser | — |'),
+      ],
+      [
+        'a column name repeated in the header',
+        withSection(
+          '| package | tier | override | direction | package |\n|---|---|---|---|---|\n' +
+            '| `@kiwa-lab/auth` | framework | 65 | looser | x |',
+        ),
+      ],
       [
         'no separator row',
         withSection(
