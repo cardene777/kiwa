@@ -39,22 +39,21 @@ const UNSCORED_ALLOWLIST: readonly string[] = [
 ];
 
 /**
- * File names Stryker resolves a config from.
+ * A Stryker config, by shape rather than by name.
  *
  * Keying on `stryker.config.mjs` alone would let a package rename its config to
  * another supported name and drop out of this axis while still running — the
- * same invisibility the axis exists to catch.
+ * same invisibility the axis exists to catch. Listing the supported names
+ * instead just moves the problem: Stryker resolves four extensions across two
+ * stems today, `.cjs` was missing from the first version of this list, and a
+ * list of forms has no point at which it is provably complete (the lesson
+ * `docs/quality/mutation-thresholds.md § Telling the shapes apart` records).
+ *
+ * So both stems with any extension count. A stray `stryker.conf.md` would make
+ * this axis demand wiring for a package that does not run — the safe direction,
+ * since the failure it prevents is a package that runs unscored.
  */
-const STRYKER_CONFIG_NAMES = [
-  'stryker.config.mjs',
-  'stryker.config.js',
-  'stryker.config.json',
-  'stryker.conf.mjs',
-  'stryker.conf.js',
-  'stryker.conf.json',
-  '.stryker.conf.json',
-  '.stryker.conf.js',
-];
+const STRYKER_CONFIG_PATTERN = /^\.?stryker\.(config|conf)\.[a-z0-9]+$/i;
 
 interface TierEntry {
   tier: string;
@@ -89,9 +88,10 @@ function mutationRunners(): Runner[] {
   for (const entry of readdirSync(packagesDir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue;
     const dir = entry.name;
-    const configs = STRYKER_CONFIG_NAMES.filter((name) =>
-      existsSync(resolve(packagesDir, dir, name)),
-    );
+    const configs = readdirSync(resolve(packagesDir, dir), { withFileTypes: true })
+      .filter((child) => !child.isDirectory() && STRYKER_CONFIG_PATTERN.test(child.name))
+      .map((child) => child.name)
+      .sort();
     const manifestPath = resolve(packagesDir, dir, 'package.json');
     if (!existsSync(manifestPath)) continue;
     const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as {
