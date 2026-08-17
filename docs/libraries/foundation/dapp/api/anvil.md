@@ -14,7 +14,7 @@ title: "@kiwa-lab/dapp anvil の API 契約"
 
 #### <code v-pre>getFreePort</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L22) <code v-pre>packages/dapp/src/anvil.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L56) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export declare function getFreePort(): Promise<number>;
@@ -22,7 +22,7 @@ export declare function getFreePort(): Promise<number>;
 
 #### <code v-pre>startAnvil</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L80) <code v-pre>packages/dapp/src/anvil.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L114) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export declare function startAnvil(opts?: StartAnvilOptions): Promise<AnvilHandle>;
@@ -32,7 +32,7 @@ export declare function startAnvil(opts?: StartAnvilOptions): Promise<AnvilHandl
 
 #### <code v-pre>AnvilHandle</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L16) <code v-pre>packages/dapp/src/anvil.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L50) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export interface AnvilHandle {
@@ -44,7 +44,7 @@ export interface AnvilHandle {
 
 #### <code v-pre>StartAnvilOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L67) <code v-pre>packages/dapp/src/anvil.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/dapp/src/anvil.ts#L101) <code v-pre>packages/dapp/src/anvil.ts</code>
 
 ```ts
 export interface StartAnvilOptions {

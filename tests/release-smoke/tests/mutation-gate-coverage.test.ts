@@ -18,6 +18,7 @@
 //   1. add the package to `PACKAGE_TIER` / `PKG_DIRS` / root `test:mutation`
 //   2. remove its `test:mutation` script and Stryker config if it should not run
 //   3. add it to `UNSCORED_ALLOWLIST` below with the reason
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -510,6 +511,24 @@ describe('every package that runs mutation testing is scored', () => {
     ).toEqual([...FULLY_WIDENED].sort());
   });
 
+  it('states the same override roster the gate reads', () => {
+    // The roster is generated from `PACKAGE_TIER` rather than hand-written and
+    // checked. #1975 tried the second shape first: a parser read the table and
+    // compared it, and seven review rounds each found another way a hand-written
+    // table can disagree with itself. Generating it removes the surface instead
+    // of guarding it one hole at a time.
+    const result = spawnSync(
+      process.execPath,
+      [resolve(REPO_ROOT, 'scripts/sync-override-roster.mjs')],
+      { cwd: REPO_ROOT, encoding: 'utf-8' },
+    );
+    expect(
+      result.status,
+      `docs/quality/mutation-thresholds.md § Current overrides is stale — run ` +
+        `\`node scripts/sync-override-roster.mjs --write\` and commit.\n${result.stdout}${result.stderr}`,
+    ).toBe(0);
+  });
+
   it('carries no override that raises a tier bar', async () => {
     const { PACKAGE_TIER, TIER_THRESHOLD } = await loadGate();
     // #1963 removed the last two (api 90, a11y 90). A raised override is a
@@ -579,5 +598,23 @@ describe('every package that runs mutation testing is scored', () => {
         ).toBeGreaterThanOrEqual(floor as number);
       }
     }
+  });
+});
+
+// The generator has had a check mode all along and nothing ran it, so the
+// generated pages drifted from source unnoticed: #1975 found six files stale
+// and one never generated at all. `check-docs-consistency` and
+// `docs-link-check` both pass in that state — they check different things.
+describe('generated API references track their source (#1975)', () => {
+  it('reports no drift', () => {
+    const result = spawnSync(
+      process.execPath,
+      [resolve(REPO_ROOT, 'scripts/sync-library-api-reference.mjs')],
+      { cwd: REPO_ROOT, encoding: 'utf-8' },
+    );
+    expect(
+      result.status,
+      `generated API references are stale — run \`pnpm docs:api-reference:write\` and commit.\n${result.stdout}${result.stderr}`,
+    ).toBe(0);
   });
 });

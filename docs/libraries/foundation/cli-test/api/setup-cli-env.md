@@ -14,7 +14,7 @@ title: "@kiwa-lab/cli-test setup-cli-env の API 契約"
 
 #### <code v-pre>setupCliEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/setup-cli-env.ts#L106) <code v-pre>packages/cli-test/src/setup-cli-env.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/cli-test/src/setup-cli-env.ts#L122) <code v-pre>packages/cli-test/src/setup-cli-env.ts</code>
 
 ```ts
 export declare function setupCliEnv(opts?: SetupCliEnvOptions): Promise<CliTestEnv>;
