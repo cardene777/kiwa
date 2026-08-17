@@ -68,6 +68,13 @@ export const PACKAGE_TIER = Object.freeze({
   '@kiwa-lab/cli-test': { tier: 'core' },
   '@kiwa-lab/observability': { tier: 'core' },
   '@kiwa-lab/cli': { tier: 'core' },
+  // security's `mutate` covers the policy engines (CSP / rate-limit /
+  // authorization / WAF / threat-model / secrets-scan / SBOM / headers /
+  // fidelity), which are pure logic with deterministic tests. The provider
+  // drift its config header cites lives in `real-driver.ts` and the
+  // testcontainers path, and neither is mutated. First measured run: 84.31 %
+  // covered MSI over 1,203 mutants (#1951).
+  '@kiwa-lab/security': { tier: 'core' },
   // Framework tier (SSR / hydration / adapter drift).
   '@kiwa-lab/nextjs': { tier: 'framework' },
   '@kiwa-lab/edge': { tier: 'framework' },
@@ -112,7 +119,12 @@ const THRESHOLDS = Object.fromEntries(
   Object.keys(PACKAGE_TIER).map((pkg) => [pkg, thresholdFor(pkg)]),
 );
 
-const PKG_DIRS = {
+/**
+ * Where each scored package lives. Exported so a check can confirm it covers
+ * `PACKAGE_TIER` — a package with a tier but no directory here makes the gate
+ * look for a report under `undefined` (#1951).
+ */
+export const PKG_DIRS = {
   // Core tier.
   '@kiwa-lab/core': 'packages/core',
   '@kiwa-lab/api': 'packages/api',
@@ -120,6 +132,7 @@ const PKG_DIRS = {
   '@kiwa-lab/cli-test': 'packages/cli-test',
   '@kiwa-lab/observability': 'packages/observability',
   '@kiwa-lab/cli': 'packages/cli',
+  '@kiwa-lab/security': 'packages/security',
   // Framework tier.
   '@kiwa-lab/nextjs': 'packages/nextjs',
   '@kiwa-lab/edge': 'packages/edge',
