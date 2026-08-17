@@ -82,7 +82,7 @@
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**'",
-    "test:mutation": "stryker run",
+    "test:mutation": "node ../../scripts/package-mutation.mjs",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "node ../../scripts/assert-pnpm-publish.mjs"

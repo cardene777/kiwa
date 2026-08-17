@@ -18,11 +18,12 @@
 //   1. add the package to `PACKAGE_TIER` / `PKG_DIRS` / root `test:mutation`
 //   2. remove its `test:mutation` script and Stryker config if it should not run
 //   3. add it to `UNSCORED_ALLOWLIST` below with the reason
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
 
@@ -30,6 +31,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = repoRoot(HERE);
 const GATE = resolve(REPO_ROOT, 'scripts/check-mutation-gates.mjs');
 const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
+
+/** Temporary trees the guard checks need; removed when the file finishes. */
+const fixtures: string[] = [];
+afterAll(() => {
+  for (const dir of fixtures) rmSync(dir, { recursive: true, force: true });
+});
 
 // Workspace-relative directories that run mutation testing on purpose without
 // being scored (`packages/foo`, not `foo`). Each entry needs a reason: an
@@ -67,6 +74,7 @@ interface Runner {
   scoped: string;
   configs: string[];
   hasScript: boolean;
+  script: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,19 +146,20 @@ function mutationRunners(): Runner[] {
       name?: string;
       scripts?: Record<string, string>;
     };
-    const hasScript = Boolean(manifest.scripts?.['test:mutation']);
+    const script = manifest.scripts?.['test:mutation'] ?? '';
+    const hasScript = script !== '';
     const configs = readdirSync(dirPath, { withFileTypes: true })
       .filter((child) => !child.isDirectory() && STRYKER_CONFIG_PATTERN.test(child.name))
       .map((child) => child.name)
       .sort();
     if (configs.length === 0 && !hasScript) continue;
-    runners.push({ dir, scoped: manifest.name ?? dir, configs, hasScript });
+    runners.push({ dir, scoped: manifest.name ?? dir, configs, hasScript, script });
   }
   return runners.sort((a, b) => a.dir.localeCompare(b.dir));
 }
 
 /**
- * What root `test:mutation` runs.
+ * The one invocation root `test:mutation` is allowed to be.
  *
  * It no longer holds a list. `scripts/run-mutation.mjs` derives the packages
  * from `PACKAGE_TIER`, so "what runs" and "what is scored" are one object and
@@ -162,8 +171,18 @@ function mutationRunners(): Runner[] {
  * `=` versus space, quoting, scope, exclusions). Removing the second copy
  * removed the parser with it.
  */
-/** The one invocation root `test:mutation` is allowed to be. */
 export const DRIVER_INVOCATION = 'node scripts/run-mutation.mjs';
+
+/**
+ * The one invocation a package's `test:mutation` is allowed to be.
+ *
+ * A bare `stryker run` scores whatever is in the gitignored `.vitest-dist`:
+ * nothing on a clean checkout, stale JavaScript in a workspace with an old
+ * build. 20 packages were in that shape (#1955). `package-mutation.mjs` removes,
+ * compiles, then runs, and requiring the exact string keeps a package from
+ * going back to calling Stryker directly.
+ */
+export const PACKAGE_INVOCATION = 'node ../../scripts/package-mutation.mjs';
 
 export function runsThroughDriver(script: string): boolean {
   // Equality, not a pattern. Round 6 replaced a substring test with a prefix
@@ -223,6 +242,10 @@ describe('every package that runs mutation testing is scored', () => {
       // script the driver invokes. Without it pnpm skips the package silently
       // and the gate reads whatever report the last run left behind.
       expect(runner.hasScript, `${scoped}: no test:mutation script to run`).toBe(true);
+      // And that the script builds before it scores (#1955).
+      expect(runner.script.trim(), `${scoped}: test:mutation is not the shared runner`).toBe(
+        PACKAGE_INVOCATION,
+      );
     }
   });
 
@@ -287,6 +310,155 @@ describe('every package that runs mutation testing is scored', () => {
       'run',
       'test:mutation',
     ]);
+  });
+
+  it('builds before it scores, in every package', async () => {
+    // The failure this replaces: a bare `stryker run` scores the gitignored
+    // `.vitest-dist`, which is absent on a clean checkout and stale in a
+    // workspace with an old build. Checked per package rather than by reading
+    // the shared runner, since the runner only helps the packages that call it.
+    const runners = mutationRunners();
+    expect(runners.length).toBeGreaterThan(0);
+    for (const runner of runners) {
+      expect(runner.script.trim(), `${runner.scoped}: does not use the shared runner`).toBe(
+        PACKAGE_INVOCATION,
+      );
+    }
+    expect(
+      existsSync(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')),
+      'scripts/package-mutation.mjs is missing',
+    ).toBe(true);
+  });
+
+  it('removes, compiles, then runs — and stops if the compile fails', async () => {
+    const runner = await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
+    );
+    const steps: string[] = [];
+    const label = (dir: string) => dir.replace('/pkg/', '');
+    const rm = (dir: string) => steps.push(`rm ${label(dir)}`);
+
+    const green = runner.runPackageMutation({
+      cwd: '/pkg',
+      rm,
+      run: (command: string, args: string[]) => {
+        steps.push(`${command} ${args.join(' ')}`);
+        return 0;
+      },
+    });
+    // Order is the point: scoring a build that was not just produced from this
+    // source is the failure being prevented. The report goes too — the gate
+    // reads `mutation-report/mutation.json`, so a run that stops early must not
+    // leave the previous one behind.
+    expect(steps).toEqual([
+      'rm .vitest-dist',
+      'rm mutation-report',
+      'tsc -p tsconfig.vitest.json',
+      'stryker run',
+    ]);
+    expect(green).toBe(0);
+
+    // Stryker is invoked with `run` and nothing else, whatever is on the command
+    // line. Forwarding would let one invocation narrow its own scope
+    // (`--mutate`) or redirect its report while the gate reads the result as if
+    // it covered the package.
+    const argv = process.argv;
+    process.argv = [...argv.slice(0, 2), '--mutate', 'src/only-this.js'];
+    steps.length = 0;
+    try {
+      runner.runPackageMutation({
+        cwd: '/pkg',
+        rm,
+        run: (command: string, args: string[]) => {
+          steps.push(`${command} ${args.join(' ')}`);
+          return 0;
+        },
+      });
+    } finally {
+      process.argv = argv;
+    }
+    expect(steps.at(-1)).toBe('stryker run');
+
+    // A missing config cannot produce a report now, so the previous one has to
+    // go — otherwise the gate scores a run that did not happen.
+    steps.length = 0;
+    const unconfigured = runner.runPackageMutation({
+      cwd: '/pkg',
+      rm,
+      run: (command: string) => {
+        steps.push(command);
+        return 0;
+      },
+      setupProblems: () => ['no Stryker config'],
+    });
+    expect(steps).toEqual(['rm .vitest-dist', 'rm mutation-report']);
+    expect(unconfigured).toBe(2);
+
+    // The one case where deleting is the wrong move: this is not a package.
+    steps.length = 0;
+    const elsewhere = runner.runPackageMutation({
+      cwd: '/not-a-package',
+      rm,
+      run: (command: string) => {
+        steps.push(command);
+        return 0;
+      },
+      dirProblem: 'no package.json',
+    });
+    expect(steps).toEqual([]);
+    expect(elsewhere).toBe(2);
+
+    steps.length = 0;
+    const red = runner.runPackageMutation({
+      cwd: '/pkg',
+      rm,
+      run: (command: string) => {
+        steps.push(command);
+        return command === 'tsc' ? 2 : 0;
+      },
+    });
+    // A failed compile leaves the build directory empty or partial. Running
+    // Stryker anyway is how a green report gets written for code that is not
+    // there; stopping with the report already removed is how the gate finds out.
+    expect(steps).toEqual(['rm .vitest-dist', 'rm mutation-report', 'tsc']);
+    expect(red).toBe(2);
+  });
+
+  it('knows it is being run even from a path that needs URL encoding', async () => {
+    const runner = await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
+    );
+    // Both cases the `file://${argv[1]}` form misses end the same way: the
+    // guard does not fire and the script exits 0 having run nothing.
+    const real = resolve(REPO_ROOT, 'scripts/package-mutation.mjs');
+
+    // Encoding: a path with a space.
+    const spaced = mkdtempSync(join(tmpdir(), 'kiwa scope '));
+    fixtures.push(spaced);
+    const spacedScript = join(spaced, 'package-mutation.mjs');
+    writeFileSync(spacedScript, '// probe\n');
+    expect(runner.isMainModule(spacedScript, pathToFileURL(spacedScript).href)).toBe(true);
+    // The unencoded spelling resolves to the same file, so comparing paths
+    // accepts it where comparing URL strings did not.
+    expect(runner.isMainModule(spacedScript, `file://${spacedScript}`)).toBe(true);
+
+    // Symlink: reaching the same file through a link. macOS `/tmp` is itself a
+    // link to `/private/tmp`, so this is the ordinary case, not the exotic one.
+    const linkDir = mkdtempSync(join(tmpdir(), 'kiwa-scope-link-'));
+    fixtures.push(linkDir);
+    const link = join(linkDir, 'linked.mjs');
+    symlinkSync(real, link);
+    expect(runner.isMainModule(link, pathToFileURL(real).href)).toBe(true);
+
+    // Negatives: another file, a path that resolves to nothing, no argv at all.
+    expect(runner.isMainModule(real, pathToFileURL(spacedScript).href)).toBe(false);
+    expect(runner.isMainModule('/no/such/file.mjs', 'file:///no/such/file.mjs')).toBe(false);
+    expect(runner.isMainModule(undefined, 'file:///x')).toBe(false);
+
+    // The driver is the other mutation entry point and had the same guard; it
+    // now shares this one.
+    const driverSource = readFileSync(resolve(REPO_ROOT, 'scripts/run-mutation.mjs'), 'utf-8');
+    expect(driverSource).toContain('isMainModule(process.argv[1], import.meta.url)');
   });
 
   it('accepts the driver invocation and nothing else', () => {
