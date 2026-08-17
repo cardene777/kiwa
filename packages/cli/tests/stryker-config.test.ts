@@ -17,12 +17,15 @@
 //
 // ## 検査の範囲
 //
-// `src` 直下の module だけを要求する。 `src/commands` と `src/detect` は現状の選択
-// (どれを変異対象にするか) をそのまま尊重する = `anvil-seed.ts` は CAR-1530 で別途
-// 判断する対象で、ここで巻き込むと本 Issue の範囲を超える。
+// `src` 配下の実装 module を全て要求する (#1961)。 当初は直下だけを見ていた =
+// 変異対象がそもそも直下 4 file で、`src/commands` と `src/detect` を巻き込むと
+// 当時の Issue の範囲を超えたため。
 //
-// 直下に絞っても目的は達する。 #1641 のような「entry を分割して新しい module を
-// 直下に作る」 形が、本 Issue で起きた追随漏れそのものだから。
+// #1961 で対象を実装全体に広げたので、検査も同じ範囲を見る。 広げた範囲を保つのは
+// 広げた範囲を見る検査だけで、直下しか見ないままだと `detect/` 配下 5 file を
+// 明日 1 件落としても気付けない (#1936 が直した追随漏れが subdir で再発する)。
+//
+// 除外は `src` 直下の `bin` と `index` の 2 つだけ。 理由は `EXEMPT_MODULES` に書く。
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
