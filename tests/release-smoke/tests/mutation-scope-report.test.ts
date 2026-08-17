@@ -347,11 +347,16 @@ describe('reportForPackage — the separate reports', () => {
   });
 
   it('names a package carrying a Stryker config the gate never reads', async () => {
+    const { reportAll, PACKAGES } = await loadScript();
+    // The name has to be one the gate does not read. `security` was the real
+    // instance until #1951 scored it, so the fixture picks a name no package
+    // uses and asserts it is outside the gate rather than hard-coding one.
+    const unscored = 'example-not-scored';
+    expect(PACKAGES).not.toContain(unscored);
     const root = fixtureRepo('core', { 'a.ts': 'export const a = 1;\n' }, []);
-    mkdirSync(join(root, 'packages', 'security', 'src'), { recursive: true });
-    writeFileSync(join(root, 'packages', 'security', 'stryker.config.mjs'), 'export default {};\n');
-    const { reportAll } = await loadScript();
-    expect((await reportAll({ root })).outsideTheGate).toEqual(['security']);
+    mkdirSync(join(root, 'packages', unscored, 'src'), { recursive: true });
+    writeFileSync(join(root, 'packages', unscored, 'stryker.config.mjs'), 'export default {};\n');
+    expect((await reportAll({ root })).outsideTheGate).toEqual([unscored]);
   });
 });
 

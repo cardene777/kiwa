@@ -1,10 +1,12 @@
 /**
  * Mutation testing config for @kiwa-lab/security.
- * Threshold: SaaS tier (high 65 / low 55 / break 50) — security harness
- * covers CSP / rate-limit / authorization / WAF / threat-model /
- * secrets-scanning / SBOM / security-headers-advanced across 4 providers;
- * provider policy engine drift is expected.
- * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
+ * Threshold: Core tier (high 80 / low 60 / break 50) — the mutated files are
+ * the policy engines (CSP / rate-limit / authorization / WAF / threat-model /
+ * secrets-scanning / SBOM / security-headers / fidelity), which are pure logic
+ * with deterministic tests. The 4-provider drift sits in `real-driver.ts` and
+ * the testcontainers path, and neither is mutated.
+ * Measured at 84.90 % covered MSI over 1,203 mutants (#1951).
+ * SSOT: docs/quality/mutation-thresholds.md § Core tier.
  */
 export default {
   packageManager: 'pnpm',
@@ -23,7 +25,7 @@ export default {
     '.vitest-dist/src/security-headers.js',
     '.vitest-dist/src/fidelity.js',
   ],
-  thresholds: { high: 65, low: 55, break: 50 },
+  thresholds: { high: 80, low: 60, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],
   reporters: ['progress-append-only', 'html', 'clear-text', 'json'],
   jsonReporter: { fileName: 'mutation-report/mutation.json' },

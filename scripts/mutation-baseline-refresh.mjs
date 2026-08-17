@@ -63,6 +63,9 @@ const PACKAGES = {
   '@kiwa-lab/orm': 'packages/orm',
   '@kiwa-lab/search': 'packages/search',
   '@kiwa-lab/realtime': 'packages/realtime',
+  // #1951: security ran mutation testing from v1.27 without a baseline,
+  // because nothing scored it. Core tier, 84.90 % covered MSI.
+  '@kiwa-lab/security': 'packages/security',
 };
 
 /**
