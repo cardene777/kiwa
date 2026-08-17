@@ -20,9 +20,10 @@
  * Arguments are not forwarded to Stryker; see `runPackageMutation` for why.
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, realpathSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+import { isMainModule } from './lib/is-main-module.mjs';
 
 const BUILD_DIR = '.vitest-dist';
 /**
@@ -37,33 +38,6 @@ const BUILD_DIR = '.vitest-dist';
 const REPORT_DIR = 'mutation-report';
 const TS_PROJECT = 'tsconfig.vitest.json';
 const CONFIG_PATTERN = /^\.?stryker\.(config|conf)\.[a-z0-9]+$/i;
-
-/**
- * Whether this file is being run rather than imported.
- *
- * Compare resolved paths, not URLs. `file://${process.argv[1]}` — the form four
- * other scripts in this repo use — misses two cases, and both end the same way:
- * the guard does not fire and the script exits 0 having done nothing, so a
- * mutation run reports success without running.
- *
- *   encoding  a directory with a space gives `…/kiwa review/…` on one side and
- *             `…/kiwa%20review/…` on the other
- *   symlink   reaching the script through a link gives the link path on one
- *             side and the real path on the other (macOS `/tmp` is a link to
- *             `/private/tmp`, so this is the common case, not the exotic one)
- *
- * `rebuild-plugin-metadata.mjs` already carries this fix and its reasoning;
- * this is the same comparison.
- */
-export function isMainModule(argv1, metaUrl) {
-  if (!argv1) return false;
-  try {
-    return realpathSync(fileURLToPath(metaUrl)) === realpathSync(argv1);
-  } catch {
-    // A path that cannot be resolved is not the file being run.
-    return false;
-  }
-}
 
 /** Whether `cwd` is a package at all. Nothing is deleted before this holds. */
 export function packageDirProblem(cwd) {

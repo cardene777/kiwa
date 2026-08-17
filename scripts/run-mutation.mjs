@@ -21,7 +21,7 @@
  */
 import { spawnSync } from 'node:child_process';
 
-import { isMainModule } from './package-mutation.mjs';
+import { isMainModule } from './lib/is-main-module.mjs';
 import { PACKAGE_TIER } from './check-mutation-gates.mjs';
 
 /** Scoped names for the requested subset, or all scored packages. */

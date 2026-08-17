@@ -6,22 +6,15 @@
     "low": 50,
     "break": 40
   },
-  "killRate": 93.62,
-  "totalMsi": 93.62,
-  "coveredMsi": 93.62,
-  "killed": 44,
-  "survived": 3,
+  "killRate": 95.74,
+  "totalMsi": 95.74,
+  "coveredMsi": 95.74,
+  "killed": 45,
+  "survived": 2,
   "timeout": 0,
   "noCoverage": 0,
   "error": 0,
   "mutants": [
-    {
-      "file": ".vitest-dist/src/audit.js",
-      "line": 10,
-      "column": 16,
-      "mutator": "LogicalOperator",
-      "replacement": "mod.default && mod"
-    },
     {
       "file": ".vitest-dist/src/audit.js",
       "line": 28,
@@ -37,6 +30,6 @@
       "replacement": "\"\""
     }
   ],
-  "capturedAt": "2026-07-05T12:00:19Z",
-  "note": "Total MSI 93.62% / Covered MSI 93.62% (threshold high=60 / low=50 / break=40)."
+  "capturedAt": "2026-08-17T04:26:34Z",
+  "note": "Total MSI 95.74% / Covered MSI 95.74% (threshold high=60 / low=50 / break=40)."
 }
