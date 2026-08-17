@@ -59,12 +59,25 @@ export const END = '<!-- /generated: override-roster -->';
  * meant to protect the cell is what breaks it. Escaping the backslash first
  * gives `a\\\|b`, a backslash and a pipe, both literal.
  *
- * **Markup is neutralised too.** This doc is published as a site, and markdown
- * passes raw HTML through, so a reason containing `<img onerror=…>` would reach
- * the rendered page. A backtick would open a code span that swallows the rest
- * of the row. Whoever writes a reason can already edit the doc directly, so
- * this is not a trust boundary — it is a generator that must not turn ordinary
- * prose into markup by accident.
+ * Two things are guaranteed, and nothing beyond them.
+ *
+ * **The row keeps its shape.** Pipes, backslashes, backticks and line breaks
+ * are the characters that can end a cell or a row early — a backtick opens a
+ * code span that swallows the rest of the line just as surely as a pipe adds a
+ * column.
+ *
+ * **No raw HTML reaches the page.** This doc is published as a site and
+ * markdown passes HTML through, so `<` and `&` are escaped. `>` needs no
+ * escape once `<` is gone: a tag cannot start without it.
+ *
+ * **Markdown emphasis is left alone**, deliberately. `*` and `_` and `[` cannot
+ * break the row or inject an element, and escaping them would put backslashes
+ * through the middle of ordinary prose. A reason that renders one word in
+ * italics is not a problem worth that.
+ *
+ * Whoever writes a reason can already edit the doc directly, so none of this is
+ * a trust boundary. It is a generator that must not turn prose into structure
+ * by accident.
  */
 export function cell(value) {
   return String(value)

@@ -72,15 +72,32 @@ test('a backslash in the reason does not turn into a column break', () => {
   assert.equal(columns(rows[2]), columns(rows[0]));
 });
 
-test('markup in a reason is rendered as text, not as markup', () => {
-  // The doc is published as a site and markdown passes raw HTML through, so an
-  // unescaped reason would reach the page as an element. A backtick would open
-  // a code span that swallows the rest of the row.
+test('a reason cannot inject an element', () => {
+  // The doc is published as a site and markdown passes HTML through. `>` needs
+  // no escape once `<` is gone — a tag cannot start without it.
   assert.equal(cell('<img onerror=x>'), '&lt;img onerror=x>');
   assert.equal(cell('a & b'), 'a &amp; b');
-  assert.equal(cell('use `code` here'), 'use \\`code\\` here');
   // `&` is escaped before `<`, so an escape does not get escaped again.
   assert.equal(cell('&lt;'), '&amp;lt;');
+});
+
+test('a backtick cannot open a code span that eats the row', () => {
+  assert.equal(cell('use `code` here'), 'use \\`code\\` here');
+  const table = rosterTable(
+    { '@kiwa-lab/x': { tier: 'saas', override: 60, reason: 'raise `session.js`' } },
+    TIERS,
+  );
+  const rows = table.split('\n');
+  const columns = (row) => row.split(/(?<!\\)\|/).length;
+  assert.equal(columns(rows[2]), columns(rows[0]));
+});
+
+test('markdown emphasis is left alone', () => {
+  // Deliberate: `*` and `_` cannot break the row or inject an element, and
+  // escaping them would run backslashes through ordinary prose.
+  assert.equal(cell('raise *soon*'), 'raise *soon*');
+  assert.equal(cell('see snake_case_name'), 'see snake_case_name');
+  assert.equal(cell('[note] follow-up'), '[note] follow-up');
 });
 
 test('the package cell keeps the code span it is given', () => {
