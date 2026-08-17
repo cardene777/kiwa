@@ -49,6 +49,13 @@ const loadHelper = (): Promise<any> => import(pathToFileURL(HELPER).href);
  * code, and the shapes that needed excluding kept growing. The parser knows
  * what a comment and a string literal are, so the question becomes a walk over
  * expressions.
+ *
+ * **Its reach is direct reads.** `const a = process.argv; a[1]` and
+ * `const [, first] = process.argv` are not caught, and following values through
+ * variables would put this check back in the business of enumerating forms —
+ * the loop that produced the two versions above. Nobody writes an entry check
+ * that way, and the property that actually matters (a script that exits 0
+ * having done nothing) is covered for the gate scripts by running them below.
  */
 function handRolledEntryChecks(file: string): string[] {
   const source = readFileSync(file, 'utf-8');
