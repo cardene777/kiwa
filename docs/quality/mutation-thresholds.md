@@ -181,14 +181,21 @@ restore the high number by not looking, which is the failure this rule exists to
 
 ### Current overrides
 
+<!-- generated: override-roster -->
 | package | tier | override | direction | reason |
 |---|---|---|---|---|
 | (none) | — | — | — | — |
+<!-- /generated: override-roster -->
 
-**This table is the only place in the repo that states which packages carry an override**, and
-`tests/release-smoke/tests/mutation-gate-coverage.test.ts` requires it to equal `PACKAGE_TIER`
-exactly. Adding an override without adding its row fails, and so does deleting one without deleting
-its row.
+**This table is generated from `PACKAGE_TIER` — do not edit it by hand.**
+`node scripts/sync-override-roster.mjs --write` rewrites it, and release-smoke runs the same script
+in check mode, so a hand edit or a stale roster fails.
+
+It is generated rather than checked because #1975 tried checking first: a parser read the
+hand-written table and compared it to `PACKAGE_TIER`, and seven review rounds each found another way
+a hand-written table can disagree with itself (a `(none)` row beside real rows, one package listed
+twice, a `tier` cell naming the wrong tier, a repeated column name, a second copy of the section
+further down). Markdown has no bottom to that list. A generated table has nothing to disagree with.
 
 Everywhere else — the assignment table above, the concept doc, the tutorials, the JSDoc on
 `ReleaseGateContext.mutationTierThreshold` — points here instead of repeating it. #1973 spent seven
