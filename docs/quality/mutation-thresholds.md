@@ -320,7 +320,7 @@ v1.27-4 promotes the mutation kill rate to a first-class 12th axis in the releas
 ```ts
 evaluateReleaseGate(report, thresholdOverrides, {
   mutationTier: 'saas',          // required to enable the 12th axis
-  mutationTierThreshold: 60,     // optional looser override (no package carries one today)
+  mutationTierThreshold: 60,     // optional looser override; see § Overrides for who has one
 });
 ```
 

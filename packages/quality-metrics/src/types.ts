@@ -386,10 +386,10 @@ export interface ReleaseGateContext {
   /**
    * Optional per-package looser override for the mutation tier default.
    *
-   * `scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is the SSOT for which
-   * package carries one, and **none do today** — the last two were removed in
-   * #1973 once re-measured. Passing a number here bypasses the tier table, so
-   * use it only for a package whose override is recorded there.
+   * Passing a number bypasses the tier table, so pass one only for a package
+   * that records an override in `scripts/check-mutation-gates.mjs`
+   * (`PACKAGE_TIER`) — that map is the SSOT for which packages have one, and
+   * this comment deliberately does not restate its contents.
    */
   mutationTierThreshold?: number;
   /**

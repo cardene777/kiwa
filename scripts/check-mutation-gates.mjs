@@ -18,10 +18,13 @@
  * and may declare an `override`: a looser one must stay above the tier's
  * `break` bar, a stricter one just raises the floor.
  *
- * **No package carries an override in either direction today.** The raised two
- * went in #1963 (`api` 90, `a11y` 90) and the lowered ones in #1941 (`orm`),
- * #1967 (`cache`), and #1973 (`auth`, `realtime`). Both kinds are claims about
- * a measurement, so re-measure before adding or trusting one.
+ * **An override is a claim about a measurement, in either direction.** A raised
+ * bar is a number about the scope it was measured on; a lowered bar is a debt
+ * with a date on it. Re-measure before adding one, and re-measure the ones
+ * below on a schedule rather than waiting for the work their reason names —
+ * #1941 / #1963 / #1967 / #1973 each deleted one that had been removable for a
+ * while. The entries below are the roster; `docs/quality/mutation-thresholds.md`
+ * § Overrides carries the reasoning.
  *
  * Per-package thresholds follow the 4-tier rationale from
  * `docs/quality/mutation-thresholds.md`.

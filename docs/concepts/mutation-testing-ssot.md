@@ -49,11 +49,11 @@ Kill rate ≥ `high` colours the Stryker HTML report green. Kill rate ≥ `low` 
 ### Stricter and looser overrides
 
 - **Stricter override** — a package may raise its floor above the tier default. Stricter overrides do not need approval, and the `stryker.config.mjs` header comment records the raised value. `@kiwa-lab/api` held Core-strict 90 until #1963 widened its `mutate` to every implementation file and it measured 88.29; per `docs/quality/mutation-thresholds.md § Overrides`, a raised bar returns to the tier default as scope grows, so it did. None remain.
-- **Looser override** — a package may sit one point below tier `low` when the baseline sweep lands below the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work, and must **not** drop below the tier's `break` threshold. **None remain today.** `orm` lost its 60 in #1941, `cache` lost its 60 in #1967, and #1973 removed the last two (`auth` 65 → measured 75.74, `realtime` 60 → measured 67.54).
+- **Looser override** — a package may sit one point below tier `low` when the baseline sweep lands below the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work, and must **not** drop below the tier's `break` threshold.
 
-  What removed them was re-measuring, not the follow-up landing. `orm`, `cache`, and `realtime` did get the work their reason named. **`auth` did not** — its reason named `session.js` at 56.76 % and that file is still 57.89 %; `adapter.js` and `providers.js` improved enough to carry the aggregate the gate reads. So a reason naming one file is a note about intent, not a condition the gate checks: re-measure the package on a schedule rather than waiting for the named work or the next scope change.
+  **What removes one is re-measuring, not the follow-up landing.** #1941, #1967, and #1973 each deleted a looser override, and in one of them (`auth`) the work its reason named had never happened — the file it pointed at barely moved and two neighbours carried the aggregate the gate reads. A reason naming one file is a note about intent, not a condition the gate checks, so re-measure the package on a schedule rather than waiting for the named work or the next scope change.
 
-`scripts/check-mutation-gates.mjs` is what the gate reads; both bullets above are a snapshot of it. **It now carries no override in either direction.**
+`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads, and which packages carry an override is its business alone. `docs/quality/mutation-thresholds.md § Overrides` records the current roster and why each one went; this file deliberately does not repeat it.
 
 ### The `MutationTier` enum
 
