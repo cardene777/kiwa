@@ -6,13 +6,13 @@
     "low": 60,
     "break": 50
   },
-  "killRate": 83.39,
-  "totalMsi": 83.39,
-  "coveredMsi": 84.9,
-  "killed": 994,
-  "survived": 180,
-  "timeout": 18,
-  "noCoverage": 11,
+  "killRate": 86.62,
+  "totalMsi": 86.62,
+  "coveredMsi": 87.13,
+  "killed": 2188,
+  "survived": 325,
+  "timeout": 13,
+  "noCoverage": 13,
   "error": 0,
   "mutants": [
     {
@@ -80,15 +80,15 @@
     },
     {
       "file": ".vitest-dist/src/authorization.js",
-      "line": 106,
-      "column": 61,
+      "line": 104,
+      "column": 69,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/authorization.js",
-      "line": 104,
-      "column": 69,
+      "line": 106,
+      "column": 61,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -98,6 +98,13 @@
       "column": 18,
       "mutator": "ObjectLiteral",
       "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/authorization.js",
+      "line": 29,
+      "column": 42,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
     },
     {
       "file": ".vitest-dist/src/sbom.js",
@@ -118,14 +125,14 @@
       "line": 48,
       "column": 33,
       "mutator": "Regex",
-      "replacement": "/\\s*\\|\\|\\S*/"
+      "replacement": "/\\s*\\|\\|\\s/"
     },
     {
       "file": ".vitest-dist/src/sbom.js",
       "line": 48,
       "column": 33,
       "mutator": "Regex",
-      "replacement": "/\\s*\\|\\|\\s/"
+      "replacement": "/\\s*\\|\\|\\S*/"
     },
     {
       "file": ".vitest-dist/src/sbom.js",
@@ -139,14 +146,14 @@
       "line": 56,
       "column": 32,
       "mutator": "Regex",
-      "replacement": "/(>=|<=|<|>|=)\\s*([0-9]+(?:\\.[0-9]+){0,2})$/"
+      "replacement": "/^(>=|<=|<|>|=)\\s*([0-9]+(?:\\.[0-9]+){0,2})/"
     },
     {
       "file": ".vitest-dist/src/sbom.js",
       "line": 56,
       "column": 32,
       "mutator": "Regex",
-      "replacement": "/^(>=|<=|<|>|=)\\s*([0-9]+(?:\\.[0-9]+){0,2})/"
+      "replacement": "/(>=|<=|<|>|=)\\s*([0-9]+(?:\\.[0-9]+){0,2})$/"
     },
     {
       "file": ".vitest-dist/src/sbom.js",
@@ -199,13 +206,6 @@
     },
     {
       "file": ".vitest-dist/src/sbom.js",
-      "line": 133,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sbom.js",
       "line": 132,
       "column": 16,
       "mutator": "StringLiteral",
@@ -220,15 +220,36 @@
     },
     {
       "file": ".vitest-dist/src/sbom.js",
-      "line": 113,
-      "column": 35,
+      "line": 133,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/sbom.js",
+      "line": 112,
+      "column": 34,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/sbom.js",
-      "line": 113,
-      "column": 12,
+      "line": 112,
+      "column": 50,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/sbom.js",
+      "line": 112,
+      "column": 66,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/sbom.js",
+      "line": 112,
+      "column": 73,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -242,7 +263,21 @@
     {
       "file": ".vitest-dist/src/sbom.js",
       "line": 113,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/sbom.js",
+      "line": 113,
       "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/sbom.js",
+      "line": 113,
+      "column": 35,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -381,38 +416,101 @@
     },
     {
       "file": ".vitest-dist/src/secrets-scan.js",
-      "line": 38,
-      "column": 22,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/secrets-scan.js",
-      "line": 43,
-      "column": 22,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/secrets-scan.js",
-      "line": 48,
-      "column": 22,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/secrets-scan.js",
-      "line": 53,
-      "column": 22,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/secrets-scan.js",
       "line": 58,
       "column": 22,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 14,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 14,
+      "column": 55,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 17,
+      "column": 41,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 20,
+      "column": 10,
+      "mutator": "Regex",
+      "replacement": "/sha(256|384|512)-/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 26,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 29,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "input.integrity.split('-')[0] && 'sha256'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 29,
+      "column": 42,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 40,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 55,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 65,
+      "column": 10,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 67,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/web-vitals-security.js",
+      "line": 79,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
     },
     {
       "file": ".vitest-dist/src/csp.js",
@@ -467,15 +565,15 @@
       "file": ".vitest-dist/src/csp.js",
       "line": 100,
       "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "trimmed.startsWith(\"'\") || trimmed.endsWith(\"'\")"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/csp.js",
       "line": 100,
       "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "mutator": "LogicalOperator",
+      "replacement": "trimmed.startsWith(\"'\") || trimmed.endsWith(\"'\")"
     },
     {
       "file": ".vitest-dist/src/csp.js",
@@ -494,21 +592,42 @@
     {
       "file": ".vitest-dist/src/csp.js",
       "line": 100,
-      "column": 53,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/csp.js",
-      "line": 100,
       "column": 36,
       "mutator": "MethodExpression",
       "replacement": "trimmed.startsWith(\"'\")"
     },
     {
       "file": ".vitest-dist/src/csp.js",
+      "line": 100,
+      "column": 53,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/csp.js",
       "line": 114,
       "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/csp.js",
+      "line": 15,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/csp.js",
+      "line": 16,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/csp.js",
+      "line": 17,
+      "column": 5,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -760,16 +879,16 @@
     {
       "file": ".vitest-dist/src/rate-limit.js",
       "line": 35,
-      "column": 36,
+      "column": 37,
       "mutator": "ArithmeticOperator",
-      "replacement": "(this.capacity - this.tokens) * this.refillPerMs"
+      "replacement": "this.capacity + this.tokens"
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
       "line": 35,
-      "column": 37,
+      "column": 36,
       "mutator": "ArithmeticOperator",
-      "replacement": "this.capacity + this.tokens"
+      "replacement": "(this.capacity - this.tokens) * this.refillPerMs"
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
@@ -822,10 +941,10 @@
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
-      "line": 81,
-      "column": 25,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
+      "line": 80,
+      "column": 36,
+      "mutator": "ArithmeticOperator",
+      "replacement": "this.queue * this.drainPerMs"
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
@@ -836,10 +955,10 @@
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
-      "line": 80,
-      "column": 36,
-      "mutator": "ArithmeticOperator",
-      "replacement": "this.queue * this.drainPerMs"
+      "line": 81,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
@@ -866,22 +985,15 @@
       "file": ".vitest-dist/src/rate-limit.js",
       "line": 93,
       "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "elapsed < 0"
-    },
-    {
-      "file": ".vitest-dist/src/rate-limit.js",
-      "line": 93,
-      "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
-      "line": 95,
-      "column": 22,
-      "mutator": "MethodExpression",
-      "replacement": "Math.min(0, this.queue - elapsed * this.drainPerMs)"
+      "line": 93,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "elapsed < 0"
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
@@ -889,6 +1001,13 @@
       "column": 47,
       "mutator": "ArithmeticOperator",
       "replacement": "elapsed / this.drainPerMs"
+    },
+    {
+      "file": ".vitest-dist/src/rate-limit.js",
+      "line": 95,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(0, this.queue - elapsed * this.drainPerMs)"
     },
     {
       "file": ".vitest-dist/src/rate-limit.js",
@@ -1010,6 +1129,48 @@
       "replacement": "{}"
     },
     {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 26,
+      "column": 26,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 27,
+      "column": 46,
+      "mutator": "LogicalOperator",
+      "replacement": "env.KIWA_MODE && 'unset'"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 27,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 35,
+      "column": 78,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 41,
+      "column": 17,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 41,
+      "column": 51,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
       "file": ".vitest-dist/src/security-headers.js",
       "line": 80,
       "column": 21,
@@ -1078,6 +1239,860 @@
       "column": 5,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 15,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 15,
+      "column": 55,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 21,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 23,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 25,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 27,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 29,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 33,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 35,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 37,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 41,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 56,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 70,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/container-k8s.js",
+      "line": 86,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 15,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.plaintextLen <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 15,
+      "column": 35,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 18,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.plaintextLen >= 1024 * 1024 * 64"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 18,
+      "column": 30,
+      "mutator": "ArithmeticOperator",
+      "replacement": "1024 * 1024 / 64"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 22,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 30,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.saltLen <= 8"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 36,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 36,
+      "column": 52,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 36,
+      "column": 67,
+      "mutator": "EqualityOperator",
+      "replacement": "input.iterations <= 10000"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 40,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 48,
+      "column": 35,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 52,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 62,
+      "column": 40,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 67,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 81,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 88,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.publicKeyLen <= 800"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 92,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/crypto-advanced.js",
+      "line": 103,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 25,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 35,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.affectedUsers <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 43,
+      "column": 35,
+      "mutator": "EqualityOperator",
+      "replacement": "input.affectedUsers >= 1000"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 45,
+      "column": 35,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 45,
+      "column": 35,
+      "mutator": "EqualityOperator",
+      "replacement": "input.affectedUsers >= 100"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 45,
+      "column": 14,
+      "mutator": "LogicalOperator",
+      "replacement": "input.serviceDown || input.affectedUsers > 100"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 49,
+      "column": 14,
+      "mutator": "EqualityOperator",
+      "replacement": "input.affectedUsers >= 10"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 53,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 71,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 82,
+      "column": 35,
+      "mutator": "EqualityOperator",
+      "replacement": "input.networkPcapMb <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 82,
+      "column": 35,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 82,
+      "column": 62,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 87,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 87,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.networkPcapMb >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 92,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 103,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.rootCause.length <= 10"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 110,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/incident-response.js",
+      "line": 122,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 22,
+      "column": 54,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 29,
+      "column": 52,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 29,
+      "column": 70,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 38,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 51,
+      "column": 39,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 51,
+      "column": 57,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 56,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 56,
+      "column": 76,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 59,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 65,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 65,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 68,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.minSctRequired <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 71,
+      "column": 16,
+      "mutator": "EqualityOperator",
+      "replacement": "input.sctCount > input.minSctRequired"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 73,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/mtls.js",
+      "line": 84,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 37,
+      "column": 26,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 38,
+      "column": 46,
+      "mutator": "LogicalOperator",
+      "replacement": "env.KIWA_MODE && 'unset'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 38,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 46,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 46,
+      "column": 78,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 52,
+      "column": 17,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 52,
+      "column": 51,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 58,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 58,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "value.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 63,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "value.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 63,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 16,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 15,
+      "column": 10,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 17,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 21,
+      "column": 10,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 22,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 27,
+      "column": 24,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/real-driver.js",
+      "line": 28,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 19,
+      "column": 35,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 19,
+      "column": 62,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 29,
+      "column": 57,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 44,
+      "column": 23,
+      "mutator": "ArithmeticOperator",
+      "replacement": "input.previousHash - JSON.stringify(session.structuredEvents)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 48,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 58,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "policy.hotDays <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 58,
+      "column": 31,
+      "mutator": "EqualityOperator",
+      "replacement": "policy.warmDays <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 58,
+      "column": 54,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 58,
+      "column": 54,
+      "mutator": "EqualityOperator",
+      "replacement": "policy.coldDays <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 63,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 81,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i <= input.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i >= input.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 90,
+      "column": 44,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 92,
+      "column": 16,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(hash << 5) - hash - chr"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 93,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "hash &= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 92,
+      "column": 16,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(hash << 5) + hash"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/siem-audit.js",
+      "line": 102,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 32,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 43,
+      "column": 43,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 48,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 66,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 83,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/supply-chain.js",
+      "line": 94,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 21,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 44,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 56,
+      "column": 36,
+      "mutator": "EqualityOperator",
+      "replacement": "request.ttlSeconds >= 3600"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 59,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "request.justification.length <= 10"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 62,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "session.riskScore <= 50"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 70,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 83,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/zero-trust.js",
+      "line": 94,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.history.length - 1"
     },
     {
       "file": ".vitest-dist/src/threat-model.js",
@@ -1276,6 +2291,6 @@
       "replacement": "/((https?|ftp):\\/\\/[^\\s])/i"
     }
   ],
-  "capturedAt": "2026-08-17T02:12:25Z",
-  "note": "Total MSI 83.39% / Covered MSI 84.90% (threshold high=80 / low=60 / break=50)."
+  "capturedAt": "2026-08-17T07:49:34Z",
+  "note": "Total MSI 86.62% / Covered MSI 87.13% (threshold high=80 / low=60 / break=50)."
 }
