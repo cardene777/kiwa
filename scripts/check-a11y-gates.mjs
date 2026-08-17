@@ -34,9 +34,13 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { isMainModule } from './lib/is-main-module.mjs';
 
-const SCRIPT_ROOT = resolve(new URL('..', import.meta.url).pathname);
+// `fileURLToPath`, not `.pathname`: a `file:` URL keeps percent-encoding, so a
+// checkout under a directory with a space resolves to `…/kiwa%20probe/…`, a path
+// that does not exist. `scripts/lib/is-main-module.mjs` records the same trap.
+const SCRIPT_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const REPO_ROOT = process.env.KIWA_GATE_ROOT
   ? resolve(process.env.KIWA_GATE_ROOT)
   : process.cwd() !== '/' && existsSync(resolve(process.cwd(), 'packages'))

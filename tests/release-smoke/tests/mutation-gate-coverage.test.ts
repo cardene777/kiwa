@@ -605,6 +605,51 @@ describe('every package that runs mutation testing is scored', () => {
 // generated pages drifted from source unnoticed: #1975 found six files stale
 // and one never generated at all. `check-docs-consistency` and
 // `docs-link-check` both pass in that state — they check different things.
+// `new URL('..', import.meta.url).pathname` keeps percent-encoding, so a
+// checkout under a directory with a space resolves to `…/kiwa%20review/…` — a
+// path that does not exist. Measured directly: `.pathname` gave
+// `/private/tmp/kiwa%20probe3` (missing) where `fileURLToPath` gave
+// `/private/tmp/kiwa probe3` (exists).
+//
+// The scripts this breaks are gates. A root that resolves to nothing makes them
+// find no packages, and a gate that looked at nothing exits 0 — the failure
+// reads as a pass. `scripts/lib/is-main-module.mjs` exists because the same
+// encoding trap bit the same way once already.
+describe('scripts resolve their own directory without percent-encoding (#1977)', () => {
+  /** `.mjs` files directly under `scripts/`, which is where the roots are built. */
+  function scriptFiles(): string[] {
+    const dir = resolve(REPO_ROOT, 'scripts');
+    return readdirSync(dir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.mjs'))
+      .map((entry) => entry.name)
+      .sort();
+  }
+
+  it('never builds a path from `import.meta.url` via `.pathname`', () => {
+    const offenders: string[] = [];
+    for (const name of scriptFiles()) {
+      const text = readFileSync(resolve(REPO_ROOT, 'scripts', name), 'utf-8');
+      // The literal form only; `new URL(...).pathname` on a URL that is not
+      // `import.meta.url` is a different question and not this check's business.
+      if (/import\.meta\.url\s*\)\s*\.pathname/.test(text)) offenders.push(name);
+    }
+    expect(
+      offenders,
+      'use `fileURLToPath(new URL(..., import.meta.url))`. `.pathname` keeps ' +
+        'percent-encoding, so a checkout under a directory with a space resolves to a ' +
+        'path that does not exist and the gate finds nothing to check',
+    ).toEqual([]);
+  });
+
+  it('finds the scripts it is checking', () => {
+    // An empty list would make the check above pass without looking.
+    const names = scriptFiles();
+    expect(names).toContain('check-mutation-gates.mjs');
+    expect(names).toContain('check-coverage-gates.mjs');
+    expect(names.length).toBeGreaterThan(10);
+  });
+});
+
 describe('generated API references track their source (#1975)', () => {
   it('reports no drift', () => {
     const result = spawnSync(
