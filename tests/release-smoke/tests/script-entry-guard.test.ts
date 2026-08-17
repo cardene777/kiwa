@@ -17,6 +17,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 
+import ts from 'typescript';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
@@ -40,9 +41,40 @@ function tempDir(prefix: string): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const loadHelper = (): Promise<any> => import(pathToFileURL(HELPER).href);
 
-/** Source with comments removed, so a comment quoting the old form is not a hit. */
-function stripComments(source: string): string {
-  return source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
+/**
+ * Reads of `process.argv[1]` that are not the shared helper's argument.
+ *
+ * Parsed, not matched. Stripping comments with a regex to avoid false hits was
+ * the first attempt, and it cut both ways: a `//` inside a string removed real
+ * code, and the shapes that needed excluding kept growing. The parser knows
+ * what a comment and a string literal are, so the question becomes a walk over
+ * expressions.
+ */
+function handRolledEntryChecks(file: string): string[] {
+  const source = readFileSync(file, 'utf-8');
+  const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const offenders: string[] = [];
+
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isElementAccessExpression(node) &&
+      node.expression.getText(parsed) === 'process.argv' &&
+      node.argumentExpression.getText(parsed) === '1'
+    ) {
+      const call = node.parent;
+      const viaHelper =
+        call !== undefined &&
+        ts.isCallExpression(call) &&
+        call.expression.getText(parsed) === 'isMainModule';
+      if (!viaHelper) {
+        const { line } = parsed.getLineAndCharacterOfPosition(node.getStart(parsed));
+        offenders.push(`${file}:${line + 1}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parsed);
+  return offenders;
 }
 
 /** Every `.mjs` under `scripts/`, including `scripts/lib/`. */
@@ -103,16 +135,39 @@ describe('scripts know whether they were run or imported', () => {
     // Not a search for the broken spelling — that is a list of forms, and the
     // one written next will be the one not on it. `process.argv[1]` has no use
     // in these scripts other than the entry check, so the rule is that every
-    // mention of it is the shared helper's.
+    // read of it is the shared helper's argument.
     const offenders = scriptFiles()
       .filter((file) => file !== HELPER)
-      .filter((file) => {
-        const code = stripComments(readFileSync(file, 'utf-8'))
-          .split('isMainModule(process.argv[1], import.meta.url)')
-          .join('');
-        return code.includes('process.argv[1]');
-      });
-    expect(offenders.map((file) => file.slice(REPO_ROOT.length + 1))).toEqual([]);
+      .flatMap((file) => handRolledEntryChecks(file))
+      .map((hit) => hit.slice(REPO_ROOT.length + 1));
+    expect(offenders).toEqual([]);
+  });
+
+  it('sees a hand-rolled check and ignores one that only looks like it', () => {
+    const dir = tempDir('kiwa-guard-scan-');
+    const write = (name: string, body: string) => {
+      const file = join(dir, name);
+      writeFileSync(file, body);
+      return file;
+    };
+
+    // The two forms this repo has actually shipped.
+    expect(handRolledEntryChecks(write('old.mjs', 'if (import.meta.url === `file://${process.argv[1]}`) run();\n'))).toHaveLength(1);
+    expect(handRolledEntryChecks(write('url.mjs', "const e = pathToFileURL(process.argv[1] ?? '').href === import.meta.url;\n"))).toHaveLength(1);
+
+    // A different function taking it directly is still a hand-rolled check —
+    // the allowance is for the shared helper, not for "it is inside a call".
+    expect(handRolledEntryChecks(write('direct.mjs', 'const e = pathToFileURL(process.argv[1]).href === import.meta.url;\n'))).toHaveLength(1);
+
+    // The helper's own call is what the rule allows.
+    expect(handRolledEntryChecks(write('ok.mjs', 'if (isMainModule(process.argv[1], import.meta.url)) run();\n'))).toEqual([]);
+
+    // A comment or a string that quotes the form is not code.
+    expect(handRolledEntryChecks(write('comment.mjs', '// process.argv[1] used to be compared here\nconst a = 1;\n'))).toEqual([]);
+    expect(handRolledEntryChecks(write('string.mjs', 'const doc = "compare process.argv[1] yourself";\n'))).toEqual([]);
+    // And a `//` inside a string does not hide the code after it, which is what
+    // the regex version got wrong.
+    expect(handRolledEntryChecks(write('url-in-string.mjs', 'const u = "https://example.com";\nconst e = process.argv[1];\n'))).toHaveLength(1);
   });
 
   it('reports an unresolvable path instead of failing quietly', async () => {
