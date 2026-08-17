@@ -132,7 +132,9 @@ export const PACKAGE_TIER = Object.freeze({
 });
 ```
 
-Stricter overrides (raising the floor above the tier default, e.g. `@kiwa-lab/api` = 90 on Core) do **not** need a reason — a higher floor is always safe. Looser overrides require a one-line justification pinned to the follow-up work that will bring the floor back to the tier default (SSOT `docs/quality/mutation-thresholds.md` § Overrides).
+Stricter overrides (raising the floor above the tier default) do **not** need a reason — a higher floor is always safe. Looser overrides require a one-line justification pinned to the follow-up work that will bring the floor back to the tier default (SSOT `docs/quality/mutation-thresholds.md` § Overrides).
+
+**No package carries an override of either kind today.** `@kiwa-lab/api` held a stricter 90 on Core until #1963, and the last looser two went in #1973. A raised bar is a number about the scope it was measured on, and a lowered bar is a claim that goes stale — both belong to a measurement, so re-measure before trusting either.
 
 ### 6. Wire the tier gate into `evaluateReleaseGate`
 
@@ -194,10 +196,11 @@ The 12-axis path is opt-in — the third argument (`context`) is optional. Consu
 The v1.27 milestone seeded 11 new packages on top of the 22 existing ones. Three of them are useful templates for future onboarding.
 
 - [`packages/nextjs/stryker.config.mjs`](https://github.com/cardene777/kiwa/blob/main/packages/nextjs/stryker.config.mjs) — Framework tier example. The v1.27-1 rollout aimed at Core-strict 90 / 80 / 80, the v1.27-2 sweep landed at ~80 % MSI, and the config now sits at Framework default (70 / 60 / 50) with a documented follow-up to raise the bar back once tests reach 90 %.
-- [`packages/auth/stryker.config.mjs`](https://github.com/cardene777/kiwa/blob/main/packages/auth/stryker.config.mjs) — Framework tier with a looser override. `.mutation-baseline/auth.json` records 68.86 % covered MSI (session.js at 56.76 % is the drag) and `PACKAGE_TIER` declares `override: 65, reason: "session.js 56.76 % — follow-up test raises back to 70."`. Override sits one point below tier low, still above tier break.
-- [`packages/cache/stryker.config.mjs`](https://github.com/cardene777/kiwa/blob/main/packages/cache/stryker.config.mjs) — SaaS tier with an exclusion. `testcontainers-cache.js` is excluded from `mutate` (0 covered mutants under the unit suite), so the baseline mutates `in-memory-cache.js` only and the JSON `note` field records the exclusion.
+- [`packages/auth/stryker.config.mjs`](https://github.com/cardene777/kiwa/blob/main/packages/auth/stryker.config.mjs) — the full life of a looser override. The v1.27-3 sweep landed at 68.86 % (`session.js` 56.76 % was the drag), so `PACKAGE_TIER` declared `override: 65` pinned to raising that file. #1973 re-measured the same three files at 75.74 % and deleted the override. `session.js` had barely moved (57.89 %) — `adapter.js` and `providers.js` carried the aggregate. **Copy the shape, not the endpoint**: declare the override with a reason, then re-measure it rather than waiting for the named work.
+- [`packages/cache/stryker.config.mjs`](https://github.com/cardene777/kiwa/blob/main/packages/cache/stryker.config.mjs) — an exclusion that did not survive measurement. `testcontainers-cache.js` was left out of `mutate` on the grounds that its assertions need a live container (a v1.27-3 sweep saw 0 covered mutants). #1967 measured 330 of 345 covered across the three `testcontainers-*` files and reversed it. Exclude a file when a run shows it has no covered mutants, and record which run — not on the shape of its name.
 
 Follow any of the three as a template and the migration cost per new package is 10-15 minutes.
+The second and third are there because both were later reversed by measurement: treat a threshold or an exclusion as a claim with a date on it.
 
 ## Where to next
 
