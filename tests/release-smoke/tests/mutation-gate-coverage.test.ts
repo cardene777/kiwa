@@ -268,8 +268,11 @@ export interface RosterRow {
  * human and there is nothing to compare it against.
  */
 export function docOverrideRoster(text: string): Record<string, RosterRow> | null {
-  const section = /^### Current overrides$/m.exec(text);
-  if (!section) return null;
+  const headings = [...text.matchAll(/^### Current overrides$/gm)];
+  // Two sections of the same name would let the doc hold two rosters, with only
+  // the first one read. There is exactly one roster.
+  if (headings.length !== 1) return null;
+  const section = headings[0] as RegExpMatchArray & { index: number };
   // Stop at the next heading of any level so a later table cannot be read as
   // part of this roster.
   const body = text.slice(section.index + section[0].length).split(/^#{1,6} /m)[0] ?? '';
@@ -799,6 +802,10 @@ describe('the override roster parser (#1975)', () => {
       [
         '(none) carrying values in the other cells',
         row('| (none) | saas | 60 | looser | — |'),
+      ],
+      [
+        'the section appearing twice',
+        `${withSection(`${HEAD}\n${NONE}`)}\n### Current overrides\n\n${HEAD}\n| \`@kiwa-lab/auth\` | framework | 65 | looser | x |\n`,
       ],
       [
         'a column name repeated in the header',
