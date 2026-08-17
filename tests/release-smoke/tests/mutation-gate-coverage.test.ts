@@ -162,11 +162,18 @@ function mutationRunners(): Runner[] {
  * `=` versus space, quoting, scope, exclusions). Removing the second copy
  * removed the parser with it.
  */
+export function runsThroughDriver(script: string): boolean {
+  // The script has to *be* the driver invocation. A substring test passes for a
+  // script that only mentions the path — in a comment, an `echo`, or a longer
+  // filename — which is a check satisfied without doing the thing it checks for.
+  return /^\s*node\s+scripts\/run-mutation\.mjs(\s|$)/.test(script);
+}
+
 function rootRunsThroughDriver(): boolean {
   const root = JSON.parse(readFileSync(resolve(REPO_ROOT, 'package.json'), 'utf-8')) as {
     scripts: Record<string, string>;
   };
-  return (root.scripts['test:mutation'] ?? '').includes('scripts/run-mutation.mjs');
+  return runsThroughDriver(root.scripts['test:mutation'] ?? '');
 }
 
 /**
@@ -274,6 +281,18 @@ describe('every package that runs mutation testing is scored', () => {
       'run',
       'test:mutation',
     ]);
+  });
+
+  it('is not satisfied by a script that only mentions the driver', () => {
+    expect(runsThroughDriver('node scripts/run-mutation.mjs')).toBe(true);
+    expect(runsThroughDriver('node scripts/run-mutation.mjs core')).toBe(true);
+    // Mentioning the path is not running it.
+    expect(runsThroughDriver('echo scripts/run-mutation.mjs')).toBe(false);
+    expect(runsThroughDriver('pnpm -F @kiwa-lab/core run test:mutation # scripts/run-mutation.mjs')).toBe(
+      false,
+    );
+    expect(runsThroughDriver('node scripts/run-mutation.mjs.bak')).toBe(false);
+    expect(runsThroughDriver('')).toBe(false);
   });
 
   it('refuses a package the gate does not score', async () => {
