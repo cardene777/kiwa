@@ -14,7 +14,7 @@ title: "@kiwa-lab/quality-metrics types の API 契約"
 
 #### <code v-pre>isAiLlmProvider</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L462) <code v-pre>packages/quality-metrics/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L465) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 `@kiwa-lab/ai-*` provider か判定する helper。 release gate と emit が AI-LLM 4 軸の有無を分岐する SSOT。
 
@@ -265,7 +265,7 @@ export interface QualityReport {
 
 #### <code v-pre>QualityReportDiff</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L440) <code v-pre>packages/quality-metrics/src/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/quality-metrics/src/types.ts#L443) <code v-pre>packages/quality-metrics/src/types.ts</code>
 
 Trend delta between two reports for the same provider — used by {@link diffReports }. Values are (`current - previous`) so positive numbers mean improvement for `coverage` / `test count` / `fidelity` / `mutation` / `accuracy`, and negative numbers mean improvement for `perf` / `latency` / `cost` / `token`.
 
@@ -326,9 +326,12 @@ export interface ReleaseGateContext {
      */
     mutationTier?: MutationTier;
     /**
-     * Optional per-package looser override for the mutation tier default (e.g.
-     * auth 65 on Framework tier). Documented per-baseline in
-     * `.mutation-baseline/*.json`.
+     * Optional per-package looser override for the mutation tier default.
+     *
+     * Passing a number bypasses the tier table, so pass one only for a package
+     * that records an override in `scripts/check-mutation-gates.mjs`
+     * (`PACKAGE_TIER`) — that map is the SSOT for which packages have one, and
+     * this comment deliberately does not restate its contents.
      */
     mutationTierThreshold?: number;
     /**
