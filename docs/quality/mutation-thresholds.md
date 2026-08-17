@@ -79,9 +79,13 @@ happens to list.
 
 Three configs currently name a barrel (`api`, `ui`, `a11y` all list their `index.js`). Harmless —
 Stryker finds nothing to mutate there — but it makes the list read wider than it is. Drop them when
-you widen that package.
+you widen that package; the report lists them under "named in `mutate`, holds no runtime value" until
+you do.
 
 ### Telling the shapes apart
+
+`scripts/mutation-scope-report.mjs` applies the test below, so a package's answer is one command
+rather than a reading of every file (`--list <package>`, § Widening a package's scope).
 
 Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
 interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
@@ -92,16 +96,27 @@ file's own.
 
 Syntax is not meaning here. `import x from './a.js'; export default x` re-publishes someone else's
 value without a specifier, so it reads as implementation. That is the safe direction to err — the
-file ends up in `mutate` and Stryker finds little to mutate.
+file ends up in `mutate` and Stryker finds little to mutate. No file in the repo is shaped that way
+today; the report counts them on every run so the claim stays checked rather than remembered.
 
 - own values present → implementation
 - only forwards → barrel
 - neither → type-only
 
-**The last case is the one place this test disagrees with the rule.** A file whose only job is a side
-effect — imports something, calls it, exports nothing — has behaviour and belongs in `mutate`, but
-exports nothing for the test to read, so it lands in type-only. Nothing in the repo is shaped that
-way today; name one by hand if it appears.
+**A file that runs but publishes nothing of its own is where this test disagrees with the rule.** It
+has behaviour and belongs in `mutate`, but there is no export for the test to read. It lands in
+type-only if it forwards nothing, and in barrel if it also re-exports — so the report keys the check
+on "publishes no values of its own", not on the bucket.
+
+Two files in the repo are shaped that way, and the report names both rather than letting them sit in
+a bucket that reads "forwards only" or "declares only types":
+
+| file | what it is | call |
+|---|---|---|
+| `cli/src/bin.ts` | the CLI entrypoint — imports `runCli` and calls it | belongs in `mutate`; add it when `cli` widens |
+| `dapp/src/strict-abi-typing.ts` | type-level assertions guarded by `if (false)` | leave out — the only code that survives erasure never runs |
+
+The call differs per file, which is why the report names them instead of deciding.
 
 Do **not** decide by reading the source and listing which declaration forms produce runtime values.
 #1944 wrote that check and had to extend it in four consecutive review rounds — first for
@@ -114,7 +129,8 @@ there is no point at which such a list is provably complete.
 
 A file can be both shapes at once: `cli/detect/index.ts` and `component/fixture.ts` re-export *and*
 implement. Count those as implementation. Their re-export lines then sit inside the implementation
-total (442 lines, 0.7% of it), which matters only when the line count drives an estimate.
+total, which matters only when the line count drives an estimate. The two come to 440 lines, **19 of
+them re-export** — that 19 is the number to subtract, not the 440, and the report prints both.
 
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
@@ -125,26 +141,31 @@ that moved sat outside every gate while the report still read green. Adding the 
 
 ### The measurement that produced this rule
 
-Classified once by hand during #1944 (2026-08-17, 21 packages). Making this repeatable is #1948;
-until it lands, re-derive the numbers the same way if a package's `mutate` changes.
+`node scripts/mutation-scope-report.mjs` produces it (#1948). The numbers below are that script's
+output at the commit which added it (2026-08-17, 21 packages); they move as the source does, so
+re-run it rather than reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 10,878 |
-| implementation, not in `mutate` | 53,875 |
-| barrel | 3,057 |
-| type-only | 704 |
+| implementation, in `mutate` | 10,817 |
+| implementation, not in `mutate` | 53,582 |
+| barrel | 3,019 |
+| type-only | 692 |
 
-So 16.8% of implementation lines were covered (10,878 of 64,753).
+So 16.8% of implementation lines were covered (10,817 of 64,399).
 
-The "it's only types" explanation does not cover the gap. Barrel and type-only files come to 3,761
-lines across the repo, against 53,875 lines of implementation sitting outside `mutate`. Per-package
-coverage ranged from `hono` at 100% to `auth` at 2.7% with no written basis for the difference.
+Everything outside `mutate` totals 57,293 lines, and barrel plus type-only accounts for 3,711 of
+that — the "it's only types" explanation does not cover the gap. Per-package coverage ranged from
+`hono` at 100% to `auth` at 2.0% with no written basis for the difference.
 
-Widening to the full set means 64,753 implementation lines against 10,878 today — roughly 6x. At the
-current density (6,271 mutants over 10,878 lines, about 0.58 per line) that projects to somewhere
+Widening to the full set means 64,399 implementation lines against 10,817 today — roughly 6x. At the
+current density (6,271 mutants over 10,817 lines, about 0.58 per line) that projects to somewhere
 near 37,000 mutants. Treat it as an order of magnitude, not a forecast: density varies by package,
 and `a11y` came in at 0.55 per line while `core` sits at 1.42.
+
+#1944 classified the same files by hand and published totals 404 lines higher — one per file, from
+counting the empty string after a file's trailing newline as a line. Which bucket each file landed
+in was the same; only the line counts moved.
 
 ### Expect scores to drop, and do not read that as regression
 
@@ -183,11 +204,20 @@ plan, while the small group is mostly a config edit plus a re-run.
 
 | group | packages | uncovered lines each |
 |---|---|---|
-| large — one Issue each | `auth` (13,975), `orm` (5,032), `queue` (5,000), `observability` (4,996), `ai-llm` (4,759), `realtime` (3,975), `dapp` (3,523) | 3,000+ |
-| medium — one Issue each | `edge` (2,820), `search` (2,191), `cache` (2,096), `cli` (2,059) | 1,000-3,000 |
+| large — one Issue each | `auth` (13,899), `orm` (5,011), `queue` (4,978), `observability` (4,970), `ai-llm` (4,735), `realtime` (3,950), `dapp` (3,501) | 3,000+ |
+| medium — one Issue each | `edge` (2,802), `search` (2,179), `cache` (2,084), `cli` (2,053) | 1,000-3,000 |
 | small — one Issue for all | `component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data` | under 1,000 |
 
 `hono` already sits at 100% and needs no Issue.
+
+`node scripts/mutation-scope-report.mjs --list <package>` prints that package's implementation files
+outside `mutate`, largest first. That list is the input for the checklist below — the numbers in the
+table above are the same output, summed.
+
+`@kiwa-lab/security` is in neither the table above nor the tier matrix, and the gate does not read
+it either: `packages/security/stryker.config.mjs` exists, but `check-mutation-gates.mjs` has no
+`PACKAGE_TIER` entry for it, so its mutation run is never scored. The report prints it under
+"Stryker config the gate never reads" on every run. Settling that is #1951, not this plan.
 
 ### What a widening PR has to show
 
@@ -248,4 +278,5 @@ The three v1.26 dogfood apps (`dogfood-postgres-cdc-outbox-app`, `dogfood-mysql-
 - `packages/quality-metrics/src/gate.ts` — `DEFAULT_MUTATION_TIER_THRESHOLDS`, `assertMutationTier`, `resolveMutationTier`, and the 12-axis extension of `evaluateReleaseGate`.
 - `packages/*/stryker.config.mjs` — per-package configs.
 - `scripts/check-mutation-gates.mjs` — CI gate; `PACKAGE_TIER` / `TIER_THRESHOLD` / `thresholdFor()` exports.
+- `scripts/mutation-scope-report.mjs` — the classification above, run over every gate package; `--list <package>` for one.
 - root `package.json` `test:mutation` script — pnpm filter list covering all packages in this doc.
