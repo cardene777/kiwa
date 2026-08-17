@@ -15,13 +15,16 @@
  * **tier + override** SSOT that mirrors `docs/quality/mutation-thresholds.md`
  * and `packages/quality-metrics/src/gate.ts` DEFAULT_MUTATION_TIER_THRESHOLDS.
  * Each package picks a tier (Core 80 / Framework 70 / SaaS 65 / Test type 60)
- * and may declare a looser `override` that must stay above the tier's
- * `break` bar. A stricter override (e.g. `@kiwa-lab/api` = Core-strict 90)
- * just raises the floor.
+ * and may declare an `override`: a looser one must stay above the tier's
+ * `break` bar, a stricter one just raises the floor.
+ *
+ * **No package carries an override in either direction today.** The raised two
+ * went in #1963 (`api` 90, `a11y` 90) and the lowered ones in #1941 (`orm`),
+ * #1967 (`cache`), and #1973 (`auth`, `realtime`). Both kinds are claims about
+ * a measurement, so re-measure before adding or trusting one.
  *
  * Per-package thresholds follow the 4-tier rationale from
- * `docs/quality/mutation-thresholds.md`:
- * Core-strict 90 / Core 80 / Framework 70 / SaaS 65 / Test-type 60.
+ * `docs/quality/mutation-thresholds.md`.
  * A stricter override raises the floor; a looser override needs a one-line
  * justification in the PR that introduces it.
  *
