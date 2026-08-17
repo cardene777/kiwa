@@ -30,7 +30,7 @@ The SSOT matches Stryker's "% Mutation score / covered" column. The v0.3 `mutati
 
 ### Exceptions
 
-- **Provider-specific `testcontainers-*.js`** — when a file only exercises against a live container, its mutants land at `no-coverage` under the unit suite. Exclude those files from Stryker's `mutate` glob (see `@kiwa-lab/queue` / `cache` / `realtime` `stryker.config.mjs`) and record the exclusion in the baseline JSON `note` field so a reviewer sees why. Live-container mutation testing is out of scope for the unit gate.
+- **Provider-specific `testcontainers-*.js`** — a file that only exercises against a live container produces `no-coverage` mutants under the unit suite, which the covered denominator already excludes. That makes listing it free, so the rule is **measure before excluding**: `@kiwa-lab/cache` carried this exclusion citing a v1.27-3 sweep of 0 covered mutants, and #1967 measured 330 of 345 covered across its three `testcontainers-*` files, each scoring above the SaaS bar. `@kiwa-lab/queue` still excludes its `testcontainers-queue.js` and has not been re-measured. (`realtime` has no such file — its exclusions are `pusher.js` / `socketio.js` / `report.js`, for other reasons its config records.) When a file genuinely has no covered mutants, record the exclusion in the baseline JSON `note` field with the run that showed it.
 - **Effectful bridges** — thin re-exports of downstream helpers (`@kiwa-lab/realtime/report.js` re-exports `@kiwa-lab/quality-metrics`) are excluded from `mutate` because the mutation coverage belongs to the source module.
 
 ## Rule 2 — 4-tier threshold rationale
@@ -49,7 +49,7 @@ Kill rate ≥ `high` colours the Stryker HTML report green. Kill rate ≥ `low` 
 ### Stricter and looser overrides
 
 - **Stricter override** — a package may raise its floor above the tier default (e.g. `@kiwa-lab/api` = Core-strict 90 / 80 / 80 because its historical bar already met it). Stricter overrides do not need approval — they raise the floor. The `stryker.config.mjs` header comment records the raised value.
-- **Looser override** — a package may sit one point below tier `low` when the baseline sweep lands below the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work, and must **not** drop below the tier's `break` threshold. `@kiwa-lab/auth` at 65 / `@kiwa-lab/cache` / `realtime` / `orm` at 60 are the four Framework / SaaS packages that currently sit on a documented looser override.
+- **Looser override** — a package may sit one point below tier `low` when the baseline sweep lands below the tier default and a follow-up PR is scoped to bring it back. Looser overrides require a one-line justification pinned to the follow-up work, and must **not** drop below the tier's `break` threshold. Two remain today: `@kiwa-lab/auth` at 65 and `@kiwa-lab/realtime` at 60. `orm` lost its 60 in #1941 and `cache` lost its 60 in #1967 — in both cases the follow-up the override was waiting on had already landed, and the override outlived it because nobody re-measured. `scripts/check-mutation-gates.mjs` is what the gate reads; this list is a snapshot of it.
 
 ### The `MutationTier` enum
 
