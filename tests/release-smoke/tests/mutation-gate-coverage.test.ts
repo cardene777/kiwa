@@ -372,6 +372,35 @@ describe('every package that runs mutation testing is scored', () => {
     }
     expect(steps.at(-1)).toBe('stryker run');
 
+    // A missing config cannot produce a report now, so the previous one has to
+    // go — otherwise the gate scores a run that did not happen.
+    steps.length = 0;
+    const unconfigured = runner.runPackageMutation({
+      cwd: '/pkg',
+      rm,
+      run: (command: string) => {
+        steps.push(command);
+        return 0;
+      },
+      setupProblems: () => ['no Stryker config'],
+    });
+    expect(steps).toEqual(['rm .vitest-dist', 'rm mutation-report']);
+    expect(unconfigured).toBe(2);
+
+    // The one case where deleting is the wrong move: this is not a package.
+    steps.length = 0;
+    const elsewhere = runner.runPackageMutation({
+      cwd: '/not-a-package',
+      rm,
+      run: (command: string) => {
+        steps.push(command);
+        return 0;
+      },
+      dirProblem: 'no package.json',
+    });
+    expect(steps).toEqual([]);
+    expect(elsewhere).toBe(2);
+
     steps.length = 0;
     const red = runner.runPackageMutation({
       cwd: '/pkg',
@@ -386,6 +415,24 @@ describe('every package that runs mutation testing is scored', () => {
     // there; stopping with the report already removed is how the gate finds out.
     expect(steps).toEqual(['rm .vitest-dist', 'rm mutation-report', 'tsc']);
     expect(red).toBe(2);
+  });
+
+  it('knows it is being run even from a path that needs URL encoding', async () => {
+    const runner = await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
+    );
+    // Comparing an unencoded path against an encoded URL fails for a checkout
+    // under a directory with a space, and the script then exits 0 having run
+    // nothing — a mutation run that reports success without running.
+    const spaced = '/tmp/kiwa review/scripts/package-mutation.mjs';
+    expect(runner.isMainModule(spaced, pathToFileURL(spaced).href)).toBe(true);
+    expect(runner.isMainModule(spaced, `file://${spaced}`)).toBe(false);
+    expect(runner.isMainModule(undefined, 'file:///x')).toBe(false);
+
+    // The driver is the other mutation entry point and had the same guard.
+    const driverSource = readFileSync(resolve(REPO_ROOT, 'scripts/run-mutation.mjs'), 'utf-8');
+    const guard = /if \([^)]*pathToFileURL\(process\.argv\[1\]\)\.href === import\.meta\.url\) \{/;
+    expect(guard.test(driverSource), 'run-mutation.mjs guard is not URL-safe').toBe(true);
   });
 
   it('accepts the driver invocation and nothing else', () => {
