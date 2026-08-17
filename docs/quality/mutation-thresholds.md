@@ -103,12 +103,13 @@ today; the report counts them on every run so the claim stays checked rather tha
 - only forwards → barrel
 - neither → type-only
 
-**The last case is the one place this test disagrees with the rule.** A file whose only job is a side
-effect — imports something, calls it, exports nothing — has behaviour and belongs in `mutate`, but
-exports nothing for the test to read, so it lands in type-only.
+**A file that runs but publishes nothing of its own is where this test disagrees with the rule.** It
+has behaviour and belongs in `mutate`, but there is no export for the test to read. It lands in
+type-only if it forwards nothing, and in barrel if it also re-exports — so the report keys the check
+on "publishes no values of its own", not on the bucket.
 
 Two files in the repo are shaped that way, and the report names both rather than letting them sit in
-a bucket that reads "declares only types":
+a bucket that reads "forwards only" or "declares only types":
 
 | file | what it is | call |
 |---|---|---|

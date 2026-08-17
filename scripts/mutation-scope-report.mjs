@@ -199,24 +199,24 @@ export function classify(source, fileName = 'input.ts') {
   let ownValues = 0;
   let forwards = 0;
   let ownValuesFromImports = 0;
-  // Anything the emitted module still does at load time. An empty `export {}`
-  // marker is the one statement that does nothing.
-  let runtimeStatements = 0;
+  // Work the emitted module still does at load time, counting neither the
+  // forwarding statements nor the empty `export {}` marker. Forwarding is what a
+  // barrel is made of, so counting it here would call every barrel a side
+  // effect; the marker does nothing at all.
+  let sideEffectStatements = 0;
 
   for (const node of emitted.statements) {
     if (ts.isExportDeclaration(node)) {
       if (node.moduleSpecifier) {
         forwards += 1;
-        runtimeStatements += 1;
         continue;
       }
       const clause = node.exportClause;
-      if (clause && ts.isNamedExports(clause) && clause.elements.length > 0) {
+      if (clause && ts.isNamedExports(clause)) {
         for (const element of clause.elements) {
           ownValues += 1;
           if (imported.has((element.propertyName ?? element.name).text)) ownValuesFromImports += 1;
         }
-        runtimeStatements += 1;
       }
       continue;
     }
@@ -226,11 +226,10 @@ export function classify(source, fileName = 'input.ts') {
       if (ts.isIdentifier(node.expression) && imported.has(node.expression.text)) {
         ownValuesFromImports += 1;
       }
-      runtimeStatements += 1;
       continue;
     }
 
-    runtimeStatements += 1;
+    sideEffectStatements += 1;
     const exported =
       ts.canHaveModifiers(node) &&
       (ts.getModifiers(node) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
@@ -244,9 +243,14 @@ export function classify(source, fileName = 'input.ts') {
     ownValues,
     forwards,
     mixed: ownValues > 0 && forwards > 0,
-    // Has behaviour, publishes nothing. The doc's rule puts it in `mutate`; this
-    // test cannot see it, so it lands in type-only and gets named instead.
-    runsWithoutExporting: kind === 'type-only' && runtimeStatements > 0,
+    // Runs, publishes nothing of its own. The rule puts such a file in `mutate`;
+    // this test cannot see it, so it is named instead of sitting in a bucket
+    // that reads "forwards only" or "declares only types".
+    //
+    // Keyed on the absence of own values rather than on the bucket: a barrel
+    // that also calls something lands in `barrel`, and gating on type-only
+    // would let that one through unnamed.
+    runsWithoutExporting: ownValues === 0 && sideEffectStatements > 0,
     // Every own value it publishes came from an import, so it forwards in a
     // shape the syntactic test reads as implementation.
     publishesImportsOnly: ownValues > 0 && ownValues === ownValuesFromImports,
@@ -480,7 +484,7 @@ export const NOTE_LABELS = Object.freeze({
   listedWithoutValue: 'named in `mutate`, holds no runtime value',
   listedButMissing: 'named in `mutate`, source file is gone',
   mixed: 'implements and forwards',
-  runsWithoutExporting: 'exports nothing, but still runs at load time',
+  runsWithoutExporting: 'runs at load time, publishes nothing of its own',
   publishesImportsOnly: 'publishes imported bindings only',
   outsideTheGate: 'Stryker config the gate never reads',
 });

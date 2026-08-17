@@ -140,9 +140,31 @@ describe('classify — the shape is whatever survives type erasure', () => {
     expect(shape).toMatchObject({ kind: 'type-only', runsWithoutExporting: true });
   });
 
+  it('names a barrel that also runs something at load time', async () => {
+    const { classify } = await loadScript();
+    // Same disagreement, different bucket. Keying the check on "type-only" would
+    // let this one through unnamed, because forwarding puts it in `barrel`.
+    const shape = classify("import './register.js';\nexport * from './a.js';\n");
+    expect(shape).toMatchObject({ kind: 'barrel', runsWithoutExporting: true });
+  });
+
+  it('does not read a plain barrel as running at load time', async () => {
+    const { classify } = await loadScript();
+    // Forwarding is what a barrel is made of. Counting it as a side effect would
+    // name all 38 barrels in the repo and make the note useless.
+    const shape = classify("export * from './a.js';\nexport { b } from './b.js';\n");
+    expect(shape).toMatchObject({ kind: 'barrel', runsWithoutExporting: false });
+  });
+
   it('does not flag a file that only declares types as running at load time', async () => {
     const { classify } = await loadScript();
     expect(classify('export interface A { a: string }\n').runsWithoutExporting).toBe(false);
+  });
+
+  it('does not count the empty module marker as running at load time', async () => {
+    const { classify } = await loadScript();
+    // `export declare function` erases to a bare `export {}`, which does nothing.
+    expect(classify('export declare function f(): void;\n').runsWithoutExporting).toBe(false);
   });
 
   it('names a file whose only exports re-publish imported bindings', async () => {
