@@ -233,39 +233,57 @@ function rootRunsThroughDriver(): boolean {
  * silently skip a fifth, and the rows are already distinctive (three percentage
  * columns).
  */
+/** A markdown table row split into trimmed cells, or null if it is not a row. */
+function tableCells(line: string): string[] | null {
+  if (!line.startsWith('|') || !line.endsWith('|')) return null;
+  return line.slice(1, -1).split('|').map((cell) => cell.trim());
+}
+
 /**
  * The `§ Current overrides` roster, as `scoped package -> override value`.
  *
- * Returns `null` when the section or its table is missing — a parse failure and
- * an empty roster are different answers, and only the second one may pass.
- * The single row `(none)` is how the doc writes an empty roster; a table with
- * no rows at all is a parse failure.
+ * Returns `null` when the section, its table, or any row cannot be read — a
+ * parse failure and an empty roster are different answers, and only the second
+ * one may pass. The single row `(none)` is how the doc writes an empty roster;
+ * a table with no data rows is a parse failure.
  *
- * Rows look like `| \`@kiwa-lab/x\` | saas | 60 | looser | … |`. Only the
- * package and the number are read; the rest is for the human.
+ * **The columns are located by name, not by position.** Reading "the first
+ * numeric cell" instead would take the tier column's number if the two were
+ * ever swapped, and would accept a row with a column missing — both give a
+ * wrong override value rather than a failure, which is the one outcome this
+ * check exists to prevent.
  */
 export function docOverrideRoster(text: string): Record<string, number> | null {
   const section = /^### Current overrides$/m.exec(text);
   if (!section) return null;
-  const rest = text.slice(section.index + section[0].length);
   // Stop at the next heading of any level so a later table cannot be read as
   // part of this roster.
-  const body = rest.split(/^#{1,6} /m)[0] ?? '';
-  const rows = [...body.matchAll(/^\|(?!\s*(?:package|-+)\s*\|)([^|]+)\|([^\n]*)$/gm)];
-  if (rows.length === 0) return null;
+  const body = text.slice(section.index + section[0].length).split(/^#{1,6} /m)[0] ?? '';
+
+  const lines = body.split('\n').map((line) => line.trim()).filter((line) => line.startsWith('|'));
+  const header = tableCells(lines[0] ?? '');
+  if (!header) return null;
+  const packageAt = header.indexOf('package');
+  const overrideAt = header.indexOf('override');
+  if (packageAt === -1 || overrideAt === -1) return null;
 
   const roster: Record<string, number> = {};
-  for (const [, first = '', tail = ''] of rows) {
-    const name = first.trim();
+  let dataRows = 0;
+  // Row 0 is the header and row 1 is the `|---|` separator.
+  for (const line of lines.slice(2)) {
+    const cells = tableCells(line);
+    // A row with a different column count is not a row this parser understands.
+    if (!cells || cells.length !== header.length) return null;
+    dataRows += 1;
+    const name = cells[packageAt] as string;
     if (name === '(none)') continue;
     const scoped = /^`(@kiwa-lab\/[a-z0-9-]+)`$/.exec(name);
-    // An unreadable row is a parse failure, not an empty roster: returning the
-    // rows we did understand would let a typo silently shrink the set.
     if (!scoped) return null;
-    const value = /\|\s*(\d+)\s*\|/.exec(tail);
+    const value = /^(\d+)$/.exec(cells[overrideAt] as string);
     if (!value) return null;
     roster[scoped[1] as string] = Number(value[1]);
   }
+  if (dataRows === 0) return null;
   return roster;
 }
 
@@ -670,18 +688,50 @@ describe('the override roster parser (#1975)', () => {
     expect(docOverrideRoster(withSection(table))).toEqual({});
   });
 
+  it('reads the override column by name, not by position', () => {
+    // Swapping the two numeric-ish columns must not change the answer. Reading
+    // "the first number in the row" would return 70 here — the tier bar, not
+    // the override.
+    const swapped =
+      '| package | override | tier | direction | reason |\n|---|---|---|---|---|\n' +
+      '| `@kiwa-lab/auth` | 65 | framework | looser | session.js follow-up |';
+    expect(docOverrideRoster(withSection(swapped))).toEqual({ '@kiwa-lab/auth': 65 });
+  });
+
   it('returns null rather than an empty roster when it cannot read', () => {
     const cases: Array<[string, string]> = [
       ['no section', '## Overrides\n\nprose only\n'],
       ['section but no table', '### Current overrides\n\nprose only\n\n'],
       [
+        'header without an override column',
+        withSection('| package | tier | reason |\n|---|---|---|\n| `@kiwa-lab/auth` | fw | x |'),
+      ],
+      [
+        'header without a package column',
+        withSection('| name | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | fw | 65 |'),
+      ],
+      [
+        'row with a column missing',
+        withSection('| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | 65 |'),
+      ],
+      [
+        'header and separator but no data row',
+        withSection('| package | tier | override |\n|---|---|---|'),
+      ],
+      [
         'package name not in the expected form',
         withSection('| package | tier | override |\n|---|---|---|\n| auth | framework | 65 |'),
       ],
       [
-        'row without a number',
+        'override cell is not a number',
         withSection(
           '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | soon |',
+        ),
+      ],
+      [
+        'override cell carries more than the number',
+        withSection(
+          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 % |',
         ),
       ],
     ];
