@@ -61,15 +61,16 @@ The comment is the on-the-spot receipt. This doc is the shared law.
 
 ## What goes in `mutate` (Issue #1944)
 
-**Every implementation file.** A file is out of scope only when it produces no runtime value, which
-narrows to two shapes:
+**Every file with behaviour of its own.** Two shapes have none, and only those are out of scope:
 
-- a barrel that only re-exports other modules
-- a file that declares nothing but types and interfaces
+- a barrel, which forwards other modules and decides nothing itself
+- a file that declares nothing but types and interfaces, which is gone before anything runs
 
-Everything else belongs in `mutate`. One shape needs naming by hand: a file whose only job is a side
-effect (imports something, calls it, exports nothing) also exports no value, yet it does run.
-Nothing in the repo is shaped that way today.
+Everything else belongs in `mutate`. A barrel does execute, but there is nothing in it to get wrong —
+Stryker generates no mutants from a re-export.
+
+The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
+§ Telling the shapes apart records where the two come apart.
 
 **This is the target, not the current state.** As of #1944 only `hono` satisfies it; the repo sits at
 16.8% and each package moves under its own Issue (§ Widening a package's scope). Read a green
@@ -85,11 +86,31 @@ you widen that package.
 Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
 interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
 
+Then classify what remains. The split is syntactic: an export carrying a module specifier
+(`export * from './a.js'`, `export { b } from './b.js'`) forwards, and anything else counts as the
+file's own.
+
+Syntax is not meaning here. `import x from './a.js'; export default x` re-publishes someone else's
+value without a specifier, so it reads as implementation. That is the safe direction to err — the
+file ends up in `mutate` and Stryker finds little to mutate.
+
+- own values present → implementation
+- only forwards → barrel
+- neither → type-only
+
+**The last case is the one place this test disagrees with the rule.** A file whose only job is a side
+effect — imports something, calls it, exports nothing — has behaviour and belongs in `mutate`, but
+exports nothing for the test to read, so it lands in type-only. Nothing in the repo is shaped that
+way today; name one by hand if it appears.
+
 Do **not** decide by reading the source and listing which declaration forms produce runtime values.
 #1944 wrote that check and had to extend it in four consecutive review rounds — first for
 `export { run }` written apart from its declaration, then `export default <expr>`, then
-`export namespace`, then `export declare function`. Each gap silently drops a real implementation
-file out of scope, and there is no point at which the list is provably complete.
+`export namespace`, then `export declare function`.
+
+The first three dropped real implementation out of scope. The fourth erred the other way, counting a
+type declaration as implementation. Both directions are wrong and neither announces itself, and
+there is no point at which such a list is provably complete.
 
 A file can be both shapes at once: `cli/detect/index.ts` and `component/fixture.ts` re-export *and*
 implement. Count those as implementation. Their re-export lines then sit inside the implementation
@@ -97,9 +118,10 @@ total (442 lines, 0.7% of it), which matters only when the line count drives an 
 
 The rule is deliberately blunt. `mutate` lists paths by hand, so a file added later is outside the
 scope until someone remembers to add it. #1936 is what that costs: `index.ts` was split into
-`runCli.ts`, the list kept pointing at the old shape, and 611 mutants' worth of argument parsing and
-command routing sat outside every gate while the report still read green. "All implementation"
-removes the remembering.
+`runCli.ts`, the list kept pointing at the old shape, and the argument parsing and command routing
+that moved sat outside every gate while the report still read green. Adding the file back produced
+611 mutants — none of which existed while it was out of scope, which is why nothing failed.
+"Every file with behaviour of its own" removes the remembering.
 
 ### The measurement that produced this rule
 
@@ -113,9 +135,11 @@ until it lands, re-derive the numbers the same way if a package's `mutate` chang
 | barrel | 3,057 |
 | type-only | 704 |
 
-So 16.8% of implementation lines were covered, and the "it's only types" explanation accounts for
-3,761 lines out of 53,875. Per-package coverage ranged from `hono` at 100% to `auth` at 2.7% with no
-written basis for the difference.
+So 16.8% of implementation lines were covered (10,878 of 64,753).
+
+The "it's only types" explanation does not cover the gap. Barrel and type-only files come to 3,761
+lines across the repo, against 53,875 lines of implementation sitting outside `mutate`. Per-package
+coverage ranged from `hono` at 100% to `auth` at 2.7% with no written basis for the difference.
 
 Widening to the full set means 64,753 implementation lines against 10,878 today — roughly 6x. At the
 current density (6,271 mutants over 10,878 lines, about 0.58 per line) that projects to somewhere
