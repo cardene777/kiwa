@@ -72,6 +72,22 @@ test('a backslash in the reason does not turn into a column break', () => {
   assert.equal(columns(rows[2]), columns(rows[0]));
 });
 
+test('markup in a reason is rendered as text, not as markup', () => {
+  // The doc is published as a site and markdown passes raw HTML through, so an
+  // unescaped reason would reach the page as an element. A backtick would open
+  // a code span that swallows the rest of the row.
+  assert.equal(cell('<img onerror=x>'), '&lt;img onerror=x>');
+  assert.equal(cell('a & b'), 'a &amp; b');
+  assert.equal(cell('use `code` here'), 'use \\`code\\` here');
+  // `&` is escaped before `<`, so an escape does not get escaped again.
+  assert.equal(cell('&lt;'), '&amp;lt;');
+});
+
+test('the package cell keeps the code span it is given', () => {
+  const table = rosterTable({ '@kiwa-lab/auth': { tier: 'framework', override: 65 } }, TIERS);
+  assert.match(table, /\| `@kiwa-lab\/auth` \|/);
+});
+
 test('a carriage return is folded like a newline', () => {
   assert.equal(cell('first\r\nsecond'), 'first second');
   assert.equal(cell('first\rsecond'), 'first second');

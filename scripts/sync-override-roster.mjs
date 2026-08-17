@@ -58,11 +58,21 @@ export const END = '<!-- /generated: override-roster -->';
  * which renders as a literal backslash followed by a column break — the escape
  * meant to protect the cell is what breaks it. Escaping the backslash first
  * gives `a\\\|b`, a backslash and a pipe, both literal.
+ *
+ * **Markup is neutralised too.** This doc is published as a site, and markdown
+ * passes raw HTML through, so a reason containing `<img onerror=…>` would reach
+ * the rendered page. A backtick would open a code span that swallows the rest
+ * of the row. Whoever writes a reason can already edit the doc directly, so
+ * this is not a trust boundary — it is a generator that must not turn ordinary
+ * prose into markup by accident.
  */
 export function cell(value) {
   return String(value)
     .replace(/\s*[\r\n]+\s*/g, ' ')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
     .replace(/\\/g, '\\\\')
+    .replace(/`/g, '\\`')
     .replace(/\|/g, '\\|')
     .trim();
 }
@@ -76,8 +86,11 @@ export function rosterTable(packageTier, tierThreshold) {
     .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
     .map(([scoped, entry]) => {
       const direction = entry.override < tierThreshold[entry.tier] ? 'looser' : 'stricter';
-      const cells = [`\`${scoped}\``, entry.tier, entry.override, direction, entry.reason ?? ''];
-      return `| ${cells.map(cell).join(' | ')} |`;
+      // The code span is added after escaping, not before: `cell` escapes
+      // backticks, so wrapping first would escape the ones put there on purpose
+      // and the table would show them literally.
+      const cells = [entry.tier, entry.override, direction, entry.reason ?? ''].map(cell);
+      return `| \`${cell(scoped)}\` | ${cells.join(' | ')} |`;
     });
   const body = rows.length > 0 ? rows : ['| (none) | — | — | — | — |'];
   return [

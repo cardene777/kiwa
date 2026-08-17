@@ -601,9 +601,6 @@ describe('every package that runs mutation testing is scored', () => {
   });
 });
 
-// The roster parser, in both directions. A check that only ever sees the real
-// doc passes whether it reads the table or returns an empty object, so the
-// shapes it must reject are pinned here.
 // The generator has had a check mode all along and nothing ran it, so the
 // generated pages drifted from source unnoticed: #1975 found six files stale
 // and one never generated at all. `check-docs-consistency` and
