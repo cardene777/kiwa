@@ -179,6 +179,26 @@ restore the high number by not looking, which is the failure this rule exists to
 
 **Use the tier default.** An override is an exception and needs the reason recorded next to it.
 
+### Current overrides
+
+| package | tier | override | direction | reason |
+|---|---|---|---|---|
+| (none) | — | — | — | — |
+
+**This table is the only place in the repo that states which packages carry an override**, and
+`tests/release-smoke/tests/mutation-gate-coverage.test.ts` requires it to equal `PACKAGE_TIER`
+exactly. Adding an override without adding its row fails, and so does deleting one without deleting
+its row.
+
+Everywhere else — the assignment table above, the concept doc, the tutorials, the JSDoc on
+`ReleaseGateContext.mutationTierThreshold` — points here instead of repeating it. #1973 spent seven
+review rounds on the alternative: the same fact written into six files, each going stale on its own
+schedule, and the fix for each one restating the *new* current value so the next change would stale
+them again.
+
+Prose below this table describes overrides that existed and why they went. That is history and does
+not go stale; the roster is state and does.
+
 **`scripts/check-mutation-gates.mjs` (`PACKAGE_TIER`) is what the gate reads.** The assignment table
 above repeats those numbers for readability, so the two can drift — `@kiwa-lab/a11y` sat at
 60 / 50 / 40 in the table while running at `override: 90` until #1944 corrected the row. When they
@@ -205,10 +225,9 @@ and nothing re-read the override. Widening then took it to 78.77 and the overrid
 lowered override that no one re-measures reads as "this package is weak" long after it stopped being
 true, and the gate scores against the lower bar the whole time.
 
-**`PACKAGE_TIER` now carries no override at all, in either direction** (#1973). The last two went
-the same way as `cache`: `@kiwa-lab/auth` was pinned at 65 against a 68.86 sweep and measured 75.74,
-`@kiwa-lab/realtime` was pinned at 60 against 62.31 and measured 67.54. Every package is scored at
-its tier default.
+The last two lowered overrides went the same way as `cache` (#1973): `@kiwa-lab/auth` was pinned at
+65 against a 68.86 sweep and measured 75.74, `@kiwa-lab/realtime` was pinned at 60 against 62.31 and
+measured 67.54. What the roster holds today is § Current overrides above, not this paragraph.
 
 `auth` is the one worth reading twice. Its reason named `session.js` at 56.76 % and said follow-up
 tests would raise it — and `session.js` is still 57.89. What moved was `adapter.js` (76.71) and

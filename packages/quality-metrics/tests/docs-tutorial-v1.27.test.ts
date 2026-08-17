@@ -121,7 +121,10 @@ describe('tutorial 50 — Section 7: 12-axis release gate', () => {
     expect(blocker?.actual).toBe(70);
   });
 
-  it('accepts a looser per-package override when the SSOT documents one', () => {
+  // The field exists whether or not any package uses it today; which packages
+  // do is `PACKAGE_TIER`'s business (docs/quality/mutation-thresholds.md
+  // § Current overrides). 65 here is just a number below the Framework default.
+  it('honours an explicit threshold below the tier default', () => {
     const report = baseReportForRelease();
     report.mutation = mutationFromCounts({ mutations: 100, killed: 66 });
     const verdict = evaluateReleaseGate(

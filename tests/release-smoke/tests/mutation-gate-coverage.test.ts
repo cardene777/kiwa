@@ -18,6 +18,7 @@
 //   1. add the package to `PACKAGE_TIER` / `PKG_DIRS` / root `test:mutation`
 //   2. remove its `test:mutation` script and Stryker config if it should not run
 //   3. add it to `UNSCORED_ALLOWLIST` below with the reason
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -232,6 +233,42 @@ function rootRunsThroughDriver(): boolean {
  * silently skip a fifth, and the rows are already distinctive (three percentage
  * columns).
  */
+/**
+ * The `§ Current overrides` roster, as `scoped package -> override value`.
+ *
+ * Returns `null` when the section or its table is missing — a parse failure and
+ * an empty roster are different answers, and only the second one may pass.
+ * The single row `(none)` is how the doc writes an empty roster; a table with
+ * no rows at all is a parse failure.
+ *
+ * Rows look like `| \`@kiwa-lab/x\` | saas | 60 | looser | … |`. Only the
+ * package and the number are read; the rest is for the human.
+ */
+export function docOverrideRoster(text: string): Record<string, number> | null {
+  const section = /^### Current overrides$/m.exec(text);
+  if (!section) return null;
+  const rest = text.slice(section.index + section[0].length);
+  // Stop at the next heading of any level so a later table cannot be read as
+  // part of this roster.
+  const body = rest.split(/^#{1,6} /m)[0] ?? '';
+  const rows = [...body.matchAll(/^\|(?!\s*(?:package|-+)\s*\|)([^|]+)\|([^\n]*)$/gm)];
+  if (rows.length === 0) return null;
+
+  const roster: Record<string, number> = {};
+  for (const [, first = '', tail = ''] of rows) {
+    const name = first.trim();
+    if (name === '(none)') continue;
+    const scoped = /^`(@kiwa-lab\/[a-z0-9-]+)`$/.exec(name);
+    // An unreadable row is a parse failure, not an empty roster: returning the
+    // rows we did understand would let a typo silently shrink the set.
+    if (!scoped) return null;
+    const value = /\|\s*(\d+)\s*\|/.exec(tail);
+    if (!value) return null;
+    roster[scoped[1] as string] = Number(value[1]);
+  }
+  return roster;
+}
+
 function docTierTable(): Record<string, { high: number; low: number; break: number }> {
   const text = readFileSync(DOC, 'utf-8');
   const rows = [...text.matchAll(/^\|\s*([A-Za-z][\w -]*?)\s*\|\s*(\d+) %\s*\|\s*(\d+) %\s*\|\s*(\d+) %\s*\|/gm)];
@@ -510,6 +547,27 @@ describe('every package that runs mutation testing is scored', () => {
     ).toEqual([...FULLY_WIDENED].sort());
   });
 
+  it('states the same override roster the gate reads', async () => {
+    // #1973 removed two overrides and spent seven of its ten review rounds on
+    // the same failure: six files each restated which packages carry one, and
+    // the PR falsified them one per round. Restating the new value in each
+    // place only re-arms the problem, so the doc now holds the roster in one
+    // machine-checked table and everything else points at it.
+    const { PACKAGE_TIER } = await loadGate();
+    const fromGate: Record<string, number> = {};
+    for (const [scoped, entry] of Object.entries(PACKAGE_TIER as Record<string, TierEntry>)) {
+      if (entry.override !== undefined) fromGate[scoped] = entry.override;
+    }
+
+    const fromDoc = docOverrideRoster(readFileSync(DOC, 'utf-8'));
+    expect(fromDoc, '§ Current overrides table did not parse').not.toBeNull();
+    expect(
+      fromDoc,
+      'docs/quality/mutation-thresholds.md § Current overrides must equal PACKAGE_TIER. ' +
+        'Adding an override means adding its row; deleting one means deleting the row',
+    ).toEqual(fromGate);
+  });
+
   it('carries no override that raises a tier bar', async () => {
     const { PACKAGE_TIER, TIER_THRESHOLD } = await loadGate();
     // #1963 removed the last two (api 90, a11y 90). A raised override is a
@@ -579,5 +637,74 @@ describe('every package that runs mutation testing is scored', () => {
         ).toBeGreaterThanOrEqual(floor as number);
       }
     }
+  });
+});
+
+// The roster parser, in both directions. A check that only ever sees the real
+// doc passes whether it reads the table or returns an empty object, so the
+// shapes it must reject are pinned here.
+describe('the override roster parser (#1975)', () => {
+  const withSection = (table: string) =>
+    `## Overrides\n\n### Current overrides\n\n${table}\n\n### Something else\n\n| pkg | 9 |\n`;
+
+  it('reads an empty roster from the `(none)` row', () => {
+    const table = '| package | tier | override | direction | reason |\n|---|---|---|---|---|\n| (none) | — | — | — | — |';
+    expect(docOverrideRoster(withSection(table))).toEqual({});
+  });
+
+  it('reads the package and the number from a populated row', () => {
+    const table =
+      '| package | tier | override | direction | reason |\n|---|---|---|---|---|\n' +
+      '| `@kiwa-lab/auth` | framework | 65 | looser | session.js follow-up |\n' +
+      '| `@kiwa-lab/cache` | saas | 60 | looser | TTL follow-up |';
+    expect(docOverrideRoster(withSection(table))).toEqual({
+      '@kiwa-lab/auth': 65,
+      '@kiwa-lab/cache': 60,
+    });
+  });
+
+  it('stops at the next heading instead of reading the table after it', () => {
+    const table = '| package | tier | override | direction | reason |\n|---|---|---|---|---|\n| (none) | — | — | — | — |';
+    // The trailing `| pkg | 9 |` in `withSection` sits under another heading.
+    // Reading it would invent an override out of an unrelated table.
+    expect(docOverrideRoster(withSection(table))).toEqual({});
+  });
+
+  it('returns null rather than an empty roster when it cannot read', () => {
+    const cases: Array<[string, string]> = [
+      ['no section', '## Overrides\n\nprose only\n'],
+      ['section but no table', '### Current overrides\n\nprose only\n\n'],
+      [
+        'package name not in the expected form',
+        withSection('| package | tier | override |\n|---|---|---|\n| auth | framework | 65 |'),
+      ],
+      [
+        'row without a number',
+        withSection(
+          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | soon |',
+        ),
+      ],
+    ];
+    for (const [label, text] of cases) {
+      expect(docOverrideRoster(text), label).toBeNull();
+    }
+  });
+});
+
+// The generator has had a check mode all along and nothing ran it, so the
+// generated pages drifted from source unnoticed: #1975 found six files stale
+// and one never generated at all. `check-docs-consistency` and
+// `docs-link-check` both pass in that state — they check different things.
+describe('generated API references track their source (#1975)', () => {
+  it('reports no drift', () => {
+    const result = spawnSync(
+      process.execPath,
+      [resolve(REPO_ROOT, 'scripts/sync-library-api-reference.mjs')],
+      { cwd: REPO_ROOT, encoding: 'utf-8' },
+    );
+    expect(
+      result.status,
+      `generated API references are stale — run \`pnpm docs:api-reference:write\` and commit.\n${result.stdout}${result.stderr}`,
+    ).toBe(0);
   });
 });
