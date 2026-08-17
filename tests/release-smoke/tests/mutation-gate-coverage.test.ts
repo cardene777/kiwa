@@ -39,9 +39,10 @@ const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
  * Packages whose `mutate` covers every implementation file.
  *
  * `hono` was there from the start; `cli` widened in #1961, the small group in
- * #1963, `security` in #1965, `cache` in #1967, and `search` in #1969. The list
- * only grows — a package that reached 100% and then dropped a file is the drift
- * #1936 cost 611 unseen mutants for.
+ * #1963, `security` in #1965, `cache` in #1967, `search` in #1969, and `edge`
+ * in #1971 — the last of the medium group. The list only grows — a package that
+ * reached 100% and then dropped a file is the drift #1936 cost 611 unseen
+ * mutants for.
  */
 const FULLY_WIDENED: readonly string[] = [
   'a11y',
@@ -53,6 +54,7 @@ const FULLY_WIDENED: readonly string[] = [
   'core',
   'data',
   'e2e',
+  'edge',
   'hono',
   'nextjs',
   'search',
