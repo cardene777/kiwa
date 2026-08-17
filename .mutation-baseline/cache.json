@@ -6,14 +6,14 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 61.96,
-  "totalMsi": 61.96,
-  "coveredMsi": 62.68,
-  "killed": 171,
-  "survived": 103,
-  "timeout": 2,
-  "noCoverage": 12,
-  "error": 0,
+  "killRate": 78.1,
+  "totalMsi": 78.1,
+  "coveredMsi": 78.77,
+  "killed": 1109,
+  "survived": 301,
+  "timeout": 8,
+  "noCoverage": 19,
+  "error": 2,
   "mutants": [
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -21,34 +21,6 @@
       "column": 26,
       "mutator": "LogicalOperator",
       "replacement": "opts.inMemory?.expiryTickMs && 5"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 15,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 17,
-      "column": 16,
-      "mutator": "EqualityOperator",
-      "replacement": "entry.expireAt < Date.now()"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 23,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 30,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -68,48 +40,6 @@
       "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 30,
       "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "expiryTimer === null"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 30,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "expiryTimer !== null && stopped"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 30,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 32,
-      "column": 41,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 33,
-      "column": 47,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 34,
-      "column": 21,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 34,
-      "column": 21,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
@@ -122,10 +52,38 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 30,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "expiryTimer !== null && stopped"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 30,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "expiryTimer === null"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 30,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 41,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 41,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -140,13 +98,6 @@
       "column": 13,
       "mutator": "LogicalOperator",
       "replacement": "typeof expiryTimer === 'object' || expiryTimer !== null"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 41,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -206,13 +157,6 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 60,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 72,
       "column": 30,
       "mutator": "StringLiteral",
@@ -241,6 +185,20 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 94,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 101,
+      "column": 43,
+      "mutator": "ArithmeticOperator",
+      "replacement": "ttlSeconds / 1000"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 84,
       "column": 17,
       "mutator": "ConditionalExpression",
@@ -262,17 +220,10 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 94,
+      "line": 125,
       "column": 30,
       "mutator": "StringLiteral",
       "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 101,
-      "column": 43,
-      "mutator": "ArithmeticOperator",
-      "replacement": "ttlSeconds / 1000"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -297,13 +248,6 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 125,
-      "column": 30,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 129,
       "column": 30,
       "mutator": "StringLiteral",
@@ -318,13 +262,6 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 133,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 141,
       "column": 33,
       "mutator": "MethodExpression",
@@ -332,10 +269,10 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 143,
-      "column": 25,
+      "line": 133,
+      "column": 17,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -360,13 +297,6 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 153,
-      "column": 39,
-      "mutator": "OptionalChaining",
-      "replacement": "nextOpts.timeoutMs"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 157,
       "column": 33,
       "mutator": "ConditionalExpression",
@@ -376,15 +306,15 @@
       "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 157,
       "column": 33,
-      "mutator": "EqualityOperator",
-      "replacement": "idx > 0"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 157,
       "column": 33,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "mutator": "EqualityOperator",
+      "replacement": "idx > 0"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -412,13 +342,6 @@
       "line": 171,
       "column": 25,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 173,
-      "column": 30,
-      "mutator": "BooleanLiteral",
       "replacement": "false"
     },
     {
@@ -451,6 +374,13 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 182,
+      "column": 52,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 177,
       "column": 29,
       "mutator": "ConditionalExpression",
@@ -462,13 +392,6 @@
       "column": 29,
       "mutator": "EqualityOperator",
       "replacement": "bucket.size !== 0"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 182,
-      "column": 52,
-      "mutator": "StringLiteral",
-      "replacement": "\"Stryker was here!\""
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -514,17 +437,17 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 191,
-      "column": 31,
-      "mutator": "LogicalOperator",
-      "replacement": "expected.timeoutMs && 500"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 197,
       "column": 25,
       "mutator": "ConditionalExpression",
       "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 191,
+      "column": 31,
+      "mutator": "LogicalOperator",
+      "replacement": "expected.timeoutMs && 500"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -573,28 +496,21 @@
       "line": 230,
       "column": 17,
       "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 236,
-      "column": 58,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 237,
-      "column": 44,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 230,
       "column": 17,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 230,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiryTimer === null"
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -605,10 +521,10 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 230,
-      "column": 17,
-      "mutator": "EqualityOperator",
-      "replacement": "expiryTimer === null"
+      "line": 239,
+      "column": 52,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
@@ -654,27 +570,6 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 266,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 266,
-      "column": 41,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 267,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 272,
       "column": 9,
       "mutator": "ConditionalExpression",
@@ -696,47 +591,1538 @@
     },
     {
       "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 280,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
       "line": 278,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 15,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 17,
+      "column": 16,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expireAt < Date.now()"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 32,
+      "column": 41,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 33,
+      "column": 47,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 34,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/in-memory-cache.js",
+      "line": 34,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/testcontainers-keydb.js",
+      "line": 63,
+      "column": 39,
+      "mutator": "Regex",
+      "replacement": "/(keydb|redis):\\/\\//"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/testcontainers-keydb.js",
+      "line": 55,
+      "column": 39,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 8,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i <= str.length"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 22,
+      "column": 29,
+      "mutator": "EqualityOperator",
+      "replacement": "i <= 128"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 34,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "node.hash > target"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 37,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "this.ring[0]?.server && this.ring[this.ring.length - 1].server"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 37,
+      "column": 16,
+      "mutator": "OptionalChaining",
+      "replacement": "this.ring[0].server"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 50,
+      "column": 26,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.stub?.expiryTickMs && 5"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 57,
+      "column": 35,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 58,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 58,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 58,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "stopped && expiryTimer !== null"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 60,
+      "column": 40,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 58,
+      "column": 24,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 58,
+      "column": 24,
+      "mutator": "EqualityOperator",
+      "replacement": "expiryTimer === null"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 63,
+      "column": 47,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "entry.expiresAt > 0 || entry.expiresAt <= now"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 44,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 44,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt < now"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 64,
+      "column": 44,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt > now"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 67,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "store.size >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 67,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 67,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 67,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "store.size <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 70,
+      "column": 9,
+      "mutator": "OptionalChaining",
+      "replacement": "expiryTimer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 75,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ttlSeconds <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 84,
+      "column": 36,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt < Date.now()"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 106,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 106,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 106,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiresAt <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 106,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiresAt >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 124,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 124,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 124,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiresAt <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 124,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiresAt >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 137,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 137,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 137,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiresAt >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 137,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "expiresAt <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 156,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 159,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 182,
+      "column": 51,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 185,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 185,
+      "column": 51,
+      "mutator": "EqualityOperator",
+      "replacement": "observed <= expected.atLeast"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 188,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 200,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 200,
+      "column": 44,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt < now"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 213,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 213,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/stub-memcached.js",
+      "line": 213,
+      "column": 30,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/testcontainers-memcached.js",
+      "line": 36,
+      "column": 20,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/testcontainers-memcached.js",
+      "line": 71,
+      "column": 39,
+      "mutator": "Regex",
+      "replacement": "/memcached:\\/\\//"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/testcontainers-memcached.js",
+      "line": 63,
+      "column": 39,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 15,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 30,
+      "column": 40,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 39,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 51,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 60,
+      "column": 44,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 62,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 69,
+      "column": 32,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 73,
+      "column": 25,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 70,
+      "column": 21,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 74,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 75,
+      "column": 44,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 83,
+      "column": 22,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 88,
+      "column": 40,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 101,
+      "column": 40,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 109,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 121,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 133,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 142,
+      "column": 25,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 143,
+      "column": 44,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 151,
+      "column": 22,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 156,
+      "column": 40,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 172,
+      "column": 23,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.redis?.image && 'redis:7-alpine'"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 172,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 185,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "messageIndex -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 188,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 189,
+      "column": 22,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 207,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 211,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 213,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 219,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 223,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 230,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 238,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 242,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 255,
+      "column": 33,
+      "mutator": "MethodExpression",
+      "replacement": "history"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 260,
+      "column": 39,
+      "mutator": "OptionalChaining",
+      "replacement": "nextOpts.timeoutMs"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 264,
+      "column": 33,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 264,
+      "column": 33,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 264,
+      "column": 33,
+      "mutator": "EqualityOperator",
+      "replacement": "idx > 0"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 264,
+      "column": 33,
+      "mutator": "EqualityOperator",
+      "replacement": "idx < 0"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 268,
+      "column": 25,
+      "mutator": "OptionalChaining",
+      "replacement": "timer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 277,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 281,
+      "column": 52,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 292,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 295,
+      "column": 61,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 296,
+      "column": 41,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 297,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 293,
+      "column": 31,
+      "mutator": "LogicalOperator",
+      "replacement": "expected.timeoutMs && 1000"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 302,
+      "column": 66,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 306,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() >= deadline"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 310,
+      "column": 55,
+      "mutator": "MethodExpression",
+      "replacement": "Math.max(30, timeoutMs)"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 311,
+      "column": 21,
+      "mutator": "OptionalChaining",
+      "replacement": "timer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 316,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 320,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 323,
+      "column": 46,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 329,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 329,
+      "column": 32,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 339,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 343,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 344,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 344,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 344,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof match !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 344,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 355,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 355,
+      "column": 43,
+      "mutator": "EqualityOperator",
+      "replacement": "observed <= expected.atLeast"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 358,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 361,
       "column": 9,
       "mutator": "LogicalOperator",
       "replacement": "expected.seconds === undefined && expected.atLeast === undefined || expected.atMost === undefined"
     },
     {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 278,
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 361,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
     {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 278,
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 361,
       "column": 9,
       "mutator": "LogicalOperator",
       "replacement": "expected.seconds === undefined || expected.atLeast === undefined"
     },
     {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 278,
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 362,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
     {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 279,
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 361,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
     {
-      "file": ".vitest-dist/src/in-memory-cache.js",
-      "line": 280,
+      "file": ".vitest-dist/src/testcontainers-cache.js",
+      "line": 363,
       "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 10,
+      "column": 26,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.stub?.expiryTickMs && 5"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 42,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 46,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 46,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 46,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 46,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 54,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 57,
+      "column": 9,
+      "mutator": "OptionalChaining",
+      "replacement": "timer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 63,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 73,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 76,
+      "column": 9,
+      "mutator": "OptionalChaining",
+      "replacement": "timer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 79,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 78,
+      "column": 35,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 79,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 79,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "stopped && expiryTimer !== null"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 79,
+      "column": 24,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 81,
+      "column": 40,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 79,
+      "column": 24,
+      "mutator": "EqualityOperator",
+      "replacement": "expiryTimer === null"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 84,
+      "column": 27,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 85,
+      "column": 50,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 86,
+      "column": 51,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 87,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 87,
+      "column": 48,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 87,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt < now"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 87,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt > now"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "store.size >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "store.size <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 91,
+      "column": 31,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 93,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 93,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 96,
+      "column": 9,
+      "mutator": "OptionalChaining",
+      "replacement": "expiryTimer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 100,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 105,
+      "column": 36,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt < Date.now()"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 164,
+      "column": 51,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 167,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 167,
+      "column": 51,
+      "mutator": "EqualityOperator",
+      "replacement": "observed <= expected.atLeast"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 170,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 178,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "messageIndex -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 186,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 215,
+      "column": 39,
+      "mutator": "OptionalChaining",
+      "replacement": "nextOpts.timeoutMs"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 219,
+      "column": 33,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 221,
+      "column": 36,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 224,
+      "column": 25,
+      "mutator": "OptionalChaining",
+      "replacement": "timer.unref()"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 226,
+      "column": 33,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 228,
+      "column": 36,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 237,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 237,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 237,
+      "column": 25,
+      "mutator": "EqualityOperator",
+      "replacement": "slots.size !== 0"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 248,
+      "column": 24,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() <= deadline"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 252,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 255,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 261,
+      "column": 21,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 275,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 275,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.expiresAt < now"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 289,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 289,
+      "column": 30,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 289,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/stub-keydb.js",
+      "line": 302,
+      "column": 16,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/types.js",
+      "line": 3,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/keydb/types.js",
+      "line": 8,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/types.js",
+      "line": 3,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/memcached/types.js",
+      "line": 8,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 15,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 15,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 20,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 51,
+      "column": 64,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.evictions - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 84,
+      "column": 38,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.writesCommitted - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 98,
+      "column": 21,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 98,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 99,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 99,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 100,
+      "column": 45,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 100,
+      "column": 23,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 100,
+      "column": 52,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('event:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 100,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 104,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly - invalid + terminal"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/cache-lifecycle-orchestrator.js",
+      "line": 104,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly + invalid"
+    },
+    {
+      "file": ".vitest-dist/src/types.js",
+      "line": 4,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/types.js",
+      "line": 10,
+      "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     }
   ],
-  "capturedAt": "2026-07-05T12:02:32Z",
-  "note": "Total MSI 61.96% / Covered MSI 62.68% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-17T08:47:10Z",
+  "note": "Total MSI 78.10% / Covered MSI 78.77% (threshold high=65 / low=55 / break=50)."
 }

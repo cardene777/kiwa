@@ -34,7 +34,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. |
 | `@kiwa-lab/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
 | `@kiwa-lab/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
-| `@kiwa-lab/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. v1.27-3 baseline mutates `in-memory-cache.js` only; `testcontainers-cache.js` is excluded for the same reason as queue. |
+| `@kiwa-lab/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. Ran on `in-memory-cache.js` alone under `override: 60`; #1967 widened it to every implementation file, measured 78.77, and deleted the override. |
 | `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-lab/quality-metrics` (mutation-tested there). |
 | `@kiwa-lab/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. |
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
@@ -73,7 +73,7 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** The repo sits at 29.6%, and each remaining package
+**This is the target, not the current state.** The repo sits at 32.7%, and each remaining package
 moves under its own Issue (§ Widening a package's scope). Read a green mutation gate accordingly —
 until a package's Issue lands, "passed" covers whatever its config happens to list.
 
@@ -147,18 +147,18 @@ re-run it rather than reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 20,244 |
-| implementation, not in `mutate` | 48,109 |
+| implementation, in `mutate` | 22,328 |
+| implementation, not in `mutate` | 46,025 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 29.6% of implementation lines were covered (20,244 of 68,353).
+So 32.7% of implementation lines were covered (22,328 of 68,353).
 
-Everything outside `mutate` totals 52,162 lines, and barrel plus type-only accounts for 4,053 of
+Everything outside `mutate` totals 50,078 lines, and barrel plus type-only accounts for 4,053 of
 that — the "it's only types" explanation does not cover the gap. Per-package coverage ranges from
-100% (12 packages after #1961, #1963, and #1965) to `auth` at 2.0%.
+100% (13 packages after #1961, #1963, #1965, and #1967) to `auth` at 2.0%.
 
-Widening to the full set means 68,353 implementation lines against 20,244 today — roughly 3.4x. At
+Widening to the full set means 68,353 implementation lines against 22,328 today — roughly 3.1x. At
 the current density (about 0.6 mutants per line) that projects to somewhere near 40,000 mutants.
 Treat it as an order of magnitude, not a forecast: density varies by package.
 
@@ -198,6 +198,13 @@ Overrides that *lower* the bar are temporary by construction and must not drop b
 `override: 60` with a "raises back to 65" note until #1941 covered the 18 mutants that had no test at
 all, at which point the score reached 90.43 and the override was deleted rather than adjusted.
 
+**Re-evaluating means re-measuring, because the number an override cites goes stale.**
+`@kiwa-lab/cache` held `override: 60` against a 62.68 measurement, waiting on TTL and eviction
+follow-up. #1967 re-ran the same narrow scope and got 68.42 — the follow-up had landed at some point
+and nothing re-read the override. Widening then took it to 78.77 and the override was deleted. A
+lowered override that no one re-measures reads as "this package is weak" long after it stopped being
+true, and the gate scores against the lower bar the whole time.
+
 A looser override still requires a one-line justification in the PR body that introduces it.
 
 ## Widening a package's scope
@@ -209,12 +216,12 @@ plan, while the small group is mostly a config edit plus a re-run.
 | group | packages | uncovered lines each |
 |---|---|---|
 | large — one Issue each | `auth` (13,899), `orm` (5,011), `queue` (4,978), `observability` (4,970), `ai-llm` (4,735), `realtime` (3,950), `dapp` (3,501) | 3,000+ |
-| medium — one Issue each | `edge` (2,802), `search` (2,179), `cache` (2,084), ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
+| medium — one Issue each | `edge` (2,802), `search` (2,179), ~~`cache` (2,084)~~, ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
 | small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
 `hono` already sat at 100% and needed no Issue. `cli` widened in #1961, the small group in #1963,
-and `security` in #1965, so 12 of 22 packages are now at 100%. What remains is the large group and
-three of the medium group.
+`security` in #1965, and `cache` in #1967, so 13 of 22 packages are now at 100%. What remains is the
+large group and two of the medium group.
 
 `tests/release-smoke/tests/mutation-gate-coverage.test.ts` holds the other half of that sentence in
 `FULLY_WIDENED`, which has to be exactly the packages with nothing left outside `mutate`. A widened
@@ -291,7 +298,7 @@ v1.27-4 promotes the mutation kill rate to a first-class 12th axis in the releas
 ```ts
 evaluateReleaseGate(report, thresholdOverrides, {
   mutationTier: 'saas',          // required to enable the 12th axis
-  mutationTierThreshold: 60,     // optional looser override (e.g. auth, cache, realtime, orm)
+  mutationTierThreshold: 60,     // optional looser override (auth and realtime carry one today)
 });
 ```
 

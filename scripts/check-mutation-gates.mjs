@@ -95,11 +95,12 @@ export const PACKAGE_TIER = Object.freeze({
   // once the baseline lands.
   '@kiwa-lab/ai-llm': { tier: 'saas' },
   '@kiwa-lab/queue': { tier: 'saas' },
-  // cache landed at 62.68 % covered MSI on `in-memory-cache.js` (the sole
-  // mutated file after excluding testcontainers-cache.js). Held at 60 % —
-  // above tier break 50 — until follow-up covers the TTL + eviction edge
-  // cases surfaced by the surviving mutant list.
-  '@kiwa-lab/cache': { tier: 'saas', override: 60, reason: 'in-memory-cache.js TTL + eviction follow-up.' },
+  // cache carried `override: 60` from a 62.68 % run over `in-memory-cache.js`
+  // alone, held until follow-up covered the TTL + eviction survivors. #1967
+  // measured 78.77 % across every implementation file and removed it. The
+  // follow-up it was waiting on had already landed — a re-run of the old scope
+  // came in at 68.42 %, above the tier default, before the scope grew at all.
+  '@kiwa-lab/cache': { tier: 'saas' },
   // realtime landed at 62.31 % covered MSI across engine / fidelity / ably
   // (pusher / socketio / report excluded, see stryker.config.mjs). Held at
   // 60 % until follow-up fidelity tests raise it back to 65.
