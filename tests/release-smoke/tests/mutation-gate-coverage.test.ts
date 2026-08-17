@@ -290,7 +290,11 @@ export function docOverrideRoster(text: string): Record<string, number> | null {
     if (!scoped) return null;
     const value = /^(\d+)$/.exec(cells[overrideAt] as string);
     if (!value) return null;
-    roster[scoped[1] as string] = Number(value[1]);
+    const pkg = scoped[1] as string;
+    // Two rows for one package state two different rosters. Assigning over the
+    // first would keep whichever came last and drop the contradiction.
+    if (Object.hasOwn(roster, pkg)) return null;
+    roster[pkg] = Number(value[1]);
   }
   if (dataRows === 0) return null;
   // `(none)` says the roster is empty, so it is only true as the sole row.
@@ -767,6 +771,20 @@ describe('the override roster parser (#1975)', () => {
         'separator with the wrong column count',
         withSection(
           '| package | tier | override |\n|---|---|\n| `@kiwa-lab/auth` | framework | 65 |',
+        ),
+      ],
+      [
+        'the same package twice with different values',
+        withSection(
+          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 |\n' +
+            '| `@kiwa-lab/auth` | framework | 70 |',
+        ),
+      ],
+      [
+        'the same package twice with the same value',
+        withSection(
+          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 |\n' +
+            '| `@kiwa-lab/auth` | framework | 65 |',
         ),
       ],
     ];
