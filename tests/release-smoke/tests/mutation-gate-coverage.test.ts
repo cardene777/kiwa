@@ -67,6 +67,7 @@ interface Runner {
   scoped: string;
   configs: string[];
   hasScript: boolean;
+  script: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -138,19 +139,20 @@ function mutationRunners(): Runner[] {
       name?: string;
       scripts?: Record<string, string>;
     };
-    const hasScript = Boolean(manifest.scripts?.['test:mutation']);
+    const script = manifest.scripts?.['test:mutation'] ?? '';
+    const hasScript = script !== '';
     const configs = readdirSync(dirPath, { withFileTypes: true })
       .filter((child) => !child.isDirectory() && STRYKER_CONFIG_PATTERN.test(child.name))
       .map((child) => child.name)
       .sort();
     if (configs.length === 0 && !hasScript) continue;
-    runners.push({ dir, scoped: manifest.name ?? dir, configs, hasScript });
+    runners.push({ dir, scoped: manifest.name ?? dir, configs, hasScript, script });
   }
   return runners.sort((a, b) => a.dir.localeCompare(b.dir));
 }
 
 /**
- * What root `test:mutation` runs.
+ * The one invocation root `test:mutation` is allowed to be.
  *
  * It no longer holds a list. `scripts/run-mutation.mjs` derives the packages
  * from `PACKAGE_TIER`, so "what runs" and "what is scored" are one object and
@@ -162,8 +164,18 @@ function mutationRunners(): Runner[] {
  * `=` versus space, quoting, scope, exclusions). Removing the second copy
  * removed the parser with it.
  */
-/** The one invocation root `test:mutation` is allowed to be. */
 export const DRIVER_INVOCATION = 'node scripts/run-mutation.mjs';
+
+/**
+ * The one invocation a package's `test:mutation` is allowed to be.
+ *
+ * A bare `stryker run` scores whatever is in the gitignored `.vitest-dist`:
+ * nothing on a clean checkout, stale JavaScript in a workspace with an old
+ * build. 20 packages were in that shape (#1955). `package-mutation.mjs` removes,
+ * compiles, then runs, and requiring the exact string keeps a package from
+ * going back to calling Stryker directly.
+ */
+export const PACKAGE_INVOCATION = 'node ../../scripts/package-mutation.mjs';
 
 export function runsThroughDriver(script: string): boolean {
   // Equality, not a pattern. Round 6 replaced a substring test with a prefix
@@ -223,6 +235,10 @@ describe('every package that runs mutation testing is scored', () => {
       // script the driver invokes. Without it pnpm skips the package silently
       // and the gate reads whatever report the last run left behind.
       expect(runner.hasScript, `${scoped}: no test:mutation script to run`).toBe(true);
+      // And that the script builds before it scores (#1955).
+      expect(runner.script.trim(), `${scoped}: test:mutation is not the shared runner`).toBe(
+        PACKAGE_INVOCATION,
+      );
     }
   });
 
@@ -287,6 +303,60 @@ describe('every package that runs mutation testing is scored', () => {
       'run',
       'test:mutation',
     ]);
+  });
+
+  it('builds before it scores, in every package', async () => {
+    // The failure this replaces: a bare `stryker run` scores the gitignored
+    // `.vitest-dist`, which is absent on a clean checkout and stale in a
+    // workspace with an old build. Checked per package rather than by reading
+    // the shared runner, since the runner only helps the packages that call it.
+    const runners = mutationRunners();
+    expect(runners.length).toBeGreaterThan(0);
+    for (const runner of runners) {
+      expect(runner.script.trim(), `${runner.scoped}: does not use the shared runner`).toBe(
+        PACKAGE_INVOCATION,
+      );
+    }
+    expect(
+      existsSync(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')),
+      'scripts/package-mutation.mjs is missing',
+    ).toBe(true);
+  });
+
+  it('removes, compiles, then runs — and stops if the compile fails', async () => {
+    const runner = await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
+    );
+    const steps: string[] = [];
+    const rm = (dir: string) => steps.push(`rm ${dir.endsWith('.vitest-dist') ? 'build' : dir}`);
+
+    const green = runner.runPackageMutation({
+      cwd: '/pkg',
+      rm,
+      run: (command: string, args: string[]) => {
+        steps.push(`${command} ${args.join(' ')}`);
+        return 0;
+      },
+      args: ['--concurrency', '2'],
+    });
+    // Order is the point: scoring a build that was not just produced from this
+    // source is the failure being prevented.
+    expect(steps).toEqual(['rm build', 'tsc -p tsconfig.vitest.json', 'stryker run --concurrency 2']);
+    expect(green).toBe(0);
+
+    steps.length = 0;
+    const red = runner.runPackageMutation({
+      cwd: '/pkg',
+      rm,
+      run: (command: string) => {
+        steps.push(command);
+        return command === 'tsc' ? 2 : 0;
+      },
+    });
+    // A failed compile leaves the build directory empty or partial. Running
+    // Stryker anyway is how a green report gets written for code that is not there.
+    expect(steps).toEqual(['rm build', 'tsc']);
+    expect(red).toBe(2);
   });
 
   it('accepts the driver invocation and nothing else', () => {

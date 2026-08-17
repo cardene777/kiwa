@@ -289,3 +289,4 @@ The three v1.26 dogfood apps (`dogfood-postgres-cdc-outbox-app`, `dogfood-mysql-
 - `scripts/check-mutation-gates.mjs` — CI gate; `PACKAGE_TIER` / `TIER_THRESHOLD` / `thresholdFor()` exports.
 - `scripts/mutation-scope-report.mjs` — the classification above, run over every gate package; `--list <package>` for one.
 - `scripts/run-mutation.mjs` — what root `test:mutation` runs. It derives the package list from `PACKAGE_TIER`, so the run and the scoring cannot name different sets (#1951). `node scripts/run-mutation.mjs <pkg>` runs one.
+- `scripts/package-mutation.mjs` — what each package's `test:mutation` runs: remove `.vitest-dist`, compile, then Stryker. A bare `stryker run` scored a gitignored build directory that a clean checkout does not have and a stale workspace fills with old JavaScript (#1955).
