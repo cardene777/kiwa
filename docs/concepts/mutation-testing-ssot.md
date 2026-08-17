@@ -141,13 +141,19 @@ import {
   resolveMutationTier,
 } from '@kiwa-lab/quality-metrics';
 
-const metric = mutationFromCounts({ mutations: 167, killed: 115 });
+const metric = mutationFromCounts({ mutations: 169, killed: 128 });
 assertMutationTier({
   metric,
   tier: resolveMutationTier('Framework'),
-  threshold: 65, // .mutation-baseline/auth.json override
+  // No `threshold`: auth is scored at the Framework default (70). The field is
+  // there for a package carrying a looser override, and no package carries one
+  // today — #1973 removed the last two. Passing a number here bypasses the tier
+  // table, so it belongs with an override recorded in `PACKAGE_TIER`, not on
+  // its own.
 });
 ```
+
+The counts are auth's own (`.mutation-baseline/auth.json`: 128 killed of 169 covered = 75.74 %).
 
 The zero-mutation guard is deliberate. `assertMutationTier` throws when `metric.mutations === 0` with the message `no mutation signal` — an empty test suite would otherwise register as 0/0 = 0 % kill rate and slip past a naïve `>= threshold` check.
 
