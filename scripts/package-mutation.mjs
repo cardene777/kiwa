@@ -17,14 +17,23 @@
  * `tests/release-smoke/tests/mutation-gate-coverage.test.ts` requires that
  * string, so a package cannot quietly go back to running Stryker directly.
  *
- * Extra arguments are forwarded to Stryker (`pnpm -F @kiwa-lab/core run
- * test:mutation -- --concurrency 2`).
+ * Arguments are not forwarded to Stryker; see `runPackageMutation` for why.
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const BUILD_DIR = '.vitest-dist';
+/**
+ * Where Stryker writes the report the gate reads.
+ *
+ * Removed alongside the build. A run that stops before Stryker — a failed
+ * compile, an interrupt — would otherwise leave the previous run's
+ * `mutation.json` in place, and `check-mutation-gates.mjs` reads whatever
+ * report it finds. Deleting first turns that into "no mutation.json", which the
+ * gate already fails on.
+ */
+const REPORT_DIR = 'mutation-report';
 const TS_PROJECT = 'tsconfig.vitest.json';
 const CONFIG_PATTERN = /^\.?stryker\.(config|conf)\.[a-z0-9]+$/i;
 
@@ -57,17 +66,24 @@ function runStep(command, args, cwd) {
 /**
  * Remove, compile, run — in that order, and only as far as each step allows.
  *
- * The removal and the compile are what make the score belong to the current
+ * The removals and the compile are what make the score belong to the current
  * source, so a check has to be able to see that they happen and that a failed
  * compile stops the run. `rm` and `run` are parameters for that reason: the
  * order and the short-circuit are observable without spawning anything.
  *
+ * Stryker gets no arguments beyond `run`. Forwarding them would let a single
+ * invocation narrow its own scope (`--mutate`) or redirect its report
+ * (`--reporters`, `--jsonReporter`) while the gate goes on reading the result as
+ * if it covered the package. The config is the only place scope is set.
+ *
  * @returns the exit code to leave with.
  */
-export function runPackageMutation({ cwd, rm, run, args = [], warn = () => {} }) {
+export function runPackageMutation({ cwd, rm, run, warn = () => {} }) {
   // Remove first: a partial build from an interrupted run is the shape that
-  // produces a green report for code that is no longer there.
+  // produces a green report for code that is no longer there, and a leftover
+  // report is the shape that gets scored when no run happened at all.
   rm(resolve(cwd, BUILD_DIR));
+  rm(resolve(cwd, REPORT_DIR));
 
   const compiled = run('tsc', ['-p', TS_PROJECT], cwd);
   if (compiled !== 0) {
@@ -75,7 +91,7 @@ export function runPackageMutation({ cwd, rm, run, args = [], warn = () => {} })
     return compiled;
   }
 
-  return run('stryker', ['run', ...args], cwd);
+  return run('stryker', ['run'], cwd);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -94,7 +110,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       cwd,
       rm: (dir) => rmSync(dir, { recursive: true, force: true }),
       run: runStep,
-      args: process.argv.slice(2),
       warn: (message) => process.stderr.write(message),
     }),
   );

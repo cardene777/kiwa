@@ -328,7 +328,8 @@ describe('every package that runs mutation testing is scored', () => {
       pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
     );
     const steps: string[] = [];
-    const rm = (dir: string) => steps.push(`rm ${dir.endsWith('.vitest-dist') ? 'build' : dir}`);
+    const label = (dir: string) => dir.replace('/pkg/', '');
+    const rm = (dir: string) => steps.push(`rm ${label(dir)}`);
 
     const green = runner.runPackageMutation({
       cwd: '/pkg',
@@ -337,12 +338,39 @@ describe('every package that runs mutation testing is scored', () => {
         steps.push(`${command} ${args.join(' ')}`);
         return 0;
       },
-      args: ['--concurrency', '2'],
     });
     // Order is the point: scoring a build that was not just produced from this
-    // source is the failure being prevented.
-    expect(steps).toEqual(['rm build', 'tsc -p tsconfig.vitest.json', 'stryker run --concurrency 2']);
+    // source is the failure being prevented. The report goes too — the gate
+    // reads `mutation-report/mutation.json`, so a run that stops early must not
+    // leave the previous one behind.
+    expect(steps).toEqual([
+      'rm .vitest-dist',
+      'rm mutation-report',
+      'tsc -p tsconfig.vitest.json',
+      'stryker run',
+    ]);
     expect(green).toBe(0);
+
+    // Stryker is invoked with `run` and nothing else, whatever is on the command
+    // line. Forwarding would let one invocation narrow its own scope
+    // (`--mutate`) or redirect its report while the gate reads the result as if
+    // it covered the package.
+    const argv = process.argv;
+    process.argv = [...argv.slice(0, 2), '--mutate', 'src/only-this.js'];
+    steps.length = 0;
+    try {
+      runner.runPackageMutation({
+        cwd: '/pkg',
+        rm,
+        run: (command: string, args: string[]) => {
+          steps.push(`${command} ${args.join(' ')}`);
+          return 0;
+        },
+      });
+    } finally {
+      process.argv = argv;
+    }
+    expect(steps.at(-1)).toBe('stryker run');
 
     steps.length = 0;
     const red = runner.runPackageMutation({
@@ -354,8 +382,9 @@ describe('every package that runs mutation testing is scored', () => {
       },
     });
     // A failed compile leaves the build directory empty or partial. Running
-    // Stryker anyway is how a green report gets written for code that is not there.
-    expect(steps).toEqual(['rm build', 'tsc']);
+    // Stryker anyway is how a green report gets written for code that is not
+    // there; stopping with the report already removed is how the gate finds out.
+    expect(steps).toEqual(['rm .vitest-dist', 'rm mutation-report', 'tsc']);
     expect(red).toBe(2);
   });
 
