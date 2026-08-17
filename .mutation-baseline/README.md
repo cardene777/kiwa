@@ -21,4 +21,4 @@ Baselines are tracked so mutation-rate regressions surface as file-level `git di
 
 - `docs/quality/mutation-thresholds.md` — 4-tier threshold rationale.
 - `packages/*/stryker.config.mjs` — per-package Stryker configs (each names its tier in the header comment).
-- root `package.json` `test:mutation` — pnpm filter list across all packages with a baseline here.
+- `scripts/run-mutation.mjs` — root `test:mutation` driver; the package list comes from `PACKAGE_TIER`, not from a filter list in `package.json`.

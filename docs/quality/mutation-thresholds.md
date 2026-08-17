@@ -288,4 +288,4 @@ The three v1.26 dogfood apps (`dogfood-postgres-cdc-outbox-app`, `dogfood-mysql-
 - `packages/*/stryker.config.mjs` — per-package configs.
 - `scripts/check-mutation-gates.mjs` — CI gate; `PACKAGE_TIER` / `TIER_THRESHOLD` / `thresholdFor()` exports.
 - `scripts/mutation-scope-report.mjs` — the classification above, run over every gate package; `--list <package>` for one.
-- root `package.json` `test:mutation` script — pnpm filter list covering all packages in this doc.
+- `scripts/run-mutation.mjs` — what root `test:mutation` runs. It derives the package list from `PACKAGE_TIER`, so the run and the scoring cannot name different sets (#1951). `node scripts/run-mutation.mjs <pkg>` runs one.

@@ -150,33 +150,23 @@ function mutationRunners(): Runner[] {
 }
 
 /**
- * The packages root `test:mutation` selects.
+ * What root `test:mutation` runs.
  *
- * Both spellings pnpm accepts (`-F`, `--filter`, with a space or `=`), and any
- * package name rather than the `@kiwa-lab/` scope. The runner set is
- * workspace-wide since Round 3, so a scope-locked parser would read a filter
- * naming an `examples/*` package as absent and compare a truncated list.
+ * It no longer holds a list. `scripts/run-mutation.mjs` derives the packages
+ * from `PACKAGE_TIER`, so "what runs" and "what is scored" are one object and
+ * cannot disagree.
  *
- * Exclusions (`!pkg`) are returned separately. This parser does not model what
- * they subtract, so the caller fails rather than comparing a set it derived
- * with rules it does not implement.
+ * The previous shape — a hand-written `-F @kiwa-lab/…` list in the root script —
+ * needed this file to parse a shell string to check the two agreed, and five
+ * review rounds each found another form that parser read wrongly (spellings,
+ * `=` versus space, quoting, scope, exclusions). Removing the second copy
+ * removed the parser with it.
  */
-export function parseMutationFilters(script: string): { include: string[]; exclude: string[] } {
-  const include: string[] = [];
-  const exclude: string[] = [];
-  for (const match of script.matchAll(/(?:^|\s)(?:-F|--filter)(?:=|\s+)(['"]?)([^\s'"]+)\1/g)) {
-    const value = match[2] as string;
-    if (value.startsWith('!')) exclude.push(value.slice(1));
-    else include.push(value);
-  }
-  return { include, exclude };
-}
-
-function rootMutationFilters(): { include: string[]; exclude: string[] } {
+function rootRunsThroughDriver(): boolean {
   const root = JSON.parse(readFileSync(resolve(REPO_ROOT, 'package.json'), 'utf-8')) as {
     scripts: Record<string, string>;
   };
-  return parseMutationFilters(root.scripts['test:mutation'] ?? '');
+  return (root.scripts['test:mutation'] ?? '').includes('scripts/run-mutation.mjs');
 }
 
 /**
@@ -185,13 +175,17 @@ function rootMutationFilters(): { include: string[]; exclude: string[] } {
  * Copying the break column into this file would let the doc move without the
  * check noticing, which is the drift `§ Overrides` already warns about between
  * the doc and the gate.
+ *
+ * Tier labels are read, not listed: naming the four current tiers here would
+ * silently skip a fifth, and the rows are already distinctive (three percentage
+ * columns).
  */
 function docTierTable(): Record<string, { high: number; low: number; break: number }> {
   const text = readFileSync(DOC, 'utf-8');
-  const rows = [...text.matchAll(/^\| (Core|Framework|SaaS|Test type) \| (\d+) % \| (\d+) % \| (\d+) % \|/gm)];
+  const rows = [...text.matchAll(/^\|\s*([A-Za-z][\w -]*?)\s*\|\s*(\d+) %\s*\|\s*(\d+) %\s*\|\s*(\d+) %\s*\|/gm)];
   const table: Record<string, { high: number; low: number; break: number }> = {};
   for (const [, label, high, low, brk] of rows) {
-    const key = String(label).toLowerCase().replace(' ', '-');
+    const key = String(label).toLowerCase().replace(/\s+/g, '-');
     table[key] = { high: Number(high), low: Number(low), break: Number(brk) };
   }
   return table;
@@ -200,11 +194,6 @@ function docTierTable(): Record<string, { high: number; low: number; break: numb
 describe('every package that runs mutation testing is scored', () => {
   it('gives each runner a tier, a directory, and a place in the run', async () => {
     const { PACKAGE_TIER, PKG_DIRS } = await loadGate();
-    const parsed = rootMutationFilters();
-    expect(parsed.exclude, 'root test:mutation uses `!pkg`, which this axis does not model').toEqual(
-      [],
-    );
-    const filters = new Set(parsed.include);
     const runners = mutationRunners();
     const expected = withoutExemptions(
       runners.map((runner) => runner.dir),
@@ -216,11 +205,10 @@ describe('every package that runs mutation testing is scored', () => {
       const { scoped, dir } = runner;
       expect(PACKAGE_TIER[scoped], `${scoped}: no PACKAGE_TIER entry`).toBeDefined();
       expect(PKG_DIRS[scoped], `${scoped}: no PKG_DIRS entry`).toBe(dir);
-      expect(filters.has(scoped), `${scoped}: absent from root test:mutation`).toBe(true);
-      // The root filter names the package; the package has to own the script it
-      // names. Without this, dropping `test:mutation` from a package leaves the
-      // config, the tier, and the filter in place while pnpm skips it — the
-      // report the gate then reads is whatever the last run left behind.
+      // A tier entry puts the package in the run (the driver derives the list
+      // from that table), so what is left to check is that the package owns the
+      // script the driver invokes. Without it pnpm skips the package silently
+      // and the gate reads whatever report the last run left behind.
       expect(runner.hasScript, `${scoped}: no test:mutation script to run`).toBe(true);
     }
   });
@@ -270,24 +258,30 @@ describe('every package that runs mutation testing is scored', () => {
   });
 
   it('runs exactly the packages it scores', async () => {
+    // By construction now: the driver builds its pnpm filters from the same
+    // table the gate scores against. What can still break is the root script
+    // being pointed somewhere else, or the driver being handed a different
+    // source of names.
+    expect(rootRunsThroughDriver(), 'root test:mutation no longer calls the driver').toBe(true);
+
     const { PACKAGE_TIER } = await loadGate();
-    const parsed = rootMutationFilters();
-    expect(parsed.exclude, 'root test:mutation uses `!pkg`, which this axis does not model').toEqual(
-      [],
-    );
-    expect([...new Set(parsed.include)].sort()).toEqual(Object.keys(PACKAGE_TIER).sort());
+    const driver = await import(pathToFileURL(resolve(REPO_ROOT, 'scripts/run-mutation.mjs')).href);
+    expect(driver.selectPackages([]).sort()).toEqual(Object.keys(PACKAGE_TIER).sort());
+    expect(driver.pnpmArgs(['@kiwa-lab/core'])).toEqual([
+      '-F',
+      '@kiwa-lab/core',
+      '--no-bail',
+      'run',
+      'test:mutation',
+    ]);
   });
 
-  it('reads both filter spellings and any package name', () => {
-    // pnpm accepts `-F` and `--filter`, with a space or `=`, and the runner set
-    // is workspace-wide so the name is not always `@kiwa-lab/*`.
-    const parsed = parseMutationFilters(
-      "pnpm -F @kiwa-lab/core --filter examples-probe -F='@kiwa-lab/api' --filter=!@kiwa-lab/e2e run test:mutation",
-    );
-    expect(parsed.include).toEqual(['@kiwa-lab/core', 'examples-probe', '@kiwa-lab/api']);
-    expect(parsed.exclude).toEqual(['@kiwa-lab/e2e']);
-    // A word that merely contains the flag is not a filter.
-    expect(parseMutationFilters('pnpm run test:mutation --no-bail').include).toEqual([]);
+  it('refuses a package the gate does not score', async () => {
+    const driver = await import(pathToFileURL(resolve(REPO_ROOT, 'scripts/run-mutation.mjs')).href);
+    // The subset form is for running one package by hand. Accepting an unknown
+    // name would run something the gate then has no threshold for.
+    expect(() => driver.selectPackages(['nope'])).toThrow(/not scored/);
+    expect(driver.selectPackages(['security'])).toEqual(['@kiwa-lab/security']);
   });
 
   it('gives every entry a tier the threshold table knows', async () => {
