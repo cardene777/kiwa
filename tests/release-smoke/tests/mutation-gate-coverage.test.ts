@@ -31,9 +31,10 @@ const REPO_ROOT = repoRoot(HERE);
 const GATE = resolve(REPO_ROOT, 'scripts/check-mutation-gates.mjs');
 const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
 
-// Packages that run mutation testing on purpose without being scored. Each entry
-// needs a reason: an unexplained exemption is the state this axis exists to
-// detect. `withoutExemptions` below is what applies it, and it is tested.
+// Workspace-relative directories that run mutation testing on purpose without
+// being scored (`packages/foo`, not `foo`). Each entry needs a reason: an
+// unexplained exemption is the state this axis exists to detect.
+// `withoutExemptions` below is what applies it, and it is tested.
 const UNSCORED_ALLOWLIST: readonly string[] = [
   // (empty — every package that runs mutation testing is scored by the gate)
 ];
@@ -76,31 +77,74 @@ export function withoutExemptions(names: string[], allowlist: readonly string[])
 }
 
 /**
- * Packages that run mutation testing, by either signal.
+ * Every workspace package, from the globs `pnpm-workspace.yaml` declares.
  *
- * A config with no script never runs, and a script with no config runs with
- * whatever the command line says. Both shapes are wiring that should be scored,
- * so the union is the fact rather than one file name.
+ * Scanning `packages/*` alone would miss the other five entries the workspace
+ * lists (`examples/*`, `tests/fixtures/*`, `tests/release-smoke`, `promo`,
+ * and one nested path). A mutation run set up under any of them is a run the
+ * gate does not score, which is the failure this axis exists to catch — and the
+ * narrower scan would report success while never having looked.
+ */
+export function workspaceGlobs(yaml: string): string[] {
+  const lines = yaml.split('\n');
+  const start = lines.findIndex((line) => /^packages:\s*$/.test(line));
+  if (start === -1) return [];
+  const globs: string[] = [];
+  for (const line of lines.slice(start + 1)) {
+    // A non-indented line starts the next top-level key. `onlyBuiltDependencies`
+    // is also a list of bare words, and reading it as paths would add packages
+    // that do not exist.
+    if (/^\S/.test(line)) break;
+    const match = /^\s*-\s*["']?([^"'#\s]+)["']?\s*$/.exec(line);
+    if (match) globs.push(match[1] as string);
+  }
+  return globs;
+}
+
+function workspacePackageDirs(): string[] {
+  const yaml = readFileSync(resolve(REPO_ROOT, 'pnpm-workspace.yaml'), 'utf-8');
+  const dirs: string[] = [];
+  for (const glob of workspaceGlobs(yaml)) {
+    if (!glob.endsWith('/*')) {
+      if (existsSync(resolve(REPO_ROOT, glob, 'package.json'))) dirs.push(glob);
+      continue;
+    }
+    const parent = glob.slice(0, -2);
+    const parentPath = resolve(REPO_ROOT, parent);
+    if (!existsSync(parentPath)) continue;
+    for (const entry of readdirSync(parentPath, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      if (existsSync(resolve(parentPath, entry.name, 'package.json'))) {
+        dirs.push(`${parent}/${entry.name}`);
+      }
+    }
+  }
+  return [...new Set(dirs)].sort();
+}
+
+/**
+ * Workspace packages that run mutation testing.
+ *
+ * The script is the fact: `pnpm -F <pkg> run test:mutation` is what the root
+ * sweep invokes, and a package without it does not run whatever config it
+ * carries. A Stryker config counts too, because a config with no script is
+ * wiring someone meant to run and the gate should say so either way.
  */
 function mutationRunners(): Runner[] {
-  const packagesDir = resolve(REPO_ROOT, 'packages');
   const runners: Runner[] = [];
-  for (const entry of readdirSync(packagesDir, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const dir = entry.name;
-    const configs = readdirSync(resolve(packagesDir, dir), { withFileTypes: true })
-      .filter((child) => !child.isDirectory() && STRYKER_CONFIG_PATTERN.test(child.name))
-      .map((child) => child.name)
-      .sort();
-    const manifestPath = resolve(packagesDir, dir, 'package.json');
-    if (!existsSync(manifestPath)) continue;
-    const manifest = JSON.parse(readFileSync(manifestPath, 'utf-8')) as {
+  for (const dir of workspacePackageDirs()) {
+    const dirPath = resolve(REPO_ROOT, dir);
+    const manifest = JSON.parse(readFileSync(resolve(dirPath, 'package.json'), 'utf-8')) as {
       name?: string;
       scripts?: Record<string, string>;
     };
     const hasScript = Boolean(manifest.scripts?.['test:mutation']);
+    const configs = readdirSync(dirPath, { withFileTypes: true })
+      .filter((child) => !child.isDirectory() && STRYKER_CONFIG_PATTERN.test(child.name))
+      .map((child) => child.name)
+      .sort();
     if (configs.length === 0 && !hasScript) continue;
-    runners.push({ dir, scoped: manifest.name ?? `@kiwa-lab/${dir}`, configs, hasScript });
+    runners.push({ dir, scoped: manifest.name ?? dir, configs, hasScript });
   }
   return runners.sort((a, b) => a.dir.localeCompare(b.dir));
 }
@@ -145,7 +189,7 @@ describe('every package that runs mutation testing is scored', () => {
     for (const runner of runners.filter((r) => expected.includes(r.dir))) {
       const { scoped, dir } = runner;
       expect(PACKAGE_TIER[scoped], `${scoped}: no PACKAGE_TIER entry`).toBeDefined();
-      expect(PKG_DIRS[scoped], `${scoped}: no PKG_DIRS entry`).toBe(`packages/${dir}`);
+      expect(PKG_DIRS[scoped], `${scoped}: no PKG_DIRS entry`).toBe(dir);
       expect(filters.has(scoped), `${scoped}: absent from root test:mutation`).toBe(true);
       // The root filter names the package; the package has to own the script it
       // names. Without this, dropping `test:mutation` from a package leaves the
@@ -160,8 +204,30 @@ describe('every package that runs mutation testing is scored', () => {
     // run against the real tree. Exercising it here keeps it from rotting into a
     // hole nobody notices (the same gap #1948 found in its own missing-target
     // report).
-    expect(withoutExemptions(['core', 'security'], ['security'])).toEqual(['core']);
-    expect(withoutExemptions(['core', 'security'], [])).toEqual(['core', 'security']);
+    const dirs = ['packages/core', 'packages/security'];
+    expect(withoutExemptions(dirs, ['packages/security'])).toEqual(['packages/core']);
+    expect(withoutExemptions(dirs, [])).toEqual(dirs);
+  });
+
+  it('reads the workspace globs rather than assuming packages/*', () => {
+    // `packages/*` is one of six entries. Reading only that one would let a
+    // mutation run under `examples/*` sit unscored while this axis reports
+    // success, which is the failure it exists to catch.
+    const globs = workspaceGlobs(readFileSync(resolve(REPO_ROOT, 'pnpm-workspace.yaml'), 'utf-8'));
+    expect(globs).toContain('packages/*');
+    expect(globs).toContain('examples/*');
+    expect(globs.length).toBeGreaterThan(1);
+    // The list stops at the next top-level key: `onlyBuiltDependencies` is also
+    // a list, and its entries are package names that resolve to nothing.
+    expect(globs).not.toContain('better-sqlite3');
+  });
+
+  it('stops parsing globs at the end of the packages block', () => {
+    const yaml = ['packages:', '  - "packages/*"', '  - promo', 'onlyBuiltDependencies:', '  - better-sqlite3', ''].join(
+      '\n',
+    );
+    expect(workspaceGlobs(yaml)).toEqual(['packages/*', 'promo']);
+    expect(workspaceGlobs('minimumReleaseAge: 4320\n')).toEqual([]);
   });
 
   it('does not score a package that runs nothing to score', async () => {
@@ -225,7 +291,7 @@ describe('every package that runs mutation testing is scored', () => {
         'number',
       );
       for (const configName of runner.configs) {
-        const config = readFileSync(resolve(REPO_ROOT, 'packages', runner.dir, configName), 'utf-8');
+        const config = readFileSync(resolve(REPO_ROOT, runner.dir, configName), 'utf-8');
         const declared = /thresholds:\s*\{[^}]*\bbreak:\s*(\d+)/.exec(config);
         expect(declared, `${runner.scoped}: no thresholds.break in ${configName}`).not.toBeNull();
         expect(
