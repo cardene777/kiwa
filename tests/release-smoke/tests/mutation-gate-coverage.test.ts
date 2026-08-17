@@ -239,8 +239,15 @@ function tableCells(line: string): string[] | null {
   return line.slice(1, -1).split('|').map((cell) => cell.trim());
 }
 
+/** One `§ Current overrides` row, as everything the gate can verify about it. */
+export interface RosterRow {
+  override: number;
+  tier: string;
+  direction: 'looser' | 'stricter';
+}
+
 /**
- * The `§ Current overrides` roster, as `scoped package -> override value`.
+ * The `§ Current overrides` roster, as `scoped package -> row`.
  *
  * Returns `null` when the section, its table, or any row cannot be read — a
  * parse failure and an empty roster are different answers, and only the second
@@ -252,8 +259,15 @@ function tableCells(line: string): string[] | null {
  * ever swapped, and would accept a row with a column missing — both give a
  * wrong override value rather than a failure, which is the one outcome this
  * check exists to prevent.
+ *
+ * **`tier` and `direction` are returned so the caller can check them too.**
+ * Both are derivable from `PACKAGE_TIER` and `TIER_THRESHOLD`, so a table that
+ * states them without anything comparing them is the same restated-fact drift
+ * this whole check exists to stop — one row could say `saas` for a framework
+ * package and nothing would notice. `reason` stays unread: it is prose for a
+ * human and there is nothing to compare it against.
  */
-export function docOverrideRoster(text: string): Record<string, number> | null {
+export function docOverrideRoster(text: string): Record<string, RosterRow> | null {
   const section = /^### Current overrides$/m.exec(text);
   if (!section) return null;
   // Stop at the next heading of any level so a later table cannot be read as
@@ -265,7 +279,9 @@ export function docOverrideRoster(text: string): Record<string, number> | null {
   if (!header) return null;
   const packageAt = header.indexOf('package');
   const overrideAt = header.indexOf('override');
-  if (packageAt === -1 || overrideAt === -1) return null;
+  const tierAt = header.indexOf('tier');
+  const directionAt = header.indexOf('direction');
+  if (packageAt === -1 || overrideAt === -1 || tierAt === -1 || directionAt === -1) return null;
 
   // Row 1 must be the `|---|` separator. Assuming it without looking would make
   // a table written without one lose its first data row silently.
@@ -273,7 +289,7 @@ export function docOverrideRoster(text: string): Record<string, number> | null {
   if (!separator || separator.length !== header.length) return null;
   if (!separator.every((cell) => /^:?-+:?$/.test(cell))) return null;
 
-  const roster: Record<string, number> = {};
+  const roster: Record<string, RosterRow> = {};
   let dataRows = 0;
   let sawNone = false;
   for (const line of lines.slice(2)) {
@@ -290,11 +306,15 @@ export function docOverrideRoster(text: string): Record<string, number> | null {
     if (!scoped) return null;
     const value = /^(\d+)$/.exec(cells[overrideAt] as string);
     if (!value) return null;
+    const direction = cells[directionAt] as string;
+    if (direction !== 'looser' && direction !== 'stricter') return null;
+    const tier = cells[tierAt] as string;
+    if (!/^[a-z-]+$/.test(tier)) return null;
     const pkg = scoped[1] as string;
     // Two rows for one package state two different rosters. Assigning over the
     // first would keep whichever came last and drop the contradiction.
     if (Object.hasOwn(roster, pkg)) return null;
-    roster[pkg] = Number(value[1]);
+    roster[pkg] = { override: Number(value[1]), tier, direction };
   }
   if (dataRows === 0) return null;
   // `(none)` says the roster is empty, so it is only true as the sole row.
@@ -587,10 +607,18 @@ describe('every package that runs mutation testing is scored', () => {
     // the PR falsified them one per round. Restating the new value in each
     // place only re-arms the problem, so the doc now holds the roster in one
     // machine-checked table and everything else points at it.
-    const { PACKAGE_TIER } = await loadGate();
-    const fromGate: Record<string, number> = {};
+    const { PACKAGE_TIER, TIER_THRESHOLD } = await loadGate();
+    const fromGate: Record<string, RosterRow> = {};
     for (const [scoped, entry] of Object.entries(PACKAGE_TIER as Record<string, TierEntry>)) {
-      if (entry.override !== undefined) fromGate[scoped] = entry.override;
+      if (entry.override === undefined) continue;
+      // `tier` and `direction` are derived, never read from the doc — the doc
+      // stating them is what the comparison then holds to account.
+      fromGate[scoped] = {
+        override: entry.override,
+        tier: entry.tier,
+        direction:
+          entry.override < (TIER_THRESHOLD[entry.tier] as number) ? 'looser' : 'stricter',
+      };
     }
 
     const fromDoc = docOverrideRoster(readFileSync(DOC, 'utf-8'));
@@ -598,7 +626,9 @@ describe('every package that runs mutation testing is scored', () => {
     expect(
       fromDoc,
       'docs/quality/mutation-thresholds.md § Current overrides must equal PACKAGE_TIER. ' +
-        'Adding an override means adding its row; deleting one means deleting the row',
+        'Adding an override means adding its row; deleting one means deleting the row. ' +
+        'The tier and direction cells are checked too — both are derivable, so a row ' +
+        'stating either wrongly is drift the roster is supposed to catch',
     ).toEqual(fromGate);
   });
 
@@ -680,111 +710,104 @@ describe('every package that runs mutation testing is scored', () => {
 describe('the override roster parser (#1975)', () => {
   const withSection = (table: string) =>
     `## Overrides\n\n### Current overrides\n\n${table}\n\n### Something else\n\n| pkg | 9 |\n`;
+  // The real table's shape. Cases that need a different shape spell it out.
+  const HEAD = '| package | tier | override | direction | reason |\n|---|---|---|---|---|';
+  const NONE = '| (none) | — | — | — | — |';
 
   it('reads an empty roster from the `(none)` row', () => {
-    const table = '| package | tier | override | direction | reason |\n|---|---|---|---|---|\n| (none) | — | — | — | — |';
-    expect(docOverrideRoster(withSection(table))).toEqual({});
+    expect(docOverrideRoster(withSection(`${HEAD}\n${NONE}`))).toEqual({});
   });
 
-  it('reads the package and the number from a populated row', () => {
+  it('reads every verifiable cell from a populated row', () => {
     const table =
-      '| package | tier | override | direction | reason |\n|---|---|---|---|---|\n' +
+      `${HEAD}\n` +
       '| `@kiwa-lab/auth` | framework | 65 | looser | session.js follow-up |\n' +
       '| `@kiwa-lab/cache` | saas | 60 | looser | TTL follow-up |';
     expect(docOverrideRoster(withSection(table))).toEqual({
-      '@kiwa-lab/auth': 65,
-      '@kiwa-lab/cache': 60,
+      '@kiwa-lab/auth': { override: 65, tier: 'framework', direction: 'looser' },
+      '@kiwa-lab/cache': { override: 60, tier: 'saas', direction: 'looser' },
     });
   });
 
   it('stops at the next heading instead of reading the table after it', () => {
-    const table = '| package | tier | override | direction | reason |\n|---|---|---|---|---|\n| (none) | — | — | — | — |';
     // The trailing `| pkg | 9 |` in `withSection` sits under another heading.
     // Reading it would invent an override out of an unrelated table.
-    expect(docOverrideRoster(withSection(table))).toEqual({});
+    expect(docOverrideRoster(withSection(`${HEAD}\n${NONE}`))).toEqual({});
   });
 
-  it('reads the override column by name, not by position', () => {
+  it('reads the columns by name, not by position', () => {
     // Swapping the two numeric-ish columns must not change the answer. Reading
     // "the first number in the row" would return 70 here — the tier bar, not
     // the override.
     const swapped =
       '| package | override | tier | direction | reason |\n|---|---|---|---|---|\n' +
       '| `@kiwa-lab/auth` | 65 | framework | looser | session.js follow-up |';
-    expect(docOverrideRoster(withSection(swapped))).toEqual({ '@kiwa-lab/auth': 65 });
+    expect(docOverrideRoster(withSection(swapped))).toEqual({
+      '@kiwa-lab/auth': { override: 65, tier: 'framework', direction: 'looser' },
+    });
   });
 
   it('returns null rather than an empty roster when it cannot read', () => {
+    const row = (cells: string) => withSection(`${HEAD}\n${cells}`);
     const cases: Array<[string, string]> = [
       ['no section', '## Overrides\n\nprose only\n'],
       ['section but no table', '### Current overrides\n\nprose only\n\n'],
       [
         'header without an override column',
-        withSection('| package | tier | reason |\n|---|---|---|\n| `@kiwa-lab/auth` | fw | x |'),
+        withSection('| package | tier | direction | reason |\n|---|---|---|---|\n| `@kiwa-lab/auth` | fw | looser | x |'),
       ],
       [
         'header without a package column',
-        withSection('| name | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | fw | 65 |'),
+        withSection('| name | tier | override | direction | reason |\n|---|---|---|---|---|\n| `@kiwa-lab/auth` | fw | 65 | looser | x |'),
       ],
       [
-        'row with a column missing',
-        withSection('| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | 65 |'),
+        'header without a tier column',
+        withSection('| package | override | direction | reason |\n|---|---|---|---|\n| `@kiwa-lab/auth` | 65 | looser | x |'),
       ],
       [
-        'header and separator but no data row',
-        withSection('| package | tier | override |\n|---|---|---|'),
+        'header without a direction column',
+        withSection('| package | tier | override | reason |\n|---|---|---|---|\n| `@kiwa-lab/auth` | fw | 65 | x |'),
       ],
-      [
-        'package name not in the expected form',
-        withSection('| package | tier | override |\n|---|---|---|\n| auth | framework | 65 |'),
-      ],
-      [
-        'override cell is not a number',
-        withSection(
-          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | soon |',
-        ),
-      ],
+      ['row with a column missing', row('| `@kiwa-lab/auth` | framework | 65 | looser |')],
+      ['header and separator but no data row', withSection(HEAD)],
+      ['package name not in the expected form', row('| auth | framework | 65 | looser | x |')],
+      ['override cell is not a number', row('| `@kiwa-lab/auth` | framework | soon | looser | x |')],
       [
         'override cell carries more than the number',
-        withSection(
-          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 % |',
-        ),
+        row('| `@kiwa-lab/auth` | framework | 65 % | looser | x |'),
       ],
+      [
+        'direction cell is not one of the two words',
+        row('| `@kiwa-lab/auth` | framework | 65 | lower | x |'),
+      ],
+      ['tier cell is empty', row('| `@kiwa-lab/auth` |  | 65 | looser | x |')],
       [
         '(none) sitting beside a real row',
-        withSection(
-          '| package | tier | override |\n|---|---|---|\n| (none) | — | — |\n' +
-            '| `@kiwa-lab/auth` | framework | 65 |',
-        ),
+        row(`${NONE}\n| \`@kiwa-lab/auth\` | framework | 65 | looser | x |`),
       ],
-      [
-        '(none) twice',
-        withSection(
-          '| package | tier | override |\n|---|---|---|\n| (none) | — | — |\n| (none) | — | — |',
-        ),
-      ],
+      ['(none) twice', row(`${NONE}\n${NONE}`)],
       [
         'no separator row',
-        withSection('| package | tier | override |\n| `@kiwa-lab/auth` | framework | 65 |'),
+        withSection(
+          '| package | tier | override | direction | reason |\n| `@kiwa-lab/auth` | framework | 65 | looser | x |',
+        ),
       ],
       [
         'separator with the wrong column count',
         withSection(
-          '| package | tier | override |\n|---|---|\n| `@kiwa-lab/auth` | framework | 65 |',
+          '| package | tier | override | direction | reason |\n|---|---|\n| `@kiwa-lab/auth` | framework | 65 | looser | x |',
         ),
       ],
       [
         'the same package twice with different values',
-        withSection(
-          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 |\n' +
-            '| `@kiwa-lab/auth` | framework | 70 |',
+        row(
+          '| `@kiwa-lab/auth` | framework | 65 | looser | x |\n| `@kiwa-lab/auth` | framework | 70 | looser | x |',
         ),
       ],
       [
         'the same package twice with the same value',
-        withSection(
-          '| package | tier | override |\n|---|---|---|\n| `@kiwa-lab/auth` | framework | 65 |\n' +
-            '| `@kiwa-lab/auth` | framework | 65 |',
+        row(
+          '| `@kiwa-lab/auth` | framework | 65 | looser | x |\n| `@kiwa-lab/auth` | framework | 65 | looser | x |',
         ),
       ],
     ];
