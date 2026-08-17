@@ -59,6 +59,39 @@ const PKG_ROOT = packageRoot(HERE);
  */
 const EXEMPT_MODULES = new Set(['bin', 'index']);
 
+/**
+ * `src` 配下の全実装 module を返す (`src` からの相対 path、拡張子なし)。
+ *
+ * #1961 で `mutate` を実装全体に広げた。 直下だけを見る `topLevelModules` は
+ * `detect/` と `commands/` 配下 8 file を見ないので、明日 1 file 落としても
+ * 気付けない。 広げた範囲を保つのは、広げた範囲を見る検査だけ。
+ *
+ * 除外は 2 つで、どちらも `src` 直下に限る。 `bin` は `runCli` を呼んで
+ * `process.exit` する 6 行で、test から起動すると test process ごと終わる。
+ * `index` は公開 API の再 export で、変異させても意味を持つ分岐が無い。
+ * `detect/index` は再 export と実装が同居するため除外しない (#1961 の判断)。
+ */
+export function implementationModules(walk: (dir: string) => string[], srcDir: string): string[] {
+  const modules: string[] = [];
+  const visit = (dir: string, prefix: string): void => {
+    for (const entry of walk(dir)) {
+      if (entry.endsWith('.ts')) {
+        if (entry.endsWith('.d.ts')) continue;
+        const name = prefix + entry.slice(0, -'.ts'.length);
+        if (prefix === '' && EXEMPT_MODULES.has(name)) continue;
+        modules.push(name);
+        continue;
+      }
+      // 拡張子が無い entry は dir とみなす。 file なら walk が空を返して終わる。
+      const nested = join(dir, entry);
+      if (entry.includes('.')) continue;
+      visit(nested, `${prefix}${entry}/`);
+    }
+  };
+  visit(srcDir, '');
+  return modules.sort();
+}
+
 export function topLevelModules(entries: string[]): string[] {
   return entries
     .filter((name) => name.endsWith('.ts') && !name.endsWith('.d.ts'))
@@ -119,6 +152,27 @@ export function findMissingBuildStep(script: unknown): string | null {
 }
 
 describe('stryker 設定が実装構成に追随している (#1936)', () => {
+  it('src 配下の実装 module は全て変異対象に載っている', async () => {
+    const config = await import(pathToFileURL(join(PKG_ROOT, 'stryker.config.mjs')).href);
+    const modules = implementationModules(
+      (dir) => readdirSync(dir),
+      join(PKG_ROOT, 'src'),
+    );
+    // 対象が空だと検査が常に通る。 直下と subdir の両方が列挙できていることを先に固定する。
+    expect(modules).toContain('runCli');
+    expect(modules).toContain('detect/layers');
+    expect(modules).toContain('commands/anvil-seed');
+    // 除外した 2 つは要求しない (#1961 の判断)。
+    expect(modules).not.toContain('bin');
+    expect(modules).not.toContain('index');
+
+    expect(
+      findUnmutatedModules(modules, config.default?.mutate),
+      'src 配下に実装 module を足したら stryker.config.mjs の mutate にも足す。 ' +
+        '漏れると、その module を壊しても変異 gate が緑を返す',
+    ).toEqual([]);
+  });
+
   it('src 直下の module は全て変異対象に載っている', async () => {
     const config = await import(pathToFileURL(join(PKG_ROOT, 'stryker.config.mjs')).href);
     const modules = topLevelModules(readdirSync(join(PKG_ROOT, 'src')));
@@ -170,6 +224,22 @@ describe('stryker 設定の検査自体 (#1936)', () => {
     ).toEqual([]);
     // 対象 module が無ければ漏れも無い。
     expect(findUnmutatedModules([], [])).toEqual([]);
+  });
+
+  it('subdir を含めて列挙し、直下の bin と index だけを外す', () => {
+    const tree: Record<string, string[]> = {
+      '/src': ['bin.ts', 'index.ts', 'runCli.ts', 'types.d.ts', 'detect', 'commands'],
+      '/src/detect': ['index.ts', 'layers.ts'],
+      '/src/commands': ['anvil-seed.ts'],
+    };
+    const walk = (dir: string) => tree[dir] ?? [];
+    // 直下の index は外れるが、subdir の index は実装として残る。
+    expect(implementationModules(walk, '/src')).toEqual([
+      'commands/anvil-seed',
+      'detect/index',
+      'detect/layers',
+      'runCli',
+    ]);
   });
 
   it('bin と index は変異対象として要求しない', () => {
