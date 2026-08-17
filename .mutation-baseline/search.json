@@ -6,15 +6,22 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 74.67,
-  "totalMsi": 74.67,
-  "coveredMsi": 75.98,
-  "killed": 171,
-  "survived": 55,
-  "timeout": 3,
-  "noCoverage": 16,
+  "killRate": 79.08,
+  "totalMsi": 79.08,
+  "coveredMsi": 79.89,
+  "killed": 1644,
+  "survived": 418,
+  "timeout": 17,
+  "noCoverage": 62,
   "error": 0,
   "mutants": [
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 7,
+      "column": 54,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 24,
@@ -39,16 +46,16 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 64,
-      "column": 43,
-      "mutator": "ArithmeticOperator",
-      "replacement": "Date.now() + start"
+      "column": 31,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(0, Date.now() - start)"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 64,
-      "column": 31,
-      "mutator": "MethodExpression",
-      "replacement": "Math.min(0, Date.now() - start)"
+      "column": 43,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + start"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -164,6 +171,13 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
+      "line": 137,
+      "column": 20,
+      "mutator": "ArithmeticOperator",
+      "replacement": "b.score + a.score"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
       "line": 141,
       "column": 24,
       "mutator": "ConditionalExpression",
@@ -172,9 +186,16 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 148,
-      "column": 21,
+      "column": 48,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 148,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -199,6 +220,13 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
+      "line": 166,
+      "column": 16,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
       "line": 168,
       "column": 31,
       "mutator": "EqualityOperator",
@@ -213,10 +241,10 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 166,
-      "column": 16,
-      "mutator": "BooleanLiteral",
-      "replacement": "true"
+      "line": 168,
+      "column": 54,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -250,15 +278,15 @@
       "file": ".vitest-dist/src/engine.js",
       "line": 174,
       "column": 12,
-      "mutator": "LogicalOperator",
-      "replacement": "i < shorter.length || j < longer.length"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 174,
       "column": 12,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "LogicalOperator",
+      "replacement": "i < shorter.length || j < longer.length"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -271,15 +299,15 @@
       "file": ".vitest-dist/src/engine.js",
       "line": 174,
       "column": 34,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "EqualityOperator",
+      "replacement": "j <= longer.length"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 174,
       "column": 34,
-      "mutator": "EqualityOperator",
-      "replacement": "j <= longer.length"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -304,10 +332,38 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
+      "line": 178,
+      "column": 24,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 179,
+      "column": 51,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 180,
+      "column": 17,
+      "mutator": "AssignmentOperator",
+      "replacement": "i -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
       "line": 179,
       "column": 17,
       "mutator": "ConditionalExpression",
       "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 181,
+      "column": 17,
+      "mutator": "AssignmentOperator",
+      "replacement": "j -= 1"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -345,11 +401,2475 @@
       "replacement": "true"
     },
     {
-      "file": ".vitest-dist/src/algolia.js",
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
       "line": 10,
-      "column": 29,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 27,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "outerVal === null && innerVal === null"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 27,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 27,
+      "column": 34,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 32,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 38,
+      "column": 26,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 43,
+      "column": 9,
+      "mutator": "MethodExpression",
+      "replacement": "children"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 43,
+      "column": 23,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 56,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 48,
+      "column": 57,
       "mutator": "ObjectLiteral",
       "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 62,
+      "column": 23,
+      "mutator": "MethodExpression",
+      "replacement": "raw.split(sep).map(p => p.trim())"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 62,
+      "column": 49,
+      "mutator": "MethodExpression",
+      "replacement": "p"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 62,
+      "column": 73,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 62,
+      "column": 73,
+      "mutator": "EqualityOperator",
+      "replacement": "p.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 68,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 69,
+      "column": 61,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 88,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 89,
+      "column": 58,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 99,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 103,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 104,
+      "column": 64,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 115,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/faceted-advanced.js",
+      "line": 125,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 3,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 9,
+      "column": 20,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 10,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 23,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "bbox.swLat > bbox.neLat && bbox.swLng > bbox.neLng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 23,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 23,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "bbox.swLat >= bbox.neLat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 23,
+      "column": 36,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 23,
+      "column": 36,
+      "mutator": "EqualityOperator",
+      "replacement": "bbox.swLng >= bbox.neLng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "LogicalOperator",
+      "replacement": "d.lat >= bbox.swLat && d.lat <= bbox.neLat && d.lng >= bbox.swLng || d.lng <= bbox.neLng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "LogicalOperator",
+      "replacement": "d.lat >= bbox.swLat && d.lat <= bbox.neLat || d.lng >= bbox.swLng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "LogicalOperator",
+      "replacement": "d.lat >= bbox.swLat || d.lat <= bbox.neLat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 27,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 27,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "d.lat < bbox.neLat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 28,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 29,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 29,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "d.lng < bbox.neLng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 30,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 31,
+      "column": 61,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 45,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "session.documents.map(d => ({\n  ...d,\n  distanceMeters: haversineMeters(input.centerLat, input.centerLng, d.lat, d.lng)\n"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 50,
+      "column": 24,
+      "mutator": "EqualityOperator",
+      "replacement": "d.distanceMeters < input.radiusMeters"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 51,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "a.distanceMeters + b.distanceMeters"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 51,
+      "column": 15,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 52,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 53,
+      "column": 55,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 64,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 65,
+      "column": 56,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 75,
+      "column": 22,
+      "mutator": "LogicalOperator",
+      "replacement": "input.avgSpeedKmh && 30"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 76,
+      "column": 26,
+      "mutator": "ArithmeticOperator",
+      "replacement": "speedKmh * 1000 * input.travelTimeMinutes * 60"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 76,
+      "column": 27,
+      "mutator": "ArithmeticOperator",
+      "replacement": "speedKmh / 1000"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 76,
+      "column": 27,
+      "mutator": "ArithmeticOperator",
+      "replacement": "speedKmh * 1000 / input.travelTimeMinutes"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 77,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "session.documents.map(d => {\n  const distance = haversineMeters(input.centerLat, input.centerLng, d.lat, d.lng);\n  retur"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 77,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "session.documents.map(d => {\n  const distance = haversineMeters(input.centerLat, input.centerLng, d.lat, d.lng);\n  retur"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 82,
+      "column": 32,
+      "mutator": "ArithmeticOperator",
+      "replacement": "distance / (speedKmh * 1000) / 60"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 85,
+      "column": 24,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 85,
+      "column": 24,
+      "mutator": "EqualityOperator",
+      "replacement": "d.travelTimeMinutes < input.travelTimeMinutes"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 86,
+      "column": 15,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 86,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "a.travelTimeMinutes + b.travelTimeMinutes"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 87,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 88,
+      "column": 58,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 102,
+      "column": 24,
+      "mutator": "ArithmeticOperator",
+      "replacement": "dPhi * 2"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 102,
+      "column": 41,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Math.cos(phi1) / Math.cos(phi2)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 103,
+      "column": 54,
+      "mutator": "ArithmeticOperator",
+      "replacement": "1 + a"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 112,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "vertices.length + 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 112,
+      "column": 46,
+      "mutator": "EqualityOperator",
+      "replacement": "i <= vertices.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 107,
+      "column": 13,
+      "mutator": "ArithmeticOperator",
+      "replacement": "deg / Math.PI"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 115,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 115,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "!vi && !vj"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 117,
+      "column": 27,
+      "mutator": "EqualityOperator",
+      "replacement": "vi.lat >= lat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 117,
+      "column": 44,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 117,
+      "column": 44,
+      "mutator": "EqualityOperator",
+      "replacement": "vj.lat >= lat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 118,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "lng <= (vj.lng - vi.lng) * (lat - vi.lat) / (vj.lat - vi.lat) + vi.lng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 118,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "lng >= (vj.lng - vi.lng) * (lat - vi.lat) / (vj.lat - vi.lat) + vi.lng"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 118,
+      "column": 19,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(vj.lng - vi.lng) * (lat - vi.lat) * (vj.lat - vi.lat)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 118,
+      "column": 20,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(vj.lng - vi.lng) / (lat - vi.lat)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 118,
+      "column": 41,
+      "mutator": "ArithmeticOperator",
+      "replacement": "lat + vi.lat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 118,
+      "column": 59,
+      "mutator": "ArithmeticOperator",
+      "replacement": "vj.lat + vi.lat"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 125,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 125,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "lat > -90"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 125,
+      "column": 26,
+      "mutator": "EqualityOperator",
+      "replacement": "lat < 90"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 125,
+      "column": 39,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 125,
+      "column": 39,
+      "mutator": "EqualityOperator",
+      "replacement": "lng > -180"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 125,
+      "column": 54,
+      "mutator": "EqualityOperator",
+      "replacement": "lng < 180"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/geo.js",
+      "line": 133,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 21,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 32,
+      "column": 22,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 41,
+      "column": 25,
+      "mutator": "EqualityOperator",
+      "replacement": "r <= session.replicaCount"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 42,
+      "column": 48,
+      "mutator": "ArithmeticOperator",
+      "replacement": "s - r"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 47,
+      "column": 51,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 54,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 57,
+      "column": 56,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 57,
+      "column": 56,
+      "mutator": "LogicalOperator",
+      "replacement": "s.shardId === input.shardId || s.role === 'primary'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 57,
+      "column": 56,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 57,
+      "column": 87,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 61,
+      "column": 56,
+      "mutator": "LogicalOperator",
+      "replacement": "s.shardId === input.shardId && s.role === 'replica' || s.nodeId !== input.failedNode"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 61,
+      "column": 56,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 61,
+      "column": 56,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 61,
+      "column": 56,
+      "mutator": "LogicalOperator",
+      "replacement": "s.shardId === input.shardId || s.role === 'replica'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 61,
+      "column": 87,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 61,
+      "column": 111,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 68,
+      "column": 24,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 67,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 67,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 69,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 70,
+      "column": 24,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 71,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 69,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 72,
+      "column": 52,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 75,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "replica?.nodeId && ''"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 75,
+      "column": 25,
+      "mutator": "OptionalChaining",
+      "replacement": "replica.nodeId"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 87,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/index-management.js",
+      "line": 91,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 10,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 24,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 25,
+      "column": 64,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 44,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 45,
+      "column": 57,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 63,
+      "column": 21,
+      "mutator": "MethodExpression",
+      "replacement": "[...counts.entries()].map(([key, count]) => ({\n  key,\n  count\n}))"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 65,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "a.key + b.key"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 65,
+      "column": 15,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 66,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 67,
+      "column": 60,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 75,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 91,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 94,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 95,
+      "column": 61,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 112,
+      "column": 21,
+      "mutator": "MethodExpression",
+      "replacement": "clause.clauses.some(c => evalClause(doc, c))"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 117,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 117,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 117,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "raw === undefined && raw === null"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 117,
+      "column": 30,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 124,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 127,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof raw === 'number' || typeof leaf.value === 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 127,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 127,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 127,
+      "column": 47,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 129,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 129,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof raw === 'number' || typeof leaf.value === 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 129,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 129,
+      "column": 47,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 130,
+      "column": 14,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 133,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 133,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 133,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof raw === 'string' || typeof leaf.value === 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 136,
+      "column": 30,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 133,
+      "column": 47,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 137,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 140,
+      "column": 37,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "d >= max"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 145,
+      "column": 12,
+      "mutator": "ArithmeticOperator",
+      "replacement": "1 - max"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "d <= max"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-dsl.js",
+      "line": 160,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 22,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 22,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 27,
+      "column": 24,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 27,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 37,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 37,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 115,
+      "column": 50,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('invalid:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 115,
+      "column": 21,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 115,
+      "column": 43,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 116,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 116,
+      "column": 51,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('terminal:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 115,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 116,
+      "column": 44,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 117,
+      "column": 23,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 117,
+      "column": 45,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 116,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 117,
+      "column": 52,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('event:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 117,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 121,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly - invalid + terminal"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/query-orchestrator.js",
+      "line": 121,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly + invalid"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 6,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 9,
+      "column": 39,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 9,
+      "column": 39,
+      "mutator": "EqualityOperator",
+      "replacement": "input.bm25B <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 9,
+      "column": 58,
+      "mutator": "EqualityOperator",
+      "replacement": "input.bm25B >= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 18,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 42,
+      "column": 23,
+      "mutator": "ArithmeticOperator",
+      "replacement": "totalLen * totalDocs"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 50,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 50,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 50,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "tf === 0 && dfq === 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 50,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 52,
+      "column": 38,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(totalDocs - dfq + 0.5) * (dfq + 0.5)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 52,
+      "column": 39,
+      "mutator": "ArithmeticOperator",
+      "replacement": "totalDocs + dfq"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 52,
+      "column": 65,
+      "mutator": "ArithmeticOperator",
+      "replacement": "dfq - 0.5"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 53,
+      "column": 26,
+      "mutator": "ArithmeticOperator",
+      "replacement": "1 + session.bm25B"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 53,
+      "column": 46,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.bm25B * docLen * (avgDocLen === 0 ? 1 : avgDocLen)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 53,
+      "column": 47,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.bm25B / docLen"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 53,
+      "column": 74,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 53,
+      "column": 74,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 53,
+      "column": 74,
+      "mutator": "EqualityOperator",
+      "replacement": "avgDocLen !== 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 54,
+      "column": 29,
+      "mutator": "ArithmeticOperator",
+      "replacement": "tf * (session.bm25K1 + 1) * (tf + session.bm25K1 * norm)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 54,
+      "column": 30,
+      "mutator": "ArithmeticOperator",
+      "replacement": "tf / (session.bm25K1 + 1)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 54,
+      "column": 36,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.bm25K1 - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 54,
+      "column": 65,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.bm25K1 / norm"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 86,
+      "column": 24,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 86,
+      "column": 24,
+      "mutator": "LogicalOperator",
+      "replacement": "docTokens.length && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 89,
+      "column": 24,
+      "mutator": "ArithmeticOperator",
+      "replacement": "docTokens.filter(t => t === q).length * docLen"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 91,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "tf === 0 && dfq === 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 91,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 91,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 93,
+      "column": 34,
+      "mutator": "ArithmeticOperator",
+      "replacement": "totalDocs * dfq"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 94,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "tf / idf"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 99,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 100,
+      "column": 58,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 107,
+      "column": 59,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 108,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "hits.map(h => {\n  const doc = docsById.get(h.id);\n  const boost = doc ? input.boostFn(doc) : 1;\n  return {\n    id: h.id,"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 114,
+      "column": 15,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 114,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "b.score + a.score"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 115,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 116,
+      "column": 68,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 118,
+      "column": 19,
+      "mutator": "OptionalChaining",
+      "replacement": "ranked[0].score"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 118,
+      "column": 19,
+      "mutator": "LogicalOperator",
+      "replacement": "ranked[0]?.score && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 129,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "input.salt && session.indexId"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 133,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 134,
+      "column": 65,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 142,
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "input.toUpperCase()"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 144,
+      "column": 16,
+      "mutator": "Regex",
+      "replacement": "/[\\s\\-_.,;:!?()\"']/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 150,
+      "column": 17,
+      "mutator": "ArithmeticOperator",
+      "replacement": "hash / 31"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/relevance.js",
+      "line": 150,
+      "column": 17,
+      "mutator": "ArithmeticOperator",
+      "replacement": "hash * 31 - input.charCodeAt(i)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 10,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 9,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 22,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 28,
+      "column": 55,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 45,
+      "column": 50,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 45,
+      "column": 68,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 56,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "0.5 * cross - 0.5 * c.baseScore"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 56,
+      "column": 39,
+      "mutator": "ArithmeticOperator",
+      "replacement": "0.5 / c.baseScore"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 59,
+      "column": 5,
+      "mutator": "MethodExpression",
+      "replacement": "reranked"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 59,
+      "column": 19,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 59,
+      "column": 29,
+      "mutator": "ArithmeticOperator",
+      "replacement": "b.fusedScore + a.fusedScore"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 60,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 61,
+      "column": 67,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 64,
+      "column": 19,
+      "mutator": "LogicalOperator",
+      "replacement": "reranked[0]?.fusedScore && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 64,
+      "column": 19,
+      "mutator": "OptionalChaining",
+      "replacement": "reranked[0].fusedScore"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 77,
+      "column": 55,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 93,
+      "column": 29,
+      "mutator": "MethodExpression",
+      "replacement": "query.split(/\\s+/)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 92,
+      "column": 50,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 93,
+      "column": 41,
+      "mutator": "Regex",
+      "replacement": "/\\s/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 93,
+      "column": 62,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 93,
+      "column": 62,
+      "mutator": "EqualityOperator",
+      "replacement": "t.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 94,
+      "column": 29,
+      "mutator": "MethodExpression",
+      "replacement": "content.toLowerCase().split(/\\s+/)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 94,
+      "column": 57,
+      "mutator": "Regex",
+      "replacement": "/\\s/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 94,
+      "column": 78,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 94,
+      "column": 78,
+      "mutator": "EqualityOperator",
+      "replacement": "t.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 95,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 95,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 95,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "qTokens.size === 0 && cTokens.size === 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 95,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 102,
+      "column": 12,
+      "mutator": "ArithmeticOperator",
+      "replacement": "overlap * Math.max(qTokens.size, cTokens.size)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/semantic.js",
+      "line": 102,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(qTokens.size, cTokens.size)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 9,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 10,
+      "column": 25,
+      "mutator": "LogicalOperator",
+      "replacement": "input.activeLanguage && 'en'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 10,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 11,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 29,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 35,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 35,
+      "column": 18,
+      "mutator": "MethodExpression",
+      "replacement": "entry.synonyms.every(s => s.toLowerCase() === input.query.toLowerCase())"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 35,
+      "column": 45,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 38,
+      "column": 30,
+      "mutator": "MethodExpression",
+      "replacement": "s.toUpperCase()"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 41,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 42,
+      "column": 67,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 44,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 52,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 53,
+      "column": 60,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 62,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 63,
+      "column": 62,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 72,
+      "column": 25,
+      "mutator": "MethodExpression",
+      "replacement": "input.dictionary.map(term => ({\n  term,\n  distance: levenshtein(input.query, term)\n})).filter(s => s.distance > 0 && s.d"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 75,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "a.distance + b.distance"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 75,
+      "column": 15,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 76,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 77,
+      "column": 56,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 88,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 87,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 89,
+      "column": 17,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 91,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 93,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 94,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 95,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 96,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 98,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 97,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 99,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 100,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 101,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 102,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 103,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 104,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 105,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 106,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 107,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 109,
+      "column": 16,
+      "mutator": "MethodExpression",
+      "replacement": "s.charAt(0).toLowerCase()"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 110,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 110,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "map[s.charAt(0)] && ''"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 110,
+      "column": 20,
+      "mutator": "MethodExpression",
+      "replacement": "s"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i <= s.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i >= s.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 37,
+      "mutator": "EqualityOperator",
+      "replacement": "code.length <= 4"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 37,
+      "mutator": "EqualityOperator",
+      "replacement": "code.length >= 4"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 111,
+      "column": 62,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 112,
+      "column": 19,
+      "mutator": "LogicalOperator",
+      "replacement": "map[s.charAt(i)] && ''"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 112,
+      "column": 23,
+      "mutator": "MethodExpression",
+      "replacement": "s"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 112,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 113,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 115,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 118,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 115,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 120,
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "code + '0000'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 120,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 126,
+      "column": 30,
+      "mutator": "Regex",
+      "replacement": "/(ing|ed|ly|es|s)/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 128,
+      "column": 30,
+      "mutator": "Regex",
+      "replacement": "/(en|er|es|em|s)/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 132,
+      "column": 30,
+      "mutator": "Regex",
+      "replacement": "/(mente|ando|iendo|ado|ido|es|s)/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 134,
+      "column": 30,
+      "mutator": "Regex",
+      "replacement": "/(です|ます|した|ない)/"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 140,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 144,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 146,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 150,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "new Array()"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 150,
+      "column": 27,
+      "mutator": "ArithmeticOperator",
+      "replacement": "n - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 151,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i < m"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 151,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 151,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i > m"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 151,
+      "column": 37,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 153,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 153,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 157,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 163,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 163,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "!row && !prev"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 170,
+      "column": 12,
+      "mutator": "OptionalChaining",
+      "replacement": "dp[m][n]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/synonym-advanced.js",
+      "line": 178,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 13,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 20,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 53,
+      "column": 54,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 56,
+      "column": 19,
+      "mutator": "LogicalOperator",
+      "replacement": "hits[0]?.score && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 56,
+      "column": 19,
+      "mutator": "OptionalChaining",
+      "replacement": "hits[0].score"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 64,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "input.vectorWeight <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 64,
+      "column": 35,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 64,
+      "column": 35,
+      "mutator": "EqualityOperator",
+      "replacement": "input.keywordWeight <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 69,
+      "column": 60,
+      "mutator": "ArithmeticOperator",
+      "replacement": "hit.score / input.vectorWeight"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 72,
+      "column": 31,
+      "mutator": "LogicalOperator",
+      "replacement": "combined.get(hit.id) && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 78,
+      "column": 55,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 96,
+      "column": 55,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 107,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "i <= a.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/vector.js",
+      "line": 114,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/algolia.js",
@@ -367,6 +2887,13 @@
     },
     {
       "file": ".vitest-dist/src/algolia.js",
+      "line": 10,
+      "column": 29,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/algolia.js",
       "line": 12,
       "column": 49,
       "mutator": "BooleanLiteral",
@@ -380,11 +2907,32 @@
       "replacement": "\"\""
     },
     {
-      "file": ".vitest-dist/src/typesense.js",
-      "line": 9,
-      "column": 29,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 20,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 20,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "explicit.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 53,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 53,
+      "column": 19,
+      "mutator": "EqualityOperator",
+      "replacement": "key.length >= 0"
     },
     {
       "file": ".vitest-dist/src/typesense.js",
@@ -392,15 +2940,8 @@
       "column": 24,
       "mutator": "LogicalOperator",
       "replacement": "config?.typoTolerance && false"
-    },
-    {
-      "file": ".vitest-dist/src/typesense.js",
-      "line": 10,
-      "column": 19,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
     }
   ],
-  "capturedAt": "2026-07-05T12:00:19Z",
-  "note": "Total MSI 74.67% / Covered MSI 75.98% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-17T09:17:27Z",
+  "note": "Total MSI 79.08% / Covered MSI 79.89% (threshold high=65 / low=55 / break=50)."
 }

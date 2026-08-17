@@ -36,7 +36,7 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
 | `@kiwa-lab/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. Ran on `in-memory-cache.js` alone under `override: 60`; #1967 widened it to every implementation file, measured 78.77, and deleted the override. |
 | `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. v1.27-3 baseline mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-lab/quality-metrics` (mutation-tested there). |
-| `@kiwa-lab/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. |
+| `@kiwa-lab/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. #1969 widened it from the three adapters plus the engine to every implementation file and measured 79.89. |
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
 | `@kiwa-lab/ui` | Test type | 60 / 50 / 40 | Vue / Solid / Lit / Qwik / Angular DOM harness — jsdom + framework noise. |
@@ -73,7 +73,7 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** The repo sits at 32.7%, and each remaining package
+**This is the target, not the current state.** The repo sits at 35.9%, and each remaining package
 moves under its own Issue (§ Widening a package's scope). Read a green mutation gate accordingly —
 until a package's Issue lands, "passed" covers whatever its config happens to list.
 
@@ -147,18 +147,18 @@ re-run it rather than reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 22,328 |
-| implementation, not in `mutate` | 46,025 |
+| implementation, in `mutate` | 24,507 |
+| implementation, not in `mutate` | 43,846 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 32.7% of implementation lines were covered (22,328 of 68,353).
+So 35.9% of implementation lines were covered (24,507 of 68,353).
 
-Everything outside `mutate` totals 50,078 lines, and barrel plus type-only accounts for 4,053 of
+Everything outside `mutate` totals 47,899 lines, and barrel plus type-only accounts for 4,053 of
 that — the "it's only types" explanation does not cover the gap. Per-package coverage ranges from
-100% (13 packages after #1961, #1963, #1965, and #1967) to `auth` at 2.0%.
+100% (14 packages after #1961, #1963, #1965, #1967, and #1969) to `auth` at 2.0%.
 
-Widening to the full set means 68,353 implementation lines against 22,328 today — roughly 3.1x. At
+Widening to the full set means 68,353 implementation lines against 24,507 today — roughly 2.8x. At
 the current density (about 0.6 mutants per line) that projects to somewhere near 40,000 mutants.
 Treat it as an order of magnitude, not a forecast: density varies by package.
 
@@ -216,12 +216,12 @@ plan, while the small group is mostly a config edit plus a re-run.
 | group | packages | uncovered lines each |
 |---|---|---|
 | large — one Issue each | `auth` (13,899), `orm` (5,011), `queue` (4,978), `observability` (4,970), `ai-llm` (4,735), `realtime` (3,950), `dapp` (3,501) | 3,000+ |
-| medium — one Issue each | `edge` (2,802), `search` (2,179), ~~`cache` (2,084)~~, ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
+| medium — one Issue each | `edge` (2,802), ~~`search` (2,179)~~, ~~`cache` (2,084)~~, ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
 | small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
 `hono` already sat at 100% and needed no Issue. `cli` widened in #1961, the small group in #1963,
-`security` in #1965, and `cache` in #1967, so 13 of 22 packages are now at 100%. What remains is the
-large group and two of the medium group.
+`security` in #1965, `cache` in #1967, and `search` in #1969, so 14 of 22 packages are now at 100%.
+What remains is the large group and `edge`, the last of the medium group.
 
 `tests/release-smoke/tests/mutation-gate-coverage.test.ts` holds the other half of that sentence in
 `FULLY_WIDENED`, which has to be exactly the packages with nothing left outside `mutate`. A widened
