@@ -149,12 +149,34 @@ function mutationRunners(): Runner[] {
   return runners.sort((a, b) => a.dir.localeCompare(b.dir));
 }
 
-function rootMutationFilters(): string[] {
+/**
+ * The packages root `test:mutation` selects.
+ *
+ * Both spellings pnpm accepts (`-F`, `--filter`, with a space or `=`), and any
+ * package name rather than the `@kiwa-lab/` scope. The runner set is
+ * workspace-wide since Round 3, so a scope-locked parser would read a filter
+ * naming an `examples/*` package as absent and compare a truncated list.
+ *
+ * Exclusions (`!pkg`) are returned separately. This parser does not model what
+ * they subtract, so the caller fails rather than comparing a set it derived
+ * with rules it does not implement.
+ */
+export function parseMutationFilters(script: string): { include: string[]; exclude: string[] } {
+  const include: string[] = [];
+  const exclude: string[] = [];
+  for (const match of script.matchAll(/(?:^|\s)(?:-F|--filter)(?:=|\s+)(['"]?)([^\s'"]+)\1/g)) {
+    const value = match[2] as string;
+    if (value.startsWith('!')) exclude.push(value.slice(1));
+    else include.push(value);
+  }
+  return { include, exclude };
+}
+
+function rootMutationFilters(): { include: string[]; exclude: string[] } {
   const root = JSON.parse(readFileSync(resolve(REPO_ROOT, 'package.json'), 'utf-8')) as {
     scripts: Record<string, string>;
   };
-  const script = root.scripts['test:mutation'] ?? '';
-  return [...script.matchAll(/-F (@kiwa-lab\/[a-z0-9-]+)/g)].map((match) => match[1] as string);
+  return parseMutationFilters(root.scripts['test:mutation'] ?? '');
 }
 
 /**
@@ -178,7 +200,11 @@ function docTierTable(): Record<string, { high: number; low: number; break: numb
 describe('every package that runs mutation testing is scored', () => {
   it('gives each runner a tier, a directory, and a place in the run', async () => {
     const { PACKAGE_TIER, PKG_DIRS } = await loadGate();
-    const filters = new Set(rootMutationFilters());
+    const parsed = rootMutationFilters();
+    expect(parsed.exclude, 'root test:mutation uses `!pkg`, which this axis does not model').toEqual(
+      [],
+    );
+    const filters = new Set(parsed.include);
     const runners = mutationRunners();
     const expected = withoutExemptions(
       runners.map((runner) => runner.dir),
@@ -245,13 +271,31 @@ describe('every package that runs mutation testing is scored', () => {
 
   it('runs exactly the packages it scores', async () => {
     const { PACKAGE_TIER } = await loadGate();
-    expect([...new Set(rootMutationFilters())].sort()).toEqual(Object.keys(PACKAGE_TIER).sort());
+    const parsed = rootMutationFilters();
+    expect(parsed.exclude, 'root test:mutation uses `!pkg`, which this axis does not model').toEqual(
+      [],
+    );
+    expect([...new Set(parsed.include)].sort()).toEqual(Object.keys(PACKAGE_TIER).sort());
+  });
+
+  it('reads both filter spellings and any package name', () => {
+    // pnpm accepts `-F` and `--filter`, with a space or `=`, and the runner set
+    // is workspace-wide so the name is not always `@kiwa-lab/*`.
+    const parsed = parseMutationFilters(
+      "pnpm -F @kiwa-lab/core --filter examples-probe -F='@kiwa-lab/api' --filter=!@kiwa-lab/e2e run test:mutation",
+    );
+    expect(parsed.include).toEqual(['@kiwa-lab/core', 'examples-probe', '@kiwa-lab/api']);
+    expect(parsed.exclude).toEqual(['@kiwa-lab/e2e']);
+    // A word that merely contains the flag is not a filter.
+    expect(parseMutationFilters('pnpm run test:mutation --no-bail').include).toEqual([]);
   });
 
   it('gives every entry a tier the threshold table knows', async () => {
     const { PACKAGE_TIER, TIER_THRESHOLD, thresholdFor } = await loadGate();
     const tiers = Object.keys(docTierTable());
-    expect(tiers.length, 'doc tier table did not parse').toBe(4);
+    // Not a fixed count: a fifth tier is a doc edit, not a regression. An empty
+    // table means the parse broke, and every entry below is checked against it.
+    expect(tiers.length, 'doc tier table did not parse').toBeGreaterThan(0);
     for (const [scoped, entry] of Object.entries(PACKAGE_TIER as Record<string, TierEntry>)) {
       expect(tiers, `${scoped}: unknown tier ${entry.tier}`).toContain(entry.tier);
       expect(typeof thresholdFor(scoped), `${scoped}: no effective threshold`).toBe('number');
