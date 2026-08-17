@@ -34,6 +34,7 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { isMainModule } from './lib/is-main-module.mjs';
 
 const SCRIPT_ROOT = resolve(new URL('..', import.meta.url).pathname);
 const REPO_ROOT = process.env.KIWA_GATE_ROOT
@@ -225,7 +226,7 @@ function formatThreshold(t) {
 
 // Skip the CLI when imported (e.g. from unit tests). The module-level exports
 // stay reachable so consumers can cross-check the tier table SSOT.
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(process.argv[1], import.meta.url)) {
   const failures = [];
   const rows = [];
   for (const pkg of PACKAGES) {

@@ -18,6 +18,7 @@
  */
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
+import { isMainModule } from './lib/is-main-module.mjs';
 
 const SCRIPT_ROOT = resolve(new URL('..', import.meta.url).pathname);
 const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
@@ -207,7 +208,7 @@ function refreshBaseline(pkg, pkgDir) {
 
 // Skip the CLI when imported (e.g. from tests) so summariseReport can be
 // exercised without spawning the write path.
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(process.argv[1], import.meta.url)) {
   const argv = process.argv.slice(2);
   const requestedPkgs = argv.length === 0
     ? Object.keys(PACKAGES)

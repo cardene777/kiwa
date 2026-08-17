@@ -27,6 +27,7 @@
 import { existsSync, readFileSync, readdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isMainModule } from './lib/is-main-module.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = resolve(HERE, '..');
@@ -333,17 +334,6 @@ function main() {
   );
 }
 
-// Comparing `import.meta.url` to a `file://` string built from `process.argv[1]` fails on
-// paths containing spaces (the URL percent-encodes them) and when the script is reached
-// through a symlink (the URL resolves to the real path). Either case skipped `main()`
-// silently, so `--check` exited 0 without checking anything. Compare resolved paths instead.
-function isMainModule() {
-  if (!process.argv[1]) return false;
-  try {
-    return realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]);
-  } catch {
-    return false;
-  }
-}
-
-if (isMainModule()) main();
+// The entry check lives in `scripts/lib/is-main-module.mjs`; this file is where the
+// defect it fixes was first found (a `--check` run that exited 0 without checking).
+if (isMainModule(process.argv[1], import.meta.url)) main();

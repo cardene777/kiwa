@@ -58,6 +58,7 @@ import { StringDecoder } from 'node:string_decoder';
 import { existsSync, lstatSync, readFileSync, readlinkSync, realpathSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isMainModule } from './lib/is-main-module.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
@@ -883,7 +884,7 @@ async function main() {
 }
 
 // Only run as CLI when invoked directly (not when imported by tests).
-const isEntry = pathToFileURL(process.argv[1] ?? '').href === import.meta.url;
+const isEntry = isMainModule(process.argv[1], import.meta.url);
 if (isEntry) {
   main().catch((err) => {
     process.stderr.write(`[test-all] ${err.stack ?? err.message ?? err}\n`);

@@ -18,6 +18,8 @@
  * on the `main` branch and uploaded as a workflow artifact.
  */
 import { existsSync, readFileSync } from 'node:fs';
+
+import { isMainModule } from './lib/is-main-module.mjs';
 import { resolve } from 'node:path';
 
 const PACKAGES = [
@@ -163,7 +165,7 @@ async function main() {
   process.stdout.write(renderMarkdown(rows));
 }
 
-const isCli = import.meta.url === `file://${process.argv[1]}`;
+const isCli = isMainModule(process.argv[1], import.meta.url);
 if (isCli) {
   await main();
 }
