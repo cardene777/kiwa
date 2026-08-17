@@ -86,9 +86,13 @@ you widen that package.
 Compile the file with the types stripped and read what the emitted JavaScript still exports. Types,
 interfaces, and `declare` forms leave nothing behind, so whatever remains is what exists at runtime.
 
-Then classify what remains. An export carrying a module specifier (`export * from './a.js'`,
-`export { b } from './b.js'`) forwards someone else's value; anything else publishes a value this
-file defines.
+Then classify what remains. The split is syntactic: an export carrying a module specifier
+(`export * from './a.js'`, `export { b } from './b.js'`) forwards, and anything else counts as the
+file's own.
+
+Syntax is not meaning here. `import x from './a.js'; export default x` re-publishes someone else's
+value without a specifier, so it reads as implementation. That is the safe direction to err — the
+file ends up in `mutate` and Stryker finds little to mutate.
 
 - own values present → implementation
 - only forwards → barrel
@@ -133,10 +137,9 @@ until it lands, re-derive the numbers the same way if a package's `mutate` chang
 
 So 16.8% of implementation lines were covered (10,878 of 64,753).
 
-The "it's only types" explanation does not cover the gap. Everything outside `mutate` totals 57,636
-lines, and barrel plus type-only accounts for 3,761 of them — the other 53,875 lines are
-implementation. Per-package coverage ranged from `hono` at 100% to `auth` at 2.7% with no written
-basis for the difference.
+The "it's only types" explanation does not cover the gap. Barrel and type-only files come to 3,761
+lines across the repo, against 53,875 lines of implementation sitting outside `mutate`. Per-package
+coverage ranged from `hono` at 100% to `auth` at 2.7% with no written basis for the difference.
 
 Widening to the full set means 64,753 implementation lines against 10,878 today — roughly 6x. At the
 current density (6,271 mutants over 10,878 lines, about 0.58 per line) that projects to somewhere
