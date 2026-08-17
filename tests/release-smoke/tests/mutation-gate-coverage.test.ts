@@ -162,11 +162,17 @@ function mutationRunners(): Runner[] {
  * `=` versus space, quoting, scope, exclusions). Removing the second copy
  * removed the parser with it.
  */
+/** The one invocation root `test:mutation` is allowed to be. */
+export const DRIVER_INVOCATION = 'node scripts/run-mutation.mjs';
+
 export function runsThroughDriver(script: string): boolean {
-  // The script has to *be* the driver invocation. A substring test passes for a
-  // script that only mentions the path — in a comment, an `echo`, or a longer
-  // filename — which is a check satisfied without doing the thing it checks for.
-  return /^\s*node\s+scripts\/run-mutation\.mjs(\s|$)/.test(script);
+  // Equality, not a pattern. Round 6 replaced a substring test with a prefix
+  // pattern, and Round 7 found the next form it let through
+  // (`node scripts/run-mutation.mjs || true`, which runs the driver and throws
+  // its exit code away). Every partial match leaves another suffix to find;
+  // equality leaves none, and the cost is that changing the invocation means
+  // changing this constant with it.
+  return script.trim() === DRIVER_INVOCATION;
 }
 
 function rootRunsThroughDriver(): boolean {
@@ -283,15 +289,16 @@ describe('every package that runs mutation testing is scored', () => {
     ]);
   });
 
-  it('is not satisfied by a script that only mentions the driver', () => {
-    expect(runsThroughDriver('node scripts/run-mutation.mjs')).toBe(true);
-    expect(runsThroughDriver('node scripts/run-mutation.mjs core')).toBe(true);
+  it('accepts the driver invocation and nothing else', () => {
+    expect(runsThroughDriver(DRIVER_INVOCATION)).toBe(true);
+    expect(runsThroughDriver(` ${DRIVER_INVOCATION} `)).toBe(true);
     // Mentioning the path is not running it.
     expect(runsThroughDriver('echo scripts/run-mutation.mjs')).toBe(false);
-    expect(runsThroughDriver('pnpm -F @kiwa-lab/core run test:mutation # scripts/run-mutation.mjs')).toBe(
-      false,
-    );
+    expect(runsThroughDriver('pnpm run x # scripts/run-mutation.mjs')).toBe(false);
     expect(runsThroughDriver('node scripts/run-mutation.mjs.bak')).toBe(false);
+    // Running it and discarding the result is not running the gate's run.
+    expect(runsThroughDriver('node scripts/run-mutation.mjs || true')).toBe(false);
+    expect(runsThroughDriver('node scripts/run-mutation.mjs > /dev/null 2>&1')).toBe(false);
     expect(runsThroughDriver('')).toBe(false);
   });
 
