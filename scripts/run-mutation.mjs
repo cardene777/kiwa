@@ -20,8 +20,8 @@
  *   node scripts/run-mutation.mjs core api   # a subset, by short or scoped name
  */
 import { spawnSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
 
+import { isMainModule } from './package-mutation.mjs';
 import { PACKAGE_TIER } from './check-mutation-gates.mjs';
 
 /** Scoped names for the requested subset, or all scored packages. */
@@ -44,10 +44,10 @@ export function pnpmArgs(packages) {
   return [...packages.flatMap((name) => ['-F', name]), '--no-bail', 'run', 'test:mutation'];
 }
 
-// `file://${process.argv[1]}` fails for any checkout path that needs URL
-// encoding — a directory with a space compares `…/kiwa review/…` against
-// `…/kiwa%20review/…` — and the script then exits 0 having run nothing (#1955).
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+// Shared with `package-mutation.mjs`: comparing a `file://` string built from
+// `process.argv[1]` misses encoded paths and symlinks, and the script then
+// exits 0 having run nothing (#1955).
+if (isMainModule(process.argv[1], import.meta.url)) {
   let packages;
   try {
     packages = selectPackages(process.argv.slice(2));

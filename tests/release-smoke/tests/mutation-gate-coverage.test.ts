@@ -18,11 +18,12 @@
 //   1. add the package to `PACKAGE_TIER` / `PKG_DIRS` / root `test:mutation`
 //   2. remove its `test:mutation` script and Stryker config if it should not run
 //   3. add it to `UNSCORED_ALLOWLIST` below with the reason
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
 
@@ -30,6 +31,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = repoRoot(HERE);
 const GATE = resolve(REPO_ROOT, 'scripts/check-mutation-gates.mjs');
 const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
+
+/** Temporary trees the guard checks need; removed when the file finishes. */
+const fixtures: string[] = [];
+afterAll(() => {
+  for (const dir of fixtures) rmSync(dir, { recursive: true, force: true });
+});
 
 // Workspace-relative directories that run mutation testing on purpose without
 // being scored (`packages/foo`, not `foo`). Each entry needs a reason: an
@@ -421,18 +428,37 @@ describe('every package that runs mutation testing is scored', () => {
     const runner = await import(
       pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
     );
-    // Comparing an unencoded path against an encoded URL fails for a checkout
-    // under a directory with a space, and the script then exits 0 having run
-    // nothing — a mutation run that reports success without running.
-    const spaced = '/tmp/kiwa review/scripts/package-mutation.mjs';
-    expect(runner.isMainModule(spaced, pathToFileURL(spaced).href)).toBe(true);
-    expect(runner.isMainModule(spaced, `file://${spaced}`)).toBe(false);
+    // Both cases the `file://${argv[1]}` form misses end the same way: the
+    // guard does not fire and the script exits 0 having run nothing.
+    const real = resolve(REPO_ROOT, 'scripts/package-mutation.mjs');
+
+    // Encoding: a path with a space.
+    const spaced = mkdtempSync(join(tmpdir(), 'kiwa scope '));
+    fixtures.push(spaced);
+    const spacedScript = join(spaced, 'package-mutation.mjs');
+    writeFileSync(spacedScript, '// probe\n');
+    expect(runner.isMainModule(spacedScript, pathToFileURL(spacedScript).href)).toBe(true);
+    // The unencoded spelling resolves to the same file, so comparing paths
+    // accepts it where comparing URL strings did not.
+    expect(runner.isMainModule(spacedScript, `file://${spacedScript}`)).toBe(true);
+
+    // Symlink: reaching the same file through a link. macOS `/tmp` is itself a
+    // link to `/private/tmp`, so this is the ordinary case, not the exotic one.
+    const linkDir = mkdtempSync(join(tmpdir(), 'kiwa-scope-link-'));
+    fixtures.push(linkDir);
+    const link = join(linkDir, 'linked.mjs');
+    symlinkSync(real, link);
+    expect(runner.isMainModule(link, pathToFileURL(real).href)).toBe(true);
+
+    // Negatives: another file, a path that resolves to nothing, no argv at all.
+    expect(runner.isMainModule(real, pathToFileURL(spacedScript).href)).toBe(false);
+    expect(runner.isMainModule('/no/such/file.mjs', 'file:///no/such/file.mjs')).toBe(false);
     expect(runner.isMainModule(undefined, 'file:///x')).toBe(false);
 
-    // The driver is the other mutation entry point and had the same guard.
+    // The driver is the other mutation entry point and had the same guard; it
+    // now shares this one.
     const driverSource = readFileSync(resolve(REPO_ROOT, 'scripts/run-mutation.mjs'), 'utf-8');
-    const guard = /if \([^)]*pathToFileURL\(process\.argv\[1\]\)\.href === import\.meta\.url\) \{/;
-    expect(guard.test(driverSource), 'run-mutation.mjs guard is not URL-safe').toBe(true);
+    expect(driverSource).toContain('isMainModule(process.argv[1], import.meta.url)');
   });
 
   it('accepts the driver invocation and nothing else', () => {
