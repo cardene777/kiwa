@@ -159,8 +159,9 @@ that. 20 of 22 packages are at 100%; what stays outside is `orm` (5,011 lines) a
 which #1980 measured and could not widen (§ Widening a package's scope).
 
 Reaching every one of the 68,353 implementation lines therefore needs those two packages and nothing
-else. The gap this section opened with was 50,225 lines at 26.5%, and closing it to here took six
-PRs without a new test: every package that was widened met its tier as it already stood.
+else. The gap this section opened with was 50,225 lines at 26.5%, and five PRs closed it to here
+(#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group) without a new
+test: every package that was widened met its tier as it already stood.
 
 
 #1944 classified the same files by hand and published totals 404 lines higher — one per file, from
@@ -249,9 +250,11 @@ removed so far had all been removable for some time before anyone looked.
 
 ## Widening a package's scope
 
-One package per PR, sized by how much sits outside `mutate` today. The three groups below were drawn
-on the assumption that the work differs in kind with volume — that the small group would be a config
-edit plus a re-run and the large group would need its own test-writing plan.
+One Issue per unit of work, sized by how much sits outside `mutate` today. A unit is usually one
+package, but packages that turn out to need the same edit go together: #1963 widened nine in one PR
+and #1980 widened five. The three groups below were drawn on the assumption that the work differs in
+kind with volume — that the small group would be a config edit plus a re-run and the large group
+would need its own test-writing plan.
 
 **Only the first half held.** #1980 measured the large group and five of its seven packages were
 also a config edit plus a re-run (§ The large group was measured before it was planned). The two

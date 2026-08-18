@@ -16,11 +16,12 @@
  * "already tested elsewhere" argument fails the same way: the adapter's own
  * branches are not the ones quality-metrics runs.
  *
- * Four exclusions of this shape have been checked across `cache` (#1967),
- * `queue` and this package (#1980), and none held. The reasoning is appealing
- * because it sounds like it protects the score, but `covered MSI` drops
- * no-coverage mutants from its denominator, so excluding a file can only hide
- * work — never protect a number.
+ * Eight files across three packages have been excluded on this reasoning and
+ * measured since: `cache` (#1967, three files), `queue` (#1980, two) and this
+ * one (#1980, three). None of the eight had zero covered mutants. The argument
+ * is appealing because it sounds like it protects the score, but `covered MSI`
+ * drops no-coverage mutants from its denominator, so excluding a file can only
+ * hide work — never protect a number.
  */
 export default {
   packageManager: 'pnpm',
