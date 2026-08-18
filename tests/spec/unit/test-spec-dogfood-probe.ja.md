@@ -95,8 +95,8 @@ throw / no-throw を直接見る。
 | 6 | 入力バリデーション | `arguments` が JSON でない場合の fallback 経路 |
 
 `4 状態遷移` は state machine を持たないため除外。 `5 権限` / `7 冪等性` / `8 並行処理` /
-`9 性能` / `10 セキュリティ` は § 主な品質リスク のとおり該当しない。 `11 回帰` は既存 test が
-無いため今回は対象外。
+`9 性能` / `10 セキュリティ` は § 主な品質リスク のとおり該当しない。 `11 回帰` は既知不具合の
+再発防止を目的とする case が無いため今回は対象外。
 
 ## テストケース一覧
 
@@ -143,9 +143,52 @@ throw / no-throw を直接見る。
 | TC-022 | 単体 | 入力バリデーション | spy に `Read` を `{"a":1}` で記録 | `'Read', { a: 1, b: 2 }` | `assertToolCalledWith(spy, 'Read', { a: 1, b: 2 })` | throw する (key 数が異なる) | 中 | 推奨 |
 | TC-023 | 単体 | 入力バリデーション | spy に `Read` を `{"a":null}` で記録 | `'Read', { a: {} }` | `assertToolCalledWith(spy, 'Read', { a: {} })` | throw する。 **`Object.keys(null)` の TypeError ではなく assertion 失敗**として返る | 中 | 推奨 |
 
+## 既存 test との対応
+
+`/kiwa-design` § Step 2 § 既存 test の探索 の実測結果と、 § テストケース一覧 の全 TC を突き合わせた結果。
+
+- 探索した path — `packages/skill-test/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` 除外)。 見つかった dir は `tests/` のみで `test/` は存在しない
+- 見つけた既存 test — 27 件 (`tests/skill-test.test.ts` 26 件 + `tests/docs-library-skill-test.test.ts` 1 件)
+- 判定の履歴 — 探索を持たなかった初回 dogfood では、 既存 19 件を 1 件も見ずに 23 TC を起こし 18 件が重複した。 探索を入れた再 dogfood で候補なし 5 件 (TC-014 / 015 / 021 / 022 / 023) を検出し、 候補ありの 18 件も body を読んだ結果 2 件 (TC-017 / TC-018) が「名前は一致するが入力を走らせていない」 と判明した。 計 7 件を既存 file へ追記した後の状態が下表
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| TC-001 | `少なくとも 1 回呼ばれていれば pass` (`packages/skill-test/tests/skill-test.test.ts:52`) | 既覆 (候補) |
+| TC-002 | `times 指定で回数厳密一致` (`packages/skill-test/tests/skill-test.test.ts:64`) | 既覆 (候補) |
+| TC-003 | `未呼出で pass` (`packages/skill-test/tests/skill-test.test.ts:74`) | 既覆 (候補) |
+| TC-004 | `引数一致 (deep equal) で pass` (`packages/skill-test/tests/skill-test.test.ts:88`) | 既覆 (候補) |
+| TC-005 | `subsequence として一致すれば pass` (`packages/skill-test/tests/skill-test.test.ts:129`) | 既覆 (候補) |
+| TC-006 | `間に他 tool 挟んでも subsequence 一致で pass` (`packages/skill-test/tests/skill-test.test.ts:137`) | 既覆 (候補) |
+| TC-007 | `複数呼出のうち 1 つでも一致すれば pass` (`packages/skill-test/tests/skill-test.test.ts:104`) | 既覆 (候補) |
+| TC-008 | `未呼出で throw` (`packages/skill-test/tests/skill-test.test.ts:58`) | 既覆 (候補) |
+| TC-009 | `times 指定で回数厳密一致` (`packages/skill-test/tests/skill-test.test.ts:64`) | 既覆 (候補) |
+| TC-010 | `1 回でも呼ばれてたら throw` (`packages/skill-test/tests/skill-test.test.ts:80`) | 既覆 (候補) |
+| TC-011 | `tool 未呼出で throw` (`packages/skill-test/tests/skill-test.test.ts:112`) | 既覆 (候補) |
+| TC-012 | `引数不一致で throw` (`packages/skill-test/tests/skill-test.test.ts:96`) | 既覆 (候補) |
+| TC-013 | `順序逆で throw` (`packages/skill-test/tests/skill-test.test.ts:147`) | 既覆 (候補) |
+| TC-014 | `TC-014 未呼出で times: 0 なら pass` (`packages/skill-test/tests/skill-test.test.ts:181`) | 既覆 (候補) |
+| TC-015 | `TC-015 1 回呼ばれていて times: 0 なら throw` (`packages/skill-test/tests/skill-test.test.ts:186`) | 既覆 (候補) |
+| TC-016 | `TC-016 spy が空で expectedOrder も空なら pass` (`packages/skill-test/tests/skill-test.test.ts:165`) | 既覆 (候補) |
+| TC-017 | `TC-017 呼出記録があっても expectedOrder が空なら pass` (`packages/skill-test/tests/skill-test.test.ts:170`) | 既覆 (候補) |
+| TC-018 | `TC-018 reset 後は assertToolCalled が throw する` (`packages/skill-test/tests/skill-test.test.ts:230`) | 既覆 (候補) |
+| TC-019 | `record + getCalls で挿入順を保持する` (`packages/skill-test/tests/skill-test.test.ts:11`) | 既覆 (候補) |
+| TC-020 | `non-JSON 引数 (CLI style) は raw string 比較 fallback` (`packages/skill-test/tests/skill-test.test.ts:119`) | 既覆 (候補) |
+| TC-021 | `TC-021 入れ子 object を deep 比較して pass` (`packages/skill-test/tests/skill-test.test.ts:196`) | 既覆 (候補) |
+| TC-022 | `TC-022 key 数が異なれば throw` (`packages/skill-test/tests/skill-test.test.ts:202`) | 既覆 (候補) |
+| TC-023 | `TC-023 null と object の比較を TypeError ではなく assertion 失敗にする` (`packages/skill-test/tests/skill-test.test.ts:210`) | 既覆 (候補) |
+
+`既覆 (候補)` は「候補の test が見つかった」 までの判定で、 覆われていることの断定ではない。
+本表の 23 件は候補の body を 1 件ずつ読み、 TC の入力と期待を実際に走らせていることを確認済。
+
 ## 自動化すべきテスト
 
-優先度順。
+`未覆` / `不明` を先に置き、 その中で優先度順。
+
+未覆 / 不明。
+
+- (なし) — § 既存 test との対応 のとおり 23 件とも既存 test が覆っている。 本 spec から新規に書くべき TC は無い
+
+既覆 (候補)。 実装前に候補の body を読み、 重複なら書かない。
 
 1. **TC-001 〜 TC-013 (高)** — 4 primitive の pass 経路と throw 経路。 本 module の契約そのもの
    で、 どちらか一方だけでは「常に pass する assertion」 を検知できない
