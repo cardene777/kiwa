@@ -154,8 +154,8 @@ reading the snapshot as current.
 
 So 100.0% of implementation lines were covered (68,353 of 68,353).
 
-Everything outside `mutate` totals 4,053 lines, and **all of it is barrel plus type-only** — the two
-shapes this section defines as out of scope. All 22 packages are at 100%.
+Everything outside `mutate` totals 4,053 lines, and barrel plus type-only accounts for 4,053 —
+**all of it**, in the two shapes this section defines as out of scope. All 22 packages are at 100%.
 
 The gap this section opened with was 50,225 lines at 26.5%, and seven PRs closed it entirely
 (#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group, #1985 `orm`,
