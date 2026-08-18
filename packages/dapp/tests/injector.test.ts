@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { resolveKiwaRepoRoot } from '@kiwa-lab/perf-harness';
+import { repoRoot } from './repo-root.js';
 import {
   createPublicClient,
   createWalletClient,
@@ -37,8 +37,8 @@ const SECOND_PRIVATE_KEY =
 const CHAIN_ID = 31337;
 // `process.cwd()` からの相対で解決すると Stryker の sandbox で別 dir を指す (#1982、
 // `deploy-contract.test.ts` の同 pattern と同じ理由)。
-const repoRoot = resolveKiwaRepoRoot(process.cwd());
-const aaExampleRoot = resolve(repoRoot, 'examples/nextjs-aa-smart-account');
+const monorepoRoot = repoRoot(process.cwd());
+const aaExampleRoot = resolve(monorepoRoot, 'examples/nextjs-aa-smart-account');
 
 function ctx(): RpcContext {
   return {

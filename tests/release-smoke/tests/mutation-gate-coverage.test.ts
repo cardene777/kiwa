@@ -533,22 +533,30 @@ describe('every package that runs mutation testing is scored', () => {
       .filter((name) => existsSync(resolve(REPO_ROOT, 'packages', name, 'vitest.stryker.config.mjs')))
       .sort();
 
-    // A test file named outright — no `*` anywhere in the entry.
-    const namesFilesOutright = (pkg: string): boolean => {
+    // The one pattern that reaches every compiled test file. Asking for this
+    // exact string rather than "contains a `*`" is deliberate: a narrow glob
+    // (`anvil-*.test.js`) caps coverage exactly like naming files does, and a
+    // predicate that only rejects star-free entries would wave it through.
+    // Anything else has to justify itself in RUNNER_ALLOWLIST.
+    const CANONICAL_INCLUDE = '.vitest-dist/tests/**/*.test.js';
+
+    const includesSomethingElse = (pkg: string): boolean => {
       const source = readFileSync(
         resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs'),
         'utf8',
       );
       const block = /include:\s*\[([^\]]*)\]/.exec(source);
-      if (block === null) return false;
-      return [...block[1].matchAll(/['"]([^'"]+)['"]/g)].some((m) => !m[1].includes('*'));
+      // No `include` at all means vitest's own default, which is not narrowed.
+      if (block?.[1] === undefined) return false;
+      const entries = [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1] ?? '');
+      return entries.length !== 1 || entries[0] !== CANONICAL_INCLUDE;
     };
 
     expect(
-      configs.filter(namesFilesOutright),
-      'A `vitest.stryker.config.mjs` naming individual test files hides mutants as no-coverage ' +
-        'without marking anything excluded (#1982). Use the glob ' +
-        "`.vitest-dist/tests/**/*.test.js`, or add the package to RUNNER_ALLOWLIST with its reason.",
+      configs.filter(includesSomethingElse),
+      'A `vitest.stryker.config.mjs` that narrows `include` hides mutants as no-coverage without ' +
+        'marking anything excluded (#1982) — whether it names files outright or globs a subset. ' +
+        `Use exactly ['${CANONICAL_INCLUDE}'], or add the package to RUNNER_ALLOWLIST with its reason.`,
     ).toEqual([...RUNNER_ALLOWLIST].sort());
   });
 

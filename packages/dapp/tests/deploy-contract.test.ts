@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { resolveKiwaRepoRoot } from '@kiwa-lab/perf-harness';
+import { repoRoot } from './repo-root.js';
 import {
   createPublicClient,
   createWalletClient,
@@ -22,7 +22,7 @@ const account = privateKeyToAccount(PRIVATE_KEY);
 // `process.cwd()` からの相対で解決すると、 Stryker の sandbox (`.stryker-tmp/sandbox-*`) で
 // 走った時に `packages/dapp/examples/...` を指して artefact を見失う (#1982 で実測)。
 // forge artefact は repo に commit されており構築は要らないので、 repo root から解決する。
-const exampleRoot = resolve(resolveKiwaRepoRoot(process.cwd()), 'examples/nextjs-bridge');
+const exampleRoot = resolve(repoRoot(process.cwd()), 'examples/nextjs-bridge');
 const contractSlug = 'SimpleERC20.sol/SimpleERC20';
 const erc20ViewAbi = parseAbi([
   'function name() view returns (string)',
