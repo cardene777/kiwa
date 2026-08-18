@@ -5,14 +5,22 @@
  *
  * Threshold: Test type tier (high 60 / low 50 / break 40). It was 90 / 80 / 80
  * over a scope of 5 files; #1963 added the remaining 4 and the run came in at
- * 65.26 by Stryker's own score, which counts the no-coverage mutants the
- * browser adapter contributes. Keeping the old break would fail every local
- * run while the gate (covered score, 91.18 against 60) passes.
+ * 65.26 by Stryker's own score, which counted the no-coverage mutants the
+ * browser adapter contributed. Keeping the old break would have failed every
+ * local run while the gate (covered score) passed.
  *
- * `browser.js` is now mutated. It spawns a real Chromium process through
- * Playwright, so its mutants are almost all no-coverage — they cost nothing in
- * the covered score the gate reads, and leaving the file out kept 125 lines
- * invisible. Per-mutant slowness never materialised because no test drives it.
+ * That gap closed in #1986, and the reason it existed was not the browser
+ * adapter. `vitest.stryker.config.mjs` named six of the package's fourteen test
+ * files in an `include` allowlist, so `browser.js` and `svelte.js` had no test
+ * in the run at all — 54 of 190 mutants reported as no-coverage, `svelte.js`
+ * entirely. With the glob in place the run measures **0 no-coverage** and
+ * Stryker's own score matches the covered one at 93.16.
+ *
+ * `browser.js` is mutated and reached. Its real-Chromium test stays out of the
+ * mutation run (it needs `environment: 'node'`), but `browser-mock.test.js`
+ * drives the same adapter under jsdom, so none of its 34 mutants go unreached.
+ * The per-mutant slowness this header once anticipated never materialised: the
+ * full run takes 39 seconds.
  */
 export default {
   packageManager: 'pnpm',
