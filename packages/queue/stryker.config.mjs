@@ -9,12 +9,14 @@
  * **The testcontainers exclusion was wrong.** It said those files score
  * "0 % / 0 covered mutants" without a live container, citing a v1.27-3 sweep.
  * Measured: `testcontainers-queue.js` has 234 covered mutants against 17
- * no-coverage, and `rabbitmq/testcontainers-rabbitmq.js` 40 against 14. The
- * fourth time an exclusion of this shape has been checked and failed —
- * `cache` (#1967) and `realtime` (#1980) are the others. A file needing a live
- * server for *some* of its assertions still runs plenty without one, and
- * no-coverage mutants leave the covered denominator anyway, so excluding one
- * can only hide work, never protect the score.
+ * no-coverage, and `rabbitmq/testcontainers-rabbitmq.js` 40 against 14.
+ *
+ * Eight files across three packages have been excluded on this reasoning and
+ * measured since — `cache` (#1967, three files), this package (#1980, two) and
+ * `realtime` (#1980, three) — and not one had zero covered mutants. A file
+ * needing a live server for *some* of its assertions still runs plenty without
+ * one, and no-coverage mutants leave the covered denominator anyway, so
+ * excluding one can only hide work, never protect the score.
  * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
  */
 export default {
