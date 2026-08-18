@@ -183,10 +183,18 @@ export const PKG_DIRS = {
 // Packages whose baseline is deferred to a later milestone. The gate lists
 // them as deferred (not a failure) so the report stays honest — silent skip
 // is worse than a marker — but they do not block release.
-// Remove entries here as each milestone lands the baseline.
-const DEFERRED = new Set([
-  '@kiwa-lab/ai-llm', // v1.27-4 release-gate integration scope.
-]);
+//
+// Empty since #1980. Its only entry was `@kiwa-lab/ai-llm`, waiting on
+// "v1.27-4 release-gate integration scope"; v1.27-4 shipped without lifting
+// it, and the package went on running mutation testing with no baseline to
+// record what it scored. It measures 75.83 now, so the grace it was given is
+// spent.
+//
+// The reprieve only applies when a report is missing, which makes it quiet
+// while things work and load-bearing the moment they stop: a package listed
+// here that loses its report reads as "deferred" rather than as the failure it
+// is. Leave an entry here only while a baseline genuinely does not exist.
+const DEFERRED = new Set([]);
 
 const PACKAGES = Object.keys(THRESHOLDS);
 

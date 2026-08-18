@@ -142,8 +142,8 @@ that moved sat outside every gate while the report still read green. Adding the 
 ### The measurement that produced this rule
 
 `node scripts/mutation-scope-report.mjs` produces it (#1948). The numbers below are that script's
-output at the commit which added it (2026-08-17, 22 packages); they move as the source does, so
-re-run it rather than reading the snapshot as current.
+output as of #1980 (2026-08-18, 22 packages); they move as the source does, so re-run it rather than
+reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
