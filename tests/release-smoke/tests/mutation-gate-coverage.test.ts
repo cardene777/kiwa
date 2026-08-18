@@ -522,6 +522,70 @@ describe('every package that runs mutation testing is scored', () => {
     }
   });
 
+  it('keeps interrupted mutation runs out of the test suite', () => {
+    // `vitest run .vitest-dist/tests` reads its positional argument as a filter
+    // matched against each file's path, not as a glob rooted at the package. A
+    // killed mutation run leaves `.stryker-tmp/sandbox-*/`, and the copies inside
+    // it contain `.vitest-dist/tests` too — so the suite silently picks up stale
+    // duplicates of itself and runs against code that is no longer there.
+    //
+    // Measured on `orm` with two leaked sandboxes: 33 files / 618 tests became
+    // 99 files / 1,854 tests, and it passed. Nothing fails, so nothing tells you
+    // (#1984). Stryker removes its sandbox on a clean exit, which is why this
+    // only shows up after an interrupted run — and mutation runs take minutes,
+    // so they do get interrupted.
+    //
+    // `--exclude` is what fixes it, and every invocation reading that directory
+    // needs it: `ui` runs vitest twice, once per environment.
+    const EXCLUDE = "--exclude '**/.stryker-tmp/**'";
+    const READS_DIST_TESTS = /vitest run\s+\.vitest-dist\/tests/;
+
+    // Splitting on `&&` keeps each invocation's own flags together. The index is
+    // reported alongside the script name because a script can hold more than one
+    // — `ui` runs vitest twice, and naming only the script would leave the reader
+    // to work out which half is unprotected.
+    const unprotectedInvocations = (script: string): number[] =>
+      script
+        .split('&&')
+        .map((part, index): [string, number] => [part, index])
+        .filter(([part]) => READS_DIST_TESTS.test(part))
+        .filter(([part]) => !part.includes(EXCLUDE))
+        .map(([, index]) => index);
+
+    const offenders: string[] = [];
+    for (const pkg of readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .sort()) {
+      const manifestPath = resolve(REPO_ROOT, 'packages', pkg, 'package.json');
+      if (!existsSync(manifestPath)) continue;
+      // Only packages that run Stryker can accumulate its sandboxes. Requiring the
+      // flag everywhere would demand it of `lean` / `perf-harness` /
+      // `quality-metrics` / `skill-test`, none of which has a config or a
+      // `test:mutation` script, and the failure message would be untrue for them.
+      //
+      // Deriving the set from the config file rather than listing it means a
+      // package that starts running mutation testing is covered the same day.
+      if (!existsSync(resolve(REPO_ROOT, 'packages', pkg, 'stryker.config.mjs'))) continue;
+      const scripts = (JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+        scripts?: Record<string, string>;
+      }).scripts;
+      for (const name of ['test', 'test:cov']) {
+        const script = scripts?.[name];
+        if (script === undefined) continue;
+        for (const index of unprotectedInvocations(script)) {
+          offenders.push(`${pkg}:${name}#${index}`);
+        }
+      }
+    }
+
+    expect(
+      offenders,
+      `Every \`vitest run .vitest-dist/tests\` needs ${EXCLUDE}, or an interrupted mutation ` +
+        'run makes the suite run against stale copies of itself and still pass (#1984).',
+    ).toEqual([]);
+  });
+
   it('hands the mutation runner every test file, or records why not', async () => {
     // `mutate` decides which code gets mutated; the runner config decides which
     // tests get to kill those mutants. Only the first has a check, and #1982 is
