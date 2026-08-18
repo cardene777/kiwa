@@ -574,16 +574,28 @@ describe('every package that runs mutation testing is scored', () => {
       return prototype === Object.prototype || prototype === null;
     };
 
+    const resolveConfig = async (value: unknown): Promise<unknown> => {
+      const awaited = await value;
+      if (typeof awaited !== 'function') return awaited;
+      return awaited({
+        command: 'serve',
+        mode: 'test',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+    };
+
     const narrowsTheRun = async (pkg: string): Promise<boolean> => {
       const mod = (await import(
         pathToFileURL(resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs')).href
       )) as StrykerVitestModule;
 
-      // `defineConfig` also accepts functions and promises. This repo currently
-      // passes plain objects, but an unsupported export shape must not collapse
-      // into an absent `test` section and silently pass the check.
-      if (!configObject(mod.default)) return true;
-      const testValue = mod.default.test;
+      // Vitest resolves promise and function exports before reading `test`, so
+      // inspect the same value it does. An unsupported resolved shape must not
+      // collapse into an absent `test` section and silently pass the check.
+      const config = await resolveConfig(mod.default);
+      if (!configObject(config)) return true;
+      const testValue = config.test;
       if (testValue !== undefined && !configObject(testValue)) return true;
       const test = testValue;
 
