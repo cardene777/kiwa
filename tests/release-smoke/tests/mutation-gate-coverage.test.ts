@@ -555,25 +555,56 @@ describe('every package that runs mutation testing is scored', () => {
     // itself in RUNNER_ALLOWLIST.
     const BENIGN_EXCLUDE = '**/.stryker-tmp/**';
 
-    const arrayEntries = (source: string, key: string): string[] | null => {
-      const block = new RegExp(`${key}:\\s*\\[([^\\]]*)\\]`).exec(source);
-      if (block?.[1] === undefined) return null;
-      return [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1] ?? '');
+    // Comment lines are dropped first. The key is matched anywhere in the file, so
+    // a config explaining `exclude:` in its header would otherwise be read from the
+    // prose instead of the code.
+    //
+    // Dropping whole comment *lines* rather than comment *spans* is deliberate.
+    // A span-based strip treats the `/**/` inside `tests/**/*.test.js` as an empty
+    // block comment and eats the middle of the glob — measured, that made all 22
+    // packages look narrowed. No config line begins with `*`, so the line filter
+    // cannot reach inside a string.
+    const withoutComments = (source: string): string =>
+      source
+        .split('\n')
+        .filter((line) => !/^\s*(\/\/|\*|\/\*)/.test(line))
+        .join('\n');
+
+    // Three outcomes, not two. `absent` is vitest's own default, which is not
+    // narrowed; `unreadable` is a key whose value is not a literal array — a
+    // variable, a spread, a call — and it has to count as narrowing. Folding it
+    // into `absent` would let any config opt out of this check by hoisting its
+    // list into a `const`.
+    type Entries = { kind: 'absent' } | { kind: 'unreadable' } | { kind: 'literal'; values: string[] };
+
+    const arrayEntries = (source: string, key: string): Entries => {
+      if (new RegExp(`\\b${key}\\s*:`).exec(source) === null) return { kind: 'absent' };
+      const block = new RegExp(`\\b${key}\\s*:\\s*\\[([^\\]]*)\\]`).exec(source);
+      if (block?.[1] === undefined) return { kind: 'unreadable' };
+      return {
+        kind: 'literal',
+        values: [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1] ?? ''),
+      };
     };
 
     const narrowsTheRun = (pkg: string): boolean => {
-      const source = readFileSync(
-        resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs'),
-        'utf8',
+      const source = withoutComments(
+        readFileSync(resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs'), 'utf8'),
       );
+
       const include = arrayEntries(source, 'include');
-      // No `include` at all means vitest's own default, which is not narrowed.
-      if (include !== null && (include.length !== 1 || include[0] !== CANONICAL_INCLUDE)) {
+      if (include.kind === 'unreadable') return true;
+      if (
+        include.kind === 'literal' &&
+        (include.values.length !== 1 || include.values[0] !== CANONICAL_INCLUDE)
+      ) {
         return true;
       }
+
       const exclude = arrayEntries(source, 'exclude');
-      if (exclude === null) return false;
-      return exclude.some((entry) => entry !== BENIGN_EXCLUDE);
+      if (exclude.kind === 'unreadable') return true;
+      if (exclude.kind === 'absent') return false;
+      return exclude.values.some((entry) => entry !== BENIGN_EXCLUDE);
     };
 
     expect(
