@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -637,5 +637,84 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
         expect(line).toBeLessThanOrEqual(candidate.split('\n').length);
       }
     }
+  });
+});
+
+describe('Layer 2 skill が既存 test の判定を読む', () => {
+  const REUSE_REF = '.claude/skills/kiwa-design/references/existing-test-reuse.md';
+
+  /**
+   * `docs/layers.json` が宣言する Layer 2 skill。
+   *
+   * 一覧を手で持たない。 layer を足した時に skill を足し忘れると、 その layer だけ判定を
+   * 読まないまま緑になる (#2005 が塞いだのはこの形)。
+   */
+  function layer2Skills(): string[] {
+    const layers = (
+      JSON.parse(read('docs/layers.json')) as {
+        layers: { consumer_skill: string; also_consumed_by?: string[] }[];
+      }
+    ).layers;
+    const names = new Set<string>();
+    for (const layer of layers) {
+      names.add(layer.consumer_skill);
+      for (const also of layer.also_consumed_by ?? []) names.add(also);
+    }
+    return [...names].sort();
+  }
+
+  it('共有 contract が実在し 4 項目を持つ', () => {
+    expect(existsSync(resolve(REPO_ROOT, REUSE_REF)), `${REUSE_REF} が無い`).toBe(true);
+    const ref = read(REUSE_REF);
+    for (const heading of [
+      '## 1. 判定の読み方',
+      '## 2. 対象の絞り方',
+      '## 3. 追記先の決め方',
+      '## 4. 禁止',
+    ]) {
+      expect(ref, `共有 contract に ${heading} が無い`).toContain(heading);
+    }
+    for (const verdict of VERDICTS) {
+      // 表の行として持っていることを見る。 本文のどこかに語があるだけでは、 定義表から
+      // 落ちても素通りする (実測で `不明` の行を崩す変異が生き残った)。
+      expect(ref, `共有 contract の判定表に ${verdict} の行が無い`).toContain(`| \`${verdict}\` |`);
+    }
+  });
+
+  /** `test_outputs` の key が名指しする skill (`consumer_skill` とは別の宣言経路)。 */
+  function outputConsumers(): string[] {
+    const layers = (
+      JSON.parse(read('docs/layers.json')) as {
+        layers: { test_outputs?: Record<string, string[]> }[];
+      }
+    ).layers;
+    const names = new Set<string>();
+    for (const layer of layers) {
+      for (const name of Object.keys(layer.test_outputs ?? {})) names.add(name);
+    }
+    return [...names].sort();
+  }
+
+  it('対象 skill を docs/layers.json から導けている', () => {
+    // 0 件でも `it.each` は 1 件も走らずに緑になる。 導出が壊れた状態を pass にしない。
+    const skills = layer2Skills();
+    expect(skills.length).toBeGreaterThan(0);
+    // `docs/layers.json` は consumer を 2 経路で宣言する (`consumer_skill` + `also_consumed_by` と
+    // `test_outputs` の key)。 **片方だけを見ると、 traversal を落とした時に検査対象が静かに
+    // 減るだけで緑になる** (実測で `also_consumed_by` を落とすと kiwa-hardhat が検査から消え、
+    // 件数が 50 → 49 に減っただけで pass した)。 2 経路の一致を見る。
+    expect(skills).toEqual(outputConsumers());
+  });
+
+  it.each(layer2Skills())('%s が 既存 test の再利用 を持つ', (skill) => {
+    const section = sectionOf(skillBody(skill), /^## 既存 test の再利用/m);
+    // 契約の複製ではなく参照であること。 複製すると 16 file のうち 1 つ直した時に 15 が残る。
+    expect(section, `${skill} が共有 contract を参照していない`).toContain(REUSE_REF);
+    // 対象を絞る規約と、 既存 test を壊さない規約は各 skill の本文にも要る
+    // (reference を読まずに動く経路が残るため)。
+    expect(section, `${skill} が対象の絞り方を書いていない`).toContain('`未覆` / `不明` の TC だけ');
+    expect(section, `${skill} が既存 test の保護を書いていない`).toContain(
+      '既存 test の削除と期待値の書き換えは行わない',
+    );
   });
 });
