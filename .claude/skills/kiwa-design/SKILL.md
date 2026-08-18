@@ -310,7 +310,9 @@ find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
 探索先は `tests/` と `test/` の両方を含める。
 kiwa の package は `tests/` を使い、 `/kiwa-vitest` の既定出力は `test/unit/` で、 片方だけを見ると取りこぼす。
 
-抽出した `file:行番号` と test 名は **全件そのまま控える** (要約しない)。
+探索 command は repo root から実行し、 抽出した **repo root 相対**の `file:行番号` と test 名を
+**全件そのまま控える** (要約しない)。 `packages/{name}/` / `examples/{name}/` の prefix を
+落とさない = Layer 2 が repo root から候補 file を Read するため、 package 相対 path では開けない。
 Step 4 で TC と突き合わせる時、 名前の文字列そのものが唯一の手がかりになる。
 
 ##### 探索できなかった場合
@@ -384,7 +386,7 @@ test 名は自由文で、 名前が一致しても body が同じ入力を走�
 候補を読んで TC の入力を走らせていないと分かった場合は `未覆` に倒す。
 迷った場合も `未覆` に倒す = 誤って `既覆` と書くと必要な TC が落ち、 誤って `未覆` と書いても重複 test が 1 件増えるだけで、 損失が非対称。
 
-候補 column には `file:行番号` と test 名をそのまま書く (人が 1 手で開いて確かめられる形にする)。
+候補 column には repo root 相対の `file:行番号` と test 名をそのまま書く (人が 1 手で開いて確かめられる形にする)。
 
 #### 高リスク module の TC 件数 check (改善 5 / Issue #227)
 

@@ -153,29 +153,29 @@ throw / no-throw を直接見る。
 
 | TC | 既存 test の候補 | 判定 |
 |---|---|---|
-| TC-001 | `少なくとも 1 回呼ばれていれば pass` (`tests/skill-test.test.ts:52`) | 既覆 (候補) |
-| TC-002 | `times 指定で回数厳密一致` (`tests/skill-test.test.ts:64`) | 既覆 (候補) |
-| TC-003 | `未呼出で pass` (`tests/skill-test.test.ts:74`) | 既覆 (候補) |
-| TC-004 | `引数一致 (deep equal) で pass` (`tests/skill-test.test.ts:88`) | 既覆 (候補) |
-| TC-005 | `subsequence として一致すれば pass` (`tests/skill-test.test.ts:129`) | 既覆 (候補) |
-| TC-006 | `間に他 tool 挟んでも subsequence 一致で pass` (`tests/skill-test.test.ts:137`) | 既覆 (候補) |
-| TC-007 | `複数呼出のうち 1 つでも一致すれば pass` (`tests/skill-test.test.ts:104`) | 既覆 (候補) |
-| TC-008 | `未呼出で throw` (`tests/skill-test.test.ts:58`) | 既覆 (候補) |
-| TC-009 | `times 指定で回数厳密一致` (`tests/skill-test.test.ts:64`) | 既覆 (候補) |
-| TC-010 | `1 回でも呼ばれてたら throw` (`tests/skill-test.test.ts:80`) | 既覆 (候補) |
-| TC-011 | `tool 未呼出で throw` (`tests/skill-test.test.ts:112`) | 既覆 (候補) |
-| TC-012 | `引数不一致で throw` (`tests/skill-test.test.ts:96`) | 既覆 (候補) |
-| TC-013 | `順序逆で throw` (`tests/skill-test.test.ts:147`) | 既覆 (候補) |
-| TC-014 | `TC-014 未呼出で times: 0 なら pass` (`tests/skill-test.test.ts:181`) | 既覆 (候補) |
-| TC-015 | `TC-015 1 回呼ばれていて times: 0 なら throw` (`tests/skill-test.test.ts:186`) | 既覆 (候補) |
-| TC-016 | `TC-016 spy が空で expectedOrder も空なら pass` (`tests/skill-test.test.ts:165`) | 既覆 (候補) |
-| TC-017 | `TC-017 呼出記録があっても expectedOrder が空なら pass` (`tests/skill-test.test.ts:170`) | 既覆 (候補) |
-| TC-018 | `TC-018 reset 後は assertToolCalled が throw する` (`tests/skill-test.test.ts:230`) | 既覆 (候補) |
-| TC-019 | `record + getCalls で挿入順を保持する` (`tests/skill-test.test.ts:11`) | 既覆 (候補) |
-| TC-020 | `non-JSON 引数 (CLI style) は raw string 比較 fallback` (`tests/skill-test.test.ts:119`) | 既覆 (候補) |
-| TC-021 | `TC-021 入れ子 object を deep 比較して pass` (`tests/skill-test.test.ts:196`) | 既覆 (候補) |
-| TC-022 | `TC-022 key 数が異なれば throw` (`tests/skill-test.test.ts:202`) | 既覆 (候補) |
-| TC-023 | `TC-023 null と object の比較を TypeError ではなく assertion 失敗にする` (`tests/skill-test.test.ts:210`) | 既覆 (候補) |
+| TC-001 | `少なくとも 1 回呼ばれていれば pass` (`packages/skill-test/tests/skill-test.test.ts:52`) | 既覆 (候補) |
+| TC-002 | `times 指定で回数厳密一致` (`packages/skill-test/tests/skill-test.test.ts:64`) | 既覆 (候補) |
+| TC-003 | `未呼出で pass` (`packages/skill-test/tests/skill-test.test.ts:74`) | 既覆 (候補) |
+| TC-004 | `引数一致 (deep equal) で pass` (`packages/skill-test/tests/skill-test.test.ts:88`) | 既覆 (候補) |
+| TC-005 | `subsequence として一致すれば pass` (`packages/skill-test/tests/skill-test.test.ts:129`) | 既覆 (候補) |
+| TC-006 | `間に他 tool 挟んでも subsequence 一致で pass` (`packages/skill-test/tests/skill-test.test.ts:137`) | 既覆 (候補) |
+| TC-007 | `複数呼出のうち 1 つでも一致すれば pass` (`packages/skill-test/tests/skill-test.test.ts:104`) | 既覆 (候補) |
+| TC-008 | `未呼出で throw` (`packages/skill-test/tests/skill-test.test.ts:58`) | 既覆 (候補) |
+| TC-009 | `times 指定で回数厳密一致` (`packages/skill-test/tests/skill-test.test.ts:64`) | 既覆 (候補) |
+| TC-010 | `1 回でも呼ばれてたら throw` (`packages/skill-test/tests/skill-test.test.ts:80`) | 既覆 (候補) |
+| TC-011 | `tool 未呼出で throw` (`packages/skill-test/tests/skill-test.test.ts:112`) | 既覆 (候補) |
+| TC-012 | `引数不一致で throw` (`packages/skill-test/tests/skill-test.test.ts:96`) | 既覆 (候補) |
+| TC-013 | `順序逆で throw` (`packages/skill-test/tests/skill-test.test.ts:147`) | 既覆 (候補) |
+| TC-014 | `TC-014 未呼出で times: 0 なら pass` (`packages/skill-test/tests/skill-test.test.ts:181`) | 既覆 (候補) |
+| TC-015 | `TC-015 1 回呼ばれていて times: 0 なら throw` (`packages/skill-test/tests/skill-test.test.ts:186`) | 既覆 (候補) |
+| TC-016 | `TC-016 spy が空で expectedOrder も空なら pass` (`packages/skill-test/tests/skill-test.test.ts:165`) | 既覆 (候補) |
+| TC-017 | `TC-017 呼出記録があっても expectedOrder が空なら pass` (`packages/skill-test/tests/skill-test.test.ts:170`) | 既覆 (候補) |
+| TC-018 | `TC-018 reset 後は assertToolCalled が throw する` (`packages/skill-test/tests/skill-test.test.ts:230`) | 既覆 (候補) |
+| TC-019 | `record + getCalls で挿入順を保持する` (`packages/skill-test/tests/skill-test.test.ts:11`) | 既覆 (候補) |
+| TC-020 | `non-JSON 引数 (CLI style) は raw string 比較 fallback` (`packages/skill-test/tests/skill-test.test.ts:119`) | 既覆 (候補) |
+| TC-021 | `TC-021 入れ子 object を deep 比較して pass` (`packages/skill-test/tests/skill-test.test.ts:196`) | 既覆 (候補) |
+| TC-022 | `TC-022 key 数が異なれば throw` (`packages/skill-test/tests/skill-test.test.ts:202`) | 既覆 (候補) |
+| TC-023 | `TC-023 null と object の比較を TypeError ではなく assertion 失敗にする` (`packages/skill-test/tests/skill-test.test.ts:210`) | 既覆 (候補) |
 
 `既覆 (候補)` は「候補の test が見つかった」 までの判定で、 覆われていることの断定ではない。
 本表の 23 件は候補の body を 1 件ずつ読み、 TC の入力と期待を実際に走らせていることを確認済。

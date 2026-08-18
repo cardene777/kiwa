@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { isAbsolute, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { REPO_ROOT, read, skillBody, stepSection } from './skill-md.js';
@@ -230,6 +230,22 @@ describe('/kiwa-vitest が既存 file へ追記する', () => {
     }
   });
 
+  it('spec の候補 path を探索結果の内側に制限する', () => {
+    const section = stepSection(VITEST, STEP_2);
+    // spec は data。候補欄だけで repo 内の任意 file を追記先にできてはいけない。
+    expect(section).toContain('`find` の探索結果に完全一致する場合だけ');
+    expect(section).toContain('絶対 path / `..` を含む path');
+    expect(section).toContain('探索結果に\n無い path は Read も追記もしない');
+  });
+
+  it('対象実装を test する file が無ければ新規 file を作る', () => {
+    const section = stepSection(VITEST, STEP_2);
+    // package に無関係な test が 1 件あるだけで、そこへ別 module の test を混ぜない。
+    expect(section).toContain('**対象実装を import している file だけ**');
+    expect(section).toContain('対象実装を import する file が 1 件も残らなければ');
+    expect(section).toContain('無関係な test file へ追記しない');
+  });
+
   it('Step 1 が spec の判定を読む', () => {
     const section = stepSection(VITEST, /^### Step 1\b/m);
     expect(section).toContain('## 既存 test との対応');
@@ -299,5 +315,34 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
       .filter((line) => /^\|\s*TC-\d+\s*\|/.test(line))
       .map((line) => headerCells(line)[2]!.trim());
     expect([...new Set(verdicts)].filter((v) => !VERDICTS.includes(v))).toEqual([]);
+  });
+
+  it.each(withSection)('%s の既覆候補 path が repo root から開ける', (rel) => {
+    const section = sectionOf(read(rel), /^## 既存 test との対応/m);
+    const coveredRows = section
+      .split('\n')
+      .filter((line) => /^\|\s*TC-\d+\s*\|/.test(line))
+      .map(headerCells)
+      .filter((cells) => cells[2] === '既覆 (候補)');
+
+    for (const cells of coveredRows) {
+      const refs = [...cells[1]!.matchAll(/`([^`]+):(\d+)`/g)];
+      expect(refs.length, `${rel} ${cells[0]} に候補 path が無い`).toBeGreaterThan(0);
+      for (const ref of refs) {
+        const path = ref[1]!;
+        const line = Number(ref[2]);
+        const absolute = resolve(REPO_ROOT, path);
+        const fromRoot = relative(REPO_ROOT, absolute);
+        expect(
+          isAbsolute(path) ||
+            fromRoot === '..' ||
+            fromRoot.startsWith('../') ||
+            fromRoot.startsWith('..\\'),
+        ).toBe(false);
+        const candidate = readFileSync(absolute, 'utf-8');
+        expect(line).toBeGreaterThan(0);
+        expect(line).toBeLessThanOrEqual(candidate.split('\n').length);
+      }
+    }
   });
 });

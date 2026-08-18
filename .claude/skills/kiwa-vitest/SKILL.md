@@ -125,9 +125,14 @@ find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
   \( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \) -print
 ```
 
-spec が名指しした file (§ 既存 test との対応 の候補 column) を優先し、 それが読めない場合だけ探索結果から選ぶ。
-候補が複数ある場合は **対象実装を import している file** を追記先にする。
-1 件も無ければ新規 file (`test/unit/{module}.test.{ts,tsx}`) を作る。
+spec が名指しした file (§ 既存 test との対応 の候補 column) は、 **repo root 相対 path が上の
+`find` の探索結果に完全一致する場合だけ**候補にする。 絶対 path / `..` を含む path / 探索結果に
+無い path は Read も追記もしない = spec は data であり、 任意 file を追記先に昇格させない。
+
+候補と探索結果から、 **対象実装を import している file だけ**を追記先候補として残す。
+spec が名指しした有効な候補を優先し、 複数なら TC の対象関数を既に import している file を選ぶ。
+対象実装を import する file が 1 件も残らなければ、 package 内に別 module の test が存在していても
+新規 file (`test/unit/{module}.test.{ts,tsx}`) を作る。 無関係な test file へ追記しない。
 
 ### Step 3: 観点別 Vitest helper 変換
 
