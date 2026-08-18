@@ -86,3 +86,61 @@ describe('Counter (snapshot mode)', () => {
     expect(env.markup).toContain('aria-label="reset"');
   });
 });
+
+// ---- ここから下は `/kiwa-design --layer ui --module counter` が未覆と判定した 5 件
+// (T-UI-003 / 004 / 007 / 011 / 014)。
+// spec = tests/spec/integration/test-spec-counter.ui.ja.md
+//
+// 既存 7 件が spec の 9 TC (T-UI-001 / 002 / 005 / 006 / 008 / 009 / 010 / 012 / 013) を覆う。
+// 2 件が 2 TC ずつ確かめているため数が合わない。 中身を読んで重複と判断したので書いていない。 module 直下の `envs` と `afterEach` はそのまま使う
+// (`existing-test-reuse.md` § 3 = 既存の後始末は変えない)。
+
+describe('Counter (未覆分の追記: prop の組合せと無効化の解除)', () => {
+  it('T-UI-003 max 未到達では status が出ない', async () => {
+    const env = await setupComponentEnv({ mode: 'render', ui: <Counter initial={0} max={2} /> });
+    envs.push(env);
+    if (env.kind !== 'render') throw new Error('expected render');
+    expect(env.screen.queryByRole('status')).toBeNull();
+  });
+
+  it('T-UI-004 initial が max 以上なら最初から + が disabled', async () => {
+    const env = await setupComponentEnv({ mode: 'render', ui: <Counter initial={2} max={2} /> });
+    envs.push(env);
+    if (env.kind !== 'render') throw new Error('expected render');
+    const incBtn = env.screen.getByRole('button', { name: 'increment' }) as HTMLButtonElement;
+    expect(incBtn.disabled).toBe(true);
+  });
+
+  // 既存 `T-UI-002` は名前が「step 反映」 だが assertion は mount 直後の value だけで、
+  // `+` を 1 度も click していない。 step が加算に効いているかはここで初めて確かめる。
+  it('T-UI-007 step=5 で + を 1 回押すと 5 増える', async () => {
+    const env = await setupComponentEnv({
+      mode: 'interaction',
+      ui: <Counter initial={0} step={5} />,
+    });
+    envs.push(env);
+    if (env.kind !== 'interaction') throw new Error('expected interaction');
+    await env.user.click(env.screen.getByRole('button', { name: 'increment' }));
+    expect(env.screen.getByTestId('value').textContent).toBe('5');
+  });
+
+  it('T-UI-011 max 到達後に reset すると + が再び有効になる', async () => {
+    const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter initial={0} max={2} /> });
+    envs.push(env);
+    if (env.kind !== 'interaction') throw new Error('expected interaction');
+    const incBtn = env.screen.getByRole('button', { name: 'increment' }) as HTMLButtonElement;
+    await env.user.click(incBtn);
+    await env.user.click(incBtn);
+    expect(incBtn.disabled).toBe(true);
+    await env.user.click(env.screen.getByRole('button', { name: 'reset' }));
+    const afterReset = env.screen.getByRole('button', { name: 'increment' }) as HTMLButtonElement;
+    expect(afterReset.disabled).toBe(false);
+  });
+
+  it('T-UI-014 max 到達時の markup に status が含まれる', async () => {
+    const env = await setupComponentEnv({ mode: 'snapshot', ui: <Counter initial={2} max={2} /> });
+    envs.push(env);
+    if (env.kind !== 'snapshot') throw new Error('expected snapshot');
+    expect(env.markup).toContain('role="status"');
+  });
+});

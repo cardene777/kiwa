@@ -490,6 +490,14 @@ describe('出力の契約を壊していない', () => {
     expect(tableHeaderStartingWith(skeleton, 'テスト ID')).toEqual(NINE_COLUMNS);
   });
 
+  it('雛形が ID 形式を テストケース一覧 に合わせさせる', () => {
+    // layer 別 9 column 表は ID 形式が違う。 雛形の例が `TC-001` だけだと、 ui / api layer で
+    // その形をそのまま写して対応表が 1 行も一致しない (#2009 の dogfood で実際に起きた)。
+    const section = sectionOf(skeleton, /^## 既存 test との対応/m);
+    expect(section).toContain('§ テストケース一覧 と同じ形式をそのまま使う');
+    expect(section).toContain('`T-UI-001`');
+  });
+
   it('雛形が探索した runtime を書かせる', () => {
     // runtime を残さないと、 当たらない glob で 0 件になった spec と本当に 0 件の spec が
     // 読み分けられない (`solidity` の package を `typescript` の glob で探すと必ず 0 件)。
@@ -586,9 +594,44 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
     );
   }
 
-  /** 本文中の TC id (先頭 cell が `TC-NNN` の行)。 */
-  function tcIds(body: string): string[] {
-    return [...body.matchAll(/^\|\s*(TC-\d+)\s*\|/gm)].map((m) => m[1]!);
+  /**
+   * 本文中の markdown 表を header と行に分けて返す。
+   *
+   * **ID の形を前提にしない**。 layer 別 9 column 表の ID は layer ごとに違う
+   * (`TC-001` / `T-UI-001` / `T-API-001` / `T-DATA-001` / `T-CLI-001`)。 形を列挙すると
+   * layer が増えた時に落とし忘れ、 その layer の spec だけ **1 行も読まれずに緑になる**
+   * (#2009 の dogfood で ui layer が実際にこれに当たった)。 表の構造だけで読む。
+   */
+  function markdownTables(section: string): { header: string[]; rows: string[][] }[] {
+    const lines = section.split('\n');
+    const tables: { header: string[]; rows: string[][] }[] = [];
+    for (let i = 0; i < lines.length; i += 1) {
+      const line = lines[i]!;
+      const next = lines[i + 1] ?? '';
+      // header 行の次が区切り行 (`|---|---|`) であることを表の開始とみなす。
+      // cell ごとに見る = 行全体の正規表現だと cell 区切りの `|` を書き落として一致しない。
+      if (!line.startsWith('|') || !next.startsWith('|')) continue;
+      const sep = headerCells(next);
+      if (sep.length === 0 || !sep.every((cell) => /^:?-+:?$/.test(cell))) continue;
+      const header = headerCells(line);
+      const rows: string[][] = [];
+      let j = i + 2;
+      for (; j < lines.length; j += 1) {
+        const row = lines[j]!;
+        if (!row.startsWith('|')) break;
+        rows.push(headerCells(row));
+      }
+      tables.push({ header, rows });
+      i = j - 1;
+    }
+    return tables;
+  }
+
+  /** § テストケース一覧 の全表の先頭 cell (= TC の ID)。 */
+  function caseIds(body: string): string[] {
+    return markdownTables(sectionOf(body, /^## テストケース一覧/m)).flatMap((table) =>
+      table.rows.map((cells) => cells[0]!),
+    );
   }
 
   /**
@@ -599,17 +642,9 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
    * TypeError で落ちる = 「対応表が壊れている」 と「別表がある」 を区別できない。
    */
   function correspondenceRows(section: string): string[][] {
-    const lines = section.split('\n');
-    const header = lines.findIndex(
-      (line) => line.startsWith('|') && headerCells(line)[0] === 'TC',
-    );
-    if (header < 0) throw new Error('先頭 cell が TC の対応表が無い');
-    const rows: string[][] = [];
-    for (const line of lines.slice(header + 2)) {
-      if (!line.startsWith('|')) break;
-      rows.push(headerCells(line));
-    }
-    return rows;
+    const table = markdownTables(section).find((t) => t.header[0] === 'TC');
+    if (!table) throw new Error('先頭 cell が TC の対応表が無い');
+    return table.rows;
   }
 
   const withSection = specFiles('tests/spec').filter((rel) =>
@@ -623,7 +658,7 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
 
   it.each(withSection)('%s の全 TC が 1 行ずつ現れる', (rel) => {
     const body = read(rel);
-    const cases = tcIds(sectionOf(body, /^## テストケース一覧/m));
+    const cases = caseIds(body);
     const rows = correspondenceRows(sectionOf(body, /^## 既存 test との対応/m)).map(
       (cells) => cells[0]!,
     );
