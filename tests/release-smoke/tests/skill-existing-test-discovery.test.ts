@@ -269,7 +269,11 @@ describe('/kiwa-design が既存 test を探す', () => {
     ];
     for (const runner of runners) {
       const globs = documentedGlobs(runner.commands[0]!).map(globToRegExp);
-      const uncovered = declaredOutputs('solidity', runner.consumer)
+      const outputs = declaredOutputs('solidity', runner.consumer);
+      // 宣言が 0 件だと uncovered も 0 件になり、 照合を 1 度もせずに通る。 consumer 名を
+      // 打ち間違えた時に「全部拾えている」 と報告されるのを防ぐ。
+      expect(outputs.length, `${runner.consumer} の test_outputs が宣言されていない`).toBeGreaterThan(0);
+      const uncovered = outputs
         .flatMap(sampleBasenames)
         .filter((name) => !globs.some((glob) => glob.test(name)));
       expect(
