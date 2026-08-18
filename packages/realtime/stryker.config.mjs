@@ -12,7 +12,9 @@
  * **The three exclusions were wrong.** `pusher.js` and `socketio.js` were left
  * out as needing a live provider socket, and `report.js` as a thin adapter
  * already mutation-tested inside `@kiwa-lab/quality-metrics`. Measured, they
- * hold 119 / 137 / 67 covered mutants against 2 / 2 / 0 no-coverage. The
+ * hold 115 / 137 / 67 covered mutants against 2 / 2 / 0 no-coverage (the
+ * pusher file also has 4 RuntimeError mutants, which the covered denominator
+ * excludes alongside no-coverage). The
  * "already tested elsewhere" argument fails the same way: the adapter's own
  * branches are not the ones quality-metrics runs.
  *

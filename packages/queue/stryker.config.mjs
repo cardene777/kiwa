@@ -12,8 +12,11 @@
  * no-coverage, and `rabbitmq/testcontainers-rabbitmq.js` 40 against 14.
  *
  * Eight files across three packages have been excluded on this reasoning and
- * measured since — `cache` (#1967, three files), this package (#1980, two) and
- * `realtime` (#1980, three) — and not one had zero covered mutants. A file
+ * measured since — `cache` (#1967, 328 covered mutants across three files),
+ * this package (#1980, 274 across two) and `realtime` (#1980, 319 across
+ * three) — and not one had zero. Counts are covered mutants as the gate
+ * defines them: killed + survived + timeout, with no-coverage and error both
+ * outside the denominator. A file
  * needing a live server for *some* of its assertions still runs plenty without
  * one, and no-coverage mutants leave the covered denominator anyway, so
  * excluding one can only hide work, never protect the score.
