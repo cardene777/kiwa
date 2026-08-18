@@ -98,28 +98,32 @@ role を持たない。
 |---|---|---|---|---|---|---|---|---|
 | TC-001 | 単体 | 正常系 | 未 deploy | `initialSupply = 1_000_000e18` | `new DogfoodToken(1_000_000e18)` | `totalSupply : 0 → 1_000_000e18` | 高 | 推奨 |
 | TC-002 | 単体 | 正常系 | 未 deploy | `initialSupply = 1_000_000e18` | `new DogfoodToken(1_000_000e18)` | `balanceOf[deployer] : 0 → 1_000_000e18` | 高 | 推奨 |
-| TC-003 | 単体 | 正常系 | alice が 1_000e18 保有 | `to = bob, amount = 100e18` | alice として `transfer(bob, 100e18)` | `balanceOf[alice] : 1_000e18 → 900e18`、 `balanceOf[bob] : 0 → 100e18` | 高 | 推奨 |
-| TC-004 | 単体 | 正常系 | alice が 1_000e18 保有 | `to = bob, amount = 100e18` | alice として `transfer(bob, 100e18)` | `emit Transfer(from=alice, to=bob, value=100e18)` | 高 | 推奨 |
-| TC-005 | 単体 | 正常系 | alice が 1_000e18 保有 | `to = bob, amount = 100e18` | alice として `transfer(bob, 100e18)` | `return true` | 中 | 推奨 |
-| TC-006 | 単体 | 正常系 | alice が 1_000e18 保有 | `spender = bob, amount = 500e18` | alice として `approve(bob, 500e18)` | `allowance[alice][bob] : 0 → 500e18` | 高 | 推奨 |
-| TC-007 | 単体 | 正常系 | alice が 1_000e18 保有 | `spender = bob, amount = 500e18` | alice として `approve(bob, 500e18)` | `emit Approval(owner=alice, spender=bob, value=500e18)` | 中 | 推奨 |
-| TC-008 | 単体 | 正常系 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 400e18` | bob として `transferFrom(alice, bob, 400e18)` | `balanceOf[alice] : 1_000e18 → 600e18`、 `balanceOf[bob] : 0 → 400e18` | 高 | 推奨 |
-| TC-009 | 単体 | 正常系 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 400e18` | bob として `transferFrom(alice, bob, 400e18)` | `allowance[alice][bob] : 500e18 → 100e18` | 高 | 推奨 |
+| TC-003 | 単体 | 正常系 | 未 deploy | `initialSupply = 1_000_000e18` | `new DogfoodToken(1_000_000e18)` | `emit Transfer(from=address(0), to=deployer, value=1_000_000e18)` | 中 | 推奨 |
+| TC-004 | 単体 | 正常系 | alice が 1_000e18 保有 | `to = bob, amount = 100e18` | alice として `transfer(bob, 100e18)` | `balanceOf[alice] : 1_000e18 → 900e18`、 `balanceOf[bob] : 0 → 100e18` | 高 | 推奨 |
+| TC-005 | 単体 | 正常系 | alice が 1_000e18 保有 | `to = bob, amount = 100e18` | alice として `transfer(bob, 100e18)` | `emit Transfer(from=alice, to=bob, value=100e18)` | 高 | 推奨 |
+| TC-006 | 単体 | 正常系 | alice が 1_000e18 保有 | `to = bob, amount = 100e18` | alice として `transfer(bob, 100e18)` | `return true` | 中 | 推奨 |
+| TC-007 | 単体 | 正常系 | alice が 1_000e18 保有 | `spender = bob, amount = 500e18` | alice として `approve(bob, 500e18)` | `allowance[alice][bob] : 0 → 500e18` | 高 | 推奨 |
+| TC-008 | 単体 | 正常系 | alice が 1_000e18 保有 | `spender = bob, amount = 500e18` | alice として `approve(bob, 500e18)` | `emit Approval(owner=alice, spender=bob, value=500e18)` | 中 | 推奨 |
+| TC-009 | 単体 | 正常系 | alice が 1_000e18 保有 | `spender = bob, amount = 500e18` | alice として `approve(bob, 500e18)` | `return true` | 中 | 推奨 |
+| TC-010 | 単体 | 正常系 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 400e18` | bob として `transferFrom(alice, bob, 400e18)` | `balanceOf[alice] : 1_000e18 → 600e18`、 `balanceOf[bob] : 0 → 400e18` | 高 | 推奨 |
+| TC-011 | 単体 | 正常系 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 400e18` | bob として `transferFrom(alice, bob, 400e18)` | `allowance[alice][bob] : 500e18 → 100e18` | 高 | 推奨 |
+| TC-012 | 単体 | 正常系 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 400e18` | bob として `transferFrom(alice, bob, 400e18)` | `emit Transfer(from=alice, to=bob, value=400e18)` | 中 | 推奨 |
+| TC-013 | 単体 | 正常系 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 400e18` | bob として `transferFrom(alice, bob, 400e18)` | `return true` | 中 | 推奨 |
 
 ### 観点 2 — 異常系
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-010 | 単体 | 異常系 | alice が 1_000e18 保有 | `to = bob, amount = 10_000e18` | alice として `transfer(bob, 10_000e18)` | `revert("balance")` | 高 | 推奨 |
-| TC-011 | 単体 | 異常系 | alice が 1_000e18 保有、 bob に 10_000e18 approve 済 | `from = alice, to = bob, amount = 5_000e18` | bob として `transferFrom(alice, bob, 5_000e18)` | `revert("balance")` (枠は足りるが残高が不足) | 高 | 推奨 |
-| TC-012 | 単体 | 異常系 | alice が 1_000e18 保有、 bob に 100e18 approve 済 | `from = alice, to = bob, amount = 200e18` | bob として `transferFrom(alice, bob, 200e18)` | `revert("allowance")` | 高 | 推奨 |
+| TC-014 | 単体 | 異常系 | alice が 1_000e18 保有 | `to = bob, amount = 10_000e18` | alice として `transfer(bob, 10_000e18)` | `revert("balance")` | 高 | 推奨 |
+| TC-015 | 単体 | 異常系 | alice が 1_000e18 保有、 bob に 10_000e18 approve 済 | `from = alice, to = bob, amount = 5_000e18` | bob として `transferFrom(alice, bob, 5_000e18)` | `revert("balance")` (枠は足りるが残高が不足) | 高 | 推奨 |
+| TC-016 | 単体 | 異常系 | alice が 1_000e18 保有、 bob に 100e18 approve 済 | `from = alice, to = bob, amount = 200e18` | bob として `transferFrom(alice, bob, 200e18)` | `revert("allowance")` | 高 | 推奨 |
 
 ### 観点 3 — 境界値
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| TC-013 | 単体 | 境界値 | alice が 1_000e18 保有 | `to = bob, amount = 1_000e18` | alice として `transfer(bob, 1_000e18)` | 成功し `balanceOf[alice] : 1_000e18 → 0` | 中 | 推奨 |
-| TC-014 | 単体 | 境界値 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 500e18` | bob として `transferFrom(alice, bob, 500e18)` | 成功し `allowance[alice][bob] : 500e18 → 0` | 中 | 推奨 |
+| TC-017 | 単体 | 境界値 | alice が 1_000e18 保有 | `to = bob, amount = 1_000e18` | alice として `transfer(bob, 1_000e18)` | 成功し `balanceOf[alice] : 1_000e18 → 0` | 中 | 推奨 |
+| TC-018 | 単体 | 境界値 | alice が 1_000e18 保有、 bob に 500e18 approve 済 | `from = alice, to = bob, amount = 500e18` | bob として `transferFrom(alice, bob, 500e18)` | 成功し `allowance[alice][bob] : 500e18 → 0` | 中 | 推奨 |
 
 ## 既存 test との対応
 
@@ -133,26 +137,30 @@ role を持たない。
 |---|---|---|
 | TC-001 | (なし) | 未覆 |
 | TC-002 | (なし) | 未覆 |
-| TC-003 | `test_transferReducesBalance` (`examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol:17`) | 既覆 (候補) |
-| TC-004 | (なし) | 未覆 |
+| TC-003 | (なし) | 未覆 |
+| TC-004 | `test_transferReducesBalance` (`examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol:17`) | 既覆 (候補) |
 | TC-005 | (なし) | 未覆 |
 | TC-006 | (なし) | 未覆 |
 | TC-007 | (なし) | 未覆 |
-| TC-008 | `test_transferFromRespectsAllowance` (`examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol:24`) | 既覆 (候補) |
+| TC-008 | (なし) | 未覆 |
 | TC-009 | (なし) | 未覆 |
-| TC-010 | `test_transferRevertsOnInsufficientBalance` (`examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol:33`) | 既覆 (候補) |
+| TC-010 | `test_transferFromRespectsAllowance` (`examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol:24`) | 既覆 (候補) |
 | TC-011 | (なし) | 未覆 |
 | TC-012 | (なし) | 未覆 |
 | TC-013 | (なし) | 未覆 |
-| TC-014 | (なし) | 未覆 |
+| TC-014 | `test_transferRevertsOnInsufficientBalance` (`examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol:33`) | 既覆 (候補) |
+| TC-015 | (なし) | 未覆 |
+| TC-016 | (なし) | 未覆 |
+| TC-017 | (なし) | 未覆 |
+| TC-018 | (なし) | 未覆 |
 
 `既覆 (候補)` の 3 件は中身を読み、 TC の入力と期待の両方を実際に走らせていることを確認した。
 
-- TC-003 — `vm.prank(alice)` で 100e18 を送り、 alice 900e18 / bob 100e18 を `assertEq`
-- TC-008 — 500e18 approve 後に bob が 400e18 引き出し、 alice 600e18 / bob 400e18 を `assertEq`
-- TC-010 — 残高 1_000e18 に対し 10_000e18 を送り、 `vm.expectRevert(bytes("balance"))`
+- TC-004 — `vm.prank(alice)` で 100e18 を送り、 alice 900e18 / bob 100e18 を `assertEq`
+- TC-010 — 500e18 approve 後に bob が 400e18 引き出し、 alice 600e18 / bob 400e18 を `assertEq`
+- TC-014 — 残高 1_000e18 に対し 10_000e18 を送り、 `vm.expectRevert(bytes("balance"))`
 
-**TC-009 は候補なし**。
+**TC-011 は候補なし**。
 `test_transferFromRespectsAllowance` は名前に allowance を含むが、 assertion は balance 2 件だけで
 `allowance` を 1 度も読んでいない。 名前で判定していたら `既覆` に倒れていた。
 
@@ -160,22 +168,22 @@ role を持たない。
 
 `未覆` / `不明` を先に置き、 その中で優先度順。
 
-未覆 (11 件)。
+未覆 (15 件)。
 
-1. **TC-001 / TC-002 / TC-006 / TC-009 (高)** — constructor の初期配布と、 `approve` / `transferFrom` が
+1. **TC-001 / TC-002 / TC-007 / TC-011 (高)** — constructor の初期配布と、 `approve` / `transferFrom` が
    allowance に与える変化。 state を直接読む経路が 1 件も無い
-2. **TC-011 / TC-012 (高)** — `transferFrom` の revert 2 種。 残高不足と枠不足を取り違えると、
+2. **TC-015 / TC-016 (高)** — `transferFrom` の revert 2 種。 残高不足と枠不足を取り違えると、
    引出の可否判定が壊れても気付けない
-3. **TC-004 / TC-007 (中)** — event の emit。 off-chain の index はこれだけを見るため、
+3. **TC-003 / TC-005 / TC-008 / TC-012 (中)** — event の emit。 off-chain の index はこれだけを見るため、
    state が正しくても event が出なければ観測できない
-4. **TC-005 (中)** — `transfer` の return 値
-5. **TC-013 / TC-014 (中)** — 残高ちょうど / 枠ちょうど の境界
+4. **TC-006 / TC-009 / TC-013 (中)** — `transfer` / `approve` / `transferFrom` の return 値
+5. **TC-017 / TC-018 (中)** — 残高ちょうど / 枠ちょうど の境界
 
 既覆 (候補) 3 件。 実装前に候補の中身を読み、 重複なら書かない。
 
-- TC-003 (高) — `test_transferReducesBalance` が同じ入力と期待を走らせているため書かない
-- TC-008 (高) — `test_transferFromRespectsAllowance` が同じ入力と期待を走らせているため書かない
-- TC-010 (高) — `test_transferRevertsOnInsufficientBalance` が同じ入力と期待を走らせているため書かない
+- TC-004 (高) — `test_transferReducesBalance` が同じ入力と期待を走らせているため書かない
+- TC-010 (高) — `test_transferFromRespectsAllowance` が同じ入力と期待を走らせているため書かない
+- TC-014 (高) — `test_transferRevertsOnInsufficientBalance` が同じ入力と期待を走らせているため書かない
 
 ## 手動確認でよいテスト
 
