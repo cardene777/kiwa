@@ -13,7 +13,7 @@
  * adapter. `vitest.stryker.config.mjs` named six of the package's fourteen test
  * files in an `include` allowlist, so `browser.js` and `svelte.js` had no test
  * in the run at all — 54 of 190 mutants reported as no-coverage, `svelte.js`
- * entirely. With the glob in place the run measures **0 no-coverage** and
+ * entirely. The #1986 run with the glob measures **0 no-coverage**, and
  * Stryker's own score matches the covered one at 93.16.
  *
  * `browser.js` is mutated and reached. Its real-Chromium test stays out of the
@@ -33,10 +33,10 @@ export default {
   // Every adapter is mutated since #1963. The three that used to be excluded
   // (svelte / qwik / angular) were left out on the expectation that their
   // framework compilers do not run here, so their mutants would be equivalent
-  // by construction. Measured, that held for `svelte` only — 17 mutants, all
-  // no-coverage, which cost nothing in the score the gate reads. `qwik` killed
-  // 15 of 15 and `angular` 16 of 17, so the expectation was wrong for both and
-  // excluding them hid 146 lines that the tests do exercise.
+  // by construction. In the #1963 run, that held for `svelte` only — 17
+  // mutants, all no-coverage, which cost nothing in the score the gate reads.
+  // `qwik` killed 15 of 15 and `angular` 16 of 17, so the expectation was wrong
+  // for both and excluding them hid 146 lines that the tests do exercise.
   mutate: [
     '.vitest-dist/src/angular.js',
     '.vitest-dist/src/browser.js',
