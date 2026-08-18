@@ -167,3 +167,52 @@ describe('assertToolCallOrder', () => {
     expect(() => assertToolCallOrder(spy, [])).not.toThrow();
   });
 });
+
+// `/kiwa-design --layer unit --module dogfood-probe` が起こした TC のうち、
+// 既存 19 件が覆っていなかった 5 件 (spec の TC-014 / 015 / 021 / 022 / 023)。
+// spec = tests/spec/unit/test-spec-dogfood-probe.ja.md
+describe('assertToolCalled — times: 0 の境界', () => {
+  it('TC-014 未呼出で times: 0 なら pass', () => {
+    const spy = createToolSpy();
+    expect(() => assertToolCalled(spy, 'Read', { times: 0 })).not.toThrow();
+  });
+
+  it('TC-015 1 回呼ばれていて times: 0 なら throw', () => {
+    const spy = createToolSpy();
+    spy.record('Read', '{}');
+    expect(() => assertToolCalled(spy, 'Read', { times: 0 })).toThrow(
+      /expected tool "Read" to be called 0 time\(s\), observed 1/,
+    );
+  });
+});
+
+describe('assertToolCalledWith — deepEquals の分岐', () => {
+  it('TC-021 入れ子 object を deep 比較して pass', () => {
+    const spy = createToolSpy();
+    spy.record('Read', JSON.stringify({ a: { b: 1 } }));
+    expect(() => assertToolCalledWith(spy, 'Read', { a: { b: 1 } })).not.toThrow();
+  });
+
+  it('TC-022 key 数が異なれば throw', () => {
+    const spy = createToolSpy();
+    spy.record('Read', JSON.stringify({ a: 1 }));
+    expect(() => assertToolCalledWith(spy, 'Read', { a: 1, b: 2 })).toThrow(
+      /no call matched expected args/,
+    );
+  });
+
+  it('TC-023 null と object を比べても throw せず不一致として返す', () => {
+    // `deepEquals` の `a === null || b === null` を守る。 この行が無いと `null` が
+    // object 分岐へ落ち、 `Object.keys(null)` が TypeError を投げて assertion の
+    // 失敗ではなく実装の crash になる。
+    //
+    // **等価な null 同士では到達しない**。 先頭の `a === b` が `null === null` を
+    // true で返して抜けるため、 `{a:null}` vs `{a:null}` は分岐を通らない (最初に
+    // 書いた TC はこれで、 行を消しても pass した)。 片側だけ null にする。
+    const spy = createToolSpy();
+    spy.record('Read', JSON.stringify({ a: null }));
+    expect(() => assertToolCalledWith(spy, 'Read', { a: {} })).toThrow(
+      /no call matched expected args/,
+    );
+  });
+});
