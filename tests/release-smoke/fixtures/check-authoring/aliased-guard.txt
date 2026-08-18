@@ -1,0 +1,4 @@
+function layerSkills(): string[] { return []; }
+const skills = layerSkills();
+expect(skills.length).toBeGreaterThan(0);
+it.each(layerSkills())('%s', () => {});

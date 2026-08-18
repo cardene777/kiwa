@@ -1,0 +1,2 @@
+const CASES = [['a', 1], ['b', 2]];
+it.each(CASES)('%s', () => {});

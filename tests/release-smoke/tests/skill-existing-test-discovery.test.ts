@@ -788,8 +788,9 @@ describe('Layer 2 skill が既存 test の判定を読む', () => {
 
   it('対象 skill を docs/layers.json から導けている', () => {
     // 0 件でも `it.each` は 1 件も走らずに緑になる。 導出が壊れた状態を pass にしない。
+    // 名指しで書く = 別名に代入してから確かめると check-authoring の検査から見えない。
+    expect(layer2Skills().length).toBeGreaterThan(0);
     const skills = layer2Skills();
-    expect(skills.length).toBeGreaterThan(0);
     // `docs/layers.json` は consumer を 2 経路で宣言する (`consumer_skill` + `also_consumed_by` と
     // `test_outputs` の key)。 **片方だけを見ると、 traversal を落とした時に検査対象が静かに
     // 減るだけで緑になる** (実測で `also_consumed_by` を落とすと kiwa-hardhat が検査から消え、

@@ -1,0 +1,2 @@
+const targets = list().filter((x) => x.ok);
+it.each(targets)('%s', () => {});

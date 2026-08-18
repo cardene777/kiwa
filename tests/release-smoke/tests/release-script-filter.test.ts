@@ -107,6 +107,9 @@ describe('release script filter — systematic root cause pattern SSOT (Issue #9
     // tracks the real count, or shrinking the set on purpose reads as the guard
     // breaking.
     expect(publishable.length).toBeGreaterThanOrEqual(26);
+    // 下の `it.each` の対象。 空になると filter 検査が 1 件も走らずに緑になる
+    // (docs/quality/check-authoring.md § 形 1)。
+    expect(assertable.length).toBeGreaterThan(0);
   });
 
   it.each(assertable.map((name) => ({ name })))(

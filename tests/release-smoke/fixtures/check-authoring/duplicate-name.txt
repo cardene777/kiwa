@@ -1,0 +1,5 @@
+const target = a().filter((x) => x.ok);
+expect(target.length).toBeGreaterThan(0);
+it.each(target)('%s', () => {});
+const target = b().filter((x) => x.ok);
+it.each(target)('%s', () => {});
