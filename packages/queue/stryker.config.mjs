@@ -1,11 +1,20 @@
 /**
  * Mutation testing config for @kiwa-lab/queue.
- * Threshold: SaaS tier (high 65 / low 55 / break 50) — queue adapter targets
- * the sandbox backend. testcontainers-queue.js is excluded because its
- * assertions only fire when a live RabbitMQ / Cloudflare Queues / Inngest
- * container is running, which the mutation run does not spin up (the file
- * scored 0 % / 0 covered mutants in the v1.27-3 baseline sweep). Live-provider
- * coverage lives in the dogfood adapter tests, not the mutation baseline.
+ * Threshold: SaaS tier (high 65 / low 55 / break 50) — provider transport and
+ * semantics drift across RabbitMQ / SQS / Cloudflare Queues / Inngest.
+ *
+ * Every implementation file (#1980). It mutated `sandbox-queue.js` alone
+ * before, 298 lines of 5,276, and measures 78.37 % over 2,839 mutants widened.
+ *
+ * **The testcontainers exclusion was wrong.** It said those files score
+ * "0 % / 0 covered mutants" without a live container, citing a v1.27-3 sweep.
+ * Measured: `testcontainers-queue.js` has 234 covered mutants against 17
+ * no-coverage, and `rabbitmq/testcontainers-rabbitmq.js` 40 against 14. The
+ * fourth time an exclusion of this shape has been checked and failed —
+ * `cache` (#1967) and `realtime` (#1980) are the others. A file needing a live
+ * server for *some* of its assertions still runs plenty without one, and
+ * no-coverage mutants leave the covered denominator anyway, so excluding one
+ * can only hide work, never protect the score.
  * SSOT: docs/quality/mutation-thresholds.md § SaaS tier.
  */
 export default {
@@ -15,7 +24,29 @@ export default {
   plugins: ['@stryker-mutator/vitest-runner'],
   vitest: { configFile: 'vitest.stryker.config.mjs' },
   mutate: [
+    '.vitest-dist/src/cloudflare-queues/miniflare-cloudflare-queues.js',
+    '.vitest-dist/src/cloudflare-queues/setup-cloudflare-queues-env.js',
+    '.vitest-dist/src/cloudflare-queues/types.js',
+    '.vitest-dist/src/cloudflare-queues/wrangler-cloudflare-queues.js',
+    '.vitest-dist/src/inngest/dev-server-inngest.js',
+    '.vitest-dist/src/inngest/setup-inngest-env.js',
+    '.vitest-dist/src/inngest/stub-inngest.js',
+    '.vitest-dist/src/inngest/types.js',
+    '.vitest-dist/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.js',
+    '.vitest-dist/src/rabbitmq-advanced/types.js',
+    '.vitest-dist/src/rabbitmq/setup-rabbitmq-env.js',
+    '.vitest-dist/src/rabbitmq/stub-rabbitmq.js',
+    '.vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js',
+    '.vitest-dist/src/rabbitmq/types.js',
     '.vitest-dist/src/sandbox-queue.js',
+    '.vitest-dist/src/semantics/job-lifecycle-orchestrator.js',
+    '.vitest-dist/src/setup-bullmq-env.js',
+    '.vitest-dist/src/sqs/localstack-sqs.js',
+    '.vitest-dist/src/sqs/setup-sqs-env.js',
+    '.vitest-dist/src/sqs/stub-sqs.js',
+    '.vitest-dist/src/sqs/types.js',
+    '.vitest-dist/src/testcontainers-queue.js',
+    '.vitest-dist/src/types.js',
   ],
   thresholds: { high: 65, low: 55, break: 50 },
   ignorePatterns: ['dist/**', 'coverage/**', 'node_modules/**'],

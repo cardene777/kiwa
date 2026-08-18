@@ -71,6 +71,11 @@ const PACKAGES = {
   // #1951: security ran mutation testing from v1.27 without a baseline,
   // because nothing scored it. Core tier, 84.90 % covered MSI.
   '@kiwa-lab/security': 'packages/security',
+  // #1980: ai-llm was left out here as "deferred to v1.27-4", and v1.27-4 came
+  // and went without adding it. Its baseline stayed a `killRate: null` stub
+  // from 2026-07-05 — a package that ran mutation testing, was scored by the
+  // gate, and had no way to record what it scored.
+  '@kiwa-lab/ai-llm': 'packages/ai-llm',
 };
 
 /**

@@ -135,6 +135,6 @@
       "replacement": "\"Stryker was here!\""
     }
   ],
-  "capturedAt": "2026-07-05T11:40:26Z",
+  "capturedAt": "2026-08-17T23:57:16Z",
   "note": "Total MSI 84.21% / Covered MSI 85.09% (threshold high=65 / low=55 / break=50)."
 }

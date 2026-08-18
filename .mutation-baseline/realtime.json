@@ -6,28 +6,28 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 66.88,
-  "totalMsi": 66.88,
-  "coveredMsi": 67.54,
-  "killed": 307,
-  "survived": 149,
+  "killRate": 69.17,
+  "totalMsi": 69.17,
+  "coveredMsi": 69.41,
+  "killed": 1642,
+  "survived": 725,
   "timeout": 3,
-  "noCoverage": 17,
-  "error": 0,
+  "noCoverage": 35,
+  "error": 4,
   "mutants": [
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 17,
-      "column": 34,
-      "mutator": "LogicalOperator",
-      "replacement": "config.artificialLatencyMs && 5"
-    },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 18,
       "column": 42,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 17,
+      "column": 34,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 5"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -45,17 +45,17 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 21,
-      "column": 35,
-      "mutator": "LogicalOperator",
-      "replacement": "config.reconnect?.initialBackoffMs && 100"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 20,
       "column": 30,
       "mutator": "LogicalOperator",
       "replacement": "config.reconnect?.maxAttempts && 5"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 21,
+      "column": 35,
+      "mutator": "LogicalOperator",
+      "replacement": "config.reconnect?.initialBackoffMs && 100"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -66,17 +66,17 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 23,
-      "column": 36,
-      "mutator": "LogicalOperator",
-      "replacement": "config.reconnect?.backoffMultiplier && 2"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 24,
       "column": 25,
       "mutator": "LogicalOperator",
       "replacement": "config.reconnect?.jitter && 0.1"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 23,
+      "column": 36,
+      "mutator": "LogicalOperator",
+      "replacement": "config.reconnect?.backoffMultiplier && 2"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -101,15 +101,15 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 34,
-      "column": 38,
+      "line": 36,
+      "column": 33,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 36,
-      "column": 33,
+      "line": 34,
+      "column": 38,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -123,23 +123,9 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 41,
-      "column": 38,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 41,
       "column": 56,
       "mutator": "ConditionalExpression",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 43,
-      "column": 45,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -147,6 +133,20 @@
       "column": 81,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 41,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 43,
+      "column": 45,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -185,6 +185,13 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
+      "line": 94,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
       "line": 84,
       "column": 69,
       "mutator": "StringLiteral",
@@ -208,8 +215,8 @@
       "file": ".vitest-dist/src/engine.js",
       "line": 94,
       "column": 21,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "EqualityOperator",
+      "replacement": "s.handlers.size !== 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -217,13 +224,6 @@
       "column": 21,
       "mutator": "ConditionalExpression",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
-      "line": 94,
-      "column": 21,
-      "mutator": "EqualityOperator",
-      "replacement": "s.handlers.size !== 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -249,16 +249,16 @@
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 126,
-      "column": 37,
-      "mutator": "ArithmeticOperator",
-      "replacement": "Date.now() + start"
+      "column": 25,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(0, Date.now() - start)"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 126,
-      "column": 25,
-      "mutator": "MethodExpression",
-      "replacement": "Math.min(0, Date.now() - start)"
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + start"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -276,13 +276,6 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 191,
-      "column": 45,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 186,
       "column": 33,
       "mutator": "ArrayDeclaration",
@@ -297,10 +290,10 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 206,
-      "column": 29,
-      "mutator": "ArrayDeclaration",
-      "replacement": "[\"Stryker was here\"]"
+      "line": 191,
+      "column": 45,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -313,6 +306,13 @@
       "file": ".vitest-dist/src/engine.js",
       "line": 204,
       "column": 31,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 206,
+      "column": 29,
       "mutator": "ArrayDeclaration",
       "replacement": "[\"Stryker was here\"]"
     },
@@ -493,17 +493,17 @@
     },
     {
       "file": ".vitest-dist/src/engine.js",
-      "line": 321,
-      "column": 47,
-      "mutator": "ArithmeticOperator",
-      "replacement": "Math.random() / 2"
-    },
-    {
-      "file": ".vitest-dist/src/engine.js",
       "line": 322,
       "column": 16,
       "mutator": "MethodExpression",
       "replacement": "Math.min(0, base + jitterAmount)"
+    },
+    {
+      "file": ".vitest-dist/src/engine.js",
+      "line": 321,
+      "column": 47,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Math.random() / 2"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -538,14 +538,14 @@
       "line": 325,
       "column": 13,
       "mutator": "EqualityOperator",
-      "replacement": "ms > 0"
+      "replacement": "ms < 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
       "line": 325,
       "column": 13,
       "mutator": "EqualityOperator",
-      "replacement": "ms < 0"
+      "replacement": "ms > 0"
     },
     {
       "file": ".vitest-dist/src/engine.js",
@@ -581,6 +581,13 @@
       "column": 9,
       "mutator": "EqualityOperator",
       "replacement": "arr.length <= cap"
+    },
+    {
+      "file": ".vitest-dist/src/fidelity.js",
+      "line": 2,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "input.perScenarioTimeoutMs && 3000"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -658,13 +665,6 @@
       "column": 57,
       "mutator": "ArithmeticOperator",
       "replacement": "s - r.kindOrderMatch"
-    },
-    {
-      "file": ".vitest-dist/src/fidelity.js",
-      "line": 2,
-      "column": 21,
-      "mutator": "LogicalOperator",
-      "replacement": "input.perScenarioTimeoutMs && 3000"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -761,15 +761,15 @@
       "file": ".vitest-dist/src/fidelity.js",
       "line": 52,
       "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "LogicalOperator",
+      "replacement": "i < a.length || i < b.length"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
       "line": 52,
       "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "i < a.length || i < b.length"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/fidelity.js",
@@ -926,6 +926,1889 @@
       "replacement": "Date.now() <= deadline"
     },
     {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 3,
+      "column": 51,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 3,
+      "column": 39,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 5,
+      "column": 45,
+      "mutator": "MethodExpression",
+      "replacement": "Math.random().toString(36)"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 29,
+      "column": 33,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 51,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 57,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 57,
+      "column": 22,
+      "mutator": "LogicalOperator",
+      "replacement": "event.kind === 'presence' || isPresence"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 57,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 60,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 60,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 60,
+      "column": 22,
+      "mutator": "EqualityOperator",
+      "replacement": "event.kind !== 'connection'"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 60,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 60,
+      "column": 51,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 61,
+      "column": 29,
+      "mutator": "LogicalOperator",
+      "replacement": "state.handlers.get('pusher:connection_state_change') && []"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 61,
+      "column": 48,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 61,
+      "column": 85,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 70,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 74,
+      "column": 22,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 75,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "state.members.get(userId) && null"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 96,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 106,
+      "column": 20,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 109,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 129,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 129,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "!arr && arr.length === 0"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 122,
+      "column": 25,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 129,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 132,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 138,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "event.type !== 'join'"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 38,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 38,
+      "mutator": "EqualityOperator",
+      "replacement": "event.type !== 'sync'"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 149,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 149,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 146,
+      "column": 53,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 149,
+      "column": 18,
+      "mutator": "EqualityOperator",
+      "replacement": "event.type !== 'leave'"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 149,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 149,
+      "column": 42,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/pusher.js",
+      "line": 152,
+      "column": 56,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 20,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 27,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 27,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "pushSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 32,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 33,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "metrics.streamsOpened -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 39,
+      "column": 20,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 38,
+      "column": 22,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 40,
+      "column": 29,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 57,
+      "column": 30,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 58,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 59,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 63,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 63,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 67,
+      "column": 36,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 73,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 74,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 78,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 78,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 78,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "state === 'cancelled' && state === 'body-sent'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 78,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 78,
+      "column": 46,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 78,
+      "column": 56,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 84,
+      "column": 22,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 87,
+      "column": 30,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 85,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 88,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 89,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 101,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 96,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/http3-push.js",
+      "line": 111,
+      "column": 17,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 24,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 25,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 25,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 25,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 25,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 31,
+      "column": 26,
+      "mutator": "UpdateOperator",
+      "replacement": "streamSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 33,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 34,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "metrics.streamsOpened -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 38,
+      "column": 22,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 39,
+      "column": 20,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 40,
+      "column": 29,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 49,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 49,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 51,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 53,
+      "column": 17,
+      "mutator": "AssignmentOperator",
+      "replacement": "metrics.streamsClosed -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 57,
+      "column": 30,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 58,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 59,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 67,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 78,
+      "column": 43,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom.hpackInserts ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 78,
+      "column": 44,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom.hpackInserts && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 81,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 82,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 83,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 95,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 95,
+      "column": 40,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 96,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 97,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/quic-multiplex.js",
+      "line": 105,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 10,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 10,
+      "column": 81,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 35,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 38,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 43,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 44,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 45,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 45,
+      "column": 47,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom['bytesReceived'] ?? 0) - input.byteLength"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 45,
+      "column": 48,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom['bytesReceived'] && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 45,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 48,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/voice-streaming.js",
+      "line": 49,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 35,
+      "column": 60,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 38,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 43,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 44,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 47,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 49,
+      "column": 66,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-encoder.js",
+      "line": 52,
+      "column": 66,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 9,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "config.seed && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 21,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 27,
+      "column": 17,
+      "mutator": "ArithmeticOperator",
+      "replacement": "seed * 1103515245 - 12345"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 27,
+      "column": 17,
+      "mutator": "ArithmeticOperator",
+      "replacement": "seed / 1103515245"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 32,
+      "column": 38,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 32,
+      "column": 22,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.ordered && true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 35,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 34,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 35,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.label && `dc-${channelSeq}`"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 37,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 37,
+      "column": 26,
+      "mutator": "UpdateOperator",
+      "replacement": "channelSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 43,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "metrics.streamsOpened -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 47,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 48,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 49,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 65,
+      "column": 42,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 65,
+      "column": 42,
+      "mutator": "EqualityOperator",
+      "replacement": "resolved.maxRetransmits >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 66,
+      "column": 40,
+      "mutator": "ArithmeticOperator",
+      "replacement": "1 * (resolved.maxRetransmits + 2)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 65,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "!resolved.ordered || resolved.maxRetransmits > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 67,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 67,
+      "column": 25,
+      "mutator": "EqualityOperator",
+      "replacement": "nextRandom() <= dropChance"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 67,
+      "column": 25,
+      "mutator": "EqualityOperator",
+      "replacement": "nextRandom() >= dropChance"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 68,
+      "column": 49,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom.drops && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 68,
+      "column": 48,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom.drops ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 74,
+      "column": 45,
+      "mutator": "UpdateOperator",
+      "replacement": "sendSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 75,
+      "column": 36,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 76,
+      "column": 45,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 85,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 86,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 90,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 90,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 92,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 95,
+      "column": 17,
+      "mutator": "AssignmentOperator",
+      "replacement": "metrics.streamsClosed -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 99,
+      "column": 30,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 100,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 101,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 113,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 108,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 120,
+      "column": 25,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 123,
+      "column": 17,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-data-channel.js",
+      "line": 127,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "config.seed && 1"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 3,
+      "column": 39,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 3,
+      "column": 51,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 27,
+      "column": 24,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 28,
+      "column": 26,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 41,
+      "column": 44,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 42,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 45,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 45,
+      "column": 24,
+      "mutator": "MethodExpression",
+      "replacement": "Math.random().toString(36)"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 61,
+      "column": 63,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 56,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 65,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 66,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 66,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 66,
+      "column": 50,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 67,
+      "column": 25,
+      "mutator": "BooleanLiteral",
+      "replacement": "connected"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 67,
+      "column": 37,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 67,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 68,
+      "column": 37,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 67,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 69,
+      "column": 40,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 74,
+      "column": 37,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 73,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 78,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "event === 'connect' || !connected"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 40,
+      "mutator": "BooleanLiteral",
+      "replacement": "connected"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 52,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "event !== 'connect'"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 102,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 103,
+      "column": 58,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 104,
+      "column": 33,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 113,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 117,
+      "column": 29,
+      "mutator": "LogicalOperator",
+      "replacement": "eventHandlers.get(event) && []"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 118,
+      "column": 45,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 118,
+      "column": 52,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 125,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 126,
+      "column": 50,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 126,
+      "column": 27,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 139,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 139,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 139,
+      "column": 25,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 151,
+      "column": 48,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 145,
+      "column": 25,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 152,
+      "column": 29,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 153,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/socketio.js",
+      "line": 173,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 15,
+      "column": 35,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 3,
+      "column": 51,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 6,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 16,
+      "column": 48,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 22,
+      "column": 18,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 24,
+      "column": 26,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 26,
+      "column": 21,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 27,
+      "column": 20,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 59,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 75,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 84,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 84,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 84,
+      "column": 28,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 88,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 88,
+      "column": 41,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 88,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 88,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "trackedUserId === null"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 101,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 117,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 117,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "!arr && arr.length === 0"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 117,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 121,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 121,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 121,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "event.type !== 'join'"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 121,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 122,
+      "column": 15,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 122,
+      "column": 57,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 122,
+      "column": 49,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 124,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 124,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 124,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "event.type !== 'leave'"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 124,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 125,
+      "column": 15,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 125,
+      "column": 58,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 125,
+      "column": 50,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 133,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 133,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 133,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "!arr && arr.length === 0"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 136,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 145,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 145,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 147,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/supabase.js",
+      "line": 149,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
       "file": ".vitest-dist/src/ably.js",
       "line": 5,
       "column": 41,
@@ -997,15 +2880,15 @@
     },
     {
       "file": ".vitest-dist/src/ably.js",
-      "line": 103,
-      "column": 24,
+      "line": 107,
+      "column": 28,
       "mutator": "BlockStatement",
       "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/ably.js",
-      "line": 107,
-      "column": 28,
+      "line": 103,
+      "column": 24,
       "mutator": "BlockStatement",
       "replacement": "{}"
     },
@@ -1032,6 +2915,13 @@
     },
     {
       "file": ".vitest-dist/src/ably.js",
+      "line": 157,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "!arr && arr.length === 0"
+    },
+    {
+      "file": ".vitest-dist/src/ably.js",
       "line": 154,
       "column": 9,
       "mutator": "ConditionalExpression",
@@ -1047,18 +2937,2160 @@
     {
       "file": ".vitest-dist/src/ably.js",
       "line": 157,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "!arr && arr.length === 0"
-    },
-    {
-      "file": ".vitest-dist/src/ably.js",
-      "line": 157,
       "column": 17,
       "mutator": "ConditionalExpression",
       "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 36,
+      "column": 43,
+      "mutator": "LogicalOperator",
+      "replacement": "process?.env && {}"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 36,
+      "column": 43,
+      "mutator": "OptionalChaining",
+      "replacement": "process.env"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 37,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 61,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 68,
+      "column": 17,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/real-driver.js",
+      "line": 83,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 10,
+      "column": 26,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventCount / costPerEvent"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 11,
+      "column": 28,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 12,
+      "column": 11,
+      "mutator": "ArithmeticOperator",
+      "replacement": "totalCostUsd * input.mockMetrics.publishCount"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 14,
+      "column": 28,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 26,
+      "column": 11,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 31,
+      "column": 60,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(0, Math.round(estimatePayloadBytes(r.real) / 4))"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 31,
+      "column": 83,
+      "mutator": "ArithmeticOperator",
+      "replacement": "estimatePayloadBytes(r.real) * 4"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 32,
+      "column": 64,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(0, Math.round(estimatePayloadBytes(r.mock) / 4))"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 32,
+      "column": 87,
+      "mutator": "ArithmeticOperator",
+      "replacement": "estimatePayloadBytes(r.mock) * 4"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 41,
+      "column": 36,
+      "mutator": "MethodExpression",
+      "replacement": "input.fidelity.records"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 41,
+      "column": 73,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 41,
+      "column": 73,
+      "mutator": "EqualityOperator",
+      "replacement": "r.accuracyScore <= 0.5"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 45,
+      "column": 31,
+      "mutator": "ArrayDeclaration",
+      "replacement": "new Array()"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 45,
+      "column": 41,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(1, input.mockMetrics.publishCount)"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 46,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 46,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 46,
+      "column": 37,
+      "mutator": "EqualityOperator",
+      "replacement": "latencySamples.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 46,
+      "column": 37,
+      "mutator": "EqualityOperator",
+      "replacement": "latencySamples.length <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 46,
+      "column": 82,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 48,
+      "column": 27,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 49,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 52,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 55,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 61,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 60,
+      "column": 30,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 61,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 61,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ev.payload === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 61,
+      "column": 39,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/report.js",
+      "line": 62,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "total -= JSON.stringify(ev.payload).length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 10,
+      "column": 81,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 21,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 40,
+      "column": 66,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 44,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 44,
+      "column": 46,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom['prioritySets'] ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 44,
+      "column": 47,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom['prioritySets'] && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-datagram-media.js",
+      "line": 44,
+      "column": 62,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 21,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 35,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 35,
+      "column": 50,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom['tracksAnnounced'] && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 35,
+      "column": 49,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom['tracksAnnounced'] ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 35,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 38,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 39,
+      "column": 66,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 42,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 47,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 48,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 48,
+      "column": 49,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom['objectsReceived'] ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 48,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 48,
+      "column": 50,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom['objectsReceived'] && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/moq-fetch.js",
+      "line": 49,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 10,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 10,
+      "column": 81,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 21,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 35,
+      "column": 62,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 38,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 39,
+      "column": 67,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 40,
+      "column": 70,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 43,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 50,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 46,
+      "column": 68,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/realtime-ai-inference.js",
+      "line": 51,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 25,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 25,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 35,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 70,
+      "column": 38,
+      "mutator": "ArithmeticOperator",
+      "replacement": "session.reconnectRounds - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 125,
+      "column": 23,
+      "mutator": "MethodExpression",
+      "replacement": "session.events"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 125,
+      "column": 45,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 125,
+      "column": 52,
+      "mutator": "MethodExpression",
+      "replacement": "e.endsWith('event:')"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 125,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 129,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly - invalid + terminal"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/session-orchestrator.js",
+      "line": 129,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "eventOnly + invalid"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 10,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 10,
+      "column": 81,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 21,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 38,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 39,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 42,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 46,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/simulcast-svc.js",
+      "line": 47,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 10,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 10,
+      "column": 81,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 21,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 35,
+      "column": 60,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 38,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 40,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "input.type !== 'key'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 45,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 41,
+      "column": 70,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 46,
+      "column": 65,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 47,
+      "column": 75,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 50,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webcodecs-decoder.js",
+      "line": 51,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 27,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 28,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 28,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 28,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 28,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 33,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 42,
+      "column": 30,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 47,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 48,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 56,
+      "column": 35,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + gatheringStart"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 61,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 62,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 71,
+      "column": 49,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 71,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 72,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 73,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 77,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 78,
+      "column": 18,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 79,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 80,
+      "column": 35,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 80,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 82,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 81,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 86,
+      "column": 48,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 86,
+      "column": 36,
+      "mutator": "MethodExpression",
+      "replacement": "Math.min(1, candidatesGathered * candidatesRemote > 0 ? 1 : 0)"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 86,
+      "column": 48,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 86,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "candidatesGathered * candidatesRemote >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 86,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "candidatesGathered * candidatesRemote <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 86,
+      "column": 48,
+      "mutator": "ArithmeticOperator",
+      "replacement": "candidatesGathered / candidatesRemote"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 89,
+      "column": 18,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 90,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 91,
+      "column": 35,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 91,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 92,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 93,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 102,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 103,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 104,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 118,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-ice.js",
+      "line": 125,
+      "column": 25,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 25,
+      "column": 17,
+      "mutator": "ArithmeticOperator",
+      "replacement": "seed * 1103515245 - 12345"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 28,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 29,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 29,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 29,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 29,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 39,
+      "column": 39,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 40,
+      "column": 23,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 40,
+      "column": 24,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 40,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 40,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 41,
+      "column": 16,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 42,
+      "column": 25,
+      "mutator": "ArithmeticOperator",
+      "replacement": "index * kinds.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 43,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 44,
+      "column": 23,
+      "mutator": "ArithmeticOperator",
+      "replacement": "2113667327 + index * 100"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 44,
+      "column": 36,
+      "mutator": "ArithmeticOperator",
+      "replacement": "index / 100"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 45,
+      "column": 24,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 45,
+      "column": 70,
+      "mutator": "ArithmeticOperator",
+      "replacement": "2113667327 + index * 100"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 45,
+      "column": 83,
+      "mutator": "ArithmeticOperator",
+      "replacement": "index / 100"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 45,
+      "column": 105,
+      "mutator": "ArithmeticOperator",
+      "replacement": "index * 255"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 45,
+      "column": 143,
+      "mutator": "ArithmeticOperator",
+      "replacement": "index * kinds.length"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 54,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "offerCount -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 59,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 60,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 67,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "answerCount -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 72,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 73,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 82,
+      "column": 17,
+      "mutator": "AssignmentOperator",
+      "replacement": "candidateCount -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 89,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 102,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 103,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 109,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-signaling.js",
+      "line": 126,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "config.seed && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 22,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 23,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 23,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 23,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 23,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 33,
+      "column": 29,
+      "mutator": "UpdateOperator",
+      "replacement": "trackSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 37,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 37,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 37,
+      "column": 20,
+      "mutator": "EqualityOperator",
+      "replacement": "kind !== 'video'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 37,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 37,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 37,
+      "column": 52,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 38,
+      "column": 22,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 50,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 53,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 53,
+      "column": 31,
+      "mutator": "UpdateOperator",
+      "replacement": "streamSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 56,
+      "column": 38,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom.streams ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 56,
+      "column": 39,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom.streams && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 72,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 73,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 75,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 88,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 89,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 90,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 98,
+      "column": 36,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 99,
+      "column": 36,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom.mutes ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 99,
+      "column": 37,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom.mutes && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 103,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 104,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 105,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 113,
+      "column": 36,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 114,
+      "column": 38,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom.unmutes ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 114,
+      "column": 39,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom.unmutes && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 118,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 119,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 120,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 125,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webrtc-track.js",
+      "line": 135,
+      "column": 17,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 20,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 21,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 27,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 27,
+      "column": 26,
+      "mutator": "UpdateOperator",
+      "replacement": "streamSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 32,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "metrics.streamsOpened -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 36,
+      "column": 35,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 37,
+      "column": 20,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 38,
+      "column": 29,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 53,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 53,
+      "column": 21,
+      "mutator": "EqualityOperator",
+      "replacement": "data.byteLength >= windowRemaining"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 58,
+      "column": 34,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 62,
+      "column": 32,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 63,
+      "column": 41,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 73,
+      "column": 22,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 74,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 76,
+      "column": 30,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 80,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 81,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 86,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 92,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 92,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 99,
+      "column": 30,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 99,
+      "column": 43,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 100,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 101,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 108,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 113,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 123,
+      "column": 17,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-bi.js",
+      "line": 120,
+      "column": 25,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 3,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 21,
+      "column": 27,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms < 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 22,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "ms > 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 28,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 28,
+      "column": 27,
+      "mutator": "UpdateOperator",
+      "replacement": "streamSeq--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 35,
+      "column": 20,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 36,
+      "column": 29,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 52,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 53,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 57,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 59,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 63,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 63,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 72,
+      "column": 37,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 71,
+      "column": 28,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 80,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 89,
+      "column": 24,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 90,
+      "column": 33,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + startTime"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 95,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/webtransport-uni.js",
+      "line": 105,
+      "column": 17,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 7,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "config.artificialLatencyMs && 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "AssignmentOperator",
+      "replacement": "elapsedMs -= latency"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 10,
+      "column": 20,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 10,
+      "column": 81,
+      "mutator": "UpdateOperator",
+      "replacement": "order--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "UpdateOperator",
+      "replacement": "metrics.eventsEmitted--"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 21,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 34,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 35,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 35,
+      "column": 44,
+      "mutator": "ArithmeticOperator",
+      "replacement": "(metrics.custom['chunksSent'] ?? 0) - 1"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 35,
+      "column": 45,
+      "mutator": "LogicalOperator",
+      "replacement": "metrics.custom['chunksSent'] && 0"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 35,
+      "column": 60,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 36,
+      "column": 59,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 39,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 43,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 44,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 47,
+      "column": 18,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 48,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "input.type !== 'start'"
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 49,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics/whisper-streaming.js",
+      "line": 52,
+      "column": 61,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/semantics-fidelity.js",
+      "line": 64,
+      "column": 23,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/semantics-fidelity.js",
+      "line": 73,
+      "column": 25,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/semantics-fidelity.js",
+      "line": 88,
+      "column": 25,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
     }
   ],
-  "capturedAt": "2026-08-17T10:03:23Z",
-  "note": "Total MSI 66.88% / Covered MSI 67.54% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-17T23:54:09Z",
+  "note": "Total MSI 69.17% / Covered MSI 69.41% (threshold high=65 / low=55 / break=50)."
 }
