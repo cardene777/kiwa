@@ -1103,7 +1103,8 @@ describe('perf suite absence is recorded (#1993)', () => {
       const manifest = JSON.parse(readFileSync(join(REPO_ROOT, dir, 'package.json'), 'utf8')) as {
         scripts?: Record<string, unknown>;
       };
-      return !withPerf.has(dir) || typeof manifest.scripts?.['test:perf'] !== 'string';
+      const script = manifest.scripts?.['test:perf'];
+      return !withPerf.has(dir) || typeof script !== 'string' || script.trim().length === 0;
     });
 
     expect(
