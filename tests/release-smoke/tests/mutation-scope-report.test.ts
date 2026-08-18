@@ -479,10 +479,11 @@ describe('the command line', () => {
   });
 
   it('lists one package with a line count per file', async () => {
-    // `observability` still has files outside `mutate`; `a11y` does not since
-    // #1963, and a package with nothing left to list cannot show the row shape.
-    const { stdout } = await runScript(['--list', 'observability']);
-    expect(stdout).toContain('observability — implementation files not in `mutate`');
+    // A package with nothing left outside `mutate` cannot show the row shape,
+    // so this needs one that still has files. `observability` served until
+    // #1980 widened it; `orm` and `dapp` are what is left.
+    const { stdout } = await runScript(['--list', 'orm']);
+    expect(stdout).toContain('orm — implementation files not in `mutate`');
     expect(stdout).toMatch(/^ {2}\S+\s+[\d,]+$/m);
   });
 

@@ -37,8 +37,12 @@ const REPO_ROOT = process.env.KIWA_BASELINE_ROOT
  * v1.27-2 landed 9 core + 11 framework baselines. v1.27-3 extends to the
  * remaining 13 packages: 3 test-type packages (a11y / visual / component) +
  * 10 SaaS adapters (auth / queue / cache / orm / payment / streaming /
- * search / mcp / agent / realtime). The remaining `ai-llm` slot is deferred
- * to v1.27-4 where release gate integration lands.
+ * search / mcp / agent / realtime).
+ *
+ * `ai-llm` was listed here as deferred to v1.27-4 until #1980. v1.27-4 shipped
+ * without adding it, so the package ran mutation testing and was scored by the
+ * gate for months with a `killRate: null` stub for a baseline. It is in the map
+ * below now.
  *
  * Tier + threshold values are read from the pre-existing baseline stub
  * (`.mutation-baseline/<pkg>.json`) so this writer never diverges from
@@ -71,6 +75,11 @@ const PACKAGES = {
   // #1951: security ran mutation testing from v1.27 without a baseline,
   // because nothing scored it. Core tier, 84.90 % covered MSI.
   '@kiwa-lab/security': 'packages/security',
+  // #1980: ai-llm was left out here as "deferred to v1.27-4", and v1.27-4 came
+  // and went without adding it. Its baseline stayed a `killRate: null` stub
+  // from 2026-07-05 — a package that ran mutation testing, was scored by the
+  // gate, and had no way to record what it scored.
+  '@kiwa-lab/ai-llm': 'packages/ai-llm',
 };
 
 /**

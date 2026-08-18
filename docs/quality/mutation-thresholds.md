@@ -27,15 +27,15 @@ Kill-rate = `killed / (killed + survived + timeout + error)` as reported by Stry
 | `@kiwa-lab/cli-test` | Core | 80 / 60 / 50 | CLI expectation runner, pure logic. |
 | `@kiwa-lab/cli` | Core | 80 / 60 / 50 | CLI runtime for kiwa init / scaffold, pure logic. |
 | `@kiwa-lab/security` | Core | 80 / 60 / 50 | v0.1 policy engines (CSP / rate-limit / authorization / WAF / threat-model / secrets-scan / SBOM / headers) plus the v0.2 advanced-II semantics layer — pure logic. #1965 widened it to every implementation file, the env-gated `real-driver.ts` included, and it measured 87.13. |
-| `@kiwa-lab/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. |
+| `@kiwa-lab/observability` | Core | 80 / 60 / 50 | Flaky detection + coverage gap analysis, pure logic. #1980 widened it to every implementation file and measured 84.97. |
 | `@kiwa-lab/nextjs` | Framework | 70 / 60 / 50 | RSC + Server Actions + Middleware invariants. v1.27-1 rolled out with an aspirational 90 / 80 / 80 override, but the v1.27-2 baseline sweep landed at 80 % covered MSI (79.35 % total). Reverted to Framework default until follow-up tests raise the bar back to 90. |
 | `@kiwa-lab/edge` | Framework | 70 / 60 / 50 | Workers / Deno / Bun edge runtimes with divergent APIs. #1971 widened it from two files to every implementation file and measured 91.08, second only to `ui` at 91.18 and 21 points clear of its tier. |
 | `@kiwa-lab/hono` | Framework | 70 / 60 / 50 | Hono edge + node adapter drift. |
-| `@kiwa-lab/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. Ran at `override: 65` until #1973 re-measured it at 75.74 and removed it. |
-| `@kiwa-lab/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. |
-| `@kiwa-lab/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. v1.27-3 baseline mutates `sandbox-queue.js` only; `testcontainers-queue.js` is excluded because its assertions only fire against live containers (0 covered mutants under the unit suite). |
+| `@kiwa-lab/auth` | Framework | 70 / 60 / 50 | Adapter wraps NextAuth v5 / Lucia v3 / Better Auth / Clerk / Auth0 / Supabase Auth — SSR + RSC + provider drift. Ran at `override: 65` until #1973 re-measured it at 75.74 and removed it; #1980 widened it to every implementation file and measured 79.89. |
+| `@kiwa-lab/ai-llm` | SaaS | 65 / 55 / 50 | Anthropic / OpenAI / Vercel AI SDK / LangChain — provider API surfaces evolve rapidly. Its narrow scope measured 64.45, below the tier; #1980 widened it to every implementation file and measured 75.83. |
+| `@kiwa-lab/queue` | SaaS | 65 / 55 / 50 | BullMQ / Inngest / Cloudflare Queues / SQS / RabbitMQ — provider transport + semantics drift. #1980 widened it to every implementation file and measured 78.37; the `testcontainers-*` exclusion it carried was checked and found wrong (274 covered mutants across the two files, not 0). |
 | `@kiwa-lab/cache` | SaaS | 65 / 55 / 50 | Redis / KeyDB / Memcached — client library + protocol drift. Ran on `in-memory-cache.js` alone under `override: 60`; #1967 widened it to every implementation file, measured 78.77, and deleted the override. |
-| `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. Mutates `engine.js` / `fidelity.js` / `ably.js` only; `pusher.js` + `socketio.js` require a live provider socket to exercise, and `report.js` is a thin adapter over `@kiwa-lab/quality-metrics` (mutation-tested there). Ran at `override: 60` until #1973 re-measured it at 67.54 and removed it. |
+| `@kiwa-lab/realtime` | SaaS | 65 / 55 / 50 | Supabase Realtime / Ably / Pusher / Socket.io — WebSocket API drift. Ran at `override: 60` until #1973 re-measured it at 67.54 and removed it; #1980 widened it to every implementation file and measured 69.41. The `pusher` / `socketio` / `report` exclusions it carried were checked and found wrong (115 / 137 / 67 covered mutants). |
 | `@kiwa-lab/search` | SaaS | 65 / 55 / 50 | Algolia / Meilisearch / Typesense — index + query fidelity drift. #1969 widened it from the three adapters plus the engine to every implementation file and measured 79.89. |
 | `@kiwa-lab/orm` | SaaS | 65 / 55 / 50 | Prisma / Drizzle / Kysely — SQL dialect + query planner drift. |
 | `@kiwa-lab/dapp` | SaaS | 65 / 55 / 50 | viem + anvil + wallet fixture — chain protocol + wallet inject drift. |
@@ -73,9 +73,9 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** The repo sits at 40.0%, and each remaining package
-moves under its own Issue (§ Widening a package's scope). Read a green mutation gate accordingly —
-until a package's Issue lands, "passed" covers whatever its config happens to list.
+**This is the target, not the current state.** The repo sits at 87.5%, with `orm` and `dapp` still
+to go (§ Widening a package's scope). Read a green mutation gate accordingly — until a package's
+Issue lands, "passed" covers whatever its config happens to list.
 
 No config names a barrel any more (`api`, `ui`, and `a11y` each listed their `index.js` until #1963
 widened them). Listing one is harmless — Stryker finds nothing to mutate there — but it makes the
@@ -142,25 +142,27 @@ that moved sat outside every gate while the report still read green. Adding the 
 ### The measurement that produced this rule
 
 `node scripts/mutation-scope-report.mjs` produces it (#1948). The numbers below are that script's
-output at the commit which added it (2026-08-17, 22 packages); they move as the source does, so
-re-run it rather than reading the snapshot as current.
+output as of #1980 (2026-08-18, 22 packages); they move as the source does, so re-run it rather than
+reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 27,309 |
-| implementation, not in `mutate` | 41,044 |
+| implementation, in `mutate` | 59,841 |
+| implementation, not in `mutate` | 8,512 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 40.0% of implementation lines were covered (27,309 of 68,353).
+So 87.5% of implementation lines were covered (59,841 of 68,353).
 
-Everything outside `mutate` totals 45,097 lines, and barrel plus type-only accounts for 4,053 of
-that — the "it's only types" explanation does not cover the gap. Per-package coverage ranges from
-100% (15 packages after #1961, #1963, #1965, #1967, #1969, and #1971) to `auth` at 2.0%.
+Everything outside `mutate` totals 12,565 lines, and barrel plus type-only accounts for 4,053 of
+that. 20 of 22 packages are at 100%; what stays outside is `orm` (5,011 lines) and `dapp` (3,501),
+which #1980 measured and could not widen (§ Widening a package's scope).
 
-Widening to the full set means 68,353 implementation lines against 27,309 today — roughly 2.5x. At
-the current density (about 0.6 mutants per line) that projects to somewhere near 40,000 mutants.
-Treat it as an order of magnitude, not a forecast: density varies by package.
+Reaching every one of the 68,353 implementation lines therefore needs those two packages and nothing
+else. The gap this section opened with was 50,225 lines at 26.5%, and five PRs closed it to here
+(#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group) without a new
+test: every package that was widened met its tier as it already stood.
+
 
 #1944 classified the same files by hand and published totals 404 lines higher — one per file, from
 counting the empty string after a file's trailing newline as a line. Which bucket each file landed
@@ -248,28 +250,70 @@ removed so far had all been removable for some time before anyone looked.
 
 ## Widening a package's scope
 
-One package per PR, sized by how much sits outside `mutate` today. The three groups below exist
-because the work differs in kind, not just in volume: the large group needs its own test-writing
-plan, while the small group is mostly a config edit plus a re-run.
+One Issue per unit of work, sized by how much sits outside `mutate` today. A unit is usually one
+package, but packages that turn out to need the same edit go together: #1963 widened nine in one PR
+and #1980 widened five. The three groups below were drawn on the assumption that the work differs in
+kind with volume — that the small group would be a config edit plus a re-run and the large group
+would need its own test-writing plan.
+
+**Only the first half held.** #1980 measured the large group and five of its seven packages were
+also a config edit plus a re-run (§ The large group was measured before it was planned). The two
+that were not failed on wall-clock and on missing tests, neither of which the grouping predicts.
+Read the groups as a record of how the work was scheduled, not as a claim about how hard each one is.
 
 | group | packages | uncovered lines each |
 |---|---|---|
-| large — one Issue each | `auth` (13,899), `orm` (5,011), `queue` (4,978), `observability` (4,970), `ai-llm` (4,735), `realtime` (3,950), `dapp` (3,501) | 3,000+ |
+| large — measured in #1980 | ~~`auth` (13,899)~~, `orm` (5,011), ~~`queue` (4,978)~~, ~~`observability` (4,970)~~, ~~`ai-llm` (4,735)~~, ~~`realtime` (3,950)~~, `dapp` (3,501) | 3,000+ |
 | medium — done | ~~`edge` (2,802)~~, ~~`search` (2,179)~~, ~~`cache` (2,084)~~, ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
 | small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
 `hono` already sat at 100% and needed no Issue. `cli` widened in #1961, the small group in #1963,
-`security` in #1965, `cache` in #1967, `search` in #1969, and `edge` in #1971, so 15 of 22 packages
-are now at 100%. **Only the large group remains**, and the 41,044 lines still outside `mutate` are
-all inside its 7 packages — the two totals are the same number.
+`security` in #1965, `cache` in #1967, `search` in #1969, `edge` in #1971, and five of the large
+group in #1980, so 20 of 22 packages are now at 100%. What remains is `orm` and `dapp`.
 
-The small and medium groups turned out to be config edits plus a re-run. All 14 that were widened
-met their tier with no test written, and 7 of the 14 scored *higher* afterwards than before
-(`component` 67.78 → 82.99, `cache` 68.42 → 78.77, `search` 74.27 → 79.89, `edge` 83.97 → 91.08,
-`nextjs`, `data`, `security`). The other 7 fell and still cleared the bar.
+### The large group was measured before it was planned (#1980)
 
-The large group will not go that way. `auth` mutates 2.0% of its 14,187 lines, and § Widening a
-package's scope already says that group needs its own test-writing plan rather than one PR each.
+This section used to say the large group "will not go that way" — that config edits plus a re-run
+would not be enough, and it needed its own test-writing plan. The evidence was one number: `auth`
+mutated 2.0% of its 14,187 lines.
+
+#1980 widened all seven on a throwaway branch and ran them once each. Five met their tier with no
+test written, and every one of the five scored *higher* than its narrow scope did.
+
+| package | tier | before | after | mutants | run |
+|---|---|---|---|---|---|
+| `auth` | 70 | 75.74 | **79.89** | 6,171 | 15m52s |
+| `observability` | 80 | 84.43 | **84.97** | 3,581 | 5m18s |
+| `ai-llm` | 65 | 64.45 | **75.83** | 4,375 | 8m45s |
+| `queue` | 65 | 77.47 | **78.37** | 2,839 | 14m36s |
+| `realtime` | 65 | 67.54 | **69.41** | 2,409 | 4m04s |
+| `orm` | 65 | 90.43 | *(unfinished)* | 2,856 | 2.5h+ |
+| `dapp` | 65 | 85.09 | 48.92 | 2,473 | 7m35s |
+
+`auth` is the one the old text was written about, and it cleared its tier by ten points. `ai-llm` is
+the sharper case: its narrow scope scored 64.45, *below* the SaaS bar, and widening took it to 75.83
+— **the six files it had been mutating were its worst-tested ones.**
+
+**Line count does not predict this.** `observability` (5,544 lines) finishes in 5 minutes;
+`orm` (5,134) does not finish in 2.5 hours. Within the medium group `search` (2,179) took 1m41s and
+`cache` (2,084) took 5m02s. What the count measures is how much code there is, and the question is
+what the tests do with it.
+
+Two packages did fail, for reasons that are not about score:
+
+- **`orm` — wall-clock** (#1981). 2,463 of 2,856 mutants in 11 minutes, then roughly 8 mutants a
+  minute with timeouts climbing to 24. The semantics suite waits on something. Widening it means
+  finding out what, not writing tests — its narrow scope already scores 90.43.
+- **`dapp` — the tests are not there** (#1982). 2,103 of 2,473 widened mutants land as no-coverage:
+  `rpc-handlers` 687 of 715, `fixture` 511 of 536, `tx` 119 of 119. Its config header already said
+  the dry run cannot construct the forge artefacts and nextjs-bridge fixtures its suite needs. Its
+  48.92 is not a weak score but a score computed over the 370 mutants that ran. The question is
+  whether the unit suite can reach this code at all, which comes before any test-writing plan.
+
+The lesson is the one § Overrides already states about override values, applied to a different kind
+of claim. **"This will be expensive" is a measurement, and an unmeasured one goes stale the same way
+a number does.** The claim here was never measured, and five of the seven packages it described had
+been one config edit away the whole time.
 
 `tests/release-smoke/tests/mutation-gate-coverage.test.ts` holds the other half of that sentence in
 `FULLY_WIDENED`, which has to be exactly the packages with nothing left outside `mutate`. A widened

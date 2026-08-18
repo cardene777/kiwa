@@ -7,7 +7,7 @@ Introduced in v1.11 as `@kiwa-lab/quality-metrics` v0.1 (`mutationFromCounts` + 
 Mutation tests without a shared standard fail three ways.
 
 - **Threshold drift**. One package uses 90 / 80 / 80 as the gate, another uses 80 / 60 / 50, a third uses 65 / 55 / 50. When a mutation regression fires on package A but not on B, the reader cannot tell whether B is genuinely fine or whether B's gate is looser than A's. The 4-tier SSOT names the shape of the code Stryker runs over (`Core` / `Framework` / `SaaS` / `Test type`), and every downstream config picks the tier that fits its shape — not the tier that flatters its historic score.
-- **Kill-rate formula drift**. Stryker's HTML report exposes multiple numbers: `total MSI`, `covered MSI`, `killed / mutations`, `killed / (killed + survived)`. The SSOT pins the kill rate at **`killed / (killed + survived + timeout + error)`** — the "% Mutation score / covered" column — so a package with a lot of `no-coverage` mutants is not penalised for lines the test suite never touches, and a package with `timeout` / `error` mutants is not silently rewarded.
+- **Kill-rate formula drift**. Stryker's HTML report exposes multiple numbers: `total MSI`, `covered MSI`, `killed / mutations`, `killed / (killed + survived)`. The SSOT pins the kill rate at **`killed / (killed + survived + timeout + error)`** — so a package with a lot of `no-coverage` mutants is not penalised for lines the test suite never touches, and a package with `timeout` / `error` mutants is not silently rewarded. This is *not* Stryker's "% Mutation score / covered" column; Rule 1 spells out how the two differ.
 - **Regression detection drift**. Rebuilding the baseline on every run misses regressions entirely. Comparing today's kill rate against a hard-coded number misses improvements. The SSOT pins baseline persistence at `.mutation-baseline/{package}.json`, tracked in git, so a mutation regression on a future PR shows up as a **diff on the baseline JSON alongside the code diff**.
 
 The 4 rules below are the smallest set that make kiwa mutation suites comparable across packages, milestones, and forks.
@@ -26,12 +26,25 @@ const metric = mutationFromCounts({
 // metric.killRate === 65
 ```
 
-The SSOT matches Stryker's "% Mutation score / covered" column. The v0.3 `mutationFromCounts` helper takes `{ mutations, killed }` and derives `survived + killRate` from the two inputs; downstream code should not compute the ratio by hand.
+The v0.3 `mutationFromCounts` helper takes `{ mutations, killed }` and derives `survived + killRate` from the two inputs; downstream code should not compute the ratio by hand.
+
+### Two scores, and where they part
+
+`summariseReport()` in `scripts/mutation-baseline-refresh.mjs` writes both, and they are not the same number.
+
+| | numerator | denominator |
+|---|---|---|
+| `totalMsi` (this rule, written to `killRate`) | `killed` | `killed + survived + timeout + error` |
+| `coveredMsi` (what `check-mutation-gates.mjs` scores against) | `killed + timeout` | `killed + survived + timeout` |
+
+They differ in two places, not one. **`timeout`** counts against `totalMsi` but *for* `coveredMsi`, which treats a mutant that hung as one the suite caught. **`error`** sits in `totalMsi`'s denominator and is absent from `coveredMsi` entirely. `no-coverage` is outside both.
+
+The gap is real in the baselines: `@kiwa-lab/queue` records 76.64 total against 78.37 covered (42 timeouts, 5 errors), `@kiwa-lab/realtime` 69.17 against 69.41. When quoting a number, say which one it is — the gate reads `coveredMsi`, and a threshold written against `totalMsi` will not match it.
 
 ### Exceptions
 
-- **Provider-specific `testcontainers-*.js`** — a file that only exercises against a live container produces `no-coverage` mutants under the unit suite, which the covered denominator already excludes. That makes listing it free, so the rule is **measure before excluding**: `@kiwa-lab/cache` carried this exclusion citing a v1.27-3 sweep of 0 covered mutants, and #1967 measured 330 of 345 covered across its three `testcontainers-*` files, each scoring above the SaaS bar. `@kiwa-lab/queue` still excludes its `testcontainers-queue.js` and has not been re-measured. (`realtime` has no such file — its exclusions are `pusher.js` / `socketio.js` / `report.js`, for other reasons its config records.) When a file genuinely has no covered mutants, record the exclusion in the baseline JSON `note` field with the run that showed it.
-- **Effectful bridges** — thin re-exports of downstream helpers (`@kiwa-lab/realtime/report.js` re-exports `@kiwa-lab/quality-metrics`) are excluded from `mutate` because the mutation coverage belongs to the source module.
+- **Provider-specific `testcontainers-*.js`** — a file that needs a live container is assumed to produce nothing but `no-coverage` mutants under the unit suite, which would make listing it free. Measured, that assumption has failed every time: these files run plenty without the container, and the mutants they do cover tend to score *below* their package, so the exclusion was holding the aggregate up. The rule is **measure before excluding**: `@kiwa-lab/cache` carried this exclusion citing a v1.27-3 sweep of 0 covered mutants, and #1967 measured 328 covered mutants across its three `testcontainers-*` files, each scoring above the SaaS bar. #1980 then measured `@kiwa-lab/queue` (`testcontainers-queue.js` 234 covered against 17 no-coverage, `rabbitmq/testcontainers-rabbitmq.js` 40 against 14) and `@kiwa-lab/realtime` (`pusher.js` 115, `socketio.js` 137, `report.js` 67), and dropped every one of those exclusions too. Counts here are covered mutants as `coveredMsi` defines them — killed + survived + timeout — which is the denominator `check-mutation-gates.mjs` scores against (§ Two scores, and where they part). **Eight files across three packages have now been checked this way and not one had zero covered mutants.** When a file genuinely has no covered mutants, record the exclusion in the baseline JSON `note` field with the run that showed it — but measure first, because so far the measurement has always disagreed.
+- **Effectful bridges** — a thin re-export of a downstream helper looks like it needs no mutants of its own, since the logic lives in the source module. `@kiwa-lab/realtime/report.js` was excluded on that reasoning until #1980 measured 67 covered mutants in it: the adapter's own branches are not the ones `@kiwa-lab/quality-metrics` runs. This exception is kept here as a shape to watch for, not as a standing exclusion — none is in effect.
 
 ## Rule 2 — 4-tier threshold rationale
 
