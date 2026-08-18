@@ -202,6 +202,7 @@ contract / e2e 両方の細分項目を併記してよい。 ただし Layer 2 s
 Step 2 § 既存 test の探索 で控えた test 名と、 § テストケース一覧 の全 TC を突き合わせた結果。
 9 column 表には column を足さず本 section に持つ (Layer 2 parser が column index で読むため)。
 
+- 探索した runtime — `typescript` / `solidity` (`kiwa layers --json` の `runtime` をそのまま書く、 解決できなければ `不明`)
 - 探索した path — `packages/{name}/tests/` / `packages/{name}/test/` (実際に見た path をそのまま書く)
 - 見つけた既存 test — {N} 件 (探索できなかった場合は `不明 ({理由})`)
 
@@ -219,6 +220,7 @@ Step 2 § 既存 test の探索 で控えた test 名と、 § テストケー�
 - 候補を読んで TC の入力を走らせていないと分かった場合、 及び判断が付かない場合は `未覆` に倒す
 - `不明` は § 自動化すべきテスト で `未覆` と同じ扱い (先に置く)
 - 行数は § テストケース一覧 の TC 件数と一致 (全 TC が 1 行ずつ現れる)
+- runtime を書くのは、 当たらない glob で 0 件になった状態と本当に 0 件の状態を読み分けるため (`solidity` の package を `typescript` の glob で探すと必ず 0 件になる)
 
 ## 自動化すべきテスト
 
