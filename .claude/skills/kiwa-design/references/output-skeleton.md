@@ -197,13 +197,41 @@ getByTestId('status').toHaveText('connected')、 walletClient.getBalance() : 1 E
 
 contract / e2e 両方の細分項目を併記してよい。 ただし Layer 2 skill の変換精度が下がるため、 `--layer all` での運用は legacy compatibility 用とし、 新規 spec は `--layer contract` / `--layer e2e` のいずれかに倒すことを推奨する。
 
+## 既存 test との対応
+
+Step 2 § 既存 test の探索 で控えた test 名と、 § テストケース一覧 の全 TC を突き合わせた結果。
+9 column 表には column を足さず本 section に持つ (Layer 2 parser が column index で読むため)。
+
+- 探索した path — `packages/{name}/tests/` / `packages/{name}/test/` (実際に見た path をそのまま書く)
+- 見つけた既存 test — {N} 件 (探索できなかった場合は `不明 ({理由})`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| TC-001 | `少なくとも 1 回呼ばれていれば pass` (`packages/{name}/tests/{name}.test.ts:52`) | 既覆 (候補) |
+| TC-002 | (なし) | 未覆 |
+| TC-003 | 不明 (test dir を特定できず) | 不明 |
+
+埋め方の規約。
+
+- 判定は 3 値のみ (`既覆 (候補)` / `未覆` / `不明`)、 **`既覆` と断定しない** (test 名は自由文で、 名前の一致は body の一致を意味しない)
+- 候補 column は `file:行番号` + test 名を **そのまま** 書く (要約 / 意訳しない、 人が 1 手で開いて確かめる)
+- 候補が 1 件も無い TC は `未覆`、 Step 2 の探索ができなかった場合は全 TC が `不明`
+- 候補を読んで TC の入力を走らせていないと分かった場合、 及び判断が付かない場合は `未覆` に倒す
+- `不明` は § 自動化すべきテスト で `未覆` と同じ扱い (先に置く)
+- 行数は § テストケース一覧 の TC 件数と一致 (全 TC が 1 行ずつ現れる)
+
 ## 自動化すべきテスト
 
-優先度順 (高 → 中 → 低)。 Layer 2 skill が次フェーズで実装する。
+`未覆` / `不明` を先に置き、 その中で優先度順 (高 → 中 → 低)。 Layer 2 skill が次フェーズで実装する。
 
-- TC-001 (高) — E2E happy path mint
-- TC-002 (高) — 統合 RPC error fallback
-- TC-003 (高) — 単体 maxSupply boundary
+未覆。
+
+- TC-002 (高) — 統合 RPC error fallback (候補なし)
+- TC-003 (高) — 単体 maxSupply boundary (候補なし)
+
+既覆 (候補)。
+
+- TC-001 (高) — E2E happy path mint (候補 `{name}.test.ts:52`、 実装前に body を読んで重複か確かめる)
 
 ## 手動確認でよいテスト
 
@@ -243,7 +271,7 @@ skill は本雛形を **そのまま流用** し、 以下を変える / 変え�
 | 変更可 | 変更禁止 |
 |---|---|
 | `{module 名}` 等の placeholder 置換 | section ヘッダ (`## 対象機能` 等) の文字列 |
-| 表の column / 行追加 | column の名前 / 順序 |
+| 表の行追加 | column の名前 / 順序、 § テストケース一覧 の 9 column への column 追加 |
 | 観点の選択 (適用 / 非適用) | 観点の番号 / 名称 |
 | TC-XXX の連番 | TC-XXX の prefix `TC-` |
 
@@ -262,6 +290,7 @@ section ヘッダ文字列が SSOT (`docs/SKILL-DESIGN.md` § 出力フォーマ
 ## 関連
 
 - SSOT: `docs/SKILL-DESIGN.md` § 出力フォーマット (9 section 順序固定)
+- 差し込む section (`## UI feature 一覧` / `## 既存 test との対応`) の位置: `.claude/skills/kiwa-design/SKILL.md` § 出力フォーマット
 - risk 表の埋め方: `references/risk-criteria.md`
 - 観点選択: `references/viewpoints-catalog.md`
 - Layer 2 連携: `references/layer2-bridge.md`

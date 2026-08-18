@@ -284,6 +284,43 @@ grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
 
 リスク表を Step 3 / Step 5 で参照するので必ず生成する。
 
+#### 既存 test の探索 (Issue #2000)
+
+**リスクを測る前に「どの経路が既に test で守られているか」 を実測する**。
+探索を省くと既に test がある package に重複 TC を起こす = 実測で 19 test がある package に対して 23 TC を生成し、 うち 18 件が重複した (Issue #2000)。
+守られていない経路ほど壊れた時に気付けないため、 本 step の risk 表 (過去障害履歴) と Step 3 の観点 11 (回帰) の判定材料になる。
+
+対象実装 file が属する package (`packages/{name}` / `examples/{name}`) を `$PKG_DIR` として 2 段で探す。
+
+```bash
+# 1. test file を列挙する (node_modules は除外)
+find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
+  \( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \) -print
+
+# 2. 列挙した file から describe / it / test の名前を行番号つきで抽出する
+find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
+  \( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \) -print0 |
+  xargs -0 grep -nE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
+```
+
+2 段目で `grep -r` を `$PKG_DIR` に直接掛けない。 `-r` は build 成果物 (`.vitest-dist/` / `dist/` / `coverage/`) を辿るため、 **同じ test が 2 度現れ、 候補の行番号が生成物を指す** (実測で `packages/skill-test` は 35 行が 70 行になり、 増えた分は全て `.vitest-dist/` の compile 済 copy だった)。 1 段目と同じ `find` の結果だけを渡す。
+
+`node_modules` を `-prune` するのは、 pnpm の symlink を辿らない既定に依存しないため。 hoisting された実体 dir を持つ project では `-r` がそのまま入る。
+
+探索先は `tests/` と `test/` の両方を含める。
+kiwa の package は `tests/` を使い、 `/kiwa-vitest` の既定出力は `test/unit/` で、 片方だけを見ると取りこぼす。
+
+抽出した `file:行番号` と test 名は **全件そのまま控える** (要約しない)。
+Step 4 で TC と突き合わせる時、 名前の文字列そのものが唯一の手がかりになる。
+
+##### 探索できなかった場合
+
+test dir が無い / 読めない / 対象 package を特定できない場合は「既存 test 不明」 と記録し、 全 TC の判定を `不明` にする。
+
+`不明` は Step 5 で `未覆` と同じに扱う。
+重複 TC が出るだけで必要な TC が落ちない向きに倒すため、 `既覆 (候補)` 側へは倒さない。
+「既存 test が 0 件だった」 と「探せなかった」 を同じ表記にしない = 後者は次に読む人が確かめ直す対象になる。
+
 ### Step 3: テスト観点を選ぶ
 
 `references/viewpoints-catalog.md` の 11 観点から該当するものを選ぶ。 catalog は SSOT そのままで拡張禁止。 「常に」観点 (正常系) は省略不可、 「適用」観点は前提条件を満たす場合のみ含める。
@@ -301,6 +338,9 @@ grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
 | 9 | 性能 | 高負荷 endpoint / 大 payload |
 | 10 | セキュリティ | 認証 / 署名 / 暗号化 / secret 管理 |
 | 11 | 回帰 | 既存 test が存在 / 過去 bug fix した shape を持つ |
+
+観点 11 (回帰) の適用条件「既存 test が存在」 は **Step 2 § 既存 test の探索 の実測結果で判定する**。
+探索していない状態を「既存 test が無い」 と書かない = 実際には 19 件あった package を「無い」 と書いた実例がある (Issue #2000)。
 
 選択した観点を Step 4 のテストケースカテゴリの見出しに使う。
 
@@ -323,6 +363,28 @@ grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
 表 column 順序は固定 (`テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化`)。 Layer 2 parser が column index で読むため絶対変更しない。
 
 skill は **1 ケース 1 行** で出力。 複数操作を 1 行にまとめない (Step 5 の分類が壊れるため)。
+
+#### 既存 test との突き合わせ (Issue #2000)
+
+Step 2 で控えた既存 test 名と、 本 step で起こした TC を全件突き合わせる。
+結果は **9 column 表に column を足さず、 別 section `## 既存 test との対応` に持つ** (Layer 2 parser が column index で読むため、 表の形は変えられない)。
+
+| 判定 | 条件 |
+|---|---|
+| `既覆 (候補)` | TC が確かめる振る舞い (呼ぶ関数 + 期待の向き + **入力の形**) を名指ししていそうな既存 test が 1 件以上ある |
+| `未覆` | 候補が 1 件も無い |
+| `不明` | Step 2 の探索ができなかった (全 TC が `不明`) |
+
+関数と向きだけの一致では候補にしない。
+`assertToolCalledWith` が throw する test が既にあっても、 「key 数が違う」 入力を名指ししていなければ別の case で、 粗く採ると走っていない case を `既覆` に倒す (実測、 Issue #2000 の TC-022)。
+
+**`既覆` と断定せず必ず `既覆 (候補)` と書く**。
+test 名は自由文で、 名前が一致しても body が同じ入力を走らせているとは限らない = 実測で「`expectedOrder` 空なら常に pass」 という名前の test が、 記録が空の場合しか走らせていなかった (Issue #2000 の再 dogfood)。
+
+候補を読んで TC の入力を走らせていないと分かった場合は `未覆` に倒す。
+迷った場合も `未覆` に倒す = 誤って `既覆` と書くと必要な TC が落ち、 誤って `未覆` と書いても重複 test が 1 件増えるだけで、 損失が非対称。
+
+候補 column には `file:行番号` と test 名をそのまま書く (人が 1 手で開いて確かめられる形にする)。
 
 #### 高リスク module の TC 件数 check (改善 5 / Issue #227)
 
@@ -587,9 +649,13 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 
 最終出力に以下 3 サブセクションを必ず含める。
 
-- **自動化すべきテスト** — 優先度順
+- **自動化すべきテスト** — 未覆 (`未覆` / `不明`) を先に置き、 その中で優先度順
 - **手動確認でよいテスト** — 各ケース理由付き
 - **不足している仕様** — skill が解消できなかった事項を bullet (空なら `(なし)`)
+
+「自動化すべきテスト」 の並びは Step 4 の判定を先に見る。
+既に覆われている TC を先頭に置くと、 読んだ人が上から実装して重複 test を作る = 本 skill が Issue #2000 で起こした失敗そのものになる。
+`不明` は `未覆` と同じ扱いで先に置く (探せなかったことを覆われている側に倒さない)。
 
 ### Step 6: kiwa-review 自動呼出 (spec-review mode)
 
@@ -636,6 +702,17 @@ report 出力先: `tests/reports/review/spec-review-{module}.{$DOC_LANG}.md`
 
 該当事項がない section は `(なし)` placeholder を必ず置き、 section ヘッダ自体を省略しない。
 
+上記 9 section は順序固定で省略禁止 (SSOT `docs/SKILL-DESIGN.ja.md` § 出力フォーマット)。
+これに加えて、 layer 条件つきの section を 2 つ差し込む。
+
+| 差し込む section | 位置 | 条件 |
+|---|---|---|
+| `## UI feature 一覧` | `## 推奨テスト構成` の後 | e2e layer は必須、 contract layer は省略可 |
+| `## 既存 test との対応` | `## 自動化すべきテスト` の直前 | 常に必須 (探索できなかった場合も `不明` 表記で置く) |
+
+差し込む section は 9 section の順序を変えず、 間に入るだけ。
+`## 既存 test との対応` の中身と placeholder 規約は `references/output-skeleton.md` § 既存 test との対応 を Read する。
+
 ## Layer 2 連携
 
 Layer 1 出力を Layer 2 skill が消費する経路と引き渡し方は `references/layer2-bridge.md` を Read する。 出力 path は `--layer` で決定したものを使い、 Layer 2 skill 起動時に対応 layer の dir を Read する。
@@ -670,6 +747,8 @@ path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec �
 - 優先度判定が Step 5 のロジック (リスク 5 基準) と整合している
 - 「不足している仕様」が空でなければ追加ヒアリングが必要な旨を末尾で報告
 - Layer 2 連携先 skill を末尾で 1 件以上推奨 (`--layer` 指定で自動的に推奨 skill が絞られる)
+- `## 既存 test との対応` が全 TC 分の行を持ち、 各行の判定が `既覆 (候補)` / `未覆` / `不明` のいずれか
+- 「自動化すべきテスト」 の並びが `未覆` / `不明` から始まっている
 
 ## references
 

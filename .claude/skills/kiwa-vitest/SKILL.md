@@ -45,7 +45,8 @@ $ARGUMENTS
 
 | 観点 | 出力 path |
 |---|---|
-| unit test file | `test/unit/{module}.test.{ts,tsx}` |
+| unit test file (既存 test が無い) | `test/unit/{module}.test.{ts,tsx}` |
+| unit test file (既存 test がある) | **その既存 file に追記** (§ Step 4 の分岐) |
 | coverage report | `tests/reports/unit/coverage-report-{module}.{lang}.md` |
 | round 別 coverage | `tests/reports/unit/coverage-report-{module}-round-{N}.{lang}.md` |
 
@@ -110,9 +111,23 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 § 入力 spec の path は CLI から受け取る で解決した path を Read、 9 column 表から TC 行を全件抽出。 各 TC の (テストレベル / 観点 / 前提 / 入力 / 操作 / 期待結果) を Vitest 文法に対応付ける map を内部で作る。
 
+spec の `## 既存 test との対応` section (`/kiwa-design` § Step 4 が生成) も同時に読み、 **各 TC の判定 (`既覆 (候補)` / `未覆` / `不明`) を map に持たせる**。
+section が無い spec (本経路より前に生成されたもの) は全 TC を `不明` として扱う = 「section が無い」 を「全て覆われている」 に倒すと、 本来書くべき test が 1 件も書かれない。
+
 ### Step 2: 対象実装 file 確認
 
 `--target` で指定された file (or `--module {name}` から推測した `src/lib/{name}.ts`) を Read。 export 一覧を grep し、 TC の「操作手順」 で参照されている関数 / hook が実在することを確認する。 不在の関数 / hook は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
+
+併せて **追記先になる既存 test file を特定する** (Issue #2000)。 探索は `/kiwa-design` § Step 2 § 既存 test の探索 と同じ 2 段で、 対象 package を `$PKG_DIR` として実行する。
+
+```bash
+find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
+  \( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \) -print
+```
+
+spec が名指しした file (§ 既存 test との対応 の候補 column) を優先し、 それが読めない場合だけ探索結果から選ぶ。
+候補が複数ある場合は **対象実装を import している file** を追記先にする。
+1 件も無ければ新規 file (`test/unit/{module}.test.{ts,tsx}`) を作る。
 
 ### Step 3: 観点別 Vitest helper 変換
 
@@ -134,9 +149,32 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 | UI feature 網羅 (12、 TSX hook 時のみ) | `@testing-library/react` の `render` + `screen.getByTestId` で TSX hook の state 経路を assert |
 | wallet 接続 flow (13、 非適用 unit では基本 skip) | `vi.mock('wagmi', () => ({...}))` で mock 接続 state を inject |
 
-### Step 4: `*.test.ts` Write + `vitest run` 実行
+### Step 4: `*.test.ts` Write / 追記 + `vitest run` 実行
 
-各 TC を `it(name, () => { ... })` 1 行に変換、 観点別に `describe` でグループ化する。 出力 file 名は `test/unit/{module}.test.{ts,tsx}` (TSX hook 時は tsx)。 Write 後に `pnpm exec vitest run` を実行し、 失敗 TC は flag、 全 PASS で次へ。
+各 TC を `it(name, () => { ... })` 1 行に変換、 観点別に `describe` でグループ化する。 Write 後に `pnpm exec vitest run` を実行し、 失敗 TC は flag、 全 PASS で次へ。
+
+#### 対象 TC の絞り込み (Issue #2000)
+
+**書くのは Step 1 で `未覆` / `不明` と判定された TC だけ**。 `既覆 (候補)` の TC は候補の test を Read し、 TC の入力と期待を実際に走らせているかを確かめる。
+
+| 確かめた結果 | 動作 |
+|---|---|
+| 走らせている | 書かない (重複になる) |
+| 走らせていない | `未覆` として書く |
+| 候補 file を読めない | `未覆` として書く |
+
+判定は「候補」 であって断定ではない (`/kiwa-design` § Step 4 § 既存 test との突き合わせ)。 候補があることを理由に body を読まず skip すると、 名前だけ似た test に守られていると誤認する。
+
+#### 出力先の分岐
+
+| 既存 test file | 出力 |
+|---|---|
+| Step 2 で特定できた | **その file に追記** (末尾に `describe` を 1 つ足す、 既存 `it` は消さない / 書き換えない) |
+| 無い | 新規 Write (`test/unit/{module}.test.{ts,tsx}`、 TSX hook 時は tsx) |
+
+追記する `describe` の名前には対象 TC の ID を含める (`describe('assertToolCalled — times: 0 の境界', ...)` の中で `it('TC-014 ...')`)。 spec の行と test の行が後から突き合わせられる形にするため。
+
+**既存 `it` の削除 / 期待値の書き換えは行わない**。 既存 test が spec と食い違う場合は spec の「不足している仕様」 に bullet を足して報告する = 実装を確かめずに test を通す向きへ書き換えるのは、 test を壊すのと同じ。
 
 ### Step 5: coverage 評価 + auto loop + report
 
@@ -210,7 +248,9 @@ describe('integration', () => {
 
 ## 完了条件
 
-- Layer 1 spec の「自動化すべきテスト」 全 TC が `test/unit/{module}.test.{ts,tsx}` に Write 済
+- Layer 1 spec の「自動化すべきテスト」 のうち `未覆` / `不明` の TC が全て Write 済 (追記先は Step 4 の分岐で決めた file)
+- `既覆 (候補)` の TC は候補 test を Read した上で「重複のため書かない」 / 「実際は未覆だったので書いた」 のどちらかを報告済
+- 既存 test file の `it` を 1 件も削除 / 書き換えていない
 - `pnpm exec vitest run` 全 PASS (failure 0 件)
 - `pnpm exec vitest run --coverage` で production target (`src/` 配下) の Lines / Stmts / Funcs が threshold 達成 (default 80%)
 - `tests/reports/unit/coverage-report-{module}.md` が 4 section format で Write 済
