@@ -552,6 +552,7 @@ describe('every package that runs mutation testing is scored', () => {
         .filter(([part]) => !part.includes(EXCLUDE))
         .map(([, index]) => index);
 
+    const runnerDirs = new Set(mutationRunners().map((runner) => runner.dir));
     const offenders: string[] = [];
     for (const pkg of readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
       .filter((e) => e.isDirectory())
@@ -564,9 +565,11 @@ describe('every package that runs mutation testing is scored', () => {
       // `quality-metrics` / `skill-test`, none of which has a config or a
       // `test:mutation` script, and the failure message would be untrue for them.
       //
-      // Deriving the set from the config file rather than listing it means a
-      // package that starts running mutation testing is covered the same day.
-      if (!existsSync(resolve(REPO_ROOT, 'packages', pkg, 'stryker.config.mjs'))) continue;
+      // Reuse the runner discovery above rather than keying this check to one
+      // config spelling. It covers both a mutation script and every supported
+      // Stryker config shape, so either way of starting mutation testing brings
+      // the package under this guard on the same change.
+      if (!runnerDirs.has(`packages/${pkg}`)) continue;
       const scripts = (JSON.parse(readFileSync(manifestPath, 'utf8')) as {
         scripts?: Record<string, string>;
       }).scripts;
