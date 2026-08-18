@@ -5,10 +5,10 @@
     "platform": "darwin-arm64",
     "cpuModel": "Apple M4 Pro",
     "cpuCount": 12,
-    "gitSha": "5bf2379",
+    "gitSha": "55b4953",
     "gcExposed": true,
     "measurementPremise": 5,
-    "savedAt": "2026-07-30T00:59:52.499Z"
+    "savedAt": "2026-08-03T08:11:53.488Z"
   },
   "results": {
     "writeFile.serial": {
@@ -135,7 +135,13 @@
         "name": "harness.reference.fs-write",
         "p10": 0.07265869999999999,
         "implVersion": 1
-      }
+      },
+      "ratioHistory": [
+        1.5745253736947182,
+        1.5985154531354153,
+        1.580586383965546,
+        1.3283509243464502
+      ]
     },
     "writeFile.concurrent": {
       "name": "writeFile.concurrent",
@@ -381,7 +387,13 @@
         "name": "harness.reference.fs-read",
         "p10": 0.0408714,
         "implVersion": 1
-      }
+      },
+      "ratioHistory": [
+        1.0029000304246807,
+        1.0035692952580562,
+        1.020475767671584,
+        0.9848181359089809
+      ]
     },
     "readFile.concurrent": {
       "name": "readFile.concurrent",

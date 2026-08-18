@@ -8,8 +8,8 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| writeFile | 0.13ms | 0.73ms | 20ms | 0.00036ms | PASS | stable (換算後 p10 +4% (閾値未満)、 p95 +188% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| readFile | 0.05ms | 0.28ms | 10ms | 0.00035ms | PASS | stable — gate 無効 (regressionGate=false) |
+| writeFile | 0.14ms | 0.53ms | 20ms | 0.00029ms | PASS | stable (換算後 p10 -11% (閾値未満)、 p95 +71% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
+| readFile | 0.05ms | 0.21ms | 10ms | 0.00036ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
@@ -20,22 +20,22 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| writeFile | fs-write | 0.09ms | 0.58ms | 0.13ms | 1.542 | 1.489 | n/a | 20.0% | 0.11ms | 0.11ms |
-| readFile | fs-read | 0.05ms | 0.31ms | 0.05ms | 1.019 | 1.006 | n/a | 20.0% | 0.04ms | 0.04ms |
+| writeFile | fs-write | 0.10ms | 0.37ms | 0.14ms | 1.328 | 1.489 | 7.3% | 20.0% | 0.10ms | 0.11ms |
+| readFile | fs-read | 0.05ms | 0.20ms | 0.05ms | 0.985 | 1.006 | 1.5% | 20.0% | 0.04ms | 0.04ms |
 
 ## Concurrent p95 (concurrency = 4, 25 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| writeFile | 0.85ms | 40ms | PASS |
-| readFile | 0.26ms | 20ms | PASS |
+| writeFile | 0.99ms | 40ms | PASS |
+| readFile | 0.30ms | 20ms | PASS |
 
 ## Memory retention (100 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |
 |---|---|---|---|---|---|---|
-| writeFile | 3472 B | 0 B | 102400 B | yes | 110 (10 + 100) | PASS |
-| readFile | 7936 B | 0 B | 102400 B | yes | 110 (10 + 100) | PASS |
+| writeFile | 5384 B | -24610 B | 102400 B | yes | 110 (10 + 100) | PASS |
+| readFile | 7968 B | -77913 B | 102400 B | yes | 110 (10 + 100) | PASS |
 
 ## Detailed serial reports
 
@@ -47,30 +47,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 100 |
 | warmup | 3 |
-| p10 | 0.13ms |
-| p50 | 0.24ms |
-| p95 | 0.73ms |
-| p99 | 1.70ms |
-| mean | 0.35ms |
-| stdev | 0.30ms |
-| min | 0.12ms |
-| max | 2.01ms |
-| total | 34.94ms |
+| p10 | 0.14ms |
+| p50 | 0.29ms |
+| p95 | 0.53ms |
+| p99 | 0.57ms |
+| mean | 0.30ms |
+| stdev | 0.12ms |
+| min | 0.10ms |
+| max | 0.63ms |
+| total | 29.75ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.854)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.699)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.11ms | 0.11ms | +0.0038ms | +3.52% |
-| p50 | 0.20ms | 0.13ms | +0.07ms | +51.97% |
-| p95 | 0.62ms | 0.22ms | +0.41ms | +188.20% |
-| p99 | 1.45ms | 0.25ms | +1.20ms | +479.03% |
-| mean | 0.30ms | 0.14ms | +0.16ms | +108.34% |
-| min | 0.10ms | 0.10ms | -0.00039ms | -0.39% |
-| max | 1.72ms | 0.32ms | +1.40ms | +439.93% |
-| total | 29.83ms | 14.32ms | +15.51ms | +108.34% |
+| p10 | 0.10ms | 0.11ms | -0.01ms | -10.82% |
+| p50 | 0.20ms | 0.13ms | +0.07ms | +54.34% |
+| p95 | 0.37ms | 0.22ms | +0.15ms | +71.38% |
+| p99 | 0.40ms | 0.25ms | +0.15ms | +59.54% |
+| mean | 0.21ms | 0.14ms | +0.06ms | +45.34% |
+| min | 0.07ms | 0.10ms | -0.03ms | -28.80% |
+| max | 0.44ms | 0.32ms | +0.12ms | +37.39% |
+| total | 20.81ms | 14.32ms | +6.49ms | +45.34% |
 
 ### readFile
 
@@ -81,27 +81,27 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 | iterations | 100 |
 | warmup | 3 |
 | p10 | 0.05ms |
-| p50 | 0.06ms |
-| p95 | 0.28ms |
-| p99 | 1.12ms |
-| mean | 0.12ms |
-| stdev | 0.20ms |
-| min | 0.05ms |
-| max | 1.54ms |
-| total | 12.07ms |
+| p50 | 0.07ms |
+| p95 | 0.21ms |
+| p99 | 0.27ms |
+| mean | 0.09ms |
+| stdev | 0.07ms |
+| min | 0.04ms |
+| max | 0.60ms |
+| total | 9.35ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.849)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.867)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 0.04ms | 0.04ms | +0.00056ms | +1.36% |
-| p50 | 0.05ms | 0.06ms | -0.0048ms | -8.11% |
-| p95 | 0.24ms | 0.28ms | -0.04ms | -14.89% |
-| p99 | 0.95ms | 0.78ms | +0.17ms | +21.57% |
-| mean | 0.10ms | 0.12ms | -0.02ms | -12.91% |
-| min | 0.04ms | 0.04ms | +0.0013ms | +3.49% |
-| max | 1.31ms | 1.70ms | -0.39ms | -22.99% |
-| total | 10.24ms | 11.76ms | -1.52ms | -12.91% |
+| p10 | 0.04ms | 0.04ms | -0.00085ms | -2.07% |
+| p50 | 0.06ms | 0.06ms | +0.0030ms | +5.04% |
+| p95 | 0.18ms | 0.28ms | -0.10ms | -35.70% |
+| p99 | 0.24ms | 0.78ms | -0.54ms | -69.69% |
+| mean | 0.08ms | 0.12ms | -0.04ms | -31.01% |
+| min | 0.04ms | 0.04ms | -0.00097ms | -2.63% |
+| max | 0.52ms | 1.70ms | -1.18ms | -69.56% |
+| total | 8.11ms | 11.76ms | -3.65ms | -31.01% |
 

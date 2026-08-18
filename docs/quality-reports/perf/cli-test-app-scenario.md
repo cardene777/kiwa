@@ -8,9 +8,9 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | p10 (実測) | p95 (上限判定) | cap | 下限 | gate | regression |
 |---|---|---|---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 8.91ms | 45.93ms | 500ms | 0.00056ms | PASS | regressed — gate 無効 (regressionGate=false) |
-| batch_cli_run (5x echo test) | 19.14ms | 34.31ms | 1000ms | 0.00089ms | PASS | stable (換算後 p10 +20% (閾値未満)、 p95 +28% (裾は実行間の振れ幅と区別できないため判定には使わない)) — gate 無効 (regressionGate=false) |
-| setup_cleanup_cycle (5 sequential setup+stop) | 5.31ms | 7.94ms | 500ms | 0.00055ms | PASS | regressed — gate 無効 (regressionGate=false) |
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 3.20ms | 5.42ms | 500ms | 0.0013ms | PASS | stable — gate 無効 (regressionGate=false) |
+| batch_cli_run (5x echo test) | 25.19ms | 76.59ms | 1000ms | 0.0011ms | PASS | regressed — 1 回目 (次も続けば gate) — gate 無効 (regressionGate=false) |
+| setup_cleanup_cycle (5 sequential setup+stop) | 5.59ms | 7.50ms | 500ms | 0.00040ms | PASS | stable — gate 無効 (regressionGate=false) |
 
 ## 実行内正規化 (回帰判定はこの比で行う)
 
@@ -21,25 +21,25 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 
 | op | 基準 op | 基準 p10 | 基準 p95 | 実測 p10 | 比 | baseline の比 | 実行間のばらつき | 実効閾値 | 換算後 p10 | baseline p10 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | fs-write | 0.19ms | 3.27ms | 8.91ms | 46.293 | 37.265 | n/a | 20.0% | 4.29ms | 3.45ms |
-| batch_cli_run (5x echo test) | cpu | 0.11ms | 0.17ms | 19.14ms | 174.315 | 145.572 | n/a | 20.0% | 14.57ms | 12.17ms |
-| setup_cleanup_cycle (5 sequential setup+stop) | fs-write | 0.15ms | 0.38ms | 5.31ms | 35.564 | 28.306 | n/a | 20.0% | 2.52ms | 2.01ms |
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | fs-write | 0.09ms | 0.31ms | 3.20ms | 37.397 | 37.265 | 9.3% | 20.0% | 3.47ms | 3.45ms |
+| batch_cli_run (5x echo test) | cpu | 0.09ms | 0.16ms | 25.19ms | 281.417 | 145.572 | 20.5% | 40.9% | 23.53ms | 12.17ms |
+| setup_cleanup_cycle (5 sequential setup+stop) | fs-write | 0.21ms | 0.60ms | 5.59ms | 26.750 | 28.306 | 8.1% | 20.0% | 1.90ms | 2.01ms |
 
 ## Concurrent p95 (concurrency = 2, 3 iter each)
 
 | op | p95 | cap | gate |
 |---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 11.68ms | 1000ms | PASS |
-| batch_cli_run (5x echo test) | 42.66ms | 2000ms | PASS |
-| setup_cleanup_cycle (5 sequential setup+stop) | 8.35ms | 1000ms | PASS |
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | 7.65ms | 1000ms | PASS |
+| batch_cli_run (5x echo test) | 32.63ms | 2000ms | PASS |
+| setup_cleanup_cycle (5 sequential setup+stop) | 13.97ms | 1000ms | PASS |
 
 ## Memory retention (15 iter, arrayBuffers axis is the gate; heap is informational)
 
 | op | heapUsed Δ | arrayBuffers Δ | cap | gc exposed | 呼出 (空回し + 反復) | verdict |
 |---|---|---|---|---|---|---|
-| file_scaffold_workflow (setup + 20 writeFile + listFiles) | -41584 B | 0 B | 102400 B | yes | 18 (3 + 15) | WAIVED (fs の Buffer pool の伸びを拾うため実装の保持量を表さない (#1719)) |
-| batch_cli_run (5x echo test) | 25480 B | 0 B | 102400 B | yes | 18 (3 + 15) | PASS |
-| setup_cleanup_cycle (5 sequential setup+stop) | -24504 B | -21745 B | 102400 B | yes | 18 (3 + 15) | PASS |
+| file_scaffold_workflow (setup + 20 writeFile + listFiles) | -49528 B | -8192 B | 102400 B | yes | 18 (3 + 15) | PASS |
+| batch_cli_run (5x echo test) | 73536 B | -2085 B | 102400 B | yes | 18 (3 + 15) | PASS |
+| setup_cleanup_cycle (5 sequential setup+stop) | 13584 B | 0 B | 102400 B | yes | 18 (3 + 15) | PASS |
 
 ## Detailed serial reports
 
@@ -51,30 +51,30 @@ Threshold source: [docs/quality/perf-thresholds.md](../../quality/perf-threshold
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 8.91ms |
-| p50 | 16.30ms |
-| p95 | 45.93ms |
-| p99 | 55.07ms |
-| mean | 19.58ms |
-| stdev | 14.02ms |
-| min | 8.00ms |
-| max | 57.36ms |
-| total | 293.66ms |
+| p10 | 3.20ms |
+| p50 | 4.38ms |
+| p95 | 5.42ms |
+| p99 | 5.56ms |
+| mean | 4.21ms |
+| stdev | 0.87ms |
+| min | 3.09ms |
+| max | 5.59ms |
+| total | 63.17ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.482)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 1.084)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 4.29ms | 3.45ms | +0.84ms | +24.23% |
-| p50 | 7.85ms | 3.92ms | +3.93ms | +100.17% |
-| p95 | 22.12ms | 6.89ms | +15.23ms | +221.22% |
-| p99 | 26.52ms | 7.14ms | +19.38ms | +271.42% |
-| mean | 9.43ms | 4.28ms | +5.15ms | +120.19% |
-| min | 3.85ms | 3.29ms | +0.56ms | +16.99% |
-| max | 27.62ms | 7.20ms | +20.42ms | +283.42% |
-| total | 141.42ms | 64.23ms | +77.19ms | +120.19% |
+| p10 | 3.47ms | 3.45ms | +0.01ms | +0.35% |
+| p50 | 4.74ms | 3.92ms | +0.82ms | +20.97% |
+| p95 | 5.88ms | 6.89ms | -1.01ms | -14.63% |
+| p99 | 6.03ms | 7.14ms | -1.12ms | -15.62% |
+| mean | 4.56ms | 4.28ms | +0.28ms | +6.59% |
+| min | 3.35ms | 3.29ms | +0.06ms | +1.89% |
+| max | 6.06ms | 7.20ms | -1.14ms | -15.86% |
+| total | 68.46ms | 64.23ms | +4.23ms | +6.59% |
 
 ### batch_cli_run (5x echo test)
 
@@ -84,30 +84,30 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 19.14ms |
-| p50 | 26.44ms |
-| p95 | 34.31ms |
-| p99 | 36.14ms |
-| mean | 25.85ms |
-| stdev | 5.58ms |
-| min | 16.25ms |
-| max | 36.60ms |
-| total | 387.76ms |
+| p10 | 25.19ms |
+| p50 | 40.30ms |
+| p95 | 76.59ms |
+| p99 | 97.95ms |
+| mean | 44.79ms |
+| stdev | 20.68ms |
+| min | 23.56ms |
+| max | 103.29ms |
+| total | 671.80ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.762)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.934)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 14.57ms | 12.17ms | +2.40ms | +19.75% |
-| p50 | 20.13ms | 13.49ms | +6.64ms | +49.19% |
-| p95 | 26.12ms | 20.36ms | +5.77ms | +28.34% |
-| p99 | 27.52ms | 22.30ms | +5.23ms | +23.44% |
-| mean | 19.69ms | 14.97ms | +4.72ms | +31.53% |
-| min | 12.38ms | 11.96ms | +0.42ms | +3.48% |
-| max | 27.87ms | 22.78ms | +5.09ms | +22.34% |
-| total | 295.28ms | 224.49ms | +70.79ms | +31.53% |
+| p10 | 23.53ms | 12.17ms | +11.36ms | +93.32% |
+| p50 | 37.63ms | 13.49ms | +24.14ms | +178.89% |
+| p95 | 71.53ms | 20.36ms | +51.17ms | +251.38% |
+| p99 | 91.47ms | 22.30ms | +69.18ms | +310.25% |
+| mean | 41.83ms | 14.97ms | +26.86ms | +179.47% |
+| min | 22.00ms | 11.96ms | +10.04ms | +83.93% |
+| max | 96.46ms | 22.78ms | +73.68ms | +323.40% |
+| total | 627.39ms | 224.49ms | +402.90ms | +179.47% |
 
 ### setup_cleanup_cycle (5 sequential setup+stop)
 
@@ -117,28 +117,28 @@ current は baseline を測った時の機械の速さへ換算済み (倍率 0.
 |---|---|
 | iterations | 15 |
 | warmup | 3 |
-| p10 | 5.31ms |
-| p50 | 5.77ms |
-| p95 | 7.94ms |
-| p99 | 8.45ms |
-| mean | 6.02ms |
-| stdev | 0.94ms |
-| min | 5.08ms |
-| max | 8.58ms |
-| total | 90.25ms |
+| p10 | 5.59ms |
+| p50 | 6.21ms |
+| p95 | 7.50ms |
+| p99 | 7.75ms |
+| mean | 6.23ms |
+| stdev | 0.78ms |
+| min | 4.50ms |
+| max | 7.81ms |
+| total | 93.47ms |
 
 ## Baseline diff
 
-current は baseline を測った時の機械の速さへ換算済み (倍率 0.474)。 回帰判定が読む量と同じ。 実測値は上表。
+current は baseline を測った時の機械の速さへ換算済み (倍率 0.339)。 回帰判定が読む量と同じ。 実測値は上表。
 
 | metric | current | baseline | delta ms | delta % |
 |---|---|---|---|---|
-| p10 | 2.52ms | 2.01ms | +0.51ms | +25.64% |
-| p50 | 2.74ms | 2.24ms | +0.49ms | +22.09% |
-| p95 | 3.76ms | 3.03ms | +0.73ms | +24.24% |
-| p99 | 4.01ms | 3.14ms | +0.87ms | +27.58% |
-| mean | 2.85ms | 2.39ms | +0.47ms | +19.51% |
-| min | 2.41ms | 1.98ms | +0.43ms | +21.79% |
-| max | 4.07ms | 3.17ms | +0.90ms | +28.38% |
-| total | 42.79ms | 35.81ms | +6.99ms | +19.51% |
+| p10 | 1.90ms | 2.01ms | -0.11ms | -5.49% |
+| p50 | 2.11ms | 2.24ms | -0.14ms | -6.03% |
+| p95 | 2.54ms | 3.03ms | -0.49ms | -16.02% |
+| p99 | 2.63ms | 3.14ms | -0.51ms | -16.38% |
+| mean | 2.11ms | 2.39ms | -0.27ms | -11.48% |
+| min | 1.53ms | 1.98ms | -0.45ms | -22.73% |
+| max | 2.65ms | 3.17ms | -0.52ms | -16.46% |
+| total | 31.70ms | 35.81ms | -4.11ms | -11.48% |
 

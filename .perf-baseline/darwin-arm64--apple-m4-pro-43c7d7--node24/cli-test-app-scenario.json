@@ -5,10 +5,10 @@
     "platform": "darwin-arm64",
     "cpuModel": "Apple M4 Pro",
     "cpuCount": 12,
-    "gitSha": "5bf2379",
+    "gitSha": "55b4953",
     "gcExposed": true,
     "measurementPremise": 5,
-    "savedAt": "2026-07-30T00:59:53.629Z"
+    "savedAt": "2026-08-03T08:11:53.009Z"
   },
   "results": {
     "file_scaffold_workflow (setup + 20 writeFile + listFiles).serial": {
@@ -50,7 +50,13 @@
         "name": "harness.reference.fs-write",
         "p10": 0.0926668,
         "implVersion": 1
-      }
+      },
+      "ratioHistory": [
+        37.17631707746824,
+        36.13237280504277,
+        33.787207455315276,
+        37.396711901988574
+      ]
     },
     "file_scaffold_workflow (setup + 20 writeFile + listFiles).concurrent": {
       "name": "file_scaffold_workflow (setup + 20 writeFile + listFiles).concurrent",
@@ -117,7 +123,14 @@
         "name": "harness.reference.cpu",
         "p10": 0.08360000000000001,
         "implVersion": 1
-      }
+      },
+      "ratioHistory": [
+        175.37142428731923,
+        137.87179086944948,
+        162.4631367581515
+      ],
+      "pendingRatio": 281.4171717871322,
+      "pendingVerdict": "regressed"
     },
     "batch_cli_run (5x echo test).concurrent": {
       "name": "batch_cli_run (5x echo test).concurrent",
@@ -184,7 +197,13 @@
         "name": "harness.reference.fs-write",
         "p10": 0.0708584,
         "implVersion": 1
-      }
+      },
+      "ratioHistory": [
+        27.565255320559874,
+        29.40205523727861,
+        26.005875223702706,
+        26.750498205312272
+      ]
     },
     "setup_cleanup_cycle (5 sequential setup+stop).concurrent": {
       "name": "setup_cleanup_cycle (5 sequential setup+stop).concurrent",
