@@ -88,11 +88,16 @@ const FULLY_WIDENED: readonly string[] = [
  * container startup, and on the slice they alone cover they killed 1 of 15 mutants
  * in 3m19s with 6 timeouts. The exclusion is measured, not assumed (#1981).
  *
- * `ui` names six of its test files, running them under jsdom with Solid / Vue /
- * Lit / Qwik / Angular adapters, each needing its own resolve conditions and
- * inlined deps. Its baseline records 54 no-coverage of 190 mutants, the same shape
- * `dapp` had at a smaller scale; whether the rest can join is #1986, not a
- * judgement this list makes.
+ * `ui` excludes `browser.test.js`, which launches a real Chromium through
+ * `setupBrowserComponentEnv` and needs `environment: 'node'` while the rest of the
+ * package runs under jsdom. Its own `test` script splits into two vitest
+ * invocations for the same reason, and a Stryker run takes one config.
+ *
+ * That exclusion costs nothing measurable. #1986 replaced an `include` allowlist
+ * of six files with the glob and took the package from 54 no-coverage of 190
+ * mutants to **zero** — `browser-mock.test.js` covers the same adapter with a
+ * mocked playwright, so the real-browser file is the only one left out and none of
+ * its mutants go unreached.
  */
 const RUNNER_ALLOWLIST: readonly string[] = ['orm', 'ui'];
 
