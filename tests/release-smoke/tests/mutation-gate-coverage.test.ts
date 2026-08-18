@@ -67,6 +67,7 @@ const FULLY_WIDENED: readonly string[] = [
   'hono',
   'nextjs',
   'observability',
+  'orm',
   'queue',
   'realtime',
   'search',
