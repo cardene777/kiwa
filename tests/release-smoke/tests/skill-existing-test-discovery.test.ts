@@ -443,6 +443,14 @@ describe('/kiwa-design が既存 test を探す', () => {
     expect(section).toContain('断定');
   });
 
+  it('TC を 1 つの検証単位に絞ると書いてある', () => {
+    // 期待を束ねた TC は「一部だけ覆われている」 状態を作り、 3 値のどれにも当てはまらない
+    // (#2007 の dogfood で判明)。 束ねた場合の倒し先も併せて固定する。
+    const section = stepSection(DESIGN, STEP_4);
+    expect(section).toContain('##### TC は 1 つの検証単位に絞る');
+    expect(section).toContain('既に束ねてしまった TC は `未覆` に倒す');
+  });
+
   it('候補を読んで走っていなければ 未覆 へ倒すと書いてある', () => {
     // 誤って `既覆` にすると必要な TC が落ち、 誤って `未覆` にすると重複 test が 1 件増える
     // だけ。 損失が非対称なので、 倒す向きを skill 側に固定する。 2 文を別々に見る =
@@ -583,6 +591,27 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
     return [...body.matchAll(/^\|\s*(TC-\d+)\s*\|/gm)].map((m) => m[1]!);
   }
 
+  /**
+   * 対応表の行 (3 cell) だけを返す。
+   *
+   * section に別の表や bullet があっても、 **header 行で表を特定してから** 読む。
+   * 行だけを正規表現で拾うと、 2 cell の別表が混ざった時に 3 列目が `undefined` になり
+   * TypeError で落ちる = 「対応表が壊れている」 と「別表がある」 を区別できない。
+   */
+  function correspondenceRows(section: string): string[][] {
+    const lines = section.split('\n');
+    const header = lines.findIndex(
+      (line) => line.startsWith('|') && headerCells(line)[0] === 'TC',
+    );
+    if (header < 0) throw new Error('先頭 cell が TC の対応表が無い');
+    const rows: string[][] = [];
+    for (const line of lines.slice(header + 2)) {
+      if (!line.startsWith('|')) break;
+      rows.push(headerCells(line));
+    }
+    return rows;
+  }
+
   const withSection = specFiles('tests/spec').filter((rel) =>
     readFileSync(resolve(REPO_ROOT, rel), 'utf-8').includes('## 既存 test との対応'),
   );
@@ -595,18 +624,20 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
   it.each(withSection)('%s の全 TC が 1 行ずつ現れる', (rel) => {
     const body = read(rel);
     const cases = tcIds(sectionOf(body, /^## テストケース一覧/m));
-    const rows = tcIds(sectionOf(body, /^## 既存 test との対応/m));
+    const rows = correspondenceRows(sectionOf(body, /^## 既存 test との対応/m)).map(
+      (cells) => cells[0]!,
+    );
     // 両方が空でも `toEqual` は通る。 TC を 1 件も読めていない状態を pass にしない。
     expect(cases.length).toBeGreaterThan(0);
     expect(rows).toEqual(cases);
   });
 
   it.each(withSection)('%s の判定が 3 値のいずれか', (rel) => {
-    const section = sectionOf(read(rel), /^## 既存 test との対応/m);
-    const verdicts = section
-      .split('\n')
-      .filter((line) => /^\|\s*TC-\d+\s*\|/.test(line))
-      .map((line) => headerCells(line)[2]!.trim());
+    const rows = correspondenceRows(sectionOf(read(rel), /^## 既存 test との対応/m));
+    // 3 cell であること自体を先に見る。 列が欠けた表を「判定が読めない」 のではなく
+    // 「壊れている」 として落とす。
+    expect(rows.map((cells) => cells.length).filter((n) => n !== 3)).toEqual([]);
+    const verdicts = rows.map((cells) => cells[2]!);
     expect([...new Set(verdicts)].filter((v) => !VERDICTS.includes(v))).toEqual([]);
   });
 
@@ -694,6 +725,24 @@ describe('Layer 2 skill が既存 test の判定を読む', () => {
     }
     return [...names].sort();
   }
+
+  it('共有 contract が追記の単位を runtime 別に持つ', () => {
+    // dogfood (#2007) で判明した = Solidity は `setUp` が contract 単位のため、 contract を
+    // 足す形にすると前提を 2 箇所で保つことになる。 単位は runtime で違う。
+    const ref = read(REUSE_REF);
+    expect(ref).toContain('### 追記の単位 (runtime で違う)');
+    expect(ref).toContain('| solidity | **既存の test contract に `function test_*` を足す** |');
+    expect(ref).toContain('| typescript | 既存 file の末尾に `describe` を 1 つ足す |');
+  });
+
+  it('共有 contract が追記してよい範囲を持つ', () => {
+    // `vm.expectEmit` は test contract 側の event 宣言を要る。 「既存 test を書き換えない」 だけ
+    // だと、 宣言を足してよいのかが読めない (#2007 の dogfood で詰まった点)。
+    const ref = read(REUSE_REF);
+    expect(ref).toContain('### 追記してよい範囲');
+    expect(ref).toContain('その test が動くために必要な宣言');
+    expect(ref).toContain('`setUp` (JS なら `beforeEach`) は変えない');
+  });
 
   it('対象 skill を docs/layers.json から導けている', () => {
     // 0 件でも `it.each` は 1 件も走らずに緑になる。 導出が壊れた状態を pass にしない。

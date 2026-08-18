@@ -64,8 +64,30 @@ test 名は自由文で、 名前が一致しても中身が同じ入力を走�
 既存 test が仕様書と食い違う場合は、 仕様書の `## 不足している仕様` に bullet を足して報告する。
 実装を確かめずに test を通す向きへ書き換えるのは、 test を壊すのと同じ。
 
-追記する `describe` (Solidity なら `contract`) の名前には対象 TC の ID を含める。
+### 追記の単位 (runtime で違う)
+
+| runtime | 追記の単位 |
+|---|---|
+| typescript | 既存 file の末尾に `describe` を 1 つ足す |
+| solidity | **既存の test contract に `function test_*` を足す** |
+
+Solidity で contract を分けない理由は `setUp` が contract 単位だから。
+別 contract を足すと前提 (deploy と初期配布) を組み直すことになり、 既存 test と同じ前提を 2 箇所で
+保つ形になる (実測 = `examples/dogfood-foundry-dapp` の `setUp` は deploy と 1_000e18 の配布を持つ)。
+
+名前には対象 TC の ID を含める (`test_TC009_transferFromReducesAllowance`)。
 仕様書の行と test の行を後から突き合わせられる形にするため。
+
+### 追記してよい範囲
+
+対象 TC の test と、 **その test が動くために必要な宣言** まで。
+
+Solidity で `vm.expectEmit` を使うには、 test contract 側に同じ event を宣言する必要がある
+(実測 = `event Transfer(address indexed, address indexed, uint256);` を足さないと `emit` が書けない)。
+これは既存 test の書き換えではないため許される。
+
+既存の test 本文と `setUp` (JS なら `beforeEach`) は変えない。
+変えると既存 test の前提が動き、 それまで通っていた test の意味が変わる。
 
 ## 覆えていない範囲
 
