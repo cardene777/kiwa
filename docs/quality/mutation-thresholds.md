@@ -249,9 +249,14 @@ removed so far had all been removable for some time before anyone looked.
 
 ## Widening a package's scope
 
-One package per PR, sized by how much sits outside `mutate` today. The three groups below exist
-because the work differs in kind, not just in volume: the large group needs its own test-writing
-plan, while the small group is mostly a config edit plus a re-run.
+One package per PR, sized by how much sits outside `mutate` today. The three groups below were drawn
+on the assumption that the work differs in kind with volume — that the small group would be a config
+edit plus a re-run and the large group would need its own test-writing plan.
+
+**Only the first half held.** #1980 measured the large group and five of its seven packages were
+also a config edit plus a re-run (§ The large group was measured before it was planned). The two
+that were not failed on wall-clock and on missing tests, neither of which the grouping predicts.
+Read the groups as a record of how the work was scheduled, not as a claim about how hard each one is.
 
 | group | packages | uncovered lines each |
 |---|---|---|
