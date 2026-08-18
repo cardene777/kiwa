@@ -565,15 +565,27 @@ describe('every package that runs mutation testing is scored', () => {
     // Reading `test.include` by path also fixes what the regex could not: it can
     // no longer pick up an unrelated `include` elsewhere in the file, such as
     // `deps.optimizer.web.include`.
-    type StrykerVitestConfig = {
-      default?: { test?: { include?: unknown; exclude?: unknown } };
+    type StrykerVitestModule = { default?: unknown };
+    type ConfigObject = Record<string, unknown>;
+
+    const configObject = (value: unknown): value is ConfigObject => {
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+      const prototype = Object.getPrototypeOf(value);
+      return prototype === Object.prototype || prototype === null;
     };
 
     const narrowsTheRun = async (pkg: string): Promise<boolean> => {
       const mod = (await import(
         pathToFileURL(resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs')).href
-      )) as StrykerVitestConfig;
-      const test = mod.default?.test;
+      )) as StrykerVitestModule;
+
+      // `defineConfig` also accepts functions and promises. This repo currently
+      // passes plain objects, but an unsupported export shape must not collapse
+      // into an absent `test` section and silently pass the check.
+      if (!configObject(mod.default)) return true;
+      const testValue = mod.default.test;
+      if (testValue !== undefined && !configObject(testValue)) return true;
+      const test = testValue;
 
       // Absent means vitest's own default, which is not narrowed. Present but not
       // an array of strings is unreadable, and unreadable counts as narrowing —
