@@ -47,7 +47,7 @@
 //
 // If a real omission ever slips past, the fix is a fixture below plus whatever
 // the parser needs to see it — not a broader rewrite.
-import { readFileSync, readdirSync, lstatSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, lstatSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -1054,5 +1054,67 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
     for (const [label, source] of cases) {
       expect(findMissingGcSetup(source), label).toBeNull();
     }
+  });
+});
+
+/**
+ * Packages that measure nothing, and why.
+ *
+ * The checks above ask whether a perf suite judges what it measured. They say
+ * nothing about a package with no perf suite at all, so "deliberately has none"
+ * and "nobody wrote one" read identically — which is the shape #1982 and #1986
+ * both turned out to be. `dapp` was held out because its code "can only be
+ * verified through e2e" and `ui` because of "jsdom and the adapters"; neither
+ * reason was written down anywhere a reader could check, and neither survived
+ * being measured.
+ *
+ * Each entry states something about what the package is. "Not written yet" is
+ * not a reason — a package in that state belongs in an Issue, not here.
+ */
+const PERF_EXEMPT: readonly string[] = [
+  // The harness itself. It provides the p10/p50/p95/p99 measurement, the
+  // bootstrap-CI regression detection, and the baseline persistence that the
+  // other 23 packages' perf suites run on. Measuring it with itself is circular.
+  'packages/perf-harness',
+  // A Lean 4 spec generator. It compiles a transition table into an inductive
+  // type and a total dispatch function, and the deliverable is that Lean's
+  // exhaustiveness checker accepts them — `verifyLeanSpec` runs the real
+  // toolchain. What it produces is a proof obligation, not a runtime path with a
+  // latency to cap.
+  'packages/lean',
+  // Skill-firing assertions: one source file exposing four `assert*` helpers
+  // over the `ToolCallRecord[]` a tool spy collected. There is no work of its
+  // own to time.
+  'packages/skill-test',
+];
+
+describe('perf suite absence is recorded (#1993)', () => {
+  it('lists every package without a perf suite, with a reason', () => {
+    // Reuse `perfTestFiles()` rather than globbing for `*.perf.ts` here. Both
+    // extensions are in use — `ui` writes `.perf.tsx` because its suites render
+    // React — and a check that looked for one of them would report `ui` as
+    // having no perf suite. That is not hypothetical: this Issue's own survey
+    // made exactly that mistake and undercounted by one.
+    const withPerf = new Set(
+      perfTestFiles().map((file) => {
+        const rel = file.slice(REPO_ROOT.length + 1);
+        const [root, pkg] = rel.split('/');
+        return `${root}/${pkg}`;
+      }),
+    );
+
+    const packages = readdirSync(join(REPO_ROOT, 'packages'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `packages/${entry.name}`)
+      .filter((dir) => existsSync(join(REPO_ROOT, dir, 'package.json')))
+      .sort();
+
+    expect(
+      packages.filter((dir) => !withPerf.has(dir)),
+      'A package with no perf suite has to say why in PERF_EXEMPT. Leaving it off makes ' +
+        '"deliberately unmeasured" and "nobody wrote one" the same state, which is how ' +
+        '#1982 and #1986 kept their exclusions for as long as they did. Add the package ' +
+        'with a reason about what it is, or give it a perf suite.',
+    ).toEqual([...PERF_EXEMPT].sort());
   });
 });

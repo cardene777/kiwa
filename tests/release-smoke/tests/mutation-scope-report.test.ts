@@ -479,12 +479,25 @@ describe('the command line', () => {
   });
 
   it('lists one package with a line count per file', async () => {
-    // A package with nothing left outside `mutate` cannot show the row shape,
-    // so this needs one that still has files. `observability` served until
-    // #1980 widened it; `orm` and `dapp` are what is left.
-    const { stdout } = await runScript(['--list', 'orm']);
-    expect(stdout).toContain('orm — implementation files not in `mutate`');
-    expect(stdout).toMatch(/^ {2}\S+\s+[\d,]+$/m);
+    // A package with nothing left outside `mutate` cannot show the row shape, so
+    // this needs one that still has files. It used to name a real package —
+    // `observability` until #1980 widened it, then `orm` and `dapp`. #1985 and
+    // #1987 widened those too, and with the repository at 100% there is no
+    // package left that can produce the row.
+    //
+    // A fixture is what the assertion was always about: that `--list` prints a
+    // file and its line count in the documented shape. Reaching for whichever
+    // package happens to be behind made the check expire every time one caught
+    // up, and it expired silently — the run failed on the last widening, not on
+    // the change that made the name wrong.
+    const root = fixtureRepo(
+      'core',
+      { 'listed.ts': 'export const a = 1;\nexport const b = 2;\n' },
+      [],
+    );
+    const { stdout } = await runScript(['--list', 'core'], root);
+    expect(stdout).toContain('core — implementation files not in `mutate`');
+    expect(stdout).toMatch(/^ {2}listed\.ts\s+2$/m);
   });
 
   it('says so when a package has nothing left outside `mutate`', async () => {
