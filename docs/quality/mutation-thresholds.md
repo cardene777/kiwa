@@ -73,9 +73,9 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** The repo sits at 87.5%, with `orm` and `dapp` still
-to go (§ Widening a package's scope). Read a green mutation gate accordingly — until a package's
-Issue lands, "passed" covers whatever its config happens to list.
+**This is the target, not the current state.** The repo sits at 94.9%, with `dapp` still to go
+(§ Widening a package's scope). Read a green mutation gate accordingly — until a package's Issue
+lands, "passed" covers whatever its config happens to list.
 
 No config names a barrel any more (`api`, `ui`, and `a11y` each listed their `index.js` until #1963
 widened them). Listing one is harmless — Stryker finds nothing to mutate there — but it makes the
@@ -147,21 +147,21 @@ reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 59,841 |
-| implementation, not in `mutate` | 8,512 |
+| implementation, in `mutate` | 64,852 |
+| implementation, not in `mutate` | 3,501 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 87.5% of implementation lines were covered (59,841 of 68,353).
+So 94.9% of implementation lines were covered (64,852 of 68,353).
 
-Everything outside `mutate` totals 12,565 lines, and barrel plus type-only accounts for 4,053 of
-that. 20 of 22 packages are at 100%; what stays outside is `orm` (5,011 lines) and `dapp` (3,501),
-which #1980 measured and could not widen (§ Widening a package's scope).
+Everything outside `mutate` totals 7,554 lines, and barrel plus type-only accounts for 4,053 of
+that. 21 of 22 packages are at 100%; what stays outside is `dapp` (3,501 lines), which #1980
+measured and could not widen (§ Widening a package's scope).
 
-Reaching every one of the 68,353 implementation lines therefore needs those two packages and nothing
-else. The gap this section opened with was 50,225 lines at 26.5%, and five PRs closed it to here
-(#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group) without a new
-test: every package that was widened met its tier as it already stood.
+Reaching every one of the 68,353 implementation lines therefore needs that one package and nothing
+else. The gap this section opened with was 50,225 lines at 26.5%, and six PRs closed it to here
+(#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group, #1985 `orm`)
+without a new test: every package that was widened met its tier as it already stood.
 
 
 #1944 classified the same files by hand and published totals 404 lines higher — one per file, from
@@ -263,13 +263,13 @@ Read the groups as a record of how the work was scheduled, not as a claim about 
 
 | group | packages | uncovered lines each |
 |---|---|---|
-| large — measured in #1980 | ~~`auth` (13,899)~~, `orm` (5,011), ~~`queue` (4,978)~~, ~~`observability` (4,970)~~, ~~`ai-llm` (4,735)~~, ~~`realtime` (3,950)~~, `dapp` (3,501) | 3,000+ |
+| large — measured in #1980 | ~~`auth` (13,899)~~, ~~`orm` (5,011)~~, ~~`queue` (4,978)~~, ~~`observability` (4,970)~~, ~~`ai-llm` (4,735)~~, ~~`realtime` (3,950)~~, `dapp` (3,501) | 3,000+ |
 | medium — done | ~~`edge` (2,802)~~, ~~`search` (2,179)~~, ~~`cache` (2,084)~~, ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
 | small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
 `hono` already sat at 100% and needed no Issue. `cli` widened in #1961, the small group in #1963,
-`security` in #1965, `cache` in #1967, `search` in #1969, `edge` in #1971, and five of the large
-group in #1980, so 20 of 22 packages are now at 100%. What remains is `orm` and `dapp`.
+`security` in #1965, `cache` in #1967, `search` in #1969, `edge` in #1971, five of the large group
+in #1980, and `orm` in #1981, so 21 of 22 packages are now at 100%. What remains is `dapp`.
 
 ### The large group was measured before it was planned (#1980)
 
@@ -287,23 +287,26 @@ test written, and every one of the five scored *higher* than its narrow scope di
 | `ai-llm` | 65 | 64.45 | **75.83** | 4,375 | 8m45s |
 | `queue` | 65 | 77.47 | **78.37** | 2,839 | 14m36s |
 | `realtime` | 65 | 67.54 | **69.41** | 2,409 | 4m04s |
-| `orm` | 65 | 90.43 | *(unfinished)* | 2,856 | 2.5h+ |
+| `orm` | 65 | 90.43 | **76.94** | 2,856 | 11m28s *(after #1981)* |
 | `dapp` | 65 | 85.09 | 48.92 | 2,473 | 7m35s |
 
 `auth` is the one the old text was written about, and it cleared its tier by ten points. `ai-llm` is
 the sharper case: its narrow scope scored 64.45, *below* the SaaS bar, and widening took it to 75.83
 — **the six files it had been mutating were its worst-tested ones.**
 
-**Line count does not predict this.** `observability` (5,544 lines) finishes in 5 minutes;
-`orm` (5,134) does not finish in 2.5 hours. Within the medium group `search` (2,179) took 1m41s and
-`cache` (2,084) took 5m02s. What the count measures is how much code there is, and the question is
-what the tests do with it.
+**Line count does not predict this.** `observability` (5,544 lines) finishes in 5 minutes; `orm`
+(5,134) took 2.5 hours without finishing, and 11m28s once #1981 found what it was waiting on. Within
+the medium group `search` (2,179) took 1m41s and `cache` (2,084) took 5m02s. What the count measures
+is how much code there is, and the question is what the tests do with it.
 
-Two packages did fail, for reasons that are not about score:
+Two packages did fail, for reasons that are not about score. One is resolved:
 
-- **`orm` — wall-clock** (#1981). 2,463 of 2,856 mutants in 11 minutes, then roughly 8 mutants a
-  minute with timeouts climbing to 24. The semantics suite waits on something. Widening it means
-  finding out what, not writing tests — its narrow scope already scores 90.43.
+- **`orm` — wall-clock** (#1981, resolved). 2,463 of 2,856 mutants in 11 minutes, then roughly 8
+  mutants a minute with timeouts climbing to 24. What it waited on was not the semantics suite but
+  two live-container test files, which start a real MySQL and Postgres in `beforeAll`; per-test
+  coverage made every mutant they cover pay a container startup. Excluding them from mutation runs
+  brought the run to 11m28s at 76.94 covered MSI. § A slow test can also be a weak one records why
+  excluding them reads the code more honestly than including them did.
 - **`dapp` — the tests are not there** (#1982). 2,103 of 2,473 widened mutants land as no-coverage:
   `rpc-handlers` 687 of 715, `fixture` 511 of 536, `tx` 119 of 119. Its config header already said
   the dry run cannot construct the forge artefacts and nextjs-bridge fixtures its suite needs. Its
@@ -314,6 +317,41 @@ The lesson is the one § Overrides already states about override values, applied
 of claim. **"This will be expensive" is a measurement, and an unmeasured one goes stale the same way
 a number does.** The claim here was never measured, and five of the seven packages it described had
 been one config edit away the whole time.
+
+### A slow test can also be a weak one (#1981)
+
+`orm` looked like a pure runtime problem, and the obvious reading of "exclude the slow tests" is that
+it trades measurement for speed. Measured, the trade was smaller than it looked, and it ran the other
+way.
+
+The two live test files start a real MySQL and Postgres through testcontainers in `beforeAll`. Under
+per-test coverage, Stryker re-runs the covering tests for every mutant, so each mutant they cover
+pays a full container startup. On `setup-orm-env.js:1-120` that is 107 mutants in over 11m30s with
+them and 20s without.
+
+Excluding them turns 43 % of that slice's mutants into no-coverage, which is the shape this document
+warns about under § Exceptions — an exclusion that protects a score by not looking. So the slice they
+alone cover (`:81-91`, the postgres-js driver wiring) was run **with** them:
+
+| status | count |
+|---|---|
+| killed | 1 |
+| timeout | 6 |
+| survived | 5 |
+| no-coverage | 3 |
+
+Fifteen mutants, 3m19s, one kill. The covered score of 58.33 is seven twelfths timeout, and **a
+mutant that hangs the connection times out whether or not the test asserts anything** — covered MSI
+counts a timeout as caught, so including these tests inflates the number rather than earning it.
+Reporting the same mutants as no-coverage says the true thing: no fast test reaches that code.
+
+So the general rule holds — measure before excluding — and the measurement is what licensed the
+exclusion here, on evidence about detection rather than about speed. The 341 no-coverage mutants in
+the widened run, 295 of them in `setup-orm-env.js`, are the standing record of what is still unreached.
+
+The exclusion lives in `packages/orm/vitest.stryker.config.mjs`, which Stryker alone reads; `pnpm
+test` still runs both files. `KIWA_MODE=real` is the repo's existing gate for container-backed tests
+and these two never adopted it, which is why they ran unconditionally in the first place.
 
 `tests/release-smoke/tests/mutation-gate-coverage.test.ts` holds the other half of that sentence in
 `FULLY_WIDENED`, which has to be exactly the packages with nothing left outside `mutate`. A widened

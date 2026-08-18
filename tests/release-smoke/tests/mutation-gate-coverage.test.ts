@@ -41,15 +41,18 @@ const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
  *
  * `hono` was there from the start; `cli` widened in #1961, the small group in
  * #1963, `security` in #1965, `cache` in #1967, `search` in #1969, `edge` in
- * #1971, and five of the large group in #1980. The list only grows — a package
- * that reached 100% and then dropped a file is the drift #1936 cost 611 unseen
- * mutants for.
+ * #1971, five of the large group in #1980, and `orm` in #1981. The list only
+ * grows — a package that reached 100% and then dropped a file is the drift
+ * #1936 cost 611 unseen mutants for.
  *
- * Two of the large group are not here. `orm` and `dapp` were measured in #1980
- * and failed for reasons that are not about score: `orm` needs 2.5 hours to
- * finish, and 85 % of `dapp`'s widened mutants are no-coverage because its
- * implementation is exercised through anvil and Playwright, not the unit suite.
- * They have their own Issues.
+ * One of the large group is not here. `dapp` was measured in #1980 and failed
+ * for a reason that is not about score: 85 % of its widened mutants are
+ * no-coverage because its implementation is exercised through anvil and
+ * Playwright, not the unit suite. It has its own Issue (#1982).
+ *
+ * `orm` was the other one, held out by wall-clock rather than score — 2.5 hours
+ * without finishing. #1981 traced that to two live-container test files and
+ * excluded them from mutation runs, bringing the run to 11m28s.
  */
 const FULLY_WIDENED: readonly string[] = [
   'a11y',
@@ -67,6 +70,7 @@ const FULLY_WIDENED: readonly string[] = [
   'hono',
   'nextjs',
   'observability',
+  'orm',
   'queue',
   'realtime',
   'search',
