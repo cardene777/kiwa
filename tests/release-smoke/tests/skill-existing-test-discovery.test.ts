@@ -88,6 +88,43 @@ function tableHeaderStartingWith(body: string, want: string): string[] {
 /** 4 種を 1 群として見る。 1 つ欠けると、 その拡張子を使う package が「test 0 件」 に見える。 */
 const FOUR_GLOBS = ['*.spec.ts', '*.spec.tsx', '*.test.ts', '*.test.tsx'];
 
+interface Layer {
+  runtime: string;
+  test_outputs?: Record<string, string[]>;
+}
+
+/** その runtime の layer が `test_outputs` で宣言している出力 path。 */
+function declaredOutputs(runtime: string): string[] {
+  const layers = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).layers;
+  return layers
+    .filter((l) => l.runtime === runtime)
+    .flatMap((l) => Object.values(l.test_outputs ?? {}).flat());
+}
+
+/** `{example}/test/unit/{module}.test.{ts,tsx}` を実在しうる basename へ畳む。 */
+function sampleBasenames(pattern: string): string[] {
+  const base = pattern.split('/').pop()!;
+  const brace = /\{([^{}]*,[^{}]*)\}/.exec(base);
+  if (brace) {
+    return brace[1]!.split(',').flatMap((alt) => sampleBasenames(base.replace(brace[0], alt)));
+  }
+  return [base.replace(/\{[^{}]*\}/g, 'Sample').replace(/\*/g, 'sample')];
+}
+
+/** `-name '<glob>'` で書かれた対象 (prune 側は引用符が無いので入らない)。 */
+function documentedGlobs(fence: string): string[] {
+  return [...new Set([...fence.matchAll(/-name\s+'([^']+)'/g)].map((m) => m[1]!))].sort();
+}
+
+/** glob 1 つを正規表現に畳む。 `*` は `/` を跨がない。 */
+function globToRegExp(glob: string): RegExp {
+  const escaped = glob
+    .split('*')
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+    .join('[^/]*');
+  return new RegExp(`^${escaped}$`);
+}
+
 /**
  * `\( -name '*.test.ts' -o ... \)` の群ごとに、 列挙された glob を取る。
  *
@@ -150,11 +187,13 @@ function runtimeFence(runtime: string): string {
   return fences.join('\n');
 }
 
-/** 抽出段が渡す正規表現。 書いてあるものをそのまま走らせるために取り出す。 */
-function extractRegex(runtime: string): string {
-  const m = /^\s*xargs -0 grep -nE "(.+)"\s*$/m.exec(runtimeFence(runtime));
-  if (!m) throw new Error(`##### ${runtime} に xargs -0 grep -nE の行が無い`);
-  return m[1]!;
+/** 抽出段が渡す正規表現。 runner が複数ある runtime も全て取り出す。 */
+function extractRegexes(runtime: string): string[] {
+  const matches = [
+    ...runtimeFence(runtime).matchAll(/^\s*xargs -0 grep -nE "(.+)"\s*$/gm),
+  ].map((m) => m[1]!);
+  if (matches.length === 0) throw new Error(`##### ${runtime} に xargs -0 grep -nE の行が無い`);
+  return matches;
 }
 
 /** 書いてある正規表現を実際に走らせ、 一致した行の中身を返す。 */
@@ -216,19 +255,51 @@ describe('/kiwa-design が既存 test を探す', () => {
     }
   });
 
-  it('solidity の探索が *.t.sol を対象にする', () => {
+  it('solidity の探索が Foundry と Hardhat の両方を対象にする', () => {
+    // `contract` layer は runtime が solidity でも `/kiwa-forge` と `/kiwa-hardhat` の
+    // 両方に消費される。 `*.t.sol` だけに絞ると Hardhat 側の既存 test を 1 件も拾えない。
     const commands = findCommands(runtimeFence('solidity'));
-    expect(commands.length).toBe(2);
-    for (const command of commands) {
+    expect(commands.length).toBe(4);
+    for (const command of commands.slice(0, 2)) {
       expect(command, `対象が *.t.sol でない find:\n${command}`).toContain("-name '*.t.sol'");
     }
   });
+
+  it.each(['typescript', 'solidity'])('%s の探索が 2 段 1 組で同じ対象を見る', (runtime) => {
+    // 列挙と抽出は対で 1 つの形を見る。 **fence 全体の集合で見てはいけない** = 片方から
+    // glob を落としても、 もう片方に残っていれば集合は変わらず素通りする (実測で
+    // `*.test.cjs` を列挙側だけから落とす変異が生き残った)。
+    const commands = findCommands(runtimeFence(runtime));
+    expect(commands.length % 2, `find の数が偶数でない: ${commands.length}`).toBe(0);
+    for (let i = 0; i < commands.length; i += 2) {
+      expect(
+        documentedGlobs(commands[i]!),
+        `列挙と抽出で対象が違う:\n${commands[i]}\n---\n${commands[i + 1]}`,
+      ).toEqual(documentedGlobs(commands[i + 1]!));
+    }
+  });
+
+  it.each(['typescript', 'solidity'])(
+    '%s の探索が docs/layers.json の出力 path を全て拾える',
+    (runtime) => {
+      // glob を手で並べない。 Layer 2 が書き出す path は `docs/layers.json` の `test_outputs` が
+      // SSOT なので、 そこから basename を導いて 1 つでも当たらない形が無いことを見る。
+      //
+      // この形にする前は `*.t.sol` だけを見ており、 同じ runtime の Hardhat 出力
+      // (`{Contract}.test.cjs` / `*.test.ts`) を落としていた (PR #2004 Round 1 の指摘)。
+      const globs = documentedGlobs(runtimeFence(runtime)).map(globToRegExp);
+      const uncovered = declaredOutputs(runtime)
+        .flatMap(sampleBasenames)
+        .filter((name) => !globs.some((glob) => glob.test(name)));
+      expect(uncovered).toEqual([]);
+    },
+  );
 
   it('solidity の探索が node_modules と lib を除外する', () => {
     // `lib` は forge が vendored 依存を置く dir。 実測で examples の *.t.sol 34 件のうち
     // 30 件が lib/forge-std/ にあり、 prune しないと候補の 88% が依存側の test 名になる。
     const commands = findCommands(runtimeFence('solidity'));
-    expect(commands.length).toBe(2);
+    expect(commands.length).toBe(4);
     for (const command of commands) {
       expect(command, `prune の無い find:\n${command}`).toContain(
         '\\( -name node_modules -o -name lib \\) -prune',
@@ -256,11 +327,32 @@ describe('/kiwa-design が既存 test を探す', () => {
         ].join('\n'),
         'utf-8',
       );
-      expect(grepLines(extractRegex('solidity'), sol)).toEqual([
+      const solidityRegexes = extractRegexes('solidity');
+      expect(solidityRegexes).toHaveLength(2);
+      expect(grepLines(solidityRegexes[0]!, sol)).toEqual([
         'contract SampleTest is Test {',
         'function test_alpha() public {}',
         'function testFuzz_beta(uint256 x) public {}',
         'function invariant_gamma() public {}',
+      ]);
+
+      const hardhat = resolve(dir, 'Sample.test.cjs');
+      writeFileSync(
+        hardhat,
+        [
+          "describe('contract', () => {",
+          "  it('case one', () => {});",
+          "  test('case two', () => {});",
+          '  const helperNotATest = () => {};',
+          '});',
+          '',
+        ].join('\n'),
+        'utf-8',
+      );
+      expect(grepLines(solidityRegexes[1]!, hardhat)).toEqual([
+        "describe('contract', () => {",
+        "it('case one', () => {});",
+        "test('case two', () => {});",
       ]);
 
       const ts = resolve(dir, 'sample.test.ts');
@@ -277,7 +369,7 @@ describe('/kiwa-design が既存 test を探す', () => {
         ].join('\n'),
         'utf-8',
       );
-      expect(grepLines(extractRegex('typescript'), ts)).toEqual([
+      expect(grepLines(extractRegexes('typescript')[0]!, ts)).toEqual([
         "describe('group', () => {",
         "it('case one', () => {});",
         "it.each([1])('case two', () => {});",
@@ -291,13 +383,19 @@ describe('/kiwa-design が既存 test を探す', () => {
   it('書いてある抽出が実 repo の test を拾う', () => {
     // 作った fixture だけで確かめると、 実物の書き方 (import / 修飾子 / 空白) を外していても
     // 気付けない。 repo に実在する 2 file で 1 件以上取れることを見る。
+    const solidityRegexes = extractRegexes('solidity');
     const sol = grepLines(
-      extractRegex('solidity'),
+      solidityRegexes[0]!,
       resolve(REPO_ROOT, 'examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol'),
     );
     expect(sol.length).toBeGreaterThan(0);
+    const hardhat = grepLines(
+      solidityRegexes[1]!,
+      resolve(REPO_ROOT, 'tests/fixtures/mint-nft/hardhat-test/MintNft.test.cjs'),
+    );
+    expect(hardhat.length).toBeGreaterThan(0);
     const ts = grepLines(
-      extractRegex('typescript'),
+      extractRegexes('typescript')[0]!,
       resolve(REPO_ROOT, 'packages/skill-test/tests/skill-test.test.ts'),
     );
     expect(ts.length).toBeGreaterThan(0);

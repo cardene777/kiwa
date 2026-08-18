@@ -297,10 +297,15 @@ grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
 | runtime | test file | prune する dir | 抽出する名前 |
 |---|---|---|---|
 | `typescript` | `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` | `node_modules` | `describe` / `it` / `test` |
-| `solidity` | `*.t.sol` | `node_modules` / `lib` | `contract *Test` / `function test*` / `function invariant*` |
+| `solidity` | `*.t.sol` (Foundry) + `*.test.ts` / `*.test.cjs` (Hardhat) | `node_modules` / `lib` | Foundry の `contract *Test` / `function test*` / `function invariant*` + Hardhat の `describe` / `it` / `test` |
 
 runtime を解決できない場合は探索せず § 探索できなかった場合 に倒す。
 推測で glob を選ばない = 当たらない glob で 0 件を得ると、 「test が無い」 と「探し方が違う」 が同じ結果になる。
+
+同じ runtime が複数 runner を持つ場合は **全 runner の形を探索する**。
+`contract` layer は `runtime: solidity` でも `/kiwa-forge` と `/kiwa-hardhat` の両方に消費されるため、 `*.t.sol` だけに絞らない。
+どの形が要るかは `docs/layers.json` の `test_outputs` が SSOT で、 `kiwa-hardhat` は `{example}/test/*.test.ts` と `tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs` を書き出す (実測で `*.test.cjs` は repo に 6 件ある)。
+`--layer all` または省略時に複数 runtime が返った場合も、 `layers[].runtime` を重複排除して該当 section を全て実行する。
 
 ##### typescript
 
@@ -326,6 +331,15 @@ find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f 
 find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
   -name '*.t.sol' -print0 |
   xargs -0 grep -nE "^[[:space:]]*(contract[[:space:]]+[A-Za-z0-9_]*Test|function[[:space:]]+(test|invariant|statefulFuzz)[A-Za-z0-9_]*\()"
+
+# 3. Hardhat test file も列挙する (contract layer は Foundry / Hardhat の両方を持つ)
+find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
+  \( -name '*.test.ts' -o -name '*.test.cjs' \) -print
+
+# 4. Hardhat test file から describe / it / test の名前を行番号つきで抽出する
+find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
+  \( -name '*.test.ts' -o -name '*.test.cjs' \) -print0 |
+  xargs -0 grep -nE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
 ```
 
 `lib` を prune するのは forge が vendored 依存を置く dir だから。
