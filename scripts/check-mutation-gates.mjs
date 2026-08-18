@@ -104,9 +104,10 @@ export const PACKAGE_TIER = Object.freeze({
   // condition the gate can check.
   '@kiwa-lab/auth': { tier: 'framework' },
   // SaaS tier (provider-specific adapters).
-  // ai-llm has no baseline in v1.27-3 (scope belongs to v1.27-4 release-gate
-  // integration). Threshold left at tier default so the gate stays honest
-  // once the baseline lands.
+  // ai-llm went without a baseline from v1.27-3 until #1980 — v1.27-4 was
+  // supposed to land one and did not. Measured over every implementation file
+  // it scores 75.83; its narrow scope scored 64.45, below this bar, so the
+  // files it used to mutate were its worst-tested ones.
   '@kiwa-lab/ai-llm': { tier: 'saas' },
   '@kiwa-lab/queue': { tier: 'saas' },
   // cache carried `override: 60` from a 62.68 % run over `in-memory-cache.js`
