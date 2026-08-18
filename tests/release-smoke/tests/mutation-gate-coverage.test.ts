@@ -41,18 +41,16 @@ const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
  *
  * `hono` was there from the start; `cli` widened in #1961, the small group in
  * #1963, `security` in #1965, `cache` in #1967, `search` in #1969, `edge` in
- * #1971, five of the large group in #1980, and `orm` in #1981. The list only
- * grows — a package that reached 100% and then dropped a file is the drift
- * #1936 cost 611 unseen mutants for.
+ * #1971, five of the large group in #1980, `orm` in #1981, and `dapp` in #1982.
+ * Every package is now on it. The list only grows — a package that reached 100%
+ * and then dropped a file is the drift #1936 cost 611 unseen mutants for.
  *
- * One of the large group is not here. `dapp` was measured in #1980 and failed
- * for a reason that is not about score: 85 % of its widened mutants are
- * no-coverage because its implementation is exercised through anvil and
- * Playwright, not the unit suite. It has its own Issue (#1982).
- *
- * `orm` was the other one, held out by wall-clock rather than score — 2.5 hours
- * without finishing. #1981 traced that to two live-container test files and
- * excluded them from mutation runs, bringing the run to 11m28s.
+ * The last two were held out for reasons that were not about score, and neither
+ * reason survived being measured. `orm` took 2.5 hours without finishing, which
+ * #1981 traced to two live-container test files. `dapp` reported 85 % of its
+ * mutants as no-coverage, which #1982 traced to an `include` allowlist naming
+ * three of its thirty-seven test files; with the suite switched back on that
+ * figure is 15 %.
  */
 const FULLY_WIDENED: readonly string[] = [
   'a11y',
@@ -64,6 +62,7 @@ const FULLY_WIDENED: readonly string[] = [
   'cli-test',
   'component',
   'core',
+  'dapp',
   'data',
   'e2e',
   'edge',
@@ -77,6 +76,20 @@ const FULLY_WIDENED: readonly string[] = [
   'security',
   'ui',
 ];
+
+/**
+ * Packages whose `vitest.stryker.config.mjs` names test files outright instead of
+ * globbing them. Each entry needs a reason, and the reason has to be about the
+ * runner rather than about convenience — an allowlist silently caps which mutants
+ * can be killed (#1982).
+ *
+ * `ui` runs six of its test files under jsdom with Solid / Vue / Lit / Qwik /
+ * Angular adapters, each needing its own resolve conditions and inlined deps. Its
+ * baseline records 54 no-coverage of 190 mutants, which is the same shape `dapp`
+ * had at a smaller scale; whether the remaining files can join is #1986, not a
+ * judgement this list makes.
+ */
+const RUNNER_ALLOWLIST: readonly string[] = ['ui'];
 
 const UNSCORED_ALLOWLIST: readonly string[] = [
   // (empty — every package that runs mutation testing is scored by the gate)
@@ -497,6 +510,46 @@ describe('every package that runs mutation testing is scored', () => {
         `${pkg}: implementation files dropped out of \`mutate\``,
       ).toEqual([]);
     }
+  });
+
+  it('hands the mutation runner every test file, or records why not', () => {
+    // `mutate` decides which code gets mutated; the runner config decides which
+    // tests get to kill those mutants. Only the first has a check, and #1982 is
+    // what the gap costs: `dapp` named three of its thirty-seven test files in an
+    // `include` allowlist, so 85 % of its widened mutants reported no-coverage and
+    // read as code the unit suite cannot reach. Nothing was marked excluded, which
+    // is why it survived a widening and a review.
+    //
+    // A glob keeps the pairing correct as tests are added. An allowlist has to be
+    // maintained by hand against `mutate`, and when it drifts the result is silent
+    // — the score stays green over whatever did run.
+    //
+    // Deriving the list here rather than stating a count in the docs is
+    // `rules/quality.md § 導出可能記述は人手で書かない`. Writing "no package uses an
+    // allowlist" by hand would have been wrong the day it was written: `ui` has one.
+    const configs = readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => existsSync(resolve(REPO_ROOT, 'packages', name, 'vitest.stryker.config.mjs')))
+      .sort();
+
+    // A test file named outright — no `*` anywhere in the entry.
+    const namesFilesOutright = (pkg: string): boolean => {
+      const source = readFileSync(
+        resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs'),
+        'utf8',
+      );
+      const block = /include:\s*\[([^\]]*)\]/.exec(source);
+      if (block === null) return false;
+      return [...block[1].matchAll(/['"]([^'"]+)['"]/g)].some((m) => !m[1].includes('*'));
+    };
+
+    expect(
+      configs.filter(namesFilesOutright),
+      'A `vitest.stryker.config.mjs` naming individual test files hides mutants as no-coverage ' +
+        'without marking anything excluded (#1982). Use the glob ' +
+        "`.vitest-dist/tests/**/*.test.js`, or add the package to RUNNER_ALLOWLIST with its reason.",
+    ).toEqual([...RUNNER_ALLOWLIST].sort());
   });
 
   it('lists every package that already reached every implementation file', async () => {
