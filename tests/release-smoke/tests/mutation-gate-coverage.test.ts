@@ -540,13 +540,17 @@ describe('every package that runs mutation testing is scored', () => {
     const EXCLUDE = "--exclude '**/.stryker-tmp/**'";
     const READS_DIST_TESTS = /vitest run\s+\.vitest-dist\/tests/;
 
-    // One entry per `vitest run` in the script. Splitting on `&&` keeps each
-    // invocation's own flags together.
-    const invocationsMissingExclude = (script: string): number =>
+    // Splitting on `&&` keeps each invocation's own flags together. The index is
+    // reported alongside the script name because a script can hold more than one
+    // — `ui` runs vitest twice, and naming only the script would leave the reader
+    // to work out which half is unprotected.
+    const unprotectedInvocations = (script: string): number[] =>
       script
         .split('&&')
-        .filter((part) => READS_DIST_TESTS.test(part))
-        .filter((part) => !part.includes(EXCLUDE)).length;
+        .map((part, index): [string, number] => [part, index])
+        .filter(([part]) => READS_DIST_TESTS.test(part))
+        .filter(([part]) => !part.includes(EXCLUDE))
+        .map(([, index]) => index);
 
     const offenders: string[] = [];
     for (const pkg of readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
@@ -555,13 +559,23 @@ describe('every package that runs mutation testing is scored', () => {
       .sort()) {
       const manifestPath = resolve(REPO_ROOT, 'packages', pkg, 'package.json');
       if (!existsSync(manifestPath)) continue;
+      // Only packages that run Stryker can accumulate its sandboxes. Requiring the
+      // flag everywhere would demand it of `lean` / `perf-harness` /
+      // `quality-metrics` / `skill-test`, none of which has a config or a
+      // `test:mutation` script, and the failure message would be untrue for them.
+      //
+      // Deriving the set from the config file rather than listing it means a
+      // package that starts running mutation testing is covered the same day.
+      if (!existsSync(resolve(REPO_ROOT, 'packages', pkg, 'stryker.config.mjs'))) continue;
       const scripts = (JSON.parse(readFileSync(manifestPath, 'utf8')) as {
         scripts?: Record<string, string>;
       }).scripts;
       for (const name of ['test', 'test:cov']) {
         const script = scripts?.[name];
         if (script === undefined) continue;
-        if (invocationsMissingExclude(script) > 0) offenders.push(`${pkg}:${name}`);
+        for (const index of unprotectedInvocations(script)) {
+          offenders.push(`${pkg}:${name}#${index}`);
+        }
       }
     }
 
