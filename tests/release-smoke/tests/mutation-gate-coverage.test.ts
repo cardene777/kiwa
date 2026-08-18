@@ -517,7 +517,7 @@ describe('every package that runs mutation testing is scored', () => {
     }
   });
 
-  it('hands the mutation runner every test file, or records why not', () => {
+  it('hands the mutation runner every test file, or records why not', async () => {
     // `mutate` decides which code gets mutated; the runner config decides which
     // tests get to kill those mutants. Only the first has a check, and #1982 is
     // what the gap costs: `dapp` named three of its thirty-seven test files in an
@@ -555,60 +555,54 @@ describe('every package that runs mutation testing is scored', () => {
     // itself in RUNNER_ALLOWLIST.
     const BENIGN_EXCLUDE = '**/.stryker-tmp/**';
 
-    // Comment lines are dropped first. The key is matched anywhere in the file, so
-    // a config explaining `exclude:` in its header would otherwise be read from the
-    // prose instead of the code.
+    // The config is imported rather than read as text. Four consecutive review
+    // rounds found a different hole in the regex that used to do this — a narrow
+    // glob, an `exclude` it never looked at, a value hoisted into a `const`, a
+    // header comment shadowing the real key — and each fix opened the next. The
+    // resolved object has none of those ambiguities, and `defineConfig` returns it
+    // as a plain object.
     //
-    // Dropping whole comment *lines* rather than comment *spans* is deliberate.
-    // A span-based strip treats the `/**/` inside `tests/**/*.test.js` as an empty
-    // block comment and eats the middle of the glob — measured, that made all 22
-    // packages look narrowed. No config line begins with `*`, so the line filter
-    // cannot reach inside a string.
-    const withoutComments = (source: string): string =>
-      source
-        .split('\n')
-        .filter((line) => !/^\s*(\/\/|\*|\/\*)/.test(line))
-        .join('\n');
-
-    // Three outcomes, not two. `absent` is vitest's own default, which is not
-    // narrowed; `unreadable` is a key whose value is not a literal array — a
-    // variable, a spread, a call — and it has to count as narrowing. Folding it
-    // into `absent` would let any config opt out of this check by hoisting its
-    // list into a `const`.
-    type Entries = { kind: 'absent' } | { kind: 'unreadable' } | { kind: 'literal'; values: string[] };
-
-    const arrayEntries = (source: string, key: string): Entries => {
-      if (new RegExp(`\\b${key}\\s*:`).exec(source) === null) return { kind: 'absent' };
-      const block = new RegExp(`\\b${key}\\s*:\\s*\\[([^\\]]*)\\]`).exec(source);
-      if (block?.[1] === undefined) return { kind: 'unreadable' };
-      return {
-        kind: 'literal',
-        values: [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1] ?? ''),
-      };
+    // Reading `test.include` by path also fixes what the regex could not: it can
+    // no longer pick up an unrelated `include` elsewhere in the file, such as
+    // `deps.optimizer.web.include`.
+    type StrykerVitestConfig = {
+      default?: { test?: { include?: unknown; exclude?: unknown } };
     };
 
-    const narrowsTheRun = (pkg: string): boolean => {
-      const source = withoutComments(
-        readFileSync(resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs'), 'utf8'),
-      );
+    const narrowsTheRun = async (pkg: string): Promise<boolean> => {
+      const mod = (await import(
+        pathToFileURL(resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs')).href
+      )) as StrykerVitestConfig;
+      const test = mod.default?.test;
 
-      const include = arrayEntries(source, 'include');
-      if (include.kind === 'unreadable') return true;
-      if (
-        include.kind === 'literal' &&
-        (include.values.length !== 1 || include.values[0] !== CANONICAL_INCLUDE)
-      ) {
+      // Absent means vitest's own default, which is not narrowed. Present but not
+      // an array of strings is unreadable, and unreadable counts as narrowing —
+      // folding it into "absent" is what let a hoisted `const` opt out before.
+      const readable = (value: unknown): string[] | 'absent' | 'unreadable' => {
+        if (value === undefined) return 'absent';
+        if (!Array.isArray(value) || value.some((v) => typeof v !== 'string')) return 'unreadable';
+        return value as string[];
+      };
+
+      const include = readable(test?.include);
+      if (include === 'unreadable') return true;
+      if (include !== 'absent' && (include.length !== 1 || include[0] !== CANONICAL_INCLUDE)) {
         return true;
       }
 
-      const exclude = arrayEntries(source, 'exclude');
-      if (exclude.kind === 'unreadable') return true;
-      if (exclude.kind === 'absent') return false;
-      return exclude.values.some((entry) => entry !== BENIGN_EXCLUDE);
+      const exclude = readable(test?.exclude);
+      if (exclude === 'unreadable') return true;
+      if (exclude === 'absent') return false;
+      return exclude.some((entry) => entry !== BENIGN_EXCLUDE);
     };
 
+    const narrowed: string[] = [];
+    for (const pkg of configs) {
+      if (await narrowsTheRun(pkg)) narrowed.push(pkg);
+    }
+
     expect(
-      configs.filter(narrowsTheRun),
+      narrowed,
       'A `vitest.stryker.config.mjs` that narrows which tests run hides mutants as no-coverage ' +
         'without marking anything excluded (#1982). That covers naming files in `include`, globbing ' +
         'a subset, and dropping files with `exclude`. Use exactly ' +
