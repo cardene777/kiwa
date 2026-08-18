@@ -583,6 +583,9 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     // 検討をやり直すことになる。
     expect(doc).toContain('#### 畳んでよい場合');
     expect(doc).toContain('### 形 2 を機械化しない根拠');
+    expect(doc).toContain('| 集約 (`join` / `flat` / `Set`) が `expect` の 5 行以内 | 105 | 0');
+    expect(doc).toContain('| 集約が `expect(...)` の引数内 | 53 | 0 |');
+    expect(doc).toContain('| 集約が `expect` の **値の位置** (第 1 引数) | 11 | 0 |');
   });
 
   it('別名に代入した保証は受けない', () => {
