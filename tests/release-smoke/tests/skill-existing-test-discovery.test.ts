@@ -678,11 +678,18 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
 
   it.each(withSection)('%s の既覆候補 path が repo root から開ける', (rel) => {
     const section = sectionOf(read(rel), /^## 既存 test との対応/m);
-    const coveredRows = section
+    // ID の正規表現で絞らない。 UI / API 等の layer 固有 ID も同じ対応表の row として扱う。
+    const coveredRows = correspondenceRows(section).filter(
+      (cells) => cells[2] === '既覆 (候補)',
+    );
+
+    // **読めた行数を独立に数えて突き合わせる**。 for ループは 0 行なら本体が 1 度も走らず
+    // 緑になるため、 parser が読み落としても気付けない (実測 = 候補 path の抽出を `TC-` 前提に
+    // 戻す変異が、 この検査を素通りした)。 表の行を直接数えた値と一致することを見る。
+    const literalCovered = section
       .split('\n')
-      .filter((line) => /^\|\s*TC-\d+\s*\|/.test(line))
-      .map(headerCells)
-      .filter((cells) => cells[2] === '既覆 (候補)');
+      .filter((line) => line.startsWith('|') && line.includes('| 既覆 (候補) |')).length;
+    expect(coveredRows.length, `${rel} の既覆行を読み落としている`).toBe(literalCovered);
 
     for (const cells of coveredRows) {
       const refs = [...cells[1]!.matchAll(/`([^`]+):(\d+)`/g)];
