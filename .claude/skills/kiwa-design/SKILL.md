@@ -292,6 +292,18 @@ grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
 
 対象実装 file が属する package (`packages/{name}` / `examples/{name}`) を `$PKG_DIR` として 2 段で探す。
 
+**探索の形は runtime で決める** (Issue #2003)。 値は `kiwa layers --json` の `layers[].runtime` が返すものをそのまま使い、 skill 側で拡張子を推測しない。
+
+| runtime | test file | prune する dir | 抽出する名前 |
+|---|---|---|---|
+| `typescript` | `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` | `node_modules` | `describe` / `it` / `test` |
+| `solidity` | `*.t.sol` | `node_modules` / `lib` | `contract *Test` / `function test*` / `function invariant*` |
+
+runtime を解決できない場合は探索せず § 探索できなかった場合 に倒す。
+推測で glob を選ばない = 当たらない glob で 0 件を得ると、 「test が無い」 と「探し方が違う」 が同じ結果になる。
+
+##### typescript
+
 ```bash
 # 1. test file を列挙する (node_modules は除外)
 find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
@@ -303,7 +315,28 @@ find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
   xargs -0 grep -nE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
 ```
 
-2 段目で `grep -r` を `$PKG_DIR` に直接掛けない。 `-r` は build 成果物 (`.vitest-dist/` / `dist/` / `coverage/`) を辿るため、 **同じ test が 2 度現れ、 候補の行番号が生成物を指す** (実測で `packages/skill-test` は 35 行が 70 行になり、 増えた分は全て `.vitest-dist/` の compile 済 copy だった)。 1 段目と同じ `find` の結果だけを渡す。
+##### solidity
+
+```bash
+# 1. test file を列挙する (node_modules と lib は除外)
+find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
+  -name '*.t.sol' -print
+
+# 2. 列挙した file から contract / test 関数の名前を行番号つきで抽出する
+find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
+  -name '*.t.sol' -print0 |
+  xargs -0 grep -nE "^[[:space:]]*(contract[[:space:]]+[A-Za-z0-9_]*Test|function[[:space:]]+(test|invariant|statefulFuzz)[A-Za-z0-9_]*\()"
+```
+
+`lib` を prune するのは forge が vendored 依存を置く dir だから。
+実測で `examples/` の `*.t.sol` は 34 件あり、 prune すると 4 件になる = **30 件が `lib/forge-std/` の依存側**で、 prune しないと候補の 88% が自分の test ではなくなる。
+
+`setUp` は拾わない。
+forge が test として実行するのは名前が `test` / `invariant` で始まる関数だけで、 `setUp` は前処理にあたる (実測で上の regex は `setUp` を 1 件も拾わない)。
+
+##### 共通の注意
+
+2 段目で `grep -r` を `$PKG_DIR` に直接掛けない。 `-r` は build 成果物 (`.vitest-dist/` / `dist/` / `coverage/` / forge の `out/`) を辿るため、 **同じ test が 2 度現れ、 候補の行番号が生成物を指す** (実測で `packages/skill-test` は 35 行が 70 行になり、 増えた分は全て `.vitest-dist/` の compile 済 copy だった)。 1 段目と同じ `find` の結果だけを渡す。
 
 `node_modules` を `-prune` するのは、 pnpm の symlink を辿らない既定に依存しないため。 hoisting された実体 dir を持つ project では `-r` がそのまま入る。
 

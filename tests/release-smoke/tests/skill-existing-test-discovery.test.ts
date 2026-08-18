@@ -1,4 +1,6 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -112,30 +114,193 @@ function stepBashFence(skill: string, heading: RegExp): string {
   return fences.join('\n');
 }
 
+/**
+ * `##### <runtime>` の本文 (次の見出しまで)。
+ *
+ * runtime ごとに探索の形が違うため、 Step 2 の fence を全部まとめて見てはいけない
+ * (`solidity` の prune 群 `\( -name node_modules -o -name lib \)` が glob 群に混ざる)。
+ */
+function runtimeSubsection(runtime: string): string {
+  const lines = stepSection(DESIGN, STEP_2).split('\n');
+  const start = lines.findIndex((line) => line === `##### ${runtime}`);
+  if (start < 0) throw new Error(`Step 2 に ##### ${runtime} が無い`);
+  // fence の中を見ない。 bash の comment (`# 1. test file を列挙する`) は行頭 `# ` で始まるため、
+  // 素直に見出しとして扱うと fence の途中で切れて中身が取れない。
+  let inFence = false;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    if (lines[i]!.startsWith('```')) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence && /^#{1,5} /.test(lines[i]!)) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(start, end).join('\n');
+}
+
+/** その runtime の bash fence (列挙と抽出の 2 段)。 */
+function runtimeFence(runtime: string): string {
+  const fences = [...runtimeSubsection(runtime).matchAll(/```bash\n([\s\S]*?)```/g)].map(
+    (m) => m[1]!,
+  );
+  if (fences.length === 0) throw new Error(`##### ${runtime} に bash fence が無い`);
+  return fences.join('\n');
+}
+
+/** 抽出段が渡す正規表現。 書いてあるものをそのまま走らせるために取り出す。 */
+function extractRegex(runtime: string): string {
+  const m = /^\s*xargs -0 grep -nE "(.+)"\s*$/m.exec(runtimeFence(runtime));
+  if (!m) throw new Error(`##### ${runtime} に xargs -0 grep -nE の行が無い`);
+  return m[1]!;
+}
+
+/** 書いてある正規表現を実際に走らせ、 一致した行の中身を返す。 */
+function grepLines(regex: string, file: string): string[] {
+  try {
+    return execFileSync('grep', ['-nE', regex, file], { encoding: 'utf-8' })
+      .split('\n')
+      .filter((line) => line.length > 0)
+      .map((line) => line.replace(/^\d+:\s*/, '').trim());
+  } catch (err) {
+    // grep は一致 0 件で exit 1 を返す。 内容を見たいので空配列に畳む。
+    const status = (err as { status?: number }).status;
+    if (status === 1) return [];
+    throw err;
+  }
+}
+
+/** runtime の表が宣言している runtime 名。 */
+function documentedRuntimes(): string[] {
+  return stepSection(DESIGN, STEP_2)
+    .split('\n')
+    .map((line) => /^\|\s*`([a-z]+)`\s*\|/.exec(line))
+    .filter((m): m is RegExpExecArray => m !== null)
+    .map((m) => m[1]!)
+    .sort();
+}
+
 describe('/kiwa-design が既存 test を探す', () => {
-  it('Step 2 の探索が 4 種の test file を対象にする', () => {
+  it('runtime の表が docs/layers.json の runtime を全て覆う', () => {
+    // 探索の形は runtime で決まる。 layer を足した時に形を足し忘れると、 その runtime の
+    // package は必ず「既存 test 0 件」 になる (当たらない glob で探すため)。
+    // 表を手で並べず、 実物 (`docs/layers.json`) から導いた集合と突き合わせる。
+    const declared = [
+      ...new Set(
+        (JSON.parse(read('docs/layers.json')) as { layers: { runtime: string }[] }).layers.map(
+          (l) => l.runtime,
+        ),
+      ),
+    ].sort();
+    expect(documentedRuntimes()).toEqual(declared);
+  });
+
+  it('typescript の探索が 4 種の test file を対象にする', () => {
     // `.test.` だけを見ると `.spec.` を使う package が「test 0 件」 に見え、 全 TC が未覆へ倒れる。
     // 倒れる向きは安全側だが、 重複 TC が出るのは探索を省いたのと同じ結果になる。
     // 群の数も見る = 列挙と抽出の 2 段が揃っていることを、 片方の消失で落ちる形にする。
-    expect(globGroups(stepBashFence(DESIGN, STEP_2))).toEqual([FOUR_GLOBS, FOUR_GLOBS]);
+    expect(globGroups(runtimeFence('typescript'))).toEqual([FOUR_GLOBS, FOUR_GLOBS]);
   });
 
-  it('Step 2 の探索が node_modules を除外する', () => {
+  it('typescript の探索が node_modules を除外する', () => {
     // 除外しないと依存の test 名を候補として拾う。 pnpm の symlink は既定で辿らないが、
     // hoisting された実体 dir を持つ project では入る。
     // 語だけを見ると fence の comment が残って素通りするので、 prune 句そのものを見る。
     // 起動ごとに見る = 2 段のうち片方から prune を落としても、 fence 全体では残って素通りする。
-    const commands = findCommands(stepBashFence(DESIGN, STEP_2));
+    const commands = findCommands(runtimeFence('typescript'));
     expect(commands.length).toBe(2);
     for (const command of commands) {
       expect(command, `prune の無い find:\n${command}`).toContain('-name node_modules -prune');
     }
   });
 
-  it('Step 2 の探索が test 名を抽出する', () => {
-    const fence = stepBashFence(DESIGN, STEP_2);
-    // file の列挙だけでは TC と突き合わせられない。 名前まで取って初めて候補になる。
-    expect(fence).toMatch(/describe\|it\|test|it\|test\|describe/);
+  it('solidity の探索が *.t.sol を対象にする', () => {
+    const commands = findCommands(runtimeFence('solidity'));
+    expect(commands.length).toBe(2);
+    for (const command of commands) {
+      expect(command, `対象が *.t.sol でない find:\n${command}`).toContain("-name '*.t.sol'");
+    }
+  });
+
+  it('solidity の探索が node_modules と lib を除外する', () => {
+    // `lib` は forge が vendored 依存を置く dir。 実測で examples の *.t.sol 34 件のうち
+    // 30 件が lib/forge-std/ にあり、 prune しないと候補の 88% が依存側の test 名になる。
+    const commands = findCommands(runtimeFence('solidity'));
+    expect(commands.length).toBe(2);
+    for (const command of commands) {
+      expect(command, `prune の無い find:\n${command}`).toContain(
+        '\\( -name node_modules -o -name lib \\) -prune',
+      );
+    }
+  });
+
+  it('書いてある抽出が test だけを拾う (runtime ごとに実行)', () => {
+    // 正規表現を目で読んで判断しない。 書いてあるものをそのまま走らせ、 拾う行と拾わない行を
+    // 固定する。 test でない関数まで拾うと、 候補欄が「その名前の test がある」 と嘘をつく。
+    const dir = mkdtempSync(resolve(tmpdir(), 'kiwa-discovery-'));
+    try {
+      const sol = resolve(dir, 'Sample.t.sol');
+      writeFileSync(
+        sol,
+        [
+          'contract SampleTest is Test {',
+          '    function setUp() public {}',
+          '    function test_alpha() public {}',
+          '    function testFuzz_beta(uint256 x) public {}',
+          '    function invariant_gamma() public {}',
+          '    function helperNotATest() public {}',
+          '}',
+          '',
+        ].join('\n'),
+        'utf-8',
+      );
+      expect(grepLines(extractRegex('solidity'), sol)).toEqual([
+        'contract SampleTest is Test {',
+        'function test_alpha() public {}',
+        'function testFuzz_beta(uint256 x) public {}',
+        'function invariant_gamma() public {}',
+      ]);
+
+      const ts = resolve(dir, 'sample.test.ts');
+      writeFileSync(
+        ts,
+        [
+          "describe('group', () => {",
+          "  it('case one', () => {});",
+          "  it.each([1])('case two', () => {});",
+          "  test('case three', () => {});",
+          '  const notATest = () => {};',
+          '});',
+          '',
+        ].join('\n'),
+        'utf-8',
+      );
+      expect(grepLines(extractRegex('typescript'), ts)).toEqual([
+        "describe('group', () => {",
+        "it('case one', () => {});",
+        "it.each([1])('case two', () => {});",
+        "test('case three', () => {});",
+      ]);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('書いてある抽出が実 repo の test を拾う', () => {
+    // 作った fixture だけで確かめると、 実物の書き方 (import / 修飾子 / 空白) を外していても
+    // 気付けない。 repo に実在する 2 file で 1 件以上取れることを見る。
+    const sol = grepLines(
+      extractRegex('solidity'),
+      resolve(REPO_ROOT, 'examples/dogfood-foundry-dapp/test/DogfoodToken.t.sol'),
+    );
+    expect(sol.length).toBeGreaterThan(0);
+    const ts = grepLines(
+      extractRegex('typescript'),
+      resolve(REPO_ROOT, 'packages/skill-test/tests/skill-test.test.ts'),
+    );
+    expect(ts.length).toBeGreaterThan(0);
   });
 
   it('Step 2 が test / tests の両方を探索先に含める', () => {
@@ -201,6 +366,16 @@ describe('出力の契約を壊していない', () => {
     expect(tableHeaderStartingWith(skeleton, 'テスト ID')).toEqual(NINE_COLUMNS);
   });
 
+  it('雛形が探索した runtime を書かせる', () => {
+    // runtime を残さないと、 当たらない glob で 0 件になった spec と本当に 0 件の spec が
+    // 読み分けられない (`solidity` の package を `typescript` の glob で探すと必ず 0 件)。
+    const section = sectionOf(skeleton, /^## 既存 test との対応/m);
+    expect(section).toContain('- 探索した runtime —');
+    for (const runtime of documentedRuntimes()) {
+      expect(section, `runtime ${runtime} が雛形に無い`).toContain(`\`${runtime}\``);
+    }
+  });
+
   it('雛形が 既存 test との対応 を別表として持つ', () => {
     const section = sectionOf(skeleton, /^## 既存 test との対応/m);
     expect(tableHeaderStartingWith(section, 'TC')).toEqual(['TC', '既存 test の候補', '判定']);
@@ -224,7 +399,9 @@ describe('/kiwa-vitest が既存 file へ追記する', () => {
     // 2 skill が別の集合を見ると、 spec が「候補あり」 と書いた file を Layer 2 が見つけられず
     // 新規 file を作る。 追記先を決めるのは 1 段だけなので群は 1 つ。
     const fence = stepBashFence(VITEST, STEP_2);
-    expect(globGroups(fence)).toEqual([FOUR_GLOBS]);
+    // 定数ではなく /kiwa-design の typescript 行そのものと比べる = 片方だけ形を変えた時に落ちる。
+    // /kiwa-vitest は typescript 専用なので solidity 行とは比べない。
+    expect(globGroups(fence)).toEqual([globGroups(runtimeFence('typescript'))[0]]);
     for (const command of findCommands(fence)) {
       expect(command, `prune の無い find:\n${command}`).toContain('-name node_modules -prune');
     }
