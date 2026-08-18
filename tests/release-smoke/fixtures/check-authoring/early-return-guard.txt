@@ -1,0 +1,6 @@
+const targets = list().filter((x) => x.ok);
+it('guard', () => {
+  if (targets.length === 0) return;
+  expect(targets.length).toBeGreaterThan(0);
+});
+it.each(targets)('%s', () => {});

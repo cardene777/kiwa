@@ -85,12 +85,20 @@ function directSourceReference(expr: ts.Expression, ident?: string): ts.Identifi
   return ident === undefined || reference.text === ident ? reference : null;
 }
 
-/** `it.each` の引数を辿った先で名指しされる一覧。 */
-function eachSourceReference(expr: ts.Expression): ts.Identifier | null {
+type EachSourceReference = {
+  node: ts.Identifier;
+  preservesNonEmpty: boolean;
+};
+
+const NON_EMPTY_PRESERVING_METHODS = new Set(['map', 'reverse', 'sort', 'toReversed', 'toSorted']);
+
+/** `it.each` の引数を辿った先で名指しされる一覧と、 途中の変換が非空を保つか。 */
+function eachSourceReference(expr: ts.Expression): EachSourceReference | null {
   const target = unwrap(expr);
-  if (ts.isIdentifier(target)) return target;
+  if (ts.isIdentifier(target)) return { node: target, preservesNonEmpty: true };
   if (ts.isCallExpression(target)) {
     const callee = unwrap(target.expression);
+    if (ts.isIdentifier(callee)) return { node: callee, preservesNonEmpty: true };
     if (
       ts.isPropertyAccessExpression(callee) &&
       callee.name.text === 'keys' &&
@@ -99,13 +107,23 @@ function eachSourceReference(expr: ts.Expression): ts.Identifier | null {
     ) {
       const argument = target.arguments[0];
       return argument && ts.isIdentifier(unwrap(argument))
-        ? (unwrap(argument) as ts.Identifier)
+        ? { node: unwrap(argument) as ts.Identifier, preservesNonEmpty: true }
         : null;
     }
-    return eachSourceReference(target.expression);
+    if (ts.isPropertyAccessExpression(callee)) {
+      const source = eachSourceReference(callee.expression);
+      if (!source) return null;
+      return {
+        node: source.node,
+        preservesNonEmpty:
+          source.preservesNonEmpty && NON_EMPTY_PRESERVING_METHODS.has(callee.name.text),
+      };
+    }
+    return null;
   }
   if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
-    return eachSourceReference(target.expression);
+    const source = eachSourceReference(target.expression);
+    return source && { node: source.node, preservesNonEmpty: false };
   }
   return null;
 }
@@ -125,7 +143,7 @@ function eachSources(raw: string): string[] {
       const argument = node.arguments[0];
       if (argument) {
         const reference = eachSourceReference(argument);
-        if (reference) found.add(reference.text);
+        if (reference) found.add(reference.node.text);
       }
     }
     ts.forEachChild(node, visit);
@@ -228,13 +246,13 @@ function resolveDefinitions(reference: ts.Identifier): SourceDefinition[] {
     .map(({ definition }) => definition);
 }
 
-function eachReferences(src: string, ident: string): ts.Identifier[] {
-  const found: ts.Identifier[] = [];
+function eachReferences(src: string, ident: string): EachSourceReference[] {
+  const found: EachSourceReference[] = [];
   const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && isEachCall(node)) {
       const argument = node.arguments[0];
       const reference = argument ? eachSourceReference(argument) : null;
-      if (reference?.text === ident) found.push(reference);
+      if (reference?.node.text === ident) found.push(reference);
     }
     ts.forEachChild(node, visit);
   };
@@ -245,7 +263,9 @@ function eachReferences(src: string, ident: string): ts.Identifier[] {
 function definitions(src: string, ident: string): SourceDefinition[] {
   const unique = new Map<ts.Node, SourceDefinition>();
   for (const reference of eachReferences(src, ident)) {
-    for (const definition of resolveDefinitions(reference)) unique.set(definition.node, definition);
+    for (const definition of resolveDefinitions(reference.node)) {
+      unique.set(definition.node, definition);
+    }
   }
   return [...unique.values()];
 }
@@ -277,24 +297,67 @@ function numericValue(expr: ts.Expression): number | null {
   return null;
 }
 
+function isOrdinaryTestCallback(node: ts.ArrowFunction | ts.FunctionExpression): boolean {
+  const parent = node.parent;
+  if (!ts.isCallExpression(parent) || !parent.arguments.includes(node)) return false;
+  const callee = unwrap(parent.expression);
+  return ts.isIdentifier(callee) && (callee.text === 'it' || callee.text === 'test');
+}
+
+/** 先行 statement に、 test callback を assertion より前に抜ける `return` があるか。 */
+function canReturnBefore(statements: readonly ts.Statement[]): boolean {
+  let found = false;
+  const visit = (node: ts.Node): void => {
+    if (found) return;
+    // 入れ子の関数の return は、 外側の test callback を抜けない。
+    if (ts.isFunctionLike(node)) return;
+    if (ts.isReturnStatement(node)) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(node, visit);
+  };
+  for (const statement of statements) visit(statement);
+  return found;
+}
+
 /** assertion が top-level または通常の `it` / `test` callback で必ず実行されるか。 */
 function runsIndependently(node: ts.Node): boolean {
-  let current = node.parent;
-  while (current) {
+  let statement: ts.Statement | null = null;
+  for (let current: ts.Node | undefined = node; current; current = current.parent) {
+    if (statement === null && ts.isStatement(current)) statement = current;
     if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
-      const parent = current.parent;
-      if (!ts.isCallExpression(parent) || !parent.arguments.includes(current)) return false;
-      const callee = unwrap(parent.expression);
-      return ts.isIdentifier(callee) && (callee.text === 'it' || callee.text === 'test');
+      if (!isOrdinaryTestCallback(current)) return false;
+      if (!ts.isBlock(current.body)) return statement === null && unwrap(current.body) === node;
+      if (
+        !statement ||
+        !ts.isExpressionStatement(statement) ||
+        unwrap(statement.expression) !== node ||
+        statement.parent !== current.body
+      ) {
+        return false;
+      }
+      const index = current.body.statements.indexOf(statement);
+      return index >= 0 && !canReturnBefore(current.body.statements.slice(0, index));
     }
     if (ts.isFunctionDeclaration(current)) return false;
-    current = current.parent;
+    if (ts.isSourceFile(current)) {
+      return (
+        statement !== null &&
+        ts.isExpressionStatement(statement) &&
+        unwrap(statement.expression) === node &&
+        statement.parent === current
+      );
+    }
   }
-  return true;
+  return false;
 }
 
 /** その識別子の非空を独立に主張している assertion があるか。 */
 function hasNonEmptyGuard(src: string, ident: string): boolean {
+  // `.map` 等と違い、 `.filter` / `.slice` は元が非空でも結果が空になれる。 最終結果を
+  // 変数へ束縛して名指しで保証させ、 元配列の assertion で通さない。
+  if (eachReferences(src, ident).some(({ preservesNonEmpty }) => !preservesNonEmpty)) return false;
   const expectedDefinitions = new Set(definitions(src, ident).map(({ node }) => node));
   let found = false;
   const visit = (node: ts.Node): void => {
@@ -421,6 +484,10 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(unguardedIn('spread-only-literal.txt')).toEqual(['CASES']);
   });
 
+  it('件数を減らし得る変換の前にある一覧の保証は受けない', () => {
+    expect(unguardedIn('filtered-source-guard.txt')).toEqual(['targets']);
+  });
+
   it('名指しの保証がある実行時導出を通す', () => {
     expect(unguardedIn('derived-guarded.txt')).toEqual([]);
   });
@@ -444,6 +511,11 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(unguardedIn('negated-guard.txt')).toEqual(['targets']);
   });
 
+  it('0 件を主張する toHaveLength は保証として受けない', () => {
+    // `toHaveLength(0)` は「空である」 の主張。 非空の保証として数えると意味が反転する。
+    expect(unguardedIn('zero-length-guard.txt')).toEqual(['targets']);
+  });
+
   it('否定された toContain は保証として受けない', () => {
     // `not.toContain(x)` は一覧が空でも成立する。 「含まない」 は「空でない」 を含意しない。
     expect(unguardedIn('negated-contain-guard.txt')).toEqual(['targets']);
@@ -464,6 +536,18 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
   it('it.each 自身の callback 内だけにある assertion は保証として受けない', () => {
     // 一覧が空なら callback 自体が 1 度も走らないため、 独立した保証にならない。
     expect(unguardedIn('self-guarded.txt')).toEqual(['targets']);
+  });
+
+  it('条件分岐の内側にある assertion は保証として受けない', () => {
+    expect(unguardedIn('conditional-guard.txt')).toEqual(['targets']);
+  });
+
+  it('early return の後にある assertion は保証として受けない', () => {
+    expect(unguardedIn('early-return-guard.txt')).toEqual(['targets']);
+  });
+
+  it('short-circuit 式の内側にある assertion は保証として受けない', () => {
+    expect(unguardedIn('short-circuit-guard.txt')).toEqual(['targets']);
   });
 
   it('文字列内の assertion 例を保証として受けない', () => {

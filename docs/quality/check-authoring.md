@@ -31,8 +31,12 @@ expect(rows.length).toBe(literal);
 ```
 
 **`length` の確認は対象を名指しで、 `it.each` とは独立した test に書く**。 別名の局所変数に
-代入した確認や、 一覧が空なら実行されない `it.each` 自身の callback 内の確認は、 保証として
-扱わない (`check-authoring.test.ts` は AST で対象と実行位置を照合する)。
+代入した確認、 条件分岐の内側や early return の後、 一覧が空なら実行されない `it.each` 自身の
+callback 内の確認は、 保証として扱わない (`check-authoring.test.ts` は AST で対象と実行位置を
+照合する)。
+
+`it.each(targets.filter(...))` のように件数を減らし得る変換をその場で加えず、 変換後の一覧を
+変数へ束縛してから、その変数の非空を確かめる。 `.map` のように件数を保つ変換はそのままでよい。
 
 直接要素を持つ配列 literal は静的に非空なので別の確認を要求しない。 `[]` と `[...derived]` は
 0 件になり得るため、 実行時導出の一覧と同じく非空を確かめる。

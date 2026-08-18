@@ -1,0 +1,3 @@
+const targets = list();
+expect(targets.length).toBeGreaterThan(0);
+it.each(targets.filter((x) => x.ok))('%s', () => {});
