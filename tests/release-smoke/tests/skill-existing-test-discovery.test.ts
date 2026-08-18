@@ -94,11 +94,13 @@ interface Layer {
 }
 
 /** その runtime の layer が `test_outputs` で宣言している出力 path。 */
-function declaredOutputs(runtime: string): string[] {
+function declaredOutputs(runtime: string, consumer?: string): string[] {
   const layers = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).layers;
   return layers
     .filter((l) => l.runtime === runtime)
-    .flatMap((l) => Object.values(l.test_outputs ?? {}).flat());
+    .flatMap((l) => Object.entries(l.test_outputs ?? {}))
+    .filter(([name]) => consumer === undefined || name === consumer)
+    .flatMap(([, outputs]) => outputs);
 }
 
 /** `{example}/test/unit/{module}.test.{ts,tsx}` を実在しうる basename へ畳む。 */
@@ -260,8 +262,20 @@ describe('/kiwa-design が既存 test を探す', () => {
     // 両方に消費される。 `*.t.sol` だけに絞ると Hardhat 側の既存 test を 1 件も拾えない。
     const commands = findCommands(runtimeFence('solidity'));
     expect(commands.length).toBe(4);
-    for (const command of commands.slice(0, 2)) {
-      expect(command, `対象が *.t.sol でない find:\n${command}`).toContain("-name '*.t.sol'");
+
+    const runners = [
+      { consumer: 'kiwa-forge', commands: commands.slice(0, 2) },
+      { consumer: 'kiwa-hardhat', commands: commands.slice(2, 4) },
+    ];
+    for (const runner of runners) {
+      const globs = documentedGlobs(runner.commands[0]!).map(globToRegExp);
+      const uncovered = declaredOutputs('solidity', runner.consumer)
+        .flatMap(sampleBasenames)
+        .filter((name) => !globs.some((glob) => glob.test(name)));
+      expect(
+        uncovered,
+        `${runner.consumer} の出力を拾えない find:\n${runner.commands.join('\n---\n')}`,
+      ).toEqual([]);
     }
   });
 
