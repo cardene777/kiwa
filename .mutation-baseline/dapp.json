@@ -6,14 +6,14 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 84.21,
-  "totalMsi": 84.21,
-  "coveredMsi": 85.09,
-  "killed": 96,
-  "survived": 17,
-  "timeout": 1,
-  "noCoverage": 5,
-  "error": 0,
+  "killRate": 67.59,
+  "totalMsi": 67.59,
+  "coveredMsi": 68.36,
+  "killed": 1437,
+  "survived": 671,
+  "timeout": 13,
+  "noCoverage": 347,
+  "error": 5,
   "mutants": [
     {
       "file": ".vitest-dist/src/anvil-pool.js",
@@ -49,6 +49,4255 @@
       "column": 37,
       "mutator": "ArrowFunction",
       "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 99,
+      "column": 29,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 106,
+      "column": 45,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 127,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 43,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 43,
+      "mutator": "EqualityOperator",
+      "replacement": "child.pid === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 68,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 153,
+      "column": 46,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 153,
+      "column": 70,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 153,
+      "column": 87,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 154,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 155,
+      "column": 20,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 155,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 155,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 157,
+      "column": 27,
+      "mutator": "MethodExpression",
+      "replacement": "result.split('\\n').map(line => line.trim()).filter(line => line.length > 0)"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 157,
+      "column": 27,
+      "mutator": "MethodExpression",
+      "replacement": "result.split('\\n').map(line => line.trim())"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 155,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 159,
+      "column": 28,
+      "mutator": "MethodExpression",
+      "replacement": "line"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 160,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 160,
+      "column": 31,
+      "mutator": "EqualityOperator",
+      "replacement": "line.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 166,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 166,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "!Number.isFinite(pid) && pid <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 166,
+      "column": 42,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 166,
+      "column": 42,
+      "mutator": "EqualityOperator",
+      "replacement": "pid < 0"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 169,
+      "column": 34,
+      "mutator": "LogicalOperator",
+      "replacement": "command.split('/').pop() && command"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 185,
+      "column": 20,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 195,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 207,
+      "column": 22,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() - timeoutMs"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 208,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 208,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() < deadline"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 208,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() > deadline"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 209,
+      "column": 13,
+      "mutator": "BooleanLiteral",
+      "replacement": "isPidAlive(pid)"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 209,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 209,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 209,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 216,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 217,
+      "column": 9,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 221,
+      "column": 11,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 257,
+      "column": 52,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 260,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 261,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 263,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 263,
+      "column": 54,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 267,
+      "column": 44,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 285,
+      "column": 49,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 337,
+      "column": 20,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 350,
+      "column": 20,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 24,
+      "column": 31,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 25,
+      "column": 36,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 30,
+      "column": 20,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 31,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 32,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 33,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 33,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 35,
+      "column": 31,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 40,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 48,
+      "column": 32,
+      "mutator": "EqualityOperator",
+      "replacement": "attempts <= 50"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 50,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 65,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 66,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 68,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 68,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof addr === 'object' && addr || typeof addr.port === 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 68,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 68,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof addr === 'object' || addr"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 68,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 68,
+      "column": 53,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 71,
+      "column": 25,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 92,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 99,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 102,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 105,
+      "column": 44,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 106,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 106,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 106,
+      "column": 20,
+      "mutator": "EqualityOperator",
+      "replacement": "opts.detached !== true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 106,
+      "column": 38,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 106,
+      "column": 56,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 107,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 107,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 107,
+      "column": 23,
+      "mutator": "EqualityOperator",
+      "replacement": "opts.detached !== true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 107,
+      "column": 41,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 111,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 111,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 111,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "opts.detached === true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 111,
+      "column": 31,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 122,
+      "column": 21,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 124,
+      "column": 105,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.requirePristineChain && !opts.loadState"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 124,
+      "column": 134,
+      "mutator": "BooleanLiteral",
+      "replacement": "opts.loadState"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 132,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.detached === true || child.pid !== undefined"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "opts.detached !== true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 134,
+      "column": 35,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 239,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 239,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() >= deadline"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 255,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 257,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 267,
+      "column": 21,
+      "mutator": "BooleanLiteral",
+      "replacement": "requirePristineChain"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 267,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 267,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 282,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 285,
+      "column": 21,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 310,
+      "column": 28,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 322,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 324,
+      "column": 24,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 325,
+      "column": 17,
+      "mutator": "BooleanLiteral",
+      "replacement": "leaked"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 325,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 325,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 325,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 330,
+      "column": 41,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 339,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 339,
+      "column": 34,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 4,
+      "column": 42,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 5,
+      "column": 12,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 10,
+      "column": 18,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 22,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "opts.wallet.chain && null"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 27,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 38,
+      "column": 58,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 42,
+      "column": 22,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 42,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 42,
+      "column": 78,
+      "mutator": "OptionalChaining",
+      "replacement": "parsed.bytecode.object"
+    },
+    {
+      "file": ".vitest-dist/src/deploy-contract.js",
+      "line": 43,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 36,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 36,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 36,
+      "column": 23,
+      "mutator": "LogicalOperator",
+      "replacement": "handleDetails || Number.isFinite(Date.parse(handleDetails.startedAt))"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 39,
+      "column": 21,
+      "mutator": "LogicalOperator",
+      "replacement": "handleDetails?.command.split('/').pop() && 'anvil'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 39,
+      "column": 21,
+      "mutator": "OptionalChaining",
+      "replacement": "handleDetails.command"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 39,
+      "column": 50,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 44,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 45,
+      "column": 29,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 45,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 45,
+      "column": 54,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 50,
+      "column": 45,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 64,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 66,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 67,
+      "column": 36,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 67,
+      "column": 49,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 69,
+      "column": 56,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 70,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 71,
+      "column": 60,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 94,
+      "column": 47,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 99,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 100,
+      "column": 24,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 100,
+      "column": 37,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 102,
+      "column": 63,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 105,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 107,
+      "column": 62,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 108,
+      "column": 13,
+      "mutator": "BooleanLiteral",
+      "replacement": "isPidAlive(entry.pid)"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 108,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 108,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 110,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 111,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 125,
+      "column": 16,
+      "mutator": "MethodExpression",
+      "replacement": "readFileSync(pidFilePath, 'utf8').split('\\n').map(line => line.trim())"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 125,
+      "column": 42,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 126,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 127,
+      "column": 18,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 127,
+      "column": 28,
+      "mutator": "MethodExpression",
+      "replacement": "line"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 128,
+      "column": 21,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 128,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 128,
+      "column": 31,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 128,
+      "column": 31,
+      "mutator": "EqualityOperator",
+      "replacement": "line.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 128,
+      "column": 31,
+      "mutator": "EqualityOperator",
+      "replacement": "line.length <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 130,
+      "column": 21,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 130,
+      "column": 32,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 133,
+      "column": 16,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 137,
+      "column": 9,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 139,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 139,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 139,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof parsed !== 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 139,
+      "column": 41,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 139,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 20,
+      "mutator": "LogicalOperator",
+      "replacement": "Number.isInteger(parsed) || parsed > 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 48,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 140,
+      "column": 61,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof parsed === 'object' || parsed !== null"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof parsed !== 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 43,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed === null"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 43,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 142,
+      "column": 60,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 143,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 17,
+      "mutator": "LogicalOperator",
+      "replacement": "!Number.isInteger(pid) && pid <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 17,
+      "mutator": "BooleanLiteral",
+      "replacement": "Number.isInteger(pid)"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 43,
+      "mutator": "EqualityOperator",
+      "replacement": "pid < 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 43,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 144,
+      "column": 43,
+      "mutator": "EqualityOperator",
+      "replacement": "pid > 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 146,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 147,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 148,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 149,
+      "column": 27,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 150,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 150,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 150,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof portValue !== 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 150,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 153,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 153,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 153,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof startedAtValue !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 153,
+      "column": 53,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 153,
+      "column": 43,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 156,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 156,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 156,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof commandValue !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 156,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 166,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 156,
+      "column": 51,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 166,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 166,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "Number.isInteger(pid) || pid > 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 168,
+      "column": 26,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 169,
+      "column": 9,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 173,
+      "column": 11,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 171,
+      "column": 16,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 174,
+      "column": 16,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 177,
+      "column": 33,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 179,
+      "column": 9,
+      "mutator": "BooleanLiteral",
+      "replacement": "details"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 179,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 179,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 181,
+      "column": 27,
+      "mutator": "LogicalOperator",
+      "replacement": "details.command.split('/').pop() && details.command"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 181,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 182,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 182,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 182,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "actualCommand === 'anvil'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 182,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 182,
+      "column": 36,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 201,
+      "column": 34,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 202,
+      "column": 9,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 24,
+      "mutator": "MethodExpression",
+      "replacement": "execFileSync('ps', ['-o', 'lstart=', '-o', 'comm=', '-p', String(pid)], {\n  encoding: 'utf8',\n  stdio: ['ignore', 'pipe'"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 44,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 50,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 43,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 61,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 67,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 96,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 203,
+      "column": 76,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 204,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 205,
+      "column": 20,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 205,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 205,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 208,
+      "column": 20,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 205,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 209,
+      "column": 19,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 209,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 209,
+      "column": 29,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 209,
+      "column": 29,
+      "mutator": "EqualityOperator",
+      "replacement": "line.trim().length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 209,
+      "column": 29,
+      "mutator": "MethodExpression",
+      "replacement": "line"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 209,
+      "column": 29,
+      "mutator": "EqualityOperator",
+      "replacement": "line.trim().length <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 210,
+      "column": 13,
+      "mutator": "BooleanLiteral",
+      "replacement": "result"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 210,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 210,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/(.*?)\\s+(\\S+)$/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/^(.*?)\\s+(\\S+)/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/^(.)\\s+(\\S+)$/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/^(.*?)\\s(\\S+)$/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/^(.*?)\\S+(\\S+)$/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/^(.*?)\\s+(\\S)$/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 212,
+      "column": 36,
+      "mutator": "Regex",
+      "replacement": "/^(.*?)\\s+(\\s+)$/"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 213,
+      "column": 13,
+      "mutator": "BooleanLiteral",
+      "replacement": "match"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 213,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 213,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 216,
+      "column": 24,
+      "mutator": "MethodExpression",
+      "replacement": "match[1]"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 217,
+      "column": 22,
+      "mutator": "MethodExpression",
+      "replacement": "match[2]"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 183,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 183,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 183,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "arg !== undefined"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 183,
+      "column": 28,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 202,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() - start >= timeoutMs"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 212,
+      "column": 31,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 238,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 242,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 245,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 245,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof rdns !== 'string' && rdns.length === 0"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 245,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 245,
+      "column": 41,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 249,
+      "column": 98,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 249,
+      "column": 114,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 249,
+      "column": 125,
+      "mutator": "MethodExpression",
+      "replacement": "icon"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 251,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 252,
+      "column": 138,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 252,
+      "column": 171,
+      "mutator": "MethodExpression",
+      "replacement": "privateKey"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 252,
+      "column": 160,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 255,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 258,
+      "column": 128,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 258,
+      "column": 128,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 258,
+      "column": 128,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof wallet.chainId !== 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 258,
+      "column": 154,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 266,
+      "column": 14,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 267,
+      "column": 18,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]{40}$/"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 267,
+      "column": 18,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]{40}/"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 268,
+      "column": 151,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 268,
+      "column": 151,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 268,
+      "column": 151,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof wallet.contractAccountAddress !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 268,
+      "column": 192,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 271,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 273,
+      "column": 66,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 273,
+      "column": 66,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof entry === 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 273,
+      "column": 83,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 277,
+      "column": 50,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 308,
+      "column": 37,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 311,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 404,
+      "column": 29,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 405,
+      "column": 42,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 411,
+      "column": 40,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 411,
+      "column": 55,
+      "mutator": "BooleanLiteral",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 414,
+      "column": 20,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 417,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 417,
+      "column": 30,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 423,
+      "column": 41,
+      "mutator": "Regex",
+      "replacement": "/\\s/g"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 423,
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "inspectForRpc(value).replace(/\\s+/g, ' ')"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 423,
+      "column": 49,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 429,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "durationMs > 1_000"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 438,
+      "column": 171,
+      "mutator": "ArithmeticOperator",
+      "replacement": "Date.now() + entry.startedAt"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 453,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 453,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 459,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 459,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 459,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "wallets.length !== 2"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 10,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 13,
+      "column": 29,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]{64}$/"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 13,
+      "column": 29,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]{64}/"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 14,
+      "column": 26,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 15,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 16,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 17,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 18,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 26,
+      "column": 40,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 27,
+      "column": 17,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 27,
+      "column": 39,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 27,
+      "column": 49,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 28,
+      "column": 14,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 28,
+      "column": 22,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 28,
+      "column": 32,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 29,
+      "column": 14,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 29,
+      "column": 26,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/fixture.js",
+      "line": 29,
+      "column": 36,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 50,
+      "column": 32,
+      "mutator": "UnaryOperator",
+      "replacement": "+32603"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 60,
+      "column": 40,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 64,
+      "column": 28,
+      "mutator": "MethodExpression",
+      "replacement": "numberToHex(ctx.chainState.current).toUpperCase()"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 62,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 65,
+      "column": 33,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 65,
+      "column": 44,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 65,
+      "column": 44,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 65,
+      "column": 44,
+      "mutator": "EqualityOperator",
+      "replacement": "entry.chainId.toLowerCase() !== activeChainHex"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 65,
+      "column": 44,
+      "mutator": "MethodExpression",
+      "replacement": "entry.chainId.toUpperCase()"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 66,
+      "column": 20,
+      "mutator": "OptionalChaining",
+      "replacement": "chain.rpcUrls"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 66,
+      "column": 41,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 66,
+      "column": 52,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 66,
+      "column": 52,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 66,
+      "column": 52,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof value !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 66,
+      "column": 69,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 67,
+      "column": 9,
+      "mutator": "BooleanLiteral",
+      "replacement": "rpcUrl"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 67,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 67,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 69,
+      "column": 9,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "parsed.protocol !== 'http:' || parsed.protocol !== 'https:'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed.protocol === 'http:'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 44,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 44,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed.protocol === 'https:'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 71,
+      "column": 64,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "parsed.hostname !== '127.0.0.1' || parsed.hostname !== 'localhost'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed.hostname === '127.0.0.1'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 48,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 48,
+      "mutator": "EqualityOperator",
+      "replacement": "parsed.hostname === 'localhost'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 73,
+      "column": 68,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 76,
+      "column": 16,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 76,
+      "column": 16,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 76,
+      "column": 16,
+      "mutator": "LogicalOperator",
+      "replacement": "Number.isInteger(port) || port > 0"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 76,
+      "column": 42,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 76,
+      "column": 42,
+      "mutator": "EqualityOperator",
+      "replacement": "port <= 0"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 76,
+      "column": 42,
+      "mutator": "EqualityOperator",
+      "replacement": "port >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 78,
+      "column": 11,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 129,
+      "column": 27,
+      "mutator": "OptionalChaining",
+      "replacement": "ctx.activeIndex.current"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 143,
+      "column": 46,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 151,
+      "column": 50,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]*$/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 160,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 174,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 171,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 174,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 174,
+      "column": 38,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 187,
+      "column": 36,
+      "mutator": "MethodExpression",
+      "replacement": "ctx.chainRegistry.current.every(chain => chain.chainId.toLowerCase() === chainIdHex.toLowerCase())"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 189,
+      "column": 50,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 194,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 194,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 194,
+      "column": 42,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 194,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "anvilPort === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 204,
+      "column": 77,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 224,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 224,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 224,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof from !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 224,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 224,
+      "column": 43,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 225,
+      "column": 41,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 230,
+      "column": 36,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 242,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 246,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 257,
+      "column": 27,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 271,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 274,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 283,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 287,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 302,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 302,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 302,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "executeGas === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 324,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 324,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "tokenPolicy.limit >= 0n"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 333,
+      "column": 52,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 336,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 340,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 340,
+      "column": 55,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 340,
+      "column": 40,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 348,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 352,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 352,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof spender !== 'string' && typeof amount !== 'bigint'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 352,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 352,
+      "column": 44,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 365,
+      "column": 31,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 367,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 367,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 367,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof p.to !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 367,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 369,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 369,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 369,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof p.from !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 369,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 371,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 371,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 371,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof p.data !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 371,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 374,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 374,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 374,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "value === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 377,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 377,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 377,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "gas === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 381,
+      "column": 43,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 382,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 382,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 384,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 384,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 384,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof value !== 'bigint'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 384,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 388,
+      "column": 41,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 389,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 389,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 391,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 391,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 391,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof value !== 'bigint'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 391,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 407,
+      "column": 24,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 407,
+      "column": 24,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 407,
+      "column": 24,
+      "mutator": "OptionalChaining",
+      "replacement": "issue.path"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 407,
+      "column": 24,
+      "mutator": "LogicalOperator",
+      "replacement": "issue?.path.length || issue.path[0] !== undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 407,
+      "column": 46,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 407,
+      "column": 46,
+      "mutator": "EqualityOperator",
+      "replacement": "issue.path[0] === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 408,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 432,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 436,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 436,
+      "column": 40,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 436,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "Number.isFinite(actual) || actual !== expectedChainId"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 446,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 447,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 452,
+      "column": 81,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 455,
+      "column": 55,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 471,
+      "column": 10,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]*$/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 471,
+      "column": 10,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]*/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 486,
+      "column": 40,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 488,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 498,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 498,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "(json === null || typeof json !== 'object') && Array.isArray(json)"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 498,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 498,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "json === null && typeof json !== 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 498,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 498,
+      "column": 26,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 503,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 515,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 517,
+      "column": 38,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 521,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "(typeof param !== 'object' || param === null) && typeof param.chainId !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 521,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 521,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof param !== 'object' && param === null"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 521,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 522,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 523,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 527,
+      "column": 10,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]+$/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 527,
+      "column": 10,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]+/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 536,
+      "column": 38,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 541,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 541,
+      "column": 41,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]+$/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 541,
+      "column": 41,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]+/"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 545,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 553,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 553,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 553,
+      "column": 51,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 553,
+      "column": 51,
+      "mutator": "EqualityOperator",
+      "replacement": "obj.nativeCurrency === null"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 553,
+      "column": 80,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof nc.name === 'string' && typeof nc.symbol === 'string' || typeof nc.decimals === 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof nc.name === 'string' || typeof nc.symbol === 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof nc.name !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 555,
+      "column": 32,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 556,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 556,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof nc.symbol !== 'string'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 556,
+      "column": 34,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 557,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 557,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof nc.decimals !== 'number'"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 557,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 557,
+      "column": 46,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 558,
+      "column": 37,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 14,
+      "column": 26,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 16,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 17,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 19,
+      "column": 18,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 19,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 19,
+      "column": 27,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 19,
+      "column": 37,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 87,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 88,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 89,
+      "column": 5,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 4,
+      "column": 40,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "current !== null && typeof current === 'object' && !visited.has(current) || depth < maxDepth"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "current !== null && typeof current === 'object' || !visited.has(current)"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "current !== null || typeof current === 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 8,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "current === null"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 9,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof current !== 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 10,
+      "column": 9,
+      "mutator": "BooleanLiteral",
+      "replacement": "visited.has(current)"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "depth <= maxDepth"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "depth >= maxDepth"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "LogicalOperator",
+      "replacement": "'cause' in current || current.cause"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 13,
+      "column": 13,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 13,
+      "column": 50,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 15,
+      "column": 13,
+      "mutator": "AssignmentOperator",
+      "replacement": "depth -= 1"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 22,
+      "column": 37,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 25,
+      "column": 15,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 26,
+      "column": 25,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 26,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 26,
+      "column": 50,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 27,
+      "column": 18,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 28,
+      "column": 22,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 28,
+      "column": 30,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 28,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 34,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "current !== null || typeof current === 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 34,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 34,
+      "column": 32,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 35,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 39,
+      "column": 25,
+      "mutator": "MethodExpression",
+      "replacement": "[candidate.shortMessage, candidate.message, candidate.code]"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 40,
+      "column": 32,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 41,
+      "column": 19,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 46,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 46,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "next !== current"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 56,
+      "column": 30,
+      "mutator": "LogicalOperator",
+      "replacement": "ctx.transportTimeoutMs && 5_000"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 57,
+      "column": 24,
+      "mutator": "LogicalOperator",
+      "replacement": "ctx.transportRetryCount && 0"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 60,
+      "column": 25,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 66,
+      "column": 19,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 66,
+      "column": 43,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 69,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 69,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 74,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 75,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 76,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 77,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 77,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 77,
+      "column": 17,
+      "mutator": "EqualityOperator",
+      "replacement": "gas === undefined"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 82,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 82,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 82,
+      "column": 37,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 84,
+      "column": 48,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 84,
+      "column": 80,
+      "mutator": "LogicalOperator",
+      "replacement": "e.shortMessage && e.message"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 87,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 90,
+      "column": 64,
+      "mutator": "LogicalOperator",
+      "replacement": "e.shortMessage && e.message"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 90,
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/anvil-cluster.js",
+      "line": 7,
+      "column": 29,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/anvil-cluster.js",
+      "line": 6,
+      "column": 19,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 4,
+      "column": 47,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 7,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 8,
+      "column": 15,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 11,
+      "column": 46,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 14,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 15,
+      "column": 15,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 20,
+      "column": 44,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/balance-change.js",
+      "line": 22,
+      "column": 43,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/eip1271.js",
@@ -114,18 +4363,347 @@
       "replacement": "\"\""
     },
     {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 3,
+      "column": 12,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 3,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "!!error || typeof error === 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 3,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 7,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 8,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 9,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 10,
+      "column": 10,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 11,
+      "column": 13,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 11,
+      "column": 24,
+      "mutator": "LogicalOperator",
+      "replacement": "error.data && {}"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 17,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 23,
+      "column": 12,
+      "mutator": "LogicalOperator",
+      "replacement": "current || typeof current === 'object'"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 23,
+      "column": 23,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 36,
+      "column": 12,
+      "mutator": "OptionalChaining",
+      "replacement": "reverted.data.errorName"
+    },
+    {
+      "file": ".vitest-dist/src/expect-custom-error.js",
+      "line": 38,
+      "column": 16,
+      "mutator": "OptionalChaining",
+      "replacement": "reverted.data.args"
+    },
+    {
+      "file": ".vitest-dist/src/expect-event.js",
+      "line": 9,
+      "column": 15,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/inject-multiple-wallets.js",
+      "line": 4,
+      "column": 28,
+      "mutator": "LogicalOperator",
+      "replacement": "options.defaultChainId && DEFAULT_CHAIN_ID"
+    },
+    {
+      "file": ".vitest-dist/src/inject-multiple-wallets.js",
+      "line": 9,
+      "column": 29,
+      "mutator": "LogicalOperator",
+      "replacement": "entry.chainId && defaultChainId"
+    },
+    {
+      "file": ".vitest-dist/src/inject-multiple-wallets.js",
+      "line": 16,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 3,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 3,
+      "column": 37,
+      "mutator": "EqualityOperator",
+      "replacement": "opts.wallets.length >= 0"
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 10,
+      "column": 11,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 11,
+      "column": 13,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 12,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 13,
+      "column": 23,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 15,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/injector-script.js",
+      "line": 1,
+      "column": 29,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 10,
+      "column": 17,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 11,
+      "column": 18,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 11,
+      "column": 36,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 13,
+      "column": 22,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 35,
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "slot <= 0n"
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 38,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 1,
+      "column": 27,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]{64}$/"
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 1,
+      "column": 27,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]{64}/"
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 2,
+      "column": 26,
+      "mutator": "Regex",
+      "replacement": "/0x[0-9a-fA-F]+$/"
+    },
+    {
+      "file": ".vitest-dist/src/set-storage-slot.js",
+      "line": 2,
+      "column": 26,
+      "mutator": "Regex",
+      "replacement": "/^0x[0-9a-fA-F]+/"
+    },
+    {
+      "file": ".vitest-dist/src/types.js",
+      "line": 6,
+      "column": 21,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 6,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 6,
+      "column": 18,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 25,
+      "column": 19,
+      "mutator": "ArrowFunction",
+      "replacement": "() => undefined"
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 52,
+      "column": 9,
+      "mutator": "LogicalOperator",
+      "replacement": "typeof lifecycle.beforeAll !== 'function' && typeof lifecycle.afterAll !== 'function'"
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 52,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 52,
+      "column": 54,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/vitest.js",
+      "line": 59,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/wait-for-chain-state.js",
+      "line": 14,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "Date.now() - start <= timeoutMs"
+    },
+    {
+      "file": ".vitest-dist/src/wait-for-chain-state.js",
+      "line": 16,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/wait-for-chain-state.js",
+      "line": 17,
+      "column": 52,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/wait-for-chain-state.js",
+      "line": 23,
+      "column": 52,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
       "file": ".vitest-dist/src/wait-for-wallet-connected.js",
       "line": 12,
       "column": 20,
       "mutator": "StringLiteral",
       "replacement": "\"Stryker was here!\""
-    },
-    {
-      "file": ".vitest-dist/src/wait-for-wallet-connected.js",
-      "line": 13,
-      "column": 27,
-      "mutator": "EqualityOperator",
-      "replacement": "attempt <= maxAttempts"
     },
     {
       "file": ".vitest-dist/src/wait-for-wallet-connected.js",
@@ -135,6 +4713,6 @@
       "replacement": "\"Stryker was here!\""
     }
   ],
-  "capturedAt": "2026-08-17T23:57:16Z",
-  "note": "Total MSI 84.21% / Covered MSI 85.09% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-18T06:23:41Z",
+  "note": "Total MSI 67.59% / Covered MSI 68.36% (threshold high=65 / low=55 / break=50)."
 }

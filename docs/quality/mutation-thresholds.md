@@ -73,9 +73,9 @@ Stryker generates no mutants from a re-export.
 The test below tells the shapes apart by what a file exports. That is a stand-in for behaviour, and
 § Telling the shapes apart records where the two come apart.
 
-**This is the target, not the current state.** The repo sits at 94.9%, with `dapp` still to go
-(§ Widening a package's scope). Read a green mutation gate accordingly — until a package's Issue
-lands, "passed" covers whatever its config happens to list.
+**The repo reached this target in #1982.** All 68,353 implementation lines are in `mutate`, across
+all 22 packages (§ Widening a package's scope). A green mutation gate now covers every package's
+implementation rather than whatever its config happened to list.
 
 No config names a barrel any more (`api`, `ui`, and `a11y` each listed their `index.js` until #1963
 widened them). Listing one is harmless — Stryker finds nothing to mutate there — but it makes the
@@ -147,21 +147,21 @@ reading the snapshot as current.
 
 | bucket | lines |
 |---|---|
-| implementation, in `mutate` | 64,852 |
-| implementation, not in `mutate` | 3,501 |
+| implementation, in `mutate` | 68,353 |
+| implementation, not in `mutate` | 0 |
 | barrel | 3,361 |
 | type-only | 692 |
 
-So 94.9% of implementation lines were covered (64,852 of 68,353).
+So 100.0% of implementation lines were covered (68,353 of 68,353).
 
-Everything outside `mutate` totals 7,554 lines, and barrel plus type-only accounts for 4,053 of
-that. 21 of 22 packages are at 100%; what stays outside is `dapp` (3,501 lines), which #1980
-measured and could not widen (§ Widening a package's scope).
+Everything outside `mutate` totals 4,053 lines, and **all of it is barrel plus type-only** — the two
+shapes this section defines as out of scope. All 22 packages are at 100%.
 
-Reaching every one of the 68,353 implementation lines therefore needs that one package and nothing
-else. The gap this section opened with was 50,225 lines at 26.5%, and six PRs closed it to here
-(#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group, #1985 `orm`)
-without a new test: every package that was widened met its tier as it already stood.
+The gap this section opened with was 50,225 lines at 26.5%, and seven PRs closed it entirely
+(#1966 `security`, #1968 `cache`, #1970 `search`, #1972 `edge`, #1983 the large group, #1985 `orm`,
+#1987 `dapp`) **without a new test**: every package that was widened met its tier as it already
+stood. What the widenings cost was config edits and, twice, finding out why the tests that already
+existed were not running.
 
 
 #1944 classified the same files by hand and published totals 404 lines higher — one per file, from
@@ -263,13 +263,14 @@ Read the groups as a record of how the work was scheduled, not as a claim about 
 
 | group | packages | uncovered lines each |
 |---|---|---|
-| large — measured in #1980 | ~~`auth` (13,899)~~, ~~`orm` (5,011)~~, ~~`queue` (4,978)~~, ~~`observability` (4,970)~~, ~~`ai-llm` (4,735)~~, ~~`realtime` (3,950)~~, `dapp` (3,501) | 3,000+ |
+| large — measured in #1980 | ~~`auth` (13,899)~~, ~~`orm` (5,011)~~, ~~`queue` (4,978)~~, ~~`observability` (4,970)~~, ~~`ai-llm` (4,735)~~, ~~`realtime` (3,950)~~, ~~`dapp` (3,501)~~ | 3,000+ |
 | medium — done | ~~`edge` (2,802)~~, ~~`search` (2,179)~~, ~~`cache` (2,084)~~, ~~`security` (2,116)~~, ~~`cli` (2,053)~~ | 1,000-3,000 |
 | small — done in #1963 | ~~`component`, `nextjs`, `a11y`, `ui`, `core`, `e2e`, `cli-test`, `api`, `data`~~ | under 1,000 |
 
 `hono` already sat at 100% and needed no Issue. `cli` widened in #1961, the small group in #1963,
 `security` in #1965, `cache` in #1967, `search` in #1969, `edge` in #1971, five of the large group
-in #1980, and `orm` in #1981, so 21 of 22 packages are now at 100%. What remains is `dapp`.
+in #1980, `orm` in #1981, and `dapp` in #1982. **All 22 packages are at 100%; the checklist is
+closed.**
 
 ### The large group was measured before it was planned (#1980)
 
@@ -288,7 +289,7 @@ test written, and every one of the five scored *higher* than its narrow scope di
 | `queue` | 65 | 77.47 | **78.37** | 2,839 | 14m36s |
 | `realtime` | 65 | 67.54 | **69.41** | 2,409 | 4m04s |
 | `orm` | 65 | 90.43 | **76.94** | 2,856 | 11m28s *(after #1981)* |
-| `dapp` | 65 | 85.09 | 48.92 | 2,473 | 7m35s |
+| `dapp` | 65 | 85.09 | **68.36** | 2,473 | 33m33s *(after #1982)* |
 
 `auth` is the one the old text was written about, and it cleared its tier by ten points. `ai-llm` is
 the sharper case: its narrow scope scored 64.45, *below* the SaaS bar, and widening took it to 75.83
@@ -299,7 +300,8 @@ the sharper case: its narrow scope scored 64.45, *below* the SaaS bar, and widen
 the medium group `search` (2,179) took 1m41s and `cache` (2,084) took 5m02s. What the count measures
 is how much code there is, and the question is what the tests do with it.
 
-Two packages did fail, for reasons that are not about score. One is resolved:
+Two packages did fail, for reasons that are not about score. **Both are now resolved, and in
+neither case did the stated reason survive being measured.**
 
 - **`orm` — wall-clock** (#1981, resolved). 2,463 of 2,856 mutants in 11 minutes, then roughly 8
   mutants a minute with timeouts climbing to 24. What it waited on was not the semantics suite but
@@ -307,16 +309,71 @@ Two packages did fail, for reasons that are not about score. One is resolved:
   coverage made every mutant they cover pay a container startup. Excluding them from mutation runs
   brought the run to 11m28s at 76.94 covered MSI. § A slow test can also be a weak one records why
   excluding them reads the code more honestly than including them did.
-- **`dapp` — the tests are not there** (#1982). 2,103 of 2,473 widened mutants land as no-coverage:
-  `rpc-handlers` 687 of 715, `fixture` 511 of 536, `tx` 119 of 119. Its config header already said
-  the dry run cannot construct the forge artefacts and nextjs-bridge fixtures its suite needs. Its
-  48.92 is not a weak score but a score computed over the 370 mutants that ran. The question is
-  whether the unit suite can reach this code at all, which comes before any test-writing plan.
+- **`dapp` — the tests were there all along** (#1982, resolved). 2,103 of 2,473 widened mutants
+  landed as no-coverage, and the config header attributed it to a dry run that "can't construct"
+  the forge artefacts its suite needs. Both halves were wrong. The artefacts are committed under
+  `examples/nextjs-bridge/forge-out/`, so nothing needs constructing, and `vitest.stryker.config.mjs`
+  was not excluding a few files — it named **three of the package's thirty-seven test files** in an
+  `include` allowlist. #1980 widened `mutate` to 25 files against those three tests, which is the
+  whole of the 85 %. With the suite switched back on the figure is 15 % and the score is 68.36.
+  § A no-coverage rate can be a switched-off suite records what the measurement looked like.
 
 The lesson is the one § Overrides already states about override values, applied to a different kind
 of claim. **"This will be expensive" is a measurement, and an unmeasured one goes stale the same way
 a number does.** The claim here was never measured, and five of the seven packages it described had
-been one config edit away the whole time.
+been one config edit away the whole time. The remaining two were not one config edit away, but what
+they needed was still a measurement rather than a plan: each carried a written reason for its own
+exclusion, and neither reason held.
+
+### A no-coverage rate can be a switched-off suite (#1982)
+
+`dapp` reported 85 % no-coverage after #1980 widened it, and the natural reading of that number is
+the one this document warns about elsewhere: code the unit suite cannot reach. Its config header
+said as much, naming forge artefacts the dry run "can't construct on its own".
+
+Measured, the number was not about the code at all.
+
+| | before | after |
+|---|---|---|
+| test files Stryker ran | **3 of 37** | 37 of 37 |
+| no-coverage | 2,103 of 2,473 (85 %) | 347 of 2,473 (15 %) |
+| covered MSI | 48.92 | **68.36** |
+
+`vitest.stryker.config.mjs` carried an `include` **allowlist** naming three test files. Its `mutate`
+list named the three implementation files those tests cover, so while both were narrow the config
+was self-consistent. #1980 widened `mutate` to 25 files and left the allowlist alone, and the 85 %
+is entirely that mismatch.
+
+Removing the allowlist surfaced one real dry-run failure, and its cause was also not artefact
+construction. `deploy-contract.test.ts` resolved the example root from `process.cwd()`, which is the
+package dir under `pnpm test` and `.stryker-tmp/sandbox-*` under Stryker — so it looked for
+`packages/dapp/examples/...` and found nothing. Resolving from the repo root fixed it.
+`injector.test.ts` carried the same form and was fixed with it.
+
+**Two things generalise from this.**
+
+The first is about reading a no-coverage rate. It is a statement about what ran, not about what
+could run, and the gap between those is a config away. Before concluding that code is unreachable,
+check how many test files the mutation runner is actually given — `Initial test run succeeded. Ran N
+tests` in the Stryker log is the number to compare against `pnpm test`.
+
+The second is about `include` allowlists in a `vitest.stryker.config.mjs`. They stay correct only
+while `mutate` stays matched to them by hand, and nothing checked the pairing. `dapp` now globs
+(`.vitest-dist/tests/**/*.test.js`), and a check in
+`tests/release-smoke/tests/mutation-gate-coverage.test.ts` derives which packages still name files
+outright rather than leaving that count written down here.
+
+**Writing "none remain" here would have been wrong the day it was written.** The check found `ui`,
+which names six of its test files and records 54 no-coverage of 190 mutants — the same shape at a
+smaller scale. Whether its remaining files can join the run is #1986; the check holds it as a
+recorded exception with that reason, so the exception cannot go quiet.
+
+It found a second one on the round after, and that one was in this PR. `exclude` narrows the same
+set from the other side, so a check reading `include` alone passes a canonical glob paired with
+`exclude: ['**/rpc-handlers*.test.js']` — measured, it did. Covering both sides also caught `orm`,
+whose live-container exclusion (§ A slow test can also be a weak one) is a deliberate narrowing that
+had no recorded home until now. `**/.stryker-tmp/**` is the one exclude that is not a narrowing: it
+drops sandbox copies of the suite rather than members of it (#1984).
 
 ### A slow test can also be a weak one (#1981)
 

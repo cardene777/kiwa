@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { repoRoot } from './repo-root.js';
 import {
   createPublicClient,
   createWalletClient,
@@ -34,8 +35,10 @@ const PRIVATE_KEY =
 const SECOND_PRIVATE_KEY =
   '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d' as const;
 const CHAIN_ID = 31337;
-const repoRoot = resolve(process.cwd(), '..', '..');
-const aaExampleRoot = resolve(repoRoot, 'examples/nextjs-aa-smart-account');
+// `process.cwd()` からの相対で解決すると Stryker の sandbox で別 dir を指す (#1982、
+// `deploy-contract.test.ts` の同 pattern と同じ理由)。
+const monorepoRoot = repoRoot(process.cwd());
+const aaExampleRoot = resolve(monorepoRoot, 'examples/nextjs-aa-smart-account');
 
 function ctx(): RpcContext {
   return {

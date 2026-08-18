@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { repoRoot } from './repo-root.js';
 import {
   createPublicClient,
   createWalletClient,
@@ -18,7 +19,10 @@ import {
 const PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as const;
 const account = privateKeyToAccount(PRIVATE_KEY);
-const exampleRoot = resolve(process.cwd(), '../../examples/nextjs-bridge');
+// `process.cwd()` からの相対で解決すると、 Stryker の sandbox (`.stryker-tmp/sandbox-*`) で
+// 走った時に `packages/dapp/examples/...` を指して artefact を見失う (#1982 で実測)。
+// forge artefact は repo に commit されており構築は要らないので、 repo root から解決する。
+const exampleRoot = resolve(repoRoot(process.cwd()), 'examples/nextjs-bridge');
 const contractSlug = 'SimpleERC20.sol/SimpleERC20';
 const erc20ViewAbi = parseAbi([
   'function name() view returns (string)',

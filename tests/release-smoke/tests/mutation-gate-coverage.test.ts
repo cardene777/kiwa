@@ -41,18 +41,16 @@ const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
  *
  * `hono` was there from the start; `cli` widened in #1961, the small group in
  * #1963, `security` in #1965, `cache` in #1967, `search` in #1969, `edge` in
- * #1971, five of the large group in #1980, and `orm` in #1981. The list only
- * grows — a package that reached 100% and then dropped a file is the drift
- * #1936 cost 611 unseen mutants for.
+ * #1971, five of the large group in #1980, `orm` in #1981, and `dapp` in #1982.
+ * Every package is now on it. The list only grows — a package that reached 100%
+ * and then dropped a file is the drift #1936 cost 611 unseen mutants for.
  *
- * One of the large group is not here. `dapp` was measured in #1980 and failed
- * for a reason that is not about score: 85 % of its widened mutants are
- * no-coverage because its implementation is exercised through anvil and
- * Playwright, not the unit suite. It has its own Issue (#1982).
- *
- * `orm` was the other one, held out by wall-clock rather than score — 2.5 hours
- * without finishing. #1981 traced that to two live-container test files and
- * excluded them from mutation runs, bringing the run to 11m28s.
+ * The last two were held out for reasons that were not about score, and neither
+ * reason survived being measured. `orm` took 2.5 hours without finishing, which
+ * #1981 traced to two live-container test files. `dapp` reported 85 % of its
+ * mutants as no-coverage, which #1982 traced to an `include` allowlist naming
+ * three of its thirty-seven test files; with the suite switched back on that
+ * figure is 15 %.
  */
 const FULLY_WIDENED: readonly string[] = [
   'a11y',
@@ -64,6 +62,7 @@ const FULLY_WIDENED: readonly string[] = [
   'cli-test',
   'component',
   'core',
+  'dapp',
   'data',
   'e2e',
   'edge',
@@ -77,6 +76,25 @@ const FULLY_WIDENED: readonly string[] = [
   'security',
   'ui',
 ];
+
+/**
+ * Packages whose `vitest.stryker.config.mjs` runs fewer than all of the package's
+ * test files. Each entry needs a reason, and the reason has to be about the runner
+ * rather than about convenience — a narrowed run silently caps which mutants can
+ * be killed (#1982).
+ *
+ * `orm` excludes its two live-container test files, which start a real MySQL and
+ * Postgres in `beforeAll`. Per-test coverage made every mutant they cover pay a
+ * container startup, and on the slice they alone cover they killed 1 of 15 mutants
+ * in 3m19s with 6 timeouts. The exclusion is measured, not assumed (#1981).
+ *
+ * `ui` names six of its test files, running them under jsdom with Solid / Vue /
+ * Lit / Qwik / Angular adapters, each needing its own resolve conditions and
+ * inlined deps. Its baseline records 54 no-coverage of 190 mutants, the same shape
+ * `dapp` had at a smaller scale; whether the rest can join is #1986, not a
+ * judgement this list makes.
+ */
+const RUNNER_ALLOWLIST: readonly string[] = ['orm', 'ui'];
 
 const UNSCORED_ALLOWLIST: readonly string[] = [
   // (empty — every package that runs mutation testing is scored by the gate)
@@ -497,6 +515,124 @@ describe('every package that runs mutation testing is scored', () => {
         `${pkg}: implementation files dropped out of \`mutate\``,
       ).toEqual([]);
     }
+  });
+
+  it('hands the mutation runner every test file, or records why not', async () => {
+    // `mutate` decides which code gets mutated; the runner config decides which
+    // tests get to kill those mutants. Only the first has a check, and #1982 is
+    // what the gap costs: `dapp` named three of its thirty-seven test files in an
+    // `include` allowlist, so 85 % of its widened mutants reported no-coverage and
+    // read as code the unit suite cannot reach. Nothing was marked excluded, which
+    // is why it survived a widening and a review.
+    //
+    // A glob keeps the pairing correct as tests are added. An allowlist has to be
+    // maintained by hand against `mutate`, and when it drifts the result is silent
+    // — the score stays green over whatever did run.
+    //
+    // Deriving the list here rather than stating a count in the docs is
+    // `rules/quality.md § 導出可能記述は人手で書かない`. Writing "no package uses an
+    // allowlist" by hand would have been wrong the day it was written: `ui` has one.
+    const configs = readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => existsSync(resolve(REPO_ROOT, 'packages', name, 'vitest.stryker.config.mjs')))
+      .sort();
+
+    // The one pattern that reaches every compiled test file. Asking for this
+    // exact string rather than "contains a `*`" is deliberate: a narrow glob
+    // (`anvil-*.test.js`) caps coverage exactly like naming files does, and a
+    // predicate that only rejects star-free entries would wave it through.
+    const CANONICAL_INCLUDE = '.vitest-dist/tests/**/*.test.js';
+
+    // `exclude` narrows the same set from the other side, so reading `include`
+    // alone leaves the hole open — a canonical glob plus
+    // `exclude: ['**/rpc-handlers*.test.js']` runs fewer tests and would have
+    // passed. Measured on this PR before the check covered it.
+    //
+    // One exclude entry is not a narrowing. `.stryker-tmp` holds sandbox copies
+    // of the very tests being run, so excluding it removes duplicates of the
+    // suite rather than members of it (#1984). Everything else has to justify
+    // itself in RUNNER_ALLOWLIST.
+    const BENIGN_EXCLUDE = '**/.stryker-tmp/**';
+
+    // The config is imported rather than read as text. Four consecutive review
+    // rounds found a different hole in the regex that used to do this — a narrow
+    // glob, an `exclude` it never looked at, a value hoisted into a `const`, a
+    // header comment shadowing the real key — and each fix opened the next. The
+    // resolved object has none of those ambiguities, and `defineConfig` returns it
+    // as a plain object.
+    //
+    // Reading `test.include` by path also fixes what the regex could not: it can
+    // no longer pick up an unrelated `include` elsewhere in the file, such as
+    // `deps.optimizer.web.include`.
+    type StrykerVitestModule = { default?: unknown };
+    type ConfigObject = Record<string, unknown>;
+
+    const configObject = (value: unknown): value is ConfigObject => {
+      if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+      const prototype = Object.getPrototypeOf(value);
+      return prototype === Object.prototype || prototype === null;
+    };
+
+    const resolveConfig = async (value: unknown): Promise<unknown> => {
+      const awaited = await value;
+      if (typeof awaited !== 'function') return awaited;
+      return awaited({
+        command: 'serve',
+        mode: 'test',
+        isSsrBuild: false,
+        isPreview: false,
+      });
+    };
+
+    const narrowsTheRun = async (pkg: string): Promise<boolean> => {
+      const mod = (await import(
+        pathToFileURL(resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs')).href
+      )) as StrykerVitestModule;
+
+      // Vitest resolves promise and function exports before reading `test`, so
+      // inspect the same value it does. An unsupported resolved shape must not
+      // collapse into an absent `test` section and silently pass the check.
+      const config = await resolveConfig(mod.default);
+      if (!configObject(config)) return true;
+      const testValue = config.test;
+      if (testValue !== undefined && !configObject(testValue)) return true;
+      const test = testValue;
+
+      // Absent means vitest's own default, which is not narrowed. Present but not
+      // an array of strings is unreadable, and unreadable counts as narrowing —
+      // folding it into "absent" is what let a hoisted `const` opt out before.
+      const readable = (value: unknown): string[] | 'absent' | 'unreadable' => {
+        if (value === undefined) return 'absent';
+        if (!Array.isArray(value) || value.some((v) => typeof v !== 'string')) return 'unreadable';
+        return value as string[];
+      };
+
+      const include = readable(test?.include);
+      if (include === 'unreadable') return true;
+      if (include !== 'absent' && (include.length !== 1 || include[0] !== CANONICAL_INCLUDE)) {
+        return true;
+      }
+
+      const exclude = readable(test?.exclude);
+      if (exclude === 'unreadable') return true;
+      if (exclude === 'absent') return false;
+      return exclude.some((entry) => entry !== BENIGN_EXCLUDE);
+    };
+
+    const narrowed: string[] = [];
+    for (const pkg of configs) {
+      if (await narrowsTheRun(pkg)) narrowed.push(pkg);
+    }
+
+    expect(
+      narrowed,
+      'A `vitest.stryker.config.mjs` that narrows which tests run hides mutants as no-coverage ' +
+        'without marking anything excluded (#1982). That covers naming files in `include`, globbing ' +
+        'a subset, and dropping files with `exclude`. Use exactly ' +
+        `include: ['${CANONICAL_INCLUDE}'] and no exclude beyond '${BENIGN_EXCLUDE}', or add the ` +
+        'package to RUNNER_ALLOWLIST with its reason.',
+    ).toEqual([...RUNNER_ALLOWLIST].sort());
   });
 
   it('lists every package that already reached every implementation file', async () => {
