@@ -20,10 +20,14 @@
  *
  * Eight files across three packages have been excluded on this reasoning and
  * measured since: `cache` (#1967, three files), `queue` (#1980, two) and this
- * one (#1980, three). None of the eight had zero covered mutants. The argument
- * is appealing because it sounds like it protects the score, but `covered MSI`
- * drops no-coverage mutants from its denominator, so excluding a file can only
- * hide work — never protect a number.
+ * one (#1980, three). None of the eight had zero covered mutants.
+ *
+ * **The exclusions did hold the score up, which is the reason to stop making
+ * them.** These three score 64.35 / 64.96 / 56.72, all under the 69.41
+ * aggregate, so leaving them out was the difference between a number about the
+ * package and a number about the part of it someone chose to look at. An
+ * exclusion that changes nothing would not be worth arguing over; this one
+ * changed the answer.
  */
 export default {
   packageManager: 'pnpm',
