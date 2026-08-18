@@ -364,9 +364,16 @@ while `mutate` stays matched to them by hand, and nothing checked the pairing. `
 outright rather than leaving that count written down here.
 
 **Writing "none remain" here would have been wrong the day it was written.** The check found `ui`,
-which names six of its test files and records 54 no-coverage of 190 mutants — the same shape at a
-smaller scale. Whether its remaining files can join the run is #1986; the check holds it as a
-recorded exception with that reason, so the exception cannot go quiet.
+which named six of its fourteen test files and recorded 54 no-coverage of 190 mutants — the same
+shape at a smaller scale. #1986 replaced the allowlist with the glob and took it to **zero**
+no-coverage, 91.18 → 93.16 covered MSI, in a 39-second run. Two of its files had no test in the
+list at all (`browser.js`, `svelte.js`), so every one of their mutants had been reporting as
+unreachable code.
+
+`ui` stays a recorded exception for a different and smaller reason: `browser.test.js` launches a
+real Chromium and needs `environment: 'node'` while the rest of the package runs under jsdom, and a
+Stryker run takes one config. That exclusion costs nothing — `browser-mock.test.js` covers the same
+adapter with a mocked playwright.
 
 It found a second one on the round after, and that one was in this PR. `exclude` narrows the same
 set from the other side, so a check reading `include` alone passes a canonical glob paired with

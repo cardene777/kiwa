@@ -45,6 +45,24 @@ describe('setupBrowserComponentEnv (mocked branches)', () => {
     ).rejects.toThrow(/@playwright\/test.*playwright/);
   });
 
+  it('T-BRW-M-001b react-dom 不在で friendly error', async () => {
+    // playwright は立つが react-dom が無い経路。 #1986 まで runner がこの file を走らせて
+    // おらず、 `loadReactRenderer` の catch が唯一の no-coverage として残っていた。
+    vi.resetModules();
+    const page = makeFakePage();
+    const context = { newPage: vi.fn(async () => page), close: vi.fn(async () => undefined) };
+    const browser = { newContext: vi.fn(async () => context), close: vi.fn(async () => undefined) };
+    const chromium = { launch: vi.fn(async () => browser) };
+    vi.doMock('@playwright/test', () => ({ chromium }));
+    vi.doMock('react-dom/server', () => {
+      throw new Error('not installed');
+    });
+    const fresh = await import('../src/browser.js');
+    await expect(
+      fresh.setupBrowserComponentEnv({ ui: createElement('div', null, 'hi') }),
+    ).rejects.toThrow(/requires "react-dom" to be installed/);
+  });
+
   it('T-BRW-M-002 playwright fallback (@playwright/test fail → playwright import 成功)', async () => {
     vi.resetModules();
     const page = makeFakePage();
