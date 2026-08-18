@@ -78,18 +78,23 @@ const FULLY_WIDENED: readonly string[] = [
 ];
 
 /**
- * Packages whose `vitest.stryker.config.mjs` names test files outright instead of
- * globbing them. Each entry needs a reason, and the reason has to be about the
- * runner rather than about convenience — an allowlist silently caps which mutants
- * can be killed (#1982).
+ * Packages whose `vitest.stryker.config.mjs` runs fewer than all of the package's
+ * test files. Each entry needs a reason, and the reason has to be about the runner
+ * rather than about convenience — a narrowed run silently caps which mutants can
+ * be killed (#1982).
  *
- * `ui` runs six of its test files under jsdom with Solid / Vue / Lit / Qwik /
- * Angular adapters, each needing its own resolve conditions and inlined deps. Its
- * baseline records 54 no-coverage of 190 mutants, which is the same shape `dapp`
- * had at a smaller scale; whether the remaining files can join is #1986, not a
+ * `orm` excludes its two live-container test files, which start a real MySQL and
+ * Postgres in `beforeAll`. Per-test coverage made every mutant they cover pay a
+ * container startup, and on the slice they alone cover they killed 1 of 15 mutants
+ * in 3m19s with 6 timeouts. The exclusion is measured, not assumed (#1981).
+ *
+ * `ui` names six of its test files, running them under jsdom with Solid / Vue /
+ * Lit / Qwik / Angular adapters, each needing its own resolve conditions and
+ * inlined deps. Its baseline records 54 no-coverage of 190 mutants, the same shape
+ * `dapp` had at a smaller scale; whether the rest can join is #1986, not a
  * judgement this list makes.
  */
-const RUNNER_ALLOWLIST: readonly string[] = ['ui'];
+const RUNNER_ALLOWLIST: readonly string[] = ['orm', 'ui'];
 
 const UNSCORED_ALLOWLIST: readonly string[] = [
   // (empty — every package that runs mutation testing is scored by the gate)
@@ -537,26 +542,47 @@ describe('every package that runs mutation testing is scored', () => {
     // exact string rather than "contains a `*`" is deliberate: a narrow glob
     // (`anvil-*.test.js`) caps coverage exactly like naming files does, and a
     // predicate that only rejects star-free entries would wave it through.
-    // Anything else has to justify itself in RUNNER_ALLOWLIST.
     const CANONICAL_INCLUDE = '.vitest-dist/tests/**/*.test.js';
 
-    const includesSomethingElse = (pkg: string): boolean => {
+    // `exclude` narrows the same set from the other side, so reading `include`
+    // alone leaves the hole open — a canonical glob plus
+    // `exclude: ['**/rpc-handlers*.test.js']` runs fewer tests and would have
+    // passed. Measured on this PR before the check covered it.
+    //
+    // One exclude entry is not a narrowing. `.stryker-tmp` holds sandbox copies
+    // of the very tests being run, so excluding it removes duplicates of the
+    // suite rather than members of it (#1984). Everything else has to justify
+    // itself in RUNNER_ALLOWLIST.
+    const BENIGN_EXCLUDE = '**/.stryker-tmp/**';
+
+    const arrayEntries = (source: string, key: string): string[] | null => {
+      const block = new RegExp(`${key}:\\s*\\[([^\\]]*)\\]`).exec(source);
+      if (block?.[1] === undefined) return null;
+      return [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1] ?? '');
+    };
+
+    const narrowsTheRun = (pkg: string): boolean => {
       const source = readFileSync(
         resolve(REPO_ROOT, 'packages', pkg, 'vitest.stryker.config.mjs'),
         'utf8',
       );
-      const block = /include:\s*\[([^\]]*)\]/.exec(source);
+      const include = arrayEntries(source, 'include');
       // No `include` at all means vitest's own default, which is not narrowed.
-      if (block?.[1] === undefined) return false;
-      const entries = [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((m) => m[1] ?? '');
-      return entries.length !== 1 || entries[0] !== CANONICAL_INCLUDE;
+      if (include !== null && (include.length !== 1 || include[0] !== CANONICAL_INCLUDE)) {
+        return true;
+      }
+      const exclude = arrayEntries(source, 'exclude');
+      if (exclude === null) return false;
+      return exclude.some((entry) => entry !== BENIGN_EXCLUDE);
     };
 
     expect(
-      configs.filter(includesSomethingElse),
-      'A `vitest.stryker.config.mjs` that narrows `include` hides mutants as no-coverage without ' +
-        'marking anything excluded (#1982) — whether it names files outright or globs a subset. ' +
-        `Use exactly ['${CANONICAL_INCLUDE}'], or add the package to RUNNER_ALLOWLIST with its reason.`,
+      configs.filter(narrowsTheRun),
+      'A `vitest.stryker.config.mjs` that narrows which tests run hides mutants as no-coverage ' +
+        'without marking anything excluded (#1982). That covers naming files in `include`, globbing ' +
+        'a subset, and dropping files with `exclude`. Use exactly ' +
+        `include: ['${CANONICAL_INCLUDE}'] and no exclude beyond '${BENIGN_EXCLUDE}', or add the ` +
+        'package to RUNNER_ALLOWLIST with its reason.',
     ).toEqual([...RUNNER_ALLOWLIST].sort());
   });
 

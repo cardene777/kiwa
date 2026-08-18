@@ -368,6 +368,13 @@ which names six of its test files and records 54 no-coverage of 190 mutants — 
 smaller scale. Whether its remaining files can join the run is #1986; the check holds it as a
 recorded exception with that reason, so the exception cannot go quiet.
 
+It found a second one on the round after, and that one was in this PR. `exclude` narrows the same
+set from the other side, so a check reading `include` alone passes a canonical glob paired with
+`exclude: ['**/rpc-handlers*.test.js']` — measured, it did. Covering both sides also caught `orm`,
+whose live-container exclusion (§ A slow test can also be a weak one) is a deliberate narrowing that
+had no recorded home until now. `**/.stryker-tmp/**` is the one exclude that is not a narrowing: it
+drops sandbox copies of the suite rather than members of it (#1984).
+
 ### A slow test can also be a weak one (#1981)
 
 `orm` looked like a pure runtime problem, and the obvious reading of "exclude the slow tests" is that
