@@ -553,28 +553,31 @@ describe('every package that runs mutation testing is scored', () => {
         .map(([, index]) => index);
 
     const offenders: string[] = [];
-    for (const pkg of readdirSync(resolve(REPO_ROOT, 'packages'), { withFileTypes: true })
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .sort()) {
-      const manifestPath = resolve(REPO_ROOT, 'packages', pkg, 'package.json');
-      if (!existsSync(manifestPath)) continue;
+    for (const runner of mutationRunners()) {
+      const manifestPath = resolve(REPO_ROOT, runner.dir, 'package.json');
       // Only packages that run Stryker can accumulate its sandboxes. Requiring the
       // flag everywhere would demand it of `lean` / `perf-harness` /
       // `quality-metrics` / `skill-test`, none of which has a config or a
       // `test:mutation` script, and the failure message would be untrue for them.
       //
-      // Deriving the set from the config file rather than listing it means a
-      // package that starts running mutation testing is covered the same day.
-      if (!existsSync(resolve(REPO_ROOT, 'packages', pkg, 'stryker.config.mjs'))) continue;
+      // Reuse the runner discovery above rather than keying this check to one
+      // config spelling. It reads the same two signals that axis does — a
+      // `test:mutation` script and any supported Stryker config name — across
+      // every workspace glob, so a package that adopts either one comes under
+      // this guard on the same change.
+      //
+      // Those are signals, not an exhaustive account of how Stryker can start:
+      // it also accepts a config path as a positional argument and can run from
+      // CLI flags alone. A package driven that way is invisible here, as it is
+      // to every other axis in this file.
       const scripts = (JSON.parse(readFileSync(manifestPath, 'utf8')) as {
         scripts?: Record<string, string>;
       }).scripts;
-      for (const name of ['test', 'test:cov']) {
-        const script = scripts?.[name];
-        if (script === undefined) continue;
+      for (const [name, script] of Object.entries(scripts ?? {}).sort(([a], [b]) =>
+        a.localeCompare(b),
+      )) {
         for (const index of unprotectedInvocations(script)) {
-          offenders.push(`${pkg}:${name}#${index}`);
+          offenders.push(`${runner.dir}:${name}#${index}`);
         }
       }
     }
