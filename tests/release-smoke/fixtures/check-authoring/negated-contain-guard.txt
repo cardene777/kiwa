@@ -1,0 +1,3 @@
+const targets = list().filter((x) => x.ok);
+expect(targets).not.toContain('excluded');
+it.each(targets)('%s', () => {});

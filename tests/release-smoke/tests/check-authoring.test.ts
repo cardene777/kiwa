@@ -1,5 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 import { REPO_ROOT, read } from './skill-md.js';
@@ -30,59 +31,334 @@ function testFiles(): string[] {
 }
 
 /**
- * comment を落とした source。
+ * 判定は TypeScript parser が作る AST で行う。
  *
- * comment 内の説明文が `it.each(list)` のような形を含むと、 **説明を対象として拾う**
- * (本 file 自身の doc comment で実際に踏んだ)。 走査の前に落とす。
- *
- * 落とすのは block comment と、 行頭が `//` / `*` の行だけ。 行末の trailing comment は
- * 残す = 文字列 literal の中の `//` (URL 等) を巻き込まないため。 trailing comment に
- * `it.each(...)` を書いた場合は拾うが、 その形は実測で存在しない。
+ * 正規表現だと comment / 文字列の例示、 `.not`、 matcher の引数、 callback の実行条件を
+ * 区別できない。 いずれも「非空を確かめていないのに保証あり」と読む向きの誤判定になる。
  */
-function withoutComments(src: string): string {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .split('\n')
-    .filter((line) => {
-      const t = line.trimStart();
-      return !t.startsWith('//') && !t.startsWith('*');
-    })
-    .join('\n');
+const parsed = new Map<string, ts.SourceFile>();
+
+function parse(src: string): ts.SourceFile {
+  const cached = parsed.get(src);
+  if (cached) return cached;
+  const sourceFile = ts.createSourceFile('check-authoring-input.ts', src, ts.ScriptTarget.Latest, true);
+  parsed.set(src, sourceFile);
+  return sourceFile;
+}
+
+function unwrap(expr: ts.Expression): ts.Expression {
+  let current = expr;
+  for (;;) {
+    if (
+      ts.isParenthesizedExpression(current) ||
+      ts.isAsExpression(current) ||
+      ts.isTypeAssertionExpression(current) ||
+      ts.isNonNullExpression(current) ||
+      ts.isSatisfiesExpression(current)
+    ) {
+      current = current.expression;
+      continue;
+    }
+    return current;
+  }
+}
+
+/** 一覧そのものを名指す式が参照する識別子。 */
+function directSourceReference(expr: ts.Expression, ident?: string): ts.Identifier | null {
+  const target = unwrap(expr);
+  if (ts.isIdentifier(target)) return ident === undefined || target.text === ident ? target : null;
+  if (!ts.isCallExpression(target)) return null;
+  const callee = unwrap(target.expression);
+  if (ts.isIdentifier(callee)) return ident === undefined || callee.text === ident ? callee : null;
+  if (!ts.isPropertyAccessExpression(callee) || callee.name.text !== 'keys') return null;
+  const receiver = unwrap(callee.expression);
+  const argument = target.arguments[0];
+  if (
+    !ts.isIdentifier(receiver) ||
+    receiver.text !== 'Object' ||
+    argument === undefined ||
+    !ts.isIdentifier(unwrap(argument))
+  ) {
+    return null;
+  }
+  const reference = unwrap(argument) as ts.Identifier;
+  return ident === undefined || reference.text === ident ? reference : null;
+}
+
+/** `it.each` の引数を辿った先で名指しされる一覧。 */
+function eachSourceReference(expr: ts.Expression): ts.Identifier | null {
+  const target = unwrap(expr);
+  if (ts.isIdentifier(target)) return target;
+  if (ts.isCallExpression(target)) {
+    const callee = unwrap(target.expression);
+    if (
+      ts.isPropertyAccessExpression(callee) &&
+      callee.name.text === 'keys' &&
+      ts.isIdentifier(unwrap(callee.expression)) &&
+      (unwrap(callee.expression) as ts.Identifier).text === 'Object'
+    ) {
+      const argument = target.arguments[0];
+      return argument && ts.isIdentifier(unwrap(argument))
+        ? (unwrap(argument) as ts.Identifier)
+        : null;
+    }
+    return eachSourceReference(target.expression);
+  }
+  if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)) {
+    return eachSourceReference(target.expression);
+  }
+  return null;
+}
+
+function isEachCall(node: ts.CallExpression): boolean {
+  const callee = unwrap(node.expression);
+  if (!ts.isPropertyAccessExpression(callee) || callee.name.text !== 'each') return false;
+  const receiver = unwrap(callee.expression);
+  return ts.isIdentifier(receiver) && (receiver.text === 'it' || receiver.text === 'test');
 }
 
 /** `it.each(<ident>)` / `it.each(Object.keys(<ident>))` が名指しする識別子。 */
 function eachSources(raw: string): string[] {
-  const src = withoutComments(raw);
   const found = new Set<string>();
-  for (const m of src.matchAll(/\b(?:it|test)\.each\(\s*(Object\.keys\(\s*)?([A-Za-z_$][\w$]*)/g)) {
-    found.add(m[2]!);
-  }
+  const visit = (node: ts.Node): void => {
+    if (ts.isCallExpression(node) && isEachCall(node)) {
+      const argument = node.arguments[0];
+      if (argument) {
+        const reference = eachSourceReference(argument);
+        if (reference) found.add(reference.text);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parse(raw));
   return [...found].sort();
 }
 
-/**
- * その識別子の定義の右辺 (先頭 1 文字)。
- *
- * `const X = [` なら literal、 それ以外は実行時に導いているとみなす。 関数宣言
- * (`function X()`) は常に実行時導出。
- */
-function definitionKind(src: string, ident: string): 'literal' | 'derived' | 'unknown' {
-  if (new RegExp(`function\\s+${ident}\\s*\\(`).test(src)) return 'derived';
-  const m = new RegExp(`(?:const|let|var)\\s+${ident}\\b[^=\\n]*=\\s*([\\s\\S]{0,4})`).exec(src);
-  if (!m) return 'unknown';
-  return m[1]!.trimStart().startsWith('[') ? 'literal' : 'derived';
+function isGuaranteedNonEmptyArray(expr: ts.Expression): boolean {
+  const target = unwrap(expr);
+  return (
+    ts.isArrayLiteralExpression(target) &&
+    target.elements.some((element) => !ts.isSpreadElement(element))
+  );
 }
 
-/** その識別子の非空を主張している行があるか。 */
-function hasNonEmptyGuard(src: string, ident: string): boolean {
-  // `expect(X.length).toBeGreaterThan(0)` / `expect(X).toContain(...)` /
-  // `expect(Object.keys(X).length).toBeGreaterThanOrEqual(N)` を受ける。
-  // **名指しを要求する** = 別名の局所変数に代入してから確かめると、 ここから見えない。
-  const pattern = new RegExp(
-    `expect\\(\\s*(?:Object\\.keys\\(\\s*)?${ident}\\b[\\s\\S]{0,80}?\\)[\\s\\S]{0,120}?` +
-      `(toBeGreaterThan|toBeGreaterThanOrEqual|toContain|toHaveLength)`,
+type SourceDefinition = {
+  node: ts.FunctionDeclaration | ts.VariableDeclaration;
+  kind: 'literal' | 'derived';
+  scope: ts.Node;
+};
+
+function isScope(node: ts.Node): boolean {
+  return (
+    ts.isSourceFile(node) ||
+    ts.isBlock(node) ||
+    ts.isCaseBlock(node) ||
+    ts.isForStatement(node) ||
+    ts.isForOfStatement(node) ||
+    ts.isForInStatement(node) ||
+    ts.isCatchClause(node)
   );
-  return pattern.test(src);
+}
+
+function enclosingScope(node: ts.Node): ts.Node {
+  let current = node.parent;
+  while (current && !isScope(current)) current = current.parent;
+  return current ?? node.getSourceFile();
+}
+
+function declarationScope(node: ts.FunctionDeclaration | ts.VariableDeclaration): ts.Node {
+  if (
+    ts.isVariableDeclaration(node) &&
+    ts.isVariableDeclarationList(node.parent) &&
+    (node.parent.flags & ts.NodeFlags.BlockScoped) === 0
+  ) {
+    let current: ts.Node | undefined = node.parent;
+    while (current) {
+      if (ts.isSourceFile(current)) return current;
+      if (ts.isFunctionLike(current)) {
+        const body = (current as ts.FunctionLikeDeclarationBase & { body?: ts.ConciseBody }).body;
+        if (body && ts.isBlock(body)) return body;
+      }
+      current = current.parent;
+    }
+  }
+  return enclosingScope(node);
+}
+
+function allDefinitions(sourceFile: ts.SourceFile, ident: string): SourceDefinition[] {
+  const found: SourceDefinition[] = [];
+  const visit = (node: ts.Node): void => {
+    if (ts.isFunctionDeclaration(node) && node.name?.text === ident) {
+      found.push({ node, kind: 'derived', scope: declarationScope(node) });
+    }
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === ident) {
+      found.push({
+        node,
+        kind: node.initializer && isGuaranteedNonEmptyArray(node.initializer) ? 'literal' : 'derived',
+        scope: declarationScope(node),
+      });
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return found;
+}
+
+function scopeChain(node: ts.Node): ts.Node[] {
+  const scopes: ts.Node[] = [];
+  let current: ts.Node | undefined = node.parent;
+  while (current) {
+    if (isScope(current)) scopes.push(current);
+    current = current.parent;
+  }
+  return scopes;
+}
+
+/** 参照位置から見える同名宣言のうち、 最も内側の scope にあるもの。 */
+function resolveDefinitions(reference: ts.Identifier): SourceDefinition[] {
+  const sourceFile = reference.getSourceFile();
+  const scopes = scopeChain(reference);
+  const candidates = allDefinitions(sourceFile, reference.text)
+    .map((definition) => ({ definition, depth: scopes.indexOf(definition.scope) }))
+    .filter(({ depth }) => depth >= 0);
+  if (candidates.length === 0) return [];
+  const nearest = Math.min(...candidates.map(({ depth }) => depth));
+  return candidates
+    .filter(({ depth }) => depth === nearest)
+    .map(({ definition }) => definition);
+}
+
+function eachReferences(src: string, ident: string): ts.Identifier[] {
+  const found: ts.Identifier[] = [];
+  const visit = (node: ts.Node): void => {
+    if (ts.isCallExpression(node) && isEachCall(node)) {
+      const argument = node.arguments[0];
+      const reference = argument ? eachSourceReference(argument) : null;
+      if (reference?.text === ident) found.push(reference);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parse(src));
+  return found;
+}
+
+function definitions(src: string, ident: string): SourceDefinition[] {
+  const unique = new Map<ts.Node, SourceDefinition>();
+  for (const reference of eachReferences(src, ident)) {
+    for (const definition of resolveDefinitions(reference)) unique.set(definition.node, definition);
+  }
+  return [...unique.values()];
+}
+
+/** 静的に 1 要素以上を持つ配列 literal だけを literal とみなす。 */
+function definitionKind(src: string, ident: string): 'literal' | 'derived' | 'unknown' {
+  const kinds = definitions(src, ident);
+  if (kinds.length === 0) return 'unknown';
+  return kinds.every(({ kind }) => kind === 'literal') ? 'literal' : 'derived';
+}
+
+function lengthSourceReference(expr: ts.Expression, ident: string): ts.Identifier | null {
+  const target = unwrap(expr);
+  if (!ts.isPropertyAccessExpression(target) || target.name.text !== 'length') return null;
+  return directSourceReference(target.expression, ident);
+}
+
+function numericValue(expr: ts.Expression): number | null {
+  const target = unwrap(expr);
+  if (ts.isNumericLiteral(target)) return Number(target.text);
+  if (
+    ts.isPrefixUnaryExpression(target) &&
+    (target.operator === ts.SyntaxKind.PlusToken || target.operator === ts.SyntaxKind.MinusToken) &&
+    ts.isNumericLiteral(target.operand)
+  ) {
+    const value = Number(target.operand.text);
+    return target.operator === ts.SyntaxKind.MinusToken ? -value : value;
+  }
+  return null;
+}
+
+/** assertion が top-level または通常の `it` / `test` callback で必ず実行されるか。 */
+function runsIndependently(node: ts.Node): boolean {
+  let current = node.parent;
+  while (current) {
+    if (ts.isArrowFunction(current) || ts.isFunctionExpression(current)) {
+      const parent = current.parent;
+      if (!ts.isCallExpression(parent) || !parent.arguments.includes(current)) return false;
+      const callee = unwrap(parent.expression);
+      return ts.isIdentifier(callee) && (callee.text === 'it' || callee.text === 'test');
+    }
+    if (ts.isFunctionDeclaration(current)) return false;
+    current = current.parent;
+  }
+  return true;
+}
+
+/** その識別子の非空を独立に主張している assertion があるか。 */
+function hasNonEmptyGuard(src: string, ident: string): boolean {
+  const expectedDefinitions = new Set(definitions(src, ident).map(({ node }) => node));
+  let found = false;
+  const visit = (node: ts.Node): void => {
+    if (found) return;
+    if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(unwrap(node.expression))) {
+      const matcherAccess = unwrap(node.expression) as ts.PropertyAccessExpression;
+      const matcher = matcherAccess.name.text;
+      let chain = unwrap(matcherAccess.expression);
+      let negated = false;
+      if (ts.isPropertyAccessExpression(chain) && chain.name.text === 'not') {
+        negated = true;
+        chain = unwrap(chain.expression);
+      }
+      if (
+        ts.isCallExpression(chain) &&
+        ts.isIdentifier(unwrap(chain.expression)) &&
+        (unwrap(chain.expression) as ts.Identifier).text === 'expect' &&
+        chain.arguments.length >= 1 &&
+        runsIndependently(node)
+      ) {
+        const subject = chain.arguments[0];
+        const argument = node.arguments[0];
+        if (subject && argument) {
+          const value = numericValue(argument);
+          const direct = directSourceReference(subject, ident);
+          const length = lengthSourceReference(subject, ident);
+          const reference = direct ?? length;
+          const sameBinding =
+            reference !== null &&
+            (expectedDefinitions.size === 0 ||
+              resolveDefinitions(reference).some(({ node: definition }) =>
+                expectedDefinitions.has(definition),
+              ));
+          found =
+            sameBinding &&
+            ((!negated && matcher === 'toContain' && direct !== null) ||
+              (!negated &&
+                matcher === 'toHaveLength' &&
+                direct !== null &&
+                value !== null &&
+                value > 0) ||
+              (!negated &&
+                matcher === 'toBeGreaterThan' &&
+                length !== null &&
+                value !== null &&
+                value >= 0) ||
+              (!negated &&
+                matcher === 'toBeGreaterThanOrEqual' &&
+                length !== null &&
+                value !== null &&
+                value > 0) ||
+              (negated && matcher === 'toHaveLength' && direct !== null && value === 0) ||
+              (negated &&
+                matcher === 'toEqual' &&
+                direct !== null &&
+                ts.isArrayLiteralExpression(unwrap(argument)) &&
+                (unwrap(argument) as ts.ArrayLiteralExpression).elements.length === 0));
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(parse(src));
+  return found;
 }
 
 /**
@@ -92,12 +368,10 @@ function hasNonEmptyGuard(src: string, ident: string): boolean {
  * 名前を分けさせる (実測で `test-taxonomy-existence.test.ts` が `target` を 2 つ持っていた)。
  */
 function shadowedSources(raw: string): string[] {
-  const src = withoutComments(raw);
   return eachSources(raw).filter((ident) => {
     // literal は書いた時点で件数が決まっており、 名前が重なっても 0 件にならない。
     if (definitionKind(raw, ident) === 'literal') return false;
-    const defs = src.match(new RegExp(`(?:const|let|var)\\s+${ident}\\b\\s*(?::[^=]*)?=`, 'g'));
-    return (defs?.length ?? 0) > 1;
+    return definitions(raw, ident).length > 1;
   });
 }
 
@@ -135,8 +409,16 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
   }
 
   it('literal の一覧を対象にしない', () => {
-    // 誤検出すると、 空になり得ない一覧にまで保証を書かせることになり検査が形骸化する。
+    // 直接要素を持つ literal は静的に非空。 空になり得ない一覧への保証は形骸化する。
     expect(unguardedIn('literal-list.txt')).toEqual([]);
+  });
+
+  it('空の literal を非空として扱わない', () => {
+    expect(unguardedIn('empty-literal.txt')).toEqual(['CASES']);
+  });
+
+  it('spread だけの literal を非空として扱わない', () => {
+    expect(unguardedIn('spread-only-literal.txt')).toEqual(['CASES']);
   });
 
   it('名指しの保証がある実行時導出を通す', () => {
@@ -152,6 +434,40 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     // `expect(x).toEqual([])` は x が空でも成立する。 これを保証として受けると、
     // 「空でないこと」 を 1 度も確かめないまま緑になる。
     expect(unguardedIn('toequal-guard.txt')).toEqual(['targets']);
+  });
+
+  it('0 件を許す境界値は保証として受けない', () => {
+    expect(unguardedIn('zero-bound-guard.txt')).toEqual(['targets']);
+  });
+
+  it('否定された非空 assertion は保証として受けない', () => {
+    expect(unguardedIn('negated-guard.txt')).toEqual(['targets']);
+  });
+
+  it('否定された toContain は保証として受けない', () => {
+    // `not.toContain(x)` は一覧が空でも成立する。 「含まない」 は「空でない」 を含意しない。
+    expect(unguardedIn('negated-contain-guard.txt')).toEqual(['targets']);
+  });
+
+  it('hook 内の assertion は保証として受けない', () => {
+    // 一覧が空だと test が 1 件も生成されず、 その suite の `beforeAll` も走らない。
+    // callback の呼び先を問わないと、 走らない hook の assertion を数えることになる。
+    expect(unguardedIn('hook-scoped-guard.txt')).toEqual(['targets']);
+  });
+
+  it('呼ばれるとは限らない関数内の assertion は保証として受けない', () => {
+    // 宣言しただけの関数は実行されるとは限らない。 実行位置まで見ないと、 書いてあるだけの
+    // assertion を保証として数えることになる。
+    expect(unguardedIn('function-scoped-guard.txt')).toEqual(['targets']);
+  });
+
+  it('it.each 自身の callback 内だけにある assertion は保証として受けない', () => {
+    // 一覧が空なら callback 自体が 1 度も走らないため、 独立した保証にならない。
+    expect(unguardedIn('self-guarded.txt')).toEqual(['targets']);
+  });
+
+  it('文字列内の assertion 例を保証として受けない', () => {
+    expect(unguardedIn('string-guard.txt')).toEqual(['targets']);
   });
 
   it('comment 内の言及を対象にしない', () => {

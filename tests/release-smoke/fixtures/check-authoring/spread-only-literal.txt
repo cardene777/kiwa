@@ -1,0 +1,2 @@
+const CASES = [...list()];
+it.each(CASES)('%s', () => {});

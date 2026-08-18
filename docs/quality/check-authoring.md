@@ -30,8 +30,12 @@ const literal = section.split('\n').filter((line) => line.startsWith('|')).lengt
 expect(rows.length).toBe(literal);
 ```
 
-**`length` の確認は対象を名指しで書く**。 別名の局所変数に代入してから確かめると、 機械検査から
-見えない (`check-authoring.test.ts` は名前で照合する)。
+**`length` の確認は対象を名指しで、 `it.each` とは独立した test に書く**。 別名の局所変数に
+代入した確認や、 一覧が空なら実行されない `it.each` 自身の callback 内の確認は、 保証として
+扱わない (`check-authoring.test.ts` は AST で対象と実行位置を照合する)。
+
+直接要素を持つ配列 literal は静的に非空なので別の確認を要求しない。 `[]` と `[...derived]` は
+0 件になり得るため、 実行時導出の一覧と同じく非空を確かめる。
 
 ### 形 2 — 集合を畳むと片側の欠落が消える
 
