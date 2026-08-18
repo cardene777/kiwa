@@ -1071,30 +1071,20 @@ describe('perf gate coverage の検査自体 (#1708)', () => {
  * Each entry states something about what the package is. "Not written yet" is
  * not a reason — a package in that state belongs in an Issue, not here.
  */
-const PERF_EXEMPT: readonly string[] = [
-  // The harness itself. It provides the p10/p50/p95/p99 measurement, the
-  // bootstrap-CI regression detection, and the baseline persistence that the
-  // other 23 packages' perf suites run on. Measuring it with itself is circular.
-  'packages/perf-harness',
-  // A Lean 4 spec generator. It compiles a transition table into an inductive
-  // type and a total dispatch function, and the deliverable is that Lean's
-  // exhaustiveness checker accepts them — `verifyLeanSpec` runs the real
-  // toolchain. What it produces is a proof obligation, not a runtime path with a
-  // latency to cap.
-  'packages/lean',
-  // Skill-firing assertions: one source file exposing four `assert*` helpers
-  // over the `ToolCallRecord[]` a tool spy collected. There is no work of its
-  // own to time.
-  'packages/skill-test',
-];
+const PERF_EXEMPT: Readonly<Record<string, string>> = {
+  'packages/perf-harness':
+    'Provides the measurement, regression detection, and baseline persistence used by every other perf suite; measuring it with itself is circular.',
+  'packages/lean':
+    'Generates Lean proof obligations whose relevant result is acceptance by the real Lean toolchain, not runtime latency.',
+  'packages/skill-test':
+    'Exposes assertions over ToolCallRecord values collected by a tool spy and performs no independent work to measure.',
+};
 
 describe('perf suite absence is recorded (#1993)', () => {
   it('lists every package without a perf suite, with a reason', () => {
-    // Reuse `perfTestFiles()` rather than globbing for `*.perf.ts` here. Both
-    // extensions are in use — `ui` writes `.perf.tsx` because its suites render
-    // React — and a check that looked for one of them would report `ui` as
-    // having no perf suite. That is not hypothetical: this Issue's own survey
-    // made exactly that mistake and undercounted by one.
+    // A source file alone does not make a suite runnable: the root perf command
+    // uses `--if-present`, so removing a package's `test:perf` script silently
+    // skips it. Require both the source and the package-level execution wiring.
     const withPerf = new Set(
       perfTestFiles().map((file) => {
         const rel = file.slice(REPO_ROOT.length + 1);
@@ -1109,12 +1099,24 @@ describe('perf suite absence is recorded (#1993)', () => {
       .filter((dir) => existsSync(join(REPO_ROOT, dir, 'package.json')))
       .sort();
 
+    const withoutRunnablePerf = packages.filter((dir) => {
+      const manifest = JSON.parse(readFileSync(join(REPO_ROOT, dir, 'package.json'), 'utf8')) as {
+        scripts?: Record<string, unknown>;
+      };
+      return !withPerf.has(dir) || typeof manifest.scripts?.['test:perf'] !== 'string';
+    });
+
     expect(
-      packages.filter((dir) => !withPerf.has(dir)),
+      Object.values(PERF_EXEMPT).every((reason) => reason.trim().length > 0),
+      'Every PERF_EXEMPT entry must carry a non-empty reason.',
+    ).toBe(true);
+
+    expect(
+      withoutRunnablePerf,
       'A package with no perf suite has to say why in PERF_EXEMPT. Leaving it off makes ' +
         '"deliberately unmeasured" and "nobody wrote one" the same state, which is how ' +
         '#1982 and #1986 kept their exclusions for as long as they did. Add the package ' +
         'with a reason about what it is, or give it a perf suite.',
-    ).toEqual([...PERF_EXEMPT].sort());
+    ).toEqual(Object.keys(PERF_EXEMPT).sort());
   });
 });
