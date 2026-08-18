@@ -1,0 +1,2 @@
+const CASES: string[] = [];
+it.each(CASES)('%s', () => {});

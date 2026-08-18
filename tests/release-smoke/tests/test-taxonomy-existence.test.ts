@@ -65,9 +65,15 @@ const packages = listPackages();
 
 describe('Q1 test taxonomy meta lint', () => {
   describe('perf test (全 lib 必須、 fail on missing)', () => {
-    const target = packages.filter((pkg) => !config.requirePerf.exempt.includes(pkg));
+    const perfTarget = packages.filter((pkg) => !config.requirePerf.exempt.includes(pkg));
 
-    it.each(target)('%s に tests/perf/*.perf.ts が存在する', (pkg) => {
+    // 対象が空だと下の `it.each` が 1 件も走らずに緑になる
+    // (docs/quality/check-authoring.md § 形 1)。
+    it('対象 package が 1 件以上ある', () => {
+      expect(perfTarget.length).toBeGreaterThan(0);
+    });
+
+    it.each(perfTarget)('%s に tests/perf/*.perf.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'perf', '.perf.ts');
       if (!has) {
         throw new Error(
@@ -79,9 +85,15 @@ describe('Q1 test taxonomy meta lint', () => {
   });
 
   describe('fidelity test (mock 提供 lib のみ、 phase 2 = fail)', () => {
-    const target = config.requireFidelity.mockAdapterLibs.filter((pkg) => packages.includes(pkg));
+    const fidelityTarget = config.requireFidelity.mockAdapterLibs.filter((pkg) =>
+      packages.includes(pkg),
+    );
 
-    it.each(target)('%s に tests/fidelity/*.fidelity.test.ts が存在する', (pkg) => {
+    it('対象 package が 1 件以上ある', () => {
+      expect(fidelityTarget.length).toBeGreaterThan(0);
+    });
+
+    it.each(fidelityTarget)('%s に tests/fidelity/*.fidelity.test.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'fidelity', '.fidelity.test.ts');
       if (!has) {
         throw new Error(
@@ -93,9 +105,13 @@ describe('Q1 test taxonomy meta lint', () => {
   });
 
   describe('skill test (skill 実装 lib のみ、 phase 2 = fail)', () => {
-    const target = config.requireSkill.skillLibs.filter((pkg) => packages.includes(pkg));
+    const skillTarget = config.requireSkill.skillLibs.filter((pkg) => packages.includes(pkg));
 
-    it.each(target)('%s に tests/skill/*.skill.test.ts が存在する', (pkg) => {
+    it('対象 package が 1 件以上ある', () => {
+      expect(skillTarget.length).toBeGreaterThan(0);
+    });
+
+    it.each(skillTarget)('%s に tests/skill/*.skill.test.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'skill', '.skill.test.ts');
       if (!has) {
         throw new Error(
@@ -107,9 +123,15 @@ describe('Q1 test taxonomy meta lint', () => {
   });
 
   describe('integration test (依存 lib のみ、 phase 2 = fail)', () => {
-    const target = config.requireIntegration.integrationLibs.filter((pkg) => packages.includes(pkg));
+    const integrationTarget = config.requireIntegration.integrationLibs.filter((pkg) =>
+      packages.includes(pkg),
+    );
 
-    it.each(target)('%s に tests/integration/*.integration.test.ts が存在する', (pkg) => {
+    it('対象 package が 1 件以上ある', () => {
+      expect(integrationTarget.length).toBeGreaterThan(0);
+    });
+
+    it.each(integrationTarget)('%s に tests/integration/*.integration.test.ts が存在する', (pkg) => {
       const has = hasDirWithPattern(pkg, 'integration', '.integration.test.ts');
       if (!has) {
         throw new Error(
