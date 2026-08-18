@@ -3,8 +3,8 @@
 Layer 1 (`/kiwa-design`) が仕様書に書く `## 既存 test との対応` を、 Layer 2 skill が読む時の契約。
 `docs/layers.json` の `consumer_skill` と `also_consumed_by` に現れる skill が全て本 file に従う。
 
-本 file が SSOT で、 各 SKILL.md は `## 既存 test の再利用` から 1 行で参照する。
-契約を各 skill に複製しない = 16 file に同じ規約を書くと、 1 つ直した時に 15 が取り残される。
+本 file が SSOT で、 各 SKILL.md は `## 既存 test の再利用` に実行時必須の要約と本 file への参照を書く。
+詳細な判定表と追記先の規約は各 skill に複製しない = 16 file に同じ詳細を書くと、 1 つ直した時に 15 が取り残される。
 
 ## 1. 判定の読み方
 

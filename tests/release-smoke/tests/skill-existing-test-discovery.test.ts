@@ -713,6 +713,9 @@ describe('Layer 2 skill が既存 test の判定を読む', () => {
     // 対象を絞る規約と、 既存 test を壊さない規約は各 skill の本文にも要る
     // (reference を読まずに動く経路が残るため)。
     expect(section, `${skill} が対象の絞り方を書いていない`).toContain('`未覆` / `不明` の TC だけ');
+    expect(section, `${skill} が候補 test の入力と期待を確認していない`).toContain(
+      'TC の入力と期待を実際に走らせているか',
+    );
     expect(section, `${skill} が既存 test の保護を書いていない`).toContain(
       '既存 test の削除と期待値の書き換えは行わない',
     );
