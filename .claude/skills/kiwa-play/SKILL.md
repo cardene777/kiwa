@@ -353,6 +353,17 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 - `examples/multi-chain.ts` — startAnvilCluster + chain 切替雛形
 - `examples/custom-error-revert.ts` — expectCustomError パターン
 
+## 既存 test の再利用
+
+Layer 1 (`/kiwa-design`) が仕様書に書く `## 既存 test との対応` を読み、 **`未覆` / `不明` の TC だけ** を書く。
+`既覆 (候補)` の TC は候補として挙がった test を Read し、 TC の入力と期待を実際に走らせているかを確かめてから決める (名前の一致は中身の一致を意味しない)。
+section を持たない仕様書は全 TC を `不明` として扱う。
+
+既存 test file があればそこに追記し、 無ければ本 skill の既定出力先へ新規 Write する。
+**既存 test の削除と期待値の書き換えは行わない**。
+
+判定の読み方 / 追記先の決め方 / 禁止事項の全文は `.claude/skills/kiwa-design/references/existing-test-reuse.md` を Read する。
+
 ## 関連 link
 
 - リポジトリ: https://github.com/cardene777/kiwa
