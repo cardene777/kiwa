@@ -6,7 +6,7 @@ exit code / stdout / stderr / temp dir 副作用を表現する。
 - module: kiwa-cli
 - layer: cli
 
-## テストケース
+## テストケース一覧
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Topic |
 |---|---|---|---|---|---|---|---|---|

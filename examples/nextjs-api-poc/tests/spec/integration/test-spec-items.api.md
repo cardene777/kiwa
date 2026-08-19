@@ -5,7 +5,7 @@
 - module: items
 - layer: api
 
-## テストケース
+## テストケース一覧
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
