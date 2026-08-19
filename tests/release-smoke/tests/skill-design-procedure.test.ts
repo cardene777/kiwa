@@ -148,11 +148,22 @@ describe('Step 1.5 の grep が起点を持つ', () => {
   it('手順の grep を repo root から実行してヒットする', () => {
     // 実行して確かめる。 「$PKG_DIR と書いてあるか」 だけでは、 値が空でも通る。
     const body = fence();
-    const setup = body.split('\n').find((l) => l.startsWith('PKG_DIR='));
-    const grepLine = body.split('\n').find((l) => l.startsWith('grep -rn "data-testid"'));
-    expect(setup, 'PKG_DIR の代入行が無い').toBeTruthy();
+    const lines = body.split('\n');
+    const grepIndex = lines.findIndex((l) => l.startsWith('grep -rn "data-testid"'));
+    const grepLine = lines[grepIndex];
+    const setup = lines.slice(0, grepIndex).join('\n');
+    expect(setup, 'PKG_DIR と探索 dir の代入が無い').toContain('PKG_DIR=');
     expect(grepLine, 'data-testid の grep 行が無い').toBeTruthy();
     expect(hits(`${setup}\n${grepLine}`), '手順どおり実行して 0 hit').toBeGreaterThan(0);
+    // 対象 example は app/ だけを持つ。 存在しない src/components/ も grep に渡すと、
+    // hit を出力しながら exit 2 になるため、 出力件数だけでは回帰を検出できない。
+    expect(() =>
+      execFileSync('bash', ['-c', `${setup}\n${grepLine}`], {
+        cwd: REPO_ROOT,
+        encoding: 'utf-8',
+        stdio: 'pipe',
+      }),
+    ).not.toThrow();
   });
 
   it('起点を外すと 0 hit になる (穴の再現)', () => {

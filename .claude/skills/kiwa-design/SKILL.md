@@ -297,23 +297,30 @@ repo root で `app/` を裸で渡すと **0 hit になる** (実測)。 repo roo
 
 ```bash
 PKG_DIR=examples/nextjs-app-router-full   # 対象 package を確定させてから実行する
+UI_DIRS=()
+for dir in "$PKG_DIR/app" "$PKG_DIR/src/components"; do
+  [ -d "$dir" ] && UI_DIRS+=("$dir")
+done
+[ "${#UI_DIRS[@]}" -gt 0 ] || { echo "UI dir が無い: $PKG_DIR" >&2; exit 1; }
 
 # testid / data-testid を全件列挙 (単引用 / 変数埋め込みも拾うため = の右を丸ごと出す)
-grep -rn "data-testid" "$PKG_DIR/app" "$PKG_DIR/src/components" 2>/dev/null
+grep -rn "data-testid" "${UI_DIRS[@]}"
 
 # button element の state (disabled / loading) を持つ箇所
-grep -rn -E "disabled=|isLoading|isPending" "$PKG_DIR/app" "$PKG_DIR/src/components" 2>/dev/null
+grep -rn -E "disabled=|isLoading|isPending" "${UI_DIRS[@]}"
 
 # form input の name / placeholder
-grep -rn -E "name=\"[a-zA-Z]+\"|placeholder=\"" "$PKG_DIR/app" "$PKG_DIR/src/components" 2>/dev/null
+grep -rn -E "name=\"[a-zA-Z]+\"|placeholder=\"" "${UI_DIRS[@]}"
 
 # error display (onError / catch 経由の表示)
-grep -rn -E "onError|catch|error\." "$PKG_DIR/app" "$PKG_DIR/src/components" 2>/dev/null | head -20
+grep -rn -E "onError|catch|error\." "${UI_DIRS[@]}" | head -20
 ```
 
 `$PKG_DIR` の 2 dir はどちらか一方しか無い package が多い (実測で `app/` と
-`src/components/` の両方を持つ example は 0 件)。 片方が無いことは異常ではないので
-`2>/dev/null` で落とすが、 **両方とも 0 hit の時は `$PKG_DIR` の確定を疑う**。
+`src/components/` の両方を持つ example は 0 件)。 片方が無いことは異常ではないため、
+存在する dir だけを `UI_DIRS` に入れる。 存在しない path も `grep` に渡すと、 一致を出力しても
+exit 2 になる。 **2 dir とも無い時はその場で止め、 4 scan 全てが 0 hit の時は `$PKG_DIR` の
+確定を疑う**。
 
 `data-testid` の抽出で `awk -F'"' '{print $2}'` に通さない。 単引用や
 `data-testid={id}` の形が空文字に潰れ、 **拾えたのに空行として転記される** (実測で
@@ -862,7 +869,7 @@ path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec �
 
 ## 完了条件
 
-- 出力 path (`kiwa layers` が返した `spec_path`、 `--layer all` のみ `tests/spec/test-spec-{module}.md`) が 9 section 全て揃って Write 済 (空 section は `(なし)`)
+- 出力 path (`kiwa layers` が返した `spec_path`、 `--layer all` のみ `tests/spec/test-spec-{module}{lang}.md`) が 9 section 全て揃って Write 済 (空 section は `(なし)`)
 - 「テストケース一覧」が 1 ケース 1 行で観点別グループ化されている
 - 優先度判定が Step 5 のロジック (リスク 5 基準) と整合している
 - 「不足している仕様」が空でなければ追加ヒアリングが必要な旨を末尾で報告

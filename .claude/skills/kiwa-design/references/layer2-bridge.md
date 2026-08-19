@@ -44,16 +44,17 @@ Layer 2 skill は `tests/spec/test-spec-{module}.md` の以下を機械的に抽
 
 **列の名前は layer で変わる**。 上の並びは汎用形で、 `SKILL.md` に `#### {layer} layer 専用 column`
 節を持つ layer はそちらが優先される (`--layer api` は `Mode` / `Route` を持つ等)。
-列数 9 と `## テストケース一覧` の anchor はどの layer でも変わらない。
+ID prefix も layer ごとに異なる (`TC-` / `T-UI-` / `T-API-` 等)。 列数 9 と
+`## テストケース一覧` の anchor はどの layer でも変わらない。
 
 Layer 1 skill は本 contract を維持するため、 以下を絶対変更しない (`references/output-skeleton.md` § placeholder 規約 と整合)。
 
 | 変更禁止 | 理由 |
 |---|---|
 | `## テストケース一覧` 文字列 | Layer 2 parser の anchor |
-| 9 column の名前 / 順序 | parser が column index で読む |
+| 選択した layer 用 9 column の名前 / 順序 | parser が column index で読む |
 | 3 列目 `テスト観点` の存在 | section ヘッダで暗黙的に分かるが行単位でも明示 |
-| `TC-XXX` の prefix `TC-` | Layer 2 が TC ID を関数名に変換 |
+| 選択した layer 用 ID prefix | Layer 2 が TC ID を関数名に変換 |
 
 ## 観点 → ランナー特化 helper のマッピング
 
