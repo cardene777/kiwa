@@ -202,6 +202,24 @@ expect(flag, '抽出が -E を付けていない').toContain('E');
 3 手目を飛ばすと候補の数だけ全 suite を回すことになり、 かつ結果が読めない = 検査が 1 件も
 無い候補は必ず生存するため、 「照合が足りない」 と「そもそも見ていない」 が同じ結果になる。
 
+##### 検査を書かないと決めた対象
+
+棚卸しで出た「検査が 1 件も無い」 21 件のうち、 他に検査を持つ skill の 6 件を 1 件ずつ
+判定した。 **落として実害が出るかで決める**。 数や見た目では決めない。
+
+| 起動形 | 落とすと起きること | 判断 |
+|---|---|---|
+| `kiwa init --detect` (`/kiwa-app`) | `--detect` 無しは **scaffold** する = 「`.kiwa/stack.json` だけ書く」 と宣言した Step が利用者 project に書き込む | 検査を書く |
+| `forge coverage --report lcov` (`/kiwa-forge`) | 既定は `summary` なので `.lcov` に表が入り、 file 名は正しいまま中身だけ別物になる | 検査を書く |
+| `pnpm add --save-dev` (`/kiwa-hardhat`) | 利用者 project の `dependencies` に test 専用 dep が入る | 検査を書く |
+| `forge coverage --report summary` (`/kiwa-forge` の 2 行目) | **何も起きない** = 既定が `summary` なので出力が同じ (等価変異) | 書かない |
+| `--reporter=list,json:test-results.json` (`/kiwa-e2e`) | 書かれた JSON を読む consumer が repo に 1 件も無い (grep で確認)。 解析は stdout で成立する | 書かない |
+| `forge --version` / `node --version` (`/kiwa-test`) | 環境確認の出力が変わるだけで、 後段の判定に使っていない | 書かない |
+
+**「書かない」 も判断なので残す**。 残さないと、 次に数えた人が同じ 6 件を同じ手順で調べ直す。
+実害が変われば判断も変わる = `test-results.json` を読む consumer ができた時点で 5 行目は
+「検査を書く」 に動く。
+
 ## 機械で止める範囲
 
 | 形 | 機械化 | 理由 |

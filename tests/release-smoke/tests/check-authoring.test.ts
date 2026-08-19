@@ -621,6 +621,12 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     // 守らない形は、 まさに本節が扱う形になる。
     expect(doc).toContain('**その fence を読む検査があるかを先に確かめる**');
     expect(doc).toContain('検査がある候補だけ落として全 suite を回す');
+    // 「検査を書かない」 判断 3 件 (#2023)。 判断が消えると、 次に数えた人が同じ 6 件を
+    // 同じ手順で調べ直す。 3 件は独立した判断なので 1 件で代表させない。
+    expect(doc).toContain('##### 検査を書かないと決めた対象');
+    expect(doc).toContain('**何も起きない** = 既定が `summary` なので出力が同じ (等価変異)');
+    expect(doc).toContain('書かれた JSON を読む consumer が repo に 1 件も無い');
+    expect(doc).toContain('環境確認の出力が変わるだけで、 後段の判定に使っていない');
   });
 
   it('別名に代入した保証は受けない', () => {
