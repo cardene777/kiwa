@@ -33,6 +33,7 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 - `--module {name}` — spec / test の module 名キー (1 起動 = 1 module)
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
+- `--project-root {path}` — 生成先 (`{example}/...`) の起点。 `kiwa layers --project-root` にそのまま渡す (省略時は cwd)
 - `--output {path}` — 生成 test の path (省略時は `tests/integration/{module}.nextjs.test.ts`)
 
 ### mode 別の生成先
@@ -66,7 +67,8 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 | RSC streaming | `nextjs-rsc-streaming` |
 
 ```bash
-pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
+  --project-root "$PROJECT_ROOT"
 ```
 
 `$LAYER` は起動元 (`/kiwa-app` 等) が指定した mode から決まる。 **単体起動で判らない時は user に確認する**。 推測で 1 つ目を選ぶと、 別 mode の spec を読んで別 helper 向けの test を生成する。
@@ -79,6 +81,22 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 `$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
 
 `$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+`$PROJECT_ROOT` は skill 引数の `--project-root` (省略時は `.`)。 **返る `spec_path` はこれを起点にする**ため、 省くと example 配下の spec を repo root から探すことになる。
+
+#### 2 つの path は起点が違う
+
+**`spec_path` は `--project-root` 起点、 `test_paths.files` は cwd 起点**。 同じ応答の中で基準が分かれているので、 同列に「返った値を Read する」 と読むと spec だけ外す。
+
+| field | 起点 | Read する時 |
+|---|---|---|
+| `spec_path` | `--project-root` (省略時は cwd) | `$PROJECT_ROOT` を前置して開く |
+| `test_paths.patterns` / `test_paths.files` | cwd | そのまま開く |
+
+CLI 側は `spec_path` に lang と module しか差し込まず (`applyLang`)、 `test_paths` だけ `relativeTo(cwd, join(projectRoot, …))` で cwd 基準に直している。 宣言の出所が `docs/layers.json` と生成先で違うためで、 揃える先は skill ではなく CLI にあるが、 **読む側が起点を知らないまま使うと必ず外す** (`skills/kiwa-review/SKILL.md` § 2 つの path は起点が違う SSOT)。
+
+実測 (cwd = repo root、 `examples/cli-poc` の `cli` layer)。 応答は下の検証表を全行 pass するが、 そのまま `spec_path` を開くと `No such file or directory` になる。
+
 
 #### 解決に失敗したら止める
 
@@ -97,7 +115,10 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 | 同じ `id` が 2 件以上ある | どちらを使うか決められない。 中断 |
 | その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
 | `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
-| 上記いずれでもない | その `spec_path` を使う |
+| `$PROJECT_ROOT` を前置した path に file が無い | spec が未生成か `--project-root` が誤り。 **開いた path をそのまま添えて中断** |
+| 上記いずれでもない | その `spec_path` を `$PROJECT_ROOT` 起点で開く |
+
+「解決先に file が無い」 行を置くのは、 **上の全行を pass した応答でも Read が落ちる**から。 検査が「応答の形」 までで止まっていると、 起点違いも spec 未生成も同じ「spec が無い」 に潰れる。
 
 `.layers[] | select(.id == "<layer>")` で先に絞ってから、 取れた 1 件を見る。
 
