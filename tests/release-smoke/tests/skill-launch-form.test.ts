@@ -98,12 +98,6 @@ function unwrapExpression(node: ts.Expression): ts.Expression {
   return node;
 }
 
-function identifierName(node: ts.Expression | undefined): string | undefined {
-  if (!node) return undefined;
-  const expression = unwrapExpression(node);
-  return ts.isIdentifier(expression) ? expression.text : undefined;
-}
-
 /**
  * `layersCommand` が空白区切りで受け取る option の集合。
  *
@@ -114,27 +108,48 @@ function identifierName(node: ts.Expression | undefined): string | undefined {
 function cliAcceptedOptions(script = read('packages/cli/src/runCli.ts')): Set<string> {
   const file = 'packages/cli/src/runCli.ts';
   const source = ts.createSourceFile(file, script, ts.ScriptTarget.Latest, true);
+  const compilerOptions: ts.CompilerOptions = { noLib: true, noResolve: true };
+  const host = ts.createCompilerHost(compilerOptions);
+  host.fileExists = (candidate) => candidate === file;
+  host.readFile = (candidate) => (candidate === file ? script : undefined);
+  host.getSourceFile = (candidate) => (candidate === file ? source : undefined);
+  const checker = ts
+    .createProgram({ rootNames: [file], options: compilerOptions, host })
+    .getTypeChecker();
   const accepted = new Set<string>();
   const command = source.statements.find(
     (node): node is ts.FunctionDeclaration =>
       ts.isFunctionDeclaration(node) && node.name?.text === 'layersCommand',
   );
   if (!command?.body) return accepted;
-  const argsName =
+  const argsSymbol =
     command.parameters[0] && ts.isIdentifier(command.parameters[0].name)
-      ? command.parameters[0].name.text
+      ? checker.getSymbolAtLocation(command.parameters[0].name)
       : undefined;
-  if (!argsName) return accepted;
+  if (!argsSymbol) return accepted;
 
-  const argumentTokens = new Set<string>();
+  const identifierSymbol = (node: ts.Expression | undefined): ts.Symbol | undefined => {
+    if (!node) return undefined;
+    const expression = unwrapExpression(node);
+    return ts.isIdentifier(expression) ? checker.getSymbolAtLocation(expression) : undefined;
+  };
+
+  const argumentTokens = new Set<ts.Symbol>();
   const collectArgumentTokens = (node: ts.Node): void => {
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isVariableDeclarationList(node.parent) &&
+      (node.parent.flags & ts.NodeFlags.Const) !== 0 &&
+      ts.isIdentifier(node.name) &&
+      node.initializer
+    ) {
       const initializer = unwrapExpression(node.initializer);
       if (
         ts.isElementAccessExpression(initializer) &&
-        identifierName(initializer.expression) === argsName
+        identifierSymbol(initializer.expression) === argsSymbol
       ) {
-        argumentTokens.add(node.name.text);
+        const symbol = checker.getSymbolAtLocation(node.name);
+        if (symbol) argumentTokens.add(symbol);
       }
     }
     ts.forEachChild(node, collectArgumentTokens);
@@ -142,11 +157,11 @@ function cliAcceptedOptions(script = read('packages/cli/src/runCli.ts')): Set<st
   collectArgumentTokens(command.body);
 
   const isArgumentToken = (node: ts.Expression): boolean => {
-    const name = identifierName(node);
-    if (name && argumentTokens.has(name)) return true;
+    const symbol = identifierSymbol(node);
+    if (symbol && argumentTokens.has(symbol)) return true;
     node = unwrapExpression(node);
     return (
-      ts.isElementAccessExpression(node) && identifierName(node.expression) === argsName
+      ts.isElementAccessExpression(node) && identifierSymbol(node.expression) === argsSymbol
     );
   };
 
@@ -170,11 +185,11 @@ function cliAcceptedOptions(script = read('packages/cli/src/runCli.ts')): Set<st
       const flag =
         ts.isPropertyAccessExpression(callee) &&
         callee.name.text === 'includes' &&
-        identifierName(callee.expression) === argsName
+        identifierSymbol(callee.expression) === argsSymbol
           ? exactOption(node.arguments[0])
           : ts.isIdentifier(callee) &&
               callee.text === 'takeFlagValue' &&
-              identifierName(node.arguments[0]) === argsName
+              identifierSymbol(node.arguments[0]) === argsSymbol
             ? exactOption(node.arguments[1])
             : undefined;
       if (flag) accepted.add(flag);
@@ -405,11 +420,18 @@ describe('skill が CLI に渡す option を CLI が受け取る', () => {
         const arg = args[0];
         const otherArgs: string[] = [];
         const marker = '--not-an-option';
+        let reassigned = args[1];
+        reassigned = marker;
         if (arg === '--json') return;
         if (args.includes('--lang')) return;
         takeFlagValue(args, '--module');
         if (arg.startsWith('--equals-only=')) return;
         if (marker === '--comparison-only') return;
+        if (reassigned === '--reassigned') return;
+        {
+          const arg = marker;
+          if (arg === '--shadowed') return;
+        }
         if (otherArgs.includes('--other-collection')) return;
         takeFlagValue(otherArgs, '--other-argv');
         throw new Error('--message-only');
