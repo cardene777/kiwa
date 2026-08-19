@@ -47,10 +47,20 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     // 中身だけが別物になる。 分類 (`references/coverage-classify.md`) は lcov の
     // `SF:` / `DA:` を読むため、 何も分類できない。
     const command = executableLines(fenceUnder('kiwa-forge', /^#### Step 5a: /m, 'bash'));
-    expect(command, 'forge coverage を呼んでいない').toContain('forge coverage');
-    expect(command, '--report lcov を渡していない').toContain('--report lcov');
-    // 出力先も併せて見る。 lcov を出しても tee 先が変われば分類は同じ場所を読めない。
-    expect(command, 'lcov の出力先が変わっている').toContain(
+    // fence には summary を出す 2 本目の `forge coverage` もある。 fence 全体で 3 要素を
+    // 別々に見ると、 `--report lcov` を 2 本目へ移しても緑になるため、 同じ実行行に束縛する。
+    const lcovCommand = command
+      .split('\n')
+      .find(
+        (line) =>
+          line.includes('forge coverage') &&
+          line.includes('tests/reports/contract/coverage-{module}.lcov'),
+      );
+    expect(lcovCommand, 'lcov の出力先へ書く forge coverage を呼んでいない').toBeDefined();
+    expect(lcovCommand, '--report lcov を同じ実行行に渡していない').toContain('--report lcov');
+    // 出力先も同じ実行行に束縛する。 lcov を出しても別の行が file を書けば、 分類は
+    // summary を読む可能性がある。
+    expect(lcovCommand, 'lcov の出力先が変わっている').toContain(
       'tests/reports/contract/coverage-{module}.lcov',
     );
   });
