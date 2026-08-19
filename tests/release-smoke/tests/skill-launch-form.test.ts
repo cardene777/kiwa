@@ -550,9 +550,19 @@ describe('/kiwa-nextjs の手順が実行できる形になっている', () => 
     const find = commandLine(fence, 'find');
     expect(find, 'Step 2 に探索 command が無い').toBeDefined();
     expect(find, '探索起点が project 全体でない').toMatch(/find\s+\.\s/);
-    expect(find, 'node_modules を除外していない').toContain('-name node_modules -prune');
+    expect(find, 'node_modules を除外していない').toContain('-name node_modules');
+    expect(find, '探索対象 directory の prune が無い').toContain('-prune');
+    expect(find, '.next の生成物を除外していない').toContain('-name .next');
+    expect(find, '候補を先頭だけで打ち切っている').not.toMatch(/\|\s*head(?:\s|$)/);
     const grep = commandLine(fence, 'grep');
     expect(grep, '抽出段が無い').toBeDefined();
+    // 生成物を候補に混ぜない。 `.next` / `dist` の生成 file は action ではない。
+    for (const generated of ['.next', 'dist']) {
+      expect(find, `${generated} を prune していない`).toContain(`-name ${generated}`);
+    }
+    // `export default async function` も Server Action の形。 落とすと既定 export の
+    // action を持つ project で 0 件になる。
+    expect(grep, 'default export の action を拾えない').toContain('default');
     // 候補は file:行番号 で出す (#2017 と同じ形)。
     for (const required of ['n', 'H', 'E']) {
       expect(grep, `抽出が -${required} を付けていない`).toMatch(
@@ -561,17 +571,35 @@ describe('/kiwa-nextjs の手順が実行できる形になっている', () => 
     }
   });
 
-  it('Step 4 が vitest の前に依存を build する', () => {
+  it('Step 4 が Kiwa checkout だけ依存を build してから vitest を起動する', () => {
     // `@kiwa-lab/nextjs` は `dist/index.js` を entry にしており、 build を飛ばすと
     // dist が無い / 古い環境で解決に失敗する。 実測で `test` script を持つ example 137 件の
     // うち 131 件が先に `build-deps.mjs` を呼ぶ。
     const lines = executableLines(fenceUnder('kiwa-nextjs', STEP_4, 'bash')).split('\n');
-    const build = lines.findIndex((line) => line.includes('build-deps.mjs'));
+    const build = lines.findIndex(
+      (line) => line.trimStart().startsWith('node ') && line.includes('build-deps.mjs'),
+    );
     const run = lines.findIndex((line) => line.includes('vitest run'));
     expect(build, 'Step 4 に依存 build の行が無い').toBeGreaterThanOrEqual(0);
     expect(run, 'Step 4 に vitest 起動の行が無い').toBeGreaterThanOrEqual(0);
     expect(run, 'build が vitest の後に来ている').toBeGreaterThan(build);
+    // build-deps.mjs は Kiwa monorepo 専用。 published package を使う利用者 project には
+    // 存在しないので、 file guard が無いと正常な consumer 経路が test 前に落ちる。
+    const guard = lines.findIndex(
+      (line) => line.includes('if ') && line.includes('-f ') && line.includes('build-deps.mjs'),
+    );
+    const close = lines.findIndex((line, index) => index > build && line.trim() === 'fi');
+    expect(guard, 'repo 専用 build script の存在確認が無い').toBeGreaterThanOrEqual(0);
+    expect(lines[guard], 'Kiwa workspace の同定が無い').toContain('packages/nextjs/package.json');
+    expect(guard, 'build が存在確認より前に来ている').toBeLessThan(build);
+    expect(close, 'build script の存在確認が閉じていない').toBeGreaterThan(build);
+    expect(run, 'vitest まで存在確認の内側に入っている').toBeGreaterThan(close);
     // 対象 package を名指しする。 引数なしの build は別 package を作らない。
     expect(lines[build], 'build 対象に @kiwa-lab/nextjs が無い').toContain('@kiwa-lab/nextjs');
+    // **利用者 project では走らせない**。 `scripts/build-deps.mjs` は kiwa monorepo 専用で、
+    // 存在確認なしに起動すると正常な consumer project を test 到達前に落とす。
+    const fence = executableLines(fenceUnder('kiwa-nextjs', STEP_4, 'bash'));
+    expect(fence, 'kiwa checkout の判定が無い').toContain('git rev-parse --show-toplevel');
+    expect(fence, 'build script の存在確認が無い').toMatch(/-f\s+"?\$KIWA_REPO_ROOT\/scripts\/build-deps\.mjs/);
   });
 });

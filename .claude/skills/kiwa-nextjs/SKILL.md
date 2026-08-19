@@ -136,16 +136,17 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 対象 Server Action の export を探す。 **path を推測せず project 全体を走査する**。
 
 ```bash
-find . -type d -name node_modules -prune -o -type f \
-  \( -name '*.ts' -o -name '*.tsx' \) -print0 |
-  xargs -0 grep -nHE "^[[:space:]]*(export[[:space:]]+async[[:space:]]+function|'use server')" |
-  head -30
+find . \
+  \( -type d \( -name node_modules -o -name .git -o -name .next -o -name dist -o -name build -o -name coverage \) -prune \) -o \
+  \( -type f \( -name '*.ts' -o -name '*.tsx' \) -print0 \) |
+  xargs -0 grep -nHE "^[[:space:]]*(export[[:space:]]+(default[[:space:]]+)?async[[:space:]]+function|['\"]use server['\"])"
 ```
 
 置き場所は project ごとに違う。 `app/actions.ts` / `lib/actions/*.ts` を挙げるだけでは
 **`src/` に置く project を 1 件も拾えない** (実測 = `examples/nextjs-server-actions-poc` の
 action は `src/login-action.ts`)。 `/kiwa-design` Step 2 と同じ走査形にして、 file:行番号 つきで
-候補を出す。
+候補を出す。 `node_modules` と生成物は候補に混ぜず、 件数で打ち切らない。先頭だけに絞ると、
+生成 file や別 action が多い project で対象 action が候補から消える。
 
 確認するのは 2 軸で、 **止める軸と seed する軸が違う**。
 
@@ -469,14 +470,24 @@ describe('signup server action', () => {
 違うので、 生成した path をそのまま渡す。
 
 ```bash
-node <repo root>/scripts/build-deps.mjs @kiwa-lab/nextjs @kiwa-lab/core
+KIWA_REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
+if [ -n "$KIWA_REPO_ROOT" ] \
+  && [ -f "$KIWA_REPO_ROOT/scripts/build-deps.mjs" ] \
+  && grep -Eq '"name"[[:space:]]*:[[:space:]]*"@kiwa-lab/nextjs"' "$KIWA_REPO_ROOT/packages/nextjs/package.json" 2>/dev/null; then
+  node "$KIWA_REPO_ROOT/scripts/build-deps.mjs" @kiwa-lab/nextjs @kiwa-lab/core
+fi
 pnpm vitest run <解決した出力先> --environment node
 ```
 
-build を飛ばすと **`dist/` が無い / 古い環境で解決に失敗する**。 `@kiwa-lab/nextjs` は
-`dist/index.js` を entry にしており、 `build-deps.mjs` の docstring も「単独で走らせる時はこれが
-要る (依存の `dist/` が古いと型定義が合わない)」 と書く。 実測で、 `test` script を持つ
-example 137 件のうち 131 件が先に `build-deps.mjs` を呼ぶ。
+Kiwa monorepo checkout 内では build を飛ばすと **`dist/` が無い / 古い環境で解決に失敗する**。
+`@kiwa-lab/nextjs` は `dist/index.js` を entry にしており、 `build-deps.mjs` の docstring も
+「単独で走らせる時はこれが要る (依存の `dist/` が古いと型定義が合わない)」 と書く。 実測で、
+`test` script を持つ example 137 件のうち 131 件が先に `build-deps.mjs` を呼ぶ。
+
+一方、 通常の利用者 project には Kiwa repo 専用の `scripts/build-deps.mjs` は無い。 published
+package は `dist/` を同梱するので、 script と `@kiwa-lab/nextjs` workspace の両方を確認できる
+Kiwa checkout だけ build し、 それ以外は install 済 package をそのまま使う。存在確認なしで
+repo 専用 script を起動すると、 test 本体へ到達する前に正常な consumer project を落とす。
 
 fail 行を spec の対応 TC ID と紐付けて report する。
 
