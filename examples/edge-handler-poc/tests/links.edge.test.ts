@@ -2,16 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   createKvNamespace,
   invokeEdgeHandler,
-  type EdgeEnvBindings,
   type EdgeFetchHandler,
   type KVNamespace,
 } from '@kiwa-lab/edge';
 
-import worker from '../src/worker.js';
+import worker, { type WorkerEnv } from '../src/worker.js';
 
 // spec = tests/spec/integration/test-spec-links.edge.md
 
-const handler = worker.fetch as unknown as EdgeFetchHandler;
+const handler: EdgeFetchHandler<WorkerEnv> = worker.fetch;
 
 /**
  * TC ごとに作り直す。 使い回すと前の TC の書込が残り、 T-EDGE-005 の計数が
@@ -22,9 +21,9 @@ const handler = worker.fetch as unknown as EdgeFetchHandler;
 function env(
   seed: Record<string, string> = {},
   apiKey?: string,
-): { bindings: EdgeEnvBindings; links: KVNamespace } {
+): { bindings: WorkerEnv; links: KVNamespace } {
   const links = createKvNamespace(seed);
-  const bindings: EdgeEnvBindings =
+  const bindings: WorkerEnv =
     apiKey === undefined ? { LINKS: links } : { LINKS: links, API_KEY: apiKey };
   return { bindings, links };
 }

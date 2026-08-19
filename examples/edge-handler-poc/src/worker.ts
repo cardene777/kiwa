@@ -8,21 +8,18 @@
  * Miniflare / workerd を起動せずに test できる。
  */
 
+import type {
+  EdgeEnvBindings,
+  KVNamespace,
+  SimulatedExecutionContext,
+} from '@kiwa-lab/edge';
+
 /** handler が期待する env binding。 */
-export interface WorkerEnv {
+export interface WorkerEnv extends EdgeEnvBindings {
   /** 短縮 URL の対応表。 test では `createKvNamespace` の mock を渡す。 */
-  readonly LINKS: {
-    get(key: string): Promise<string | null>;
-    put(key: string, value: string): Promise<void>;
-  };
+  readonly LINKS: KVNamespace;
   /** 書込 API に要る共有鍵。 */
   readonly API_KEY?: string;
-  [binding: string]: unknown;
-}
-
-interface Ctx {
-  waitUntil(promise: Promise<unknown>): void;
-  passThroughOnException(): void;
 }
 
 /** 遷移数を数える。 応答を待たせないため `waitUntil` に載せる。 */
@@ -33,7 +30,11 @@ async function recordHit(env: WorkerEnv, slug: string): Promise<void> {
 }
 
 export default {
-  async fetch(request: Request, env: WorkerEnv, ctx: Ctx): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: WorkerEnv,
+    ctx: SimulatedExecutionContext,
+  ): Promise<Response> {
     const url = new URL(request.url);
 
     // 健全性確認。 binding も鍵も要らない。
