@@ -563,6 +563,11 @@ describe('/kiwa-nextjs の手順が実行できる形になっている', () => 
     // `export default async function` も Server Action の形。 落とすと既定 export の
     // action を持つ project で 0 件になる。
     expect(grep, 'default export の action を拾えない').toContain('default');
+    // file-level / function-level directive は単引用符・二重引用符のどちらも有効。
+    // 片方だけに戻ると、その書式を使う action が候補から消える。
+    expect(grep, '引用符の異なる server directive を拾えない').toContain(
+      `['\\"]use server['\\"]`,
+    );
     // 候補は file:行番号 で出す (#2017 と同じ形)。
     for (const required of ['n', 'H', 'E']) {
       expect(grep, `抽出が -${required} を付けていない`).toMatch(
