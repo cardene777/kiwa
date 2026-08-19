@@ -229,6 +229,8 @@ it('integration with mocked HTTP + real chain', async () => {
 default は `timeout=5000` / `retryCount=0` で fail-fast、 integration test では 200ms 以下に短縮して invalid-port 系の test を高速化できる。
 
 ```ts
+import { sendTransaction } from '@kiwa-lab/dapp';
+
 const ctx = {
   privateKey,
   chainId: 31337,
