@@ -320,6 +320,20 @@ describe('review report の名前が writer と reader で一致する', () => {
       generationInvocations.filter((line) => !line.includes('--no-review')),
       '子の自動 review が有効な生成側起動が残っている',
     ).toEqual([]);
+
+    // `--no-review` だけでは再生成後の review が消える。 auto-fix 節自身が、 初回 chain と
+    // 同じ一意な出力先を使う親の直接 review 経路まで保持していることを確認する。
+    const autoFix = headingSectionIn(
+      TEST_SKILL,
+      /^### Step 5c: auto-fix loop \(review FAIL 時の自走修正、 上限なし\)$/m,
+    );
+    expect(autoFix, 'auto-fix 後の review が repo root 起点でない').toContain('repo root から');
+    expect(autoFix, 'auto-fix 後に親が review を直接再実行していない').toContain(
+      'spec-review / test-review を直接再実行',
+    );
+    expect(autoFix, 'auto-fix 後の review 出力先が一意でない').toContain(
+      'Steps 3 / 4 と同じ一意な `--out`',
+    );
   });
 
   it('Step 3 が書いた path を chain return に載せる', () => {
