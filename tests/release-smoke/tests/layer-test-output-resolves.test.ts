@@ -47,6 +47,16 @@ const ROSTER = [
   { layer: 'ui', producer: 'kiwa-ui', module: 'counter', example: 'react-component-poc' },
   { layer: 'data', producer: 'kiwa-data', module: 'orders', example: 'queue-poc' },
   { layer: 'cli', producer: 'kiwa-cli-test', module: 'kiwa-cli', example: 'cli-poc' },
+  { layer: 'auth', producer: 'kiwa-auth', module: 'auth-flow', example: 'auth-lucia-poc' },
+  { layer: 'cache', producer: 'kiwa-cache', module: 'session-cache', example: 'cache-redis-poc' },
+  { layer: 'job-queue', producer: 'kiwa-queue', module: 'queue-flow', example: 'queue-bullmq-poc' },
+  { layer: 'orm-query', producer: 'kiwa-orm', module: 'users-repo', example: 'orm-drizzle-sqlite-poc' },
+  {
+    layer: 'e2e-generic',
+    producer: 'kiwa-e2e',
+    module: 'reorg-4scenario',
+    example: 'dogfood-dapp-e2e-reorg',
+  },
 ] as const;
 
 function resolveTestPaths(entry: (typeof ROSTER)[number]): {
