@@ -153,6 +153,15 @@ function stepBashFence(skill: string, heading: RegExp): string {
   return fences.join('\n');
 }
 
+/** 指定見出しより後で最初に現れる bash fence。 Step 以外の小見出しにも使う。 */
+function bashFenceAfter(body: string, heading: RegExp): string {
+  const at = body.search(heading);
+  if (at < 0) throw new Error(`${heading} が見つからない`);
+  const fence = /```bash\n([\s\S]*?)```/.exec(body.slice(at));
+  if (!fence) throw new Error(`${heading} より後に bash fence が無い`);
+  return fence[1]!;
+}
+
 /**
  * `##### <runtime>` の本文 (次の見出しまで)。
  *
@@ -428,16 +437,20 @@ describe('/kiwa-design が既存 test を探す', () => {
     // Layer 1 が受け取る素材だけが古い形のまま残る。
     const play = read('.claude/skills/kiwa-play/SKILL.md');
     const design = read(`.claude/skills/${DESIGN}/SKILL.md`);
+    const playFence = bashFenceAfter(play, /^#### 1\.5\.A プロジェクト読込$/m);
     const core = '^[[:space:]]*(describe|it|test)(\\.[a-z]+)?\\(';
     expect(design, `${DESIGN} の抽出が既知の形でない`).toContain(core);
-    expect(play, '/kiwa-play の抽出が /kiwa-design と別の形').toContain(core);
-    expect(play, '/kiwa-play が tests/ だけを探索している').toContain(
-      'find . -type d -name node_modules -prune',
+    expect(playFence, '/kiwa-play の抽出が /kiwa-design と別の形').toContain(core);
+    expect(globGroups(playFence)).toEqual([globGroups(runtimeFence('typescript'))[0]]);
+    const playFinds = findCommands(playFence);
+    expect(playFinds.length).toBe(1);
+    expect(playFinds[0], '/kiwa-play が node_modules を除外していない').toContain(
+      '-name node_modules -prune',
     );
-    for (const pattern of ['*.test.ts', '*.test.tsx', '*.spec.ts', '*.spec.tsx']) {
-      expect(design, `${DESIGN} が ${pattern} を探索していない`).toContain(`-name '${pattern}'`);
-      expect(play, `/kiwa-play が ${pattern} を探索していない`).toContain(`-name '${pattern}'`);
-    }
+    // 探索の **起点** も見る。 glob と prune だけを見ると `find tests` に狭める変異が
+    // 素通りする (実測)。 `tests/` の外に置いた test file を Layer 1 が見落とす。
+    // `findCommands` は `find ` を落として返すため、 起点は先頭に出る。
+    expect(playFinds[0], '/kiwa-play の探索起点が project 全体でない').toMatch(/^\.\s/);
     // flag も 3 つとも要る (#2017 と同じ形)。 候補は `file:行番号` で書くため。
     const flags = [...play.matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
     expect(flags.length, '/kiwa-play に抽出段が無い').toBeGreaterThan(0);
