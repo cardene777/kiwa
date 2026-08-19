@@ -464,11 +464,13 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
       .split('\n')
       .filter((line) => line.startsWith('|') && !line.startsWith('|---'))
       .slice(1); // header を除く
-    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(8);
+    // 9 行 = 8 行 + 「解決先に file が無い」 (#2048)。 応答の形を全行 pass しても Read が
+    // 落ちるため、 形の検査だけでは起点違いと spec 未生成が同じ結果に潰れる。
+    expect(rows.length, `${skill} の失敗時の判定表が足りない:\n${rows.join('\n')}`).toBe(9);
     expect(
       rows.filter((r) => r.includes('中断')).length,
       `${skill} の判定表に中断の行が足りない`,
-    ).toBe(7);
+    ).toBe(8);
     // Parsing is not validating. A partially broken response parses fine and
     // then produces a path built from whatever happened to be there.
     const table = rows.join('\n');

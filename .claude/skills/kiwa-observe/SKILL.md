@@ -51,7 +51,8 @@ layer は spec の場所を決めるだけでなく、 dashboard の本文と fi
 `--spec` を省略した時、 **自前で組み立てず `kiwa layers` に訊く**。
 
 ```bash
-pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE" \
+  --project-root "$PROJECT_ROOT"
 ```
 
 本 skill は Layer 3 で、 Layer 2 のように扱う layer が決まっていない。 **どの layer の spec と突き合わせるかは `--layer` で受け取る**。 `docs/layers.json` が宣言する id をそのまま渡す。
@@ -63,6 +64,22 @@ layer が違えば spec dir も suffix も違うため、 別 layer の spec を
 `$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
 
 `$MODULE` は skill 引数の `--module`。 必須で、 推測しない。
+
+`$PROJECT_ROOT` は skill 引数の `--project-root` (省略時は `.`)。 **返る `spec_path` はこれを起点にする**ため、 省くと example 配下の spec を repo root から探すことになる。
+
+#### 2 つの path は起点が違う
+
+**`spec_path` は `--project-root` 起点、 `test_paths.files` は cwd 起点**。 同じ応答の中で基準が分かれているので、 同列に「返った値を Read する」 と読むと spec だけ外す。
+
+| field | 起点 | Read する時 |
+|---|---|---|
+| `spec_path` | `--project-root` (省略時は cwd) | `$PROJECT_ROOT` を前置して開く |
+| `test_paths.patterns` / `test_paths.files` | cwd | そのまま開く |
+
+CLI 側は `spec_path` に lang と module しか差し込まず (`applyLang`)、 `test_paths` だけ `relativeTo(cwd, join(projectRoot, …))` で cwd 基準に直している。 宣言の出所が `docs/layers.json` と生成先で違うためで、 揃える先は skill ではなく CLI にあるが、 **読む側が起点を知らないまま使うと必ず外す** (`skills/kiwa-review/SKILL.md` § 2 つの path は起点が違う SSOT)。
+
+実測 (cwd = repo root、 data layer / module `orders` / `examples/queue-poc`)。 応答は下の検証表を全行 pass するが、 そのまま `spec_path` を開くと `No such file or directory` になる。
+
 
 #### test code の path も同じ CLI が返す
 
@@ -116,7 +133,10 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 | その layer の `spec_path` が文字列でない、 または空 | spec を持たないか応答が壊れている。 中断 |
 | `spec_path` に `{module}` が残っている | `--module` が効いていない。 中断 |
 | `test_paths.files` が空 | 観測対象が存在しない。 中断。 理由に `test_paths.patterns` を添える |
-| 上記いずれでもない | その `spec_path` と `test_paths.files` を使う |
+| `$PROJECT_ROOT` を前置した path に file が無い | spec が未生成か `--project-root` が誤り。 **開いた path をそのまま添えて中断** |
+| 上記いずれでもない | `spec_path` を `$PROJECT_ROOT` 起点で、 `test_paths.files` を cwd 起点で開く |
+
+「解決先に file が無い」 行を置くのは、 **上の全行を pass した応答でも Read が落ちる**から。 検査が「応答の形」 までで止まっていると、 起点違いも spec 未生成も同じ「spec が無い」 に潰れる。
 
 鍵の選択 (`--producer` の要否 / 宣言に無い鍵) と起点の妥当性 (`--project-root` が無い dir / cwd の外) は CLI が非 0 で返すため、 1 行目の exit code 判定で捕まる。 skill 側で二重に判定しない。
 
