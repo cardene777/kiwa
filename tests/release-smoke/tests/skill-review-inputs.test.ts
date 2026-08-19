@@ -312,8 +312,28 @@ describe('review report の名前が writer と reader で一致する', () => {
     // 初回 chain だけでなく auto-fix loop の再生成も同じ規約に従う。 Step 名だけを
     // 列挙すると loop 内の command が検査対象から落ち、 FAIL 後だけ既定 report を
     // 再び上書きする回帰が素通りする。
-    const generationInvocations = lines.filter((line) =>
-      /^\s*(?:\[[^\]]+\]\s*)?\/kiwa-(?:design|forge|hardhat|play|e2e|a11y)\b/.test(line),
+    // **行頭で anchor せず、 fence の中だけを見る**。 起動行は cwd の指示
+    // (`examples/{example}/ へ cd して`) を前置する形になったため、 `[Step 3a] /kiwa-design ...`
+    // の並びを前提にすると検出数が落ちて検査が空回りする (#2046 の review で実際に落ちた)。
+    // 一方 anchor を外すだけだと、 description の 1 文や統合 report の表の行まで拾う。
+    // 起動が書かれるのは fence の中だけなので、 対象をそこに絞る。
+    // fence は **言語で選ぶ**。 `mermaid` の node label (`C1["/kiwa-design --layer contract"]`)
+    // は図のための省略表記で起動ではないため、 混ぜると `--no-review` の欠落として 7 件出る。
+    const fenced: string[] = [];
+    let lang: string | null = null;
+    for (const line of TEST_SKILL.split('\n')) {
+      const open = /^\s*```(\w*)/.exec(line);
+      if (open) {
+        lang = lang === null ? (open[1] || 'plain') : null;
+        continue;
+      }
+      if (lang === 'text' || lang === 'bash') fenced.push(line);
+    }
+    // 起動行は **skill 名の直後に flag が続く**。 先頭の `/` を要求して review 行の
+    // `--producer kiwa-forge` を外し、 直後の `--` を要求して fence 内の言及
+    // (`# invoke /kiwa-forge` / 統合 report の表の `| /kiwa-hardhat |`) を外す。
+    const generationInvocations = fenced.filter((line) =>
+      /\/kiwa-(?:design|forge|hardhat|play|e2e|a11y)\s+--/.test(line),
     );
     expect(generationInvocations.length, '生成側の起動を十分に検出できていない').toBeGreaterThan(9);
     expect(

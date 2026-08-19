@@ -189,19 +189,45 @@ describe('spec 存在 check の起点が生成先と揃っている', () => {
     expect(line!, 'cwd 起点のまま spec を見ている').toContain('examples/$EXAMPLE/$SPEC');
   });
 
-  it('全生成 chain の起点が examples/{example} 配下であることと辻褄が合う', () => {
+  it('全生成子 skill の起点が examples/{example} 配下であることと辻褄が合う', () => {
     // spec の存在 check は target に関係なく example 起点で見る。 contract だけでなく、
     // dApp / web の単独実行でも同じ起点を明示しないと生成先と存在 check が食い違う。
-    const steps: [string, RegExp][] = [
-      ['Step 3', /^### Step 3: contract test chain 実行/m],
-      ['Step 4', /^### Step 4: dApp e2e test chain 実行/m],
-      ['Step 4w', /^### Step 4w: web chain 実行/m],
+    const steps: [string, RegExp, RegExp[]][] = [
+      [
+        'Step 3',
+        /^### Step 3: contract test chain 実行/m,
+        [
+          /^\[Step 3a\].*examples\/{example}\/.*cd/m,
+          /^  examples\/{example}\/.*cd.*\/kiwa-forge/m,
+          /^  examples\/{example}\/.*cd.*\/kiwa-hardhat/m,
+        ],
+      ],
+      [
+        'Step 4',
+        /^### Step 4: dApp e2e test chain 実行/m,
+        [
+          /^\[Step 4a\].*examples\/{example}\/.*cd/m,
+          /^\[Step 4b\].*examples\/{example}\/.*cd/m,
+        ],
+      ],
+      [
+        'Step 4w',
+        /^### Step 4w: web chain 実行/m,
+        [
+          /^\[Step 4w-e2e-a\].*examples\/{example}\/.*cd/m,
+          /^\[Step 4w-e2e-b\].*examples\/{example}\/.*cd/m,
+          /^\[Step 4w-a11y-a\].*examples\/{example}\/.*cd/m,
+          /^\[Step 4w-a11y-b\].*examples\/{example}\/.*cd/m,
+        ],
+      ],
     ];
-    for (const [label, heading] of steps) {
+    for (const [label, heading, invocations] of steps) {
       const section = headingSectionIn(TEST_SKILL, heading);
-      expect(section, `${label} の cd 先が examples/{example}/ でない`).toContain(
-        '`examples/{example}/` に cd した状態で',
-      );
+      for (const invocation of invocations) {
+        expect(section, `${label} の生成子 skill に examples/{example}/ への cd が無い`).toMatch(
+          invocation,
+        );
+      }
     }
 
     // CLI が返す spec_path は project-root 起点の相対 path で、 repo root からは開けない。

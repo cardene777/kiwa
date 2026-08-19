@@ -299,27 +299,27 @@ done
 
 ### Step 3: contract test chain 実行 (target=contract or both)
 
-`examples/{example}/` に cd した状態で生成側の子 skill を `$RUNNER` 分岐に応じて内部呼出。 Step 3a (spec 生成) は runner 共通、 Step 3b / 3c は `$RUNNER` で選択実行。
+生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd する。 Step 3a (spec 生成) は runner 共通、 Step 3b / 3c は `$RUNNER` で選択実行。各子 skill の直後に review のため repo root へ戻るので、次の生成前に cwd を再確立する。
 
 **本 skill から起動する生成側の子 skill には常に `--no-review` を渡し、 review は repo root に戻って本 skill が直接起動する**。 子の自動 review に任せると、 同じ `--module` を使う Foundry / Hardhat / Playwright が既定の同じ path を順に上書きし、 chain return を集めても最後の 1 枚しか残らない。 本 skill は run 全体を知る呼出側なので、 surface ごとに一意な `--out` を渡す。
 
 親の `--no-review` が指定されている場合は直接 review も全件 skip する。 指定されていない場合、 生成側の子 skill が戻った直後に repo root から下記 review を起動し、 各 chain return の report path を控える。 `${DOC_LANG}` は明示 `--out` の一部なので、 `en` でも suffix を付ける。
 
 ```text
-[Step 3a] /kiwa-design --layer contract --module {example} --input contracts/ --lang $DOC_LANG --no-review
+[Step 3a] examples/{example}/ へ cd して /kiwa-design --layer contract --module {example} --input contracts/ --lang $DOC_LANG --no-review
   ↓ spec 生成
   ↓ tests/spec/contract/test-spec-{example}.{lang}.md が Write される
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer contract --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-contract.${DOC_LANG}.md
 
 [Step 3b] $RUNNER ∈ {foundry, both} の場合のみ実行:
-  /kiwa-forge --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
+  examples/{example}/ へ cd し直して /kiwa-forge --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
   ↓ test/{Contract}.t.sol 生成 + forge test 全 PASS + coverage 100% 到達 (auto loop)
   ↓ Step 5c で tests/reports/contract/coverage-report-{example}.{lang}.md Write
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-foundry.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
 [Step 3c] $RUNNER ∈ {hardhat, both} の場合のみ実行:
-  /kiwa-hardhat --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
+  examples/{example}/ へ cd し直して /kiwa-hardhat --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
   ↓ hardhat-test/{Contract}.test.cjs 生成 + hardhat test 4 round PASS + coverage 100%
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer contract --lang $DOC_LANG --producer kiwa-hardhat --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-hardhat.${DOC_LANG}.md
   ↓ review が返した report path を控える
@@ -340,19 +340,19 @@ fi
 
 ### Step 4: dApp e2e test chain 実行 (target=dapp or both)
 
-`examples/{example}/` に cd した状態で生成側の子 skill を呼ぶ。 target=dapp の単独経路でも
-Step 2 の repo root に残らず、 target=both で直前の review を repo root から呼んだ後も
-生成前にこの cwd を確立し直す。
+生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd する。 target=dapp の単独経路でも
+Step 2 の repo root に残らず、 target=both で直前の review を repo root から呼んだ後も、
+Step 4a の review 後に Step 4b を呼ぶ時も、生成前にこの cwd を確立し直す。
 
 target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) なら 3 完了待ち、 mode=parallel なら 3 と並走 (ただし parallel は port 衝突リスクあるため非推奨)。
 
 ```text
-[Step 4a] /kiwa-design --layer e2e --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4a] examples/{example}/ へ cd して /kiwa-design --layer e2e --module {example} --input app/ --lang $DOC_LANG --no-review
   ↓ spec 生成
   ↓ tests/spec/e2e/test-spec-{example}.{lang}.md Write
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer e2e --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e.${DOC_LANG}.md
 
-[Step 4b] /kiwa-play --mode new --rounds {N} --lang $DOC_LANG --no-review [--no-codex]
+[Step 4b] examples/{example}/ へ cd し直して /kiwa-play --mode new --rounds {N} --lang $DOC_LANG --no-review [--no-codex]
   ↓ tests/{example}.spec.ts + helper 生成
   ↓ playwright test 4 round PASS (flaky 0 検証)
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-playwright.${DOC_LANG}.md
@@ -361,27 +361,28 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
 
 ### Step 4w: web chain 実行 (e2e-generic + a11y、 target=web or all)
 
-`examples/{example}/` に cd した状態で生成側の子 skill を呼ぶ。 target=web / all は Step 3 を
-通らないため、 Step 2 の repo root から明示的に移動してから各 chain を始める。
+生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd する。 target=web / all は Step 3 を
+通らないため Step 2 の repo root から明示的に移動し、各 review 後も次の生成前に cwd を
+確立し直す。
 
 target=web (汎用 web 2 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y の 2 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 2 子 skill が同時 Read するだけ、 file 書込 path は別)。
 
 ```text
-[Step 4w-e2e-a] /kiwa-design --layer e2e-generic --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4w-e2e-a] examples/{example}/ へ cd して /kiwa-design --layer e2e-generic --module {example} --input app/ --lang $DOC_LANG --no-review
   ↓ tests/spec/integration/test-spec-{example}.e2e.{lang}.md Write
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer e2e-generic --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e-generic.${DOC_LANG}.md
 
-[Step 4w-e2e-b] /kiwa-e2e --mode new --lang $DOC_LANG --no-review
+[Step 4w-e2e-b] examples/{example}/ へ cd し直して /kiwa-e2e --mode new --lang $DOC_LANG --no-review
   ↓ tests/{example}.e2e.spec.ts 生成
   ↓ @kiwa-lab/e2e で playwright 起動
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer e2e-generic --lang $DOC_LANG --producer kiwa-e2e --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-generic.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
-[Step 4w-a11y-a] /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4w-a11y-a] examples/{example}/ へ cd し直して /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG --no-review
   ↓ tests/spec/integration/test-spec-{example}.a11y.{lang}.md Write
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer a11y --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-a11y.${DOC_LANG}.md
 
-[Step 4w-a11y-b] /kiwa-a11y --mode new --lang $DOC_LANG --no-review
+[Step 4w-a11y-b] examples/{example}/ へ cd し直して /kiwa-a11y --mode new --lang $DOC_LANG --no-review
   ↓ tests/{example}.a11y.test.ts 生成
   ↓ @kiwa-lab/a11y で axe-core 評価
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer a11y --lang $DOC_LANG --producer kiwa-a11y --project-root examples/{example} --out tests/reports/review/test-review-{example}-a11y.${DOC_LANG}.md
