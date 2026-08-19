@@ -142,8 +142,8 @@ item は handler 内の配列に保持され、 `id` は 1 起点の連番。
 `/kiwa-design` § Step 2 § 既存 test の探索 の実測結果と、 § テストケース一覧 の全 TC を突き合わせた結果。
 
 - 探索した runtime — `typescript` (`docs/layers.json` の `api` layer)
-- 探索した path — `examples/nextjs-api-poc/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 見つかったのは `tests/` のみ
-- 見つけた既存 test — 12 件 (`describe` 3 + `it` 9)
+- 探索した path — `examples/nextjs-api-poc/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 既存 9 case は現在 `test/integration/items.api.test.ts` にある
+- 追記前に見つけた既存 test — 12 件 (`describe` 3 + `it` 9)
 
 | TC | 既存 test の候補 | 判定 |
 |---|---|---|
