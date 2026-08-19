@@ -3,7 +3,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { invokeMiddleware } from '@kiwa-lab/nextjs';
-import { authMiddleware } from '../lib/_kiwa/auth-middleware.js';
+import { authMiddleware } from '../../lib/_kiwa/auth-middleware.js';
 
 describe('authMiddleware via @kiwa-lab/nextjs invokeMiddleware', () => {
   it('T-NF-101: session=banned で 403 JSON action', async () => {

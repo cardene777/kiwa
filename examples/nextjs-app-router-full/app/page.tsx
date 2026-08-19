@@ -3,9 +3,9 @@ export default function Home() {
     <main>
       <h1>kiwa Next.js App Router PoC</h1>
       <p>
-        This example demonstrates <code>@kiwa-test/nextjs</code> v1.0.x の 3 helper
-        (<code>invokeServerAction</code> + <code>invokeMiddleware</code> + <code>renderServerComponent</code>)
-        + Route Handler を real Next.js v15 project に統合。
+        This example demonstrates <code>@kiwa-lab/nextjs</code> v2.0.0 の 5 helper + Route
+        Handler。Server Actions / middleware / RSC / Route Handler は real Next.js v15 project
+        に統合し、Parallel Routes / RSC streaming は pure test seam で扱う。
       </p>
       <ul>
         <li>
