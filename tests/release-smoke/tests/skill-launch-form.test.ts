@@ -18,16 +18,58 @@
 // 照合は **comment を除いた実行行** に対して行う。 fence の text は実行される引数の代理指標
 // でしかなく、 引数を comment に退避する変異が素通りする (#2021 で実測)。
 import { describe, expect, it } from 'vitest';
+import ts from 'typescript';
 
-import { fenceUnder, fenceUnderIn, headingSectionIn, skillBody } from './skill-md.js';
+import { fenceUnder, fenceUnderIn, headingSectionIn, read, skillBody } from './skill-md.js';
 
-/** fence から comment を除いた実行行だけを返す。 */
+/**
+ * fence から comment を除いた実行行だけを返す。
+ *
+ * `\\` で継続した行は **1 行に畳む**。 畳まないと、 同じ command の要素が別々の行に見え、
+ * 「同じ実行行にあること」 を見る検査 (#2024 の review 指摘) が成立しない。
+ */
 function executableLines(fence: string): string {
   return fence
+    .replace(/\\\n\s*/g, ' ')
     .split('\n')
     .filter((line) => !line.trimStart().startsWith('#'))
     .map((line) => line.replace(/\s+#.*$/, ''))
     .join('\n');
+}
+
+/** 実行行のうち、 指定した語をすべて含む最初の 1 行。 */
+function commandLine(fence: string, ...needles: string[]): string | undefined {
+  return executableLines(fence)
+    .split('\n')
+    .find((line) => needles.every((needle) => line.includes(needle)));
+}
+
+/** JavaScript の実行 code で option を判定している includes / startsWith call から flag を導く。 */
+function acceptedOptions(script: string): Set<string> {
+  const source = ts.createSourceFile(
+    'release-readiness-check.mjs',
+    script,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
+  const accepted = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      (node.expression.name.text === 'includes' || node.expression.name.text === 'startsWith')
+    ) {
+      const argument = node.arguments[0];
+      if (argument !== undefined && ts.isStringLiteral(argument)) {
+        const flag = /^--[a-z][a-z0-9-]*/.exec(argument.text)?.[0];
+        if (flag !== undefined) accepted.add(flag);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return accepted;
 }
 
 describe('SKILL.md の起動形が必須要素を落としていない', () => {
@@ -87,6 +129,15 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     expect(section.length, '範囲が潰れている').toBeGreaterThan(50);
   });
 
+  it('fence の中の comment 行で範囲が閉じない', () => {
+    // shell の comment (`# 既存 worktree 掃除`) は行頭の `#` が markdown の見出しと同じ形。
+    // 素朴に探すと fence の 1 行目で閉じ、 fence が「無い」 ことになる (実測 =
+    // `/docs-publish-kiwa` の Step 3 が 46 文字で切れた)。
+    const section = headingSectionIn(skillBody('docs-publish-kiwa'), /^### Step 3: /m);
+    expect(section, 'fence の中で閉じている').toContain('git worktree add');
+    expect(section, '次の Step を飲み込んでいる').not.toContain('### Step 4: ');
+  });
+
   it('対象 Step から fence が消えたら隣の Step を拾わない', () => {
     // 範囲を `### ` で閉じると、 `## ` 見出しの skill では後続 Step を飲み込む =
     // 対象から fence が消えても隣の fence を拾って緑になる。 `fenceUnderIn` は level を
@@ -95,5 +146,120 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     const stripped = body.replace(/```bash\nnpx --no kiwa init --detect\n```/, '');
     expect(stripped, '前提が崩れている (対象 fence を消せていない)').not.toBe(body);
     expect(() => fenceUnderIn(stripped, /^## Step 1: /m, 'bash')).toThrow();
+  });
+});
+
+describe('/docs-generate が公開する API の範囲を絞る', () => {
+  const TYPEDOC = /^### Step 3: /m;
+  const FORGE_DOC = /^### Step 4: /m;
+
+  it('typedoc の起動が private と internal を同じ行で除外する', () => {
+    // 生成先 `docs/api/typescript` は `/docs-publish-kiwa` が gh-pages へ push する =
+    // **除外が落ちると内部 API が公開 site に載る**。 生成も publish も成功するため落ちない。
+    //
+    // 2 つの除外は独立した要素で、 片方だけでは片方の surface が漏れる。 起動は継続行を
+    // 持つため、 畳んでから同じ実行行に束縛する (別 command に移されると意味が変わる)。
+    const line = commandLine(fenceUnder('docs-generate', TYPEDOC, 'bash'), 'typedoc');
+    expect(line, 'typedoc を起動していない').toBeDefined();
+    expect(line, '--excludePrivate を渡していない').toContain('--excludePrivate');
+    expect(line, '--excludeInternal を渡していない').toContain('--excludeInternal');
+    // 生成先も同じ行に束縛する。 別の行が別の場所へ出すと、 publish は空の dir を配る。
+    expect(line, '生成先が docs/api/typescript でない').toContain('--out docs/api/typescript');
+  });
+
+  it('forge doc の起動が --no-server を渡す', () => {
+    // `--no-server` 無しの `forge doc` は **server を起動して待ち続ける** (forge の既定)。
+    // 落ちるのではなく止まるため、 chain から呼ぶと次の Step へ進まない。
+    const line = commandLine(fenceUnder('docs-generate', FORGE_DOC, 'bash'), 'forge doc');
+    expect(line, 'forge doc を起動していない').toBeDefined();
+    expect(line, '--no-server を渡していない (server が上がって止まる)').toContain('--no-server');
+  });
+});
+
+describe('/docs-publish-kiwa の gh-pages 操作が範囲を外さない', () => {
+  const STEP_2 = /^### Step 2: /m;
+  const STEP_3 = /^### Step 3: /m;
+  const STEP_4 = /^### Step 4: /m;
+
+  it('branch の存在確認が --heads で branch に限定する', () => {
+    // `--heads` 無しの `ls-remote` は tag も返す。 `gh-pages` という tag があるだけで
+    // 「branch は既にある」 と読み、 orphan の新設を飛ばして `worktree add` が失敗する。
+    const line = commandLine(fenceUnder('docs-publish-kiwa', STEP_3, 'bash'), 'ls-remote');
+    expect(line, 'branch の存在を確認していない').toBeDefined();
+    expect(line, '--heads で branch に限定していない').toContain('--heads');
+  });
+
+  it('gh-pages を新設する時は orphan から始める', () => {
+    // `--orphan` 無しで branch を切ると **main の履歴の上に site を載せる**。 push は成功し、
+    // 公開もされるため気付かない。 gh-pages に repo の全履歴が入る。
+    const line = commandLine(
+      fenceUnder('docs-publish-kiwa', STEP_3, 'bash'),
+      'git switch',
+      'gh-pages',
+    );
+    expect(line, 'gh-pages を作る行が無い').toBeDefined();
+    expect(line, '--orphan から始めていない').toContain('--orphan');
+  });
+
+  it('既定の push が --force を持たない', () => {
+    // `--force` は `--force` option を渡した時だけの経路 (SKILL.md § Step 4 の但し書き)。
+    // 既定の fence に `--force` が入ると、 **毎回 history を上書きする** publish になる。
+    const push = executableLines(fenceUnder('docs-publish-kiwa', STEP_4, 'bash'))
+      .split('\n')
+      .filter((line) => line.includes('git push'));
+    expect(push.length, 'Step 4 に push が無い').toBeGreaterThan(0);
+    for (const line of push) {
+      expect(line, '既定の push が history を上書きする').not.toContain('--force');
+    }
+  });
+
+  it('build output の入替が worktree に降りた後に走る', () => {
+    // 入替は **cwd を消す**。 直前の `cd` が消えるか行き先が変わると、 kiwa 本体で走る。
+    // fence の中の順序が唯一の担保になる。
+    const lines = executableLines(fenceUnder('docs-publish-kiwa', STEP_4, 'bash')).split('\n');
+    const enter = lines.findIndex((line) => line.trim() === 'cd ../kiwa-gh-pages');
+    const wipe = lines.findIndex((line) => line.includes('rm -rf'));
+    expect(enter, 'gh-pages worktree に降りる行が無い').toBeGreaterThanOrEqual(0);
+    expect(wipe, '入替の行が無い').toBeGreaterThanOrEqual(0);
+    expect(wipe, '入替が worktree に降りる前に走る').toBeGreaterThan(enter);
+    // 間に別の `cd` が挟まると、 降りた先が変わる。
+    const between = lines
+      .slice(enter + 1, wipe)
+      .filter((line) => line.trimStart().startsWith('cd '));
+    expect(between, '降りた後に別の cd が挟まっている').toEqual([]);
+  });
+
+  it('変更検出が --porcelain を渡す', () => {
+    // `--porcelain` 無しの `git status` は branch 情報を必ず出す = 出力が空にならず、
+    // 「変更なし」 を判定できない。
+    const line = commandLine(fenceUnder('docs-publish-kiwa', STEP_2, 'bash'), 'git status');
+    expect(line, '変更検出の行が無い').toBeDefined();
+    expect(line, '--porcelain を渡していない').toContain('--porcelain');
+  });
+});
+
+describe('/kiwa-release-check の宣言が script と一致する', () => {
+  it('宣言した option を script が受け取る', () => {
+    // SKILL.md は user に渡す option を宣言する。 script 側が名前を変えると、 **渡した option が
+    // 黙って無視される** = `--include-dogfood-run` を渡したのに heavy run が走らないまま
+    // 「RELEASE READY」 が出る。 どちらも成功で終わるため気付かない。
+    //
+    // 宣言を実物から導く (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。
+    // 一覧を手で書き写すと、 option が増えた時に検査だけ古いまま残る。
+    const section = headingSectionIn(skillBody('kiwa-release-check'), /^## 引数仕様/m);
+    const declared = [...section.matchAll(/^- `(--[a-z][a-z0-9-]*)/gm)].map((m) => m[1]!);
+    expect(declared.length, '引数仕様が 1 件も読めない').toBeGreaterThan(0);
+    const script = read('scripts/release-readiness-check.mjs');
+    const accepted = acceptedOptions(script);
+    for (const flag of declared) {
+      expect(accepted.has(flag), `script が ${flag} を受け取らない (宣言だけ残っている)`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('comment 内の option 判定を受理 code として数えない', () => {
+    const script = "const found = args.includes('--actual'); // args.includes('--comment-only')";
+    expect(acceptedOptions(script)).toEqual(new Set(['--actual']));
   });
 });
