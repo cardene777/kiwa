@@ -1,3 +1,4 @@
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 import { headingSectionIn, read, skillBody } from './skill-md.js';
@@ -23,6 +24,7 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as {
     consumer_skill: string | null;
     also_consumed_by?: string[];
     backing_package: string | null;
+    providers: string[];
   }[];
 }).layers;
 
@@ -63,6 +65,31 @@ function columnsOf(section: string): string[] {
     out.push(cell);
   }
   return out;
+}
+
+/** TypeScript entry point が明示的に export する名前。 comment や local declaration は含めない。 */
+function exportedNamesIn(sourceText: string, fileName: string): Set<string> {
+  const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  const names = new Set<string>();
+  for (const statement of source.statements) {
+    if (ts.isExportDeclaration(statement)) {
+      const clause = statement.exportClause;
+      if (clause && ts.isNamedExports(clause)) {
+        for (const element of clause.elements) names.add(element.name.text);
+      }
+      continue;
+    }
+    const modifiers = ts.canHaveModifiers(statement) ? ts.getModifiers(statement) : undefined;
+    if (!modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) continue;
+    if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) {
+      if (statement.name) names.add(statement.name.text);
+    } else if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations) {
+        if (ts.isIdentifier(declaration.name)) names.add(declaration.name.text);
+      }
+    }
+  }
+  return names;
 }
 
 const WITH_SECTION = LAYERS.filter((l) => sectionOf(l.id) !== null).map((l) => l.id);
@@ -141,6 +168,28 @@ describe.each(WITH_SECTION)('%s の節', (layer) => {
   });
 });
 
+describe.each([
+  ['auth', ['Provider', 'Flow']],
+  ['job-queue', ['Provider', 'Mode']],
+  ['cache', ['Provider', 'Mode']],
+] as const)('%s の selector column', (layer, selectors) => {
+  const section = sectionOf(layer)!;
+
+  it('末尾 2 列が consumer の読む selector と一致する', () => {
+    expect(columnsOf(section).slice(-2)).toEqual(selectors);
+  });
+
+  it('Provider の列挙が manifest と一致する', () => {
+    const providerRow = section.split('\n').find((line) => line.startsWith('| Provider |'));
+    const enumText = /\(([^)]*)\)/.exec(providerRow ?? '')?.[1] ?? '';
+    const values = [...enumText.matchAll(/`([^`]+)`/g)].map((m) => m[1]!);
+    const declared = LAYERS.find((l) => l.id === layer)!.providers;
+    expect(values.sort(), `${layer}: Provider が docs/layers.json と食い違う`).toEqual(
+      [...declared].sort(),
+    );
+  });
+});
+
 describe('節が名指しする helper が実在する', () => {
   // 節の冒頭は「どの helper と mapping するか」 を書く。 手で並べた名前は package の
   // 改名に追随しないので、 **backing package の export に問い直す**。
@@ -165,11 +214,20 @@ describe('節が名指しする helper が実在する', () => {
   it.each(HELPER_CASES)(
     '%s の節が名指しする helper を @kiwa-lab/%s が export している',
     (layer, pkg, names) => {
-      const index = read(`packages/${pkg}/src/index.ts`);
-      const missing = names.filter((n) => !index.includes(n));
+      const path = `packages/${pkg}/src/index.ts`;
+      const exported = exportedNamesIn(read(path), path);
+      const missing = names.filter((n) => !exported.has(n));
       expect(missing, `${layer}: package が export していない helper がある`).toEqual([]);
     },
   );
+
+  it('comment や local declaration に名前があるだけでは export とみなさない', () => {
+    const names = exportedNamesIn(
+      '// setupCommentEnv\nconst setupLocalEnv = () => {};\nexport { setupRealEnv } from "./real.js";',
+      'fixture.ts',
+    );
+    expect([...names]).toEqual(['setupRealEnv']);
+  });
 });
 
 describe('consumer は表の写しを持たない', () => {

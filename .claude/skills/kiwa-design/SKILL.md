@@ -854,7 +854,7 @@ Issue #2067)。
 | Priority | `P0` / `P1` / `P2` / `P3` |
 | Automation | `yes` / `no` / `manual` |
 | Provider | 対象 backend (`nextauth` / `lucia` / `better-auth` / `clerk` / `auth0`)、 省略時は `/kiwa-auth --provider` の既定 |
-| OAuth | 外部 IdP mock (`none` = password 認証 / `google` / `github`) |
+| Flow | provider ごとの認証 flow (`nextauth`: `email` / `google` / `github`、 `lucia`: `password` / `google` / `github`、 `better-auth`: `password` / `google` / `github` / `magic-link` / `two-factor` / `passkey` / `organization`、 `clerk`: `session` / `external-account` / `organization`、 `auth0`: `password` / `google` / `github` / `rules` / `actions` / `management-api`) |
 
 `/kiwa-auth` Layer 2 skill が本 9 column を該当 factory の引数に機械変換する。 列を helper の
 どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
@@ -862,6 +862,11 @@ Issue #2067)。
 `Provider` の値は `docs/layers.json` の `providers` 宣言に揃える (`/kiwa-auth --provider` が
 受ける値と同じ)。 **`backend` ではなく `provider` と呼ぶ** = 宣言と flag と `selected_by` の
 3 箇所が `provider` で揃っており、 呼び分けると spec の書き手がどちらを書くか迷う。
+
+`Flow` は provider 共通 enum にしない。 NextAuth の password 認証に相当するものは `email`
+provider で、 Clerk は password 認証 API 自体を持たず、 Auth0 の Google connection は
+`google-oauth2` だからである。 `/kiwa-auth` は provider ごとの mapping 表で helper の option /
+method に変換する。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.auth.md`。
 

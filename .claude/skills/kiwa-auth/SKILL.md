@@ -111,15 +111,28 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 `/kiwa-app` から起動される経路では常に値が渡るため、 尋ねる契機は単体起動に限られる。 その場合も既定があるので **AskUserQuestion は出さない** = 既定が決まっている問いを毎回聞くと chain が止まる。
 
-### Step 1: Layer 1 spec 読込 + backend 判定
+### Step 1: Layer 1 spec 読込 + provider / flow 判定
 
-`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の `Provider` column (列の定義は `/kiwa-design` の § `#### auth layer 専用 column`) から 5 provider のどれを組み立てるか判定する。 `Provider` 未指定の TC は `--provider` の既定に従う。
+`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の `Provider` + `Flow` column (列の定義は `/kiwa-design` の § `#### auth layer 専用 column`) から 5 provider のどれを、 どの認証 flow で組み立てるか判定する。 `Provider` 未指定の TC は `--provider` の既定に従う。
 
 **`backend` ではなく `provider` と呼ぶ**。 `docs/layers.json` の `providers` 宣言と `--provider` flag と `selected_by` の 3 箇所が `provider` で揃っているため、 呼び分けると spec の書き手がどちらを書くか迷う (#2067)。
 
+#### Provider / Flow mapping
+
+| Provider | Flow | helper への mapping |
+|---|---|---|
+| `nextauth` | `email` / `google` / `github` | `setupNextAuthEnv({ providers: [flow] })` + `env.signIn(flow, input)` |
+| `lucia` | `password` | `setupLuciaEnv()` + `env.signUpWithPassword` / `env.signInWithPassword` |
+| `lucia` | `google` / `github` | `setupLuciaEnv({ providers: [flow] })` + `env.signInWithOAuth(flow, input)` |
+| `better-auth` | `password` / `magic-link` / `two-factor` / `passkey` / `organization` | 順に `emailAndPassword` / `magicLink` / `twoFactor` / `passkey` / `organizations` を `plugins` に渡し、 flow に対応する env method を呼ぶ |
+| `better-auth` | `google` / `github` | `setupBetterAuthEnv({ providers: [flow] })` + `env.signInWithOAuth(flow, input)` |
+| `clerk` | `session` / `external-account` / `organization` | `setupClerkEnv` の `tokens` / `users[].externalAccounts` / `orgs` に Given を変換し、 `env.signIn` または各 resource API を呼ぶ |
+| `auth0` | `password` / `google` / `github` | `setupAuth0Env` の user connection を順に `Username-Password-Authentication` / `google-oauth2` / `github` へ変換し、 `env.authenticate` を呼ぶ |
+| `auth0` | `rules` / `actions` / `management-api` | `setupAuth0Env({ rules, actions })` または `env.users` の Management API surface に変換する |
+
 ### Step 2: test code 生成
 
-TC 表を describe / it に落とす。 各 TC で `setupNextAuthEnv` / `setupLuciaEnv` / `setupBetterAuthEnv` のうち該当 factory を呼び、 期待結果を `expect()` にマッピングする。
+TC 表を describe / it に落とす。 各 TC で `setupNextAuthEnv` / `setupLuciaEnv` / `setupBetterAuthEnv` / `setupClerkEnv` / `setupAuth0Env` のうち該当 factory を呼び、 Provider / Flow mapping に従って操作と期待結果を `expect()` にマッピングする。
 
 生成テンプレ (backend = NextAuth v5、 session mock を通したい TC の場合):
 
