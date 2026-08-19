@@ -579,6 +579,13 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain('## 2 つの形');
     expect(doc).toContain('### 形 1 — 0 件でも通る');
     expect(doc).toContain('### 形 2 — 集合を畳むと片側の欠落が消える');
+    // 形 2 を機械化しない根拠は実測 (#2013)。 数字が消えると、 次に同じ問いが出た時に
+    // 検討をやり直すことになる。
+    expect(doc).toContain('#### 畳んでよい場合');
+    expect(doc).toContain('### 形 2 を機械化しない根拠');
+    expect(doc).toContain('| 集約 (`join` / `flat` / `Set`) が `expect` の 5 行以内 | 105 | 0');
+    expect(doc).toContain('| 集約が `expect(...)` の引数内 | 53 | 0 |');
+    expect(doc).toContain('| 集約が `expect` の **値の位置** (第 1 引数) | 11 | 0 |');
   });
 
   it('別名に代入した保証は受けない', () => {
