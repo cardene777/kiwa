@@ -21,12 +21,18 @@ import { REPO_ROOT, headingSectionIn, read } from './skill-md.js';
 const RESOLUTION_HEADING = '### 入力 spec の path は CLI から受け取る';
 const RESOLUTION = /^### 入力 spec の path は CLI から受け取る$/m;
 
+const LAYERS = (JSON.parse(read('docs/layers.json')) as {
+  layers: {
+    consumer_skill: string | null;
+    also_consumed_by?: string[];
+    test_outputs?: Record<string, string[]>;
+  }[];
+}).layers;
+
 const CONSUMERS = [
   'kiwa-review',
   'kiwa-observe',
-  ...(JSON.parse(read('docs/layers.json')) as {
-    layers: { consumer_skill: string | null; also_consumed_by?: string[] }[];
-  }).layers
+  ...LAYERS
     .flatMap((l) => [l.consumer_skill, ...(l.also_consumed_by ?? [])])
     .filter((s): s is string => Boolean(s)),
 ]
@@ -103,6 +109,30 @@ describe.each(CONSUMERS)('%s が spec の起点を書いている', (skill) => {
       options.some((l) => l.startsWith('- `--project-root ')),
       `${skill}: --project-root が option に無い`,
     ).toBe(true);
+  });
+});
+
+describe('複数 producer layer の解決 command', () => {
+  const cases = LAYERS.flatMap((layer) => {
+    const producers = Object.keys(layer.test_outputs ?? {});
+    if (producers.length < 2) return [];
+    return [layer.consumer_skill, ...(layer.also_consumed_by ?? [])]
+      .filter((skill): skill is string => Boolean(skill))
+      .map((skill) => [skill, producers.find((producer) => producer === skill)] as const);
+  });
+
+  it('複数 producer を持つ consumer が存在する', () => {
+    expect(cases.length).toBeGreaterThan(0);
+  });
+
+  it.each(cases)('%s が自身の producer を選ぶ', (skill, producer) => {
+    expect(producer, `${skill}: test_outputs に対応する producer が無い`).toBeTruthy();
+    const section = headingSectionIn(body(skill), RESOLUTION);
+    const fence = /```bash\n([\s\S]*?)```/.exec(section);
+    expect(fence, `${skill}: 解決 command の fence が無い`).toBeTruthy();
+    expect(fence![1], `${skill}: 複数 producer から自身を選んでいない`).toContain(
+      `--producer ${producer}`,
+    );
   });
 });
 
