@@ -140,17 +140,9 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 期待する 9 column (`/kiwa-design --layer nextjs-server-action` の SSOT):
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-NA-001` 等の連番 |
-| Observation | 観点 (正常系 / 異常系 / 境界値 / 権限 / 冪等性 等) |
-| Given | 初期 state (`cookies` / `headers` / 既存 DB row / fixture seed) |
-| FormData | action に渡す FormData entries (key=value 形式) |
-| Args | useFormState 等で formData 後ろに追加する extra args |
-| Then | 期待 (`result.ok === true` / `env.redirect.url === '/dashboard'` / `env.cookies.get('session') === 'sid_X'` 等) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Action | 対象 Server Action の identifier (`login` / `createPost` 等) |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### nextjs-server-action layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
 
 ### Step 2: action の依存を 2 軸で確認する
 
@@ -582,17 +574,9 @@ App Router の `middleware.ts` を `invokeMiddleware({ middleware, url, method, 
 
 ### 9 column 拡張表 (`/kiwa-design --layer nextjs-middleware`)
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-MW-001` 等の連番 |
-| Observation | 観点 (auth gate / locale rewrite / geo block / header inject / csp 等) |
-| Given | URL + initial cookies/headers/geo seed (`url=https://x/foo`、 `cookies={session:'sid'}`、 `geo={country:'JP'}`) |
-| Method | HTTP method (`GET` / `POST` 等、 default GET) |
-| Headers | request headers (case-insensitive、 `Authorization=Bearer ...`) |
-| Then | 期待 (`env.action.kind==='redirect'` + `env.action.url==='/login'`、 `env.responseHeaders.get('x-csp')==='...'`、 `env.responseCookies.get('tid')==='...'`) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Middleware | 対象 middleware の identifier (default 1 つだけ、 多 middleware 構成は entry 別に行を分ける) |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### nextjs-middleware layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
 
 ### action helper
 
@@ -630,17 +614,9 @@ App Router の async React Server Components (`async function Page(props): Promi
 
 ### 9 column 拡張表 (`/kiwa-design --layer nextjs-rsc`)
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RSC-001` 等の連番 |
-| Observation | 観点 (初期 render / async data fetch / notFound / forbidden / redirect / props 分岐 / search params 等) |
-| Component | 対象 server component の identifier (`UserPage` / `ProductList` 等) |
-| Props | `params` / `searchParams` / fetched data 等の props seed (`{slug:'kiwa'}` / `{q:'foo'}`) |
-| Then | 期待 (`textContent(tree).toBe('Hello kiwa')` / `findAll(tree, n => n.type==='li').length===3` / `signal[NOT_FOUND_SYMBOL]===true` / `signal.url==='/login'`) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Mode | `direct` (renderServerComponent 直 await) / `withFetch` (component 内で await fetch、 vitest の `vi.stubGlobal('fetch', ...)` で mock) |
-| Signal | 期待 throw signal の種類 (`none` / `notFound` / `forbidden` / `redirect`) |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### nextjs-rsc layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
 
 ### signal helper
 
@@ -673,17 +649,11 @@ App Router の Parallel Routes (`layout({ children, @modal, @sidebar })`) と In
 
 ### 9 column 拡張表 (`/kiwa-design --layer nextjs-parallel-route`)
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-PR-001` 等の連番 |
-| Observation | 観点 (multi-slot render / parallel await / per-slot error isolation / default fallback / intercepting variant / zero slots edge case 等) |
-| Layout | 対象 layout 関数の identifier (`DashboardLayout` / `PhotoFeedLayout` 等) |
-| Slots | slot 配列 (`[{ slot: 'modal', component: PhotoModal, defaultFallback?, intercepting? }, { slot: 'sidebar', component: Sidebar }]`) |
-| Children | `children` slot の component + props (`{ component: PostsPage, props: { page: 1 } }`) |
-| Then | 期待 (`tree.tag==='layout'` / `slotResults[0].tree===...` / `slotResults[0].error.message==='boom'` / `slotResults[0].interception.variant==='intercepted'` / `slotResults[0].usedDefault===true`) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Variant | Intercepting 動作 (`none` / `intercepted` (soft-nav) / `default` (hard-nav)) |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### nextjs-parallel-route layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
+
+列を `@kiwa-lab/nextjs` の `invokeParallelRoutes` のどの引数へ渡すかは本 skill の mapping 節が持つ。
 
 ### Intercepting Routes 対応
 
@@ -736,17 +706,11 @@ RSC streaming chunk + Suspense boundary 遷移を `setupNextRscEnv({ component?,
 
 ### 9 column 拡張表 (`/kiwa-design --layer nextjs-rsc-streaming`)
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-RST-001` 等の連番 |
-| Observation | 観点 (single-chunk / streaming order / Suspense fallback / fallback-only / component throw / mid-stream throw / injectError / streamingTimeout / dataSource precedence 等) |
-| Source | dataSource async generator の identifier (`streamItems()` / `slowSource()`) または component の identifier (`Page` / `ItemsPageRSC`) |
-| Fallback | `suspenseFallback` markup (`<Skeleton />` 相当の RscNode) または `none` |
-| Timeout | `streamingTimeout` (ms、 default 5000)、 `0` は fail-fast |
-| ErrorMode | `none` / `injectError` / `component-throw` / `stream-throw` のいずれか |
-| Then | 期待 (`chunks.length===N` / `chunks[0]===fallback` / `resolved===<Item />` / `errorBoundary?.error.message==='...'` / `timedOut===true`) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### nextjs-rsc-streaming layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
+
+列を `@kiwa-lab/nextjs` の `setupNextRscEnv` のどの引数へ渡すかは本 skill の mapping 節が持つ。
 
 ### test 生成 template
 
