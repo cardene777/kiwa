@@ -577,7 +577,7 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     // 失敗 message が doc を指すため、 消えると案内先が消える。
     const doc = read('docs/quality/check-authoring.md');
     expect(doc).toContain('## 3 つの形');
-    expect(doc).toContain('本 file は 12 回の実測から書いた');
+    expect(doc).toContain('本 file は 13 回の実測から書いた');
     expect(doc).toContain('### 形 1 — 0 件でも通る');
     expect(doc).toContain('### 形 2 — 集合を畳むと片側の欠落が消える');
     // 形 2 を機械化しない根拠は実測 (#2013)。 数字が消えると、 次に同じ問いが出た時に
@@ -598,6 +598,15 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain('| `it.each` に渡す一覧が空 | **する**');
     expect(doc).toContain('| 集合を畳む | しない |');
     expect(doc).toContain('| 代理指標だけを守る | しない |');
+    // 契約が複数の要素を要求する時に 1 要素で代表させない形 (#2019)。 見出しと規範の一文を
+    // 別々に守る = 見出しだけを見るのは形 3 そのものになる。
+    expect(doc).toContain('#### 複数の要素を要求する契約では「全要素」 が最小の形');
+    expect(doc).toContain('契約の要素を数えてから、 要素ごとに 1 つ照合を書く');
+    // 実例は 3 flag を要求する契約なので、 3 つとも照合する。 1 つで代表させると、 この
+    // 検査自身が本節の反例になる。
+    expect(doc).toContain("expect(flag, '抽出が -n を付けていない').toContain('n');");
+    expect(doc).toContain("expect(flag, '抽出が -H を付けていない').toContain('H');");
+    expect(doc).toContain("expect(flag, '抽出が -E を付けていない').toContain('E');");
   });
 
   it('別名に代入した保証は受けない', () => {
