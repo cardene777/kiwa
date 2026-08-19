@@ -12,7 +12,9 @@ pnpm add -D @kiwa-lab/core vitest
 
 ## 仕様を解析して warning を失敗にする
 
-メタデータは `- module: 値` と `- layer: 値` の形で書きます。表には `id`、`observation`、`given`、`when`、`then` の五つが必須です。priority、automation、mode、route は任意です。
+メタデータは `- module: 値` と `- layer: 値` の形で書きます。表に必須なのは `id`、`observation`、`then` の三つです。priority、automation、mode、route、および `given`、`when` は任意です。
+
+必須を三つに絞っているのは、入力側の列名が layer ごとに違うためです。`/kiwa-design` が書く 17 の列形のうち、`given` と `when` を両方持つのは 8 形だけで、残りは `FormData` / `Args`、`Component` / `Props`、`Layout` / `Slots` / `Children`、`Job` のように layer 固有の名前を使います。期待結果の列は `then` のほか `Expected`、`期待結果` も同じ列として読みます。
 
 ```ts
 import { expect, test } from 'vitest';
@@ -43,7 +45,7 @@ test('converts a specification table and fails on parser warnings', () => {
 
   const broken = parseSpec('| id | observation |\n| --- | --- |\n| E2E-002 | missing columns |');
   expect(broken.cases).toEqual([]);
-  expect(broken.warnings).toContain('required columns missing: given, when, then');
+  expect(broken.warnings).toContain('required columns missing: then');
 });
 ```
 
