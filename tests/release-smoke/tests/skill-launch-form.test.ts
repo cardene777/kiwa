@@ -85,6 +85,25 @@ function exactOption(node: ts.Node | undefined): string | undefined {
   return /^--[a-z][a-z0-9-]*$/.test(node.text) ? node.text : undefined;
 }
 
+/** 括弧や型 assertion を外した式。 */
+function unwrapExpression(node: ts.Expression): ts.Expression {
+  while (
+    ts.isParenthesizedExpression(node) ||
+    ts.isNonNullExpression(node) ||
+    ts.isAsExpression(node) ||
+    ts.isTypeAssertionExpression(node)
+  ) {
+    node = node.expression;
+  }
+  return node;
+}
+
+function identifierName(node: ts.Expression | undefined): string | undefined {
+  if (!node) return undefined;
+  const expression = unwrapExpression(node);
+  return ts.isIdentifier(expression) ? expression.text : undefined;
+}
+
 /**
  * `layersCommand` が空白区切りで受け取る option の集合。
  *
@@ -101,21 +120,61 @@ function cliAcceptedOptions(script = read('packages/cli/src/runCli.ts')): Set<st
       ts.isFunctionDeclaration(node) && node.name?.text === 'layersCommand',
   );
   if (!command?.body) return accepted;
+  const argsName =
+    command.parameters[0] && ts.isIdentifier(command.parameters[0].name)
+      ? command.parameters[0].name.text
+      : undefined;
+  if (!argsName) return accepted;
+
+  const argumentTokens = new Set<string>();
+  const collectArgumentTokens = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.initializer) {
+      const initializer = unwrapExpression(node.initializer);
+      if (
+        ts.isElementAccessExpression(initializer) &&
+        identifierName(initializer.expression) === argsName
+      ) {
+        argumentTokens.add(node.name.text);
+      }
+    }
+    ts.forEachChild(node, collectArgumentTokens);
+  };
+  collectArgumentTokens(command.body);
+
+  const isArgumentToken = (node: ts.Expression): boolean => {
+    const name = identifierName(node);
+    if (name && argumentTokens.has(name)) return true;
+    node = unwrapExpression(node);
+    return (
+      ts.isElementAccessExpression(node) && identifierName(node.expression) === argsName
+    );
+  };
 
   const visit = (node: ts.Node): void => {
     if (
       ts.isBinaryExpression(node) &&
       node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
     ) {
-      const flag = exactOption(node.left) ?? exactOption(node.right);
+      const leftFlag = exactOption(node.left);
+      const rightFlag = exactOption(node.right);
+      const flag =
+        leftFlag && isArgumentToken(node.right)
+          ? leftFlag
+          : rightFlag && isArgumentToken(node.left)
+            ? rightFlag
+            : undefined;
       if (flag) accepted.add(flag);
     }
     if (ts.isCallExpression(node)) {
       const callee = node.expression;
       const flag =
-        ts.isPropertyAccessExpression(callee) && callee.name.text === 'includes'
+        ts.isPropertyAccessExpression(callee) &&
+        callee.name.text === 'includes' &&
+        identifierName(callee.expression) === argsName
           ? exactOption(node.arguments[0])
-          : ts.isIdentifier(callee) && callee.text === 'takeFlagValue'
+          : ts.isIdentifier(callee) &&
+              callee.text === 'takeFlagValue' &&
+              identifierName(node.arguments[0]) === argsName
             ? exactOption(node.arguments[1])
             : undefined;
       if (flag) accepted.add(flag);
@@ -344,10 +403,15 @@ describe('skill が CLI に渡す option を CLI が受け取る', () => {
       function otherCommand(args: string[]) { return args.includes('--other-command'); }
       function layersCommand(args: string[]) {
         const arg = args[0];
+        const otherArgs: string[] = [];
+        const marker = '--not-an-option';
         if (arg === '--json') return;
         if (args.includes('--lang')) return;
         takeFlagValue(args, '--module');
         if (arg.startsWith('--equals-only=')) return;
+        if (marker === '--comparison-only') return;
+        if (otherArgs.includes('--other-collection')) return;
+        takeFlagValue(otherArgs, '--other-argv');
         throw new Error('--message-only');
       }
     `;
