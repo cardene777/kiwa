@@ -122,11 +122,14 @@ export function unresolvedUses(code: string, exported: Set<string>): string[] {
   const called = new Set<string>();
   const visit = (node: ts.Node): void => {
     if (ts.isImportDeclaration(node)) {
-      const bindings = node.importClause?.namedBindings;
-      if (bindings && ts.isNamedImports(bindings)) {
-        for (const element of bindings.elements) bound.add(element.name.text);
+      const importClause = node.importClause;
+      const bindings = importClause?.namedBindings;
+      if (importClause && !importClause.isTypeOnly && bindings && ts.isNamedImports(bindings)) {
+        for (const element of bindings.elements) {
+          if (!element.isTypeOnly) bound.add(element.name.text);
+        }
       }
-      if (node.importClause?.name) bound.add(node.importClause.name.text);
+      if (importClause?.name && !importClause.isTypeOnly) bound.add(importClause.name.text);
     } else if (ts.isFunctionDeclaration(node) && node.name) {
       bound.add(node.name.text);
     } else if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
@@ -222,6 +225,25 @@ describe('SKILL.md の sample が実在する API を import している', () =
     expect(unresolvedUses(defined, exported), 'fence 内定義を未解決に数えている').toEqual([]);
     const used = "await waitForChainState({ publicClient: pub });";
     expect(unresolvedUses(used, exported), '未 import の呼出を拾えていない').toEqual([
+      'waitForChainState',
+    ]);
+  });
+
+  it('type-only import は実行時の呼出を解決したとみなさない', () => {
+    const exported = new Set(['waitForChainState']);
+    const importType = [
+      "import type { waitForChainState } from '@kiwa-lab/dapp';",
+      'await waitForChainState({ publicClient: pub });',
+    ].join('\n');
+    expect(unresolvedUses(importType, exported), 'import type の呼出を解決済みにしている').toEqual([
+      'waitForChainState',
+    ]);
+
+    const inlineType = [
+      "import { type waitForChainState } from '@kiwa-lab/dapp';",
+      'await waitForChainState({ publicClient: pub });',
+    ].join('\n');
+    expect(unresolvedUses(inlineType, exported), 'inline type import の呼出を解決済みにしている').toEqual([
       'waitForChainState',
     ]);
   });
