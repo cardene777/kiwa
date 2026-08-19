@@ -114,7 +114,14 @@ describe('kiwa-observe の Step 0 が観測対象に範囲を絞る', () => {
     // Step 0 の契約は 5 要素 (`vitest run` / `--root` / `--passWithNoTests` /
     // `--reporter=json` / `--outputFile`) で、 本 file は 4 要素しか照合していなかった
     // (docs/quality/check-authoring.md § 複数の要素を要求する契約では「全要素」 が最小の形)。
-    expect(stepZeroCommand(), '--reporter=json を渡していない').toContain('--reporter=json');
+    // fence 内の comment に引数の語だけ残っても保証にはならない。 実行行から comment を
+    // 除いた後に照合し、 引数を comment out した変異も FAIL させる。
+    const executable = stepZeroCommand()
+      .split('\n')
+      .filter((line) => !line.trimStart().startsWith('#'))
+      .map((line) => line.replace(/\s+#.*$/, ''))
+      .join('\n');
+    expect(executable, '--reporter=json を渡していない').toContain('--reporter=json');
   });
 
   it('出力先を --root 相対で書いている', () => {
