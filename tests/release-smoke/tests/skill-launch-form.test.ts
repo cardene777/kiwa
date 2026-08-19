@@ -221,8 +221,17 @@ describe('/kiwa-release-check の宣言が script と一致する', () => {
     const declared = [...section.matchAll(/^- `(--[a-z][a-z0-9-]*)/gm)].map((m) => m[1]!);
     expect(declared.length, '引数仕様が 1 件も読めない').toBeGreaterThan(0);
     const script = read('scripts/release-readiness-check.mjs');
+    const code = script.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    const accepted = new Set<string>();
+    const optionCheck = /\.(?:includes|startsWith)\((['"])(--[a-z][a-z0-9-]*)(?:=[^'"]*)?\1\)/g;
+    for (const match of code.matchAll(optionCheck)) {
+      const flag = match[2];
+      if (flag !== undefined) accepted.add(flag);
+    }
     for (const flag of declared) {
-      expect(script, `script が ${flag} を受け取らない (宣言だけ残っている)`).toContain(flag);
+      expect(accepted.has(flag), `script が ${flag} を受け取らない (宣言だけ残っている)`).toBe(
+        true,
+      );
     }
   });
 });
