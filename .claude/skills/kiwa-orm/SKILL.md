@@ -116,17 +116,11 @@ drizzle / prisma / kysely の 3 種は spec の中身から読み取る選択で
 
 ## 9 column 表 (Layer 1 spec が出力する形式)
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-ORM-001` 等の連番 |
-| Observation | 観点 (insert / select / where filter / update / delete / FK 制約 / migration / seed / 並行 env 隔離 等) |
-| Given | 初期 state (`seed` で挿入する rows / `migrations` で適用する SQL) |
-| Method | drizzle query type (`select` / `insert` / `update` / `delete` / `raw SQL`) |
-| Query | 期待 query (`db.select().from(users).where(eq(users.id, 1))` 等) |
-| Then | 期待 (`rows.length === N`、 `rows[0].email === '...'`、 `expectRowCount(env, 'users', N)`、 `expect(() => ...).toThrow(/FK constraint/)`) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Table | 対象 table 名 (`users` / `posts` 等) |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### orm-query layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
+
+列を `@kiwa-lab/orm` の `setupOrmEnv` / `expectQuery` / `expectRowCount` のどの引数へ渡すかは本 skill の mapping 節が持つ。
 
 ## test 生成 template
 

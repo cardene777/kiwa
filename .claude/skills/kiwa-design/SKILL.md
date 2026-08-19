@@ -754,6 +754,90 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.rsc.md` (`.rsc.md` suffix で RSC test 経路向けと識別)。
 
+#### nextjs-parallel-route layer 専用 column (Next.js Parallel Routes)
+
+`--layer nextjs-parallel-route` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/nextjs` の `invokeParallelRoutes` と直接 mapping、 Issue #523)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-PR-001` 等の連番 |
+| Observation | 観点 (multi-slot render / parallel await / per-slot error isolation / default fallback / intercepting variant / zero slots edge case 等) |
+| Layout | 対象 layout 関数の identifier (`DashboardLayout` / `PhotoFeedLayout` 等) |
+| Slots | slot 配列 (`[{ slot: 'modal', component: PhotoModal, defaultFallback?, intercepting? }, { slot: 'sidebar', component: Sidebar }]`) |
+| Children | `children` slot の component + props (`{ component: PostsPage, props: { page: 1 } }`) |
+| Then | 期待 (`tree.tag==='layout'` / `slotResults[0].tree===...` / `slotResults[0].error.message==='boom'` / `slotResults[0].interception.variant==='intercepted'` / `slotResults[0].usedDefault===true`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Variant | Intercepting 動作 (`none` / `intercepted` (soft-nav) / `default` (hard-nav)) |
+
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs` の `invokeParallelRoutes` の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.parallel.md`。
+
+#### nextjs-rsc-streaming layer 専用 column (Next.js RSC streaming)
+
+`--layer nextjs-rsc-streaming` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/nextjs` の `setupNextRscEnv` と直接 mapping、 Issue #558)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-RST-001` 等の連番 |
+| Observation | 観点 (single-chunk / streaming order / Suspense fallback / fallback-only / component throw / mid-stream throw / injectError / streamingTimeout / dataSource precedence 等) |
+| Source | dataSource async generator の identifier (`streamItems()` / `slowSource()`) または component の identifier (`Page` / `ItemsPageRSC`) |
+| Fallback | `suspenseFallback` markup (`<Skeleton />` 相当の RscNode) または `none` |
+| Timeout | `streamingTimeout` (ms、 default 5000)、 `0` は fail-fast |
+| ErrorMode | `none` / `injectError` / `component-throw` / `stream-throw` のいずれか |
+| Then | 期待 (`chunks.length===N` / `chunks[0]===fallback` / `resolved===<Item />` / `errorBoundary?.error.message==='...'` / `timedOut===true`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs` の `setupNextRscEnv` の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.rsc-streaming.md`。
+
+#### orm-query layer 専用 column (Drizzle / Prisma / Kysely)
+
+`--layer orm-query` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/orm` の `setupOrmEnv` / `expectQuery` / `expectRowCount` と直接 mapping、 Issue #1074)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-ORM-001` 等の連番 |
+| Observation | 観点 (insert / select / where filter / update / delete / FK 制約 / migration / seed / 並行 env 隔離 等) |
+| Given | 初期 state (`seed` で挿入する rows / `migrations` で適用する SQL) |
+| Method | drizzle query type (`select` / `insert` / `update` / `delete` / `raw SQL`) |
+| Query | 期待 query (`db.select().from(users).where(eq(users.id, 1))` 等) |
+| Then | 期待 (`rows.length === N`、 `rows[0].email === '...'`、 `expectRowCount(env, 'users', N)`、 `expect(() => ...).toThrow(/FK constraint/)`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Table | 対象 table 名 (`users` / `posts` 等) |
+
+`/kiwa-orm` Layer 2 skill が本 9 column を `@kiwa-lab/orm` の `setupOrmEnv` / `expectQuery` / `expectRowCount` の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.orm.md`。
+
+#### edge-handler layer 専用 column (Cloudflare Workers 形式の fetch handler)
+
+`--layer edge-handler` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/edge` の `invokeEdgeHandler` と直接 mapping、 Issue #1663)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-EDGE-001` 等の連番 |
+| Observation | 観点 (正常 / GET / POST / KV read / KV write / waitUntil / redirect / 異常系 / passThroughOnException 等) |
+| Given | URL + method + headers + body + env bindings seed (`{ MY_KV: createKvNamespace({...}), API_KEY: 'secret' }`) |
+| Method | `GET` / `POST` / `PUT` / `DELETE` / `PATCH` |
+| Then | 期待 (`response.status===200` / `await response.json()===...` / `ctx.waitedPromises.length===1` / `redirect.url==='/login'` / `await env.MY_KV.get('foo')==='bar'` 等) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Handler | 対象 edge handler の identifier (`export default` / `worker.fetch` 等) |
+| Bindings | 使用 env binding (`KV: MY_KV` / `R2: BUCKET` / `D1: DB` / `var: API_KEY` 等) |
+
+`/kiwa-edge` Layer 2 skill が本 9 column を `@kiwa-lab/edge` の `invokeEdgeHandler` の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.edge.md`。
+
 ### Step 5: 優先度付け + 自動化方針
 
 優先度は Step 2 のリスク要約から導出 (skill が勝手に判定しない、 SSOT `docs/SKILL-DESIGN.ja.md` § Step 5 と完全一致):

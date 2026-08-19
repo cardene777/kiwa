@@ -106,17 +106,11 @@ Cloudflare Workers / Vercel Edge / 汎用 ESM fetch handler の違いは spec �
 
 ## 9 column 拡張表 (`/kiwa-design --layer edge-handler`)
 
-| 項目 | 内容 |
-|---|---|
-| ID | `T-EDGE-001` 等の連番 |
-| Observation | 観点 (正常 / GET / POST / KV read / KV write / waitUntil / redirect / 異常系 / passThroughOnException 等) |
-| Given | URL + method + headers + body + env bindings seed (`{ MY_KV: createKvNamespace({...}), API_KEY: 'secret' }`) |
-| Method | `GET` / `POST` / `PUT` / `DELETE` / `PATCH` |
-| Then | 期待 (`response.status===200` / `await response.json()===...` / `ctx.waitedPromises.length===1` / `redirect.url==='/login'` / `await env.MY_KV.get('foo')==='bar'` 等) |
-| Priority | `P0` / `P1` / `P2` / `P3` |
-| Automation | `yes` / `no` / `manual` |
-| Handler | 対象 edge handler の identifier (`export default` / `worker.fetch` 等) |
-| Bindings | 使用 env binding (`KV: MY_KV` / `R2: BUCKET` / `D1: DB` / `var: API_KEY` 等) |
+列の定義は `/kiwa-design` が持つ (`.claude/skills/kiwa-design/SKILL.md` §
+`#### edge-handler layer 専用 column`)。 **ここに写しを置かない** = 写しは片方だけ
+直った時に気付けない。
+
+列を `@kiwa-lab/edge` の `invokeEdgeHandler` のどの引数へ渡すかは本 skill の mapping 節が持つ。
 
 ## test 生成 template
 
