@@ -573,11 +573,11 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(shadowedSources(src)).toEqual(['target']);
   });
 
-  it('手順の doc が実在し 3 形を持つ', () => {
+  it('手順の doc が実在し 4 形を持つ', () => {
     // 失敗 message が doc を指すため、 消えると案内先が消える。
     const doc = read('docs/quality/check-authoring.md');
-    expect(doc).toContain('## 3 つの形');
-    expect(doc).toContain('本 file は 13 回の実測から書いた');
+    expect(doc).toContain('## 4 つの形');
+    expect(doc).toContain('本 file は 17 回の実測から書いた');
     expect(doc).toContain('### 形 1 — 0 件でも通る');
     expect(doc).toContain('### 形 2 — 集合を畳むと片側の欠落が消える');
     // 形 2 を機械化しない根拠は実測 (#2013)。 数字が消えると、 次に同じ問いが出た時に
@@ -635,6 +635,17 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     // proxy の外れ方は 5 通り。 うち 3 つは手順を回して初めて出た = 数字を消すと、
     // 次に数えた人が同じ 3 つを踏み直す。
     expect(doc).toContain('**この proxy は 5 通りに外れる**');
+    // 形 4 = 照合する範囲が代理指標になる (#2026)。 4 実例はそれぞれ別の道具で踏んだ
+    // 独立した判断なので、 1 件で代表させない (形 3 § 複数の要素を要求する契約)。
+    expect(doc).toContain('### 形 4 — 照合する範囲が代理指標になる');
+    expect(doc).toContain('| 1 | fence 全体 | 1 つの実行行 |');
+    expect(doc).toContain('| 2 | 見出しから次の `###` まで |');
+    expect(doc).toContain('| 3 | script 全文 | 実行される code |');
+    expect(doc).toContain('| 4 | 行頭 comment を除いた text | 構文木上の呼出 |');
+    // 対処の 2 本。 見出しと実例だけを守ると、 直し方が消えても気付けない。
+    expect(doc).toContain('**comment を除く処理は構文で行う**');
+    expect(doc).toContain('**範囲を切る処理そのものにも変異を当てる**');
+    expect(doc).toContain('| 照合する範囲が代理指標 | しない |');
   });
 
   it('別名に代入した保証は受けない', () => {
