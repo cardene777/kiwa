@@ -411,6 +411,26 @@ describe('/kiwa-release-check の宣言が script と一致する', () => {
   });
 });
 
+/**
+ * USAGE の `<command> options:` block が宣言している option。
+ *
+ * 範囲は **block の見出しから次の空行まで**。 説明の続き行は行頭が 2 space を超えるため、
+ * 宣言行 (`  --x ...`) だけを取る形にすると本文中の `--x` を拾わない (§ 形 4)。
+ */
+function usageOptions(script: string, command: string): Set<string> {
+  const start = script.indexOf(`${command} options:`);
+  if (start < 0) return new Set();
+  const rest = script.slice(start);
+  const end = rest.indexOf('\n\n');
+  const block = end === -1 ? rest : rest.slice(0, end);
+  const options = new Set<string>();
+  for (const line of block.split('\n')) {
+    const declared = /^ {2}(--[a-z][a-z0-9-]*)(?=\s|$)/.exec(line);
+    if (declared?.[1]) options.add(declared[1]);
+  }
+  return options;
+}
+
 describe('skill が CLI に渡す option を CLI が受け取る', () => {
   it('argv 判定だけを受理の証拠にする', () => {
     const script = `
@@ -479,5 +499,41 @@ describe('skill が CLI に渡す option を CLI が受け取る', () => {
       'HITS=$(printf %s "$OUT" | jq -r --arg id "$LAYER" \'.layers\')',
     ].join('\n');
     expect(layersOptions(fence)).toEqual(['--json', '--layer']);
+  });
+});
+
+describe('USAGE と parser が同じ option を持つ', () => {
+  it('`layers options:` の宣言と受理集合が一致する', () => {
+    // 向きで症状が違う。 **USAGE 側にだけある option は渡しても黙って無視される** =
+    // PR #2029 で塞いだのと同じ silent な向き。 parser 側にだけある option は使えるのに
+    // 誰も知らない (loud ではないが実害は小さい)。 集合一致で両向きを見る。
+    const script = read('packages/cli/src/runCli.ts');
+    const documented = usageOptions(script, 'layers');
+    const accepted = cliAcceptedOptions(script);
+    // 0 件で通る形を作らない (§ 形 1)。 書式が変わって 1 件も取れなくなると、
+    // 空集合どうしが一致して緑になる。
+    expect(documented.size, 'USAGE から option を 1 件も読めない').toBeGreaterThan(0);
+    expect(accepted.size, 'parser から option を 1 件も読めない').toBeGreaterThan(0);
+    expect([...documented].sort(), 'USAGE と parser の option がずれている').toEqual(
+      [...accepted].sort(),
+    );
+  });
+
+  it('block の切り出しが次の block と説明文を含まない', () => {
+    // 範囲の 3 点 (先頭から始まる / 次を含まない / 潰れていない) を fixture で固定する。
+    // 実装中に範囲が潰れる形を 2 度踏んでいる (PR #2025 / PR #2027)。
+    const script = [
+      'Usage: kiwa <command>',
+      '',
+      'layers options:',
+      '  --layer L                     Use L instead of the detection.',
+      '  --json                        Emit one record per layer.',
+      '                                --producer and --project-root add test_paths.',
+      '',
+      'init options:',
+      '  --force                       Overwrite existing files.',
+    ].join('\n');
+    const options = usageOptions(script, 'layers');
+    expect([...options].sort(), '宣言行以外を拾っている').toEqual(['--json', '--layer']);
   });
 });
