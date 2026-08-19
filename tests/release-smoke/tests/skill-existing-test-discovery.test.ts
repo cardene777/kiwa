@@ -153,12 +153,22 @@ function stepBashFence(skill: string, heading: RegExp): string {
   return fences.join('\n');
 }
 
-/** 指定見出しより後で最初に現れる bash fence。 Step 以外の小見出しにも使う。 */
+/** 指定見出しの section で最初に現れる bash fence。 Step 以外の小見出しにも使う。 */
 function bashFenceAfter(body: string, heading: RegExp): string {
   const at = body.search(heading);
   if (at < 0) throw new Error(`${heading} が見つからない`);
-  const fence = /```bash\n([\s\S]*?)```/.exec(body.slice(at));
-  if (!fence) throw new Error(`${heading} より後に bash fence が無い`);
+  const rest = body.slice(at);
+  const headingLine = rest.split('\n', 1)[0]!;
+  const level = /^#+/.exec(headingLine)?.[0].length;
+  if (level === undefined) throw new Error(`${heading} が markdown 見出しでない`);
+  const section = rest.slice(headingLine.length + 1);
+  const nextHeading = section.search(new RegExp(`^#{1,${level}}\\s`, 'm'));
+  const fenceAt = section.search(/^```bash$/m);
+  if (fenceAt < 0 || (nextHeading >= 0 && nextHeading < fenceAt)) {
+    throw new Error(`${heading} の section に bash fence が無い`);
+  }
+  const fence = /```bash\n([\s\S]*?)```/.exec(section.slice(fenceAt));
+  if (!fence) throw new Error(`${heading} の bash fence が閉じていない`);
   return fence[1]!;
 }
 
@@ -452,7 +462,7 @@ describe('/kiwa-design が既存 test を探す', () => {
     // `findCommands` は `find ` を落として返すため、 起点は先頭に出る。
     expect(playFinds[0], '/kiwa-play の探索起点が project 全体でない').toMatch(/^\.\s/);
     // flag も 3 つとも要る (#2017 と同じ形)。 候補は `file:行番号` で書くため。
-    const flags = [...play.matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
+    const flags = [...playFence.matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
     expect(flags.length, '/kiwa-play に抽出段が無い').toBeGreaterThan(0);
     for (const flag of flags) {
       for (const required of ['n', 'H', 'E']) {
