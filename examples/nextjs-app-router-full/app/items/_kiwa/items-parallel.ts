@@ -55,7 +55,7 @@ export function ItemsList(): RscNode {
   });
 }
 
-/** `@detail` slot。 id が解決できなければ throw する (default fallback に落ちる)。 */
+/** `@detail` slot。 id が解決できなければ throw し、 slot error として捕捉される。 */
 export function ItemDetail(props: { readonly id?: number }): RscNode {
   const item = ITEMS.find((candidate) => candidate.id === props.id);
   if (item === undefined) throw new Error(`item ${String(props.id)} not found`);

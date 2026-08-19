@@ -6,15 +6,15 @@
 - module: items
 - layer: nextjs-rsc
 
-## テストケース
+## テストケース一覧
 
-| ID | Observation | Given | When | Then | Priority | Automation | Mode |
-|---|---|---|---|---|---|---|---|
-| T-NF-201 | 認証済は一覧を描く | session=admin | renderServerComponent | `h1` + `li` 3 件 | P0 | yes | rsc |
-| T-NF-202 | 未 login は案内を描く | cookie 無し | renderServerComponent | Sign in required の文言 | P0 | yes | rsc |
-| T-NF-203 | 停止中は拒否を描く | session=banned | renderServerComponent | Forbidden + `data-testid=banned` | P0 | yes | rsc |
-| T-NF-204 | tag で絞り込む | `searchParams.tag=framework` | renderServerComponent | 2 件に絞られる | P1 | yes | rsc |
-| T-NF-205 | 別 tag でも絞れる | tag=react | renderServerComponent | 2 件 hit | P1 | yes | rsc |
+| ID | Observation | Component | Props | Then | Priority | Automation | Mode | Signal |
+|---|---|---|---|---|---|---|---|---|
+| T-NF-201 | 認証済は一覧を描く | `ItemsPageRSC` | `sessionGetter=admin` | `h1` 1 件 + `li` 3 件 | P0 | yes | direct | none |
+| T-NF-202 | 未 login は案内を描く | `ItemsPageRSC` | `sessionGetter=null` | Sign in required の文言 | P0 | yes | direct | none |
+| T-NF-203 | 停止中は拒否を描く | `ItemsPageRSC` | `sessionGetter=banned` | Forbidden + `data-testid=banned` | P0 | yes | direct | none |
+| T-NF-204 | tag で絞り込む | `ItemsPageRSC` | `sessionGetter=admin, searchParams={tag:'framework'}` | `li` 2 件 + 2 items の文言 | P1 | yes | direct | none |
+| T-NF-205 | 別 tag でも絞れる | `ItemsPageRSC` | `sessionGetter=admin, searchParams={tag:'react'}` | `li` 2 件 | P1 | yes | direct | none |
 
 ## 自動化方針
 

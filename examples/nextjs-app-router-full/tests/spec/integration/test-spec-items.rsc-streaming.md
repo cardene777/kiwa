@@ -6,15 +6,15 @@
 - module: items
 - layer: nextjs-rsc-streaming
 
-## テストケース
+## テストケース一覧
 
-| ID | Observation | Given | When | Then | Priority | Automation | Mode |
-|---|---|---|---|---|---|---|---|
-| T-NS-301 | 正常 stream | 4 chunk source | setupNextRscEnv | fallback + 4 chunk + resolved = 最終 list | P0 | yes | rsc-streaming |
-| T-NS-302 | fallback を chunk 0 として出す | 同上 | setupNextRscEnv | `env.fallback` と chunk 0 が一致 | P0 | yes | rsc-streaming |
-| T-NS-303 | 途中の失敗は boundary が捕まえる | chunk 2 で throw | setupNextRscEnv | `errorBoundary` に捕捉、 `resolved` は null | P0 | yes | rsc-streaming |
-| T-NS-304 | 遅い stream を打ち切る | streamingTimeout 超過 | setupNextRscEnv | fail fast する | P1 | yes | rsc-streaming |
-| T-NS-305 | chunk が単調に増える | 同上 | setupNextRscEnv | partial の `data-count` が単調増加 | P1 | yes | rsc-streaming |
+| ID | Observation | Source | Fallback | Timeout | ErrorMode | Then | Priority | Automation |
+|---|---|---|---|---|---|---|---|---|
+| T-NS-301 | 正常 stream | `streamItems()` | `itemsSkeleton()` | 5000 | none | fallback + 4 chunk + resolved = 最終 list | P0 | yes |
+| T-NS-302 | fallback を chunk 0 として出す | `streamItems()` | `itemsSkeleton()` | 5000 | none | `env.fallback` と chunk 0 が一致 | P0 | yes |
+| T-NS-303 | 途中の失敗は boundary が捕まえる | `streamItems({injectErrorAt:1})` | `itemsSkeleton()` | 5000 | stream-throw | `errorBoundary` に捕捉、 `resolved` は null | P0 | yes |
+| T-NS-304 | 遅い stream を打ち切る | `slowSource()` | none | 20 | none | `timedOut === true`、 `resolved` は null | P1 | yes |
+| T-NS-305 | chunk が単調に増える | `streamItems()` | none | 5000 | none | partial の `data-count` が `[1, 2, 3, 3]` | P1 | yes |
 
 ## 自動化方針
 

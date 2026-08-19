@@ -7,16 +7,16 @@
 - module: items
 - layer: nextjs-server-action
 
-## テストケース
+## テストケース一覧
 
-| ID | Observation | Given | When | Then | Priority | Automation | Mode |
-|---|---|---|---|---|---|---|---|
-| T-NF-001 | session 不在は login へ送る | cookie 無し | createItemAction | `REDIRECT_SYMBOL` で `/login` | P0 | yes | server-action |
-| T-NF-002 | 停止中の利用者は拒む | session=banned | createItemAction | `Error` を throw | P0 | yes | server-action |
-| T-NF-003 | 空の name を弾く | name 空 | createItemAction | `{ ok: false, field, message }` | P0 | yes | server-action |
-| T-NF-004 | 短すぎる name を弾く | name 1 文字 | createItemAction | `{ ok: false }` に minlength | P1 | yes | server-action |
-| T-NF-005 | 禁止語を弾く | name=danger | createItemAction | `Error` を throw | P1 | yes | server-action |
-| T-NF-006 | 成功時の副作用 | 正常な name | createItemAction | `{ ok: true, id, name }` + `cookies.set('last-created')` + `revalidatePath` | P0 | yes | server-action |
+| ID | Observation | Given | FormData | Args | Then | Priority | Automation | Action |
+|---|---|---|---|---|---|---|---|---|
+| T-NF-001 | session 不在は login へ送る | cookie 無し | `name=nextjs` | none | `REDIRECT_SYMBOL` で `/login` | P0 | yes | `createItemAction` |
+| T-NF-002 | 停止中の利用者は拒む | `session=banned` | `name=nextjs` | none | `Error('banned')` を throw | P0 | yes | `createItemAction` |
+| T-NF-003 | 空の name を弾く | `session=admin` | `name=` | none | `{ ok: false, field: 'name', message: 'name is required' }` | P0 | yes | `createItemAction` |
+| T-NF-004 | 短すぎる name を弾く | `session=admin` | `name=a` | none | `{ ok: false }` かつ minlength message | P1 | yes | `createItemAction` |
+| T-NF-005 | 禁止語を弾く | `session=admin` | `name=danger` | none | `Error('danger forbidden')` を throw | P1 | yes | `createItemAction` |
+| T-NF-006 | 成功時の副作用 | `session=admin` | `name=nextjs, seed=200` | none | `{ ok: true, id: 206, name: 'nextjs' }` + `cookies.set('last-created', '206')` + `revalidatePath('/items')` | P0 | yes | `createItemAction` |
 
 ## 自動化方針
 
