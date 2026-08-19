@@ -116,10 +116,20 @@ spec が存在しない場合は「Layer 1 spec が未生成、 `/kiwa-design --
 ### Step 2: contract 実体確認
 
 ```bash
-ls contracts/ src/ 2>/dev/null
-grep -E "function |event |error |modifier " contracts/*.sol src/*.sol 2>/dev/null
+grep -nHE "^[[:space:]]*(function|event|error|modifier)[[:space:]]" -- "${CONTRACT_PATHS[@]}"
 npx hardhat compile 2>&1 | tail -10
 ```
+
+`$CONTRACT_PATHS` は Step 1 で spec の「対象機能」 から抽出した、 対象実装の repo 相対 path
+だけを持つ配列。 各要素が repo 内の通常 file であることを Read 前に確認し、 絶対 path / `..` /
+symlink は拒否する。 0 件なら Step 2 を中断し、 対象 path が spec に無いと報告する。 `grep` の
+`--` は、 `-` から始まる path を option として解釈させないために省略しない。
+
+**glob を並べず、 project 全体も探索しない**。 `contracts/*.sol src/*.sol` の形は、 片方の dir が
+無いと zsh が `no matches found` で **command 全体を止める** = 出力 0 件になる (実測 =
+`examples/mint-nft` は `src/` を持たず、 `contracts/` があるのに 1 行も出ない)。 一方で
+`find . -name '*.sol'` は `test/` や別 contract まで含み、 production に無い API が test 側に
+あるだけで実装済みと誤判定する。 `/kiwa-forge` Step 2 と同じ形。
 
 spec の function / error が実 contract に存在しなければ「不足している仕様」として記録、 Step 3 に進む前にユーザーに報告。
 
@@ -227,9 +237,19 @@ npm ls solidity-coverage >/dev/null 2>&1 || pnpm add --save-dev solidity-coverag
 #### Step 5a: coverage 計測 + file 分類
 
 ```bash
+mkdir -p tests/reports/contract
 npx hardhat coverage 2>&1 | tee tests/reports/contract/coverage-{module}.log
-cat coverage/coverage-summary.json 2>/dev/null || cat coverage/lcov.info
+cat coverage/coverage-final.json 2>/dev/null || cat coverage/lcov.info
 ```
+
+`tee` は親 dir を作らない。 `mkdir -p` を前段に置かないと log が保存されない (実測 =
+`tee: tests/reports/contract/coverage-mint-nft.log: No such file or directory`、 pipeline の
+exit code は 0 のままなので気付きにくい)。
+
+読む先は **`coverage-final.json`**。 solidity-coverage が書くのは `coverage/coverage-final.json`
+/ `coverage/lcov.info` / `./coverage.json` で、 **`coverage-summary.json` は生成されない**
+(istanbul の `json-summary` reporter を有効にした時だけ出る、 実測)。 存在しない file を
+primary に置くと毎回 fallback に落ち、 分類が想定と違う構造を読む。
 
 solidity-coverage 出力 (json / lcov) を file path で分類 (rule SSOT は `references/coverage-classify.md`):
 

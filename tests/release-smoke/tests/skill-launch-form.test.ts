@@ -257,25 +257,55 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     expect(lcovIndex, 'mkdir が coverage の後に来ている').toBeGreaterThan(mkdir);
   });
 
-  it('/kiwa-forge の contract 探索が spec の対象 path だけを見る', () => {
+  it('contract 探索を持つ skill が 1 件以上ある', () => {
+    // 0 件だと下の `it.each` が 1 件も生成されず、 探索形の検査が消える (§ 形 1)。
+    expect(CONTRACT_SKILLS.length).toBeGreaterThan(0);
+  });
+
+  it.each(CONTRACT_SKILLS)('%s の contract 探索が spec の対象 path に限定される', (skill) => {
     // `contracts/*.sol src/*.sol` の形は、 片方の dir が無いと zsh が `no matches found` で
-    // **command 全体を止める** = 出力 0 件になる (実測 = `examples/dogfood-foundry-dapp` は
-    // `src/` を持たず、 `contracts/` があるのに 1 行も出ない)。 bash では動くため shell 依存。
-    const fence = fenceUnder('kiwa-forge', /^### Step 2: /m, 'bash');
-    const lines = executableLines(fence).split('\n');
-    const grep = lines.find((line) => line.includes('grep'));
+    // **command 全体を止める** = 出力 0 件になる (実測 = `examples/dogfood-foundry-dapp` と
+    // `examples/mint-nft` はどちらも `src/` を持たない)。 bash では動くため shell 依存。
+    //
+    // 一方 `find . -name '*.sol'` は `test/` まで含み、 production に無い API が test 側に
+    // あるだけで実装済みと誤判定する。 spec が指定した path だけを見る。
+    const fence = fenceUnder(skill, /^### Step 2: /m, 'bash');
+    const grep = commandLine(fence, 'grep');
     expect(grep, 'Step 2 に抽出段が無い').toBeDefined();
-    expect(grep, 'glob を並べた grep のまま (shell 依存で 0 件になる)').not.toMatch(/\*\.sol\s+\S+\*\.sol/);
+    // `--` が無いと `-` で始まる path を option として解釈する。
+    expect(grep, 'option 終端 (--) 付きで対象 path を渡していない').toContain(
+      '-- "${CONTRACT_PATHS[@]}"',
+    );
+    expect(grep, 'glob を並べた grep のまま (shell 依存で 0 件になる)').not.toMatch(
+      /\*\.sol\s+\S+\*\.sol/,
+    );
     for (const required of ['n', 'H', 'E']) {
       expect(grep, `抽出が -${required} を付けていない`).toMatch(
         new RegExp(`grep\\s+-[a-zA-Z]*${required}`),
       );
     }
-    // project 全体を find すると test / mock / monorepo 内の別 contract が候補へ混ざり、
-    // production に無い API を test 側の同名宣言で実装済みと誤判定する。
-    expect(grep, 'spec から抽出した対象 path を使っていない').toContain('"${CONTRACT_PATHS[@]}"');
-    expect(grep, 'spec 由来 path の前で option を終端していない').toContain('-- "${CONTRACT_PATHS[@]}"');
-    expect(lines.some((line) => line.includes('find .'))).toBe(false);
+  });
+
+  it('/kiwa-hardhat の coverage が実在する file を読む', () => {
+    // solidity-coverage が書くのは `coverage-final.json` / `lcov.info` / `./coverage.json` で、
+    // **`coverage-summary.json` は生成されない** (istanbul の `json-summary` reporter を
+    // 有効にした時だけ出る、 実測)。 存在しない file を primary に置くと毎回 fallback に落ち、
+    // 分類が想定と違う構造を読む。
+    const lines = executableLines(
+      fenceUnder('kiwa-hardhat', /^#### Step 5a: /m, 'bash'),
+    ).split('\n');
+    const read = lines.find((line) => line.includes('coverage/'));
+    expect(read, 'coverage の読込行が無い').toBeDefined();
+    expect(read, '生成されない coverage-summary.json を読んでいる').not.toContain(
+      'coverage-summary.json',
+    );
+    expect(read, '実在する coverage file を読んでいない').toContain('coverage/coverage-final.json');
+    // `tee` は親 dir を作らない。 pipeline の exit code は 0 のままなので気付きにくい。
+    const mkdir = lines.findIndex((line) => line.includes('mkdir -p tests/reports/contract'));
+    const tee = lines.findIndex((line) => line.includes('tee tests/reports/contract'));
+    expect(mkdir, '出力先 dir を作っていない').toBeGreaterThanOrEqual(0);
+    expect(tee, 'log の tee 行が無い').toBeGreaterThanOrEqual(0);
+    expect(tee, 'mkdir が tee の後に来ている').toBeGreaterThan(mkdir);
   });
 
   it('/kiwa-hardhat の solidity-coverage install が --save-dev を渡す', () => {
@@ -561,6 +591,9 @@ describe('USAGE と parser が同じ option を持つ', () => {
     expect([...options].sort(), '宣言行以外を拾っている').toEqual(['--json', '--layer']);
   });
 });
+
+/** contract 実体確認 (Step 2) を持つ skill。 探索形は 2 skill で同じ。 */
+const CONTRACT_SKILLS = ['kiwa-forge', 'kiwa-hardhat'] as const;
 
 describe('/kiwa-nextjs の手順が実行できる形になっている', () => {
   const STEP_2 = /^### Step 2: /m;
