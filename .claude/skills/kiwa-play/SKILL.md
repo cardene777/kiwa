@@ -127,9 +127,19 @@ spec.ts 実装の前に Layer 1 の 9 section + 9 column 仕様書 (SSOT = `docs
 ```bash
 ls contracts/ tests/ app/ 2>/dev/null
 wc -l contracts/*.sol tests/*.spec.ts 2>/dev/null
-grep -E "function |event |error |modifier " contracts/*.sol | head -30
-grep -E "^test\(|^test\.describe\(" tests/*.spec.ts | head -20
+grep -nH -E "function |event |error |modifier " contracts/*.sol | head -30
+find tests -type d -name node_modules -prune -o -type f \
+  \( -name '*.spec.ts' -o -name '*.spec.tsx' \) -print0 |
+  xargs -0 grep -nHE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\(" | head -20
 ```
+
+**走査は `/kiwa-design` Step 2 と同じ形にする**。 `^test\(` で始まる形だけを見ると
+**`describe` の中に入った test を 1 件も拾わない** = 実測で 12 件の test を持つ
+`examples/nextjs-staking` が「`test.describe` 1 行」 に見えた。 Layer 1 にはこの結果が
+「既存 test」 として渡るため、 既にある test を重複して起こす。
+
+`-n` と `-H` も要る。 候補を `file:行番号` で書くのに path も行番号も出ないため
+(単一 file の対象では `grep` が path を前置しない)。
 
 #### 1.5.B Layer 1 (`/kiwa-design`) 起動
 
@@ -193,7 +203,7 @@ dApp test は以下 3 layer で構造化:
 
 ### Step 3: 既存 example pattern 参照
 
-`@kiwa-lab/dapp` のリポジトリ (https://github.com/cardene777/kiwa) には 22 example が含まれており、 用途別の典型実装を学べる。
+`examples/` 配下に用途別の典型実装がある。 下表は代表例で、 **一覧ではない** = 件数を書くと実物とずれる (実測で 22 と書かれていた時点の実物は 179)。
 
 | 用途 | example | 学べるパターン |
 |---|---|---|
@@ -253,8 +263,29 @@ const cluster = await startAnvilCluster({
 
 ### Step 5: spec.ts 設計 (fixture 利用)
 
+`makeClients` は **`@kiwa-lab/dapp` の export ではない**。 viem の `createWalletClient` /
+`createPublicClient` を束ねる local helper で、 spec.ts の中に自分で定義する
+(実測で 6 example がそれぞれ持っている)。 package から import しようとすると解決に失敗する。
+
 ```ts
+import { createPublicClient, createWalletClient, defineChain, http } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture'; // dappE2eTest 経由
+
+// local helper (package には無い)
+function makeClients(port: number, privateKey: `0x${string}`) {
+  const chain = defineChain({
+    id: 31337,
+    name: 'anvil',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: { default: { http: [`http://127.0.0.1:${port}`] } },
+  });
+  const transport = http(`http://127.0.0.1:${port}`);
+  return {
+    pub: createPublicClient({ chain, transport }),
+    wallet: createWalletClient({ account: privateKeyToAccount(privateKey), chain, transport }),
+  };
+}
 
 test('T-XX-001 my flow', async ({ page, anvilPort }) => {
   const { wallet, pub } = makeClients(anvilPort, OWNER_PK);
@@ -302,7 +333,8 @@ forge build      # contract artifact 生成
 pnpm test        # playwright test 1 round
 ```
 
-flaky 検証は 4 round 連続 PASS で固定。
+flaky 検証は `--rounds` の値だけ連続 PASS を見る (既定 1)。 連続で回す時は同じ command を
+`--rounds` 回繰り返し、 1 度でも FAIL したら flaky として Step 8 に回す。
 並列実行は `@kiwa-lab/dapp` の build race を起こすため sequential 厳守。
 
 ### Step 8: 任意 — adversarial review
@@ -320,7 +352,7 @@ flaky 検証は 4 round 連続 PASS で固定。
 
 ### Step 9: kiwa-review 自動呼出 (test-review mode)
 
-Step 7 (4 round 連続 PASS) 完了後、 `--no-review` 未指定なら生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root .` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
+Step 7 (`--rounds` 回の連続 PASS) 完了後、 `--no-review` 未指定なら生成 spec.ts の品質を独立 review する。 `/kiwa-review --mode test-review --module {module} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root .` を内部呼出し、 spec vs spec.ts 整合 / 観点別 cover 率 / UI 起点 e2e で追加すべき test 提案 を 5 軸で判定。
 
 呼出例:
 ```text

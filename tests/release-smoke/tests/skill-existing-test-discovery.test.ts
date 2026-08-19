@@ -419,6 +419,28 @@ describe('/kiwa-design が既存 test を探す', () => {
     expect(ts.length).toBeGreaterThan(0);
   });
 
+  it('/kiwa-play の既存 test 走査が /kiwa-design と同じ形になっている', () => {
+    // `/kiwa-play` は Layer 1 に渡す「既存 test」 を自分で走査する。 `^test\\(` で始まる形だけを
+    // 見ると **`describe` の中に入った test を 1 件も拾わない** = 実測で 12 件を持つ
+    // `examples/nextjs-staking` が 1 行に見えた (#2032 の dogfood)。
+    //
+    // 同じ抽出が 2 箇所にある以上、 **形が一致していること** を見る = 片方だけ直ると、
+    // Layer 1 が受け取る素材だけが古い形のまま残る。
+    const play = read('.claude/skills/kiwa-play/SKILL.md');
+    const design = read(`.claude/skills/${DESIGN}/SKILL.md`);
+    const core = '^[[:space:]]*(describe|it|test)(\\.[a-z]+)?\\(';
+    expect(design, `${DESIGN} の抽出が既知の形でない`).toContain(core);
+    expect(play, '/kiwa-play の抽出が /kiwa-design と別の形').toContain(core);
+    // flag も 3 つとも要る (#2017 と同じ形)。 候補は `file:行番号` で書くため。
+    const flags = [...play.matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
+    expect(flags.length, '/kiwa-play に抽出段が無い').toBeGreaterThan(0);
+    for (const flag of flags) {
+      for (const required of ['n', 'H', 'E']) {
+        expect(flag, `/kiwa-play の抽出が -${required} を付けていない`).toContain(required);
+      }
+    }
+  });
+
   it('Step 2 の抽出が行番号・file 名・拡張正規表現を使う', () => {
     // `grep` は複数 file を渡された時だけ file 名を前置する。 test file が 1 件しかない package
     // では `-H` 無しだと path が出ず、 候補 column を埋められない (#2017 の dogfood で
