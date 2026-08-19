@@ -20,7 +20,14 @@
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
 
-import { fenceUnder, fenceUnderIn, headingSectionIn, read, skillBody } from './skill-md.js';
+import {
+  fenceUnder,
+  fenceUnderIn,
+  headingSectionIn,
+  read,
+  skillBody,
+  skillsWithSkillMd,
+} from './skill-md.js';
 
 /**
  * fence から comment を除いた実行行だけを返す。
@@ -70,6 +77,146 @@ function acceptedOptions(script: string): Set<string> {
   };
   visit(source);
   return accepted;
+}
+
+/** `--flag` と完全一致する string literal。 `--flag=value` の判定は別の argv 形式になる。 */
+function exactOption(node: ts.Node | undefined): string | undefined {
+  if (!node || !ts.isStringLiteralLike(node)) return undefined;
+  return /^--[a-z][a-z0-9-]*$/.test(node.text) ? node.text : undefined;
+}
+
+/** 括弧や型 assertion を外した式。 */
+function unwrapExpression(node: ts.Expression): ts.Expression {
+  while (
+    ts.isParenthesizedExpression(node) ||
+    ts.isNonNullExpression(node) ||
+    ts.isAsExpression(node) ||
+    ts.isTypeAssertionExpression(node)
+  ) {
+    node = node.expression;
+  }
+  return node;
+}
+
+/**
+ * `layersCommand` が空白区切りで受け取る option の集合。
+ *
+ * Usage / error の literal は受理の証拠にならないため、 `layersCommand` 内の 3 つの argv
+ * 判定 (`arg === '--x'` / `args.includes('--x')` / `takeFlagValue(args, '--x')`) だけを見る。
+ * `startsWith('--x=')` は `--x=value` 専用で、 skill が書く `--x value` の証拠には数えない。
+ */
+function cliAcceptedOptions(script = read('packages/cli/src/runCli.ts')): Set<string> {
+  const file = 'packages/cli/src/runCli.ts';
+  const source = ts.createSourceFile(file, script, ts.ScriptTarget.Latest, true);
+  const compilerOptions: ts.CompilerOptions = { noLib: true, noResolve: true };
+  const host = ts.createCompilerHost(compilerOptions);
+  host.fileExists = (candidate) => candidate === file;
+  host.readFile = (candidate) => (candidate === file ? script : undefined);
+  host.getSourceFile = (candidate) => (candidate === file ? source : undefined);
+  const checker = ts
+    .createProgram({ rootNames: [file], options: compilerOptions, host })
+    .getTypeChecker();
+  const accepted = new Set<string>();
+  const command = source.statements.find(
+    (node): node is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(node) && node.name?.text === 'layersCommand',
+  );
+  if (!command?.body) return accepted;
+  const argsSymbol =
+    command.parameters[0] && ts.isIdentifier(command.parameters[0].name)
+      ? checker.getSymbolAtLocation(command.parameters[0].name)
+      : undefined;
+  if (!argsSymbol) return accepted;
+
+  const identifierSymbol = (node: ts.Expression | undefined): ts.Symbol | undefined => {
+    if (!node) return undefined;
+    const expression = unwrapExpression(node);
+    return ts.isIdentifier(expression) ? checker.getSymbolAtLocation(expression) : undefined;
+  };
+
+  const argumentTokens = new Set<ts.Symbol>();
+  const collectArgumentTokens = (node: ts.Node): void => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isVariableDeclarationList(node.parent) &&
+      (node.parent.flags & ts.NodeFlags.Const) !== 0 &&
+      ts.isIdentifier(node.name) &&
+      node.initializer
+    ) {
+      const initializer = unwrapExpression(node.initializer);
+      if (
+        ts.isElementAccessExpression(initializer) &&
+        identifierSymbol(initializer.expression) === argsSymbol
+      ) {
+        const symbol = checker.getSymbolAtLocation(node.name);
+        if (symbol) argumentTokens.add(symbol);
+      }
+    }
+    ts.forEachChild(node, collectArgumentTokens);
+  };
+  collectArgumentTokens(command.body);
+
+  const isArgumentToken = (node: ts.Expression): boolean => {
+    const symbol = identifierSymbol(node);
+    if (symbol && argumentTokens.has(symbol)) return true;
+    node = unwrapExpression(node);
+    return (
+      ts.isElementAccessExpression(node) && identifierSymbol(node.expression) === argsSymbol
+    );
+  };
+
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
+    ) {
+      const leftFlag = exactOption(node.left);
+      const rightFlag = exactOption(node.right);
+      const flag =
+        leftFlag && isArgumentToken(node.right)
+          ? leftFlag
+          : rightFlag && isArgumentToken(node.left)
+            ? rightFlag
+            : undefined;
+      if (flag) accepted.add(flag);
+    }
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression;
+      const flag =
+        ts.isPropertyAccessExpression(callee) &&
+        callee.name.text === 'includes' &&
+        identifierSymbol(callee.expression) === argsSymbol
+          ? exactOption(node.arguments[0])
+          : ts.isIdentifier(callee) &&
+              callee.text === 'takeFlagValue' &&
+              identifierSymbol(node.arguments[0]) === argsSymbol
+            ? exactOption(node.arguments[1])
+            : undefined;
+      if (flag) accepted.add(flag);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(command.body);
+  return accepted;
+}
+
+/**
+ * fence の中で `kiwa layers` に渡している option。
+ *
+ * 範囲は **`kiwa layers` から pipe まで**。 行全体を見ると同じ行の別 command の option を
+ * 拾う (実測で `jq --arg` と `npx --no` の 2 件が混ざった)。 § 形 4 の「実効の単位で切る」。
+ */
+function layersOptions(fence: string): string[] {
+  const found: string[] = [];
+  for (const line of executableLines(fence).split('\n')) {
+    const at = line.indexOf('kiwa layers');
+    if (at < 0) continue;
+    const rest = line.slice(at);
+    const end = rest.search(/[|)]/);
+    const segment = end === -1 ? rest : rest.slice(0, end);
+    found.push(...(segment.match(/(?<![\w-])--[a-z][a-z0-9-]*/g) ?? []));
+  }
+  return found;
 }
 
 describe('SKILL.md の起動形が必須要素を落としていない', () => {
@@ -261,5 +408,76 @@ describe('/kiwa-release-check の宣言が script と一致する', () => {
   it('comment 内の option 判定を受理 code として数えない', () => {
     const script = "const found = args.includes('--actual'); // args.includes('--comment-only')";
     expect(acceptedOptions(script)).toEqual(new Set(['--actual']));
+  });
+});
+
+describe('skill が CLI に渡す option を CLI が受け取る', () => {
+  it('argv 判定だけを受理の証拠にする', () => {
+    const script = `
+      const USAGE = '--usage-only';
+      function otherCommand(args: string[]) { return args.includes('--other-command'); }
+      function layersCommand(args: string[]) {
+        const arg = args[0];
+        const otherArgs: string[] = [];
+        const marker = '--not-an-option';
+        let reassigned = args[1];
+        reassigned = marker;
+        if (arg === '--json') return;
+        if (args.includes('--lang')) return;
+        takeFlagValue(args, '--module');
+        if (arg.startsWith('--equals-only=')) return;
+        if (marker === '--comparison-only') return;
+        if (reassigned === '--reassigned') return;
+        {
+          const arg = marker;
+          if (arg === '--shadowed') return;
+        }
+        if (otherArgs.includes('--other-collection')) return;
+        takeFlagValue(otherArgs, '--other-argv');
+        throw new Error('--message-only');
+      }
+    `;
+    expect(cliAcceptedOptions(script)).toEqual(new Set(['--json', '--lang', '--module']));
+  });
+
+  it('`kiwa layers` に渡す option が CLI の受理集合に含まれる', () => {
+    // CLI が option 名を変えると、 skill が渡した値は **黙って無視される** = layer は
+    // 既定で解決され、 spec の path も既定に落ちる。 どちらも成功で終わるため気付かない。
+    //
+    // 受理集合は `runCli.ts` の `layersCommand` にある argv 判定から導く
+    // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。 一覧を書き写すと、
+    // option が増えた時に検査だけ古いまま残る。
+    const accepted = cliAcceptedOptions();
+    expect(accepted.size, 'CLI から option を 1 件も読めない').toBeGreaterThan(0);
+
+    const passed = new Map<string, Set<string>>();
+    for (const skill of skillsWithSkillMd()) {
+      const body = skillBody(skill);
+      const options = [...body.matchAll(/```(?:bash|sh)\n([\s\S]*?)```/g)].flatMap((m) =>
+        layersOptions(m[1] ?? ''),
+      );
+      if (options.length > 0) passed.set(skill, new Set(options));
+    }
+    // 0 件で通る形を作らない (§ 形 1)。 fence の書き方が変わって 1 件も取れなくなると、
+    // 検査本体が 1 度も走らずに緑になる。
+    expect(passed.size, '`kiwa layers` を呼ぶ skill が 1 件も無い').toBeGreaterThan(0);
+
+    const unknown: string[] = [];
+    for (const [skill, options] of passed) {
+      for (const option of options) {
+        if (!accepted.has(option)) unknown.push(`${skill}: ${option}`);
+      }
+    }
+    expect(unknown, `CLI が受け取らない option を渡している:\n${unknown.join('\n')}`).toEqual([]);
+  });
+
+  it('別 command の option を対象に含めない', () => {
+    // 行全体を見ると同じ行の別 command を拾う (実測 = `jq --arg` と `npx --no` の 2 件)。
+    // 範囲を `kiwa layers` から pipe までに切る (§ 形 4)。
+    const fence = [
+      'npx --no kiwa layers --json --layer contract',
+      'HITS=$(printf %s "$OUT" | jq -r --arg id "$LAYER" \'.layers\')',
+    ].join('\n');
+    expect(layersOptions(fence)).toEqual(['--json', '--layer']);
   });
 });

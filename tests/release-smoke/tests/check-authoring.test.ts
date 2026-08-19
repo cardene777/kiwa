@@ -649,6 +649,16 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain('fence の開閉だけでは shell comment は除けない');
     expect(doc).toContain('**範囲を切る処理そのものにも変異を当てる**');
     expect(doc).toContain('| 照合する範囲が代理指標 | しない |');
+    // flag 以外の 3 族の実測 (#2028)。 族ごとに判定が違うため 1 件で代表させない。
+    expect(doc).toContain('##### flag 以外の族を試作した結果');
+    expect(doc).toContain('| A = 宣言 option が実装か検査に現れるか | 158 件中 39 件が未出現 | 精度が低い |');
+    expect(doc).toContain('| B = json fence の field が検査に現れるか | **0 件** | 族が存在しない |');
+    expect(doc).toContain('| C = Step 見出しが検査に現れるか | 141 件中 32 件が未出現 | proxy が弱い |');
+    // 導出でも範囲で外した 2 件。 「実物から導けば安全」 という誤読を残さない。
+    expect(doc).toContain('**導出は「実物から」 だけでは足りず、 実物のどの範囲を読むかまで決めて初めて成立する**');
+    // 範囲は狭すぎても広すぎても外れる。 「広く取れば安全」 の誤読を残さない (#2029 review)。
+    expect(doc).toContain('**狭すぎても広すぎても外れる**');
+    expect(doc).toContain('**緩む側に倒す判断は成立しない**');
   });
 
   it('別名に代入した保証は受けない', () => {
