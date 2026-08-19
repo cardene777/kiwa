@@ -69,6 +69,9 @@ function columnsOf(section: string): string[] {
 }
 
 const WITH_SECTION = LAYERS.filter((l) => sectionOf(l.id) !== null).map((l) => l.id);
+const DECLARED_SECTIONS = [
+  ...DESIGN.matchAll(/^#### ([a-z0-9-]+) layer 専用 column(?: |$)/gm),
+].map((m) => m[1]!);
 
 describe('layer 専用 column 表は kiwa-design に 1 つだけ置く', () => {
   it('全 layer が 3 群のいずれかに属する', () => {
@@ -104,6 +107,14 @@ describe('layer 専用 column 表は kiwa-design に 1 つだけ置く', () => {
       if (n !== 1) dup.push(`${id}: ${n} 節`);
     }
     expect(dup, '同じ layer の節が複数ある').toEqual([]);
+  });
+
+  it('専用節は manifest に存在する layer だけを持つ', () => {
+    // manifest から消した layer や typo の見出しが残ると、 producer に到達不能な表が残る。
+    // layer → 節だけでなく節 → layer も照合し、 SSOT の残骸を見逃さない。
+    expect(DECLARED_SECTIONS.sort(), 'manifest に無い専用節がある').toEqual(
+      [...WITH_SECTION].sort(),
+    );
   });
 });
 
