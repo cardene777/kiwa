@@ -838,6 +838,92 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.edge.md`。
 
+#### auth layer 専用 column (認証 backend 5 種)
+
+`--layer auth` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/auth` の `setupNextAuthEnv` /
+`setupLuciaEnv` / `setupBetterAuthEnv` / `setupClerkEnv` / `setupAuth0Env` と直接 mapping、
+Issue #2067)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-AUTH-001` 等の連番 |
+| Observation | 観点 (sign up / sign in / session 検証 / session 回転 / 期限切れ / OAuth callback / 権限 / logout 等) |
+| Given | 初期 state (既存 user row / 発行済 session / provider mock が返す profile) |
+| When | 実行する操作 (`env.signUpWithPassword({ email, password })` / session id を付けて保護 route を呼ぶ 等) |
+| Then | 期待 (`res.status===200` / `session.fresh===true` / `await env.database.getUserByEmail(...)===null` 等) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Provider | 対象 backend (`nextauth` / `lucia` / `better-auth` / `clerk` / `auth0`)、 省略時は `/kiwa-auth --provider` の既定 |
+| Flow | provider ごとの認証 flow (`nextauth`: `email` / `google` / `github`、 `lucia`: `password` / `google` / `github`、 `better-auth`: `password` / `google` / `github` / `magic-link` / `two-factor` / `passkey` / `organization`、 `clerk`: `session` / `external-account` / `organization`、 `auth0`: `password` / `google` / `github` / `rules` / `actions` / `management-api`) |
+
+`/kiwa-auth` Layer 2 skill が本 9 column を該当 factory の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+`Provider` の値は `docs/layers.json` の `providers` 宣言に揃える (`/kiwa-auth --provider` が
+受ける値と同じ)。 **`backend` ではなく `provider` と呼ぶ** = 宣言と flag と `selected_by` の
+3 箇所が `provider` で揃っており、 呼び分けると spec の書き手がどちらを書くか迷う。
+
+`Flow` は provider 共通 enum にしない。 NextAuth の password 認証に相当するものは `email`
+provider で、 Clerk は password 認証 API 自体を持たず、 Auth0 の Google connection は
+`google-oauth2` だからである。 `/kiwa-auth` は provider ごとの mapping 表で helper の option /
+method に変換する。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.auth.md`。
+
+#### job-queue layer 専用 column (job queue backend 4 種)
+
+`--layer job-queue` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/queue` の `setupBullMQEnv` /
+`setupInngestEnv` / `setupCloudflareQueuesEnv` / `setupSQSEnv` と直接 mapping、 Issue #2067)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-QUEUE-001` 等の連番 |
+| Observation | 観点 (enqueue / 正常処理 / retry / 失敗 / 遅延実行 / drain / 並行実行 / dead letter 等) |
+| Given | queue 名 + 登録する processor + 事前投入済 job |
+| Job | 投入する job の name と data (`send-email` / `{ to, subject, body }`) |
+| Then | 期待 (`snap.state==='completed'` / `env.assertRetried('send-email', 2)` / `env.assertFailed(...)` / `env.listJobs().length===N`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Provider | 対象 backend (`bullmq` / `inngest` / `cloudflare` / `sqs`)、 省略時は `/kiwa-queue --provider` の既定 |
+| Mode | provider 内の実行形態 (`sandbox` / `testcontainers` / `stub` / `dev-server` / `miniflare` / `wrangler` / `localstack`)、 省略時は高速側 |
+
+`/kiwa-queue` Layer 2 skill が本 9 column を該当 factory の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+`Mode` が取る値は provider ごとに違う (`bullmq` は `sandbox` / `testcontainers`、 `inngest` は
+`stub` / `dev-server`、 `cloudflare` は `miniflare` / `wrangler`、 `sqs` は `stub` / `localstack`)。
+**列は 1 つに保つ** = provider ごとに列を分けると層ごとに列数が変わり、 column index で読む
+Layer 2 parser が壊れる。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.queue.md`。
+
+#### cache layer 専用 column (cache provider 3 種)
+
+`--layer cache` 指定時は **9 column 拡張表** を使う (`@kiwa-lab/cache` の `setupCacheEnv` /
+`setupMemcachedEnv` / `setupKeyDBEnv` と直接 mapping、 Issue #2067)。
+
+| 項目 | 内容 |
+|---|---|
+| ID | `T-CACHE-001` 等の連番 |
+| Observation | 観点 (get / set / TTL / expire / delete / 期限切れ / pub-sub / flush / 並行 env 隔離 等) |
+| Given | 初期 key-value と TTL (`session:u-101` に payload を `ttlSeconds: 60` で seed 済 等) |
+| When | 実行する操作 (`env.set(key, value, { ttlSeconds })` / `env.expire(key, 30)` / `env.publish(channel, message)`) |
+| Then | 期待 (`await env.get(key)===value` / `await env.assertTTL(key, { atMost: 60 })` / `await env.assertPublished(channel, { match: /invalidate/ })`) |
+| Priority | `P0` / `P1` / `P2` / `P3` |
+| Automation | `yes` / `no` / `manual` |
+| Provider | 対象 provider (`redis` / `memcached` / `keydb`)、 省略時は `/kiwa-cache --provider` の既定 |
+| Mode | 実行形態 (`in-memory` / `stub` / `testcontainers`)、 client を指定する TC は括弧で添える (`testcontainers (node-redis)`) |
+
+`/kiwa-cache` Layer 2 skill が本 9 column を該当 factory の引数に機械変換する。 列を helper の
+どの引数へ渡すかは同 skill の mapping 節が持つ (本節は列の定義だけを持つ)。
+
+client (`ioredis` / `node-redis` / `memjs` / `memcached`) に **専用の列を割り当てない**。
+9 column は固定で、 provider / mode / client に 3 列を割くと入力 (`Given` / `When`) が
+1 列に潰れる。 client は `testcontainers` mode でしか効かず provider 依存の既定を持つため、
+必要な TC だけ `Mode` の括弧で添える形にした。
+
+出力 path 規約 は `tests/spec/integration/test-spec-{module}.cache.md`。
+
 ### Step 5: 優先度付け + 自動化方針
 
 優先度は Step 2 のリスク要約から導出 (skill が勝手に判定しない、 SSOT `docs/SKILL-DESIGN.ja.md` § Step 5 と完全一致):

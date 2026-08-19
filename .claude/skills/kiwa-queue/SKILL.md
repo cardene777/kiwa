@@ -114,7 +114,7 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 ### Step 1: Layer 1 spec 読込 + backend / mode 判定
 
-`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の 「対象 backend」 + 「mode」 column から BullMQ vs Inngest、 sandbox / testcontainers / stub / dev-server を判定。
+`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の `Provider` + `Mode` column (列の定義は `/kiwa-design` の § `#### job-queue layer 専用 column`) から、 どの provider をどの実行形態で組み立てるか判定する。 `Mode` が取る値は provider ごとに違う (`bullmq` は `sandbox` / `testcontainers`、 `inngest` は `stub` / `dev-server`、 `cloudflare` は `miniflare` / `wrangler`、 `sqs` は `stub` / `localstack`)。 未指定の TC は `--provider` / `--mode` の既定に従う。
 
 ### Step 2: test code 生成
 
