@@ -419,15 +419,18 @@ describe('/kiwa-design が既存 test を探す', () => {
     expect(ts.length).toBeGreaterThan(0);
   });
 
-  it('Step 2 の抽出が file 名を前置する', () => {
+  it('Step 2 の抽出が行番号・file 名・拡張正規表現を使う', () => {
     // `grep` は複数 file を渡された時だけ file 名を前置する。 test file が 1 件しかない package
     // では `-H` 無しだと path が出ず、 候補 column を埋められない (#2017 の dogfood で
-    // `examples/nextjs-api-poc` が実際にこれに当たった)。
+    // `examples/nextjs-api-poc` が実際にこれに当たった)。 `extractRegexes` は flag の並びを
+    // 固定しないため、 従来から必要な行番号 (`-n`) と拡張正規表現 (`-E`) もここで守る。
     for (const runtime of documentedRuntimes()) {
       const flags = [...runtimeFence(runtime).matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
       expect(flags.length, `${runtime} に抽出段が無い`).toBeGreaterThan(0);
       for (const flag of flags) {
+        expect(flag, `${runtime} の抽出が -n を付けていない`).toContain('n');
         expect(flag, `${runtime} の抽出が -H を付けていない`).toContain('H');
+        expect(flag, `${runtime} の抽出が -E を付けていない`).toContain('E');
       }
     }
   });
