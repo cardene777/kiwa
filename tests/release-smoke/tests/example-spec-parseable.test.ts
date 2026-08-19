@@ -114,6 +114,13 @@ function cellsIn(line: string): string[] {
   return line.split('|').slice(1, -1).map((cell) => cell.trim());
 }
 
+function separatorMatchesHeader(table: MarkdownTable): boolean {
+  return (
+    table.separator.length === table.header.length &&
+    table.separator.every((cell) => /^-+$/.test(cell))
+  );
+}
+
 /** `## テストケース一覧` section の先頭にある連続した Markdown 表。 */
 function testCaseTable(body: string): MarkdownTable | null {
   const heading = /^## テストケース一覧$/m;
@@ -166,9 +173,9 @@ describe.each(SPECS.map((s) => [`${s.example}/${s.rel}`, s.file, s.rel] as const
       const table = testCaseTable(body);
       expect(table, '表の header 行が無い').not.toBeNull();
       expect(
-        table!.separator,
+        separatorMatchesHeader(table!),
         '表の区切り行が無い、または header と列数が違う',
-      ).toEqual(table!.header.map(() => '---'));
+      ).toBe(true);
       // 名前が揃っていても順序が違えば別の値を読む。 集合ではなく列で比べる。
       expect(table!.header, `${layer}: 列が宣言と食い違う`).toEqual(requiredColumns(layer!));
     });
@@ -210,5 +217,13 @@ describe('契約の突き合わせ先が実在する', () => {
     );
     expect(table).not.toBeNull();
     expect(table!.rows.some((row) => row.length !== table!.header.length)).toBe(true);
+  });
+
+  it('区切り行の hyphen 数を 3 個に固定しない (陰性対照)', () => {
+    const table = testCaseTable(
+      '## テストケース一覧\n\n| ID | Given | Then |\n|-----|----|---|\n| T-001 | input | output |\n',
+    );
+    expect(table).not.toBeNull();
+    expect(separatorMatchesHeader(table!)).toBe(true);
   });
 });
