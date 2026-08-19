@@ -267,16 +267,47 @@ describe('review report の名前が writer と reader で一致する', () => {
     const found = new Set(declaredPlaceholders(TEST_SKILL));
     expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual(['example']);
 
-    // `{example}` は `/kiwa-test` が `--module {example}` を渡すため writer が出せる。
-    // 出せないのは runner / surface の suffix を足した形で、 これは `--out` を渡す側の
-    // 責務になった (`/kiwa-review` § 同じ `--module` で 2 回呼ぶ時は `--out` が要る)。
-    //
-    // 許すのは `review-{example}` の直後が言語 suffix か `.md` の形だけ。 言語は writer が
-    // `--lang` から付けるので出せる。 `-foundry` / `.a11y` / `-{tool}` は出せない。
-    const invented = [...TEST_SKILL.matchAll(/review-\{example\}([^\s`|)]*?)\.md/g)]
+    // suffix 付きの名前は `--out` を渡す時だけ caller が決められる。 名前だけ宣言して
+    // `--out` が無ければ writer は出せないので、 全 occurrence を直前の flag と対応付ける。
+    const explicit = [...TEST_SKILL.matchAll(/\/kiwa-review[^\n]*--out\s+(tests\/reports\/review\/\S+\.md)/g)].map(
+      (m) => m[1]!,
+    );
+    expect(explicit.length, '子 review の明示 --out が 9 件でない').toBe(9);
+    expect(new Set(explicit).size, '子 review の --out が衝突している').toBe(explicit.length);
+    expect(explicit.every((p) => p.startsWith('tests/reports/review/'))).toBe(true);
+
+    // **`--out` を伴わない suffix 付きの名前は残っていない**。 上の 3 行だけだと、
+    // `--out` の無い行に `test-review-{example}-{tool}.{lang}.md` と書いた宣言が
+    // 素通りする (実測 = 変異 m7)。 writer が出せるのは lang suffix までなので、
+    // それ以外の形は同じ行に `--out` が無ければ誰も出せない名前になる。
+    const unbacked = TEST_SKILL.split('\n')
+      .filter((line) => !line.includes('--out'))
+      .flatMap((line) => [...line.matchAll(/review-\{example\}([^\s`|)]*?)\.md/g)])
       .map((m) => m[1]!)
       .filter((middle) => !/^(?:\.\{(?:lang|\$DOC_LANG)\})?$/.test(middle));
-    expect(invented, 'writer が出せない suffix 付きの名前が残っている').toEqual([]);
+    expect(unbacked, '--out を伴わない suffix 付きの名前が残っている').toEqual([]);
+  });
+
+  it('kiwa-test は子の自動 review を止めて一意な --out で直接 review する', () => {
+    const lines = TEST_SKILL.split('\n');
+    for (const step of [
+      'Step 3a',
+      'Step 3b',
+      'Step 3c',
+      'Step 4a',
+      'Step 4b',
+      'Step 4w-e2e-a',
+      'Step 4w-e2e-b',
+      'Step 4w-a11y-a',
+      'Step 4w-a11y-b',
+    ]) {
+      const at = lines.findIndex((l) => l.startsWith(`[${step}]`));
+      expect(at, `${step} の生成側起動が無い`).toBeGreaterThanOrEqual(0);
+      expect(
+        lines.slice(at, at + 3).join('\n'),
+        `${step} が子の自動 review を止めていない`,
+      ).toContain('--no-review');
+    }
   });
 
   it('Step 3 が書いた path を chain return に載せる', () => {
@@ -288,5 +319,13 @@ describe('review report の名前が writer と reader で一致する', () => {
     const row = TEST_SKILL.split('\n').find((l) => l.startsWith('| review report'));
     expect(row, '統合 report Section 2 に review report 行が無い').toBeTruthy();
     expect(row!, 'child の返した path を書く指示になっていない').toContain('chain return');
+  });
+
+  it('result-review に example の project-root を渡し CONDITIONAL を受ける', () => {
+    const section = headingSectionIn(TEST_SKILL, /^### Step 5b: kiwa-review 自動呼出 \(result-review mode\)$/m);
+    expect(section, 'result-review に project-root が無い').toContain(
+      '--project-root examples/{example}',
+    );
+    expect(section, 'result-review の CONDITIONAL 分岐が無い').toContain('CONDITIONAL');
   });
 });
