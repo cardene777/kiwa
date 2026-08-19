@@ -33,7 +33,7 @@ spec 設計件数と test 実行件数の一致、 skip 件数の妥当性 (理�
 
 ### 判定手順
 
-1. spec file (`tests/spec/{layer}/test-spec-{example}.{lang}.md`) の TC 件数 (`spec_count`) を Grep
+1. spec file の TC 件数 (`spec_count`) を Grep。 **path は組み立てず `kiwa layers` が返す `spec_path` を使う** (親 SKILL.md § 入力 spec の path は CLI から受け取る)
 2. test 実行結果 (統合 report Section 1 の passing / failing / skipped) を取得 (`executed_count` / `skipped_count`)
 3. test code 内の skip 理由 (`it.skip` / `test.skip` の前後コメント) を Grep
 4. score:
@@ -80,14 +80,38 @@ spec 設計件数と test 実行件数の一致、 skip 件数の妥当性 (理�
 
 ### 判定手順
 
-1. 各 review report (`tests/reports/review/{mode}-review-{example}.{lang}.md`) の Section 1 から weighted_score を抽出
-2. 全 review の平均 score を算出
-3. 各 review report の critical / major 件数を集計
-4. score:
+1. 子 review report の path を **統合 report Section 2 の「review report」 行から読む**。 file 名を組み立てない (§ 子 report の path は組み立てない)
+2. 読めた report の Section 1 から weighted_score を抽出
+3. 全 review の平均 score を算出
+4. 各 review report の critical / major 件数を集計
+5. score:
    - 平均 score >= 8.0 + critical 0 件 → 10/10
    - 平均 score 7.0-7.9 + critical 0 件 → 7/10
    - 平均 score < 7.0 (FAIL あり) → -3
    - critical 残存 1+ 件 → 0/10 + critical (本 result-review でも critical)
+   - **読めた report が 1 件も無い → score を出さず `—` (未測定)**
+
+### 子 report の path は組み立てない
+
+統合 report Section 2 に載っている path をそのまま開く。 載っていない、 または載っているが実在しない場合は **その path を控えて未測定として扱う**。
+
+観測対象の一覧を読む側が持たない形は、 同じ result-review mode の observe dashboard で既に採っている (親 SKILL.md § 1C)。 軸 4 だけが `{example}` から file 名を組み立てており、 **子 report を書く側は `--module` の値で書く**ため、 module と example が違う layer (ui / api / data / cli / unit ...) では毎回外す。
+
+### 読めなかった時に推定で埋めない
+
+**子 report が 1 件も読めない run で、 自前の推定値を入れてはいけない**。 軸 4 は「独立に行われた review の集約」 を測る軸で、 推定を入れた瞬間に測っているものが自己採点に変わる。 集約される側と集約する側が同じ agent になり、 軸そのものが消える。
+
+実測 = `tests/reports/review/` にある result-review 5 件はすべて子 report 0 件の状態で書かれ、 5 件とも「推定 weighted_score 平均 9.3-9.5」 として 9/10 を計上していた。 5 回とも軸 4 は何も集約していない。
+
+未測定の時は以下 3 点を守る。
+
+| # | 扱い |
+|---|---|
+| 1 | 軸 4 の score 欄は `—`、 重み付き欄は `0.00` |
+| 2 | **weighted_score の分母は 1.00 のまま**。 残り 4 軸で再正規化しない |
+| 3 | 総合判定は score に関わらず ⚠️ CONDITIONAL。 未測定である旨と、 開いて無かった path を report に列挙する |
+
+2 を再正規化しないのは、 分母を 0.80 に詰めると **証拠が少ない run ほど score が上がる**から。 親 SKILL.md § 未生成 TC の扱い が cover 率で同じ形を禁じているのと同じ理由で、 ここでも「gate を通すほど成績が良くなる」 経路を作らない。
 
 ### 評価例
 
@@ -134,9 +158,14 @@ spec 「不足している仕様」 section の未消化 bullet 件数、 統合
 weighted_score = (coverage × 0.30) + (件数 × 0.20) + (flaky × 0.20) + (review 集約 × 0.20) + (後追い × 0.10)
 ```
 
-- 7.0 以上 → ✅ PASS (test suite 全体が production 公開水準)
-- 7.0 未満 → ❌ FAIL (修正推奨、 critical 軸を最優先)
+未測定軸 (`—`) は 0 として加算し、 **分母は 1.00 のまま**にする。
+
+- 未測定軸が 1 つでもある → ⚠️ CONDITIONAL (score に関わらず、 親 SKILL.md § Step 3 の判定表と同じ優先順位)
+- 未測定軸なし + 7.0 以上 → ✅ PASS (test suite 全体が production 公開水準)
+- 未測定軸なし + 7.0 未満 → ❌ FAIL (修正推奨、 critical 軸を最優先)
 - 軸 1 (coverage) や 軸 4 (review 集約) が 0 → critical (test の信頼性 or 全体品質に重大問題)
+
+**未測定 (`—`) と 0 点は別**。 前者は測っていない、 後者は測って悪かった。 どちらも加算値は 0 だが、 判定は前者が CONDITIONAL (何を測れば決まるかを添えて先へ進む)、 後者が critical。
 
 ## 関連
 

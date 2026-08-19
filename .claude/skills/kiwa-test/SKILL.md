@@ -288,12 +288,12 @@ rm -rf "$ROOT/tests/reports"/{contract,e2e,review,integrated}/*${EXAMPLE}* 2>/de
   ↓ test/{Contract}.t.sol 生成 + forge test 全 PASS + coverage 100% 到達 (auto loop)
   ↓ Step 5c で tests/reports/contract/coverage-report-{example}.{lang}.md Write
   ↓ Step 6 で kiwa-review --mode test-review 自動呼出
-  ↓ tests/reports/review/test-review-{example}-foundry.{lang}.md Write
+  ↓ 子が返した review report path を控える (既定 test-review-{example}.{lang}.md、 分けるなら --out)
 
 [Step 3c] $RUNNER ∈ {hardhat, both} の場合のみ実行:
   /kiwa-hardhat --module {example} --gas-report --lang $DOC_LANG [--no-review] [--no-coverage-loop]
   ↓ hardhat-test/{Contract}.test.cjs 生成 + hardhat test 4 round PASS + coverage 100%
-  ↓ tests/reports/review/test-review-{example}-hardhat.{lang}.md Write
+  ↓ 子が返した review report path を控える (既定は Foundry と同名、 分けるなら --out)
 ```
 
 `$RUNNER` 分岐の実装パターン:
@@ -322,7 +322,7 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
   ↓ tests/{example}.spec.ts + helper 生成
   ↓ playwright test 4 round PASS (flaky 0 検証)
   ↓ Step 9 で kiwa-review --mode test-review 自動呼出
-  ↓ tests/reports/review/test-review-{example}.{lang}.md Write (contract と同 path、 後勝ち or suffix 区別)
+  ↓ 子が返した review report path を控える (既定は contract と同名、 分けるなら --out)
 ```
 
 ### Step 4w: web chain 実行 (e2e-generic + a11y、 target=web or all)
@@ -336,7 +336,7 @@ target=web (汎用 web 2 surface セット) または target=all の場合に実
 [Step 4w-e2e-b] /kiwa-e2e --mode new --lang $DOC_LANG [--no-review]
   ↓ tests/{example}.e2e.spec.ts 生成
   ↓ @kiwa-lab/e2e で playwright 起動
-  ↓ tests/reports/review/test-review-{example}.e2e.{lang}.md Write
+  ↓ 子が返した review report path を控える (分けるなら --out)
 
 [Step 4w-a11y-a] /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG [--no-review]
   ↓ tests/spec/integration/test-spec-{example}.a11y.{lang}.md Write
@@ -344,7 +344,7 @@ target=web (汎用 web 2 surface セット) または target=all の場合に実
 [Step 4w-a11y-b] /kiwa-a11y --mode new --lang $DOC_LANG [--no-review]
   ↓ tests/{example}.a11y.test.ts 生成
   ↓ @kiwa-lab/a11y で axe-core 評価
-  ↓ tests/reports/review/test-review-{example}.a11y.{lang}.md Write
+  ↓ 子が返した review report path を控える (分けるなら --out)
 ```
 
 2 surface の result は Step 5 統合 report の「web (e2e-generic / a11y)」 section に集約する。
@@ -386,7 +386,7 @@ Total duration: {sec} 秒
 | Hardhat test (退避済) | tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs | Layer 2 出力 → Step 5.5 で退避 |
 | Playwright spec (退避済) | tests/fixtures/{example}/e2e-test/*.spec.ts | Layer 2 出力 → Step 5.5 で退避 (名前は生成時のまま) |
 | coverage report (contract) | tests/reports/contract/coverage-report-{example}.{lang}.md | auto loop 結果 |
-| review report (spec / test) | tests/reports/review/{spec\|test}-review-{example}.{lang}.md | reviewer 判定 |
+| review report (spec / test) | 各 `/kiwa-review` が chain return した実 path をそのまま書く | reviewer 判定。 Step 5b の result-review 軸 4 がこの行を読む |
 | observe dashboard (layer ごと) | tests/reports/observe/dashboard-{example}-{layer}.{lang}.md | Step 5a 出力。 失敗した layer は path の代わりに理由を書く |
 | observe dashboard (contract, foundry) | tests/reports/observe/dashboard-{example}-contract-foundry.{lang}.md | `$RUNNER` が `foundry` / `both` の時 |
 | observe dashboard (contract, hardhat) | tests/reports/observe/dashboard-{example}-contract-hardhat.{lang}.md | `$RUNNER` が `hardhat` / `both` の時 |
@@ -408,9 +408,7 @@ Total duration: {sec} 秒
 
 ## 5. 各子 skill report への link
 
-- spec-review (contract): `tests/reports/review/spec-review-{example}-contract.{lang}.md`
-- spec-review (e2e): `tests/reports/review/spec-review-{example}-e2e.{lang}.md`
-- test-review (Foundry / Hardhat / Playwright): `tests/reports/review/test-review-{example}-{tool}.{lang}.md`
+- spec-review / test-review: 各 `/kiwa-review` が chain return した実 path (§ 2 の review report 行と同じ値)
 - coverage report: `tests/reports/contract/coverage-report-{example}.{lang}.md` / `tests/reports/e2e/coverage-report-{example}.{lang}.md`
 ```
 
