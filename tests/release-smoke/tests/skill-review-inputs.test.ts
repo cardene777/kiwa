@@ -308,6 +308,18 @@ describe('review report の名前が writer と reader で一致する', () => {
         `${step} が子の自動 review を止めていない`,
       ).toContain('--no-review');
     }
+
+    // 初回 chain だけでなく auto-fix loop の再生成も同じ規約に従う。 Step 名だけを
+    // 列挙すると loop 内の command が検査対象から落ち、 FAIL 後だけ既定 report を
+    // 再び上書きする回帰が素通りする。
+    const generationInvocations = lines.filter((line) =>
+      /^\s*(?:\[[^\]]+\]\s*)?\/kiwa-(?:design|forge|hardhat|play|e2e|a11y)\b/.test(line),
+    );
+    expect(generationInvocations.length, '生成側の起動を十分に検出できていない').toBeGreaterThan(9);
+    expect(
+      generationInvocations.filter((line) => !line.includes('--no-review')),
+      '子の自動 review が有効な生成側起動が残っている',
+    ).toEqual([]);
   });
 
   it('Step 3 が書いた path を chain return に載せる', () => {

@@ -575,19 +575,19 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 2. **対応 skill 再走** — review 指摘を prompt に含めて該当 skill を再起動:
    ```text
    # spec-review FAIL の場合
-   /kiwa-design --layer {layer} --module {module} --input {input} --lang $DOC_LANG
+   /kiwa-design --layer {layer} --module {module} --input {input} --lang $DOC_LANG --no-review
      "[前 round review 指摘] {critical / major bullets を貼付}、 これを反映して spec を再生成してください"
 
    # test-review FAIL の場合
-   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG
+   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
      "[前 round review 指摘] {bullets}、 不足 TC を追加 + assertion 具体化してください"
 
    # result-review FAIL (coverage 不足) の場合
-   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG
+   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
      (coverage auto loop が真の未踏 line を追加 test で cover、 #222 ロジックに従う)
    ```
 
-3. **再 test + 再 review** — Layer 2 完了後に再度 review chain (spec-review / test-review / result-review) を回す
+3. **再 test + 再 review** — Layer 2 完了後、 Steps 3 / 4 と同じ一意な `--out` を渡して repo root から spec-review / test-review を直接再実行し、 続けて result-review を回す。 子の自動 review は使わない
 
 4. **round 別 report 累積** — `tests/reports/integrated/{example}-{target}-round-{N}.md` を round ごとに保存、 canonical report は最終 round の内容で上書き
 
