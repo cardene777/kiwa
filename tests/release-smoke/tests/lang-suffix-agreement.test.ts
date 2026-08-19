@@ -761,10 +761,13 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     // the check. Naming them is what let `kiwa-hardhat` and `kiwa-play` sit
     // unchecked through two earlier passes.
     //
-    // `kiwa-design` is excluded as the producer: it writes the spec, so the
-    // convention has to be stated somewhere and that somewhere is its own file.
+    // `kiwa-design` used to be excluded as the producer, on the reasoning that
+    // it writes the spec so the convention had to live in its own file. #2064
+    // measured what that exemption cost: the producer assembled the path from
+    // `--layer`, and that form disagrees with the declaration for 16 of the 20
+    // layers. The convention now lives in the CLI, which the producer calls
+    // like everyone else, so the exemption is gone.
     const offenders = skillNames()
-      .filter((name) => name !== 'kiwa-design')
       .flatMap((name) =>
         selfAssembledLines(read(`.claude/skills/${name}/SKILL.md`)).map(
           (line) => `${name}: ${line.trim()}`,
@@ -773,12 +776,15 @@ describe('spec path の言語解決が producer と CLI で一致する', () => 
     expect(offenders, `自前で組む行が残っている:\n${offenders.join('\n')}`).toEqual([]);
   });
 
-  it('producer だけが規約を持つ', () => {
-    // The other half. Excluding `kiwa-design` from the sweep is only sound if
-    // it is the one file that states the convention — if it stopped, the
-    // sweep would pass with the rule written down nowhere.
+  it('producer が規約を CLI 経由で述べている', () => {
+    // The other half. Nobody assembles the path now, so the sweep above would
+    // stay green with the rule written down nowhere. What has to remain is a
+    // statement of where the rule lives, and a call that actually fetches it.
     const design = read('.claude/skills/kiwa-design/SKILL.md');
-    expect(selfAssembledLines(design).length, 'producer が規約を持たない').toBeGreaterThan(0);
+    expect(design, 'lang suffix 規約の節が無い').toMatch(/^#### lang suffix 規約 \(SSOT\)$/m);
+    expect(cliInvocations(design), 'kiwa layers に --lang を渡していない').toMatch(
+      /layers --json[^\n]*--lang/,
+    );
   });
 
   it('入口 skill が --lang を CLI に渡す', () => {

@@ -142,9 +142,27 @@ recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む�
 
 <!-- kiwa-layers:routing-table:end -->
 
-出力 path 親 dir (`tests/spec/{layer}/`) は skill が `mkdir -p` で自動作成する。
+### 書き先は CLI が返す 1 つの path
 
-**既存 file があっても書き先を変えない**。 CLI (`kiwa layers`) が返す `spec_path` に上書きする。
+**path を `--layer` から組み立てない**。 `kiwa layers` が返す `spec_path` をそのまま使う。
+
+```bash
+SPEC_PATH=$(pnpm exec kiwa layers --json --layer "$LAYER" --module "$MODULE" --lang "$DOC_LANG" \
+  | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const j=JSON.parse(s);if(j.layers.length!==1)process.exit(1);console.log(j.layers[0].spec_path)})')
+mkdir -p "$(dirname "$SPEC_PATH")"
+```
+
+組み立ててはいけないのは、 **`--layer` の値と dir 名が 20 layer 中 16 で一致しないから**。
+上の routing 表のとおり `a11y` の書き先は `tests/spec/a11y/` ではなく
+`tests/spec/integration/` で、 file 名にも `.a11y` が付く。 一致するのは `contract` /
+`e2e` / `integration` / `unit` の 4 件だけで、 **その 4 件だけを見て規則を推すと残り 16 件で外す**。
+
+`spec_path` は lang suffix も解決済 (§ lang suffix 規約)。 自分で `.ja` を足さない。
+
+`--layer all` だけは例外で `tests/spec/test-spec-{module}{lang}.md` に書く。 `all` は layer では
+なく「全 layer」 を表す予約値で、 CLI は 20 件を返し `spec_path` を 1 つに決められない。
+
+**既存 file があっても書き先を変えない**。 返った `spec_path` に上書きする。
 
 Layer 2 skill は `kiwa layers --json --layer <L> --lang <C> --module <M>` が返す 1 つの path しか
 Read しない。 連番 (`test-spec-{module}-2.md`) へ逃がすと **再生成した spec が誰にも読まれず**、
@@ -204,7 +222,7 @@ format。
 
 ### 出力 path
 
-batch 起動時の各 module は `--module` 単数経路と同じ出力 path 規約に従う (`tests/spec/{layer}/test-spec-{module}.md`)。 「contract 間連携」 section は **最初の module** の spec 末尾に追記する (例 `tests/spec/contract/test-spec-{first-module}.md` 末尾)。 これにより batch 起動かどうかが contributor から見て自然に伝わる (最初の spec を読めば連携全体が見える)。
+batch 起動時の各 module は `--module` 単数経路と同じ出力 path 規約に従う (module ごとに `kiwa layers --module` を引き直し、 返った `spec_path` に書く)。 「contract 間連携」 section は **最初の module** の spec 末尾に追記する (例 `tests/spec/contract/test-spec-{first-module}.md` 末尾)。 これにより batch 起動かどうかが contributor から見て自然に伝わる (最初の spec を読めば連携全体が見える)。
 
 ### 後方互換
 
@@ -220,11 +238,15 @@ AskUserQuestion で文書生成言語を user に確認する。 `--lang {code}`
 
 選択肢 — 🇯🇵 日本語 (ja、 Recommended) / 🇬🇧 English (en) / 🌏 その他多言語 (free input、 ISO 639-1 言語コード)。 詳細仕様 + 出力 path 規約 + section 見出し言語切替は `references/doc-language-selection.md` を Read。
 
-確定後の言語 `$DOC_LANG` は以降の全 Write step (test 仕様書 file 名 / section 見出し言語) に反映する。 出力 path 規約 (Issue #341 SSOT):
+確定後の言語 `$DOC_LANG` は以降の全 Write step (test 仕様書 file 名 / section 見出し言語) に反映する。 `$DOC_LANG` は `kiwa layers --lang` に渡す値で、 **path は組み立てず CLI が返す `spec_path` を使う** (§ 書き先は CLI が返す 1 つの path)。
 
-- ja → `tests/spec/{layer}/test-spec-{module}.ja.md`
-- en → `tests/spec/{layer}/test-spec-{module}.md`
-- その他 (zh / ko 等) → `tests/spec/{layer}/test-spec-{module}.{lang_code}.md`
+lang が path のどこに出るかは layer で違う (Issue #341 SSOT)。
+
+| 指定 | `--layer contract` | `--layer a11y` |
+|---|---|---|
+| `--lang en` (default) | `tests/spec/contract/test-spec-{module}.md` | `tests/spec/integration/test-spec-{module}.a11y.md` |
+| `--lang ja` | `tests/spec/contract/test-spec-{module}.ja.md` | `tests/spec/integration/test-spec-{module}.a11y.ja.md` |
+| `--lang zh` 等 | `tests/spec/contract/test-spec-{module}.zh.md` | `tests/spec/integration/test-spec-{module}.a11y.zh.md` |
 
 #### lang suffix 規約 (SSOT)
 
@@ -233,7 +255,8 @@ producer (`/kiwa-design`) と consumer (`/kiwa-test` / `/kiwa-review`) の file 
 ```bash
 LANG_SUFFIX=""
 [ "$DOC_LANG" != "en" ] && [ -n "$DOC_LANG" ] && LANG_SUFFIX=".${DOC_LANG}"
-# 使用例: tests/spec/{layer}/test-spec-${MODULE}${LANG_SUFFIX}.md
+# 本 suffix 規約は CLI (`kiwa layers --lang`) が実装済。 producer も自前で組み立てず
+# `spec_path` を受け取る (§ 書き先は CLI が返す 1 つの path)。 本 block は規約の説明用。
 ```
 
 en (default) は suffix なし、 ja は `.ja`、 その他 ISO 639-1 は `.{code}`。 layer suffix (`.api` / `.ui` / `.data` / `.cli`) と直交、 lang suffix が常に末尾 (例 `test-spec-foo.api.ja.md`)。
@@ -260,23 +283,48 @@ contract 改変を伴う場合は `function | event | error | modifier` 単位�
 
 `--layer e2e` または `--layer all` 起動時に **必ず実行する**。 contract layer 単独 (`--layer contract`) の場合は skip。
 
-`app/` / `src/components/` 配下を grep して UI 要素を機械的に列挙し、 spec の「UI feature 一覧」 sub-section (`references/output-skeleton.md` § UI feature 一覧) に転記する。 button disabled state / error testid 経路 / polling 動作 / refetch race / wallet 接続 flow が現行 11 観点では明示的に cover されない構造的問題を補う (Issue #236)。
+対象 package の `app/` / `src/components/` 配下を grep して UI 要素を機械的に列挙し、 spec の「UI feature 一覧」 sub-section (`references/output-skeleton.md` § UI feature 一覧) に転記する。 button disabled state / error testid 経路 / polling 動作 / refetch race / wallet 接続 flow が現行 11 観点では明示的に cover されない構造的問題を補う (Issue #236)。
 
-grep コマンド例。
+##### 探索の起点は `$PKG_DIR`
+
+**`app/` を裸で渡さない**。 Step 2 と同じく対象 package (`packages/{name}` / `examples/{name}`) を
+`$PKG_DIR` に確定させ、 その配下を探す。 command は repo root から実行する。
+
+repo root で `app/` を裸で渡すと **0 hit になる** (実測)。 repo root に `app/` は無く、
+`app/` か `src/components/` を持つ example は 23 件あるため、 0 hit は「UI が無い」 ではなく
+「探す場所が違う」 を意味する。 本 step は「grep ヒット内容のみ転記」 する規約なので、
+0 hit は UI feature 一覧が空のまま静かに通り、 **転記漏れと区別が付かない**。
 
 ```bash
-# testid / data-testid を全件列挙
-grep -rn "data-testid" app/ src/components/ 2>/dev/null | awk -F'"' '{print $2}' | sort -u
+PKG_DIR=examples/nextjs-app-router-full   # 対象 package を確定させてから実行する
+UI_DIRS=()
+for dir in "$PKG_DIR/app" "$PKG_DIR/src/components"; do
+  [ -d "$dir" ] && UI_DIRS+=("$dir")
+done
+[ "${#UI_DIRS[@]}" -gt 0 ] || { echo "UI dir が無い: $PKG_DIR" >&2; exit 1; }
+
+# testid / data-testid を全件列挙 (単引用 / 変数埋め込みも拾うため = の右を丸ごと出す)
+grep -rn "data-testid" "${UI_DIRS[@]}"
 
 # button element の state (disabled / loading) を持つ箇所
-grep -rn -E "disabled=|isLoading|isPending" app/ src/components/ 2>/dev/null
+grep -rn -E "disabled=|isLoading|isPending" "${UI_DIRS[@]}"
 
 # form input の name / placeholder
-grep -rn -E "name=\"[a-zA-Z]+\"|placeholder=\"" app/ src/components/ 2>/dev/null
+grep -rn -E "name=\"[a-zA-Z]+\"|placeholder=\"" "${UI_DIRS[@]}"
 
 # error display (onError / catch 経由の表示)
-grep -rn -E "onError|catch|error\." app/ src/components/ 2>/dev/null | head -20
+grep -rn -E "onError|catch|error\." "${UI_DIRS[@]}" | head -20
 ```
+
+`$PKG_DIR` の 2 dir はどちらか一方しか無い package が多い (実測で `app/` と
+`src/components/` の両方を持つ example は 0 件)。 片方が無いことは異常ではないため、
+存在する dir だけを `UI_DIRS` に入れる。 存在しない path も `grep` に渡すと、 一致を出力しても
+exit 2 になる。 **2 dir とも無い時はその場で止め、 4 scan 全てが 0 hit の時は `$PKG_DIR` の
+確定を疑う**。
+
+`data-testid` の抽出で `awk -F'"' '{print $2}'` に通さない。 単引用や
+`data-testid={id}` の形が空文字に潰れ、 **拾えたのに空行として転記される** (実測で
+`examples/nextjs-app-router-full` の 13 hit のうち 11 件が空行になった)。
 
 列挙結果は spec の `## UI feature 一覧` sub-section の表に **grep ヒット内容のみ転記** する (推測で UI element を補完しない)。 各 element には対応 TC を最低 1 件以上紐付け、 0 件の element は「spec の欠落」 として「不足している仕様」 にも追記する。
 
@@ -757,7 +805,7 @@ report 出力先: `tests/reports/review/spec-review-{module}.{$DOC_LANG}.md`
 
 ## 出力フォーマット
 
-`tests/spec/{layer}/test-spec-{module}.md` (`--layer all` の場合は `tests/spec/test-spec-{module}.md`) を以下 9 section で Write する (順序固定、 省略禁止)。 完全な雛形は `references/output-skeleton.md` を Read する。
+§ 書き先は CLI が返す 1 つの path で解決した `spec_path` に、 以下 9 section で Write する (順序固定、 省略禁止)。 完全な雛形は `references/output-skeleton.md` を Read する。
 
 ```markdown
 ## 対象機能
@@ -821,7 +869,7 @@ path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec �
 
 ## 完了条件
 
-- 出力 path (`tests/spec/{layer}/test-spec-{module}.md` または `tests/spec/test-spec-{module}.md`) が 9 section 全て揃って Write 済 (空 section は `(なし)`)
+- 出力 path (`kiwa layers` が返した `spec_path`、 `--layer all` のみ `tests/spec/test-spec-{module}{lang}.md`) が 9 section 全て揃って Write 済 (空 section は `(なし)`)
 - 「テストケース一覧」が 1 ケース 1 行で観点別グループ化されている
 - 優先度判定が Step 5 のロジック (リスク 5 基準) と整合している
 - 「不足している仕様」が空でなければ追加ヒアリングが必要な旨を末尾で報告
