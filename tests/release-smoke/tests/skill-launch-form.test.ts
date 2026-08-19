@@ -537,3 +537,41 @@ describe('USAGE と parser が同じ option を持つ', () => {
     expect([...options].sort(), '宣言行以外を拾っている').toEqual(['--json', '--layer']);
   });
 });
+
+describe('/kiwa-nextjs の手順が実行できる形になっている', () => {
+  const STEP_2 = /^### Step 2: /m;
+  const STEP_4 = /^### Step 4: /m;
+
+  it('Step 2 の探索が project 全体を起点にして行番号つきで出す', () => {
+    // path を推測して列挙すると、 別の置き場所を持つ project を 1 件も拾わない
+    // (実測 = `examples/nextjs-server-actions-poc` の action は `src/login-action.ts` で、
+    // 旧記述の `app/actions.ts` / `lib/actions/*.ts` には当たらない)。
+    const fence = fenceUnder('kiwa-nextjs', STEP_2, 'bash');
+    const find = commandLine(fence, 'find');
+    expect(find, 'Step 2 に探索 command が無い').toBeDefined();
+    expect(find, '探索起点が project 全体でない').toMatch(/find\s+\.\s/);
+    expect(find, 'node_modules を除外していない').toContain('-name node_modules -prune');
+    const grep = commandLine(fence, 'grep');
+    expect(grep, '抽出段が無い').toBeDefined();
+    // 候補は file:行番号 で出す (#2017 と同じ形)。
+    for (const required of ['n', 'H', 'E']) {
+      expect(grep, `抽出が -${required} を付けていない`).toMatch(
+        new RegExp(`grep\\s+-[a-zA-Z]*${required}`),
+      );
+    }
+  });
+
+  it('Step 4 が vitest の前に依存を build する', () => {
+    // `@kiwa-lab/nextjs` は `dist/index.js` を entry にしており、 build を飛ばすと
+    // dist が無い / 古い環境で解決に失敗する。 実測で `test` script を持つ example 137 件の
+    // うち 131 件が先に `build-deps.mjs` を呼ぶ。
+    const lines = executableLines(fenceUnder('kiwa-nextjs', STEP_4, 'bash')).split('\n');
+    const build = lines.findIndex((line) => line.includes('build-deps.mjs'));
+    const run = lines.findIndex((line) => line.includes('vitest run'));
+    expect(build, 'Step 4 に依存 build の行が無い').toBeGreaterThanOrEqual(0);
+    expect(run, 'Step 4 に vitest 起動の行が無い').toBeGreaterThanOrEqual(0);
+    expect(run, 'build が vitest の後に来ている').toBeGreaterThan(build);
+    // 対象 package を名指しする。 引数なしの build は別 package を作らない。
+    expect(lines[build], 'build 対象に @kiwa-lab/nextjs が無い').toContain('@kiwa-lab/nextjs');
+  });
+});

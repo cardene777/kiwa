@@ -133,7 +133,19 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 ### Step 2: action の依存を 2 軸で確認する
 
-対象 Server Action の export を Grep で探す (`app/actions.ts` / `app/{path}/actions.ts` / `lib/actions/*.ts` 等)。
+対象 Server Action の export を探す。 **path を推測せず project 全体を走査する**。
+
+```bash
+find . -type d -name node_modules -prune -o -type f \
+  \( -name '*.ts' -o -name '*.tsx' \) -print0 |
+  xargs -0 grep -nHE "^[[:space:]]*(export[[:space:]]+async[[:space:]]+function|'use server')" |
+  head -30
+```
+
+置き場所は project ごとに違う。 `app/actions.ts` / `lib/actions/*.ts` を挙げるだけでは
+**`src/` に置く project を 1 件も拾えない** (実測 = `examples/nextjs-server-actions-poc` の
+action は `src/login-action.ts`)。 `/kiwa-design` Step 2 と同じ走査形にして、 file:行番号 つきで
+候補を出す。
 
 確認するのは 2 軸で、 **止める軸と seed する軸が違う**。
 
@@ -453,7 +465,20 @@ describe('signup server action', () => {
 
 ### Step 4: test 実行 + 結果取得
 
-`pnpm vitest run <解決した出力先> --environment node` を起動。 出力先は § mode 別の生成先 で layer ごとに違うので、 生成した path をそのまま渡す。 fail 行を spec の対応 TC ID と紐付けて report する。
+**依存 package を build してから** vitest を起動する。 出力先は § mode 別の生成先 で layer ごとに
+違うので、 生成した path をそのまま渡す。
+
+```bash
+node <repo root>/scripts/build-deps.mjs @kiwa-lab/nextjs @kiwa-lab/core
+pnpm vitest run <解決した出力先> --environment node
+```
+
+build を飛ばすと **`dist/` が無い / 古い環境で解決に失敗する**。 `@kiwa-lab/nextjs` は
+`dist/index.js` を entry にしており、 `build-deps.mjs` の docstring も「単独で走らせる時はこれが
+要る (依存の `dist/` が古いと型定義が合わない)」 と書く。 実測で、 `test` script を持つ
+example 137 件のうち 131 件が先に `build-deps.mjs` を呼ぶ。
+
+fail 行を spec の対応 TC ID と紐付けて report する。
 
 **生成しなかった TC を pass 件数と並べて報告する** (§ 生成しなかった TC を返す)。 spec の TC 数と実行された `it` の数は一致しないので、 差の理由を同じ場所に置く。
 
