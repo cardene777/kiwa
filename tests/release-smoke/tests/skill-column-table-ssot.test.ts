@@ -69,8 +69,10 @@ function columnsOf(section: string): string[] {
 }
 
 const WITH_SECTION = LAYERS.filter((l) => sectionOf(l.id) !== null).map((l) => l.id);
+// ID 文法で先に絞ると、 大文字や underscore を含む typo 見出しほど列挙から消える。
+// 専用節らしい見出しをすべて拾い、 manifest との比較側で不正な ID として落とす。
 const DECLARED_SECTIONS = [
-  ...DESIGN.matchAll(/^#### ([a-z0-9-]+) layer 専用 column(?: |$)/gm),
+  ...DESIGN.matchAll(/^#### (.+?) layer 専用 column(?: |$)/gm),
 ].map((m) => m[1]!);
 
 describe('layer 専用 column 表は kiwa-design に 1 つだけ置く', () => {
