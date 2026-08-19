@@ -340,6 +340,10 @@ fi
 
 ### Step 4: dApp e2e test chain 実行 (target=dapp or both)
 
+`examples/{example}/` に cd した状態で生成側の子 skill を呼ぶ。 target=dapp の単独経路でも
+Step 2 の repo root に残らず、 target=both で直前の review を repo root から呼んだ後も
+生成前にこの cwd を確立し直す。
+
 target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) なら 3 完了待ち、 mode=parallel なら 3 と並走 (ただし parallel は port 衝突リスクあるため非推奨)。
 
 ```text
@@ -356,6 +360,9 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
 ```
 
 ### Step 4w: web chain 実行 (e2e-generic + a11y、 target=web or all)
+
+`examples/{example}/` に cd した状態で生成側の子 skill を呼ぶ。 target=web / all は Step 3 を
+通らないため、 Step 2 の repo root から明示的に移動してから各 chain を始める。
 
 target=web (汎用 web 2 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y の 2 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 2 子 skill が同時 Read するだけ、 file 書込 path は別)。
 

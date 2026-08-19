@@ -189,12 +189,20 @@ describe('spec 存在 check の起点が生成先と揃っている', () => {
     expect(line!, 'cwd 起点のまま spec を見ている').toContain('examples/$EXAMPLE/$SPEC');
   });
 
-  it('生成先が examples/{example} 配下であることと辻褄が合う', () => {
-    // 起点を揃える根拠は Step 3 の cd 先。 そちらが変われば本検査の前提も変わる。
-    const step3 = headingSectionIn(TEST_SKILL, /^### Step 3: contract test chain 実行/m);
-    expect(step3, 'Step 3 の cd 先が examples/{example}/ でない').toContain(
-      '`examples/{example}/` に cd した状態で',
-    );
+  it('全生成 chain の起点が examples/{example} 配下であることと辻褄が合う', () => {
+    // spec の存在 check は target に関係なく example 起点で見る。 contract だけでなく、
+    // dApp / web の単独実行でも同じ起点を明示しないと生成先と存在 check が食い違う。
+    const steps: [string, RegExp][] = [
+      ['Step 3', /^### Step 3: contract test chain 実行/m],
+      ['Step 4', /^### Step 4: dApp e2e test chain 実行/m],
+      ['Step 4w', /^### Step 4w: web chain 実行/m],
+    ];
+    for (const [label, heading] of steps) {
+      const section = headingSectionIn(TEST_SKILL, heading);
+      expect(section, `${label} の cd 先が examples/{example}/ でない`).toContain(
+        '`examples/{example}/` に cd した状態で',
+      );
+    }
 
     // CLI が返す spec_path は project-root 起点の相対 path で、 repo root からは開けない。
     const bin = resolve(REPO_ROOT, 'packages/cli/dist/bin.js');
