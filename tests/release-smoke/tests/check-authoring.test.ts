@@ -573,10 +573,11 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(shadowedSources(src)).toEqual(['target']);
   });
 
-  it('手順の doc が実在し 2 形を持つ', () => {
+  it('手順の doc が実在し 3 形を持つ', () => {
     // 失敗 message が doc を指すため、 消えると案内先が消える。
     const doc = read('docs/quality/check-authoring.md');
-    expect(doc).toContain('## 2 つの形');
+    expect(doc).toContain('## 3 つの形');
+    expect(doc).toContain('本 file は 12 回の実測から書いた');
     expect(doc).toContain('### 形 1 — 0 件でも通る');
     expect(doc).toContain('### 形 2 — 集合を畳むと片側の欠落が消える');
     // 形 2 を機械化しない根拠は実測 (#2013)。 数字が消えると、 次に同じ問いが出た時に
@@ -586,6 +587,17 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain('| 集約 (`join` / `flat` / `Set`) が `expect` の 5 行以内 | 105 | 0');
     expect(doc).toContain('| 集約が `expect(...)` の引数内 | 53 | 0 |');
     expect(doc).toContain('| 集約が `expect` の **値の位置** (第 1 引数) | 11 | 0 |');
+    // 形 3 (代理指標だけを守る) も同じ扱い。 見出しだけでなく測定値まで守る = この検査自身が
+    // 5 件目の実例なので、 同じ形に戻らないよう値を照合する (#2015)。
+    expect(doc).toContain('### 形 3 — 代理指標だけを守る');
+    expect(doc).toContain('### 形 3 を機械化しない根拠');
+    expect(doc).toContain('| `toContain(<literal>)` の総数 | 225 |');
+    expect(doc).toContain('| 短く構造の無い literal | 124 |');
+    // 判断そのものの行も守る。 見出しと測定値だけを見て「する / しない」 を見ないのは、
+    // まさに形 3 (実装中に踏んだ 6 件目)。
+    expect(doc).toContain('| `it.each` に渡す一覧が空 | **する**');
+    expect(doc).toContain('| 集合を畳む | しない |');
+    expect(doc).toContain('| 代理指標だけを守る | しない |');
   });
 
   it('別名に代入した保証は受けない', () => {
