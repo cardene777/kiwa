@@ -230,11 +230,70 @@ describe('検査が実際に呼出を見ている', () => {
     expect(playwright, 'Playwright page を Node/jsdom 用 runAxe に渡している').not.toMatch(
       /\brunAxe\s*\(/,
     );
-    expect(playwright, 'axe-core source を Playwright page に注入していない').toContain(
-      'page.addScriptTag({ content: axe.source })',
-    );
-    expect(playwright, 'axe を browser context 内で実行していない').toMatch(
-      /page\.evaluate\([\s\S]*\baxe\.run\(document,/,
-    );
+
+    const source = parseFence(playwright ?? '');
+    let injectsAxeSource = false;
+    let runsAxeInBrowser = false;
+    const containsAxeRun = (root: ts.Node): boolean => {
+      let found = false;
+      const visit = (node: ts.Node): void => {
+        if (
+          ts.isCallExpression(node) &&
+          ts.isPropertyAccessExpression(node.expression) &&
+          node.expression.name.text === 'run' &&
+          ((ts.isIdentifier(node.expression.expression) &&
+            node.expression.expression.text === 'axe') ||
+            (ts.isPropertyAccessExpression(node.expression.expression) &&
+              node.expression.expression.name.text === 'axe')) &&
+          node.arguments[0] !== undefined &&
+          ts.isIdentifier(node.arguments[0]) &&
+          node.arguments[0].text === 'document'
+        ) {
+          found = true;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(root);
+      return found;
+    };
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.expression) &&
+        node.expression.expression.text === 'page' &&
+        node.expression.name.text === 'addScriptTag' &&
+        node.arguments[0] !== undefined &&
+        ts.isObjectLiteralExpression(node.arguments[0]) &&
+        node.arguments[0].properties.some(
+          (property) =>
+            ts.isPropertyAssignment(property) &&
+            ts.isIdentifier(property.name) &&
+            property.name.text === 'content' &&
+            ts.isPropertyAccessExpression(property.initializer) &&
+            ts.isIdentifier(property.initializer.expression) &&
+            property.initializer.expression.text === 'axe' &&
+            property.initializer.name.text === 'source',
+        )
+      ) {
+        injectsAxeSource = true;
+      }
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        ts.isIdentifier(node.expression.expression) &&
+        node.expression.expression.text === 'page' &&
+        node.expression.name.text === 'evaluate' &&
+        node.arguments[0] !== undefined &&
+        (ts.isArrowFunction(node.arguments[0]) || ts.isFunctionExpression(node.arguments[0])) &&
+        containsAxeRun(node.arguments[0])
+      ) {
+        runsAxeInBrowser = true;
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(injectsAxeSource, 'axe-core source を Playwright page に注入していない').toBe(true);
+    expect(runsAxeInBrowser, 'axe を browser context 内で実行していない').toBe(true);
   });
 });
