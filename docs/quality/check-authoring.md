@@ -160,6 +160,44 @@ expect(flag, '抽出が -E を付けていない').toContain('E');
 数える対象は「契約が『かつ』 で繋いでいるもの」 になる。 command なら flag、 表なら column、
 出力なら field、 手順なら step で、 いずれも 1 つ欠けると契約が成立しない単位を指す。
 
+#### 既存の検査を棚卸しした結果 (2026-08-19 時点の実測)
+
+規範を足した後、 同じ形が既に残っていないかを数えた。
+対象は `.claude/skills/*/SKILL.md` の bash fence に現れる flag で、 検査の assertion literal
+(`toContain` / `toMatch` / `toBe` / `toEqual` の引数) と突き合わせた。
+
+| 指標 | 件数 |
+|---|---|
+| fence に現れる flag | 133 |
+| assertion literal に現れる | 108 |
+| 現れない | 25 |
+
+現れない 25 件を **1 件ずつ変異させて** 分類した。 「照合が無い」 と「別経路で守られている」 は
+数えただけでは区別できない。
+
+| 内訳 | 件数 | 変異の結果 |
+|---|---|---|
+| 検査が 1 件も無い skill (`docs-generate` / `docs-publish-kiwa` / `kiwa-release-check`) | 15 | 未実施 (参照する検査が無いことを grep で確認) |
+| fence 自体に検査が無い (`kiwa-e2e` の起動 / `kiwa-forge` の coverage / `kiwa-app` の init 等) | 6 | **生存** (3 件を実測) |
+| loop で照合済 (`--producer` を配列で回している) | 2 | 対象外 (literal では無いだけで照合されている) |
+| 別の検査が検知 (`--arg id` の束縛) | 1 | **FAIL** (1 件) |
+| **1 要素だけ照合していた** (`kiwa-observe` Step 0 の `--reporter=json`) | 1 | **生存** |
+
+**本節の形に当たるのは最後の 1 件だけ**。 残り 24 件は「検査が無い」 か「別経路で守られている」 で、
+どちらも直し方が違う (前者は検査を書く、 後者は何もしない)。
+
+`kiwa-observe` Step 0 の契約は 5 要素 (`vitest run` / `--root` / `--passWithNoTests` /
+`--reporter=json` / `--outputFile`) で、 検査は 4 要素を持っていた。
+`--reporter=json` を落とすと **file が 1 件も書かれない** (実測 = 既定 reporter は stdout に
+しか出さず `--outputFile` は無視される)。 前 run の結果が残っていれば、 次の段はそれを読む。
+
+**assertion literal だけを数える proxy は両方向に外れる**。 配列で回している照合を取りこぼし
+(`--producer` の 2 件)、 検査が別の形で守っている要素も未照合に数える (`--arg id` の 1 件)。
+数えた後に変異を当てないと分類できない。
+
+再測する時は 3 手で回す。 fence の flag を数える、 assertion literal に現れないものを抽出する、
+1 件ずつ落として全 suite を回す。 生存した中で「sibling が照合されている」 ものが本節の形になる。
+
 ## 機械で止める範囲
 
 | 形 | 機械化 | 理由 |

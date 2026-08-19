@@ -102,6 +102,21 @@ describe('kiwa-observe の Step 0 が観測対象に範囲を絞る', () => {
     expect(stepZeroCommand(), '--passWithNoTests を渡していない').toContain('--passWithNoTests');
   });
 
+  it('結果を JSON で書き出す reporter を渡す', () => {
+    // Step 1 は書かれた file を `JSON.parse` する。 reporter を渡さないと **file が 1 件も
+    // 書かれない** (実測 = 既定 reporter は stdout にしか出さず、 `--outputFile` は無視されて
+    // exit 0 で終わる)。
+    //
+    // **落ちないのが問題**。 前 run の `tests/reports/vitest-results.json` が残っていれば
+    // Step 1 はそれを読み、 dashboard が前回の結果を今回の観測として報告する。 Step 0 が
+    // 「読み先を 1 箇所に決める」 理由そのものが崩れる。
+    //
+    // Step 0 の契約は 5 要素 (`vitest run` / `--root` / `--passWithNoTests` /
+    // `--reporter=json` / `--outputFile`) で、 本 file は 4 要素しか照合していなかった
+    // (docs/quality/check-authoring.md § 複数の要素を要求する契約では「全要素」 が最小の形)。
+    expect(stepZeroCommand(), '--reporter=json を渡していない').toContain('--reporter=json');
+  });
+
   it('出力先を --root 相対で書いている', () => {
     // `--outputFile` は `--root` から解決される。 repo root 相対で書くと
     // `$PROJECT_ROOT/$PROJECT_ROOT/tests/...` に書かれる (実測)。
