@@ -1,6 +1,6 @@
 # nextjs-app-router-full — kiwa Next.js v15 App Router PoC (5 kiwa layer + Route Handler)
 
-`@kiwa-lab/nextjs` v2.0.0 の **5 helper** (`invokeServerAction` / `invokeMiddleware` / `renderServerComponent` / `invokeParallelRoutes` / `setupNextRscEnv`) + **Route Handler** を **実 Next.js v15 App Router project** に統合した参考実装。
+`@kiwa-lab/nextjs` v2.0.0 の **5 helper** (`invokeServerAction` / `invokeMiddleware` / `renderServerComponent` / `invokeParallelRoutes` / `setupNextRscEnv`) + **Route Handler** を 1 つの Next.js v15 App Router example で試せる参考実装。Server Actions / middleware / RSC / Route Handler は実 App Router project に統合し、Parallel Routes / RSC streaming は `_kiwa` の pure seam と Vitest test で扱う。
 
 OSS contributor / kiwa を初めて触る user 向けに、 Server Actions + middleware + RSC + Parallel Routes + RSC streaming + REST Route Handler をどう書けば kiwa 経由で test できるかを **コピペで動く形** で示す。
 
@@ -56,8 +56,8 @@ nextjs-app-router-full/
 | Server Actions | `'use server'` で `next/headers.cookies()` + `next/navigation.redirect()` + `next/cache.revalidatePath()` を bind して env を構築、 pure action に流す | `invokeServerAction` で formData + cookieJar + redirect(REDIRECT_SYMBOL throw) + revalidatePath spy を inject、 redirect / error / result を全捕捉 |
 | middleware | `middleware.ts` で `NextRequest` → kiwa `MiddlewareRequest` 変換、 返り値の `MiddlewareAction` → `NextResponse` 再変換 | `invokeMiddleware` で synthetic request を inject、 `env.action.kind` (`next/redirect/rewrite/json`) と response headers / cookies を全捕捉 |
 | RSC | `app/items/page.tsx` で `cookies()` を `sessionGetter` に inject、 純粋 RSC を await | `renderServerComponent` で async component を直接 await、 `findAll` / `textContent` で element tree を検証 |
-| Parallel Routes | layout が `children` と named slot を受け、 slot ごとに `default.tsx` / intercepting route を持つ | `invokeParallelRoutes` で layout / children / slot を直接渡し、 fallback・割り込み・失敗隔離を検証 |
-| RSC streaming | async data source を Suspense boundary 内で段階描画 | `setupNextRscEnv` で fallback・chunk 順序・resolved・error boundary・timeout を捕捉 |
+| Parallel Routes | この example では実 route tree は未実装。`_kiwa/items-parallel.ts` で layout / children / named slot を pure model 化 | `invokeParallelRoutes` で layout / children / slot を直接渡し、 fallback・割り込み・失敗隔離を検証 |
+| RSC streaming | この example では実 Suspense page は未実装。`_kiwa/items-streaming.ts` で段階描画する async data source を pure model 化 | `setupNextRscEnv` で fallback・chunk 順序・resolved・error boundary・timeout を捕捉 |
 | Route Handler | `app/api/items/route.ts` で `Request → Response` の thin wrapper | `itemsGetHandler(new Request(url, { headers: { cookie } }))` で direct invoke (kiwa helper 不要、 Web API のみ) |
 
 ## 実行方法
@@ -86,7 +86,7 @@ pnpm -F examples-nextjs-app-router-full test:e2e
 # → Playwright が自動で `next dev --port 3070` を起動 + 7 e2e spec を実行
 ```
 
-実 Next.js v15 runtime (RSC streaming + Server Action multipart + middleware NextResponse + Route Handler) の統合動作を end-to-end で確認する。 各 e2e spec は kiwa unit test と **同じ振る舞いを実 server で検証** する形になっており、 unit test と e2e が同じ実装を別 angle で test する 2 軸構成。
+実 Next.js v15 runtime (async RSC + Server Action multipart + middleware NextResponse + Route Handler) の統合動作を end-to-end で確認する。Parallel Routes / RSC streaming はこの e2e の対象外。各 e2e spec は対応する kiwa unit test と **同じ振る舞いを実 server で検証** する形になっており、 unit test と e2e が同じ実装を別 angle で test する 2 軸構成。
 
 ### Step 4 — `/kiwa-design → /kiwa-nextjs → /kiwa-review` chain (skill 経由)
 
