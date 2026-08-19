@@ -610,9 +610,9 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     // 棚卸しの測定値 (#2021)。 3 段の数字が消えると、 次に同じ問いが出た時に数え直しになる。
     // 形 2 / 形 3 の根拠表と同じ扱いで、 見出しではなく値そのものを照合する。
     expect(doc).toContain('#### 既存の検査を棚卸しした結果');
-    expect(doc).toContain('| fence に現れる flag | 133 |');
-    expect(doc).toContain('| assertion literal に現れる | 108 |');
-    expect(doc).toContain('| 現れない | 25 |');
+    expect(doc).toContain('| fence に現れる flag | 135 |');
+    expect(doc).toContain('| 検査の string literal に現れる | 123 |');
+    expect(doc).toContain('| 現れない | 12 |');
     // 分類の結論。 25 件のうち本節の形は 1 件だけで、 残りは別種の gap になる。
     // 件数だけを守ると「1 件だけ」 の判断が消えるため、 判断の行も照合する。
     expect(doc).toContain('**本節の形に当たるのは最後の 1 件だけ**');
@@ -627,6 +627,14 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain('**何も起きない** = 既定が `summary` なので出力が同じ (等価変異)');
     expect(doc).toContain('書かれた JSON を読む consumer が repo に 1 件も無い');
     expect(doc).toContain('環境確認の出力が変わるだけで、 後段の判定に使っていない');
+    // 検査が 1 件も無い skill を対象にするかの判断 (#2023 群 2)。 3 skill とも「落ちずに
+    // 壊れる」 経路を持つことが根拠なので、 見出しと根拠の 1 行を別々に照合する。
+    expect(doc).toContain('##### 検査が 1 件も無い skill を対象にするか');
+    expect(doc).toContain('3 skill とも対象にした。 いずれも **落ちずに壊れる** 経路を持つため');
+    expect(doc).toContain('**flag の数では決めない**');
+    // proxy の外れ方は 5 通り。 うち 3 つは手順を回して初めて出た = 数字を消すと、
+    // 次に数えた人が同じ 3 つを踏み直す。
+    expect(doc).toContain('**この proxy は 5 通りに外れる**');
   });
 
   it('別名に代入した保証は受けない', () => {

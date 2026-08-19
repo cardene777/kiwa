@@ -116,11 +116,26 @@ export function headingSectionIn(body: string, heading: RegExp): string {
   // `m` flag の `^` が文字列の先頭にも一致するため、 対象の見出し自身を「次の見出し」 として
   // 拾って範囲が 1 文字になる (実測)。 `### ` で閉じる `stepSectionIn` は level が違うため
   // 同じ書き方でも当たらなかっただけで、 同 level を探す本関数では成立しない。
-  const firstLineEnd = rest.indexOf('\n');
-  if (firstLineEnd === -1) return rest;
-  const after = rest.slice(firstLineEnd + 1);
-  const next = after.search(new RegExp(`^#{1,${level}} `, 'm'));
-  return next === -1 ? rest : rest.slice(0, firstLineEnd + 1 + next);
+  //
+  // **code fence の中は見ない**。 shell の comment 行 (`# 既存 worktree 掃除`) は行頭の `#` が
+  // markdown の見出しと同じ形をしており、 素朴に探すと fence の 1 行目で範囲が閉じる
+  // (実測 = `/docs-publish-kiwa` の Step 3 が 46 文字で切れ、 fence が「無い」 ことになった)。
+  const lines = rest.split('\n');
+  const closing = new RegExp(`^#{1,${level}} `);
+  let inFence = false;
+  let end = lines.length;
+  for (let i = 1; i < lines.length; i += 1) {
+    const line = lines[i]!;
+    if (line.trimStart().startsWith('```')) {
+      inFence = !inFence;
+      continue;
+    }
+    if (!inFence && closing.test(line)) {
+      end = i;
+      break;
+    }
+  }
+  return lines.slice(0, end).join('\n') + (end === lines.length ? '' : '\n');
 }
 
 /** `headingSectionIn` の範囲にある最初の code fence の中身。 */
