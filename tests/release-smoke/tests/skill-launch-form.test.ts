@@ -79,27 +79,50 @@ function acceptedOptions(script: string): Set<string> {
   return accepted;
 }
 
+/** `--flag` と完全一致する string literal。 `--flag=value` の判定は別の argv 形式になる。 */
+function exactOption(node: ts.Node | undefined): string | undefined {
+  if (!node || !ts.isStringLiteralLike(node)) return undefined;
+  return /^--[a-z][a-z0-9-]*$/.test(node.text) ? node.text : undefined;
+}
+
 /**
- * `runCli.ts` が受け取る option の集合。
+ * `layersCommand` が空白区切りで受け取る option の集合。
  *
- * **AST の string literal から導く**。 parse の形は 3 通りある (`arg === '--x'` /
- * `argv.includes('--x')` / `takeFlagValue(argv, '--x')`) ため、 呼出の形で拾うと形が
- * 1 つ増えるたびに漏れる (実測 = 等値比較形を落として 6 件を「受理しない」 と誤判定した)。
- *
- * 広く取る側に倒す = 受理していない literal を混ぜると検査は緩む方向に外れるが、
- * 狭く取ると **正しい skill の起動を落とす** ため運用が止まる。
+ * Usage / error の literal は受理の証拠にならないため、 `layersCommand` 内の 3 つの argv
+ * 判定 (`arg === '--x'` / `args.includes('--x')` / `takeFlagValue(args, '--x')`) だけを見る。
+ * `startsWith('--x=')` は `--x=value` 専用で、 skill が書く `--x value` の証拠には数えない。
  */
-function cliAcceptedOptions(): Set<string> {
+function cliAcceptedOptions(script = read('packages/cli/src/runCli.ts')): Set<string> {
   const file = 'packages/cli/src/runCli.ts';
-  const source = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+  const source = ts.createSourceFile(file, script, ts.ScriptTarget.Latest, true);
   const accepted = new Set<string>();
+  const command = source.statements.find(
+    (node): node is ts.FunctionDeclaration =>
+      ts.isFunctionDeclaration(node) && node.name?.text === 'layersCommand',
+  );
+  if (!command?.body) return accepted;
+
   const visit = (node: ts.Node): void => {
-    if (ts.isStringLiteralLike(node) && /^--[a-z][a-z0-9-]*$/.test(node.text)) {
-      accepted.add(node.text);
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
+    ) {
+      const flag = exactOption(node.left) ?? exactOption(node.right);
+      if (flag) accepted.add(flag);
+    }
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression;
+      const flag =
+        ts.isPropertyAccessExpression(callee) && callee.name.text === 'includes'
+          ? exactOption(node.arguments[0])
+          : ts.isIdentifier(callee) && callee.text === 'takeFlagValue'
+            ? exactOption(node.arguments[1])
+            : undefined;
+      if (flag) accepted.add(flag);
     }
     ts.forEachChild(node, visit);
   };
-  visit(source);
+  visit(command.body);
   return accepted;
 }
 
@@ -315,12 +338,29 @@ describe('/kiwa-release-check の宣言が script と一致する', () => {
 });
 
 describe('skill が CLI に渡す option を CLI が受け取る', () => {
+  it('argv 判定だけを受理の証拠にする', () => {
+    const script = `
+      const USAGE = '--usage-only';
+      function otherCommand(args: string[]) { return args.includes('--other-command'); }
+      function layersCommand(args: string[]) {
+        const arg = args[0];
+        if (arg === '--json') return;
+        if (args.includes('--lang')) return;
+        takeFlagValue(args, '--module');
+        if (arg.startsWith('--equals-only=')) return;
+        throw new Error('--message-only');
+      }
+    `;
+    expect(cliAcceptedOptions(script)).toEqual(new Set(['--json', '--lang', '--module']));
+  });
+
   it('`kiwa layers` に渡す option が CLI の受理集合に含まれる', () => {
     // CLI が option 名を変えると、 skill が渡した値は **黙って無視される** = layer は
     // 既定で解決され、 spec の path も既定に落ちる。 どちらも成功で終わるため気付かない。
     //
-    // 受理集合は `runCli.ts` の AST から導く (`rules/quality.md § 導出可能記述は人手で
-    // 書かない` の経路 1)。 一覧を書き写すと、 option が増えた時に検査だけ古いまま残る。
+    // 受理集合は `runCli.ts` の `layersCommand` にある argv 判定から導く
+    // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。 一覧を書き写すと、
+    // option が増えた時に検査だけ古いまま残る。
     const accepted = cliAcceptedOptions();
     expect(accepted.size, 'CLI から option を 1 件も読めない').toBeGreaterThan(0);
 
