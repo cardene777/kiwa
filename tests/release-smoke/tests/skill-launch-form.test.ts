@@ -20,7 +20,14 @@
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
 
-import { fenceUnder, fenceUnderIn, headingSectionIn, read, skillBody } from './skill-md.js';
+import {
+  fenceUnder,
+  fenceUnderIn,
+  headingSectionIn,
+  read,
+  skillBody,
+  skillsWithSkillMd,
+} from './skill-md.js';
 
 /**
  * fence から comment を除いた実行行だけを返す。
@@ -70,6 +77,49 @@ function acceptedOptions(script: string): Set<string> {
   };
   visit(source);
   return accepted;
+}
+
+/**
+ * `runCli.ts` が受け取る option の集合。
+ *
+ * **AST の string literal から導く**。 parse の形は 3 通りある (`arg === '--x'` /
+ * `argv.includes('--x')` / `takeFlagValue(argv, '--x')`) ため、 呼出の形で拾うと形が
+ * 1 つ増えるたびに漏れる (実測 = 等値比較形を落として 6 件を「受理しない」 と誤判定した)。
+ *
+ * 広く取る側に倒す = 受理していない literal を混ぜると検査は緩む方向に外れるが、
+ * 狭く取ると **正しい skill の起動を落とす** ため運用が止まる。
+ */
+function cliAcceptedOptions(): Set<string> {
+  const file = 'packages/cli/src/runCli.ts';
+  const source = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+  const accepted = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (ts.isStringLiteralLike(node) && /^--[a-z][a-z0-9-]*$/.test(node.text)) {
+      accepted.add(node.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return accepted;
+}
+
+/**
+ * fence の中で `kiwa layers` に渡している option。
+ *
+ * 範囲は **`kiwa layers` から pipe まで**。 行全体を見ると同じ行の別 command の option を
+ * 拾う (実測で `jq --arg` と `npx --no` の 2 件が混ざった)。 § 形 4 の「実効の単位で切る」。
+ */
+function layersOptions(fence: string): string[] {
+  const found: string[] = [];
+  for (const line of executableLines(fence).split('\n')) {
+    const at = line.indexOf('kiwa layers');
+    if (at < 0) continue;
+    const rest = line.slice(at);
+    const end = rest.search(/[|)]/);
+    const segment = end === -1 ? rest : rest.slice(0, end);
+    found.push(...(segment.match(/(?<![\w-])--[a-z][a-z0-9-]*/g) ?? []));
+  }
+  return found;
 }
 
 describe('SKILL.md の起動形が必須要素を落としていない', () => {
@@ -261,5 +311,47 @@ describe('/kiwa-release-check の宣言が script と一致する', () => {
   it('comment 内の option 判定を受理 code として数えない', () => {
     const script = "const found = args.includes('--actual'); // args.includes('--comment-only')";
     expect(acceptedOptions(script)).toEqual(new Set(['--actual']));
+  });
+});
+
+describe('skill が CLI に渡す option を CLI が受け取る', () => {
+  it('`kiwa layers` に渡す option が CLI の受理集合に含まれる', () => {
+    // CLI が option 名を変えると、 skill が渡した値は **黙って無視される** = layer は
+    // 既定で解決され、 spec の path も既定に落ちる。 どちらも成功で終わるため気付かない。
+    //
+    // 受理集合は `runCli.ts` の AST から導く (`rules/quality.md § 導出可能記述は人手で
+    // 書かない` の経路 1)。 一覧を書き写すと、 option が増えた時に検査だけ古いまま残る。
+    const accepted = cliAcceptedOptions();
+    expect(accepted.size, 'CLI から option を 1 件も読めない').toBeGreaterThan(0);
+
+    const passed = new Map<string, Set<string>>();
+    for (const skill of skillsWithSkillMd()) {
+      const body = skillBody(skill);
+      const options = [...body.matchAll(/```(?:bash|sh)\n([\s\S]*?)```/g)].flatMap((m) =>
+        layersOptions(m[1] ?? ''),
+      );
+      if (options.length > 0) passed.set(skill, new Set(options));
+    }
+    // 0 件で通る形を作らない (§ 形 1)。 fence の書き方が変わって 1 件も取れなくなると、
+    // 検査本体が 1 度も走らずに緑になる。
+    expect(passed.size, '`kiwa layers` を呼ぶ skill が 1 件も無い').toBeGreaterThan(0);
+
+    const unknown: string[] = [];
+    for (const [skill, options] of passed) {
+      for (const option of options) {
+        if (!accepted.has(option)) unknown.push(`${skill}: ${option}`);
+      }
+    }
+    expect(unknown, `CLI が受け取らない option を渡している:\n${unknown.join('\n')}`).toEqual([]);
+  });
+
+  it('別 command の option を対象に含めない', () => {
+    // 行全体を見ると同じ行の別 command を拾う (実測 = `jq --arg` と `npx --no` の 2 件)。
+    // 範囲を `kiwa layers` から pipe までに切る (§ 形 4)。
+    const fence = [
+      'npx --no kiwa layers --json --layer contract',
+      'HITS=$(printf %s "$OUT" | jq -r --arg id "$LAYER" \'.layers\')',
+    ].join('\n');
+    expect(layersOptions(fence)).toEqual(['--json', '--layer']);
   });
 });
