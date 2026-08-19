@@ -230,6 +230,11 @@ describe('検査が実際に呼出を見ている', () => {
     expect(playwright, 'Playwright page を Node/jsdom 用 runAxe に渡している').not.toMatch(
       /\brunAxe\s*\(/,
     );
-    expect(playwright, 'axe を browser context 内で実行していない').toContain('page.evaluate');
+    expect(playwright, 'axe-core source を Playwright page に注入していない').toContain(
+      'page.addScriptTag({ content: axe.source })',
+    );
+    expect(playwright, 'axe を browser context 内で実行していない').toMatch(
+      /page\.evaluate\([\s\S]*\baxe\.run\(document,/,
+    );
   });
 });
