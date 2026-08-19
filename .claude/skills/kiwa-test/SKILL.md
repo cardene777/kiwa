@@ -618,18 +618,18 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
    - `test-review` FAIL (TC mapping 漏れ / assertion 抽象化 / 追加 test 提案) → test code 再生成
    - `result-review` FAIL (coverage 未達 / flaky 兆候 / 後追い項目残存) → 対応する Layer 2 skill 再走 (coverage 不足は kiwa-forge auto loop、 flaky は該当 Layer 2 を再生成)
 
-2. **対応 skill 再走** — review 指摘を prompt に含めて該当 skill を再起動:
+2. **対応 skill 再走** — review 指摘を prompt に含めて該当 skill を再起動。各 review は repo root から呼ぶため、生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd し直す:
    ```text
    # spec-review FAIL の場合
-   /kiwa-design --layer {layer} --module {module} --input {input} --lang $DOC_LANG --no-review
+   examples/{example}/ へ cd し直して /kiwa-design --layer {layer} --module {module} --input {input} --lang $DOC_LANG --no-review
      "[前 round review 指摘] {critical / major bullets を貼付}、 これを反映して spec を再生成してください"
 
    # test-review FAIL の場合
-   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
+   examples/{example}/ へ cd し直して /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
      "[前 round review 指摘] {bullets}、 不足 TC を追加 + assertion 具体化してください"
 
    # result-review FAIL (coverage 不足) の場合
-   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
+   examples/{example}/ へ cd し直して /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
      (coverage auto loop が真の未踏 line を追加 test で cover、 #222 ロジックに従う)
    ```
 

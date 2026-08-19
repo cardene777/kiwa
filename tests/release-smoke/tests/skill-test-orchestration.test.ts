@@ -191,44 +191,19 @@ describe('spec 存在 check の起点が生成先と揃っている', () => {
 
   it('全生成子 skill の起点が examples/{example} 配下であることと辻褄が合う', () => {
     // spec の存在 check は target に関係なく example 起点で見る。 contract だけでなく、
-    // dApp / web の単独実行でも同じ起点を明示しないと生成先と存在 check が食い違う。
-    const steps: [string, RegExp, RegExp[]][] = [
-      [
-        'Step 3',
-        /^### Step 3: contract test chain 実行/m,
-        [
-          /^\[Step 3a\].*examples\/{example}\/.*cd/m,
-          /^  examples\/{example}\/.*cd.*\/kiwa-forge/m,
-          /^  examples\/{example}\/.*cd.*\/kiwa-hardhat/m,
-        ],
-      ],
-      [
-        'Step 4',
-        /^### Step 4: dApp e2e test chain 実行/m,
-        [
-          /^\[Step 4a\].*examples\/{example}\/.*cd/m,
-          /^\[Step 4b\].*examples\/{example}\/.*cd/m,
-        ],
-      ],
-      [
-        'Step 4w',
-        /^### Step 4w: web chain 実行/m,
-        [
-          /^\[Step 4w-e2e-a\].*examples\/{example}\/.*cd/m,
-          /^\[Step 4w-e2e-b\].*examples\/{example}\/.*cd/m,
-          /^\[Step 4w-a11y-a\].*examples\/{example}\/.*cd/m,
-          /^\[Step 4w-a11y-b\].*examples\/{example}\/.*cd/m,
-        ],
-      ],
-    ];
-    for (const [label, heading, invocations] of steps) {
-      const section = headingSectionIn(TEST_SKILL, heading);
-      for (const invocation of invocations) {
-        expect(section, `${label} の生成子 skill に examples/{example}/ への cd が無い`).toMatch(
-          invocation,
-        );
-      }
-    }
+    // dApp / web の単独実行でも、 review 後の auto-fix 再生成でも、 同じ起点を呼出単位で
+    // 明示しないと生成先と存在 check が食い違う。 Step 名の固定列挙では新しい再生成経路を
+    // 見落とすため、 text / bash fence 内の全生成子起動を列挙して個別に検査する。
+    const generationInvocations = [...TEST_SKILL.matchAll(/```(?:text|bash)\n([\s\S]*?)```/g)]
+      .flatMap((m) => codeLines(m[1]!))
+      .filter((line) => /\/kiwa-(?:design|forge|hardhat|play|e2e|a11y)\s+--/.test(line));
+    expect(generationInvocations.length, '生成子 skill の起動を十分に検出できていない').toBeGreaterThan(9);
+    expect(
+      generationInvocations.filter(
+        (line) => !/examples\/{example}\/.*cd.*\/kiwa-(?:design|forge|hardhat|play|e2e|a11y)/.test(line),
+      ),
+      'examples/{example}/ への cwd 再確立が無い生成子 skill 起動が残っている',
+    ).toEqual([]);
 
     // CLI が返す spec_path は project-root 起点の相対 path で、 repo root からは開けない。
     const bin = resolve(REPO_ROOT, 'packages/cli/dist/bin.js');
