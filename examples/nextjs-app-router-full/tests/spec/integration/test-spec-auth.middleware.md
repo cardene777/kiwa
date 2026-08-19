@@ -11,11 +11,11 @@
 
 | ID | Observation | Given | Method | Headers | Then | Priority | Automation | Middleware |
 |---|---|---|---|---|---|---|---|---|
-| T-NF-101 | 停止中は 403 を返す | `url=/items, cookies={session:'banned'}` | GET | none | 403 の JSON action | P0 | yes | `authMiddleware` |
-| T-NF-102 | 未 login は login へ送る | `url=/items?tag=framework, cookies={}` | GET | none | `/login?from=%2Fitems` へ 307 redirect | P0 | yes | `authMiddleware` |
-| T-NF-103 | matcher 外は素通しする | `url=/api/items, cookies={}` | GET | none | `next()` + `x-kiwa-request-id=next-default` | P0 | yes | `authMiddleware` |
-| T-NF-104 | 通す時は request id を付ける | `url=/items, cookies={session:'admin'}` | GET | none | `next()` + `x-kiwa-request-id=next-default` | P1 | yes | `authMiddleware` |
-| T-NF-105 | 与えられた request id を尊重する | `url=/items, cookies={session:'admin'}` | GET | `x-request-id=abc-123` | `x-kiwa-request-id=abc-123` | P1 | yes | `authMiddleware` |
+| T-NF-101 | 停止中は 403 を返す | `url=http://localhost/items, cookies={session:'banned'}` | GET | none | 403 の JSON action | P0 | yes | `authMiddleware` |
+| T-NF-102 | 未 login は login へ送る | `url=http://localhost/items?tag=framework, cookies={}` | GET | none | `/login?from=%2Fitems` へ 307 redirect | P0 | yes | `authMiddleware` |
+| T-NF-103 | matcher 外は素通しする | `url=http://localhost/api/items, cookies={}` | GET | none | `next()` + `x-kiwa-request-id=next-default` | P0 | yes | `authMiddleware` |
+| T-NF-104 | 通す時は request id を付ける | `url=http://localhost/items, cookies={session:'admin'}` | GET | none | `next()` + `x-kiwa-request-id=next-default` | P1 | yes | `authMiddleware` |
+| T-NF-105 | 与えられた request id を尊重する | `url=http://localhost/items, cookies={session:'admin'}` | GET | `x-request-id=abc-123` | `x-kiwa-request-id=abc-123` | P1 | yes | `authMiddleware` |
 
 ## 自動化方針
 
