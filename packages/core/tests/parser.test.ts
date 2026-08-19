@@ -414,3 +414,73 @@ ${jaTable('TC-003')}`;
     expect(doc.cases[0]?.route).toBe('/api/items');
   });
 });
+
+/**
+ * 入力側の列名が layer ごとに違う形を読めるか (#2072)。
+ *
+ * `/kiwa-design` は 16 の layer 専用表と汎用表の 17 形を書く。 入力側は layer 固有で、
+ * `given` と `when` を両方持つのは 8 形だけ。 必須をその 2 つに置いていた間、
+ * 残り 9 形が `required columns missing` で 0 件になり、 `analyzeSpecCoverage` は
+ * どの gap も判定できなかった。
+ *
+ * 必須は `id` / `observation` / `then` の 3 つ。 欠けた入力列は空文字で読む。
+ */
+describe('parseSpec は layer 固有の入力列を読む', () => {
+  it('T-PARSE-044 given / when が無い形でも case を読む (nextjs-server-action)', () => {
+    const md = `| ID | Observation | Given | FormData | Args | Then | Priority | Automation | Action |
+|---|---|---|---|---|---|---|---|---|
+| T-NA-001 | 正常系 | 未ログイン | title=hi | [] | result.ok === true | P0 | yes | createItem |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]?.id).toBe('T-NA-001');
+    expect(doc.cases[0]?.then).toBe('result.ok === true');
+    // 列が無い側は空文字。 `undefined` にすると型が変わり、 読む側が分岐を持つ。
+    expect(doc.cases[0]?.when).toBe('');
+    expect(doc.warnings).toEqual([]);
+  });
+
+  it('T-PARSE-045 given も when も無い形を読む (nextjs-parallel-route)', () => {
+    const md = `| ID | Observation | Layout | Slots | Children | Then | Priority | Automation | Variant |
+|---|---|---|---|---|---|---|---|---|
+| T-PR-001 | 全 slot render | DashboardLayout | [modal] | PostsPage | tree.tag === 'layout' | P0 | yes | none |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]?.given).toBe('');
+    expect(doc.cases[0]?.when).toBe('');
+    expect(doc.cases[0]?.then).toBe("tree.tag === 'layout'");
+  });
+
+  it('T-PARSE-046 Expected 列を期待結果として読む (a11y)', () => {
+    const md = `| ID | Observation | Component | WCAG-rule | Severity | Expected | Priority | Automation | Mode |
+|---|---|---|---|---|---|---|---|---|
+| T-A11Y-001 | 既定 render | Counter | WCAG 2.1 AA | serious | violations 0 件 | P0 | yes | jsdom |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toHaveLength(1);
+    expect(doc.cases[0]?.then).toBe('violations 0 件');
+  });
+
+  it('T-PARSE-047 then が無い表は依然として case 表とみなさない', () => {
+    // 必須を緩めたが 0 にはしていない。 期待結果を持たない表を case 表と読むと、
+    // 目次や観点一覧の表から case を作ることになる。
+    const md = `| ID | Observation | Given | When | Priority |
+|---|---|---|---|---|
+| T-X-001 | a | b | c | P0 |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toEqual([]);
+    expect(doc.warnings[0]).toBe('required columns missing: then');
+  });
+
+  it('T-PARSE-048 observation が無い表も case 表とみなさない', () => {
+    const md = `| ID | Given | When | Then | Priority |
+|---|---|---|---|---|
+| T-X-001 | a | b | c | P0 |
+`;
+    const doc = parseSpec(md);
+    expect(doc.cases).toEqual([]);
+    expect(doc.warnings[0]).toBe('required columns missing: observation');
+  });
+});

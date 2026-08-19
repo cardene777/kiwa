@@ -16,7 +16,7 @@ test('the quickstart parses a complete table and exposes incomplete columns', ()
 
   const broken = parseSpec('| id | observation |\n| --- | --- |\n| E2E-002 | missing columns |');
   expect(broken.cases).toEqual([]);
-  expect(broken.warnings).toContain('required columns missing: given, when, then');
+  expect(broken.warnings).toContain('required columns missing: then');
 });
 
 test('the how-to resets a lease before the next borrower and releases it on shutdown', async () => {

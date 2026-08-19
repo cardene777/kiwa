@@ -12,8 +12,26 @@ const HEADER_KEYS = [
   'route',
 ];
 
-/** The columns a table must carry to be the case table. */
-const REQUIRED_KEYS = ['id', 'observation', 'given', 'when', 'then'];
+/**
+ * The columns a table must carry to be the case table.
+ *
+ * Only the three that every declared shape has. `docs/layers.json` declares 20
+ * layers, and `/kiwa-design` writes 16 per-layer tables plus the general one —
+ * 17 shapes in total. The input side is named per layer (`FormData` / `Args` on
+ * server actions, `Component` / `Props` on RSC, `Layout` / `Slots` / `Children`
+ * on parallel routes, `Job` on the queue), so `given` and `when` are not
+ * columns every shape has.
+ *
+ * Measured before this was narrowed: requiring `given` and `when` made 9 of the
+ * 17 shapes unparseable, and `analyzeSpecCoverage` returned zero cases for all
+ * of them. The dashboard says so rather than reporting full coverage (#1897),
+ * but the analysis simply did not run for those layers (#2072).
+ *
+ * `given` and `when` stay on `SpecCase` and read as the empty string when the
+ * shape has no such column — `get` already returns `''` for an absent index, so
+ * no consumer sees a shape change.
+ */
+const REQUIRED_KEYS = ['id', 'observation', 'then'];
 
 /**
  * Header labels that name the same column.
@@ -46,6 +64,10 @@ const HEADER_ALIASES: Record<string, string> = {
   期待結果: 'then',
   優先度: 'priority',
   自動化: 'automation',
+  // `a11y` names the expected column `Expected` rather than `Then`. It is the
+  // same slot — the row's expectation — and the only shape that spells it this
+  // way, so it maps rather than getting its own key.
+  expected: 'then',
 };
 
 const VALID_LAYERS: ReadonlySet<TestLayer> = new Set<TestLayer>([
