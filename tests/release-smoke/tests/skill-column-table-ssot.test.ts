@@ -81,6 +81,7 @@ function exportedNamesIn(sourceText: string, fileName: string): Set<string> {
     }
     const modifiers = ts.canHaveModifiers(statement) ? ts.getModifiers(statement) : undefined;
     if (!modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) continue;
+    if (modifiers.some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)) continue;
     if (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) {
       if (statement.name) names.add(statement.name.text);
     } else if (ts.isVariableStatement(statement)) {
@@ -223,7 +224,7 @@ describe('節が名指しする helper が実在する', () => {
 
   it('comment や local declaration に名前があるだけでは export とみなさない', () => {
     const names = exportedNamesIn(
-      '// setupCommentEnv\nconst setupLocalEnv = () => {};\nexport { setupRealEnv } from "./real.js";',
+      '// setupCommentEnv\nconst setupLocalEnv = () => {};\nexport default function setupDefaultEnv() {}\nexport { setupRealEnv } from "./real.js";',
       'fixture.ts',
     );
     expect([...names]).toEqual(['setupRealEnv']);
