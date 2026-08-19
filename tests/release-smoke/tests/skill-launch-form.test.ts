@@ -18,6 +18,7 @@
 // 照合は **comment を除いた実行行** に対して行う。 fence の text は実行される引数の代理指標
 // でしかなく、 引数を comment に退避する変異が素通りする (#2021 で実測)。
 import { describe, expect, it } from 'vitest';
+import ts from 'typescript';
 
 import { fenceUnder, fenceUnderIn, headingSectionIn, read, skillBody } from './skill-md.js';
 
@@ -41,6 +42,34 @@ function commandLine(fence: string, ...needles: string[]): string | undefined {
   return executableLines(fence)
     .split('\n')
     .find((line) => needles.every((needle) => line.includes(needle)));
+}
+
+/** JavaScript の実行 code で option を判定している includes / startsWith call から flag を導く。 */
+function acceptedOptions(script: string): Set<string> {
+  const source = ts.createSourceFile(
+    'release-readiness-check.mjs',
+    script,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
+  const accepted = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression) &&
+      (node.expression.name.text === 'includes' || node.expression.name.text === 'startsWith')
+    ) {
+      const argument = node.arguments[0];
+      if (argument !== undefined && ts.isStringLiteral(argument)) {
+        const flag = /^--[a-z][a-z0-9-]*/.exec(argument.text)?.[0];
+        if (flag !== undefined) accepted.add(flag);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return accepted;
 }
 
 describe('SKILL.md の起動形が必須要素を落としていない', () => {
@@ -221,17 +250,16 @@ describe('/kiwa-release-check の宣言が script と一致する', () => {
     const declared = [...section.matchAll(/^- `(--[a-z][a-z0-9-]*)/gm)].map((m) => m[1]!);
     expect(declared.length, '引数仕様が 1 件も読めない').toBeGreaterThan(0);
     const script = read('scripts/release-readiness-check.mjs');
-    const code = script.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
-    const accepted = new Set<string>();
-    const optionCheck = /\.(?:includes|startsWith)\((['"])(--[a-z][a-z0-9-]*)(?:=[^'"]*)?\1\)/g;
-    for (const match of code.matchAll(optionCheck)) {
-      const flag = match[2];
-      if (flag !== undefined) accepted.add(flag);
-    }
+    const accepted = acceptedOptions(script);
     for (const flag of declared) {
       expect(accepted.has(flag), `script が ${flag} を受け取らない (宣言だけ残っている)`).toBe(
         true,
       );
     }
+  });
+
+  it('comment 内の option 判定を受理 code として数えない', () => {
+    const script = "const found = args.includes('--actual'); // args.includes('--comment-only')";
+    expect(acceptedOptions(script)).toEqual(new Set(['--actual']));
   });
 });
