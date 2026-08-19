@@ -92,6 +92,50 @@ export function stepFence(skill: string, heading: RegExp, lang: string): string 
 }
 
 /**
+ * 指定した heading の本文 (**同じか上の level の heading まで**)。
+ *
+ * `stepSectionIn` は次の `### ` で閉じるため、 heading の level が `###` 以外だと範囲が
+ * 実態とずれる。
+ *
+ * | 対象の level | `stepSectionIn` の閉じ方 | 起きること |
+ * |---|---|---|
+ * | `## Step N` (`/kiwa-app`) | 次の `### ` まで | **後続の `## Step` を飲み込む** |
+ * | `#### Step 5a` (`/kiwa-forge`) | 次の `### ` まで | 同 `###` 配下の後続 `####` を飲み込む |
+ *
+ * 飲み込むと、 対象 Step から fence が消えた時に **隣の Step の fence を拾って緑になる**
+ * (#1920 が `skill-script-imports` で塞いだ形と同じ)。 level を数えて閉じれば、 消えたことが
+ * 「見つからない」 として落ちる。
+ */
+export function headingSectionIn(body: string, heading: RegExp): string {
+  const at = body.search(heading);
+  if (at < 0) throw new Error(`${heading} が見つからない`);
+  const rest = body.slice(at);
+  const level = /^#+/.exec(rest)?.[0].length ?? 0;
+  if (level === 0) throw new Error(`${heading} が heading 行に一致していない`);
+  // 探索は **見出し行の次の行から** 始める。 `rest.slice(1)` で 1 文字だけ落とす形にすると、
+  // `m` flag の `^` が文字列の先頭にも一致するため、 対象の見出し自身を「次の見出し」 として
+  // 拾って範囲が 1 文字になる (実測)。 `### ` で閉じる `stepSectionIn` は level が違うため
+  // 同じ書き方でも当たらなかっただけで、 同 level を探す本関数では成立しない。
+  const firstLineEnd = rest.indexOf('\n');
+  if (firstLineEnd === -1) return rest;
+  const after = rest.slice(firstLineEnd + 1);
+  const next = after.search(new RegExp(`^#{1,${level}} `, 'm'));
+  return next === -1 ? rest : rest.slice(0, firstLineEnd + 1 + next);
+}
+
+/** `headingSectionIn` の範囲にある最初の code fence の中身。 */
+export function fenceUnderIn(body: string, heading: RegExp, lang: string): string {
+  const section = headingSectionIn(body, heading);
+  const fence = new RegExp('```' + lang + '\\n([\\s\\S]*?)```').exec(section);
+  if (!fence) throw new Error(`${heading} に ${lang} の code fence が無い`);
+  return fence[1]!;
+}
+
+export function fenceUnder(skill: string, heading: RegExp, lang: string): string {
+  return fenceUnderIn(skillBody(skill), heading, lang);
+}
+
+/**
  * root が宣言している依存の全件 (dependencies + devDependencies)。
  *
  * 実行できることは宣言があることを意味しない。 link は宣言を消しても次の
