@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { afterEach, describe, expect, it } from 'vitest';
 import { setupApiServer, type ApiTestEnv } from '@kiwa-lab/api';
-import { createItemsHandler, type Item } from '../src/route.js';
+import { createItemsHandler, type Item } from '../../src/route.js';
 
 const envs: ApiTestEnv[] = [];
 

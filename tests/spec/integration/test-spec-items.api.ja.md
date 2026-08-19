@@ -142,20 +142,20 @@ item は handler 内の配列に保持され、 `id` は 1 起点の連番。
 `/kiwa-design` § Step 2 § 既存 test の探索 の実測結果と、 § テストケース一覧 の全 TC を突き合わせた結果。
 
 - 探索した runtime — `typescript` (`docs/layers.json` の `api` layer)
-- 探索した path — `examples/nextjs-api-poc/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 見つかったのは `tests/` のみ
-- 見つけた既存 test — 12 件 (`describe` 3 + `it` 9)
+- 探索した path — `examples/nextjs-api-poc/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 既存 9 case は現在 `test/integration/items.api.test.ts` にある
+- 追記前に見つけた既存 test — 12 件 (`describe` 3 + `it` 9)
 
 | TC | 既存 test の候補 | 判定 |
 |---|---|---|
-| T-API-001 | `T-API-001 GET 正常系: 空配列を返す` (`examples/nextjs-api-poc/tests/items.test.ts:16`) | 既覆 (候補) |
-| T-API-002 | `T-API-002 POST 正常系: 201 + 新規 id 返却` (`examples/nextjs-api-poc/tests/items.test.ts:24`) | 既覆 (候補) |
-| T-API-003 | `T-API-003 POST + GET の整合性` (`examples/nextjs-api-poc/tests/items.test.ts:32`) | 既覆 (候補) |
-| T-API-004 | `T-API-004 body 無し: 400` (`examples/nextjs-api-poc/tests/items.test.ts:44`) | 既覆 (候補) |
-| T-API-005 | `T-API-005 name 長過ぎ: 422` (`examples/nextjs-api-poc/tests/items.test.ts:52`) | 既覆 (候補) |
-| T-API-006 | `T-API-006 DELETE: 405` (`examples/nextjs-api-poc/tests/items.test.ts:59`) | 既覆 (候補) |
-| T-API-007 | `T-API-007 未対応 path: 404` (`examples/nextjs-api-poc/tests/items.test.ts:66`) | 既覆 (候補) |
-| T-API-008 | `T-API-008 mock handler の固定応答が返る` (`examples/nextjs-api-poc/tests/items.test.ts:75`) | 既覆 (候補) |
-| T-API-009 | `T-API-009 live 実装 + mock 経路共存、 上書きなしなら live 動作` (`examples/nextjs-api-poc/tests/items.test.ts:92`) | 既覆 (候補) |
+| T-API-001 | `T-API-001 GET 正常系: 空配列を返す` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:16`) | 既覆 (候補) |
+| T-API-002 | `T-API-002 POST 正常系: 201 + 新規 id 返却` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:24`) | 既覆 (候補) |
+| T-API-003 | `T-API-003 POST + GET の整合性` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:32`) | 既覆 (候補) |
+| T-API-004 | `T-API-004 body 無し: 400` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:44`) | 既覆 (候補) |
+| T-API-005 | `T-API-005 name 長過ぎ: 422` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:52`) | 既覆 (候補) |
+| T-API-006 | `T-API-006 DELETE: 405` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:59`) | 既覆 (候補) |
+| T-API-007 | `T-API-007 未対応 path: 404` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:66`) | 既覆 (候補) |
+| T-API-008 | `T-API-008 mock handler の固定応答が返る` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:75`) | 既覆 (候補) |
+| T-API-009 | `T-API-009 live 実装 + mock 経路共存、 上書きなしなら live 動作` (`examples/nextjs-api-poc/test/integration/items.api.test.ts:92`) | 既覆 (候補) |
 | T-API-010 | (なし) | 未覆 |
 | T-API-011 | (なし) | 未覆 |
 | T-API-012 | (なし) | 未覆 |
