@@ -270,6 +270,7 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     // 一方 `find . -name '*.sol'` は `test/` まで含み、 production に無い API が test 側に
     // あるだけで実装済みと誤判定する。 spec が指定した path だけを見る。
     const fence = fenceUnder(skill, /^### Step 2: /m, 'bash');
+    const lines = executableLines(fence).split('\n');
     const grep = commandLine(fence, 'grep');
     expect(grep, 'Step 2 に抽出段が無い').toBeDefined();
     // `--` が無いと `-` で始まる path を option として解釈する。
@@ -284,6 +285,9 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
         new RegExp(`grep\\s+-[a-zA-Z]*${required}`),
       );
     }
+    expect(lines.some((line) => line.includes('find .')), 'project 全体を探索している').toBe(
+      false,
+    );
   });
 
   it('/kiwa-hardhat の coverage が実在する file を読む', () => {
@@ -294,7 +298,7 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     const lines = executableLines(
       fenceUnder('kiwa-hardhat', /^#### Step 5a: /m, 'bash'),
     ).split('\n');
-    const read = lines.find((line) => line.includes('coverage/'));
+    const read = commandLine(lines.join('\n'), 'cat', 'coverage/');
     expect(read, 'coverage の読込行が無い').toBeDefined();
     expect(read, '生成されない coverage-summary.json を読んでいる').not.toContain(
       'coverage-summary.json',
