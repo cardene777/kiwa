@@ -607,6 +607,20 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain("expect(flag, '抽出が -n を付けていない').toContain('n');");
     expect(doc).toContain("expect(flag, '抽出が -H を付けていない').toContain('H');");
     expect(doc).toContain("expect(flag, '抽出が -E を付けていない').toContain('E');");
+    // 棚卸しの測定値 (#2021)。 3 段の数字が消えると、 次に同じ問いが出た時に数え直しになる。
+    // 形 2 / 形 3 の根拠表と同じ扱いで、 見出しではなく値そのものを照合する。
+    expect(doc).toContain('#### 既存の検査を棚卸しした結果');
+    expect(doc).toContain('| fence に現れる flag | 133 |');
+    expect(doc).toContain('| assertion literal に現れる | 108 |');
+    expect(doc).toContain('| 現れない | 25 |');
+    // 分類の結論。 25 件のうち本節の形は 1 件だけで、 残りは別種の gap になる。
+    // 件数だけを守ると「1 件だけ」 の判断が消えるため、 判断の行も照合する。
+    expect(doc).toContain('**本節の形に当たるのは最後の 1 件だけ**');
+    // 再測手順の 3 手目 (検査の有無を先に見る) と 4 手目 (検査がある候補だけ落とす) は
+    // 本 PR の判断そのもの。 変異で落とすと素通りしたため照合する = 手順を書いただけで
+    // 守らない形は、 まさに本節が扱う形になる。
+    expect(doc).toContain('**その fence を読む検査があるかを先に確かめる**');
+    expect(doc).toContain('検査がある候補だけ落として全 suite を回す');
   });
 
   it('別名に代入した保証は受けない', () => {
