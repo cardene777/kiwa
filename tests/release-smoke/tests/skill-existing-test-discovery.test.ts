@@ -438,6 +438,38 @@ describe('/kiwa-design が既存 test を探す', () => {
     expect(ts.length).toBeGreaterThan(0);
   });
 
+  it('/kiwa-design の出力先が consumer の解決 path と一致する', () => {
+    // Layer 2 skill は `kiwa layers` が返す **1 つの path しか読まない**。 連番へ逃がすと
+    // 再生成した spec が誰にも読まれず、 Layer 2 が古い内容で test を作る。 spec の更新も
+    // test 生成もそれぞれ成功で終わるため気付けない (#2042 の dogfood)。
+    const design = read(`.claude/skills/${DESIGN}/SKILL.md`);
+    expect(design, '連番へ逃がす記述が残っている').not.toMatch(/test-spec-\{module\}-\{?n\}?/);
+    expect(design, 'CLI 解決 path に上書きすると書いていない').toContain(
+      '既存 file があっても書き先を変えない',
+    );
+  });
+
+  it('/kiwa-design の batch 出力件数が 2 箇所で一致する', () => {
+    // mermaid が「N + 1 file」、 § 出力 path が「最初の module の spec 末尾に追記」 で
+    // 食い違っていた。 追記なら file は増えない。
+    //
+    // **照合は mermaid の fence に限定する**。 doc 全体を見ると § 出力 path 側の記述で
+    // 通ってしまい、 mermaid だけを薄める変異が素通りする (実測 = b3)。
+    const design = read(`.claude/skills/${DESIGN}/SKILL.md`);
+    const section = design.slice(design.indexOf('## --modules batch 起動規約'));
+    const mermaid = /```mermaid\n([\s\S]*?)```/.exec(section)?.[1];
+    expect(mermaid, 'batch の flow 図が無い').toBeDefined();
+    expect(mermaid, 'batch の出力件数が N + 1 のまま').not.toContain('N + 1 file');
+    expect(mermaid, '出力件数を書いていない').toContain('N file 出力');
+    expect(mermaid, '追記先を書いていない (図だけ見ると別 file に見える)').toContain(
+      '最初の module',
+    );
+    // § 出力 path 側も同じことを言っている必要がある (2 箇所の一致が本検査の対象)。
+    expect(design, '§ 出力 path が追記先を書いていない').toContain(
+      '「contract 間連携」 section は **最初の module** の spec 末尾に追記する',
+    );
+  });
+
   it('/kiwa-play の既存 test 走査が /kiwa-design と同じ形になっている', () => {
     // `/kiwa-play` は Layer 1 に渡す「既存 test」 を自分で走査する。 `^test\\(` で始まる形だけを
     // 見ると **`describe` の中に入った test を 1 件も拾わない** = 実測で 12 件を持つ
