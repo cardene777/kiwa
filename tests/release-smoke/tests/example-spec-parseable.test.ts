@@ -104,17 +104,34 @@ function specFiles(): { file: string; example: string; rel: string }[] {
 
 const SPECS = specFiles();
 
-/** 表の header 行 (最初の `|` 始まりで区切り行でない行) の列。 */
-function headerColumns(body: string): string[] | null {
-  const at = body.indexOf('## テストケース一覧');
-  if (at < 0) return null;
-  for (const line of body.slice(at).split('\n')) {
-    if (!line.startsWith('|')) continue;
-    const cells = line.split('|').slice(1, -1).map((c) => c.trim());
-    if (cells.every((c) => /^-+$/.test(c))) continue;
-    return cells;
+interface MarkdownTable {
+  header: string[];
+  separator: string[];
+  rows: string[][];
+}
+
+function cellsIn(line: string): string[] {
+  return line.split('|').slice(1, -1).map((cell) => cell.trim());
+}
+
+/** `## テストケース一覧` section の先頭にある連続した Markdown 表。 */
+function testCaseTable(body: string): MarkdownTable | null {
+  const heading = /^## テストケース一覧$/m;
+  if (body.search(heading) < 0) return null;
+  const section = headingSectionIn(body, heading);
+  const lines = section.split('\n');
+  const start = lines.findIndex((line) => line.startsWith('|'));
+  if (start < 0) return null;
+  const tableLines: string[] = [];
+  for (const line of lines.slice(start)) {
+    if (!line.startsWith('|')) break;
+    tableLines.push(line);
   }
-  return null;
+  return {
+    header: cellsIn(tableLines[0]!),
+    separator: tableLines.length > 1 ? cellsIn(tableLines[1]!) : [],
+    rows: tableLines.slice(2).map(cellsIn),
+  };
 }
 
 describe('examples の spec が Layer 2 の parse 契約を満たす', () => {
@@ -146,21 +163,24 @@ describe.each(SPECS.map((s) => [`${s.example}/${s.rel}`, s.file, s.rel] as const
     it('列が layer の宣言と順序まで一致する', () => {
       const layer = layerOf(rel);
       expect(layer, 'layer を引けない').not.toBeNull();
-      const actual = headerColumns(body);
-      expect(actual, '表の header 行が無い').not.toBeNull();
+      const table = testCaseTable(body);
+      expect(table, '表の header 行が無い').not.toBeNull();
+      expect(
+        table!.separator,
+        '表の区切り行が無い、または header と列数が違う',
+      ).toEqual(table!.header.map(() => '---'));
       // 名前が揃っていても順序が違えば別の値を読む。 集合ではなく列で比べる。
-      expect(actual, `${layer}: 列が宣言と食い違う`).toEqual(requiredColumns(layer!));
+      expect(table!.header, `${layer}: 列が宣言と食い違う`).toEqual(requiredColumns(layer!));
     });
 
-    it('TC 行が 1 行以上ある', () => {
-      const at = body.indexOf('## テストケース一覧');
-      const rows = body
-        .slice(at)
-        .split('\n')
-        .filter((l) => l.startsWith('|'))
-        .filter((l) => !l.split('|').slice(1, -1).every((c) => /^-+$/.test(c.trim())));
-      // header の 1 行しか無い spec は「表がある」 が中身が無い。
-      expect(rows.length, 'TC 行が無い').toBeGreaterThan(1);
+    it('TC 行が 1 行以上あり、全行が header と同じ列数を持つ', () => {
+      const table = testCaseTable(body);
+      expect(table, 'テストケース表が無い').not.toBeNull();
+      expect(table!.rows.length, 'TC 行が無い').toBeGreaterThan(0);
+      const malformed = table!.rows
+        .map((row, index) => ({ row: index + 1, columns: row.length }))
+        .filter((row) => row.columns !== table!.header.length);
+      expect(malformed, 'header と列数が違う TC 行がある').toEqual([]);
     });
   },
 );
@@ -182,5 +202,13 @@ describe('契約の突き合わせ先が実在する', () => {
       return layer !== null && requiredColumns(layer) !== GENERIC_COLUMNS;
     });
     expect(specific.length).toBeGreaterThan(0);
+  });
+
+  it('列不足の TC 行を正常な表とみなさない (陰性対照)', () => {
+    const table = testCaseTable(
+      '## テストケース一覧\n\n| ID | Given | Then |\n|---|---|---|\n| T-001 | input |\n',
+    );
+    expect(table).not.toBeNull();
+    expect(table!.rows.some((row) => row.length !== table!.header.length)).toBe(true);
   });
 });
