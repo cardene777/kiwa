@@ -61,22 +61,38 @@ describe('inventory integration (mode: mock)', () => {
     await expect(fetchStock('a-1')).rejects.toMatchObject({ status: 503 });
   });
 
-  it('T-INT-005 4xx は再試行しても直らない', async () => {
+  it('T-INT-005 429 は再試行可能な失敗', async () => {
+    await withStock([http.get(STOCK_URL, () => new HttpResponse(null, { status: 429 }))]);
+    await expect(fetchStock('a-1')).rejects.toMatchObject({
+      status: 429,
+      name: 'StockUnavailableError',
+    });
+  });
+
+  it('T-INT-006 通信失敗は再試行可能な失敗', async () => {
+    await withStock([http.get(STOCK_URL, () => HttpResponse.error())]);
+    await expect(fetchStock('a-1')).rejects.toMatchObject({
+      status: undefined,
+      name: 'StockUnavailableError',
+    });
+  });
+
+  it('T-INT-007 その他の 4xx は再試行しても直らない', async () => {
     await withStock([http.get(STOCK_URL, () => new HttpResponse(null, { status: 400 }))]);
     await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
   });
 
-  it('T-INT-006 本体が JSON でない', async () => {
+  it('T-INT-008 本体が JSON でない', async () => {
     await withStock([http.get(STOCK_URL, () => new HttpResponse('not json', { status: 200 }))]);
     await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
   });
 
-  it('T-INT-007 形が違う応答', async () => {
+  it('T-INT-009 形が違う応答', async () => {
     await withStock([http.get(STOCK_URL, () => HttpResponse.json({ sku: 'a-1' }))]);
     await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
   });
 
-  it('T-INT-008 負の在庫は通さない', async () => {
+  it('T-INT-010 負の在庫は通さない', async () => {
     // 上流の欠陥をそのまま通すと、 呼出側の計算が静かに狂う。
     await withStock([
       http.get(STOCK_URL, () => HttpResponse.json({ sku: 'a-1', available: -1 })),
@@ -84,7 +100,7 @@ describe('inventory integration (mode: mock)', () => {
     await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
   });
 
-  it('T-INT-009 SKU を URL に安全に載せる', async () => {
+  it('T-INT-011 SKU を URL に安全に載せる', async () => {
     let seen: string | undefined;
     await withStock([
       http.get(STOCK_URL, ({ request }) => {

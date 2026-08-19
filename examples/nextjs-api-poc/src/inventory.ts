@@ -17,8 +17,14 @@ export interface Stock {
 
 /** 呼出側が分岐できるよう、 失敗の種類を型で分ける。 */
 export class StockUnavailableError extends Error {
-  constructor(readonly status: number) {
-    super(`stock service unavailable (${status})`);
+  constructor(
+    readonly status?: number,
+    options?: ErrorOptions,
+  ) {
+    super(
+      status === undefined ? 'stock service unavailable' : `stock service unavailable (${status})`,
+      options,
+    );
     this.name = 'StockUnavailableError';
   }
 }
@@ -35,14 +41,22 @@ export class StockResponseError extends Error {
  *
  * - 200 かつ想定の形 ... `Stock` を返す
  * - 404 ... **在庫サービスが「知らない」 と答えた** ので `null` (呼出側は 0 と区別できる)
- * - 5xx ... `StockUnavailableError` (再試行してよい失敗)
+ * - 通信失敗 / 429 / 5xx ... `StockUnavailableError` (再試行してよい失敗)
  * - 本体が読めない / 形が違う ... `StockResponseError` (再試行しても直らない)
  */
 export async function fetchStock(sku: string): Promise<Stock | null> {
-  const response = await fetch(`${STOCK_API}/${encodeURIComponent(sku)}`);
+  const url = `${STOCK_API}/${encodeURIComponent(sku)}`;
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch (cause) {
+    throw new StockUnavailableError(undefined, { cause });
+  }
 
   if (response.status === 404) return null;
-  if (response.status >= 500) throw new StockUnavailableError(response.status);
+  if (response.status === 429 || response.status >= 500) {
+    throw new StockUnavailableError(response.status);
+  }
   if (!response.ok) throw new StockResponseError(`unexpected status ${response.status}`);
 
   let body: unknown;
