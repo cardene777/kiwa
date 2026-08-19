@@ -268,7 +268,7 @@ literal で持たないため、 上の proxy では永久に「未照合」 に
 範囲は広すぎても狭すぎても外れる。 広いと実行されない場所 (comment / 別の実行単位) を含み、
 狭いと対象そのものを取り逃がす。
 
-1 つの PR で 4 回起きた。 **道具を変えるたびに姿を変えて出る**。
+直近 2 つの PR で 4 回起きた。 **道具を変えるたびに姿を変えて出る**。
 
 | # | 読んでいた範囲 | 実効の単位 | どう抜けたか |
 |---|---|---|---|
@@ -293,9 +293,11 @@ expect(line).toBeDefined();
 expect(line).toContain('--report lcov');
 ```
 
-**comment を除く処理は構文で行う**。 regex の comment 除去は形が 1 つ増えるたびに漏れる
-(行頭は消せても行末が残る、 の実測がある)。 code なら AST、 markdown なら fence の
-開閉を追う形にすると、 comment は最初から対象に入らない。
+**comment を除く処理は対象言語の構文で行う**。 regex の comment 除去は形が 1 つ増えるたびに
+漏れる (行頭は消せても行末が残る、 の実測がある)。 TypeScript / JavaScript なら AST を辿る。
+Markdown は fence の開閉を追って、 見出しと fence 内の `#` を区別する。 ただし
+fence の開閉だけでは shell comment は除けないため、 fence 内の code はその言語の
+quote / comment 規則で読む。
 
 **範囲を切る処理そのものにも変異を当てる**。 範囲が壊れた時の症状は「対象が見つからない」 で、
 assertion の失敗と区別が付かない。 実測では範囲が 1 文字に潰れた状態を「fence が無い」 と

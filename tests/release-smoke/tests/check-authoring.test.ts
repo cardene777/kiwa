@@ -642,8 +642,11 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(doc).toContain('| 2 | 見出しから次の `###` まで |');
     expect(doc).toContain('| 3 | script 全文 | 実行される code |');
     expect(doc).toContain('| 4 | 行頭 comment を除いた text | 構文木上の呼出 |');
+    expect(doc).toContain('直近 2 つの PR で 4 回起きた');
     // 対処の 2 本。 見出しと実例だけを守ると、 直し方が消えても気付けない。
-    expect(doc).toContain('**comment を除く処理は構文で行う**');
+    expect(doc).toContain('**comment を除く処理は対象言語の構文で行う**');
+    expect(doc).toContain('見出しと fence 内の `#` を区別する');
+    expect(doc).toContain('fence の開閉だけでは shell comment は除けない');
     expect(doc).toContain('**範囲を切る処理そのものにも変異を当てる**');
     expect(doc).toContain('| 照合する範囲が代理指標 | しない |');
   });
