@@ -31,9 +31,9 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).lay
 /**
  * 宣言と突き合わせられる組。
  *
- * **全 layer は対象にしない**。 20 layer のうち生成済 test を持つ example があるのは 6 件で、
+ * **全 layer は対象にしない**。 20 layer のうち生成済 test を持つ example があるのは 11 件で、
  * 残りは「まだ dogfood していない」 だけであって宣言の誤りではない。 全件を要求すると
- * 14 layer ぶんの example を作るまで赤のままになる。
+ * 9 layer ぶんの example を作るまで赤のままになる。
  *
  * 逆に **今解決している組を減らす変更は落ちる**。 roster を減らす形でしか通せないので、
  * 減らしたことが差分に出る (`skill-cli-invocation` の起動行数と同じ形)。
@@ -47,6 +47,16 @@ const ROSTER = [
   { layer: 'ui', producer: 'kiwa-ui', module: 'counter', example: 'react-component-poc' },
   { layer: 'data', producer: 'kiwa-data', module: 'orders', example: 'queue-poc' },
   { layer: 'cli', producer: 'kiwa-cli-test', module: 'kiwa-cli', example: 'cli-poc' },
+  { layer: 'auth', producer: 'kiwa-auth', module: 'auth-flow', example: 'auth-lucia-poc' },
+  { layer: 'cache', producer: 'kiwa-cache', module: 'session-cache', example: 'cache-redis-poc' },
+  { layer: 'job-queue', producer: 'kiwa-queue', module: 'queue-flow', example: 'queue-bullmq-poc' },
+  { layer: 'orm-query', producer: 'kiwa-orm', module: 'users-repo', example: 'orm-drizzle-sqlite-poc' },
+  {
+    layer: 'e2e-generic',
+    producer: 'kiwa-e2e',
+    module: 'reorg-4scenario',
+    example: 'dogfood-dapp-e2e-reorg',
+  },
 ] as const;
 
 function resolveTestPaths(entry: (typeof ROSTER)[number]): {
