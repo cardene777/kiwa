@@ -219,4 +219,17 @@ describe('検査が実際に呼出を見ている', () => {
       'expectNoViolations',
     );
   });
+
+  it('a11y の Playwright sample は browser context 内で axe を実行する', () => {
+    const fences = [
+      ...skillBody('kiwa-a11y').matchAll(/```tsx?\n([\s\S]*?)```/g),
+    ].map((match) => match[1] ?? '');
+    const playwright = fences.find((code) => code.includes("test('{Module} a11y check'"));
+
+    expect(playwright, 'kiwa-a11y の Playwright sample が無い').toBeDefined();
+    expect(playwright, 'Playwright page を Node/jsdom 用 runAxe に渡している').not.toMatch(
+      /\brunAxe\s*\(/,
+    );
+    expect(playwright, 'axe を browser context 内で実行していない').toContain('page.evaluate');
+  });
 });

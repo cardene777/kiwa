@@ -3,7 +3,7 @@ name: kiwa-a11y
 description: |
   Layer 1 spec (`tests/spec/integration/test-spec-{module}.a11y.md`) を accessibility test (axe-core + @kiwa-lab/a11y) に変換する Layer 2 a11y test skill。
   jsdom (Vitest) と Playwright page の 2 経路で axe-core を実行し、 WCAG 2.1 AA 違反を検出する。
-  `/kiwa-design --layer a11y` が出力する 9 column 表を `@kiwa-lab/a11y` の `runAxe` / `expectNoViolations` の引数に機械的に変換する。
+  `/kiwa-design --layer a11y` が出力する 9 column 表を、 jsdom では `@kiwa-lab/a11y` の `runAxe`、 Playwright では page 内の `axe.run` と `expectNoViolations` に機械的に変換する。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -133,7 +133,8 @@ import { LoginForm } from '../src/components/LoginForm.js';
 
 ```ts
 import { test, expect } from '@playwright/test';
-import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
+import { expectNoViolations } from '@kiwa-lab/a11y';
+import axe from 'axe-core';
 ```
 
 ### Step 2: TC → test code 変換 (jsdom)
@@ -144,7 +145,10 @@ describe('{Component} a11y', () => {
     const { container } = render(<LoginForm />);
     const results = await runAxe({
       context: container,
-      runOptions: { runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
+      runOptions: {
+        runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+        rules: { 'color-contrast': { enabled: false } },
+      },
     });
     expectNoViolations(results, expect);
   });
@@ -156,11 +160,18 @@ describe('{Component} a11y', () => {
 ```ts
 test('{Module} a11y check', async ({ page }) => {
   await page.goto('/login');
-  const html = await page.content();
-  const results = await runAxe({ context: html, runOptions: { runOnly: ['wcag2aa'] } });
+  await page.addScriptTag({ content: axe.source });
+  const results = await page.evaluate(
+    async () => await (window as any).axe.run(document, { runOnly: ['wcag2aa'] }),
+  );
   expectNoViolations(results, expect);
 });
 ```
+
+Playwright 経路で `runAxe` は使わない。 `runAxe` は Node 側の jsdom `Element` / `Document` を
+走査する API で、 `page.content()` の HTML 文字列を渡しても browser page の DOM にはならない。
+local の `axe-core` source を page に注入し、 `page.evaluate()` の browser context 内で `axe.run`
+を実行する。
 
 ### Step 3: WCAG rule mapping
 
@@ -201,7 +212,9 @@ violations 発生時は `reportViolations(results)` で詳細 markdown report �
 
 ## Gotchas
 
-- **jsdom の限界** ... color-contrast / focus-visible は実 browser 必須、 jsdom 経路では skip される (axe が自動判定)
+- **jsdom の限界** ... color-contrast / focus-visible は実 browser 必須。 `color-contrast` は
+  `HTMLCanvasElement.getContext` を呼んで stderr を汚すため jsdom 経路では明示的に無効化し、
+  Playwright 経路で評価する
 - **WCAG level 混同** ... level A は最低限、 AA が業界標準、 AAA は厳格 (CTA / 政府機関等の要件)
 - **Severity と Priority の区別** ... axe Severity (Impact) は技術的影響度、 spec Priority は事業優先度、 mapping しない
 - **violations report の format** ... `reportViolations(results)` は markdown 出力、 CI で artifact として保存可能

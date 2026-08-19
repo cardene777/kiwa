@@ -33,5 +33,6 @@ T-A11Y-005 / 006 は閾値の既定を固定する。 `reportViolations` の `ma
 
 ## 不足している仕様
 
-- jsdom では `color-contrast` / `focus-visible` が評価されない (実 browser が要る)。 これらを
-  covering するには playwright mode の TC が別途要る。 本 spec は jsdom mode に限定している。
+- jsdom では `color-contrast` / `focus-visible` が評価できない (実 browser が要る)。
+  `color-contrast` は canvas 未実装 error を避けるため test の run options で無効化している。
+  これらを covering するには playwright mode の TC が別途要る。 本 spec は jsdom mode に限定する。

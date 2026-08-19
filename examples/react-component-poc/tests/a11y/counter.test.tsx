@@ -12,7 +12,11 @@ import { Counter } from '../../src/counter.js';
 // spec = tests/spec/integration/test-spec-counter.a11y.md
 
 /** WCAG 2.1 AA までを対象にする。 spec の WCAG-rule column に対応する。 */
-const WCAG_21_AA = { runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] };
+const WCAG_21_AA = {
+  runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+  // jsdom に layout / canvas は無い。 実 browser が必要な rule は Playwright 側で扱う。
+  rules: { 'color-contrast': { enabled: false } },
+};
 
 afterEach(() => {
   cleanup();
