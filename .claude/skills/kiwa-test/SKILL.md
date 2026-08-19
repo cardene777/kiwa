@@ -245,7 +245,7 @@ multiSelect: false
 - label: "🗑️ 削除して 0 から再生成 (Recommended)"
   description: "理由 — skill chain を clean state で再走、 retrofit walkthrough と同じ条件。 既存 test の影響を完全排除。 削除対象 file が user に列挙される (列挙後 user 最終確認なしで削除実行)。 ⭐⭐⭐⭐⭐"
 - label: "📝 上書き許可 (skill の判定に委ねる)"
-  description: "理由 — kiwa-design は spec を新規 file で衝突回避 (-2.md として連番)、 kiwa-forge / kiwa-hardhat / kiwa-play は既存 test を上書き or extend mode に切替。 既存 test と新規 test が並立する可能性、 chain の途中で意図しない state になるリスク。 ⭐⭐⭐"
+  description: "理由 — kiwa-design は CLI が解決した同じ spec path を上書きし、 kiwa-forge / kiwa-hardhat / kiwa-play は既存 test を上書き or extend mode に切替。 既存成果物を残したまま各 skill の更新規約で再生成する。 ⭐⭐⭐"
 - label: "🛑 skill chain を中断"
   description: "理由 — 既存 test の処理方針を一旦保留し /kiwa-test を中断。 user が手動でリセットしてから再起動。 リセットコマンドは tests/docs/run-tests.ja.md Step 0 を参照。 ⭐⭐"
 ```

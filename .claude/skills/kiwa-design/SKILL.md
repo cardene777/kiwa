@@ -142,7 +142,19 @@ recording (`.kiwa/stack.json`) は、 それを書いた signal table と読む�
 
 <!-- kiwa-layers:routing-table:end -->
 
-出力 path 親 dir (`tests/spec/{layer}/`) は skill が `mkdir -p` で自動作成する。 既存 file がある場合は上書きせず `tests/spec/{layer}/test-spec-{module}-{n}.md` (n は 2 以降の連番) として Write、 衝突回避する。
+出力 path 親 dir (`tests/spec/{layer}/`) は skill が `mkdir -p` で自動作成する。
+
+**既存 file があっても書き先を変えない**。 CLI (`kiwa layers`) が返す `spec_path` に上書きする。
+
+Layer 2 skill は `kiwa layers --json --layer <L> --lang <C> --module <M>` が返す 1 つの path しか
+Read しない。 連番 (`test-spec-{module}-2.md`) へ逃がすと **再生成した spec が誰にも読まれず**、
+Layer 2 は古い内容で test を作る。 spec の更新も test 生成もそれぞれ成功で終わるため気付けない。
+
+連番形は lang suffix 規約 (§ lang suffix 規約 の「lang suffix が常に末尾」) にも反する
+(`test-spec-foo-2.md` は `.ja` を落とす)。
+
+旧版が要る時は git の履歴から取る。 spec は入力 (contract / spec 元) から再生成できる成果物で、
+退避 file を残す理由が無い。
 
 ## --modules batch 起動規約 (Issue #221)
 
@@ -163,8 +175,8 @@ graph LR
     B --> C[m1 Step 1-5 完走]
     C --> D[m2 Step 1-5 完走<br/>共通 interface cache 利用]
     D --> E[m3 Step 1-5 完走<br/>共通 interface cache 利用]
-    E --> F[contract 間連携 section<br/>を 1 つだけ追加生成]
-    F --> G[N + 1 file 出力]
+    E --> F[contract 間連携 section<br/>を最初の module の spec 末尾に追記]
+    F --> G[N file 出力]
 ```
 
 ### 共通 interface parse cache
