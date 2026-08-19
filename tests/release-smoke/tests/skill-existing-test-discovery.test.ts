@@ -192,9 +192,9 @@ function runtimeFence(runtime: string): string {
 /** 抽出段が渡す正規表現。 runner が複数ある runtime も全て取り出す。 */
 function extractRegexes(runtime: string): string[] {
   const matches = [
-    ...runtimeFence(runtime).matchAll(/^\s*xargs -0 grep -nE "(.+)"\s*$/gm),
+    ...runtimeFence(runtime).matchAll(/^\s*xargs -0 grep -\S+ "(.+)"\s*$/gm),
   ].map((m) => m[1]!);
-  if (matches.length === 0) throw new Error(`##### ${runtime} に xargs -0 grep -nE の行が無い`);
+  if (matches.length === 0) throw new Error(`##### ${runtime} に xargs -0 grep の行が無い`);
   return matches;
 }
 
@@ -417,6 +417,19 @@ describe('/kiwa-design が既存 test を探す', () => {
       resolve(REPO_ROOT, 'packages/skill-test/tests/skill-test.test.ts'),
     );
     expect(ts.length).toBeGreaterThan(0);
+  });
+
+  it('Step 2 の抽出が file 名を前置する', () => {
+    // `grep` は複数 file を渡された時だけ file 名を前置する。 test file が 1 件しかない package
+    // では `-H` 無しだと path が出ず、 候補 column を埋められない (#2017 の dogfood で
+    // `examples/nextjs-api-poc` が実際にこれに当たった)。
+    for (const runtime of documentedRuntimes()) {
+      const flags = [...runtimeFence(runtime).matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
+      expect(flags.length, `${runtime} に抽出段が無い`).toBeGreaterThan(0);
+      for (const flag of flags) {
+        expect(flag, `${runtime} の抽出が -H を付けていない`).toContain('H');
+      }
+    }
   });
 
   it('Step 2 が test / tests の両方を探索先に含める', () => {
@@ -664,7 +677,10 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
     );
     // 両方が空でも `toEqual` は通る。 TC を 1 件も読めていない状態を pass にしない。
     expect(cases.length).toBeGreaterThan(0);
-    expect(rows).toEqual(cases);
+    // **並び順は問わない**。 契約は「全 TC が 1 行ずつ現れる」 で、 対応表が TC 一覧と同じ順に
+    // 並ぶことは skeleton も要求していない (layer 別 spec は観点でまとめるため順が入れ替わる)。
+    // 並べ替えてから比べても、 欠落と重複は検出できる。
+    expect([...rows].sort()).toEqual([...cases].sort());
   });
 
   it.each(withSection)('%s の判定が 3 値のいずれか', (rel) => {

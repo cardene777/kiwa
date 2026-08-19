@@ -104,3 +104,56 @@ describe('items API (hybrid mode)', () => {
     expect(typeof env.mocks.reset).toBe('function');
   });
 });
+
+// ---- ここから下は `/kiwa-design --layer api --module items` が未覆と判定した 5 件
+// (T-API-010 / 011 / 012 / 013 / 014)。
+// spec = tests/spec/integration/test-spec-items.api.ja.md
+//
+// 既存 9 件 (T-API-001 〜 009) は中身を読んで重複と判断したため書いていない。
+// module 直下の `envs` と `afterEach` はそのまま使う
+// (`existing-test-reuse.md` § 3 = 既存の後始末は変えない)。
+
+describe('items API (未覆分の追記: 入力検証の分岐と境界)', () => {
+  // 入力検証は 4 分岐あるが、 既存 test が踏むのは「name が無い」 の 1 つだけ。
+  // 4 分岐とも 400 を返すため、 status だけを見る test では区別できない。
+  // ここでは `error` の値まで見て分岐を固定する。
+  it('T-API-010 JSON が壊れていれば 400 invalid json', async () => {
+    const env = await setupApiServer({ mode: 'live', app: createItemsHandler() });
+    envs.push(env);
+    const res = await env.request.post('/api/items', '{invalid');
+    expect(res.status).toBe(400);
+    expect(res.json<{ error: string }>().error).toBe('invalid json');
+  });
+
+  it('T-API-011 name が文字列でなければ 400 name required', async () => {
+    const env = await setupApiServer({ mode: 'live', app: createItemsHandler() });
+    envs.push(env);
+    const res = await env.request.post('/api/items', { name: 123 });
+    expect(res.status).toBe(400);
+    expect(res.json<{ error: string }>().error).toBe('name required');
+  });
+
+  it('T-API-012 name が空文字なら 400 name required', async () => {
+    const env = await setupApiServer({ mode: 'live', app: createItemsHandler() });
+    envs.push(env);
+    const res = await env.request.post('/api/items', { name: '' });
+    expect(res.status).toBe(400);
+    expect(res.json<{ error: string }>().error).toBe('name required');
+  });
+
+  it('T-API-013 name 100 字ちょうどは 201', async () => {
+    const env = await setupApiServer({ mode: 'live', app: createItemsHandler() });
+    envs.push(env);
+    const name = 'x'.repeat(100);
+    const res = await env.request.post('/api/items', { name });
+    expect(res.status).toBe(201);
+    expect(res.json<Item>()).toEqual({ id: 1, name });
+  });
+
+  it('T-API-014 未対応 path への POST は 405 ではなく 404', async () => {
+    const env = await setupApiServer({ mode: 'live', app: createItemsHandler() });
+    envs.push(env);
+    const res = await env.request.post('/api/other', { name: 'x' });
+    expect(res.status).toBe(404);
+  });
+});
