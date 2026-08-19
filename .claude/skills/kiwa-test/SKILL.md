@@ -116,7 +116,11 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAM
 ```bash
 ROOT=$(git rev-parse --show-toplevel)
 HAS_FOUNDRY=$([ -f "$ROOT/examples/$EXAMPLE/foundry.toml" ] && echo 1 || echo 0)
-HAS_HARDHAT=$(ls "$ROOT/examples/$EXAMPLE/"hardhat.config.* 2>/dev/null | head -1 | grep -q . && echo 1 || echo 0)
+# glob を shell に展開させない。 zsh は一致 0 件を **展開段で** エラーにするため、
+# `ls ...hardhat.config.* 2>/dev/null` の `2>/dev/null` は届かず端末に
+# `no matches found` が出る (値自体は 0 で正しいので、 読み手だけが誤解する)。
+# `find -name` は pattern を自分で解釈するので 0 件でも黙って終わる。
+HAS_HARDHAT=$(find "$ROOT/examples/$EXAMPLE" -maxdepth 1 -name 'hardhat.config.*' -print -quit 2>/dev/null | grep -qc . && echo 1 || echo 0)
 ```
 
 | 検出パターン | `$RUNNER` 確定値 | summary 提示 |
@@ -226,13 +230,20 @@ EXISTING=()
 [ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/test" ] && [ -n "$(ls -A examples/$EXAMPLE/test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/test")
 [ "$TARGET" != "dapp" ] && [ -d "examples/$EXAMPLE/hardhat-test" ] && [ -n "$(ls -A examples/$EXAMPLE/hardhat-test 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/hardhat-test")
 [ "$TARGET" != "contract" ] && [ -d "examples/$EXAMPLE/tests" ] && [ -n "$(ls -A examples/$EXAMPLE/tests 2>/dev/null)" ] && EXISTING+=("examples/$EXAMPLE/tests")
-# spec 既存 check (解決済 path をそのまま見る)
+# spec 既存 check。 **起点は `examples/$EXAMPLE`** で、 cwd ではない。
+# 返る `spec_path` は project-root 起点の相対 path で、 Step 3 / 4 / 4w は
+# `examples/{example}/` に cd して生成するため spec はそこに落ちる。 Step 2 が repo root へ
+# 移動した後の cwd でそのまま見ると当たらず、 **上書き確認が発火しないまま再生成する**。
 for SPEC in "${SPECS[@]}"; do
-  [ -f "$SPEC" ] && EXISTING+=("$SPEC")
+  [ -f "examples/$EXAMPLE/$SPEC" ] && EXISTING+=("examples/$EXAMPLE/$SPEC")
 done
 ```
 
 **解決に失敗したら中断する**。 握り潰して空 path のまま進むと、 spec が存在するのに「無い」 と判定して上書き確認を出さず、 user の spec を黙って作り直す。 `$TARGET` の分岐に既定を置かないのも同じ理由で、 未知の値が「layer 0 件」 に落ちると全 spec が見えなくなる。
+
+**repo root 直下の `tests/spec/` は見ない**。 そこにある spec は Step 3 が cd する前の規約で書かれた
+過去の生成物で、 本 skill の生成先ではないため上書きも起きない。 見に行くと「消さないものを消すか
+訊く」 ことになり、 確認の意味が薄れる。
 
 既存 file / dir 検出時は AskUserQuestion で 3 択:
 
@@ -267,7 +278,19 @@ done
 # 関連 cache / report も削除 (再走時の混乱防止)
 [ "$TARGET" != "dapp" ] && rm -rf "$ROOT/examples/$EXAMPLE"/{forge-out,hardhat-cache,hardhat-artifacts,cache,coverage,coverage.json}
 [ "$TARGET" != "contract" ] && rm -rf "$ROOT/examples/$EXAMPLE"/{test-results,playwright-report,.next}
-rm -rf "$ROOT/tests/reports"/{contract,e2e,review,integrated}/*${EXAMPLE}* 2>/dev/null || true
+
+# report は **dir ごとに find で列挙して** 消す。 brace + glob を 1 行に畳むと、
+# zsh が 1 dir でも一致 0 件の時点で **展開段で全体を中断** し、 他 3 dir に一致が
+# あっても 1 件も消えない (実測 = `mint-nft` は contract / review / integrated に
+# 一致があるのに `tests/reports/e2e/` が無いだけで 0 件だった)。
+#
+# 展開段のエラーなので `2>/dev/null` も `|| true` も届かない。 前者は rm の stderr を、
+# 後者は rm の exit を隠すだけで、 **rm はそもそも起動しない**。
+# 消し残った report は次の run の result-review が「前回の結果」 として読む。
+for d in contract e2e review integrated; do
+  [ -d "$ROOT/tests/reports/$d" ] || continue
+  find "$ROOT/tests/reports/$d" -maxdepth 1 -name "*${EXAMPLE}*" -exec rm -rf {} +
+done
 ```
 
 📝 上書き許可選択時は何もせず Step 3 へ進む。 🛑 中断選択時は skill を停止 + リセットコマンドを return。
@@ -276,27 +299,27 @@ rm -rf "$ROOT/tests/reports"/{contract,e2e,review,integrated}/*${EXAMPLE}* 2>/de
 
 ### Step 3: contract test chain 実行 (target=contract or both)
 
-`examples/{example}/` に cd した状態で生成側の子 skill を `$RUNNER` 分岐に応じて内部呼出。 Step 3a (spec 生成) は runner 共通、 Step 3b / 3c は `$RUNNER` で選択実行。
+生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd する。 Step 3a (spec 生成) は runner 共通、 Step 3b / 3c は `$RUNNER` で選択実行。各子 skill の直後に review のため repo root へ戻るので、次の生成前に cwd を再確立する。
 
 **本 skill から起動する生成側の子 skill には常に `--no-review` を渡し、 review は repo root に戻って本 skill が直接起動する**。 子の自動 review に任せると、 同じ `--module` を使う Foundry / Hardhat / Playwright が既定の同じ path を順に上書きし、 chain return を集めても最後の 1 枚しか残らない。 本 skill は run 全体を知る呼出側なので、 surface ごとに一意な `--out` を渡す。
 
 親の `--no-review` が指定されている場合は直接 review も全件 skip する。 指定されていない場合、 生成側の子 skill が戻った直後に repo root から下記 review を起動し、 各 chain return の report path を控える。 `${DOC_LANG}` は明示 `--out` の一部なので、 `en` でも suffix を付ける。
 
 ```text
-[Step 3a] /kiwa-design --layer contract --module {example} --input contracts/ --lang $DOC_LANG --no-review
+[Step 3a] examples/{example}/ へ cd して /kiwa-design --layer contract --module {example} --input contracts/ --lang $DOC_LANG --no-review
   ↓ spec 生成
   ↓ tests/spec/contract/test-spec-{example}.{lang}.md が Write される
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer contract --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-contract.${DOC_LANG}.md
 
 [Step 3b] $RUNNER ∈ {foundry, both} の場合のみ実行:
-  /kiwa-forge --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
+  examples/{example}/ へ cd し直して /kiwa-forge --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
   ↓ test/{Contract}.t.sol 生成 + forge test 全 PASS + coverage 100% 到達 (auto loop)
   ↓ Step 5c で tests/reports/contract/coverage-report-{example}.{lang}.md Write
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-foundry.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
 [Step 3c] $RUNNER ∈ {hardhat, both} の場合のみ実行:
-  /kiwa-hardhat --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
+  examples/{example}/ へ cd し直して /kiwa-hardhat --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
   ↓ hardhat-test/{Contract}.test.cjs 生成 + hardhat test 4 round PASS + coverage 100%
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer contract --lang $DOC_LANG --producer kiwa-hardhat --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-hardhat.${DOC_LANG}.md
   ↓ review が返した report path を控える
@@ -317,15 +340,19 @@ fi
 
 ### Step 4: dApp e2e test chain 実行 (target=dapp or both)
 
+生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd する。 target=dapp の単独経路でも
+Step 2 の repo root に残らず、 target=both で直前の review を repo root から呼んだ後も、
+Step 4a の review 後に Step 4b を呼ぶ時も、生成前にこの cwd を確立し直す。
+
 target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) なら 3 完了待ち、 mode=parallel なら 3 と並走 (ただし parallel は port 衝突リスクあるため非推奨)。
 
 ```text
-[Step 4a] /kiwa-design --layer e2e --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4a] examples/{example}/ へ cd して /kiwa-design --layer e2e --module {example} --input app/ --lang $DOC_LANG --no-review
   ↓ spec 生成
   ↓ tests/spec/e2e/test-spec-{example}.{lang}.md Write
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer e2e --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e.${DOC_LANG}.md
 
-[Step 4b] /kiwa-play --mode new --rounds {N} --lang $DOC_LANG --no-review [--no-codex]
+[Step 4b] examples/{example}/ へ cd し直して /kiwa-play --mode new --rounds {N} --lang $DOC_LANG --no-review [--no-codex]
   ↓ tests/{example}.spec.ts + helper 生成
   ↓ playwright test 4 round PASS (flaky 0 検証)
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-playwright.${DOC_LANG}.md
@@ -334,24 +361,28 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
 
 ### Step 4w: web chain 実行 (e2e-generic + a11y、 target=web or all)
 
+生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd する。 target=web / all は Step 3 を
+通らないため Step 2 の repo root から明示的に移動し、各 review 後も次の生成前に cwd を
+確立し直す。
+
 target=web (汎用 web 2 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y の 2 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 2 子 skill が同時 Read するだけ、 file 書込 path は別)。
 
 ```text
-[Step 4w-e2e-a] /kiwa-design --layer e2e-generic --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4w-e2e-a] examples/{example}/ へ cd して /kiwa-design --layer e2e-generic --module {example} --input app/ --lang $DOC_LANG --no-review
   ↓ tests/spec/integration/test-spec-{example}.e2e.{lang}.md Write
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer e2e-generic --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e-generic.${DOC_LANG}.md
 
-[Step 4w-e2e-b] /kiwa-e2e --mode new --lang $DOC_LANG --no-review
+[Step 4w-e2e-b] examples/{example}/ へ cd し直して /kiwa-e2e --mode new --lang $DOC_LANG --no-review
   ↓ tests/{example}.e2e.spec.ts 生成
   ↓ @kiwa-lab/e2e で playwright 起動
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer e2e-generic --lang $DOC_LANG --producer kiwa-e2e --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-generic.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
-[Step 4w-a11y-a] /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4w-a11y-a] examples/{example}/ へ cd し直して /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG --no-review
   ↓ tests/spec/integration/test-spec-{example}.a11y.{lang}.md Write
   ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer a11y --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-a11y.${DOC_LANG}.md
 
-[Step 4w-a11y-b] /kiwa-a11y --mode new --lang $DOC_LANG --no-review
+[Step 4w-a11y-b] examples/{example}/ へ cd し直して /kiwa-a11y --mode new --lang $DOC_LANG --no-review
   ↓ tests/{example}.a11y.test.ts 生成
   ↓ @kiwa-lab/a11y で axe-core 評価
   ↓ repo root から /kiwa-review --mode test-review --module {example} --layer a11y --lang $DOC_LANG --producer kiwa-a11y --project-root examples/{example} --out tests/reports/review/test-review-{example}-a11y.${DOC_LANG}.md
@@ -524,9 +555,24 @@ for spec in "${MOVES[@]}"; do
     rm -rf "$dst_path"
   fi
 
-  # 履歴保持のため git mv 優先、 失敗時は plain mv で fallback (tracked でない場合)
-  git mv "examples/$EXAMPLE/$src" "tests/fixtures/$EXAMPLE/$dst" 2>/dev/null \
-    || { mkdir -p "$(dirname "$dst_path")"; mv "$src_path" "$dst_path"; git add "tests/fixtures/$EXAMPLE/$dst"; }
+  # 履歴保持のため git mv 優先、 失敗時は plain mv で fallback (tracked でない場合)。
+  #
+  # **git は `-C "$ROOT"` で対象を明示する**。 pathspec は repo 相対なので、 cwd 依存の
+  # まま書くと Step 3 が確立した cwd (`examples/{example}/`) で解決され
+  # `fatal: bad source, source=examples/{example}/examples/{example}/test` になる (実測)。
+  # しかも `2>/dev/null ||` が git mv の失敗を隠して plain mv に落ちるため **履歴が消え**、
+  # fallback 側の `git add` も同じ理由で外して **退避物が staging されない**。
+  # 本 step の目的は「生成 test を commit 対象化する」 ことなので、 staging に失敗したまま
+  # 進むと PR に test code が入らない。
+  git -C "$ROOT" mv "examples/$EXAMPLE/$src" "tests/fixtures/$EXAMPLE/$dst" 2>/dev/null \
+    || {
+      mkdir -p "$(dirname "$dst_path")"
+      mv "$src_path" "$dst_path"
+      # **fallback の git add は exit を見る**。 握り潰すと「退避したが staging されていない」
+      # 状態が成功として通り、 git status を目で見るまで気付けない。
+      git -C "$ROOT" add "tests/fixtures/$EXAMPLE/$dst" \
+        || { echo "ERROR: 退避先を staging できません: tests/fixtures/$EXAMPLE/$dst"; exit 1; }
+    }
 
   echo "📦 退避: examples/$EXAMPLE/$src → tests/fixtures/$EXAMPLE/$dst"
 done
@@ -572,18 +618,18 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
    - `test-review` FAIL (TC mapping 漏れ / assertion 抽象化 / 追加 test 提案) → test code 再生成
    - `result-review` FAIL (coverage 未達 / flaky 兆候 / 後追い項目残存) → 対応する Layer 2 skill 再走 (coverage 不足は kiwa-forge auto loop、 flaky は該当 Layer 2 を再生成)
 
-2. **対応 skill 再走** — review 指摘を prompt に含めて該当 skill を再起動:
+2. **対応 skill 再走** — review 指摘を prompt に含めて該当 skill を再起動。各 review は repo root から呼ぶため、生成側の子 skill を呼ぶたびに `examples/{example}/` へ cd し直す:
    ```text
    # spec-review FAIL の場合
-   /kiwa-design --layer {layer} --module {module} --input {input} --lang $DOC_LANG --no-review
+   examples/{example}/ へ cd し直して /kiwa-design --layer {layer} --module {module} --input {input} --lang $DOC_LANG --no-review
      "[前 round review 指摘] {critical / major bullets を貼付}、 これを反映して spec を再生成してください"
 
    # test-review FAIL の場合
-   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
+   examples/{example}/ へ cd し直して /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
      "[前 round review 指摘] {bullets}、 不足 TC を追加 + assertion 具体化してください"
 
    # result-review FAIL (coverage 不足) の場合
-   /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
+   examples/{example}/ へ cd し直して /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review
      (coverage auto loop が真の未踏 line を追加 test で cover、 #222 ロジックに従う)
    ```
 
