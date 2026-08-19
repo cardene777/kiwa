@@ -431,6 +431,13 @@ describe('/kiwa-design が既存 test を探す', () => {
     const core = '^[[:space:]]*(describe|it|test)(\\.[a-z]+)?\\(';
     expect(design, `${DESIGN} の抽出が既知の形でない`).toContain(core);
     expect(play, '/kiwa-play の抽出が /kiwa-design と別の形').toContain(core);
+    expect(play, '/kiwa-play が tests/ だけを探索している').toContain(
+      'find . -type d -name node_modules -prune',
+    );
+    for (const pattern of ['*.test.ts', '*.test.tsx', '*.spec.ts', '*.spec.tsx']) {
+      expect(design, `${DESIGN} が ${pattern} を探索していない`).toContain(`-name '${pattern}'`);
+      expect(play, `/kiwa-play が ${pattern} を探索していない`).toContain(`-name '${pattern}'`);
+    }
     // flag も 3 つとも要る (#2017 と同じ形)。 候補は `file:行番号` で書くため。
     const flags = [...play.matchAll(/xargs -0 grep (-\S+)/g)].map((m) => m[1]!);
     expect(flags.length, '/kiwa-play に抽出段が無い').toBeGreaterThan(0);
