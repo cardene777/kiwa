@@ -317,7 +317,7 @@ find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
 # 2. 列挙した file から describe / it / test の名前を行番号つきで抽出する
 find "$PKG_DIR" -type d -name node_modules -prune -o -type f \
   \( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \) -print0 |
-  xargs -0 grep -nE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
+  xargs -0 grep -nHE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
 ```
 
 ##### solidity
@@ -330,7 +330,7 @@ find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f 
 # 2. 列挙した file から contract / test 関数の名前を行番号つきで抽出する
 find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
   -name '*.t.sol' -print0 |
-  xargs -0 grep -nE "^[[:space:]]*(contract[[:space:]]+[A-Za-z0-9_]*Test|function[[:space:]]+(test|invariant|statefulFuzz)[A-Za-z0-9_]*\()"
+  xargs -0 grep -nHE "^[[:space:]]*(contract[[:space:]]+[A-Za-z0-9_]*Test|function[[:space:]]+(test|invariant|statefulFuzz)[A-Za-z0-9_]*\()"
 
 # 3. Hardhat test file も列挙する (contract layer は Foundry / Hardhat の両方を持つ)
 find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
@@ -339,7 +339,7 @@ find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f 
 # 4. Hardhat test file から describe / it / test の名前を行番号つきで抽出する
 find "$PKG_DIR" -type d \( -name node_modules -o -name lib \) -prune -o -type f \
   \( -name '*.test.ts' -o -name '*.test.cjs' \) -print0 |
-  xargs -0 grep -nE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
+  xargs -0 grep -nHE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\("
 ```
 
 `lib` を prune するのは forge が vendored 依存を置く dir だから。
@@ -351,6 +351,11 @@ forge が test として実行するのは名前が `test` / `invariant` で始�
 ##### 共通の注意
 
 2 段目で `grep -r` を `$PKG_DIR` に直接掛けない。 `-r` は build 成果物 (`.vitest-dist/` / `dist/` / `coverage/` / forge の `out/`) を辿るため、 **同じ test が 2 度現れ、 候補の行番号が生成物を指す** (実測で `packages/skill-test` は 35 行が 70 行になり、 増えた分は全て `.vitest-dist/` の compile 済 copy だった)。 1 段目と同じ `find` の結果だけを渡す。
+
+`grep` には `-H` を付ける。 **付けないと test file が 1 件しかない package で path が出ない**
+(`grep` は複数 file を渡された時だけ file 名を前置する)。 実測で `examples/nextjs-api-poc` は
+test file が 1 件しかなく、 `-H` 無しでは `16:  it('...')` としか出ずに候補 column を埋められなかった。
+test file が 2 件以上ある package では出るため、 **1 件の package を踏むまで気付けない**。
 
 `node_modules` を `-prune` するのは、 pnpm の symlink を辿らない既定に依存しないため。 hoisting された実体 dir を持つ project では `-r` がそのまま入る。
 
