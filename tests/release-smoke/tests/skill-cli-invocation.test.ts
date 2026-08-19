@@ -490,7 +490,10 @@ describe('skill が書いている起動形が文脈に合っている', () => {
       'kiwa-orm': 1,
       'kiwa-play': 1,
       'kiwa-queue': 1,
-      'kiwa-review': 2,
+      // spec 解決と test 解決で 2 件、 起点の差を示す実測例で 1 件 (#2044)。 例は
+      // そのまま貼って再現できる形で残す = 2 つの path の起点が違うことは、 文章より
+      // 実際の応答を並べた方が短く伝わる。
+      'kiwa-review': 3,
       'kiwa-test': 2,
       'kiwa-ui': 1,
       'kiwa-vitest': 1,
