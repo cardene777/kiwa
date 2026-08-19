@@ -31,9 +31,9 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).lay
 /**
  * 宣言と突き合わせられる組。
  *
- * **全 layer は対象にしない**。 20 layer のうち生成済 test を持つ example があるのは 12 件で、
+ * **全 layer は対象にしない**。 20 layer のうち生成済 test を持つ example があるのは 13 件で、
  * 残りは「まだ dogfood していない」 だけであって宣言の誤りではない。 全件を要求すると
- * 8 layer ぶんの example を作るまで赤のままになる。
+ * 7 layer ぶんの example を作るまで赤のままになる。
  *
  * 逆に **今解決している組を減らす変更は落ちる**。 roster を減らす形でしか通せないので、
  * 減らしたことが差分に出る (`skill-cli-invocation` の起動行数と同じ形)。
@@ -58,6 +58,7 @@ const ROSTER = [
     example: 'dogfood-dapp-e2e-reorg',
   },
   { layer: 'unit', producer: 'kiwa-vitest', module: 'token', example: 'vitest-unit-poc' },
+  { layer: 'a11y', producer: 'kiwa-a11y', module: 'counter', example: 'react-component-poc' },
 ] as const;
 
 function resolveTestPaths(entry: (typeof ROSTER)[number]): {

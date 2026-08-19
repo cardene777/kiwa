@@ -126,7 +126,6 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
 import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
-import * as axe from 'axe-core';
 import { LoginForm } from '../src/components/LoginForm.js';
 ```
 
@@ -143,8 +142,11 @@ import { runAxe, expectNoViolations } from '@kiwa-lab/a11y';
 describe('{Component} a11y', () => {
   it('passes WCAG 2.1 AA', async () => {
     const { container } = render(<LoginForm />);
-    const results = await runAxe(container, { axe, runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] });
-    expectNoViolations(results);
+    const results = await runAxe({
+      context: container,
+      runOptions: { runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] },
+    });
+    expectNoViolations(results, expect);
   });
 });
 ```
@@ -155,8 +157,8 @@ describe('{Component} a11y', () => {
 test('{Module} a11y check', async ({ page }) => {
   await page.goto('/login');
   const html = await page.content();
-  const results = await runAxe(html, { runOnly: ['wcag2aa'] });
-  expectNoViolations(results);
+  const results = await runAxe({ context: html, runOptions: { runOnly: ['wcag2aa'] } });
+  expectNoViolations(results, expect);
 });
 ```
 
@@ -173,7 +175,13 @@ test('{Module} a11y check', async ({ page }) => {
 
 ### Step 4: severity threshold
 
-`expectNoViolations` は default で `serious` / `critical` のみ fail させる。 spec の Severity column で `--threshold moderate` 指定可能。
+`expectNoViolations` の閾値は `maxImpact` で、 **既定は `minor`** = minor 以上すべてが blocking に入る (`packages/a11y/src/audit.ts` の `opts.maxImpact ?? 'minor'`)。 「serious 以上だけ落ちる」 ではない。
+
+緩める時は第 3 引数で渡す。 本 skill に `--threshold` option は無いので、 spec の Severity column を読んで生成 code 側に書く。
+
+```ts
+expectNoViolations(results, expect, { maxImpact: 'serious' });
+```
 
 ### Step 5: 実行 + 結果集約
 

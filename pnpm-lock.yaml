@@ -3736,6 +3736,9 @@ importers:
 
   examples/react-component-poc:
     dependencies:
+      '@kiwa-lab/a11y':
+        specifier: workspace:*
+        version: link:../../packages/a11y
       '@kiwa-lab/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -3758,6 +3761,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.7(@types/react@18.3.30)
+      axe-core:
+        specifier: ^4.10.2
+        version: 4.12.1
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)

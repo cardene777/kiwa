@@ -4,12 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/ui @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/ui @kiwa-lab/a11y @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment jsdom",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*",
-    "@kiwa-lab/ui": "workspace:*"
+    "@kiwa-lab/ui": "workspace:*",
+    "@kiwa-lab/a11y": "workspace:*"
   },
   "devDependencies": {
     "@testing-library/react": "^16.1.0",
@@ -21,6 +22,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "typescript": "^5.6.0",
-    "vitest": "^3.2.6"
+    "vitest": "^3.2.6",
+    "axe-core": "^4.10.2"
   }
 }
