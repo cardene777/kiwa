@@ -11,7 +11,7 @@ orm-drizzle-sqlite-poc/
 │   ├── migration.sql.ts     # 初期 schema SQL (setupOrmEnv の migrations に渡す)
 │   └── users-repo.ts        # production-shape Repository class
 └── tests/
-    └── users-repo.test.ts   # 8 test (create / find / cascade / FK / 隔離)
+    └── users-repo.orm.test.ts   # 8 test (create / find / cascade / FK / 隔離)
 ```
 
 ## 実行
