@@ -447,6 +447,16 @@ describe('/kiwa-design が既存 test を探す', () => {
     expect(design, 'CLI 解決 path に上書きすると書いていない').toContain(
       '既存 file があっても書き先を変えない',
     );
+
+    // chain の入口も同じ契約でなければ、 /kiwa-test 経由だけ旧来の -2.md 退避を user に
+    // 案内してしまう。 producer 単体だけでなく orchestration の選択肢まで固定する。
+    const orchestrator = read('.claude/skills/kiwa-test/SKILL.md');
+    expect(orchestrator, '/kiwa-test に spec の連番退避が残っている').not.toContain(
+      'kiwa-design は spec を新規 file で衝突回避',
+    );
+    expect(orchestrator, '/kiwa-test が同じ spec path の上書きを案内していない').toContain(
+      'kiwa-design は CLI が解決した同じ spec path を上書き',
+    );
   });
 
   it('/kiwa-design の batch 出力件数が 2 箇所で一致する', () => {
