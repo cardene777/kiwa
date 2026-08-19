@@ -3,7 +3,7 @@
  *
  * `unit` layer の対象は「外部依存を持たない純粋な logic」 で、 backing package を要らない
  * (`docs/layers.json` の `unit` は `backing_package: null`)。 この module も import を持たず、
- * 時刻だけを外から受ける。
+ * 唯一の外部状態である現在時刻は `Date.now()` から読む。
  */
 
 export interface TokenOptions {
