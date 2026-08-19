@@ -31,14 +31,16 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).lay
 /**
  * 宣言と突き合わせられる組。
  *
- * **全 layer は対象にしない**。 20 layer のうち生成済 test を持つ example があるのは 15 件で、
- * 残りは「まだ dogfood していない」 だけであって宣言の誤りではない。 全件を要求すると
- * 5 layer ぶんの example を作るまで赤のままになる。
+ * `{example}/` 起点の宣言を持つ layer を **全件** 載せる。 #2050 の時点では 6 件しか
+ * 解決しておらず、 残りは「まだ example が無い」 状態だったので roster 方式で明示的に
+ * 絞っていた。 #2062 で全 layer に example が揃ったため、 § roster が全 layer を覆う で
+ * **網羅そのものを検査する** 形へ上げた。
  *
- * 逆に **今解決している組を減らす変更は落ちる**。 roster を減らす形でしか通せないので、
- * 減らしたことが差分に出る (`skill-cli-invocation` の起動行数と同じ形)。
+ * layer を足した時は、 その example を作ってここに 1 行足す。 足さないと網羅の検査が落ちる =
+ * 「宣言だけ増えて実物が無い」 状態を作れない。
  *
- * 新しく生成済 test を持つ example を足した時は、 ここに 1 行足す。
+ * 逆に **今解決している組を減らす変更も落ちる**。 減らしたことが差分に出る
+ * (`skill-cli-invocation` の起動行数と同じ形)。
  */
 const ROSTER = [
   { layer: 'contract', producer: 'kiwa-forge', module: 'defi-swap', example: 'defi-swap' },
@@ -70,6 +72,36 @@ const ROSTER = [
     producer: 'kiwa-api',
     module: 'inventory',
     example: 'nextjs-api-poc',
+  },
+  {
+    layer: 'nextjs-server-action',
+    producer: 'kiwa-nextjs',
+    module: 'items',
+    example: 'nextjs-app-router-full',
+  },
+  {
+    layer: 'nextjs-middleware',
+    producer: 'kiwa-nextjs',
+    module: 'auth',
+    example: 'nextjs-app-router-full',
+  },
+  {
+    layer: 'nextjs-rsc',
+    producer: 'kiwa-nextjs',
+    module: 'items',
+    example: 'nextjs-app-router-full',
+  },
+  {
+    layer: 'nextjs-parallel-route',
+    producer: 'kiwa-nextjs',
+    module: 'items',
+    example: 'nextjs-app-router-full',
+  },
+  {
+    layer: 'nextjs-rsc-streaming',
+    producer: 'kiwa-nextjs',
+    module: 'items',
+    example: 'nextjs-app-router-full',
   },
 ] as const;
 
@@ -111,6 +143,19 @@ describe('test_outputs の宣言が example に解決する', () => {
     expect(ROSTER.length, 'roster が空').toBeGreaterThan(0);
     const layers = ROSTER.map((r) => r.layer);
     expect(new Set(layers).size, 'roster に同じ layer が 2 度ある').toBe(layers.length);
+  });
+
+  it('roster が全 layer を覆う', () => {
+    // `{example}/` 起点の宣言を持つ layer は、 実物が repo にあるはず。 roster から漏れると
+    // その layer は無監視のまま壊れうる (#2052 で `e2e-generic` が 28 file 持ちながら
+    // 監視外だった)。 **宣言から導く** = 手で列挙すると layer が増えた時に検査だけ古くなる。
+    const declared = LAYERS.filter((layer) =>
+      Object.values(layer.test_outputs ?? {}).some((paths) =>
+        paths.some((path) => path.startsWith('{example}/')),
+      ),
+    ).map((layer) => layer.id);
+    const covered = ROSTER.map((entry) => entry.layer);
+    expect([...declared].sort(), 'roster に無い layer がある').toEqual([...covered].sort());
   });
 
   it('roster の layer / producer が宣言に実在する', () => {

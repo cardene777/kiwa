@@ -3,7 +3,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { invokeServerAction, REDIRECT_SYMBOL } from '@kiwa-lab/nextjs';
-import { buildDefaultEnv, createItemAction } from '../app/items/_kiwa/items-action.js';
+import { buildDefaultEnv, createItemAction } from '../../app/items/_kiwa/items-action.js';
 
 function buildFormData(entries: Record<string, string>): FormData {
   const fd = new FormData();

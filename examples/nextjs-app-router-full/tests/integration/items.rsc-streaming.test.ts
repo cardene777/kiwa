@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { setupNextRscEnv } from '@kiwa-lab/nextjs';
-import { streamItems, itemsSkeleton } from '../app/items/_kiwa/items-streaming.js';
+import { streamItems, itemsSkeleton } from '../../app/items/_kiwa/items-streaming.js';
 
 describe('items-streaming via @kiwa-lab/nextjs setupNextRscEnv', () => {
   it('T-NS-301: 正常 stream — fallback + 4 chunk + resolved=final list', async () => {
