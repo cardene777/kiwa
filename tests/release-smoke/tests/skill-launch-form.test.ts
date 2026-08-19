@@ -5,7 +5,7 @@
 // 大半 (21 件) は **その fence を読む検査が 1 件も無い** = 起動形を丸ごと書き換えても誰も
 // 気付かない状態だった。
 //
-// 本 file が扱うのは、 そのうち **落とすと実害が出ることを実測した 3 件**。 実害の無い 3 件は
+// 本 file が扱うのは、 **落とすと実害が出ることを実測した 4 件**。 実害の無い 3 件は
 // 検査を書かず、 判断と理由を `docs/quality/check-authoring.md` に残した (何を検査しないと
 // 決めたかが残らないと、 次に数えた人が同じ調査をやり直す)。
 //
@@ -13,6 +13,7 @@
 // |---|---|---|
 // | `kiwa init --detect` | `--detect` 無しは **scaffold** する (CLI が分岐を持つ) | `runCli.ts` の `SCAFFOLD_FLAGS` |
 // | `forge coverage --report lcov` | 既定は `summary` なので `.lcov` に表が入る | `forge coverage --help` の `[default: summary]` |
+// | spec の対象 contract path | project 全体の探索は test / 別 contract を混ぜる | dogfood project の `test/*.t.sol` 混入 |
 // | `pnpm add --save-dev` | 利用者 project の `dependencies` に test 専用 dep が入る | pnpm の既定 |
 //
 // 照合は **comment を除いた実行行** に対して行う。 fence の text は実行される引数の代理指標
@@ -230,28 +231,51 @@ describe('SKILL.md の起動形が必須要素を落としていない', () => {
     expect(command, '--detect を渡していない (scaffold に変わる)').toContain('--detect');
   });
 
-  it('/kiwa-forge の coverage 計測が --report lcov を渡す', () => {
-    // `forge coverage` の既定は `summary` (実測 = `--help` が `[default: summary]`)。
-    // 落とすと `coverage-{module}.lcov` に summary の表が書かれ、 file 名は正しいまま
-    // 中身だけが別物になる。 分類 (`references/coverage-classify.md`) は lcov の
-    // `SF:` / `DA:` を読むため、 何も分類できない。
-    const command = executableLines(fenceUnder('kiwa-forge', /^#### Step 5a: /m, 'bash'));
-    // fence には summary を出す 2 本目の `forge coverage` もある。 fence 全体で 3 要素を
-    // 別々に見ると、 `--report lcov` を 2 本目へ移しても緑になるため、 同じ実行行に束縛する。
-    const lcovCommand = command
-      .split('\n')
-      .find(
-        (line) =>
-          line.includes('forge coverage') &&
-          line.includes('tests/reports/contract/coverage-{module}.lcov'),
-      );
-    expect(lcovCommand, 'lcov の出力先へ書く forge coverage を呼んでいない').toBeDefined();
-    expect(lcovCommand, '--report lcov を同じ実行行に渡していない').toContain('--report lcov');
-    // 出力先も同じ実行行に束縛する。 lcov を出しても別の行が file を書けば、 分類は
-    // summary を読む可能性がある。
-    expect(lcovCommand, 'lcov の出力先が変わっている').toContain(
-      'tests/reports/contract/coverage-{module}.lcov',
+  it('/kiwa-forge の coverage 計測が LCOV を file へ直接書く', () => {
+    // `forge coverage --report lcov` が **stdout に流すのは compile / 実行の log** で、
+    // LCOV 本体は file に書かれる (実測 = 既定 `lcov.info`)。 stdout を tee した file には
+    // `SF:` も `DA:` も 1 行も入らず、 分類 (`references/coverage-classify.md`) が空の入力で
+    // 回る。 **PR #2024 の検査は tee 前提の形をそのまま固定していた** (#2038 の dogfood)。
+    const fence = fenceUnder('kiwa-forge', /^#### Step 5a: /m, 'bash');
+    const lines = executableLines(fence).split('\n');
+    // fence には summary を出す 2 本目の `forge coverage` もある。 fence 全体で見ると
+    // 要素が別の行に散っても通るため、 同じ実行行に束縛する。
+    const lcovIndex = lines.findIndex(
+      (line) =>
+        line.includes('forge coverage') &&
+        line.includes('tests/reports/contract/coverage-{module}.lcov'),
     );
+    const lcov = lines[lcovIndex];
+    expect(lcov, 'lcov の出力先へ書く forge coverage を呼んでいない').toBeDefined();
+    expect(lcov, '--report lcov を同じ実行行に渡していない').toContain('--report lcov');
+    // **file へ直接書く**。 stdout の tee では coverage data を取れない。
+    expect(lcov, '--report-file で出力先を指定していない').toContain('--report-file');
+    expect(lcov, 'stdout を tee している (coverage data は stdout に出ない)').not.toContain('tee');
+    // 親 dir は作られない (実測 = tee も --report-file も dir が無ければ落ちる)。
+    const mkdir = lines.findIndex((line) => line.includes('mkdir -p tests/reports/contract'));
+    expect(mkdir, '出力先 dir を作っていない').toBeGreaterThanOrEqual(0);
+    expect(lcovIndex, 'mkdir が coverage の後に来ている').toBeGreaterThan(mkdir);
+  });
+
+  it('/kiwa-forge の contract 探索が spec の対象 path だけを見る', () => {
+    // `contracts/*.sol src/*.sol` の形は、 片方の dir が無いと zsh が `no matches found` で
+    // **command 全体を止める** = 出力 0 件になる (実測 = `examples/dogfood-foundry-dapp` は
+    // `src/` を持たず、 `contracts/` があるのに 1 行も出ない)。 bash では動くため shell 依存。
+    const fence = fenceUnder('kiwa-forge', /^### Step 2: /m, 'bash');
+    const lines = executableLines(fence).split('\n');
+    const grep = lines.find((line) => line.includes('grep'));
+    expect(grep, 'Step 2 に抽出段が無い').toBeDefined();
+    expect(grep, 'glob を並べた grep のまま (shell 依存で 0 件になる)').not.toMatch(/\*\.sol\s+\S+\*\.sol/);
+    for (const required of ['n', 'H', 'E']) {
+      expect(grep, `抽出が -${required} を付けていない`).toMatch(
+        new RegExp(`grep\\s+-[a-zA-Z]*${required}`),
+      );
+    }
+    // project 全体を find すると test / mock / monorepo 内の別 contract が候補へ混ざり、
+    // production に無い API を test 側の同名宣言で実装済みと誤判定する。
+    expect(grep, 'spec から抽出した対象 path を使っていない').toContain('"${CONTRACT_PATHS[@]}"');
+    expect(grep, 'spec 由来 path の前で option を終端していない').toContain('-- "${CONTRACT_PATHS[@]}"');
+    expect(lines.some((line) => line.includes('find .'))).toBe(false);
   });
 
   it('/kiwa-hardhat の solidity-coverage install が --save-dev を渡す', () => {

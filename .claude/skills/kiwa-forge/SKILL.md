@@ -106,7 +106,7 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 | 抽出対象 | source section |
 |---|---|
-| 対象 contract 名 / function 一覧 / error 一覧 | `## 対象機能` / `## 仕様の要約` § API 契約 |
+| 対象 contract path (`$CONTRACT_PATHS` 配列) / contract 名 / function 一覧 / error 一覧 | `## 対象機能` / `## 仕様の要約` § API 契約 |
 | 優先度別ケース一覧 | `## テストケース一覧` の 9 column 表 |
 | 観点別 grouping | `### 観点 N: {name}` サブセクション |
 | 自動化対象 | `## 自動化すべきテスト` (優先度順) |
@@ -119,10 +119,21 @@ spec が存在しない場合は「Layer 1 spec が未生成、 `/kiwa-design --
 Layer 1 spec の「対象機能」section の path (`contracts/*.sol`) を Read し、 spec の function / error 名と実コードを突き合わせる (`rules/quality.md` § 実装整合性確認)。
 
 ```bash
-ls contracts/ src/ 2>/dev/null
-grep -E "function |event |error |modifier " contracts/*.sol src/*.sol 2>/dev/null
+grep -nHE "^[[:space:]]*(function|event|error|modifier)[[:space:]]" -- "${CONTRACT_PATHS[@]}"
 forge build 2>&1 | tail -10
 ```
+
+`$CONTRACT_PATHS` は Step 1 で spec の「対象機能」から抽出した、 対象実装の repo 相対 path
+だけを持つ配列。 各要素が repo 内の通常 file であることを Read 前に確認し、 絶対 path / `..` /
+symlink は拒否する。 0 件なら Step 2 を中断し、 対象 path が spec に無いと報告する。 `grep` の
+`--` は、 `-` から始まる path を option として解釈させないために省略しない。
+
+**glob を並べず、 project 全体も探索しない**。 `contracts/*.sol src/*.sol` の形は、 片方の dir が
+無いと zsh が `no matches found` で **command 全体を止める** = 出力 0 件になる (実測 =
+`examples/dogfood-foundry-dapp` は `src/` を持たず、 `contracts/` があるのに 1 行も出ない)。
+一方で `find . -name '*.sol'` は `test/` や monorepo 内の別 contract まで含み、 production に
+無い API が test 側にあるだけで実装済みと誤判定する。 spec が指定した path のみに限定すれば、
+shell と project layout の両方に依存せず実体を照合できる。
 
 spec の function / error が実 contract に存在しなければ「不足している仕様」として記録、 Step 3 に進む前にユーザーに報告。
 
@@ -222,9 +233,17 @@ failure があれば spec の「期待結果」と実 contract behavior の整�
 #### Step 5a: coverage 計測 + file 分類
 
 ```bash
-forge coverage --report lcov 2>&1 | tee tests/reports/contract/coverage-{module}.lcov
+mkdir -p tests/reports/contract
+forge coverage --report lcov --report-file tests/reports/contract/coverage-{module}.lcov
 forge coverage --report summary 2>&1 | tail -10
 ```
+
+**stdout を tee しない**。 `forge coverage --report lcov` が stdout に流すのは compile と
+実行の log で、 LCOV 本体は file に書かれる (既定 `lcov.info`)。 tee した file には `SF:` も
+`DA:` も 1 行も入らず、 § Step 5b 以降の分類が空の入力で回る (実測)。
+
+`--report-file` で出力先を直接指定する。 **親 dir は作られない** ため `mkdir -p` を前段に置く
+(実測 = `tee` も `--report-file` も、 dir が無ければ `No such file or directory` で落ちる)。
 
 lcov 出力を file path で分類 (rule SSOT は `references/coverage-classify.md`):
 
