@@ -5,7 +5,7 @@
 - module: counter
 - layer: ui
 
-## テストケース
+## テストケース一覧
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Component |
 |---|---|---|---|---|---|---|---|---|

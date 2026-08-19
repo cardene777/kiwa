@@ -6,17 +6,17 @@
 - module: counter
 - layer: a11y
 
-## テストケース
+## テストケース一覧
 
-| ID | Observation | Mode | Component | WCAG-rule | Severity | Expected | Priority | Automation |
+| ID | Observation | Component | WCAG-rule | Severity | Expected | Priority | Automation | Mode |
 |---|---|---|---|---|---|---|---|---|
-| T-A11Y-001 | 既定 render に違反が無い | jsdom | Counter | WCAG 2.1 AA | serious | violations 0 件 | P0 | yes |
-| T-A11Y-002 | max 到達時も違反が無い | jsdom | Counter | WCAG 2.1 AA | serious | disabled + `role="status"` の状態で violations 0 件 | P0 | yes |
-| T-A11Y-003 | 名前の無いボタンを検出する | jsdom | (裸の markup) | WCAG 2.0 A | critical | `button-name` が violations に現れる | P0 | yes |
-| T-A11Y-004 | 走査範囲を context で絞る | jsdom | Counter | WCAG 2.1 AA | serious | 範囲外に違反があっても Counter の走査では 0 件 | P1 | yes |
-| T-A11Y-005 | 既定の閾値は minor から塞ぐ | jsdom | (合成 results) | — | minor | `reportViolations` の既定で minor も blocking に入る | P1 | yes |
-| T-A11Y-006 | 閾値を上げると minor は通す | jsdom | (合成 results) | — | serious | `maxImpact: 'serious'` で minor は blocking に入らない | P1 | yes |
-| T-A11Y-007 | 違反 0 件なら assertion が通る | jsdom | Counter | WCAG 2.1 AA | serious | `expectNoViolations` が例外を投げない | P0 | yes |
+| T-A11Y-001 | 既定 render に違反が無い | Counter | WCAG 2.1 AA | serious | violations 0 件 | P0 | yes | jsdom |
+| T-A11Y-002 | max 到達時も違反が無い | Counter | WCAG 2.1 AA | serious | disabled + `role="status"` の状態で violations 0 件 | P0 | yes | jsdom |
+| T-A11Y-003 | 名前の無いボタンを検出する | (裸の markup) | WCAG 2.0 A | critical | `button-name` が violations に現れる | P0 | yes | jsdom |
+| T-A11Y-004 | 走査範囲を context で絞る | Counter | WCAG 2.1 AA | serious | 範囲外に違反があっても Counter の走査では 0 件 | P1 | yes | jsdom |
+| T-A11Y-005 | 既定の閾値は minor から塞ぐ | (合成 results) | — | minor | `reportViolations` の既定で minor も blocking に入る | P1 | yes | jsdom |
+| T-A11Y-006 | 閾値を上げると minor は通す | (合成 results) | — | serious | `maxImpact: 'serious'` で minor は blocking に入らない | P1 | yes | jsdom |
+| T-A11Y-007 | 違反 0 件なら assertion が通る | Counter | WCAG 2.1 AA | serious | `expectNoViolations` が例外を投げない | P0 | yes | jsdom |
 
 ## 自動化方針
 

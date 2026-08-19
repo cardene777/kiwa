@@ -9,21 +9,21 @@
 - module: inventory
 - layer: integration
 
-## テストケース
+## テストケース一覧
 
-| ID | Observation | Given | Method | Then | Priority | Automation | Mode |
-|---|---|---|---|---|---|---|---|
-| T-INT-001 | 正常応答を型に写す | 200 `{ sku: 'a-1', available: 3 }` | GET | `{ sku: 'a-1', available: 3 }` を返す | P0 | yes | mock |
-| T-INT-002 | 在庫 0 と未知を区別する | 200 `{ sku: 'a-1', available: 0 }` | GET | `available === 0` を返す (`null` ではない) | P0 | yes | mock |
-| T-INT-003 | 未知の SKU は null | 404 | GET | `null` を返す | P0 | yes | mock |
-| T-INT-004 | 5xx は再試行可能な失敗 | 503 | GET | `StockUnavailableError`、 `status === 503` | P0 | yes | mock |
-| T-INT-005 | 429 は再試行可能な失敗 | 429 | GET | `StockUnavailableError`、 `status === 429` | P0 | yes | mock |
-| T-INT-006 | 通信失敗は再試行可能な失敗 | msw の network error | GET | `StockUnavailableError`、 `status === undefined` | P0 | yes | mock |
-| T-INT-007 | その他の 4xx は再試行しても直らない | 400 | GET | `StockResponseError` | P1 | yes | mock |
-| T-INT-008 | 本体が JSON でない | 200 かつ本文 `not json` | GET | `StockResponseError` | P1 | yes | mock |
-| T-INT-009 | 形が違う応答 | 200 `{ sku: 'a-1' }` (available 欠落) | GET | `StockResponseError` | P1 | yes | mock |
-| T-INT-010 | 負の在庫は通さない | 200 `{ sku: 'a-1', available: -1 }` | GET | `StockResponseError` | P1 | yes | mock |
-| T-INT-011 | SKU を URL に安全に載せる | SKU `a/1` | GET | 要求 path が `a%2F1` を含む | P1 | yes | mock |
+| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
+|---|---|---|---|---|---|---|---|---|
+| T-INT-001 | 統合 | 正常応答を型に写す | `mock` で上流応答を差し替え済 | 200 `{ sku: 'a-1', available: 3 }` | `fetchStock` を `GET` 経路で呼ぶ | `{ sku: 'a-1', available: 3 }` を返す | 高 | 推奨 |
+| T-INT-002 | 統合 | 在庫 0 と未知を区別する | `mock` で上流応答を差し替え済 | 200 `{ sku: 'a-1', available: 0 }` | `fetchStock` を `GET` 経路で呼ぶ | `available === 0` を返す (`null` ではない) | 高 | 推奨 |
+| T-INT-003 | 統合 | 未知の SKU は null | `mock` で上流応答を差し替え済 | 404 | `fetchStock` を `GET` 経路で呼ぶ | `null` を返す | 高 | 推奨 |
+| T-INT-004 | 統合 | 5xx は再試行可能な失敗 | `mock` で上流応答を差し替え済 | 503 | `fetchStock` を `GET` 経路で呼ぶ | `StockUnavailableError`、 `status === 503` | 高 | 推奨 |
+| T-INT-005 | 統合 | 429 は再試行可能な失敗 | `mock` で上流応答を差し替え済 | 429 | `fetchStock` を `GET` 経路で呼ぶ | `StockUnavailableError`、 `status === 429` | 高 | 推奨 |
+| T-INT-006 | 統合 | 通信失敗は再試行可能な失敗 | `mock` で上流応答を差し替え済 | msw の network error | `fetchStock` を `GET` 経路で呼ぶ | `StockUnavailableError`、 `status === undefined` | 高 | 推奨 |
+| T-INT-007 | 統合 | その他の 4xx は再試行しても直らない | `mock` で上流応答を差し替え済 | 400 | `fetchStock` を `GET` 経路で呼ぶ | `StockResponseError` | 中 | 推奨 |
+| T-INT-008 | 統合 | 本体が JSON でない | `mock` で上流応答を差し替え済 | 200 かつ本文 `not json` | `fetchStock` を `GET` 経路で呼ぶ | `StockResponseError` | 中 | 推奨 |
+| T-INT-009 | 統合 | 形が違う応答 | `mock` で上流応答を差し替え済 | 200 `{ sku: 'a-1' }` (available 欠落) | `fetchStock` を `GET` 経路で呼ぶ | `StockResponseError` | 中 | 推奨 |
+| T-INT-010 | 統合 | 負の在庫は通さない | `mock` で上流応答を差し替え済 | 200 `{ sku: 'a-1', available: -1 }` | `fetchStock` を `GET` 経路で呼ぶ | `StockResponseError` | 中 | 推奨 |
+| T-INT-011 | 統合 | SKU を URL に安全に載せる | `mock` で上流応答を差し替え済 | SKU `a/1` | `fetchStock` を `GET` 経路で呼ぶ | 要求 path が `a%2F1` を含む | 中 | 推奨 |
 
 ## 自動化方針
 

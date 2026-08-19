@@ -6,7 +6,7 @@
 - module: links
 - layer: edge-handler
 
-## テストケース
+## テストケース一覧
 
 | ID | Observation | Given | Method | Then | Priority | Automation | Handler | Bindings |
 |---|---|---|---|---|---|---|---|---|

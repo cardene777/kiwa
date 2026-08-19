@@ -6,7 +6,7 @@ queue / cron / time-warp / idempotency / DLQ の経路を統合表現する。
 - module: orders
 - layer: data
 
-## テストケース
+## テストケース一覧
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Topic |
 |---|---|---|---|---|---|---|---|---|
