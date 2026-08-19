@@ -1,41 +1,36 @@
 # Layer 2 連携 (Layer 1 → Layer 2 skill への引き渡し)
 
-Layer 1 (`/kiwa-design`) が `tests/spec/{layer}/test-spec-{module}.md` (`--layer all` の場合は `tests/spec/test-spec-{module}.md`) を Write した後、 Layer 2 skill が同 file を入力に実装を生成する経路。
+Layer 1 (`/kiwa-design`) が spec を Write した後、 Layer 2 skill が同 file を入力に実装を生成する経路。
 
 ## 出力 path × Layer 2 skill 対応
 
-| 出力 path | 主要 Layer 2 skill |
-|---|---|
-| `tests/spec/contract/test-spec-{module}.md` | `/kiwa-forge` / `/kiwa-hardhat` |
-| `tests/spec/e2e/test-spec-{module}.md` | `/kiwa-play` (refactored) |
-| `tests/spec/integration/test-spec-{module}.md` | (Layer 2 未確定、 API mock + Playwright 想定) |
-| `tests/spec/unit/test-spec-{module}.md` | Vitest / Jest 汎用 unit runner |
-| `tests/spec/test-spec-{module}.md` | 全 Layer 2 skill (default、 layer 混在) |
+**本 file に対応表を持たない**。 layer / 書き先 / 消費 skill の対応は `docs/layers.json` が SSOT で、
+`.claude/skills/kiwa-design/SKILL.md` § 出力 path の決定 の routing 表がそこから生成されている。
 
-## Layer 2 skill 一覧
+引き当てるのは CLI。
 
-| Layer 2 skill | 変換先 | 状態 |
-|---|---|---|
-| `/kiwa-play` (refactored) | `tests/*.spec.ts` + `tests/prepare-env.ts` (Playwright) | Phase E-3 で refactor 予定 |
-| `/kiwa-forge` | `test/*.t.sol` (`forge test` 実行) | Phase E-4 で新規追加予定 |
-| `/kiwa-hardhat` | `test/*.test.ts` (`npx hardhat test` 実行) | Phase E-5 で新規追加予定 |
+```bash
+pnpm exec kiwa layers --json --layer "$LAYER" --module "$MODULE" --lang "$DOC_LANG"
+```
 
-現状 (Phase E-2 時点) では `/kiwa-play` が既存の `Step 1.5` 経路で Layer 1 出力を任意で消費できる。 厳密な Layer 2 統合は Phase E-3 以降で対応。
+`spec_path` が書き先、 `consumer_skill` と `also_consumed_by` が Layer 2 skill になる。
+
+写しを置かない理由は、 **置いた写しが実際に腐ったから**。 本節は 5 行の表を持ち、
+宣言のうち大半の layer が抜けたまま、 `integration` の消費 skill を決まっていないものとして
+書き続けていた (`docs/layers.json` は `kiwa-api` を消費 skill として宣言している)。
 
 ## 引き渡し flow
 
 ```mermaid
 graph LR
     A[/kiwa-design 起動] --> B[5 段階フロー]
-    B --> C[tests/spec/test-spec-X.md]
-    C --> D{Layer 2 選択}
-    D -->|contract| E[/kiwa-forge]
-    D -->|contract| F[/kiwa-hardhat]
-    D -->|e2e| G[/kiwa-play]
-    E --> H[*.t.sol Write]
-    F --> I[*.test.ts Write]
-    G --> J[*.spec.ts Write]
+    B --> C[kiwa layers が返す spec_path に Write]
+    C --> D[kiwa layers の consumer_skill を起動]
+    D --> E[test_outputs が宣言する path に Write]
 ```
+
+分岐先を図に列挙しない。 どの layer がどの skill に行くかは `docs/layers.json` が持ち、
+図に写すと layer が増えるたびに図だけ古くなる。
 
 skill は 5 段階フロー完了後、 最終応答で「次の Layer 2 候補」を 1 件以上推奨する (`docs/SKILL-DESIGN.md` § 完了条件 と整合)。
 
@@ -46,6 +41,10 @@ Layer 2 skill は `tests/spec/test-spec-{module}.md` の以下を機械的に抽
 - `## テストケース一覧` section
 - 観点別の `### 観点 N: {name}` サブセクション
 - 9 column 表 (`テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化`)
+
+**列の名前は layer で変わる**。 上の並びは汎用形で、 `SKILL.md` に `#### {layer} layer 専用 column`
+節を持つ layer はそちらが優先される (`--layer api` は `Mode` / `Route` を持つ等)。
+列数 9 と `## テストケース一覧` の anchor はどの layer でも変わらない。
 
 Layer 1 skill は本 contract を維持するため、 以下を絶対変更しない (`references/output-skeleton.md` § placeholder 規約 と整合)。
 
@@ -106,20 +105,6 @@ custom error 名は対象 contract の actual error 名に置き換える (例 O
 | 並行処理 | multi-tab (`context.newPage()`) |
 | 性能 | Playwright trace + perf metrics |
 | セキュリティ | signature flow E2E (`verifySignature`) |
-
-## Phase E-3 以降の予定経路
-
-```mermaid
-graph TD
-    A[Phase E-2 = 本 PR] -->|Layer 1 確立| B[/kiwa-design 単独で利用可]
-    B --> C[Phase E-3 = /kiwa-play refactor]
-    C --> D[Step 1.5 を /kiwa-design に置換]
-    D --> E[Phase E-4 = /kiwa-forge 新規]
-    E --> F[Phase E-5 = /kiwa-hardhat 新規]
-    F --> G[Phase E-6 = cookbook 章追加]
-```
-
-Phase E-2 完了時点では Layer 2 統合は optional (skill が末尾で推奨候補を出すのみ)、 強制経路化は Phase E-3 以降。
 
 ## 関連
 

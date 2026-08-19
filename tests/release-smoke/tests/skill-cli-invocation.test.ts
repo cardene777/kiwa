@@ -480,7 +480,9 @@ describe('skill が書いている起動形が文脈に合っている', () => {
       'kiwa-cache': 1,
       'kiwa-cli-test': 1,
       'kiwa-data': 1,
-      'kiwa-design': 1,
+      // `--layer 省略時の解決` と `書き先は CLI が返す 1 つの path` で 2 件。 後者は
+      // 書き先を `--layer` から組み立てないための解決で、 #2064 で足した。
+      'kiwa-design': 2,
       'kiwa-e2e': 1,
       'kiwa-edge': 1,
       'kiwa-forge': 1,
