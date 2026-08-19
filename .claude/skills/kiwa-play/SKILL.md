@@ -128,8 +128,8 @@ spec.ts 実装の前に Layer 1 の 9 section + 9 column 仕様書 (SSOT = `docs
 ls contracts/ tests/ app/ 2>/dev/null
 wc -l contracts/*.sol tests/*.spec.ts 2>/dev/null
 grep -nH -E "function |event |error |modifier " contracts/*.sol | head -30
-find tests -type d -name node_modules -prune -o -type f \
-  \( -name '*.spec.ts' -o -name '*.spec.tsx' \) -print0 |
+find . -type d -name node_modules -prune -o -type f \
+  \( -name '*.test.ts' -o -name '*.test.tsx' -o -name '*.spec.ts' -o -name '*.spec.tsx' \) -print0 |
   xargs -0 grep -nHE "^[[:space:]]*(describe|it|test)(\.[a-z]+)?\(" | head -20
 ```
 
@@ -253,6 +253,8 @@ await runE2EPrepareEnv({
 multi-chain test では `startAnvilCluster`:
 
 ```ts
+import { startAnvilCluster } from '@kiwa-lab/dapp';
+
 const cluster = await startAnvilCluster({
   chains: [
     { id: 31337, port: 8554, name: 'chain-a' },
@@ -268,6 +270,7 @@ const cluster = await startAnvilCluster({
 (実測で 6 example がそれぞれ持っている)。 package から import しようとすると解決に失敗する。
 
 ```ts
+import { waitForChainState } from '@kiwa-lab/dapp';
 import { createPublicClient, createWalletClient, defineChain, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { test, expect } from './fixture'; // dappE2eTest 経由

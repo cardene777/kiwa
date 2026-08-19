@@ -87,15 +87,57 @@ export function fenceImports(body: string, packageName: string): string[] {
   const names: string[] = [];
   for (const fence of body.matchAll(/```ts\n([\s\S]*?)```/g)) {
     const code = fence[1] ?? '';
-    const pattern = new RegExp(`import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${packageName}['"]`, 'g');
-    for (const match of code.matchAll(pattern)) {
-      for (const raw of (match[1] ?? '').split(',')) {
-        const name = raw.replace(/^\s*type\s+/, '').trim().split(/\s+as\s+/)[0]?.trim();
-        if (name) names.push(name);
+    const source = ts.createSourceFile('skill-fence.ts', code, ts.ScriptTarget.Latest, true);
+    for (const statement of source.statements) {
+      if (
+        !ts.isImportDeclaration(statement) ||
+        !ts.isStringLiteral(statement.moduleSpecifier) ||
+        statement.moduleSpecifier.text !== packageName
+      ) {
+        continue;
+      }
+      const bindings = statement.importClause?.namedBindings;
+      if (!bindings || !ts.isNamedImports(bindings)) continue;
+      for (const element of bindings.elements) {
+        names.push((element.propertyName ?? element.name).text);
       }
     }
   }
   return names;
+}
+
+/**
+ * fence の中で **呼んでいるのに import も定義もしていない** 名前。
+ *
+ * hole 4 の裏返し。 sample が package の API を import 無しで呼ぶと、 読み手はどこから来たか
+ * 分からず、 そのまま写すと解決に失敗する (実測 = `waitForChainState` が import 無しで
+ * 呼ばれていた)。
+ *
+ * fence の中で定義した名前は除く = Step 6 は `expectCustomError` の **local fallback 実装** を
+ * 意図的に見せており、 それを「import していない」 と落とすと sample の意図を壊す。
+ */
+export function unresolvedUses(code: string, exported: Set<string>): string[] {
+  const source = ts.createSourceFile('fence.ts', code, ts.ScriptTarget.Latest, true);
+  const bound = new Set<string>();
+  const called = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (ts.isImportDeclaration(node)) {
+      const bindings = node.importClause?.namedBindings;
+      if (bindings && ts.isNamedImports(bindings)) {
+        for (const element of bindings.elements) bound.add(element.name.text);
+      }
+      if (node.importClause?.name) bound.add(node.importClause.name.text);
+    } else if (ts.isFunctionDeclaration(node) && node.name) {
+      bound.add(node.name.text);
+    } else if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+      bound.add(node.name.text);
+    } else if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      called.add(node.expression.text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(source);
+  return [...called].filter((name) => exported.has(name) && !bound.has(name)).sort();
 }
 
 describe('SKILL.md の sample が実在する API を import している', () => {
@@ -133,16 +175,54 @@ describe('SKILL.md の sample が実在する API を import している', () =
   });
 
   it('fence の外と別 package の import を拾わない', () => {
-    // 範囲の切り出しを fixture で固定する (§ 形 4)。 散文が package 名に触れる形と、
-    // 別 package からの import が同じ fence にある形の 2 つを入れる。
+    // 範囲の切り出しを fixture で固定する (§ 形 4)。 散文 / comment / 別 package を除外し、
+    // import type と alias は公開元の名前を拾う。
     const body = [
       '`@kiwa-lab/dapp` の `notImported` は fence の外にある散文なので拾わない。',
       '',
       '```ts',
+      "// import { commentedOut } from '@kiwa-lab/dapp';",
       "import { createPublicClient } from 'viem';",
       "import { runE2EPrepareEnv, type WalletConfig } from '@kiwa-lab/dapp';",
+      "import type { SpecDoc as ImportedSpecDoc } from '@kiwa-lab/dapp';",
       '```',
     ].join('\n');
-    expect(fenceImports(body, '@kiwa-lab/dapp').sort()).toEqual(['WalletConfig', 'runE2EPrepareEnv']);
+    expect(fenceImports(body, '@kiwa-lab/dapp').sort()).toEqual([
+      'SpecDoc',
+      'WalletConfig',
+      'runE2EPrepareEnv',
+    ]);
+  });
+
+  it('sample が package の API を import 無しで呼んでいない', () => {
+    const missing: string[] = [];
+    let checked = 0;
+    for (const [packageName, entry] of Object.entries(PACKAGES)) {
+      const exported = exportedNames(entry);
+      for (const skill of skillsWithSkillMd()) {
+        for (const fence of skillBody(skill).matchAll(/```ts\n([\s\S]*?)```/g)) {
+          checked += 1;
+          for (const name of unresolvedUses(fence[1] ?? '', exported)) {
+            missing.push(`${skill}: ${name} を ${packageName} から import せずに呼んでいる`);
+          }
+        }
+      }
+    }
+    expect(checked, 'ts fence を 1 件も走査していない').toBeGreaterThan(0);
+    expect(missing, `sample が出どころ不明の API を呼んでいる:\n${missing.join('\n')}`).toEqual(
+      [],
+    );
+  });
+
+  it('fence 内で定義した名前は import 不要とみなす', () => {
+    // Step 6 は `expectCustomError` の local fallback 実装を意図的に見せている。
+    // それを「import していない」 と落とすと sample の意図を壊す。
+    const exported = new Set(['expectCustomError', 'waitForChainState']);
+    const defined = ['function expectCustomError(e: unknown) {}', 'expectCustomError(err);'].join('\n');
+    expect(unresolvedUses(defined, exported), 'fence 内定義を未解決に数えている').toEqual([]);
+    const used = "await waitForChainState({ publicClient: pub });";
+    expect(unresolvedUses(used, exported), '未 import の呼出を拾えていない').toEqual([
+      'waitForChainState',
+    ]);
   });
 });
