@@ -113,7 +113,9 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 ### Step 1: Layer 1 spec 読込 + backend 判定
 
-`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の 「対象 backend」 column から NextAuth / Lucia / Better Auth のどれを組み立てるか判定する。 backend 未指定 TC は default `--backend` に従う。
+`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の `Provider` column (列の定義は `/kiwa-design` の § `#### auth layer 専用 column`) から 5 provider のどれを組み立てるか判定する。 `Provider` 未指定の TC は `--provider` の既定に従う。
+
+**`backend` ではなく `provider` と呼ぶ**。 `docs/layers.json` の `providers` 宣言と `--provider` flag と `selected_by` の 3 箇所が `provider` で揃っているため、 呼び分けると spec の書き手がどちらを書くか迷う (#2067)。
 
 ### Step 2: test code 生成
 

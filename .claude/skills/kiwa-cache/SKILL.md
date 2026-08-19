@@ -115,7 +115,9 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 ### Step 1: Layer 1 spec 読込 + provider / backend / client 判定
 
-`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の 「対象 provider」 (v1.9-6 追加) + 「対象 mode」 + 「対象 client」 column から `redis` vs `memcached` vs `keydb`、 fast backend (Redis=in-memory、 Memcached/KeyDB=stub) vs testcontainers、 client 選択を判定。
+`--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read、 各 TC の `Provider` + `Mode` column (列の定義は `/kiwa-design` の § `#### cache layer 専用 column`) から、 `redis` / `memcached` / `keydb` のどれを高速 backend (Redis=in-memory、 Memcached/KeyDB=stub) と testcontainers のどちらで組み立てるか判定する。
+
+**client には専用の列が無い** (#2067)。 9 column は固定で provider / mode / client に 3 列を割くと入力側が潰れるため、 client を指定する TC は `Mode` の括弧で添える (`testcontainers (node-redis)`)。 括弧が無ければ provider 依存の既定 (redis / keydb = `ioredis`、 memcached = `memjs`) に従う。
 
 ### Step 2: test code 生成 (provider 別 factory)
 

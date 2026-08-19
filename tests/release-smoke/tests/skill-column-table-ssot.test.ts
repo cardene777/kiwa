@@ -22,6 +22,7 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as {
     spec_path: string;
     consumer_skill: string | null;
     also_consumed_by?: string[];
+    backing_package: string | null;
   }[];
 }).layers;
 
@@ -29,16 +30,12 @@ const LAYERS = (JSON.parse(read('docs/layers.json')) as {
 const GENERIC = ['contract', 'e2e', 'integration', 'unit'];
 
 /**
- * 表がまだどこにも無い layer と、 その行き先 (#2067)。
+ * 表がまだどこにも無い layer。 #2067 で `auth` / `job-queue` / `cache` の 3 件を埋めて空になった。
  *
- * 黙って対象から外さない。 外すと「覆えている」 と読めてしまうので、 欠落として
- * 列挙したまま実物と突き合わせる (no silent caps)。
- *
- * 3 件とも consumer の散文は column 名を挙げている (`/kiwa-auth` の「対象 backend」 等) が、
- * どの列がどの位置にあるかを定義した表が producer 側にも consumer 側にも無い。
+ * 空のまま残すのは、 layer を足した時に **節を書き忘れた形をここへ落とす** ため。
+ * 新 layer は宣言した時点でどの群にも属さないので、 下の網羅検査が落ちて気付ける。
  */
-const KNOWN_GAPS = ['auth', 'job-queue', 'cache'];
-const GAP_FOLLOWUP = 2067;
+const KNOWN_GAPS: string[] = [];
 
 /**
  * `#### {layer} layer 専用 column` 節の本文。
@@ -98,7 +95,7 @@ describe('layer 専用 column 表は kiwa-design に 1 つだけ置く', () => {
       .filter((id) => sectionOf(id) === null);
     expect(
       derived.sort(),
-      `欠落が変わっている。 KNOWN_GAPS を直し、 埋まったものは #${GAP_FOLLOWUP} を閉じる`,
+      '欠落が変わっている。 節を足したなら KNOWN_GAPS から外し、 layer を足したなら節を書く',
     ).toEqual([...KNOWN_GAPS].sort());
   });
 
@@ -142,6 +139,37 @@ describe.each(WITH_SECTION)('%s の節', (layer) => {
     expect(m, `${layer}: 出力 path の行が無い`).toBeTruthy();
     expect(m![1], `${layer}: 宣言と食い違う`).toBe(declared);
   });
+});
+
+describe('節が名指しする helper が実在する', () => {
+  // 節の冒頭は「どの helper と mapping するか」 を書く。 手で並べた名前は package の
+  // 改名に追随しないので、 **backing package の export に問い直す**。
+  //
+  // 実測でも 1 件外していた = `@kiwa-lab/auth` の export は複数行の block 形式で、
+  // 1 行 grep では `setupAuth0Env` と `setupBetterAuthEnv` が見えず「4 種 + 等」 と
+  // 書きかけた。 検査に載せれば書き手の grep 精度に依存しない。
+  const NAMED = LAYERS.filter((l) => l.backing_package && sectionOf(l.id) !== null).map((l) => ({
+    id: l.id,
+    pkg: l.backing_package!,
+    names: [...new Set([...sectionOf(l.id)!.matchAll(/`(setup[A-Za-z0-9]+Env)`/g)].map((m) => m[1]!))],
+  }));
+
+  const HELPER_CASES = NAMED.filter((n) => n.names.length > 0).map(
+    (n) => [n.id, n.pkg, n.names] as const,
+  );
+
+  it('helper を名指しする節が 1 つ以上ある (空振り防止)', () => {
+    expect(HELPER_CASES.length).toBeGreaterThan(0);
+  });
+
+  it.each(HELPER_CASES)(
+    '%s の節が名指しする helper を @kiwa-lab/%s が export している',
+    (layer, pkg, names) => {
+      const index = read(`packages/${pkg}/src/index.ts`);
+      const missing = names.filter((n) => !index.includes(n));
+      expect(missing, `${layer}: package が export していない helper がある`).toEqual([]);
+    },
+  );
 });
 
 describe('consumer は表の写しを持たない', () => {
