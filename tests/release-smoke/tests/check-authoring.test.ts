@@ -573,10 +573,11 @@ describe('it.each に渡す一覧が空にならないことを確かめてい�
     expect(shadowedSources(src)).toEqual(['target']);
   });
 
-  it('手順の doc が実在し 2 形を持つ', () => {
+  it('手順の doc が実在し 3 形を持つ', () => {
     // 失敗 message が doc を指すため、 消えると案内先が消える。
     const doc = read('docs/quality/check-authoring.md');
     expect(doc).toContain('## 3 つの形');
+    expect(doc).toContain('本 file は 12 回の実測から書いた');
     expect(doc).toContain('### 形 1 — 0 件でも通る');
     expect(doc).toContain('### 形 2 — 集合を畳むと片側の欠落が消える');
     // 形 2 を機械化しない根拠は実測 (#2013)。 数字が消えると、 次に同じ問いが出た時に
