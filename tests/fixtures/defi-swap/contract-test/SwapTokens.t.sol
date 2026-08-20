@@ -151,6 +151,28 @@ contract SwapTokensTest is Test {
         assertEq(tokenA.balanceOf(bob), 100 ether);
     }
 
+    /// TC-010b: allowance は足りているが残高が足りない transferFrom → InsufficientBalance
+    ///
+    /// `transferFrom` は allowance と残高を別々に検査する。 TC-004 が allowance 側の
+    /// revert を通しているが、 **allowance を満たした上で残高が足りない** 経路は
+    /// Foundry test は通っていなかった。 Hardhat 側は既存の TC-022 で到達済。
+    ///
+    /// allowance の検査だけを見て通す実装に退行すると、 残高を持たない口座からの
+    /// 引き落としが成立する。 その退行をこの 1 件が捕まえる。
+    function test_TransferFrom_Reverts_InsufficientBalance() public {
+        // bob は残高 0。 その bob を出金元にして carol に上限まで許可させる。
+        address carol = makeAddr("carol");
+        vm.prank(bob);
+        tokenA.approve(carol, 100 ether);
+
+        assertEq(tokenA.allowance(bob, carol), 100 ether, "precondition: allowance is sufficient");
+        assertEq(tokenA.balanceOf(bob), 0, "precondition: balance is zero");
+
+        vm.prank(carol);
+        vm.expectRevert(Erc20.InsufficientBalance.selector);
+        tokenA.transferFrom(bob, carol, 100 ether);
+    }
+
     /// TC-010: 通常 allowance は transferFrom で差分減算
     function test_TransferFrom_NormalApproval_AllowanceDecremented() public {
         vm.prank(alice);
