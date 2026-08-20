@@ -50,14 +50,19 @@ Route Handler) が **繋がった状態で** どう振る舞うかを対象に�
 |---|---|---|
 | `/items` の 307 | 無い | middleware (早期に返る) |
 | `/api/items` の 302 | **有る** | Route Handler (middleware は素通しして header を付けた) |
-| `/items` の 403 | 無い | middleware |
-| `/api/items` の 403 | **無い** | middleware (Route Handler は走っていない) |
+| `/items` の 403 (`session=banned`) | 無い | middleware |
+| `/api/items` の 403 (`session=banned`) | **無い** | middleware (Route Handler は走っていない) |
+| `/api/items` の 403 (`session=banned; session=admin`) | **有る** (`next-default`) | Route Handler |
 
-最後の行が要点。 middleware と Route Handler は `banned` に同じ本文 (`{"error":"banned"}`) を
-返すため、本文だけでは区別できない。 実装上は middleware の `banned` 分岐が
-`env.setHeader` と Route Handler より先に返る。 実測でも `/api/items` に `banned` と
-`x-request-id` を同時に送った 403 に header が付かず、middleware を素通しする `admin` では
-付いた。 header の欠落だけを一般的な層判定には使わず、この制御フローと組み合わせて判断する。
+middleware と Route Handler は `banned` に同じ本文 (`{"error":"banned"}`) を返すため、本文だけでは
+区別できない。 単一の `session=banned` では middleware の `banned` 分岐が `env.setHeader` と
+Route Handler より先に返る。 実測でも `/api/items` に `banned` と `x-request-id` を同時に送った
+403 に header が付かず、middleware を素通しする `admin` では付いた。
+
+ただし、middleware の cookie map と Route Handler の正規表現は同名 cookie の選択規則が違う。
+実測で raw header `session=banned; session=admin` は middleware が後方の `admin` として素通しし、
+Route Handler は先頭の `banned` を抽出して 403 を返した。 この時は `x-kiwa-request-id` が付く。
+header の有無は入力とこの制御フローを組み合わせて判断する。
 
 ### session の値と役割の対応
 
@@ -72,7 +77,10 @@ Route Handler) が **繋がった状態で** どう振る舞うかを対象に�
 実測で `session=zzz` と `session=guest` がどちらも `user: "guest"` を返し、
 **役割による項目の絞り込みも受けない** (3 件すべてを返す)。
 
-空値と不正な percent encoding は guest にならない。 実測した 4 つの境界。
+middleware は `NextRequest.cookies`、RSC と Route Handler は再構成または raw の cookie header を
+上の resolver へ渡すため、二重 encoding や同名 cookie では層ごとの解釈が一致しないことがある。
+
+空値と不正な percent encoding は guest にならない。 `/api/items` で実測した 4 つの境界。
 
 | cookie | 結果 |
 |---|---|
@@ -81,21 +89,53 @@ Route Handler) が **繋がった状態で** どう振る舞うかを対象に�
 | `session=%` | **500** |
 | `session=%zz` | **500** |
 
-`decodeURIComponent` が不正な入力で送出し、どこも受けないため 500 になる。
-**client が送った cookie 1 つで API が落ちる。**
+`decodeURIComponent` が不正な入力で `URIError` を送出し、application code が catch しないため、
+Next.js がその要求を 500 に変換する。 server process は停止せず、後続の要求には応答する。
 
-### Route Handler の応答
+### 層ごとに cookie の読み方が違う
+
+**本仕様書で最も重要な性質。** 3 つの層が同じ cookie を別々の方法で読む。
+
+| 層 | 読み方 | 同名 cookie | percent encoding |
+|---|---|---|---|
+| middleware | `NextRequest.cookies` | **後方**を採る | 1 回 decode する |
+| RSC page | `cookies()` を `name=value` へ再構成 → `auth.ts` の正規表現 | — | 再構成後に **もう 1 回** decode する |
+| Route Handler | raw の `cookie` header → `auth.ts` の正規表現 | **前方**を採る | 1 回 decode する |
+
+この差で、**middleware が素通しした要求が後段で別の役割に化ける**。 実測した 4 例。
+
+| raw cookie | `/items` の結果 | `/api/items` の結果 |
+|---|---|---|
+| `session=%3B` | 200 / **RSC の未認証描画** | 200 / guest |
+| `session=%2562anned` | 200 / **RSC の banned 描画** | 200 / guest |
+| `session=banned; session=admin` | 200 / 一覧 | 403 / **Route Handler が返す** (header 有り) |
+| `session=admin; session=banned` | 403 / middleware が返す (header 無し) | 403 / middleware が返す (header 無し) |
+
+読み方の内訳。
+
+- `%3B` は `;` に decode される。 middleware から見れば非空の未知値なので素通しするが、
+  RSC は再構成した `session=;` を正規表現に掛け、`([^;]+)` が 1 文字も取れず未認証になる
+- `%2562anned` は middleware が 1 回 decode して `%62anned` (非空・未知) として素通しし、
+  RSC が **2 回目の decode** で `banned` に戻す
+- 同名 cookie は middleware が後方、Route Handler が前方を採るため、
+  並べる順序で「どちらの層が 403 を返すか」 が入れ替わる
+
+**「middleware が先に遮るから後段に到達しない」 は成り立たない。**
+遮る判定と後段の判定が同じ入力を別々に読むため、両者が食い違う入力を作れる。
+
+### `/api/items` の統合応答
 
 | 条件 | status | body | 主な response header |
 |---|---|---|---|
 | session 不在 | 302 | 空 | `location: /login?from=%2Fapi%2Fitems`、`x-kiwa-request-id: next-default` |
-| `banned` | 403 | `{"error":"banned"}` | `content-type: application/json`、`x-kiwa-request-id` は無い |
-| それ以外 | 200 | `{items, count, user}` | `cache-control: public, max-age=60`、`x-kiwa-request-id` |
+| 単一の `session=banned` | 403 | `{"error":"banned"}` | `content-type: application/json`、`x-kiwa-request-id` は無い |
+| `session=banned; session=admin` | 403 | `{"error":"banned"}` | `content-type: application/json`、`x-kiwa-request-id: next-default` |
+| decode 不能な session (`%` / `%zz`) | 500 | 空 | `x-kiwa-request-id: next-default` |
+| admin または guest に解決された session | 200 | `{items, count, user}` | `cache-control: public, max-age=60`、`x-kiwa-request-id` |
 
-**この 403 は Route Handler まで届かない。** `/api/` は middleware の範囲内なので、
-`banned` は middleware が先に 403 を返す (実装の早期 return と header 欠落の実測が根拠)。
-Route Handler 側の `banned` 分岐は HTTP 経由では到達できず、
-単体テストが直接呼んで初めて通る。
+単一の `session=banned` は Route Handler まで届かない。 `/api/` は middleware の範囲内なので、
+middleware が先に 403 を返す (実装の早期 return と header 欠落の実測が根拠)。 一方、同名 cookie を
+重ねると上記の選択規則の差で Route Handler 側の `banned` 分岐にも HTTP 経由で到達できる。
 
 302 の方は Route Handler に届く。 未認証は middleware の `/items` 判定に当たらないため
 素通しし、Route Handler が 302 を返す。
@@ -144,18 +184,19 @@ form の hidden seed は 100。 実測で `hello` (trim 後 5 文字) が 105、
 - **未認証時の status が経路で違う**。 middleware は 307、Route Handler は 302。
   どちらも `/login?from=` へ導くが、番号で分岐する client は経路ごとに違う扱いをする
 - **`x-kiwa-request-id` は素通しの時だけ付く**。 追跡用の header を必須とみなす監視を組むと、
-  403 と 307 で欠落する
-- **`banned` の 403 が二重に定義されている**。 middleware と Route Handler が同じ本文を返すが、
-  HTTP 経由で通るのは middleware 側だけ。 片方だけ直すと単体テストと e2e で結果が割れる
+  middleware が返す 403 と 307 で欠落する
+- **`banned` の 403 が二重に定義されている**。 単一の cookie では middleware が返すが、同名 cookie を
+  重ねると Route Handler 側にも到達する。 片方だけ直すと入力によって結果が割れる
 - **`limit` が正の値でしか効かない**。 `0` と非数値がどちらも「絞り込まない」 に倒れるため、
   利用側が 0 件を期待すると全件が返る
 - **guest が既定**。 非空かつ decode 可能な未知の cookie 値が guest として通るため、
-  有効な session 値を知らなくても任意の値で項目一覧が読める。 PoC の範囲では意図した挙動だが、
+  有効な session 値を知らなくても decode 可能な未知値で項目一覧が読める。 PoC の範囲では意図した挙動だが、
   本番でこの既定を残すと認可が空洞化する
 - **browser と server で検証対象が違う**。 browser は trim 前、server は trim 後の文字数を見るため、
   空白を含む入力は browser を通って server error になる。 非 browser client も server 側の検証に届く
 - **不正な cookie で 500 になる**。 `resolveUserFromCookieHeader` の `decodeURIComponent` が
-  送出し、どこも受けない。 実測で `session=%` と `session=%zz` がともに 500 を返した。
+  `URIError` を送出し、application code が catch しない。 実測で `session=%` と `session=%zz` が
+  ともに 500 を返したが、server process は停止せず後続要求へ応答した。
   認証前の経路なので **誰でも送れる**。 未認証は 302、`banned` は 403 と分岐が整理されている中で、
   この 1 つだけが 5xx に落ちる
 
@@ -205,9 +246,9 @@ assert しない。 後者は Route Handler の 302 を追わずに status と `
 T-E2E-001 だけでは 307 を保証できないため、middleware の status も保証するなら
 `maxRedirects: 0` の要求を別途加える必要がある。
 
-**この 7 件が覆っていない範囲**を明示する。 HTTP / browser から到達できるが未観測のものと、
-middleware に遮られて到達できないものを分ける。 後者は `_kiwa/` の関数を直接呼ぶ単体テストで
-確かめる。
+**この 7 件が覆っていない範囲**を明示する。 通常の cookie では middleware に遮られる分岐も、
+層ごとの cookie 解釈がずれる境界入力なら HTTP から到達できる。 `_kiwa/` の直接呼出テストだけでは、
+この統合境界のずれは観測できない。
 
 | 覆っていないもの | HTTP / browser からの到達 | 理由 |
 |---|---|---|
@@ -216,6 +257,6 @@ middleware に遮られて到達できないものを分ける。 後者は `_ki
 | `limit=0` と非数値の扱い | できる | query の境界値を送る e2e が無い |
 | server 側の name 検証 2 分岐 | できる | 空白 2 文字や ` a` を submit する e2e が無い |
 | `danger` の例外 | できる | `danger` を submit する e2e が無い |
-| RSC の未認証 / banned 描画 | できない | middleware が先に返すため RSC に到達しない |
-| Route Handler の `banned` 分岐 | できない | middleware が先に 403 を返す |
+| RSC の未認証 / banned 描画 | できる | `session=%3B` で未認証、`session=%2562anned` で banned の描画へ到達するが e2e が無い |
+| Route Handler の `banned` 分岐 | できる | `session=banned; session=admin` なら middleware を通るが、この境界入力の e2e が無い |
 | `x-kiwa-request-id` の既定値 `next-default` | できる | T-E2E-006 は `x-request-id` 無しで要求するが、この response header を assert していない |
