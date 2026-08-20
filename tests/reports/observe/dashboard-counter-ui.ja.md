@@ -24,10 +24,4 @@ No coverage data provided.
 
 ### counter (ui)
 
-Missing TC IDs (spec にあるが test にない).
-
-- T-UI-008
-- T-UI-009
-- T-UI-010
-- T-UI-012
-- T-UI-013
+spec と test が完全に一致 (spec の case 14 件).
