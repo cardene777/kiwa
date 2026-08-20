@@ -262,7 +262,7 @@ skill が解消できなかった事項を bullet で列挙。 spec author に�
 - block.timestamp に依存するため、 timestamp manipulation attack (miner extractable) の許容範囲が未定義
 - `SECRET = "alpha-pass-2025"` は constant でも contract bytecode から読み取り可能 (機密ではない)、 secret という命名が誤解を招く可能性
 
-### runner 差異 (Foundry / Hardhat の制約) bullet
+### runner 差異 (Foundry / Hardhat の制約)
 
 contract layer で「Foundry でしか cover できない / Hardhat でしか cover できない」 branch がある場合は、 必ず本 section に bullet として明示する。 Layer 2 skill (`/kiwa-forge` `/kiwa-hardhat`) の Step 5c で coverage 評価時に未踏 branch を検出した場合、 runner 制約由来であれば本 bullet を自動追加する。
 

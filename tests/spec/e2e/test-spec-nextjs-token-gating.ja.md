@@ -199,7 +199,7 @@ UI 側 state。
 - accessCount の refetchInterval 1500ms と user-triggered 800ms refetchAll() の race 仕様が docs 未定義 (実装は問題ないが test author に依存)
 - error message の truncate 100 文字制約は意図的 UX か不明 (full error log を取れる経路を追加検討)
 
-### runner 差異 (Foundry / Hardhat の制約) bullet
+### runner 差異 (Foundry / Hardhat の制約)
 
 (該当なし、 e2e layer は Playwright 単一 runner)
 

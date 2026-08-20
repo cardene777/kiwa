@@ -239,7 +239,7 @@
 - MAX_SUPPLY=10 は example 固定値、 production 化時に config 化必要
 - ERC-4906 (MetadataUpdate) 非対応、 OpenSea 等の metadata refresh 経路なし
 
-### runner 差異 (Foundry / Hardhat の制約) bullet
+### runner 差異 (Foundry / Hardhat の制約)
 
 - `MintNft.sol L190-195 _checkOnERC721Received の try/catch branch` は Foundry 側 `RevertingReceiver` / `BadReceiver` deployed mock で 100% cover、 Hardhat 側は inline mock 定義制約により未踏 (許容、 別 .sol file 追加 or hardhat-toolbox mock 機構で改善余地あり)
 

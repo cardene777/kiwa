@@ -81,6 +81,7 @@
 | TC-004 | 単体 | 異常系 | approve なし | from=alice, value=100 | bob.transferFrom(alice, bob, 100) | InsufficientAllowance revert | 高 | 推奨 |
 | TC-005 | 単体 | 異常系 | balance 50 のみ | to=bob, value=100 | alice.transfer(bob, 100) | InsufficientBalance revert | 高 | 推奨 |
 | TC-006 | 単体 | 異常系 | pool tokenB 50 のみ | amountIn=100 | swapAforB(100) | InsufficientLiquidity revert | 高 | 推奨 |
+| TC-012 | 単体 | 異常系 | **allowance は充足** (bob が carol に 100 approve)、 bob の balance は 0 | from=bob, value=100 | carol.transferFrom(bob, carol, 100) | InsufficientBalance revert (allowance の検査を通過した後に残高の検査へ到達する) | 高 | 推奨 |
 
 ### 観点 3: 境界値
 
@@ -104,7 +105,7 @@
 
 ## 自動化すべきテスト
 
-- TC-001 〜 TC-011 全 11 件、 全件自動化推奨
+- TC-001 〜 TC-012 全 12 件、 全件自動化推奨
 
 ## 手動確認でよいテスト
 
@@ -115,3 +116,24 @@
 - LP (liquidity provider) 経由の add/remove liquidity API は未定義 (pool に直接 transfer で初期化)
 - fee 仕様なし (1:1 fixed rate のみ)
 - pause 機能なし
+
+### 検査が 2 段ある関数
+
+`transferFrom` は allowance と残高を **別々に** 検査する。 spec がこれを 1 段としか書いて
+いなかったため、 test 設計時に allowance 側 (TC-004) だけを異常系として拾い、 残高側が
+どの test からも通らない状態になっていた (#2089 で Foundry coverage の Branches 87.5% として
+検出)。
+
+検査が 2 つある関数は、 2 つとも独立に失敗させる case を spec 側で並べる。 本 spec では
+TC-004 (allowance 不足) と TC-012 (allowance 充足 + 残高不足) が対になる。
+
+### runner 差異 (Foundry / Hardhat の制約)
+
+- `SwapTokens.sol L90-91 swapAforB の TransferInFailed / TransferOutFailed branch` は
+  **戻り値が `false` の ERC20** を相手にしないと到達しない (revert する ERC20 では手前で
+  失敗するため届かない)。 Foundry 側は `contract-test/SwapTokens.t.sol` 内に mock contract を
+  直接定義できるため到達済。 Hardhat 側は現 config の Solidity source path が `contracts`
+  のみで、 mock を compile 対象へ足さない限り到達しない (production の contract 置き場に
+  test 専用 mock を混ぜることになるため採らない、 許容)
+- 逆に `transferFrom` の残高不足 (TC-012) は **Hardhat 側が先に到達していた**。 同じ contract
+  でも runner ごとに欠ける branch が違うため、 両 runner で coverage を測る
