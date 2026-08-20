@@ -279,10 +279,10 @@ describe('review report の名前が writer と reader で一致する', () => {
 
   it('kiwa-test 側が writer に出せない名前を宣言していない', () => {
     const found = new Set(declaredPlaceholders(TEST_SKILL));
-    expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual([
-      'example',
-      'module',
-    ]);
+    // `example` だけ。 `--out` を渡す子 review の名前が `{example}-...` で始まるため。
+    // `result-review-{module}` は #2080 で消えた = kiwa-test は既定名を写さず、
+    // `/kiwa-review` Step 0 の言語別解決を指すだけになった。
+    expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual(['example']);
 
     // suffix 付きの名前は `--out` を渡す時だけ caller が決められる。 名前だけ宣言して
     // `--out` が無ければ writer は出せないので、 全 occurrence を直前の flag と対応付ける。
@@ -293,13 +293,17 @@ describe('review report の名前が writer と reader で一致する', () => {
     expect(new Set(explicit).size, '子 review の --out が衝突している').toBe(explicit.length);
     expect(explicit.every((p) => p.startsWith('tests/reports/review/'))).toBe(true);
 
-    // `--out` を渡さない result-review は writer の既定名を使うため、
-    // placeholder は `--module` と同じ module でなければならない。
+    // `--out` を渡さない result-review は writer の既定名を使う。 **その名前を写さない** =
+    // 写した瞬間に lang suffix の規約 (en は suffix 無し) を再実装することになり、
+    // `.en.md` を書く指示に化ける (#2080 の r3-f1)。 指すのは `/kiwa-review` Step 0。
     const implicit = TEST_SKILL.split('\n')
       .filter((line) => !line.includes('--out'))
       .flatMap((line) => [...line.matchAll(/(?:spec|test|result)-review-\{(\w+)\}/g)])
       .map((m) => m[1]!);
-    expect(implicit, '既定出力名が module 以外の placeholder を使っている').toEqual(['module']);
+    expect(implicit, '既定出力名の写しが残っている').toEqual([]);
+    expect(TEST_SKILL, 'result-review の既定 path の指し先が無い').toContain(
+      '`/kiwa-review` Step 0 の言語別出力 path',
+    );
 
     // **`--out` を伴わない suffix 付きの名前は残っていない**。 上の 3 行だけだと、
     // `--out` の無い行に `test-review-{example}-{tool}.{lang}.md` と書いた宣言が

@@ -36,12 +36,14 @@ skip 条件 — skill 引数に `--lang {code}` が明示されている場合�
 
 ### 出力 path 規約 (skill 別)
 
+下表の `{lang_suffix}` は en なら空、 ja なら `.ja`、 その他は `.{lang_code}`。
+
 | skill | 文書 | path |
 |---|---|---|
-| `/kiwa-design` | test 仕様書 | `tests/spec/{layer}/test-spec-{module}.{$DOC_LANG}.md` (ja の場合は `.ja.md`、 en は `.md`) |
-| `/kiwa-forge` | coverage report | `tests/reports/contract/coverage-report-{module}.{$DOC_LANG}.md` (canonical) + round 別 |
+| `/kiwa-design` | test 仕様書 | `tests/spec/{layer}/test-spec-{module}{lang_suffix}.md` (ja の場合は `.ja.md`、 en は `.md`) |
+| `/kiwa-forge` | coverage report | `tests/reports/contract/coverage-report-{module}{lang_suffix}.md` (canonical) + round 別 |
 | `/kiwa-hardhat` | coverage report | 同上 (両 skill で同一 path、 後勝ち上書き or `.foundry.` / `.hardhat.` で suffix 区別) |
-| `/kiwa-play` | e2e test spec docstring | `tests/{module}.spec.ts` 内コメント (header に `// Language: {$DOC_LANG}` 注記) |
+| `/kiwa-play` | e2e test spec docstring | `tests/{module}.spec.ts` 内コメント (header に `// Language: ${DOC_LANG}` 注記) |
 
 ### section 見出し言語規約
 

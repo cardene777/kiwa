@@ -385,7 +385,7 @@ Step 7 (`--rounds` 回の連続 PASS) 完了後、 `--no-review` 未指定なら
 /kiwa-review --mode test-review --module token-gating --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root .
 ```
 
-review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 report 出力先: `tests/reports/review/test-review-{module}.{$DOC_LANG}.md`。
+review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 report 出力先は `/kiwa-review` Step 0 の言語別出力 path (`test-review` mode)。
 
 `--no-review` 引数で skip 可能 (CI 用)。
 

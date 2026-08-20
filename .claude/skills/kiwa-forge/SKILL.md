@@ -395,7 +395,7 @@ review 結果:
 - FAIL critical なし → review 指摘 (追加 test 提案 / assertion 抽象化箇所) を表示、 user に「修正して再生成 / そのまま完了」 を選択
 - FAIL critical あり → spec TC 大幅実装漏れ or assertion 信頼性無し、 user に「test 再生成必須」 警告
 
-report 出力先: `tests/reports/review/test-review-{module}.{$DOC_LANG}.md`
+report 出力先: `/kiwa-review` Step 0 の言語別出力 path (`test-review` mode)
 
 `--no-review` 引数で skip 可能 (CI 用)。
 
