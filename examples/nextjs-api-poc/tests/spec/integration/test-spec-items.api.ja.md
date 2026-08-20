@@ -125,6 +125,12 @@ item は handler 内の配列に保持され、 `id` は 1 起点の連番。
 | T-API-011 | name が文字列でない | items=[] | `POST {name:123}` | `400` + `error='name required'` | P1 | yes | live | /api/items |
 | T-API-012 | name が空文字 | items=[] | `POST {name:''}` | `400` + `error='name required'` | P1 | yes | live | /api/items |
 
+## 自動化方針
+
+- `live` は `setupApiServer({ mode: 'live', app: createItemsHandler() })` で起動する
+- `mock` は msw handler で固定応答を注入する
+- `hybrid` は live 実装を立てたまま mock 経路を保持し、必要な時だけ path 単位で上書きする
+
 ## 既存 test との対応
 
 `/kiwa-design` § Step 2 § 既存 test の探索 の実測結果と、 § テストケース一覧 の全 TC を突き合わせた結果。

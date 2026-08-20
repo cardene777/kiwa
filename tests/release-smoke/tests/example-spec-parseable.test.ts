@@ -38,6 +38,18 @@ const GENERIC_COLUMNS = [
   '自動化',
 ];
 
+/** `/kiwa-a11y` Step 3 が axe の runOnly tag へ変換できる WCAG 指定。 */
+const A11Y_WCAG_TARGETS = new Set([
+  'WCAG 2.0 A',
+  'WCAG 2.0 AA',
+  'WCAG 2.1 A',
+  'WCAG 2.1 AA',
+  'WCAG 2.2 AA',
+  'best-practice',
+]);
+
+const A11Y_SEVERITIES = new Set(['critical', 'serious', 'moderate', 'minor', '-']);
+
 /** `#### {layer} layer 専用 column` 節が定義する列。 無ければ汎用表。 */
 function requiredColumns(layer: string): string[] {
   const heading = new RegExp(`^#### ${layer} layer 専用 column`, 'm');
@@ -61,15 +73,25 @@ function requiredColumns(layer: string): string[] {
  * suffix の対応表を手で持つと layer が増えた時にそこだけ古くなる。
  */
 function layerOf(rel: string): string | null {
-  for (const l of LAYERS) {
-    const escaped = l.spec_path
+  const patterns = LAYERS.map((layer) => {
+    const exact = layer.spec_path
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       .replace('\\{module\\}', '[a-z0-9-]+');
-    // 宣言は英語 (suffix 無し) の形。 実物は言語 suffix を持ちうるので、末尾の `.md` の
-    // 手前に ISO 639-1 の 2 文字を挟める形にする (#2103)。 suffix の一覧は持たない =
-    // 手で持つと言語が増えた時にそこだけ古くなる。
-    const withLang = escaped.replace(/\\\.md$/, '(?:\\.[a-z]{2})?\\.md');
-    if (new RegExp('^' + withLang + '$').test(rel)) return l.id;
+    return {
+      id: layer.id,
+      exact: new RegExp('^' + exact + '$'),
+      // 宣言は英語 (suffix 無し) の形。 実物は言語 suffix を持ちうるので、末尾の
+      // `.md` の手前に ISO 639-1 の 2 文字を挟める形にする (#2103)。
+      withLang: new RegExp('^' + exact.replace(/\\\.md$/, '\\.[a-z]{2}\\.md') + '$'),
+    };
+  });
+  // 完全一致を全 layer で先に見る。 suffix 無しの integration を先に言語展開すると、
+  // `test-spec-counter.ui.md` の `.ui` を言語 code と誤認して ui layer を奪う。
+  for (const pattern of patterns) {
+    if (pattern.exact.test(rel)) return pattern.id;
+  }
+  for (const pattern of patterns) {
+    if (pattern.withLang.test(rel)) return pattern.id;
   }
   return null;
 }
@@ -207,10 +229,43 @@ describe.each(SPECS.map((s) => [`${s.example}/${s.rel}`, s.file, s.rel] as const
         .filter((row) => row.columns !== table!.header.length);
       expect(malformed, 'header と列数が違う TC 行がある').toEqual([]);
     });
+
+    it('a11y 専用列が Layer 2 の解釈できる値を持つ', () => {
+      if (layerOf(rel) !== 'a11y') return;
+      const table = testCaseTable(body);
+      expect(table, 'a11y のテストケース表が無い').not.toBeNull();
+      const ruleAt = table!.header.indexOf('WCAG-rule');
+      const severityAt = table!.header.indexOf('Severity');
+      expect(ruleAt, 'WCAG-rule column が無い').toBeGreaterThanOrEqual(0);
+      expect(severityAt, 'Severity column が無い').toBeGreaterThanOrEqual(0);
+
+      const invalidRules = table!.rows
+        .map((row) => row[ruleAt]!)
+        .filter(
+          (value) =>
+            value !== '-' &&
+            !A11Y_WCAG_TARGETS.has(value) &&
+            !/^`[a-z0-9-]+`$/.test(value),
+        );
+      expect(invalidRules, 'WCAG-rule が runOnly tag または axe rule ID に変換できない').toEqual(
+        [],
+      );
+
+      const invalidSeverities = table!.rows
+        .map((row) => row[severityAt]!)
+        .filter((value) => !A11Y_SEVERITIES.has(value));
+      expect(invalidSeverities, 'Severity が axe impact 値でない').toEqual([]);
+    });
   },
 );
 
 describe('契約の突き合わせ先が実在する', () => {
+  it('2 文字の layer suffix を言語 suffix と取り違えない', () => {
+    expect(layerOf('tests/spec/integration/test-spec-counter.ui.md')).toBe('ui');
+    expect(layerOf('tests/spec/integration/test-spec-counter.ui.ja.md')).toBe('ui');
+    expect(layerOf('tests/spec/integration/test-spec-counter.ja.md')).toBe('integration');
+  });
+
   it('汎用列が output-skeleton の雛形と一致する (陰性対照)', () => {
     // 上の検査は「宣言と一致する」 を主張する。 宣言側を取り違えていれば恒真になるため、
     // 汎用列を **別の SSOT** (雛形) からも引いて一致を確かめる。

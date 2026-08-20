@@ -106,6 +106,12 @@
 | T-UI-013 | markup のボタン | `initial=7` | mount Counter | markup に `aria-label="increment"` と `aria-label="reset"` が含まれる | P1 | yes | snapshot | Counter |
 | T-UI-014 | max 到達時の markup | `initial=2, max=2` | mount Counter | markup に `role="status"` が含まれる | P1 | yes | snapshot | Counter |
 
+## 自動化方針
+
+- `render` は `setupComponentEnv({ mode: 'render', ui: <Counter /> })` と screen query で検証する
+- `interaction` は `setupComponentEnv({ mode: 'interaction', ui: <Counter /> })` と `env.user.click()` で操作する
+- `snapshot` は `setupComponentEnv({ mode: 'snapshot', ui: <Counter /> })` の `env.markup` を部分一致で検証する。file snapshot の保存は別 phase とする
+
 ## 既存 test との対応
 
 `/kiwa-design` § Step 2 § 既存 test の探索 の実測結果と、 § テストケース一覧 の全 TC を突き合わせた結果。

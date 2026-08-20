@@ -121,6 +121,12 @@
 | T-UNIT-019 | 単体 | 入力バリデーション | 既定 `base=100` | `attempt=1.9` | `nextBackoffMs(attempt)` | `200` (小数部を切り捨てて 1 として扱う) | 中 | 推奨 |
 | T-UNIT-020 | 単体 | 入力バリデーション | なし | `attempt=3, base=50, cap=200` | `nextBackoffMs(3, 50, 200)` | `200` (`50 * 8 = 400` が `cap` で頭打ち) | 中 | 推奨 |
 
+## 自動化方針
+
+`pure` の case は入力と戻り値だけを Vitest の `describe` / `it` / `expect` で検証する。
+`fake-timer` の case は `vi.useFakeTimers()` と `vi.setSystemTime()` で現在時刻を固定し、各 test の
+後に `vi.useRealTimers()` で戻す。
+
 ## 自動化すべきテスト
 
 - T-UNIT-001 〜 T-UNIT-020 全 20 件、全件自動化推奨

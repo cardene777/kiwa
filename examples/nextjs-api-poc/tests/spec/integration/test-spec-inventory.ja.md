@@ -127,6 +127,12 @@ msw の handler は TC ごとに作り直す。
 | T-INT-014 | 結合 | 境界値 | 上流が JSON の `null` を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (`(body ?? {})` で形の誤りに落ちる) | 中 | 推奨 |
 | T-INT-011 | 結合 | 入力バリデーション / セキュリティ | handler が request の path を記録する | `'a/1'` | `fetchStock(sku)` | path が `/v1/items/a%2F1` (encode を外すと別 path に飛ぶ) | 高 | 推奨 |
 
+## 自動化方針
+
+`setupApiServer({ mode: 'mock', mockHandlers })` で msw を起動し、module 自身が行う `fetch` を
+捕捉する。`env.request` は使わない。本 spec の対象は自分の外への呼出であり、自分が公開する
+API ではないため。
+
 ## 自動化すべきテスト
 
 - T-INT-001 〜 T-INT-016 全 16 件、全件自動化推奨
