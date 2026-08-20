@@ -48,6 +48,27 @@ examples/*/.context/
 .kiwa/
 
 examples/*/lcov.info
+# skill chain が example 配下に残す run 成果物。 いずれも追跡済 file は 0 件で、
+# `/kiwa-test` Step 2.5 が次の run の頭で消す種類のもの。
+#
+# 無視していないと `git add examples` が無関係な PR に巻き込む。 実際に PR #2071 で
+# `examples/dogfood-foundry-dapp/tests/reports/contract/coverage-dogfood-token.lcov` が
+# staging に入り、 気付いて外した。 `quality-report/` を無視したのと同じ理由 (#2078)。
+#
+# `forge-out/` は **ここに書かない**。 54 file が追跡済で、 blanket ignore すると消える。
+# 下の `forge-out/build-info/` だけを無視する形が正しい。
+#
+# repo root の `tests/reports/` も対象外。 13 file が追跡済で、 これは commit する成果物。
+# `examples/*/` の前置を落とすとそちらを巻き込む。
+examples/*/hardhat-cache/
+examples/*/hardhat-artifacts/
+examples/*/coverage/
+examples/*/coverage.json
+examples/*/test-results/
+examples/*/playwright-report/
+# `/kiwa-observe` Step 0 が `--root` 起点で `vitest-results.json` を、 Step 1 が
+# `observe/history-*.json` を書く。 掃除する経路は無いので実行のたびに残る。
+examples/*/tests/reports/
 # Every dogfood example's `pnpm test` rewrites `quality-report/fidelity-latest.{json,md}`.
 # `reportedAt` changes on every run, and ten of them also carry wall-clock latency
 # (`p50Ms` / `p95Ms` / `p99Ms`) that lands on a different float each time. 27 examples
