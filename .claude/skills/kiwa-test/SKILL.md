@@ -595,11 +595,11 @@ done
 
 ### Step 5b: kiwa-review 自動呼出 (result-review mode)
 
-Step 5 で統合 report Write 完了後、 test 実行結果の総合品質を独立 review する。 `/kiwa-review --mode result-review --module {module}` を repo root から内部呼出し、 coverage 達成度 / passing 件数 / flaky 兆候 / 子 review 集約 / 後追い項目 を 5 軸で判定。 spec は example 配下にあるため、 **`--project-root examples/{example}` を省かない**。
+Step 5 で統合 report Write 完了後、 test 実行結果の総合品質を独立 review する。 `/kiwa-review --mode result-review --module {module}` を repo root から内部呼出し、 coverage 達成度 / passing 件数 / flaky 兆候 / 子 review 集約 / 後追い項目 を 5 軸で判定。 spec は example 配下にあるため、 **`--project-root examples/{example}` を省かない**。 統合 report は reader に組み立てさせず、 Step 5 で writer が書いた exact path を `--integrated-report` で渡す。
 
 呼出例:
 ```text
-/kiwa-review --mode result-review --module {module} --lang $DOC_LANG --project-root examples/{example}
+/kiwa-review --mode result-review --module {module} --lang $DOC_LANG --project-root examples/{example} --integrated-report tests/reports/integrated/{example}-{module}-{target}.{$DOC_LANG}.md
 ```
 
 review 結果:

@@ -48,29 +48,39 @@ function declaredColumns(layer: string): string[] {
 
 describe('読む先が writer と一致する', () => {
   it('writer 側の雛形を拾えている (空振り防止)', () => {
-    // writer から 0 件しか取れないと、 下の包含検査が空集合に対して常に成立する。
+    // writer から 0 件しか取れないと、 下の handoff 検査が空集合に対して常に成立する。
     expect(integratedTemplates(TEST).length).toBeGreaterThan(0);
-    expect(integratedTemplates(REVIEW).length).toBeGreaterThan(0);
   });
 
-  it('reader が書く統合 report の path が writer の宣言に含まれる', () => {
-    // reader は 1 形しか挙げない (round 別は読まない) ので、 包含で見る。
-    const writer = new Set(integratedTemplates(TEST));
-    const stray = integratedTemplates(REVIEW).filter((t) => !writer.has(t));
+  it('writer が result-review に渡す exact path が Step 5 の書き先と一致する', () => {
+    // **突き合わせ先を Step 5 に限る**。 file 全体から集めると handoff 行自身が集合に
+    // 入り、 handoff を書き換えても「宣言に含まれる」 が成立して素通りする (実測 = 変異 m6)。
+    const write = headingSectionIn(TEST, /^### Step 5: 統合 report Write$/m);
+    const declared = integratedTemplates(write).filter((t) => !t.includes('-round-'));
+    expect(declared.length, 'Step 5 が統合 report の書き先を宣言していない').toBe(1);
+
+    const invoke = headingSectionIn(
+      TEST,
+      /^### Step 5b: kiwa-review 自動呼出 \(result-review mode\)$/m,
+    );
+    const handedOff = /--integrated-report\s+(tests\/reports\/integrated\/\S+\.md)/.exec(
+      invoke,
+    )?.[1];
+    expect(handedOff, 'result-review に統合 report の exact path を渡していない').toBeTruthy();
     expect(
-      stray,
-      `writer が書かない path を reader が読もうとしている\nwriter: ${[...writer].join(' / ')}`,
-    ).toEqual([]);
+      integratedTemplates(handedOff!)[0],
+      `handoff が Step 5 の書き先と違う (Step 5: ${declared[0]})`,
+    ).toBe(declared[0]);
   });
 
-  it('reader が module 軸を落としていない', () => {
-    // 包含だけだと、 reader が 1 件も挙げなくなった時に通る。 module 軸を持つことまで見る。
-    const reader = integratedTemplates(REVIEW);
-    expect(reader.length, 'reader が統合 report の path を挙げていない').toBeGreaterThan(0);
-    expect(
-      reader.every((t) => t.includes('{module}')),
-      `module 軸を落としている: ${reader.join(' / ')}`,
-    ).toBe(true);
+  it('reader は統合 report の path を再構築せず exact path を要求する', () => {
+    const section = headingSectionIn(REVIEW, /^#### 1C: result-review mode$/m);
+    expect(section, 'result-review が exact path の引数を読んでいない').toContain(
+      '`--integrated-report`',
+    );
+    expect(integratedTemplates(section), 'reader に統合 report の path の写しが残っている').toEqual(
+      [],
+    );
   });
 });
 

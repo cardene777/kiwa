@@ -37,6 +37,7 @@ $ARGUMENTS
 <!-- kiwa-layers:review-enum:end -->
 - `--spec-path {path}` — spec file path を明示指定 (`--module` の代替)
 - `--test-path {path}` — test code path を明示指定 (test-review mode のみ、 省略時は `kiwa layers` が返す `test_paths.files` を使う)
+- `--integrated-report {path}` — result-review mode で読む統合 report の exact path (必須、 writer の `/kiwa-test` が渡す)
 - `--producer {skill}` — `kiwa layers --producer` にそのまま渡す `test_outputs` の鍵 (test-review mode で `--test-path` を省く時は必須、 鍵が 2 つある layer では省略不可)
 - `--project-root {path}` — 生成先 (`{example}/...`) の起点。 `kiwa layers --project-root` にそのまま渡す (省略時は cwd)
 - `--out {path}` — report 出力先を明示指定 (省略時は Step 0 の既定 path)。 `tests/reports/review/` 配下に限る
@@ -197,7 +198,7 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 #### 1C: result-review mode
 
 入力:
-- 統合 report (`tests/reports/integrated/{example}-{module}-{target}.{lang}.md`) を Read (`/kiwa-test` 完了時に生成済)。 **path の SSOT は writer 側** (`/kiwa-test` § Step 5 統合 report Write) で、 ここは写し。 writer が変えたら合わせる
+- `--integrated-report` で渡された統合 report を Read (`/kiwa-test` 完了時に生成済)。 **path は組み立てない** = `example` / `module` / `target` / 言語をすべて知る writer 側 (`/kiwa-test` § Step 5 統合 report Write) が exact path を渡す。 未指定、 path が repo 相対でない、 `tests/reports/integrated/` の外、 file が存在しない、 のいずれかなら開いた path を添えて中断する
 - 各子 report も Read:
   - coverage report: **統合 report Section 2 の「coverage report」 行に載っている path を開く**。 file 名を組み立てない (Foundry / Hardhat 別 round 履歴も含む)
   - spec-review / test-review report: **統合 report Section 2 の「review report」 行に載っている path を開く**。 file 名を組み立てない (下記 § 子 review report の path)
