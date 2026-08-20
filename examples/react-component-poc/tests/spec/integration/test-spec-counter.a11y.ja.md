@@ -108,43 +108,29 @@ jsdom は layout と canvas を持たないため、実 browser を要する rul
 
 ## テストケース一覧
 
-### 観点 1: 正常系
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
+| ID | Observation | Component | WCAG-rule | Severity | Expected | Priority | Automation | Mode |
 |---|---|---|---|---|---|---|---|---|
-| T-A11Y-001 | 結合 | 正常系 | `Counter` を既定 prop で render | `context = container` | `runAxe(...)` | `violations` が空 | 高 | 推奨 |
-| T-A11Y-007 | 結合 | 正常系 | 違反 0 件の results | assertion 関数を注入 | `expectNoViolations(...)` | 送出しない | 高 | 推奨 |
+| T-A11Y-001 | 既定 render の違反 0 件 | `<Counter />` (`context = container`) | WCAG 2.1 AA | - | `violations` が空 | P0 | yes | jsdom |
+| T-A11Y-002 | 上限到達時の違反 0 件 | `<Counter initial=2 max=2 />` (`+` が disabled、`role="status"` が出る) | WCAG 2.1 AA | - | `violations` が空 | P0 | yes | jsdom |
+| T-A11Y-003 | 検査自身の識別力 | 名前の無い `button` (`context = probe`) | `button-name` | critical | `violations` の id に `button-name` を含む | P0 | yes | jsdom |
+| T-A11Y-004 | context の範囲外を拾わない | `<Counter />` + 範囲外に名前の無い `button` (`context = container`) | `button-name` | critical | `violations` が空 | P0 | yes | jsdom |
+| T-A11Y-005 | 閾値を省いた時の既定 | `reportViolations` (`minor` 1 件の合成 results) | - | minor | `blocking` が 1 件 (既定は `minor` から塞ぐ) | P0 | yes | jsdom |
+| T-A11Y-006 | 閾値を上げると塞がない | `reportViolations` (`maxImpact: 'serious'`) | - | minor | `blocking` が空 | P0 | yes | jsdom |
+| T-A11Y-007 | 違反 0 件では送出しない | `expectNoViolations` (違反 0 件の results) | WCAG 2.1 AA | - | 送出しない | P0 | yes | jsdom |
+| T-A11Y-008 | context 省略時は document 全体 | 名前の無い `button` (`context` を省く) | `button-name` | critical | `violations` の id に `button-name` を含む | P1 | yes | jsdom |
+| T-A11Y-009 | impact が null の扱い | `reportViolations` (`impact` が `null` の合成 results) | - | - | `blocking` が空、`violations` は 1 件 (全件側には残る) | P1 | yes | jsdom |
+| T-A11Y-010 | 塞ぐ違反が無い時の文面 | `reportViolations` (blocking 0 件の results) | - | - | summary が `No a11y violations at impact >= "minor".` | P1 | yes | jsdom |
+| T-A11Y-011 | summary の件数と内訳 | `reportViolations` (`serious` 1 件の合成 results) | - | serious | summary が件数と `[serious] id: help (1 node(s))` を含む | P1 | yes | jsdom |
+| T-A11Y-012 | 違反ありで送出する | `expectNoViolations` (`serious` 1 件の合成 results) | - | serious | `1 a11y violation(s)` を含む `Error` を送出 | P1 | yes | jsdom |
+| T-A11Y-013 | 閾値が assertion へ渡る | `expectNoViolations` (`maxImpact: 'critical'`) | - | serious | 送出しない | P1 | yes | jsdom |
 
-### 観点 2: 異常系
+## 自動化方針
 
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
-| T-A11Y-003 | 結合 | 異常系 | 名前の無い `button` を body に置く | `context = probe` | `runAxe(...)` | `violations` の id に `button-name` を含む (**検査自身の識別力**) | 高 | 推奨 |
-| T-A11Y-011 | 結合 | 異常系 | `serious` 1 件の合成 results | 既定の閾値 | `reportViolations(...)` | summary が件数と `[serious] id: help (1 node(s))` を含む | 中 | 推奨 |
-| T-A11Y-012 | 結合 | 異常系 | 同上 | assertion 関数を注入 | `expectNoViolations(...)` | `1 a11y violation(s)` を含む `Error` を送出 | 中 | 推奨 |
+`@testing-library/react` の `render` で DOM に載せ、`runAxe({ context, runOptions: WCAG_21_AA })`
+で対象 subtree を走査する。Vitest は `--environment jsdom` で実行する。
 
-### 観点 3: 境界値
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
-| T-A11Y-005 | 結合 | 境界値 | `minor` 1 件の合成 results | 閾値を省く | `reportViolations(...)` | `blocking` が 1 件 (既定は `minor` から塞ぐ) | 高 | 推奨 |
-| T-A11Y-006 | 結合 | 境界値 | 同上 | `maxImpact: 'serious'` | `reportViolations(...)` | `blocking` が空 | 高 | 推奨 |
-| T-A11Y-009 | 結合 | 境界値 | `impact` が `null` の合成 results | 既定の閾値 | `reportViolations(...)` | `blocking` が空、`violations` は 1 件 (全件側には残る) | 中 | 推奨 |
-| T-A11Y-010 | 結合 | 境界値 | blocking 0 件になる results | 既定の閾値 | `reportViolations(...)` | summary が `No a11y violations at impact >= "minor".` | 中 | 推奨 |
-| T-A11Y-013 | 結合 | 境界値 | `serious` 1 件の合成 results | `maxImpact: 'critical'` | `expectNoViolations(...)` | 送出しない (閾値が渡ることの確認) | 中 | 推奨 |
-
-### 観点 4: 状態遷移
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
-| T-A11Y-002 | 結合 | 状態遷移 | `initial=2, max=2` で render (`+` が disabled、`role="status"` が出る) | `context = container` | `runAxe(...)` | `violations` が空 | 高 | 推奨 |
-
-### 走査範囲
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
-| T-A11Y-004 | 結合 | 正常系 | `Counter` を render し、**範囲外** に名前の無い `button` を置く | `context = container` | `runAxe(...)` | `violations` が空 (範囲外を拾わない) | 高 | 推奨 |
-| T-A11Y-008 | 結合 | 境界値 | body に名前の無い `button` を置く | `context` を省く | `runAxe(...)` | `violations` の id に `button-name` を含む (`document` 全体に落ちる) | 中 | 推奨 |
+T-A11Y-003 は名前の無い button を走査して `button-name` が出ることを確かめる陰性対照にする。
+違反の無い component だけでは、axe が何も走っていない退行を検知できないため。
 
 ## 自動化すべきテスト
 

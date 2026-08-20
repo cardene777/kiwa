@@ -24,19 +24,20 @@
 //
 // ## 既にある検査との違い
 //
-// `skill-review-inputs.test.ts` は同じ起点の差を **1 組合せ** (`ui` × `counter` × `en`) で
+// `skill-review-inputs.test.ts` は同じ起点の差を **1 組合せ** (`ui` × `counter` × `ja`) で
 // 固定しており、陰性対照も持つ。 覆っているのは「CLI の解決がそう振る舞うか」 まで。
 //
-// 本検査が見るのは **repo 全体の配置** になる。 2 点が届いていなかった。
+// 本検査が見るのは **repo 全体の配置と言語** になる。 3 点が届いていなかった。
 //
 //   1. どの組合せの仕様書も、読み手が開けない場所に置かれていないか
 //   2. 同じ組合せの仕様書が 2 箇所に無いか
+//   3. 読み手の既定言語で実在する仕様書を開けるか
 //
 // 1 点目は言語でも分かれる。 既存検査は `en` で解決するため、`.ja` の仕様書が直下にあっても
 // 素通りする (`ui` × `counter` が実際にその状態にある)。 本検査は suffix 無しと、
 // 全 ISO 639-1 suffix の形を見る。
 //
-// ## 2 つの歯止め
+// ## 3 つの歯止め
 //
 // どちらも現状を基準にした ratchet で、**悪化だけを落とす**。
 // 「どちらの場所が正しいか」 は layer ごとに違い、その決着は本検査の役目ではない。
@@ -59,21 +60,13 @@ import { REPO_ROOT, read } from './skill-md.js';
 const REPO_ANCHORED_LAYERS = new Set(['contract', 'e2e']);
 
 /**
- * 両方の場所に仕様書がある組合せ。
+ * 読み手が既定で使う言語。
  *
- * 読み手が起点を取り違えると **別の仕様書を読んで突き合わせる**。
- * 「仕様に無いテストがある」 と「テストが無い仕様がある」 が同時に誤検出になる。
- *
- * 解消は #2101 の段階 2 (どちらを残すかの判断が要る)。 それまでの間、
- * **増えることだけを止める**。 減る分にはこの検査は落ちない。
+ * `lang-suffix-agreement.test.ts` が全 skill の `--lang` 既定を
+ * 「省略時は起動元が渡した値、 単体起動なら `ja`」 で固定している。
+ * 単体で起動した読み手はこの言語の仕様書を探す。
  */
-const KNOWN_DUPLICATES = new Set([
-  'api × items',
-  'ui × counter',
-  'unit × token',
-  'a11y × counter',
-  'integration × inventory',
-]);
+const READER_DEFAULT_LANG = 'ja';
 
 interface Resolved {
   key: string;
@@ -81,6 +74,8 @@ interface Resolved {
   projectAnchored: string | null;
   /** 実行ディレクトリ起点で開けた仕様書 (リポジトリ直下) */
   repoAnchored: string | null;
+  /** 読み手の既定言語で解決した path が、どちらかの起点に実在するか */
+  defaultLangFound: boolean;
 }
 
 /**
@@ -155,34 +150,44 @@ function findSpecAt(anchor: string, layerId: string, spec: string): string | nul
   return file === null ? null : join(relativeDir, file);
 }
 
-function resolveSpec(entry: RosterEntry): Resolved {
-  const key = `${entry.layer} × ${entry.module}`;
-  const projectRoot = `examples/${entry.example}`;
+/** CLI に解かせた `spec_path`。 skill 側で組み立てない (module 名に separator が入る形を CLI が弾く)。 */
+function resolveSpecPath(entry: RosterEntry, projectRoot: string, lang?: string): string | null {
   const bin = resolve(REPO_ROOT, 'packages/cli/dist/bin.js');
-  const out = execFileSync(
-    'node',
-    [
-      bin,
-      'layers',
-      '--json',
-      '--layer',
-      entry.layer,
-      '--module',
-      entry.module,
-      '--producer',
-      entry.producer,
-      '--project-root',
-      projectRoot,
-    ],
-    { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' },
-  );
+  const args = [
+    bin,
+    'layers',
+    '--json',
+    '--layer',
+    entry.layer,
+    '--module',
+    entry.module,
+    '--producer',
+    entry.producer,
+    '--project-root',
+    projectRoot,
+  ];
+  if (lang !== undefined) args.push('--lang', lang);
+  const out = execFileSync('node', args, { cwd: REPO_ROOT, encoding: 'utf-8', stdio: 'pipe' });
   const layer = (
     JSON.parse(out) as { layers: { id: string; spec_path?: string | null }[] }
   ).layers.find((l) => l.id === entry.layer);
   const spec = layer?.spec_path;
+  return typeof spec === 'string' && spec.length > 0 ? spec : null;
+}
+
+function resolveSpec(entry: RosterEntry): Resolved {
+  const key = `${entry.layer} × ${entry.module}`;
+  const projectRoot = `examples/${entry.example}`;
+  const spec = resolveSpecPath(entry, projectRoot);
   if (typeof spec !== 'string' || spec.length === 0) {
-    return { key, projectAnchored: null, repoAnchored: null };
+    return { key, projectAnchored: null, repoAnchored: null, defaultLangFound: false };
   }
+  // 読み手が既定で解決する path。 CLI に同じ言語で解かせる = skill 側で組み立てない。
+  const defaultLangSpec = resolveSpecPath(entry, projectRoot, READER_DEFAULT_LANG);
+  const defaultLangFound =
+    defaultLangSpec !== null &&
+    (existsSync(resolve(REPO_ROOT, projectRoot, defaultLangSpec)) ||
+      existsSync(resolve(REPO_ROOT, defaultLangSpec)));
   // CLI は `--lang` 未指定だと suffix 無しを返す。 `--lang` は任意の ISO 639-1 を受けるため、
   // `.ja.md` だけでなく `.zh.md` 等も含め、同じ stem の全言語 variant を見る。
   const projectAnchored = findSpecAt(projectRoot, entry.layer, spec);
@@ -191,6 +196,7 @@ function resolveSpec(entry: RosterEntry): Resolved {
     key,
     projectAnchored: projectAnchored === null ? null : join(projectRoot, projectAnchored),
     repoAnchored,
+    defaultLangFound,
   };
 }
 
@@ -294,16 +300,38 @@ describe('spec_path の起点 (#2101)', () => {
     ).toEqual([]);
   });
 
-  it('両方の場所にある組合せが、既知の一覧を超えない', () => {
-    // 増えることだけを止める ratchet。 解消して減る分には落ちない。
-    const unexpected = resolved
-      .filter((r) => r.projectAnchored !== null && r.repoAnchored !== null)
-      .map((r) => r.key)
-      .filter((key) => !KNOWN_DUPLICATES.has(key));
+  it('読み手の既定言語で解決した仕様書が実在する', () => {
+    // #2103 の本体。 仕様書 13 件が日本語で書かれながら英語の名前で置かれており、
+    // 読み手の既定 (`--lang ja`) では **1 件も開けなかった**。
+    //
+    // 「まだ書いていない」 のか「名前が違う」 のかは読み手から区別できない
+    // (`/kiwa-observe` はどちらも「仕様書が無い」 として中断する)。
+    const missing = resolved
+      .filter((r) => r.projectAnchored !== null || r.repoAnchored !== null)
+      .filter((r) => !r.defaultLangFound)
+      .map((r) => r.key);
     expect(
-      unexpected,
-      '同じ組合せの仕様書が 2 箇所にある (読み手が起点を取り違えると別の仕様書を読む)',
+      missing,
+      `仕様書はあるが、読み手の既定 (--lang ${READER_DEFAULT_LANG}) では開けない`,
     ).toEqual([]);
+  });
+
+  it('既定言語で開ける仕様書が 1 件以上ある', () => {
+    // 上の検査は「仕様書がある組合せ」 だけを見るため、1 件も無ければ素通りする。
+    expect(
+      resolved.filter((r) => r.defaultLangFound).length,
+      '既定言語で開ける仕様書が 1 件も無い (検査が空振りしている)',
+    ).toBeGreaterThan(0);
+  });
+
+  it('同じ組合せの仕様書が 2 箇所に無い', () => {
+    // #2103 で 5 件を解消した。 2 箇所にあると、読み手が起点を取り違えたときに
+    // **別の仕様書を読んで突き合わせる** = 「仕様に無いテストがある」 と
+    // 「テストが無い仕様がある」 が同時に誤検出になる。
+    const duplicated = resolved
+      .filter((r) => r.projectAnchored !== null && r.repoAnchored !== null)
+      .map((r) => `${r.key}: ${r.projectAnchored} と ${r.repoAnchored}`);
+    expect(duplicated, '同じ組合せの仕様書が 2 箇所にある').toEqual([]);
   });
 
   it('リポジトリ直下に置いてよい layer が、実際に直下へ置かれている', () => {

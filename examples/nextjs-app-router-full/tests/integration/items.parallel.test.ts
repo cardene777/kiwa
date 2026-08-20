@@ -20,7 +20,7 @@ import {
   type ItemsSlot,
 } from '../../app/items/_kiwa/items-parallel.js';
 
-// spec = tests/spec/integration/test-spec-items.parallel.md
+// spec = tests/spec/integration/test-spec-items.parallel.ja.md
 
 /** 既定の呼出。 slot ごとの差分だけを TC 側で渡す。 */
 type Slots = InvokeParallelRoutesOptions<ItemsSlot, { heading?: string }, RscNode>['slots'];

@@ -89,19 +89,12 @@
 
 ## テストケース一覧
 
-### 観点 1 — 正常系 (render mode)
-
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Component |
 |---|---|---|---|---|---|---|---|---|
 | T-UI-001 | 初期 render | `initial=3` | mount Counter | `value` が `"3"` を表示 | P0 | yes | render | Counter |
 | T-UI-002 | step 指定時の初期表示 | `initial=0, step=5` | mount Counter | `value` が `"0"` を表示 (step は初期値に影響しない) | P1 | yes | render | Counter |
 | T-UI-003 | max 未到達時の status | `initial=0, max=2` | mount Counter | `role="status"` の要素が存在しない | P1 | yes | render | Counter |
 | T-UI-004 | 初期値が max 以上 | `initial=2, max=2` | mount Counter | `+` が最初から `disabled` | P0 | yes | render | Counter |
-
-### 観点 4 — 状態遷移 (interaction mode)
-
-| ID | Observation | Given | When | Then | Priority | Automation | Mode | Component |
-|---|---|---|---|---|---|---|---|---|
 | T-UI-005 | 1 クリックの加算 | 既定 prop | click `+` | `value` が `"1"` になる | P0 | yes | interaction | Counter |
 | T-UI-006 | 連続クリック | 既定 prop | click `+` × 3 | `value` が `"3"` になる | P0 | yes | interaction | Counter |
 | T-UI-007 | step を指定した加算 | `initial=0, step=5` | click `+` | `value` が `"5"` になる | P0 | yes | interaction | Counter |
@@ -109,14 +102,15 @@
 | T-UI-009 | max 到達で無効化 | `initial=0, max=2` | click `+` × 2 | `+` が `disabled` になる | P0 | yes | interaction | Counter |
 | T-UI-010 | max 到達で status 表示 | `initial=0, max=2` | click `+` × 2 | `role="status"` が `"max reached"` を表示 | P0 | yes | interaction | Counter |
 | T-UI-011 | max 到達後の reset | `initial=0, max=2` | click `+` × 2 → click `reset` | `+` が再び有効になる | P1 | yes | interaction | Counter |
-
-### 観点 3 — 境界値 (snapshot mode)
-
-| ID | Observation | Given | When | Then | Priority | Automation | Mode | Component |
-|---|---|---|---|---|---|---|---|---|
 | T-UI-012 | markup の値 | `initial=7` | mount Counter | markup に `data-testid="value"` と `>7<` が含まれる | P1 | yes | snapshot | Counter |
 | T-UI-013 | markup のボタン | `initial=7` | mount Counter | markup に `aria-label="increment"` と `aria-label="reset"` が含まれる | P1 | yes | snapshot | Counter |
 | T-UI-014 | max 到達時の markup | `initial=2, max=2` | mount Counter | markup に `role="status"` が含まれる | P1 | yes | snapshot | Counter |
+
+## 自動化方針
+
+- `render` は `setupComponentEnv({ mode: 'render', ui: <Counter /> })` と screen query で検証する
+- `interaction` は `setupComponentEnv({ mode: 'interaction', ui: <Counter /> })` と `env.user.click()` で操作する
+- `snapshot` は `setupComponentEnv({ mode: 'snapshot', ui: <Counter /> })` の `env.markup` を部分一致で検証する。file snapshot の保存は別 phase とする
 
 ## 既存 test との対応
 

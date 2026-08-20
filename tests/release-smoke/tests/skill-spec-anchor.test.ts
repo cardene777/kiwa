@@ -156,7 +156,7 @@ describe('起点の違いは CLI の実挙動である', () => {
         '--layer',
         layer,
         '--lang',
-        'en',
+        'ja',
         '--module',
         module,
         '--producer',

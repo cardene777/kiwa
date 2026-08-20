@@ -98,8 +98,6 @@
 
 ## テストケース一覧
 
-### 観点 1: 正常系
-
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
 | T-UNIT-001 | 単体 | 正常系 | なし | `'Hello World'` | `normalizeTag(input)` | `'hello-world'` | 高 | 推奨 |
@@ -107,19 +105,9 @@
 | T-UNIT-003 | 単体 | 正常系 | なし | `'__abc__'` | `normalizeTag(input)` | `'abc'` | 高 | 推奨 |
 | T-UNIT-008 | 単体 | 正常系 | 時刻を 1400 に固定 | `issuedAt=1000, ttlMs=500` | `isExpired(...)` | `false` (TTL 内) | 高 | 推奨 |
 | T-UNIT-013 | 単体 | 正常系 | 既定 `base=100` | `attempt=0, 1, 2` | `nextBackoffMs(attempt)` | `100` / `200` / `400` | 高 | 推奨 |
-
-### 観点 2: 異常系
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
 | T-UNIT-004 | 単体 | 異常系 | なし | `'！？'` (英数字 0 文字) | `normalizeTag(input)` | `''` | 高 | 推奨 |
 | T-UNIT-011 | 単体 | 異常系 | 時刻を 1000 に固定 | `issuedAt=1000, ttlMs=-1` | `isExpired(...)` | `true` (負の TTL は失効扱い) | 高 | 推奨 |
 | T-UNIT-012 | 単体 | 異常系 | 時刻を 1000 に固定 | `issuedAt=NaN` / `ttlMs=Infinity` | `isExpired(...)` | いずれも `true` (有限でない入力は失効扱い) | 高 | 推奨 |
-
-### 観点 3: 境界値
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
 | T-UNIT-005 | 単体 | 境界値 | なし | `'abcdefghij', { maxLength: 4 }` | `normalizeTag(...)` | `'abcd'` | 高 | 推奨 |
 | T-UNIT-006 | 単体 | 境界値 | `'ab cdef'` は `'ab-cdef'` に正規化される | `'ab cdef', { maxLength: 3 }` | `normalizeTag(...)` | `'ab'` (切り口の `-` を落とす) | 高 | 推奨 |
 | T-UNIT-007 | 単体 | 境界値 | なし | `'abc', { maxLength: 0 }` | `normalizeTag(...)` | `''` | 高 | 推奨 |
@@ -129,14 +117,15 @@
 | T-UNIT-016 | 単体 | 境界値 | なし | `'abc', { maxLength: -1 }` | `normalizeTag(...)` | `''` (`max <= 0` の分岐に入る) | 中 | 推奨 |
 | T-UNIT-017 | 単体 | 境界値 | 正規化後は 3 文字 | `'abc', { maxLength: 99 }` | `normalizeTag(...)` | `'abc'` (切り詰めが起きない) | 中 | 推奨 |
 | T-UNIT-018 | 単体 | 境界値 | 時刻を 1000 に固定 | `issuedAt=2000, ttlMs=500` | `isExpired(...)` | `false` (発行時刻が未来でも失効しない) | 中 | 推奨 |
-
-### 観点 6: 入力バリデーション
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
 | T-UNIT-015 | 単体 | 入力バリデーション | 既定 `base=100` | `attempt=-3` | `nextBackoffMs(attempt)` | `100` (負値は 0 として扱う) | 高 | 推奨 |
 | T-UNIT-019 | 単体 | 入力バリデーション | 既定 `base=100` | `attempt=1.9` | `nextBackoffMs(attempt)` | `200` (小数部を切り捨てて 1 として扱う) | 中 | 推奨 |
 | T-UNIT-020 | 単体 | 入力バリデーション | なし | `attempt=3, base=50, cap=200` | `nextBackoffMs(3, 50, 200)` | `200` (`50 * 8 = 400` が `cap` で頭打ち) | 中 | 推奨 |
+
+## 自動化方針
+
+`pure` の case は入力と戻り値だけを Vitest の `describe` / `it` / `expect` で検証する。
+`fake-timer` の case は `vi.useFakeTimers()` と `vi.setSystemTime()` で現在時刻を固定し、各 test の
+後に `vi.useRealTimers()` で戻す。
 
 ## 自動化すべきテスト
 

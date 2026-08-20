@@ -8,7 +8,7 @@ import {
   fetchStock,
 } from '../../src/inventory.js';
 
-// spec = tests/spec/integration/test-spec-inventory.md
+// spec = tests/spec/integration/test-spec-inventory.ja.md
 
 const STOCK_URL = 'https://stock.example/v1/items/:sku';
 
