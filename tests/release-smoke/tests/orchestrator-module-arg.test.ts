@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { read, skillBody } from './skill-md.js';
+import { ROSTER } from './layer-roster.js';
+import { skillBody } from './skill-md.js';
 
 /**
  * orchestrator が module に example 名を渡していないか (#2074).
@@ -14,19 +15,21 @@ import { read, skillBody } from './skill-md.js';
  */
 
 const TEST = skillBody('kiwa-test');
-const ROSTER = read('tests/release-smoke/tests/layer-test-output-resolves.test.ts');
 
-/** roster が宣言する (layer, module, example) の組。 */
-const ENTRIES = [
-  ...ROSTER.matchAll(
-    /layer:\s*'([a-z0-9-]+)'[\s\S]{0,160}?module:\s*'([a-z0-9-]+)'[\s\S]{0,120}?example:\s*'([a-z0-9-]+)'/g,
-  ),
-].map((m) => ({ layer: m[1]!, module: m[2]!, example: m[3]! }));
+/**
+ * roster が宣言する (layer, module, example) の組。
+ *
+ * #2101 まで `layer-test-output-resolves.test.ts` の source を正規表現で読んでいた。
+ * roster を共有 module へ移した時にその regex が 0 件になり、下の空振り防止が拾った。
+ * 実物を import すれば追随の問題自体が消える。
+ */
+const ENTRIES = ROSTER.map((e) => ({ layer: e.layer, module: e.module, example: e.example }));
 
 describe('module と example は別の値である', () => {
   it('roster を読めている (空振り防止)', () => {
-    // 正規表現が roster の一部に追随できなくなっても、 1 件以上だけでは
-    // 残った entry だけを見て緑になる。 本文が宣言する 20 件全てを固定する。
+    // roster が空だと以下の検査が 0 件を見て緑になる。 実物が宣言する 20 件を固定する。
+    // #2101 で import へ切り替えたので取りこぼしは起きないが、件数の固定は残す =
+    // roster から entry が減った時に、それが差分として見える。
     expect(ENTRIES).toHaveLength(20);
   });
 

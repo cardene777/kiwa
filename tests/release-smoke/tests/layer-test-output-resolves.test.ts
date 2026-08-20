@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { ROSTER, type RosterEntry } from './layer-roster.js';
 import { REPO_ROOT, read } from './skill-md.js';
 
 /**
@@ -28,84 +29,8 @@ interface Layer {
 
 const LAYERS = (JSON.parse(read('docs/layers.json')) as { layers: Layer[] }).layers;
 
-/**
- * 宣言と突き合わせられる組。
- *
- * `{example}/` 起点の宣言を持つ layer を **全件** 載せる。 #2050 の時点では 6 件しか
- * 解決しておらず、 残りは「まだ example が無い」 状態だったので roster 方式で明示的に
- * 絞っていた。 #2062 で全 layer に example が揃ったため、 § roster が全 layer を覆う で
- * **網羅そのものを検査する** 形へ上げた。
- *
- * layer を足した時は、 その example を作ってここに 1 行足す。 足さないと網羅の検査が落ちる =
- * 「宣言だけ増えて実物が無い」 状態を作れない。
- *
- * 逆に **今解決している組を減らす変更も落ちる**。 減らしたことが差分に出る
- * (`skill-cli-invocation` の起動行数と同じ形)。
- */
-const ROSTER = [
-  { layer: 'contract', producer: 'kiwa-forge', module: 'defi-swap', example: 'defi-swap' },
-  { layer: 'e2e', producer: 'kiwa-play', module: 'basic-connect', example: 'basic-connect' },
-  { layer: 'api', producer: 'kiwa-api', module: 'items', example: 'nextjs-api-poc' },
-  { layer: 'ui', producer: 'kiwa-ui', module: 'counter', example: 'react-component-poc' },
-  { layer: 'data', producer: 'kiwa-data', module: 'orders', example: 'queue-poc' },
-  { layer: 'cli', producer: 'kiwa-cli-test', module: 'kiwa-cli', example: 'cli-poc' },
-  { layer: 'auth', producer: 'kiwa-auth', module: 'auth-flow', example: 'auth-lucia-poc' },
-  { layer: 'cache', producer: 'kiwa-cache', module: 'session-cache', example: 'cache-redis-poc' },
-  { layer: 'job-queue', producer: 'kiwa-queue', module: 'queue-flow', example: 'queue-bullmq-poc' },
-  { layer: 'orm-query', producer: 'kiwa-orm', module: 'users-repo', example: 'orm-drizzle-sqlite-poc' },
-  {
-    layer: 'e2e-generic',
-    producer: 'kiwa-e2e',
-    module: 'reorg-4scenario',
-    example: 'dogfood-dapp-e2e-reorg',
-  },
-  { layer: 'unit', producer: 'kiwa-vitest', module: 'token', example: 'vitest-unit-poc' },
-  { layer: 'a11y', producer: 'kiwa-a11y', module: 'counter', example: 'react-component-poc' },
-  {
-    layer: 'edge-handler',
-    producer: 'kiwa-edge',
-    module: 'links',
-    example: 'edge-handler-poc',
-  },
-  {
-    layer: 'integration',
-    producer: 'kiwa-api',
-    module: 'inventory',
-    example: 'nextjs-api-poc',
-  },
-  {
-    layer: 'nextjs-server-action',
-    producer: 'kiwa-nextjs',
-    module: 'items',
-    example: 'nextjs-app-router-full',
-  },
-  {
-    layer: 'nextjs-middleware',
-    producer: 'kiwa-nextjs',
-    module: 'auth',
-    example: 'nextjs-app-router-full',
-  },
-  {
-    layer: 'nextjs-rsc',
-    producer: 'kiwa-nextjs',
-    module: 'items',
-    example: 'nextjs-app-router-full',
-  },
-  {
-    layer: 'nextjs-parallel-route',
-    producer: 'kiwa-nextjs',
-    module: 'items',
-    example: 'nextjs-app-router-full',
-  },
-  {
-    layer: 'nextjs-rsc-streaming',
-    producer: 'kiwa-nextjs',
-    module: 'items',
-    example: 'nextjs-app-router-full',
-  },
-] as const;
 
-function resolveTestPaths(entry: (typeof ROSTER)[number]): {
+function resolveTestPaths(entry: RosterEntry): {
   files: string[];
   patterns: string[];
 } {
