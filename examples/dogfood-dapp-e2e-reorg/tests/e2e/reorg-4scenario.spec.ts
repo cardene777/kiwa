@@ -38,7 +38,7 @@ const OWNER_PK =
 const RECIPIENT_ADDRESS =
   '0x70997970C51812dc3A010C7d01b50e0d17dc79C8' as const; // anvil account #1
 const OWNER_ADDRESS =
-  '0xf39Fd6e51aad88F6F4ce6aB8827279cfFFb92266' as const; // anvil account #0
+  '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266' as const; // anvil account #0
 
 const REORG_TOKEN_ABI = [
   {
@@ -100,6 +100,28 @@ function makeClients(port: number) {
 }
 
 async function ensureConnected(page: import('@playwright/test').Page) {
+  const status = page.getByTestId('connection-status');
+
+  // 差し込んだ wallet は読込直後に自動で繋がる。 その最中だけ RainbowKit の
+  // `Connect Wallet` が現れ、接続が確定した瞬間に差し替わって DOM から外れる。
+  // そこへ click すると「外れた → やり直し」 を繰り返して timeout を使い切る。
+  //
+  // 実測 = この待ちを持たない T-DR-001〜004 が 180s で timeout、
+  // click の前に `networkidle` を待っていた T-DR-000 だけが通っていた
+  // (`networkidle` の間に自動接続が終わり、ボタンを触らずに済んでいた)。
+  //
+  // 自動接続の結末を先に待ち、繋がらなかった時だけ手で繋ぐ。
+  // こうするとボタンが差し替わっている最中に触ることが無くなる。
+  const autoConnected = await expect(status)
+    .toHaveText('status: connected', { timeout: 15_000 })
+    .then(
+      () => true,
+      () => false,
+    );
+  if (autoConnected) {
+    return;
+  }
+
   const connectBtn = page.getByRole('button', { name: /connect wallet/i });
   if (await connectBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
     await connectBtn.click();
@@ -108,10 +130,7 @@ async function ensureConnected(page: import('@playwright/test').Page) {
       await injected.click();
     }
   }
-  await expect(page.getByTestId('connection-status')).toHaveText(
-    'status: connected',
-    { timeout: 15_000 },
-  );
+  await expect(status).toHaveText('status: connected', { timeout: 15_000 });
 }
 
 async function waitLoaded(page: import('@playwright/test').Page) {
@@ -138,9 +157,9 @@ test.describe('reorg 4-scenario e2e', () => {
   });
 
   test('T-DR-001 pending tx → reorg → dropped', async ({ page, dappE2e }) => {
-    // Scenario 1: submit a tx but never mine it. After the reorg the pending
-    // pool is cleared and getTransactionReceipt returns null, so the dApp's
-    // txStatus transitions from `pending` → `dropped`.
+    // Scenario 1: submit a tx but never mine it. After the reorg the tx is
+    // dropped from the pool and getTransactionReceipt returns null, so the
+    // dApp's txStatus transitions from `pending` → `dropped`.
     const env = readEnv();
     const port = Number(env.NEXT_PUBLIC_ANVIL_PORT ?? 8557);
     const { pub, wallet } = makeClients(port);
@@ -167,9 +186,19 @@ test.describe('reorg 4-scenario e2e', () => {
     expect(beforeTx.hash).toBe(pendingHash);
     expect(beforeTx.blockNumber).toBeNull();
 
-    // Reorg — evm_revert drops the pending tx.
+    // Reorg — evm_revert は chain の状態だけを巻き戻す。
     const reverted = await revertChain(pub, snapshotId);
     expect(reverted).toBe(true);
+
+    // mempool は巻き戻しの対象外で、送信済の tx は pending のまま残る
+    // (素の anvil で実測 = revert 後も blockNumber=null で存在し、
+    //  automine を戻して 1 block 掘ると取り込まれてしまう)。
+    // 落とすのは `anvil_dropTransaction` の役目なので、明示的に落とす。
+    await (
+      pub as unknown as {
+        request: (args: { method: string; params: unknown[] }) => Promise<unknown>;
+      }
+    ).request({ method: 'anvil_dropTransaction', params: [pendingHash] });
 
     // Re-enable mining so the next block confirms nothing (mempool empty).
     await (

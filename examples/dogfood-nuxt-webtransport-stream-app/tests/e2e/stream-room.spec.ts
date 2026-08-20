@@ -146,7 +146,15 @@ test.describe('WebTransport stream room — multi-tab', () => {
         try {
           const pageA = await contextA.newPage();
           const pageB = await contextB.newPage();
-          await Promise.all([pageA.goto('about:blank'), pageB.goto('about:blank')]);
+          // ページを test 内 server と同じ origin に置く。 `about:blank` は null origin で、
+          // そこからの `fetch` は cross-origin になる。 `content-type: application/json` を
+          // 付けるため preflight が要るが、この server は CORS も `OPTIONS` も持たない
+          // (実測 = `about:blank` から送出 `TypeError: Failed to fetch`、同一 origin で 200)。
+          //
+          // server 側に検証用の CORS を足す案は採らない。 本番に無い振る舞いを
+          // test のためだけに持ち込むことになる。 この test が見たいのは
+          // 「2 つのタブが別々の接続を張る」 ことで、origin の違いは主題ではない。
+          await Promise.all([pageA.goto(`${origin}/`), pageB.goto(`${origin}/`)]);
 
           async function postJson(page: typeof pageA, url: string, body: unknown) {
             return page.evaluate(
