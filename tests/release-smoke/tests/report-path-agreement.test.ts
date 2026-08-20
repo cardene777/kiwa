@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -93,6 +94,38 @@ describe('coverage report の雛形は Step 0 だけが持つ', () => {
 
     const total = body.split('\n').filter((l) => SHAPE.test(l)).length;
     expect(total, `${skill}: Step 0 の外に coverage path の写しがある`).toBe(inStep0);
+  });
+
+  it('Step 0 の雛形が repo の実 coverage report と一致する', () => {
+    // 宣言が実物とずれていないことを、 追跡済 file で確かめる。 `-hardhat` suffix は
+    // 実際に使われている (2 / 4 件) が、 Step 0 に無いまま reference の括弧書きだけが
+    // 支えていた = その括弧を消すと規約がどこにも残らない (#2082 の r3-f1)。
+    const tracked = execFileSync('git', ['ls-files', 'tests/reports/contract'], {
+      cwd: REPO_ROOT,
+      encoding: 'utf-8',
+    })
+      .split('\n')
+      .filter((f) => f.endsWith('.md'));
+    expect(tracked.length, 'coverage report を 1 件も読めていない').toBeGreaterThan(0);
+
+    const hardhat = tracked.filter((f) => f.includes('-hardhat.'));
+    const foundry = tracked.filter((f) => !f.includes('-hardhat.'));
+    expect(hardhat.length, 'Hardhat 側の実 file が無い').toBeGreaterThan(0);
+    expect(foundry.length, 'Foundry 側の実 file が無い').toBeGreaterThan(0);
+
+    // 実物が 2 形あるので、 宣言も 2 形なければならない。
+    const forgeStep0 = headingSectionIn(
+      skillBody('kiwa-forge'),
+      /^### Step 0: 文書生成言語の(?:選択|決定)/m,
+    );
+    const hardhatStep0 = headingSectionIn(
+      skillBody('kiwa-hardhat'),
+      /^### Step 0: 文書生成言語の(?:選択|決定)/m,
+    );
+    expect(hardhatStep0, 'Hardhat Step 0 が runner suffix を定めていない').toContain(
+      'coverage-report-{module}-hardhat.',
+    );
+    expect(forgeStep0, 'Foundry Step 0 に runner suffix が混ざっている').not.toContain('-hardhat');
   });
 
   it.each(OWNERS)('%s の Step 0 が round 別の suffix 位置を定めている', (skill) => {

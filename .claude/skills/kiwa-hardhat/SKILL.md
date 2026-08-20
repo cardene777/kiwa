@@ -118,11 +118,15 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 確定後の言語 `$DOC_LANG` は入力 spec の解決と Step 5c (coverage report Write) の両方で参照する。 coverage report の出力 path (Issue #341 lang suffix SSOT、 `/kiwa-design` § lang suffix 規約 と整合):
 
-- ja → `tests/reports/contract/coverage-report-{module}.ja.md` (+ round 別)
-- en → `tests/reports/contract/coverage-report-{module}.md`
-- その他 → `tests/reports/contract/coverage-report-{module}.{lang_code}.md`
+- ja → `tests/reports/contract/coverage-report-{module}-hardhat.ja.md` (+ round 別)
+- en → `tests/reports/contract/coverage-report-{module}-hardhat.md`
+- その他 → `tests/reports/contract/coverage-report-{module}-hardhat.{lang_code}.md`
 
-round 別 report は canonical の **module 名の直後** に round を挟む (`coverage-report-{module}-round-{N}.ja.md`)。 lang suffix は常に末尾 (`/kiwa-design` § lang suffix 規約)。
+**`-hardhat` を落とさない**。 `/kiwa-forge` は同じ dir に suffix 無しで書くため、 落とすと
+`--runner both` で 2 枚目が 1 枚目を上書きする。 repo の実 file がこの形になっている
+(`coverage-report-mint-nft.ja.md` = Foundry、 `coverage-report-mint-nft-hardhat.ja.md` = Hardhat)。
+
+round 別 report は canonical の **runner suffix の直後** に round を挟む (`coverage-report-{module}-hardhat-round-{N}.ja.md`)。 lang suffix は常に末尾 (`/kiwa-design` § lang suffix 規約)。
 
 **以降の step で path を組み立て直さない**。 本節が唯一の SSOT で、 写しを置くと lang suffix を落とす (#2082 で 11 箇所が落としていた)。
 
