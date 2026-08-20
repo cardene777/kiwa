@@ -22,6 +22,6 @@ No coverage data provided.
 
 ## Spec coverage gaps
 
-### counter (ui)
+### counter (a11y)
 
-spec と test が完全に一致 (spec の case 14 件).
+spec と test が完全に一致 (spec の case 13 件).
