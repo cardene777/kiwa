@@ -111,7 +111,7 @@ cookie または header に限定する。両経路を残す間は、空を含�
 | T-LUCIA-003 | 誤 password と未知 email のエラー文面を揃える | 既存 user | 誤 password と未知 email で `signInWithPassword` | 両方が同じ `invalid email or password` を送出 | P0 | yes | lucia | password |
 | T-LUCIA-004 | google sign-in が user と session を作る | user 無し | `signInWithOAuth('google', ...)` → 保護 route | `status===200`、`email` が profile の値 | P0 | yes | lucia | google |
 | T-LUCIA-005 | trusted mock profile の同じ email user を再利用する | password で登録済 | `signInWithOAuth('github', 同 email)` | `user.id` が password 側と一致。本番の自動 link を承認するテストではない | P0 | yes | lucia | github |
-| T-LUCIA-006 | 更新窓に入ると有効期限の更新を通知する | 残りが寿命の半分未満 | `x-session-id` を付けて呼ぶ | `status===200`、`x-session-rotated` が同じ id を返す | P0 | yes | lucia | password |
+| T-LUCIA-006 | 更新窓に入ると有効期限の更新を通知する | 残りが寿命の半分未満 | `x-session-id` を付けて呼ぶ | `status===200`、`x-session-rotated` が同じ id を返し、保存済み `expiresAt` が延長される | P0 | yes | lucia | password |
 | T-LUCIA-007 | 失効させた session は次の要求で通らない | 200 を確認済の session | `invalidateSession` 後に再度呼ぶ | `status===401` | P0 | yes | lucia | password |
 | T-LUCIA-008 | postgresql adapter でも同じ形 | `database.kind==='postgresql'` | `signInWithOAuth('google', ...)` → 保護 route | `database.kind==='postgresql'`、`status===200` | P1 | yes | lucia | google |
 | T-LUCIA-009 | header が無ければ query から取る | 発行済 session | `?session=<id>` だけを付けて呼ぶ | `status===200`、`email` が sign up した値 | P1 | yes | lucia | password |

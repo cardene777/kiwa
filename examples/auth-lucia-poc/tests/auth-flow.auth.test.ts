@@ -102,13 +102,17 @@ describe('lucia PoC — session lifecycle', () => {
     envs.push(env);
     const signed = await env.signUpWithPassword({ email: 'eve@example.test', password: 'p' });
     // Push the session into the refresh window without waiting on the clock.
+    const shortenedExpiresAt = new Date(Date.now() + 10 * 1000);
     await env.database.updateSession({
       id: signed.session.id,
-      expiresAt: new Date(Date.now() + 10 * 1000),
+      expiresAt: shortenedExpiresAt,
     });
     const res = await callProtected(env, signed.session.id);
     expect(res.status).toBe(200);
     expect(res.renewedSessionId).toBe(signed.session.id);
+    expect(
+      (await env.database.getSession(signed.session.id))?.expiresAt.getTime(),
+    ).toBeGreaterThan(shortenedExpiresAt.getTime());
   });
 
   it('T-LUCIA-007 invalidateSession invalidates the token on the next request', async () => {
