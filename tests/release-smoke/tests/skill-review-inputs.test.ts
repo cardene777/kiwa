@@ -244,6 +244,20 @@ describe('result-review の軸 4 が推定で埋まらない', () => {
     expect(row, '判定表に未測定軸の行が無い').toBeTruthy();
     expect(row!, '未測定軸が CONDITIONAL になっていない').toContain('CONDITIONAL');
   });
+
+  it('coverage report の path も統合 report から読む', () => {
+    for (const [name, body] of [
+      ['SKILL.md', REVIEW],
+      ['result-review-axes.md', RESULT_AXES],
+    ] as const) {
+      expect(body, `${name}: coverage path を example 名から組み立てている`).not.toContain(
+        'coverage-report-{example}',
+      );
+      const line = body.split('\n').find((item) => item.includes('coverage report'));
+      expect(line, `${name}: coverage report の読取指示が無い`).toBeTruthy();
+      expect(line, `${name}: 統合 report Section 2 から読んでいない`).toContain('Section 2');
+    }
+  });
 });
 
 describe('review report の名前が writer と reader で一致する', () => {
@@ -265,7 +279,10 @@ describe('review report の名前が writer と reader で一致する', () => {
 
   it('kiwa-test 側が writer に出せない名前を宣言していない', () => {
     const found = new Set(declaredPlaceholders(TEST_SKILL));
-    expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual(['example']);
+    expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual([
+      'example',
+      'module',
+    ]);
 
     // suffix 付きの名前は `--out` を渡す時だけ caller が決められる。 名前だけ宣言して
     // `--out` が無ければ writer は出せないので、 全 occurrence を直前の flag と対応付ける。
@@ -275,6 +292,14 @@ describe('review report の名前が writer と reader で一致する', () => {
     expect(explicit.length, '子 review の明示 --out が 9 件でない').toBe(9);
     expect(new Set(explicit).size, '子 review の --out が衝突している').toBe(explicit.length);
     expect(explicit.every((p) => p.startsWith('tests/reports/review/'))).toBe(true);
+
+    // `--out` を渡さない result-review は writer の既定名を使うため、
+    // placeholder は `--module` と同じ module でなければならない。
+    const implicit = TEST_SKILL.split('\n')
+      .filter((line) => !line.includes('--out'))
+      .flatMap((line) => [...line.matchAll(/(?:spec|test|result)-review-\{(\w+)\}/g)])
+      .map((m) => m[1]!);
+    expect(implicit, '既定出力名が module 以外の placeholder を使っている').toEqual(['module']);
 
     // **`--out` を伴わない suffix 付きの名前は残っていない**。 上の 3 行だけだと、
     // `--out` の無い行に `test-review-{example}-{tool}.{lang}.md` と書いた宣言が

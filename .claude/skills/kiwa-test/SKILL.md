@@ -28,6 +28,7 @@ $ARGUMENTS
 ## オプション
 
 - `--example {name}` — 対象 example 名 (必須、 `examples/{name}/` を参照)
+- `--module {name}` — spec / test の module 名 (省略時は `--example` の値)。 子 skill と `kiwa layers` に渡す `--module` はすべてこの値になる
 - `--target {contract|dapp|web|both|all}` — 実行範囲 (省略時は Step 1b で AskUserQuestion)。 `contract` は Foundry / Hardhat、 `dapp` は dApp e2e (Playwright + viem + anvil、 `/kiwa-play`)、 `web` は非 web3 web app 2 surface セット (`/kiwa-e2e` + `/kiwa-a11y`)、 `both` は contract + dapp、 `all` は web を起動する (contract / dapp は `both` で起動する。 内訳は各 Step の起動条件が SSOT で、 surface 数は数えない)
 - `--runner {foundry|hardhat|both}` — contract test の runner 選択 (省略時は Step 1a で LLM 自動判断 + fallback で AskUserQuestion、 target=dapp 時は無視)
 - `--mode {sequential|parallel}` — target=both 時の実行順 (default `sequential`、 contract → dapp)
@@ -63,7 +64,7 @@ $ARGUMENTS
 | `all` | `contract` / `e2e` / `e2e-generic` / `a11y` |
 
 ```bash
-pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE"
+pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE"
 ```
 
 `--layer` は省いて 1 度に全件受け取ってもよい。 その場合は返った配列から必要な `id` を選ぶ。
@@ -73,6 +74,18 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAM
 `$DOC_LANG` は skill 引数の `--lang`。 **`LANG` を使わない** = shell の locale 変数で `ja_JP.UTF-8` 等が入っており、 CLI が ISO 639-1 でないとして拒否する。 `--lang` 省略時の既定は起動元が渡した値、 単体起動なら `ja`。
 
 `$EXAMPLE` は skill 引数の `--example`。 必須で、 推測しない。
+
+`$MODULE` は skill 引数の `--module`、 省略時は `$EXAMPLE` の値。 **example 名と module 名は
+別物**で、 repo の宣言は 20 layer 中 18 で違う値を持つ (`api` の module は `items` で example は
+`nextjs-api-poc`、 `ui` の module は `counter` で example は `react-component-poc`)。
+
+一致するのは `contract` (`defi-swap`) と `e2e` (`basic-connect`) の 2 例だけで、 どちらも
+chain が spec も test も生成する dApp 系。 既定を `$EXAMPLE` にするのは、 その 2 例の
+既存の呼出を壊さないため。
+
+example 名を module として渡すと `kiwa layers` は存在しない path を返す (実測で spec が
+`test-spec-nextjs-app-router-full.nextjs.md`、 `test_paths.files` が空)。 `/kiwa-observe` は
+`test_paths.files` が空なら中断するため、 Step 5a が全 layer で止まる。
 
 #### 解決に失敗したら止める
 
@@ -206,7 +219,7 @@ for LAYER in $LAYERS; do
   # exit code / 形 / 一意性を分けて見る (§ 解決に失敗したら止める)。
   # pipe で jq に直接繋がない = pipefail 無しでは CLI が落ちても exit 0 になり、
   # 空 path が「spec 無し」 と区別できなくなる。
-  OUT=$(pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$EXAMPLE") \
+  OUT=$(pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODULE") \
     || { echo "ERROR: kiwa layers が失敗 (layer=$LAYER)"; exit 1; }
   # 型を先に見る。 `.layers[]?` は配列でない応答を黙って 0 件に潰すため、
   # 壊れた応答が「spec 無し」 と区別できなくなる。
@@ -306,22 +319,22 @@ done
 親の `--no-review` が指定されている場合は直接 review も全件 skip する。 指定されていない場合、 生成側の子 skill が戻った直後に repo root から下記 review を起動し、 各 chain return の report path を控える。 `${DOC_LANG}` は明示 `--out` の一部なので、 `en` でも suffix を付ける。
 
 ```text
-[Step 3a] examples/{example}/ へ cd して /kiwa-design --layer contract --module {example} --input contracts/ --lang $DOC_LANG --no-review
+[Step 3a] examples/{example}/ へ cd して /kiwa-design --layer contract --module {module} --input contracts/ --lang $DOC_LANG --no-review
   ↓ spec 生成
-  ↓ tests/spec/contract/test-spec-{example}.{lang}.md が Write される
-  ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer contract --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-contract.${DOC_LANG}.md
+  ↓ tests/spec/contract/test-spec-{module}.{lang}.md が Write される
+  ↓ repo root から /kiwa-review --mode spec-review --module {module} --layer contract --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-contract.${DOC_LANG}.md
 
 [Step 3b] $RUNNER ∈ {foundry, both} の場合のみ実行:
-  examples/{example}/ へ cd し直して /kiwa-forge --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
+  examples/{example}/ へ cd し直して /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
   ↓ test/{Contract}.t.sol 生成 + forge test 全 PASS + coverage 100% 到達 (auto loop)
-  ↓ Step 5c で tests/reports/contract/coverage-report-{example}.{lang}.md Write
-  ↓ repo root から /kiwa-review --mode test-review --module {example} --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-foundry.${DOC_LANG}.md
+  ↓ Step 5c で tests/reports/contract/coverage-report-{module}.{lang}.md Write
+  ↓ repo root から /kiwa-review --mode test-review --module {module} --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-foundry.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
 [Step 3c] $RUNNER ∈ {hardhat, both} の場合のみ実行:
-  examples/{example}/ へ cd し直して /kiwa-hardhat --module {example} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
+  examples/{example}/ へ cd し直して /kiwa-hardhat --module {module} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
   ↓ hardhat-test/{Contract}.test.cjs 生成 + hardhat test 4 round PASS + coverage 100%
-  ↓ repo root から /kiwa-review --mode test-review --module {example} --layer contract --lang $DOC_LANG --producer kiwa-hardhat --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-hardhat.${DOC_LANG}.md
+  ↓ repo root から /kiwa-review --mode test-review --module {module} --layer contract --lang $DOC_LANG --producer kiwa-hardhat --project-root examples/{example} --out tests/reports/review/test-review-{example}-contract-hardhat.${DOC_LANG}.md
   ↓ review が返した report path を控える
 ```
 
@@ -347,15 +360,15 @@ Step 4a の review 後に Step 4b を呼ぶ時も、生成前にこの cwd を�
 target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) なら 3 完了待ち、 mode=parallel なら 3 と並走 (ただし parallel は port 衝突リスクあるため非推奨)。
 
 ```text
-[Step 4a] examples/{example}/ へ cd して /kiwa-design --layer e2e --module {example} --input app/ --lang $DOC_LANG --no-review
+[Step 4a] examples/{example}/ へ cd して /kiwa-design --layer e2e --module {module} --input app/ --lang $DOC_LANG --no-review
   ↓ spec 生成
-  ↓ tests/spec/e2e/test-spec-{example}.{lang}.md Write
-  ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer e2e --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e.${DOC_LANG}.md
+  ↓ tests/spec/e2e/test-spec-{module}.{lang}.md Write
+  ↓ repo root から /kiwa-review --mode spec-review --module {module} --layer e2e --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e.${DOC_LANG}.md
 
-[Step 4b] examples/{example}/ へ cd し直して /kiwa-play --mode new --rounds {N} --lang $DOC_LANG --no-review [--no-codex]
-  ↓ tests/{example}.spec.ts + helper 生成
+[Step 4b] examples/{example}/ へ cd し直して /kiwa-play --module {module} --mode new --rounds {N} --lang $DOC_LANG --no-review [--no-codex]
+  ↓ tests/{module}.spec.ts + helper 生成
   ↓ playwright test 4 round PASS (flaky 0 検証)
-  ↓ repo root から /kiwa-review --mode test-review --module {example} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-playwright.${DOC_LANG}.md
+  ↓ repo root から /kiwa-review --mode test-review --module {module} --layer e2e --lang $DOC_LANG --producer kiwa-play --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-playwright.${DOC_LANG}.md
   ↓ review が返した report path を控える
 ```
 
@@ -368,24 +381,24 @@ target=both の場合、 Step 3 完了後に実行。 mode=sequential (default) 
 target=web (汎用 web 2 surface セット) または target=all の場合に実行する。 mode=sequential なら Step 3 / 4 完了後、 mode=parallel は port 衝突リスクで非推奨。 e2e-generic / a11y の 2 chain は **互いに独立** なため内部で `parallel()` 起動可能 (内部実装で同 example dir を 2 子 skill が同時 Read するだけ、 file 書込 path は別)。
 
 ```text
-[Step 4w-e2e-a] examples/{example}/ へ cd して /kiwa-design --layer e2e-generic --module {example} --input app/ --lang $DOC_LANG --no-review
-  ↓ tests/spec/integration/test-spec-{example}.e2e.{lang}.md Write
-  ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer e2e-generic --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e-generic.${DOC_LANG}.md
+[Step 4w-e2e-a] examples/{example}/ へ cd して /kiwa-design --layer e2e-generic --module {module} --input app/ --lang $DOC_LANG --no-review
+  ↓ tests/spec/integration/test-spec-{module}.e2e.{lang}.md Write
+  ↓ repo root から /kiwa-review --mode spec-review --module {module} --layer e2e-generic --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-e2e-generic.${DOC_LANG}.md
 
-[Step 4w-e2e-b] examples/{example}/ へ cd し直して /kiwa-e2e --mode new --lang $DOC_LANG --no-review
-  ↓ tests/{example}.e2e.spec.ts 生成
+[Step 4w-e2e-b] examples/{example}/ へ cd し直して /kiwa-e2e --module {module} --mode new --lang $DOC_LANG --no-review
+  ↓ tests/e2e/{module}.spec.ts 生成
   ↓ @kiwa-lab/e2e で playwright 起動
-  ↓ repo root から /kiwa-review --mode test-review --module {example} --layer e2e-generic --lang $DOC_LANG --producer kiwa-e2e --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-generic.${DOC_LANG}.md
+  ↓ repo root から /kiwa-review --mode test-review --module {module} --layer e2e-generic --lang $DOC_LANG --producer kiwa-e2e --project-root examples/{example} --out tests/reports/review/test-review-{example}-e2e-generic.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
-[Step 4w-a11y-a] examples/{example}/ へ cd し直して /kiwa-design --layer a11y --module {example} --input app/ --lang $DOC_LANG --no-review
-  ↓ tests/spec/integration/test-spec-{example}.a11y.{lang}.md Write
-  ↓ repo root から /kiwa-review --mode spec-review --module {example} --layer a11y --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-a11y.${DOC_LANG}.md
+[Step 4w-a11y-a] examples/{example}/ へ cd し直して /kiwa-design --layer a11y --module {module} --input app/ --lang $DOC_LANG --no-review
+  ↓ tests/spec/integration/test-spec-{module}.a11y.{lang}.md Write
+  ↓ repo root から /kiwa-review --mode spec-review --module {module} --layer a11y --lang $DOC_LANG --project-root examples/{example} --out tests/reports/review/spec-review-{example}-a11y.${DOC_LANG}.md
 
-[Step 4w-a11y-b] examples/{example}/ へ cd し直して /kiwa-a11y --mode new --lang $DOC_LANG --no-review
-  ↓ tests/{example}.a11y.test.ts 生成
+[Step 4w-a11y-b] examples/{example}/ へ cd し直して /kiwa-a11y --module {module} --mode new --lang $DOC_LANG --no-review
+  ↓ tests/a11y/{module}.{test.tsx|spec.ts} 生成
   ↓ @kiwa-lab/a11y で axe-core 評価
-  ↓ repo root から /kiwa-review --mode test-review --module {example} --layer a11y --lang $DOC_LANG --producer kiwa-a11y --project-root examples/{example} --out tests/reports/review/test-review-{example}-a11y.${DOC_LANG}.md
+  ↓ repo root から /kiwa-review --mode test-review --module {module} --layer a11y --lang $DOC_LANG --producer kiwa-a11y --project-root examples/{example} --out tests/reports/review/test-review-{example}-a11y.${DOC_LANG}.md
   ↓ review が返した report path を控える
 ```
 
@@ -422,12 +435,12 @@ Total duration: {sec} 秒
 
 | file | path | 用途 |
 |---|---|---|
-| spec (contract) | tests/spec/contract/test-spec-{example}.{lang}.md | Layer 1 出力 |
-| spec (e2e) | tests/spec/e2e/test-spec-{example}.{lang}.md | Layer 1 出力 |
+| spec (contract) | tests/spec/contract/test-spec-{module}.{lang}.md | Layer 1 出力 |
+| spec (e2e) | tests/spec/e2e/test-spec-{module}.{lang}.md | Layer 1 出力 |
 | Foundry test (退避済) | tests/fixtures/{example}/contract-test/{Contract}.t.sol | Layer 2 出力 → Step 5.5 で退避 |
 | Hardhat test (退避済) | tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs | Layer 2 出力 → Step 5.5 で退避 |
 | Playwright spec (退避済) | tests/fixtures/{example}/e2e-test/*.spec.ts | Layer 2 出力 → Step 5.5 で退避 (名前は生成時のまま) |
-| coverage report (contract) | tests/reports/contract/coverage-report-{example}.{lang}.md | auto loop 結果 |
+| coverage report (contract) | tests/reports/contract/coverage-report-{module}.{lang}.md | auto loop 結果 |
 | review report (spec / test) | 各 `/kiwa-review` が chain return した実 path をそのまま書く | reviewer 判定。 Step 5b の result-review 軸 4 がこの行を読む |
 | observe dashboard (layer ごと) | tests/reports/observe/dashboard-{example}-{layer}.{lang}.md | Step 5a 出力。 失敗した layer は path の代わりに理由を書く |
 | observe dashboard (contract, foundry) | tests/reports/observe/dashboard-{example}-contract-foundry.{lang}.md | `$RUNNER` が `foundry` / `both` の時 |
@@ -446,12 +459,12 @@ Total duration: {sec} 秒
 
 - ✅ ALL PASS → docs 更新 + PR 起票推奨
 - ⚠️ PARTIAL FAIL → 失敗 step の修正 (spec 修正 / test 追加 / coverage 未達対応)
-- ❌ FAIL → critical 修正必須、 該当子 skill を再起動 (`/kiwa-{forge|hardhat|play} --module {example}`)
+- ❌ FAIL → critical 修正必須、 該当子 skill を再起動 (`/kiwa-{forge|hardhat|play} --module {module}`)
 
 ## 5. 各子 skill report への link
 
 - spec-review / test-review: 各 `/kiwa-review` が chain return した実 path (§ 2 の review report 行と同じ値)
-- coverage report: `tests/reports/contract/coverage-report-{example}.{lang}.md` / `tests/reports/e2e/coverage-report-{example}.{lang}.md`
+- coverage report: `tests/reports/contract/coverage-report-{module}.{lang}.md` / `tests/reports/e2e/coverage-report-{module}.{lang}.md`
 ```
 
 ### Step 5a: kiwa-observe 自動呼出 (layer ごとに 1 枚)
@@ -463,7 +476,7 @@ Step 5b (result-review) の **前** に置く。 result-review は統合 report 
 `contract` 以外の layer は 1 回起動する。
 
 ```text
-/kiwa-observe --module {example} --layer {layer} --lang ${DOC_LANG} --producer {producer} --project-root examples/{example} --out tests/reports/observe/dashboard-{example}-{layer}.${DOC_LANG}.md
+/kiwa-observe --module {module} --layer {layer} --lang ${DOC_LANG} --producer {producer} --project-root examples/{example} --out tests/reports/observe/dashboard-{example}-{layer}.${DOC_LANG}.md
 ```
 
 `--layer` は `$LAYERS` の各値をそのまま渡す。 Step 2.5 で `--target` から解決した同じ list で、 ここで組み直さない = 2 箇所で解決すると target の解釈が割れる。
@@ -582,11 +595,11 @@ done
 
 ### Step 5b: kiwa-review 自動呼出 (result-review mode)
 
-Step 5 で統合 report Write 完了後、 test 実行結果の総合品質を独立 review する。 `/kiwa-review --mode result-review --module {example}` を repo root から内部呼出し、 coverage 達成度 / passing 件数 / flaky 兆候 / 子 review 集約 / 後追い項目 を 5 軸で判定。 spec は example 配下にあるため、 **`--project-root examples/{example}` を省かない**。
+Step 5 で統合 report Write 完了後、 test 実行結果の総合品質を独立 review する。 `/kiwa-review --mode result-review --module {module}` を repo root から内部呼出し、 coverage 達成度 / passing 件数 / flaky 兆候 / 子 review 集約 / 後追い項目 を 5 軸で判定。 spec は example 配下にあるため、 **`--project-root examples/{example}` を省かない**。
 
 呼出例:
 ```text
-/kiwa-review --mode result-review --module {example} --lang $DOC_LANG --project-root examples/{example}
+/kiwa-review --mode result-review --module {module} --lang $DOC_LANG --project-root examples/{example}
 ```
 
 review 結果:
@@ -594,7 +607,7 @@ review 結果:
 - CONDITIONAL (未生成 TC / 未測定軸あり) → 未検証の観点と次の手を統合 report に残して Step 6 へ。 FAIL として auto-fix loop に入れない
 - FAIL → Step 5c (auto-fix loop) へ
 
-report 出力先: `tests/reports/review/result-review-{example}.{$DOC_LANG}.md`
+report 出力先: `tests/reports/review/result-review-{module}.{$DOC_LANG}.md`
 
 `--no-review` 引数で本 step を skip 可能 (CI 用、 skip 時は Step 5c も skip して Step 6 へ)。
 
