@@ -16,7 +16,7 @@ browser の `fetch` がそこを叩く。 `page.goto(origin)` で同じ origin �
 | `/tenant-injection` | `driveTenantInjection` | `src/adapters/mock.ts` + `src/tenant/index.ts` + `src/rls/index.ts` + `src/audit/index.ts` |
 | `/cross-tenant-refuse` | `driveCrossTenantRefuse` | `src/adapters/mock.ts` + `src/tenant/index.ts` + `src/rls/index.ts` + `src/audit/index.ts` |
 | `/bypass-audit` | `driveBypassAudit` | `src/adapters/mock.ts` + `src/rls/index.ts` + `src/audit/index.ts` |
-| `/audit-integrity` | `driveAuditIntegrity` | `src/adapters/mock.ts` + `src/audit/index.ts` |
+| `/audit-integrity` | `driveAuditIntegrity` | `src/adapters/mock.ts` + `src/rls/index.ts` + `src/audit/index.ts` |
 
 ## 仕様の要約
 
@@ -55,7 +55,8 @@ browser の `fetch` がそこを叩く。 `page.goto(origin)` で同じ origin �
 `input.ops.length + 3` と導ける。
 `withBypass()` が開始と終了の 2 件、callback が各操作を 1 件ずつ追加し、
 終了後の `g.assertRead()` が方針強制済みの read を 1 件追加するため。
-`reArmedAfterBypass` は両方とも真で、例外の後に方針が戻ることを表す。
+`reArmedAfterBypass` は 4 ケースとも真で、bypass 処理の終了後に方針強制状態へ
+戻ったことを表す。
 
 ただしこの式は **呼出前に `g.session.auditLog` の未 drain entry が無い場合**に限る。
 同じ adapter で先に組織 1 件を含む「同じ id」の越境を 500 にすると、例外前の

@@ -60,6 +60,7 @@ mock は「異常を検出できた」 ことを成功として表す。
 |---|---|---|
 | `/group-replication` | `groupReplicationSteps` | **5** (`session.history.length` = join 2 + elect 1 + conflict 1 + leave 1) |
 | `/binlog-advance` | `binlogAdvanceOps` | **5** (`session.history.length` = position 1 + GTID 2 + format 1 + gap 1) |
+| `/router-split` | `routerSplitOps` | **1** |
 
 **counter は 4 経路とも fresh server で実測した** (経路ごとに新しい server を立て、
 `/metrics` の非 0 field を読む)。
@@ -73,7 +74,6 @@ mock は「異常を検出できた」 ことを成功として表す。
 
 **trace は 4 経路とも 1 件で揃うが、counter の単位は揃わない。**
 前 2 つは履歴の要素数を足し、後 2 つは呼出回数を足す。
-| `/router-split` | `routerSplitOps` | **1** |
 
 `/router-split` は `readHits: 4` / `writeHits: 2` を返すが、counter は 1 しか増えない。
 **返り値の回数と counter の単位が違う** (postgres の `pgvectorSearches` とは逆の関係)。
