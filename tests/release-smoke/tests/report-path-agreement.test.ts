@@ -84,6 +84,14 @@ describe('coverage report の雛形は Step 0 だけが持つ', () => {
     expect(occurrences(SHAPE).length).toBeGreaterThan(0);
   });
 
+  it('writer 以外の skill が雛形を持たない', () => {
+    // caller / reader が path を写すと、 runner suffix や lang suffix の変更時にずれる。
+    // writer が返した実 path をそのまま渡す形だけを許す。
+    const owners = new Set(OWNERS);
+    const copies = occurrences(SHAPE).filter(({ skill }) => !owners.has(skill));
+    expect(copies, 'writer 以外が coverage path の雛形を持っている').toEqual([]);
+  });
+
   it.each(OWNERS)('%s の雛形が Step 0 の中だけにある', (skill) => {
     // Step 0 が lang 別 path を定義する。 それ以外の step が雛形を持つと lang suffix を
     // 落とす (実測で forge / hardhat 合わせて 11 箇所が落としていた)。

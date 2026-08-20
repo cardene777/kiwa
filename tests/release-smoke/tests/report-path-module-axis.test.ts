@@ -97,11 +97,12 @@ describe('統合 report の link が実 path と揃っている', () => {
     expect(line!, 'chain return の実 path を読んでいない').toContain('chain return');
   });
 
-  it('Section 5 の coverage report が module 基準である', () => {
-    const line = TEST.split('\n').find((l) => l.startsWith('- coverage report:'));
-    expect(line, 'Section 5 に coverage report の行が無い').toBeTruthy();
-    expect(line!, 'coverage report が example 名のまま').not.toContain('coverage-report-{example}');
-    expect(line!, 'coverage report が module 基準でない').toContain('coverage-report-{module}');
+  it('Section 5 が coverage report を writer の実 path から読む', () => {
+    // module / runner / lang を caller が組み立てると writer の Step 0 と規約が二重になる。
+    const line = TEST.split('\n').find((l) => l.startsWith('- coverage report (contract):'));
+    expect(line, 'Section 5 に contract coverage report の行が無い').toBeTruthy();
+    expect(line!, 'writer が返した実 path を読んでいない').toContain('返した実 path');
+    expect(line!, 'coverage path の雛形を組み立て直している').not.toContain('coverage-report-{');
   });
 
   it('Section 2 の observe dashboard が Step 5a の宣言と一致する', () => {

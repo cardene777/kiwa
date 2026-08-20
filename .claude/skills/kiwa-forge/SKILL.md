@@ -373,6 +373,9 @@ Step 5c の Section 4 で未踏 branch を判定する際、 以下のいずれ�
 
 round 別 report は Step 0 の round 別 path に累積保存、 final round の内容を canonical path に複製。
 
+canonical report を Write したら、 **実際に書いた path を chain return に含める**。 呼出元は
+この値をそのまま集約し、 file 名を組み立て直さない。
+
 #### Step 5d: test-passed marker 作成
 
 以下のいずれかで marker 作成:
