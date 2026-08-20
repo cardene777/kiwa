@@ -166,7 +166,7 @@ describe.runIf(LIVE_CONTAINER_ENABLED)(
     }, 60_000);
 
     describe('axis 4a — sign → rotate → verify inside retention window (real)', () => {
-      it('id_token minted under the pre-rotation active kid verifies after rotation adds a new kid', async () => {
+      it('T-E2E-001 id_token minted under the pre-rotation active kid verifies after rotation adds a new kid', async () => {
         // Capture pre-rotation state: the current active kid is the highest-
         // priority provider's kid. Mint an id_token under that kid.
         const preRotationJwks = await fetchJwksFromKeycloak(handle.issuer);
@@ -220,7 +220,7 @@ describe.runIf(LIVE_CONTAINER_ENABLED)(
     });
 
     describe('axis 4b — verify past retention window (real)', () => {
-      it('id_token minted under a provider that is deleted after rotation fails signature verify with an unknown-kid error', async () => {
+      it('T-E2E-002 id_token minted under a provider that is deleted after rotation fails signature verify with an unknown-kid error', async () => {
         // Mint an id_token, capture the kid it was signed under.
         const { id_token } = await mintIdTokenFromKeycloak(handle, {
           clientId: CLIENT_ID,
@@ -293,7 +293,7 @@ describe.runIf(LIVE_CONTAINER_ENABLED)(
     });
 
     describe('axis 4c — multi-rotation retention (real)', () => {
-      it('three consecutive rotations retain every previous kid in /certs + every id_token verifies through jose', async () => {
+      it('T-E2E-003 three consecutive rotations retain every previous kid in /certs + every id_token verifies through jose', async () => {
         // Baseline: how many sig kids are in `/certs` right now.
         const baseline = await fetchJwksFromKeycloak(handle.issuer);
         const baselineSigCount = baseline.keys.filter((k) => k.use === 'sig').length;
@@ -352,7 +352,7 @@ describe.runIf(LIVE_CONTAINER_ENABLED)(
     });
 
     describe('axis 4d — fresh active key issues verifiable id_tokens after rotation (real)', () => {
-      it('id_token minted after rotation is signed under the new active kid + verifies immediately', async () => {
+      it('T-E2E-004 id_token minted after rotation is signed under the new active kid + verifies immediately', async () => {
         // Snapshot pre-rotation active kid — it is the highest-priority
         // enabled component's kid (Keycloak selects the highest-priority
         // enabled provider as the active signer).

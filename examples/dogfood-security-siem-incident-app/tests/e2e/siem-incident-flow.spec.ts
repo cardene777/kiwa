@@ -40,7 +40,7 @@ test.describe('security-siem-incident-app e2e — Chromium drives the SIEM + inc
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('structured + seal + retention + correlate + playbook + severity + escalate + forensics + post-mortem + orchestrator end to end', async () => {
+  test('T-E2E-001 structured + seal + retention + correlate + playbook + severity + escalate + forensics + post-mortem + orchestrator end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

@@ -40,7 +40,7 @@ test.describe('observability-llm-ops-app e2e — Chromium drives the token + pro
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('token count + prompt log + hallucination flag + budget check end to end', async () => {
+  test('T-E2E-001 token count + prompt log + hallucination flag + budget check end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

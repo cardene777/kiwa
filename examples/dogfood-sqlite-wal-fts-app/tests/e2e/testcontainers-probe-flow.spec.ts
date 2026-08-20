@@ -27,7 +27,7 @@ test.describe('testcontainers probe — real driver env-gate', () => {
     for (const s of servers) await s.close();
   });
 
-  test('testcontainers probe reports mock endpoints + reachable=true', async () => {
+  test('T-E2E-001 testcontainers probe reports mock endpoints + reachable=true', async () => {
     const { origin, close } = await bootAdapterServer();
     servers.push({ close });
     const browser = await chromium.launch();

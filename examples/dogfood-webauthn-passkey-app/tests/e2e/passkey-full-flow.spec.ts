@@ -145,7 +145,7 @@ test.describe('Playwright + Chrome Virtual Authenticator — full flow (register
     __resetWebAuthnCounters();
   });
 
-  test('walks register → list → signin → delete → signin against the kiwa mock RP', async () => {
+  test('T-E2E-001 walks register → list → signin → delete → signin against the kiwa mock RP', async () => {
     const adapter = makeMockAdapter();
     const { origin, close } = await bootAdapterServer(adapter);
     const browser = await chromium.launch();
@@ -257,7 +257,7 @@ test.describe('Playwright + Chrome Virtual Authenticator — full flow (register
     }
   });
 
-  test('DELETE /manage?confirm=true clears every credential in one call', async () => {
+  test('T-E2E-002 DELETE /manage?confirm=true clears every credential in one call', async () => {
     const adapter = makeMockAdapter();
     const { origin, close } = await bootAdapterServer(adapter);
     const browser = await chromium.launch();

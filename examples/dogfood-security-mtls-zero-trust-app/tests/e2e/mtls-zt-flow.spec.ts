@@ -39,7 +39,7 @@ test.describe('security-mtls-zero-trust-app e2e — Chromium drives the mTLS + Z
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('mTLS handshake + pin + OCSP + CT log + posture + risk + JIT + segment + broker end to end', async () => {
+  test('T-E2E-001 mTLS handshake + pin + OCSP + CT log + posture + risk + JIT + segment + broker end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

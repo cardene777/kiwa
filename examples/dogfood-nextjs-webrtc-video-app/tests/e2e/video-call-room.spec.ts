@@ -155,7 +155,7 @@ test.describe('video call room — 2 browser tabs', () => {
     await adapter.reset();
   });
 
-  test('two BrowserContext tabs join the same room and see distinct SDP fingerprints', async () => {
+  test('T-E2E-001 two BrowserContext tabs join the same room and see distinct SDP fingerprints', async () => {
     const { origin, close } = await bootAdapterServer(adapter);
     servers.push({ close });
     const browser = await chromium.launch();
@@ -206,7 +206,7 @@ test.describe('video call room — 2 browser tabs', () => {
     await browser.close();
   });
 
-  test('video publish through the room handler returns 3 simulcast layers over HTTP', async () => {
+  test('T-E2E-002 video publish through the room handler returns 3 simulcast layers over HTTP', async () => {
     const { origin, close } = await bootAdapterServer(adapter);
     servers.push({ close });
     const browser = await chromium.launch();
@@ -245,7 +245,7 @@ test.describe('video call room — 2 browser tabs', () => {
     await browser.close();
   });
 
-  test('ice-restart mid-call recovers with a fresh candidate batch through HTTP', async () => {
+  test('T-E2E-003 ice-restart mid-call recovers with a fresh candidate batch through HTTP', async () => {
     const { origin, close } = await bootAdapterServer(adapter);
     servers.push({ close });
     const browser = await chromium.launch();
