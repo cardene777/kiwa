@@ -2,7 +2,7 @@
 //
 // ## なぜ検査を置くか
 //
-// #2112 で 4 件の e2e が以前から落ちていた。 4 件のうち 3 件は、
+// #2112 で 3 example の e2e が以前から落ちていた。 そのうち 3 件は、
 // **落ちていることに誰も気付けない形** で入っていた。
 //
 // | 件 | 落ちた理由 |
@@ -13,15 +13,36 @@
 // どちらも「書いた時点」 では気付けず、実行して初めて分かる。 e2e は重いので
 // 日常的には走らせない = 落ちたまま残る。 静的に見つかる形なら書いた時点で止まる。
 //
-// ## 何を見ないか
+// ## 何を見ないか — 静的層と実行層の責務境界
 //
-// EIP-55 の checksum そのものは検証しない。 keccak256 が要り、この workspace に
+// **`about:blank` という文字列が出てこないまま null origin になる形は見ない。**
+// `newPage()` の初期 URL が `about:blank` なので、非 blank へ 1 度も遷移しない spec も、
+// `newPage()` した page を遷移させないまま使う spec も null origin になる。
+//
+// これを静的に判定するには lexical scope を追い、helper の呼出で実引数を仮引数へ
+// 対応付け、`var` と `let` の scope を区別する = **関数間の静的解析**が要る。
+// 実際に試して 3 round 回したが、round ごとに解析の精度についての指摘が出続けた
+// (名前で対応付けると両方向に外れる → binding ごとに直す → helper の本体を
+//  定義位置で見ている → 呼出位置で見る → `var` の scope が違う …)。
+// 解析部は 213 行まで伸び、その間 **実データ側の検出は 0 件のまま**だった。
+//
+// `rules/quality.md § 契約完備性 checklist § 責務境界` が同じ形を記録している
+// (hook 110 の静的 shell 解析が 6 round 収束せず、静的層を判定できる範囲へ絞って
+//  残りを実 runtime verify 層へ移す SPLIT を採った)。 ここも同じ判断を採る。
+//
+// | 層 | 担当 |
+// |---|---|
+// | 静的層 (本 file) | `goto('about:blank')` を明示的に呼ぶ形。 構文木で決定できる |
+// | 実行層 (e2e 自体) | null origin から `fetch` する形すべて。 送出時に `Failed to fetch` で落ちる |
+//
+// 実行層が実際に効くことは実測で分かっている。 **#2112 の 2 件はまさにそれで見つけた**。
+// 静的層が見ない形も、その spec を 1 度でも走らせれば同じ失敗として現れる。
+//
+// EIP-55 の checksum そのものも検証しない。 keccak256 が要り、この workspace に
 // 新しい依存を足すことになるため。 代わりに **同じ address が 2 通りの綴りで
 // 書かれていないこと** を見る (#2112 の実物はこの形で、正しい綴りが別の 3 file に
 // 既にあった)。 1 度しか出てこない誤った綴りは、この検査では捕まらない。
-//
-// 実際の checksum 違反は reorg の e2e が実行時に落として捕まえる
-// (変異試験 R1 で確認済 = 綴りを戻すと `InvalidAddressError` で落ちる)。
+// これも実行層が捕まえる (変異試験 R1 で確認済 = 綴りを戻すと `InvalidAddressError`)。
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -52,69 +73,31 @@ function e2eSpecs(): string[] {
 interface SpecFacts {
   /** `page.goto('about:blank')` を呼んでいるか (コメント内の文字列は数えない)。 */
   gotoBlank: boolean;
-  /** `about:blank` 以外へ明示的に遷移しているか。 */
-  gotoNonBlank: boolean;
   /** `evaluate(...)` に渡す関数の中で `fetch(...)` を呼んでいるか。 */
   fetchInEvaluate: boolean;
-  /** `newPage()` したのに `about:blank` 以外へ遷移していない page 変数。 */
-  unnavigatedPages: string[];
 }
 
 /**
  * 構文木から事実を取る。 source 文字列の検索では、コメントに書いた説明文が
  * そのまま一致してしまう (本 file 自身と、修正した 2 spec のコメントが該当する)。
+ *
+ * 見るのは呼出の形だけで、どの page がどの時点でどこに居るかは追わない
+ * (責務境界は本 file 冒頭)。
  */
 export function readSpecFacts(source: string): SpecFacts {
   const parsed = ts.createSourceFile('spec.ts', source, ts.ScriptTarget.Latest, true);
   let gotoBlank = false;
-  let gotoNonBlank = false;
   let fetchInEvaluate = false;
-  interface PageBinding {
-    name: string;
-    navigated: boolean;
-  }
-  const scopes: Map<string, PageBinding | undefined>[] = [new Map()];
-  const unnavigatedPages = new Set<string>();
-
-  const stringValue = (node: ts.Node): string | undefined =>
-    ts.isStringLiteralLike(node) ? node.text : undefined;
-
-  const unwrapCall = (node: ts.Expression | undefined): ts.CallExpression | undefined => {
-    if (node === undefined) return undefined;
-    const expression = ts.isAwaitExpression(node) ? node.expression : node;
-    return ts.isCallExpression(expression) ? expression : undefined;
-  };
-
-  const isMethodCall = (node: ts.CallExpression, method: string): boolean =>
-    ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === method;
-
-  const bindNames = (name: ts.BindingName, binding: PageBinding | undefined): void => {
-    if (ts.isIdentifier(name)) {
-      scopes.at(-1)?.set(name.text, binding);
-      return;
-    }
-    for (const element of name.elements) {
-      if (!ts.isOmittedExpression(element)) bindNames(element.name, binding);
-    }
-  };
-
-  const pageBinding = (name: string): PageBinding | undefined => {
-    for (let index = scopes.length - 1; index >= 0; index -= 1) {
-      const scope = scopes[index];
-      if (scope?.has(name)) return scope.get(name);
-    }
-    return undefined;
-  };
 
   const callsFetch = (node: ts.Node): boolean => {
     let found = false;
     const scan = (n: ts.Node): void => {
       if (found) return;
       if (ts.isCallExpression(n)) {
-        const expression = n.expression;
+        const callee = n.expression;
         if (
-          (ts.isIdentifier(expression) && expression.text === 'fetch') ||
-          (ts.isPropertyAccessExpression(expression) && expression.name.text === 'fetch')
+          (ts.isIdentifier(callee) && callee.text === 'fetch') ||
+          (ts.isPropertyAccessExpression(callee) && callee.name.text === 'fetch')
         ) {
           found = true;
           return;
@@ -126,70 +109,33 @@ export function readSpecFacts(source: string): SpecFacts {
     return found;
   };
 
-  const walk = (node: ts.Node, root = false): void => {
-    const opensScope = !root && (ts.isFunctionLike(node) || ts.isBlock(node));
-    if (opensScope) scopes.push(new Map());
-    if (ts.isFunctionLike(node)) {
-      for (const parameter of node.parameters) bindNames(parameter.name, undefined);
-    }
-    if (ts.isVariableDeclaration(node)) {
-      const call = unwrapCall(node.initializer);
-      const binding =
-        ts.isIdentifier(node.name) && call !== undefined && isMethodCall(call, 'newPage')
-          ? { name: node.name.text, navigated: false }
-          : undefined;
-      bindNames(node.name, binding);
-    }
+  const walk = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
       const method = node.expression.name.text;
-      const receiver = node.expression.expression;
-      const binding = ts.isIdentifier(receiver) ? pageBinding(receiver.text) : undefined;
       const [first] = node.arguments;
-      if (method === 'goto' && first !== undefined) {
-        const destination = stringValue(first);
-        if (destination === 'about:blank') {
-          gotoBlank = true;
-          if (binding !== undefined) binding.navigated = false;
-        } else {
-          gotoNonBlank = true;
-          if (binding !== undefined) binding.navigated = true;
-        }
+      // `goto(\`about:blank\`)` の形も拾うため `isStringLiteralLike` で見る
+      // (置換を持たない template literal は文字列 literal と同じ)。
+      if (method === 'goto' && first !== undefined && ts.isStringLiteralLike(first)) {
+        if (first.text === 'about:blank') gotoBlank = true;
       }
       if (method === 'evaluate' && node.arguments.some((arg) => callsFetch(arg))) {
         fetchInEvaluate = true;
-        if (binding !== undefined && !binding.navigated) unnavigatedPages.add(binding.name);
       }
     }
-    ts.forEachChild(node, (child) => walk(child));
-    if (opensScope) scopes.pop();
+    ts.forEachChild(node, walk);
   };
-  walk(parsed, true);
-  return {
-    gotoBlank,
-    gotoNonBlank,
-    fetchInEvaluate,
-    unnavigatedPages: [...unnavigatedPages].sort(),
-  };
+  walk(parsed);
+  return { gotoBlank, fetchInEvaluate };
 }
 
 /**
  * その spec が違反かを判定する。
  *
- * `evaluate` 内で `fetch` する spec は、投げる前にページが test 内 server と同じ origin に
- * 居なければならない。 null origin になる形は 3 つある。
- *
- * | 形 | 判定 |
- * |---|---|
- * | `goto('about:blank')` を明示的に呼ぶ | `gotoBlank` |
- * | 非 blank へ 1 度も遷移しない | `!gotoNonBlank` |
- * | `newPage()` した page を遷移させないまま使う | `unnavigatedPages` |
- *
- * 2 つ目と 3 つ目は **`about:blank` という文字列がどこにも出てこない**。
- * `newPage()` の初期 URL が `about:blank` だからで、明示的な呼出だけを見ると取りこぼす。
+ * `evaluate` 内で `fetch` する spec が、ページを `about:blank` に明示的に置いている形だけを
+ * 違反とみなす。 暗黙に null origin になる形は実行層の担当 (責務境界は本 file 冒頭)。
  */
 export function isOffender(facts: SpecFacts): boolean {
-  if (!facts.fetchInEvaluate) return false;
-  return facts.gotoBlank || !facts.gotoNonBlank || facts.unnavigatedPages.length > 0;
+  return facts.fetchInEvaluate && facts.gotoBlank;
 }
 
 /** 大小が混ざった address literal = EIP-55 の checksum を主張している綴り。 */
@@ -256,9 +202,7 @@ describe('e2e の spec が about:blank から fetch していない', () => {
   });
 
   it('evaluate 内で fetch する spec がページを about:blank に置いていない', () => {
-    const offenders = facts
-      .filter(([, f]) => isOffender(f))
-      .map(([file, f]) => ({ file, unnavigatedPages: f.unnavigatedPages }));
+    const offenders = facts.filter(([, f]) => isOffender(f)).map(([file]) => file);
     expect(
       offenders,
       'about:blank は null origin で、そこからの fetch は cross-origin になる。' +
@@ -266,21 +210,10 @@ describe('e2e の spec が about:blank から fetch していない', () => {
     ).toEqual([]);
   });
 
-  it('null origin になる 3 つの形をすべて違反とみなす', () => {
-    const base = { gotoBlank: false, gotoNonBlank: true, fetchInEvaluate: true, unnavigatedPages: [] };
-    // 明示的に about:blank へ置く
-    expect(isOffender({ ...base, gotoBlank: true }), '明示的な about:blank').toBe(true);
-    // 非 blank へ 1 度も遷移しない (newPage の初期 URL が about:blank のまま)
-    expect(isOffender({ ...base, gotoNonBlank: false }), '非 blank へ未遷移').toBe(true);
-    // newPage した page を遷移させないまま使う
-    expect(isOffender({ ...base, unnavigatedPages: ['pageB'] }), '未遷移の page').toBe(true);
-    // 同じ origin へ遷移していれば違反でない
-    expect(isOffender(base), '非 blank へ遷移済').toBe(false);
-    // fetch しない spec はそもそも対象外
-    expect(
-      isOffender({ ...base, fetchInEvaluate: false, gotoBlank: true }),
-      'evaluate 内で fetch しない spec は対象外',
-    ).toBe(false);
+  it('違反は evaluate 内の fetch と about:blank が揃った時だけ', () => {
+    expect(isOffender({ gotoBlank: true, fetchInEvaluate: true }), '両方揃う').toBe(true);
+    expect(isOffender({ gotoBlank: true, fetchInEvaluate: false }), 'fetch しない').toBe(false);
+    expect(isOffender({ gotoBlank: false, fetchInEvaluate: true }), 'about:blank へ置かない').toBe(false);
   });
 
   it('コメントに書いた about:blank を実物と取り違えない', () => {
@@ -291,117 +224,33 @@ describe('e2e の spec が about:blank から fetch していない', () => {
       '  await page.evaluate(async () => { await fetch("/x"); });',
       '}',
     ].join('\n');
-    expect(readSpecFacts(source)).toEqual({
-      gotoBlank: false,
-      gotoNonBlank: true,
-      fetchInEvaluate: true,
-      unnavigatedPages: [],
-    });
+    expect(readSpecFacts(source)).toEqual({ gotoBlank: false, fetchInEvaluate: true });
   });
 
-  it('明示・暗黙の about:blank は取りこぼさない', () => {
-    const explicit = "async function run(page) { await page.goto(`about:blank`); }";
-    expect(readSpecFacts(explicit).gotoBlank).toBe(true);
-
-    const implicit = [
-      'async function run(context) {',
-      '  const page = await context.newPage();',
-      '  await page.evaluate(async () => fetch("/x"));',
-      '}',
-    ].join('\n');
-    expect(readSpecFacts(implicit)).toMatchObject({
-      gotoNonBlank: false,
-      fetchInEvaluate: true,
-      unnavigatedPages: ['page'],
-    });
+  it('実物の about:blank は、引用符でも template literal でも取りこぼさない', () => {
+    expect(readSpecFacts("async function r(p) { await p.goto('about:blank'); }").gotoBlank).toBe(true);
+    expect(readSpecFacts('async function r(p) { await p.goto(`about:blank`); }').gotoBlank).toBe(true);
   });
 
-  it('newPage の遷移状態を binding ごとに判定する', () => {
-    const source = [
-      'async function valid(context) {',
-      '  const page = await context.newPage();',
-      "  await page.goto('https://example.test/');",
-      '}',
-      'async function invalid(context) {',
-      '  const page = await context.newPage();',
-      '  await page.evaluate(async () => fetch("/x"));',
-      '}',
-    ].join('\n');
-    expect(readSpecFacts(source).unnavigatedPages).toEqual(['page']);
+  it('property access 形式の fetch も evaluate 内の fetch として数える', () => {
+    const source = 'async function r(p) { await p.evaluate(async () => globalThis.fetch("/x")); }';
+    expect(readSpecFacts(source).fetchInEvaluate).toBe(true);
   });
 
-  it('内側の block が同名を宣言しても外側の page を遷移済と誤認しない', () => {
-    // 内側で別の page を立てて遷移させても、外側の page は遷移していない。
-    // binding を scope ごとに分けないと、内側の遷移が外側を上書きして見逃す。
-    const source = [
-      'async function outer(context) {',
-      '  const page = await context.newPage();',
-      '  {',
-      '    const page = await context.newPage();',
-      "    await page.goto('https://example.test/');",
-      '  }',
-      '  await page.evaluate(async () => fetch("/x"));',
-      '}',
-    ].join('\n');
-    expect(readSpecFacts(source).unnavigatedPages).toEqual(['page']);
-  });
-
-  it('引数で受けた同名の page への遷移を、外側の page の遷移と混同しない', () => {
-    // 実物の spec がこの形をしている (`postJson(page, ...)` を test の中に定義する)。
-    // 引数を binding として登録しないと、helper 内の遷移が外側の page を遷移済にする。
-    const source = [
-      'async function outer(context) {',
-      '  const page = await context.newPage();',
-      "  async function helper(page) { await page.goto('https://example.test/'); }",
-      '  await helper(page);',
-      '  await page.evaluate(async () => fetch("/x"));',
-      '}',
-    ].join('\n');
-    expect(readSpecFacts(source).unnavigatedPages).toEqual(['page']);
-  });
-
-  it('外側の scope で宣言した page への遷移を、内側の block から辿れる', () => {
-    // 遷移だけが内側の block にある形。 最も内側の scope しか見ないと
-    // 遷移を記録し損ね、遷移済の page を違反にしてしまう。
+  it('暗黙の null origin は静的層では見ない (責務境界)', () => {
+    // `newPage()` の初期 URL が `about:blank` なので、この spec も null origin から
+    // `fetch` する。 静的に判定するには関数間の解析が要るため実行層に任せる。
+    // **見ないことを固定する** = 将来ここを変える時に、境界を動かしたと分かるようにする。
     const source = [
       'async function run(context) {',
       '  const page = await context.newPage();',
-      '  {',
-      "    await page.goto('https://example.test/');",
-      '  }',
       '  await page.evaluate(async () => fetch("/x"));',
       '}',
     ].join('\n');
-    expect(readSpecFacts(source).unnavigatedPages).toEqual([]);
-  });
-
-  it('遷移した後に about:blank へ戻した page を、戻した側として名指しする', () => {
-    // `gotoBlank` は spec 全体で 1 つなので、どの page が原因かは伝わらない。
-    // 遷移済を打ち消さないと、直す人に渡る名前が抜ける。
-    const source = [
-      'async function run(context) {',
-      '  const pageA = await context.newPage();',
-      "  await pageA.goto('https://example.test/');",
-      '  const pageB = await context.newPage();',
-      "  await pageB.goto('https://example.test/');",
-      "  await pageB.goto('about:blank');",
-      '  await pageA.evaluate(async () => fetch("/x"));',
-      '  await pageB.evaluate(async () => fetch("/x"));',
-      '}',
-    ].join('\n');
-    expect(readSpecFacts(source).unnavigatedPages).toEqual(['pageB']);
-  });
-
-  it('fetch に使わない未遷移の newPage は違反にしない', () => {
-    const source = [
-      'async function run(context, page) {',
-      '  const auxiliary = await context.newPage();',
-      "  await page.goto('https://example.test/');",
-      '  await page.evaluate(async () => fetch("/x"));',
-      '  await auxiliary.close();',
-      '}',
-    ].join('\n');
-    expect(isOffender(readSpecFacts(source))).toBe(false);
+    const facts = readSpecFacts(source);
+    expect(facts.fetchInEvaluate, 'fetch は見えている').toBe(true);
+    expect(facts.gotoBlank, 'about:blank の文字列は出てこない').toBe(false);
+    expect(isOffender(facts), '静的層は違反にしない (実行層の担当)').toBe(false);
   });
 });
 
@@ -470,6 +319,13 @@ describe('address の綴りが 1 通りに揃っている', () => {
     ]);
     const spellings = found.get('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266');
     expect(spellings?.size).toBe(1);
+  });
+
+  it('markdown は構文木を持たないので source 全体を見る', () => {
+    const found = collectChecksumSpellings([
+      ['doc.md', '本文中の 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 も対象にする。'],
+    ]);
+    expect(found.get('0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266')?.size).toBe(1);
   });
 
   it('1 度しか出てこない誤った綴りは、明記した限界どおり conflict にしない', () => {
