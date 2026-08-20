@@ -1,10 +1,11 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setupLuciaEnv, type LuciaTestEnv } from '@kiwa-lab/auth';
 import { createProtectedRoute, type ProtectedProfile } from '../src/route.js';
 
 const envs: LuciaTestEnv[] = [];
 
 afterEach(async () => {
+  vi.useRealTimers();
   while (envs.length > 0) {
     const env = envs.pop();
     if (env) await env.stop();
@@ -14,7 +15,11 @@ afterEach(async () => {
 async function callProtected(
   env: LuciaTestEnv,
   sessionId: string,
-): Promise<{ status: number; body: ProtectedProfile | { error: string }; rotated: string | null }> {
+): Promise<{
+  status: number;
+  body: ProtectedProfile | { error: string };
+  renewedSessionId: string | null;
+}> {
   const handler = createProtectedRoute(env);
   const res = await handler(
     new Request('http://kiwa.test/api/me', {
@@ -22,7 +27,11 @@ async function callProtected(
     }),
   );
   const body = (await res.json()) as ProtectedProfile | { error: string };
-  return { status: res.status, body, rotated: res.headers.get('x-session-rotated') };
+  return {
+    status: res.status,
+    body,
+    renewedSessionId: res.headers.get('x-session-rotated'),
+  };
 }
 
 describe('lucia PoC — password auth on sqlite adapter', () => {
@@ -46,13 +55,16 @@ describe('lucia PoC — password auth on sqlite adapter', () => {
     expect((res.body as { error: string }).error).toBe('missing session');
   });
 
-  it('T-LUCIA-003 rejects a wrong password without leaking whether the user exists', async () => {
+  it('T-LUCIA-003 uses the same generic error for a wrong password and an unknown email', async () => {
     const env = await setupLuciaEnv();
     envs.push(env);
     await env.signUpWithPassword({ email: 'bob@example.test', password: 'hunter2' });
     await expect(
       env.signInWithPassword({ email: 'bob@example.test', password: 'wrong' }),
-    ).rejects.toThrow(/invalid email or password/);
+    ).rejects.toThrow(/^signInWithPassword: invalid email or password$/);
+    await expect(
+      env.signInWithPassword({ email: 'unknown@example.test', password: 'wrong' }),
+    ).rejects.toThrow(/^signInWithPassword: invalid email or password$/);
   });
 });
 
@@ -69,7 +81,7 @@ describe('lucia PoC — oauth flows', () => {
     expect((res.body as ProtectedProfile).email).toBe('carol@example.test');
   });
 
-  it('T-LUCIA-005 github sign-in reuses a password user with the same email', async () => {
+  it('T-LUCIA-005 trusted github mock reuses a password user with the same email', async () => {
     const env = await setupLuciaEnv();
     envs.push(env);
     const pwd = await env.signUpWithPassword({
@@ -85,18 +97,22 @@ describe('lucia PoC — oauth flows', () => {
 });
 
 describe('lucia PoC — session lifecycle', () => {
-  it('T-LUCIA-006 rolling session expiry rewrites the session id on refresh', async () => {
+  it('T-LUCIA-006 rolling expiry renewal returns the existing session id', async () => {
     const env = await setupLuciaEnv({ sessionExpiration: 100 });
     envs.push(env);
     const signed = await env.signUpWithPassword({ email: 'eve@example.test', password: 'p' });
     // Push the session into the refresh window without waiting on the clock.
+    const shortenedExpiresAt = new Date(Date.now() + 10 * 1000);
     await env.database.updateSession({
       id: signed.session.id,
-      expiresAt: new Date(Date.now() + 10 * 1000),
+      expiresAt: shortenedExpiresAt,
     });
     const res = await callProtected(env, signed.session.id);
     expect(res.status).toBe(200);
-    expect(res.rotated).toBe(signed.session.id);
+    expect(res.renewedSessionId).toBe(signed.session.id);
+    expect(
+      (await env.database.getSession(signed.session.id))?.expiresAt.getTime(),
+    ).toBeGreaterThan(shortenedExpiresAt.getTime());
   });
 
   it('T-LUCIA-007 invalidateSession invalidates the token on the next request', async () => {
@@ -123,5 +139,123 @@ describe('lucia PoC — postgresql adapter compat', () => {
     const res = await callProtected(env, signed.session.id);
     expect(res.status).toBe(200);
     expect((res.body as ProtectedProfile).email).toBe('grace@example.test');
+  });
+});
+
+describe('lucia PoC — session id の取り出し', () => {
+  it('T-LUCIA-009 falls back to the query string when the header is absent', async () => {
+    const env = await setupLuciaEnv();
+    envs.push(env);
+    const signed = await env.signUpWithPassword({ email: 'hana@example.test', password: 'p' });
+    const handler = createProtectedRoute(env);
+    const res = await handler(
+      new Request(`http://kiwa.test/api/me?session=${signed.session.id}`),
+    );
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as ProtectedProfile).email).toBe('hana@example.test');
+  });
+
+  it('T-LUCIA-010 an empty header hides the query string value', async () => {
+    // `??` は null でしか次へ進まない。 header が空文字で存在すると query は読まれない。
+    const env = await setupLuciaEnv();
+    envs.push(env);
+    const signed = await env.signUpWithPassword({ email: 'ian@example.test', password: 'p' });
+    const handler = createProtectedRoute(env);
+    const res = await handler(
+      new Request(`http://kiwa.test/api/me?session=${signed.session.id}`, {
+        headers: { 'x-session-id': '' },
+      }),
+    );
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as { error: string }).error).toBe('missing session');
+  });
+});
+
+describe('lucia PoC — 検証の失敗', () => {
+  it('T-LUCIA-011 rejects an unknown session id', async () => {
+    const env = await setupLuciaEnv();
+    envs.push(env);
+    const res = await callProtected(env, 'nope');
+    expect(res.status).toBe(401);
+    expect((res.body as { error: string }).error).toBe('invalid session');
+  });
+
+  it('T-LUCIA-012 deletes the row when the session has expired', async () => {
+    const env = await setupLuciaEnv({ sessionExpiration: 100 });
+    envs.push(env);
+    const signed = await env.signUpWithPassword({ email: 'jun@example.test', password: 'p' });
+    await env.database.updateSession({
+      id: signed.session.id,
+      expiresAt: new Date(Date.now() - 1000),
+    });
+    const res = await callProtected(env, signed.session.id);
+    expect(res.status).toBe(401);
+    expect((res.body as { error: string }).error).toBe('invalid session');
+    // status だけでは削除漏れと区別が付かない。 行が消えたことも確かめる。
+    expect(await env.database.getSession(signed.session.id)).toBeNull();
+  });
+
+  it('T-LUCIA-017 deletes an orphan session when its user no longer exists', async () => {
+    const env = await setupLuciaEnv();
+    envs.push(env);
+    const signed = await env.signUpWithPassword({ email: 'mio@example.test', password: 'p' });
+    await env.database.updateSession({
+      id: signed.session.id,
+      userId: 'deleted-user',
+    });
+    const res = await callProtected(env, signed.session.id);
+    expect(res.status).toBe(401);
+    expect((res.body as { error: string }).error).toBe('invalid session');
+    expect(await env.database.getSession(signed.session.id)).toBeNull();
+  });
+
+  it('T-LUCIA-018 rejects an unknown session id supplied through the query string', async () => {
+    const env = await setupLuciaEnv();
+    envs.push(env);
+    const handler = createProtectedRoute(env);
+    const res = await handler(new Request('http://kiwa.test/api/me?session=nope'));
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as { error: string }).error).toBe('invalid session');
+  });
+});
+
+describe('lucia PoC — rolling expiry 更新の境界', () => {
+  it('T-LUCIA-013 does not renew a freshly issued session', async () => {
+    const env = await setupLuciaEnv();
+    envs.push(env);
+    const signed = await env.signUpWithPassword({ email: 'kei@example.test', password: 'p' });
+    const res = await callProtected(env, signed.session.id);
+    expect(res.status).toBe(200);
+    expect(res.renewedSessionId).toBeNull();
+  });
+
+  it('T-LUCIA-014 does not renew at exactly half the lifetime', async () => {
+    // 判定は `remaining < totalMs / 2` の狭義の不等号。 ちょうど半分は延長しない。
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    const env = await setupLuciaEnv({ sessionExpiration: 100 });
+    envs.push(env);
+    const signed = await env.signUpWithPassword({ email: 'leo@example.test', password: 'p' });
+    await env.database.updateSession({
+      id: signed.session.id,
+      expiresAt: new Date(Date.now() + 50 * 1000),
+    });
+    const res = await callProtected(env, signed.session.id);
+    expect(res.status).toBe(200);
+    expect(res.renewedSessionId).toBeNull();
+  });
+});
+
+describe('lucia PoC — 引数の検証', () => {
+  it('T-LUCIA-015 refuses to build with an empty provider list', async () => {
+    await expect(setupLuciaEnv({ providers: [] })).rejects.toThrow(
+      /providers must contain at least one entry/,
+    );
+  });
+
+  it('T-LUCIA-016 refuses a non-positive session lifetime', async () => {
+    await expect(setupLuciaEnv({ sessionExpiration: 0 })).rejects.toThrow(
+      /sessionExpiration must be a positive number of seconds/,
+    );
   });
 });
