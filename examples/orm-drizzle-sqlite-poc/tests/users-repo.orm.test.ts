@@ -1,8 +1,7 @@
 // PoC tests — kiwa-test/orm + Drizzle + SQLite。
-// 8 test で UsersRepository の正常系 / 異常系 / FK cascade / unique 衝突 / 並行 env 隔離 を cover。
+// 18 test で UsersRepository の正常系 / 異常系 / FK cascade / schema 制約 / 並行 env 隔離を cover。
 
 import { afterEach, describe, expect, it } from 'vitest';
-import { eq } from 'drizzle-orm';
 import { setupOrmEnv, expectRowCount } from '@kiwa-lab/orm';
 import type { OrmTestEnv } from '@kiwa-lab/orm';
 import { posts, schema, type Schema } from '../src/schema.js';
@@ -88,7 +87,7 @@ describe('UsersRepository via @kiwa-lab/orm', () => {
     expect(remaining[0]?.authorId).toBe(2);
   });
 
-  it('T-POC-006: drizzle eq filter で email 検索 (case-sensitive)', async () => {
+  it('T-POC-006: findByEmail は email を case-sensitive に検索する', async () => {
     env = await setupOrmEnv({
       mode: 'mock',
       orm: 'drizzle',
@@ -99,8 +98,13 @@ describe('UsersRepository via @kiwa-lab/orm', () => {
         db.insert(schema.users).values({ id: 1, email: 'alice@example.com', displayName: 'Alice' }).run();
       },
     });
-    expect(env.db.select().from(schema.users).where(eq(schema.users.email, 'ALICE@EXAMPLE.COM')).all().length).toBe(0);
-    expect(env.db.select().from(schema.users).where(eq(schema.users.email, 'alice@example.com')).all().length).toBe(1);
+    const repo = new UsersRepository(env.db);
+    expect(repo.findByEmail('ALICE@EXAMPLE.COM')).toBeNull();
+    expect(repo.findByEmail('alice@example.com')).toEqual({
+      id: 1,
+      email: 'alice@example.com',
+      displayName: 'Alice',
+    });
   });
 
   it('T-POC-007: orphan post (存在しない author_id) は FK 制約で reject', async () => {
@@ -135,8 +139,8 @@ describe('UsersRepository via @kiwa-lab/orm', () => {
         db.insert(schema.users).values({ id: 1, email: 'a@x', displayName: 'Alice in B' }).run();
       },
     });
-    expect(envA.db.select().from(schema.users).all()[0]?.displayName).toBe('Alice in A');
-    expect(envB.db.select().from(schema.users).all()[0]?.displayName).toBe('Alice in B');
+    expect(new UsersRepository(envA.db).findByEmail('a@x')?.displayName).toBe('Alice in A');
+    expect(new UsersRepository(envB.db).findByEmail('a@x')?.displayName).toBe('Alice in B');
     await envA.stop();
     await envB.stop();
   });
@@ -191,15 +195,16 @@ describe('schema の既定値と NOT NULL', () => {
   });
 
   it('T-POC-012: email が NOT NULL', async () => {
-    env = await setupOrmEnv({
+    const drizzle = await setupOrmEnv({
       mode: 'mock',
       orm: 'drizzle',
       dialect: 'sqlite',
       schema,
       migrations: INITIAL_MIGRATION,
     });
+    env = drizzle;
     expect(() =>
-      env!.db
+      drizzle.db
         .insert(schema.users)
         .values({ id: 1, email: null, displayName: 'A' } as never)
         .run(),
@@ -208,19 +213,97 @@ describe('schema の既定値と NOT NULL', () => {
 
   it('T-POC-013: display_name が NOT NULL', async () => {
     // 列ごとに分ける。 まとめると片方の NOT NULL が外れても気付けない。
-    env = await setupOrmEnv({
+    const drizzle = await setupOrmEnv({
       mode: 'mock',
       orm: 'drizzle',
       dialect: 'sqlite',
       schema,
       migrations: INITIAL_MIGRATION,
     });
+    env = drizzle;
     expect(() =>
-      env!.db
+      drizzle.db
         .insert(schema.users)
         .values({ id: 1, email: 'a@x', displayName: null } as never)
         .run(),
     ).toThrow(/NOT NULL constraint failed: users\.display_name/);
+  });
+});
+
+describe('posts schema の制約', () => {
+  it('T-POC-015: 重複 post id は主キー制約で送出する', async () => {
+    const drizzle = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: INITIAL_MIGRATION,
+      seed: (db) => {
+        db.insert(schema.users).values({ id: 1, email: 'a@x', displayName: 'A' }).run();
+        db.insert(schema.posts).values({ id: 10, authorId: 1, title: 'p1', published: false }).run();
+      },
+    });
+    env = drizzle;
+    expect(() =>
+      drizzle.db.insert(schema.posts).values({ id: 10, authorId: 1, title: 'p2', published: true }).run(),
+    ).toThrow(/UNIQUE constraint failed: posts\.id/);
+  });
+
+  it('T-POC-016: author_id が NOT NULL', async () => {
+    const drizzle = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: INITIAL_MIGRATION,
+    });
+    env = drizzle;
+    expect(() =>
+      drizzle.db
+        .insert(schema.posts)
+        .values({ id: 10, authorId: null, title: 'p1', published: false } as never)
+        .run(),
+    ).toThrow(/NOT NULL constraint failed: posts\.author_id/);
+  });
+
+  it('T-POC-017: title が NOT NULL', async () => {
+    const drizzle = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: INITIAL_MIGRATION,
+      seed: (db) => {
+        db.insert(schema.users).values({ id: 1, email: 'a@x', displayName: 'A' }).run();
+      },
+    });
+    env = drizzle;
+    expect(() =>
+      drizzle.db
+        .insert(schema.posts)
+        .values({ id: 10, authorId: 1, title: null, published: false } as never)
+        .run(),
+    ).toThrow(/NOT NULL constraint failed: posts\.title/);
+  });
+
+  it('T-POC-018: published が NOT NULL', async () => {
+    const drizzle = await setupOrmEnv({
+      mode: 'mock',
+      orm: 'drizzle',
+      dialect: 'sqlite',
+      schema,
+      migrations: INITIAL_MIGRATION,
+      seed: (db) => {
+        db.insert(schema.users).values({ id: 1, email: 'a@x', displayName: 'A' }).run();
+      },
+    });
+    env = drizzle;
+    expect(() =>
+      drizzle.db
+        .insert(schema.posts)
+        .values({ id: 10, authorId: 1, title: 'p1', published: null } as never)
+        .run(),
+    ).toThrow(/NOT NULL constraint failed: posts\.published/);
   });
 });
 

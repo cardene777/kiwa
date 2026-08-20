@@ -1,7 +1,7 @@
 # test-spec-users-repo (orm-query layer)
 
 `src/users-repo.ts` の `UsersRepository` が Drizzle 越しに行う
-登録 / 検索 / 連鎖削除を対象にする。
+登録 / 検索 / 連鎖削除と、その前提になる schema / migration の制約を対象にする。
 
 `setupOrmEnv` が返す `db` をそのまま渡せるため、本番と同じ class を
 実 DB なしで動かせる。
@@ -27,7 +27,9 @@
 | `users` | `id` | 主キー |
 | `users` | `email` | `NOT NULL` かつ一意 |
 | `users` | `display_name` | `NOT NULL` |
+| `posts` | `id` | 主キー |
 | `posts` | `author_id` | `NOT NULL`、`users.id` への外部キー (`ON DELETE CASCADE`) |
+| `posts` | `title` | `NOT NULL` |
 | `posts` | `published` | `NOT NULL`、既定 `false` (Drizzle 側と SQL 側の両方に宣言がある) |
 
 ### 登録が捕まえる例外は 1 種類だけ
@@ -46,8 +48,8 @@
 
 ### 検索
 
-`findByEmail` は完全一致で引く。`eq` は大小を区別するため、
-大文字にした同じ綴りは `null` になる。
+`findByEmail` は完全一致で引く。現在の SQLite schema は `NOCASE` collation を
+指定していないため、大文字にした同じ綴りは `null` になる。
 
 一致が無ければ `null`、あれば先頭の行を返す。
 
@@ -92,11 +94,11 @@ Drizzle 経由で列を省いて挿入すると、Drizzle が値を明示的に�
 | # | 観点 | 対象 |
 |---|---|---|
 | 1 | 登録と検索 | 往復、存在しない値 |
-| 2 | 一意制約 | `email` の重複、`id` の重複 |
+| 2 | 一意制約 / 主キー | `email` の重複、`users.id` / `posts.id` の重複 |
 | 3 | 連鎖削除 | 件数、他 user への非波及、存在しない id |
 | 4 | 外部キー | 存在しない author を持つ post |
 | 5 | 既定値 | `published` |
-| 6 | NOT NULL | `email` / `display_name` |
+| 6 | NOT NULL | `email` / `display_name` / `author_id` / `title` / `published` |
 | 7 | 隔離 | 並行 env |
 
 ## テストケース一覧
@@ -117,6 +119,10 @@ Drizzle 経由で列を省いて挿入すると、Drizzle が値を明示的に�
 | T-POC-012 | `email` が `NOT NULL` | 空の DB | insert | `email: null` で挿入 | `/NOT NULL constraint failed: users\.email/` を送出 | P2 | yes | users |
 | T-POC-013 | `display_name` が `NOT NULL` | 空の DB | insert | `displayName: null` で挿入 | `/NOT NULL constraint failed: users\.display_name/` を送出 | P2 | yes | users |
 | T-POC-014 | SQL 側の既定も偽である | user 1 が登録済 | raw SQL | 列を省いた `INSERT` を raw で実行 | 引いた行の `published===0` | P2 | yes | posts |
+| T-POC-015 | `posts.id` が主キー | id 10 の post が登録済 | insert | 同じ id で post を挿入 | `/UNIQUE constraint failed: posts\.id/` を送出 | P2 | yes | posts |
+| T-POC-016 | `author_id` が `NOT NULL` | 空の DB | insert | `authorId: null` で挿入 | `/NOT NULL constraint failed: posts\.author_id/` を送出 | P2 | yes | posts |
+| T-POC-017 | `title` が `NOT NULL` | user 1 が登録済 | insert | `title: null` で挿入 | `/NOT NULL constraint failed: posts\.title/` を送出 | P2 | yes | posts |
+| T-POC-018 | `published` が `NOT NULL` | user 1 が登録済 | insert | `published: null` で挿入 | `/NOT NULL constraint failed: posts\.published/` を送出 | P2 | yes | posts |
 
 ## 自動化方針
 
@@ -128,8 +134,8 @@ Drizzle 経由で列を省いて挿入すると、Drizzle が値を明示的に�
 同じ一意制約でも `users.id` は素通しする。
 正規表現を列名なしへ広げる変異で落ちる向きになる。
 
-**T-POC-012 / 013 は列ごとに分ける。**
-まとめて 1 件にすると、片方の `NOT NULL` が外れても気付けない。
+**T-POC-012 / 013 / 016 / 017 / 018 は列ごとに分ける。**
+まとめると、一部の `NOT NULL` が外れても気付けない。
 
 **T-POC-011 と T-POC-014 は別の既定を見る。**
 011 は Drizzle 側、014 は SQL 側。 Drizzle 経由の挿入では SQL 側の既定が
@@ -137,7 +143,7 @@ Drizzle 経由で列を省いて挿入すると、Drizzle が値を明示的に�
 
 ## 自動化すべきテスト
 
-- T-POC-001 〜 T-POC-014 全件自動化推奨
+- T-POC-001 〜 T-POC-018 全件自動化推奨
 - 実時間を待つものは無い
 
 ## 手動確認でよいテスト
@@ -154,6 +160,15 @@ Drizzle 経由で列を省いて挿入すると、Drizzle が値を明示的に�
 - 検索が大小を区別する。 メールアドレスの照合として意図した挙動かが未定義
 - 捕まえる例外が `users.email` の一意制約だけである。 他の制約違反
   (`users.id` の重複、`NOT NULL`、外部キー) を呼出側でどう扱うかが未定義
+- `deleteCascading` の件数取得と user 削除は別 statement で、明示 transaction はない。
+  複数 connection から同時更新された場合に、どの時点の件数を保証するかが未定義
+- SQLite の `UNIQUE` は通常 `NULL` 同士を重複とみなさないが、`users.email` は
+  `NOT NULL` が先に拒否するため、この schema では NULL の一意性は観測できない
+- `posts_author_idx` は `author_id` 全体を対象にする通常 index で、partial index ではない。
+  query planner が `deleteCascading` の事前検索にこの index を使うことまでは固定していない
+- `published` の boolean は Drizzle 側の型 / mapping である。migration は `INTEGER` に
+  `CHECK (published IN (0, 1))` を持たず `STRICT` table でもないため、raw SQL から 0 / 1 以外を
+  保存した場合の扱いは未定義
 
 ## 覆えていない範囲
 
