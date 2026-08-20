@@ -4,7 +4,8 @@
 Route Handler) が **繋がった状態で** どう振る舞うかを対象にする。
 
 各層の純粋な実装は `_kiwa/` 配下に切り出してあり、そちらは単体テストが直接呼ぶ。
-本仕様書が扱うのは **browser と HTTP を経由した時にだけ現れる振る舞い**に限る。
+本仕様書は **browser と HTTP を経由した時の振る舞い**を中心にし、各層の直接呼出でしか
+到達できない分岐は統合境界を説明するために区別して記載する。
 
 - module: nextjs-server
 - layer: e2e-generic
@@ -43,7 +44,7 @@ Route Handler) が **繋がった状態で** どう振る舞うかを対象に�
 `session` 不在で path が `/api/` の場合は素通しになるため、判定は Route Handler が行う。
 **middleware と Route Handler で未認証時の status が違う** (307 と 302)。
 
-`x-kiwa-request-id` の有無が、どちらが応答したかの判別材料になる。
+現在の実装では、`x-kiwa-request-id` の有無が、どちらが応答したかの判別材料になる。
 
 | 応答 | header | 応答した層 |
 |---|---|---|
@@ -53,32 +54,46 @@ Route Handler) が **繋がった状態で** どう振る舞うかを対象に�
 | `/api/items` の 403 | **無い** | middleware (Route Handler は走っていない) |
 
 最後の行が要点。 middleware と Route Handler は `banned` に同じ本文 (`{"error":"banned"}`) を
-返すため、本文だけでは区別できない。 header の欠落が「middleware で止まった」 ことを示す。
-実測で `/api/items` に `banned` と `x-request-id` を同時に送り、403 に header が付かないこと
-(対照として `admin` では付くこと) を確認した。
+返すため、本文だけでは区別できない。 実装上は middleware の `banned` 分岐が
+`env.setHeader` と Route Handler より先に返る。 実測でも `/api/items` に `banned` と
+`x-request-id` を同時に送った 403 に header が付かず、middleware を素通しする `admin` では
+付いた。 header の欠落だけを一般的な層判定には使わず、この制御フローと組み合わせて判断する。
 
 ### session の値と役割の対応
 
-| cookie の値 | id | 役割 |
+| 抽出・decode 後の cookie の値 | id | 役割 |
 |---|---|---|
 | `admin` | `u1` | admin |
 | `banned` | `u2` | banned |
-| **上記以外の任意の文字列** | `guest` | guest |
-| cookie 自体が無い | — | 未認証 |
+| **上記以外の、非空かつ decode 可能な値** | `guest` | guest |
+| cookie 自体が無い、または空で抽出できない | — | 未認証 |
 
-`guest` は既定であって、特定の値ではない。 実測で `session=zzz` と `session=guest` が
-どちらも `user: "guest"` を返し、**項目の絞り込みも受けない** (3 件すべてを返す)。
+`guest` は特定の cookie 値ではなく、session resolver が抽出・decode できた値の既定役割。
+実測で `session=zzz` と `session=guest` がどちらも `user: "guest"` を返し、
+**役割による項目の絞り込みも受けない** (3 件すべてを返す)。
+
+空値と不正な percent encoding は guest にならない。 実測した 4 つの境界。
+
+| cookie | 結果 |
+|---|---|
+| `session=` | 302 (未認証)。 抽出の正規表現が 1 文字以上を要求するため一致しない |
+| `session=%41` | 200 / guest (`A` に decode される) |
+| `session=%` | **500** |
+| `session=%zz` | **500** |
+
+`decodeURIComponent` が不正な入力で送出し、どこも受けないため 500 になる。
+**client が送った cookie 1 つで API が落ちる。**
 
 ### Route Handler の応答
 
-| 条件 | status | body | header |
+| 条件 | status | body | 主な response header |
 |---|---|---|---|
-| session 不在 | 302 | 空 | `location: /login?from=%2Fapi%2Fitems` |
-| `banned` | 403 | `{"error":"banned"}` | — |
-| それ以外 | 200 | `{items, count, user}` | `cache-control: public, max-age=60` |
+| session 不在 | 302 | 空 | `location: /login?from=%2Fapi%2Fitems`、`x-kiwa-request-id: next-default` |
+| `banned` | 403 | `{"error":"banned"}` | `content-type: application/json`、`x-kiwa-request-id` は無い |
+| それ以外 | 200 | `{items, count, user}` | `cache-control: public, max-age=60`、`x-kiwa-request-id` |
 
 **この 403 は Route Handler まで届かない。** `/api/` は middleware の範囲内なので、
-`banned` は middleware が先に 403 を返す (上表の header 欠落が根拠)。
+`banned` は middleware が先に 403 を返す (実装の早期 return と header 欠落の実測が根拠)。
 Route Handler 側の `banned` 分岐は HTTP 経由では到達できず、
 単体テストが直接呼んで初めて通る。
 
@@ -98,27 +113,31 @@ Route Handler 側の `banned` 分岐は HTTP 経由では到達できず、
 
 `limit=0` を「0 件」 と読まない。 実装は正の値でだけ絞る。
 
-### form が到達できない検証分岐
+### browser と server の検証境界
 
 `app/items/create-form.tsx` の input は `required` と `minLength={2}` を持つ。
-browser がこの 2 つを先に見るため、**server 側の 2 つの検証分岐は form から到達できない**。
+browser は trim 前の入力を検証し、server は trim 後の文字数を検証する。 そのため、空欄と
+1 文字をそのまま submit すると browser が止めるが、server 側の 2 分岐も form から到達できる。
 
-| server 側の分岐 | form から到達するか |
+| server 側の分岐 | form から到達する入力 |
 |---|---|
-| 空 → `name is required` | **しない** (`required` が submit を止める) |
-| 2 文字未満 → `name must be at least 2 characters` | **しない** (`minLength` が止める) |
+| 空 → `name is required` | 空欄そのものは browser が止める。空白 2 文字なら browser を通り、trim 後に到達する |
+| 2 文字未満 → `name must be at least 2 characters` | 1 文字そのものは browser が止める。` a` なら browser を通り、trim 後に到達する |
 | `danger` → 例外 | する |
 
 実測で 1 文字 (`x`) と空欄を submit したところ、成功も失敗も画面に出なかった
-(submit 自体が起きていない)。 この 2 分岐は単体テストが直接呼んで確かめる。
+(submit 自体が起きていない)。 この観測は、その 2 入力だけが browser で止まることを示す。
+server の 2 分岐自体は単体テストが直接呼んで確かめているが、現行 e2e は空白を含む到達経路を
+確かめていない。
 
 ### 生成される id の決まり方
 
 ```
-id = seed (form の hidden、既定 100) + name の文字数
+id = (seed を 10 進数として parse した値。非数値なら 100) + trim 後の name の文字数
 ```
 
-実測で `hello` (5 文字) が 105、`ab` (2 文字) が 102 になった。 乱数も時刻も使わない。
+form の hidden seed は 100。 実測で `hello` (trim 後 5 文字) が 105、`ab` (trim 後 2 文字) が
+102 になった。 入力の前後の空白は文字数に含めず、乱数も時刻も使わない。
 
 ## 主な品質リスク
 
@@ -130,15 +149,21 @@ id = seed (form の hidden、既定 100) + name の文字数
   HTTP 経由で通るのは middleware 側だけ。 片方だけ直すと単体テストと e2e で結果が割れる
 - **`limit` が正の値でしか効かない**。 `0` と非数値がどちらも「絞り込まない」 に倒れるため、
   利用側が 0 件を期待すると全件が返る
-- **guest が既定**。 未知の cookie 値がすべて guest として通るため、cookie を推測されると
-  項目一覧が読める。 PoC の範囲では意図した挙動だが、本番でこの既定を残すと認可が空洞化する
-- **form の検証が browser 側に依存している**。 `required` と `minLength` を外すと
-  server 側の分岐が初めて露出する。 API を直接叩く client には最初から効かない
+- **guest が既定**。 非空かつ decode 可能な未知の cookie 値が guest として通るため、
+  有効な session 値を知らなくても任意の値で項目一覧が読める。 PoC の範囲では意図した挙動だが、
+  本番でこの既定を残すと認可が空洞化する
+- **browser と server で検証対象が違う**。 browser は trim 前、server は trim 後の文字数を見るため、
+  空白を含む入力は browser を通って server error になる。 非 browser client も server 側の検証に届く
+- **不正な cookie で 500 になる**。 `resolveUserFromCookieHeader` の `decodeURIComponent` が
+  送出し、どこも受けない。 実測で `session=%` と `session=%zz` がともに 500 を返した。
+  認証前の経路なので **誰でも送れる**。 未認証は 302、`banned` は 403 と分岐が整理されている中で、
+  この 1 つだけが 5xx に落ちる
 
 ## 推奨テスト構成
 
 `playwright.config.ts` の `webServer` が `next dev --port 3070` を起動する。
-`reuseExistingServer: false` なので実行ごとに新しい server が立ち、状態は持ち越さない。
+`reuseExistingServer: false` なので Playwright の run ごとに新しい server が立つ。 同じ run 内の
+7 件はその server を共有するため、server 側に可変状態を足した場合は test 間で持ち越されうる。
 
 **redirect を追うかどうかで見えるものが変わる。**
 `page.goto` は追うため最終の 200 を返し、`request.get({ maxRedirects: 0 })` は
@@ -165,7 +190,7 @@ cookie は `context.addCookies` (画面経由) と `headers.cookie` (要求経�
 | T-E2E-001 | 未認証の `/items` が login へ導かれる | cookie 無し | `page.goto('/items')` で redirect を追う | 最終の `status===200`、URL が `/login?from=%2Fitems` で終わる | P0 | yes | ssr | `/items` |
 | T-E2E-002 | 認証後に項目一覧が描画される | `session=admin` | `page.goto('/items')` | `status===200`、`h1` が `kiwa Next.js PoC`、`li` が 3 件で `kiwa` / `nextjs` / `app-router` を順に含む | P0 | yes | ssr | `/items` |
 | T-E2E-003 | `banned` は画面に到達しない | `session=banned` | `page.goto('/items')` | `status===403` (middleware が返す。RSC の banned 分岐は通らない) | P0 | yes | ssr | `/items` |
-| T-E2E-004 | form submit の結果が画面に返る | `session=admin` | `name` に `hello` を入れて submit | `create-success` が `id=105` と `hello` を含む (seed 100 + 文字数 5) | P0 | yes | ssr | `/items` |
+| T-E2E-004 | form submit の結果が画面に返る | `session=admin` | `name` に `hello` を入れて submit | `create-success` が `id=105` と `hello` を含む (seed 100 + trim 後の文字数 5) | P0 | yes | ssr | `/items` |
 | T-E2E-005 | 未認証の API は 302 で login を指す | cookie 無し | `request.get('/api/items', { maxRedirects: 0 })` | `status===302`、`location==='/login?from=%2Fapi%2Fitems'` (middleware の 307 とは別経路) | P0 | yes | ssr | `/api/items` |
 | T-E2E-006 | 認証済の API が一覧と cache 指示を返す | `session=admin` | `request.get('/api/items')` | `status===200`、`cache-control==='public, max-age=60'`、`count===3`、`user==='u1'` | P0 | yes | ssr | `/api/items` |
 | T-E2E-007 | 追跡用 header が素通しの経路で引き継がれる | `session=admin` かつ `x-request-id: req-e2e-7` | `request.get('/api/items')` | `status===200`、`x-kiwa-request-id==='req-e2e-7'` | P1 | yes | ssr | `/api/items` |
@@ -175,20 +200,22 @@ cookie は `context.addCookies` (画面経由) と `headers.cookie` (要求経�
 7 件はすべて `webServer` が起動した実 dev server に対して走る。 mock を持たない。
 
 **T-E2E-001 と T-E2E-005 は同じ「未認証で login へ導く」 挙動を別の経路で見ている。**
-前者は middleware の 307 を redirect ごと追って最終の 200 を確かめ、
-後者は Route Handler の 302 を追わずに `location` を直接読む。
-番号が違うのは経路が違うためで、片方の観測だけでは両方を保証できない。
+前者は middleware の redirect を追って最終の 200 と URL を確かめるが、途中の 307 自体は
+assert しない。 後者は Route Handler の 302 を追わずに status と `location` を直接読む。
+T-E2E-001 だけでは 307 を保証できないため、middleware の status も保証するなら
+`maxRedirects: 0` の要求を別途加える必要がある。
 
-**この 7 件が覆っていない範囲**を明示する。 いずれも HTTP や browser を経由すると
-到達できないため、単体テストが `_kiwa/` の関数を直接呼んで確かめる。
+**この 7 件が覆っていない範囲**を明示する。 HTTP / browser から到達できるが未観測のものと、
+middleware に遮られて到達できないものを分ける。 後者は `_kiwa/` の関数を直接呼ぶ単体テストで
+確かめる。
 
-| 覆っていないもの | 理由 |
-|---|---|
-| `guest` 役割の応答 | 未知の cookie 値がすべて guest になる経路を e2e で 1 件も通していない |
-| `tag` と `limit` の絞り込み | 既定 (絞り込みなし) だけを通している |
-| `limit=0` と非数値の扱い | 上と同じ |
-| server 側の name 検証 2 分岐 | browser の `required` と `minLength` が先に止める |
-| `danger` の例外 | e2e で submit していない |
-| RSC の未認証 / banned 描画 | middleware が先に返すため画面に到達しない |
-| Route Handler の `banned` 分岐 | 同上 |
-| `x-kiwa-request-id` の既定値 `next-default` | header を付けない要求を e2e で送っていない |
+| 覆っていないもの | HTTP / browser からの到達 | 理由 |
+|---|---|---|
+| `guest` 役割の応答 | できる | 未知の非空 cookie 値を使う e2e が無い |
+| `tag` と `limit` の絞り込み | できる | 既定 (絞り込みなし) だけを assert している |
+| `limit=0` と非数値の扱い | できる | query の境界値を送る e2e が無い |
+| server 側の name 検証 2 分岐 | できる | 空白 2 文字や ` a` を submit する e2e が無い |
+| `danger` の例外 | できる | `danger` を submit する e2e が無い |
+| RSC の未認証 / banned 描画 | できない | middleware が先に返すため RSC に到達しない |
+| Route Handler の `banned` 分岐 | できない | middleware が先に 403 を返す |
+| `x-kiwa-request-id` の既定値 `next-default` | できる | T-E2E-006 は `x-request-id` 無しで要求するが、この response header を assert していない |
