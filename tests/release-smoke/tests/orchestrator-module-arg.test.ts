@@ -110,6 +110,14 @@ describe('writer 側の生成 file 名が module 基準である', () => {
     }
     expect(offenders, '生成 file 名が example 名のままの skill がある').toEqual([]);
   });
+
+  it('kiwa-play が Layer 1 に同じ module を渡す', () => {
+    const invocation = skillBody('kiwa-play')
+      .split('\n')
+      .find((line) => line.startsWith('/kiwa-design --layer e2e '));
+    expect(invocation, '/kiwa-design の起動が無い').toBeTruthy();
+    expect(invocation, '/kiwa-design に example 名を渡している').toContain('--module {module}');
+  });
 });
 
 describe('example path 側は example 名のままである', () => {

@@ -177,7 +177,7 @@ producer と consumer が別々に組み立てる 2 経路に戻る。
 解決した path を読むため、 両者が別の file を指す (#1855 と同じ形)。
 
 ```text
-/kiwa-design --layer e2e --module {example} --input {path/to/contract.sol or app/} --lang $DOC_LANG
+/kiwa-design --layer e2e --module {module} --input {path/to/contract.sol or app/} --lang $DOC_LANG
 
 入力情報:
 - 対象 dApp = {example 名} (1-2 文で機能要約)

@@ -244,6 +244,20 @@ describe('result-review の軸 4 が推定で埋まらない', () => {
     expect(row, '判定表に未測定軸の行が無い').toBeTruthy();
     expect(row!, '未測定軸が CONDITIONAL になっていない').toContain('CONDITIONAL');
   });
+
+  it('coverage report の path も統合 report から読む', () => {
+    for (const [name, body] of [
+      ['SKILL.md', REVIEW],
+      ['result-review-axes.md', RESULT_AXES],
+    ] as const) {
+      expect(body, `${name}: coverage path を example 名から組み立てている`).not.toContain(
+        'coverage-report-{example}',
+      );
+      const line = body.split('\n').find((item) => item.includes('coverage report'));
+      expect(line, `${name}: coverage report の読取指示が無い`).toBeTruthy();
+      expect(line, `${name}: 統合 report Section 2 から読んでいない`).toContain('Section 2');
+    }
+  });
 });
 
 describe('review report の名前が writer と reader で一致する', () => {

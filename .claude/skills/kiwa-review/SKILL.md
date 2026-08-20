@@ -195,7 +195,7 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 入力:
 - 統合 report (`tests/reports/integrated/{example}-{target}.{lang}.md`) を Read (`/kiwa-test` 完了時に生成済)
 - 各子 report も Read:
-  - coverage report: `tests/reports/contract/coverage-report-{example}.{lang}.md` (Foundry / Hardhat 別 round 履歴も含む)
+  - coverage report: **統合 report Section 2 の「coverage report」 行に載っている path を開く**。 file 名を組み立てない (Foundry / Hardhat 別 round 履歴も含む)
   - spec-review / test-review report: **統合 report Section 2 の「review report」 行に載っている path を開く**。 file 名を組み立てない (下記 § 子 review report の path)
 - test 実行結果数値 (passing / failing / skipped / 各 round timing / flaky 指標)
 - observe dashboard (`tests/reports/observe/dashboard-{example}-{layer}.{lang}.md`) を統合 report の Section 2 に載っている分だけ Read。 `/kiwa-test` Step 5a が layer ごとに書く。 **Section 2 が「observe 失敗」 や「observe skip」 と書いている行は読まない** = file が無い。 dashboard が 1 枚も無い場合も軸 3 (flaky 兆候) は従来どおり実行結果数値から判定する

@@ -8,7 +8,7 @@ production target (contracts/ 配下) 100% 達成 / 不可能分類 (defensive c
 
 ### 判定手順
 
-1. coverage report (`tests/reports/contract/coverage-report-{example}.{lang}.md` / `tests/reports/e2e/coverage-report-{example}.{lang}.md`) Section 1 (判定サマリ) を Read
+1. 統合 report Section 2 の「coverage report」 行に載っている path を開き、 Section 1 (判定サマリ) を Read。 file 名は組み立てない
 2. production target 全 4 metric の pct を抽出 (Lines / Statements / Branches / Functions)
 3. 未達分について Section 3 (未到達 line 分類) を Read、 5 分類 (削除候補 / defensive / 外部依存 / 計測除外 / 真の未踏) を集計
 4. score:
