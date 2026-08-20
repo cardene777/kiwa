@@ -375,7 +375,7 @@ multiSelect: false
 
 ## 完了条件
 
-- `tests/reports/review/{mode}-review-{module}.{lang}.md` が 5 section format で Write 済
+- Step 0 の言語別出力 path が 5 section format で Write 済
 - weighted_score が計算されて判定 (PASS / CONDITIONAL / FAIL) 確定
 - critical / major 指摘 + 追加 test 提案が列挙
 - 自動呼出時は呼出元への chain return が正しく動作
