@@ -394,7 +394,7 @@ Step 5d で test-passed marker 作成成功後、 `--no-review` 未指定なら�
 /kiwa-review --mode test-review --module nft-marketplace --layer contract --lang $DOC_LANG --producer kiwa-hardhat --project-root .
 ```
 
-review 結果は kiwa-forge と同形式 (PASS / CONDITIONAL / FAIL critical なし / FAIL critical あり の 4 分岐)。 CONDITIONAL は chain を継続し、 未検証の観点を統合 report に載せる (`skills/kiwa-review/SKILL.md` § Step 4)。 report 出力先: `tests/reports/review/test-review-{module}.${DOC_LANG}.md`。
+review 結果は kiwa-forge と同形式 (PASS / CONDITIONAL / FAIL critical なし / FAIL critical あり の 4 分岐)。 CONDITIONAL は chain を継続し、 未検証の観点を統合 report に載せる (`skills/kiwa-review/SKILL.md` § Step 4)。 report 出力先は `/kiwa-review` Step 0 の言語別出力 path (`test-review` mode)。
 
 `--no-review` 引数で skip 可能 (CI 用)。
 

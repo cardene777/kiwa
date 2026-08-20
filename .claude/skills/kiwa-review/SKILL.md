@@ -265,7 +265,7 @@ Layer 2 は spec の TC を全件 test にするとは限らない。 生成し�
 
 ### Step 3: report Write
 
-`--out` が指定されていればその path、 省略時は `tests/reports/review/{mode}-review-{module}.${DOC_LANG}.md` に 5 section format で Write。 **書いた path は Step 4 の chain return に載せる** (下流はこの値でしか report の在処を知れない)。
+`--out` が指定されていればその path、 省略時は Step 0 の言語別出力 path に 5 section format で Write。 **書いた path は Step 4 の chain return に載せる** (下流はこの値でしか report の在処を知れない)。
 
 ```markdown
 # {Mode} Review Report — {module}

@@ -932,6 +932,26 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     expect(offenders, 'path 雛形に {$VAR} が残っている').toEqual([]);
   });
 
+  it('既定 report path が en に suffix を付ける指示へ戻っていない', () => {
+    // `/kiwa-review` Step 0 and the shared language reference define English
+    // as the suffix-less default. Expanding `${DOC_LANG}` directly in a default
+    // path silently changes that answer to `.en.md`; explicit `--out` paths in
+    // `/kiwa-test` are a separate, intentionally suffixed contract.
+    const review = read('.claude/skills/kiwa-review/SKILL.md');
+    const step3 = review.slice(review.indexOf('### Step 3: report Write'));
+    const defaultWrite = step3.split('\n').find((line) => line.startsWith('`--out`'));
+    expect(defaultWrite, 'kiwa-review の既定 report 書き先が無い').toBeDefined();
+    expect(defaultWrite, '既定 report path が Step 0 の言語解決を使っていない').toContain(
+      'Step 0 の言語別出力 path',
+    );
+    expect(defaultWrite, 'en に .en suffix を付ける展開が残っている').not.toContain('${DOC_LANG}');
+
+    const reference = read('.claude/skills/kiwa-forge/references/doc-language-selection.md');
+    expect(reference, '共有言語規約に lang suffix の解決が無い').toContain(
+      '{lang_suffix}` は en なら空',
+    );
+  });
+
   it('kiwa-observe が渡される 6 引数を宣言している', () => {
     // The other end of the same contract. A caller passing a flag the callee
     // does not declare is accepted and ignored, which is how `--input-spec`

@@ -607,7 +607,7 @@ review 結果:
 - CONDITIONAL (未生成 TC / 未測定軸あり) → 未検証の観点と次の手を統合 report に残して Step 6 へ。 FAIL として auto-fix loop に入れない
 - FAIL → Step 5c (auto-fix loop) へ
 
-report 出力先: `tests/reports/review/result-review-{module}.${DOC_LANG}.md`
+report 出力先: `/kiwa-review` Step 0 の言語別出力 path (`result-review` mode)
 
 `--no-review` 引数で本 step を skip 可能 (CI 用、 skip 時は Step 5c も skip して Step 6 へ)。
 
