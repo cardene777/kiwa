@@ -12,9 +12,9 @@
 
 ## Flaky tests
 
-判定は累積 34 record に対して行う (Summary はこの run)。
+判定は累積 52 record に対して行う (Summary はこの run)。
 
-flaky は判定していない。 判定には同じ test の run が 3 回要るが、 最大 2 回しか無い.
+No flaky tests detected. (16 test を判定)
 
 ## Code coverage
 
