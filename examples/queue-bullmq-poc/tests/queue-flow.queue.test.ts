@@ -72,14 +72,14 @@ describe('queue PoC — drained + introspection', () => {
     envs.push(env);
     const sink = createEmailSink();
     registerEmailProcessor(env, sink);
-    const recipients = ['a@example.test', 'b@example.test', 'c@example.test'];
+    const recipients = ['c@example.test', 'a@example.test', 'b@example.test'];
     for (const to of recipients) {
       // eslint-disable-next-line no-await-in-loop
       await env.addJob<EmailBody>('send-email', { to, subject: 'Batch', body: 'Hi.' });
     }
     await env.assertQueueDrained();
     expect(sink.sent.map((email) => email.to).sort((a, b) => a.localeCompare(b, 'en'))).toEqual(
-      recipients,
+      [...recipients].sort((a, b) => a.localeCompare(b, 'en')),
     );
   });
 });
@@ -249,10 +249,16 @@ describe('queue PoC — 一覧', () => {
     await env.addJob<EmailBody>('send-email', email, { jobId: 'j1' });
     await env.assertQueueDrained();
     const jobs = env.listJobs();
-    expect(jobs.length).toBe(1);
-    expect(jobs[0]?.state).toBe('completed');
-    expect(jobs[0]?.data).toEqual(email);
-    expect(jobs[0]?.returnValue).toEqual({ id: 'email-1', to: 'jane@example.test' });
+    expect(jobs).toEqual([
+      {
+        id: 'j1',
+        name: 'send-email',
+        data: email,
+        state: 'completed',
+        attemptsMade: 1,
+        returnValue: { id: 'email-1', to: 'jane@example.test' },
+      },
+    ]);
   });
 });
 

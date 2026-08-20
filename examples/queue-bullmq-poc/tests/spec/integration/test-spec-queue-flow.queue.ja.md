@@ -20,7 +20,7 @@
 
 ### 送信先の記録
 
-`send` は呼ばれるたびに数え、`failFirst` 回目までは送出する。
+`send` は呼ばれるたびに数え、`failFirst` 回目までは失敗する。
 **失敗した回は `sent` に積まれない**。
 
 返す id は `email-<成功件数>` で、**呼出回数ではなく成功件数から作る**。
@@ -46,10 +46,13 @@
 `attempts` を使い切って失敗した job は `state=failed` /
 `attemptsMade=N` / `failedReason` に最後の送出内容を持つ。
 
-### 同じ `jobId` を 2 度投入する
+### 同じ `jobId` を 2 度投入する (sandbox の現状挙動)
 
 **後から投入した data で置き換わる**。 job は 1 件のままで、送信も 1 回。
 先に投入した data は処理されない。
+
+これは T-QUEUE-POC-011 で固定する sandbox の characterization であり、
+実 BullMQ を含む provider 共通の契約ではない。
 
 ### 投入時の引数の検証
 
@@ -103,19 +106,19 @@
 | T-QUEUE-POC-001 | 投入した job が処理される | processor 登録済 | `send-email` / `{ to, subject, body }` | `state==='completed'`、返り値が `{ id: 'email-1', to }`、`sent.length===1` | P0 | yes | bullmq | sandbox |
 | T-QUEUE-POC-002 | 2 回失敗しても 3 回目で成功する | `failFirst: 2` の sink | `send-email` / `attempts: 3` | `attemptsMade===3`、`sent.length===1` | P0 | yes | bullmq | sandbox |
 | T-QUEUE-POC-003 | 試行を使い切ると失敗で終わる | `failFirst: 5` の sink | `send-email` / `attempts: 2` | `state==='failed'`、`attemptsMade===2`、理由が `/transient SMTP/`、`sent` が空 | P0 | yes | bullmq | sandbox |
-| T-QUEUE-POC-004 | 複数投入を待ち切れる | processor 登録済 | `send-email` を 3 件 | 待機が解決し、`sent` の宛先が投入順と一致 | P0 | yes | bullmq | sandbox |
+| T-QUEUE-POC-004 | 複数投入を待ち切れる | processor 登録済 | `send-email` を 3 件 | 待機が解決し、`sent` の宛先集合が投入した 3 件と一致 (順序は保証しない) | P0 | yes | bullmq | sandbox |
 | T-QUEUE-POC-005 | 遅延してから処理する | processor 登録済 | `send-email` / `delay: 30` | 投入から 25ms 以上経過、`sent.length===1` | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-006 | 指定した `jobId` がそのまま付く | processor 登録済 | `send-email` / `jobId: 'welcome-dave'` | `snap.id==='welcome-dave'`、処理が完了する | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-007 | 停止後は投入できない | 1 件処理済で `stop()` 済 | `send-email` | `/after stop/` を送出 | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-008 | 投入していない job の待機は timeout する | processor 未登録、投入なし | `nothing-here` / `timeoutMs: 20` | `/timeout waiting/` を送出 | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-009 | 登録した processor をそのまま返す | processor 登録済 | 返り値を snapshot で直接呼ぶ | 返り値が `{ id: 'email-1', to }`、`sent.length===1` | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-010 | id は成功件数から作る | `failFirst: 2` の sink | `send` を 3 回直接呼ぶ | 3 回目が `id==='email-1'`、`sent.length===1` | P1 | yes | bullmq | sandbox |
-| T-QUEUE-POC-011 | 同じ `jobId` は後の data で置き換わる | processor 登録済 | 同じ `jobId: 'dup'` で宛先違いを 2 回投入 | job は 1 件、`sent` が後の宛先だけ | P1 | yes | bullmq | sandbox |
+| T-QUEUE-POC-011 | sandbox では同じ `jobId` が後の data で置き換わる | processor 登録済 | 同じ `jobId: 'dup'` で宛先違いを 2 回投入 | job は 1 件、`sent` が後の宛先だけ | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-012 | `attempts` 未指定は 1 回で打ち切る | `failFirst: 1` の sink | `send-email` / option なし | `state==='failed'`、`attemptsMade===1`、`sent` が空 | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-013 | processor 未登録なら処理されない | processor 未登録 | `send-email` を投入して待機 | `/timeout waiting/` を送出 | P1 | yes | bullmq | sandbox |
 | T-QUEUE-POC-014 | 一覧が処理後の snapshot を返す | processor 登録済、1 件処理済 | `listJobs()` | 1 件で `state==='completed'`、`returnValue` と `data` を持つ | P2 | yes | bullmq | sandbox |
-| T-QUEUE-POC-015 | 試行回数が 1 未満なら投入を拒む | processor 登録済 | `send-email` / `attempts: 0` | `addJob: attempts must be at least 1` を送出 | P2 | yes | bullmq | sandbox |
-| T-QUEUE-POC-016 | 遅延が負なら投入を拒む | processor 登録済 | `send-email` / `delay: -1` | `addJob: delay must be non-negative` を送出 | P2 | yes | bullmq | sandbox |
+| T-QUEUE-POC-015 | 試行回数が 1 未満なら投入を拒む | sandbox env 作成済 (processor は不要) | `send-email` / `attempts: 0` | `addJob: attempts must be at least 1` を送出 | P2 | yes | bullmq | sandbox |
+| T-QUEUE-POC-016 | 遅延が負なら投入を拒む | sandbox env 作成済 (processor は不要) | `send-email` / `delay: -1` | `addJob: delay must be non-negative` を送出 | P2 | yes | bullmq | sandbox |
 
 ## 自動化方針
 
@@ -153,3 +156,11 @@ T-QUEUE-POC-010 は sink を直接呼ぶ。queue を経由すると retry の実
   区別する必要があるかが未定義
 - `attempts` の既定が 1 であることが呼出側に見えない。
   既定値を明示するか、指定を必須にするかが未定義
+- job の処理順序が未定義。sandbox は同時に実行可能になった job を id の辞書順で
+  逐次処理するが、FIFO や優先度を provider 共通では保証していない
+- sandbox は processor を常に 1 件ずつ実行し、並行度を指定できない。
+  並行処理時の上限、競合、完了順は未定義
+- retry は sandbox では即時実行され、backoff / jitter を指定できない。
+  再試行間隔と backoff 戦略は未定義
+- 打ち切った job は `failed` に残るだけで、dead-letter queue への移送を表現できない。
+  dead-letter の条件、保存内容、再投入方法は未定義
