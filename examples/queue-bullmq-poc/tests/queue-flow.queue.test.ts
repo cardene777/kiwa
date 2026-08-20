@@ -149,3 +149,135 @@ describe('queue PoC — waitForJob timeout guard', () => {
     );
   });
 });
+
+describe('queue PoC — processor の返り値', () => {
+  it('T-QUEUE-POC-009 returns the registered processor so it can be called directly', async () => {
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    const sink = createEmailSink();
+    const processor = registerEmailProcessor(env, sink);
+    const result = await processor({
+      id: 'direct',
+      name: 'send-email',
+      data: { to: 'frank@example.test', subject: 'Direct', body: 'No queue.' },
+      attemptsMade: 0,
+      state: 'active',
+    } as never);
+    expect(result).toEqual({ id: 'email-1', to: 'frank@example.test' });
+    expect(sink.sent.length).toBe(1);
+  });
+});
+
+describe('queue PoC — sink の id の作られ方', () => {
+  it('T-QUEUE-POC-010 numbers the id by successes, not by call count', async () => {
+    // 2 回失敗して 3 回目に成功しても id は email-1。 queue を経由すると retry の
+    // 実装が呼出回数に関与するため、sink を直接呼んで id の作り方だけを切り出す。
+    const sink = createEmailSink({ failFirst: 2 });
+    const email: EmailBody = { to: 'grace@example.test', subject: 'Id', body: 'Count.' };
+    await expect(sink.send(email)).rejects.toThrow(/transient SMTP failure 1\/2/);
+    await expect(sink.send(email)).rejects.toThrow(/transient SMTP failure 2\/2/);
+    expect(await sink.send(email)).toEqual({ id: 'email-1', to: 'grace@example.test' });
+    expect(sink.sent.length).toBe(1);
+  });
+});
+
+describe('queue PoC — 同じ jobId の二重投入', () => {
+  it('T-QUEUE-POC-011 replaces the earlier payload when the same jobId is reused', async () => {
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    const sink = createEmailSink();
+    registerEmailProcessor(env, sink);
+    await env.addJob<EmailBody>(
+      'send-email',
+      { to: 'first@example.test', subject: 'Dup', body: 'First.' },
+      { jobId: 'dup' },
+    );
+    await env.addJob<EmailBody>(
+      'send-email',
+      { to: 'second@example.test', subject: 'Dup', body: 'Second.' },
+      { jobId: 'dup' },
+    );
+    await env.assertQueueDrained();
+    expect(env.listJobs().length).toBe(1);
+    expect(sink.sent.map((email) => email.to)).toEqual(['second@example.test']);
+  });
+});
+
+describe('queue PoC — attempts の既定', () => {
+  it('T-QUEUE-POC-012 gives up after a single attempt when attempts is omitted', async () => {
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    const sink = createEmailSink({ failFirst: 1 });
+    registerEmailProcessor(env, sink);
+    await env.addJob<EmailBody>('send-email', {
+      to: 'henry@example.test',
+      subject: 'Once',
+      body: 'One shot.',
+    });
+    const snap = await env.assertFailed<EmailBody>('send-email', {
+      reasonMatch: /transient SMTP failure 1\/1/,
+    });
+    expect(snap.attemptsMade).toBe(1);
+    expect(sink.sent).toEqual([]);
+  });
+});
+
+describe('queue PoC — processor 未登録', () => {
+  it('T-QUEUE-POC-013 never processes a job when no processor is registered', async () => {
+    // T-QUEUE-POC-008 は投入していない job 名を待つ形。 こちらは投入したが
+    // processor が無い形で、**どちらも同じ timeout で失敗する** ことを固定する。
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    await env.addJob<EmailBody>('send-email', {
+      to: 'ida@example.test',
+      subject: 'Orphan',
+      body: 'Nobody listens.',
+    });
+    await expect(env.waitForJob('send-email', { timeoutMs: 50 })).rejects.toThrow(
+      /timeout waiting/,
+    );
+  });
+});
+
+describe('queue PoC — 一覧', () => {
+  it('T-QUEUE-POC-014 lists the completed snapshot with data and return value', async () => {
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    const sink = createEmailSink();
+    registerEmailProcessor(env, sink);
+    const email: EmailBody = { to: 'jane@example.test', subject: 'List', body: 'Snapshot.' };
+    await env.addJob<EmailBody>('send-email', email, { jobId: 'j1' });
+    await env.assertQueueDrained();
+    const jobs = env.listJobs();
+    expect(jobs.length).toBe(1);
+    expect(jobs[0]?.state).toBe('completed');
+    expect(jobs[0]?.data).toEqual(email);
+    expect(jobs[0]?.returnValue).toEqual({ id: 'email-1', to: 'jane@example.test' });
+  });
+});
+
+describe('queue PoC — 投入時の引数の検証', () => {
+  it('T-QUEUE-POC-015 refuses fewer than one attempt', async () => {
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    await expect(
+      env.addJob<EmailBody>(
+        'send-email',
+        { to: 'kate@example.test', subject: 'Zero', body: 'No attempts.' },
+        { attempts: 0 },
+      ),
+    ).rejects.toThrow(/addJob: attempts must be at least 1/);
+  });
+
+  it('T-QUEUE-POC-016 refuses a negative delay', async () => {
+    const env = await setupBullMQEnv();
+    envs.push(env);
+    await expect(
+      env.addJob<EmailBody>(
+        'send-email',
+        { to: 'liam@example.test', subject: 'Past', body: 'Negative.' },
+        { delay: -1 },
+      ),
+    ).rejects.toThrow(/addJob: delay must be non-negative/);
+  });
+});
