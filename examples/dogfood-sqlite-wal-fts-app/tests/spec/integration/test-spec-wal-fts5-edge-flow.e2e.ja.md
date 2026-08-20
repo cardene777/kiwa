@@ -88,20 +88,26 @@ warm の標本は `0.4 + jitter` で、`jitter` は種の byte から作る 0〜
 
 ## 主な品質リスク
 
-- **`checkpointCount` が種類を区別しない**。 4 種すべてで 1 なので、
-  「checkpoint が打たれた」 までしか分からず、どの種類で打たれたかは `walSizeBytes` からしか読めない
-- **`tokenCount` が tokenizer を見ない**。 mock と実 SQLite で最も乖離しやすい箇所で、
-  実 driver に差し替えた時にここだけ値が変わる
+- **`checkpointCount` が種類を区別しない**。 4 種すべてで 1 で、observation に mode も無い。
+  `walSizeBytes` から区別できるのは `TRUNCATE` と残り 3 種までで、
+  `PASSIVE` / `FULL` / `RESTART` のどれかは判別できない
+- **`tokenCount` が tokenizer を見ない**。 空白分割だけで数えるため、tokenizer ごとの
+  分割規則を持つ実 SQLite と意味が乖離する
 - **`matchRank` が入力の反射**。 検索の順位付けを何も検証していないため、
   この値の assert は「入出力が繋がっている」 以上を保証しない
 - **閾値が狭義の不等号**。 ちょうど同じ値で送出するため、境界を跨ぐつもりの入力が 500 になる
 - **待ち時間が実測でない**。 `coldStartMs` は runtime ごとの定数で、
   実際の起動時間を測っていない。 性能の回帰は検出できない
+- **`requests` に上限も整数検査も無い**。 大きな正数を渡すと、その件数ぶん同期 loop で
+  `warmSamplesMs` を作る。 64 KiB の body 上限では数値の大きさを制限できないため、
+  local test server の CPU / memory を過剰に消費できる
 
 ## 推奨テスト構成
 
 `bootAdapterServer()` が port 0 で listen し、`127.0.0.1` の空き port に載る。
-`browser.newContext()` ごとに新しい adapter が立つため、test 間で状態を共有しない。
+新しい adapter が立つ境界は `browser.newContext()` ではなく `bootAdapterServer()` の呼出になる。
+各 test が server を起動し直す現在の構成では test 間で状態を共有しない。同じ server を向く
+複数 context があれば、その context 間では 1 つの adapter を共有する。
 
 **`page.goto(origin)` を先に呼ぶ。** 呼ばないと `about:blank` の null origin から
 `content-type: application/json` を付けた `fetch` を投げることになり、
@@ -115,7 +121,7 @@ CORS の事前確認で落ちる (server は `Access-Control-*` も `OPTIONS` �
 | 2 | checkpoint の効果 | `checkpointCount` と `walSizeBytes` |
 | 3 | FTS5 の終端状態 | `finalState` / `tokenizer` / `tokenCount` |
 | 4 | edge の待ち時間 | `coldStartMs` / `warmMeanMs` |
-| 5 | 3 経路の連結 | 同じ context から順に投げて全部通る |
+| 5 | 3 経路の連続到達 | 同じ page / origin から順に投げて全部通る |
 
 ## テストケース一覧
 
@@ -125,21 +131,30 @@ CORS の事前確認で落ちる (server は `Access-Control-*` も `OPTIONS` �
 
 ## 自動化方針
 
-1 件で 3 経路を通す。 分けないのは、**3 つが同じ adapter の状態を共有する**ため。
-別々の test にすると adapter が別になり、「1 つの流れとして繋がる」 ことを確かめられない。
+1 件で 3 経路を通すため、同じ page / origin から 3 route へ順に到達できることを確かめる。
+実装上は 3 route が同じ adapter を使うが、この test は `/metrics` / `/traces` を読まないため、
+adapter の同一性や route 間の状態共有までは観測していない。
 
-**この 1 件が覆っていない範囲**を明示する。 いずれも同じ経路から到達できる。
+**この 1 件が覆っていない主要な範囲**を明示する。 いずれも同じ経路から到達できる。
 
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
 | `PASSIVE` / `FULL` / `RESTART` の `walSizeBytes` | できる | `TRUNCATE` だけを送っている |
+| `checkpointCount===1` | できる | `>0` の範囲でしか見ていない |
+| `sharedMemoryBytes===16384` | できる | response から読んでいない |
 | 閾値を跨がない入力の 500 | できる | 正常系だけを送っている |
 | `porter` / `trigram` の tokenizer | できる | 既定の `unicode61` だけを送っている |
+| `tokenCount===10` | できる | `>0` の範囲でしか見ていない |
+| `tableName` / `matchRank` / vocab 2 項目 | できる | response から読んでいない |
 | `node` / `workerd` の `coldStartMs` | できる | `bun` だけを送っている |
 | region を変えた時の標本列 | できる | `iad` だけを送っている |
+| response の `region==='iad'` | できる | response から読んでいない |
 | `requests` が 0 以下の 500 | できる | 正の値だけを送っている |
+| `requests` の上限 / 整数性 | できる | `6` だけを送っている |
 | `warmSamplesMs` の中身 | できる | 平均だけを assert し、列そのものを見ていない |
+| 3 route 間の adapter 状態共有 | できる | `/metrics` / `/traces` を読んでいない |
 
-`coldStartMs<10` と `warmMeanMs<1` は**範囲の assert** で、決定的な値を固定していない。
-実測では `bun` が 4、`iad:bun` の 6 回で平均 0.671 になる。 値を固定すれば
-待ち時間の模型が変わった時に落ちるが、現状は範囲を外れるまで気付けない。
+`checkpointCount>0` / `tokenCount>0` / `coldStartMs<10` / `warmMeanMs<1` は
+**範囲の assert** で、決定的な値を固定していない。 実装から導ける値は順に
+1 / 10 / 4 / 0.671 (`iad:bun`、6 回)。 値を固定すれば模型が変わった時に落ちるが、
+現状は範囲を外れるまで気付けない。

@@ -40,19 +40,20 @@ mock 側の返り値の形で確かめる。
 
 ### real 側との関係
 
-`src/adapters/real.ts` は `SQLITE_KEY` があれば container の URL を返し、無ければ
-`SQLITE_ENV_MISSING` を trace に残す形になっている。 **e2e は mock だけを見ており、
-real 側の分岐に到達しない** (`fixture.ts` が `makeMockAdapter()` を固定で呼ぶ)。
+`src/adapters/real.ts` は `SQLITE_KEY` があれば、その値を接続先の bootstrap 文字列として
+`sqliteUrl` に返す。 無ければ `SQLITE_ENV_MISSING` を trace に残す。 **e2e server は
+mock だけを載せるため、`SQLITE_KEY` の有無にかかわらず real 側の分岐に到達しない**
+(`fixture.ts` が `makeMockAdapter()` を固定で呼び、adapter の注入口を持たない)。
 
 ## 主な品質リスク
 
-- **`reachable` が常に真**。 到達性を何も測っていないため、この値の assert は
-  real driver に差し替えるまで意味を持たない。 mock で真だったことを
-  「到達できる」 と読むと、実 container が落ちていても気付けない
+- **`reachable` が常に真**。 到達性を何も測っていないため、この assert が保証するのは
+  mock の定数だけになる。 mock で真だったことを real container の到達性と読むと、
+  container が落ちていても気付けない
 - **image 名が定数**。 実際にその image を引けるかを確かめていない。
   tag (`sqlite:3.45` / `libsql-server:latest`) が消えても検出しない
-- **`latest` tag を使っている**。 `libsqlImage` が固定版でないため、
-  real driver に差し替えた時に取得する中身が時期で変わる
+- **`latest` tag を文字列として返す**。 現在の adapter は image を resolve も pull もしないが、
+  後段がこの値をそのまま pull に使うと取得内容を固定できない
 - **real 側の env-gate に到達しない**。 `SQLITE_KEY` の有無で分かれる分岐は
   e2e が 1 度も通らない
 
@@ -67,7 +68,7 @@ real 側の分岐に到達しない** (`fixture.ts` が `makeMockAdapter()` を�
 | # | 観点 | 対象 |
 |---|---|---|
 | 1 | 口の形 | 4 項目が揃って返る |
-| 2 | 値の由来 | mock の定数と一致する |
+| 2 | 値の識別子 | 3 つの文字列が期待する部分文字列を含む |
 
 ## テストケース一覧
 
@@ -77,19 +78,20 @@ real 側の分岐に到達しない** (`fixture.ts` が `makeMockAdapter()` を�
 
 ## 自動化方針
 
-**assert は部分一致で書かれている** (`toContain`)。 完全一致にしていないのは、
-image の tag が変わっても口の形は保たれるという意図と読める。
+**assert は部分一致で書かれている** (`toContain`)。 そのため image の tag が変わっても、
+部分文字列が残る限り test は通る。
 
 代償として、`sqliteUrl` が `file:sqlite-mock.db` から別の `sqlite-mock` を含む値へ
 変わっても落ちない。 値そのものを固定したいなら完全一致にする必要がある。
 
-**この 1 件が覆っていない範囲**。
+**この 1 件が覆っていない主要な範囲**。
 
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
 | `metrics().testcontainersProbes` の増分 | できる | `/metrics` を読んでいない |
 | trace の追加 | できる | `/traces` を読んでいない |
 | 定数の完全一致 | できる | 部分一致で assert している |
-| real 側の `SQLITE_ENV_MISSING` | **できない** | `fixture.ts` が mock を固定で呼ぶため、real adapter が e2e の経路に現れない |
+| real adapter (`SQLITE_KEY` 有 / 無) | **できない** | `fixture.ts` が mock を固定で呼び、real adapter を渡す経路が無い |
 
-最後の 1 件だけが到達できない。 real 側は単体テストが `makeRealAdapter()` を直接呼んで確かめる。
+最後の 1 件だけが、この e2e server の経路から到達できない。 real 側は単体テストが
+`makeRealAdapter()` を直接呼んで確かめる。

@@ -25,8 +25,10 @@ op そのものの結果ではなく、**記録の側**になる。
 
 ### 記録を残すのは 5 op だけ
 
-`timed()` を通るのは上表の「効く」 5 つ。 `metrics` / `traces` / `reset` は `timed()` を
-通らないため、**何度読んでも標本も trace も増えない**。
+待ち時間標本を足すのは `timed()`、成功 trace を足すのは各 op 内の `record()` になる
+(`timed()` 自身が trace を足すのは失敗時だけ)。 上表の「効く」 5 つは両方を通る。
+`metrics` / `traces` はどちらも呼ばないため、**何度読んでも標本も trace も増えない**。
+`reset` もどちらも呼ばず、既存の記録を消す。
 
 実測で確認した。 `/metrics` を 6 回呼んでも `latencySamplesMs` は op の数のまま。
 
@@ -50,17 +52,17 @@ op そのものの結果ではなく、**記録の側**になる。
 
 ### `reset` が消すもの
 
-trace と 5 つの metric をすべて 0 に戻す。 実測で `reset` 後の `/metrics` が
-初期値、`/traces` が空配列を返すことを確認した。
+trace を空にし、metric の 5 field のうち `latencySamplesMs` を空配列、4 counter を 0 に戻す。
+実測で `reset` 後の `/metrics` が初期値、`/traces` が空配列を返すことを確認した。
 
 ### 失敗した op も標本を残す
 
 `timed()` は `catch` の中でも標本を積む。 送出した op は trace に
 `ok: false` と `errorKind: 'SQLITE_MOCK_ERROR'` を残す。
 
-**ただし server が先に落とす形もある。** 入力の検証は `@kiwa-lab/orm` 側や
-`src/edge/index.ts` が行い、送出は `timed()` を通って trace に残るが、
-server は 500 と `errorKind` を返す。
+入力の検証は `@kiwa-lab/orm` 側や `src/edge/index.ts` が `timed()` の内側で行う。
+そこでの送出は失敗 trace を残して adapter から再送出され、server が捕捉して 500 と
+`errorKind` を返す。
 
 ## 主な品質リスク
 
@@ -68,10 +70,12 @@ server は 500 と `errorKind` を返す。
   release gate がこの値を op 数として扱うと、edge だけが過大評価される
 - **`metrics` / `traces` 自体が記録されない**。 読み取りの回数は追跡できないため、
   「誰がいつ読んだか」 は分からない
-- **`walJourneySteps` の +4 が状態遷移の数に依存する**。 `@kiwa-lab/orm` 側で遷移が
-  1 つ増えると値が変わる。 4 という数は実装から導かれるもので、契約ではない
-- **`reset` に認可が無い**。 経路が生えている以上、browser から誰でも記録を消せる。
-  dogfood の範囲では意図した挙動だが、同じ形を本番へ持ち込むと監査記録が消せる
+- **`walJourneySteps` の +4 は履歴 entry 数に依存する**。 現在の `driveWalJourney()` は
+  4 つの ORM 操作を呼び、各操作が `session.history` に 1 件ずつ記録する。 呼ぶ操作または
+  1 操作あたりの記録数が変わると値も変わるため、4 は adapter 契約ではない
+- **`reset` に認可が無い**。 server は `127.0.0.1` の一時 port にだけ bind するが、
+  そこへ POST できる local client は記録を消せる。 外部公開する実装へ同じ route を
+  持ち込む場合は、認可なしで監査記録を消せる経路になる
 
 ## 推奨テスト構成
 
@@ -85,7 +89,7 @@ server は 500 と `errorKind` を返す。
 
 | # | 観点 | 対象 |
 |---|---|---|
-| 1 | 5 op の巡回 | 全経路が 200 を返す |
+| 1 | 5 op の巡回 | 5 op の成功 trace が揃う |
 | 2 | 標本の数 | `latencySamplesMs` が op の数と一致する |
 | 3 | trace の数と成否 | 5 件すべてが `ok: true` |
 | 4 | metric の内訳 | 4 つの counter が期待値になる |
@@ -99,14 +103,15 @@ server は 500 と `errorKind` を返す。
 ## 自動化方針
 
 **`latencySamplesMs.length===5` と `trace.length===5` が、この test の要**になる。
-5 op を 1 巡して 5 件ずつなら、`metrics` と `traces` の読み取り自体が記録されていないことも
-同時に示す (記録されていれば 7 件以上になる)。
+この assert が示すのは、各 endpoint が返した snapshot の観測時点で 5 件ずつだったこと。
+`/metrics` が後続の `/traces` に trace を増やす実装なら検出できるが、1 回ずつしか読まないため、
+反復しても増えないことや `/traces` 自身が snapshot 作成後に記録しないことまでは保証しない。
 
 `edgeInvocations` だけ `>0` の範囲 assert で、値を固定していない。 既定の `requests` は 10 なので
 10 になるが、既定が変わっても落ちない。 **単位が他と違うことを示す唯一の値なので、
 固定した方が意図が伝わる。**
 
-**この 1 件が覆っていない範囲**。 いずれも同じ経路から到達できる。
+**この 1 件が覆っていない主要な範囲**。 いずれも同じ経路から到達できる。
 
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
