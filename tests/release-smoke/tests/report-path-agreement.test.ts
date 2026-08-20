@@ -1,6 +1,15 @@
+import { readdirSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
-import { headingSectionIn, read, skillBody, skillsWithSkillMd } from './skill-md.js';
+import {
+  headingSectionIn,
+  read,
+  REPO_ROOT,
+  skillBody,
+  skillsWithSkillMd,
+} from './skill-md.js';
 
 /**
  * report の path 雛形が 1 箇所にしか無いか (#2082).
@@ -20,7 +29,7 @@ import { headingSectionIn, read, skillBody, skillsWithSkillMd } from './skill-md
 
 const SKILLS = [...skillsWithSkillMd()].sort();
 
-/** skill の SKILL.md と references から、 与えた形に一致する行を集める。 */
+/** skill の SKILL.md から、 与えた形に一致する行を集める。 */
 function occurrences(pattern: RegExp): { skill: string; line: string }[] {
   const out: { skill: string; line: string }[] = [];
   for (const skill of SKILLS) {
@@ -29,6 +38,16 @@ function occurrences(pattern: RegExp): { skill: string; line: string }[] {
     }
   }
   return out;
+}
+
+/** skill の references 直下にある Markdown を全件読む (symlink も参照先を読む)。 */
+function referenceMarkdown(skill: string): { file: string; body: string }[] {
+  const dir = `.claude/skills/${skill}/references`;
+  return readdirSync(resolve(REPO_ROOT, dir), { withFileTypes: true })
+    .filter((entry) =>
+      (entry.isFile() || entry.isSymbolicLink()) && entry.name.endsWith('.md'),
+    )
+    .map((entry) => ({ file: `${dir}/${entry.name}`, body: read(`${dir}/${entry.name}`) }));
 }
 
 describe('observe dashboard の雛形は writer だけが持つ', () => {
@@ -83,15 +102,22 @@ describe('coverage report の雛形は Step 0 だけが持つ', () => {
     expect(step0, `${skill}: lang suffix の位置を書いていない`).toContain('lang suffix は常に末尾');
   });
 
-  it.each(OWNERS)('%s の template reference に写しが無い', (skill) => {
-    // 上の「Step 0 の中だけ」 は SKILL.md しか走査しない。 template は別 file なので
-    // 直接見る = ここに写しが残ると、 template を読んだ人が lang suffix を落とす。
+  it.each(OWNERS)('%s の references に写しが無い', (skill) => {
+    // 上の「Step 0 の中だけ」 は SKILL.md しか走査しない。 references も全件見る =
+    // 1 file だけを名指しすると、 別 reference に残った写しを検出できない。
     expect(skillBody(skill), `${skill}: template の参照が消えている`).toContain(
       'coverage-report-template.md',
     );
+    const references = referenceMarkdown(skill);
+    const copies = references.flatMap(({ file, body }) =>
+      body
+        .split('\n')
+        .filter((line) => SHAPE.test(line) || /`coverage-report-\{/.test(line))
+        .map((line) => ({ file, line: line.trim() })),
+    );
+    expect(copies, `${skill}: references に coverage path の写しがある`).toEqual([]);
+
     const template = read(`.claude/skills/${skill}/references/coverage-report-template.md`);
-    const copies = template.split('\n').filter((l) => SHAPE.test(l) || /`coverage-report-\{/.test(l));
-    expect(copies, `${skill}: template に coverage path の写しがある`).toEqual([]);
     expect(template, `${skill}: 出力先の委譲先を書いていない`).toContain('Step 0');
   });
 });
