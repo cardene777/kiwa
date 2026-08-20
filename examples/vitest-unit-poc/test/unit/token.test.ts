@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { isExpired, nextBackoffMs, normalizeTag } from '../../src/token.js';
 
-// spec = tests/spec/unit/test-spec-token.md
+// spec = tests/spec/unit/test-spec-token.ja.md
 
 describe('normalizeTag (mode: pure)', () => {
   it('T-UNIT-001 空白区切りを - に潰して小文字化する', () => {
@@ -33,6 +33,18 @@ describe('normalizeTag (mode: pure)', () => {
 
   it('T-UNIT-007 maxLength=0 は空を返す', () => {
     expect(normalizeTag('abc', { maxLength: 0 })).toBe('');
+  });
+
+  it('T-UNIT-016 maxLength に負値を渡すと空を返す', () => {
+    // 実装は `max <= 0` で 1 つの分岐にまとめている。 0 だけを確かめると
+    // `max < 0` を `max === 0` に書き換える退行を捕まえられない。
+    expect(normalizeTag('abc', { maxLength: -1 })).toBe('');
+  });
+
+  it('T-UNIT-017 maxLength が正規化後の長さ以上なら切り詰めない', () => {
+    // `slice` は範囲を超えても落ちないため、 切り詰めが起きない側の経路が
+    // どの test からも通っていなかった。
+    expect(normalizeTag('abc', { maxLength: 99 })).toBe('abc');
   });
 });
 
@@ -74,6 +86,13 @@ describe('isExpired (mode: fake-timer)', () => {
     expect(isExpired(Number.NaN, 500)).toBe(true);
     expect(isExpired(1000, Number.POSITIVE_INFINITY)).toBe(true);
   });
+
+  it('T-UNIT-018 発行時刻が未来でも失効しない', () => {
+    // `Date.now() - issuedAt` が負になる経路。 判定式を `>=` から `>` や
+    // `Math.abs` に書き換える退行を捕まえる。
+    freezeAt(1000);
+    expect(isExpired(2000, 500)).toBe(false);
+  });
 });
 
 describe('nextBackoffMs (mode: pure)', () => {
@@ -89,5 +108,17 @@ describe('nextBackoffMs (mode: pure)', () => {
 
   it('T-UNIT-015 負の attempt は 0 として扱う', () => {
     expect(nextBackoffMs(-3)).toBe(100);
+  });
+
+  it('T-UNIT-019 attempt の小数部は切り捨てる', () => {
+    // `Math.trunc` を外しても `2 ** 1.9` は約 3.73 倍で「それらしい」 値が返るため、
+    // 期待値を固定しないと退行が数値の妥当さに紛れる。
+    expect(nextBackoffMs(1.9)).toBe(200);
+  });
+
+  it('T-UNIT-020 base / cap を明示した時も cap で頭打ちになる', () => {
+    // 既定値だけを確かめると、 `Math.min` の引数を取り違える退行 (cap ではなく
+    // base で頭打ちにする等) が既定値の組合せでは表面化しない。
+    expect(nextBackoffMs(3, 50, 200)).toBe(200);
   });
 });
