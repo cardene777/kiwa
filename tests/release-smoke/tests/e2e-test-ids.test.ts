@@ -18,6 +18,7 @@
 // これは `kiwa layers --layer e2e-generic` が `test_outputs` として宣言する場所と同じ。
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 import { REPO_ROOT, read } from './skill-md.js';
@@ -28,16 +29,31 @@ import { REPO_ROOT, read } from './skill-md.js';
  * `packages/observability/src/collect.ts` の `TC_ID_REGEX` と同じでなければ、
  * ここで通しても突き合わせでは拾われない。 実物から導いて食い違いを防ぐ。
  */
-const TC_ID_PATTERN = (() => {
-  const source = read('packages/observability/src/collect.ts');
-  const literal = /\bconst\s+TC_ID_REGEX\s*=\s*\/((?:\\.|[^/\\\r\n])+)\/([a-z]*)\s*;/.exec(source);
-  expect(literal, '`TC_ID_REGEX` の正規表現リテラルを取り出せない').toBeTruthy();
-  return new RegExp(literal![1]!, literal![2]);
-})();
+function tcIdPattern(source: string): RegExp {
+  const parsed = ts.createSourceFile('collect.ts', source, ts.ScriptTarget.Latest, true);
+  const literals: ts.RegularExpressionLiteral[] = [];
 
-/** `test(` / `it(` / repo 固有 wrapper の第 1 引数 (文字列リテラル)。 */
-const TEST_NAME =
-  /^\s*(?:test|it|withPlaywrightSkip)\(\s*(['"`])((?:\\.|(?!\1)[^\\\r\n])+)\1/gm;
+  function visit(node: ts.Node): void {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === 'TC_ID_REGEX' &&
+      node.initializer &&
+      ts.isRegularExpressionLiteral(node.initializer)
+    ) {
+      literals.push(node.initializer);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(parsed);
+
+  expect(literals, '`TC_ID_REGEX` の正規表現リテラルを一意に取り出せない').toHaveLength(1);
+  const literal = literals[0]!.getText(parsed);
+  const closingSlash = literal.lastIndexOf('/');
+  return new RegExp(literal.slice(1, closingSlash), literal.slice(closingSlash + 1));
+}
+
+const TC_ID_PATTERN = tcIdPattern(read('packages/observability/src/collect.ts'));
 
 interface E2eTest {
   file: string;
@@ -47,6 +63,94 @@ interface E2eTest {
 interface E2eScan {
   files: string[];
   tests: E2eTest[];
+}
+
+interface TestWrapper {
+  name: string;
+  nameParameter: string;
+  body: ts.ConciseBody;
+}
+
+function calledIdentifier(node: ts.CallExpression): string | undefined {
+  return ts.isIdentifier(node.expression) ? node.expression.text : undefined;
+}
+
+/** `test` / `it` へ test 名を渡す local wrapper も宣言名に依存せず辿る。 */
+function e2eTestNames(file: string, source: string): string[] {
+  const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true);
+  const wrappers: TestWrapper[] = [];
+
+  function collectWrappers(node: ts.Node): void {
+    if (
+      ts.isFunctionDeclaration(node) &&
+      node.name &&
+      node.body &&
+      node.parameters[0] &&
+      ts.isIdentifier(node.parameters[0].name)
+    ) {
+      wrappers.push({
+        name: node.name.text,
+        nameParameter: node.parameters[0].name.text,
+        body: node.body,
+      });
+    } else if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer &&
+      (ts.isArrowFunction(node.initializer) || ts.isFunctionExpression(node.initializer)) &&
+      node.initializer.parameters[0] &&
+      ts.isIdentifier(node.initializer.parameters[0].name)
+    ) {
+      wrappers.push({
+        name: node.name.text,
+        nameParameter: node.initializer.parameters[0].name.text,
+        body: node.initializer.body,
+      });
+    }
+    ts.forEachChild(node, collectWrappers);
+  }
+  collectWrappers(parsed);
+
+  const registrars = new Set(['test', 'it']);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const wrapper of wrappers) {
+      if (registrars.has(wrapper.name)) continue;
+      let forwardsName = false;
+      function findForward(node: ts.Node): void {
+        if (
+          ts.isCallExpression(node) &&
+          registrars.has(calledIdentifier(node) ?? '') &&
+          node.arguments[0] &&
+          ts.isIdentifier(node.arguments[0]) &&
+          node.arguments[0].text === wrapper.nameParameter
+        ) {
+          forwardsName = true;
+          return;
+        }
+        ts.forEachChild(node, findForward);
+      }
+      findForward(wrapper.body);
+      if (forwardsName) {
+        registrars.add(wrapper.name);
+        changed = true;
+      }
+    }
+  }
+
+  const names: string[] = [];
+  function collectNames(node: ts.Node): void {
+    if (ts.isCallExpression(node) && registrars.has(calledIdentifier(node) ?? '')) {
+      const name = node.arguments[0];
+      if (name && (ts.isStringLiteral(name) || ts.isNoSubstitutionTemplateLiteral(name))) {
+        names.push(name.text);
+      }
+    }
+    ts.forEachChild(node, collectNames);
+  }
+  collectNames(parsed);
+  return names;
 }
 
 function e2eTests(): E2eScan {
@@ -69,8 +173,8 @@ function e2eTests(): E2eScan {
       if (files.has(file)) continue;
       files.add(file);
       const body = readFileSync(resolve(REPO_ROOT, file), 'utf8');
-      for (const m of body.matchAll(TEST_NAME)) {
-        out.push({ file, name: m[2] as string });
+      for (const name of e2eTestNames(file, body)) {
+        out.push({ file, name });
       }
     }
   }
@@ -178,5 +282,28 @@ describe('e2e の test 名が突き合わせの ID を持つ (#2109)', () => {
     expect(TC_ID_PATTERN.test('T-E2E-001 login'), '正しい形を弾いている').toBe(true);
     expect(TC_ID_PATTERN.test('T-DR-S1 pending'), '末尾が数字でない形を通している').toBe(false);
     expect(TC_ID_PATTERN.test('renders the page'), 'ID の無い形を通している').toBe(false);
+  });
+
+  it('コメント内の偽宣言ではなく実際の正規表現リテラルを読む', () => {
+    const pattern = tcIdPattern(`
+      // const TC_ID_REGEX = /wrong/;
+      const TC_ID_REGEX = /T\\/E2E/gi;
+    `);
+    expect(pattern.source).toBe('T\\/E2E');
+    expect(pattern.flags).toBe('gi');
+  });
+
+  it('test 名を転送する local wrapper を宣言名に依存せず走査する', () => {
+    const names = e2eTestNames(
+      'future-wrapper.spec.ts',
+      `
+        function futureWrapper(name: string, run: () => void): void {
+          test(name, run);
+        }
+        test('T-E2E-001 direct', () => {});
+        futureWrapper('T-E2E-002 wrapped', () => {});
+      `,
+    );
+    expect(names).toEqual(['T-E2E-001 direct', 'T-E2E-002 wrapped']);
   });
 });
