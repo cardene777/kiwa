@@ -165,8 +165,24 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 
 ```bash
 pnpm exec vitest run --root "$PROJECT_ROOT" --passWithNoTests \
+  --exclude '**/node_modules/**' --exclude '**/dist/**' --exclude '**/cypress/**' \
+  --exclude '**/.{idea,git,cache,output,temp}/**' \
+  --exclude '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*' \
+  --exclude '**/.vitest-dist/**' \
   --reporter=json --outputFile=tests/reports/vitest-results.json
 ```
+
+**build 出力を除く**。 例の多くは `tsc -p tsconfig.vitest.json` で `.vitest-dist/` に
+compile してからそこだけを走らせる。 その残骸が消えていないと、 本 command は
+**source (`tests/*.tsx`) と compiled (`.vitest-dist/tests/*.js`) の両方を収集して同じ test を
+2 回数える** (実測で 19 件が 38 件になった)。
+
+例自身の `test` script は毎回 `rmSync` してから走らせるので二重にならない。 本 skill は
+別経路から起動するため、 残骸を拾う側になる。
+
+`--exclude` を渡すと既定値を置き換えるため、 **Vitest 3.2 の既定 exclude 5 件を全て残した上で**
+`.vitest-dist` を足す。 `node_modules` だけを残すと `dist` / `cypress` / cache / 各種 config の
+除外が外れ、 別の build 出力や test を再び収集する。
 
 `--outputFile` は **`--root` からの相対** で解決される。 repo root からの相対で書くと
 `$PROJECT_ROOT/$PROJECT_ROOT/tests/...` に書かれる (実測)。 Step 1 は
@@ -201,6 +217,23 @@ Summary が観測対象ではないものの pass / fail を報告すること�
 `--root` を渡した時の収集は、 その project の vitest 設定が決める。 実測では
 `examples/dogfood-dapp-e2e-reorg` が `tests/unit/**/*.test.ts` だけを集め、 同居する Playwright の
 `*.spec.ts` は拾わなかった。
+
+#### 環境は project の config が持つ
+
+**`--environment` を本 command で組み立てない**。 project が DOM を要するかは project の性質で、
+観測側が知っている値ではない。
+
+宣言が `package.json` の `test` script (`--environment jsdom`) だけに置かれていると、
+本 command は既定の `node` で走らせて **全件失敗する**。 dashboard はそれを実測値として
+`pass rate 0.0%` と報告するため、 **実装が壊れたのか観測の起動が誤っているのか読み分けられない**
+(`examples/react-component-poc` で実測、 16 件全滅)。
+
+対処は観測側ではなく project 側にある。 環境を要する project は `vitest.config.ts` に
+`environment` を書く。 script の CLI 引数は config に優先するため、 script 側を残しても
+挙動は変わらない。
+
+file ごとに環境が違う project (`examples/full-stack-poc` が該当、 1 file だけ jsdom) は
+config の 1 値で表せない。 その形は `--vitest-json` に project 自身の run 結果を渡す。
 
 #### runner が vitest でない layer
 
