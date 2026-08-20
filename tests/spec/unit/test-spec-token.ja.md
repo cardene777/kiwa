@@ -8,7 +8,8 @@
 
 ## 対象機能
 
-発行 token の正規化と失効判定、および再試行の待ち時間を返す 3 つの純粋関数。
+発行 token の正規化と失効判定、および再試行の待ち時間を返す 3 つの関数。
+`normalizeTag` と `nextBackoffMs` は純粋関数だが、`isExpired` は現在時刻を読むため純粋関数ではない。
 
 `unit` layer の対象は外部依存を持たない logic で、`docs/layers.json` の `unit` は
 `backing_package: null` を宣言する。 本 module も import を持たず、唯一の外部状態である
@@ -51,7 +52,7 @@
 
 ### 権限モデル
 
-なし (純粋関数、呼出制限を持たない)。
+なし (3 関数とも呼出制限を持たない)。
 
 ### 失敗 mode
 
