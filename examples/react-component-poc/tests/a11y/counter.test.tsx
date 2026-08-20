@@ -118,7 +118,7 @@ describe('閾値の既定 (mode: jsdom)', () => {
       passes: [],
       incomplete: [],
       inapplicable: [],
-    } as unknown as AxeResults;
+    };
   }
 
   /** `serious` 1 件。 summary の組み立てと送出の確認に使う。 */
@@ -137,7 +137,7 @@ describe('閾値の既定 (mode: jsdom)', () => {
       passes: [],
       incomplete: [],
       inapplicable: [],
-    } as unknown as AxeResults;
+    };
   }
 
   it('T-A11Y-009 impact を持たない violation は blocking に入らない', () => {

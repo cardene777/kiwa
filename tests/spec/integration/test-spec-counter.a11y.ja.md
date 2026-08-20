@@ -31,7 +31,7 @@ axe-core を jsdom 上で走らせ、違反を閾値で仕分けて報告する 
 ### 走査範囲の決め方
 
 `runAxe` は `opts.context` を優先し、無ければ `document` 全体を走査する。
-どちらも無い環境 (jsdom でない) では `runAxe: no context and no global document` を投げる。
+どちらも無い環境 (jsdom でない) では `runAxe: no context and no global document (jsdom env required).` を投げる。
 
 **範囲を絞ることが検査の意味を決める**。`context` を渡さないと、対象の外にある違反まで拾う。
 
@@ -69,7 +69,7 @@ assertion 関数を注入で受けるのは、test runner に依存しないた�
 
 | 状況 | 送出 |
 |---|---|
-| `axe-core` が読めない | `runAxe requires "axe-core" to be installed.` |
+| `axe-core` が読めない | <code>runAxe requires "axe-core" to be installed. Run &#96;pnpm add -D axe-core&#96;.</code> |
 | `context` も `document` も無い | `runAxe: no context and no global document (jsdom env required).` |
 | blocking が 1 件以上 (`expectNoViolations`) | `Error(summary)` |
 
@@ -149,7 +149,7 @@ jsdom は layout と canvas を持たないため、実 browser を要する rul
 ## 自動化すべきテスト
 
 - T-A11Y-001 〜 T-A11Y-013 全 13 件、全件自動化推奨
-- 合成 results を使う 6 件 (005 / 006 / 009 / 010 / 011 / 012 / 013) は axe を通さず閾値の分岐だけを見る
+- 合成 results を使う 7 件 (005 / 006 / 009 / 010 / 011 / 012 / 013) は axe を通さず閾値の分岐だけを見る
 
 ## 手動確認でよいテスト
 
@@ -157,11 +157,11 @@ jsdom は layout と canvas を持たないため、実 browser を要する rul
 
 ## 不足している仕様
 
-- `axe-core` を読めない場合の送出 (`runAxe requires "axe-core" to be installed.`) を確かめる経路が無い。 依存を外して走らせる形になるため、単体の test では再現しにくい
-- `context` も `document` も無い場合の送出を確かめる経路が無い。 jsdom 環境では `document` が常にあるため、node 環境で走らせる別の test が要る
-- `color-contrast` を無効にしているため、実 browser を要する rule が本 layer では 1 件も走らない。 どの rule を Playwright 側へ回すかの一覧が未定義
-- `impact` の 4 段階のうち `moderate` を通す TC が無い。 `minor` と `serious` の境界は確かめているが、中間の順序は暗黙のまま
-- `runOptions` を省いた場合の既定 (`{}` = 全 rule) を確かめる TC が無い。 本 spec の全 TC が `WCAG_21_AA` を渡している
+- この counter suite には、`axe-core` を読めない場合の送出 (`runAxe requires "axe-core" to be installed.` で始まる error) を確かめる経路が無い。依存を外して走らせる形になるため、単体の test では再現しにくい
+- この counter suite には、`context` も `document` も無い場合の送出を確かめる経路が無い。jsdom 環境では `document` が常にあるため、node 環境で走らせる別の test が要る
+- この counter suite では `color-contrast` を無効にしているため、実 browser を要する rule が 1 件も走らない。どの rule を Playwright 側へ回すかの一覧が未定義
+- この counter suite には、`impact` の 4 段階のうち `moderate` を通す TC が無い。`minor` と `serious` の境界は確かめているが、中間の順序は暗黙のまま
+- この counter suite で `runAxe` を呼ぶ全 TC が `WCAG_21_AA` を渡しており、`runOptions` を省いた場合の既定 (`{}` = 全 rule) を確かめる TC が無い
 
 ## Layer 2 連携
 
