@@ -25,18 +25,16 @@ const ENTRIES = [
 
 describe('module と example は別の値である', () => {
   it('roster を読めている (空振り防止)', () => {
-    // 正規表現が roster の書き方に追随できなくなると 0 件になり、 下の検査が
-    // 何も見ないまま緑になる。
-    expect(ENTRIES.length).toBeGreaterThan(0);
+    // 正規表現が roster の一部に追随できなくなっても、 1 件以上だけでは
+    // 残った entry だけを見て緑になる。 本文が宣言する 20 件全てを固定する。
+    expect(ENTRIES).toHaveLength(20);
   });
 
   it('大半の layer で module と example が違う', () => {
     // 「別物である」 という前提そのものを実物で固定する。 全件一致するようになったら
     // `--module` を分ける理由が消えるので、 その時はこの検査が落ちて気付ける。
     const differ = ENTRIES.filter((e) => e.module !== e.example);
-    expect(differ.length, 'module と example が全件一致している').toBeGreaterThan(
-      ENTRIES.length / 2,
-    );
+    expect(differ, 'module と example の不一致数が本文と違う').toHaveLength(18);
   });
 });
 
@@ -68,8 +66,49 @@ describe('kiwa-test が module を example から分けて渡す', () => {
     expect([...new Set(calls)], 'module に別の変数を渡している呼出がある').toEqual(['$MODULE']);
   });
 
+  it('module が必須の Layer 2 skill に同じ値を渡す', () => {
+    for (const skill of ['kiwa-play', 'kiwa-e2e', 'kiwa-a11y']) {
+      const invocation = TEST.split('\n').find((line) => line.includes(`/${skill} --`));
+      expect(invocation, `/${skill} の呼出が無い`).toBeTruthy();
+      expect(invocation, `/${skill} に module を渡していない`).toContain('--module {module}');
+    }
+  });
+
+  it('module で決まる生成物 path に example placeholder を使わない', () => {
+    expect(TEST, 'spec path がexample 名のまま').not.toMatch(/test-spec-\{example\}/);
+    expect(TEST, 'coverage report path がexample 名のまま').not.toContain(
+      'coverage-report-{example}',
+    );
+    expect(TEST, 'result-review path がexample 名のまま').not.toContain(
+      'result-review-{example}',
+    );
+  });
+
   it('$MODULE の意味を書いている', () => {
     expect(TEST, '$MODULE の説明が無い').toMatch(/\$MODULE` は skill 引数の `--module`/);
+  });
+});
+
+describe('writer 側の生成 file 名が module 基準である', () => {
+  // orchestrator が `--module` を渡しても、 writer が example 名で書けば
+  // `kiwa layers` 経由で引き当てられない。 呼出側と writer の両方を固定する。
+  it.each([
+    ['kiwa-play', /tests\/\{module\}\.spec\.ts/],
+    ['kiwa-e2e', /\{module\}\.spec\.ts/],
+    ['kiwa-a11y', /\{module\}\.(?:test\.tsx|spec\.ts)/],
+  ])('%s が生成 file 名に module を使う', (skill, pattern) => {
+    const body = skillBody(skill);
+    expect(body, `${skill}: 生成 file 名が module 基準でない`).toMatch(pattern);
+  });
+
+  it('生成 file 名に example placeholder を使う skill が無い', () => {
+    // 逆向き。 `{example}.spec.ts` 等が 1 件でも残ると、 その skill だけ別名で書く。
+    const offenders: string[] = [];
+    for (const skill of ['kiwa-play', 'kiwa-e2e', 'kiwa-a11y']) {
+      const hits = [...skillBody(skill).matchAll(/\{example\}\.(?:spec|test|e2e|a11y)/g)];
+      if (hits.length) offenders.push(`${skill}: ${hits.length} 件`);
+    }
+    expect(offenders, '生成 file 名が example 名のままの skill がある').toEqual([]);
   });
 });
 

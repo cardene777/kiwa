@@ -192,7 +192,9 @@ Layer 1 が以下 9 section の仕様書を解決済み spec path に Write す�
 
 #### 1.5.C 仕様書ベースで実装 (Layer 2 = 本 skill の責務)
 
-Layer 1 出力 (解決済み spec path) を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{example}.spec.ts` の test 関数に変換する。
+Layer 1 出力 (解決済み spec path) を Read し、 「テストケース一覧」 section の 9 column 表を **行単位** で `tests/{module}.spec.ts` の test 関数に変換する。
+
+**`{example}` ではなく `{module}`**。 本 skill の `--module` は「spec / test file 名に入る module 名」 と宣言しており、 example 名とは別の値になる (repo の宣言は 20 layer 中 18 で 違う値を持つ、 #2074)。 `docs/layers.json` の `test_outputs` は `{example}/tests/*.spec.ts` と glob で宣言するため、 どちらの名前でも宣言は満たすが、 呼出側 (`/kiwa-test`) が渡す `--module` と食い違う名前を書くと、 生成した test を `kiwa layers` 経由で引き当てられない。
 
 | Layer 1 column | spec.ts への変換 |
 |---|---|

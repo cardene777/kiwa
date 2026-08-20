@@ -265,7 +265,10 @@ describe('review report の名前が writer と reader で一致する', () => {
 
   it('kiwa-test 側が writer に出せない名前を宣言していない', () => {
     const found = new Set(declaredPlaceholders(TEST_SKILL));
-    expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual(['example']);
+    expect([...found].sort(), 'writer が出せない placeholder を宣言している').toEqual([
+      'example',
+      'module',
+    ]);
 
     // suffix 付きの名前は `--out` を渡す時だけ caller が決められる。 名前だけ宣言して
     // `--out` が無ければ writer は出せないので、 全 occurrence を直前の flag と対応付ける。
@@ -275,6 +278,14 @@ describe('review report の名前が writer と reader で一致する', () => {
     expect(explicit.length, '子 review の明示 --out が 9 件でない').toBe(9);
     expect(new Set(explicit).size, '子 review の --out が衝突している').toBe(explicit.length);
     expect(explicit.every((p) => p.startsWith('tests/reports/review/'))).toBe(true);
+
+    // `--out` を渡さない result-review は writer の既定名を使うため、
+    // placeholder は `--module` と同じ module でなければならない。
+    const implicit = TEST_SKILL.split('\n')
+      .filter((line) => !line.includes('--out'))
+      .flatMap((line) => [...line.matchAll(/(?:spec|test|result)-review-\{(\w+)\}/g)])
+      .map((m) => m[1]!);
+    expect(implicit, '既定出力名が module 以外の placeholder を使っている').toEqual(['module']);
 
     // **`--out` を伴わない suffix 付きの名前は残っていない**。 上の 3 行だけだと、
     // `--out` の無い行に `test-review-{example}-{tool}.{lang}.md` と書いた宣言が
