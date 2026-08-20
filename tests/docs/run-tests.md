@@ -101,7 +101,7 @@ Runs Step 3 (contract) and then Step 4 (dapp) sequentially (default `--mode sequ
 After the full chain completes, `/kiwa-test` generates:
 
 ```text
-tests/reports/integrated/{example}-{target}.{lang}.md
+tests/reports/integrated/{example}-{module}-{target}.{lang}.md
 ```
 
 4-section structure:
@@ -143,7 +143,7 @@ Each round:
 1. **Classify the failure** — spec-review FAIL / test-review FAIL / result-review FAIL
 2. **Rerun the appropriate skill** — restart `/kiwa-design` (spec FAIL) or `/kiwa-{forge|hardhat|play}` (test FAIL or insufficient coverage) with the review feedback as prompt context
 3. **Rerun review** — execute the review chain again after the fix
-4. **Accumulate round reports** — save each round under `tests/reports/integrated/{example}-{target}-round-{N}.md`
+4. **Accumulate round reports** — save each round under `tests/reports/integrated/{example}-{module}-{target}-round-{N}.md`
 
 You can skip this with `--no-auto-fix` (end immediately even if review FAILs; useful for CI / one-shot verification).
 
@@ -152,7 +152,7 @@ You can skip this with `--no-auto-fix` (end immediately even if review FAILs; us
 Example summary returned by `/kiwa-test`:
 
 ```text
-🎉 /kiwa-test completed - nextjs-token-gating (both)
+🎉 /kiwa-test completed - nextjs-token-gating / module=token-gating (both)
 
 Result: ✅ ALL PASS
 
@@ -161,7 +161,7 @@ Execution summary:
 - dapp e2e: Playwright 12/13 PASS (1 skip TC-005) / 4 rounds flaky 0
 - result-review: 8.4/10 PASS
 
-Integrated report: tests/reports/integrated/nextjs-token-gating-both.en.md
+Integrated report: tests/reports/integrated/nextjs-token-gating-token-gating-both.en.md
 Relocated test code: tests/fixtures/nextjs-token-gating/{contract-test, hardhat-test, e2e-test}/ (included in the PR)
 
 Next action: docs update + PR creation recommended

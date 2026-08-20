@@ -101,7 +101,7 @@ Step 3 (contract) → Step 4 (dapp) の順次実行 (default `--mode sequential`
 全 chain 完了後、 `/kiwa-test` が以下を生成:
 
 ```text
-tests/reports/integrated/{example}-{target}.{lang}.md
+tests/reports/integrated/{example}-{module}-{target}.{lang}.md
 ```
 
 4 section 構造:
@@ -143,7 +143,7 @@ result-review or 子 review が FAIL の場合、 `/kiwa-test` Step 5c が **自
 1. **failure 分類** — spec-review FAIL / test-review FAIL / result-review FAIL のいずれか
 2. **対応 skill 再走** — review 指摘 prompt 付きで `/kiwa-design` (spec FAIL) or `/kiwa-{forge|hardhat|play}` (test FAIL or coverage 不足) を再起動
 3. **再 review** — 修正後に review chain を再実行
-4. **round 別 report 累積** — `tests/reports/integrated/{example}-{target}-round-{N}.md` に各 round 履歴保存
+4. **round 別 report 累積** — `tests/reports/integrated/{example}-{module}-{target}-round-{N}.md` に各 round 履歴保存
 
 `--no-auto-fix` 引数で skip 可能 (review FAIL でも修正試行せず終了、 CI / 単発確認用)。
 
@@ -152,7 +152,7 @@ result-review or 子 review が FAIL の場合、 `/kiwa-test` Step 5c が **自
 `/kiwa-test` が user に return する summary 例:
 
 ```text
-🎉 /kiwa-test 完了 — nextjs-token-gating (both)
+🎉 /kiwa-test 完了 — nextjs-token-gating / module=token-gating (both)
 
 判定: ✅ ALL PASS
 
@@ -161,7 +161,7 @@ result-review or 子 review が FAIL の場合、 `/kiwa-test` Step 5c が **自
 - dapp e2e: Playwright 12/13 PASS (1 skip TC-005) / 4 round flaky 0
 - result-review: 8.4/10 PASS
 
-統合 report: tests/reports/integrated/nextjs-token-gating-both.ja.md
+統合 report: tests/reports/integrated/nextjs-token-gating-token-gating-both.ja.md
 test code 退避先: tests/fixtures/nextjs-token-gating/{contract-test, hardhat-test, e2e-test}/ (PR に含まれます)
 
 次アクション: docs 更新 + PR 起票推奨

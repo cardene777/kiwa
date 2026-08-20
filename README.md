@@ -189,7 +189,7 @@ Every kiwa surface follows the same `kiwa-design → Layer 2 generator → kiwa-
 | CLI / shell / file IO | `/kiwa-design --layer cli` | `/kiwa-cli-test` | `/kiwa-review --layer cli` | `@kiwa-lab/cli-test` |
 | ORM query (Drizzle + Prisma + Kysely 全 3 ORM × SQLite mock + Postgres/MySQL testcontainers + drizzle-orm/migrator folder migration + Prisma + Postgres testcontainers、 v0.6 / v1.2 完遂版) | `/kiwa-design --layer orm-query` | `/kiwa-orm` | `/kiwa-review --layer orm-query` | `@kiwa-lab/orm` (Prisma + MySQL testcontainers は future follow-up) |
 
-`/kiwa-test --target {contract|dapp|web|both|all}` orchestrates the chain end-to-end for any subset of surfaces — `web` runs the generic e2e / a11y pair against the same `app/` source, `both` covers contract + dapp, and `all` covers web. The integrated report at `tests/reports/integrated/{example}-{target}.{lang}.md` aggregates every surface's pass/fail count, coverage, and reviewer score in one table.
+`/kiwa-test --target {contract|dapp|web|both|all}` orchestrates the chain end-to-end for any subset of surfaces — `web` runs the generic e2e / a11y pair against the same `app/` source, `both` covers contract + dapp, and `all` covers web. The integrated report at `tests/reports/integrated/{example}-{module}-{target}.{lang}.md` aggregates every surface's pass/fail count, coverage, and reviewer score in one table.
 
 ---
 
