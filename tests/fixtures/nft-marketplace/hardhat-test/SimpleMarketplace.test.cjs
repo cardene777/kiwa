@@ -356,4 +356,71 @@ describe('SimpleMarketplace (Layer 2 Hardhat example)', () => {
       expect(await market.nft()).to.equal(await nft.getAddress());
     });
   });
+
+  // Foundry 側では mock 経由で通っているが Hardhat 側だけ未到達だった分岐を塞ぐ (#2088)。
+  // いずれも Solidity の mock を要さず JS だけで組める経路。
+  describe('観点 4: 状態遷移 (branch 補完)', () => {
+    it('TC-031 出品中の token に対する acceptOffer で listing も delete される', async () => {
+      // acceptOffer の `if (listings[tokenId].active)` は true 側が未到達だった。
+      // 出品を挟まずに offer を受けた test しか無く、 出品と offer が同時に立つ状態を
+      // 1 件も作っていなかった。
+      const { nft, market, alice, bob } = await loadFixture(deployFixture);
+      await market.connect(alice).list(1, PRICE);
+      await market.connect(bob)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
+
+      expect((await market.listings(1)).active).to.equal(true);
+      await market.connect(alice).acceptOffer(1);
+
+      expect(await nft.ownerOf(1)).to.equal(bob.address);
+      // 出品が残ると、 所有者が変わった token を元の価格で買える状態になる。
+      expect((await market.listings(1)).active).to.equal(false);
+    });
+
+    it('TC-032 cancel 済 offer の acceptOffer → OfferNotActive', async () => {
+      // acceptOffer 側の `if (!offer.active)` は revert 側が未到達だった。
+      // cancelOffer 側の同名検査 (TC-025) は通っているが、 別の関数の別の分岐になる。
+      const { market, alice, bob } = await loadFixture(deployFixture);
+      await market.connect(bob)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
+      await market.connect(bob).cancelOffer(1);
+
+      await expect(market.connect(alice).acceptOffer(1)).to.be.revertedWithCustomError(
+        market,
+        'OfferNotActive',
+      );
+    });
+
+    it('TC-033 同 token に複数 offer がある状態で 1 件を accept → 受理分は除外し残りだけ返金', async () => {
+      // `_invalidateOffersForToken` の `currentOfferId == excludedOfferId` の
+      // continue 側が未到達だった。 同 token の offer が常に 1 件しか無く、
+      // 受理した offer 自身を除外する経路を通っていなかった。
+      const { nft, market, alice, bob, carol } = await loadFixture(deployFixture);
+      await market.connect(bob)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
+      await market.connect(carol)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
+
+      const carolBefore = await ethers.provider.getBalance(carol.address);
+      await market.connect(alice).acceptOffer(1);
+
+      expect(await nft.ownerOf(1)).to.equal(bob.address);
+      // 受理した 1 件は除外され、 残る 1 件だけが返金される。
+      expect(await ethers.provider.getBalance(carol.address)).to.equal(carolBefore + OFFER_AMOUNT);
+      expect(await market.isOfferActive(2)).to.equal(false);
+    });
+
+    it('TC-034 同 token の offer に cancel 済が混ざっていても accept が通る', async () => {
+      // `_invalidateOffersForToken` の `!offer.active` の continue 側が未到達だった。
+      // offersByToken に残った id のうち既に delete 済のものを読み飛ばす経路。
+      const { nft, market, alice, bob, carol } = await loadFixture(deployFixture);
+      await market.connect(carol)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
+      await market.connect(bob)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
+      // carol の offer を消す。 id は offersByToken に残ったままになる。
+      await market.connect(carol).cancelOffer(1);
+
+      const carolBefore = await ethers.provider.getBalance(carol.address);
+      await market.connect(alice).acceptOffer(2);
+
+      expect(await nft.ownerOf(1)).to.equal(bob.address);
+      // 既に返金済なので二重に返らない。
+      expect(await ethers.provider.getBalance(carol.address)).to.equal(carolBefore);
+    });
+  });
 });
