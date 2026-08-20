@@ -1,6 +1,6 @@
 # coverage-report-template — coverage report 4 section format SSOT
 
-`/kiwa-forge` / `/kiwa-hardhat` の Step 5c で `tests/reports/contract/coverage-report-{module}.md` を Write する際の 4 section format template。 両 skill から参照される (skill 違いを吸収して同一 report format で出力)。
+`/kiwa-forge` / `/kiwa-hardhat` の Step 5c で coverage report を Write する際の 4 section format template。 **出力先は各 skill の Step 0 が定める** (lang suffix を含む)。 両 skill から参照される (skill 違いを吸収して同一 report format で出力)。
 
 ## template 全体
 
@@ -102,7 +102,7 @@ Loop terminated: {production_100_achieved | residual_uncoverable | stalled_2roun
 
 ## round 別 report との関係
 
-auto loop の各 round で `coverage-report-{module}-round-{N}.md` を本 template で Write し、 final round の内容を canonical `coverage-report-{module}.md` に複製。
+auto loop の各 round で Step 0 の round 別 path を本 template で Write し、 final round の内容を canonical path に複製。
 
 round 別 report は累積保存 (履歴として残す)、 canonical は最終 round のみ。 user が「どの round で何の test が追加されたか」を追えるようにする。
 

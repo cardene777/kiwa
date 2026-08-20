@@ -118,9 +118,17 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 
 確定後の言語 `$DOC_LANG` は入力 spec の解決と Step 5c (coverage report Write) の両方で参照する。 coverage report の出力 path (Issue #341 lang suffix SSOT、 `/kiwa-design` § lang suffix 規約 と整合):
 
-- ja → `tests/reports/contract/coverage-report-{module}.ja.md` (+ round 別)
-- en → `tests/reports/contract/coverage-report-{module}.md`
-- その他 → `tests/reports/contract/coverage-report-{module}.{lang_code}.md`
+- ja → `tests/reports/contract/coverage-report-{module}-hardhat.ja.md` (+ round 別)
+- en → `tests/reports/contract/coverage-report-{module}-hardhat.md`
+- その他 → `tests/reports/contract/coverage-report-{module}-hardhat.{lang_code}.md`
+
+**`-hardhat` を落とさない**。 `/kiwa-forge` は同じ dir に suffix 無しで書くため、 落とすと
+`--runner both` で 2 枚目が 1 枚目を上書きする。 repo の実 file がこの形になっている
+(`coverage-report-mint-nft.ja.md` = Foundry、 `coverage-report-mint-nft-hardhat.ja.md` = Hardhat)。
+
+round 別 report は canonical の **runner suffix の直後** に round を挟む (`coverage-report-{module}-hardhat-round-{N}.ja.md`)。 lang suffix は常に末尾 (`/kiwa-design` § lang suffix 規約)。
+
+**以降の step で path を組み立て直さない**。 本節が唯一の SSOT で、 写しを置くと lang suffix を落とす (#2082 で 11 箇所が落としていた)。
 
 ### Step 1: Layer 1 spec 読込
 
@@ -305,7 +313,7 @@ production target で threshold 未達なら以下を **上限なし** で loop�
    - Layer 1 spec (`tests/spec/contract/test-spec-{module}.md`) の「テストケース一覧」に新規 TC-NNN として追記
    - Layer 2 で `test/{Contract}.test.ts` に新規 it block を追記 (既存 it block を上書きしない)
    - 観点 describe (`describe('観点 N: {name}', () => {...})`) を spec と一致させる
-4. 再 `npx hardhat test` + `npx hardhat coverage` で計測、 round 別 report を `tests/reports/contract/coverage-report-{module}-round-{N}.md` に Write
+4. 再 `npx hardhat test` + `npx hardhat coverage` で計測、 round 別 report を Step 0 が定める path (round 別) に Write
 5. loop 終了条件 (いずれか):
    - production target 全 4 metric 100% 到達 → Step 5c へ
    - 残 uncovered (production 側) が全て「削除候補 / defensive / 外部依存」分類 → Step 5c へ (production 100% は理論不能と確定)
@@ -315,7 +323,7 @@ production target で threshold 未達なら以下を **上限なし** で loop�
 
 #### Step 5c: coverage report Write (canonical)
 
-`tests/reports/contract/coverage-report-{module}.md` を 4 section format で Write (template SSOT `references/coverage-report-template.md`)。
+Step 0 が定める canonical path に 4 section format で Write (template SSOT `references/coverage-report-template.md`)。
 
 ```markdown
 # Contract Coverage Report — {module}
@@ -372,7 +380,10 @@ Step 5c の Section 4 で未踏 branch を判定する際、 以下のいずれ�
 > 注 — 本 skill (Layer 2) は spec を **書き換えず**、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
 ```
 
-round 別 report は `coverage-report-{module}-round-{N}.md` として累積保存、 final round の内容を canonical `coverage-report-{module}.md` に複製。 path / format は `/kiwa-forge` と統一 (skill 違いを吸収して同じ report format)。
+round 別 report は Step 0 の round 別 path に累積保存、 final round の内容を canonical path に複製。 path / format は `/kiwa-forge` と統一 (skill 違いを吸収して同じ report format)。
+
+canonical report を Write したら、 **実際に書いた path を chain return に含める**。 呼出元は
+この値をそのまま集約し、 file 名を組み立て直さない。
 
 #### Step 5d: test-passed marker 作成
 
@@ -404,7 +415,7 @@ review 結果は kiwa-forge と同形式 (PASS / CONDITIONAL / FAIL critical な
 - `npx hardhat compile` が exit 0
 - `npx hardhat test` で全 it block PASS (failure 0 件)
 - `npx hardhat coverage` で **production target (contracts/ 配下) 全 4 metric 100% 到達** もしくは 「残 uncovered が全て不可能分類」 と report で明示
-- `tests/reports/contract/coverage-report-{module}.md` が 4 section format で Write 済 (final + round 別)
+- Step 0 が定める coverage report path が 4 section format で Write 済 (final + round 別)
 - 観点別 grouping (`describe('観点 N: {name}', () => {...})`) が spec と一致
 - 「停滞」判定や `hardhat coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
 
@@ -413,7 +424,7 @@ review 結果は kiwa-forge と同形式 (PASS / CONDITIONAL / FAIL critical な
 - `references/hardhat-mapping.md` — 11 観点 → Hardhat helper の完全マッピング + Code snippet + hardhat-toolbox helper 早見表
 - `references/fast-check-patterns.md` — `fast-check` property test の実装パターン詳細 (asyncProperty / fc.bigUintN / fc.constantFrom / shrinking 戦略)
 - `references/coverage-classify.md` — file 分類 rule (production / test / mock / script) + uncovered 5 分類 (kiwa-forge と共用 SSOT)
-- `references/coverage-report-template.md` — coverage report 4 section format の完全 template (kiwa-forge と共用 SSOT、 `tests/reports/contract/coverage-report-{module}.md` 生成用)
+- `references/coverage-report-template.md` — coverage report 4 section format の完全 template (kiwa-forge と共用 SSOT、 Step 0 が定める path への生成用)
 - `references/doc-language-selection.md` — Step 0 文書生成言語選択 共通 SSOT (kiwa-forge と共用、 ja / en / その他 ISO 639-1)
 
 ## examples

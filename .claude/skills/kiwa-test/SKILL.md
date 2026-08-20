@@ -327,13 +327,14 @@ done
 [Step 3b] $RUNNER ∈ {foundry, both} の場合のみ実行:
   examples/{example}/ へ cd し直して /kiwa-forge --module {module} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop で auto loop を 1 round 化]
   ↓ test/{Contract}.t.sol 生成 + forge test 全 PASS + coverage 100% 到達 (auto loop)
-  ↓ Step 5c で tests/reports/contract/coverage-report-{module}.{lang}.md Write
+  ↓ Step 5c が返した coverage report path を控える
   ↓ repo root から /kiwa-review --mode test-review --module {module} --layer contract --lang $DOC_LANG --producer kiwa-forge --project-root examples/{example} --out tests/reports/review/test-review-{example}-{module}-contract-foundry.${DOC_LANG}.md
   ↓ review が返した report path を控える
 
 [Step 3c] $RUNNER ∈ {hardhat, both} の場合のみ実行:
   examples/{example}/ へ cd し直して /kiwa-hardhat --module {module} --gas-report --lang $DOC_LANG --no-review [--no-coverage-loop]
   ↓ hardhat-test/{Contract}.test.cjs 生成 + hardhat test 4 round PASS + coverage 100%
+  ↓ Step 5c が返した coverage report path を控える
   ↓ repo root から /kiwa-review --mode test-review --module {module} --layer contract --lang $DOC_LANG --producer kiwa-hardhat --project-root examples/{example} --out tests/reports/review/test-review-{example}-{module}-contract-hardhat.${DOC_LANG}.md
   ↓ review が返した report path を控える
 ```
@@ -440,7 +441,7 @@ Total duration: {sec} 秒
 | Foundry test (退避済) | tests/fixtures/{example}/contract-test/{Contract}.t.sol | Layer 2 出力 → Step 5.5 で退避 |
 | Hardhat test (退避済) | tests/fixtures/{example}/hardhat-test/{Contract}.test.cjs | Layer 2 出力 → Step 5.5 で退避 |
 | Playwright spec (退避済) | tests/fixtures/{example}/e2e-test/*.spec.ts | Layer 2 出力 → Step 5.5 で退避 (名前は生成時のまま) |
-| coverage report (contract) | tests/reports/contract/coverage-report-{module}.{lang}.md | auto loop 結果 |
+| coverage report (contract、 runner ごと) | 各 Layer 2 skill (`/kiwa-forge` / `/kiwa-hardhat`) が返した実 path をそのまま書く | auto loop 結果。 `$RUNNER=both` は 2 行に分ける |
 | review report (spec / test) | 各 `/kiwa-review` が chain return した実 path をそのまま書く | reviewer 判定。 Step 5b の result-review 軸 4 がこの行を読む |
 | observe dashboard (layer ごと) | tests/reports/observe/dashboard-{example}-{module}-{layer}.{lang}.md | Step 5a 出力。 失敗した layer は path の代わりに理由を書く |
 | observe dashboard (contract, foundry) | tests/reports/observe/dashboard-{example}-{module}-contract-foundry.{lang}.md | `$RUNNER` が `foundry` / `both` の時 |
@@ -464,7 +465,8 @@ Total duration: {sec} 秒
 ## 5. 各子 skill report への link
 
 - spec-review / test-review: 各 `/kiwa-review` が chain return した実 path (§ 2 の review report 行と同じ値)
-- coverage report: `tests/reports/contract/coverage-report-{module}.{lang}.md` / `tests/reports/e2e/coverage-report-{module}.{lang}.md`
+- coverage report (contract): 各 Layer 2 skill (`/kiwa-forge` / `/kiwa-hardhat`) が返した実 path (`$RUNNER=both` は両方)
+- coverage report (e2e): `/kiwa-play` が返した実 path
 ```
 
 ### Step 5a: kiwa-observe 自動呼出 (layer ごとに 1 枚)
