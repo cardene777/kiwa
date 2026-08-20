@@ -121,6 +121,10 @@ Step の最後で `/kiwa-review` を呼ぶ時、 **同じ layer と同じ `--lan
 - en → `tests/reports/contract/coverage-report-{module}.md`
 - その他 → `tests/reports/contract/coverage-report-{module}.{lang_code}.md`
 
+round 別 report は canonical の **module 名の直後** に round を挟む (`coverage-report-{module}-round-{N}.ja.md`)。 lang suffix は常に末尾 (`/kiwa-design` § lang suffix 規約)。
+
+**以降の step で path を組み立て直さない**。 本節が唯一の SSOT で、 写しを置くと lang suffix を落とす (#2082 で 11 箇所が落としていた)。
+
 ### Step 1: Layer 1 spec 読込
 
 `--spec-path` が渡っていればその path、 無ければ § 入力 spec の path は CLI から受け取る で解決した path を Read し、 以下を抽出:
@@ -299,7 +303,7 @@ production target で threshold 未達なら以下を **上限なし** で loop�
    - Layer 1 spec (`tests/spec/contract/test-spec-{module}.md`) の「テストケース一覧」に新規 TC-NNN として追記
    - Layer 2 で `test/{Contract}.t.sol` に新規 test 関数を Write (既存関数を上書きしない)
    - 観点コメント (`// 観点 N: {name}`) を spec と一致させる
-4. 再 `forge test` + `forge coverage` で計測、 round 別 report を `tests/reports/contract/coverage-report-{module}-round-{N}.md` に Write
+4. 再 `forge test` + `forge coverage` で計測、 round 別 report を Step 0 が定める path (round 別) に Write
 5. loop 終了条件 (いずれか):
    - production target 全 4 metric 100% 到達 → Step 5c へ
    - 残 uncovered (production 側) が全て「削除候補 / defensive / 外部依存」分類 → Step 5c へ (production 100% は理論不能と確定)
@@ -309,7 +313,7 @@ production target で threshold 未達なら以下を **上限なし** で loop�
 
 #### Step 5c: coverage report Write (canonical)
 
-`tests/reports/contract/coverage-report-{module}.md` を 4 section format で Write (template SSOT `references/coverage-report-template.md`)。
+Step 0 が定める canonical path に 4 section format で Write (template SSOT `references/coverage-report-template.md`)。
 
 ```markdown
 # Contract Coverage Report — {module}
@@ -367,7 +371,7 @@ Step 5c の Section 4 で未踏 branch を判定する際、 以下のいずれ�
 > 注 — 本 skill (Layer 2) は spec を **書き換えず**、 上記提案を report に列挙のみ。 spec への反映は user 手動 or `/kiwa-design --mode update` (別 Issue 検討予定)。
 ```
 
-round 別 report は `coverage-report-{module}-round-{N}.md` として累積保存、 final round の内容を canonical `coverage-report-{module}.md` に複製。
+round 別 report は Step 0 の round 別 path に累積保存、 final round の内容を canonical path に複製。
 
 #### Step 5d: test-passed marker 作成
 
@@ -405,7 +409,7 @@ report 出力先: `/kiwa-review` Step 0 の言語別出力 path (`test-review` m
 - `forge build` が exit 0
 - `forge test` で全関数 PASS (failure 0 件)
 - `forge coverage` で **production target (contracts/ 配下) 全 4 metric 100% 到達** もしくは 「残 uncovered が全て不可能分類」 と report で明示
-- `tests/reports/contract/coverage-report-{module}.md` が 4 section format で Write 済 (final + round 別)
+- Step 0 が定める coverage report path が 4 section format で Write 済 (final + round 別)
 - 観点別 grouping (`// 観点 N: {name}` コメント) が spec と一致
 - 「停滞」判定や `forge coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
 
@@ -414,7 +418,7 @@ report 出力先: `/kiwa-review` Step 0 の言語別出力 path (`test-review` m
 - `references/foundry-mapping.md` — 11 観点 → forge helper の完全マッピング + Code snippet
 - `references/fuzz-invariant-patterns.md` — `forge fuzz` / `forge invariant` の実装パターン詳細 (vm.assume / handler 設計 / target contract 設定)
 - `references/coverage-classify.md` — file 分類 rule (production / test / mock / script) + uncovered 5 分類 (削除候補 / defensive / 外部依存 / 計測除外 / 真の未踏)
-- `references/coverage-report-template.md` — coverage report 4 section format の完全 template (`tests/reports/contract/coverage-report-{module}.md` 生成用)
+- `references/coverage-report-template.md` — coverage report 4 section format の完全 template (Step 0 が定める path への生成用)
 - `references/doc-language-selection.md` — Step 0 文書生成言語選択 共通 SSOT (ja / en / その他 ISO 639-1)、 4 skill 共用
 
 ## examples

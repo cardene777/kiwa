@@ -1,0 +1,97 @@
+import { describe, expect, it } from 'vitest';
+
+import { headingSectionIn, read, skillBody, skillsWithSkillMd } from './skill-md.js';
+
+/**
+ * report の path 雛形が 1 箇所にしか無いか (#2082).
+ *
+ * #2081 が 5 round (上限) を要した原因は、 「path を写しで持つ」 形が 6 skill / 9 箇所に
+ * 散っていたのに 1 round で 1 箇所ずつ潰したこと。 掃き直したところ **writer と reader が
+ * 別の値を持つ** 形が 2 件残っていた。
+ *
+ * | 種別 | SSOT | 写しが起こしたずれ |
+ * |---|---|---|
+ * | observe dashboard | `/kiwa-test` Step 5a の `--out` | reader が `{module}` を落とす (#2077 の取りこぼし) |
+ * | coverage report | 各 skill の Step 0 (lang 別 path) | 11 箇所が lang suffix を落とす |
+ *
+ * 検査は **写しが 0 件であること** を見る。 値の一致を見る形にすると、 写しを保ったまま
+ * 揃えるだけで通り、 次に SSOT が変わった時にまたずれる。
+ */
+
+const SKILLS = [...skillsWithSkillMd()].sort();
+
+/** skill の SKILL.md と references から、 与えた形に一致する行を集める。 */
+function occurrences(pattern: RegExp): { skill: string; line: string }[] {
+  const out: { skill: string; line: string }[] = [];
+  for (const skill of SKILLS) {
+    for (const line of skillBody(skill).split('\n')) {
+      if (pattern.test(line)) out.push({ skill, line: line.trim() });
+    }
+  }
+  return out;
+}
+
+describe('observe dashboard の雛形は writer だけが持つ', () => {
+  const SHAPE = /tests\/reports\/observe\/dashboard-\{/;
+
+  it('雛形を 1 件以上拾えている (空振り防止)', () => {
+    // 形が変わって 0 件になると、 下の「writer だけ」 が空集合で成立する。
+    expect(occurrences(SHAPE).length).toBeGreaterThan(0);
+  });
+
+  it('writer (kiwa-test / kiwa-observe) 以外が雛形を持たない', () => {
+    // `/kiwa-observe` は既定名を自分で決める writer、 `/kiwa-test` は `--out` を渡す caller。
+    // それ以外 (reader) が雛形を持つと、 writer が軸を足した時にずれる。
+    const owners = new Set(['kiwa-test', 'kiwa-observe']);
+    const stray = occurrences(SHAPE).filter((o) => !owners.has(o.skill));
+    expect(stray, 'writer 以外が observe dashboard の雛形を持っている').toEqual([]);
+  });
+
+  it('reader が組み立てないことを明記している', () => {
+    // 雛形が無いだけだと「書き忘れ」 と区別が付かない。 読み方を書いてあることまで見る。
+    const review = skillBody('kiwa-review');
+    const line = review.split('\n').find((l) => l.includes('observe dashboard'));
+    expect(line, 'kiwa-review に observe dashboard の読み方が無い').toBeTruthy();
+    expect(line!, '組み立てないことを書いていない').toContain('file 名を組み立てない');
+  });
+});
+
+describe('coverage report の雛形は Step 0 だけが持つ', () => {
+  const SHAPE = /tests\/reports\/contract\/coverage-report-\{/;
+  const OWNERS = ['kiwa-forge', 'kiwa-hardhat'];
+
+  it('雛形を 1 件以上拾えている (空振り防止)', () => {
+    expect(occurrences(SHAPE).length).toBeGreaterThan(0);
+  });
+
+  it.each(OWNERS)('%s の雛形が Step 0 の中だけにある', (skill) => {
+    // Step 0 が lang 別 path を定義する。 それ以外の step が雛形を持つと lang suffix を
+    // 落とす (実測で forge / hardhat 合わせて 11 箇所が落としていた)。
+    const body = skillBody(skill);
+    const step0 = headingSectionIn(body, /^### Step 0: 文書生成言語の(?:選択|決定)/m);
+    const inStep0 = step0.split('\n').filter((l) => SHAPE.test(l)).length;
+    expect(inStep0, `${skill}: Step 0 が coverage path を定義していない`).toBeGreaterThan(0);
+
+    const total = body.split('\n').filter((l) => SHAPE.test(l)).length;
+    expect(total, `${skill}: Step 0 の外に coverage path の写しがある`).toBe(inStep0);
+  });
+
+  it.each(OWNERS)('%s の Step 0 が round 別の suffix 位置を定めている', (skill) => {
+    // canonical と round 別で suffix の付き方が違うと、 どちらが正か決められない。
+    const step0 = headingSectionIn(skillBody(skill), /^### Step 0: 文書生成言語の(?:選択|決定)/m);
+    expect(step0, `${skill}: round 別 path の規約が無い`).toContain('-round-{N}');
+    expect(step0, `${skill}: lang suffix の位置を書いていない`).toContain('lang suffix は常に末尾');
+  });
+
+  it.each(OWNERS)('%s の template reference に写しが無い', (skill) => {
+    // 上の「Step 0 の中だけ」 は SKILL.md しか走査しない。 template は別 file なので
+    // 直接見る = ここに写しが残ると、 template を読んだ人が lang suffix を落とす。
+    expect(skillBody(skill), `${skill}: template の参照が消えている`).toContain(
+      'coverage-report-template.md',
+    );
+    const template = read(`.claude/skills/${skill}/references/coverage-report-template.md`);
+    const copies = template.split('\n').filter((l) => SHAPE.test(l) || /`coverage-report-\{/.test(l));
+    expect(copies, `${skill}: template に coverage path の写しがある`).toEqual([]);
+    expect(template, `${skill}: 出力先の委譲先を書いていない`).toContain('Step 0');
+  });
+});
