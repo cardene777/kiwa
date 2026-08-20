@@ -33,19 +33,20 @@
 //   2. 同じ組合せの仕様書が 2 箇所に無いか
 //
 // 1 点目は言語でも分かれる。 既存検査は `en` で解決するため、`.ja` の仕様書が直下にあっても
-// 素通りする (`ui` × `counter` が実際にその状態にある)。 本検査は両方の言語の形を見る。
+// 素通りする (`ui` × `counter` が実際にその状態にある)。 本検査は suffix 無しと、
+// 全 ISO 639-1 suffix の形を見る。
 //
 // ## 2 つの歯止め
 //
 // どちらも現状を基準にした ratchet で、**悪化だけを落とす**。
 // 「どちらの場所が正しいか」 は layer ごとに違い、その決着は本検査の役目ではない。
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { ROSTER, type RosterEntry } from './layer-roster.js';
-import { REPO_ROOT } from './skill-md.js';
+import { REPO_ROOT, read } from './skill-md.js';
 
 /**
  * 仕様書がリポジトリ直下にあってよい layer。
@@ -82,6 +83,52 @@ interface Resolved {
   repoAnchored: string | null;
 }
 
+/**
+ * layer の suffix。 `docs/layers.json` の宣言から導く。
+ *
+ * suffix を持たない layer (`contract` / `e2e` / `integration` / `unit`) の仕様書は
+ * stem が `test-spec-{module}` になるため、同じ dir にある別 layer の仕様書が
+ * **言語 variant に見える**。 `ui` の suffix は 2 文字なので、
+ * `test-spec-counter.ui.md` が `test-spec-counter.md` の `ui` 語版として通っていた (実測)。
+ * 同じ dir を共有するのは `integration` と `ui` の組で、実際に起こりうる。
+ *
+ * 手で列挙すると layer が増えた時に検査だけ古くなるので、宣言から取る。
+ */
+const LAYER_SUFFIXES = new Set(
+  (JSON.parse(read('docs/layers.json')) as { layers: { spec_path?: string | null }[] }).layers
+    .map((l) => /test-spec-\{module\}\.([a-z0-9-]+)\.md$/.exec(l.spec_path ?? ''))
+    .filter((m): m is RegExpExecArray => m !== null)
+    .map((m) => m[1]!),
+);
+
+/**
+ * English (suffix 無し) または ISO 639-1 suffix 付きの同じ仕様書か。
+ *
+ * layer の suffix と一致する形は言語とみなさない = 別 layer の仕様書を
+ * 自分の言語 variant として数えない。
+ */
+function isSpecVariant(spec: string, file: string): boolean {
+  const english = basename(spec);
+  if (file === english) return true;
+  if (!english.endsWith('.md')) return false;
+  const stem = english.slice(0, -'.md'.length);
+  if (!file.startsWith(`${stem}.`) || !file.endsWith('.md')) return false;
+  const lang = file.slice(stem.length + 1, -'.md'.length);
+  if (LAYER_SUFFIXES.has(lang)) return false;
+  return /^[a-z]{2}$/.test(lang);
+}
+
+/** anchor 配下にある、CLI が返した仕様書の任意言語 variant を探す。 */
+function findSpecAt(anchor: string, spec: string): string | null {
+  const relativeDir = dirname(spec);
+  const absoluteDir = resolve(REPO_ROOT, anchor, relativeDir);
+  if (!existsSync(absoluteDir)) return null;
+  const file = readdirSync(absoluteDir)
+    .sort()
+    .find((candidate) => isSpecVariant(spec, candidate));
+  return file === undefined ? null : join(relativeDir, file);
+}
+
 function resolveSpec(entry: RosterEntry): Resolved {
   const key = `${entry.layer} × ${entry.module}`;
   const projectRoot = `examples/${entry.example}`;
@@ -110,12 +157,10 @@ function resolveSpec(entry: RosterEntry): Resolved {
   if (typeof spec !== 'string' || spec.length === 0) {
     return { key, projectAnchored: null, repoAnchored: null };
   }
-  // CLI は `--lang` 未指定だと suffix 無しを返す。 実物はどちらの形でも置かれうるので
-  // 両方見る (`withLangSuffix` が付ける `.ja` は末尾固定)。
-  const candidates = [spec, spec.replace(/\.md$/, '.ja.md')];
-  const projectAnchored =
-    candidates.find((c) => existsSync(resolve(REPO_ROOT, projectRoot, c))) ?? null;
-  const repoAnchored = candidates.find((c) => existsSync(resolve(REPO_ROOT, c))) ?? null;
+  // CLI は `--lang` 未指定だと suffix 無しを返す。 `--lang` は任意の ISO 639-1 を受けるため、
+  // `.ja.md` だけでなく `.zh.md` 等も含め、同じ stem の全言語 variant を見る。
+  const projectAnchored = findSpecAt(projectRoot, spec);
+  const repoAnchored = findSpecAt('.', spec);
   return {
     key,
     projectAnchored: projectAnchored === null ? null : join(projectRoot, projectAnchored),
@@ -126,6 +171,47 @@ function resolveSpec(entry: RosterEntry): Resolved {
 describe('spec_path の起点 (#2101)', () => {
   const resolved = ROSTER.map(resolveSpec);
   const byKey = new Map(ROSTER.map((e, i) => [e, resolved[i]!] as const));
+
+  it('suffix 無しと任意の ISO 639-1 suffix を同じ仕様書として扱う', () => {
+    // ISO 639-1 はちょうど 2 文字。 3 文字 (`jpn` = ISO 639-2) と地域付き (`ja-JP`) は
+    // CLI が受けないため言語とみなさない。 この 2 件が、桁を緩めた実装と現行を分ける。
+    const spec = 'tests/spec/integration/test-spec-items.api.md';
+    expect(
+      [
+        'test-spec-items.api.md',
+        'test-spec-items.api.ja.md',
+        'test-spec-items.api.zh.md',
+        'test-spec-items.api.ja-JP.md',
+        'test-spec-items.api.jpn.md',
+        'test-spec-other.api.ja.md',
+      ].filter((file) => isSpecVariant(spec, file)),
+    ).toEqual([
+      'test-spec-items.api.md',
+      'test-spec-items.api.ja.md',
+      'test-spec-items.api.zh.md',
+    ]);
+  });
+
+  it('別 layer の仕様書を言語 variant として数えない', () => {
+    // suffix を持たない layer の stem は `test-spec-{module}` で、同じ dir にある
+    // `ui` layer の仕様書が 2 文字 suffix ゆえに言語に見える。 `integration` と `ui` は
+    // 実際に `tests/spec/integration/` を共有するので、起こりうる形になる。
+    const integration = 'tests/spec/integration/test-spec-counter.md';
+    expect(
+      isSpecVariant(integration, 'test-spec-counter.ui.md'),
+      'ui layer の仕様書を integration の言語 variant として数えている',
+    ).toBe(false);
+    expect(
+      isSpecVariant(integration, 'test-spec-counter.ja.md'),
+      '本当の言語 variant を取りこぼしている',
+    ).toBe(true);
+  });
+
+  it('layer の suffix 一覧を宣言から導けている', () => {
+    // 一覧が空だと上の除外が効かず、恒真になる。 宣言から取れていることを固定する。
+    expect(LAYER_SUFFIXES.size, 'layer の suffix を 1 件も導けていない').toBeGreaterThan(0);
+    expect([...LAYER_SUFFIXES], 'ui の suffix が一覧に無い').toContain('ui');
+  });
 
   it('roster を走査でき、両方の起点で仕様書が見つかっている', () => {
     // 集合が空だと以下 2 件が素通りする。 起点ごとに下限を置く = 合計だけを見ると
