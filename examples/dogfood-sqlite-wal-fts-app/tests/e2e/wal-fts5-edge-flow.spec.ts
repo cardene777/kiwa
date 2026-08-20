@@ -28,7 +28,7 @@ test.describe('WAL + FTS5 + edge — SQLite dogfood core flow', () => {
     for (const s of servers) await s.close();
   });
 
-  test('wal + fts5 + edge routes drive the full 3-flow surface together', async () => {
+  test('T-E2E-001 wal + fts5 + edge routes drive the full 3-flow surface together', async () => {
     const { origin, close } = await bootAdapterServer();
     servers.push({ close });
     const browser = await chromium.launch();

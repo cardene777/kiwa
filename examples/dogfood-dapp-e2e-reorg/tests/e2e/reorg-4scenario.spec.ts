@@ -137,7 +137,7 @@ test.describe('reorg 4-scenario e2e', () => {
     await page.waitForTimeout(3000);
   });
 
-  test('T-DR-S1 pending tx → reorg → dropped', async ({ page, dappE2e }) => {
+  test('T-DR-001 pending tx → reorg → dropped', async ({ page, dappE2e }) => {
     // Scenario 1: submit a tx but never mine it. After the reorg the pending
     // pool is cleared and getTransactionReceipt returns null, so the dApp's
     // txStatus transitions from `pending` → `dropped`.
@@ -190,7 +190,7 @@ test.describe('reorg 4-scenario e2e', () => {
     await waitLoaded(page);
   });
 
-  test('T-DR-S2 confirmed tx → reorg → balance rollback', async ({
+  test('T-DR-002 confirmed tx → reorg → balance rollback', async ({
     page,
     dappE2e,
   }) => {
@@ -253,7 +253,7 @@ test.describe('reorg 4-scenario e2e', () => {
     );
   });
 
-  test('T-DR-S3 Transfer event → reorg → history disappears + refetch', async ({
+  test('T-DR-003 Transfer event → reorg → history disappears + refetch', async ({
     page,
     dappE2e,
   }) => {
@@ -312,7 +312,7 @@ test.describe('reorg 4-scenario e2e', () => {
     );
   });
 
-  test('T-DR-S4 nonce gap → mempool re-send', async ({ page, dappE2e }) => {
+  test('T-DR-004 nonce gap → mempool re-send', async ({ page, dappE2e }) => {
     // Scenario 4: reset the nonce via anvil_setNonce to create a gap, then
     // re-send a transfer at the correct nonce. The mempool re-orders and
     // confirms the new tx.

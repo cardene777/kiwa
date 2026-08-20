@@ -28,7 +28,7 @@ test.describe('logical-replication + slot-advance + pgvector — full journey', 
     for (const s of servers) await s.close();
   });
 
-  test('logical-replication + slot-advance + pgvector routes drive together', async () => {
+  test('T-E2E-001 logical-replication + slot-advance + pgvector routes drive together', async () => {
     const { origin, close } = await bootAdapterServer();
     servers.push({ close });
     const browser = await chromium.launch();

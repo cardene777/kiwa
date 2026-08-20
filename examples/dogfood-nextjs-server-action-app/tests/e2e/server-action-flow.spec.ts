@@ -34,7 +34,7 @@ function browserAvailable(): boolean {
 test.describe('server-action-app e2e — Chromium drives the Server Action ceremony', () => {
   test.skip(!browserAvailable(), 'Chromium binary not installed — run `pnpm exec playwright install chromium`');
 
-  test('subscribe form action + like optimistic + login redirect end to end', async () => {
+  test('T-E2E-001 subscribe form action + like optimistic + login redirect end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });
@@ -112,7 +112,7 @@ test.describe('server-action-app e2e — Chromium drives the Server Action cerem
     }
   });
 
-  test('404 route returns ok:false', async () => {
+  test('T-E2E-002 404 route returns ok:false', async () => {
     const adapter = makeMockAdapter();
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });
@@ -130,7 +130,7 @@ test.describe('server-action-app e2e — Chromium drives the Server Action cerem
     }
   });
 
-  test('GET method is rejected with 405', async () => {
+  test('T-E2E-003 GET method is rejected with 405', async () => {
     const adapter = makeMockAdapter();
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

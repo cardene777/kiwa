@@ -41,7 +41,7 @@ test.describe('security-sbom-scanning-app e2e — Chromium drives the SBOM + sec
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('SBOM emission + secret scan + scanner report end to end', async () => {
+  test('T-E2E-001 SBOM emission + secret scan + scanner report end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

@@ -40,7 +40,7 @@ test.describe('security-csp-headers-app e2e — Chromium drives the CSP + violat
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('CSP build + violation ingest + headers bundle end to end', async () => {
+  test('T-E2E-001 CSP build + violation ingest + headers bundle end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });
@@ -135,7 +135,7 @@ test.describe('security-csp-headers-app e2e — Chromium drives the CSP + violat
     }
   });
 
-  test('route dispatcher returns 404 for unknown paths and 405 for GET', async () => {
+  test('T-E2E-002 route dispatcher returns 404 for unknown paths and 405 for GET', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

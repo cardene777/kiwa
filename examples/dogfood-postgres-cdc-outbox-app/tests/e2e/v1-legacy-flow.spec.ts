@@ -28,7 +28,7 @@ test.describe('v1 legacy — outbox + cdc + replication + at-least-once full jou
     for (const s of servers) await s.close();
   });
 
-  test('v1 legacy routes drive together', async () => {
+  test('T-E2E-001 v1 legacy routes drive together', async () => {
     const { origin, close } = await bootAdapterServer();
     servers.push({ close });
     const browser = await chromium.launch();

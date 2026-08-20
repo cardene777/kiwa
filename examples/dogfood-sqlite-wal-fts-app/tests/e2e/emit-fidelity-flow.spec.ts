@@ -29,7 +29,7 @@ test.describe('emit fidelity — trace feed for release gate 13 axis', () => {
     for (const s of servers) await s.close();
   });
 
-  test('emit-fidelity + metrics + traces routes return the full mock surface', async () => {
+  test('T-E2E-001 emit-fidelity + metrics + traces routes return the full mock surface', async () => {
     const { origin, close } = await bootAdapterServer();
     servers.push({ close });
     const browser = await chromium.launch();

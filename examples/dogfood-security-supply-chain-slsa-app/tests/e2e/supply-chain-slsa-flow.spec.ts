@@ -43,7 +43,7 @@ test.describe('security-supply-chain-slsa-app e2e — Chromium drives the SLSA s
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('SLSA level verify + reproducible match + provenance sign + attestation verify + orchestrator decide end to end', async () => {
+  test('T-E2E-001 SLSA level verify + reproducible match + provenance sign + attestation verify + orchestrator decide end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

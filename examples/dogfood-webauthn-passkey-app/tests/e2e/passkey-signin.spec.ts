@@ -162,7 +162,7 @@ test.describe('Playwright + Chrome Virtual Authenticator — real signin fidelit
     __resetWebAuthnCounters();
   });
 
-  test('real Chrome round-trips /register + /signin against the kiwa mock RP', async () => {
+  test('T-E2E-001 real Chrome round-trips /register + /signin against the kiwa mock RP', async () => {
     const adapter = makeMockAdapter();
     const { origin, close } = await bootAdapterServer(adapter);
     const browser = await chromium.launch();
@@ -261,7 +261,7 @@ test.describe('Playwright + Chrome Virtual Authenticator — real signin fidelit
     }
   });
 
-  test('WebAuthn API surface is available inside the Playwright context', async () => {
+  test('T-E2E-002 WebAuthn API surface is available inside the Playwright context', async () => {
     const adapter = makeMockAdapter();
     const { origin, close } = await bootAdapterServer(adapter);
     const browser = await chromium.launch();

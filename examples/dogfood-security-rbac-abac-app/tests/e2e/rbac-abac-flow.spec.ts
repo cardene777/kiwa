@@ -39,7 +39,7 @@ test.describe('security-rbac-abac-app e2e — Chromium drives the RBAC + ABAC + 
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('RBAC attach + check + ABAC evaluate + policy-store rollback end to end', async () => {
+  test('T-E2E-001 RBAC attach + check + ABAC evaluate + policy-store rollback end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });

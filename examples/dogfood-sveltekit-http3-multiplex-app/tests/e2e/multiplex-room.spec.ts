@@ -150,7 +150,7 @@ async function withPlaywrightSkip(name: string, run: () => Promise<void>): Promi
 
 test.describe('HTTP/3 multiplex room — multi-tab', () => {
   withPlaywrightSkip(
-    'two tabs open distinct connections + concurrent send + 0-RTT resume + HPACK insert through the same handlers',
+    'T-E2E-001 two tabs open distinct connections + concurrent send + 0-RTT resume + HPACK insert through the same handlers',
     async () => {
       const adapter = makeMockAdapter({ seed: 42, latencyMs: 1 });
       const { origin, close } = await bootAdapterServer(adapter);

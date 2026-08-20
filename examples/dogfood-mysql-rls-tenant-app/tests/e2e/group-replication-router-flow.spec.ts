@@ -28,7 +28,7 @@ test.describe('group replication + router split — advanced db semantics', () =
     for (const s of servers) await s.close();
   });
 
-  test('group replication + binlog + router split routes drive together', async () => {
+  test('T-E2E-001 group replication + binlog + router split routes drive together', async () => {
     const { origin, close } = await bootAdapterServer();
     servers.push({ close });
     const browser = await chromium.launch();

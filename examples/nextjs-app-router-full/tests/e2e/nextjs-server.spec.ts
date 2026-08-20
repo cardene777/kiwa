@@ -5,13 +5,13 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('Next.js full PoC — real dev server', () => {
-  test('Middleware: unauthenticated /items -> 307 redirect to /login?from=/items', async ({ page }) => {
+  test('T-E2E-001 Middleware: unauthenticated /items -> 307 redirect to /login?from=/items', async ({ page }) => {
     const response = await page.goto('/items', { waitUntil: 'load' });
     expect(response?.status()).toBe(200);
     await expect(page).toHaveURL(/\/login\?from=%2Fitems$/);
   });
 
-  test('RSC: after login the items page renders 3 items', async ({ page, context }) => {
+  test('T-E2E-002 RSC: after login the items page renders 3 items', async ({ page, context }) => {
     await context.addCookies([
       { name: 'session', value: 'admin', url: 'http://localhost:3070' },
     ]);
@@ -25,7 +25,7 @@ test.describe('Next.js full PoC — real dev server', () => {
     await expect(page.locator('li').nth(2)).toContainText('app-router');
   });
 
-  test('Middleware: banned -> 403 JSON for /items', async ({ page, context }) => {
+  test('T-E2E-003 Middleware: banned -> 403 JSON for /items', async ({ page, context }) => {
     await context.addCookies([
       { name: 'session', value: 'banned', url: 'http://localhost:3070' },
     ]);
@@ -33,7 +33,7 @@ test.describe('Next.js full PoC — real dev server', () => {
     expect(response?.status()).toBe(403);
   });
 
-  test('Server Action: create form submit with valid name shows success message', async ({ page, context }) => {
+  test('T-E2E-004 Server Action: create form submit with valid name shows success message', async ({ page, context }) => {
     await context.addCookies([
       { name: 'session', value: 'admin', url: 'http://localhost:3070' },
     ]);
@@ -44,13 +44,13 @@ test.describe('Next.js full PoC — real dev server', () => {
     await expect(page.locator('[data-testid="create-success"]')).toContainText('hello');
   });
 
-  test('Route Handler: GET /api/items unauthenticated -> 302 redirect', async ({ request }) => {
+  test('T-E2E-005 Route Handler: GET /api/items unauthenticated -> 302 redirect', async ({ request }) => {
     const response = await request.get('/api/items', { maxRedirects: 0 });
     expect(response.status()).toBe(302);
     expect(response.headers()['location']).toBe('/login?from=%2Fapi%2Fitems');
   });
 
-  test('Route Handler: GET /api/items with session=admin returns 200 + JSON + cache-control', async ({ request }) => {
+  test('T-E2E-006 Route Handler: GET /api/items with session=admin returns 200 + JSON + cache-control', async ({ request }) => {
     const response = await request.get('/api/items', {
       headers: { cookie: 'session=admin' },
     });
@@ -61,7 +61,7 @@ test.describe('Next.js full PoC — real dev server', () => {
     expect(body.user).toBe('u1');
   });
 
-  test('Middleware: x-request-id header echoed via x-kiwa-request-id (Route Handler matcher 経路)', async ({ request }) => {
+  test('T-E2E-007 Middleware: x-request-id header echoed via x-kiwa-request-id (Route Handler matcher 経路)', async ({ request }) => {
     const response = await request.get('/api/items', {
       headers: { cookie: 'session=admin', 'x-request-id': 'req-e2e-7' },
     });

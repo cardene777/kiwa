@@ -39,7 +39,7 @@ test.describe('observability-iac-drift-app e2e — Chromium drives the plan + dr
     'Chromium binary not installed — run `pnpm exec playwright install chromium`',
   );
 
-  test('plan capture + drift detect + policy evaluate + cost attribute end to end', async () => {
+  test('T-E2E-001 plan capture + drift detect + policy evaluate + cost attribute end to end', async () => {
     const adapter = makeMockAdapter({ latencyMs: 0 });
     const running = await startNextServer({ adapter });
     const browser = await chromium.launch({ headless: true });
