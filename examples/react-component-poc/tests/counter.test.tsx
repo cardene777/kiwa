@@ -31,7 +31,7 @@ describe('Counter (render mode)', () => {
 });
 
 describe('Counter (interaction mode)', () => {
-  it('T-UI-003 + クリックで value が "1"', async () => {
+  it('T-UI-005 + クリックで value が "1"', async () => {
     const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter /> });
     envs.push(env);
     if (env.kind !== 'interaction') throw new Error('expected interaction');
@@ -39,7 +39,7 @@ describe('Counter (interaction mode)', () => {
     expect(env.screen.getByTestId('value').textContent).toBe('1');
   });
 
-  it('T-UI-004 連続クリック × 3 で value が "3"', async () => {
+  it('T-UI-006 連続クリック × 3 で value が "3"', async () => {
     const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter /> });
     envs.push(env);
     if (env.kind !== 'interaction') throw new Error('expected interaction');
@@ -50,7 +50,10 @@ describe('Counter (interaction mode)', () => {
     expect(env.screen.getByTestId('value').textContent).toBe('3');
   });
 
-  it('T-UI-005 reset で initial に戻る', async () => {
+  // reset の戻り先も同時に覆う。
+  // spec は「`initial=5` で `+` を 3 回 → `reset` → value が `"5"`」 で、
+  // 本 test の手順と assertion がそのまま一致する。
+  it('T-UI-008 reset で initial に戻る', async () => {
     const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter initial={5} /> });
     envs.push(env);
     if (env.kind !== 'interaction') throw new Error('expected interaction');
@@ -63,7 +66,9 @@ describe('Counter (interaction mode)', () => {
     expect(env.screen.getByTestId('value').textContent).toBe('5');
   });
 
-  it('T-UI-006 max 到達で + ボタンが disabled になり status が表示される', async () => {
+  // max 到達での無効化と status 表示を同時に覆う。
+  // 2 つの assertion がそれぞれ 1 項目に対応する。
+  it('T-UI-009 / T-UI-010 max 到達で + ボタンが disabled になり status が表示される', async () => {
     const env = await setupComponentEnv({ mode: 'interaction', ui: <Counter initial={0} max={2} /> });
     envs.push(env);
     if (env.kind !== 'interaction') throw new Error('expected interaction');
@@ -76,7 +81,9 @@ describe('Counter (interaction mode)', () => {
 });
 
 describe('Counter (snapshot mode)', () => {
-  it('T-UI-007 markup に value + ボタン群が含まれる', async () => {
+  // markup の値とボタンを同時に覆う。
+  // 前 2 つの assertion は値、 後 2 つはボタンに対応する。
+  it('T-UI-012 / T-UI-013 markup に value + ボタン群が含まれる', async () => {
     const env = await setupComponentEnv({ mode: 'snapshot', ui: <Counter initial={7} /> });
     envs.push(env);
     if (env.kind !== 'snapshot') throw new Error('expected snapshot');
@@ -87,12 +94,22 @@ describe('Counter (snapshot mode)', () => {
   });
 });
 
-// ---- ここから下は `/kiwa-design --layer ui --module counter` が未覆と判定した 5 件
-// (T-UI-003 / 004 / 007 / 011 / 014)。
+// ---- ここから下は `/kiwa-design --layer ui --module counter` が未覆と判定した 5 件。
 // spec = tests/spec/integration/test-spec-counter.ui.ja.md
 //
-// 既存 7 件が spec の 9 TC (T-UI-001 / 002 / 005 / 006 / 008 / 009 / 010 / 012 / 013) を覆う。
-// 2 件が 2 TC ずつ確かめているため数が合わない。 中身を読んで重複と判断したので書いていない。 module 直下の `envs` と `afterEach` はそのまま使う
+// 既存 7 件が spec の 9 TC を覆う。
+// 3 件が複数 TC を確かめているため数が合わない。
+//
+// **覆っている TC の番号は全て test 名に書く** (#2094)。 以前は「中身を読んで重複と
+// 判断したので書いていない」 としていたが、 `analyzeSpecCoverage` は spec の TC ID が
+// test code に literal で現れるかだけを見るため、 書かないと覆っていても未実装と
+// 報告される。 実測で 5 件が偽陽性になった (#2093 の dashboard)。
+//
+// 番号は意味的な等価判定の代わりに置かれた契約なので、 覆ったなら書く。 逆に覆って
+// いない番号を書くと偽の「覆った」 を作るため、 書く前に assertion と spec の確認内容を
+// 突き合わせる。
+//
+// module 直下の `envs` と `afterEach` はそのまま使う
 // (`existing-test-reuse.md` § 3 = 既存の後始末は変えない)。
 
 describe('Counter (未覆分の追記: prop の組合せと無効化の解除)', () => {
@@ -111,7 +128,7 @@ describe('Counter (未覆分の追記: prop の組合せと無効化の解除)',
     expect(incBtn.disabled).toBe(true);
   });
 
-  // 既存 `T-UI-002` は名前が「step 反映」 だが assertion は mount 直後の value だけで、
+  // 既存の step 初期表示 test は assertion が mount 直後の value だけで、
   // `+` を 1 度も click していない。 step が加算に効いているかはここで初めて確かめる。
   it('T-UI-007 step=5 で + を 1 回押すと 5 増える', async () => {
     const env = await setupComponentEnv({
