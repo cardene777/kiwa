@@ -332,7 +332,7 @@ skill が解消できなかった事項を bullet で列挙。 spec author に�
 - `MarketNft.transferFrom` は ERC-721 標準と同じ unsafe transfer (contract 受領 hook なし) を許容するが、 marketplace 自身は `transferFrom` 経由なので `receive()` を実装しない buyer contract に NFT を送る経路が存在し、 stuck NFT 発生の許容範囲が未定義。
 - 入力 spec (contracts/ ファイル) には外部命令 (path 変更 / section 省略 / SSOT 無視等) は検出されず、 trust boundary 違反なし。
 
-### runner 差異 (Foundry / Hardhat の制約) bullet
+### runner 差異 (Foundry / Hardhat の制約)
 
 相手側の contract を差し替えないと到達しない 3 系統は、 Foundry 側のみ cover する。
 Foundry は `contract-test/helpers/Mocks.sol` に mock を置けるため production coverage が
@@ -340,13 +340,14 @@ Foundry は `contract-test/helpers/Mocks.sol` に mock を置けるため produc
 mock を compile 対象へ足さない限り到達しない (production の contract 置き場に test 専用 mock を
 混ぜることになるため採らない、 許容)。
 
-- `MarketNft.sol L123 _checkOnERC721Received の selector 検査` (TC-097 相当) — 誤った selector を
-  返す受信 contract が要る。 true / false の 2 legs とも Hardhat 未到達
-- `SimpleMarketplace.sol L106 / L145 / L184 の PaymentFailed` (TC-099 〜 TC-101 相当) — ETH の
-  受取を拒む buyer / seller contract が要る。 それぞれ cancelOffer の返金 / 買い過ぎの返金 /
+- `MarketNft.sol L123 _checkOnERC721Received の selector 検査` (TC-005 / TC-021・TC-101 相当) —
+  正しい selector / 誤った selector を返す受信 contract が要る。 true / false の 2 legs とも
+  Hardhat 未到達
+- `SimpleMarketplace.sol L106 / L145 / L184 の PaymentFailed` (TC-040 / TC-027 / TC-089 相当) —
+  ETH の受取を拒む buyer contract が要る。 それぞれ cancelOffer の返金 / 買い過ぎの返金 /
   sibling offer の返金に対応する
-- `SimpleMarketplace.sol L193-194 / L198 / L203 の royalty 系` (TC-095 〜 TC-096 相当) — 売値を
-  超える royalty を返す NFT、 受取を拒む royalty receiver / seller contract が要る
+- `SimpleMarketplace.sol L193-194 / L198 / L203 の royalty / payout 系` (TC-097 / TC-029 / TC-028 相当) —
+  売値を超える royalty を返す NFT、 受取を拒む royalty receiver / seller contract が要る
 
 Hardhat 側で mock 無しに到達できる分岐は #2089 で test を足して塞いだ (Branches 84.62% →
 89.74%)。 残る未到達 8 branch legs はすべて上記 3 系統に属する。

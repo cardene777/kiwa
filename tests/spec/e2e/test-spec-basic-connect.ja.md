@@ -180,7 +180,7 @@ window.ethereum 経由の EIP-1193 RPC。 anvil RPC を localhost:port で利用
 - `eth_sendTransaction` の tx receipt を waitForTransactionReceipt するための `publicClient` が test 内で別途生成されているが、 fixture の `anvilPort` から自動派生する helper があると DX 改善
 - `eip6963:requestProvider` の announce timing が race の場合の動作 (kiwa fixture が同期 dispatch なので race は起きないが、 仕様明示推奨)
 
-### runner 差異 (Foundry / Hardhat の制約) bullet
+### runner 差異 (Foundry / Hardhat の制約)
 
 (該当なし — e2e layer は Playwright 単一 runner)
 

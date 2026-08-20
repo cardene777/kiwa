@@ -127,7 +127,7 @@
 検査が 2 つある関数は、 2 つとも独立に失敗させる case を spec 側で並べる。 本 spec では
 TC-004 (allowance 不足) と TC-012 (allowance 充足 + 残高不足) が対になる。
 
-### runner 差異 (Foundry / Hardhat の制約) bullet
+### runner 差異 (Foundry / Hardhat の制約)
 
 - `SwapTokens.sol L90-91 swapAforB の TransferInFailed / TransferOutFailed branch` は
   **戻り値が `false` の ERC20** を相手にしないと到達しない (revert する ERC20 では手前で
