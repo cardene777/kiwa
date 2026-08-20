@@ -69,8 +69,12 @@ export function readSpecFacts(source: string): SpecFacts {
   let gotoBlank = false;
   let gotoNonBlank = false;
   let fetchInEvaluate = false;
-  const newPages = new Set<string>();
-  const navigatedPages = new Set<string>();
+  interface PageBinding {
+    name: string;
+    navigated: boolean;
+  }
+  const scopes: Map<string, PageBinding | undefined>[] = [new Map()];
+  const unnavigatedPages = new Set<string>();
 
   const stringValue = (node: ts.Node): string | undefined =>
     ts.isStringLiteralLike(node) ? node.text : undefined;
@@ -83,6 +87,24 @@ export function readSpecFacts(source: string): SpecFacts {
 
   const isMethodCall = (node: ts.CallExpression, method: string): boolean =>
     ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === method;
+
+  const bindNames = (name: ts.BindingName, binding: PageBinding | undefined): void => {
+    if (ts.isIdentifier(name)) {
+      scopes.at(-1)?.set(name.text, binding);
+      return;
+    }
+    for (const element of name.elements) {
+      if (!ts.isOmittedExpression(element)) bindNames(element.name, binding);
+    }
+  };
+
+  const pageBinding = (name: string): PageBinding | undefined => {
+    for (let index = scopes.length - 1; index >= 0; index -= 1) {
+      const scope = scopes[index];
+      if (scope?.has(name)) return scope.get(name);
+    }
+    return undefined;
+  };
 
   const callsFetch = (node: ts.Node): boolean => {
     let found = false;
@@ -104,38 +126,49 @@ export function readSpecFacts(source: string): SpecFacts {
     return found;
   };
 
-  const walk = (node: ts.Node): void => {
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) {
+  const walk = (node: ts.Node, root = false): void => {
+    const opensScope = !root && (ts.isFunctionLike(node) || ts.isBlock(node));
+    if (opensScope) scopes.push(new Map());
+    if (ts.isFunctionLike(node)) {
+      for (const parameter of node.parameters) bindNames(parameter.name, undefined);
+    }
+    if (ts.isVariableDeclaration(node)) {
       const call = unwrapCall(node.initializer);
-      if (call !== undefined && isMethodCall(call, 'newPage')) {
-        newPages.add(node.name.text);
-      }
+      const binding =
+        ts.isIdentifier(node.name) && call !== undefined && isMethodCall(call, 'newPage')
+          ? { name: node.name.text, navigated: false }
+          : undefined;
+      bindNames(node.name, binding);
     }
     if (ts.isCallExpression(node) && ts.isPropertyAccessExpression(node.expression)) {
       const method = node.expression.name.text;
+      const receiver = node.expression.expression;
+      const binding = ts.isIdentifier(receiver) ? pageBinding(receiver.text) : undefined;
       const [first] = node.arguments;
       if (method === 'goto' && first !== undefined) {
         const destination = stringValue(first);
         if (destination === 'about:blank') {
           gotoBlank = true;
+          if (binding !== undefined) binding.navigated = false;
         } else {
           gotoNonBlank = true;
-          const receiver = node.expression.expression;
-          if (ts.isIdentifier(receiver)) navigatedPages.add(receiver.text);
+          if (binding !== undefined) binding.navigated = true;
         }
       }
       if (method === 'evaluate' && node.arguments.some((arg) => callsFetch(arg))) {
         fetchInEvaluate = true;
+        if (binding !== undefined && !binding.navigated) unnavigatedPages.add(binding.name);
       }
     }
-    ts.forEachChild(node, walk);
+    ts.forEachChild(node, (child) => walk(child));
+    if (opensScope) scopes.pop();
   };
-  walk(parsed);
+  walk(parsed, true);
   return {
     gotoBlank,
     gotoNonBlank,
     fetchInEvaluate,
-    unnavigatedPages: [...newPages].filter((page) => !navigatedPages.has(page)).sort(),
+    unnavigatedPages: [...unnavigatedPages].sort(),
   };
 }
 
@@ -281,6 +314,94 @@ describe('e2e の spec が about:blank から fetch していない', () => {
       fetchInEvaluate: true,
       unnavigatedPages: ['page'],
     });
+  });
+
+  it('newPage の遷移状態を binding ごとに判定する', () => {
+    const source = [
+      'async function valid(context) {',
+      '  const page = await context.newPage();',
+      "  await page.goto('https://example.test/');",
+      '}',
+      'async function invalid(context) {',
+      '  const page = await context.newPage();',
+      '  await page.evaluate(async () => fetch("/x"));',
+      '}',
+    ].join('\n');
+    expect(readSpecFacts(source).unnavigatedPages).toEqual(['page']);
+  });
+
+  it('内側の block が同名を宣言しても外側の page を遷移済と誤認しない', () => {
+    // 内側で別の page を立てて遷移させても、外側の page は遷移していない。
+    // binding を scope ごとに分けないと、内側の遷移が外側を上書きして見逃す。
+    const source = [
+      'async function outer(context) {',
+      '  const page = await context.newPage();',
+      '  {',
+      '    const page = await context.newPage();',
+      "    await page.goto('https://example.test/');",
+      '  }',
+      '  await page.evaluate(async () => fetch("/x"));',
+      '}',
+    ].join('\n');
+    expect(readSpecFacts(source).unnavigatedPages).toEqual(['page']);
+  });
+
+  it('引数で受けた同名の page への遷移を、外側の page の遷移と混同しない', () => {
+    // 実物の spec がこの形をしている (`postJson(page, ...)` を test の中に定義する)。
+    // 引数を binding として登録しないと、helper 内の遷移が外側の page を遷移済にする。
+    const source = [
+      'async function outer(context) {',
+      '  const page = await context.newPage();',
+      "  async function helper(page) { await page.goto('https://example.test/'); }",
+      '  await helper(page);',
+      '  await page.evaluate(async () => fetch("/x"));',
+      '}',
+    ].join('\n');
+    expect(readSpecFacts(source).unnavigatedPages).toEqual(['page']);
+  });
+
+  it('外側の scope で宣言した page への遷移を、内側の block から辿れる', () => {
+    // 遷移だけが内側の block にある形。 最も内側の scope しか見ないと
+    // 遷移を記録し損ね、遷移済の page を違反にしてしまう。
+    const source = [
+      'async function run(context) {',
+      '  const page = await context.newPage();',
+      '  {',
+      "    await page.goto('https://example.test/');",
+      '  }',
+      '  await page.evaluate(async () => fetch("/x"));',
+      '}',
+    ].join('\n');
+    expect(readSpecFacts(source).unnavigatedPages).toEqual([]);
+  });
+
+  it('遷移した後に about:blank へ戻した page を、戻した側として名指しする', () => {
+    // `gotoBlank` は spec 全体で 1 つなので、どの page が原因かは伝わらない。
+    // 遷移済を打ち消さないと、直す人に渡る名前が抜ける。
+    const source = [
+      'async function run(context) {',
+      '  const pageA = await context.newPage();',
+      "  await pageA.goto('https://example.test/');",
+      '  const pageB = await context.newPage();',
+      "  await pageB.goto('https://example.test/');",
+      "  await pageB.goto('about:blank');",
+      '  await pageA.evaluate(async () => fetch("/x"));',
+      '  await pageB.evaluate(async () => fetch("/x"));',
+      '}',
+    ].join('\n');
+    expect(readSpecFacts(source).unnavigatedPages).toEqual(['pageB']);
+  });
+
+  it('fetch に使わない未遷移の newPage は違反にしない', () => {
+    const source = [
+      'async function run(context, page) {',
+      '  const auxiliary = await context.newPage();',
+      "  await page.goto('https://example.test/');",
+      '  await page.evaluate(async () => fetch("/x"));',
+      '  await auxiliary.close();',
+      '}',
+    ].join('\n');
+    expect(isOffender(readSpecFacts(source))).toBe(false);
   });
 });
 
