@@ -7,7 +7,7 @@ import { headingSectionIn, skillBody } from './skill-md.js';
  *
  * #2076 で `--module` を足すまで module は example と同じ値だったため、 report 名が
  * `{example}` だけで一意になっていた。 module が run ごとに変わる軸になった以上、
- * layer 別の report は module でも区別しないと 2 回目が 1 回目を上書きする。
+ * report は module でも区別しないと 2 回目が 1 回目を上書きする。
  *
  * `nextjs-app-router-full` は `items` と `auth` の 2 module を持つため実際に起こりうる。
  *
@@ -43,7 +43,7 @@ function fill(template: string, example: string, module: string): string {
     .replace(/\$\{DOC_LANG\}|\{\$DOC_LANG\}|\{lang\}/g, 'ja');
 }
 
-describe('layer 別 report が module で区別される', () => {
+describe('report が module で区別される', () => {
   it('雛形を 1 件以上拾えている (空振り防止)', () => {
     // 正規表現が書き方に追随できなくなると 0 件になり、 下の検査が何も見ない。
     expect(TEMPLATES.length).toBeGreaterThan(0);
