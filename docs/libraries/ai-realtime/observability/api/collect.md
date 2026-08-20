@@ -22,7 +22,7 @@ export declare function collectRunHistory(opts: CollectRunHistoryOptions): RunHi
 
 #### <code v-pre>fromPlaywrightJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L179) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L177) <code v-pre>packages/observability/src/collect.ts</code>
 
 Playwright の JSON レポートを `TestRunRecord[]` へ写す。 `fromVitestJson` と対になる入口で、返す形も同じ。 違いは入力の木構造だけ。 **`results` が空の test も 1 件として数える**。 Playwright は未実行の test にも `status: 'skipped'` を付けるため、落とすと「実行していない」 が 「存在しない」 に化けて突き合わせが実物とずれる。
 
@@ -57,7 +57,7 @@ export interface CollectRunHistoryOptions {
 
 #### <code v-pre>FromPlaywrightJsonOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L122) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L120) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface FromPlaywrightJsonOptions {
@@ -77,13 +77,13 @@ export interface FromVitestJsonOptions {
 
 #### <code v-pre>PlaywrightJsonReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L117) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L115) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonReport {
-    suites?: PlaywrightJsonSuite[];
-    stats?: {
-        startTime?: string;
+    suites: PlaywrightJsonSuite[];
+    stats: {
+        startTime: string;
     };
 }
 ```
@@ -97,31 +97,29 @@ Playwright `JSONReport` の最小形。 実 `JSONReport` は `config` 等も持�
 ```ts
 export interface PlaywrightJsonResult {
     status?: 'passed' | 'failed' | 'timedOut' | 'interrupted' | 'skipped' | undefined;
-    duration?: number;
-    startTime?: string;
+    duration: number;
 }
 ```
 
 #### <code v-pre>PlaywrightJsonSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L104) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L103) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonSpec {
     title: string;
-    tests?: PlaywrightJsonTest[];
+    tests: PlaywrightJsonTest[];
 }
 ```
 
 #### <code v-pre>PlaywrightJsonSuite</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L109) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L108) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonSuite {
-    title?: string;
-    file?: string;
-    specs?: PlaywrightJsonSpec[];
+    title: string;
+    specs: PlaywrightJsonSpec[];
     /** `test.describe` の入れ子。 深さに上限は無い。 */
     suites?: PlaywrightJsonSuite[];
 }
@@ -129,13 +127,13 @@ export interface PlaywrightJsonSuite {
 
 #### <code v-pre>PlaywrightJsonTest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L98) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L97) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonTest {
-    /** suite 単位の判定。 `results` が空でもこちらは付く。 */
+    /** test 単位の判定。 実 JSON では必須だが、欠落時も末尾 result から復元する。 */
     status?: 'skipped' | 'expected' | 'unexpected' | 'flaky';
-    results?: PlaywrightJsonResult[];
+    results: PlaywrightJsonResult[];
 }
 ```
 

@@ -91,32 +91,30 @@ export function fromVitestJson(report: VitestStyleReport, opts: FromVitestJsonOp
  */
 export interface PlaywrightJsonResult {
   status?: 'passed' | 'failed' | 'timedOut' | 'interrupted' | 'skipped' | undefined;
-  duration?: number;
-  startTime?: string;
+  duration: number;
 }
 
 export interface PlaywrightJsonTest {
-  /** suite 単位の判定。 `results` が空でもこちらは付く。 */
+  /** test 単位の判定。 実 JSON では必須だが、欠落時も末尾 result から復元する。 */
   status?: 'skipped' | 'expected' | 'unexpected' | 'flaky';
-  results?: PlaywrightJsonResult[];
+  results: PlaywrightJsonResult[];
 }
 
 export interface PlaywrightJsonSpec {
   title: string;
-  tests?: PlaywrightJsonTest[];
+  tests: PlaywrightJsonTest[];
 }
 
 export interface PlaywrightJsonSuite {
-  title?: string;
-  file?: string;
-  specs?: PlaywrightJsonSpec[];
+  title: string;
+  specs: PlaywrightJsonSpec[];
   /** `test.describe` の入れ子。 深さに上限は無い。 */
   suites?: PlaywrightJsonSuite[];
 }
 
 export interface PlaywrightJsonReport {
-  suites?: PlaywrightJsonSuite[];
-  stats?: { startTime?: string };
+  suites: PlaywrightJsonSuite[];
+  stats: { startTime: string };
 }
 
 export interface FromPlaywrightJsonOptions {
@@ -143,7 +141,7 @@ function playwrightStatus(test: PlaywrightJsonTest): TestRunRecord['status'] {
       break;
   }
   // `status` が無い形は最後の result から決める。 retry があるので末尾を見る。
-  const last = test.results?.[test.results.length - 1];
+  const last = test.results[test.results.length - 1];
   if (last?.status === 'passed') return 'passed';
   if (last?.status === 'skipped' || last?.status === undefined) return 'skipped';
   return 'failed';
@@ -159,8 +157,8 @@ function* walkSpecs(
     // ここでは落とさず、`fullName` を組む時に空要素をまとめて落とす。
     // ここでも落とすと 2 箇所が同じ入力を捕まえ、片方が死んでも気付けない
     // (変異でどちらを外しても 1 件も落ちなかった)。
-    const next = [...trail, suite.title ?? ''];
-    for (const spec of suite.specs ?? []) {
+    const next = [...trail, suite.title];
+    for (const spec of suite.specs) {
       yield { spec, trail: next };
     }
     yield* walkSpecs(suite.suites ?? [], next);
@@ -180,23 +178,38 @@ export function fromPlaywrightJson(
   report: PlaywrightJsonReport,
   opts: FromPlaywrightJsonOptions,
 ): TestRunRecord[] {
-  const startedAt = report.stats?.startTime ? Date.parse(report.stats.startTime) : 0;
+  const startedAt = Date.parse(report.stats.startTime);
   const out: TestRunRecord[] = [];
-  for (const { spec, trail } of walkSpecs(report.suites ?? [], [])) {
-    for (const test of spec.tests ?? [{}]) {
-      // 空要素を落とす唯一の場所。 名前の無い suite (`test.describe` を挟まない file)
-      // と、名前の無い spec の両方がここへ来る。
-      const fullName = [...trail, spec.title].filter((part) => part !== '').join(' > ');
-      const match = fullName.match(TC_ID_REGEX);
-      out.push({
-        testId: match ? match[0] : fullName,
-        fullName,
-        status: playwrightStatus(test),
-        durationMs: test.results?.[test.results.length - 1]?.duration ?? 0,
-        runId: opts.runId,
-        startedAt: Number.isNaN(startedAt) ? 0 : startedAt,
-      });
-    }
+  for (const { spec, trail } of walkSpecs(report.suites, [])) {
+    if (spec.tests.length === 0) continue;
+
+    // Playwright は同じ spec の project / repeatEach 実行を tests にまとめる。
+    // ここで 1 test = 1 record にすると同じ runId を複数 run として数えるため、
+    // logical spec ごとに 1 record へ集約する。
+    const statuses = spec.tests.map(playwrightStatus);
+    const status = statuses.includes('failed')
+      ? 'failed'
+      : statuses.includes('passed')
+        ? 'passed'
+        : 'skipped';
+    const durationMs = spec.tests.reduce(
+      (testTotal, test) =>
+        testTotal + test.results.reduce((attemptTotal, result) => attemptTotal + result.duration, 0),
+      0,
+    );
+
+    // 空要素を落とす唯一の場所。 名前の無い suite (`test.describe` を挟まない file)
+    // と、名前の無い spec の両方がここへ来る。
+    const fullName = [...trail, spec.title].filter((part) => part !== '').join(' > ');
+    const match = fullName.match(TC_ID_REGEX);
+    out.push({
+      testId: match ? match[0] : fullName,
+      fullName,
+      status,
+      durationMs,
+      runId: opts.runId,
+      startedAt: Number.isNaN(startedAt) ? 0 : startedAt,
+    });
   }
   return out;
 }

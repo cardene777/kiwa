@@ -207,7 +207,7 @@ describe('fromPlaywrightJson', () => {
         suites: [
           {
             title: 'reorg-4scenario.spec.ts',
-            file: 'tests/e2e/reorg-4scenario.spec.ts',
+            specs: [],
             suites: [
               {
                 title: 'reorg 4-scenario e2e',
@@ -243,8 +243,10 @@ describe('fromPlaywrightJson', () => {
     });
     const out = fromPlaywrightJson(
       {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
         suites: [
           {
+            title: '',
             specs: [
               spec('T-E2E-001 ok', 'expected'),
               spec('T-E2E-002 broken', 'unexpected'),
@@ -269,7 +271,15 @@ describe('fromPlaywrightJson', () => {
     // 未実行を落とすと「実行していない」 が「存在しない」 に化けて、
     // 突き合わせが実物とずれる。
     const out = fromPlaywrightJson(
-      { suites: [{ specs: [{ title: 'T-E2E-005 never ran', tests: [{ status: 'skipped' }] }] }] },
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: '',
+            specs: [{ title: 'T-E2E-005 never ran', tests: [{ status: 'skipped', results: [] }] }],
+          },
+        ],
+      },
       { runId: 'r-3' },
     );
     expect(out).toHaveLength(1);
@@ -280,12 +290,21 @@ describe('fromPlaywrightJson', () => {
   it('falls back to the last result when the test has no status', () => {
     const out = fromPlaywrightJson(
       {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
         suites: [
           {
+            title: '',
             specs: [
               {
                 title: 'T-E2E-006 retried then passed',
-                tests: [{ results: [{ status: 'failed' }, { status: 'passed', duration: 5 }] }],
+                tests: [
+                  {
+                    results: [
+                      { status: 'failed', duration: 7 },
+                      { status: 'passed', duration: 5 },
+                    ],
+                  },
+                ],
               },
             ],
           },
@@ -294,12 +313,51 @@ describe('fromPlaywrightJson', () => {
       { runId: 'r-4' },
     );
     expect(out[0]?.status).toBe('passed');
-    expect(out[0]?.durationMs).toBe(5);
+    expect(out[0]?.durationMs).toBe(12);
+  });
+
+  it('merges projects into one logical record without counting one run multiple times', () => {
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: 'multi-project.spec.ts',
+            specs: [
+              {
+                title: 'T-E2E-009 cross-browser',
+                tests: [
+                  { status: 'expected', results: [{ status: 'passed', duration: 3 }] },
+                  { status: 'unexpected', results: [{ status: 'failed', duration: 4 }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-projects' },
+    );
+
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({
+      testId: 'T-E2E-009',
+      status: 'failed',
+      durationMs: 7,
+      runId: 'r-projects',
+    });
   });
 
   it('uses fullName as the id when no TC id is present', () => {
     const out = fromPlaywrightJson(
-      { suites: [{ title: 'flow', specs: [{ title: 'renders the page', tests: [{ status: 'expected' }] }] }] },
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: 'flow',
+            specs: [{ title: 'renders the page', tests: [{ status: 'expected', results: [] }] }],
+          },
+        ],
+      },
       { runId: 'r-5' },
     );
     expect(out[0]?.testId).toBe('flow > renders the page');
@@ -311,14 +369,17 @@ describe('fromPlaywrightJson', () => {
     // 足りることを確かめる。
     const out = fromPlaywrightJson(
       {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
         suites: [
           {
             title: '',
+            specs: [],
             suites: [
               {
+                title: '',
                 specs: [
-                  { title: 'T-E2E-007 x', tests: [{ status: 'expected' }] },
-                  { title: '', tests: [{ status: 'expected' }] },
+                  { title: 'T-E2E-007 x', tests: [{ status: 'expected', results: [] }] },
+                  { title: '', tests: [{ status: 'expected', results: [] }] },
                 ],
               },
             ],
@@ -330,13 +391,50 @@ describe('fromPlaywrightJson', () => {
     expect(out.map((r) => r.fullName)).toEqual(['T-E2E-007 x', '']);
   });
 
+  it('produces no record for a spec that has no tests', () => {
+    // Playwright は project を 1 つも解決できない spec に空の `tests` を返しうる。
+    // 合成の record を作ると「実行していない」 が「1 件通った」 に化ける。
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-02T03:04:05.000Z' },
+        suites: [
+          {
+            title: 'flow',
+            specs: [
+              { title: 'T-E2E-009 unresolved', tests: [] },
+              {
+                title: 'T-E2E-010 ran',
+                tests: [{ status: 'expected', results: [{ status: 'passed', duration: 1 }] }],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-9' },
+    );
+    expect(out.map((r) => r.testId)).toEqual(['T-E2E-010']);
+  });
+
   it('returns an empty array for a report with no suites', () => {
-    expect(fromPlaywrightJson({}, { runId: 'r-7' })).toEqual([]);
+    expect(
+      fromPlaywrightJson(
+        { stats: { startTime: '2026-01-01T00:00:00.000Z' }, suites: [] },
+        { runId: 'r-7' },
+      ),
+    ).toEqual([]);
   });
 
   it('falls back to 0 when startTime is not parseable', () => {
     const out = fromPlaywrightJson(
-      { stats: { startTime: 'not a date' }, suites: [{ specs: [{ title: 'T-E2E-008 x', tests: [{}] }] }] },
+      {
+        stats: { startTime: 'not a date' },
+        suites: [
+          {
+            title: '',
+            specs: [{ title: 'T-E2E-008 x', tests: [{ results: [] }] }],
+          },
+        ],
+      },
       { runId: 'r-8' },
     );
     expect(out[0]?.startedAt).toBe(0);
