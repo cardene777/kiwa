@@ -901,6 +901,37 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     }
   });
 
+  it('path 雛形も {$VAR} を書いていない', () => {
+    // The check above only looked at `kiwa-observe` invocation lines. The same
+    // notation survived in 9 path templates across 6 skills because prose was
+    // never scanned — a reader substituting the template gets `{ja}` in the
+    // name just as a shell would (#2080).
+    //
+    // The rule's own statement quotes the wrong form to name it, so the line
+    // that explains the rule is the one exception.
+    const files: string[] = [];
+    for (const skill of [...skillsWithSkillMd()].sort()) {
+      files.push(`${skill}/SKILL.md`);
+      const refs = resolve(REPO_ROOT, '.claude/skills', skill, 'references');
+      if (!existsSync(refs)) continue;
+      for (const name of readdirSync(refs)) {
+        if (name.endsWith('.md')) files.push(`${skill}/references/${name}`);
+      }
+    }
+    expect(files.length, '走査対象を 1 件も集められていない').toBeGreaterThan(0);
+
+    const offenders: string[] = [];
+    for (const rel of files) {
+      read(`.claude/skills/${rel}`)
+        .split('\n')
+        .forEach((line, i) => {
+          if (line.includes('shell の変数展開にならず')) return;
+          if (/`[^`]*\{\$[A-Za-z_][^`]*`/.test(line)) offenders.push(`${rel}:${i + 1}`);
+        });
+    }
+    expect(offenders, 'path 雛形に {$VAR} が残っている').toEqual([]);
+  });
+
   it('kiwa-observe が渡される 6 引数を宣言している', () => {
     // The other end of the same contract. A caller passing a flag the callee
     // does not declare is accepted and ignored, which is how `--input-spec`

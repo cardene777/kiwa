@@ -969,7 +969,7 @@ review 結果:
 - FAIL critical なし → review 指摘を user に表示、 「指摘反映して再生成 / そのまま Layer 2 へ進む」 を AskUserQuestion で選択
 - FAIL critical あり → spec に critical 欠陥 (観点漏れ / 抽象表現過多 / 優先度判定ミス)、 user に「spec 修正 → 再 design / 無視して継続」 を選択
 
-report 出力先: `tests/reports/review/spec-review-{module}.{$DOC_LANG}.md`
+report 出力先: `tests/reports/review/spec-review-{module}.${DOC_LANG}.md`
 
 `--no-review` 引数 (kiwa-design 側) で本 step を skip 可能 (CI / 自動化用)。
 

@@ -67,6 +67,8 @@ describe('読む先が writer と一致する', () => {
       invoke,
     )?.[1];
     expect(handedOff, 'result-review に統合 report の exact path を渡していない').toBeTruthy();
+    expect(write, 'Step 5 の書き先が {$VAR} を使っている').not.toMatch(/\{\$[A-Za-z_]/);
+    expect(handedOff, 'handoff が {$VAR} を使っている').not.toMatch(/\{\$[A-Za-z_]/);
     expect(
       integratedTemplates(handedOff!)[0],
       `handoff が Step 5 の書き先と違う (Step 5: ${declared[0]})`,

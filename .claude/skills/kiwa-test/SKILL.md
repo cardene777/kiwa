@@ -406,7 +406,7 @@ target=web (汎用 web 2 surface セット) または target=all の場合に実
 
 ### Step 5: 統合 report Write
 
-全 step 完了後、 `tests/reports/integrated/{example}-{module}-{target}.{$DOC_LANG}.md` に統合 report を Write。
+全 step 完了後、 `tests/reports/integrated/{example}-{module}-{target}.${DOC_LANG}.md` に統合 report を Write。
 
 ```markdown
 # Integrated Test Report — {example} ({target}, runner={runner})
@@ -599,7 +599,7 @@ Step 5 で統合 report Write 完了後、 test 実行結果の総合品質を�
 
 呼出例:
 ```text
-/kiwa-review --mode result-review --module {module} --lang $DOC_LANG --project-root examples/{example} --integrated-report tests/reports/integrated/{example}-{module}-{target}.{$DOC_LANG}.md
+/kiwa-review --mode result-review --module {module} --lang $DOC_LANG --project-root examples/{example} --integrated-report tests/reports/integrated/{example}-{module}-{target}.${DOC_LANG}.md
 ```
 
 review 結果:
@@ -607,7 +607,7 @@ review 結果:
 - CONDITIONAL (未生成 TC / 未測定軸あり) → 未検証の観点と次の手を統合 report に残して Step 6 へ。 FAIL として auto-fix loop に入れない
 - FAIL → Step 5c (auto-fix loop) へ
 
-report 出力先: `tests/reports/review/result-review-{module}.{$DOC_LANG}.md`
+report 出力先: `tests/reports/review/result-review-{module}.${DOC_LANG}.md`
 
 `--no-review` 引数で本 step を skip 可能 (CI 用、 skip 時は Step 5c も skip して Step 6 へ)。
 
@@ -762,7 +762,7 @@ graph TD
 
 - `--target` で指定された範囲 (contract / dapp / both) の全 step が PASS or 意図的 skip
 - `--runner` (contract 関連 target のみ) で選択された runner の test chain が PASS、 非選択 runner は report 内で skipped と明示
-- `tests/reports/integrated/{example}-{module}-{target}.{$DOC_LANG}.md` が Write 済
+- `tests/reports/integrated/{example}-{module}-{target}.${DOC_LANG}.md` が Write 済
 - 各子 skill の report path が integrated report 内に link 集約
 - 生成 test が `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に退避済 (Step 5.5、 `--target` 範囲外と非選択 runner の subdir は対象外)
 
