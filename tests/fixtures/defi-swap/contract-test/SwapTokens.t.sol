@@ -155,7 +155,7 @@ contract SwapTokensTest is Test {
     ///
     /// `transferFrom` は allowance と残高を別々に検査する。 TC-004 が allowance 側の
     /// revert を通しているが、 **allowance を満たした上で残高が足りない** 経路は
-    /// どの test も通っていなかった (Foundry / Hardhat の両 runner で branch 未到達)。
+    /// Foundry test は通っていなかった。 Hardhat 側は既存の TC-022 で到達済。
     ///
     /// allowance の検査だけを見て通す実装に退行すると、 残高を持たない口座からの
     /// 引き落としが成立する。 その退行をこの 1 件が捕まえる。

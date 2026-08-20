@@ -57,7 +57,7 @@ contract spec に runner 差異 bullet を追加する (Hardhat 側 report と�
 
 ## 5. test 件数サマリ
 
-- `FOUNDRY_OFFLINE=true forge test` PASS: 17 件
-- fuzz test: `royaltyInfo` の整数除算に対する境界値 fuzz を含む
+- `FOUNDRY_OFFLINE=true forge test` PASS: 109 件 (SimpleMarketplace 73 件 + MarketNft 35 件 + invariant 1 件)
+- fuzz test: 2 件 (`testFuzz_Mint_AnyNonZeroAddress_Succeeds` / `testFuzz_RoyaltyInfo_AlwaysBelowSalePrice`、 各 256 runs)
 - 主要 gas: list / buy / acceptOffer は offer の掃き出し (`_invalidateOffersForToken`) が
   同 token の offer 件数に比例するため、 offer が増えるほど acceptOffer が重くなる

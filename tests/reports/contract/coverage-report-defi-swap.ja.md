@@ -43,7 +43,7 @@ test file の未実行行は helper と mock の宣言で、 production の到�
 残高 0 の口座を出金元にし、 上限まで許可を与えた第三者から引き落とす形で、
 allowance の検査を通過した後に残高の検査へ到達する。
 
-Hardhat 経路の同 branch も同時に塞がるかは別 report で扱う (結論は runner 差異で未到達のまま)。
+Hardhat 経路の同 branch は既存の TC-022 で到達済。 今回の gap は Foundry 側だけにあった。
 
 ## 4. Layer 1 spec への書き戻し提案
 
@@ -59,11 +59,12 @@ test 設計時に allowance 側だけを異常系として拾っていた。
 
 `swapAforB` の `TransferInFailed` / `TransferOutFailed` は、 `transfer` が revert せず
 `false` を返す ERC20 を必要とする。 Foundry では `.t.sol` 内に mock を直接定義できるため
-到達済だが、 Hardhat では contract を `contracts/` に置かない限り同じ mock を作れない。
-runner 差異として contract spec に bullet 追加が要る。
+到達済。 現在の Hardhat config は `./contracts` だけを Solidity source として compile するため、
+同じ経路には test 専用 mock を compile 対象へ追加する必要がある。 本 PR の production contract
+非変更制約では採らず、 fixture 構成上の runner 差異として contract spec に bullet 追加が要る。
 
 ## 5. test 件数サマリ
 
 - `FOUNDRY_OFFLINE=true forge test` PASS: 18 件 (追加 1 件を含む)
-- fuzz test: 0 (1:1 swap で scalar fuzz の対象が薄く、 境界は revert 条件で表現済)
+- fuzz test: 1 件 (`testFuzz_Swap_Boundary`、 256 runs)
 - 主要 gas: swap 106k / transferFrom 78k / transfer 50k

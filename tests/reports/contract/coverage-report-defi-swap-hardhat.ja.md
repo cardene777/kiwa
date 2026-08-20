@@ -37,8 +37,9 @@ revert する ERC20 では手前で失敗するため、 この分岐には届�
 
 Foundry では `contract-test/SwapTokens.t.sol` の中に mock contract を直接書けるため、
 `test_Swap_Reverts_TransferInFailed` / `test_Swap_Reverts_TransferOutFailed` の 2 件で到達済。
-Hardhat は Solidity を JS の test file 内に定義できず、 mock を `contracts/` に置く以外の
-経路が無い。 production の contract 置き場に test 専用の mock を混ぜることになるため採らない。
+現在の Hardhat config は `./contracts` だけを Solidity source として compile するため、 同じ経路には
+test 専用 mock を compile 対象へ追加する必要がある。 本 PR の production contract 非変更制約では
+採らず、 fixture 構成上の runner 差異として扱う。
 
 同じ形の許容は `mint-nft` の Hardhat report が先例で、 そちらは
 `_checkOnERC721Received` の try/catch を同じ理由で runner 差異としている。
@@ -62,5 +63,5 @@ Hardhat 側は mock 配置制約で未到達」 の bullet を追加する。
 ## 5. test 件数サマリ
 
 - `hardhat test` PASS: 23 件
-- fuzz test: 0 (Hardhat 経路は fuzz を持たない、 境界は Foundry 側が担当)
+- property test: 1 件 (`fast-check` による amountIn 1〜100 ether の検証)
 - 未到達 2 branch は上記のとおり runner 差異

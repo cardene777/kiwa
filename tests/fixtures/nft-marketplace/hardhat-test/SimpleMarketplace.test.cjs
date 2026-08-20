@@ -407,8 +407,9 @@ describe('SimpleMarketplace (Layer 2 Hardhat example)', () => {
     });
 
     it('TC-034 同 token の offer に cancel 済が混ざっていても accept が通る', async () => {
-      // `_invalidateOffersForToken` の `!offer.active` の continue 側が未到達だった。
-      // offersByToken に残った id のうち既に delete 済のものを読み飛ばす経路。
+      // offersByToken に残った id のうち既に delete 済のものを含む状態を作る。
+      // accept が通ることは検証できるが、 delete 済 struct の amount は 0 なので、
+      // 残高だけでは `!offer.active` の continue 自体を独立に証明できない。
       const { nft, market, alice, bob, carol } = await loadFixture(deployFixture);
       await market.connect(carol)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
       await market.connect(bob)['makeOffer(uint256,uint256)'](1, OFFER_AMOUNT, { value: OFFER_AMOUNT });
@@ -421,6 +422,21 @@ describe('SimpleMarketplace (Layer 2 Hardhat example)', () => {
       expect(await nft.ownerOf(1)).to.equal(bob.address);
       // 既に返金済なので二重に返らない。
       expect(await ethers.provider.getBalance(carol.address)).to.equal(carolBefore);
+    });
+
+    it('TC-035 zero-price sale は royalty 0 のまま buy が成功する', async () => {
+      // 現行 MarketNft でも salePrice=0 なら royaltyAmount=0 になる。
+      // mock 無しで `_payoutWithRoyalty` の royaltyAmount > 0 false 側を通せる。
+      const { nft, market, alice, bob, royalty } = await loadFixture(deployFixture);
+      await market.connect(alice).list(1, 0);
+      const royaltyBefore = await ethers.provider.getBalance(royalty.address);
+
+      await expect(market.connect(bob).buy(1, { value: 0 }))
+        .to.emit(market, 'Bought')
+        .withArgs(1, bob.address, 0);
+
+      expect(await nft.ownerOf(1)).to.equal(bob.address);
+      expect(await ethers.provider.getBalance(royalty.address)).to.equal(royaltyBefore);
     });
   });
 });
