@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -44,6 +44,7 @@ function occurrences(pattern: RegExp): { skill: string; line: string }[] {
 /** skill の references 直下にある Markdown を全件読む (symlink も参照先を読む)。 */
 function referenceMarkdown(skill: string): { file: string; body: string }[] {
   const dir = `.claude/skills/${skill}/references`;
+  if (!existsSync(resolve(REPO_ROOT, dir))) return [];
   return readdirSync(resolve(REPO_ROOT, dir), { withFileTypes: true })
     .filter((entry) =>
       (entry.isFile() || entry.isSymbolicLink()) && entry.name.endsWith('.md'),
@@ -85,10 +86,21 @@ describe('coverage report の雛形は Step 0 だけが持つ', () => {
   });
 
   it('writer 以外の skill が雛形を持たない', () => {
-    // caller / reader が path を写すと、 runner suffix や lang suffix の変更時にずれる。
-    // writer が返した実 path をそのまま渡す形だけを許す。
+    // caller / reader の SKILL.md だけでなく references に path を写しても、
+    // runner suffix や lang suffix の変更時にずれる。 writer が返した実 path を
+    // そのまま渡す形だけを許す。
     const owners = new Set(OWNERS);
-    const copies = occurrences(SHAPE).filter(({ skill }) => !owners.has(skill));
+    const copies = SKILLS.filter((skill) => !owners.has(skill)).flatMap((skill) =>
+      [
+        { file: `.claude/skills/${skill}/SKILL.md`, body: skillBody(skill) },
+        ...referenceMarkdown(skill),
+      ].flatMap(({ file, body }) =>
+        body
+          .split('\n')
+          .filter((line) => SHAPE.test(line))
+          .map((line) => ({ file, line: line.trim() })),
+      ),
+    );
     expect(copies, 'writer 以外が coverage path の雛形を持っている').toEqual([]);
   });
 
