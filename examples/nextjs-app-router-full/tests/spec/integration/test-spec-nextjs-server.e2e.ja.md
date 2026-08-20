@@ -99,7 +99,7 @@ Next.js がその要求を 500 に変換する。 server process は停止せず
 | 層 | 読み方 | 同名 cookie | percent encoding |
 |---|---|---|---|
 | middleware | `NextRequest.cookies` | **後方**を採る | 1 回 decode する |
-| RSC page | `cookies()` を `name=value` へ再構成 → `auth.ts` の正規表現 | — | 再構成後に **もう 1 回** decode する |
+| RSC page | `cookies()` を `name=value` へ再構成 → `auth.ts` の正規表現 | **後方**を採る (`cookies()` で集約済み) | 再構成後に **もう 1 回** decode する |
 | Route Handler | raw の `cookie` header → `auth.ts` の正規表現 | **前方**を採る | 1 回 decode する |
 
 この差で、**middleware が素通しした要求が後段で別の役割に化ける**。 実測した 4 例。
@@ -117,7 +117,7 @@ Next.js がその要求を 500 に変換する。 server process は停止せず
   RSC は再構成した `session=;` を正規表現に掛け、`([^;]+)` が 1 文字も取れず未認証になる
 - `%2562anned` は middleware が 1 回 decode して `%62anned` (非空・未知) として素通しし、
   RSC が **2 回目の decode** で `banned` に戻す
-- 同名 cookie は middleware が後方、Route Handler が前方を採るため、
+- 同名 cookie は middleware と RSC の `cookies()` が後方、Route Handler が前方を採るため、
   並べる順序で「どちらの層が 403 を返すか」 が入れ替わる
 
 **「middleware が先に遮るから後段に到達しない」 は成り立たない。**
