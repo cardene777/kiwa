@@ -13,12 +13,12 @@ Loop terminated: residual_uncoverable (runner 差異許容)
 | Functions | ✅ 100% | 100% |
 | Lines | ⚠️ 98.17% (runner 差異許容) | 98.17% |
 
-**判定 — ✅ PASS** (Funcs 100%、 残る未到達は mock contract を要する失敗系と、
-`continue` の計上が runner で割れる 1 件)
+**判定 — ✅ PASS** (Funcs 100%、 残る未到達 8 branch legs はすべて
+test 専用 mock contract を要する経路)
 
 本 report の作成時に 5 件を test 追加し、 4 分岐を coverage 上で塞いだ。
-残る 1 件 (TC-034) は stale offer を含む状態を実行する regression test だが、 Istanbul の
-分岐 count には反映されていない。 数値の推移は § 3 に記載する。
+TC-033 は受理 offer の除外と sibling offer の返金を同時に保証する regression test で、
+対象分岐自体は既存 test でも到達済だった。 数値の推移は § 3 に記載する。
 
 ## 2. file 別 coverage 内訳
 
@@ -38,7 +38,7 @@ Foundry 側では到達しているのに Hardhat 側だけ未到達だった分
 |---|---|
 | `SimpleMarketplace.sol:118` の `if (listings[tokenId].active)` の true 側 | TC-031 出品中の token に対する acceptOffer |
 | `SimpleMarketplace.sol:112` の `if (!offer.active) revert OfferNotActive` | TC-032 cancel 済 offer の acceptOffer |
-| `SimpleMarketplace.sol:177` の `currentOfferId == excludedOfferId` の continue | TC-033 同 token に複数 offer がある状態で 1 件を accept |
+| `SimpleMarketplace.sol:180` の `if (!offer.active) continue` の true 側 | TC-034 cancel 済 offer が混ざる状態での acceptOffer |
 | `SimpleMarketplace.sol:192` の `royaltyAmount > 0` の false 側 | TC-035 zero-price sale |
 | `MarketNft.sol` / `SimpleMarketplace.sol` の line coverage 3 行 | 上記 test の副次的な到達 |
 
@@ -47,6 +47,10 @@ TC-031〜034 は「出品と offer が同時に立つ」「同じ token に offe
 zero-price sale で royalty が 0 になる既存仕様の境界を補う。
 TC-031 が塞いだ経路は、 出品が残ったまま所有者が変わる状態を防ぐ分岐なので、
 退行すると所有者の変わった token を元の価格で買える。
+
+TC-033 が対象にした `SimpleMarketplace.sol:177` の受理 offer 除外分岐は、 既存の
+acceptOffer test でも通る。 TC-033 の役割は、 同 token に複数 offer がある場合に
+受理分を返金対象から除外し、 sibling だけを返金する組合せの regression 検証にある。
 
 数値の推移。
 
@@ -58,18 +62,20 @@ TC-031 が塞いだ経路は、 出品が残ったまま所有者が変わる状
 
 test 件数は 51 件から 56 件になった。
 
-### 3.2 mock contract を要するもの (5 件、 runner 差異)
+### 3.2 mock contract を要するもの (8 branch legs、 runner 差異)
 
 | 対象 | 必要な相手 |
 |---|---|
-| `MarketNft.sol:123` `if (retval != onERC721Received.selector) revert UnsafeRecipient();` | 誤った selector を返す受信 contract |
+| `MarketNft.sol:123` selector 検査の true / false 両側 (2 legs) | 正しい selector / 誤った selector を返す受信 contract |
 | `SimpleMarketplace.sol:106` `if (!ok) revert PaymentFailed();` (cancelOffer の返金) | ETH の受取を拒む buyer contract |
 | `SimpleMarketplace.sol:145` `if (!refund) revert PaymentFailed();` (買い過ぎの返金) | 同上 |
-| `SimpleMarketplace.sol:192` の `try nft.royaltyInfo(...)` catch 側と receiver 0 判定 | `royaltyInfo` を持たない NFT / receiver 0 の NFT |
-| `SimpleMarketplace.sol:193-194,198,203` royalty が売値を超える clamp と支払い失敗 | 異常な royalty を返す NFT / 受取を拒む receiver |
+| `SimpleMarketplace.sol:184` `if (!refunded) revert PaymentFailed();` (sibling offer の返金) | ETH の受取を拒む buyer contract |
+| `SimpleMarketplace.sol:193-194` royalty が売値を超える clamp | 異常な royalty を返す NFT |
+| `SimpleMarketplace.sol:198` royalty 支払い失敗 | ETH の受取を拒む royalty receiver |
+| `SimpleMarketplace.sol:203` seller 支払い失敗 | ETH の受取を拒む seller contract |
 
 いずれも **相手側の contract を差し替えないと到達しない**。
-Foundry は `contract-test/helpers/Mocks.sol` に mock を置けるため 5 件とも到達済で、
+Foundry は `contract-test/helpers/Mocks.sol` に mock を置けるためすべて到達済で、
 Foundry 側の production coverage は 4 metric とも 100% になっている。
 
 現在の Hardhat config は `./contracts` だけを Solidity source として compile するため、 同じ経路には
@@ -78,20 +84,14 @@ test 専用 mock を compile 対象へ追加する必要がある。 本 PR の 
 `mint-nft` の Hardhat report が同じ理由で `_checkOnERC721Received` を runner 差異としており、
 その先例に揃える。
 
-### 3.3 原因を特定できていないもの (1 件)
+### 3.3 Istanbul branch map との照合
 
-`SimpleMarketplace.sol:180` の `if (!offer.active) continue;` は、 TC-034
-(同 token の offer に cancel 済が混ざっていても accept が通る) で到達するはずだが、
-Istanbul の計上では未到達 (`counts=[0, 2]`) のまま残っている。
+`SimpleMarketplace.sol:180` の `if (!offer.active) continue;` は、 TC-034 により
+Istanbul でも到達済 (`counts=[1, 2]`)。 runner 間の計上差異ではない。
 
-TC-034 は stale id が `offersByToken` に残る状態でも accept が成功し、 cancel 済 buyer の
-残高が変わらないことを確認している。 ただし `cancelOffer` は offer struct 全体を delete するため、
-`continue` を除いても zero address への 0 ETH call となり、 この残高 assertion だけでは分岐通過を
-独立には証明できない。 coverage の到達根拠にはせず、 Istanbul の数値どおり未到達として扱う。
-Foundry 側は同じ行を到達済として 100% を出す。
-
-`continue` を含む分岐の計上が runner で割れている可能性はあるが、 Istanbul 側の
-計上規則を確かめていないため **断定しない**。
+従来この行の値として記録していた `counts=[0, 2]` は、 source map 上は line 184 の
+`if (!refunded) revert PaymentFailed();` に対応する。 したがって未到達の原因は
+`continue` の計上差異ではなく、 sibling offer の返金を拒む buyer mock が無いこと。
 
 ## 4. Layer 1 spec への書き戻し提案
 
@@ -100,7 +100,7 @@ Foundry 側は同じ行を到達済として 100% を出す。
 | 出品と offer が同時に立つ状態 | 状態遷移 test case 表 | TC 追加 (acceptOffer が listing も畳むこと) |
 | 同 token に offer が複数ある状態 | 状態遷移 test case 表 | TC 追加 (受理分の除外と残りの返金) |
 | royalty が 0 になる sale | 境界値 test case 表 | TC 追加 (zero-price sale でも buy が完了すること) |
-| mock を要する失敗系 5 件 | runner 差異 bullet | Hardhat では未到達と明記 |
+| mock を要する 8 branch legs | runner 差異 bullet | Hardhat では未到達と明記 |
 
 状態の組合せ (出品 × offer、 offer 複数、 cancel 済混在) を spec の表に持たせていなかった。
 単独の操作は網羅していたが、 組合せを 1 件も並べていなかったため test 側でも落ちた。
@@ -114,4 +114,4 @@ contract spec に runner 差異 bullet を追加する。
 
 - `hardhat test` PASS: 56 件 (追加 5 件を含む、 追加前は 51 件)
 - fuzz test: 0 (Hardhat 経路は fuzz を持たない、 境界は Foundry 側が担当)
-- 未到達 6 件の内訳 = mock 必須 5 件 + 計上差異 1 件
+- 未到達 8 branch legs はすべて mock 必須経路
