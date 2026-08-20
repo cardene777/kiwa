@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
 
 import { REPO_ROOT, skillBody } from './skill-md.js';
@@ -14,17 +14,25 @@ import { REPO_ROOT, skillBody } from './skill-md.js';
  * staging に入った。
  */
 
-/** `git check-ignore` の判定。 `.gitignore` の文字列ではなく git 自身に訊く。 */
+/**
+ * `git check-ignore` の判定。 `.gitignore` の文字列ではなく git 自身に訊く。
+ *
+ * **`--no-index` を外さない**。 既定の `check-ignore` は追跡済 path を判定対象から外し、
+ * pattern が一致しても「無視されない」 を返す。 下の陰性対照は追跡済 path
+ * (`tests/reports/contract/coverage-report-mint-nft.ja.md`) を含むため、 外すと
+ * 「追跡済だから通った」 と「pattern が当たらないから通った」 が区別できず恒真になる。
+ */
 function ignored(path: string): boolean {
-  try {
-    execFileSync('git', ['check-ignore', '-q', '--', path], {
-      cwd: REPO_ROOT,
-      stdio: 'pipe',
-    });
-    return true;
-  } catch {
-    return false;
+  const r = spawnSync('git', ['check-ignore', '--no-index', '-q', '--', path], {
+    cwd: REPO_ROOT,
+    encoding: 'utf-8',
+  });
+  if (r.error) throw r.error;
+  // 0 = 一致 / 1 = 不一致。 それ以外は実行できていないので判定材料にしない。
+  if (r.status !== 0 && r.status !== 1) {
+    throw new Error(`git check-ignore が異常終了した (status=${r.status}): ${r.stderr}`);
   }
+  return r.status === 0;
 }
 
 /** 無視されるべき run 成果物。 いずれも追跡済 file は 0 件。 */
@@ -70,9 +78,9 @@ describe('example 配下の run 成果物を無視する', () => {
   });
 
   it('追跡済 file が 1 件も無視対象に入っていない', () => {
-    // 上の 2 件は代表点。 実際の追跡 file 全件を git に通して、 巻き込みが 0 であることを
-    // 直接確かめる。
-    const tracked = execFileSync('git', ['ls-files'], {
+    // 上の 2 件は代表点。 追跡済 path は通常の `check-ignore` では判定対象から
+    // 外れるため、 `--no-index` を付けて example 配下の追跡 file 全件を直接確かめる。
+    const tracked = execFileSync('git', ['ls-files', '--', 'examples'], {
       cwd: REPO_ROOT,
       encoding: 'utf-8',
       maxBuffer: 64 * 1024 * 1024,
@@ -80,19 +88,18 @@ describe('example 配下の run 成果物を無視する', () => {
     expect(tracked.split('\n').filter(Boolean).length, '追跡 file を 1 件も読めていない').toBeGreaterThan(
       0,
     );
-    let swept = '';
-    try {
-      swept = execFileSync('git', ['check-ignore', '--stdin'], {
-        cwd: REPO_ROOT,
-        input: tracked,
-        encoding: 'utf-8',
-        maxBuffer: 64 * 1024 * 1024,
-      });
-    } catch {
-      // 1 件も一致しなければ `check-ignore` は exit 1 を返す = これが期待する状態。
-      swept = '';
-    }
-    expect(swept.split('\n').filter(Boolean), '追跡済 file が無視対象に入っている').toEqual([]);
+    const checked = spawnSync('git', ['check-ignore', '--no-index', '--stdin'], {
+      cwd: REPO_ROOT,
+      input: tracked,
+      encoding: 'utf-8',
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    expect(checked.error, '`git check-ignore` を実行できない').toBeUndefined();
+    expect([0, 1], `git check-ignore が異常終了した\n${checked.stderr}`).toContain(checked.status);
+    expect(
+      checked.stdout.split('\n').filter(Boolean),
+      '追跡済 file が無視対象に入っている',
+    ).toEqual([]);
   });
 });
 
