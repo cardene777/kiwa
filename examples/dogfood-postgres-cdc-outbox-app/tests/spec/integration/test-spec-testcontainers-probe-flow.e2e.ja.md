@@ -1,10 +1,11 @@
 # test-spec-testcontainers-probe-flow (e2e-generic layer)
 
-container 実体を持つ driver に差し替えられる形になっているかを、
+container 実体を持つ driver と同じ observation 型を使う mock の HTTP 経路を、
 mock 側の返り値の形で確かめる。
 
-**実際に container を起動しない。** mock adapter は決まった文字列を返すだけで、
-`reachable` も常に真。 この仕様書が保証するのは「口の形が揃っている」 ことだけになる。
+**実際に container を起動せず、driver の差し替えも行わない。** mock adapter は決まった文字列を
+返すだけで、`reachable` も常に真。 この仕様書が保証するのは mock の route と observation の
+「口の形が繋がっている」 ことだけになる。
 
 - module: testcontainers-probe-flow
 - layer: e2e-generic
@@ -42,17 +43,19 @@ mock 側の返り値の形で確かめる。
 
 ### real 側との関係
 
-`src/adapters/real.ts` は `POSTGRES_BOOTSTRAP` があれば container の情報を返し、
-無ければ `POSTGRES_ENV_MISSING` を trace に残す。 **e2e は mock だけを見ており、
-real 側のどちらの分岐にも到達しない** (`fixture.ts` が `makeMockAdapter()` を固定で呼び、
-adapter を差し替える口を持たない)。
+`src/adapters/real.ts` は `POSTGRES_BOOTSTRAP` があれば bootstrap と image の設定値を返し、
+無ければ `POSTGRES_ENV_MISSING` を trace に残す。 env がある側では bootstrap が URL または
+`host:port` の形かを正規表現で判定し、その結果を `reachable` に入れる。 **e2e は mock だけを
+見ており、real 側の env 有無と `reachable` 真偽のいずれにも到達しない**
+(`fixture.ts` が `makeMockAdapter()` を固定で呼び、adapter を差し替える口を持たない)。
 
 ## 主な品質リスク
 
-- **`reachable` が常に真**。 到達性を何も測っていないため、この値の assert は
-  real driver に差し替えるまで意味を持たない
-- **URL に資格情報が literal で入っている**。 `postgres:postgres` は mock の置き換え文字列だが、
-  同じ形を real 側の応答に持ち込むと接続情報が応答本文に載る
+- **`reachable` が常に真**。 mock は到達性を何も測っていない。 現在の real adapter も
+  bootstrap の文字列形式だけを判定し、接続は試さないため、実際の疎通保証には使えない
+- **URL に資格情報が literal で入っている**。 mock の `postgres:postgres` は置き換え文字列だが、
+  connected real adapter も `POSTGRES_BOOTSTRAP` を `postgresUrl` としてそのまま応答と trace に載せる。
+  bootstrap に実資格情報を含めると現在の実装でも接続情報が露出する
 - **image 名が定数**。 実際にその image を引けるかを確かめていない
 - **`pg16` と `16-alpine` で版の書き方が揃っていない**。 同じ Postgres 16 を指すが
   文字列としては別で、版を機械的に突き合わせられない
@@ -91,6 +94,8 @@ adapter を差し替える口を持たない)。
 | `metrics().testcontainersProbes` の増分 | できる | `/metrics` を読んでいない |
 | trace の追加 | できる | `/traces` を読んでいない |
 | 定数の完全一致 | できる | 部分一致で assert している |
-| real 側の 2 分岐 (`POSTGRES_BOOTSTRAP` の有無) | **できない** | `fixture.ts` に adapter の注入口が無い |
+| real factory の 2 分岐 (`POSTGRES_BOOTSTRAP` の有無) | **できない** | `fixture.ts` に adapter の注入口が無い |
+| env がある時の `reachable` 真偽 (bootstrap の形式判定) | **できない** | 同上 |
 
-最後の 1 件だけが到達できない。 real 側は単体テストが `makeRealAdapter()` を直接呼んで確かめる。
+最後の 2 件が e2e から到達できない。 単体テストは `makeRealAdapter()` を直接呼び、env 無しと
+妥当な URL の env 有りを確かめるが、不正な bootstrap による `reachable: false` は確かめていない。

@@ -29,8 +29,8 @@ Postgres 16 の進んだ 3 経路 (論理複製 / 複製 slot の寿命 / pgvect
 '/pgvector':            async (adapter) => adapter.drivePgvector(),
 ```
 
-**何を POST しても結果は変わらない。** body の内容は捨てられる
-(壊れた JSON だけは server が先に 400 を返す)。
+**parse 可能で 64 KiB 以下なら何を POST しても結果は変わらない。** body の内容は捨てられる。
+壊れた JSON は server が先に 400、64 KiB を超える body は route 到達前に 413 を返す。
 
 ### 実測した返り値
 
@@ -41,6 +41,11 @@ Postgres 16 の進んだ 3 経路 (論理複製 / 複製 slot の寿命 / pgvect
 | `/pgvector` | `indexKind: 'ivfflat'`、`dimensions: 8`、`lists: 3`、`searchCount: 2`、`computedDistance: 1`、`bothSearchesRecorded: true` |
 
 いずれも呼ぶたびに同じ値を返す。 乱数も実時計も使わない。
+
+**同じ server で 2 回ずつ呼んで確かめた。** 3 経路とも 1 回目と 2 回目で応答が完全に一致する。
+
+これは v1 の `/outbox` と `/replication` と対照的で、あちらは 2 回目の結果が変わる
+(`/outbox` は行の有無で、`/replication` は terminal state に達して 500 になる)。
 
 ### 値どうしの関係
 
@@ -66,12 +71,14 @@ Postgres 16 の進んだ 3 経路 (論理複製 / 複製 slot の寿命 / pgvect
 
 ## 主な品質リスク
 
-- **3 経路とも入力を取らない**。 分岐が 1 本しかないため、mock の段階では
-  異常系も境界も存在しない。 実 driver に差し替えた時に初めて分岐が生まれる
+- **3 つの HTTP 経路は入力を取らない**。 adapter が各 flow を既定値で呼ぶため、
+  HTTP から選べる正常系・境界・異常系の分岐が無い。 下位の `driveSlotAdvanceFlow()` には
+  `advancedLsn <= retainedLsn` の拒否分岐があるが、`fixture.ts` の route からは入力できない
 - **`dropped: true` が常に返る**。 slot を落とさない経路が無いため、
   「落とさずに保持し続ける」 状態の検証手段が無い
-- **`pgvectorSearches` の単位が呼出回数でない**。 release gate がこれを op 数として扱うと
-  2 倍に見える (`@kiwa-lab/quality-metrics` の 13 軸 gate が消費する)
+- **`pgvectorSearches` の単位が呼出回数でない**。 1 呼出を 1 op とみなす consumer が
+  この counter を使うと 2 倍に見える。 現在の fidelity release gate は trace の op coverage を使い、
+  `pgvectorSearches` を直接は消費しない
 - **`computedDistance: 1` の意味が値から読めない**。 cosine 距離なら 1 は直交を表すが、
   mock が計算しているのか定数なのかを応答からは区別できない
 - **body が捨てられる**。 誤って別の経路の body を投げても 200 が返るため、
@@ -100,15 +107,16 @@ Postgres 16 の進んだ 3 経路 (論理複製 / 複製 slot の寿命 / pgvect
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | v2 の 3 経路が 1 つの page から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/logical-replication` → `/slot-advance` → `/pgvector` を空の body で順に `fetch` | 論理複製は `finalState==='cascade-synced'`、`cascadedSubscribers>=1`。 slot は `dropped===true`、`recycledBytes>0`。 pgvector は `indexKind==='ivfflat'`、`bothSearchesRecorded===true` | P0 | yes | node | `/logical-replication` `/slot-advance` `/pgvector` |
+| T-E2E-001 | v2 の 3 経路が 1 つの page から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/logical-replication` → `/slot-advance` → `/pgvector` を空の body で順に `fetch` | 論理複製は `finalState==='cascade-synced'`、`cascadedSubscribers>=1`。 slot は `dropped===true`、`recycledBytes>0`。 pgvector は `indexKind==='ivfflat'`、`bothSearchesRecorded===true`、`searchCount>=2` | P0 | yes | node | `/logical-replication` `/slot-advance` `/pgvector` |
 
 ## 自動化方針
 
 1 件で 3 経路を通す。 3 つが互いに依存しないため分けても値は変わらないが、
 **1 つの adapter が 3 op を続けて処理できる**ことを 1 件で示す形にしてある。
 
-assert は終端状態と真偽値に寄せてあり、**数値は 1 つも固定していない**。
-`cascadedSubscribers>=1` と `recycledBytes>0` はどちらも範囲で、実測値 (1 と 4096) を pin しない。
+assert は終端状態と真偽値に寄せてあり、**数値の完全一致は 1 つもない**。
+`cascadedSubscribers>=1`、`recycledBytes>0`、`searchCount>=2` はいずれも範囲で、
+実測値 (1、4096、2) を pin しない。
 
 **この 1 件が覆っていない範囲**。 いずれも同じ経路から到達できる。
 
@@ -117,10 +125,12 @@ assert は終端状態と真偽値に寄せてあり、**数値は 1 つも固�
 | `startLsn` / `confirmedFlushLsn` / `originId` / `synchronousStandbys` | できる | 応答に含まれるが assert していない |
 | `slotName` / `retainedLsn` / `advancedLsn` | できる | 同上 |
 | `advancedLsn - retainedLsn === recycledBytes` の関係 | できる | 両方を読んでいない |
-| `dimensions` / `lists` / `searchCount` / `computedDistance` | できる | 同上 |
+| `dimensions` / `lists` / `computedDistance` | できる | 応答に含まれるが assert していない |
+| `searchCount` の具体値 (2) | できる | `>=2` の範囲でしか assert していない |
 | metric への効き方 (`pgvectorSearches` が +2) | できる | `/metrics` を読んでいない |
 | body を変えても結果が変わらないこと | できる | 空の body だけを送っている |
 
-到達できない範囲は無い。 3 経路とも mock が 1 本の分岐しか持たないため、
-**この test が通る限り mock 側に未検証の分岐は残らない** (real 側は別 adapter で、
-`fixture.ts` に注入口が無いため e2e からは到達しない)。
+3 つの mock adapter op が返す成功時の応答については、別の結果を選ぶ入力分岐が無い。
+一方、下位 flow を直接呼ぶ時の override / 拒否分岐と real adapter はこの HTTP test の範囲外で、
+`fixture.ts` に注入口が無いため e2e からは到達しない。 shared server の JSON parse / body-size /
+未知 route / method の分岐も、この test case は通していない。
