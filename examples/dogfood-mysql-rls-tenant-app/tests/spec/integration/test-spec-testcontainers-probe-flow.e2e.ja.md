@@ -44,11 +44,13 @@ mock adapter の probe が返す 4 項目の形を確かめる。
 
 ## 主な品質リスク
 
-- **`reachable` が常に真**。 到達性を何も測っていないため、この値の assert は
-  real driver に差し替えるまで意味を持たない。 mock で真だったことを
+- **`reachable` が常に真**。 到達性を何も測っていないため、この assert が
+  確かめるのは mock の固定値が HTTP 応答まで届くことだけになる。mock で真だったことを
   「到達できる」 と読むと、実 container が落ちていても気付けない
 - **URL に資格情報が literal で入っている**。 `mysql:mysql` は mock の置き換え文字列だが、
-  real 側が接続文字列をそのまま応答へ載せる形なら、実資格情報が本文と trace に出る
+  real 側は `MYSQL_KEY` を初期 `probe` trace の `detail.bootstrap`、応答の `mysqlUrl`、
+  `driveTestcontainersProbe` trace の `detail.mysqlUrl` にそのまま載せる。
+  DSN に実資格情報があれば 3 箇所に露出する
 - **image 名が定数**。 実際にその image を引けるかを確かめていない
 - **real 側の分岐に到達しない**。 env の有無で分かれる経路は e2e が 1 度も通らない
 
@@ -82,6 +84,7 @@ mock adapter の probe が返す 4 項目の形を確かめる。
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
 | `metrics().testcontainersProbes` の増分 | できる | `/metrics` を読んでいない |
+| `metrics().latencySamplesMs` の標本追加 | できる | `/metrics` を読んでいない |
 | trace の追加 | できる | `/traces` を読んでいない |
 | 定数の完全一致 | できる | 部分一致で assert している |
 | 2 回目の呼出でも同じ値になること | できる | 1 回しか投げていない |

@@ -3,8 +3,9 @@
 MySQL の 3 経路 (group replication / binlog の前進 / router の読み書き分離) を、
 同じ adapter に順に投げて確かめる。
 
-いずれも **入力を取らない**。 mock は決まった値を返すため、この仕様書が保証するのは
-「口が繋がっていて、期待の終端状態に至る」 ことになる。
+3 つの **adapter op は入力を取らない**。 mock は決まった値を返すため、
+この仕様書が保証するのは「口が繋がっていて、期待の終端状態に至る」
+ことになる。下位 flow は入力を取るが、adapter がそれらを固定値で呼ぶ。
 
 - module: group-replication-router-flow
 - layer: e2e-generic
@@ -13,9 +14,9 @@ MySQL の 3 経路 (group replication / binlog の前進 / router の読み書�
 
 | 経路 | adapter の op | 実体 |
 |---|---|---|
-| `/group-replication` | `driveGroupReplication` | `src/group-replication/index.ts` |
-| `/binlog-advance` | `driveBinlogAdvance` | `src/binlog-advance/index.ts` |
-| `/router-split` | `driveRouterSplit` | `src/router-split/index.ts` |
+| `/group-replication` | `driveGroupReplication` | `src/adapters/mock.ts` + `src/group-replication/index.ts` |
+| `/binlog-advance` | `driveBinlogAdvance` | `src/adapters/mock.ts` + `src/binlog-advance/index.ts` |
+| `/router-split` | `driveRouterSplit` | `src/adapters/mock.ts` + `src/router-split/index.ts` |
 
 ## 仕様の要約
 
@@ -57,8 +58,21 @@ mock は「異常を検出できた」 ことを成功として表す。
 
 | 経路 | 増える counter | 増分 |
 |---|---|---|
-| `/group-replication` | `groupReplicationSteps` | 状態遷移の数 |
-| `/binlog-advance` | `binlogAdvanceOps` | 1 |
+| `/group-replication` | `groupReplicationSteps` | **5** (`session.history.length` = join 2 + elect 1 + conflict 1 + leave 1) |
+| `/binlog-advance` | `binlogAdvanceOps` | **5** (`session.history.length` = position 1 + GTID 2 + format 1 + gap 1) |
+
+**counter は 4 経路とも fresh server で実測した** (経路ごとに新しい server を立て、
+`/metrics` の非 0 field を読む)。
+
+| 経路 | 非 0 の counter | trace |
+|---|---|---|
+| `/group-replication` | `groupReplicationSteps=5` | 1 件 |
+| `/binlog-advance` | `binlogAdvanceOps=5` | 1 件 |
+| `/router-split` | `routerSplitOps=1` | 1 件 |
+| `/testcontainers-probe` | `testcontainersProbes=1` | 1 件 |
+
+**trace は 4 経路とも 1 件で揃うが、counter の単位は揃わない。**
+前 2 つは履歴の要素数を足し、後 2 つは呼出回数を足す。
 | `/router-split` | `routerSplitOps` | **1** |
 
 `/router-split` は `readHits: 4` / `writeHits: 2` を返すが、counter は 1 しか増えない。
@@ -66,8 +80,9 @@ mock は「異常を検出できた」 ことを成功として表す。
 
 ## 主な品質リスク
 
-- **3 経路とも adapter 側に分岐が無い**。 mock の段階では異常系も境界も存在せず、
-  実 driver に差し替えた時に初めて分岐が生まれる
+- **HTTP から下位 flow の分岐を選べない**。adapter op は入力を取らず、
+  固定した既定値だけを下位 flow に渡す。下位 flow に入力 validation と
+  状態遷移の異常系は存在するが、この fixture からは到達できない
 - **異常が正常な終端として返る**。 `gapDetected` と `conflictCount` が真 / 正の値で固定されているため、
   「異常が無い」 状態を観測する手段が無い。 検出漏れを検証できない
 - **`readHits` と `writeHits` が counter に反映されない**。 `routerSplitOps` は 1 しか増えないため、
@@ -127,11 +142,12 @@ router だけ **和** でしか見ていないため、`readHits: 6` / `writeHit
 | `readHits` と `writeHits` の個別値 | できる | 和でしか見ていない |
 | `binlogPosition` / `warmedConnections` の具体値 | できる | 範囲でしか見ていない |
 | metric への効き方 | できる | `/metrics` を読んでいない |
+| trace の追加 | できる | `/traces` を読んでいない |
 | 2 回目の呼出でも同じ値になること | できる | 1 回ずつしか投げていない |
 | body を変えても結果が変わらないこと | できる | 空の body だけを送っている |
 | 壊れた JSON の 400 / 64 KiB 超の 413 | できる | 正常な body だけを送っている |
+| 下位 flow の別入力と異常系 | **HTTP からはできない** | adapter op が引数を取らず、下位 flow を既定値で呼ぶ |
 
-到達できない範囲は adapter 側には無い。 **ただし「HTTP の口が 1 本」 は
-「実装に分岐が無い」 を意味しない** — 下位 flow (`src/group-replication/index.ts` 等) は
-入力を取る関数を持ち、adapter がその一部だけを固定値で呼んでいる。
-それらの分岐は HTTP から選べないだけで存在する。
+adapter が返す固定応答の field はすべて HTTP から到達できる。一方、
+下位 flow (`src/group-replication/index.ts` 等) の別入力とそれに伴う分岐は、
+adapter が引数無しで呼ぶため HTTP からは選べない。
