@@ -28,16 +28,9 @@ function templates(): string[] {
 
 const TEMPLATES = templates();
 
-/**
- * run 単位ではなく **layer 単位** で書かれる report。
- *
- * `integrated/` は run 単位の成果物で、 1 run が 1 module しか扱わない以上 module を
- * 足しても区別が増えない (#2075 の 反例)。 対象から外すことを **宣言して** おり、
- * 黙って除いていない。
- */
-const PER_RUN_ONLY = ['tests/reports/integrated/'];
-
-const LAYER_SCOPED = TEMPLATES.filter((t) => !PER_RUN_ONLY.some((p) => t.startsWith(p)));
+// 1 run が 1 module でも、同じ example / target を別 module で再実行すれば
+// run 間で衝突する。 integrated を含む report 全件が module 軸を持つ必要がある。
+const MODULE_SCOPED = TEMPLATES;
 
 /** 雛形に値を差し込む。 lang は固定で、 module だけを振る。 */
 function fill(template: string, example: string, module: string): string {
@@ -46,6 +39,7 @@ function fill(template: string, example: string, module: string): string {
     .replace(/\{module\}/g, module)
     .replace(/\{layer\}/g, 'nextjs-server-action')
     .replace(/\{target\}/g, 'web')
+    .replace(/\{N\}/g, '1')
     .replace(/\$\{DOC_LANG\}|\{\$DOC_LANG\}|\{lang\}/g, 'ja');
 }
 
@@ -53,29 +47,25 @@ describe('layer 別 report が module で区別される', () => {
   it('雛形を 1 件以上拾えている (空振り防止)', () => {
     // 正規表現が書き方に追随できなくなると 0 件になり、 下の検査が何も見ない。
     expect(TEMPLATES.length).toBeGreaterThan(0);
-    expect(LAYER_SCOPED.length).toBeGreaterThan(0);
+    expect(MODULE_SCOPED.length).toBeGreaterThan(0);
   });
 
-  it('run 単位の report を除外対象として宣言している', () => {
-    // 除外を黙って増やせないよう、 実際に除かれた雛形を数える。
-    const excluded = TEMPLATES.filter((t) => PER_RUN_ONLY.some((p) => t.startsWith(p)));
-    expect(excluded.length, '除外対象が 1 件も無い (宣言が実物と合っていない)').toBeGreaterThan(0);
-    expect(
-      excluded.every((t) => t.includes('{target}')),
-      'run 単位でない雛形を除外している',
-    ).toBe(true);
+  it('integrated report も module 軸の検査対象に含む', () => {
+    const integrated = MODULE_SCOPED.filter((t) => t.startsWith('tests/reports/integrated/'));
+    expect(integrated.length, 'integrated report の雛形が無い').toBeGreaterThan(0);
+    expect(integrated.every((t) => t.includes('{module}'))).toBe(true);
   });
 
-  it('layer 別 report の雛形がすべて {module} を持つ', () => {
-    const missing = LAYER_SCOPED.filter((t) => !t.includes('{module}'));
-    expect(missing, '{module} を持たない layer 別 report がある').toEqual([]);
+  it('report の雛形がすべて {module} を持つ', () => {
+    const missing = MODULE_SCOPED.filter((t) => !t.includes('{module}'));
+    expect(missing, '{module} を持たない report がある').toEqual([]);
   });
 
   it('同じ example で module 違いの 2 run が別 file を書く', () => {
     // 「{module} と書いてあるか」 だけでは、 位置が違って衝突する形を見逃す。
     // 実際に 2 つの module を差し込んで、 生成される path 集合が交わらないことを見る。
-    const a = LAYER_SCOPED.map((t) => fill(t, 'nextjs-app-router-full', 'items'));
-    const b = LAYER_SCOPED.map((t) => fill(t, 'nextjs-app-router-full', 'auth'));
+    const a = MODULE_SCOPED.map((t) => fill(t, 'nextjs-app-router-full', 'items'));
+    const b = MODULE_SCOPED.map((t) => fill(t, 'nextjs-app-router-full', 'auth'));
     const overlap = a.filter((p) => b.includes(p));
     expect(overlap, 'module を変えても同じ path を書く report がある').toEqual([]);
   });
@@ -83,8 +73,8 @@ describe('layer 別 report が module で区別される', () => {
   it('同じ module 同士では従来どおり同じ path になる (陰性対照)', () => {
     // 上の検査は「交わらない」 を主張する。 `fill` が毎回違う値を返すなら恒真になるため、
     // **同じ入力なら同じ path** であることを確かめる。
-    const a = LAYER_SCOPED.map((t) => fill(t, 'defi-swap', 'defi-swap'));
-    const b = LAYER_SCOPED.map((t) => fill(t, 'defi-swap', 'defi-swap'));
+    const a = MODULE_SCOPED.map((t) => fill(t, 'defi-swap', 'defi-swap'));
+    const b = MODULE_SCOPED.map((t) => fill(t, 'defi-swap', 'defi-swap'));
     expect(a).toEqual(b);
     // module == example の既定でも placeholder が両方 埋まることを確かめる。
     expect(a.every((p) => !p.includes('{')), '埋め残した placeholder がある').toBe(true);
@@ -92,7 +82,7 @@ describe('layer 別 report が module で区別される', () => {
 
   it('module を持たない雛形が残っていれば衝突する (陽性対照)', () => {
     // 直す前の形。 `{module}` を外すと 2 run が同じ path を書くことを、 その場で示す。
-    const legacy = LAYER_SCOPED.map((t) => t.replace(/-\{module\}/g, ''));
+    const legacy = MODULE_SCOPED.map((t) => t.replace(/-\{module\}/g, ''));
     const a = legacy.map((t) => fill(t, 'nextjs-app-router-full', 'items'));
     const b = legacy.map((t) => fill(t, 'nextjs-app-router-full', 'auth'));
     expect(a.filter((p) => b.includes(p)).length, '直す前の形でも衝突しない').toBeGreaterThan(0);

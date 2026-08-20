@@ -3,7 +3,7 @@ name: kiwa-test
 description: |
   kiwa の skill chain (kiwa-design → kiwa-forge / kiwa-hardhat / kiwa-play → kiwa-review) を 1 コマンドで一括実行する統合フロー skill。
   contract test / dApp e2e test / 両方 を user に選ばせ、 指定 example で 0 から spec 生成 → test code 生成 → 実走 → review → 統合 report Write まで一気通貫。
-  repo root から `/kiwa-test --example {name}` で起動、 内部で cwd 切替 + 子 skill 起動を行う。 report は `tests/reports/integrated/{example}-{target}.{lang}.md` に Write。
+  repo root から `/kiwa-test --example {name}` で起動、 内部で cwd 切替 + 子 skill 起動を行う。 report は `tests/reports/integrated/{example}-{module}-{target}.{lang}.md` に Write。
 user_invocable: true
 context: conversation
 agent: general-purpose
@@ -406,7 +406,7 @@ target=web (汎用 web 2 surface セット) または target=all の場合に実
 
 ### Step 5: 統合 report Write
 
-全 step 完了後、 `tests/reports/integrated/{example}-{target}.{$DOC_LANG}.md` に統合 report を Write。
+全 step 完了後、 `tests/reports/integrated/{example}-{module}-{target}.{$DOC_LANG}.md` に統合 report を Write。
 
 ```markdown
 # Integrated Test Report — {example} ({target}, runner={runner})
@@ -648,7 +648,7 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 
 3. **再 test + 再 review** — Layer 2 完了後、 Steps 3 / 4 と同じ一意な `--out` を渡して repo root から spec-review / test-review を直接再実行し、 続けて result-review を回す。 子の自動 review は使わない
 
-4. **round 別 report 累積** — `tests/reports/integrated/{example}-{target}-round-{N}.md` を round ごとに保存、 canonical report は最終 round の内容で上書き
+4. **round 別 report 累積** — `tests/reports/integrated/{example}-{module}-{target}-round-{N}.md` を round ごとに保存、 canonical report は最終 round の内容で上書き
 
 5. **改善判定** — 前 round と result-review weighted_score を比較:
    - 改善あり (delta > 0) → 次 round 継続
@@ -701,7 +701,7 @@ result-review or 子 review (spec-review / test-review) が FAIL の場合、 re
 - contract: Foundry 27/27 + Hardhat 24/24 × 4 / coverage 100%
 - dapp e2e: Playwright 12/13 PASS (1 skip) / 4 round flaky 0
 
-統合 report: tests/reports/integrated/{example}-{target}.{lang}.md
+統合 report: tests/reports/integrated/{example}-{module}-{target}.{lang}.md
 test code 退避先: tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/ (PR に含まれます)
 
 次アクション: {recommend}
@@ -762,7 +762,7 @@ graph TD
 
 - `--target` で指定された範囲 (contract / dapp / both) の全 step が PASS or 意図的 skip
 - `--runner` (contract 関連 target のみ) で選択された runner の test chain が PASS、 非選択 runner は report 内で skipped と明示
-- `tests/reports/integrated/{example}-{target}.{$DOC_LANG}.md` が Write 済
+- `tests/reports/integrated/{example}-{module}-{target}.{$DOC_LANG}.md` が Write 済
 - 各子 skill の report path が integrated report 内に link 集約
 - 生成 test が `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に退避済 (Step 5.5、 `--target` 範囲外と非選択 runner の subdir は対象外)
 
