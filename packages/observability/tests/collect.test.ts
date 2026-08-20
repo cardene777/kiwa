@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { collectRunHistory, fromVitestJson, type TestRunRecord } from '../src/index.js';
+import {
+  collectRunHistory,
+  fromPlaywrightJson,
+  fromVitestJson,
+  type TestRunRecord,
+} from '../src/index.js';
 
 function rec(testId: string, status: 'passed' | 'failed' | 'skipped', startedAt: number): TestRunRecord {
   return {
@@ -191,5 +196,247 @@ describe('fromVitestJson', () => {
     };
     const records = fromVitestJson(report, { runId: 'custom-run-42' });
     expect(records[0]?.runId).toBe('custom-run-42');
+  });
+});
+
+describe('fromPlaywrightJson', () => {
+  it('flattens nested suites and joins the trail into fullName', () => {
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-02T03:04:05.000Z' },
+        suites: [
+          {
+            title: 'reorg-4scenario.spec.ts',
+            specs: [],
+            suites: [
+              {
+                title: 'reorg 4-scenario e2e',
+                specs: [
+                  {
+                    title: 'T-DR-001 pending tx dropped',
+                    tests: [{ status: 'expected', results: [{ status: 'passed', duration: 12 }] }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-1' },
+    );
+    expect(out).toEqual([
+      {
+        testId: 'T-DR-001',
+        fullName: 'reorg-4scenario.spec.ts > reorg 4-scenario e2e > T-DR-001 pending tx dropped',
+        status: 'passed',
+        durationMs: 12,
+        runId: 'r-1',
+        startedAt: Date.parse('2026-01-02T03:04:05.000Z'),
+      },
+    ]);
+  });
+
+  it('maps every playwright status onto the three record states', () => {
+    const spec = (title: string, status: 'expected' | 'unexpected' | 'flaky' | 'skipped') => ({
+      title,
+      tests: [{ status, results: [] }],
+    });
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: '',
+            specs: [
+              spec('T-E2E-001 ok', 'expected'),
+              spec('T-E2E-002 broken', 'unexpected'),
+              spec('T-E2E-003 retried', 'flaky'),
+              spec('T-E2E-004 skipped', 'skipped'),
+            ],
+          },
+        ],
+      },
+      { runId: 'r-2' },
+    );
+    expect(out.map((r) => [r.testId, r.status])).toEqual([
+      ['T-E2E-001', 'passed'],
+      ['T-E2E-002', 'failed'],
+      // retry で通ったものは通った側に寄せる。 flaky の検出は detectFlaky が履歴から行う。
+      ['T-E2E-003', 'passed'],
+      ['T-E2E-004', 'skipped'],
+    ]);
+  });
+
+  it('keeps a test whose results array is empty', () => {
+    // 未実行を落とすと「実行していない」 が「存在しない」 に化けて、
+    // 突き合わせが実物とずれる。
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: '',
+            specs: [{ title: 'T-E2E-005 never ran', tests: [{ status: 'skipped', results: [] }] }],
+          },
+        ],
+      },
+      { runId: 'r-3' },
+    );
+    expect(out).toHaveLength(1);
+    expect(out[0]?.status).toBe('skipped');
+    expect(out[0]?.durationMs).toBe(0);
+  });
+
+  it('falls back to the last result when the test has no status', () => {
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: '',
+            specs: [
+              {
+                title: 'T-E2E-006 retried then passed',
+                tests: [
+                  {
+                    results: [
+                      { status: 'failed', duration: 7 },
+                      { status: 'passed', duration: 5 },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-4' },
+    );
+    expect(out[0]?.status).toBe('passed');
+    expect(out[0]?.durationMs).toBe(12);
+  });
+
+  it('merges projects into one logical record without counting one run multiple times', () => {
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: 'multi-project.spec.ts',
+            specs: [
+              {
+                title: 'T-E2E-009 cross-browser',
+                tests: [
+                  { status: 'expected', results: [{ status: 'passed', duration: 3 }] },
+                  { status: 'unexpected', results: [{ status: 'failed', duration: 4 }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-projects' },
+    );
+
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({
+      testId: 'T-E2E-009',
+      status: 'failed',
+      durationMs: 7,
+      runId: 'r-projects',
+    });
+  });
+
+  it('uses fullName as the id when no TC id is present', () => {
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: 'flow',
+            specs: [{ title: 'renders the page', tests: [{ status: 'expected', results: [] }] }],
+          },
+        ],
+      },
+      { runId: 'r-5' },
+    );
+    expect(out[0]?.testId).toBe('flow > renders the page');
+  });
+
+  it('drops empty titles from fullName', () => {
+    // 空の区切りが混ざると ID の切り出しに影響する。 名前の無い suite と
+    // 名前の無い spec の **両方** を 1 つの入力で通し、落とす場所が 1 つで
+    // 足りることを確かめる。
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-01T00:00:00.000Z' },
+        suites: [
+          {
+            title: '',
+            specs: [],
+            suites: [
+              {
+                title: '',
+                specs: [
+                  { title: 'T-E2E-007 x', tests: [{ status: 'expected', results: [] }] },
+                  { title: '', tests: [{ status: 'expected', results: [] }] },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-6' },
+    );
+    expect(out.map((r) => r.fullName)).toEqual(['T-E2E-007 x', '']);
+  });
+
+  it('produces no record for a spec that has no tests', () => {
+    // Playwright は project を 1 つも解決できない spec に空の `tests` を返しうる。
+    // 合成の record を作ると「実行していない」 が「1 件通った」 に化ける。
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: '2026-01-02T03:04:05.000Z' },
+        suites: [
+          {
+            title: 'flow',
+            specs: [
+              { title: 'T-E2E-009 unresolved', tests: [] },
+              {
+                title: 'T-E2E-010 ran',
+                tests: [{ status: 'expected', results: [{ status: 'passed', duration: 1 }] }],
+              },
+            ],
+          },
+        ],
+      },
+      { runId: 'r-9' },
+    );
+    expect(out.map((r) => r.testId)).toEqual(['T-E2E-010']);
+  });
+
+  it('returns an empty array for a report with no suites', () => {
+    expect(
+      fromPlaywrightJson(
+        { stats: { startTime: '2026-01-01T00:00:00.000Z' }, suites: [] },
+        { runId: 'r-7' },
+      ),
+    ).toEqual([]);
+  });
+
+  it('falls back to 0 when startTime is not parseable', () => {
+    const out = fromPlaywrightJson(
+      {
+        stats: { startTime: 'not a date' },
+        suites: [
+          {
+            title: '',
+            specs: [{ title: 'T-E2E-008 x', tests: [{ results: [] }] }],
+          },
+        ],
+      },
+      { runId: 'r-8' },
+    );
+    expect(out[0]?.startedAt).toBe(0);
   });
 });

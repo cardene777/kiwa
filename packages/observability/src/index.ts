@@ -8,9 +8,16 @@ export type {
 } from './types.js';
 export {
   collectRunHistory,
+  fromPlaywrightJson,
   fromVitestJson,
   type CollectRunHistoryOptions,
+  type FromPlaywrightJsonOptions,
   type FromVitestJsonOptions,
+  type PlaywrightJsonReport,
+  type PlaywrightJsonResult,
+  type PlaywrightJsonSpec,
+  type PlaywrightJsonSuite,
+  type PlaywrightJsonTest,
   type VitestStyleAssertionResult,
   type VitestStyleReport,
   type VitestStyleTestResult,
