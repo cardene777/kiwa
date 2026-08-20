@@ -186,14 +186,18 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 - spec file を Read
 - 対応 test file は **`kiwa layers` に訊く**。 § test code の path も CLI から受け取る で解決する。
 - 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read
-- 新 3 layer 専用観点の追加 SSOT
-  - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Action + Expected) を Layer 2 mapping と照合
+- layer 別の専用観点を持つ 2 layer
+  - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Given + When + Then) を Layer 2 mapping と照合
   - `a11y`: 9 column (Mode `jsdom`/`playwright` + Component + WCAG-rule + Severity) を axe-core rule 適用率で照合
+
+  列名の SSOT は `/kiwa-design` の `#### {layer} layer 専用 column` 節。 ここに挙げるのは
+  照合に使う列だけで、 9 件全部は写さない (写すほど drift 面が増える)。 挙げた列名は宣言に
+  実在するものに限る。
 
 #### 1C: result-review mode
 
 入力:
-- 統合 report (`tests/reports/integrated/{example}-{target}.{lang}.md`) を Read (`/kiwa-test` 完了時に生成済)
+- 統合 report (`tests/reports/integrated/{example}-{module}-{target}.{lang}.md`) を Read (`/kiwa-test` 完了時に生成済)。 **path の SSOT は writer 側** (`/kiwa-test` § Step 5 統合 report Write) で、 ここは写し。 writer が変えたら合わせる
 - 各子 report も Read:
   - coverage report: **統合 report Section 2 の「coverage report」 行に載っている path を開く**。 file 名を組み立てない (Foundry / Hardhat 別 round 履歴も含む)
   - spec-review / test-review report: **統合 report Section 2 の「review report」 行に載っている path を開く**。 file 名を組み立てない (下記 § 子 review report の path)
