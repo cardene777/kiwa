@@ -88,21 +88,26 @@ describe('cache PoC — TTL extension', () => {
     await env.assertTTL('session:sess-1', { atLeast: 3590, atMost: 3600 });
   });
 
-  it('T-CACHE-POC-007 extendSession returns false when the session has already expired / been deleted', async () => {
-    const env = await boot();
-    const extended = await extendSession(env, 'gone', 60);
-    expect(extended).toBe(false);
+  it('T-CACHE-POC-007 extendSession returns false for missing and expired sessions', async () => {
+    // Keep the sweep later than the assertion so expire() itself observes expiry.
+    const env = await setupCacheEnv({ inMemory: { expiryTickMs: 60_000 } });
+    envs.push(env);
+    expect(await extendSession(env, 'gone', 60)).toBe(false);
+    await env.set('session:short', JSON.stringify(alice), { ttlSeconds: 1 });
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    expect(await extendSession(env, 'short', 60)).toBe(false);
   });
 });
 
 describe('cache PoC — expiration semantics', () => {
   it('T-CACHE-POC-008 an expired session reads back as null', async () => {
-    const env = await setupCacheEnv({ inMemory: { expiryTickMs: 5 } });
+    // Keep the sweep later than the assertion so get() itself observes expiry.
+    const env = await setupCacheEnv({ inMemory: { expiryTickMs: 60_000 } });
     envs.push(env);
     // Skip the storeSession helper — we need a 1-second TTL for a fast test.
     await env.set('session:short', JSON.stringify(alice), { ttlSeconds: 1 });
     await new Promise((resolve) => setTimeout(resolve, 1200));
-    expect(await env.get('session:short')).toBeNull();
+    expect(await readSession(env, 'short')).toBeNull();
   });
 });
 
@@ -137,12 +142,17 @@ describe('cache PoC — 異常系', () => {
   });
 
   it('T-CACHE-POC-012 reports deleted=false when the session has already expired', async () => {
-    const env = await setupCacheEnv({ inMemory: { expiryTickMs: 5 } });
+    // Keep the sweep later than the assertion so delete() itself observes expiry.
+    const env = await setupCacheEnv({ inMemory: { expiryTickMs: 60_000 } });
     envs.push(env);
     await env.set('session:short', JSON.stringify(alice), { ttlSeconds: 1 });
+    const sub = await env.subscribe(SESSION_INVALIDATE_CHANNEL);
     await new Promise((resolve) => setTimeout(resolve, 1200));
     const result = await invalidateSession(env, 'short');
     expect(result.deleted).toBe(false);
+    const notice = await sub.next();
+    expect(JSON.parse(notice.message)).toEqual({ sessionId: 'short', at: 'now' });
+    await sub.close();
   });
 
   it('T-CACHE-POC-013 refuses a non-positive extension window', async () => {

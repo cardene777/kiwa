@@ -15,7 +15,7 @@
 |---|---|---|
 | `storeSession(env, id, payload)` | session id と payload | `void` (`ttlSeconds: 900` で保存) |
 | `readSession(env, id)` | session id | `SessionPayload` または `null` |
-| `invalidateSession(env, id)` | session id | `{ deleted: boolean }` (通知は必ず出る) |
+| `invalidateSession(env, id)` | session id | `{ deleted: boolean }` (削除が完了すれば通知を出す) |
 | `extendSession(env, id, seconds)` | session id と秒数 | 延長できたかの真偽 |
 
 定数は 2 つ。`SESSION_TTL_SECONDS = 900` と
@@ -26,7 +26,7 @@
 ### key の名前空間
 
 保存先の key は `session:<id>` で、id をそのまま key にしない。
-生の id で読むと `null` が返る。
+空の cache に保存した場合、生の id は作られず `null` のままである。
 
 ### 保存と読出
 
@@ -39,7 +39,8 @@
 
 ### 失効
 
-`invalidateSession` は削除の成否に関わらず **必ず通知を出す**。
+`invalidateSession` は `env.delete` が完了した後、削除件数が 0 / 1 のどちらでも
+**通知を出す**。`env.delete` 自体が例外を送出した場合は publish へ進まない。
 
 | 削除対象 | `deleted` |
 |---|---|
@@ -67,7 +68,7 @@
 
 ## 主な品質リスク
 
-- **通知と削除が独立している**。 削除できなくても通知は出るため、
+- **削除件数が 0 でも通知する**。 対象 key が無くても通知は出るため、
   下流が「消えた」 と解釈すると存在しない session の失効を伝播する
 - **上書きが残り時間を戻す**。 短縮した残り時間を保ったまま値だけ更新する経路が無い
 - **壊れた値を捕まえない**。 cache に別形式の値が入ると呼出側まで例外が届く
@@ -76,7 +77,8 @@
 ## 推奨テスト構成
 
 `setupCacheEnv()` の既定は in-memory で、実 Redis を起動しない。
-期限切れは `inMemory: { expiryTickMs }` を縮めて短い残り時間で作る。
+期限切れは 1 秒の残り時間で作る。`expiryTickMs` は待機時間より長くし、
+対象操作の `get` / `delete` / `expire` 自身に期限切れを判定させる。
 
 ## テスト観点一覧
 
@@ -99,12 +101,12 @@
 | T-CACHE-POC-004 | 存在しない id でも通知は出る | 空の cache と購読 | `invalidateSession('never-existed')` | `deleted===false`、通知に id が載る | P0 | yes | redis | in-memory |
 | T-CACHE-POC-005 | 通知を正規表現で捕まえられる | 保存済 session と購読 | `invalidateSession` → `assertPublished` | `/"sessionId":"sess-1"/` に一致 | P1 | yes | redis | in-memory |
 | T-CACHE-POC-006 | 残り時間を指定秒へ延ばす | 保存済 session | `extendSession(3600)` | `true`、残りが 3590〜3600 | P0 | yes | redis | in-memory |
-| T-CACHE-POC-007 | 無い session は延ばせない | 空の cache | `extendSession('gone', 60)` | `false` | P1 | yes | redis | in-memory |
-| T-CACHE-POC-008 | 期限切れは `null` として読める | 残り 1 秒で保存、掃除間隔 5ms | 1.2 秒待って `get` | `null` | P0 | yes | redis | in-memory |
+| T-CACHE-POC-007 | 無い / 期限切れの session は延ばせない | 空の cache と、残り 1 秒で保存した session | `extendSession('gone', 60)`、1.2 秒待って `extendSession('short', 60)` | 両方 `false` | P1 | yes | redis | in-memory |
+| T-CACHE-POC-008 | 期限切れは `null` として読める | 残り 1 秒で保存、掃除間隔 60 秒 | 1.2 秒待って `readSession` | `null` | P0 | yes | redis | in-memory |
 | T-CACHE-POC-009 | 生の id では引けない | 保存済 session | `env.get('sess-1')` と `env.get('session:sess-1')` | 前者は `null`、後者は非 `null` | P1 | yes | redis | in-memory |
 | T-CACHE-POC-010 | 上書きが値と残り時間を置き換える | 保存後に残りを 60 秒へ縮めた session | 同じ id で `storeSession` | 残りが 890〜900 へ戻り、`role` が新しい値 | P1 | yes | redis | in-memory |
 | T-CACHE-POC-011 | 壊れた値は捕まえず伝わる | `session:broken` に `'not json'` を保存 | `readSession('broken')` | `SyntaxError` を送出 | P1 | yes | redis | in-memory |
-| T-CACHE-POC-012 | 期限切れの失効は `false` を返す | 残り 1 秒で保存、掃除間隔 5ms | 1.2 秒待って `invalidateSession` | `deleted===false` | P1 | yes | redis | in-memory |
+| T-CACHE-POC-012 | 期限切れの失効は `false` を返して通知する | 残り 1 秒で保存、掃除間隔 60 秒、購読済み | 1.2 秒待って `invalidateSession` | `deleted===false`、通知が `{ sessionId, at: 'now' }` | P1 | yes | redis | in-memory |
 | T-CACHE-POC-013 | 0 以下の秒数を拒む | 保存済 session | `extendSession(0)` と `extendSession(-1)` | 両方 `expire: ttlSeconds must be positive` を送出 | P2 | yes | redis | in-memory |
 | T-CACHE-POC-014 | 停止後の読出を拒む | `env.stop()` 済 | `readSession` | `cannot get after stop()` を送出 | P2 | yes | redis | in-memory |
 
@@ -114,9 +116,9 @@
 `afterEach` で `env.stop()` を呼び、env を跨いだ state の持ち越しを断つ。
 
 **期限切れは待って作る。**
-掃除の間隔 (`inMemory: { expiryTickMs: 5 }`) を縮め、残り 1 秒で保存してから
-1.2 秒待つ。残り時間の下限が 1 秒なので、これ以上は縮められない
-(`ttlSeconds` は正の整数で、0 以下は送出される)。
+掃除の間隔を 60 秒にして残り 1 秒で保存し、1.2 秒待つ。
+掃除より先に対象操作を呼ぶことで、`get` / `delete` / `expire` の各経路が
+期限切れを判定する。0 以下の `ttlSeconds` は送出される。
 
 T-CACHE-POC-014 は `env.stop()` を明示的に呼ぶため `afterEach` の掃除対象に載せない
 (二重に停止すると別の経路に入る)。
@@ -124,7 +126,7 @@ T-CACHE-POC-014 は `env.stop()` を明示的に呼ぶため `afterEach` の掃�
 ## 自動化すべきテスト
 
 - T-CACHE-POC-001 〜 T-CACHE-POC-014 全件自動化推奨
-- 実時間を待つ 2 件 (008 / 012) は掃除の間隔を縮めて 1.2 秒に収める
+- 実時間を待つ 3 件 (007 / 008 / 012) は残り 1 秒 + 1.2 秒待機で確認する
 
 ## 手動確認でよいテスト
 
@@ -134,7 +136,7 @@ T-CACHE-POC-014 は `env.stop()` を明示的に呼ぶため `afterEach` の掃�
 
 - 通知の `at` が固定文字列 `'now'` である。 実時刻を入れるのか、
   そもそも時刻を載せないのかが未定義。 下流が時刻として解釈する前提なら壊れる
-- 削除できなくても通知を出す設計が意図かどうかが未定義。
+- 削除件数が 0 でも通知を出す設計が意図かどうかが未定義。
   下流が「消えた」 と解釈すると、存在しない session の失効を伝播する
 - 壊れた値を `readSession` が捕まえない。 呼出側で握るのか、
   `null` へ倒すのか、別形式が入りうる前提かが未定義
