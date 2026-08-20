@@ -71,7 +71,9 @@
 
 ### 失敗 mode
 
-例外は 2 種のみ。`sku` の値による失敗はない (どの文字列でも URL に載る)。
+`fetch` 到達後に本 module が送出する独自例外は 2 種。
+ただし、孤立 surrogate を含む `sku` は URL 生成時の `encodeURIComponent` が `URIError` を投げる。
+この入力を拒否するか正規化するかは未定義のため、§ 不足している仕様に記録する。
 
 ## 主な品質リスク
 
@@ -125,6 +127,7 @@ msw の handler は TC ごとに作り直す。
 | T-INT-009 | 結合 | 異常系 | 上流が `{ sku: 'a-1' }` を返す (`available` 欠落) | `'a-1'` | `fetchStock(sku)` | `StockResponseError` | 高 | 推奨 |
 | T-INT-010 | 結合 | 異常系 | 上流が `available: -1` を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` | 高 | 推奨 |
 | T-INT-015 | 結合 | 異常系 | 上流が 304 を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (2xx 以外は 429 / 5xx を除き再試行不可) | 中 | 推奨 |
+| T-INT-016 | 結合 | 異常系 | 通信失敗と 503 の 2 通り | `'a-1'` | `fetchStock(sku)` の message を読む | 前者が `stock service unavailable`、後者が `stock service unavailable (503)` | 中 | 推奨 |
 
 ### 観点 3: 境界値
 
@@ -135,17 +138,11 @@ msw の handler は TC ごとに作り直す。
 | T-INT-013 | 結合 | 境界値 | 上流が 499 を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (境界の向こう側) | 中 | 推奨 |
 | T-INT-014 | 結合 | 境界値 | 上流が JSON の `null` を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (`(body ?? {})` で形の誤りに落ちる) | 中 | 推奨 |
 
-### 観点 6: 入力バリデーション
+### 観点 6 / 10: 入力バリデーション / セキュリティ
 
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
-| T-INT-011 | 結合 | 入力バリデーション | handler が request の path を記録する | `'a/1'` | `fetchStock(sku)` | path が `/v1/items/a%2F1` (encode を外すと別 path に飛ぶ) | 高 | 推奨 |
-
-### 観点 10: セキュリティ
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
-| T-INT-016 | 結合 | セキュリティ | 通信失敗と 503 の 2 通り | `'a-1'` | `fetchStock(sku)` の message を読む | 前者が `stock service unavailable`、後者が `stock service unavailable (503)` | 中 | 推奨 |
+| T-INT-011 | 結合 | 入力バリデーション / セキュリティ | handler が request の path を記録する | `'a/1'` | `fetchStock(sku)` | path が `/v1/items/a%2F1` (encode を外すと別 path に飛ぶ) | 高 | 推奨 |
 
 ## 自動化すべきテスト
 
@@ -158,6 +155,7 @@ msw の handler は TC ごとに作り直す。
 
 ## 不足している仕様
 
+- **孤立 surrogate を含む `sku` は URL 生成時に `URIError` となる**。 `encodeURIComponent(sku)` が `fetch` の `try` より前に失敗するため、2 種の独自例外には翻訳されない。この入力を拒否するか、well-formed な文字列へ正規化するかが未定義
 - **応答の `sku` が要求した `sku` と違っても検査しない**。 上流が別の SKU を返すと、そのまま `Stock.sku` として返る (実測で `fetchStock('a-1')` が `{ sku: 'OTHER', available: 1 }` を返す)。 照合すべきか、上流を信頼する設計かが未定義
 - **`available` が整数でなくても通る**。 `typeof available === 'number'` しか見ないため `1.5` が通る (実測)。 在庫が小数を取りうるかが未定義
 - `available` の上限が未定義 (`Number.MAX_SAFE_INTEGER` を超える値の扱い)
