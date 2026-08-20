@@ -21,6 +21,7 @@
 //
 //   T-UNIT-008 / 009 / 010     → 3 個
 //   TC-014 / 015 / 021         → 3 個
+//   TC-E001 / E002 / E003      → 3 個
 //
 // 短縮形を数えないと常に 1 と数えて誤検出する。 逆に括弧内の数字を無条件に拾うと
 // `(1 node(s))` のような無関係な値を数えて誤検出する。 3 桁の裸の数字だけを短縮形として
@@ -37,8 +38,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = repoRoot(HERE);
 const SPEC_ROOT = join(REPO_ROOT, 'tests/spec');
 
-/** `| T-XXX-NNN |` / `| TC-NNN |` で始まる表の行。 spec の TC 一覧はこの形で書く。 */
-const TABLE_ROW = /^\|\s*(T-[A-Z0-9]+-\d+|TC-\d+)\s*\|/gm;
+/** `| T-XXX-NNN |` / `| TC-NNN |` / `| TC-EXXX |` で始まる表の行。 */
+const TABLE_ROW = /^\|\s*(T-[A-Z0-9]+-\d+|TC-E?\d+)\s*\|/gm;
 
 /** `全 N 件` の主張。 */
 const TOTAL_CLAIM = /全\s*(\d+)\s*件/g;
@@ -49,12 +50,14 @@ const ENUM_CLAIM = /(\d+)\s*件\s*[（(]([^）)]*)[）)]/g;
 /**
  * 括弧内の TC 番号を数える。
  *
- * 完全形 (`T-UNIT-008` / `TC-014`) と、 短縮形の 3 桁 (`009`) を受ける。
+ * 完全形 (`T-UNIT-008` / `TC-014` / `TC-E001`) と、 短縮形 (`009` / `E002`) を受ける。
  * 短縮形は前後が英数字 / `-` でない時だけ番号とみなす = `(1 node(s))` の `1` は
  * 桁が足りず、 `wcag21aa` の `21` は前後が英字のため数えない。
  */
 function countIds(inner: string): number {
-  const ids = inner.match(/T-[A-Z0-9]+-\d+|TC-\d+|(?<![\dA-Za-z-])\d{3}(?![\dA-Za-z-])/g);
+  const ids = inner.match(
+    /T-[A-Z0-9]+-\d+|TC-E?\d+|(?<![\dA-Za-z-])E?\d{3}(?![\dA-Za-z-])/g,
+  );
   return ids === null ? 0 : ids.length;
 }
 
@@ -124,11 +127,15 @@ describe('spec の件数の主張 (#2099)', () => {
 
   it('spec を走査できている', () => {
     // 集合が空だと以下の突き合わせが素通りする。 走査対象と、そこから取れた主張の
-    // 両方に下限を置く。
+    // 各種類に下限を置く。 合計だけを見ると一方の抽出が 0 件でも対応する検査が恒真になる。
     expect(files, 'spec markdown を 1 件も見つけられない (検査が空振りしている)').toBeGreaterThan(0);
     expect(
-      totals.length + enums.length,
-      '件数の主張を 1 件も見つけられない (抽出が壊れている可能性)',
+      totals.length,
+      '`全 N 件` の主張を 1 件も見つけられない (抽出が壊れている可能性)',
+    ).toBeGreaterThan(0);
+    expect(
+      enums.length,
+      '`N 件 (a / b / c)` の主張を 1 件も見つけられない (抽出が壊れている可能性)',
     ).toBeGreaterThan(0);
   });
 
@@ -148,11 +155,16 @@ describe('spec の件数の主張 (#2099)', () => {
     ).toEqual([]);
   });
 
-  it('短縮形の列挙を数え、無関係な数字を数えない', () => {
+  it('実際の ID 形式と短縮形を数え、無関係な数字を数えない', () => {
     // 抽出条件そのものの検査。 spec の中身に依らず固定する = 条件を緩めた / 狭めた時に
     // 実 spec が偶然通っても、ここで落ちる。
+    expect(
+      '| T-UNIT-008 |\n| TC-014 |\n| TC-E001 |'.match(TABLE_ROW),
+      '表行の ID 形式を取りこぼしている',
+    ).toEqual(['| T-UNIT-008 |', '| TC-014 |', '| TC-E001 |']);
     expect(countIds('T-UNIT-008 / 009 / 010'), '短縮形を取りこぼしている').toBe(3);
     expect(countIds('TC-014 / 015 / 021 / 022 / 023'), '短縮形を取りこぼしている').toBe(5);
+    expect(countIds('TC-E001 / E002 / E003'), '英字 prefix 付き短縮形を取りこぼしている').toBe(3);
     expect(countIds('TC-017 / TC-018'), '完全形を取りこぼしている').toBe(2);
     expect(countIds('1 node(s)'), '無関係な数字を数えている').toBe(0);
     expect(countIds('wcag2a / wcag21aa'), '無関係な数字を数えている').toBe(0);
