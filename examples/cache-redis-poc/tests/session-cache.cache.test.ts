@@ -105,3 +105,61 @@ describe('cache PoC — expiration semantics', () => {
     expect(await env.get('session:short')).toBeNull();
   });
 });
+
+describe('cache PoC — key の名前空間', () => {
+  it('T-CACHE-POC-009 stores under a session: prefix, not the raw id', async () => {
+    const env = await boot();
+    await storeSession(env, 'sess-1', alice);
+    expect(await env.get('sess-1')).toBeNull();
+    expect(await env.get('session:sess-1')).not.toBeNull();
+  });
+});
+
+describe('cache PoC — 上書き', () => {
+  it('T-CACHE-POC-010 a second store replaces both the value and the TTL', async () => {
+    // 短くしておいた残り時間は、上書きで既定の 900 へ戻る。
+    const env = await boot();
+    await storeSession(env, 'sess-1', alice);
+    await extendSession(env, 'sess-1', 60);
+    await env.assertTTL('session:sess-1', { atLeast: 50, atMost: 60 });
+    await storeSession(env, 'sess-1', { ...alice, role: 'admin' });
+    await env.assertTTL('session:sess-1', { atLeast: 890, atMost: 900 });
+    expect((await readSession(env, 'sess-1'))?.role).toBe('admin');
+  });
+});
+
+describe('cache PoC — 異常系', () => {
+  it('T-CACHE-POC-011 lets a malformed value surface as a SyntaxError', async () => {
+    // readSession は JSON.parse を握らない。 呼出側まで例外が届く。
+    const env = await boot();
+    await env.set('session:broken', 'not json', { ttlSeconds: 60 });
+    await expect(readSession(env, 'broken')).rejects.toThrow(SyntaxError);
+  });
+
+  it('T-CACHE-POC-012 reports deleted=false when the session has already expired', async () => {
+    const env = await setupCacheEnv({ inMemory: { expiryTickMs: 5 } });
+    envs.push(env);
+    await env.set('session:short', JSON.stringify(alice), { ttlSeconds: 1 });
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    const result = await invalidateSession(env, 'short');
+    expect(result.deleted).toBe(false);
+  });
+
+  it('T-CACHE-POC-013 refuses a non-positive extension window', async () => {
+    const env = await boot();
+    await storeSession(env, 'sess-1', alice);
+    await expect(extendSession(env, 'sess-1', 0)).rejects.toThrow(
+      /expire: ttlSeconds must be positive/,
+    );
+    await expect(extendSession(env, 'sess-1', -1)).rejects.toThrow(
+      /expire: ttlSeconds must be positive/,
+    );
+  });
+
+  it('T-CACHE-POC-014 refuses reads after the env has stopped', async () => {
+    // stop() を明示的に呼ぶため afterEach の掃除対象へ載せない。
+    const env = await setupCacheEnv();
+    await env.stop();
+    await expect(readSession(env, 'sess-1')).rejects.toThrow(/cannot get after stop\(\)/);
+  });
+});
