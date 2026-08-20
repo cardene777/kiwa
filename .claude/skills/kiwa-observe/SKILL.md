@@ -165,7 +165,10 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 
 ```bash
 pnpm exec vitest run --root "$PROJECT_ROOT" --passWithNoTests \
-  --exclude '**/node_modules/**' --exclude '**/.vitest-dist/**' \
+  --exclude '**/node_modules/**' --exclude '**/dist/**' --exclude '**/cypress/**' \
+  --exclude '**/.{idea,git,cache,output,temp}/**' \
+  --exclude '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*' \
+  --exclude '**/.vitest-dist/**' \
   --reporter=json --outputFile=tests/reports/vitest-results.json
 ```
 
@@ -177,7 +180,9 @@ compile してからそこだけを走らせる。 その残骸が消えてい�
 例自身の `test` script は毎回 `rmSync` してから走らせるので二重にならない。 本 skill は
 別経路から起動するため、 残骸を拾う側になる。
 
-`--exclude` を渡すと既定値を置き換えるため、 `node_modules` も併せて明示する。
+`--exclude` を渡すと既定値を置き換えるため、 **Vitest 3.2 の既定 exclude 5 件を全て残した上で**
+`.vitest-dist` を足す。 `node_modules` だけを残すと `dist` / `cypress` / cache / 各種 config の
+除外が外れ、 別の build 出力や test を再び収集する。
 
 `--outputFile` は **`--root` からの相対** で解決される。 repo root からの相対で書くと
 `$PROJECT_ROOT/$PROJECT_ROOT/tests/...` に書かれる (実測)。 Step 1 は
