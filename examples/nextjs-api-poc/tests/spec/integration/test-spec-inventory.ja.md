@@ -108,17 +108,10 @@ msw の handler は TC ごとに作り直す。
 
 ## テストケース一覧
 
-### 観点 1: 正常系
-
 | テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
 |---|---|---|---|---|---|---|---|---|
 | T-INT-001 | 結合 | 正常系 | 上流が `{ sku: 'a-1', available: 3 }` を返す | `'a-1'` | `fetchStock(sku)` | `{ sku: 'a-1', available: 3 }` | 高 | 推奨 |
 | T-INT-003 | 結合 | 正常系 | 上流が 404 を返す | `'nope'` | `fetchStock(sku)` | `null` (未知の SKU) | 高 | 推奨 |
-
-### 観点 2: 異常系
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
 | T-INT-004 | 結合 | 異常系 | 上流が 503 を返す | `'a-1'` | `fetchStock(sku)` | `StockUnavailableError`、`status` が 503 | 高 | 推奨 |
 | T-INT-005 | 結合 | 異常系 | 上流が 429 を返す | `'a-1'` | `fetchStock(sku)` | `StockUnavailableError`、`status` が 429 | 高 | 推奨 |
 | T-INT-006 | 結合 | 異常系 | 上流への通信が失敗する | `'a-1'` | `fetchStock(sku)` | `StockUnavailableError`、`status` が `undefined` | 高 | 推奨 |
@@ -128,20 +121,10 @@ msw の handler は TC ごとに作り直す。
 | T-INT-010 | 結合 | 異常系 | 上流が `available: -1` を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` | 高 | 推奨 |
 | T-INT-015 | 結合 | 異常系 | 上流が 304 を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (2xx 以外は 429 / 5xx を除き再試行不可) | 中 | 推奨 |
 | T-INT-016 | 結合 | 異常系 | 通信失敗と 503 の 2 通り | `'a-1'` | `fetchStock(sku)` の message を読む | 前者が `stock service unavailable`、後者が `stock service unavailable (503)` | 中 | 推奨 |
-
-### 観点 3: 境界値
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
 | T-INT-002 | 結合 | 境界値 | 上流が `available: 0` を返す | `'a-1'` | `fetchStock(sku)` | `{ sku: 'a-1', available: 0 }` (`null` に潰さない) | 高 | 推奨 |
 | T-INT-012 | 結合 | 境界値 | 上流が 500 を返す | `'a-1'` | `fetchStock(sku)` | `StockUnavailableError`、`status` が 500 (境界のこちら側) | 中 | 推奨 |
 | T-INT-013 | 結合 | 境界値 | 上流が 499 を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (境界の向こう側) | 中 | 推奨 |
 | T-INT-014 | 結合 | 境界値 | 上流が JSON の `null` を返す | `'a-1'` | `fetchStock(sku)` | `StockResponseError` (`(body ?? {})` で形の誤りに落ちる) | 中 | 推奨 |
-
-### 観点 6 / 10: 入力バリデーション / セキュリティ
-
-| テスト ID | テストレベル | テスト観点 | 前提条件 | 入力値 | 操作手順 | 期待結果 | 優先度 | 自動化 |
-|---|---|---|---|---|---|---|---|---|
 | T-INT-011 | 結合 | 入力バリデーション / セキュリティ | handler が request の path を記録する | `'a/1'` | `fetchStock(sku)` | path が `/v1/items/a%2F1` (encode を外すと別 path に飛ぶ) | 高 | 推奨 |
 
 ## 自動化すべきテスト

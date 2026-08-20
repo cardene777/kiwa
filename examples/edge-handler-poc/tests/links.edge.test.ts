@@ -8,7 +8,7 @@ import {
 
 import worker, { type WorkerEnv } from '../src/worker.js';
 
-// spec = tests/spec/integration/test-spec-links.edge.md
+// spec = tests/spec/integration/test-spec-links.edge.ja.md
 
 const handler: EdgeFetchHandler<WorkerEnv> = worker.fetch;
 

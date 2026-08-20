@@ -96,7 +96,7 @@ describe('kiwa-review が読む入力の起点', () => {
   it('spec_path と test_paths.files の起点は実測で違う', () => {
     const layer = resolveLayer({
       layer: LAYER,
-      lang: 'en',
+      lang: 'ja',
       module: MODULE,
       producer: PRODUCER,
       projectRoot: EXAMPLE,

@@ -62,14 +62,14 @@ function requiredColumns(layer: string): string[] {
  */
 function layerOf(rel: string): string | null {
   for (const l of LAYERS) {
-    const pattern = new RegExp(
-      '^' +
-        l.spec_path
-          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          .replace('\\{module\\}', '[a-z0-9-]+') +
-        '$',
-    );
-    if (pattern.test(rel)) return l.id;
+    const escaped = l.spec_path
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace('\\{module\\}', '[a-z0-9-]+');
+    // 宣言は英語 (suffix 無し) の形。 実物は言語 suffix を持ちうるので、末尾の `.md` の
+    // 手前に ISO 639-1 の 2 文字を挟める形にする (#2103)。 suffix の一覧は持たない =
+    // 手で持つと言語が増えた時にそこだけ古くなる。
+    const withLang = escaped.replace(/\\\.md$/, '(?:\\.[a-z]{2})?\\.md');
+    if (new RegExp('^' + withLang + '$').test(rel)) return l.id;
   }
   return null;
 }
@@ -178,6 +178,24 @@ describe.each(SPECS.map((s) => [`${s.example}/${s.rel}`, s.file, s.rel] as const
       ).toBe(true);
       // 名前が揃っていても順序が違えば別の値を読む。 集合ではなく列で比べる。
       expect(table!.header, `${layer}: 列が宣言と食い違う`).toEqual(requiredColumns(layer!));
+    });
+
+    it('`## テストケース一覧` の表が 1 つにまとまっている', () => {
+      // Layer 2 は anchor 直後の **連続した 1 表** しか読まない。 観点ごとに小見出しで
+      // 割ると、2 表目以降の行は誰にも読まれないまま「仕様に無い」 扱いになる。
+      //
+      // 実測 (#2103) = 5 spec が 4〜5 表に割れており、16 行のうち 2 行しか読まれない形が
+      // あった。 表が 1 つなら header 行も 1 つになるので、その数で見る。
+      const section = headingSectionIn(body, /^## テストケース一覧$/m);
+      const lines = section.split('\n');
+      const headers = lines.filter(
+        (line, index) =>
+          line.startsWith('|') && /^\|[-| :]+\|$/.test(lines[index + 1] ?? ''),
+      );
+      expect(
+        headers.length,
+        '表が 2 つ以上ある (2 表目以降は Layer 2 に読まれない)',
+      ).toBe(1);
     });
 
     it('TC 行が 1 行以上あり、全行が header と同じ列数を持つ', () => {

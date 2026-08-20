@@ -108,8 +108,6 @@ item は handler 内の配列に保持され、 `id` は 1 起点の連番。
 
 ## テストケース一覧
 
-### 観点 1 — 正常系
-
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
 | T-API-001 | GET 空一覧 | items=[] | `GET /api/items` | `200` + `[]` を返す | P0 | yes | live | /api/items |
@@ -118,20 +116,10 @@ item は handler 内の配列に保持され、 `id` は 1 起点の連番。
 | T-API-008 | mock 固定応答 | mock handler 登録済 | `GET /api/items` | mock の固定値を返す | P1 | yes | mock | /api/items |
 | T-API-009 | hybrid の既定動作 | `mockHandlers=[]` | `POST` → `GET` | live 実装の結果が返る | P1 | yes | hybrid | /api/items |
 | T-API-013 | name 100 字ちょうど | items=[] | `POST {name:'x'.repeat(100)}` | `201` を返す (境界の内側) | P1 | yes | live | /api/items |
-
-### 観点 2 — 異常系
-
-| ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
-|---|---|---|---|---|---|---|---|---|
 | T-API-005 | name 長過ぎ | items=[] | `POST {name:'x'.repeat(101)}` | `422` を返す | P0 | yes | live | /api/items |
 | T-API-006 | 未対応 method | items=[] | `DELETE /api/items` | `405` を返す | P1 | yes | live | /api/items |
 | T-API-007 | 未対応 path (GET) | — | `GET /api/other` | `404` を返す | P1 | yes | live | /api/other |
 | T-API-014 | 未対応 path (POST) | — | `POST /api/other {name:'x'}` | `404` を返す (path 判定が method 判定より先) | P1 | yes | live | /api/other |
-
-### 観点 6 — 入力バリデーション
-
-| ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
-|---|---|---|---|---|---|---|---|---|
 | T-API-004 | name 欠落 | items=[] | `POST {}` | `400` + `error='name required'` | P0 | yes | live | /api/items |
 | T-API-010 | JSON が壊れている | items=[] | `POST` に生文字列 `'{invalid'` | `400` + `error='invalid json'` | P0 | yes | live | /api/items |
 | T-API-011 | name が文字列でない | items=[] | `POST {name:123}` | `400` + `error='name required'` | P1 | yes | live | /api/items |
