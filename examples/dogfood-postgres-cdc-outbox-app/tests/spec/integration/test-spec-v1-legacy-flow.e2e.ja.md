@@ -65,7 +65,7 @@ pickupSince(outbox.outbox(), consumer.state().ackedLsn)
 
 **同じ入力が 1 回目と 3 回目で違う結果になる。** 差は「outbox に行があるか」 だけ。
 
-### adapter ごとの最初の複製は promoted で終わる
+### reset 後を含む session ごとの最初の複製は promoted で終わる
 
 `/replication` は入力を取らない。 実測した値。
 
@@ -77,9 +77,9 @@ pickupSince(outbox.outbox(), consumer.state().ackedLsn)
 | `promotedReplicaId` | `replica-b` |
 
 `failoverState` は `streaming` / `lagged` / `failover-in-progress` / `promoted` の 4 値を持つが、
-**その adapter で最初の `/replication` 成功呼出は `promoted` を返す**。 他の 3 状態は HTTP 応答として
-観測できない。 `promoted` は terminal state なので、同じ server で `/replication` を再度呼ぶと
-最初の `primaryWrite()` が拒否し、HTTP は 500 を返す。
+**reset 後を含む新しい replication session で最初の `/replication` 成功呼出は `promoted` を返す**。
+他の 3 状態は HTTP 応答として観測できない。 `promoted` は terminal state なので、同じ server で
+`/reset` を挟まず `/replication` を再度呼ぶと最初の `primaryWrite()` が拒否し、HTTP は 500 を返す。
 
 実測した推移。
 
@@ -89,7 +89,25 @@ pickupSince(outbox.outbox(), consumer.state().ackedLsn)
 | 2 回目 | **500** `{"errorKind":"primaryWrite: session is promoted (terminal), primary was demoted"}` |
 | 3 回目 | 500 (同じ) |
 
-**`/replication` は adapter ごとに 1 度しか成功しない。**
+**`/replication` は `/reset` を挟まない連続呼出では最初の 1 度しか成功しない。** `/reset` は
+`replicationSession` を破棄するため、その後の最初の呼出は再び成功する。
+
+### `/reset` は adapter を初期状態へ戻す
+
+上の 2 つの状態依存は、どちらも `/reset` で元に戻る。 実測した推移。
+
+| 呼出 | 結果 |
+|---|---|
+| `/replication` 1 回目 | 200 / `promoted` |
+| `/replication` 2 回目 | 500 (terminal) |
+| `/reset` | 200 |
+| `/replication` 3 回目 | **200 / `promoted`** (1 回目と同じ値) |
+| `/outbox` 注文 2 件 | 200 / `writes: 2` |
+| `/reset` | 200 |
+| `/outbox` 注文 0 件 | **500** `seal: outbox is empty, nothing to seal` |
+
+**`/reset` の後は「まっさらな server」 と同じ振る舞いに戻る。**
+outbox の行も replication session も消えるため、初回だけ現れる 2 つの形が再び現れる。
 
 ## 主な品質リスク
 

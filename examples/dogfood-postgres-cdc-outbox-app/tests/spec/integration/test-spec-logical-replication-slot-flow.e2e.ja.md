@@ -71,9 +71,10 @@ Postgres 16 の進んだ 3 経路 (論理複製 / 複製 slot の寿命 / pgvect
 
 ## 主な品質リスク
 
-- **3 つの HTTP 経路は入力を取らない**。 adapter が各 flow を既定値で呼ぶため、
-  HTTP から選べる正常系・境界・異常系の分岐が無い。 下位の `driveSlotAdvanceFlow()` には
-  `advancedLsn <= retainedLsn` の拒否分岐があるが、`fixture.ts` の route からは入力できない
+- **3 つの HTTP 経路は adapter op への入力を取らない**。 adapter が各 flow を既定値で呼ぶため、
+  route 到達後の adapter 応答には HTTP から選べる正常系・境界・異常系の分岐が無い。 下位の
+  `driveSlotAdvanceFlow()` には `advancedLsn <= retainedLsn` の拒否分岐があるが、`fixture.ts` の
+  route からは入力できない。 route 到達前の JSON parse / body-size 分岐は別に存在する
 - **`dropped: true` が常に返る**。 slot を落とさない経路が無いため、
   「落とさずに保持し続ける」 状態の検証手段が無い
 - **`pgvectorSearches` の単位が呼出回数でない**。 1 呼出を 1 op とみなす consumer が
