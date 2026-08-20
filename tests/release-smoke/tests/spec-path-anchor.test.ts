@@ -84,7 +84,7 @@ interface Resolved {
 }
 
 /**
- * layer の suffix。 `docs/layers.json` の宣言から導く。
+ * layer ごとの仕様書 path。 `docs/layers.json` の宣言から導く。
  *
  * suffix を持たない layer (`contract` / `e2e` / `integration` / `unit`) の仕様書は
  * stem が `test-spec-{module}` になるため、同じ dir にある別 layer の仕様書が
@@ -92,41 +92,67 @@ interface Resolved {
  * `test-spec-counter.ui.md` が `test-spec-counter.md` の `ui` 語版として通っていた (実測)。
  * 同じ dir を共有するのは `integration` と `ui` の組で、実際に起こりうる。
  *
- * 手で列挙すると layer が増えた時に検査だけ古くなるので、宣言から取る。
+ * ただし suffix だけを見て除外すると広すぎる。 CLI の `--lang` は 2 文字の形しか見ないため
+ * `--lang ui` を受け付け (実測)、`test-spec-items.api.ui.md` を生成できる。 この path は
+ * どの layer の宣言とも一致しないので、除外すると正当な仕様書を取りこぼす。
+ *
+ * 同じ module を別 layer の宣言へ代入した path と **完全一致** する候補だけを除外する。
  */
-const LAYER_SUFFIXES = new Set(
-  (JSON.parse(read('docs/layers.json')) as { layers: { spec_path?: string | null }[] }).layers
-    .map((l) => /test-spec-\{module\}\.([a-z0-9-]+)\.md$/.exec(l.spec_path ?? ''))
-    .filter((m): m is RegExpExecArray => m !== null)
-    .map((m) => m[1]!),
+const LAYER_SPEC_PATHS = new Map(
+  (
+    JSON.parse(read('docs/layers.json')) as {
+      layers: { id: string; spec_path?: string | null }[];
+    }
+  ).layers.flatMap((layer) =>
+    typeof layer.spec_path === 'string' ? [[layer.id, layer.spec_path] as const] : [],
+  ),
 );
+
+function isOtherLayerSpec(layerId: string, spec: string, file: string): boolean {
+  const template = LAYER_SPEC_PATHS.get(layerId);
+  if (template === undefined) return false;
+  const [prefix, suffix, extra] = template.split('{module}');
+  if (prefix === undefined || suffix === undefined || extra !== undefined) return false;
+  if (!spec.startsWith(prefix) || !spec.endsWith(suffix)) return false;
+  const module = spec.slice(prefix.length, spec.length - suffix.length);
+  const candidate = join(dirname(spec), file);
+  // `otherId !== layerId` は防御で、この経路には到達しない。 自分自身の宣言へ同じ module を
+  // 代入すると `spec` そのものになり、`candidate === spec` は `file === basename(spec)` を
+  // 意味する。 その形は `isSpecVariant` の先頭で `true` を返して抜けるため、ここまで来ない。
+  // 変異試験でこの条件を外しても 1 件も落ちない (到達する入力を作れないため)。
+  return [...LAYER_SPEC_PATHS].some(
+    ([otherId, otherTemplate]) =>
+      otherId !== layerId && otherTemplate.replace('{module}', module) === candidate,
+  );
+}
 
 /**
  * English (suffix 無し) または ISO 639-1 suffix 付きの同じ仕様書か。
  *
- * layer の suffix と一致する形は言語とみなさない = 別 layer の仕様書を
- * 自分の言語 variant として数えない。
+ * 別 layer の宣言 path と一致する形は言語とみなさない。
  */
-function isSpecVariant(spec: string, file: string): boolean {
+function isSpecVariant(layerId: string, spec: string, file: string): boolean {
   const english = basename(spec);
   if (file === english) return true;
   if (!english.endsWith('.md')) return false;
   const stem = english.slice(0, -'.md'.length);
   if (!file.startsWith(`${stem}.`) || !file.endsWith('.md')) return false;
   const lang = file.slice(stem.length + 1, -'.md'.length);
-  if (LAYER_SUFFIXES.has(lang)) return false;
+  if (isOtherLayerSpec(layerId, spec, file)) return false;
   return /^[a-z]{2}$/.test(lang);
 }
 
+function selectSpecVariant(layerId: string, spec: string, files: string[]): string | null {
+  return files.sort().find((file) => isSpecVariant(layerId, spec, file)) ?? null;
+}
+
 /** anchor 配下にある、CLI が返した仕様書の任意言語 variant を探す。 */
-function findSpecAt(anchor: string, spec: string): string | null {
+function findSpecAt(anchor: string, layerId: string, spec: string): string | null {
   const relativeDir = dirname(spec);
   const absoluteDir = resolve(REPO_ROOT, anchor, relativeDir);
   if (!existsSync(absoluteDir)) return null;
-  const file = readdirSync(absoluteDir)
-    .sort()
-    .find((candidate) => isSpecVariant(spec, candidate));
-  return file === undefined ? null : join(relativeDir, file);
+  const file = selectSpecVariant(layerId, spec, readdirSync(absoluteDir));
+  return file === null ? null : join(relativeDir, file);
 }
 
 function resolveSpec(entry: RosterEntry): Resolved {
@@ -159,8 +185,8 @@ function resolveSpec(entry: RosterEntry): Resolved {
   }
   // CLI は `--lang` 未指定だと suffix 無しを返す。 `--lang` は任意の ISO 639-1 を受けるため、
   // `.ja.md` だけでなく `.zh.md` 等も含め、同じ stem の全言語 variant を見る。
-  const projectAnchored = findSpecAt(projectRoot, spec);
-  const repoAnchored = findSpecAt('.', spec);
+  const projectAnchored = findSpecAt(projectRoot, entry.layer, spec);
+  const repoAnchored = findSpecAt('.', entry.layer, spec);
   return {
     key,
     projectAnchored: projectAnchored === null ? null : join(projectRoot, projectAnchored),
@@ -184,11 +210,13 @@ describe('spec_path の起点 (#2101)', () => {
         'test-spec-items.api.ja-JP.md',
         'test-spec-items.api.jpn.md',
         'test-spec-other.api.ja.md',
-      ].filter((file) => isSpecVariant(spec, file)),
+        'test-spec-items.api.ui.md',
+      ].filter((file) => isSpecVariant('api', spec, file)),
     ).toEqual([
       'test-spec-items.api.md',
       'test-spec-items.api.ja.md',
       'test-spec-items.api.zh.md',
+      'test-spec-items.api.ui.md',
     ]);
   });
 
@@ -198,19 +226,41 @@ describe('spec_path の起点 (#2101)', () => {
     // 実際に `tests/spec/integration/` を共有するので、起こりうる形になる。
     const integration = 'tests/spec/integration/test-spec-counter.md';
     expect(
-      isSpecVariant(integration, 'test-spec-counter.ui.md'),
+      isSpecVariant('integration', integration, 'test-spec-counter.ui.md'),
       'ui layer の仕様書を integration の言語 variant として数えている',
     ).toBe(false);
     expect(
-      isSpecVariant(integration, 'test-spec-counter.ja.md'),
+      isSpecVariant('integration', integration, 'test-spec-counter.ja.md'),
       '本当の言語 variant を取りこぼしている',
     ).toBe(true);
   });
 
-  it('layer の suffix 一覧を宣言から導けている', () => {
-    // 一覧が空だと上の除外が効かず、恒真になる。 宣言から取れていることを固定する。
-    expect(LAYER_SUFFIXES.size, 'layer の suffix を 1 件も導けていない').toBeGreaterThan(0);
-    expect([...LAYER_SUFFIXES], 'ui の suffix が一覧に無い').toContain('ui');
+  it('別 layer の仕様書 path を宣言の全形から導けている', () => {
+    // 一覧が空だと上の除外が効かず、恒真になる。 全宣言を取れていることを固定する。
+    const declarations = (
+      JSON.parse(read('docs/layers.json')) as {
+        layers: { id: string; spec_path?: string | null }[];
+      }
+    ).layers.filter((layer) => typeof layer.spec_path === 'string');
+    expect(LAYER_SPEC_PATHS.size, 'layer の spec_path を 1 件も導けていない').toBeGreaterThan(0);
+    expect(LAYER_SPEC_PATHS.size, '一部の layer の spec_path を取りこぼしている').toBe(
+      declarations.length,
+    );
+    expect(
+      [...LAYER_SPEC_PATHS.values()].filter(
+        (path) => path.split('{module}').length !== 2,
+      ),
+      'module を一意に復元できない spec_path 宣言がある',
+    ).toEqual([]);
+  });
+
+  it('同じ stem の variant が複数あっても選択結果が並び順に依存しない', () => {
+    const spec = 'tests/spec/integration/test-spec-items.api.md';
+    const variants = ['test-spec-items.api.zh.md', 'test-spec-items.api.ja.md'];
+    expect(selectSpecVariant('api', spec, [...variants])).toBe('test-spec-items.api.ja.md');
+    expect(selectSpecVariant('api', spec, [...variants].reverse())).toBe(
+      'test-spec-items.api.ja.md',
+    );
   });
 
   it('roster を走査でき、両方の起点で仕様書が見つかっている', () => {
