@@ -41,8 +41,8 @@ skip 条件 — skill 引数に `--lang {code}` が明示されている場合�
 | skill | 文書 | path |
 |---|---|---|
 | `/kiwa-design` | test 仕様書 | `tests/spec/{layer}/test-spec-{module}{lang_suffix}.md` (ja の場合は `.ja.md`、 en は `.md`) |
-| `/kiwa-forge` | coverage report | `tests/reports/contract/coverage-report-{module}{lang_suffix}.md` (canonical) + round 別 |
-| `/kiwa-hardhat` | coverage report | 同上 (両 skill で同一 path、 後勝ち上書き or `.foundry.` / `.hardhat.` で suffix 区別) |
+| `/kiwa-forge` | coverage report | `/kiwa-forge` Step 0 が定める canonical + round 別 path |
+| `/kiwa-hardhat` | coverage report | `/kiwa-hardhat` Step 0 が定める canonical + round 別 path (両 skill で同一 path、 後勝ち上書き or runner suffix で区別) |
 | `/kiwa-play` | e2e test spec docstring | `tests/{module}.spec.ts` 内コメント (header に `// Language: ${DOC_LANG}` 注記) |
 
 ### section 見出し言語規約
