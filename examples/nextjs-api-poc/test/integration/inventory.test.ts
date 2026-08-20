@@ -112,4 +112,45 @@ describe('inventory integration (mode: mock)', () => {
     // encode を外すと `a/1` が別 path として飛び、 handler に届かない。
     expect(seen).toBe('/v1/items/a%2F1');
   });
+
+  // ---- ここから下は spec (tests/spec/integration/test-spec-inventory.ja.md) を
+  // 実装から起こした時に、既存 test が通っていないと判った分岐 (#2092)。
+
+  it('T-INT-012 500 ちょうどは再試行可能な失敗', async () => {
+    // 再試行の可否は 500 で分かれる。 503 だけを確かめると、境界を
+    // `> 500` に書き換える退行が 503 では表面化しない。
+    await withStock([http.get(STOCK_URL, () => new HttpResponse(null, { status: 500 }))]);
+    await expect(fetchStock('a-1')).rejects.toMatchObject({
+      status: 500,
+      name: 'StockUnavailableError',
+    });
+  });
+
+  it('T-INT-013 499 は再試行しても直らない', async () => {
+    // 境界の反対側。 T-INT-012 と対で、境界そのものを固定する。
+    await withStock([http.get(STOCK_URL, () => new HttpResponse(null, { status: 499 }))]);
+    await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
+  });
+
+  it('T-INT-014 本体が JSON の null なら形が違う扱い', async () => {
+    // `(body ?? {})` の null 側。 T-INT-009 は `{ sku }` (欠落) しか通しておらず、
+    // `??` を外す退行を捕まえられない (null に対する分割代入で落ちる形になる)。
+    await withStock([http.get(STOCK_URL, () => HttpResponse.json(null))]);
+    await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
+  });
+
+  it('T-INT-015 304 は再試行しても直らない', async () => {
+    // `!response.ok` の 4xx 以外。 T-INT-007 は 400 だけを通している。
+    await withStock([http.get(STOCK_URL, () => new HttpResponse(null, { status: 304 }))]);
+    await expect(fetchStock('a-1')).rejects.toBeInstanceOf(StockResponseError);
+  });
+
+  it('T-INT-016 status の有無で message が変わる', async () => {
+    // 呼出側が log から状況を読むための情報。 既存 test は `status` field しか
+    // 見ておらず、message の組み立てを消しても落ちない。
+    await withStock([http.get(STOCK_URL, () => HttpResponse.error())]);
+    await expect(fetchStock('a-1')).rejects.toThrow('stock service unavailable');
+    await withStock([http.get(STOCK_URL, () => new HttpResponse(null, { status: 503 }))]);
+    await expect(fetchStock('a-1')).rejects.toThrow('stock service unavailable (503)');
+  });
 });

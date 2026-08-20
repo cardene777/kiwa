@@ -22,6 +22,6 @@ No coverage data provided.
 
 ## Spec coverage gaps
 
-### items (api)
+### inventory (integration)
 
-spec と test が完全に一致 (spec の case 14 件).
+spec と test が完全に一致 (spec の case 16 件).
