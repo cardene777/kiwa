@@ -1,4 +1,5 @@
 import { existsSync, readdirSync, statSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -48,7 +49,24 @@ const A11Y_WCAG_TARGETS = new Set([
   'best-practice',
 ]);
 
+/** `@kiwa-lab/a11y` が peer として使う axe-core に実在する rule ID。 */
+const A11Y_RULE_IDS = new Set<string>(
+  (
+    createRequire(resolve(REPO_ROOT, 'packages/a11y/package.json'))('axe-core') as {
+      getRules(): { ruleId: string }[];
+    }
+  )
+    .getRules()
+    .map((rule) => rule.ruleId),
+);
+
 const A11Y_SEVERITIES = new Set(['critical', 'serious', 'moderate', 'minor', '-']);
+
+function isA11yRule(value: string): boolean {
+  if (value === '-') return true;
+  const normalized = /^`[^`]+`$/.test(value) ? value.slice(1, -1) : value;
+  return A11Y_WCAG_TARGETS.has(normalized) || A11Y_RULE_IDS.has(normalized);
+}
 
 /** `#### {layer} layer 専用 column` 節が定義する列。 無ければ汎用表。 */
 function requiredColumns(layer: string): string[] {
@@ -241,12 +259,7 @@ describe.each(SPECS.map((s) => [`${s.example}/${s.rel}`, s.file, s.rel] as const
 
       const invalidRules = table!.rows
         .map((row) => row[ruleAt]!)
-        .filter(
-          (value) =>
-            value !== '-' &&
-            !A11Y_WCAG_TARGETS.has(value) &&
-            !/^`[a-z0-9-]+`$/.test(value),
-        );
+        .filter((value) => !isA11yRule(value));
       expect(invalidRules, 'WCAG-rule が runOnly tag または axe rule ID に変換できない').toEqual(
         [],
       );
@@ -260,6 +273,13 @@ describe.each(SPECS.map((s) => [`${s.example}/${s.rel}`, s.file, s.rel] as const
 );
 
 describe('契約の突き合わせ先が実在する', () => {
+  it('a11y の WCAG target と実在 rule ID だけを受ける (陰性対照)', () => {
+    expect(isA11yRule('WCAG 2.1 AA')).toBe(true);
+    expect(isA11yRule('`best-practice`')).toBe(true);
+    expect(isA11yRule('`button-name`')).toBe(true);
+    expect(isA11yRule('`not-a-real-axe-rule`')).toBe(false);
+  });
+
   it('2 文字の layer suffix を言語 suffix と取り違えない', () => {
     expect(layerOf('tests/spec/integration/test-spec-counter.ui.md')).toBe('ui');
     expect(layerOf('tests/spec/integration/test-spec-counter.ui.ja.md')).toBe('ui');
