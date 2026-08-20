@@ -8,13 +8,13 @@
 // **結び付かないことは失敗として現れない**。 突き合わせは「テストが無い」 と
 // 報告し続け、実際にはテストがある状態になる。
 //
-// 実測 (#2109) では 48 テスト中 **1 件しか ID を持っていなかった**。
+// 実測 (#2109) では 50 テスト中 **1 件しか ID を持っていなかった**。
 // 27 / 28 ファイルが 1 件も持たず、`T-DR-S1` のような近い形も
 // 末尾が数字でないため一致しなかった。
 //
 // ## 何を見るか
 //
-// `examples/*/tests/e2e/*.spec.ts` の `test(` / `it(` の第 1 引数。
+// `examples/*/tests/e2e/*.spec.ts` の `test(` / `it(` と repo 固有 wrapper の第 1 引数。
 // これは `kiwa layers --layer e2e-generic` が `test_outputs` として宣言する場所と同じ。
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -30,23 +30,28 @@ import { REPO_ROOT, read } from './skill-md.js';
  */
 const TC_ID_PATTERN = (() => {
   const source = read('packages/observability/src/collect.ts');
-  const line = source.split('\n').find((l) => l.includes('const TC_ID_REGEX'));
-  expect(line, '`TC_ID_REGEX` の宣言を collect.ts から引けない').toBeTruthy();
-  const literal = /\/(.+)\/([a-z]*)\s*;/.exec(line!);
+  const literal = /\bconst\s+TC_ID_REGEX\s*=\s*\/((?:\\.|[^/\\\r\n])+)\/([a-z]*)\s*;/.exec(source);
   expect(literal, '`TC_ID_REGEX` の正規表現リテラルを取り出せない').toBeTruthy();
   return new RegExp(literal![1]!, literal![2]);
 })();
 
-/** `test(` / `it(` の第 1 引数 (文字列リテラル)。 */
-const TEST_NAME = /^\s*(?:test|it)\(\s*(['"`])([^'"`]+)\1/gm;
+/** `test(` / `it(` / repo 固有 wrapper の第 1 引数 (文字列リテラル)。 */
+const TEST_NAME =
+  /^\s*(?:test|it|withPlaywrightSkip)\(\s*(['"`])((?:\\.|(?!\1)[^\\\r\n])+)\1/gm;
 
 interface E2eTest {
   file: string;
   name: string;
 }
 
-function e2eTests(): E2eTest[] {
+interface E2eScan {
+  files: string[];
+  tests: E2eTest[];
+}
+
+function e2eTests(): E2eScan {
   const out: E2eTest[] = [];
+  const files = new Set<string>();
   // `examples/*/tests/e2e/*.spec.ts` は `docs/layers.json` の `e2e-generic` が
   // `test_outputs` として宣言する形。 glob を手で書かず宣言から導く。
   const layers = JSON.parse(read('docs/layers.json')) as {
@@ -61,13 +66,33 @@ function e2eTests(): E2eTest[] {
     // `{example}/tests/e2e/{module}.spec.ts` を glob へ写す。
     const glob = pattern.replace('{example}', '*').replace('{module}', '*');
     for (const file of globSync(`examples/${glob}`)) {
+      if (files.has(file)) continue;
+      files.add(file);
       const body = readFileSync(resolve(REPO_ROOT, file), 'utf8');
       for (const m of body.matchAll(TEST_NAME)) {
         out.push({ file, name: m[2] as string });
       }
     }
   }
-  return out;
+  return { files: [...files].sort(), tests: out };
+}
+
+/** 宣言 glob と独立に、repo の配置規約から実在する e2e spec を列挙する。 */
+function actualE2eSpecFiles(): string[] {
+  const examplesDir = resolve(REPO_ROOT, 'examples');
+  return readdirSync(examplesDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((example) => {
+      const e2eDir = resolve(examplesDir, example.name, 'tests/e2e');
+      try {
+        return readdirSync(e2eDir, { withFileTypes: true })
+          .filter((entry) => entry.isFile() && entry.name.endsWith('.spec.ts'))
+          .map((entry) => `examples/${example.name}/tests/e2e/${entry.name}`);
+      } catch {
+        return [];
+      }
+    })
+    .sort();
 }
 
 /** 依存を増やさないための最小 glob。 `*` は 1 階層のみに一致する。 */
@@ -103,16 +128,19 @@ function escapeRe(s: string): string {
 }
 
 describe('e2e の test 名が突き合わせの ID を持つ (#2109)', () => {
-  const tests = e2eTests();
+  const scan = e2eTests();
+  const tests = scan.tests;
 
   it('e2e の test を走査できている', () => {
-    // 集合が空だと以下の検査が素通りする。 走査対象と、それを含む file の
-    // 両方に下限を置く = file だけ数えても test を 1 件も読めていない形が残る。
+    // 宣言の取りこぼしと、動的な test 名を静的検査が黙って除外する形を防ぐ。
+    expect(scan.files, '宣言 glob が実在する e2e spec の集合と一致しない').toEqual(
+      actualE2eSpecFiles(),
+    );
     expect(tests.length, 'e2e の test を 1 件も見つけられない (検査が空振りしている)').toBeGreaterThan(0);
     expect(
-      new Set(tests.map((t) => t.file)).size,
-      'e2e の spec file を 1 件も見つけられない (検査が空振りしている)',
-    ).toBeGreaterThan(0);
+      [...new Set(tests.map((t) => t.file))].sort(),
+      'test 名を 1 件も取得できていない e2e spec がある',
+    ).toEqual(scan.files);
   });
 
   it('全 test 名が突き合わせの ID を含む', () => {
