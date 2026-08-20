@@ -946,6 +946,17 @@ describe('Layer 3 の観測が chain から起動される (#1894)', () => {
     );
     expect(defaultWrite, 'en に .en suffix を付ける展開が残っている').not.toContain('${DOC_LANG}');
 
+    const completion = review.slice(review.indexOf('## 完了条件'));
+    expect(completion, '完了条件が Step 0 の言語解決を参照していない').toContain(
+      'Step 0 の言語別出力 path',
+    );
+    expect(completion, '完了条件が --out 指定時の出力 path を参照していない').toContain(
+      '`--out` 指定時はその path',
+    );
+    expect(completion, '完了条件が en に suffix を付ける雛形を要求している').not.toContain(
+      '{mode}-review-{module}.{lang}.md',
+    );
+
     const reference = read('.claude/skills/kiwa-forge/references/doc-language-selection.md');
     expect(reference, '共有言語規約に lang suffix の解決が無い').toContain(
       '{lang_suffix}` は en なら空',
