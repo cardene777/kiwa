@@ -236,7 +236,33 @@ cookie は `context.addCookies` (画面経由) と `headers.cookie` (要求経�
 | T-E2E-006 | 認証済の API が一覧と cache 指示を返す | `session=admin` | `request.get('/api/items')` | `status===200`、`cache-control==='public, max-age=60'`、`count===3`、`user==='u1'` | P0 | yes | ssr | `/api/items` |
 | T-E2E-007 | 追跡用 header が素通しの経路で引き継がれる | `session=admin` かつ `x-request-id: req-e2e-7` | `request.get('/api/items')` | `status===200`、`x-kiwa-request-id==='req-e2e-7'` | P1 | yes | ssr | `/api/items` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/nextjs-app-router-full/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/`、`tests/e2e/`、`tests/integration/` の 3 dir
+- 見つけた既存 test — 48 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 Middleware: unauthenticated /items -> 307 redirect to /login?from=/items` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:8`) | 既覆 (候補) |
+| T-E2E-002 | `T-E2E-002 RSC: after login the items page renders 3 items` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:14`) | 既覆 (候補) |
+| T-E2E-003 | `T-E2E-003 Middleware: banned -> 403 JSON for /items` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:28`) | 既覆 (候補) |
+| T-E2E-004 | `T-E2E-004 Server Action: create form submit with valid name shows success message` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:36`) | 既覆 (候補) |
+| T-E2E-005 | `T-E2E-005 Route Handler: GET /api/items unauthenticated -> 302 redirect` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:47`) | 既覆 (候補) |
+| T-E2E-006 | `T-E2E-006 Route Handler: GET /api/items with session=admin returns 200 + JSON + cache-control` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:53`) | 既覆 (候補) |
+| T-E2E-007 | `T-E2E-007 Middleware: x-request-id header echoed via x-kiwa-request-id (Route Handler matcher 経路)` (`examples/nextjs-app-router-full/tests/e2e/nextjs-server.spec.ts:64`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — cookie 無しで `/items` へ行き、`/login?from=%2Fitems` に導かれることを確かめる
+- T-E2E-002 (P0) — `session=admin` で `/items` を開き、`h1` と 3 件の `li` が描画されることを確かめる
+- T-E2E-003 (P0) — `session=banned` で `/items` が 403 になることを確かめる (middleware が返す経路)
+- T-E2E-004 (P0) — `name` に `hello` を入れて submit し、`create-success` が `id=105` と `hello` を含むことを確かめる
+- T-E2E-005 (P0) — cookie 無しの `/api/items` が 302 と `location` を返すことを確かめる (middleware の 307 とは別経路)
+- T-E2E-006 (P0) — `session=admin` の `/api/items` が 200 / `cache-control` / `count===3` / `user==='u1'` を返すことを確かめる
+- T-E2E-007 (P1) — `x-request-id` を付けた `/api/items` が `x-kiwa-request-id` で同じ値を返すことを確かめる
 
 7 件はすべて `webServer` が起動した実 dev server に対して走る。 mock を持たない。
 
@@ -260,3 +286,12 @@ T-E2E-001 だけでは 307 を保証できないため、middleware の status �
 | RSC の未認証 / banned 描画 | できる | `session=%3B` で未認証、`session=%2562anned` で banned の描画へ到達するが e2e が無い |
 | Route Handler の `banned` 分岐 | できる | `session=banned; session=admin` なら middleware を通るが、この境界入力の e2e が無い |
 | `x-kiwa-request-id` の既定値 `next-default` | できる | T-E2E-006 は `x-request-id` 無しで要求するが、この response header を assert していない |
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+- `limit` に `0` と非数値を渡した時の扱いが決まっていない。 route の doc comment は「`limit` で件数制限」 としか書かず、実装は `Number.isFinite(limit) && limit > 0` で どちらも絞り込まない側に倒す。 0 件を返すのか拒むのか、拒むなら status と error を決める必要がある
+- decode できない `session` cookie の扱いが決まっていない。 `resolveUserFromCookieHeader` の `decodeURIComponent` が `URIError` を送出し、どこも捕捉しないため実測で `session=%` と `session=%zz` が 500 になる。 認証前の経路で誰でも送れる一方、未認証は 302 / `banned` は 403 と分岐が整理されている中でここだけ 5xx に落ちる。 400 を返すのか guest に倒すのかを決める必要がある
