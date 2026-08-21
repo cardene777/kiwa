@@ -59,20 +59,21 @@ HTTP status がアプリケーション処理の成否を表していない。
 
 `examples/dogfood-security-sbom-scanning-app/tests/e2e/sbom-scanning-flow.spec.ts` の
 `expect(scanBody.findings.length).toBeGreaterThanOrEqual(1)` を実測すると、
-同じ入力に対する findings は **常にちょうど 1 件**で、契約上も AWS access key 1 件を
-返す case だった。
+同じ入力に対する findings は **常にちょうど 1 件**だった。 一方、対応する spec が定める
+件数は 1 件以上で、exact count は契約にしていない。
 
-`>= 1` は 2 件に変わっても、別種別だけが当たるようになっても通る。 契約が件数を
-定める場合はその値を書き、少なくとも期待する種別と内容を確かめる。
+この case で `>= 1` を exact count に強めるのは、現在値を契約へ昇格させるため誤りになる。
+一方、件数だけでは別種別だけが当たるようになっても通るので、期待する種別と内容を併せて
+確かめる。
 
 | 書き方 | 識別力 |
 |---|---|
-| `expect(findings.length).toBeGreaterThanOrEqual(1)` | この case には弱い。契約は AWS access key 1 件 |
-| `expect(findings).toHaveLength(1)` + `expect(findings[0].kind).toBe('aws-access-key')` | ある |
+| `expect(findings.length).toBeGreaterThanOrEqual(1)` | 件数の下限しか見ず、期待種別を識別しない |
+| `expect(findings.length).toBeGreaterThanOrEqual(1)` + `expect(findings.some((finding) => finding.kind === 'aws-access-key')).toBe(true)` | この case の契約を正確に表す |
 
 **現在の実測値だけを理由に exact count を契約へ昇格させない**。 件数を定めない契約なら
 下限と期待種別を併記する。件数を定める契約なのに下限だけを書くと、挙動が変わっても
-気付けない。
+気付けない。その場合に限り `toHaveLength` で契約上の件数を確かめる。
 
 ### 3. 両経路が同じ結果を返す
 
