@@ -115,6 +115,7 @@ const NEUTRAL_EVENTS: Record<NeutralEventName, true> = {
 const ALL_NEUTRAL = Object.keys(NEUTRAL_EVENTS) as NeutralEventName[];
 const BACKENDS: OrmBackend[] = ['postgres', 'mysql', 'sqlite'];
 const PROVIDERS: OrmProvider[] = ['drizzle', 'prisma', 'kysely'];
+const SQLITE_SERVER_ONLY_AXES = ['cdc', 'logical', 'replication'] as const;
 
 /**
  * event 名として使える形。 英小文字 / 数字で始まり、 区切りは `.` `_` `-` のみ。
@@ -198,9 +199,11 @@ describe('backendEventName — 返す名前そのものの性質', () => {
   });
 
   it('T-ORM-TY-004 方言を持たない event は neutral 名をそのまま返す', () => {
-    const missing = missingDialect('sqlite');
-    expect(missing.length, 'sqlite で fallback する event が 1 件も無い').toBeGreaterThan(0);
-    for (const neutral of missing) {
+    const serverOnly = ALL_NEUTRAL.filter((neutral) =>
+      SQLITE_SERVER_ONLY_AXES.some((axis) => neutral.startsWith(`${axis}.`)),
+    );
+    expect(serverOnly.length, 'sqlite で fallback する event が 1 件も無い').toBeGreaterThan(0);
+    for (const neutral of serverOnly) {
       expect(backendEventName('sqlite', neutral)).toBe(neutral);
     }
   });
@@ -216,7 +219,7 @@ describe('backendEventName — 返す名前そのものの性質', () => {
     expect(sqliteOnly.length, 'sqlite だけが欠く event が 1 件も無い').toBeGreaterThan(0);
     // sqlite に server 側の複製機構が無いことが理由。 それ以外の axis が欠けていたら設計が変わっている。
     const axes = [...new Set(sqliteOnly.map((n) => n.split('.')[0]))].sort();
-    expect(axes).toStrictEqual(['cdc', 'logical', 'replication']);
+    expect(axes).toStrictEqual(SQLITE_SERVER_ONLY_AXES);
   });
 
   it('T-ORM-TY-007 backend 内で 2 つの event が同じ名前を共有しない (既知の共有を除く)', () => {
