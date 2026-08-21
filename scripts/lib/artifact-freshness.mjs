@@ -29,12 +29,12 @@
  *
  * ## What is compared instead
  *
- * The implementation's age is the later of two things.
+ * The report inputs' age is the later of two things.
  *
  * | source | what it catches |
  * |---|---|
- * | commit time of the last change under `src/` | committed work, immune to checkout churn |
- * | mtime of files git reports dirty under `src/` | edits not committed yet |
+ * | commit time of the last change to an input | committed work, immune to checkout churn |
+ * | filesystem time of inputs git reports dirty | edits not committed yet |
  *
  * Both are needed. The commit time alone misses the ordinary case (edit, run
  * the gate, forget to re-measure); the dirty scan alone misses everything
@@ -47,12 +47,38 @@
  * result is `unknown`, and the caller fails closed — a gate that cannot tell
  * whether its input is current must not report a pass.
  *
- * A package with no `src/` has no implementation to have changed; its artefact
- * is never stale.
+ * A package that never had `src/` has no implementation to have changed. A
+ * tracked `src/` that was removed is still a change and invalidates the report.
+ *
+ * ## What is deliberately not an input
+ *
+ * Only `src/` and `tests/` are compared. Configuration (`stryker.config.mjs`,
+ * `tsconfig.vitest.json`, `package.json`) determines the report too, and both
+ * were tried and removed after measuring what they do here.
+ *
+ * `package.json` holds every script the package has, so the commit that added
+ * `--exclude` to `test` and `test:cov` marked 16 mutation reports stale — and
+ * the mutation run does not go through either script.
+ *
+ * Configuration hits a second problem that no input can escape by tightening:
+ * a squash merge stamps its commit with the merge time, while the work — and
+ * the measuring — happened on the branch before it. `packages/api` shows the
+ * shape: its report is 52 minutes older than the commit that changed its
+ * `stryker.config.mjs`, and its file set matches that config exactly. The
+ * report was produced from the very config it is accused of predating.
+ *
+ * `src/` and `tests/` carry the same skew, but there the answer is the one
+ * this gate exists to give: after a merge that changes what is measured, the
+ * numbers on `main` were taken somewhere else, and re-measuring is the point.
+ * Configuration changes are rare and deliberate, and the person making one is
+ * the person who knows whether it moves the score.
+ *
+ * Comparing content instead of time removes the skew entirely, and needs the
+ * generator to record a fingerprint of its inputs. That is #2135.
  */
-import { existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { join } from 'node:path';
+import { existsSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 /**
  * Newest mtime under `dir`, in ms. `null` when the walk cannot complete —
@@ -82,6 +108,29 @@ export function newestMtimeMs(dir, io = {}) {
     return null;
   }
   return newest;
+}
+
+/** Newest mtime across report input files and directories. */
+function newestInputMtimeMs(repoRoot, inputRels, io = {}) {
+  const exists = io.existsSync ?? existsSync;
+  const stat = io.statSync ?? statSync;
+  let newest = 0;
+  let found = false;
+  for (const rel of inputRels) {
+    const path = join(repoRoot, rel);
+    if (!exists(path)) continue;
+    found = true;
+    let value;
+    try {
+      const entry = stat(path);
+      value = entry.isFile() ? entry.mtimeMs : newestMtimeMs(path, io);
+    } catch {
+      return null;
+    }
+    if (value === null) return null;
+    if (value > newest) newest = value;
+  }
+  return found ? newest : 0;
 }
 
 /**
@@ -131,24 +180,44 @@ export function parseDirtyPaths(porcelainZ) {
 }
 
 /**
- * When the implementation under `srcRel` last changed, in ms.
+ * Filesystem time of a dirty path, including removal and rename metadata.
+ *
+ * A deleted path cannot be statted, so walk up to the first surviving parent;
+ * removing its directory entry updates that parent's metadata. `ctime` also
+ * matters because rename and chmod can change tracked content without touching
+ * the file's mtime.
+ */
+function dirtyChangedAt(path, repoRoot, stat) {
+  let current = path;
+  while (current !== repoRoot) {
+    try {
+      const { ctimeMs, mtimeMs } = stat(current);
+      return Math.max(ctimeMs, mtimeMs);
+    } catch {
+      current = dirname(current);
+    }
+  }
+  return 0;
+}
+
+/**
+ * When the inputs that determine a report last changed, in ms.
  *
  * @param {object} args
  * @param {string} args.repoRoot
- * @param {string} args.srcRel `src/` relative to `repoRoot`, with `/` separators.
+ * @param {string} args.srcRel primary `src/` relative to `repoRoot`.
+ * @param {string[]} [args.inputRels] all files and directories that determine the report.
  * @param {object} [io] injection seam for the tests.
  * @returns {{ at: number, source: 'git' | 'mtime' | 'absent' | 'unknown' }}
  */
-export function implementationChangedAt({ repoRoot, srcRel }, io = {}) {
+export function implementationChangedAt({ repoRoot, srcRel, inputRels = [srcRel] }, io = {}) {
   const exists = io.existsSync ?? existsSync;
   const stat = io.statSync ?? statSync;
-  const srcAbs = join(repoRoot, srcRel);
+  const inputsExist = inputRels.some((rel) => exists(join(repoRoot, rel)));
 
-  if (!exists(srcAbs)) return { at: 0, source: 'absent' };
-
-  const commitOut = git(['log', '-1', '--format=%ct', '--', srcRel], repoRoot, io.execFileSync);
+  const commitOut = git(['log', '-1', '--format=%ct', '--', ...inputRels], repoRoot, io.execFileSync);
   const statusOut = git(
-    ['status', '--porcelain', '-z', '--', srcRel],
+    ['status', '--porcelain', '-z', '--', ...inputRels],
     repoRoot,
     io.execFileSync,
     { trim: false },
@@ -158,31 +227,28 @@ export function implementationChangedAt({ repoRoot, srcRel }, io = {}) {
   // repository (or git is gone), and a half-git answer is smaller than the
   // truth — exactly the direction that reads as "fresh".
   if (commitOut === null || statusOut === null) {
-    const scanned = newestMtimeMs(srcAbs, io);
+    if (!inputsExist) return { at: 0, source: 'absent' };
+    const scanned = newestInputMtimeMs(repoRoot, inputRels, io);
     return scanned === null ? { at: 0, source: 'unknown' } : { at: scanned, source: 'mtime' };
   }
 
   const committedAt = commitOut === '' ? 0 : Number(commitOut) * 1000;
   let dirtyAt = 0;
   for (const rel of parseDirtyPaths(statusOut)) {
-    try {
-      const { mtimeMs } = stat(join(repoRoot, rel));
-      if (mtimeMs > dirtyAt) dirtyAt = mtimeMs;
-    } catch {
-      // A deleted file has no mtime. The deletion itself is not evidence the
-      // artefact is stale — the commit that removes it will be.
-    }
+    const changedAt = dirtyChangedAt(join(repoRoot, rel), repoRoot, stat);
+    if (changedAt > dirtyAt) dirtyAt = changedAt;
   }
 
   if (!Number.isFinite(committedAt)) {
-    const scanned = newestMtimeMs(srcAbs, io);
+    const scanned = newestInputMtimeMs(repoRoot, inputRels, io);
     return scanned === null ? { at: 0, source: 'unknown' } : { at: scanned, source: 'mtime' };
   }
 
   // Never committed and not dirty: git knows nothing about this path, so its
   // silence is not evidence of freshness.
   if (committedAt === 0 && dirtyAt === 0) {
-    const scanned = newestMtimeMs(srcAbs, io);
+    if (!inputsExist) return { at: 0, source: 'absent' };
+    const scanned = newestInputMtimeMs(repoRoot, inputRels, io);
     return scanned === null ? { at: 0, source: 'unknown' } : { at: scanned, source: 'mtime' };
   }
 
@@ -190,7 +256,7 @@ export function implementationChangedAt({ repoRoot, srcRel }, io = {}) {
 }
 
 /**
- * Whether `artifactRel` still describes the implementation under `srcRel`.
+ * Whether `artifactRel` still describes its current inputs.
  *
  * Equal timestamps count as fresh. A tie cannot be ordered, and filesystems
  * with one-second granularity produce them for work that is genuinely in
@@ -199,7 +265,7 @@ export function implementationChangedAt({ repoRoot, srcRel }, io = {}) {
  *
  * @returns {{ state: 'missing' | 'fresh' | 'stale' | 'unknown', artifactAt?: number, changedAt?: number, source?: string }}
  */
-export function checkArtifactFreshness({ repoRoot, srcRel, artifactRel }, io = {}) {
+export function checkArtifactFreshness({ repoRoot, srcRel, artifactRel, inputRels = [srcRel] }, io = {}) {
   const exists = io.existsSync ?? existsSync;
   const stat = io.statSync ?? statSync;
   const artifactAbs = join(repoRoot, artifactRel);
@@ -216,9 +282,9 @@ export function checkArtifactFreshness({ repoRoot, srcRel, artifactRel }, io = {
     return { state: 'unknown', reason: `cannot stat ${artifactRel}` };
   }
 
-  const changed = implementationChangedAt({ repoRoot, srcRel }, io);
+  const changed = implementationChangedAt({ repoRoot, srcRel, inputRels }, io);
   if (changed.source === 'unknown') {
-    return { state: 'unknown', reason: `cannot determine when ${srcRel} last changed` };
+    return { state: 'unknown', reason: 'cannot determine when the report inputs last changed' };
   }
   if (changed.source === 'absent') return { state: 'fresh', artifactAt, changedAt: 0, source: 'absent' };
 
@@ -230,15 +296,20 @@ export function checkArtifactFreshness({ repoRoot, srcRel, artifactRel }, io = {
   };
 }
 
-/** One line telling the reader what to run. */
-export function staleMessage({ pkg, artifactRel, regenerateCommand, result }) {
+/**
+ * One line telling the reader what to run.
+ *
+ * The package name is left out: both gates already prefix their failure lines
+ * with it, and including it here printed it twice.
+ */
+export function staleMessage({ artifactRel, regenerateCommand, result }) {
   const when = (ms) => new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
   if (result.state === 'unknown') {
-    return `${pkg}: cannot tell whether ${artifactRel} is current (${result.reason}). Re-run \`${regenerateCommand}\`.`;
+    return `cannot tell whether ${artifactRel} is current (${result.reason}). Re-run \`${regenerateCommand}\`.`;
   }
   return (
-    `${pkg}: ${artifactRel} predates the implementation ` +
-    `(artefact ${when(result.artifactAt)}, src changed ${when(result.changedAt)} via ${result.source}). ` +
+    `${artifactRel} predates the report inputs ` +
+    `(artefact ${when(result.artifactAt)}, inputs changed ${when(result.changedAt)} via ${result.source}). ` +
     `Re-run \`${regenerateCommand}\`.`
   );
 }

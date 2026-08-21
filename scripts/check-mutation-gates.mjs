@@ -279,6 +279,7 @@ function freshnessProblem(pkg, pkgDir) {
     repoRoot: REPO_ROOT,
     srcRel: `${pkgDir}/src`,
     artifactRel,
+    inputRels: [`${pkgDir}/src`, `${pkgDir}/tests`],
   });
   if (result.state === 'fresh' || result.state === 'missing') return null;
   return staleMessage({

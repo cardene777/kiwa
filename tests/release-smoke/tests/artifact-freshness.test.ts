@@ -7,24 +7,31 @@
 //
 // 落ちた時の直し方は 1 つで、出力に出る command を実行して測り直す。
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
-import {
-  checkArtifactFreshness,
-  implementationChangedAt,
-  newestMtimeMs,
-  parseDirtyPaths,
-  staleMessage,
-} from '../../../scripts/lib/artifact-freshness.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = repoRoot(HERE);
+
+/**
+ * helper は相対 import ではなく repo root 起点で読み込む。
+ *
+ * この suite は 2 箇所から走る = `pnpm test` は `.vitest-dist/tests/` へ compile して
+ * から実行し、単独起動は `tests/` を直接読む。 2 つは 1 階層ずれるので、
+ * 固定の `../../../` は片方で repo の外を指す (実測で
+ * `Cannot find module` になった)。 `repo-root.ts` が同じ理由で存在する。
+ */
+const helper: typeof import('../../../scripts/lib/artifact-freshness.mjs') = await import(
+  pathToFileURL(resolve(REPO_ROOT, 'scripts/lib/artifact-freshness.mjs')).href
+);
+const { checkArtifactFreshness, implementationChangedAt, newestMtimeMs, parseDirtyPaths, staleMessage } =
+  helper;
 
 const SRC_REL = 'packages/demo/src';
 const ARTIFACT_REL = 'packages/demo/coverage/coverage-summary.json';
@@ -185,6 +192,35 @@ describe('鮮度判定 — mtime ではなく内容が変わった時刻を見�
     expect(changed.source).toBe('mtime');
     expect(changed.at).toBe(2_000_000_000);
   });
+
+  it('T-FRESH-107 mtime を動かさない変更 (mode 変更) も stale にする', () => {
+    const { root, srcFile, artifact } = makeTree({ asRepo: true });
+    setMtime(artifact, COMMIT_EPOCH + 60);
+    setMtime(srcFile, COMMIT_EPOCH);
+    // chmod は内容も mtime も変えず ctime だけ動かす。 git は mode 変更として dirty に出す。
+    chmodSync(srcFile, 0o755);
+    const result = freshness(root);
+    expect(result.state, 'mtime が動かない変更を見落としている').toBe('stale');
+    expect(result.source).toBe('git');
+  });
+
+  it('T-FRESH-105 成果物の生成後に tracked source を削除していれば stale', () => {
+    const { root, srcFile, artifact } = makeTree({ asRepo: true });
+    setMtime(artifact, COMMIT_EPOCH + 60);
+    rmSync(srcFile);
+    const result = freshness(root);
+    expect(result.state, '削除した file は stat できなくても実装の変更である').toBe('stale');
+    expect(result.source).toBe('git');
+  });
+
+  it('T-FRESH-106 tracked src/ 全体を削除した状態を未実装 package と取り違えない', () => {
+    const { root, artifact } = makeTree({ asRepo: true });
+    setMtime(artifact, COMMIT_EPOCH + 60);
+    rmSync(join(root, SRC_REL), { recursive: true });
+    const result = freshness(root);
+    expect(result.state, 'tracked 実装の全削除は成果物を無効にする').toBe('stale');
+    expect(result.source).toBe('git');
+  });
 });
 
 describe('鮮度判定 — 判定できない時は fail-closed', () => {
@@ -290,7 +326,7 @@ describe('鮮度判定 — 実 gate が古い成果物で落ちる', () => {
     expect(status, 'stale なのに exit 0 で通している').not.toBe(0);
     expect(stderr).toContain('@kiwa-lab/core');
     expect(stderr, '再計測 command が出力に無い').toContain(spec.command);
-    expect(stderr).toContain('predates the implementation');
+    expect(stderr).toContain('predates the report inputs');
     expect(stdout).toContain('stale report');
   });
 
@@ -303,7 +339,7 @@ describe('鮮度判定 — 実 gate が古い成果物で落ちる', () => {
       setMtime(artifact, 2_000_000);
     });
     // core 以外は成果物が無いので落ちる。 見るのは core が stale 扱いされないこと。
-    expect(stderr).not.toContain('predates the implementation');
+    expect(stderr).not.toContain('predates the report inputs');
   });
 
   it.each(cases)('T-FRESH-403 $gate は成果物が無い package の扱いを変えない', (spec) => {
@@ -311,9 +347,28 @@ describe('鮮度判定 — 実 gate が古い成果物で落ちる', () => {
       // core の成果物を作らない。
     });
     expect(stderr).toContain('@kiwa-lab/core');
-    expect(stderr, '未計測を stale と取り違えている').not.toContain('predates the implementation');
+    expect(stderr, '未計測を stale と取り違えている').not.toContain('predates the report inputs');
     // 既存の message (探した path を名指しする形) が残っていること。
     expect(stderr).toContain(spec.artifactRel);
+  });
+
+  it.each(cases)('T-FRESH-404 $gate は成果物より新しい test 変更を stale として落とす', (spec) => {
+    const { stderr } = runGate(spec.gate, (fixtureRoot) => {
+      const src = join(fixtureRoot, 'packages/core/src/index.ts');
+      const test = join(fixtureRoot, 'packages/core/tests/index.test.ts');
+      const artifact = join(fixtureRoot, 'packages/core', spec.artifactRel);
+      mkdirSync(dirname(test), { recursive: true });
+      mkdirSync(dirname(artifact), { recursive: true });
+      writeFileSync(test, 'test("current suite", () => {});\n');
+      writeFileSync(artifact, spec.body);
+      setMtime(src, 1_000_000);
+      setMtime(artifact, 2_000_000);
+      setMtime(test, 3_000_000);
+    });
+    expect(stderr, 'test suite が変わっても保存済み score を fresh 扱いしている').toContain(
+      'predates the report inputs',
+    );
+    expect(stderr).toContain(spec.command);
   });
 });
 
