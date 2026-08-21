@@ -21,9 +21,28 @@
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { isMainModule } from './lib/is-main-module.mjs';
+import { recordArtifactInputs } from './lib/input-fingerprint.mjs';
+import { MUTATION_INPUT_DIRS } from './lib/gate-inputs.mjs';
+
+/** Repo root, found from this file rather than from the caller's cwd. */
+const REPO_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+
+/**
+ * The paths whose content the report depends on, repo-relative.
+ *
+ * Kept next to the gate's own list (`scripts/lib/gate-inputs.mjs`) so the set
+ * recorded here and the set the gate checks cannot drift apart. They have to
+ * match exactly: the sidecar records which inputs it covered, and the gate
+ * refuses a fingerprint taken over a different set.
+ */
+function mutationInputRels(cwd, repoRoot) {
+  const pkgRel = relative(repoRoot, cwd).split(/[\\/]/).join('/');
+  return MUTATION_INPUT_DIRS.map((suffix) => `${pkgRel}/${suffix}`);
+}
 
 const BUILD_DIR = '.vitest-dist';
 /**
@@ -97,6 +116,7 @@ export function runPackageMutation({
   warn = () => {},
   dirProblem = null,
   setupProblems = () => [],
+  record = () => ({ ok: false, reason: 'no recorder supplied' }),
 }) {
   if (dirProblem) {
     warn(`${cwd}: ${dirProblem} — run this through a package's \`test:mutation\` script.\n`);
@@ -118,7 +138,19 @@ export function runPackageMutation({
     return compiled;
   }
 
-  return run('stryker', ['run'], cwd);
+  const scored = run('stryker', ['run'], cwd);
+  if (scored !== 0) return scored;
+
+  // Only after a run that produced a report. A sidecar written beside an
+  // artefact from an earlier run would pair this content with those numbers,
+  // and the gate would read the stale report as current (#2135).
+  const recorded = record();
+  if (!recorded.ok) {
+    // Not a failure of the run. The gate falls back to comparing timestamps
+    // when the sidecar is absent, which is what it did before #2135.
+    warn(`could not record the input fingerprint: ${recorded.reason}\n`);
+  }
+  return 0;
 }
 
 if (isMainModule(process.argv[1], import.meta.url)) {
@@ -131,6 +163,12 @@ if (isMainModule(process.argv[1], import.meta.url)) {
       warn: (message) => process.stderr.write(message),
       dirProblem: packageDirProblem(cwd),
       setupProblems: () => mutationSetupProblems(cwd),
+      record: () =>
+        recordArtifactInputs({
+          repoRoot: REPO_ROOT,
+          inputRels: mutationInputRels(cwd, REPO_ROOT),
+          artifactAbs: resolve(cwd, REPORT_DIR, 'mutation.json'),
+        }),
     }),
   );
 }
