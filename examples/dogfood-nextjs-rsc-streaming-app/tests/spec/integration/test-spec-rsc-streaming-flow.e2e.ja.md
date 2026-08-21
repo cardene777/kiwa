@@ -68,7 +68,7 @@ trace には 1 回の描画で `renderArticle` → `enterSuspense` → `streamCh
 | 境界 2 件 + 復帰可能な失敗 1 件 | 0 | **2** | 1 |
 | 境界 1 件 + 復帰不能な失敗 1 件 | 0 | **0** | 1 |
 
-**復帰不能な失敗は水和を止める**。 それでも応答は `ok: true` / 200 で、
+**復帰不能な失敗は、その境界の水和を止める**。 それでも応答は `ok: true` / 200 で、
 `hydratedCount` が 0 であることからしか区別できない。
 
 `pendingCount` は応答では常に 0 になる。 1 回の呼出の中で pend してから hydrate
@@ -88,14 +88,30 @@ trace は 2 件目の呼出で `startCatalog` → `pendCatalogBoundary` →
 
 `documentTransition` は body に `documentTransition` を渡さない限り `null` になる。
 
-form の 3 つの真偽値は、それぞれ `enhance` / `optimistic` / `resolveWith` を
-渡したかどうかに対応する。 渡さなければ偽になる。
+`enhanced` / `optimisticApplied` は、それぞれ `enhance` / `optimistic` を
+渡したかどうかに対応する。 **`resolved` だけは対応しない**。 実測した値。
 
-### adapter は server ごとで、trace は累積する
+| `resolveWith` | `rejectWith` | `resolved` |
+|---|---|---|
+| 省略 | 省略 | **true** |
+| 省略 | `'boom'` | false |
+| 省略 | `''` | **true** |
+| `{ok:true}` | `'boom'` | false |
+
+`resolveWith` を省いても真になり、`rejectWith` が非空の時だけ偽になる。
+`rejectWith` は **文字列でなければ validator が落とす**ので、object を渡すと
+省略したのと同じになる (実測で `rejectWith: {err:'x'} ` は `resolved: true`)。
+両方を渡した時は `rejectWith` が勝つ。
+
+### 注入した adapter の trace は累積する
 
 `startNextServer({ adapter })` に渡した adapter が全 route を処理する。
-実測で 11 回の呼出 (成功 8 / 失敗 3) を 1 つの server に投げると trace が **35 件**積まれた。
-失敗した 3 件 (404 / 405 / validator) は adapter に届かないため trace を作らない。
+server は adapter を生成も reset もしないため、同じ adapter を複数 server へ渡せば
+trace も共有される。
+
+実測では 11 通りの body を POST し、さらに `GET /article` を 1 回、計 12 回の HTTP 呼出を
+1 つの server に投げると trace が **35 件**積まれた。成功は 7 件、adapter に届かない
+失敗は 5 件 (404 / 405 / validator 3 件) で、後者は trace を作らない。
 
 ## 主な品質リスク
 
@@ -113,9 +129,10 @@ form の 3 つの真偽値は、それぞれ `enhance` / `optimistic` / `resolve
   `routeId_required` のような固定 token だが、adapter が投げた失敗は
   `coerceErrorKind` が `err.message` をそのまま返すため英文になる。
   consumer が token として扱うと後者で外れる
-- **adapter の失敗経路に HTTP から届かない**。 mock は `routeId` /
-  `articleId` が空なら投げるが、validator が先に `routeId_required` /
-  `articleId_required` で 400 を返すため、この分岐は e2e から通らない
+- **一部の adapter guard には HTTP から届かない**。 mock が `routeId` /
+  `articleId` の空文字で投げる分岐は、validator が先に `routeId_required` /
+  `articleId_required` を返すため通らない。一方で `chunks: ['']` は validator を通り、
+  `streamHtmlChunk` が投げるため、adapter の失敗経路そのものには HTTP から到達できる
 - **method の判定が route より先**。 存在しない path への `GET` が 404 ではなく
   405 になるため、`405` を「path はあるが method が違う」 と読むと外れる
 
@@ -127,7 +144,8 @@ form の 3 つの真偽値は、それぞれ `enhance` / `optimistic` / `resolve
 `page.goto` は要らない。 `page.request` は browser の fetch ではなく Playwright の
 API testing helper なので、CORS の事前確認を通らない。
 
-**adapter は server ごと**。 trace を数える test を書くなら server を分ける。
+trace を test 間で分けるなら、server だけでなく adapter も test ごとに作る。
+同じ adapter を別 server へ渡すと trace は引き継がれる。
 
 ## テスト観点一覧
 
@@ -172,7 +190,7 @@ API testing helper なので、CORS の事前確認を通らない。
 **T-E2E-001 は 4 経路を 1 件に畳んである**。 4 つは互いの状態に依存しないので分けても
 値は変わらないが、1 つの adapter が 4 op を続けて処理できることを 1 件で示す形にしてある。
 
-**T-E2E-002 と T-E2E-003 は server を作り直す**。 adapter が server ごとなので、
+**T-E2E-002 と T-E2E-003 は server と adapter の両方を作り直す**ため、
 T-E2E-001 の trace を引き継がない。
 
 **この 3 件が覆っていない範囲**。
@@ -184,14 +202,16 @@ T-E2E-001 の trace を引き継がない。
 | `hasFallback` | できる | 応答に含まれるが assert していない |
 | 復帰不能な失敗で `hydratedCount` が 0 になること | できる | `recoverable: true` だけを送っている |
 | `documentTransition` | できる | 渡していない (常に `null`) |
-| form の 3 真偽値が偽になる形 | できる | 3 つとも渡した形だけを送っている |
+| form の 3 真偽値が偽になる形 | できる | `optimistic` / `enhance` を省き、非空の `rejectWith` を渡した形を送っていない |
 | trace の中身と件数 | できる | `traces()` を読んでいない |
 | validator の失敗 (`routeId_required` 等) | できる | 妥当な body だけを送っている |
 | `body_parse_failed` | できる | 壊れた body を送っていない |
-| adapter が投げる失敗 | **できない** | validator が先に 400 を返すため、`routeId` / `articleId` が空の状態を adapter へ渡せない |
+| `routeId` / `articleId` の空文字による adapter guard | **できない** | validator が先に 400 を返すため、空文字を adapter へ渡せない |
+| validator が許す入力による adapter の失敗 | できる | `chunks: ['']` など、adapter 内の semantics helper が拒む入力を送っていない |
 
-最後の 1 件だけが到達できない。 mock adapter の失敗経路は単体テストが
-`makeMockAdapter()` を直接呼んで確かめる。
+空の `routeId` / `articleId` を使う guard だけが到達できない。この分岐は単体テストが
+handler / `makeMockAdapter()` を直接呼んで確かめる。adapter の失敗応答そのものは、
+validator が型だけを確認する optional field から e2e でも観測できる。
 
 ## 手動確認でよいテスト
 
