@@ -39,11 +39,12 @@ container は `quay.io/keycloak/keycloak:26.0` を `start-dev` で起こし、
 待ち条件は起動 log の `/started in/` (`real.ts:342`)。 file 全体で 1 container を
 `beforeAll` で 1 度だけ用意し、4 つの test が同じ handle を使い回す。
 
-### rotation の規則 (`real.ts:526-589`)
+### rotation の規則 (`real.ts:516-583`)
 
-新しい provider の優先度は **既存の最大値 + 100** (`real.ts:535`)。 最大値は初期値 0 の `reduce` で
-取るので負にはならない。 provider は `rsa-generated` / RS256 / 2048 bit /
-`enabled` + `active` の固定で、名前は `kiwa-e2e-rotate-{Date.now()}-{priority}`。
+本 test が `options.priority` を渡さない既定経路では、新しい provider の優先度は
+**既存の最大値 + 100** (`real.ts:535`)。 最大値は初期値 0 の `reduce` で取るので負にはならない。
+明示した `options.priority` はこの計算を上書きできる。 provider は `rsa-generated` / RS256 / 2048 bit /
+`enabled` + `active` の固定で、既定名は `kiwa-e2e-rotate-{Date.now()}-{priority}`。
 
 **古い provider を無効にしない**ので、その鍵は `/certs` に残り続ける。 これが
 「保持期間の窓が開いている」 状態にあたる。
@@ -86,8 +87,8 @@ test 側は `use === 'sig'` で絞り、空の kid を落として扱う。
 sig kid の一覧を返す。 既定の上限は 10 秒で、超えると **最後に見た一覧を含めて throw** する (`spec.ts:110`)。
 `setTimeout` を直に置かないのはこのため。
 
-jose 側は `cacheMaxAge: 100` / `cooldownDuration: 100` (ミリ秒、 `spec.ts:127-128`) を渡す。 既定の
-5 分だと 4b の「消えた kid」 が cache に残って判定できない。
+jose 側は `cacheMaxAge: 100` / `cooldownDuration: 100` (ミリ秒、 `spec.ts:127-128`) を渡す。
+ただし各 test は rotation / 削除の後に remote JWK set を作るため、既存 cache の更新は測っていない。
 
 ## 主な品質リスク
 
@@ -118,9 +119,9 @@ jose 側は `cacheMaxAge: 100` / `cooldownDuration: 100` (ミリ秒、 `spec.ts:
 |---|---|
 | 保持期間の内側 | rotation で kid が増えても、前の kid で署名された token が検証できる |
 | 保持期間の外側 | provider を消すと、その kid の token は `JWKSNoMatchingKey` で拒まれる |
-| 複数回の rotation | 3 回続けても過去の kid が全て `/certs` に残る |
-| 新しい鍵の即時性 | rotation 直後に mint した token が新しい kid で署名され、待ち時間なしで検証できる |
-| RP 側の JWKS 更新 | jose の `createRemoteJWKSet` が kid の取り違えで取り直す |
+| 複数回の rotation | 2 回の rotation 後、3 回の mint で控えた kid が全て `/certs` に含まれる |
+| 新しい鍵の利用可能性 | 新しい kid が `/certs` に現れた後に mint した token が、その kid で署名されて検証できる |
+| RP 側の JWKS 取得 | jose の `createRemoteJWKSet` が現在の JWKS を初回取得して検証に使う。既存 cache の更新は測らない |
 | 署名の本物性 | RS256 の署名検証と `iss` / `aud` の照合を実際に通す |
 
 ## テストケース一覧
@@ -129,8 +130,8 @@ jose 側は `cacheMaxAge: 100` / `cooldownDuration: 100` (ミリ秒、 `spec.ts:
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | 保持期間の内側で、rotation 前の kid の token が検証できる | `OIDC_BOOTSTRAP=1` で起きた Keycloak と、用意済みの confidential client + user | `/certs` の sig kid を控えて id_token を mint し、優先度の高い provider を足す。 kid が増えて前の kid も残るまで待つ | 追加前の kid が `/certs` に残り、集合の件数が増える。 jose の `jwtVerify` が `issuer` と `audience` 込みで通り、`payload.sub` が空でなく `protectedHeader.kid` が rotation 前の kid | P0 | yes | node | `/admin/realms/{realm}/components` `/protocol/openid-connect/certs` `/protocol/openid-connect/token` |
 | T-E2E-002 | 保持期間の外側では kid が見つからず拒まれる | 同上 | mint した token の kid を持つ provider を `/keys` から特定し、先に rotation してから **その provider を消す**。 `/certs` から kid が消えるまで最大 30 秒待つ | `jwtVerify` が拒否し、理由が jose の `JWKSNoMatchingKey` | P0 | yes | node | `/admin/realms/{realm}/keys` `/admin/realms/{realm}/components/{id}` `/protocol/openid-connect/certs` |
-| T-E2E-003 | 3 回続けて入れ替えても過去の kid が残る | 同上 | mint → rotation → mint → rotation → mint を回す (最後の mint の後は入れ替えない) | 3 つの kid が全て `/certs` に残り、3 つの token が全て `jwtVerify` を通る。 各 token の `protectedHeader.kid` が控えた kid の集合に含まれる | P0 | yes | node | `/admin/realms/{realm}/components` `/protocol/openid-connect/certs` |
-| T-E2E-004 | 入れ替えた直後の鍵で mint できる | 同上 | provider を列挙して先頭の id を控え、rotation して kid が増えるまで待つ。 増えた kid を特定してから id_token を mint する | 増えた kid はちょうど 1 件。 token の header がその kid で `alg` が `RS256`。 `jwtVerify` が通り `payload.iss` が issuer、署名前に `decodeJwt` した `sub` が検証後の `sub` と一致 | P0 | yes | node | `/admin/realms/{realm}/components` `/protocol/openid-connect/token` |
+| T-E2E-003 | 2 回の入れ替えをまたいで控えた kid が残る | 同上 | mint → rotation → mint → rotation → mint を回す (最後の mint の後は入れ替えない) | `kids` 配列の 3 要素が全て `/certs` に含まれ、3 つの token が全て `jwtVerify` を通る。 各 token の `protectedHeader.kid` が控えた kid の集合に含まれる | P0 | yes | node | `/admin/realms/{realm}/components` `/protocol/openid-connect/certs` |
+| T-E2E-004 | 増えた kid が `/certs` に現れた後、その鍵で mint できる | 同上 | provider を列挙して先頭の id を控え、rotation して kid が増えるまで待つ。 増えた kid を特定してから id_token を mint する | 増えた kid はちょうど 1 件。 token の header がその kid で `alg` が `RS256`。 `jwtVerify` が通り `payload.iss` が issuer、署名を検証せず `decodeJwt` で読んだ `sub` が検証後の `sub` と一致 | P0 | yes | node | `/admin/realms/{realm}/components` `/protocol/openid-connect/token` |
 
 `Mode` はどの値も正確ではない (§ 主な品質リスク の 6)。 server を起こして
 その口を叩く形が一番近いので `node` を置いた。 `Route` は browser の URL ではなく
@@ -146,21 +147,22 @@ jose 側は `cacheMaxAge: 100` / `cooldownDuration: 100` (ミリ秒、 `spec.ts:
 |---|---|---|---|
 | T-E2E-001 | `tests/e2e/jwks-rotation-real-e2e.spec.ts:169` | 8 件。 rotation 前の sig kid が 1 件以上、header の kid が空でない、`alg` が `RS256`、その kid が rotation 前の集合にある、rotation 後も残る、件数が増える、`jwtVerify` 後の `payload.sub` が空でない、`protectedHeader.kid` が rotation 前の kid | **増えた kid が新しい active signer になったこと**を見ていない。 待ちの述語も「件数が増え、前の kid が全て残る」 までで、増えた kid が何かは特定しない |
 | T-E2E-002 | `tests/e2e/jwks-rotation-real-e2e.spec.ts:223` | 2 件。 mint した token の kid が空でない、`jwtVerify` が `joseErrors.JWKSNoMatchingKey` で拒否 | **署名そのものの失敗** (kid は見つかるが署名が合わない) は見ていない。 削除の応答 status も見ていない (helper が 204 / 404 以外なら throw するだけ) |
-| T-E2E-003 | `tests/e2e/jwks-rotation-real-e2e.spec.ts:296` | assert 文は 2 つ (`339` 行 / `349` 行) で、どちらも 3 要素の loop の中にあるため実行時は 6 件。 3 つの kid が `/certs` に残る (3 件)、3 つの token が `jwtVerify` を通り `protectedHeader.kid` が控えた集合に含まれる (3 件) | **3 つの kid が互いに違うこと**を assert していない。 `toContain` なので同じ kid が 3 回並んでも通る。 待ちの述語も件数だけを見る |
-| T-E2E-004 | `tests/e2e/jwks-rotation-real-e2e.spec.ts:355` | 7 件。 rotation 前の先頭 component の id が空でない、増えた kid がちょうど 1 件、header の kid がそれ、`alg` が `RS256`、`payload.sub` が空でない、`payload.iss` が issuer、`decodeJwt` した `sub` が一致 | 控えた `preActiveComponentId` を **空でないこと以外に使っていない**。 rotation で優先度が実際に上がったことを provider 側から確かめていない |
+| T-E2E-003 | `tests/e2e/jwks-rotation-real-e2e.spec.ts:296` | assert 文は 2 つ (`339` 行 / `349` 行) で、どちらも 3 要素の loop の中にあるため実行時は 6 件。 `kids` 配列の 3 要素が `/certs` に含まれる (3 件)、3 つの token が `jwtVerify` を通り `protectedHeader.kid` が控えた集合に含まれる (3 件) | `it` 名は three consecutive rotations だが、body の rotation は **2 回**。 また、3 要素の kid が互いに違うことを assert していない。 `toContain` なので同じ kid が 3 回並んでも通る。 待ちの述語も件数だけを見る |
+| T-E2E-004 | `tests/e2e/jwks-rotation-real-e2e.spec.ts:355` | 7 件。 rotation 前の先頭 component の id が空でない、増えた kid がちょうど 1 件、header の kid がそれ、`alg` が `RS256`、`payload.sub` が空でない、`payload.iss` が issuer、`decodeJwt` した `sub` が一致 | 控えた `preActiveComponentId` を **空でないこと以外に使っていない**。 rotation で優先度が実際に上がったことを provider 側から確かめていない。 また、mint 前に `/certs` への反映を待つため、rotation 直後の待ち時間なしの利用は測らない |
 
 TC の ID は `it()` に直接書かれている (wrapper を挟まないので、名前の直書きを探す走査でも
 見つかる)。 上の行番号は `it(` の行を指す。
 
 ## 自動化すべきテスト
 
-4 件とも自動化済み。 追加するなら以下 4 つで、いずれも同じ container で書ける。
+4 件とも自動化済み。 追加するなら以下 5 つで、いずれも同じ container で書ける。
 
 | 追加 | 何を確かめるか |
 |---|---|
-| 増えた kid が active signer か | rotation 直後に mint し、その kid が「増えた側」 と一致することを 4a でも見る (今は 4d だけが持つ) |
+| 増えた kid が active signer か | 4a でも rotation 後に mint し、その kid が「増えた側」 と一致することを見る (今は 4d が `/certs` への反映待ち後にだけ持つ) |
 | kid が互いに違うこと | 4c で 3 つの kid を集合にして件数が 3 であることを見る |
 | 署名の取り違え | 別の realm で mint した token を検証させ、`JWKSNoMatchingKey` ではなく署名側の拒否が出ることを見る |
+| RP 側の JWKS cache 更新 | 同じ remote JWK set を rotation 前に一度使って cache を作り、rotation 後の新しい kid で再取得が起きることを見る |
 | 優先度の同値 | 同じ優先度の provider を 2 つ作り、列挙の先頭がどちらになるかを見る (§ 不足している仕様 の 2) |
 
 ## 手動確認でよいテスト
@@ -174,6 +176,6 @@ TC の ID は `it()` に直接書かれている (wrapper を挟まないので�
 
 | # | 項目 | 中身 |
 |---|---|---|
-| 1 | `KIWA_OIDC_ENV_MISSING` が何を意味するか | `interface.ts:108-111` は「実 driver が環境無しで動いたときに出す」「test がこれを見て一律に skip できる」 と書く。 実際には `real.ts` の **22 箇所**で使われ、意味が 4 通りに割れている。 環境が無い (5 箇所 — `834` / `904` / `922` / `932` と、testcontainers が入っていない `313`)、同期の口では返せないので非同期版を先に呼べ (2 箇所 — `850` / `903`)、この機能は adapter の範囲外 (1 箇所 — `877`、 環境を見ずに必ず throw する)、**動いている container への操作が失敗した** (14 箇所 / helper 9 個 — `178` `222` `405` `437` `443` `504` `562` `570` `579` `603` `663` `703` `735` `744`)。 4 番目は環境不足ではないのに、doc comment に従う消費側は skip に倒れる |
+| 1 | `KIWA_OIDC_ENV_MISSING` が何を意味するか | `interface.ts:108-111` は「実 driver が環境無しで動いたときに出す」「test がこれを見て一律に skip できる」 と書く。 実際には `real.ts` の error message が **22 分岐** (21 個の `throw` のうち `901` 行だけが 2 分岐)あり、意味が 4 通りに割れている。 環境が無い (5 箇所 — `834` / `904` / `922` / `932` と、testcontainers が入っていない `313`)、同期の口では返せないので非同期版を先に呼べ (2 箇所 — `850` / `903`)、この機能は adapter の範囲外 (1 箇所 — `877`、 環境を見ずに必ず throw する)、**動いている container への操作が失敗した** (14 箇所 / helper 9 個 — `178` `222` `405` `437` `443` `504` `562` `570` `579` `603` `663` `703` `735` `744`)。 4 番目は環境不足ではないのに、doc comment に従う消費側は skip に倒れる |
 | 2 | 優先度が同値のときどれが active か | `real.ts:487-492` は「先頭を active provider として扱ってよい」 と書くが、比較子は priority だけを見る (`real.ts:512`)。 同値なら 0 を返して Keycloak の応答順が残る。 どれを active とみなすかが決まっていない |
 | 3 | 「保持期間の窓」 が何で閉じるか | `real.ts:518-521` は古い provider を残すことを「Keycloak 内蔵の保持期間の窓」 と呼ぶ。 窓を閉じる条件はどこにも書かれておらず、実際に閉じる経路は明示的な削除だけになっている。 4b が「保持期間切れ」 を削除で模擬しているが、期限切れと削除が同じ扱いでよいかは決まっていない |
