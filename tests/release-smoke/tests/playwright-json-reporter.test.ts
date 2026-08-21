@@ -3,8 +3,8 @@
 // ## なぜ検査を置くか
 //
 // #2109 の完了条件は「`tests/e2e/` を持つ 20 example の `playwright.config.ts` が
-// JSON レポーターを出力できる」。 実測すると **20 件すべてが `[['list']]` だけ**で、
-// 1 件も JSON を書かなかった。
+// JSON レポーターを出力できる」。 実測すると `'list'` が 1 件、`[['list']]` が
+// 19 件で、1 件も JSON を書かなかった。
 //
 // `@kiwa-lab/observability` の `fromPlaywrightJson` は実行履歴の入口だが、
 // 入力を作る側が無いまま置かれていた。
@@ -15,12 +15,12 @@
 // `[['list']]` (配列) の 2 形があり、Playwright はどちらも受ける。 正規表現で
 // 見分けようとすると、**形が 1 つ増えるたびに検査が静かに素通りする**。
 //
-// 読み込めば Playwright 自身が正規化した後の値を見られる。 config が compile
-// できない状態も同時に捕まる。
+// 読み込めば config が実際に export する値を見られ、下の helper で対応 shape を
+// 明示的に正規化できる。 config の構文 error や import error も同時に捕まる。
 //
 // ## outputFile を必須にする理由
 //
-// Playwright の JSON レポーターは `outputFile` が解決できないと
+// Playwright の JSON レポーターは config や環境変数から `outputFile` が解決できないと
 // **stdout へ書く** (`printsToStdio()` が `!this._resolvedOutputFile` を返す)。
 // `list` と混ざって console が読めなくなるうえ、後段が読む file もできない。
 //
@@ -32,9 +32,9 @@
 //
 // ## 何を見ないか
 //
-// **実際に走らせて file ができることは見ない。** browser の起動と webServer の
-// boot が要り、20 example ぶんで数十分かかる。 ここで固定するのは「宣言が
-// 揃っていること」 までで、実際に書けるかは e2e を 1 度走らせれば分かる。
+// **Playwright reporter を実行して file ができることまでは見ない。** ここは repo の
+// config 宣言を固定する gate で、Playwright 自身の書き込み動作は再検査しない。
+// browser / webServer を起動しない `playwright test --list` で別途 smoke できる。
 import { existsSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -61,6 +61,7 @@ function collectConfigs(): { example: string; abs: string }[] {
 }
 
 const CONFIGS = collectConfigs();
+const REQUIRED_CONFIG_COUNT = 20;
 
 /** reporter の宣言を `[name, options]` の組へ正規化する。 */
 function normalizeReporter(reporter: unknown): [string, Record<string, unknown>][] {
@@ -77,15 +78,31 @@ function normalizeReporter(reporter: unknown): [string, Record<string, unknown>]
 }
 
 describe('e2e-generic の Playwright config — JSON レポート (#2109)', () => {
-  it('T-PJR-001 対象の config を 1 件以上見つけている', () => {
-    // 集合が空だと以下の each が 1 度も走らず、検査の件数だけが並ぶ。
+  it(`T-PJR-001 完了条件の ${REQUIRED_CONFIG_COUNT} config 以上を見つけている`, () => {
+    // 下限を固定しないと、config が 1 件だけ残った部分空振りでも以下の each は通る。
     expect(
       CONFIGS.length,
       'tests/e2e/ と playwright.config.ts を両方持つ example を 1 件も見つけていない (検査が空振りしている)',
     ).toBeGreaterThan(0);
+    expect(
+      CONFIGS.length,
+      `tests/e2e/ と playwright.config.ts を両方持つ example が ${REQUIRED_CONFIG_COUNT} 件未満 (検査が部分空振りしている)`,
+    ).toBeGreaterThanOrEqual(REQUIRED_CONFIG_COUNT);
   });
 
-  it.each(CONFIGS)('T-PJR-002 $example が JSON レポーターを出力先付きで宣言する', async (target) => {
+  it.each([
+    { label: '裸の文字列', reporter: 'list', expected: [['list', {}]] },
+    { label: '単一 tuple', reporter: ['list', {}], expected: [['list', {}]] },
+    {
+      label: 'reporter 配列',
+      reporter: [['list'], ['json', { outputFile: JSON_REPORT_REL }]],
+      expected: [['list', {}], ['json', { outputFile: JSON_REPORT_REL }]],
+    },
+  ])('T-PJR-002 normalizeReporter が $label を分ける', ({ reporter, expected }) => {
+    expect(normalizeReporter(reporter)).toEqual(expected);
+  });
+
+  it.each(CONFIGS)('T-PJR-003 $example が JSON レポーターを出力先付きで宣言する', async (target) => {
     const loaded = (await import(pathToFileURL(target.abs).href)) as { default?: unknown };
     const config = loaded.default as { reporter?: unknown } | undefined;
     expect(config, `${target.example} の config が default export を持たない`).toBeTruthy();
