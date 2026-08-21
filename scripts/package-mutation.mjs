@@ -110,9 +110,8 @@ function runStep(command, args, cwd) {
  * copy and this run takes minutes (35 for `dapp`), so an edit landing in that
  * window must not be recorded as what was measured.
  *
- * Exported because the entry-point block below only runs as a CLI inside a real
- * package, where nothing checks it. Calling through here puts the wiring —
- * which kind, which root — somewhere a test can reach.
+ * Kept as the default recorder of `runPackageMutation`, so the same callable
+ * wiring — kind, package root, and repo root — is used by the CLI and tests.
  */
 export function recordMutationInputs(cwd, repoRoot = REPO_ROOT) {
   return recordForPackage({ kind: 'mutation', cwd, repoRoot });
@@ -120,12 +119,13 @@ export function recordMutationInputs(cwd, repoRoot = REPO_ROOT) {
 
 export function runPackageMutation({
   cwd,
+  repoRoot = REPO_ROOT,
   rm,
   run,
   warn = () => {},
   dirProblem = null,
   setupProblems = () => [],
-  record = () => ({ ok: false, reason: 'no recorder supplied' }),
+  record = () => recordMutationInputs(cwd, repoRoot),
 }) {
   if (dirProblem) {
     warn(`${cwd}: ${dirProblem} — run this through a package's \`test:mutation\` script.\n`);
@@ -155,8 +155,9 @@ export function runPackageMutation({
   // and the gate would read the stale report as current (#2135).
   const recorded = record();
   if (!recorded.ok) {
-    // Not a failure of the run. The gate falls back to comparing timestamps
-    // when the sidecar is absent, which is what it did before #2135.
+    // Not a failure of the measurement itself. Input drift leaves an unusable
+    // marker so the gate fails closed; an unwritable sidecar may still leave
+    // the legacy timestamp comparison as the only available check.
     warn(`could not record the input fingerprint: ${recorded.reason}\n`);
   }
   return 0;
@@ -172,12 +173,6 @@ if (isMainModule(process.argv[1], import.meta.url)) {
       warn: (message) => process.stderr.write(message),
       dirProblem: packageDirProblem(cwd),
       setupProblems: () => mutationSetupProblems(cwd),
-      // Not reachable from a test: this block runs only when the file is the
-      // entry point, and getting here needs a real Stryker run (a fixture
-      // package stops at `setupProblems`, which returns 2 before recording).
-      // What the call does is checked through `recordMutationInputs`; what is
-      // left unchecked is this one line wiring it in.
-      record: () => recordMutationInputs(cwd),
     }),
   );
 }

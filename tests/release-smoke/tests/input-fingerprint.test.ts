@@ -63,7 +63,10 @@ const fingerprint = (await import(
       buildDirAbs?: string;
     },
     io?: {
+      execFileSync?: typeof execFileSync;
       mkdirSync?: typeof mkdirSync;
+      readdirSync?: typeof import('node:fs').readdirSync;
+      statSync?: typeof import('node:fs').statSync;
       writeFileSync?: typeof writeFileSync;
     },
   ) => RecordResult;
@@ -95,6 +98,7 @@ const runner = (await import(
 )) as {
   runPackageMutation: (args: {
     cwd: string;
+    repoRoot?: string;
     rm: (path: string) => void;
     run: (command: string, args: string[], cwd: string) => number;
     warn?: (message: string) => void;
@@ -519,8 +523,10 @@ describe('記録 — 測定中に入力が変わった run は結び付けない
     touchAfterBuild(srcFile);
     const result = record(root, artifact);
     expect(result.ok, '測定に入っていない内容を成果物へ結び付けている').toBe(false);
-    expect(result.ok === false && result.reason).toContain('changed after the build');
-    expect(existsSync(sidecarPathFor(artifact)), 'sidecar を書いてしまっている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('at or after the build');
+    expect(readArtifactInputs(artifact).state, 'timestamp fallback を許す sidecar absent にしている').toBe(
+      'unreadable',
+    );
   });
 
   it('T-FP-208b test 側の入力が build より新しくても記録しない', () => {
@@ -547,18 +553,17 @@ describe('記録 — 測定中に入力が変わった run は結び付けない
     touchDuringRun(srcFile);
     const result = record(root, artifact);
     expect(result.ok, '成果物の時刻を基準にしていて compile を見ていない').toBe(false);
-    expect(result.ok === false && result.reason).toContain('changed after the build');
+    expect(result.ok === false && result.reason).toContain('at or after the build');
   });
 
-  it('T-FP-208e 消えた入力があっても後続の入力を見る', () => {
-    const { root, artifact, srcFile, testFile } = makeTree();
-    // commit 済 file を消すと git は列挙し続ける。 そこで走査を止めると、
-    // その後ろにある変更を 1 件も見なくなる。
+  it('T-FP-208e 測定中に消えた入力は記録しない', () => {
+    const { root, artifact, srcFile } = makeTree();
+    // post-run fingerprint だけなら削除後の tree を正しい入力として記録してしまう。
     rmSync(srcFile);
-    touchAfterBuild(testFile);
     const result = record(root, artifact);
-    expect(result.ok, '消えた入力で走査を打ち切っている').toBe(false);
-    expect(result.ok === false && result.reason).toContain('index.test.ts');
+    expect(result.ok, 'build に残る削除済み入力を現在の tree と結び付けている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('is missing');
+    expect(readArtifactInputs(artifact).state).toBe('unreadable');
   });
 
   it('T-FP-208f 参照先の無い symlink は fail-closed', () => {
@@ -569,6 +574,47 @@ describe('記録 — 測定中に入力が変わった run は結び付けない
     const result = record(root, artifact);
     expect(result.ok, '年齢を測れない入力を素通ししている').toBe(false);
     expect(result.ok === false && result.reason).toContain('could not be read to compare');
+  });
+
+  it('T-FP-208g newest output より前でも最初の emit より後の編集は記録しない', () => {
+    const { root, artifact, srcFile, buildDir } = makeTree();
+    const laterOutput = join(buildDir, 'late.js');
+    writeFileSync(laterOutput, 'export const late = true;\n');
+    utimesSync(laterOutput, BUILD_EPOCH + 100, BUILD_EPOCH + 100);
+    // newest output を compile 時刻にすると、この emit window 内の変更を見逃す。
+    writeFileSync(srcFile, 'export const value = 2;\n');
+    utimesSync(srcFile, BUILD_EPOCH + 50, BUILD_EPOCH + 50);
+    const result = record(root, artifact);
+    expect(result.ok, '最後の emit を基準にして compile 中の編集を見逃している').toBe(false);
+    expect(result.ok === false && result.reason).toContain('at or after the build');
+  });
+
+  it('T-FP-208h hash 中に入力が変わっても記録しない', () => {
+    const { root, artifact, srcFile, buildDir } = makeTree();
+    let changed = false;
+    const changingExec = ((command: string, args: readonly string[], options: object) => {
+      if (!changed && args[0] === 'hash-object') {
+        changed = true;
+        writeFileSync(srcFile, 'export const value = 2;\n');
+        touchDuringRun(srcFile);
+      }
+      return execFileSync(command, args, options as Parameters<typeof execFileSync>[2]);
+    }) as typeof execFileSync;
+    const result = recordArtifactInputs(
+      { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact, buildDirAbs: buildDir },
+      { execFileSync: changingExec },
+    );
+    expect(changed, 'hash 中の変更を作る seam が走っていない').toBe(true);
+    expect(result.ok, 'mtime 検査を hash より前に終えている').toBe(false);
+  });
+
+  it('T-FP-208i build と同じ mtime の入力も曖昧なため記録しない', () => {
+    const { root, artifact, srcFile } = makeTree();
+    writeFileSync(srcFile, 'export const value = 2;\n');
+    utimesSync(srcFile, BUILD_EPOCH, BUILD_EPOCH);
+    const result = record(root, artifact);
+    expect(result.ok, '同一 timestamp を測定済みと決め打ちしている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('at or after the build');
   });
 
   it('T-FP-209 build が無ければ記録しない (fail-closed)', () => {
@@ -592,7 +638,7 @@ describe('記録 — 測定中に入力が変わった run は結び付けない
     const result = recordArtifactInputs({ repoRoot: root, inputRels: INPUTS, artifactAbs: artifact });
     expect(result.ok, '検査する相手が無いまま sidecar を書いている').toBe(false);
     expect(result.ok === false && result.reason).toContain('no build directory');
-    expect(existsSync(sidecarPathFor(artifact))).toBe(false);
+    expect(readArtifactInputs(artifact).state).toBe('unreadable');
   });
 });
 
@@ -630,13 +676,33 @@ describe('記録 — 書けない時も返り値で返す', () => {
     expect(result?.ok === false && result.reason).toContain('EACCES');
   });
 
-  it('T-FP-211c 書込失敗の後に sidecar が残らない', () => {
+  it('T-FP-211c partial write が残っても有効な sidecar にはならない', () => {
     const { root, artifact } = makeTree();
-    recordArtifactInputs(
+    const result = recordArtifactInputs(
       { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact, buildDirAbs: join(root, BUILD_REL) },
-      { writeFileSync: failing('ENOSPC') as typeof writeFileSync },
+      {
+        writeFileSync: ((path: Parameters<typeof writeFileSync>[0]) => {
+          writeFileSync(path, `schema_version: ${SIDECAR_SCHEMA_VERSION}\n`);
+          throw new Error('ENOSPC after partial write');
+        }) as typeof writeFileSync,
+      },
     );
-    expect(existsSync(sidecarPathFor(artifact)), '書けなかったのに sidecar がある').toBe(false);
+    expect(result.ok).toBe(false);
+    expect(readArtifactInputs(artifact).state, 'partial sidecar を有効として読んでいる').toBe('unreadable');
+  });
+
+  it('T-FP-211d rejection marker を書けなくても例外でなく ok:false', () => {
+    const { root, artifact, srcFile } = makeTree();
+    touchDuringRun(srcFile);
+    let result: RecordResult | undefined;
+    expect(() => {
+      result = recordArtifactInputs(
+        { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact, buildDirAbs: join(root, BUILD_REL) },
+        { writeFileSync: failing('EROFS: read-only file system') as typeof writeFileSync },
+      );
+    }).not.toThrow();
+    expect(result?.ok).toBe(false);
+    expect(result?.ok === false && result.reason).toContain('rejection marker could not be written');
   });
 });
 
@@ -677,8 +743,8 @@ describe('記録 script — 成果物が無ければ書かない', () => {
     touchDuringRun(srcFile);
     const result = recordForPackage({ kind: 'coverage', cwd: join(root, 'packages/demo'), repoRoot: root });
     expect(result.ok, '測定に入っていない内容を成果物へ結び付けている').toBe(false);
-    expect(result.ok === false && result.reason).toContain('changed after the build');
-    expect(existsSync(sidecarPathFor(artifact))).toBe(false);
+    expect(result.ok === false && result.reason).toContain('at or after the build');
+    expect(readArtifactInputs(artifact).state).toBe('unreadable');
   });
 
   it('T-FP-304 build が揃っていれば記録する', () => {
@@ -701,8 +767,8 @@ describe('記録 script — 成果物が無ければ書かない', () => {
     touchDuringRun(srcFile);
     const result = recordForPackage({ kind: 'mutation', cwd: pkg, repoRoot: root });
     expect(result.ok, 'mutation 側だけ build を見ていない').toBe(false);
-    expect(result.ok === false && result.reason).toContain('changed after the build');
-    expect(existsSync(sidecarPathFor(report))).toBe(false);
+    expect(result.ok === false && result.reason).toContain('at or after the build');
+    expect(readArtifactInputs(report).state).toBe('unreadable');
   });
 
   // runner の入口は実 package の中でしか走らないので、どちらの成果物へ記録するかは
@@ -715,8 +781,15 @@ describe('記録 script — 成果物が無ければ書かない', () => {
     const report = join(pkg, 'mutation-report/mutation.json');
     writeFileSync(report, '{"files":{}}\n');
     utimesSync(report, ARTIFACT_EPOCH, ARTIFACT_EPOCH);
-    const result = runner.recordMutationInputs(pkg, root);
-    expect(result.ok, `記録できていない: ${result.ok === false ? result.reason : ''}`).toBe(true);
+    const resultCode = runner.runPackageMutation({
+      cwd: pkg,
+      repoRoot: root,
+      rm: () => {},
+      run: () => 0,
+      dirProblem: null,
+      setupProblems: () => [],
+    });
+    expect(resultCode).toBe(0);
     expect(existsSync(sidecarPathFor(report)), 'mutation の成果物に sidecar が無い').toBe(true);
     expect(existsSync(sidecarPathFor(artifact)), 'coverage 側へ書いている').toBe(false);
   });
@@ -819,8 +892,8 @@ describe('実 gate — 内容で判定する', () => {
       // compile の後に入力が変わった状態。 成果物はこの内容を測っていない。
       const input = join(root, 'packages/core/src/index.ts');
       writeFileSync(input, 'export const v = 2;\n');
-      const future = Date.now() / 1000 + 3600;
-      utimesSync(input, future, future);
+      const changedAt = Date.now() / 1000 + 3600;
+      utimesSync(input, changedAt, changedAt);
       const recorded = recordArtifactInputs({
         repoRoot: root,
         inputRels: ['packages/core/src', 'packages/core/tests'],
@@ -828,11 +901,10 @@ describe('実 gate — 内容で判定する', () => {
         buildDirAbs: join(root, 'packages/core/.vitest-dist'),
       });
       expect(recorded.ok, '測定に入っていない内容で sidecar を書いている').toBe(false);
-      // 時刻だけ見れば fresh になる形に置き、時刻比較の側も試す。
-      utimesSync(artifact, COMMIT_EPOCH + 86_400, COMMIT_EPOCH + 86_400);
+      // 時刻だけなら fresh になる形。 rejection marker が無ければ gate は通る。
+      utimesSync(artifact, changedAt + 60, changedAt + 60);
     });
-    // sidecar が無いので #2125 の時刻比較に落ち、dirty な入力で stale と判定される。
-    expect(stderr, '測定していない内容の成果物を通している').toContain('predates the report inputs');
+    expect(stderr, '測定していない内容の成果物を通している').toContain('cannot tell whether');
     expect(stderr).toContain(spec.command);
   });
 

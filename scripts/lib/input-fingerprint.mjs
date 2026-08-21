@@ -45,13 +45,12 @@ import {
   lstatSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   readlinkSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
-
-import { newestMtimeMs } from './artifact-freshness.mjs';
 
 
 /** The only sidecar layout this module reads or writes. */
@@ -212,6 +211,54 @@ function computeArtifactFingerprint(artifactAbs, io = {}) {
 }
 
 /**
+ * Oldest emitted file under a clean build.
+ *
+ * `tsc` reads the program before it emits it. The first output is therefore
+ * the conservative edge of the measured copy: using the newest output leaves
+ * the whole emit window open, because an input can change after it was read but
+ * before the last output lands.
+ */
+function oldestMtimeMs(dir, io = {}) {
+  const readdir = io.readdirSync ?? readdirSync;
+  const stat = io.statSync ?? statSync;
+  let oldest = Number.POSITIVE_INFINITY;
+  const walk = (current) => {
+    for (const entry of readdir(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile()) {
+        const { mtimeMs } = stat(path);
+        if (mtimeMs < oldest) oldest = mtimeMs;
+      }
+    }
+  };
+  try {
+    walk(dir);
+  } catch {
+    return null;
+  }
+  return oldest === Number.POSITIVE_INFINITY ? 0 : oldest;
+}
+
+/** Leave an unusable sidecar so the gate fails closed instead of using time. */
+function rejectRecordedPair(artifactAbs, reason, io = {}) {
+  const path = sidecarPathFor(artifactAbs);
+  const body = [
+    `schema_version: ${SIDECAR_SCHEMA_VERSION}`,
+    `recording_rejected: ${reason.replaceAll('\n', ' ')}`,
+    '',
+  ].join('\n');
+  try {
+    (io.mkdirSync ?? mkdirSync)(dirname(path), { recursive: true });
+    (io.writeFileSync ?? writeFileSync)(path, body);
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    return { ok: false, reason: `${reason}; the rejection marker could not be written (${detail})` };
+  }
+  return { ok: false, reason };
+}
+
+/**
  * Whether the inputs still stand as the run's build left them.
  *
  * A sidecar is written after the run, so it describes the working tree *then*
@@ -222,23 +269,24 @@ function computeArtifactFingerprint(artifactAbs, io = {}) {
  * unchanged between recording and checking, so the pair reads as `match` and
  * the gate scores the new code against the old run.
  *
- * The build is the instant the inputs were consumed. Both `test:cov` and
- * `test:mutation` delete `.vitest-dist` and recompile before measuring, so its
- * mtimes mark when the compiler last read `src/` and `tests/`. An input newer
- * than that did not reach the build, and no sidecar may claim it did.
+ * Both `test:cov` and `test:mutation` delete `.vitest-dist` and recompile before
+ * measuring. `tsc` reads the program before emitting it, so the oldest emitted
+ * file is a conservative upper bound on when the inputs were consumed. An
+ * input at or after that edge may not have reached the build, and no sidecar
+ * may claim it did.
  *
  * Measured across all 30 package build directories on this tree: the newest
- * input predates the build every time, and the build predates its artefact
- * every time (`core` compiled 15:52:05 and its coverage landed 15:53:18). The
- * check costs one `git ls-files` and one walk, both of which the recording
- * path already pays.
+ * input predates the oldest build output every time, and the build predates
+ * its artefact every time (`core` compiled 15:52:05 and its coverage landed
+ * 15:53:18). The check costs one `git ls-files` and one walk, both of which the
+ * recording path already pays.
  *
  * @returns {string | null} why recording must not happen, or `null` when it may.
  */
 function inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io = {}) {
   if (!buildDirAbs) return 'no build directory was given to compare the inputs against';
 
-  const builtAt = newestMtimeMs(buildDirAbs, io);
+  const builtAt = oldestMtimeMs(buildDirAbs, io);
   // `null` is an unreadable directory, `0` a directory holding no files. The
   // build is deleted and recompiled by every run that records, so neither
   // shape belongs to a run that just measured something.
@@ -251,9 +299,13 @@ function inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io = {}) 
   const stat = io.statSync ?? statSync;
   for (const rel of paths) {
     const abs = join(repoRoot, rel);
-    // A path git lists but the tree no longer has is a deletion, which the
-    // fingerprint already reflects by dropping its line.
-    if (!pathEntryExists(abs, io)) continue;
+    // The post-run fingerprint reflects a deletion, but the compiled copy may
+    // still contain the deleted file. With no file left there is no mtime that
+    // can prove whether the deletion preceded the build, so do not claim the
+    // pair. The timestamp fallback remains blocked by the rejection marker.
+    if (!pathEntryExists(abs, io)) {
+      return `${rel} is missing, so its age cannot be compared against the build`;
+    }
     let mtimeMs;
     try {
       ({ mtimeMs } = stat(abs));
@@ -262,7 +314,7 @@ function inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io = {}) 
       // over a file whose age is unknown.
       return `${rel} could not be read to compare against the build`;
     }
-    if (mtimeMs > builtAt) return `${rel} changed after the build the run measured`;
+    if (mtimeMs >= builtAt) return `${rel} changed at or after the build the run measured`;
   }
   return null;
 }
@@ -280,8 +332,9 @@ function inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io = {}) 
  * whichever caller is added next.
  *
  * Recording is not a failure of the run. Every rejection here returns a reason
- * for the caller to report while still leaving with success, and the gate goes
- * on comparing timestamps as it did before #2135.
+ * for the caller to report while still leaving with success. A rejected pair
+ * leaves an unusable marker so the gate fails closed instead of accepting the
+ * newer artefact through its legacy timestamp fallback.
  *
  * @returns {{ ok: true, fingerprint: string } | { ok: false, reason: string }}
  */
@@ -294,11 +347,14 @@ export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs, buildDi
     return { ok: false, reason: 'the artefact could not be read' };
   }
 
-  const drifted = inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io);
-  if (drifted !== null) return { ok: false, reason: drifted };
-
+  // Hash first, then inspect mtimes. If an edit lands while git is hashing, the
+  // later age check rejects it. If it lands after that check, the recorded old
+  // digest no longer matches the working tree and the gate rejects it.
   const fingerprint = computeInputFingerprint({ repoRoot, inputRels }, io);
   if (fingerprint === null) return { ok: false, reason: 'git could not describe the inputs' };
+
+  const drifted = inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io);
+  if (drifted !== null) return rejectRecordedPair(artifactAbs, drifted, io);
 
   const body = [
     `schema_version: ${SIDECAR_SCHEMA_VERSION}`,
@@ -319,7 +375,8 @@ export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs, buildDi
     // reports it and the CLI still exits 0, and `runPackageMutation` warns and
     // still returns the run's own exit code. Throwing here escapes both and
     // turns "the sidecar could not be written" into "`test:cov` failed".
-    return { ok: false, reason: `the sidecar could not be written (${error.message})` };
+    const detail = error instanceof Error ? error.message : String(error);
+    return { ok: false, reason: `the sidecar could not be written (${detail})` };
   }
   return { ok: true, fingerprint };
 }

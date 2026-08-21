@@ -43,9 +43,9 @@ export const KINDS = {
 /**
  * The compiled copy both kinds measure.
  *
- * `test:cov` and `test:mutation` delete it and recompile before running, so
- * its mtimes mark when the compiler last read `src/` and `tests/`. The
- * recorder refuses to pair inputs newer than that with the artefact.
+ * `test:cov` and `test:mutation` delete it and recompile before running. `tsc`
+ * reads the program before emitting it, so the oldest output is the
+ * conservative edge used to reject later input changes.
  */
 export const BUILD_DIR = '.vitest-dist';
 
