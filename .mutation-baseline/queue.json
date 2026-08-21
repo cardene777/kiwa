@@ -6,14 +6,14 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 76.64,
-  "totalMsi": 76.64,
-  "coveredMsi": 78.37,
-  "killed": 2027,
-  "survived": 571,
-  "timeout": 42,
+  "killRate": 78.64,
+  "totalMsi": 78.64,
+  "coveredMsi": 80.48,
+  "killed": 2080,
+  "survived": 515,
+  "timeout": 43,
   "noCoverage": 194,
-  "error": 5,
+  "error": 7,
   "mutants": [
     {
       "file": ".vitest-dist/src/cloudflare-queues/miniflare-cloudflare-queues.js",
@@ -391,14 +391,14 @@
       "line": 268,
       "column": 17,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/cloudflare-queues/miniflare-cloudflare-queues.js",
       "line": 268,
       "column": 17,
       "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/cloudflare-queues/miniflare-cloudflare-queues.js",
@@ -753,16 +753,16 @@
     {
       "file": ".vitest-dist/src/inngest/dev-server-inngest.js",
       "line": 4,
-      "column": 45,
-      "mutator": "StringLiteral",
-      "replacement": "\"Stryker was here!\""
+      "column": 37,
+      "mutator": "Regex",
+      "replacement": "/\\/$/"
     },
     {
       "file": ".vitest-dist/src/inngest/dev-server-inngest.js",
       "line": 4,
-      "column": 37,
-      "mutator": "Regex",
-      "replacement": "/\\/$/"
+      "column": 45,
+      "mutator": "StringLiteral",
+      "replacement": "\"Stryker was here!\""
     },
     {
       "file": ".vitest-dist/src/inngest/dev-server-inngest.js",
@@ -1158,24 +1158,10 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 65,
-      "column": 22,
-      "mutator": "ArrayDeclaration",
-      "replacement": "[\"Stryker was here\"]"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 83,
       "column": 25,
       "mutator": "LogicalOperator",
       "replacement": "spec.autoDelete && false"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 84,
-      "column": 23,
-      "mutator": "LogicalOperator",
-      "replacement": "spec.internal && false"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1187,9 +1173,30 @@
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 84,
+      "column": 23,
+      "mutator": "LogicalOperator",
+      "replacement": "spec.internal && false"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 65,
+      "column": 22,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 84,
       "column": 40,
       "mutator": "BooleanLiteral",
       "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 86,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1207,13 +1214,6 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 86,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 93,
       "column": 13,
       "mutator": "ConditionalExpression",
@@ -1221,17 +1221,17 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 95,
-      "column": 19,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 97,
       "column": 22,
       "mutator": "LogicalOperator",
       "replacement": "spec.durable && true"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 95,
+      "column": 19,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1249,6 +1249,13 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 99,
+      "column": 24,
+      "mutator": "LogicalOperator",
+      "replacement": "spec.exclusive && false"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 98,
       "column": 44,
       "mutator": "BooleanLiteral",
@@ -1260,13 +1267,6 @@
       "column": 42,
       "mutator": "BooleanLiteral",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 99,
-      "column": 24,
-      "mutator": "LogicalOperator",
-      "replacement": "spec.exclusive && false"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1300,12 +1300,26 @@
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 103,
       "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 103,
+      "column": 13,
       "mutator": "EqualityOperator",
       "replacement": "spec.args === undefined"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 103,
+      "line": 106,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 112,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
@@ -1319,22 +1333,8 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 106,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 131,
       "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 112,
-      "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
@@ -1445,17 +1445,17 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 214,
-      "column": 33,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 213,
       "column": 21,
       "mutator": "OptionalChaining",
       "replacement": "opts.requeue"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 214,
+      "column": 33,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1508,20 +1508,6 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 262,
-      "column": 42,
-      "mutator": "ArrayDeclaration",
-      "replacement": "[\"Stryker was here\"]"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 289,
-      "column": 51,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 289,
       "column": 51,
       "mutator": "ConditionalExpression",
@@ -1533,6 +1519,20 @@
       "column": 51,
       "mutator": "LogicalOperator",
       "replacement": "b.exchange === spec.exchange && b.queue === spec.queue || b.routingKey === spec.routingKey"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 262,
+      "column": 42,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 289,
+      "column": 51,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1571,17 +1571,17 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
-      "line": 299,
-      "column": 43,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
       "line": 266,
       "column": 41,
       "mutator": "ArrayDeclaration",
       "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
+      "line": 299,
+      "column": 43,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/stub-rabbitmq.js",
@@ -1746,17 +1746,17 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
-      "line": 20,
-      "column": 30,
-      "mutator": "OptionalChaining",
-      "replacement": "opts.testcontainers.startupTimeoutMs"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
       "line": 58,
       "column": 22,
       "mutator": "ArithmeticOperator",
       "replacement": "Date.now() - timeoutMs"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
+      "line": 20,
+      "column": 30,
+      "mutator": "OptionalChaining",
+      "replacement": "opts.testcontainers.startupTimeoutMs"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
@@ -1770,14 +1770,14 @@
       "line": 61,
       "column": 12,
       "mutator": "EqualityOperator",
-      "replacement": "Date.now() <= deadline"
+      "replacement": "Date.now() >= deadline"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
       "line": 61,
       "column": 12,
       "mutator": "EqualityOperator",
-      "replacement": "Date.now() >= deadline"
+      "replacement": "Date.now() <= deadline"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
@@ -1888,13 +1888,6 @@
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
       "line": 94,
       "column": 22,
-      "mutator": "LogicalOperator",
-      "replacement": "url.hostname && 'localhost'"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
-      "line": 94,
-      "column": 22,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
@@ -1904,6 +1897,13 @@
       "column": 22,
       "mutator": "ConditionalExpression",
       "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
+      "line": 94,
+      "column": 22,
+      "mutator": "LogicalOperator",
+      "replacement": "url.hostname && 'localhost'"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
@@ -1921,17 +1921,17 @@
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
-      "line": 105,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
       "line": 103,
       "column": 9,
       "mutator": "BlockStatement",
       "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
+      "line": 105,
+      "column": 13,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/rabbitmq/testcontainers-rabbitmq.js",
@@ -2111,16 +2111,16 @@
     {
       "file": ".vitest-dist/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.js",
       "line": 120,
-      "column": 42,
-      "mutator": "OptionalChaining",
-      "replacement": "spec.maxDeliveries"
+      "column": 79,
+      "mutator": "EqualityOperator",
+      "replacement": "delivery.deliveryCount > spec.maxDeliveries"
     },
     {
       "file": ".vitest-dist/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.js",
       "line": 120,
-      "column": 79,
-      "mutator": "EqualityOperator",
-      "replacement": "delivery.deliveryCount > spec.maxDeliveries"
+      "column": 42,
+      "mutator": "OptionalChaining",
+      "replacement": "spec.maxDeliveries"
     },
     {
       "file": ".vitest-dist/src/rabbitmq-advanced/setup-rabbitmq-advanced-env.js",
@@ -2453,34 +2453,6 @@
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 9,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 11,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 21,
-      "column": 28,
-      "mutator": "LogicalOperator",
-      "replacement": "opts.sandbox?.pollIntervalMs && 1"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 35,
-      "column": 21,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
       "line": 32,
       "column": 13,
       "mutator": "ConditionalExpression",
@@ -2488,38 +2460,10 @@
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 62,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 62,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "!running && schedulerTimer !== null"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 62,
-      "column": 25,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
       "line": 74,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 74,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
@@ -2538,44 +2482,9 @@
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
       "line": 74,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof schedulerTimer !== 'object'"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 74,
-      "column": 39,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 74,
       "column": 51,
       "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 74,
-      "column": 76,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 74,
-      "column": 51,
-      "mutator": "EqualityOperator",
-      "replacement": "schedulerTimer === null"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 75,
-      "column": 13,
-      "mutator": "OptionalChaining",
-      "replacement": "schedulerTimer.unref()"
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
@@ -2583,20 +2492,6 @@
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 84,
-      "column": 17,
-      "mutator": "LogicalOperator",
-      "replacement": "job.state === 'waiting' || job.runAfter <= now"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 84,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
@@ -2614,27 +2509,6 @@
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 89,
-      "column": 9,
-      "mutator": "MethodExpression",
-      "replacement": "runnable"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 89,
-      "column": 23,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 90,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
       "line": 90,
       "column": 36,
       "mutator": "BlockStatement",
@@ -2645,12 +2519,12 @@
       "line": 91,
       "column": 17,
       "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 91,
-      "column": 17,
+      "line": 90,
+      "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
@@ -2663,94 +2537,10 @@
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 103,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 108,
-      "column": 44,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 108,
-      "column": 58,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 108,
-      "column": 71,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 108,
-      "column": 85,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 126,
-      "column": 13,
-      "mutator": "AssignmentOperator",
-      "replacement": "jobCounter -= 1"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
       "line": 136,
       "column": 30,
       "mutator": "ArithmeticOperator",
       "replacement": "Date.now() - delay"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 143,
-      "column": 24,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 149,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 149,
-      "column": 17,
-      "mutator": "EqualityOperator",
-      "replacement": "delay >= 0"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 150,
-      "column": 17,
-      "mutator": "OptionalChaining",
-      "replacement": "setTimeout(() => {\n  const stored = jobs.get(id);\n  if (stored && stored.state === 'delayed') {\n    stored.state = 'wait"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 152,
-      "column": 25,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 152,
-      "column": 25,
-      "mutator": "LogicalOperator",
-      "replacement": "stored || stored.state === 'delayed'"
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
@@ -2761,66 +2551,10 @@
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 168,
-      "column": 25,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
       "line": 173,
       "column": 21,
       "mutator": "EqualityOperator",
       "replacement": "Date.now() >= deadline"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 178,
-      "column": 55,
-      "mutator": "MethodExpression",
-      "replacement": "Math.max(10, pollIntervalMs * 5)"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 178,
-      "column": 68,
-      "mutator": "ArithmeticOperator",
-      "replacement": "pollIntervalMs / 5"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 179,
-      "column": 21,
-      "mutator": "OptionalChaining",
-      "replacement": "timer.unref()"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 186,
-      "column": 120,
-      "mutator": "LogicalOperator",
-      "replacement": "snap.failedReason && 'unknown'"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 207,
-      "column": 64,
-      "mutator": "LogicalOperator",
-      "replacement": "snap.failedReason && ''"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 221,
-      "column": 29,
-      "mutator": "EqualityOperator",
-      "replacement": "i <= 50"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 227,
-      "column": 21,
-      "mutator": "OptionalChaining",
-      "replacement": "timer.unref()"
     },
     {
       "file": ".vitest-dist/src/sandbox-queue.js",
@@ -2835,20 +2569,6 @@
       "column": 17,
       "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 238,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/sandbox-queue.js",
-      "line": 238,
-      "column": 33,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/setup-bullmq-env.js",
@@ -2950,16 +2670,16 @@
     },
     {
       "file": ".vitest-dist/src/sqs/localstack-sqs.js",
-      "line": 68,
-      "column": 21,
-      "mutator": "BlockStatement",
+      "line": 62,
+      "column": 42,
+      "mutator": "ObjectLiteral",
       "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/sqs/localstack-sqs.js",
-      "line": 62,
-      "column": 42,
-      "mutator": "ObjectLiteral",
+      "line": 68,
+      "column": 21,
+      "mutator": "BlockStatement",
       "replacement": "{}"
     },
     {
@@ -2980,15 +2700,15 @@
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 10,
       "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "mutator": "EqualityOperator",
+      "replacement": "msg.failedReason === undefined"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 10,
       "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "msg.failedReason === undefined"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
@@ -3001,15 +2721,15 @@
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 12,
       "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "mutator": "EqualityOperator",
+      "replacement": "msg.messageGroupId === undefined"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 12,
       "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "msg.messageGroupId === undefined"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
@@ -3092,15 +2812,15 @@
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 74,
       "column": 17,
-      "mutator": "LogicalOperator",
-      "replacement": "msg.state === 'inflight' || msg.visibleAt <= now"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 74,
       "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "LogicalOperator",
+      "replacement": "msg.state === 'inflight' || msg.visibleAt <= now"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
@@ -3196,23 +2916,16 @@
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 183,
-      "column": 54,
-      "mutator": "ArithmeticOperator",
-      "replacement": "visibilityTimeoutSeconds / 1000"
-    },
-    {
-      "file": ".vitest-dist/src/sqs/stub-sqs.js",
-      "line": 183,
       "column": 41,
       "mutator": "ArithmeticOperator",
       "replacement": "Date.now() - visibilityTimeoutSeconds * 1000"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
-      "line": 191,
-      "column": 37,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "line": 183,
+      "column": 54,
+      "mutator": "ArithmeticOperator",
+      "replacement": "visibilityTimeoutSeconds / 1000"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
@@ -3220,6 +2933,13 @@
       "column": 37,
       "mutator": "LogicalOperator",
       "replacement": "msg.state === 'deleted' && msg.state === 'dead'"
+    },
+    {
+      "file": ".vitest-dist/src/sqs/stub-sqs.js",
+      "line": 191,
+      "column": 37,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
@@ -3475,17 +3195,17 @@
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
-      "line": 284,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/sqs/stub-sqs.js",
       "line": 285,
       "column": 69,
       "mutator": "ArrayDeclaration",
       "replacement": "[\"Stryker was here\"]"
+    },
+    {
+      "file": ".vitest-dist/src/sqs/stub-sqs.js",
+      "line": 284,
+      "column": 17,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/sqs/stub-sqs.js",
@@ -3622,13 +3342,6 @@
     },
     {
       "file": ".vitest-dist/src/testcontainers-queue.js",
-      "line": 74,
-      "column": 30,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/testcontainers-queue.js",
       "line": 72,
       "column": 17,
       "mutator": "ConditionalExpression",
@@ -3636,15 +3349,8 @@
     },
     {
       "file": ".vitest-dist/src/testcontainers-queue.js",
-      "line": 52,
-      "column": 48,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/testcontainers-queue.js",
-      "line": 53,
-      "column": 52,
+      "line": 74,
+      "column": 30,
       "mutator": "ObjectLiteral",
       "replacement": "{}"
     },
@@ -3666,6 +3372,20 @@
       "file": ".vitest-dist/src/testcontainers-queue.js",
       "line": 82,
       "column": 12,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-queue.js",
+      "line": 52,
+      "column": 48,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
+    },
+    {
+      "file": ".vitest-dist/src/testcontainers-queue.js",
+      "line": 53,
+      "column": 52,
       "mutator": "ObjectLiteral",
       "replacement": "{}"
     },
@@ -3701,15 +3421,15 @@
       "file": ".vitest-dist/src/testcontainers-queue.js",
       "line": 108,
       "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "mutator": "BooleanLiteral",
+      "replacement": "first"
     },
     {
       "file": ".vitest-dist/src/testcontainers-queue.js",
       "line": 108,
       "column": 13,
-      "mutator": "BooleanLiteral",
-      "replacement": "first"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/testcontainers-queue.js",
@@ -3899,120 +3619,8 @@
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 16,
-      "column": 17,
-      "mutator": "ArrayDeclaration",
-      "replacement": "[]"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 16,
-      "column": 18,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 88,
-      "column": 21,
-      "mutator": "MethodExpression",
-      "replacement": "session.events"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 88,
-      "column": 43,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 88,
-      "column": 50,
-      "mutator": "MethodExpression",
-      "replacement": "e.endsWith('invalid:')"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 88,
-      "column": 63,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 89,
-      "column": 22,
-      "mutator": "MethodExpression",
-      "replacement": "session.events"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 89,
-      "column": 44,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 89,
-      "column": 51,
-      "mutator": "MethodExpression",
-      "replacement": "e.endsWith('terminal:')"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 89,
-      "column": 64,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 90,
-      "column": 23,
-      "mutator": "MethodExpression",
-      "replacement": "session.events"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 90,
-      "column": 45,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 90,
-      "column": 52,
-      "mutator": "MethodExpression",
-      "replacement": "e.endsWith('event:')"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 90,
-      "column": 65,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 94,
-      "column": 22,
-      "mutator": "ArithmeticOperator",
-      "replacement": "eventOnly - invalid + terminal"
-    },
-    {
-      "file": ".vitest-dist/src/semantics/job-lifecycle-orchestrator.js",
-      "line": 94,
-      "column": 22,
-      "mutator": "ArithmeticOperator",
-      "replacement": "eventOnly + invalid"
     }
   ],
-  "capturedAt": "2026-08-17T23:54:09Z",
-  "note": "Total MSI 76.64% / Covered MSI 78.37% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-21T11:56:16Z",
+  "note": "Total MSI 78.64% / Covered MSI 80.48% (threshold high=65 / low=55 / break=50)."
 }

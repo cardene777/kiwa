@@ -6,252 +6,252 @@
     "low": 60,
     "break": 50
   },
-  "killRate": 83.33,
-  "totalMsi": 83.33,
-  "coveredMsi": 84.01,
-  "killed": 370,
-  "survived": 71,
+  "killRate": 87.39,
+  "totalMsi": 87.39,
+  "coveredMsi": 88.05,
+  "killed": 395,
+  "survived": 54,
   "timeout": 3,
-  "noCoverage": 24,
+  "noCoverage": 15,
   "error": 0,
   "mutants": [
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 58,
-      "column": 12,
-      "mutator": "MethodExpression",
-      "replacement": "value"
-    },
-    {
-      "file": ".vitest-dist/src/parser.js",
-      "line": 68,
+      "line": 90,
       "column": 42,
       "mutator": "Regex",
       "replacement": "/\\s/g"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 87,
-      "column": 30,
-      "mutator": "Regex",
-      "replacement": "/^[-*]\\s+([A-Za-z][\\w-]*)\\s*[::]\\s*(.+)/"
+      "line": 80,
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "value"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 87,
+      "line": 109,
       "column": 30,
       "mutator": "Regex",
       "replacement": "/[-*]\\s+([A-Za-z][\\w-]*)\\s*[::]\\s*(.+)$/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 87,
+      "line": 109,
+      "column": 30,
+      "mutator": "Regex",
+      "replacement": "/^[-*]\\s+([A-Za-z][\\w-]*)\\s*[::]\\s*(.+)/"
+    },
+    {
+      "file": ".vitest-dist/src/parser.js",
+      "line": 109,
       "column": 30,
       "mutator": "Regex",
       "replacement": "/^[-*]\\s([A-Za-z][\\w-]*)\\s*[::]\\s*(.+)$/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 87,
+      "line": 109,
       "column": 30,
       "mutator": "Regex",
       "replacement": "/^[-*]\\s+([A-Za-z][\\w-]*)\\S*[::]\\s*(.+)$/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 87,
+      "line": 109,
       "column": 30,
       "mutator": "Regex",
       "replacement": "/^[-*]\\s+([A-Za-z][\\w-]*)\\s*[::]\\S*(.+)$/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 87,
+      "line": 109,
       "column": 30,
       "mutator": "Regex",
       "replacement": "/^[-*]\\s+([A-Za-z][\\w-]*)\\s*[::]\\s(.+)$/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 90,
+      "line": 112,
       "column": 40,
       "mutator": "MethodExpression",
       "replacement": "match[2] ?? ''"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 95,
+      "line": 117,
       "column": 21,
       "mutator": "EqualityOperator",
       "replacement": "i <= lines.length - 1"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 95,
+      "line": 117,
       "column": 25,
       "mutator": "ArithmeticOperator",
       "replacement": "lines.length + 1"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 13,
       "mutator": "LogicalOperator",
       "replacement": "header || divider"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 58,
       "mutator": "Regex",
       "replacement": "/\\s*\\|?\\s*[-:]+/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 58,
       "mutator": "Regex",
       "replacement": "/^\\S*\\|?\\s*[-:]+/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 58,
       "mutator": "Regex",
       "replacement": "/^\\s*\\|\\s*[-:]+/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 58,
       "mutator": "Regex",
       "replacement": "/^\\s*\\|?\\s*[-:]/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 98,
+      "line": 120,
       "column": 58,
       "mutator": "Regex",
       "replacement": "/^\\s*\\|?\\s*[^-:]+/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 100,
+      "line": 122,
       "column": 33,
       "mutator": "EqualityOperator",
       "replacement": "j <= lines.length"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 104,
+      "line": 126,
       "column": 21,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 104,
+      "line": 126,
       "column": 21,
       "mutator": "MethodExpression",
       "replacement": "row"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 134,
+      "line": 156,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 143,
+      "line": 165,
       "column": 21,
       "mutator": "MethodExpression",
       "replacement": "row"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 143,
+      "line": 165,
       "column": 40,
       "mutator": "Regex",
       "replacement": "/\\|/"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 165,
+      "line": 187,
       "column": 18,
       "mutator": "ConditionalExpression",
       "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 186,
+      "line": 208,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 200,
+      "line": 212,
+      "column": 99,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/parser.js",
+      "line": 222,
       "column": 38,
       "mutator": "StringLiteral",
       "replacement": "\"Stryker was here!\""
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 198,
+      "line": 220,
       "column": 21,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 206,
+      "line": 228,
       "column": 78,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 213,
+      "line": 235,
       "column": 31,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 231,
+      "line": 253,
       "column": 17,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 39,
+      "line": 57,
       "column": 9,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/parser.js",
-      "line": 48,
+      "line": 70,
       "column": 5,
       "mutator": "StringLiteral",
       "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 85,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/temp.js",
@@ -266,34 +266,6 @@
       "column": 63,
       "mutator": "StringLiteral",
       "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 101,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 101,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "!Number.isSafeInteger(createdAt) && createdAt <= 0"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 101,
-      "column": 45,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 101,
-      "column": 45,
-      "mutator": "EqualityOperator",
-      "replacement": "createdAt < 0"
     },
     {
       "file": ".vitest-dist/src/temp.js",
@@ -325,13 +297,6 @@
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 107,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
       "line": 120,
       "column": 9,
       "mutator": "ConditionalExpression",
@@ -346,17 +311,10 @@
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 156,
-      "column": 13,
+      "line": 160,
+      "column": 15,
       "mutator": "BlockStatement",
       "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 157,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/temp.js",
@@ -367,136 +325,59 @@
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 182,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 181,
-      "column": 28,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 182,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 185,
-      "column": 16,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 184,
-      "column": 25,
-      "mutator": "BooleanLiteral",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 214,
-      "column": 13,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 215,
-      "column": 13,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 237,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 237,
+      "line": 244,
       "column": 9,
       "mutator": "LogicalOperator",
       "replacement": "(inside === '' || inside.startsWith('..')) && isAbsolute(inside)"
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 237,
+      "line": 244,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 237,
+      "line": 244,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
+    },
+    {
+      "file": ".vitest-dist/src/temp.js",
+      "line": 244,
       "column": 9,
       "mutator": "LogicalOperator",
       "replacement": "inside === '' && inside.startsWith('..')"
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 237,
+      "line": 244,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 237,
+      "line": 244,
       "column": 20,
       "mutator": "StringLiteral",
       "replacement": "\"Stryker was here!\""
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 237,
+      "line": 244,
       "column": 26,
       "mutator": "MethodExpression",
       "replacement": "inside.endsWith('..')"
     },
     {
       "file": ".vitest-dist/src/temp.js",
-      "line": 252,
+      "line": 259,
       "column": 56,
       "mutator": "BooleanLiteral",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 263,
-      "column": 48,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 23,
-      "column": 25,
-      "mutator": "BooleanLiteral",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 66,
-      "column": 24,
-      "mutator": "Regex",
-      "replacement": "/[A-Za-z0-9]{6,}$/"
-    },
-    {
-      "file": ".vitest-dist/src/temp.js",
-      "line": 66,
-      "column": 24,
-      "mutator": "Regex",
-      "replacement": "/^[A-Za-z0-9]{6,}/"
     },
     {
       "file": ".vitest-dist/src/pool.js",
@@ -513,6 +394,6 @@
       "replacement": "false"
     }
   ],
-  "capturedAt": "2026-08-17T06:51:11Z",
-  "note": "Total MSI 83.33% / Covered MSI 84.01% (threshold high=80 / low=60 / break=50)."
+  "capturedAt": "2026-08-21T11:56:16Z",
+  "note": "Total MSI 87.39% / Covered MSI 88.05% (threshold high=80 / low=60 / break=50)."
 }
