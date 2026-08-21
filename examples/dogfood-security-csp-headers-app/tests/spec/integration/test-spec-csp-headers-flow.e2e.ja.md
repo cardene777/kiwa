@@ -67,8 +67,14 @@ JSON の parse と dispatch が完了し、route validator または route handl
 | `Buffer` + header あり | **400** / `body_parse_failed` |
 | `Buffer` + header なし | **400** / `body_parse_failed` |
 
-**`Buffer` が必要なのではなく、header を明示しないことが条件になる。**
-1 回目の probe が 400 に届かなかったのは header を付けていたため。
+条件は送り方で分かれる。
+
+| `data` の型 | 400 に届く条件 |
+|---|---|
+| 文字列 | **header を明示しない時だけ**。 明示すると Playwright が JSON 符号化して 200 になる |
+| `Buffer` | **header に関わらず常に届く**。 Playwright が raw のまま送る |
+
+1 回目の probe が 400 に届かなかったのは、文字列に header を付けていたため。
 
 ### `/csp` の組み立て
 
