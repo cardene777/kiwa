@@ -92,6 +92,9 @@ adapter を `startNextServer({ adapter })` に渡せば 500 に到達する。
 `tokens.delete(...)`)。 そのため **`*_session_closed` の guard には届かない** =
 `close` 後の op は `*_session_not_found` で先に止まる。
 
+ただし公開 surface は内部状態機械の全段を必須にはしない。`/prompts` の `flag` は
+`log` を省くと synthetic prompt を補ってから `flagHallucination` を実行する。
+
 ## 主な品質リスク
 
 - **status が成否を表さない**。 route に届いた後はすべて 200 なので、
@@ -116,7 +119,9 @@ CORS の事前確認を通らない。
 **予算の枯渇あり / なしを見るには session を 2 つ立てる**。 `check` は 1 session に
 1 度しか呼べない。
 
-**`flag` の前に `log` が要る**。 `flagHallucination` は prompt を記録した後の状態を要求する。
+**happy path では `flag` の前に `log` を呼ぶ**。 prompt の記録結果も観測対象だからであり、
+公開 surface の到達条件ではない。`log` を省いた場合は mock adapter が synthetic prompt を
+補うため、`start` → `flag` でも成功する。
 
 ## テスト観点一覧
 
