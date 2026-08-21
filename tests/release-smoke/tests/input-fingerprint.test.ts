@@ -261,7 +261,7 @@ describe('指紋 — 何が入ると変わるか', () => {
     expect(digest(root), 'symlink 自体の内容を見ていない').not.toBe(before);
   });
 
-  it('T-FP-014 path が区切りを真似ても別の入力は別の指紋になる', () => {
+  it('T-FP-015 path が区切りを真似ても別の入力は別の指紋になる', () => {
     // digest の本文は `path<TAB>hash` を改行で並べた形。 path を escape しないと、
     // TAB と改行を名前に含む 1 file が「2 file 分の行」 を丸ごと真似られる。
     //
