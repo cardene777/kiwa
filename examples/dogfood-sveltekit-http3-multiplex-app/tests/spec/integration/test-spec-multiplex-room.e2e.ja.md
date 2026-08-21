@@ -28,22 +28,23 @@ op 名は `src/adapters/interface.ts` の宣言をそのまま写した。
 
 ## 仕様の要約
 
-### status は 5 段に分かれる
+### 失敗応答の status は 5 段に分かれる
 
 | 段 | status | 本文 |
 |---|---|---|
 | body が上限を超える | **413** | `payload too large` の**平文** |
 | body を JSON として読めない | 400 | `{"ok":false,"errorKind":"invalid_json"}` |
-| validator が拒む | 400 | 11 種の固定 token |
+| validator が拒む | 400 | 12 種の固定 token |
 | adapter が投げる | 500 | `err.message` の英文 |
 | 3 route のどれでもない | **404** | `not found` の**平文** |
 
-**413 と 404 が平文**で、他の 3 段は JSON。 `errorKind` を読む client は
+成功時は `statusCode` を代入せず、Node HTTP server の既定 **200** を返す。
+失敗時は **413 と 404 が平文**で、他の 3 段は JSON。 `errorKind` を読む client は
 この 2 段だけ parse に失敗する。
 
 ### `errorKind` は 3 種類の由来を混ぜる
 
-`invalid_json` と validator の 11 token (`body_not_object` / `unknown_kind` /
+`invalid_json` と validator の 12 token (`body_not_object` / `unknown_kind` /
 `missing_connection_id` / `missing_url` / `missing_streams` / `missing_stream_id` /
 `missing_data` / `missing_early_data_bytes` / `missing_header_name` /
 `missing_header_value` / `invalid_priority` / `invalid_stream_entry`) は固定だが、
@@ -53,7 +54,7 @@ adapter が投げた失敗は
 英文になるのは**現在の mock adapter が `Error` を投げるため**で、adapter を
 差し替えれば変わる。
 
-### `zeroRttUsed` は origin ごとの ticket で決まる
+### `zeroRttUsed` は origin ごとの ticket を含む 3 条件で決まる
 
 **実装の該当行** (`src/adapters/mock.ts:214`)。
 
@@ -67,7 +68,7 @@ conn.zeroRttUsed = wantZeroRtt && allowZeroRtt && hasTicketForOrigin;
 |---|---|
 | `wantZeroRtt` | 入力の `zeroRtt === true` |
 | `allowZeroRtt` | adapter の option (既定 `true`) |
-| `hasTicketForOrigin` | **origin ごとの ticket Map** に origin があるか |
+| `hasTicketForOrigin` | **origin ごとの ticket Set** に origin があるか |
 
 実測。
 
@@ -77,17 +78,21 @@ conn.zeroRttUsed = wantZeroRtt && allowZeroRtt && hasTicketForOrigin;
 | 2 本目 (`tab-b`) | `true` | **true** |
 | 3 本目 (`tab-c`) | 省略 | **false** |
 
-**接続の通し番号ではない**。 3 本目でも `zeroRtt` を渡さなければ偽になる。
+**接続の通し番号では決まらない**。 3 本目でも `zeroRtt` を渡さなければ偽になる。
 comment が「A fresh origin always cold-starts even if other origins have prior tickets」
-と書いており、判定は origin 単位になる。
+と書いており、ticket の有無は origin 単位で判定する。
+既存 test の `multiplex-room.spec.ts:202` は「`seq > 1`」と説明しているが、
+現在の実装と一致しない。assertion が通るのは、1 本目が同じ origin の ticket を発行し、
+2 本目が `zeroRtt: true` を渡すためになる。
 
-`earlyDataAccepted` は `Math.min(requested, 16384)`。 nginx-quic の既定 16 KB が上限。
+`openConnection` の `earlyDataAccepted` は `zeroRttUsed` が偽なら 0、真なら
+`Math.min(requested, 16384)`。 mock が置く nginx-quic 相当の上限は 16 KB。
 
 ### `drainOrder` は優先度の昇順
 
 **実装の該当行**。 adapter (`src/adapters/mock.ts:347`) が
 `conn.mock.getActiveStreams()` の並びを使い、その `getActiveStreams` は
-`packages/realtime/src/semantics/quic-multiplex.ts:165` で
+`packages/realtime/src/semantics/quic-multiplex.ts:166` で
 
 ```ts
 Array.from(activeStreams.values()).sort((a, b) => a.priority - b.priority)
@@ -106,12 +111,16 @@ Array.from(activeStreams.values()).sort((a, b) => a.priority - b.priority)
 `totalBytes` は入力の `byteLength` の総和 (実装は `for` で足す)。
 実測で `8 + 32 + 16 = 56`。
 
-### HPACK の `index` と `tableSize` は挿入ごとに進む
+### HPACK の `index` と `tableSize` は同じ接続内の挿入ごとに進む
 
-実測で 2 回挿入すると `index` が 0 → 1、`tableSize` が 1 → 2 になった。
+同じ接続へ 2 回挿入すると `index` が 0 → 1、`tableSize` が 1 → 2 になる。
+接続ごとに別の QUIC mock を持つため、別の接続では 0 / 1 から始まる。
+現在の mock の `tableSize` は `hpackTable.length` なので entry 数だが、
+`src/adapters/interface.ts:98` は byte 数と宣言している。
 
 `compressionRatio` は `conn.hpackRawBytes / conn.hpackCompressedBytes`
-(`mock.ts:505`)。 実測では 2 回とも `3.0833...` で変わらなかった。
+(`mock.ts:505`)。各挿入の raw byte と丸め後の compressed byte を累積するため、
+header の長さによって値は変わりうる。
 
 ### 同じ接続を 2 度開くと 500
 
@@ -121,9 +130,9 @@ Array.from(activeStreams.values()).sort((a, b) => a.priority - b.priority)
 
 ## 主な品質リスク
 
-- **QUIC を張らない**。 browser の `fetch` で JSON を投げるだけで、多重化も
-  優先度制御も 1 度も動かない。 「2 つのタブが別々の接続を持つ」 ことも
-  server 側の `connectionId` で区別しているだけになる
+- **実 QUIC を張らない**。 browser は `fetch` で JSON を投げ、mock 内では stream の
+  作成と優先度 sort が動くが、network 上の多重化や優先度制御は動かない。
+  「2 つのタブが別々の接続を持つ」ことも server 側の `connectionId` で区別しているだけになる
 - **context と接続を結び付ける仕組みが無い**。 同じ context から 2 つの
   `connectionId` を送っても通る
 - **HTTP 層が test file にある**。 production の SvelteKit route ではないため、
@@ -131,8 +140,8 @@ Array.from(activeStreams.values()).sort((a, b) => a.priority - b.priority)
 - **413 と 404 が平文**。 他の 3 段が JSON なので、`errorKind` を読む client は
   この 2 段だけ parse に失敗する
 - **`errorKind` が 3 種類の由来を混ぜる**。 validator は固定 token だが adapter は英文
-- **`compressionRatio` が挿入で動かない**。 実測で 2 回とも同じ値だったため、
-  圧縮の効きを表す指標として読むと外れる
+- **`compressionRatio` の値を確かめていない**。 既存 test は数値型だけを見ており、
+  header の長さに応じて変わる値や、圧縮の効きを検証していない
 
 ## 推奨テスト構成
 
@@ -192,13 +201,16 @@ Array.from(activeStreams.values()).sort((a, b) => a.priority - b.priority)
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
 | `zeroRttUsed` が偽になる 3 本目 | できる | 2 本目までしか開いていない |
-| `earlyDataAccepted` の 16384 上限 | できる | 4096 と 8192 だけを送っている |
+| `allowZeroRtt: false` / ticket の無い別 origin での `zeroRttUsed` | できる | 3 条件のうち option と origin の偽分岐を作っていない |
+| `openConnection` の 16384 上限 / `resumeZeroRtt` の上限超過拒否 | できる | 4096 と 8192 だけを送っている |
+| `drainOrder` の 2、3 番目 | できる | 長さと `[0]` だけを見ている |
 | `drainOrder` の同値の並び | できる | 相異なる優先度だけを送っている |
 | `compressionRatio` の値 | できる | `typeof` が数値かだけを見ている |
 | 2 回目以降の HPACK 挿入 | できる | 1 回しか挿入していない |
 | `open-stream` / `write-stream` / `read-stream` / `close-stream` / `close-connection` | できる | 投げていない |
 | 同じ接続を 2 度開いた時の 500 | できる | 1 度ずつしか開いていない |
-| validator の 11 token | できる | 妥当な body だけを送っている |
+| validator の 12 token | できる | 妥当な body だけを送っている |
+| 成功時の 200 | できる | `postJson` が返す `status` を見ていない |
 | `invalid_json` の 400 / 上限超過の 413 / 未知 path の 404 | できる | 投げていない |
 | `metrics()` の値 | できる | 読んでいない |
 
@@ -216,6 +228,9 @@ Array.from(activeStreams.values()).sort((a, b) => a.priority - b.priority)
   `{"ok": false, "errorKind": ...}` の JSON。 全段を JSON にするのかが source に
   書かれていない
 - 応答の `errorKind` を安定した token として扱えるかが決まっていない。
-  `invalid_json` と validator の 11 token は固定だが、adapter の失敗は
+  `invalid_json` と validator の 12 token は固定だが、adapter の失敗は
   `err.message` を返すため、consumer が分岐に使える契約なのか表示専用なのかが
   書かれていない
+- `tableSize` の単位が揃っていない。`src/adapters/interface.ts:98` は byte 数と宣言するが、
+  mock の `packages/realtime/src/semantics/quic-multiplex.ts:136` は entry 数を返す。
+  HTTP 応答でどちらを契約にするかが source から決まらない
