@@ -237,5 +237,4 @@ counter は module scope に置かれ、`__resetWebAuthnCounters()` で 0 に戻
 
 ## 不足している仕様
 
-- `?discoverable=` に未知の値を渡した時の挙動が決まっていない。 現在は絞り込まずに全件を返すが、拒否するのか無視するのか、拒否するなら HTTP status と `error` を決める必要がある
-- 資格情報 id の採番規則が決まっていない。 現在は `credential-1` から連番で、`/manage?credentialId=` に認証が無いことと組み合わさると他の利用者の id を推測できる。推測できないことを要求するのかを決める必要がある
+(なし)
