@@ -19,11 +19,13 @@
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import { createManagedTempDir, __resetTempScanStateForTests } from '../src/index.js';
 
 const HOUR = 60 * 60 * 1000;
 const roots: string[] = [];
+const exitListenersAtLoad = new Set(process.listeners('exit'));
+let installedExitHook: ((code: number) => void) | undefined;
 
 function makeRoot(): string {
   const root = mkdtempSync(join(tmpdir(), 'kiwa-lifecycle-spec-'));
@@ -52,9 +54,12 @@ function seedReclaimable(root: string, tag: string): string {
 
 /** 登録済みの exit hook をその場で走らせる。 実際に終了させられないため。 */
 function fireExitHooks(): void {
-  for (const listener of process.listeners('exit')) {
-    (listener as (code: number) => void)(0);
-  }
+  const added = process.listeners('exit').filter((listener) => !exitListenersAtLoad.has(listener));
+  expect(added, 'createManagedTempDir の exit listener が 1 件でない').toHaveLength(1);
+  expect(added[0], '登録済みの managed exit listener が置き換わっている').toBe(
+    installedExitHook,
+  );
+  installedExitHook?.(0);
 }
 
 const runningAsRoot = process.getuid?.() === 0;
@@ -70,6 +75,10 @@ afterEach(() => {
     }
     rmSync(root, { recursive: true, force: true });
   }
+});
+
+afterAll(() => {
+  if (installedExitHook) process.removeListener('exit', installedExitHook);
 });
 
 describe('label の検証が理由を返す', () => {
@@ -97,9 +106,13 @@ describe('label の検証が理由を返す', () => {
 describe('exit hook は 1 度しか登録しない', () => {
   it('何度 dir を掘っても listener が増えない', () => {
     const root = makeRoot();
-    // 1 件目で hook が入る。 そこを基準にする。
+    // 1 件目でこの module instance の hook が 1 件増えることまで確かめる。
     const first = createManagedTempDir({ root });
-    const baseline = process.listeners('exit').length;
+    const installed = process
+      .listeners('exit')
+      .filter((listener) => !exitListenersAtLoad.has(listener));
+    expect(installed, 'exit listener が正しい event に登録されていない').toHaveLength(1);
+    installedExitHook = installed[0] as (code: number) => void;
 
     const rest = [
       createManagedTempDir({ root }),
@@ -107,9 +120,10 @@ describe('exit hook は 1 度しか登録しない', () => {
       createManagedTempDir({ root }),
     ];
 
-    expect(process.listeners('exit').length, 'exit listener が掘るたびに増えている').toBe(
-      baseline,
-    );
+    const after = process
+      .listeners('exit')
+      .filter((listener) => !exitListenersAtLoad.has(listener));
+    expect(after, 'exit listener が掘るたびに増えている').toEqual(installed);
 
     first.dispose();
     for (const dir of rest) dir.dispose();

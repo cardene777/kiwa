@@ -30,7 +30,7 @@
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   createManagedTempDir,
   __resetTempScanStateForTests,
@@ -42,6 +42,8 @@ const HOUR = 60 * 60 * 1000;
 /** mode を戻してから消す。 戻さないと root 自体を削除できない。 */
 const guarded: string[] = [];
 const dirs: ManagedTempDir[] = [];
+const exitListenersAtLoad = new Set(process.listeners('exit'));
+let installedExitHook: ((code: number) => void) | undefined;
 
 /**
  * root 権限では mode による拒否が起きない。
@@ -116,6 +118,20 @@ afterEach(() => {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+afterAll(() => {
+  if (installedExitHook) process.removeListener('exit', installedExitHook);
+});
+
+/** この module instance が追加した exit hook だけを返す。 */
+function managedExitHook(): (code: number) => void {
+  const added = process.listeners('exit').filter((listener) => !exitListenersAtLoad.has(listener));
+  expect(added, 'createManagedTempDir の exit listener が 1 件でない').toHaveLength(1);
+  const hook = added[0] as (code: number) => void;
+  installedExitHook ??= hook;
+  expect(hook, '登録済みの managed exit listener が置き換わっている').toBe(installedExitHook);
+  return hook;
+}
 
 describe('createManagedTempDir の回収が失敗した時', () => {
   it.skipIf(runningAsRoot)('root を読めない時、回収を諦めて掘る側は続く', () => {
@@ -197,11 +213,7 @@ describe('プロセス終了時の取りこぼし回収', () => {
 
     // hook は process に登録されている。 実際に終了させられないので、
     // 登録された listener をその場で呼ぶ。
-    const listeners = process.listeners('exit');
-    expect(listeners.length, 'exit listener が登録されていない').toBeGreaterThan(0);
-    for (const listener of listeners) {
-      (listener as (code: number) => void)(0);
-    }
+    managedExitHook()(0);
 
     expect(existsSync(dir.path)).toBe(false);
   });
@@ -213,11 +225,7 @@ describe('プロセス終了時の取りこぼし回収', () => {
     // 終了処理には報告先が無いため、握り潰して次の entry へ進むのが期待動作。
     chmodSync(root, 0o500);
 
-    const listeners = process.listeners('exit');
-    expect(listeners.length, 'exit listener が登録されていない').toBeGreaterThan(0);
-    for (const listener of listeners) {
-      expect(() => (listener as (code: number) => void)(0)).not.toThrow();
-    }
+    expect(() => managedExitHook()(0)).not.toThrow();
 
     chmodSync(root, 0o700);
     // 消せていないことを確かめる = 握り潰した先で消せたことにしていない。
