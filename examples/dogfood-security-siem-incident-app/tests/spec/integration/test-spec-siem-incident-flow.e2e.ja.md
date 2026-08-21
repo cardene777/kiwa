@@ -315,7 +315,21 @@ session は id ごとに一方通行で、`/siem` と `/incident` は同じ id �
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | 監査 / 障害対応 / 束ねた判断が 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server と Chromium BrowserContext に紐づく `page.request`、`startSiem` / `startIncident` / `startOrchestrator` で作った 3 session | `/siem` (`structure` → `seal` → `retention` → `correlate`) → `/incident` (`playbook` → `severity` → `escalate` → `forensics` → `post-mortem`) → `/ir-orchestrator` (`decide` を一致あり / 一致なしで 2 回) を順に投げる | 構造化は `status===200` で `{ok: true, eventId: 'evt-1'}`。 封印は `{ok: true, eventCount: 1}`。 保存期間は `{ok: true, totalDays: 372}`。 照合は `{ok: true, matched: true}`。 手順は `playbookId==='suspicious-login'`、深刻度は `'sev1'`、連絡は `{channelCount: 2, hasSecondary: true}`、証跡は `artifactCount===3`、記録は `actionItemCount===2`。 束ねた判断は一致ありで `{incidentTriggered: true, severity: 'sev1'}`、一致なしで `{incidentTriggered: false, severity: 'sev5'}` | P0 | yes | node | `/siem` `/incident` `/ir-orchestrator` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-security-siem-incident-app/tests/e2e/`
+- 見つけた既存 test — 1 件
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 structured + seal + retention + correlate + playbook + severity + escalate + forensics + post-mortem + orchestrator end to end` (`examples/dogfood-security-siem-incident-app/tests/e2e/siem-incident-flow.spec.ts:43`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — 監査 / 障害対応 / 束ねた判断を 1 つの `APIRequestContext` から順に実行する happy path
 
 T-E2E-001 は 11 手を 1 件に畳んである。 分けないのは `/siem` と `/incident` が一方通行の
 状態機械で、各手が直前の状態を前提にするため。 途中で切ると後半だけを実行できない。
@@ -365,3 +379,11 @@ domain の成否を判別しているのは `toMatchObject({ok: true, ...})` の
 **adapter が計算した値を route が捨てている** ため応答に現れない、
 残り 3 つは HTTP の口が無いか防御用の経路になる。
 **HTTP の口の数と、その下にある route / adapter / semantics の分岐の数は別になる。**
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)

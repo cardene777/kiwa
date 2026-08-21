@@ -299,7 +299,21 @@ critical と medium の 2 件を渡しても `vulnerableCount` は `1` だった
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | 部品表 / 秘密走査 / 突き合わせが 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server と Chromium BrowserContext に紐づく `page.request` | `/sbom` (`start` → `addComponent` × 2 → `emitCycloneDx` → `evaluateLicense`) → `/secrets-scan` (`start` → `scan` → `trackRotation` → `markRotated`) → `/scanner` (`report`) を順に投げる | 部品追加は `status===200` で `{ok: true, kind: 'addComponent', componentCount: 1}`。 出力は `{ok: true, format: 'cyclonedx', formatVersion: '1.5'}`。 ライセンスは `overallVerdict==='allow'`。 走査は `ok===true` かつ `findings.length>=1`。 交換は `{ok: true, kind: 'markRotated', overdue: false}`。 報告は `{ok: true, kind: 'report', overallVerdict: 'deny'}` かつ `componentCount===2` かつ `vulnerableCount===1` | P0 | yes | node | `/sbom` `/secrets-scan` `/scanner` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-security-sbom-scanning-app/tests/e2e/`
+- 見つけた既存 test — 1 件
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 SBOM emission + secret scan + scanner report end to end` (`examples/dogfood-security-sbom-scanning-app/tests/e2e/sbom-scanning-flow.spec.ts:44`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — 部品表 / 秘密走査 / 突き合わせを 1 つの `APIRequestContext` から順に実行する happy path
 
 T-E2E-001 は 10 手を 1 件に畳んである。 分けないのは後段が前段の状態を前提にするため。
 `addComponent` は `start` を、`scan` は `start` を、`trackRotation` は `scan` を、
@@ -351,3 +365,11 @@ signature が増えて 2 件に変わっても、あるいは別の kind が当�
 route validator と handler の分岐は HTTP から到達できる。 到達できないのは防御用の 500 と、
 応答に載らない trace の 2 つだけになる。
 **HTTP の口の数と、その下にある route / adapter の分岐の数は別になる。**
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
