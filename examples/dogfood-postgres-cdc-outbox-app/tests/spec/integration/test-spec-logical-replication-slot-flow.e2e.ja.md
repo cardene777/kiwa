@@ -110,7 +110,21 @@ Postgres 16 の進んだ 3 経路 (論理複製 / 複製 slot の寿命 / pgvect
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | v2 の 3 経路が 1 つの page から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/logical-replication` → `/slot-advance` → `/pgvector` を空の body で順に `fetch` | 論理複製は `finalState==='cascade-synced'`、`cascadedSubscribers>=1`。 slot は `dropped===true`、`recycledBytes>0`。 pgvector は `indexKind==='ivfflat'`、`bothSearchesRecorded===true`、`searchCount>=2` | P0 | yes | node | `/logical-replication` `/slot-advance` `/pgvector` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-postgres-cdc-outbox-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 55 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 logical-replication + slot-advance + pgvector routes drive together` (`examples/dogfood-postgres-cdc-outbox-app/tests/e2e/logical-replication-slot-flow.spec.ts:31`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/logical-replication` → `/slot-advance` → `/pgvector` を 1 つの page から順に投げ、3 経路が同じ adapter で続けて処理されることを確かめる happy path
 
 1 件で 3 経路を通す。 3 つが互いに依存しないため分けても値は変わらないが、
 **1 つの adapter が 3 op を続けて処理できる**ことを 1 件で示す形にしてある。
@@ -135,3 +149,11 @@ assert は終端状態と真偽値に寄せてあり、**数値の完全一致�
 一方、下位 flow を直接呼ぶ時の override / 拒否分岐と real adapter はこの HTTP test の範囲外で、
 `fixture.ts` に注入口が無いため e2e からは到達しない。 shared server の JSON parse / body-size /
 未知 route / method の分岐も、この test case は通していない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)

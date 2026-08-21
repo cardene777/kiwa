@@ -155,7 +155,21 @@ CORS の事前確認で落ちる (server は `Access-Control-*` も `OPTIONS` �
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | v1 の 3 経路が 1 つの page から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/outbox` (注文 2 件) → `/cdc-pickup` (注文 1 件 / `ackBatchSize` 4) → `/replication` を順に `fetch` | outbox は `ok===true`、`writes===2`、`sealed===true`。 CDC は `ok===true`、`decodedCount>0`。 複製は `ok===true`、`primaryLsn>0` | P0 | yes | node | `/outbox` `/cdc-pickup` `/replication` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-postgres-cdc-outbox-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 55 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 v1 legacy routes drive together` (`examples/dogfood-postgres-cdc-outbox-app/tests/e2e/v1-legacy-flow.spec.ts:31`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/outbox` (注文 2 件) → `/cdc-pickup` (注文 1 件 / `ackBatchSize` 4) → `/replication` を順に投げ、outbox と CDC が状態を共有することを確かめる happy path
 
 1 件で 3 経路を通す。 同じ adapter の状態共有が必要なのは **`/outbox` と `/cdc-pickup`**。
 fresh server を立てる別々の test に分けると adapter が別になり、`/cdc-pickup` が前段の書込を
@@ -179,3 +193,11 @@ fresh server を立てる別々の test に分けると adapter が別になり�
 | `/at-least-once` 経路 | できる | この test が投げていない (同じ server にある) |
 | 同じ server で 2 回目の `/replication` が 500 になること | できる | 1 回だけ投げている |
 | `failoverState` の `promoted` 以外の 3 状態 | **できない** | mock は昇格まで進めてから成功応答を返す |
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)

@@ -80,7 +80,21 @@ mock 側の返り値の形で確かめる。
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | mock の probe が 4 項目を揃えて返す | mock adapter を載せた server と、その origin に置いた page | `/testcontainers-probe` へ空の body を POST する | `ok===true`、`reachable===true`、`postgresUrl` が `postgres-mock` を含み、`postgresImage` が `postgres:16` を、`pgvectorImage` が `pgvector` を含む | P1 | yes | node | `/testcontainers-probe` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-postgres-cdc-outbox-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 55 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 testcontainers probe reports mock endpoints + reachable=true` (`examples/dogfood-postgres-cdc-outbox-app/tests/e2e/testcontainers-probe-flow.spec.ts:31`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P1) — `/testcontainers-probe` が 4 項目を揃えて返すことを確かめる happy path
 
 **assert は部分一致で書かれている** (`toContain`)。 値そのものを固定していない。
 
@@ -99,3 +113,11 @@ mock 側の返り値の形で確かめる。
 
 最後の 2 件が e2e から到達できない。 単体テストは `makeRealAdapter()` を直接呼び、env 無しと
 妥当な URL の env 有りを確かめるが、不正な bootstrap による `reachable: false` は確かめていない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
