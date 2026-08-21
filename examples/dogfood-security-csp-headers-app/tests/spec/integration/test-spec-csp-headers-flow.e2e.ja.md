@@ -20,7 +20,6 @@ keep-alive: timeout=5
 content-length: ...
 ```
 
-
 - module: csp-headers-flow
 - layer: e2e-generic
 
@@ -166,7 +165,23 @@ header の有無に関わらず parse に失敗して 400 になる。
 | T-E2E-001 | CSP / 違反 / header 束が 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server と Chromium BrowserContext に紐づく `page.request` | `/csp` (nonce + hash + strictDynamic + trustedTypes) → `/violation` (ingest) → `/violation` (close) → `/headers` (HSTS + Referrer + Permissions + XFO + XCTO) を順に投げる | CSP は `status===200`、`{ok: true, kind: 'build'}`、`headerValue` が `'strict-dynamic'` と `trusted-types default` を含む。 違反は `status===200` で ingest / close とも `ok: true`。 header 束は `status===200`、`validationOk===true`、`Strict-Transport-Security` が `preload` を含み、`X-Frame-Options==='DENY'`、`X-Content-Type-Options==='nosniff'` | P0 | yes | node | `/csp` `/violation` `/headers` |
 | T-E2E-002 | dispatcher が未知 path と誤 method を分ける | 同上 | `POST /missing` と `GET /csp` を投げる | 前者は `status===404`、`errorKind==='route_not_found'`。 後者は `status===405`、`errorKind==='method_not_allowed'` | P1 | yes | node | `/missing` `/csp` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-security-csp-headers-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 93 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 CSP build + violation ingest + headers bundle end to end` (`examples/dogfood-security-csp-headers-app/tests/e2e/csp-headers-flow.spec.ts:43`) | 既覆 (候補) |
+| T-E2E-002 | `T-E2E-002 route dispatcher returns 404 for unknown paths and 405 for GET` (`examples/dogfood-security-csp-headers-app/tests/e2e/csp-headers-flow.spec.ts:138`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/csp` (nonce + hash + strictDynamic + trustedTypes) → `/violation` (ingest) → `/violation` (close) → `/headers` (HSTS + Referrer + Permissions + XFO + XCTO) を順に投げ、3 経路が 1 つの `APIRequestContext` から連続で通ることを確かめる
+- T-E2E-002 (P1) — `POST /missing` と `GET /csp` を投げ、dispatcher が未知 path (404 / `route_not_found`) と誤 method (405 / `method_not_allowed`) を分けることを確かめる
 
 T-E2E-001 は 4 手を 1 件に畳んである。 分けないのは `close` が `ingest` を前提にするため。
 
@@ -204,3 +219,11 @@ T-E2E-002 は dispatcher の 404 / 405 を明示的に区別する。400 / 500 �
 route validator の分岐は HTTP から到達できる。一方、handler が session を自動作成するため隠れる
 adapter の状態分岐と、防御用の 500 は通常の HTTP 入力からは選べない。
 **HTTP の口の数と、その下にある route / adapter の分岐の数は別になる。**
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+- 任意 field に不正な値を渡した時の扱いが決まっていない。 `parseHeadersRequest` は `hsts.maxAgeSec` が不正なら `hsts_maxAgeSec_required` で拒むのに、`xFrame` に `ALLOW` のような無効な値を渡すと黙って落とす。 どちらの形を任意 field の既定にするのか、拒むなら `errorKind` を決める必要がある

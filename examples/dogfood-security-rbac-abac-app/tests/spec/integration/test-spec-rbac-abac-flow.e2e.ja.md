@@ -136,7 +136,21 @@ RBAC は親子 role が check より前に揃うことが結果に効くが、�
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | RBAC の継承 + ABAC の評価 + 版の巻き戻しが 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server、Chromium BrowserContext に紐づく `page.request`、**adapter を直接呼んで作った 3 方針** (ABAC は `deny-overrides`) | `/rbac` に `viewer` と `parents: ['viewer']` を持つ `editor` を attach し `editor` で `post:read` を check、`/abac` に `permit` 規則を attach し一致する属性で evaluate、`/policy-store` に 2 回 publish して version 1 へ rollback | すべて `status===200`。 RBAC は `{ok: true, kind: 'check', allowed: true}`。 ABAC は `{ok: true, kind: 'evaluate', effect: 'permit', matchedRule: 'r-permit'}`。 版管理は 1 回目が `{version: 1, activeVersion: 1}`、2 回目が `{version: 2, activeVersion: 2}`、rollback が `{rolledBackFrom: 2, rolledBackTo: 1, activeVersion: 1}` | P0 | yes | node | `/rbac` `/abac` `/policy-store` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-security-rbac-abac-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 105 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 RBAC attach + check + ABAC evaluate + policy-store rollback end to end` (`examples/dogfood-security-rbac-abac-app/tests/e2e/rbac-abac-flow.spec.ts:42`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/rbac` に `viewer` と `parents: ['viewer']` を持つ `editor` を attach して `editor` で `post:read` を check し、`/abac` で `permit` を評価し、`/policy-store` で 2 版を publish してから巻き戻し、RBAC の継承 + ABAC の評価 + 版の巻き戻しが 1 つの `APIRequestContext` から連続で通ることを確かめる
 
 1 件で 3 route / 8 呼出を畳んである。 分けないのは RBAC の継承と版管理の巻き戻しが
 どちらも前段の呼出を前提にするため。
@@ -175,3 +189,11 @@ assert は値を固定してある (`allowed: true` / `matchedRule: 'r-permit'` 
 route が公開する 3 つの未実行 kind (`expand` / `combined` / `activate`) は HTTP から到達できる。
 一方、結合規則の選択と方針の作成 / 終了は HTTP から到達できず、防御用の 500 も通常入力では
 選べない。結合規則を切り替える経路は単体テストが `startAbac` を直接呼んで確かめる。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
