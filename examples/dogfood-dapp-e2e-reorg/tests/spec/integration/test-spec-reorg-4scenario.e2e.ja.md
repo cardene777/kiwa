@@ -83,8 +83,9 @@ Playwright の fixture が実 anvil (port 8557) に繋ぎ、`snapshotChain` / `r
   (`op` field を見るしかない)
 - **実 anvil の port が固定**。 fixture は 8557 を決め打ちするため、
   他の process が使っていると衝突する
-- **`stop` が空**。 fixture の `_anvilHandle.stop` が `async () => {}` なので、
-  test が anvil を止めない
+- **per-test の `stop` が空**。 fixture の `_anvilHandle.stop` は `async () => {}` なので、
+  各 test の終了時には anvil を止めず、同じ process と chain state を共有する。 suite 終了時は
+  `tests/global-teardown.ts` が PID file を使って anvil を止める
 
 ## 推奨テスト構成
 
@@ -94,28 +95,29 @@ port 8557 の anvil に繋ぐ。 実 anvil が要る。
 **巻き戻しは `snapshotChain` → 変更 → `revertChain` の 3 段**で行う。
 `revertChain` は真偽値を返し、成功で `true`。
 
-画面は Next.js の実 page を開き (`page.goto('/')`)、`networkidle` を待ってから
-`data-testid` で読む。
+画面は Next.js の実 page を開く (`page.goto('/')`)。 warmup は `networkidle`、
+4 scenario は wallet 接続・RPC idle・`sender-balance` の load 完了を待ってから
+`data-testid` を読む。
 
 ## テスト観点一覧
 
 | # | 観点 | 対象 |
 |---|---|---|
 | 1 | 画面が描画される | warmup |
-| 2 | 未確定 tx が巻き戻しで消える | `getTransaction` が `null` |
-| 3 | 確定 tx の残高が戻る | `balanceOf` |
-| 4 | Transfer の履歴が消えて再取得される | `getLogs` の件数 |
-| 5 | nonce の穴が再送で埋まる | `getTransactionCount` |
+| 2 | 未確定 tx を巻き戻し後に明示的に落とせる | `getTransaction` が `null` |
+| 3 | 確定 tx の chain 残高が戻り、巻き戻し後に開いた画面へ反映される | `balanceOf` / `sender-balance` |
+| 4 | Transfer log が戻り、巻き戻し後に開いた画面へ件数が反映される | `getLogs` / `past-transfers-count` |
+| 5 | 巻き戻し後の nonce から別の tx を 1 件確定できる | `getTransactionCount` |
 
 ## テストケース一覧
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-DR-000 | 画面が描画される | 実 anvil (port 8557) と Next.js の page | `page.goto('/')` して `networkidle` を待つ | 描画が完了する | P2 | yes | browser | `/` |
-| T-DR-001 | 未確定 tx が巻き戻しで消える | 同上 | `snapshotChain` → 未確定 tx を送る → `revertChain` | 巻き戻し前は `hash` が一致し `blockNumber` が `null`。 `revertChain` が `true`。 巻き戻し後は `getTransaction` が `null` | P0 | yes | browser | `/` |
-| T-DR-002 | 確定 tx の残高が戻る | 同上 | `snapshotChain` → 100 単位を transfer して確定 → `revertChain` | 確定時は `receipt.status==='success'` で残高が 100 減る。 `revertChain` が `true`。 巻き戻し後は残高が元に戻り、画面の `sender-balance` も戻る | P0 | yes | browser | `/` |
-| T-DR-003 | Transfer の履歴が消えて再取得される | 同上 | `snapshotChain` → transfer を 3 件 → `revertChain` | 途中の `getLogs` が `countBefore + 3`。 `revertChain` が `true`。 巻き戻し後は `countBefore` に戻り、画面の `past-transfers-count` も戻る | P0 | yes | browser | `/` |
-| T-DR-004 | nonce の穴が再送で埋まる | 同上 | `snapshotChain` → tx を送る → `revertChain` → 別の tx を送る | `revertChain` が `true`。 巻き戻し後の nonce が `nonceBefore`。 再送は `receipt.status==='success'` で `hash` が 1 回目と異なり、最終 nonce が `nonceBefore + 1` | P0 | yes | browser | `/` |
+| T-DR-000 | 画面が接続済みになる | 実 anvil (port 8557) と Next.js の page | `page.goto('/')` して `networkidle` と RPC idle を待つ | `connection-status` が `status: connected` になる | P2 | yes | ssr | `/` |
+| T-DR-001 | 未確定 tx を明示的に落とす | 同上 | `snapshotChain` → 未確定 tx を送る → `revertChain` → `anvil_dropTransaction` → automine を戻して 1 block 掘る | drop 前は `hash` が一致し `blockNumber` が `null`。 `revertChain` が `true`。 明示的な drop 後は `getTransaction` が `null` | P0 | yes | ssr | `/` |
+| T-DR-002 | 確定 tx の残高を巻き戻す | 同上 | `snapshotChain` → 100 単位を transfer して確定 → `revertChain` → page を開く | 確定時は `receipt.status==='success'` で残高が 100 減る。 `revertChain` が `true`。 chain の残高が元に戻り、巻き戻し後に開いた画面の `sender-balance` が元の値を表示する | P0 | yes | ssr | `/` |
+| T-DR-003 | Transfer log を巻き戻す | 同上 | `snapshotChain` → transfer を 3 件 → `revertChain` → page を開く | 途中の `getLogs` が `countBefore + 3`。 `revertChain` が `true`。 chain の log 数が `countBefore` に戻り、巻き戻し後に開いた画面の `past-transfers-count` が `countBefore` を表示する | P0 | yes | ssr | `/` |
+| T-DR-004 | 巻き戻し後に別の tx を確定する | 同上 | `snapshotChain` → tx を送る → `revertChain` → 別の tx を送る | `revertChain` が `true`。 巻き戻し後の nonce が `nonceBefore`。 2 件目は `receipt.status==='success'` で `hash` が 1 件目と異なり、最終 nonce が `nonceBefore + 1` | P0 | yes | ssr | `/` |
 
 ## 既存 test との対応
 
@@ -136,10 +138,10 @@ port 8557 の anvil に繋ぐ。 実 anvil が要る。
 既覆 (候補)。
 
 - T-DR-000 (P2) — 画面が描画されることを確かめる warmup
-- T-DR-001 (P0) — 未確定 tx が巻き戻しで消えることを確かめる
-- T-DR-002 (P0) — 確定 tx の残高が巻き戻しで戻り、画面にも反映されることを確かめる
-- T-DR-003 (P0) — Transfer の履歴が巻き戻しで消え、画面の件数も戻ることを確かめる
-- T-DR-004 (P0) — 巻き戻し後の再送で nonce の穴が埋まることを確かめる
+- T-DR-001 (P0) — 未確定 tx を巻き戻し後に明示的に落とせることを確かめる
+- T-DR-002 (P0) — 確定 tx の残高が巻き戻り、後から開いた画面が元の値を表示することを確かめる
+- T-DR-003 (P0) — Transfer log が巻き戻り、後から開いた画面が元の件数を表示することを確かめる
+- T-DR-004 (P0) — 巻き戻し後の nonce から別の tx が 1 件確定することを確かめる
 
 **5 件とも実 anvil と実 page を使う**。 他の e2e-generic example が mock adapter を
 HTTP の口として立てるのと違い、この example は chain の実挙動そのものを見る。
@@ -152,10 +154,11 @@ HTTP の口として立てるのと違い、この example は chain の実挙�
 | `runAllScenarios` の並び | できる | 同上 |
 | `metrics()` の値 | できる | 同上 |
 | `reset()` が何もしないこと | できる | 同上 |
-| mock と実 chain の食い違い | **できない** | e2e が adapter を通らないため、両者を突き合わせる観測点が無い |
+| mock と実 chain の食い違い | できる | 現在は両者を同じ test で突き合わせる観測点が無い。 e2e から mock adapter も呼び、同じ 4 op の観測値を比較する test を追加すれば到達できる |
 
-最後の 1 件だけが到達できない。 mock の振る舞いは `tests/unit/mock-scenarios.test.ts` が、
-実 adapter は `tests/unit/real-adapter.test.ts` が別々に確かめる。
+到達できない項目は無い。 現在は mock の振る舞いを `tests/unit/mock-scenarios.test.ts` が、
+実 adapter の skip 経路を `tests/unit/real-adapter.test.ts` が別々に確かめるだけで、
+mock と実 anvil の観測値を直接比較する test は無い。
 
 ## 手動確認でよいテスト
 
