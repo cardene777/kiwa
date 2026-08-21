@@ -52,7 +52,7 @@ import { dirname, join } from 'node:path';
 
 
 /** The only sidecar layout this module reads or writes. */
-export const SIDECAR_SCHEMA_VERSION = 1;
+export const SIDECAR_SCHEMA_VERSION = 2;
 
 /** File name placed next to an artefact. */
 export const SIDECAR_BASENAME = 'inputs.sha';
@@ -189,6 +189,16 @@ export function sidecarPathFor(artifactAbs) {
   return join(dirname(artifactAbs), SIDECAR_BASENAME);
 }
 
+/** SHA-256 of the exact artefact bytes paired with a sidecar. */
+function computeArtifactFingerprint(artifactAbs, io = {}) {
+  try {
+    const body = (io.readFileSync ?? readFileSync)(artifactAbs);
+    return createHash('sha256').update(body).digest('hex');
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Record the fingerprint of `inputRels` beside `artifactAbs`.
  *
@@ -199,12 +209,21 @@ export function sidecarPathFor(artifactAbs) {
  * @returns {{ ok: true, fingerprint: string } | { ok: false, reason: string }}
  */
 export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs }, io = {}) {
+  // The sidecar identifies a pair, not just the inputs. Without the artefact
+  // digest, replacing a successful run's report while leaving inputs.sha in
+  // place makes the replacement look current.
+  const artifactFingerprint = computeArtifactFingerprint(artifactAbs, io);
+  if (artifactFingerprint === null) {
+    return { ok: false, reason: 'the artefact could not be read' };
+  }
+
   const fingerprint = computeInputFingerprint({ repoRoot, inputRels }, io);
   if (fingerprint === null) return { ok: false, reason: 'git could not describe the inputs' };
 
   const body = [
     `schema_version: ${SIDECAR_SCHEMA_VERSION}`,
     `fingerprint: ${fingerprint}`,
+    `artifact_fingerprint: ${artifactFingerprint}`,
     `inputs: ${[...inputRels].sort().join(',')}`,
     `recorded_at: ${new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')}`,
     '',
@@ -219,7 +238,7 @@ export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs }, io = 
 /**
  * Read the sidecar beside `artifactAbs`.
  *
- * @returns {{ state: 'absent' } | { state: 'unreadable', reason: string } | { state: 'ok', fingerprint: string, inputs: string[] }}
+ * @returns {{ state: 'absent' } | { state: 'unreadable', reason: string } | { state: 'ok', fingerprint: string, artifactFingerprint: string, inputs: string[] }}
  */
 export function readArtifactInputs(artifactAbs, io = {}) {
   const path = sidecarPathFor(artifactAbs);
@@ -266,11 +285,20 @@ export function readArtifactInputs(artifactAbs, io = {}) {
   }
 
   const fingerprint = field('fingerprint');
+  const artifactFingerprint = field('artifact_fingerprint');
   const inputs = field('inputs');
-  if (!fingerprint || inputs === null) {
-    return { state: 'unreadable', reason: `${SIDECAR_BASENAME} is missing fingerprint or inputs` };
+  if (!fingerprint || !artifactFingerprint || inputs === null) {
+    return {
+      state: 'unreadable',
+      reason: `${SIDECAR_BASENAME} is missing fingerprint, artifact_fingerprint, or inputs`,
+    };
   }
-  return { state: 'ok', fingerprint, inputs: inputs === '' ? [] : inputs.split(',') };
+  return {
+    state: 'ok',
+    fingerprint,
+    artifactFingerprint,
+    inputs: inputs === '' ? [] : inputs.split(','),
+  };
 }
 
 /**
@@ -297,7 +325,15 @@ export function compareArtifactInputs({ repoRoot, inputRels, artifactAbs }, io =
 
   const current = computeInputFingerprint({ repoRoot, inputRels }, io);
   if (current === null) return { state: 'unusable', reason: 'git could not describe the inputs' };
-  return current === recorded.fingerprint
+  if (current !== recorded.fingerprint) {
+    return { state: 'mismatch', reason: 'the inputs changed since the artefact was produced' };
+  }
+
+  const currentArtifact = computeArtifactFingerprint(artifactAbs, io);
+  if (currentArtifact === null) {
+    return { state: 'unusable', reason: 'the artefact could not be read' };
+  }
+  return currentArtifact === recorded.artifactFingerprint
     ? { state: 'match' }
-    : { state: 'mismatch', reason: 'the inputs changed since the artefact was produced' };
+    : { state: 'mismatch', reason: 'the artefact differs from the one paired with the inputs' };
 }

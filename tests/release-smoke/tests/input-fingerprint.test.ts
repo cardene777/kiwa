@@ -37,7 +37,7 @@ type RecordResult = { ok: true; fingerprint: string } | { ok: false; reason: str
 type ReadResult =
   | { state: 'absent' }
   | { state: 'unreadable'; reason: string }
-  | { state: 'ok'; fingerprint: string; inputs: string[] };
+  | { state: 'ok'; fingerprint: string; artifactFingerprint: string; inputs: string[] };
 
 const fingerprint = (await import(
   pathToFileURL(resolve(REPO_ROOT, 'scripts/lib/input-fingerprint.mjs')).href
@@ -334,6 +334,15 @@ describe('指紋 — 時刻では塞げない 2 つの形', () => {
     expect(result.state, '少ない入力で取った指紋を広い gate が受け入れている').toBe('mismatch');
     expect(result.reason).toContain('differ from the inputs this gate reads');
   });
+
+  it('T-FP-104 sidecar を残して成果物だけ差し替えれば mismatch', () => {
+    const { root, artifact } = makeTree();
+    record(root, artifact);
+    writeFileSync(artifact, '{"total":{"lines":{"pct":100}}}\n');
+    const result = compare(root, artifact);
+    expect(result.state, '別 run の成果物を sidecar と組み替えている').toBe('mismatch');
+    expect(result.reason).toContain('artefact differs');
+  });
 });
 
 describe('sidecar — 読めない時の倒し方', () => {
@@ -350,7 +359,7 @@ describe('sidecar — 読めない時の倒し方', () => {
     writeFileSync(path, raw.replace(/schema_version: \d+/, `schema_version: ${SIDECAR_SCHEMA_VERSION + 1}`));
     const result = compare(root, artifact);
     expect(result.state, '読めない形式を fresh 側に倒している').toBe('unusable');
-    expect(result.reason).toContain('schema_version 2');
+    expect(result.reason).toContain(`schema_version ${SIDECAR_SCHEMA_VERSION + 1}`);
   });
 
   it('T-FP-202b 古い schema_version も unusable (算法が違う digest を比べない)', () => {
@@ -388,6 +397,34 @@ describe('sidecar — 読めない時の倒し方', () => {
     expect(compare(root, artifact).state).toBe('unusable');
   });
 
+  it('T-FP-204b artifact_fingerprint 欄が欠ければ unusable', () => {
+    const { root, artifact } = makeTree();
+    record(root, artifact);
+    const path = sidecarPathFor(artifact);
+    const raw = readFileSync(path, 'utf8');
+    writeFileSync(path, raw.replace(/^artifact_fingerprint:.*\n/m, ''));
+    expect(compare(root, artifact).state).toBe('unusable');
+  });
+
+  it('T-FP-207 成果物を読めない時は unusable (fresh へ倒さない)', () => {
+    const { root, artifact } = makeTree();
+    record(root, artifact);
+    const sidecar = sidecarPathFor(artifact);
+    const result = compareArtifactInputs(
+      { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact },
+      {
+        // sidecar は読めるが成果物は読めない状況。 権限や I/O 障害で起きる。
+        readFileSync: ((path: string, encoding?: unknown) => {
+          if (path === artifact) throw new Error('EACCES');
+          return readFileSync(path, encoding as never);
+        }) as never,
+      },
+    );
+    expect(result.state, '成果物を読めないのに match にしている').toBe('unusable');
+    expect(result.reason).toContain('artefact could not be read');
+    expect(existsSync(sidecar)).toBe(true);
+  });
+
   it('T-FP-205 記録した内容を読み戻せる', () => {
     const { root, artifact } = makeTree();
     const written = record(root, artifact);
@@ -396,6 +433,7 @@ describe('sidecar — 読めない時の倒し方', () => {
     expect(read.state).toBe('ok');
     if (read.state !== 'ok') return;
     expect(read.fingerprint).toBe(written.ok ? written.fingerprint : '');
+    expect(read.artifactFingerprint).toMatch(/^[0-9a-f]{64}$/);
     expect(read.inputs).toStrictEqual([...INPUTS].sort());
   });
 
