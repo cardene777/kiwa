@@ -21,29 +21,22 @@
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { isMainModule } from './lib/is-main-module.mjs';
-import { recordArtifactInputs } from './lib/input-fingerprint.mjs';
-import { MUTATION_INPUT_DIRS } from './lib/gate-inputs.mjs';
+import { recordForPackage } from './record-artifact-inputs.mjs';
 
 /** Repo root, found from this file rather than from the caller's cwd. */
 const REPO_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
 /**
- * The paths whose content the report depends on, repo-relative.
+ * Where `tsc` puts the copy Stryker measures.
  *
- * Kept next to the gate's own list (`scripts/lib/gate-inputs.mjs`) so the set
- * recorded here and the set the gate checks cannot drift apart. They have to
- * match exactly: the sidecar records which inputs it covered, and the gate
- * refuses a fingerprint taken over a different set.
+ * Deleted and recompiled by every run, which is what makes it usable as the
+ * instant the inputs were read: `recordForPackage` refuses to record an input
+ * newer than this build, because such an input never reached the report.
  */
-function mutationInputRels(cwd, repoRoot) {
-  const pkgRel = relative(repoRoot, cwd).split(/[\\/]/).join('/');
-  return MUTATION_INPUT_DIRS.map((suffix) => `${pkgRel}/${suffix}`);
-}
-
 const BUILD_DIR = '.vitest-dist';
 /**
  * Where Stryker writes the report the gate reads.
@@ -109,6 +102,22 @@ function runStep(command, args, cwd) {
  *
  * @returns the exit code to leave with.
  */
+/**
+ * Record what this run measured.
+ *
+ * Through the shared recorder so the artefact, the inputs, and the build are
+ * resolved the same way coverage resolves them. Stryker measures the compiled
+ * copy and this run takes minutes (35 for `dapp`), so an edit landing in that
+ * window must not be recorded as what was measured.
+ *
+ * Exported because the entry-point block below only runs as a CLI inside a real
+ * package, where nothing checks it. Calling through here puts the wiring —
+ * which kind, which root — somewhere a test can reach.
+ */
+export function recordMutationInputs(cwd, repoRoot = REPO_ROOT) {
+  return recordForPackage({ kind: 'mutation', cwd, repoRoot });
+}
+
 export function runPackageMutation({
   cwd,
   rm,
@@ -163,12 +172,12 @@ if (isMainModule(process.argv[1], import.meta.url)) {
       warn: (message) => process.stderr.write(message),
       dirProblem: packageDirProblem(cwd),
       setupProblems: () => mutationSetupProblems(cwd),
-      record: () =>
-        recordArtifactInputs({
-          repoRoot: REPO_ROOT,
-          inputRels: mutationInputRels(cwd, REPO_ROOT),
-          artifactAbs: resolve(cwd, REPORT_DIR, 'mutation.json'),
-        }),
+      // Not reachable from a test: this block runs only when the file is the
+      // entry point, and getting here needs a real Stryker run (a fixture
+      // package stops at `setupProblems`, which returns 2 before recording).
+      // What the call does is checked through `recordMutationInputs`; what is
+      // left unchecked is this one line wiring it in.
+      record: () => recordMutationInputs(cwd),
     }),
   );
 }

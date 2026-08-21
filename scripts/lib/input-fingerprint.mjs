@@ -46,9 +46,12 @@ import {
   mkdirSync,
   readFileSync,
   readlinkSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
+
+import { newestMtimeMs } from './artifact-freshness.mjs';
 
 
 /** The only sidecar layout this module reads or writes. */
@@ -99,24 +102,33 @@ function pathIsSymlink(path, io) {
  * @param {object} [io] injection seam for the tests.
  * @returns {string | null} hex digest, or `null` when git cannot answer.
  */
-export function computeInputFingerprint({ repoRoot, inputRels }, io = {}) {
-  const run = io.execFileSync;
-
-  // The file list comes from git so ignored files stay out: `coverage/`,
-  // `.vitest-dist/` and the rest live under the package too, and hashing them
-  // would make every artefact invalidate itself.
-  //
-  // `--cached` covers tracked files, `--others --exclude-standard` covers new
-  // ones. A tracked file that was deleted still appears in `--cached`; it is
-  // dropped below, and its absence changes the digest because its line goes.
+/**
+ * The input files git knows about, repo-relative.
+ *
+ * Ignored files stay out: `coverage/`, `.vitest-dist/` and the rest live under
+ * the package too, and counting them would make every artefact invalidate
+ * itself. `--cached` covers tracked files, `--others --exclude-standard`
+ * covers new ones. A tracked file that was deleted still appears in
+ * `--cached`; callers drop it, and its absence changes the digest because its
+ * line goes.
+ *
+ * @returns {string[] | null} `null` when git cannot answer.
+ */
+function listInputPaths({ repoRoot, inputRels }, io = {}) {
   const listed = git(
     ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', ...inputRels],
     repoRoot,
-    run,
+    io.execFileSync,
   );
   if (listed === null) return null;
+  return listed.split('\0').filter((entry) => entry !== '');
+}
 
-  const paths = listed.split('\0').filter((entry) => entry !== '');
+export function computeInputFingerprint({ repoRoot, inputRels }, io = {}) {
+  const run = io.execFileSync;
+
+  const paths = listInputPaths({ repoRoot, inputRels }, io);
+  if (paths === null) return null;
   const present = paths.filter((rel) => pathEntryExists(join(repoRoot, rel), io));
 
   const lines = [`v${SIDECAR_SCHEMA_VERSION}`, `inputs\t${[...inputRels].sort().join(',')}`];
@@ -200,15 +212,80 @@ function computeArtifactFingerprint(artifactAbs, io = {}) {
 }
 
 /**
+ * Whether the inputs still stand as the run's build left them.
+ *
+ * A sidecar is written after the run, so it describes the working tree *then*
+ * — not the tree the numbers came from. Both generators compile into
+ * `.vitest-dist` first and measure that copy, so a `src/` edit made while
+ * Stryker is running (35 minutes for `dapp`) reaches the sidecar but not the
+ * report. Nothing downstream can tell: the inputs and the artefact are both
+ * unchanged between recording and checking, so the pair reads as `match` and
+ * the gate scores the new code against the old run.
+ *
+ * The build is the instant the inputs were consumed. Both `test:cov` and
+ * `test:mutation` delete `.vitest-dist` and recompile before measuring, so its
+ * mtimes mark when the compiler last read `src/` and `tests/`. An input newer
+ * than that did not reach the build, and no sidecar may claim it did.
+ *
+ * Measured across all 30 package build directories on this tree: the newest
+ * input predates the build every time, and the build predates its artefact
+ * every time (`core` compiled 15:52:05 and its coverage landed 15:53:18). The
+ * check costs one `git ls-files` and one walk, both of which the recording
+ * path already pays.
+ *
+ * @returns {string | null} why recording must not happen, or `null` when it may.
+ */
+function inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io = {}) {
+  if (!buildDirAbs) return 'no build directory was given to compare the inputs against';
+
+  const builtAt = newestMtimeMs(buildDirAbs, io);
+  // `null` is an unreadable directory, `0` a directory holding no files. The
+  // build is deleted and recompiled by every run that records, so neither
+  // shape belongs to a run that just measured something.
+  if (builtAt === null) return 'the build the run measured could not be read';
+  if (builtAt === 0) return 'the build the run measured holds no files';
+
+  const paths = listInputPaths({ repoRoot, inputRels }, io);
+  if (paths === null) return 'git could not list the inputs';
+
+  const stat = io.statSync ?? statSync;
+  for (const rel of paths) {
+    const abs = join(repoRoot, rel);
+    // A path git lists but the tree no longer has is a deletion, which the
+    // fingerprint already reflects by dropping its line.
+    if (!pathEntryExists(abs, io)) continue;
+    let mtimeMs;
+    try {
+      ({ mtimeMs } = stat(abs));
+    } catch {
+      // Listed, present, and still unreadable. Recording would assert a pairing
+      // over a file whose age is unknown.
+      return `${rel} could not be read to compare against the build`;
+    }
+    if (mtimeMs > builtAt) return `${rel} changed after the build the run measured`;
+  }
+  return null;
+}
+
+/**
  * Record the fingerprint of `inputRels` beside `artifactAbs`.
  *
  * Called by the generators once their run has succeeded. A run that fails must
  * not leave a sidecar: it would pair a fingerprint with an artefact from an
  * earlier run and make the stale one read as current.
  *
+ * `buildDirAbs` is the compiled copy the run measured, and it is required. A
+ * sidecar written without it would claim a pairing that nothing checked
+ * (`inputsChangedAfterBuild`), and an optional argument is dropped silently by
+ * whichever caller is added next.
+ *
+ * Recording is not a failure of the run. Every rejection here returns a reason
+ * for the caller to report while still leaving with success, and the gate goes
+ * on comparing timestamps as it did before #2135.
+ *
  * @returns {{ ok: true, fingerprint: string } | { ok: false, reason: string }}
  */
-export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs }, io = {}) {
+export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs, buildDirAbs }, io = {}) {
   // The sidecar identifies a pair, not just the inputs. Without the artefact
   // digest, replacing a successful run's report while leaving inputs.sha in
   // place makes the replacement look current.
@@ -216,6 +293,9 @@ export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs }, io = 
   if (artifactFingerprint === null) {
     return { ok: false, reason: 'the artefact could not be read' };
   }
+
+  const drifted = inputsChangedAfterBuild({ repoRoot, inputRels, buildDirAbs }, io);
+  if (drifted !== null) return { ok: false, reason: drifted };
 
   const fingerprint = computeInputFingerprint({ repoRoot, inputRels }, io);
   if (fingerprint === null) return { ok: false, reason: 'git could not describe the inputs' };
@@ -230,8 +310,17 @@ export function recordArtifactInputs({ repoRoot, inputRels, artifactAbs }, io = 
   ].join('\n');
 
   const path = sidecarPathFor(artifactAbs);
-  (io.mkdirSync ?? mkdirSync)(dirname(path), { recursive: true });
-  (io.writeFileSync ?? writeFileSync)(path, body);
+  try {
+    (io.mkdirSync ?? mkdirSync)(dirname(path), { recursive: true });
+    (io.writeFileSync ?? writeFileSync)(path, body);
+  } catch (error) {
+    // A read-only tree, a full disk, or a directory this user cannot write.
+    // The documented failure shape is a returned reason: `recordForPackage`
+    // reports it and the CLI still exits 0, and `runPackageMutation` warns and
+    // still returns the run's own exit code. Throwing here escapes both and
+    // turns "the sidecar could not be written" into "`test:cov` failed".
+    return { ok: false, reason: `the sidecar could not be written (${error.message})` };
+  }
   return { ok: true, fingerprint };
 }
 

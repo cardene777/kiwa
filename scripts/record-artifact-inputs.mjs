@@ -41,12 +41,28 @@ export const KINDS = {
 };
 
 /**
- * @returns {{ ok: boolean, message?: string }}
+ * The compiled copy both kinds measure.
+ *
+ * `test:cov` and `test:mutation` delete it and recompile before running, so
+ * its mtimes mark when the compiler last read `src/` and `tests/`. The
+ * recorder refuses to pair inputs newer than that with the artefact.
+ */
+export const BUILD_DIR = '.vitest-dist';
+
+/**
+ * Record what a package's artefact was measured against.
+ *
+ * The single place both kinds resolve their paths: the artefact, the inputs,
+ * and the build the run compiled into. `package-mutation.mjs` comes through
+ * here too, so the build the recorder compares against cannot be wired one way
+ * for coverage and another for mutation.
+ *
+ * @returns {{ ok: true } | { ok: false, reason: string }}
  */
 export function recordForPackage({ kind, cwd, repoRoot, exists = existsSync, record = recordArtifactInputs }) {
   const spec = KINDS[kind];
   if (!spec) {
-    return { ok: false, message: `unknown kind "${kind}" — expected one of ${Object.keys(KINDS).join(' / ')}` };
+    return { ok: false, reason: `unknown kind "${kind}" — expected one of ${Object.keys(KINDS).join(' / ')}` };
   }
 
   const artifactAbs = resolve(cwd, spec.artifactRel);
@@ -54,27 +70,28 @@ export function recordForPackage({ kind, cwd, repoRoot, exists = existsSync, rec
     // Nothing was produced. Recording here would describe inputs for an
     // artefact that is not there, and the next run would find a sidecar
     // without its pair.
-    return { ok: false, message: `no ${spec.artifactRel} in ${cwd} — nothing to record` };
+    return { ok: false, reason: `no ${spec.artifactRel} in ${cwd} — nothing to record` };
   }
 
   const pkgRel = relative(repoRoot, cwd).split(/[\\/]/).join('/');
   if (pkgRel === '' || pkgRel.startsWith('..')) {
-    return { ok: false, message: `${cwd} is outside ${repoRoot}` };
+    return { ok: false, reason: `${cwd} is outside ${repoRoot}` };
   }
 
   const result = record({
     repoRoot,
     inputRels: spec.inputs.map((suffix) => `${pkgRel}/${suffix}`),
     artifactAbs,
+    buildDirAbs: resolve(cwd, BUILD_DIR),
   });
-  return result.ok ? { ok: true } : { ok: false, message: result.reason };
+  return result.ok ? { ok: true } : { ok: false, reason: result.reason };
 }
 
 if (isMainModule(process.argv[1], import.meta.url)) {
   const kind = process.argv[2];
   const result = recordForPackage({ kind, cwd: process.cwd(), repoRoot: REPO_ROOT });
   if (!result.ok) {
-    process.stderr.write(`record-artifact-inputs: ${result.message}\n`);
+    process.stderr.write(`record-artifact-inputs: ${result.reason}\n`);
   }
   process.exit(0);
 }

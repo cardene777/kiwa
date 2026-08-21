@@ -55,11 +55,18 @@ const fingerprint = (await import(
     io?: { execFileSync?: (command: string, args: string[], options: Record<string, unknown>) => string },
   ) => string | null;
   readArtifactInputs: (artifactAbs: string) => ReadResult;
-  recordArtifactInputs: (args: {
-    repoRoot: string;
-    inputRels: string[];
-    artifactAbs: string;
-  }) => RecordResult;
+  recordArtifactInputs: (
+    args: {
+      repoRoot: string;
+      inputRels: string[];
+      artifactAbs: string;
+      buildDirAbs?: string;
+    },
+    io?: {
+      mkdirSync?: typeof mkdirSync;
+      writeFileSync?: typeof writeFileSync;
+    },
+  ) => RecordResult;
   sidecarPathFor: (artifactAbs: string) => string;
   SIDECAR_SCHEMA_VERSION: number;
 };
@@ -71,6 +78,17 @@ const {
   sidecarPathFor,
   SIDECAR_SCHEMA_VERSION,
 } = fingerprint;
+
+const recorderModule = (await import(
+  pathToFileURL(resolve(REPO_ROOT, 'scripts/record-artifact-inputs.mjs')).href
+)) as {
+  recordForPackage: (args: {
+    kind: string;
+    cwd: string;
+    repoRoot: string;
+  }) => { ok: true } | { ok: false; reason: string };
+};
+const { recordForPackage } = recorderModule;
 
 const runner = (await import(
   pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
@@ -84,14 +102,21 @@ const runner = (await import(
     setupProblems?: () => string[];
     record?: () => RecordResult;
   }) => number;
+  recordMutationInputs: (cwd: string, repoRoot: string) => { ok: true } | { ok: false; reason: string };
 };
 
 const SRC_REL = 'packages/demo/src';
 const TESTS_REL = 'packages/demo/tests';
 const ARTIFACT_REL = 'packages/demo/coverage/coverage-summary.json';
+/** 実行が測る compile 済 copy。 入力がこれより新しければ記録しない。 */
+const BUILD_REL = 'packages/demo/.vitest-dist';
 const INPUTS = [SRC_REL, TESTS_REL];
 /** fixture の基準時刻。 実行時刻に依らないよう固定する。 */
 const COMMIT_EPOCH = 1_600_000_000;
+/** 入力を compile した時刻。 記録が「測定に入ったか」 を見る基準。 */
+const BUILD_EPOCH = COMMIT_EPOCH + 100;
+/** 測定が終わって成果物が書かれた時刻。 compile より後になる。 */
+const ARTIFACT_EPOCH = COMMIT_EPOCH + 200;
 
 const created: string[] = [];
 afterEach(() => {
@@ -118,7 +143,13 @@ function gitAt(root: string, epochSeconds: number, ...args: string[]): string {
   });
 }
 
-type Fixture = { root: string; srcFile: string; testFile: string; artifact: string };
+type Fixture = {
+  root: string;
+  srcFile: string;
+  testFile: string;
+  artifact: string;
+  buildDir: string;
+};
 
 function makeTree({ asRepo = true }: { asRepo?: boolean } = {}): Fixture {
   const root = mkdtempSync(join(tmpdir(), 'kiwa-fingerprint-'));
@@ -132,19 +163,50 @@ function makeTree({ asRepo = true }: { asRepo?: boolean } = {}): Fixture {
   writeFileSync(testFile, 'export const covered = true;\n');
   const artifact = join(root, ARTIFACT_REL);
   writeFileSync(artifact, '{"total":{}}\n');
+  // 実行は入力を compile してから測る。 build を入力より新しく置くのが
+  // 「測定中に入力が変わっていない」 状態にあたる。
+  const buildDir = join(root, BUILD_REL);
+  mkdirSync(buildDir, { recursive: true });
+  writeFileSync(join(buildDir, 'index.js'), 'export const value = 1;\n');
+  // 実行の順序どおりに時刻を置く。 入力 → compile → 測定 → 成果物 の 3 段が
+  // 別々の時刻を持たないと、どれを基準に見ているのかを test が区別できない。
+  for (const path of [srcFile, testFile]) utimesSync(path, COMMIT_EPOCH, COMMIT_EPOCH);
+  utimesSync(join(buildDir, 'index.js'), BUILD_EPOCH, BUILD_EPOCH);
+  utimesSync(artifact, ARTIFACT_EPOCH, ARTIFACT_EPOCH);
   if (asRepo) {
     gitAt(root, COMMIT_EPOCH, 'init', '-q');
     gitAt(root, COMMIT_EPOCH, 'add', '-A');
     gitAt(root, COMMIT_EPOCH, 'commit', '-q', '-m', 'init');
   }
-  return { root, srcFile, testFile, artifact };
+  return { root, srcFile, testFile, artifact, buildDir };
+}
+
+/** 入力を build より新しくする (= 測定中に編集された状態)。 */
+function touchAfterBuild(path: string): void {
+  const future = Date.now() / 1000 + 3600;
+  utimesSync(path, future, future);
+}
+
+/**
+ * 入力を compile と成果物の「あいだ」 に置く。
+ *
+ * 実行中の編集はここに落ちる。 成果物より古いので、成果物の時刻を基準に見ている
+ * 実装はこれを見逃す。 compile を基準に見ている実装だけが捕まえられる。
+ */
+function touchDuringRun(path: string): void {
+  utimesSync(path, BUILD_EPOCH + 50, BUILD_EPOCH + 50);
 }
 
 const digest = (root: string, inputRels = INPUTS) =>
   computeInputFingerprint({ repoRoot: root, inputRels });
 
 const record = (root: string, artifact: string, inputRels = INPUTS) =>
-  recordArtifactInputs({ repoRoot: root, inputRels, artifactAbs: artifact });
+  recordArtifactInputs({
+    repoRoot: root,
+    inputRels,
+    artifactAbs: artifact,
+    buildDirAbs: join(root, BUILD_REL),
+  });
 
 const compare = (root: string, artifact: string, inputRels = INPUTS) =>
   compareArtifactInputs({ repoRoot: root, inputRels, artifactAbs: artifact });
@@ -448,6 +510,136 @@ describe('sidecar — 読めない時の倒し方', () => {
   });
 });
 
+// sidecar は実行の「後」 に書かれる。 書いた時点の working tree が、成果物を測った
+// 内容と同じとは限らない。 実行は入力を compile してから測るので、compile より新しい
+// 入力は成果物に入っていない。
+describe('記録 — 測定中に入力が変わった run は結び付けない', () => {
+  it('T-FP-208 build より新しい入力があれば記録しない', () => {
+    const { root, artifact, srcFile } = makeTree();
+    touchAfterBuild(srcFile);
+    const result = record(root, artifact);
+    expect(result.ok, '測定に入っていない内容を成果物へ結び付けている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('changed after the build');
+    expect(existsSync(sidecarPathFor(artifact)), 'sidecar を書いてしまっている').toBe(false);
+  });
+
+  it('T-FP-208b test 側の入力が build より新しくても記録しない', () => {
+    const { root, artifact, testFile } = makeTree();
+    touchAfterBuild(testFile);
+    const result = record(root, artifact);
+    expect(result.ok, 'src だけを見て tests を見ていない').toBe(false);
+    expect(result.ok === false && result.reason).toContain('index.test.ts');
+  });
+
+  it('T-FP-208c ignore された file は build より新しくても記録を妨げない', () => {
+    const { root, artifact, buildDir } = makeTree();
+    // 成果物も build 自身も package の下にある。 これらを入力として数えると
+    // どの実行も自分自身を無効にしてしまう。
+    touchAfterBuild(artifact);
+    touchAfterBuild(join(buildDir, 'index.js'));
+    expect(record(root, artifact).ok, '追跡外の file で誤って拒否している').toBe(true);
+  });
+
+  it('T-FP-208d compile と成果物のあいだの編集も捕まえる', () => {
+    const { root, artifact, srcFile } = makeTree();
+    // 実行中の編集はここに落ちる。 成果物の時刻を基準にすると見逃す形。
+    writeFileSync(srcFile, 'export const value = 2;\n');
+    touchDuringRun(srcFile);
+    const result = record(root, artifact);
+    expect(result.ok, '成果物の時刻を基準にしていて compile を見ていない').toBe(false);
+    expect(result.ok === false && result.reason).toContain('changed after the build');
+  });
+
+  it('T-FP-208e 消えた入力があっても後続の入力を見る', () => {
+    const { root, artifact, srcFile, testFile } = makeTree();
+    // commit 済 file を消すと git は列挙し続ける。 そこで走査を止めると、
+    // その後ろにある変更を 1 件も見なくなる。
+    rmSync(srcFile);
+    touchAfterBuild(testFile);
+    const result = record(root, artifact);
+    expect(result.ok, '消えた入力で走査を打ち切っている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('index.test.ts');
+  });
+
+  it('T-FP-208f 参照先の無い symlink は fail-closed', () => {
+    const { root, artifact } = makeTree();
+    // lstat は通るが stat は通らない。 年齢を測れない入力を素通しすると、
+    // 測定に入っていない内容を結び付けうる。
+    symlinkSync(join(root, SRC_REL, 'gone.ts'), join(root, SRC_REL, 'dangling.ts'));
+    const result = record(root, artifact);
+    expect(result.ok, '年齢を測れない入力を素通ししている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('could not be read to compare');
+  });
+
+  it('T-FP-209 build が無ければ記録しない (fail-closed)', () => {
+    const { root, artifact, buildDir } = makeTree();
+    rmSync(buildDir, { recursive: true, force: true });
+    const result = record(root, artifact);
+    expect(result.ok, '測定した compile 済 copy が無いのに結び付けている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('could not be read');
+  });
+
+  it('T-FP-209b build が空なら記録しない', () => {
+    const { root, artifact, buildDir } = makeTree();
+    rmSync(join(buildDir, 'index.js'));
+    const result = record(root, artifact);
+    expect(result.ok, '中身の無い build を測定の証拠にしている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('holds no files');
+  });
+
+  it('T-FP-210 buildDirAbs を渡さなければ記録しない', () => {
+    const { root, artifact } = makeTree();
+    const result = recordArtifactInputs({ repoRoot: root, inputRels: INPUTS, artifactAbs: artifact });
+    expect(result.ok, '検査する相手が無いまま sidecar を書いている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('no build directory');
+    expect(existsSync(sidecarPathFor(artifact))).toBe(false);
+  });
+});
+
+// 記録できないことは実行の失敗ではない。 呼出側 (`recordForPackage` は exit 0、
+// `runPackageMutation` は warn して実行自身の exit code) はいずれも返り値を見る契約で、
+// 例外はその両方を飛び越えて「`test:cov` が落ちた」 に化ける。
+describe('記録 — 書けない時も返り値で返す', () => {
+  const failing = (message: string) => () => {
+    throw new Error(message);
+  };
+
+  it('T-FP-211 sidecar を書けなければ例外でなく ok:false', () => {
+    const { root, artifact } = makeTree();
+    let result: RecordResult | undefined;
+    expect(() => {
+      result = recordArtifactInputs(
+        { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact, buildDirAbs: join(root, BUILD_REL) },
+        { writeFileSync: failing('ENOSPC: no space left on device') as typeof writeFileSync },
+      );
+    }, '書込失敗が例外として呼出側へ伝播している').not.toThrow();
+    expect(result?.ok).toBe(false);
+    expect(result?.ok === false && result.reason).toContain('ENOSPC');
+  });
+
+  it('T-FP-211b dir を作れなければ例外でなく ok:false', () => {
+    const { root, artifact } = makeTree();
+    let result: RecordResult | undefined;
+    expect(() => {
+      result = recordArtifactInputs(
+        { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact, buildDirAbs: join(root, BUILD_REL) },
+        { mkdirSync: failing('EACCES: permission denied') as typeof mkdirSync },
+      );
+    }, 'dir 作成の失敗が例外として伝播している').not.toThrow();
+    expect(result?.ok).toBe(false);
+    expect(result?.ok === false && result.reason).toContain('EACCES');
+  });
+
+  it('T-FP-211c 書込失敗の後に sidecar が残らない', () => {
+    const { root, artifact } = makeTree();
+    recordArtifactInputs(
+      { repoRoot: root, inputRels: INPUTS, artifactAbs: artifact, buildDirAbs: join(root, BUILD_REL) },
+      { writeFileSync: failing('ENOSPC') as typeof writeFileSync },
+    );
+    expect(existsSync(sidecarPathFor(artifact)), '書けなかったのに sidecar がある').toBe(false);
+  });
+});
+
 describe('記録 script — 成果物が無ければ書かない', () => {
   const recorder = resolve(REPO_ROOT, 'scripts/record-artifact-inputs.mjs');
 
@@ -472,6 +664,61 @@ describe('記録 script — 成果物が無ければ書かない', () => {
     });
     expect(run.stderr).toContain('unknown kind');
     expect(run.status).toBe(0);
+  });
+
+  // CLI 自身は自分の file 位置から repo root を決めるので fixture では動かせない。
+  // build を渡す配線そのものを持つのは `recordForPackage` で、両 kind がここを通る。
+  it('T-FP-303 coverage は build を測定の基準として渡している', () => {
+    const { root, artifact, srcFile } = makeTree();
+    // compile と成果物のあいだに落ちる編集。 基準が build でなければ
+    // (成果物の時刻や、そもそも渡していない場合) 記録は通り、
+    // 測っていない内容が成果物に結び付く。
+    writeFileSync(srcFile, 'export const value = 2;\n');
+    touchDuringRun(srcFile);
+    const result = recordForPackage({ kind: 'coverage', cwd: join(root, 'packages/demo'), repoRoot: root });
+    expect(result.ok, '測定に入っていない内容を成果物へ結び付けている').toBe(false);
+    expect(result.ok === false && result.reason).toContain('changed after the build');
+    expect(existsSync(sidecarPathFor(artifact))).toBe(false);
+  });
+
+  it('T-FP-304 build が揃っていれば記録する', () => {
+    const { root, artifact } = makeTree();
+    const result = recordForPackage({ kind: 'coverage', cwd: join(root, 'packages/demo'), repoRoot: root });
+    expect(result.ok, `記録できていない: ${result.ok === false ? result.reason : ''}`).toBe(true);
+    expect(existsSync(sidecarPathFor(artifact))).toBe(true);
+  });
+
+  // mutation runner も同じ recorder を通す。 経路が分かれていると、build を
+  // 渡す配線を片方だけ落としても誰も気付けない。
+  it('T-FP-305 mutation も同じ配線を通る', () => {
+    const { root } = makeTree();
+    const pkg = join(root, 'packages/demo');
+    mkdirSync(join(pkg, 'mutation-report'), { recursive: true });
+    const report = join(pkg, 'mutation-report/mutation.json');
+    writeFileSync(report, '{"files":{}}\n');
+    const srcFile = join(root, SRC_REL, 'index.ts');
+    writeFileSync(srcFile, 'export const value = 3;\n');
+    touchDuringRun(srcFile);
+    const result = recordForPackage({ kind: 'mutation', cwd: pkg, repoRoot: root });
+    expect(result.ok, 'mutation 側だけ build を見ていない').toBe(false);
+    expect(result.ok === false && result.reason).toContain('changed after the build');
+    expect(existsSync(sidecarPathFor(report))).toBe(false);
+  });
+
+  // runner の入口は実 package の中でしか走らないので、どちらの成果物へ記録するかは
+  // 呼出側の 1 語でしか決まらない。 その語を取り違えると coverage 側へ書き、
+  // mutation の gate は sidecar を 1 度も持たない。
+  it('T-FP-306 mutation runner は mutation の成果物へ記録する', () => {
+    const { root, artifact } = makeTree();
+    const pkg = join(root, 'packages/demo');
+    mkdirSync(join(pkg, 'mutation-report'), { recursive: true });
+    const report = join(pkg, 'mutation-report/mutation.json');
+    writeFileSync(report, '{"files":{}}\n');
+    utimesSync(report, ARTIFACT_EPOCH, ARTIFACT_EPOCH);
+    const result = runner.recordMutationInputs(pkg, root);
+    expect(result.ok, `記録できていない: ${result.ok === false ? result.reason : ''}`).toBe(true);
+    expect(existsSync(sidecarPathFor(report)), 'mutation の成果物に sidecar が無い').toBe(true);
+    expect(existsSync(sidecarPathFor(artifact)), 'coverage 側へ書いている').toBe(false);
   });
 });
 
@@ -498,8 +745,10 @@ describe('実 gate — 内容で判定する', () => {
     created.push(root);
     mkdirSync(join(root, 'packages/core/src'), { recursive: true });
     mkdirSync(join(root, 'packages/core/tests'), { recursive: true });
+    mkdirSync(join(root, 'packages/core/.vitest-dist'), { recursive: true });
     writeFileSync(join(root, 'packages/core/src/index.ts'), 'export const v = 1;\n');
     writeFileSync(join(root, 'packages/core/tests/index.test.ts'), 'export const t = 1;\n');
+    writeFileSync(join(root, 'packages/core/.vitest-dist/index.js'), 'export const v = 1;\n');
     gitAt(root, COMMIT_EPOCH, 'init', '-q');
     gitAt(root, COMMIT_EPOCH, 'add', '-A');
     gitAt(root, COMMIT_EPOCH, 'commit', '-q', '-m', 'init');
@@ -527,6 +776,7 @@ describe('実 gate — 内容で判定する', () => {
         repoRoot: root,
         inputRels: ['packages/core/src', 'packages/core/tests'],
         artifactAbs: artifact,
+        buildDirAbs: join(root, 'packages/core/.vitest-dist'),
       });
       // 時刻だけ見れば stale になる形に置く。
       utimesSync(artifact, COMMIT_EPOCH - 86_400, COMMIT_EPOCH - 86_400);
@@ -543,6 +793,7 @@ describe('実 gate — 内容で判定する', () => {
         repoRoot: root,
         inputRels: ['packages/core/src', 'packages/core/tests'],
         artifactAbs: artifact,
+        buildDirAbs: join(root, 'packages/core/.vitest-dist'),
       });
       writeFileSync(join(root, 'packages/core/src/index.ts'), 'export const v = 2;\n');
       // 時刻だけ見れば fresh になる形に置く。
@@ -562,6 +813,29 @@ describe('実 gate — 内容で判定する', () => {
     expect(stderr).toContain(spec.command);
   });
 
+  it.each(cases)('T-FP-405 $gate は測定中に入力が変わった run を通さない', (spec) => {
+    const { stderr } = runGate(spec.gate, (root, artifact) => {
+      writeFileSync(artifact, spec.body);
+      // compile の後に入力が変わった状態。 成果物はこの内容を測っていない。
+      const input = join(root, 'packages/core/src/index.ts');
+      writeFileSync(input, 'export const v = 2;\n');
+      const future = Date.now() / 1000 + 3600;
+      utimesSync(input, future, future);
+      const recorded = recordArtifactInputs({
+        repoRoot: root,
+        inputRels: ['packages/core/src', 'packages/core/tests'],
+        artifactAbs: artifact,
+        buildDirAbs: join(root, 'packages/core/.vitest-dist'),
+      });
+      expect(recorded.ok, '測定に入っていない内容で sidecar を書いている').toBe(false);
+      // 時刻だけ見れば fresh になる形に置き、時刻比較の側も試す。
+      utimesSync(artifact, COMMIT_EPOCH + 86_400, COMMIT_EPOCH + 86_400);
+    });
+    // sidecar が無いので #2125 の時刻比較に落ち、dirty な入力で stale と判定される。
+    expect(stderr, '測定していない内容の成果物を通している').toContain('predates the report inputs');
+    expect(stderr).toContain(spec.command);
+  });
+
   it.each(cases)('T-FP-404 $gate は読めない sidecar で落とす', (spec) => {
     const { stderr } = runGate(spec.gate, (root, artifact) => {
       writeFileSync(artifact, spec.body);
@@ -569,6 +843,7 @@ describe('実 gate — 内容で判定する', () => {
         repoRoot: root,
         inputRels: ['packages/core/src', 'packages/core/tests'],
         artifactAbs: artifact,
+        buildDirAbs: join(root, 'packages/core/.vitest-dist'),
       });
       const path = sidecarPathFor(artifact);
       writeFileSync(path, readFileSync(path, 'utf8').replace(/schema_version: \d+/, 'schema_version: 99'));
