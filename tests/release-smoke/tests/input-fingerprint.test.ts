@@ -42,11 +42,14 @@ type ReadResult =
 const fingerprint = (await import(
   pathToFileURL(resolve(REPO_ROOT, 'scripts/lib/input-fingerprint.mjs')).href
 )) as {
-  compareArtifactInputs: (args: {
-    repoRoot: string;
-    inputRels: string[];
-    artifactAbs: string;
-  }) => FingerprintResult;
+  compareArtifactInputs: (
+    args: {
+      repoRoot: string;
+      inputRels: string[];
+      artifactAbs: string;
+    },
+    io?: { readFileSync?: typeof readFileSync },
+  ) => FingerprintResult;
   computeInputFingerprint: (
     args: { repoRoot: string; inputRels: string[] },
     io?: { execFileSync?: (command: string, args: string[], options: Record<string, unknown>) => string },
