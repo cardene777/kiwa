@@ -15,7 +15,8 @@ kiwa 自身の package で実測した。 `packages/core/src/temp.ts` に防御�
 | **生存変異** | **36 件** | **36 件 (変化なし)** |
 
 行カバレッジは 3.35 ポイント上がったが、**壊しても気付けない箇所は 1 件も減らなかった**。
-狙いを変異に変えた 12 test で 16 件減った。 同じ労力で結果が違った原因は、狙う対象だけ。
+狙いを変異に変えた 12 test で 16 件減った。 test 数だけで効果は決まらず、狙う対象で
+結果が分かれた。
 
 kiwa は利用者の test を生成する library なので、弱い test を生成すると利用者全員に伝播する。
 
@@ -29,11 +30,12 @@ Step 4 の 9 column 表の `期待結果` を書く時、次を自問する。
 
 「はい」 でなければ、その期待結果は識別力を持たない。 観測する対象を変える。
 
-## 識別力を持たない 3 形 (本 repo の実測)
+## 期待対象を十分に識別しない 3 形 (本 repo の実測)
 
-### 1. 常に成立する status
+### 1. アプリケーション成否に関わらず成立する status
 
-`dogfood-security-*` の 6 example で実測した。 HTTP status が成否を表していない。
+`examples/dogfood-security-*/src/lib/next-server.ts` の 6 example で実測した。
+HTTP status がアプリケーション処理の成否を表していない。
 
 | 種別 | status |
 |---|---|
@@ -43,33 +45,39 @@ Step 4 の 9 column 表の `期待結果` を書く時、次を自問する。
 | 未知の path | 404 |
 | POST 以外の method | 405 |
 
-route へ到達すれば常に 200 なので、`status===200` は **route が存在することしか確かめていない**。
-成否を判別しているのは body の `ok` の方になる。
+正しい method / path / JSON で dispatch が応答を返せば、アプリケーション処理の成否に
+関わらず 200 になる。 `status===200` は 400 / 404 / 405 / 500 の transport failure を
+検知する補助 assertion にはなるが、**アプリケーション処理の成功は確かめられない**。
+成否を判別している body の `ok` と結果種別を併せて見る。
 
 | 書き方 | 識別力 |
 |---|---|
-| `expect(res.status()).toBe(200)` | 無い。 検証失敗も状態不整合も通る |
+| `expect(res.status()).toBe(200)` | transport failure は検知するが、検証失敗と状態不整合も通るため成功判定にはならない |
 | `expect(body).toMatchObject({ ok: true, kind: 'build' })` | ある |
 
 ### 2. 実測より緩い件数
 
+`examples/dogfood-security-sbom-scanning-app/tests/e2e/sbom-scanning-flow.spec.ts` の
 `expect(scanBody.findings.length).toBeGreaterThanOrEqual(1)` を実測すると、
-同じ入力に対する findings は **常にちょうど 1 件**だった。
+同じ入力に対する findings は **常にちょうど 1 件**で、契約上も AWS access key 1 件を
+返す case だった。
 
-`>= 1` は 2 件に変わっても、別種別が当たるようになっても通る。 実測値が定まるなら
-その値を書く。
+`>= 1` は 2 件に変わっても、別種別だけが当たるようになっても通る。 契約が件数を
+定める場合はその値を書き、少なくとも期待する種別と内容を確かめる。
 
 | 書き方 | 識別力 |
 |---|---|
-| `expect(findings.length).toBeGreaterThanOrEqual(1)` | 弱い。 実測は常に 1 |
+| `expect(findings.length).toBeGreaterThanOrEqual(1)` | この case には弱い。契約は AWS access key 1 件 |
 | `expect(findings).toHaveLength(1)` + `expect(findings[0].kind).toBe('aws-access-key')` | ある |
 
-**下限で書いてよいのは、値が入力に対して定まらない時だけ**。 定まるのに緩く書くと、
-挙動が変わっても気付けない。
+**現在の実測値だけを理由に exact count を契約へ昇格させない**。 件数を定めない契約なら
+下限と期待種別を併記する。件数を定める契約なのに下限だけを書くと、挙動が変わっても
+気付けない。
 
 ### 3. 両経路が同じ結果を返す
 
-「例外が飛ぶこと」 だけを見る形。 本 repo で実際に踏んだ。
+「例外が飛ぶこと」 だけを見る形。 `packages/core/tests/temp-branches.defensive.test.ts` で
+実際に踏んだ。
 
 `createManagedTempDir` の回収は、失敗を握り潰して掘る側を続行する契約を持つ。
 これを確かめる test で root の権限を落とすと、**回収も `mkdtemp` も落ちる**。
@@ -111,7 +119,7 @@ expect(message).not.toContain(victimBasename);
 
 | 変異 | なぜ殺せないか | 確かめ方 |
 |---|---|---|
-| `pid <= 0` を `pid < 0` に | `process.kill(0, 0)` が **成功する** (プロセスグループ宛て) ため、後段の生存判定が同じ結果を返す | `node -e` で実測 |
+| `pid <= 0` を `pid < 0` に | 当該 mutation run の macOS 環境では `process.kill(0, 0)` が **成功した** (プロセスグループ宛て) ため、後段の生存判定が同じ結果を返した | 同じ対象環境で `node -e` を実行して再確認 |
 | 脱出ガードの条件式 | 上流の検証が到達する入力を作らせない | 入力を組もうとして組めないことを示す |
 
 「たぶん等価」 で片付けない。 判定した根拠を PR body か code comment に残す。
@@ -119,7 +127,8 @@ expect(message).not.toContain(victimBasename);
 ## Layer 2 への引き継ぎ
 
 `kiwa-vitest` / `kiwa-forge` は Step 4 の `期待結果` を assertion に変換する。
-**緩い期待結果は緩い assertion にしかならない**ので、変換時に強められない。
+Layer 2 は実装の現在値を見て **spec に無い期待値を発明してはならない**。 Layer 1 の期待結果が
+緩くて識別力を持たない場合は強めずに報告し、Layer 1 を直す。
 
-識別力は Layer 1 で作り込む。 Layer 2 が補えるのは、同じ期待結果をより厳密な matcher
-(`toHaveLength` / `toMatchObject` / `toBe`) で書くところまでになる。
+Layer 2 が選べるのは、同じ期待結果を正確に表現する matcher
+(`toHaveLength` / `toMatchObject` / `toBe` 等) までになる。

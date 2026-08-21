@@ -185,15 +185,12 @@ format。
 
 Layer 1 spec の各ケース行を 観点別に forge helper へ変換 (詳細マッピングは `references/foundry-mapping.md`)。
 
-**assert は spec の `期待結果` が許す範囲で最も厳密なものを選ぶ** (Issue #2127)。
-`assertTrue` は、実測値が定まるなら `assertEq` に落とす。
-`vm.expectRevert()` を引数なしで書くと **どの revert でも通る**ので、
-selector を指定できる場合は必ず指定する (正しい revert と別の revert を区別できないため)。
-
-識別力の判定基準は
+assert の識別力判定と Layer 1 への引き継ぎは
 `.claude/skills/kiwa-design/references/assertion-discrimination.md` が SSOT。
-**Layer 1 の `期待結果` 自体が緩い場合、Layer 2 では強められない**ため、
-該当する TC は同 file § Layer 2 への引き継ぎ に従って報告する。
+Step 3 では同 file を Read し、spec の `期待結果` を正確に表す assert を選ぶ。
+Layer 1 が緩い場合は現在の実装値から期待値を発明せず、同 file の規範どおり報告する。
+revert の種別が spec にある場合、`vm.expectRevert()` は引数なしにせず selector または
+encoded error を指定する。
 
 | Layer 1 観点 | forge helper | 関数命名規約 |
 |---|---|---|
