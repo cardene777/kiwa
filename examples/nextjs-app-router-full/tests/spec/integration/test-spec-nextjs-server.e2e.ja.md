@@ -240,7 +240,7 @@ cookie は `context.addCookies` (画面経由) と `headers.cookie` (要求経�
 
 - 探索した runtime — `typescript`
 - 探索した path — `examples/nextjs-app-router-full/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/`、`tests/e2e/`、`tests/integration/` の 3 dir
-- 見つけた既存 test — 49 件。 数え方は `grep -oE '\b(describe|it|test)\('` で、`test.describe(` のように前置きが付く形も 1 件として数える
+- 探索した test file — 7 件
 
 | TC | 既存 test の候補 | 判定 |
 |---|---|---|

@@ -319,7 +319,7 @@ session は id ごとに一方通行で、`/siem` と `/incident` は同じ id �
 
 - 探索した runtime — `typescript`
 - 探索した path — `examples/dogfood-security-siem-incident-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
-- 見つけた既存 test — 111 件 (`describe` / `it` / `test`)
+- 探索した test file — 5 件
 
 | TC | 既存 test の候補 | 判定 |
 |---|---|---|
