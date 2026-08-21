@@ -5,7 +5,8 @@ Passkey の 3 面 (登録 / 認証 / 管理) を、実 Chrome の仮想認証器
 
 `tests/e2e/passkey-full-flow.spec.ts` が RP 側の 4 経路を node server に載せ、
 browser の `fetch` がそこを叩く。 CDP で仮想認証器を付けるが、
-**資格情報を作るのは RP 側の mock** で、browser 側は同じ security context を用意するだけになる。
+**資格情報を作るのは Node process 内の `@kiwa-lab/auth` mock authenticator** で、
+browser 側は同じ security context から `fetch` するだけになる。
 
 - module: passkey-full-flow
 - layer: e2e-generic
@@ -32,18 +33,20 @@ browser の `fetch` がそこを叩く。 CDP で仮想認証器を付けるが�
 `webauthn-server.ts` は `issueChallenge` と `consumeChallenge` を持ち、後者のコメントに
 「WebAuthn L3 §7.1 step 4 — a challenge is single use」 と書いてある。
 
-**どちらも呼出箇所が 0 件**になる。 `mock.ts` が `createWebAuthnServer()` を作るが、
+**どちらも実行時の呼出箇所が 0 件**になる。 `mock.ts` が `createWebAuthnServer()` を作るが、
 使うのは資格情報の 5 つだけで、challenge 側の Map は 1 度も読み書きされない。
 `signin` route は `adapter.signin(input)` を呼ぶだけで challenge を照合しない。
 
-実測で確かめた。 **同じ challenge を 2 回投げると 2 回とも 200 が返る。**
+実測で確かめた。 **同じ challenge を指定して `/signin` を 2 回呼ぶと、2 回とも 200 が返る。**
 
 | 呼出 | 結果 |
 |---|---|
 | `challenge: 'same-challenge'` 1 回目 | 200 / `signCount: 1` |
 | `challenge: 'same-challenge'` 2 回目 | 200 / `signCount: 2` |
 
-再送された ceremony を RP が拒めない状態になる。
+この probe が示すのは、caller が指定した challenge の再利用を RP が拒まないことになる。
+各呼出では mock が新しい assertion と signature を生成するため、**同一の署名済み assertion を
+再送して受理されることまでは観測していない**。
 
 ### 資格情報 id は連番で、counter は test が明示的に戻す
 
@@ -58,10 +61,25 @@ counter は module scope に置かれ、`__resetWebAuthnCounters()` で 0 に戻
 
 ### `residentKey` が `discoverable` を決める
 
-| `authenticatorSelection.residentKey` | `discoverable` |
+判定は `packages/auth/src/webauthn/creation.ts` の `resolveDiscoverable` が持つ。
+**8 通りをすべて実測した** (経路ごとに新しい server を立てて登録する)。
+
+| `authenticatorSelection` | `discoverable` |
 |---|---|
-| `required` | `true` |
-| `discouraged` | `false` |
+| 未指定 | `false` |
+| 空の object | `false` |
+| `residentKey: 'required'` | `true` |
+| `residentKey: 'preferred'` | **`true`** |
+| `residentKey: 'discouraged'` | `false` |
+| `requireResidentKey: true` のみ | **`true`** |
+| `requireResidentKey: false` のみ | `false` |
+| `residentKey: 'discouraged'` + `requireResidentKey: true` | **`false`** |
+
+最後の行が境界になる。 `residentKey` が明示されていれば `requireResidentKey` は見ない
+(実装が `residentKey` を先に判定して return する)。
+
+**`preferred` も `discoverable` を真にする。** WebAuthn では `preferred` は
+「作れるなら作る」 の意味だが、この mock は作れた前提で真を返す。
 
 ### 一覧の絞り込みは 3 通りではなく 2 通り + 素通し
 
@@ -103,12 +121,15 @@ counter は module scope に置かれ、`__resetWebAuthnCounters()` で 0 に戻
 資格情報 1 件だけの store に対して **200 が返る**。 実測で確認した。
 
 探索は「discoverable な資格情報だけを対象にする」 のが WebAuthn の意図だが、
-mock は保管中の全件から選ぶ。
+`mock.ts` は `allowCredentialIds` が空なら RP-side snapshot の候補を全件にし、
+`@kiwa-lab/auth` の `credentialAssertion` へ `allowCredentials` を渡さない。後者も registry の
+全件を候補にし、`discoverable` では絞らない。
 
 ## 主な品質リスク
 
 - **challenge の単回使用が実装されていない**。 `consumeChallenge` は書かれているが
-  呼出が無く、同じ challenge で何度でも signin できる。 再送攻撃を RP が拒めない
+  呼出が無く、caller が同じ challenge を指定した signin を繰り返しても拒まない。
+  同一の署名済み assertion の再送可否はこの probe では観測していない
 - **探索が discoverable を見ない**。 `discouraged` で登録した資格情報が探索経路で選ばれるため、
   discoverable の区別が認証の可否に効いていない
 - **`/manage` に認証が無い**。 route の doc comment が「単一利用者の dogfood だから」 と
@@ -138,7 +159,9 @@ mock は保管中の全件から選ぶ。
 | あり | 200 / `credential-1` / `discoverable: true` | 200 / `signCount: 1` | 存在する |
 | **なし** | 200 / `credential-1` / `discoverable: true` | 200 / `signCount: 1` | 存在する |
 
-資格情報も署名も RP 側の mock が作るため、browser 側の認証器は 1 度も使われない。
+資格情報と署名は Node process 内で `mock.ts` が呼ぶ `@kiwa-lab/auth` mock authenticator が
+生成するため、browser 側の認証器は 1 度も使われない。`real.ts` もこの 2 件では生成も注入も
+されない。
 **この 2 件の assert は仮想認証器の有無を区別しない。**
 
 ## テスト観点一覧
@@ -186,6 +209,8 @@ mock は保管中の全件から選ぶ。
 | 64 KiB 超の body の 413 | できる | 小さい body だけを送っている |
 | 未知 path の 404 | できる | 既知の 3 path だけを送っている |
 
-**到達できない範囲は無い。** ただし「HTTP の口が 4 本」 は「実装に分岐が無い」 を意味しない。
-`webauthn-server.ts` の `issueChallenge` / `consumeChallenge` は **呼出が 0 件**で、
-HTTP からも単体テストからも通らない (書かれているが使われていない)。
+表に挙げた未カバー項目は、同じ mock adapter と test server の入力を変えれば到達できる。
+一方、到達できない実装もある。`webauthn-server.ts` の `issueChallenge` /
+`consumeChallenge` は **実行時の呼出が 0 件**で、HTTP からも単体テストからも通らない。
+`real.ts` も、2 件とも `makeMockAdapter()` を `bootAdapterServer` へ渡すため、この e2e からは
+到達しない。

@@ -5,7 +5,7 @@
 
 `tests/e2e/passkey-signin.spec.ts` が RP 側の経路を node server に載せ、
 browser の `fetch` がそこを叩く。 CDP で仮想認証器を付けるが、
-**署名を作るのは RP 側の mock** になる。
+**署名を作るのは Node process 内の `@kiwa-lab/auth` mock authenticator** になる。
 
 - module: passkey-signin
 - layer: e2e-generic
@@ -17,7 +17,7 @@ browser の `fetch` がそこを叩く。 CDP で仮想認証器を付けるが�
 | `POST /register` | `createRegisterHandler` | `src/app/register/route.ts` → `src/adapters/mock.ts` |
 | `POST /signin` | `createSigninHandler` | `src/app/signin/route.ts` → `src/adapters/mock.ts` |
 
-browser 側は `PublicKeyCredential` が存在するかだけを見る。
+browser 側は `typeof PublicKeyCredential === 'function'` かだけを見る。
 
 ## 仕様の要約
 
@@ -53,28 +53,33 @@ mock が `rpId` から組み立てるため、実際の origin とは一致し�
 ### challenge の単回使用は効いていない
 
 `webauthn-server.ts` の `consumeChallenge` は「a challenge is single use」 と書かれているが、
-**呼出箇所が 0 件**になる。 `mock.ts` は資格情報の保管 5 つだけを使い、
+**実行時の呼出箇所が 0 件**になる。 `mock.ts` は資格情報の保管 5 つだけを使い、
 challenge 側の Map は 1 度も読み書きされない。
 
-実測で **同じ challenge を 2 回投げると 2 回とも 200 が返る** (`signCount` は 1 → 2 と進む)。
+実測で **同じ challenge を指定して `/signin` を 2 回呼ぶと 2 回とも 200 が返る**
+(`signCount` は 1 → 2 と進む)。各呼出では mock が新しい assertion と signature を生成する。
+したがって、challenge の再利用が拒まれないことは示すが、同一の署名済み assertion の再送が
+受理されることまでは観測していない。
 
 ### browser 側の口
 
-`PublicKeyCredential` が `undefined` でないことだけを見る。
-仮想認証器を付けた Chromium では常に存在する。
+`typeof PublicKeyCredential === 'function'` だけを見る。
+仮想認証器を付けた Chromium では `true` になる。
 
 **この確認は RP 側を 1 度も呼ばない。** server を起動しても使わない。
 
 ## 主な品質リスク
 
-- **challenge の単回使用が実装されていない**。 再送された ceremony を RP が拒めない
+- **challenge の単回使用が実装されていない**。 caller が同じ challenge を指定した signin を
+  繰り返しても拒まない。同一の署名済み assertion の再送可否はこの probe では観測していない
 - **署名が検証されていない**。 `signature` の形 (base64url) しか見ておらず、
   公開鍵との照合を行わない。 mock が返す 11 文字でも通る
 - **`clientDataJSON` の `origin` が実際の origin と違う**。 `https://<rpId>` を組み立てるため、
   `http://127.0.0.1:<port>` で動く test server とは一致しない。
   実 RP は origin の一致を検証するので、この mock では origin 検証の欠落を検出できない
-- **`signCount` の巻き戻し検知が無い**。 値が進むことは確かめられるが、
-  減った時に RP が拒むかは mock に分岐が無い (clone 検知の本来の目的)
+- **`signCount` の巻き戻し guard をこの e2e から通せない**。 `mock.ts` には
+  `bumped.signCount <= previousSignCount` を拒む分岐があるが、`credentialAssertion` が成功時に
+  必ず counter を増やし、route input から counter を注入できないため、この 2 件は拒否を保証しない
 - **browser 側の確認が API の有無だけ**。 実測で **仮想認証器が無くても真**になった。
   T-E2E-002 は仮想認証器の設定を検証していない
 
@@ -93,7 +98,8 @@ CDP で仮想認証器を付ける (`hasResidentKey: true` / `isUserVerified: tr
 | あり | 200 / `credential-1` | 200 / `signCount: 1` | 存在する |
 | **なし** | 200 / `credential-1` | 200 / `signCount: 1` | 存在する |
 
-署名を作るのは RP 側の mock なので、browser 側の認証器は 1 度も使われない。
+署名は Node process 内で `mock.ts` が呼ぶ `@kiwa-lab/auth` mock authenticator が生成するため、
+browser 側の認証器は 1 度も使われない。`real.ts` もこの 2 件では生成も注入もされない。
 
 ## テスト観点一覧
 
@@ -109,8 +115,8 @@ CDP で仮想認証器を付ける (`hasResidentKey: true` / `isUserVerified: tr
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | 登録と認証を 2 度行い署名回数が進む | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` → `/signin` → `/signin` を順に呼ぶ | 登録は `credentialId==='credential-1'`、`signCount===0`。 1 回目の認証は `previousSignCount===0`、`signCount===1`、`signature` / `clientDataJSON` / `authenticatorData` が `/^[A-Za-z0-9_-]+$/` に一致。 2 回目は `previousSignCount===1`、`signCount===2` | P0 | yes | node | `/register` `/signin` |
-| T-E2E-002 | browser の security context に WebAuthn の口がある | 仮想認証器を付けた page | `typeof PublicKeyCredential` を評価する | `'undefined'` ではない | P2 | yes | node | `/` |
+| T-E2E-001 | 登録と認証を 2 度行い署名回数が進む | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` → `/signin` → `/signin` を順に呼ぶ | 登録は `status===200`、`credentialId==='credential-1'`、`signCount===0`。 1 回目の認証は `status===200`、`previousSignCount===0`、`signCount===1`、`signature` / `clientDataJSON` / `authenticatorData` が `/^[A-Za-z0-9_-]+$/` に一致。 2 回目は `status===200`、`previousSignCount===1`、`signCount===2` | P0 | yes | node | `/register` `/signin` |
+| T-E2E-002 | browser の security context に WebAuthn の口がある | 仮想認証器を付けた page | `typeof PublicKeyCredential` を評価する | `'function'` である | P2 | yes | node | `/` |
 
 ## 自動化方針
 
@@ -139,6 +145,8 @@ browser に API があるかだけを見る。 この 1 件だけは他の 1 件
 | 仮想認証器を外した場合の挙動 | できる | 常に付けている (実測では結果が変わらない) |
 | 64 KiB 超の body の 413 / 未知 path の 404 | できる | 送っていない |
 
-**到達できない範囲は無い。** ただし `webauthn-server.ts` の
-`issueChallenge` / `consumeChallenge` は **呼出が 0 件**で、
-HTTP からも単体テストからも通らない (書かれているが使われていない)。
+表に挙げた未カバー項目は、同じ mock adapter と test server の入力を変えれば到達できる。
+一方、到達できない実装もある。`webauthn-server.ts` の `issueChallenge` /
+`consumeChallenge` は **実行時の呼出が 0 件**で、HTTP からも単体テストからも通らない。
+`real.ts` も、2 件とも `makeMockAdapter()` を `bootAdapterServer` へ渡すため、この e2e からは
+到達しない。
