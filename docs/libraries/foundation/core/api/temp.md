@@ -14,7 +14,7 @@ title: "@kiwa-lab/core temp の API 契約"
 
 #### <code v-pre>&#95;&#95;resetTempScanStateForTests</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/temp.ts#L299) <code v-pre>packages/core/src/temp.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/core/src/temp.ts#L306) <code v-pre>packages/core/src/temp.ts</code>
 
 test から回収の走査状態を戻すための入口。 production からは呼ばない。
 

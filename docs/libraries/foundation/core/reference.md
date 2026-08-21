@@ -67,7 +67,7 @@ const pool = await createPool({
 | --- | --- |
 | <code v-pre>createPool: size must be a positive integer, got $&#123;opts.size&#125;</code> | [packages/core/src/pool.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/pool.ts#L17) |
 | <code v-pre>&#96;createManagedTempDir: label は $&#123;LABEL&#95;PATTERN.source&#125; に一致する必要があります&#96; + &#96; (受け取った値 $&#123;JSON.stringify(label)&#125;)。&#96; + &#96; path の区切りと "." を含む値は名前空間の外に dir を作れるため受けません。&#96;</code> | [packages/core/src/temp.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/temp.ts#L242) |
-| <code v-pre>createManagedTempDir: 掘った dir が root の外にあります ($&#123;path&#125;)</code> | [packages/core/src/temp.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/temp.ts#L278) |
+| <code v-pre>createManagedTempDir: 掘った dir が root の外にあります ($&#123;path&#125;)</code> | [packages/core/src/temp.ts](https://github.com/cardene777/kiwa/blob/main/packages/core/src/temp.ts#L285) |
 
 ## API 契約
 
