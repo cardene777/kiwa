@@ -165,7 +165,21 @@ TLS negotiation や client certificate による mTLS 成立ではない。
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | mTLS 4 呼出 + zero-trust 4 段 + broker 2 通りが 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server、Chromium BrowserContext に紐づく `page.request`、**adapter を直接呼んで作った 3 session** | `/mtls` を `handshake` → `pin` → `ocsp` → `ct` の順に、`/zero-trust` を `posture` → `risk` → `jit` → `segment` の順に、`/broker` を `mtlsOk: true` と `mtlsOk: false` の 2 通りで投げる | すべて `status===200`。 mTLS は `handshake` が `ok: true`、`pin` が `matched: true`、`ocsp` が `good: true`、`ct` が `sctOk: true`。 zero-trust は `posture` が `passed: true`、`risk` / `jit` / `segment` が `ok: true` で `segment` は `allowed: true`。 broker は 2 通りとも `kind: 'decide'` | P0 | yes | node | `/mtls` `/zero-trust` `/broker` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-security-mtls-zero-trust-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 96 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 mTLS handshake + pin + OCSP + CT log + posture + risk + JIT + segment + broker end to end` (`examples/dogfood-security-mtls-zero-trust-app/tests/e2e/mtls-zt-flow.spec.ts:42`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/mtls` を `handshake` → `pin` → `ocsp` → `ct` の順に、`/zero-trust` を `posture` → `risk` → `jit` → `segment` の順に、`/broker` を 2 通りで投げ、mTLS 4 呼出 + zero-trust 4 段 + broker 2 通りが 1 つの `APIRequestContext` から連続で通ることを確かめる
 
 1 件で 3 route / 10 HTTP 呼出を畳んである。 分けないのは mTLS と zero-trust の後段が
 同じ session の前提状態に依存するため。
@@ -205,3 +219,11 @@ TLS negotiation や client certificate による mTLS 成立ではない。
 
 route が公開する domain 分岐は、adapter 直呼びの bootstrap を併用すれば HTTP request で選べる。
 一方、session の作成 / 終了と、防御用の 500 は通常の HTTP 入力だけでは到達できない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
