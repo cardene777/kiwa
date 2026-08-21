@@ -118,7 +118,23 @@ browser 側の認証器は 1 度も使われない。`real.ts` もこの 2 件�
 | T-E2E-001 | 登録と認証を 2 度行い署名回数が進む | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` → `/signin` → `/signin` を順に呼ぶ | 登録は `status===200`、`credentialId==='credential-1'`、`signCount===0`。 1 回目の認証は `status===200`、`previousSignCount===0`、`signCount===1`、`signature` / `clientDataJSON` / `authenticatorData` が `/^[A-Za-z0-9_-]+$/` に一致。 2 回目の認証は `status===200`、`previousSignCount===1`、`signCount===2` | P0 | yes | node | `/register` `/signin` |
 | T-E2E-002 | browser の security context に WebAuthn の口がある | 仮想認証器を付けた page | `typeof PublicKeyCredential` を評価する | `'function'` である | P2 | yes | node | `/` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-webauthn-passkey-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 112 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 real Chrome round-trips /register + /signin against the kiwa mock RP` (`examples/dogfood-webauthn-passkey-app/tests/e2e/passkey-signin.spec.ts:165`) | 既覆 (候補) |
+| T-E2E-002 | `T-E2E-002 WebAuthn API surface is available inside the Playwright context` (`examples/dogfood-webauthn-passkey-app/tests/e2e/passkey-signin.spec.ts:264`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/register` → `/signin` → `/signin` を順に呼び、署名回数が 0 → 1 → 2 と進むことを確かめる
+- T-E2E-002 (P2) — 仮想認証器を付けた page で `typeof PublicKeyCredential` が `'function'` になることを確かめる
 
 **T-E2E-001 は 3 手を 1 件に畳んである。** 署名回数が進むことは、前の呼出の結果を
 前提にするため分けられない。
@@ -150,3 +166,11 @@ browser に API があるかだけを見る。 この 1 件だけは他の 1 件
 `consumeChallenge` は **実行時の呼出が 0 件**で、HTTP からも単体テストからも通らない。
 `real.ts` も、2 件とも `makeMockAdapter()` を `bootAdapterServer` へ渡すため、この e2e からは
 到達しない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+- 同じ challenge を使い回した signin を拒むかが決まっていない。 `consumeChallenge` は書かれているが呼出が無く、拒否も許容も仕様として定まっていない
