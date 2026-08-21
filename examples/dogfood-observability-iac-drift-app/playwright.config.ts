@@ -17,7 +17,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   workers: 1,
-  reporter: [['list']],
+  reporter: [['list'], ['json', { outputFile: 'tests/reports/playwright-results.json' }]],
   use: {
     // Each spec spins up its own ad-hoc HTTP server on a random port; the
     // baseURL is set inside the test after the server is bound.

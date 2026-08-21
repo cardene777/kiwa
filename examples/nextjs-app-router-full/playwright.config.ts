@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   workers: 1,
-  reporter: [['list']],
+  reporter: [['list'], ['json', { outputFile: 'tests/reports/playwright-results.json' }]],
   use: {
     baseURL: `http://localhost:${PORT}`,
   },

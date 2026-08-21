@@ -5,7 +5,7 @@ export default defineConfig({
   timeout: 180_000,
   fullyParallel: false,
   workers: 1,
-  reporter: 'list',
+  reporter: [['list'], ['json', { outputFile: 'tests/reports/playwright-results.json' }]],
   globalSetup: './tests/global-setup.ts',
   globalTeardown: './tests/global-teardown.ts',
   use: {
