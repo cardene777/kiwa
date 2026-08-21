@@ -268,6 +268,13 @@ export function createManagedTempDir(opts: ManagedTempDirOptions = {}): ManagedT
   //
   // 文字列の前方一致では測れない。 `root` が `/` の時に区切りが重なり、 正当な path を
   // 外と判定する。 `relative` なら区切りの表記に依らず「上に出たか」 だけを見られる。
+  //
+  // **本分岐は現在の公開 API からは到達できない** (`tests/temp-branches.defensive.test.ts`
+  // の変異試験で未到達を確認済)。 `label` は `LABEL_PATTERN` が区切りと `.` を弾き、
+  // `mkdtemp` は渡した prefix の後ろに文字を足すだけなので、 戻り値が `root` の外に
+  // 出る入力を組めない。 それでも残すのは、 `LABEL_PATTERN` か `encodePrefix` を
+  // 緩めた時に **黙って外へ掘れるようになる** のを防ぐため = 上流の検証が壊れたことを
+  // ここで捕まえる。 覆えていないことを明記しておき、 coverage の穴として扱わない。
   const inside = relative(root, path);
   if (inside === '' || inside.startsWith('..') || isAbsolute(inside)) {
     try {
