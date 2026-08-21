@@ -6,13 +6,13 @@
     "low": 55,
     "break": 50
   },
-  "killRate": 67.59,
-  "totalMsi": 67.59,
-  "coveredMsi": 68.36,
-  "killed": 1437,
-  "survived": 671,
+  "killRate": 75.44,
+  "totalMsi": 75.44,
+  "coveredMsi": 76.22,
+  "killed": 1625,
+  "survived": 511,
   "timeout": 13,
-  "noCoverage": 347,
+  "noCoverage": 319,
   "error": 5,
   "mutants": [
     {
@@ -150,17 +150,17 @@
     },
     {
       "file": ".vitest-dist/src/anvil.js",
-      "line": 157,
-      "column": 27,
-      "mutator": "MethodExpression",
-      "replacement": "result.split('\\n').map(line => line.trim())"
-    },
-    {
-      "file": ".vitest-dist/src/anvil.js",
       "line": 155,
       "column": 39,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 157,
+      "column": 27,
+      "mutator": "MethodExpression",
+      "replacement": "result.split('\\n').map(line => line.trim())"
     },
     {
       "file": ".vitest-dist/src/anvil.js",
@@ -402,17 +402,17 @@
     },
     {
       "file": ".vitest-dist/src/anvil.js",
-      "line": 32,
-      "column": 16,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/anvil.js",
       "line": 33,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/anvil.js",
+      "line": 32,
+      "column": 16,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/anvil.js",
@@ -620,16 +620,16 @@
     {
       "file": ".vitest-dist/src/anvil.js",
       "line": 111,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "opts.detached === true"
+      "column": 31,
+      "mutator": "BooleanLiteral",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/anvil.js",
       "line": 111,
-      "column": 31,
-      "mutator": "BooleanLiteral",
-      "replacement": "false"
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "opts.detached === true"
     },
     {
       "file": ".vitest-dist/src/anvil.js",
@@ -1223,15 +1223,15 @@
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 139,
       "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "mutator": "EqualityOperator",
+      "replacement": "typeof parsed !== 'number'"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 139,
       "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof parsed !== 'number'"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1242,17 +1242,17 @@
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
-      "line": 139,
-      "column": 31,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 140,
       "column": 20,
       "mutator": "ConditionalExpression",
       "replacement": "true"
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 139,
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1327,16 +1327,16 @@
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 142,
-      "column": 31,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
+      "column": 13,
+      "mutator": "EqualityOperator",
+      "replacement": "typeof parsed !== 'object'"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 142,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof parsed !== 'object'"
+      "column": 31,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1398,15 +1398,15 @@
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 144,
       "column": 43,
-      "mutator": "EqualityOperator",
-      "replacement": "pid < 0"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 144,
       "column": 43,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
+      "mutator": "EqualityOperator",
+      "replacement": "pid < 0"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1644,21 +1644,14 @@
       "line": 182,
       "column": 9,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/e2e-prepare-env.js",
-      "line": 182,
-      "column": 9,
-      "mutator": "ConditionalExpression",
       "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 182,
       "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "actualCommand === 'anvil'"
+      "mutator": "ConditionalExpression",
+      "replacement": "false"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1666,6 +1659,13 @@
       "column": 27,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/e2e-prepare-env.js",
+      "line": 182,
+      "column": 9,
+      "mutator": "EqualityOperator",
+      "replacement": "actualCommand === 'anvil'"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1719,16 +1719,16 @@
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 203,
-      "column": 43,
-      "mutator": "ArrayDeclaration",
-      "replacement": "[]"
+      "column": 61,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 203,
-      "column": 61,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
+      "column": 43,
+      "mutator": "ArrayDeclaration",
+      "replacement": "[]"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1740,16 +1740,16 @@
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 203,
-      "column": 96,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
+      "column": 76,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 203,
-      "column": 76,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
+      "column": 96,
+      "mutator": "ObjectLiteral",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -1781,15 +1781,15 @@
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
-      "line": 208,
-      "column": 20,
+      "line": 205,
+      "column": 39,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
-      "line": 205,
-      "column": 39,
+      "line": 208,
+      "column": 20,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -1825,15 +1825,15 @@
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 209,
       "column": 29,
-      "mutator": "MethodExpression",
-      "replacement": "line"
+      "mutator": "EqualityOperator",
+      "replacement": "line.trim().length <= 0"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
       "line": 209,
       "column": 29,
-      "mutator": "EqualityOperator",
-      "replacement": "line.trim().length <= 0"
+      "mutator": "MethodExpression",
+      "replacement": "line"
     },
     {
       "file": ".vitest-dist/src/e2e-prepare-env.js",
@@ -2258,16 +2258,16 @@
     {
       "file": ".vitest-dist/src/fixture.js",
       "line": 423,
-      "column": 41,
-      "mutator": "Regex",
-      "replacement": "/\\s/g"
+      "column": 12,
+      "mutator": "MethodExpression",
+      "replacement": "inspectForRpc(value).replace(/\\s+/g, ' ')"
     },
     {
       "file": ".vitest-dist/src/fixture.js",
       "line": 423,
-      "column": 12,
-      "mutator": "MethodExpression",
-      "replacement": "inspectForRpc(value).replace(/\\s+/g, ' ')"
+      "column": 41,
+      "mutator": "Regex",
+      "replacement": "/\\s/g"
     },
     {
       "file": ".vitest-dist/src/fixture.js",
@@ -2453,304 +2453,10 @@
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 50,
-      "column": 32,
-      "mutator": "UnaryOperator",
-      "replacement": "+32603"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 60,
-      "column": 40,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 64,
-      "column": 28,
-      "mutator": "MethodExpression",
-      "replacement": "numberToHex(ctx.chainState.current).toUpperCase()"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 62,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 65,
-      "column": 33,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 65,
-      "column": 44,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 65,
-      "column": 44,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 65,
-      "column": 44,
-      "mutator": "EqualityOperator",
-      "replacement": "entry.chainId.toLowerCase() !== activeChainHex"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 65,
-      "column": 44,
-      "mutator": "MethodExpression",
-      "replacement": "entry.chainId.toUpperCase()"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 66,
-      "column": 20,
-      "mutator": "OptionalChaining",
-      "replacement": "chain.rpcUrls"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 66,
-      "column": 41,
-      "mutator": "ArrowFunction",
-      "replacement": "() => undefined"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 66,
-      "column": 52,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 66,
-      "column": 52,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 66,
-      "column": 52,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof value !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 66,
-      "column": 69,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 67,
-      "column": 9,
-      "mutator": "BooleanLiteral",
-      "replacement": "rpcUrl"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 67,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 67,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 69,
-      "column": 9,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "parsed.protocol !== 'http:' || parsed.protocol !== 'https:'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "parsed.protocol === 'http:'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 33,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 44,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 44,
-      "mutator": "EqualityOperator",
-      "replacement": "parsed.protocol === 'https:'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 71,
-      "column": 64,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "parsed.hostname !== '127.0.0.1' || parsed.hostname !== 'localhost'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "parsed.hostname === '127.0.0.1'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 48,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 33,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 48,
-      "mutator": "EqualityOperator",
-      "replacement": "parsed.hostname === 'localhost'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 73,
-      "column": 68,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 76,
-      "column": 16,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 76,
-      "column": 16,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 76,
-      "column": 16,
-      "mutator": "LogicalOperator",
-      "replacement": "Number.isInteger(port) || port > 0"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 76,
-      "column": 42,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 76,
-      "column": 42,
-      "mutator": "EqualityOperator",
-      "replacement": "port <= 0"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 76,
-      "column": 42,
-      "mutator": "EqualityOperator",
-      "replacement": "port >= 0"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -2758,27 +2464,6 @@
       "column": 11,
       "mutator": "BlockStatement",
       "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 129,
-      "column": 27,
-      "mutator": "OptionalChaining",
-      "replacement": "ctx.activeIndex.current"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 143,
-      "column": 46,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 151,
-      "column": 50,
-      "mutator": "Regex",
-      "replacement": "/0x[0-9a-fA-F]*$/"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -2796,133 +2481,7 @@
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 171,
-      "column": 37,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 174,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 174,
-      "column": 38,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 187,
-      "column": 36,
-      "mutator": "MethodExpression",
-      "replacement": "ctx.chainRegistry.current.every(chain => chain.chainId.toLowerCase() === chainIdHex.toLowerCase())"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 189,
-      "column": 50,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 194,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 194,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 194,
-      "column": 42,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 194,
-      "column": 17,
-      "mutator": "EqualityOperator",
-      "replacement": "anvilPort === undefined"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 204,
-      "column": 77,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 224,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 224,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 224,
-      "column": 17,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof from !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 224,
-      "column": 33,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 224,
-      "column": 43,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 225,
-      "column": 41,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 230,
-      "column": 36,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 242,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 246,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "false"
@@ -2943,59 +2502,17 @@
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 274,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 283,
-      "column": 27,
+      "line": 287,
+      "column": 69,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 287,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 302,
       "column": 13,
       "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 302,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 302,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "executeGas === undefined"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 324,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 324,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "tokenPolicy.limit >= 0n"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -3006,24 +2523,10 @@
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 336,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 340,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 340,
-      "column": 55,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -3031,6 +2534,13 @@
       "column": 40,
       "mutator": "StringLiteral",
       "replacement": "\"\""
+    },
+    {
+      "file": ".vitest-dist/src/rpc-handlers.js",
+      "line": 340,
+      "column": 55,
+      "mutator": "BlockStatement",
+      "replacement": "{}"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -3069,41 +2579,6 @@
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 365,
-      "column": 31,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 367,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 367,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 367,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof p.to !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 367,
-      "column": 25,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 369,
       "column": 9,
       "mutator": "ConditionalExpression",
@@ -3132,56 +2607,7 @@
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 371,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 371,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 371,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof p.data !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 371,
-      "column": 27,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 374,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 374,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 374,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "value === undefined"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 377,
       "column": 9,
       "mutator": "ConditionalExpression",
       "replacement": "true"
@@ -3191,133 +2617,7 @@
       "line": 377,
       "column": 9,
       "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 377,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "gas === undefined"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 381,
-      "column": 43,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 382,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 382,
-      "column": 26,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 384,
-      "column": 9,
-      "mutator": "ConditionalExpression",
       "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 384,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 384,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof value !== 'bigint'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 384,
-      "column": 26,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 388,
-      "column": 41,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 389,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 389,
-      "column": 26,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 391,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 391,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 391,
-      "column": 9,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof value !== 'bigint'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 391,
-      "column": 26,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 407,
-      "column": 24,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 407,
-      "column": 24,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 407,
-      "column": 24,
-      "mutator": "OptionalChaining",
-      "replacement": "issue.path"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -3329,408 +2629,23 @@
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 407,
-      "column": 46,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "column": 24,
+      "mutator": "OptionalChaining",
+      "replacement": "issue.path"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 407,
       "column": 46,
-      "mutator": "EqualityOperator",
-      "replacement": "issue.path[0] === undefined"
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 408,
+      "line": 409,
       "column": 15,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 432,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 436,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 436,
-      "column": 40,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 436,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "Number.isFinite(actual) || actual !== expectedChainId"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 446,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 447,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 452,
-      "column": 81,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 455,
-      "column": 55,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 471,
-      "column": 10,
-      "mutator": "Regex",
-      "replacement": "/0x[0-9a-fA-F]*$/"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 471,
-      "column": 10,
-      "mutator": "Regex",
-      "replacement": "/^0x[0-9a-fA-F]*/"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 486,
-      "column": 40,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 488,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 498,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 498,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "(json === null || typeof json !== 'object') && Array.isArray(json)"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 498,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 498,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "json === null && typeof json !== 'object'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 498,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 498,
-      "column": 26,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 503,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 515,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 517,
-      "column": 38,
-      "mutator": "StringLiteral",
-      "replacement": "``"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 521,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "(typeof param !== 'object' || param === null) && typeof param.chainId !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 521,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 521,
-      "column": 9,
-      "mutator": "LogicalOperator",
-      "replacement": "typeof param !== 'object' && param === null"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 521,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 522,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 523,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 527,
-      "column": 10,
-      "mutator": "Regex",
-      "replacement": "/0x[0-9a-fA-F]+$/"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 527,
-      "column": 10,
-      "mutator": "Regex",
-      "replacement": "/^0x[0-9a-fA-F]+/"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 536,
-      "column": 38,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 541,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 541,
-      "column": 41,
-      "mutator": "Regex",
-      "replacement": "/0x[0-9a-fA-F]+$/"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 541,
-      "column": 41,
-      "mutator": "Regex",
-      "replacement": "/^0x[0-9a-fA-F]+/"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 545,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 553,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 553,
-      "column": 39,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 553,
-      "column": 51,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 553,
-      "column": 51,
-      "mutator": "EqualityOperator",
-      "replacement": "obj.nativeCurrency === null"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 553,
-      "column": 80,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "typeof nc.name === 'string' && typeof nc.symbol === 'string' || typeof nc.decimals === 'number'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "LogicalOperator",
-      "replacement": "typeof nc.name === 'string' || typeof nc.symbol === 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof nc.name !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 555,
-      "column": 32,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 556,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 556,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof nc.symbol !== 'string'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 556,
-      "column": 34,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 557,
-      "column": 13,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 557,
-      "column": 13,
-      "mutator": "EqualityOperator",
-      "replacement": "typeof nc.decimals !== 'number'"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 557,
-      "column": 36,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 557,
-      "column": 46,
-      "mutator": "BlockStatement",
-      "replacement": "{}"
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 558,
-      "column": 37,
-      "mutator": "ObjectLiteral",
-      "replacement": "{}"
+      "mutator": "OptionalChaining",
+      "replacement": "issue.message"
     },
     {
       "file": ".vitest-dist/src/rpc-handlers.js",
@@ -3778,27 +2693,6 @@
       "file": ".vitest-dist/src/rpc-handlers.js",
       "line": 19,
       "column": 37,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 87,
-      "column": 5,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 88,
-      "column": 5,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
-    },
-    {
-      "file": ".vitest-dist/src/rpc-handlers.js",
-      "line": 89,
-      "column": 5,
       "mutator": "StringLiteral",
       "replacement": "\"\""
     },
@@ -3860,13 +2754,6 @@
     },
     {
       "file": ".vitest-dist/src/tx.js",
-      "line": 8,
-      "column": 12,
-      "mutator": "EqualityOperator",
-      "replacement": "current === null"
-    },
-    {
-      "file": ".vitest-dist/src/tx.js",
       "line": 9,
       "column": 9,
       "mutator": "ConditionalExpression",
@@ -3874,10 +2761,10 @@
     },
     {
       "file": ".vitest-dist/src/tx.js",
-      "line": 9,
-      "column": 28,
-      "mutator": "StringLiteral",
-      "replacement": "\"\""
+      "line": 8,
+      "column": 12,
+      "mutator": "EqualityOperator",
+      "replacement": "current === null"
     },
     {
       "file": ".vitest-dist/src/tx.js",
@@ -3888,10 +2775,10 @@
     },
     {
       "file": ".vitest-dist/src/tx.js",
-      "line": 11,
-      "column": 9,
-      "mutator": "ConditionalExpression",
-      "replacement": "true"
+      "line": 9,
+      "column": 28,
+      "mutator": "StringLiteral",
+      "replacement": "\"\""
     },
     {
       "file": ".vitest-dist/src/tx.js",
@@ -3899,6 +2786,13 @@
       "column": 9,
       "mutator": "BooleanLiteral",
       "replacement": "visited.has(current)"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 11,
+      "column": 9,
+      "mutator": "ConditionalExpression",
+      "replacement": "true"
     },
     {
       "file": ".vitest-dist/src/tx.js",
@@ -4091,17 +2985,17 @@
     },
     {
       "file": ".vitest-dist/src/tx.js",
-      "line": 57,
-      "column": 24,
-      "mutator": "LogicalOperator",
-      "replacement": "ctx.transportRetryCount && 0"
-    },
-    {
-      "file": ".vitest-dist/src/tx.js",
       "line": 60,
       "column": 25,
       "mutator": "StringLiteral",
       "replacement": "``"
+    },
+    {
+      "file": ".vitest-dist/src/tx.js",
+      "line": 57,
+      "column": 24,
+      "mutator": "LogicalOperator",
+      "replacement": "ctx.transportRetryCount && 0"
     },
     {
       "file": ".vitest-dist/src/tx.js",
@@ -4161,20 +3055,6 @@
     },
     {
       "file": ".vitest-dist/src/tx.js",
-      "line": 77,
-      "column": 17,
-      "mutator": "ConditionalExpression",
-      "replacement": "false"
-    },
-    {
-      "file": ".vitest-dist/src/tx.js",
-      "line": 77,
-      "column": 17,
-      "mutator": "EqualityOperator",
-      "replacement": "gas === undefined"
-    },
-    {
-      "file": ".vitest-dist/src/tx.js",
       "line": 82,
       "column": 13,
       "mutator": "ConditionalExpression",
@@ -4218,16 +3098,16 @@
     {
       "file": ".vitest-dist/src/tx.js",
       "line": 90,
-      "column": 64,
-      "mutator": "LogicalOperator",
-      "replacement": "e.shortMessage && e.message"
+      "column": 39,
+      "mutator": "StringLiteral",
+      "replacement": "``"
     },
     {
       "file": ".vitest-dist/src/tx.js",
       "line": 90,
-      "column": 39,
-      "mutator": "StringLiteral",
-      "replacement": "``"
+      "column": 64,
+      "mutator": "LogicalOperator",
+      "replacement": "e.shortMessage && e.message"
     },
     {
       "file": ".vitest-dist/src/anvil-cluster.js",
@@ -4713,6 +3593,6 @@
       "replacement": "\"Stryker was here!\""
     }
   ],
-  "capturedAt": "2026-08-18T06:23:41Z",
-  "note": "Total MSI 67.59% / Covered MSI 68.36% (threshold high=65 / low=55 / break=50)."
+  "capturedAt": "2026-08-21T11:56:16Z",
+  "note": "Total MSI 75.44% / Covered MSI 76.22% (threshold high=65 / low=55 / break=50)."
 }
