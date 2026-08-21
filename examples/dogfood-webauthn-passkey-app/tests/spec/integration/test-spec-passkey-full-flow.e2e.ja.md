@@ -182,7 +182,23 @@ counter は module scope に置かれ、`__resetWebAuthnCounters()` で 0 に戻
 | T-E2E-001 | 登録から削除後の認証失敗まで 1 巡する | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` (`residentKey: required`) → `/manage` → `/signin` (探索) → `/manage?credentialId=` DELETE → `/signin` を順に呼ぶ | 登録は `status===200`、`discoverable===true`、`credentialId==='credential-1'`。 一覧は `status===200` で 1 件、id と `discoverable` が一致。 認証は `status===200`、`credentialId` 一致、`signCount===1`。 削除は `status===200`、`deleted===true`、`remaining===0`。 削除後の認証は `status===400`、`error==='signin_failed'`、message が `/no credentials/` に一致 | P0 | yes | node | `/register` `/manage` `/signin` |
 | T-E2E-002 | 全消しが 1 回で全件を消す | 資格情報を 2 件登録した store | `/manage` で 2 件を確認 → `/manage?confirm=true` DELETE → `/manage` を再度呼ぶ | 登録 2 件がいずれも `status===200`。 一覧が 2 件。 全消しは `status===200`、`deleted===true`、`remaining===0`。 再度の一覧が 0 件 | P0 | yes | node | `/manage` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-webauthn-passkey-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 112 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 walks register → list → signin → delete → signin against the kiwa mock RP` (`examples/dogfood-webauthn-passkey-app/tests/e2e/passkey-full-flow.spec.ts:148`) | 既覆 (候補) |
+| T-E2E-002 | `T-E2E-002 DELETE /manage?confirm=true clears every credential in one call` (`examples/dogfood-webauthn-passkey-app/tests/e2e/passkey-full-flow.spec.ts:260`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/register` (`residentKey: required`) → `/manage` → `/signin` (探索) → `/manage?credentialId=` DELETE → `/signin` を順に呼び、登録から削除後の認証失敗まで 1 巡することを確かめる
+- T-E2E-002 (P0) — 資格情報を 2 件登録した store に対し `/manage?confirm=true` DELETE を 1 回投げ、全件が消えることを確かめる
 
 2 件とも実 Chrome を起動し、CDP で仮想認証器を付ける。
 
@@ -214,3 +230,11 @@ counter は module scope に置かれ、`__resetWebAuthnCounters()` で 0 に戻
 `consumeChallenge` は **実行時の呼出が 0 件**で、HTTP からも単体テストからも通らない。
 `real.ts` も、2 件とも `makeMockAdapter()` を `bootAdapterServer` へ渡すため、この e2e からは
 到達しない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
