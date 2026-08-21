@@ -7,8 +7,19 @@ Playwright `APIRequestContext` から順に叩いて確かめる。
 Playwright の `page.request` が JSON を投げる。これは `page.context().request` と同じ
 API testing helper で、Chromium page 内の `fetch` ではない。
 
-server の実 HTTP response header は `content-type: application/json` だけで、組み立てた CSP / HSTS 等は
+server code が明示的に設定する response header は `content-type: application/json` だけで、組み立てた CSP / HSTS 等は
 JSON body の field として返る。Chromium に header を適用した時の強制動作はこの E2E の保証外になる。
+
+実測した実 response header は下の 5 つで、`content-type` 以外は Node が付ける。
+
+```
+content-type: application/json
+date: ...
+connection: keep-alive
+keep-alive: timeout=5
+content-length: ...
+```
+
 
 - module: csp-headers-flow
 - layer: e2e-generic
@@ -43,18 +54,21 @@ JSON の parse と dispatch が完了し、route validator または route handl
 
 `res.status()` だけを見る client は、route validator が返す検証失敗を成功と読む。
 
-**400 は `page.request` の `data:` に文字列を渡しても届かない。** Playwright が
-文字列を JSON として符号化するため、server 側は `"{"` という正しい JSON を受け取り
-`body_not_object` (200) を返す。 400 に届かせるには `Buffer` を渡す必要がある。
+**400 に届くかは `content-type` header で決まる。** `page.request` の `data:` に文字列を渡し、
+かつ `content-type: application/json` を明示した時だけ Playwright が文字列を JSON として
+符号化するため、server は `"{"` という**正しい JSON** を受け取って `body_not_object` (200) を返す。
 
-実測した 3 通り。
+実測した 4 通り。
 
 | 送り方 | 結果 |
 |---|---|
-| `data: '{'` (文字列) | 200 / `body_not_object` |
-| **`data: Buffer.from('{')`** | **400 / `body_parse_failed`** |
-| `data: Buffer.from('not json')` | 400 / `body_parse_failed` |
+| 文字列 + `content-type: application/json` | 200 / `body_not_object` |
+| **文字列 + header なし** | **400** / `body_parse_failed` |
+| `Buffer` + header あり | **400** / `body_parse_failed` |
+| `Buffer` + header なし | **400** / `body_parse_failed` |
 
+**`Buffer` が必要なのではなく、header を明示しないことが条件になる。**
+1 回目の probe が 400 に届かなかったのは header を付けていたため。
 
 ### `/csp` の組み立て
 
