@@ -302,8 +302,8 @@ critical と medium の 2 件を渡しても `vulnerableCount` は `1` だった
 ## 既存 test との対応
 
 - 探索した runtime — `typescript`
-- 探索した path — `examples/dogfood-security-sbom-scanning-app/tests/e2e/`
-- 見つけた既存 test — 1 件
+- 探索した path — `examples/dogfood-security-sbom-scanning-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 80 件 (`describe` / `it` / `test`)
 
 | TC | 既存 test の候補 | 判定 |
 |---|---|---|
