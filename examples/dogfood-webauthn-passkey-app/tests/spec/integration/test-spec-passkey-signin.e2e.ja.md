@@ -115,7 +115,7 @@ browser 側の認証器は 1 度も使われない。`real.ts` もこの 2 件�
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | 登録と認証を 2 度行い署名回数が進む | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` → `/signin` → `/signin` を順に呼ぶ | 登録は `status===200`、`credentialId==='credential-1'`、`signCount===0`。 1 回目の認証は `status===200`、`previousSignCount===0`、`signCount===1`、`signature` / `clientDataJSON` / `authenticatorData` が `/^[A-Za-z0-9_-]+$/` に一致。 2 回目は `status===200`、`previousSignCount===1`、`signCount===2` | P0 | yes | node | `/register` `/signin` |
+| T-E2E-001 | 登録と認証を 2 度行い署名回数が進む | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` → `/signin` → `/signin` を順に呼ぶ | 登録は `status===200`、`credentialId==='credential-1'`、`signCount===0`。 1 回目の認証は `status===200`、`previousSignCount===0`、`signCount===1`、`signature` / `clientDataJSON` / `authenticatorData` が `/^[A-Za-z0-9_-]+$/` に一致。 2 回目の認証は `status===200`、`previousSignCount===1`、`signCount===2` | P0 | yes | node | `/register` `/signin` |
 | T-E2E-002 | browser の security context に WebAuthn の口がある | 仮想認証器を付けた page | `typeof PublicKeyCredential` を評価する | `'function'` である | P2 | yes | node | `/` |
 
 ## 自動化方針

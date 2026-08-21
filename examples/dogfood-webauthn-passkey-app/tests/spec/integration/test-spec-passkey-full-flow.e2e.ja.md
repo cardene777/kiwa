@@ -179,8 +179,8 @@ counter は module scope に置かれ、`__resetWebAuthnCounters()` で 0 に戻
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | 登録から削除後の認証失敗まで 1 巡する | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` (`residentKey: required`) → `/manage` → `/signin` (探索) → `/manage?credentialId=` DELETE → `/signin` を順に呼ぶ | 登録は `status===200`、`discoverable===true`、`credentialId==='credential-1'`。 一覧は 1 件で id と `discoverable` が一致。 認証は `credentialId` 一致で `signCount===1`。 削除は `deleted===true`、`remaining===0`。 削除後の認証は `status===400`、`error==='signin_failed'`、message が `/no credentials/` に一致 | P0 | yes | node | `/register` `/manage` `/signin` |
-| T-E2E-002 | 全消しが 1 回で全件を消す | 資格情報を 2 件登録した store | `/manage` で 2 件を確認 → `/manage?confirm=true` DELETE → `/manage` を再度呼ぶ | 全消しは `status===200`、`deleted===true`、`remaining===0`。 再度の一覧が 0 件 | P0 | yes | node | `/manage` |
+| T-E2E-001 | 登録から削除後の認証失敗まで 1 巡する | mock adapter を載せた server、仮想認証器を付けた page、counter を戻した状態 | `/register` (`residentKey: required`) → `/manage` → `/signin` (探索) → `/manage?credentialId=` DELETE → `/signin` を順に呼ぶ | 登録は `status===200`、`discoverable===true`、`credentialId==='credential-1'`。 一覧は `status===200` で 1 件、id と `discoverable` が一致。 認証は `status===200`、`credentialId` 一致、`signCount===1`。 削除は `status===200`、`deleted===true`、`remaining===0`。 削除後の認証は `status===400`、`error==='signin_failed'`、message が `/no credentials/` に一致 | P0 | yes | node | `/register` `/manage` `/signin` |
+| T-E2E-002 | 全消しが 1 回で全件を消す | 資格情報を 2 件登録した store | `/manage` で 2 件を確認 → `/manage?confirm=true` DELETE → `/manage` を再度呼ぶ | 登録 2 件がいずれも `status===200`。 一覧が 2 件。 全消しは `status===200`、`deleted===true`、`remaining===0`。 再度の一覧が 0 件 | P0 | yes | node | `/manage` |
 
 ## 自動化方針
 
