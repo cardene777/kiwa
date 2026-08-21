@@ -143,7 +143,21 @@ if (log.size() === 0) {
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | v1 の 4 経路が 1 つの page から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/tenant-injection` (組織 2 件) → `/cross-tenant-refuse` (`t-a` から `t-b` へ) → `/bypass-audit` (操作 1 件) → `/audit-integrity` を順に `fetch` | 注入は `writes===2`、`policyInstalled===true`。 越境は `refusals===1`、`refusalKind==='CROSS_TENANT_REFUSED'`。 例外は `bypassOps===1`、`reArmedAfterBypass===true`。 監査は `chainOk===true`、`totalRecords>0` | P0 | yes | node | `/tenant-injection` `/cross-tenant-refuse` `/bypass-audit` `/audit-integrity` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-mysql-rls-tenant-app/tests/e2e/`
+- 見つけた既存 test — 1 件
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 v1 legacy routes drive together` (`examples/dogfood-mysql-rls-tenant-app/tests/e2e/v1-legacy-flow.spec.ts:32`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — v1 の 4 経路 (`/tenant-injection` → `/cross-tenant-refuse` → `/bypass-audit` → `/audit-integrity`) を 1 つの page から順に実行する happy path
 
 1 件で 4 経路を通す。 分けないのは 4 つが同じ adapter の監査 log を共有するため。
 
@@ -174,3 +188,11 @@ if (log.size() === 0) {
 最後の 1 件だけがこの adapter の HTTP 経路から到達できない。
 `tamperAtIndex` は対象 record の `reason` を変えるが、hash も再計算するため、
 応答の `chainOk` / `brokenAt` を失敗側へ変えられない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
