@@ -129,7 +129,21 @@ CORS の事前確認で落ちる (server は `Access-Control-*` も `OPTIONS` �
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | 3 経路が 1 つの context から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/wal-full-journey` (閾値 1024 / WAL 4096 / `TRUNCATE` / 領域 16384) → `/fts5-full-journey` (既定) → `/edge-roundtrip` (`iad` / `bun` / 6 回) を順に `fetch` | WAL は `finalJournalMode==='WAL'`、`finalState==='shared-memory-mapped'`、`checkpointCount>0`、`walSizeBytes===0`。 FTS5 は `finalState==='vocab-inspected'`、`tokenizer==='unicode61'`、`tokenCount>0`。 edge は `runtime==='bun'`、`coldStartMs<10`、`warmMeanMs<1`、`requestsHandled===6` | P0 | yes | node | `/wal-full-journey` `/fts5-full-journey` `/edge-roundtrip` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-sqlite-wal-fts-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 43 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 wal + fts5 + edge routes drive the full 3-flow surface together` (`examples/dogfood-sqlite-wal-fts-app/tests/e2e/wal-fts5-edge-flow.spec.ts:31`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — `/wal-full-journey` (閾値 1024 / WAL 4096 / `TRUNCATE` / 領域 16384) → `/fts5-full-journey` (既定) → `/edge-roundtrip` (`iad` / `bun` / 6 回) を順に投げ、3 経路が 1 つの context から連続で通ることを確かめる happy path
 
 1 件で 3 経路を通すため、同じ page / origin から 3 route へ順に到達できることを確かめる。
 実装上は 3 route が同じ adapter を使うが、この test は `/metrics` / `/traces` を読まないため、
@@ -158,3 +172,11 @@ adapter の同一性や route 間の状態共有までは観測していない�
 **範囲の assert** で、決定的な値を固定していない。 実装から導ける値は順に
 1 / 10 / 4 / 0.671 (`iad:bun`、6 回)。 値を固定すれば模型が変わった時に落ちるが、
 現状は範囲を外れるまで気付けない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
