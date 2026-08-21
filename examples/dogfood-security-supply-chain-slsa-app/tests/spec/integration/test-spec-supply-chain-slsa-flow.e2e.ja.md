@@ -293,7 +293,21 @@ adapter の `closeSlsa` / `closeReproducible` / `closeAttestation` は session �
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | 等級 / 照合 / 署名と検証 / 出荷判断が 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server と Chromium BrowserContext に紐づく `page.request`、`startSlsa` / `startReproducible` / `startAttestation` / `startOrchestrator` で作った 4 session | `/supply-chain` (`verify-slsa-level` を 8 項目すべて満たす入力で) → `/reproducible` (`match-build` を同一 hash で) → `/attestation` (`sign-provenance` → `verify-attestation`) → `/sc-orchestrator` (`decide` を等級 4 と等級 1 で 2 回) を順に投げる | 等級は `status===200` で `{ok: true, level: 4}`。 照合は `{ok: true, matched: true, toolchainVersion: 'rust-1.80.0'}`。 署名は `{ok: true, builderId: 'github-actions://actions/runner@v2.317.0'}`。 検証は `{ok: true, attestationType: 'slsa-provenance', validSignatures: 2}`。 出荷判断は等級 4 で `{policyPassed: true, slsaLevel: 4}`、等級 1 で `{policyPassed: false, slsaLevel: 1}` | P0 | yes | node | `/supply-chain` `/reproducible` `/attestation` `/sc-orchestrator` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-security-supply-chain-slsa-app/tests/e2e/`
+- 見つけた既存 test — 1 件
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 SLSA level verify + reproducible match + provenance sign + attestation verify + orchestrator decide end to end` (`examples/dogfood-security-supply-chain-slsa-app/tests/e2e/supply-chain-slsa-flow.spec.ts:46`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — 4 route を 1 つの `APIRequestContext` から順に実行する happy path
 
 T-E2E-001 は 6 手を 1 件に畳んである。 分けないのは `/attestation` の 2 手が順序を持ち、
 4 route が 1 つの出荷判断へ集まる形を 1 本で見せるため。
@@ -347,3 +361,11 @@ domain の成否を判別しているのは `toMatchObject({ok: true, ...})` の
 残り 3 つは HTTP の口が無いか防御用の経路になる。
 **HTTP の口の数と、その下にある route / adapter / semantics の分岐の数は別になる。**
 本 example では route が 4 つに増えた分、下の直線 1 本との対応がさらに離れている。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
