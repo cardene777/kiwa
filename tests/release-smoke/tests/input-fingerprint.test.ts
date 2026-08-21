@@ -9,7 +9,16 @@
 //
 // どちらも時刻では塞げない。 入力の指紋を成果物の隣に記録して突き合わせる。
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  utimesSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -23,9 +32,34 @@ const REPO_ROOT = repoRoot(HERE);
 
 // helper は repo root 起点で読む。 相対 import は `.vitest-dist/` へ compile した側で
 // 1 階層ずれる (`repo-root.ts` が同じ理由で存在する)。
-const fingerprint: typeof import('../../../scripts/lib/input-fingerprint.mjs') = await import(
+type FingerprintResult = { state: 'match' | 'mismatch' | 'absent' | 'unusable'; reason?: string };
+type RecordResult = { ok: true; fingerprint: string } | { ok: false; reason: string };
+type ReadResult =
+  | { state: 'absent' }
+  | { state: 'unreadable'; reason: string }
+  | { state: 'ok'; fingerprint: string; inputs: string[] };
+
+const fingerprint = (await import(
   pathToFileURL(resolve(REPO_ROOT, 'scripts/lib/input-fingerprint.mjs')).href
-);
+)) as {
+  compareArtifactInputs: (args: {
+    repoRoot: string;
+    inputRels: string[];
+    artifactAbs: string;
+  }) => FingerprintResult;
+  computeInputFingerprint: (
+    args: { repoRoot: string; inputRels: string[] },
+    io?: { execFileSync?: (command: string, args: string[], options: Record<string, unknown>) => string },
+  ) => string | null;
+  readArtifactInputs: (artifactAbs: string) => ReadResult;
+  recordArtifactInputs: (args: {
+    repoRoot: string;
+    inputRels: string[];
+    artifactAbs: string;
+  }) => RecordResult;
+  sidecarPathFor: (artifactAbs: string) => string;
+  SIDECAR_SCHEMA_VERSION: number;
+};
 const {
   compareArtifactInputs,
   computeInputFingerprint,
@@ -35,9 +69,19 @@ const {
   SIDECAR_SCHEMA_VERSION,
 } = fingerprint;
 
-const runner: typeof import('../../../scripts/package-mutation.mjs') = await import(
+const runner = (await import(
   pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
-);
+)) as {
+  runPackageMutation: (args: {
+    cwd: string;
+    rm: (path: string) => void;
+    run: (command: string, args: string[], cwd: string) => number;
+    warn?: (message: string) => void;
+    dirProblem?: string | null;
+    setupProblems?: () => string[];
+    record?: () => RecordResult;
+  }) => number;
+};
 
 const SRC_REL = 'packages/demo/src';
 const TESTS_REL = 'packages/demo/tests';
@@ -196,6 +240,66 @@ describe('指紋 — 何が入ると変わるか', () => {
     ).toBeNull();
   });
 
+  it('T-FP-013 改行を含む file 名でも内容を指紋に含める', () => {
+    const { root } = makeTree();
+    const unusual = join(root, SRC_REL, 'line\nbreak.ts');
+    writeFileSync(unusual, 'export const lineBreak = 1;\n');
+    const before = digest(root);
+    expect(before, '改行を path separator と誤認して指紋計算を諦めている').toEqual(expect.any(String));
+    writeFileSync(unusual, 'export const lineBreak = 2;\n');
+    expect(digest(root), '改行入り file の内容を見ていない').not.toBe(before);
+  });
+
+  it('T-FP-014 dangling symlink の link target が変われば変わる', () => {
+    const { root } = makeTree();
+    const link = join(root, SRC_REL, 'generated-types');
+    symlinkSync('missing-v1.d.ts', link);
+    const before = digest(root);
+    expect(before, 'dangling symlink を存在しない file として捨てている').toEqual(expect.any(String));
+    rmSync(link);
+    symlinkSync('missing-v2.d.ts', link);
+    expect(digest(root), 'symlink 自体の内容を見ていない').not.toBe(before);
+  });
+
+  it('T-FP-014 path が区切りを真似ても別の入力は別の指紋になる', () => {
+    // digest の本文は `path<TAB>hash` を改行で並べた形。 path を escape しないと、
+    // TAB と改行を名前に含む 1 file が「2 file 分の行」 を丸ごと真似られる。
+    //
+    //   file 2 個 :  packages/demo/src/a.ts<TAB>Ha
+    //                packages/demo/src/b.ts<TAB>Hb
+    //   file 1 個 :  packages/demo/src/a.ts<TAB>Ha<LF>packages/demo/src/b.ts<TAB>Hb
+    //
+    // 中身が同じなら Hb も同じなので、escape が無い実装では 2 つが同じ digest になる。
+    // path に `/` は入れられないので、真似たい行の残りを dir 名として掘る。
+    const two = makeTree();
+    const contentA = 'export const a = 1;\n';
+    const contentB = 'export const b = 2;\n';
+    rmSync(join(two.root, SRC_REL, 'index.ts'));
+    writeFileSync(join(two.root, SRC_REL, 'a.ts'), contentA);
+    writeFileSync(join(two.root, SRC_REL, 'b.ts'), contentB);
+    const twoDigest = digest(two.root);
+    expect(twoDigest, '2 file の指紋を計算できていない').toEqual(expect.any(String));
+
+    const hashOfA = execFileSync('git', ['hash-object', '--', `${SRC_REL}/a.ts`], {
+      cwd: two.root,
+      encoding: 'utf8',
+    }).trim();
+
+    const one = makeTree();
+    rmSync(join(one.root, SRC_REL, 'index.ts'));
+    // `packages/demo/src/` + `a.ts<TAB>Ha<LF>packages` + `/demo/src/b.ts`
+    // を繋ぐと、真似たい 2 行がそのまま 1 つの path になる。
+    const forged = join(one.root, SRC_REL, `a.ts\t${hashOfA}\npackages`, 'demo', 'src');
+    mkdirSync(forged, { recursive: true });
+    writeFileSync(join(forged, 'b.ts'), contentB);
+    const oneDigest = digest(one.root);
+    expect(oneDigest, '境界を真似た名前で指紋を計算できていない').toEqual(expect.any(String));
+
+    expect(oneDigest, 'path を escape していないため 2 つの入力が同じ指紋になる').not.toBe(
+      twoDigest,
+    );
+  });
+
   it('T-FP-009 git の外では null を返す (呼出側が時刻比較へ落ちる)', () => {
     const { root } = makeTree({ asRepo: false });
     expect(digest(root), 'git 不在で指紋を捏造している').toBeNull();
@@ -246,7 +350,20 @@ describe('sidecar — 読めない時の倒し方', () => {
     writeFileSync(path, raw.replace(/schema_version: \d+/, `schema_version: ${SIDECAR_SCHEMA_VERSION + 1}`));
     const result = compare(root, artifact);
     expect(result.state, '読めない形式を fresh 側に倒している').toBe('unusable');
-    expect(result.reason).toContain('newer than this reader');
+    expect(result.reason).toContain('schema_version 2');
+  });
+
+  it('T-FP-202b 古い schema_version も unusable (算法が違う digest を比べない)', () => {
+    const { root, artifact } = makeTree();
+    record(root, artifact);
+    const path = sidecarPathFor(artifact);
+    const raw = readFileSync(path, 'utf8');
+    writeFileSync(path, raw.replace(/schema_version: \d+/, 'schema_version: 0'));
+    const result = compare(root, artifact);
+    // 別の算法で作った digest を比べると「入力が変わった」 と誤報する。
+    // 変わったのは算法なので、探しに行く先が違う。
+    expect(result.state).toBe('unusable');
+    expect(result.reason).toContain('digest algorithm');
   });
 
   it('T-FP-203 schema_version が無ければ unusable', () => {
@@ -254,7 +371,13 @@ describe('sidecar — 読めない時の倒し方', () => {
     record(root, artifact);
     const path = sidecarPathFor(artifact);
     writeFileSync(path, 'fingerprint: abc\ninputs: x\n');
-    expect(compare(root, artifact).state).toBe('unusable');
+    const result = compare(root, artifact);
+    expect(result.state).toBe('unusable');
+    // 「version 行が無い」 と「version が 0 と書いてある」 は直しに行く先が違う。
+    // `Number(null)` は 0 になるので、理由まで見ないと 2 つが同じ扱いに潰れる。
+    expect(result.reason, 'version 行の欠落を version 0 と混同している').toContain(
+      'no usable schema_version',
+    );
   });
 
   it('T-FP-204 fingerprint 欄が欠ければ unusable', () => {

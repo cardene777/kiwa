@@ -40,7 +40,14 @@
  */
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  readlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 
 
@@ -61,6 +68,25 @@ function git(args, cwd, runner, input) {
     });
   } catch {
     return null;
+  }
+}
+
+/** Whether a directory entry exists, without following a symlink target. */
+function pathEntryExists(path, io) {
+  if (io.existsSync) return io.existsSync(path);
+  try {
+    (io.lstatSync ?? lstatSync)(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function pathIsSymlink(path, io) {
+  try {
+    return (io.lstatSync ?? lstatSync)(path).isSymbolicLink();
+  } catch {
+    return false;
   }
 }
 
@@ -91,7 +117,7 @@ export function computeInputFingerprint({ repoRoot, inputRels }, io = {}) {
   if (listed === null) return null;
 
   const paths = listed.split('\0').filter((entry) => entry !== '');
-  const present = paths.filter((rel) => (io.existsSync ?? existsSync)(join(repoRoot, rel)));
+  const present = paths.filter((rel) => pathEntryExists(join(repoRoot, rel), io));
 
   const lines = [`v${SIDECAR_SCHEMA_VERSION}`, `inputs\t${[...inputRels].sort().join(',')}`];
 
@@ -102,12 +128,56 @@ export function computeInputFingerprint({ repoRoot, inputRels }, io = {}) {
     // to be storing it. Hashing the HEAD tree instead would change the digest
     // when identical content moves from uncommitted to committed, and every
     // artefact measured before the commit would read as stale.
-    const hashed = git(['hash-object', '--stdin-paths'], repoRoot, run, present.join('\n') + '\n');
-    if (hashed === null) return null;
-    const hashes = hashed.split('\n').filter((entry) => entry !== '');
-    if (hashes.length !== present.length) return null;
+    // `--stdin-paths` is LF-delimited and has no NUL mode. Git permits LF in a
+    // path, so putting such a name on stdin would split it into two names and
+    // disable the content check for the whole package. Keep the one-spawn fast
+    // path for ordinary names and pass only those exceptional paths as argv,
+    // where `execFileSync` preserves them exactly.
+    const symlinkPaths = new Set(
+      present.filter((rel) => pathIsSymlink(join(repoRoot, rel), io)),
+    );
+    const stdinPaths = present.filter((rel) => !rel.includes('\n') && !symlinkPaths.has(rel));
+    const hashesByPath = new Map();
+    if (stdinPaths.length > 0) {
+      const hashed = git(
+        ['hash-object', '--stdin-paths'],
+        repoRoot,
+        run,
+        stdinPaths.join('\n') + '\n',
+      );
+      if (hashed === null) return null;
+      const hashes = hashed.split('\n').filter((entry) => entry !== '');
+      if (hashes.length !== stdinPaths.length) return null;
+      stdinPaths.forEach((rel, index) => hashesByPath.set(rel, hashes[index]));
+    }
 
-    const pairs = present.map((rel, index) => `${rel}\t${hashes[index]}`).sort();
+    for (const rel of present) {
+      if (symlinkPaths.has(rel)) {
+        let target;
+        try {
+          target = (io.readlinkSync ?? readlinkSync)(join(repoRoot, rel), 'utf8');
+        } catch {
+          return null;
+        }
+        hashesByPath.set(
+          rel,
+          createHash('sha256').update('symlink\0').update(target).digest('hex'),
+        );
+        continue;
+      }
+      if (!rel.includes('\n')) continue;
+      const hashed = git(['hash-object', '--', rel], repoRoot, run);
+      if (hashed === null) return null;
+      const hashes = hashed.split('\n').filter((entry) => entry !== '');
+      if (hashes.length !== 1) return null;
+      hashesByPath.set(rel, hashes[0]);
+    }
+
+    // JSON escaping keeps tabs and line breaks inside a path from imitating
+    // the separators between path/hash pairs in the digest input.
+    const pairs = present
+      .map((rel) => `${JSON.stringify(rel)}\t${hashesByPath.get(rel)}`)
+      .sort();
     lines.push(...pairs);
   }
 
@@ -174,13 +244,24 @@ export function readArtifactInputs(artifactAbs, io = {}) {
   if (!Number.isInteger(version)) {
     return { state: 'unreadable', reason: `${SIDECAR_BASENAME} has no usable schema_version` };
   }
-  // A newer writer may encode something this reader cannot check. Refusing is
-  // the default for a format this reader does not know
+  // Any version but this one is refused, in both directions.
+  //
+  // A newer writer may encode something this reader cannot check — the default
+  // for a format a reader does not know
   // (`rules/quality.md § 永続する形式を変える修正の後始末`).
-  if (version > SIDECAR_SCHEMA_VERSION) {
+  //
+  // An older one is refused because **the version names the digest algorithm**.
+  // Comparing a digest from another algorithm produces a mismatch whose message
+  // says the inputs changed, which is not what happened; the reader would send
+  // someone to look for a change that is not there. Refusing says the sidecar
+  // cannot be used, and the gate asks for a re-measure — which is the fix.
+  //
+  // So: **changing how the digest is built means bumping this version.** Leaving
+  // it alone turns an algorithm change into a repo-wide "your inputs changed".
+  if (version !== SIDECAR_SCHEMA_VERSION) {
     return {
       state: 'unreadable',
-      reason: `${SIDECAR_BASENAME} is schema_version ${version}, newer than this reader (${SIDECAR_SCHEMA_VERSION})`,
+      reason: `${SIDECAR_BASENAME} is schema_version ${version}, and this reader writes ${SIDECAR_SCHEMA_VERSION} (the version names the digest algorithm, so digests are only comparable within one)`,
     };
   }
 
