@@ -11,6 +11,13 @@
  * which matches Stryker's "% Mutation score / covered" column (no-coverage
  * mutants are excluded so the score reflects what tests can actually observe).
  *
+ * Nothing here regenerates that report, so a package whose `src/` moved on
+ * after the last `test:mutation` would be scored on code that is no longer
+ * there. #2124 measured it: `core` read 83.33 from a stored report and 81.37
+ * when re-run, and the gate passed on the older number. Each report is checked
+ * against when its implementation last changed, and one that predates it fails
+ * with the command to re-run.
+ *
  * v1.27-4: the per-package threshold table below has been reshaped into a
  * **tier + override** SSOT that mirrors `docs/quality/mutation-thresholds.md`
  * and `packages/quality-metrics/src/gate.ts` DEFAULT_MUTATION_TIER_THRESHOLDS.
@@ -38,6 +45,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isMainModule } from './lib/is-main-module.mjs';
+import { checkArtifactFreshness, staleMessage } from './lib/artifact-freshness.mjs';
 
 // `fileURLToPath`, not `.pathname`: a `file:` URL keeps percent-encoding, so a
 // checkout under a directory with a space resolves to `…/kiwa%20review/…`.
@@ -246,6 +254,42 @@ function loadMsi(pkgDir) {
   };
 }
 
+const REPORT_REL = 'mutation-report/mutation.json';
+
+/**
+ * Whether this package's report still describes its `src/`.
+ *
+ * The gate reads `mutation-report/mutation.json`, not `.mutation-baseline/`,
+ * so that is the file whose age decides the verdict. #2124 hit the gap this
+ * closes: `core` scored 83.33 from a stored report and 81.37 when re-measured,
+ * and the gate passed on the older number.
+ *
+ * `missing` is left to `loadMsi`, which names the path it looked for and feeds
+ * the `DEFERRED` allowlist; calling it stale would lose both. Anything the
+ * check cannot work out fails here — a gate that does not know whether its
+ * input is current must not report a pass.
+ *
+ * `scripts/lib/artifact-freshness.mjs` carries why the comparison is not a
+ * plain mtime check (a checkout rewrites files without changing them, and four
+ * packages in this repo failed that way while untouched).
+ */
+function freshnessProblem(pkg, pkgDir) {
+  const artifactRel = `${pkgDir}/${REPORT_REL}`;
+  const result = checkArtifactFreshness({
+    repoRoot: REPO_ROOT,
+    srcRel: `${pkgDir}/src`,
+    artifactRel,
+    inputRels: [`${pkgDir}/src`, `${pkgDir}/tests`],
+  });
+  if (result.state === 'fresh' || result.state === 'missing') return null;
+  return staleMessage({
+    pkg,
+    artifactRel,
+    regenerateCommand: `pnpm -F ${pkg} test:mutation`,
+    result,
+  });
+}
+
 // Skip the CLI when imported (e.g. from unit tests). The module-level exports
 // stay reachable so consumers can cross-check the tier table SSOT.
 if (isMainModule(process.argv[1], import.meta.url)) {
@@ -256,6 +300,12 @@ if (isMainModule(process.argv[1], import.meta.url)) {
     const threshold = THRESHOLDS[pkg];
     const tierInfo = PACKAGE_TIER[pkg];
     const tierLabel = tierInfo.tier + (tierInfo.override !== undefined ? ` (override ${tierInfo.override})` : '');
+    const stale = freshnessProblem(pkg, dir);
+    if (stale) {
+      failures.push({ pkg, reason: stale });
+      rows.push(`| ${pkg} | ${tierLabel} | n/a | ${threshold} | ❌ stale report |`);
+      continue;
+    }
     const result = loadMsi(dir);
     if (!result.ok) {
       if (DEFERRED.has(pkg)) {
