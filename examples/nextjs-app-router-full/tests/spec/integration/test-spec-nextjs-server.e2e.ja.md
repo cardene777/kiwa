@@ -239,7 +239,7 @@ cookie は `context.addCookies` (画面経由) と `headers.cookie` (要求経�
 ## 既存 test との対応
 
 - 探索した runtime — `typescript`
-- 探索した path — `examples/nextjs-app-router-full/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/`、`tests/e2e/`、`tests/integration/` の 3 dir
+- 探索した path — `examples/nextjs-app-router-full/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` / `.next` / `.turbo` / `dist` / `.vitest-dist` は除外)。 実在したのは `tests/`、`tests/e2e/`、`tests/integration/` の 3 dir
 - 探索した test file — 7 件
 
 | TC | 既存 test の候補 | 判定 |

@@ -18,13 +18,14 @@
  *     test.skip('T-E2E-999 ...', async () => {});  // a skipped test
  *
  * Telling them apart needs the first argument's type, which no pattern over the
- * text can decide. All 23 occurrences today are directives, so any count is
- * right until someone writes the other form.
+ * text can decide. All 23 occurrences today are directives: including
+ * `test.skip` overcounts now, while excluding it will undercount as soon as a
+ * skipped test definition is added.
  *
- * File counts have no such split: a path either matches the glob or it does
- * not. `rules/quality.md § 導出可能記述は人手で書かない` calls for either a
- * check that derives the value or no value at all — this makes the first one
- * possible.
+ * File counts have no such split: a path outside the excluded directories
+ * either matches a suffix or it does not. `rules/quality.md §
+ * 導出可能記述は人手で書かない` calls for either a check that derives the
+ * value or no value at all — this makes the first one possible.
  */
 
 import { readdirSync, statSync } from 'node:fs';
@@ -43,8 +44,9 @@ export const SKIPPED_DIRS = new Set(['node_modules', '.next', '.turbo', 'dist', 
  * into a hang rather than a failure: dropping `node_modules` from
  * `SKIPPED_DIRS` made the check run for minutes instead of failing (measured).
  * A hang cannot be read as "the skip list is wrong", so bound the walk and say
- * what went wrong. The examples' own trees are three orders of magnitude below
- * this (the largest returns 14 files).
+ * what went wrong. The checked source trees are far smaller after dependency
+ * and generated-output directories are excluded, while the limit still stops
+ * an accidentally traversed dependency tree.
  */
 export const MAX_ENTRIES_SCANNED = 20000;
 
@@ -59,31 +61,40 @@ export function listTestFiles(dir, io = {}) {
   const stat = io.statSync ?? statSync;
   const found = [];
   let scanned = 0;
+  const ancestors = new Set();
   const walk = (current, prefix) => {
-    let entries;
+    const currentStat = stat(current);
+    const identity = `${currentStat.dev}:${currentStat.ino}`;
+    // Follow linked directories, but stop a link that points back to an
+    // ancestor. Separate aliases remain separate matching paths.
+    if (ancestors.has(identity)) return;
+    ancestors.add(identity);
     try {
-      entries = readdir(current, { withFileTypes: true });
-    } catch {
-      return;
-    }
-    for (const entry of entries) {
-      scanned += 1;
-      if (scanned > MAX_ENTRIES_SCANNED) {
-        throw new Error(
-          `${dir} の走査が ${MAX_ENTRIES_SCANNED} entry を超えた。` +
-            ' SKIPPED_DIRS が実際の tree と噛み合っていない可能性がある',
-        );
+      for (const entry of readdir(current, { withFileTypes: true })) {
+        scanned += 1;
+        if (scanned > MAX_ENTRIES_SCANNED) {
+          throw new Error(
+            `${dir} の走査が ${MAX_ENTRIES_SCANNED} entry を超えた。` +
+              ' SKIPPED_DIRS が実際の tree と噛み合っていない可能性がある',
+          );
+        }
+        const rel = prefix === '' ? entry.name : `${prefix}/${entry.name}`;
+        const abs = join(current, entry.name);
+        const target = entry.isSymbolicLink() ? statSymlink(abs, stat) : entry;
+        if (target === null) continue;
+        if (target.isDirectory()) {
+          if (!SKIPPED_DIRS.has(entry.name)) walk(abs, rel);
+          continue;
+        }
+        if (
+          target.isFile() &&
+          TEST_FILE_SUFFIXES.some((suffix) => entry.name.endsWith(suffix))
+        ) {
+          found.push(rel);
+        }
       }
-      const rel = prefix === '' ? entry.name : `${prefix}/${entry.name}`;
-      const abs = join(current, entry.name);
-      // `withFileTypes` reports a symlink as neither file nor directory, so ask
-      // for the target: a linked `tests/` dir holds test files like any other.
-      const isDir = entry.isDirectory() || (entry.isSymbolicLink() && isDirectory(abs, stat));
-      if (isDir) {
-        if (!SKIPPED_DIRS.has(entry.name)) walk(abs, rel);
-        continue;
-      }
-      if (TEST_FILE_SUFFIXES.some((suffix) => entry.name.endsWith(suffix))) found.push(rel);
+    } finally {
+      ancestors.delete(identity);
     }
   };
   walk(dir, '');
@@ -94,11 +105,21 @@ export function listTestFiles(dir, io = {}) {
   return found.sort();
 }
 
-function isDirectory(path, stat) {
+function statSymlink(path, stat) {
   try {
-    return stat(path).isDirectory();
-  } catch {
-    return false;
+    return stat(path);
+  } catch (error) {
+    // A dangling link has no file to count. Other failures can hide a real
+    // subtree, so leave them visible to the caller.
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      (error.code === 'ENOENT' || error.code === 'ENOTDIR')
+    ) {
+      return null;
+    }
+    throw error;
   }
 }
 

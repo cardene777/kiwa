@@ -79,7 +79,7 @@ mock だけを載せるため、`SQLITE_KEY` の有無にかかわらず real �
 ## 既存 test との対応
 
 - 探索した runtime — `typescript`
-- 探索した path — `examples/dogfood-sqlite-wal-fts-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 探索した path — `examples/dogfood-sqlite-wal-fts-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` / `.next` / `.turbo` / `dist` / `.vitest-dist` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
 - 探索した test file — 11 件
 
 | TC | 既存 test の候補 | 判定 |

@@ -31,7 +31,8 @@
 //     test.skip('T-E2E-999 ...', async () => {});  // skip された test の定義
 //
 // 見分けは第 1 引数の型で、text 上の pattern では決まらない。 実測した 23 件は
-// すべて前者だが、後者が 1 件書かれた瞬間にどの数え方も壊れる。
+// すべて前者なので、`test.skip` を数えれば現在は過大、数えなければ後者が追加された時に
+// 過小になる。固定した text pattern では両方を正しく扱えない。
 //
 // file の件数にはこの分岐が無い。 path が glob に一致するかしないかで、
 // 判断が 1 つも要らない。
@@ -42,13 +43,18 @@
 // 各 Phase が `sed -n '<line>p'` で全件確認しており、そちらは別の主張になる。
 // 本 file が見るのは「探索の広さの申告が実物と合っているか」 だけ。
 
+import { execFileSync } from 'node:child_process';
 import {
+  type Dirent,
   existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
   rmSync,
+  type Stats,
+  statSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -67,12 +73,18 @@ const REPO_ROOT = repoRoot(HERE);
 const helper = (await import(
   pathToFileURL(resolve(REPO_ROOT, 'scripts/lib/spec-test-files.mjs')).href
 )) as {
-  listTestFiles: (dir: string) => string[];
+  listTestFiles: (
+    dir: string,
+    io?: {
+      readdirSync?: (path: string, options: { withFileTypes: true }) => Dirent[];
+      statSync?: (path: string) => Stats;
+    },
+  ) => string[];
   statedFileCount: (specMarkdown: string) => number | null;
   TEST_FILE_SUFFIXES: string[];
   SKIPPED_DIRS: Set<string>;
 };
-const { listTestFiles, statedFileCount } = helper;
+const { listTestFiles, SKIPPED_DIRS, statedFileCount } = helper;
 
 /** 仕様書の置き場所。 example ごとに 1 dir。 */
 const SPEC_REL = 'tests/spec/integration';
@@ -139,16 +151,86 @@ describe('e2e 仕様書 — 探索の広さの申告 (#2142)', () => {
   it('T-SFC-004 走査が除外 dir を降りない', () => {
     const root = mkdtempSync(join(tmpdir(), 'kiwa-sfc-'));
     created.push(root);
-    for (const dir of ['tests', 'tests/e2e', 'node_modules', 'node_modules/pkg', '.vitest-dist']) {
+    const skippedDirs = ['node_modules', '.next', '.turbo', 'dist', '.vitest-dist'];
+    expect([...SKIPPED_DIRS].sort()).toEqual([...skippedDirs].sort());
+    for (const dir of ['tests', 'tests/e2e', ...skippedDirs]) {
       mkdirSync(join(root, dir), { recursive: true });
     }
     writeFileSync(join(root, 'tests/a.test.ts'), '');
     writeFileSync(join(root, 'tests/e2e/b.spec.ts'), '');
-    writeFileSync(join(root, 'node_modules/c.test.ts'), '');
-    writeFileSync(join(root, 'node_modules/pkg/d.spec.ts'), '');
-    writeFileSync(join(root, '.vitest-dist/e.test.ts'), '');
-    // 数えるのは実 test file の 2 件だけ。 除外 dir の 3 件は入らない。
+    for (const dir of skippedDirs) writeFileSync(join(root, dir, 'ignored.test.ts'), '');
+    // 数えるのは実 test file の 2 件だけ。 除外 dir の 5 件は入らない。
     expect(listTestFiles(root)).toEqual(['tests/a.test.ts', 'tests/e2e/b.spec.ts']);
+  });
+
+  it('T-SFC-007 directory symlink を辿るが祖先へ戻る cycle は辿らない', () => {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-sfc-'));
+    created.push(root);
+    mkdirSync(join(root, 'tests'));
+    mkdirSync(join(root, 'shared'));
+    writeFileSync(join(root, 'shared/a.test.ts'), '');
+    symlinkSync(join(root, 'shared'), join(root, 'tests/linked'), 'dir');
+    symlinkSync(root, join(root, 'tests/loop'), 'dir');
+    expect(listTestFiles(root)).toEqual(['shared/a.test.ts', 'tests/linked/a.test.ts']);
+  });
+
+  it('T-SFC-008 dangling symlink を test file として数えない', () => {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-sfc-'));
+    created.push(root);
+    symlinkSync(join(root, 'missing'), join(root, 'dangling.test.ts'));
+    expect(listTestFiles(root)).toEqual([]);
+  });
+
+  // dangling (ENOENT) は「数えるものが無い」 だが、権限で読めない link は
+  // subtree を丸ごと隠しうる。 前者に倒すと、読めなかったことが「0 件だった」 に化ける。
+  it('T-SFC-008b 参照先を読めない symlink は握り潰さない', () => {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-sfc-'));
+    created.push(root);
+    mkdirSync(join(root, 'target'));
+    writeFileSync(join(root, 'target/a.test.ts'), '');
+    const link = join(root, 'linked');
+    symlinkSync(join(root, 'target'), link, 'dir');
+    expect(() =>
+      listTestFiles(root, {
+        statSync: ((path: string, ...rest: unknown[]) => {
+          if (path === link) {
+            const error = new Error('fixture permission failure') as Error & { code?: string };
+            error.code = 'EACCES';
+            throw error;
+          }
+          return (statSync as (...args: unknown[]) => unknown)(path, ...rest);
+        }) as unknown as typeof statSync,
+      }),
+    ).toThrow('fixture permission failure');
+  });
+
+  // 名前が suffix に一致しても、通常 file でなければ test ではない。
+  // 「test を書いた場所」 を数えるので、読めば block する fifo を 1 件に数えると
+  // 申告が実物からずれる。
+  it('T-SFC-005b 通常 file でない entry は数えない', () => {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-sfc-'));
+    created.push(root);
+    mkdirSync(join(root, 'tests'));
+    writeFileSync(join(root, 'tests/real.test.ts'), '');
+    execFileSync('mkfifo', [join(root, 'tests/pipe.test.ts')]);
+    expect(listTestFiles(root)).toEqual(['tests/real.test.ts']);
+  });
+
+  it('T-SFC-009 directory の読取失敗を部分的な成功にしない', () => {
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-sfc-'));
+    created.push(root);
+    const blocked = join(root, 'blocked');
+    mkdirSync(blocked);
+    writeFileSync(join(blocked, 'missed.test.ts'), '');
+    expect(() =>
+      listTestFiles(root, {
+        readdirSync: (path, options) => {
+          if (path === blocked) throw new Error('fixture read failure');
+          return readdirSync(path, options);
+        },
+        statSync,
+      }),
+    ).toThrow('fixture read failure');
   });
 
   // 上限は SKIPPED_DIRS が壊れた時の backstop なので、通常の tree では 1 度も届かない。
