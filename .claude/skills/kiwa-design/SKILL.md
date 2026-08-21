@@ -478,6 +478,12 @@ test dir が無い / 読めない / 対象 package を特定できない場合�
 
 skill は **1 ケース 1 行** で出力。 複数操作を 1 行にまとめない (Step 5 の分類が壊れるため)。
 
+#### 期待結果は識別力を持たせる (Issue #2127)
+
+期待結果の判定基準、実測根拠、anti-pattern、Layer 2 への引き継ぎは
+`references/assertion-discrimination.md` が SSOT。 Step 4 を実行する時は同 file を Read し、
+各 TC の `期待結果` に適用する。
+
 #### 既存 test との突き合わせ (Issue #2000)
 
 Step 2 で控えた既存 test 名と、 本 step で起こした TC を全件突き合わせる。

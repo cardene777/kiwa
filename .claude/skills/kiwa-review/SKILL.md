@@ -240,6 +240,13 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 
 各軸 0-10 score、 `weighted_score = (mapping 0.3 + grouping 0.15 + assertion 0.25 + cover 0.2 + 提案 0.1)` で総合判定。
 
+##### 識別力の判定 (Issue #2127、 2A の「具体性」 軸と 2B の「assertion 品質」 軸に共通)
+
+判定基準、実測値、anti-pattern は
+`.claude/skills/kiwa-design/references/assertion-discrimination.md` が SSOT。
+review 実行時は同 file を Read し、2A の「入力 / 期待結果の具体性」と 2B の
+「assertion 品質」の score に同じ基準を適用する。 軸と weight は変更しない。
+
 ##### 未生成 TC の扱い
 
 Layer 2 は spec の TC を全件 test にするとは限らない。 生成しないと判断した TC は、 生成 test の **冒頭 2 行**に残っている。
