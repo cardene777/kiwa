@@ -22,9 +22,21 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { isMainModule } from './lib/is-main-module.mjs';
+import { recordForPackage } from './record-artifact-inputs.mjs';
 
+/** Repo root, found from this file rather than from the caller's cwd. */
+const REPO_ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
+
+/**
+ * Where `tsc` puts the copy Stryker measures.
+ *
+ * Deleted and recompiled by every run, which is what makes it usable as the
+ * instant the inputs were read: `recordForPackage` refuses to record an input
+ * newer than this build, because such an input never reached the report.
+ */
 const BUILD_DIR = '.vitest-dist';
 /**
  * Where Stryker writes the report the gate reads.
@@ -90,13 +102,30 @@ function runStep(command, args, cwd) {
  *
  * @returns the exit code to leave with.
  */
+/**
+ * Record what this run measured.
+ *
+ * Through the shared recorder so the artefact, the inputs, and the build are
+ * resolved the same way coverage resolves them. Stryker measures the compiled
+ * copy and this run takes minutes (35 for `dapp`), so an edit landing in that
+ * window must not be recorded as what was measured.
+ *
+ * Kept as the default recorder of `runPackageMutation`, so the same callable
+ * wiring — kind, package root, and repo root — is used by the CLI and tests.
+ */
+export function recordMutationInputs(cwd, repoRoot = REPO_ROOT) {
+  return recordForPackage({ kind: 'mutation', cwd, repoRoot });
+}
+
 export function runPackageMutation({
   cwd,
+  repoRoot = REPO_ROOT,
   rm,
   run,
   warn = () => {},
   dirProblem = null,
   setupProblems = () => [],
+  record = () => recordMutationInputs(cwd, repoRoot),
 }) {
   if (dirProblem) {
     warn(`${cwd}: ${dirProblem} — run this through a package's \`test:mutation\` script.\n`);
@@ -118,7 +147,20 @@ export function runPackageMutation({
     return compiled;
   }
 
-  return run('stryker', ['run'], cwd);
+  const scored = run('stryker', ['run'], cwd);
+  if (scored !== 0) return scored;
+
+  // Only after a run that produced a report. A sidecar written beside an
+  // artefact from an earlier run would pair this content with those numbers,
+  // and the gate would read the stale report as current (#2135).
+  const recorded = record();
+  if (!recorded.ok) {
+    // Not a failure of the measurement itself. Input drift leaves an unusable
+    // marker so the gate fails closed; an unwritable sidecar may still leave
+    // the legacy timestamp comparison as the only available check.
+    warn(`could not record the input fingerprint: ${recorded.reason}\n`);
+  }
+  return 0;
 }
 
 if (isMainModule(process.argv[1], import.meta.url)) {

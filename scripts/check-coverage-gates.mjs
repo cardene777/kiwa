@@ -22,6 +22,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkArtifactFreshness, staleMessage } from './lib/artifact-freshness.mjs';
+import { compareArtifactInputs } from './lib/input-fingerprint.mjs';
+import { COVERAGE_INPUT_DIRS } from './lib/gate-inputs.mjs';
 
 // Default to the repo containing this script, but allow CWD override for tests / CI.
 // `fileURLToPath`, not `.pathname`: a `file:` URL keeps percent-encoding, so a
@@ -143,11 +145,33 @@ const SUMMARY_REL = 'coverage/coverage-summary.json';
  */
 function freshnessProblem(pkg, pkgDir) {
   const artifactRel = `${pkgDir}/${SUMMARY_REL}`;
+  const inputRels = COVERAGE_INPUT_DIRS.map((suffix) => `${pkgDir}/${suffix}`);
+
+  // Content first. A fingerprint recorded beside the artefact settles the
+  // question outright: same inputs, same artefact, whenever either was
+  // written. Timestamps cannot say that — a squash merge stamps the commit
+  // after the branch measured, and checking out older content moves the
+  // commit backwards under an artefact that stays put (#2135).
+  const byContent = compareArtifactInputs({
+    repoRoot: REPO_ROOT,
+    inputRels,
+    artifactAbs: resolve(REPO_ROOT, artifactRel),
+  });
+  if (byContent.state === 'match') return null;
+  if (byContent.state === 'mismatch') {
+    return `${artifactRel} was measured against different content (${byContent.reason}). Re-run \`pnpm -F ${pkg} test:cov\`.`;
+  }
+  if (byContent.state === 'unusable') {
+    return `cannot tell whether ${artifactRel} is current (${byContent.reason}). Re-run \`pnpm -F ${pkg} test:cov\`.`;
+  }
+
+  // No sidecar: an artefact from before #2135, or one whose recorder could
+  // not reach git. Fall back to the timestamp comparison #2125 put in.
   const result = checkArtifactFreshness({
     repoRoot: REPO_ROOT,
     srcRel: `${pkgDir}/src`,
     artifactRel,
-    inputRels: [`${pkgDir}/src`, `${pkgDir}/tests`],
+    inputRels,
   });
   if (result.state === 'fresh' || result.state === 'missing') return null;
   return staleMessage({
