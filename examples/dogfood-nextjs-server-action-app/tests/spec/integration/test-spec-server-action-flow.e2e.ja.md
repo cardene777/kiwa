@@ -36,7 +36,7 @@ node server に載せ、Chromium の `page.request` がそこを叩く。 **画�
 
 route に届いた後の status は `response.ok ? 200 : 400` の 2 値しかない。
 
-### `/subscribe` は 3 つの必須と 2 つの形式検査を持つ
+### `/subscribe` は必須項目と form / revalidatePath の形式を検査する
 
 実測した値。
 
@@ -48,8 +48,9 @@ route に届いた後の status は `response.ok ? 200 : 400` の 2 値しかな
 | `form: {x: 1}` (数値) | 400 `form_values_must_be_strings` |
 | `form: {}` (空) | **200** / `fieldCount: 0` / `revalidatedPaths: ['/p']` |
 
-**空の form が成功する**。 `form` は object であることしか要求されないため、
-何も入っていない form でも `fieldCount: 0` で 200 が返る。
+**空の form が成功する**。 `form` 自体に 1 field 以上という制約は無い。
+field がある場合は値が string かを検査するが、何も入っていない form なら
+`fieldCount: 0` で 200 が返る。
 
 `revalidatePath` には先頭 `/` の検査があるが、**`/like` の `revalidateTag` には
 形式の検査が無い** (非空の文字列であればよい)。
@@ -63,12 +64,16 @@ route に届いた後の status は `response.ok ? 200 : 400` の 2 値しかな
 | `optimistic` + `resolveWith` + `revalidateTag` | true | true | false |
 | `optimistic` 省略 | **false** | true | false |
 | `rejectWith: 'boom'` | false | **false** | **true** |
+| `rejectWith: ''` | false | **true** | **false** |
 
 `optimisticApplied` は `optimistic` を渡したかどうかに対応する。
-`resolved` は `resolveWith` の有無ではなく **`rejectWith` の有無**で決まり、
-省略時は真になる。
+`resolved` は `resolveWith` の有無ではなく、**非空の `rejectWith` があるか**で決まる。
+`rejectWith` の省略時と空文字列では真になる。
+**`rejectWith` は文字列でなければ validator が落とす**ので、object を渡すと
+省略したのと同じになる (実測で `rejectWith: {a:1}` は `resolved: true` / `rejected: false`)。
 
-**却下されても `ok: true` / 200 で返る**。 `rejected: true` からしか区別できない。
+**却下されても `ok: true` / 200 で返る**。status と `ok` では区別できず、
+body の `resolved: false` / `rejected: true` の組から判定する。
 
 ### `/login` は enhance と redirect が任意
 
@@ -97,12 +102,14 @@ HTTP 呼出を 1 つの server に投げると trace が **19 件**積まれた�
 | 経路 | trace |
 |---|---|
 | `/subscribe` | `startSubscribe` → `submitSubscribe` → `revalidateSubscribePath` (3 件) |
-| `/like` | `startLike` → `markLikePending` → `applyOptimisticLike` → `submitLike` → `revalidateLikeTag` → `resolveLike` (6 件) |
+| `/like` (`optimistic` あり) | `startLike` → `markLikePending` → `applyOptimisticLike` → `submitLike` → `revalidateLikeTag` → `resolveLike` (6 件) |
+| `/like` (`optimistic` 省略) | `startLike` → `markLikePending` → `submitLike` → `revalidateLikeTag` → `resolveLike` (5 件) |
 | `/login` (enhance + redirect あり) | `startLogin` → `enhanceLogin` → `markLoginPending` → `submitLogin` → `redirectLogin` → `resolveLogin` (6 件) |
 | `/login` (どちらも省略) | `startLogin` → `markLoginPending` → `submitLogin` → `resolveLogin` (4 件) |
 
-**任意の入力を省くと trace も減る**。 `enhanceLogin` と `redirectLogin` は
-対応する入力を渡した時だけ現れる。
+**trace event を持つ任意入力を省くと件数も減る**。 `applyOptimisticLike` / `enhanceLogin` /
+`redirectLogin` は対応する入力を渡した時だけ現れる。一方、`resolveWith` は省略しても
+`resolveLike` が現れるため、件数は変わらない。
 
 ## 主な品質リスク
 
@@ -117,7 +124,8 @@ HTTP 呼出を 1 つの server に投げると trace が **19 件**積まれた�
   要求するが、後者は非空であればよい。 同じ「再検証の対象」 なのに形式の扱いが逆
 - **`errorKind` が 2 種類の由来を混ぜる**。 validator の失敗は
   `revalidatePath_required` のような固定 token だが、adapter が投げた失敗は
-  `err.message` をそのまま返すため英文になる
+  `err.message` をそのまま返すため英文になる。ただし、現在の mock adapter の
+  throw 条件は validator が先に拒むため、後者はこの HTTP 経路から観測できない
 - **任意入力の省略が観測から消える**。 `enhanced` / `optimisticApplied` は
   入力を渡したかどうかを写すだけなので、「渡したが効かなかった」 と
   「渡していない」 を応答から区別できない
@@ -186,10 +194,12 @@ trace を test 間で分けるなら、server だけでなく adapter も test �
 | `form_values_must_be_strings` | できる | 文字列だけを送っている |
 | `enhance_actionUrl_required` | できる | `actionUrl` を渡している |
 | trace の中身と件数 | できる | `traces()` を読んでいない |
-| adapter が投げる失敗 | できる | `errorKind` が英文になる形を送っていない |
+| adapter が投げる失敗 | **できない** | mock の guard 条件は validator が先に拒み、validator 通過後の helper 呼出も固定順で失敗条件を作れない |
 
-**到達できないものは無い**。 3 route とも validator を通る入力の幅が広く、
-`ok: false` の分岐も `rejected: true` の分岐も HTTP から作れる。
+到達できないのは、現在の mock adapter 自身が投げる失敗である。空の `routeId` / `actionId` /
+`formId` / `targetId` や不正な再検証先は validator が先に 400 を返す。validator の
+`ok: false` と `/like` の `rejected: true` は HTTP から作れるが、adapter の catch が返す
+英文の `errorKind` は handler または adapter の単体テストで確かめる範囲になる。
 
 ## 手動確認でよいテスト
 
