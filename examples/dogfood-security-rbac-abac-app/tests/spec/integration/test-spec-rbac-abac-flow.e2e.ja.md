@@ -1,10 +1,11 @@
 # test-spec-rbac-abac-flow (e2e-generic layer)
 
-役割による認可 (RBAC) / 属性による認可 (ABAC) / 方針の版管理の 3 経路を、
-実 Chromium から順に叩いて確かめる。
+役割による認可 (RBAC) / 属性による認可 (ABAC) / 方針の版管理の 3 経路を、Chromium の
+BrowserContext に紐づく Playwright `APIRequestContext` から順に叩いて確かめる。
 
 画面は描画しない。 `src/lib/next-server.ts` が 3 route を node server に載せ、
-Playwright の `page.request` が JSON を投げる。
+Playwright の `page.request` が JSON を投げる。これは `page.context().request` と同じ
+API testing helper で、Chromium page 内の `fetch` ではない。
 
 - module: rbac-abac-flow
 - layer: e2e-generic
@@ -13,16 +14,17 @@ Playwright の `page.request` が JSON を投げる。
 
 | 経路 | kind | 実体 |
 |---|---|---|
-| `POST /rbac` | `attach` / `check` | `src/app/rbac/route.ts` → `src/adapters/mock.ts` |
-| `POST /abac` | `attach` / `evaluate` | `src/app/abac/route.ts` → 同上 |
-| `POST /policy-store` | `publish` / `rollback` | `src/app/policy-store/route.ts` → 同上 |
+| `POST /rbac` | `attach` / `expand` / `check` | `src/app/rbac/route.ts` → `src/adapters/mock.ts` |
+| `POST /abac` | `attach` / `evaluate` / `combined` | `src/app/abac/route.ts` → 同上 |
+| `POST /policy-store` | `publish` / `activate` / `rollback` | `src/app/policy-store/route.ts` → 同上 |
 
 ## 仕様の要約
 
-### 方針の作成は HTTP から到達できない
+### 方針の作成と終了は HTTP から到達できない
 
-3 つの方針 (`startRbac` / `startAbac` / `startPolicyStore`) はどの route にも生えていない。
-e2e は **adapter を直接呼んで**用意する。
+3 つの方針の作成 (`startRbac` / `startAbac` / `startPolicyStore`) と終了
+(`closeRbac` / `closeAbac` / `closePolicyStore`) はどの route にも生えていない。
+e2e は作成だけを **adapter を直接呼んで**行い、終了は呼ばない。
 
 ```ts
 await adapter.startRbac({ policyId: 'e2e-rbac' });
@@ -35,8 +37,10 @@ HTTP から選べず、e2e が 1 通りだけを固定している。
 
 ### 検証の失敗も 200 で返る
 
-status で成否を判別できない。 使うのは dispatcher の 2 種だけ
-(未知の path が 404 / `route_not_found`、POST 以外が 405 / `method_not_allowed`)。
+route が返す domain の成否は status で判別できない。非 200 を設定するのは dispatcher で、
+壊れた JSON が 400 / `body_parse_failed`、未知の path が 404 / `route_not_found`、
+POST 以外が 405 / `method_not_allowed`、dispatch が応答 object を返さず例外を投げた時が
+500 / `dispatch_failed` になる。
 
 ### RBAC は「拒否」 をエラーにしない
 
@@ -63,9 +67,10 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 | `permit` と `deny` の両方が一致 | **`deny`** | `r-deny` |
 | **規則を 1 つも attach していない** | `deny` | `null` |
 
-`reason` は一致しない時 `abac: no rule matched`、両方一致した時
-`abac: deny-overrides ...` になる。 **`matchedRule` が `null` かどうかで
-「規則が無い」 と「拒否された」 を見分けられる。**
+規則が 1 件も無い時も、規則はあるが属性に一致しない時も、`reason` は
+`abac: no rule matched (default deny)` になる。両方一致した時は `abac: deny-overrides ...`。
+`matchedRule` が規則 id なら一致した規則による判断、`null` なら一致する規則が無かったことを示す。
+空の方針と規則不一致は応答から区別できない。
 
 ### 版管理は連番と有効版を分ける
 
@@ -75,6 +80,9 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 | `publish` (`activateOnPublish: true`) | 2 | 2 |
 | `rollback` (`toVersion: 1`) | — | 1 (`rolledBackFrom: 2` / `rolledBackTo: 1`) |
 | `publish` (**`activateOnPublish: false`**) | 2 | **1 のまま** |
+
+上 3 行は 1 つの case、最後の行は fresh server で version 1 を有効化した後に非有効 publish した
+別 case の観測になる。
 
 `version` は publish のたびに増え、`activeVersion` は `activateOnPublish` が真の時だけ追従する。
 
@@ -87,17 +95,21 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 
 ## 主な品質リスク
 
+- **保護対象への強制を通らない**。`page.request` で decision JSON を読むだけなので、deny 時に
+  実 resource へのアクセスが遮断されることは検証しない
 - **拒否と設定漏れが同じ応答になる**。 RBAC は role を 1 つも attach していなくても
   `ok: true` / `allowed: false` を返す。 認可を落としたのか、設定を忘れたのかが分からない
 - **ABAC の結合規則が HTTP から選べない**。 `deny-overrides` は `startAbac` の引数で、
   route には無い。 `permit-overrides` 等に切り替えた時の挙動を e2e が 1 度も通らない
-- **status が成否を表さない**。 検証失敗も 200
+- **ABAC の規則なしと不一致が同じ応答になる**。どちらも `effect: 'deny'` /
+  `matchedRule: null` / `reason: 'abac: no rule matched (default deny)'` になる
+- **status が domain の成否を表さない**。 route validator の失敗も、handler が捕捉した状態不整合も 200
 - **`store_version_missing` が 2 つの状況を兼ねる**。 版が足りない場合と 1 つも無い場合が
   同じ `errorKind` になる
-- **`activateOnPublish: false` の版が残る**。 `version` は増えるが `activeVersion` は動かないため、
-  有効でない版が蓄積する。 消す経路が route に無い
-- **方針の作成が HTTP に無い**。 e2e が adapter を直接呼ぶため、
-  実際の deploy でどう方針が作られるかを 1 度も通していない
+- **`activateOnPublish: false` の版も履歴に残る**。 `version` は増えるが `activeVersion` は動かず、
+  保持期間や削除を指定する経路は route に無い
+- **方針の作成と終了が HTTP に無い**。 e2e は作成を adapter 直呼びで迂回し、終了を呼ばないため、
+  HTTP の外にある lifecycle の配線は検証しない
 
 ## 推奨テスト構成
 
@@ -107,7 +119,7 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 **3 つの bootstrap を忘れると経路が動かない。** `startAbac` の `algorithm` は
 ここでしか指定できない。
 
-RBAC は attach の順序が結果に効く (`parents` の解決に必要)。
+RBAC は親子 role が check より前に揃うことが結果に効くが、親と子の attach 順自体は問わない。
 版管理も publish の回数が `version` に効く。
 
 ## テスト観点一覧
@@ -122,31 +134,44 @@ RBAC は attach の順序が結果に効く (`parents` の解決に必要)。
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | RBAC の継承 + ABAC の評価 + 版の巻き戻しが 1 つの page から連続で通る | mock adapter を載せた server、Chromium の page、**adapter を直接呼んで作った 3 方針** (ABAC は `deny-overrides`) | `/rbac` に `viewer` と `parents: ['viewer']` を持つ `editor` を attach し `editor` で `post:read` を check、`/abac` に `permit` 規則を attach し一致する属性で evaluate、`/policy-store` に 2 回 publish して version 1 へ rollback | すべて `status===200`。 RBAC は `{ok: true, kind: 'check', allowed: true}`。 ABAC は `{ok: true, kind: 'evaluate', effect: 'permit', matchedRule: 'r-permit'}`。 版管理は 1 回目が `{version: 1, activeVersion: 1}`、2 回目が `{version: 2, activeVersion: 2}`、rollback が `{rolledBackFrom: 2, rolledBackTo: 1, activeVersion: 1}` | P0 | yes | node | `/rbac` `/abac` `/policy-store` |
+| T-E2E-001 | RBAC の継承 + ABAC の評価 + 版の巻き戻しが 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server、Chromium BrowserContext に紐づく `page.request`、**adapter を直接呼んで作った 3 方針** (ABAC は `deny-overrides`) | `/rbac` に `viewer` と `parents: ['viewer']` を持つ `editor` を attach し `editor` で `post:read` を check、`/abac` に `permit` 規則を attach し一致する属性で evaluate、`/policy-store` に 2 回 publish して version 1 へ rollback | すべて `status===200`。 RBAC は `{ok: true, kind: 'check', allowed: true}`。 ABAC は `{ok: true, kind: 'evaluate', effect: 'permit', matchedRule: 'r-permit'}`。 版管理は 1 回目が `{version: 1, activeVersion: 1}`、2 回目が `{version: 2, activeVersion: 2}`、rollback が `{rolledBackFrom: 2, rolledBackTo: 1, activeVersion: 1}` | P0 | yes | node | `/rbac` `/abac` `/policy-store` |
 
 ## 自動化方針
 
 1 件で 3 route / 8 呼出を畳んである。 分けないのは RBAC の継承と版管理の巻き戻しが
 どちらも前段の呼出を前提にするため。
 
-**`status===200` の assert は空振りになる。** route へ到達すれば必ず 200 が返る。
+**`status===200` の assert だけでは domain の成否を判別できない。** JSON parse や dispatch 自体の
+失敗は 400 / 500 になるが、route validator と route handler が返す失敗は 200 になる。
 
 assert は値を固定してある (`allowed: true` / `matchedRule: 'r-permit'` /
 `version` と `activeVersion` の 3 組)。 範囲ではない。
 
-**この 1 件が覆っていない範囲**。 いずれも同じ経路から到達できる。
+**この 1 件が覆っていない範囲**。 到達可否は表のとおり。
 
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
 | RBAC の `allowed: false` (3 通り) | できる | 許可される形だけを送っている |
 | **role を attach せずに check した時も `ok: true` になること** | できる | 必ず attach してから問う |
+| RBAC の `expand` とその `permissions` / `rolesVisited` | できる | `attach` / `check` だけを呼んでいる |
 | ABAC の `deny` (3 通り) | できる | 一致する形だけを送っている |
 | ABAC で `permit` と `deny` が両方一致した時の `deny-overrides` | できる | `permit` だけを attach している |
 | **規則を attach せずに evaluate した時の既定拒否** | できる | 必ず attach してから評価する |
+| ABAC の `combined` (RBAC のみ / ABAC のみ / 両方) | できる | `attach` / `evaluate` だけを呼んでいる |
 | `activateOnPublish: false` で `activeVersion` が動かないこと | できる | `true` だけを送っている |
+| `/policy-store` の `activate` | できる | `publish` / `rollback` だけを呼んでいる |
 | `store_version_missing` の 2 通り | できる | 存在する版へ巻き戻している |
+| `rbac_role_duplicate` / `abac_rule_duplicate` / `store_rollback_not_backwards` | できる | 重複と前進方向の rollback を送っていない |
+| RBAC / ABAC 応答の未 assert field (`policyId` / `subjectId` / ABAC の `reason`) | できる | 判断結果の主要 field だけを assert している |
+| policy-store 応答の `kind` / `policyId` | できる | version pointer だけを assert している |
+| bootstrap なしの `rbac_session_missing` / `abac_session_missing` / `store_session_missing` | できる | adapter を直接呼んで必ず bootstrap している |
+| 3 route の必須 field / 型 / kind の検証失敗 | できる | 正しい形だけを送っている |
 | dispatcher の 404 / 405 | できる | 既知の 3 path へ POST だけを送っている |
+| 壊れた JSON の 400 | できる | Playwright の `data` で正しい JSON だけを送っている |
+| `dispatch_failed` の 500 | 通常入力ではできない | dispatch が例外を投げた時だけの防御経路 |
 | ABAC の `deny-overrides` 以外の結合規則 | **できない** | `startAbac` の引数で、route から選べない |
+| 方針の作成 / 終了 | HTTP からはできない | `start*` / `close*` が route に無い |
 
-最後の 1 行だけが到達できない。 **方針の作成そのものが HTTP に無い**ためで、
-結合規則を切り替える経路は単体テストが `startAbac` を直接呼んで確かめる。
+route が公開する 3 つの未実行 kind (`expand` / `combined` / `activate`) は HTTP から到達できる。
+一方、結合規則の選択と方針の作成 / 終了は HTTP から到達できず、防御用の 500 も通常入力では
+選べない。結合規則を切り替える経路は単体テストが `startAbac` を直接呼んで確かめる。

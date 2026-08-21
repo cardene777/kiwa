@@ -1,9 +1,14 @@
 # test-spec-csp-headers-flow (e2e-generic layer)
 
-CSP の組み立て / 違反報告 / 安全 header 束の 3 経路を、実 Chromium から順に叩いて確かめる。
+CSP の組み立て / 違反報告 / 安全 header 束の 3 経路を、Chromium の BrowserContext に紐づく
+Playwright `APIRequestContext` から順に叩いて確かめる。
 
 画面は描画しない。 `src/lib/next-server.ts` が 3 route を node server に載せ、
-Playwright の `page.request` が JSON を投げる。
+Playwright の `page.request` が JSON を投げる。これは `page.context().request` と同じ
+API testing helper で、Chromium page 内の `fetch` ではない。
+
+server の実 HTTP response header は `content-type: application/json` だけで、組み立てた CSP / HSTS 等は
+JSON body の field として返る。Chromium に header を適用した時の強制動作はこの E2E の保証外になる。
 
 - module: csp-headers-flow
 - layer: e2e-generic
@@ -25,15 +30,31 @@ Playwright の `page.request` が JSON を投げる。
 | 種別 | status | body |
 |---|---|---|
 | 成功 | 200 | `{ok: true, ...}` |
-| **入力の検証失敗** | **200** | `{ok: false, errorKind: '...'}` |
-| **状態の不整合** | **200** | `{ok: false, kind, ..., errorKind: '...'}` |
+| **route validator の検証失敗** | **200** | `{ok: false, errorKind: '...'}` |
+| **route handler が捕捉した adapter の失敗** | **200** | `{ok: false, kind, ..., errorKind: '...'}` |
+| 壊れた JSON | 400 | `{ok: false, errorKind: 'body_parse_failed'}` |
 | 未知の path | 404 | `{ok: false, errorKind: 'route_not_found'}` |
 | POST 以外の method | 405 | `{ok: false, errorKind: 'method_not_allowed'}` |
+| dispatch が応答 object を返さず例外を投げた時 | 500 | `{ok: false, errorKind: 'dispatch_failed'}` |
 
-status を使うのは **dispatcher の 2 種だけ**。 route へ到達した後は常に 200 になる。
-実測で `routeId` を空にしても `kind` を未知の値にしても 200 が返った。
+非 200 を設定するのは dispatcher で、明示された経路は 400 / 404 / 405 / 500 の 4 種になる。
+JSON の parse と dispatch が完了し、route validator または route handler が応答 object を返した時は
+200 になる。実測で `routeId` を空にしても `kind` を未知の値にしても 200 が返った。
 
-`res.status()` だけを見る client は、すべての検証失敗を成功と読む。
+`res.status()` だけを見る client は、route validator が返す検証失敗を成功と読む。
+
+**400 は `page.request` の `data:` に文字列を渡しても届かない。** Playwright が
+文字列を JSON として符号化するため、server 側は `"{"` という正しい JSON を受け取り
+`body_not_object` (200) を返す。 400 に届かせるには `Buffer` を渡す必要がある。
+
+実測した 3 通り。
+
+| 送り方 | 結果 |
+|---|---|
+| `data: '{'` (文字列) | 200 / `body_not_object` |
+| **`data: Buffer.from('{')`** | **400 / `body_parse_failed`** |
+| `data: Buffer.from('not json')` | 400 / `body_parse_failed` |
+
 
 ### `/csp` の組み立て
 
@@ -63,9 +84,8 @@ status を使うのは **dispatcher の 2 種だけ**。 route へ到達した�
 | **`xFrame: 'ALLOW'` (未知)** | **黙って落とす**。 `X-Frame-Options` が付かず `validationOk: true` |
 | 最小 (必須 2 つのみ) | `headers: {}`、`applied: []`、**`validationOk: true`** |
 
-3 つとも同じ形の穴になる。 **「妥当でない値」 と「指定しない」 が区別されない**。
-`max-age=0` は HSTS を無効化する値だが受理され、未知の `xFrame` は無視され、
-空の束も検証を通る。
+3 つの性質は分けて読む必要がある。`max-age=0` は明示的な HSTS 無効化として header に残る。
+一方、未知の `xFrame` は無視されるため未指定と区別できず、空の束も `validationOk: true` になる。
 
 ### `/violation` の 2 kind
 
@@ -81,14 +101,16 @@ status を使うのは **dispatcher の 2 種だけ**。 route へ到達した�
 
 ## 主な品質リスク
 
-- **status が成否を表さない**。 検証失敗も状態不整合も 200。 `res.status()` だけを見る監視は
-  すべての失敗を見逃す。 body の `ok` を読む必要がある
-- **`max-age=0` が受理される**。 HSTS を無効化する値だが `maxAgeSec >= 0` の検査を通る。
-  設定ミスが検出されない
+- **browser の security header 強制を通らない**。CSP / HSTS 等は JSON body の値として比較するだけで、
+  response header、navigation、CORS、Service Worker への適用は検証しない
+- **status が domain の成否を表さない**。 route validator の失敗も、handler が捕捉した
+  状態不整合も 200。 `res.status()` だけを見る監視はこれらを見逃すため、body の `ok` を読む必要がある
+- **`max-age=0` が受理される**。 HSTS を無効化する用途にも使える値なので受理自体は不正ではないが、
+  常時 HSTS を強制したい呼出側の方針は `maxAgeSec >= 0` の検査だけでは保証されない
 - **未知の `xFrame` が黙って落ちる**。 `ALLOW` のような無効な値を送っても
   `validationOk: true` が返り、header だけが消える
 - **空の束が検証を通る**。 `headers: {}` / `applied: []` でも `validationOk: true`。
-  「何も適用しなかった」 と「正しく適用した」 を区別できない
+  `validationOk` だけでは「何も適用しなかった」 と「指定した header を正しく適用した」 を区別できない
 - **配列 body が `routeId_required` になる**。 型の誤りが値の欠落として報告されるため、
   呼出側が原因を取り違える
 - **`Content-Security-Policy-Report-Only` への切替が `reportOnly` 1 つで決まる**。
@@ -102,7 +124,8 @@ status を使うのは **dispatcher の 2 種だけ**。 route へ到達した�
 **この example は bootstrap を持たない。** 3 経路とも HTTP だけで完結する
 (同じ構造の mtls / rbac は adapter を直接呼んで session を作る)。
 
-`page.request.post` を使うため browser の同一 origin 制約を受けない。
+`page.request.post` は BrowserContext と cookie jar を共有するが、browser の navigation / renderer /
+同一 origin 制約 / Service Worker は通らない。
 
 ## テスト観点一覧
 
@@ -110,38 +133,51 @@ status を使うのは **dispatcher の 2 種だけ**。 route へ到達した�
 |---|---|---|
 | 1 | CSP の組み立て | `headerValue` の中身 |
 | 2 | 違反の取り込みと締め | `accepted` / `kind` |
-| 3 | header 束 | 4 つの header |
+| 3 | header 束 | `validationOk` と HSTS / XFO / XCTO (Referrer / Permissions は送信のみ) |
 | 4 | dispatcher | 404 / 405 |
 
 ## テストケース一覧
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | CSP / 違反 / header 束が 1 つの page から連続で通る | mock adapter を載せた server と Chromium の page | `/csp` (nonce + hash + strictDynamic + trustedTypes) → `/violation` (ingest) → `/violation` (close) → `/headers` (HSTS + Referrer + Permissions + XFO + XCTO) を順に投げる | CSP は `status===200`、`{ok: true, kind: 'build'}`、`headerValue` が `'strict-dynamic'` と `trusted-types default` を含む。 違反は `status===200` で ingest / close とも `ok: true`。 header 束は `status===200`、`validationOk===true`、`Strict-Transport-Security` が `preload` を含み、`X-Frame-Options==='DENY'`、`X-Content-Type-Options==='nosniff'` | P0 | yes | node | `/csp` `/violation` `/headers` |
+| T-E2E-001 | CSP / 違反 / header 束が 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server と Chromium BrowserContext に紐づく `page.request` | `/csp` (nonce + hash + strictDynamic + trustedTypes) → `/violation` (ingest) → `/violation` (close) → `/headers` (HSTS + Referrer + Permissions + XFO + XCTO) を順に投げる | CSP は `status===200`、`{ok: true, kind: 'build'}`、`headerValue` が `'strict-dynamic'` と `trusted-types default` を含む。 違反は `status===200` で ingest / close とも `ok: true`。 header 束は `status===200`、`validationOk===true`、`Strict-Transport-Security` が `preload` を含み、`X-Frame-Options==='DENY'`、`X-Content-Type-Options==='nosniff'` | P0 | yes | node | `/csp` `/violation` `/headers` |
 | T-E2E-002 | dispatcher が未知 path と誤 method を分ける | 同上 | `POST /missing` と `GET /csp` を投げる | 前者は `status===404`、`errorKind==='route_not_found'`。 後者は `status===405`、`errorKind==='method_not_allowed'` | P1 | yes | node | `/missing` `/csp` |
 
 ## 自動化方針
 
 T-E2E-001 は 4 手を 1 件に畳んである。 分けないのは `close` が `ingest` を前提にするため。
 
-**`status===200` の assert はほぼ空振りになる。** route へ到達すれば必ず 200 が返るので、
-実際に成否を判別しているのは `toMatchObject({ok: true, ...})` の方になる。
+**`status===200` の assert だけでは domain の成否を判別できない。** JSON parse や dispatch 自体の
+失敗は 400 / 500 になるが、route validator と route handler が返す失敗は 200 なので、
+domain の成否を判別しているのは `toMatchObject({ok: true, ...})` の方になる。
 
-T-E2E-002 だけが status を判別材料にできる (dispatcher が status を使う唯一の場所)。
+T-E2E-002 は dispatcher の 404 / 405 を明示的に区別する。400 / 500 はこの 2 件では通していない。
 
-**この 2 件が覆っていない範囲**。 いずれも同じ経路から到達できる。
+**この 2 件が覆っていない範囲**。 到達可否は表のとおり。
 
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
-| 検証失敗の `ok: false` (7 種の `errorKind`) | できる | 正常な入力だけを送っている |
+| route validator が返す各 `ok: false` | できる | 正常な入力だけを送っている |
 | `reportOnly: true` の header 名の切替 | できる | `false` だけを送っている |
 | `strictDynamic: false` の `headerValue` | できる | `true` だけを送っている |
 | `hsts.maxAgeSec: 0` が受理されること | できる | `31536000` だけを送っている |
 | 未知の `xFrame` が黙って落ちること | できる | `DENY` だけを送っている |
 | 最小入力で `headers: {}` が `validationOk: true` になること | できる | 全項目を送っている |
 | `close` を `ingest` なしで呼んだ時の `violation_session_missing` | できる | 順序どおりに送っている |
+| 短い nonce と、nonce / hash なしの `strictDynamic` が adapter semantics で拒まれること | できる | 有効な nonce / hash を送っている |
+| 不正な `referrerPolicy` が `validationOk: false` になること | できる | 有効な値だけを送っている |
+| 任意 field の不正値が黙って落ちる経路 (hash / trustedTypes / verdict / reason 等) | できる | 有効な任意 field だけを送っている |
+| 同じ id への再度の build / ingest が handler の start 呼出で session を作り直すこと | できる | 各 id を 1 回だけ開始している |
 | `DELETE` / `GET /` の 405 | できる | `GET /csp` だけを送っている |
 | body が配列の場合 | できる | object だけを送っている |
+| CSP 応答の `headerName` / `nonce` / 適用 flag と nonce / hash / `report-to` の各 directive | できる | `headerValue` の 2 断片と `ok` / `kind` しか assert していない |
+| violation 応答の id 群 | できる | `accepted` / `directive` と close の `ok` / `kind` しか assert していない |
+| verdict / reason を記録した trace | HTTP からはできない | trace を返す route が無く、adapter の `traces()` を直接読む必要がある |
+| `Referrer-Policy` / `Permissions-Policy` と headers 応答の `applied` / `validationErrors` | できる | request には含めるが応答を assert していない |
+| 壊れた JSON の 400 | できる | Playwright の `data` で正しい JSON だけを送っている |
+| `dispatch_failed` の 500 | 通常入力ではできない | dispatch が例外を投げた時だけの防御経路 |
+| `csp_session_missing` / `headers_session_missing` / `violation_session_closed` | HTTP からはできない | handler が各処理の前に session を作り直す |
 
-到達できない範囲は無い。 ただし **HTTP の口が 3 本でも、各 route の検証分岐は 7 種以上ある**。
-口の数と分岐の数は別になる。
+route validator の分岐は HTTP から到達できる。一方、handler が session を自動作成するため隠れる
+adapter の状態分岐と、防御用の 500 は通常の HTTP 入力からは選べない。
+**HTTP の口の数と、その下にある route / adapter の分岐の数は別になる。**

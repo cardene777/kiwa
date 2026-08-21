@@ -1,9 +1,11 @@
 # test-spec-mtls-zt-flow (e2e-generic layer)
 
-mTLS の 4 段 / zero-trust の 4 段 / broker の判定を、実 Chromium から順に叩いて確かめる。
+mTLS の 4 呼出 / zero-trust の 4 段 / broker の判定を、Chromium の BrowserContext に紐づく
+Playwright `APIRequestContext` から順に叩いて確かめる。
 
 画面は描画しない。 `src/lib/next-server.ts` が 3 route を node server に載せ、
-Playwright の `page.request` が JSON を投げる。
+Playwright の `page.request` が JSON を投げる。これは `page.context().request` と同じ
+API testing helper で、Chromium page 内の `fetch` ではない。
 
 - module: mtls-zt-flow
 - layer: e2e-generic
@@ -18,15 +20,18 @@ Playwright の `page.request` が JSON を投げる。
 
 ## 仕様の要約
 
-### session の作成は HTTP から到達できない
+### session の作成と終了は HTTP から到達できない
 
 **この仕様書で最も重要な性質。**
 
-3 つの session (`startMtls` / `startZeroTrust` / `startBroker`) はどの route にも生えていない。
-e2e は **adapter を直接呼んで**用意する。
+3 つの session の作成 (`startMtls` / `startZeroTrust` / `startBroker`) と終了
+(`closeMtls` / `closeZeroTrust` / `closeBroker`) はどの route にも生えていない。
+e2e は作成だけを **adapter を直接呼んで**行い、終了は呼ばない。
 
 ```ts
 await adapter.startMtls({ sessionId: 'e2e-mtls', target: 'istio' });
+await adapter.startZeroTrust({ sessionId: 'e2e-zt', target: 'opa' });
+await adapter.startBroker({ sessionId: 'e2e-broker', mtlsTarget: 'istio', ztTarget: 'opa' });
 ```
 
 **この 3 行は HTTP を経由しない。** 「end to end」 と名の付く test だが、
@@ -42,17 +47,22 @@ session が無い状態で route を叩くと、実測で下の 3 つが返る�
 
 ### 検証の失敗も状態の不整合も 200 で返る
 
-status で成否を判別できない。 使うのは dispatcher の 2 種だけ。
+route が返す domain の成否は status で判別できない。非 200 を設定するのは dispatcher になる。
 
 | 種別 | status |
 |---|---|
-| 成功 / 検証失敗 / 状態不整合 | **200** |
+| 成功 / route validator の検証失敗 / route handler が捕捉した状態不整合 | **200** |
+| 壊れた JSON | 400 (`body_parse_failed`) |
 | 未知の path | 404 (`route_not_found`) |
 | POST 以外の method | 405 (`method_not_allowed`) |
+| dispatch が応答 object を返さず例外を投げた時 | 500 (`dispatch_failed`) |
 
-### mTLS は 4 段の順序を強制する
+### mTLS は前提状態を強制するが、4 呼出の完全な直列ではない
 
-`startMtls` → `handshake` → `pin` → `ocsp` / `ct` の順で、飛ばすと拒む。 実測した文言。
+`handshake` は `startMtls` 後の idle 状態を前提にする。`pin` は handshake 後または OCSP 後、
+`ocsp` は handshake 後または pin 後、`ct` は idle / failed 以外で実行できる。
+したがって E2E の `handshake` → `pin` → `ocsp` → `ct` は有効な 1 順序だが、唯一の順序ではない。
+下は idle から各後段を呼んだ時に実測した文言。
 
 | 呼出 | 前提が無い時の `errorKind` |
 |---|---|
@@ -60,14 +70,25 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 | `ocsp` | `verifyOcsp: session is idle, need handshake / pin first` |
 | `ct` | `checkCtLog: session is idle, must have handshake first` |
 
-### handshake は TLS 1.2 も受理する
+### handshake の JSON 入力は TLS 1.2 も受理する
+
+**5 通りを実測した** (case ごとに新しい server + bootstrap)。
 
 | `tlsVersion` | 結果 |
 |---|---|
 | `'1.3'` | `{ok: true, tlsVersion: '1.3'}` |
 | **`'1.2'`** | **`{ok: true, tlsVersion: '1.2'}`** |
+| `'1.1'` | `{ok: false, errorKind: 'tlsVersion_must_be_12_or_13'}` |
+| `'zzz'` | 同上 |
+| **未指定** | 同上 (必須) |
 
-**最低版の強制が無い。** 応答は受け取った版をそのまま返すだけで、判定に使わない。
+route validator と mTLS semantics は `1.2` / `1.3` の 2 値だけを許可するため、TLS 1.2 未満は拒む。
+一方、TLS 1.3 を最低版として強制する設定は無い。mock adapter は許可された入力値を
+`completeHandshake` の結果へ写し、route がその値を応答に写す。
+
+この E2E が接続するのは平文 HTTP の node server で、`tlsVersion` は JSON field である。
+したがって保証するのは mock semantics が `'1.2'` を受理することであり、実 transport の
+TLS negotiation や client certificate による mTLS 成立ではない。
 
 ### zero-trust も 4 段の順序を強制する
 
@@ -82,7 +103,7 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 `posture` は 4 つの真偽値を受け、**1 つでも偽なら `passed: false`** を返す
 (ただし `ok: true` で、拒否ではなく評価結果として返る)。
 
-`jit` は 2 つの検証を持つ。
+`jit` の route validator について、今回実測した 2 つの分岐。
 
 | 入力 | 結果 |
 |---|---|
@@ -106,17 +127,19 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 
 ## 主な品質リスク
 
-- **session の作成が HTTP に無い**。 e2e が adapter を直接呼んで用意するため、
-  **実際の deploy でどう session が作られるかを 1 度も通していない**
-- **TLS 1.2 が通る**。 mTLS を主題にする example で最低版を強制していない。
-  応答が版をそのまま返すため、古い版で繋いでも成功に見える
-- **status が成否を表さない**。 検証失敗も状態不整合も 200
+- **browser / transport の security 境界を通らない**。`page.request` は API testing helper で、
+  mTLS / zero-trust の値は平文 HTTP 上の JSON と mock semantics だけを通る
+- **session の作成と終了が HTTP に無い**。 e2e は作成を adapter 直呼びで迂回し、終了を呼ばないため、
+  HTTP の外にある lifecycle の配線は検証しない
+- **TLS 1.3-only の方針を表現できない**。 JSON field は `'1.2'` / `'1.3'` の 2 値を許可する。
+  TLS 1.3 を必須にする呼出側の方針はこの layer では保証されず、実 transport の negotiation も検証しない
+- **status が domain の成否を表さない**。 route validator の失敗も、handler が捕捉した状態不整合も 200
 - **`ok` と `admitted` の意味が違う**。 broker の拒否は `ok: true` / `admitted: false` で返るため、
   `ok` だけを見る client は拒否を成功と読む
 - **`posture` の失敗が拒否にならない**。 `passed: false` を返すだけで後続を止めない
   (止めるのは `risk` を呼ぶ順序の検査であって、`passed` の値ではない)
-- **順序の強制が文言でしか分からない**。 3 つの `errorKind` がすべて別の文言で、
-  機械的に分類できる code を持たない
+- **前提状態の失敗が共通 category を持たない**。 `errorKind` は個別の説明文なので、
+  呼出側が一括分類するには文字列の列挙が必要になる
 
 ## 推奨テスト構成
 
@@ -126,7 +149,7 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 **session の bootstrap を忘れると全経路が `*_session_not_found` になる。**
 実測で確認した (最初の probe がこれで全件失敗した)。
 
-順序が結果に効く。 mTLS も zero-trust も前段を飛ばせない。
+順序が結果に効く。zero-trust は前段を飛ばせず、mTLS は各 op が許す前提状態に従う。
 
 ## テスト観点一覧
 
@@ -140,18 +163,20 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 
 | ID | Observation | Given | When | Then | Priority | Automation | Mode | Route |
 |---|---|---|---|---|---|---|---|---|
-| T-E2E-001 | mTLS 4 段 + zero-trust 4 段 + broker 2 通りが 1 つの page から連続で通る | mock adapter を載せた server、Chromium の page、**adapter を直接呼んで作った 3 session** | `/mtls` を `handshake` → `pin` → `ocsp` → `ct` の順に、`/zero-trust` を `posture` → `risk` → `jit` → `segment` の順に、`/broker` を `mtlsOk: true` と `mtlsOk: false` の 2 通りで投げる | すべて `status===200`。 mTLS は `handshake` が `ok: true`、`pin` が `matched: true`、`ocsp` が `good: true`、`ct` が `sctOk: true`。 zero-trust は `posture` が `passed: true`、`risk` / `jit` / `segment` が `ok: true` で `segment` は `allowed: true`。 broker は 2 通りとも `kind: 'decide'` | P0 | yes | node | `/mtls` `/zero-trust` `/broker` |
+| T-E2E-001 | mTLS 4 呼出 + zero-trust 4 段 + broker 2 通りが 1 つの `APIRequestContext` から連続で通る | mock adapter を載せた server、Chromium BrowserContext に紐づく `page.request`、**adapter を直接呼んで作った 3 session** | `/mtls` を `handshake` → `pin` → `ocsp` → `ct` の順に、`/zero-trust` を `posture` → `risk` → `jit` → `segment` の順に、`/broker` を `mtlsOk: true` と `mtlsOk: false` の 2 通りで投げる | すべて `status===200`。 mTLS は `handshake` が `ok: true`、`pin` が `matched: true`、`ocsp` が `good: true`、`ct` が `sctOk: true`。 zero-trust は `posture` が `passed: true`、`risk` / `jit` / `segment` が `ok: true` で `segment` は `allowed: true`。 broker は 2 通りとも `kind: 'decide'` | P0 | yes | node | `/mtls` `/zero-trust` `/broker` |
 
 ## 自動化方針
 
-1 件で 3 route / 9 呼出を畳んである。 分けないのは 8 つが順序を強制するため。
+1 件で 3 route / 10 HTTP 呼出を畳んである。 分けないのは mTLS と zero-trust の後段が
+同じ session の前提状態に依存するため。
 
-**`status===200` の assert は空振りになる。** route へ到達すれば必ず 200 が返る。
+**`status===200` の assert だけでは domain の成否を判別できない。** JSON parse や dispatch 自体の
+失敗は 400 / 500 になるが、route validator と route handler が返す失敗は 200 になる。
 
 **broker は 4 通りのうち 2 通りしか通していない** (`mtlsOk: true/ztOk: true` と
 `mtlsOk: false/ztOk: true`)。 `zt_denied` と `mtls_and_zt_denied` は未観測。
 
-**この 1 件が覆っていない範囲**。 いずれも同じ経路から到達できる。
+**この 1 件が覆っていない範囲**。 到達可否は表のとおり。
 
 | 覆っていないもの | 到達 | 理由 |
 |---|---|---|
@@ -161,12 +186,22 @@ status で成否を判別できない。 使うのは dispatcher の 2 種だけ
 | `pin` の不一致 / 空 list | できる | 一致する形だけを送っている |
 | `ocsp` の失効 / 未 staple | できる | 良の形だけを送っている |
 | `ct` の不足 (`sctCount < minSctRequired`) と境界 (等しい) | できる | 3/2 だけを送っている |
+| mTLS の代替順序 (`handshake` → `ocsp` → `pin`、handshake 直後の `ct`) | できる | E2E の 1 順序だけを送っている |
 | `posture` の `passed: false` | できる | 全 true だけを送っている |
 | `risk` の threat 有り | できる | 全 false だけを送っている |
+| `riskScore >= 50` で JIT が `granted: false` になること | できる | riskScore 0 だけを使っている |
 | `jit` の `ttlSeconds: 0` / 理由なし | できる | 正しい形だけを送っている |
+| `jit` の `ttlSeconds > 3600` / 10 文字未満の理由 | できる | route validator は通るが mock semantics が拒む境界を送っていない |
 | `segment` の拒否 | できる | 許可される形だけを送っている |
 | broker の `zt_denied` / `mtls_and_zt_denied` | できる | 4 通りのうち 2 通りだけを送っている |
+| 重複 handshake / posture と CT の負の `minSctRequired` | できる | 各 step を有効値で 1 回だけ呼んでいる |
+| 応答の未 assert field (`sessionId`、handshake の `peerCn` / `tlsVersion`、pin の `fingerprint`、OCSP の `stapled`、CT の `sctCount`) | できる | 各 step の一部 field だけを assert している |
+| JIT の `riskScore`、segment の `workload` / `requestedPeer`、broker の `mtlsOk` / `ztOk` | できる | 応答に含まれるが assert していない |
+| 3 route の必須 field / 型 / kind の検証失敗 | できる | 正しい形だけを送っている |
 | dispatcher の 404 / 405 | できる | 既知の 3 path へ POST だけを送っている |
+| 壊れた JSON の 400 | できる | Playwright の `data` で正しい JSON だけを送っている |
+| `dispatch_failed` の 500 | 通常入力ではできない | dispatch が例外を投げた時だけの防御経路 |
+| session の作成 / 終了 | HTTP からはできない | `start*` / `close*` が route に無い |
 
-到達できない範囲は無い。 ただし **session の作成は HTTP に無い**ため、
-その経路だけは e2e が adapter を直接呼んで迂回している。
+route が公開する domain 分岐は、adapter 直呼びの bootstrap を併用すれば HTTP request で選べる。
+一方、session の作成 / 終了と、防御用の 500 は通常の HTTP 入力だけでは到達できない。
