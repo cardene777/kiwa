@@ -54,9 +54,12 @@ JSON の parse と dispatch が完了し、route validator または route handl
 
 `res.status()` だけを見る client は、route validator が返す検証失敗を成功と読む。
 
-**400 に届くかは `content-type` header で決まる。** `page.request` の `data:` に文字列を渡し、
-かつ `content-type: application/json` を明示した時だけ Playwright が文字列を JSON として
-符号化するため、server は `"{"` という**正しい JSON** を受け取って `body_not_object` (200) を返す。
+**400 に届くかは `data:` の型で決まり、`content-type` header が効くのは文字列の時だけになる。**
+
+`page.request` の `data:` に文字列を渡し、かつ `content-type: application/json` を明示した時だけ
+Playwright が文字列を JSON として符号化するため、server は `"{"` という**正しい JSON** を
+受け取って `body_not_object` (200) を返す。 `Buffer` は Playwright が raw のまま送るため、
+header の有無に関わらず parse に失敗して 400 になる。
 
 実測した 4 通り。
 
