@@ -100,7 +100,21 @@ trace を空にし、metric の 5 field のうち `latencySamplesMs` を空配�
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | 5 op を 1 巡した後の記録が期待どおり積み上がる | mock adapter を載せた server と、その origin に置いた page | `/wal-full-journey` → `/fts5-full-journey` → `/edge-roundtrip` → `/testcontainers-probe` → `/emit-fidelity` を既定の入力で順に投げ、`/metrics` と `/traces` を読む | `emit` が `ok===true`。 `walJourneySteps===4`、`fts5JourneySteps===4`、`edgeInvocations>0`、`testcontainersProbes===1`、`latencySamplesMs.length===5`。 trace が 5 件で全件 `ok===true` | P0 | yes | node | `/wal-full-journey` `/fts5-full-journey` `/edge-roundtrip` `/testcontainers-probe` `/emit-fidelity` `/metrics` `/traces` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-sqlite-wal-fts-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 43 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 emit-fidelity + metrics + traces routes return the full mock surface` (`examples/dogfood-sqlite-wal-fts-app/tests/e2e/emit-fidelity-flow.spec.ts:32`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — 5 op を既定の入力で 1 巡してから `/metrics` と `/traces` を読み、記録が期待どおり積み上がることを確かめる happy path
 
 **`latencySamplesMs.length===5` と `trace.length===5` が、この test の要**になる。
 この assert が示すのは、各 endpoint が返した snapshot の観測時点で 5 件ずつだったこと。
@@ -120,3 +134,11 @@ trace を空にし、metric の 5 field のうち `latencySamplesMs` を空配�
 | `edgeInvocations` の具体値 | できる | 範囲でしか見ていない |
 | 同じ op を 2 回投げた時の増分 | できる | 各 op を 1 回ずつしか投げていない |
 | `metrics` / `traces` を複数回読んでも増えないこと | できる | 1 回ずつしか読んでいない |
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
