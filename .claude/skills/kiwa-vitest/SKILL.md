@@ -159,6 +159,15 @@ spec が名指しした有効な候補を優先し、 複数なら TC の対象�
 
 11 観点 + (PR #301 で追加された 12-13 観点) を Vitest 文法に変換するマッピング (`references/vitest-mapping.md` に詳細)。
 
+**matcher は spec の `期待結果` が許す範囲で最も厳密なものを選ぶ** (Issue #2127)。
+`toBeTruthy` / `toBeGreaterThanOrEqual` は、実測値が定まるなら `toBe` / `toHaveLength` に落とす。
+緩い matcher は実行はされるが壊れた実装を検知しない。
+
+識別力の判定基準は
+`.claude/skills/kiwa-design/references/assertion-discrimination.md` が SSOT。
+**Layer 1 の `期待結果` 自体が緩い場合、Layer 2 では強められない**ため、
+該当する TC は同 file § Layer 2 への引き継ぎ に従って報告する。
+
 | 観点 | Vitest helper |
 |---|---|
 | 正常系 | `it(name, () => { ... })` の通常 case |
