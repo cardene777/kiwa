@@ -72,7 +72,21 @@ mock adapter の probe が返す 4 項目の形を確かめる。
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | mock の probe が 4 項目を揃えて返す | mock adapter を載せた server と、その origin に置いた page | `/testcontainers-probe` へ空の body を POST する | `ok===true`、`reachable===true`、`mysqlUrl` が `mysql-mock` を含み、`mysqlImage` が `mysql:8` を、`routerImage` が `mysql-router` を含む | P1 | yes | node | `/testcontainers-probe` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-mysql-rls-tenant-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 72 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 testcontainers probe reports mock endpoints + reachable=true` (`examples/dogfood-mysql-rls-tenant-app/tests/e2e/testcontainers-probe-flow.spec.ts:31`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P1) — `/testcontainers-probe` が 4 項目を揃えて返すことを確かめる happy path
 
 **assert は部分一致で書かれている** (`toContain`)。 値そのものを固定していない。
 
@@ -91,3 +105,11 @@ mock adapter の probe が返す 4 項目の形を確かめる。
 | real 側の分岐 | **できない** | `fixture.ts` に adapter の注入口が無い |
 
 最後の 1 件だけが到達できない。 real 側は単体テストが `makeRealAdapter()` を直接呼んで確かめる。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)

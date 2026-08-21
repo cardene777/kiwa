@@ -116,7 +116,21 @@ mock は「異常を検出できた」 ことを成功として表す。
 |---|---|---|---|---|---|---|---|---|
 | T-E2E-001 | v2 の 3 経路が 1 つの page から連続で通る | mock adapter を載せた server と、その origin に置いた page | `/group-replication` → `/binlog-advance` → `/router-split` を空の body で順に `fetch` | group は `finalState==='member-left'`、`primaryId==='mysql-node-1'`、`peakMemberCount===2`、`conflictCount===1`。 binlog は `format==='ROW'`、`gapDetected===true`、`gtidCount===2`、`binlogPosition>0`。 router は `finalState==='metrics-exported'`、`readHits+writeHits>0`、`warmedConnections>0` | P0 | yes | node | `/group-replication` `/binlog-advance` `/router-split` |
 
-## 自動化方針
+## 既存 test との対応
+
+- 探索した runtime — `typescript`
+- 探索した path — `examples/dogfood-mysql-rls-tenant-app/` 配下の `*.test.ts` / `*.test.tsx` / `*.spec.ts` / `*.spec.tsx` (`node_modules` は除外)。 実在したのは `tests/` と `tests/e2e/` の 2 dir
+- 見つけた既存 test — 72 件 (`describe` / `it` / `test`)
+
+| TC | 既存 test の候補 | 判定 |
+|---|---|---|
+| T-E2E-001 | `T-E2E-001 group replication + binlog + router split routes drive together` (`examples/dogfood-mysql-rls-tenant-app/tests/e2e/group-replication-router-flow.spec.ts:31`) | 既覆 (候補) |
+
+## 自動化すべきテスト
+
+既覆 (候補)。
+
+- T-E2E-001 (P0) — v2 の 3 経路 (`/group-replication` → `/binlog-advance` → `/router-split`) を 1 つの page から順に実行する happy path
 
 1 件で 3 経路を通す。 3 つが互いに依存しないため分けても値は変わらないが、
 1 つの adapter が 3 op を続けて処理できることを 1 件で示す形にしてある。
@@ -151,3 +165,11 @@ router だけ **和** でしか見ていないため、`readHits: 6` / `writeHit
 adapter が返す固定応答の field はすべて HTTP から到達できる。一方、
 下位 flow (`src/group-replication/index.ts` 等) の別入力とそれに伴う分岐は、
 adapter が引数無しで呼ぶため HTTP からは選べない。
+
+## 手動確認でよいテスト
+
+(なし)
+
+## 不足している仕様
+
+(なし)
