@@ -78,6 +78,11 @@ examples/*/tests/reports/
 # `docs/quality-reports/<domain>/<name>.md`, which stays tracked. Nothing reads the
 # per-example copy.
 examples/*/quality-report/
+# 同じ成果物が `examples/` 直下にも出る。 `pnpm test:e2e` 等を example 名を挟まない cwd で
+# 起動すると、 report の writer が `examples/` を project root とみなして 1 階層上に書く
+# (2026-08-22 に review 中の実行で観測)。 上の 1 行は `examples/<name>/` にしか一致しないため、
+# untracked のまま残って次の `git add -A` が拾う = #2078 と同じ形。
+examples/quality-report/
 
 # Local-only context (markers / spec drafts / scratch)
 .context/
