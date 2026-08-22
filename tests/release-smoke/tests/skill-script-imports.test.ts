@@ -78,12 +78,22 @@ function packageImport(script: string): { specifier: string; names: string[] } {
 describe('kiwa-observe の Step 1 script が起動場所で解決する', () => {
   const { specifier, names } = packageImport(stepFence(SKILL, STEP_ONE, 'ts'));
 
-  it('package から 5 つの関数を取っている', () => {
+  it('package から 6 つの関数を取っている', () => {
     // 生存確認。 抽出が壊れて空集合になると、 下の実行検査が何も import しない module を走らせて
     // 緑になる。
+    //
+    // `fromPlaywrightJson` は #2158 で足した。 vitest 側だけを読むと e2e が観測から
+    // 丸ごと抜ける (`e2e-generic` layer の 28 組合せ / 50 test)。
     expect(specifier).toBe('@kiwa-lab/observability');
     expect([...names].sort()).toEqual(
-      ['analyzeSpecCoverage', 'collectRunHistory', 'detectFlaky', 'fromVitestJson', 'renderDashboard'].sort(),
+      [
+        'analyzeSpecCoverage',
+        'collectRunHistory',
+        'detectFlaky',
+        'fromPlaywrightJson',
+        'fromVitestJson',
+        'renderDashboard',
+      ].sort(),
     );
   });
 
