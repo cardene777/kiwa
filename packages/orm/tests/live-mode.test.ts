@@ -17,7 +17,11 @@ import { eq } from 'drizzle-orm';
 import { pgTable, serial, text, integer } from 'drizzle-orm/pg-core';
 import { setupOrmEnv, expectQuery, expectRowCount } from '../src/index.js';
 import type { OrmTestEnvLive } from '../src/index.js';
-import { ensureLiveImages, openDockerImageClient } from './helpers/ensure-docker-images.js';
+import {
+  ensureLiveImages,
+  openDockerImageClient,
+  POSTGRES_IMAGE,
+} from './helpers/ensure-docker-images.js';
 
 const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -51,7 +55,7 @@ let migrationAppliedBySetup: boolean | null = null;
 beforeAll(async () => {
   const client = await openDockerImageClient();
   if (client === null) return; // dockerode が無い形は下の hook が skip として扱う
-  await ensureLiveImages(client);
+  await ensureLiveImages(client, { dbImages: [POSTGRES_IMAGE] });
 }, 600_000);
 
 beforeAll(async () => {

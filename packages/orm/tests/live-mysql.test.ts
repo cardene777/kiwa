@@ -15,7 +15,11 @@ import { eq } from 'drizzle-orm';
 import { mysqlTable, int, varchar, index } from 'drizzle-orm/mysql-core';
 import { setupOrmEnv, expectQuery, expectRowCount } from '../src/index.js';
 import type { OrmTestEnvLiveMysql } from '../src/index.js';
-import { ensureLiveImages, openDockerImageClient } from './helpers/ensure-docker-images.js';
+import {
+  ensureLiveImages,
+  MYSQL_IMAGE,
+  openDockerImageClient,
+} from './helpers/ensure-docker-images.js';
 
 const users = mysqlTable(
   'users',
@@ -51,7 +55,7 @@ let migrationAppliedBySetup: boolean | null = null;
 beforeAll(async () => {
   const client = await openDockerImageClient();
   if (client === null) return; // dockerode が無い形は下の hook が skip として扱う
-  await ensureLiveImages(client);
+  await ensureLiveImages(client, { dbImages: [MYSQL_IMAGE] });
 }, 600_000);
 
 beforeAll(async () => {

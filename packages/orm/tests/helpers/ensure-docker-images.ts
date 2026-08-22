@@ -3,8 +3,9 @@
 // ## なぜ要るか
 //
 // image が cache に無い machine では `container.start()` が pull を含むため、
-// `beforeAll` の timeout (120s / 180s) に達して落ちる。 実測で cold の 1 container が
-// **81.5 秒**、image が揃った後の suite 全体が **21.9 秒**だった。
+// `beforeAll` の timeout (120s / 180s) に達して落ちる。 問題を確認した local run では
+// cold の 1 container が 81.5 秒、image が揃った後の suite 全体が 21.9 秒だった。
+// いずれも 1 回の環境依存な観測値で、timeout や性能の保証値ではない。
 //
 // 落ちた時の message は `Hook timed out in 120000ms` だけで、**待っていた相手を
 // 名指ししない**。 pull を別 hook に分ければ、待ちの理由が message に出る。
@@ -17,8 +18,9 @@
 //
 // ## ryuk の image 名を literal で持たない
 //
-// testcontainers は起動のたびに reaper (ryuk) container を先に立てる。 その image 名は
-// testcontainers 側が決めるので、こちらで `testcontainers/ryuk:0.11.0` と書くと
+// testcontainers は、ryuk が有効で既存 reaper が無い通常経路では、対象 container を
+// 作る前に reaper container を立てる (対象 image 自体の pull はそれより先)。 その image
+// 名は testcontainers 側が決めるので、こちらで `testcontainers/ryuk:0.11.0` と書くと
 // 更新で静かにずれる。 `REAPER_IMAGE` を読み、読めなければ **ryuk の先読みだけを
 // 諦める** (残りの image は先読みする)。
 //
@@ -28,7 +30,9 @@
 // 「docker はあるが pull に失敗した」 と同じ形で潰れる。 **判定は既存 hook に残す**。
 
 /** live suite が名指しで使う image。 `setup-orm-env.ts` の既定と一致させる。 */
-export const DB_IMAGES = ['postgres:16-alpine', 'mysql:8.4'] as const;
+export const POSTGRES_IMAGE = 'postgres:16-alpine';
+export const MYSQL_IMAGE = 'mysql:8.4';
+export const DB_IMAGES = [POSTGRES_IMAGE, MYSQL_IMAGE] as const;
 
 /** `listImages()` が返す要素のうち、本 helper が見る field だけ。 */
 export interface TaggedImage {
@@ -54,6 +58,13 @@ export interface EnsureLiveImagesResult {
 
 /** 進捗を伝える口。 既定は `console.error` (test の stdout と混ぜない)。 */
 export type Notify = (message: string) => void;
+
+export interface EnsureLiveImagesOptions {
+  /** 呼出元の suite が実際に使う DB image。 */
+  dbImages?: readonly string[];
+  notify?: Notify;
+  resolveReaper?: () => Promise<string | null>;
+}
 
 /**
  * testcontainers が使う reaper image の名前を返す。
@@ -84,14 +95,19 @@ function taggedImages(infos: TaggedImage[]): Set<string> {
 /**
  * live suite が要る image を揃える。
  *
- * **揃っている時は pull を 1 件も呼ばない**。 通常実行の所要を伸ばさないため。
+ * **揃っている時は pull を 1 件も呼ばない**。 ただし reaper 名の解決と
+ * `listImages()` は行うので、cache 済み経路も zero-cost の即 return ではない。
  * docker を引けない時は `unavailable` を立てて返す (throw しない)。
  */
 export async function ensureLiveImages(
   client: DockerImageClient,
-  notify: Notify = (message) => console.error(message),
-  resolveReaper: () => Promise<string | null> = reaperImage,
+  options: EnsureLiveImagesOptions = {},
 ): Promise<EnsureLiveImagesResult> {
+  const {
+    dbImages = DB_IMAGES,
+    notify = (message: string) => console.error(message),
+    resolveReaper = reaperImage,
+  } = options;
   const skipped: string[] = [];
   const reaper = await resolveReaper();
   if (reaper === null) {
@@ -101,7 +117,7 @@ export async function ensureLiveImages(
         ' 先読みを諦めます。 残りの image は先読みします',
     );
   }
-  const wanted = reaper === null ? [...DB_IMAGES] : [...DB_IMAGES, reaper];
+  const wanted = reaper === null ? [...dbImages] : [...dbImages, reaper];
 
   let cached: Set<string>;
   try {
@@ -116,15 +132,28 @@ export async function ensureLiveImages(
   for (const image of wanted) {
     (cached.has(image) ? present : missing).push(image);
   }
-  if (missing.length === 0) return { present, pulled: [], skipped, unavailable: null };
-
-  notify(
-    `[@kiwa-lab/orm] Docker image が cache に無いので pull します: ${missing.join(', ')}` +
-      ' (初回は数分かかります。 完了するまで live test は始まりません)',
-  );
+  // 揃っている時の早期 return は置かない。 下の loop が 0 回で同じ値を返すため、
+  // 分岐を足しても **観測できる違いが 1 つも無い** (変異試験で残存したので外した)。
+  // 欠けている一覧は **loop の外で 1 度だけ**言う。 loop 内で毎回並べると、
+  // 「今どれを待っているか」 が全体一覧に埋もれる。 分けておくと、
+  // 一覧を出す責務と個別の進捗を出す責務を別々に検査できる。
+  if (missing.length > 0) {
+    notify(
+      `[@kiwa-lab/orm] Docker image が cache にありません: ${missing.join(', ')}` +
+        ' (初回は数分かかります。 完了するまで live test は始まりません)',
+    );
+  }
   const pulled: string[] = [];
   for (const image of missing) {
-    await client.pull(image);
+    notify(`[@kiwa-lab/orm] pull 開始: ${image}`);
+    try {
+      await client.pull(image);
+    } catch (caught) {
+      const reason = caught instanceof Error ? caught.message : String(caught);
+      throw new Error(`Docker image の pull に失敗しました: ${image}: ${reason}`, {
+        cause: caught,
+      });
+    }
     pulled.push(image);
     notify(`[@kiwa-lab/orm] pull 完了: ${image}`);
   }
