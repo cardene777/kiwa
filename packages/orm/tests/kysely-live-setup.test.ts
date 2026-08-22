@@ -17,9 +17,12 @@
  * prisma postgres が既に差し替えで覆われているので、そちらに揃える。
  *
  * 実 container の test は image の cache 状態に依存する (#2159 で cold pull 81.5 秒を実測)。
- * 組み立ての検査にその依存を持ち込まない。 実 DB との噛み合わせは drizzle の 2 本が持つ。
+ * 組み立ての検査にその依存を持ち込まない。 既存の drizzle 2 本が保証するのは
+ * image / URI / driver の実 DB round-trip までで、Kysely 固有の組み立ては本 file が
+ * 実 Kysely の query と driver 形状の fake で検査する。
  */
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import type { Kysely } from 'kysely';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 /** 起動した容器。 停止まで確かめるために残す。 */
 interface FakeContainer {
@@ -70,7 +73,9 @@ const __pgPools: FakePgPool[] = [];
 
 class FakePgPool {
   queries: string[] = [];
+  driverQueries: string[] = [];
   ended = false;
+  endCalls = 0;
   constructor(public readonly config: { connectionString: string; max?: number }) {
     __pgPools.push(this);
   }
@@ -79,11 +84,20 @@ class FakePgPool {
     return { rows: [] };
   }
   async end(): Promise<void> {
+    this.endCalls += 1;
     this.ended = true;
   }
-  // Kysely の PostgresDialect は接続を取りに来る。 migration を渡さない限り呼ばれない。
-  async connect(): Promise<{ query: () => Promise<{ rows: never[] }>; release: () => void }> {
-    return { query: async () => ({ rows: [] }), release: () => undefined };
+  async connect(): Promise<{
+    query: (sql: string) => Promise<{ command: string; rowCount: number; rows: never[] }>;
+    release: () => void;
+  }> {
+    return {
+      query: async (sql: string) => {
+        this.driverQueries.push(sql);
+        return { command: 'SELECT', rowCount: 0, rows: [] };
+      },
+      release: () => undefined,
+    };
   }
 }
 
@@ -105,11 +119,32 @@ vi.mock('pg', () => ({
   },
 }));
 
-const __mysqlPools: { uri: string; queries: string[]; ended: boolean }[] = [];
+const __mysqlPools: FakeMysqlPool[] = [];
 
 class FakeMysqlPool {
   queries: string[] = [];
+  driverQueries: string[] = [];
   ended = false;
+  endCalls = 0;
+  readonly pool = {
+    getConnection: (
+      callback: (
+        error: Error | null,
+        connection: {
+          query: (sql: string, params: readonly unknown[], done: (error: Error | null, rows: never[]) => void) => void;
+          release: () => void;
+        },
+      ) => void,
+    ): void => {
+      callback(null, {
+        query: (sql, _params, done) => {
+          this.driverQueries.push(sql);
+          done(null, []);
+        },
+        release: () => undefined,
+      });
+    },
+  };
   constructor(public readonly uri: string) {
     __mysqlPools.push(this);
   }
@@ -118,15 +153,14 @@ class FakeMysqlPool {
     return [[], []];
   }
   async end(): Promise<void> {
+    this.endCalls += 1;
     this.ended = true;
-  }
-  async getConnection(): Promise<{ query: () => Promise<[never[], never[]]>; release: () => void }> {
-    return { query: async () => [[], []], release: () => undefined };
   }
 }
 
 /**
- * `mysql2/promise` の `createPool` も 2 形ある。 実装は
+ * `mysql2/promise` の `createPool` も 2 形ある。 戻り値は promise facade だが、
+ * Kysely が要求する callback pool はその `.pool` にある。 実装は
  * `createPool ?? default.createPool` の順なので、**fallback 側 (default だけ)** と
  * **どちらにも無い形** を作れるようにする。
  */
@@ -152,7 +186,7 @@ interface KyselyLiveEnv {
   mode: string;
   orm: string;
   dialect: string;
-  db: { destroy: () => Promise<void> };
+  db: Kysely<Db>;
   raw: FakePgPool | FakeMysqlPool;
   connectionUri: string;
   stop: () => Promise<void>;
@@ -193,8 +227,9 @@ describe('setupOrmEnv — kysely + live + postgres (#2161)', () => {
     // 接続先が pool へ渡っていないと、容器を起こした意味が無い。
     expect(__pgPools[0]?.config.connectionString).toBe(env.connectionUri);
     expect(__pgPools[0]?.config.max).toBe(4);
-    // 実 kysely が組み立てられたことを、facade の有無で見る。
-    expect(typeof env.db.destroy).toBe('function');
+    // query を実行して、遅延初期化される実 Kysely driver と pool の受け口まで通す。
+    await env.db.selectFrom('users').select('id').execute();
+    expect(__pgPools[0]?.driverQueries[0]).toContain('select "id" from "users"');
 
     await env.stop();
   });
@@ -254,12 +289,14 @@ describe('setupOrmEnv — kysely + live + postgres (#2161)', () => {
     const env = await setupKysely('postgres');
     const pool = __pgPools[0]!;
     const container = __containers[0]!;
+    await env.db.selectFrom('users').select('id').execute();
     expect(pool.ended).toBe(false);
     expect(container.stopped).toBe(false);
 
     await env.stop();
 
     expect(pool.ended, 'pool を閉じない と接続が残る').toBe(true);
+    expect(pool.endCalls, 'Kysely と stop から二重に閉じない').toBe(1);
     expect(container.stopped, '容器を止めない と Docker に残る').toBe(true);
   });
 });
@@ -275,7 +312,9 @@ describe('setupOrmEnv — kysely + live + mysql (#2161)', () => {
     expect(__containers[0]?.image, '既定の image').toBe('mysql:8.4');
     // mysql2 の createPool は URI を 1 本で受ける (pg の config object と違う)。
     expect(__mysqlPools[0]?.uri).toBe(env.connectionUri);
-    expect(typeof env.db.destroy).toBe('function');
+    // PromisePool 自体ではなく callback pool が Kysely へ渡ることまで検査する。
+    await env.db.selectFrom('users').select('id').execute();
+    expect(__mysqlPools[0]?.driverQueries[0]).toContain('select `id` from `users`');
 
     await env.stop();
   });
@@ -314,8 +353,8 @@ describe('setupOrmEnv — kysely + live + mysql (#2161)', () => {
   it('T-KLS-105 createPool を解決できない形は、その旨を名指しして止まる', async () => {
     __mysql2ExportShape = 'missing';
     await expect(setupKysely('mysql')).rejects.toThrow(/createPool/);
-    // 容器は起きた後なので、ここで止め損ねると Docker に残る。
-    expect(__containers, '容器は起動済み').toHaveLength(1);
+    expect(__containers, 'error 前に容器は起動済み').toHaveLength(1);
+    expect(__containers[0]?.stopped, '途中失敗でも容器を残さない').toBe(true);
   });
 
   it('T-KLS-106 容器の起動に失敗したら image を名指しして知らせる', async () => {
@@ -328,10 +367,12 @@ describe('setupOrmEnv — kysely + live + mysql (#2161)', () => {
     const env = await setupKysely('mysql');
     const pool = __mysqlPools[0]!;
     const container = __containers[0]!;
+    await env.db.selectFrom('users').select('id').execute();
 
     await env.stop();
 
     expect(pool.ended).toBe(true);
+    expect(pool.endCalls, 'Kysely と stop から二重に閉じない').toBe(1);
     expect(container.stopped).toBe(true);
   });
 });

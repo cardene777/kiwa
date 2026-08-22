@@ -526,7 +526,19 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
   const connectionUri = container.getConnectionUri();
   const PoolCtor = ((pgModule as { default?: { Pool?: unknown } }).default?.Pool ?? (pgModule as { Pool?: unknown }).Pool) as new (config: { connectionString: string; max?: number }) => import('pg').Pool;
   const raw = new PoolCtor({ connectionString: connectionUri, max: 4 });
-  const db = new kyselyModule.Kysely<TDatabase>({ dialect: new kyselyModule.PostgresDialect({ pool: raw }) });
+  let rawEnded = false;
+  const endRaw = async (): Promise<void> => {
+    if (rawEnded) return;
+    rawEnded = true;
+    await raw.end();
+  };
+  // Kysely owns its dialect pool after the first query. Keep that close and
+  // the explicit stop-path close idempotent because setup can return before a query runs.
+  const dialectPool = {
+    connect: raw.connect.bind(raw),
+    end: endRaw,
+  } as unknown as import('pg').Pool;
+  const db = new kyselyModule.Kysely<TDatabase>({ dialect: new kyselyModule.PostgresDialect({ pool: dialectPool }) });
 
   if (typeof opts.migrations !== 'undefined') {
     if (isFolderMigration(opts.migrations)) {
@@ -553,7 +565,7 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
         await db.destroy();
       } finally {
         try {
-          await raw.end();
+          await endRaw();
         } finally {
           await container.stop();
         }
@@ -597,14 +609,30 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
     uri: string,
   ) => import('mysql2/promise').Pool;
   if (typeof createPoolFn !== 'function') {
+    await container.stop();
     throw new Error('@kiwa-lab/orm: could not resolve mysql2/promise createPool export.');
   }
   const raw = createPoolFn(connectionUri);
-  // Kysely MysqlDialect expects a mysql2 callback-pool. The promise pool from
-  // `mysql2/promise` is the same underlying object with a different facade,
-  // so cast through unknown — the runtime contract holds.
+  let rawEnded = false;
+  const endRaw = async (): Promise<void> => {
+    if (rawEnded) return;
+    rawEnded = true;
+    await raw.end();
+  };
+  // `mysql2/promise` exposes the callback pool under `.pool`; Kysely calls
+  // getConnection/end with callbacks, while env.raw remains the promise facade.
+  const callbackPool = raw.pool;
+  const dialectPool = {
+    getConnection: callbackPool.getConnection.bind(callbackPool),
+    end: (callback: (error: Error | null) => void): void => {
+      void endRaw().then(
+        () => callback(null),
+        (caught: unknown) => callback(caught instanceof Error ? caught : new Error(String(caught))),
+      );
+    },
+  };
   const db = new kyselyModule.Kysely<TDatabase>({
-    dialect: new kyselyModule.MysqlDialect({ pool: raw } as unknown as ConstructorParameters<typeof kyselyModule.MysqlDialect>[0]),
+    dialect: new kyselyModule.MysqlDialect({ pool: dialectPool } as unknown as ConstructorParameters<typeof kyselyModule.MysqlDialect>[0]),
   });
 
   if (typeof opts.migrations !== 'undefined') {
@@ -632,7 +660,7 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
         await db.destroy();
       } finally {
         try {
-          await raw.end();
+          await endRaw();
         } finally {
           await container.stop();
         }

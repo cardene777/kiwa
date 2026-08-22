@@ -75,7 +75,9 @@ class FakePrismaClient {
 
 /** 切断で失敗する client。 失敗しても後始末が進むかを見る。 */
 class FailingDisconnectClient extends FakePrismaClient {
+  disconnectAttempts = 0;
   override async $disconnect(): Promise<void> {
+    this.disconnectAttempts += 1;
     throw new Error('disconnect failed');
   }
 }
@@ -236,9 +238,11 @@ describe('setupOrmEnv — prisma + live + mysql (#2161)', () => {
 
   it('T-PLM-012 切断が失敗しても容器の停止と環境変数の復元は進める', async () => {
     const env = await setupPrismaLiveMysql({ prismaClient: FailingDisconnectClient });
+    expect(env.client).toBeInstanceOf(FailingDisconnectClient);
 
     await expect(env.stop(), '切断の失敗で止まらない').resolves.toBeUndefined();
 
+    expect((env.client as FailingDisconnectClient).disconnectAttempts, '失敗する切断を実際に呼ぶ').toBe(1);
     expect(__containers[0]?.stopped).toBe(true);
     expect(ENV_NAME in process.env).toBe(false);
   });
