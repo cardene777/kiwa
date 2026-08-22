@@ -2,7 +2,7 @@
 name: kiwa-observe
 description: |
   test 実行結果と Layer 1 spec を突き合わせて flaky 検出 + spec coverage gap を抽出し、 markdown dashboard を出力する Layer 3 observability skill。
-  vitest JSON reporter 出力を `@kiwa-lab/observability` の `fromVitestJson` で `TestRunRecord[]` に変換し、 `detectFlaky` + `analyzeSpecCoverage` + `renderDashboard` を順に呼ぶ。
+  vitest JSON reporter 出力を `@kiwa-lab/observability` の `fromVitestJson` で、 Playwright JSON reporter 出力を `fromPlaywrightJson` で `TestRunRecord[]` に変換し (同じ run は同じ runId で束ねる)、 `detectFlaky` + `analyzeSpecCoverage` + `renderDashboard` を順に呼ぶ。
   出力は `tests/reports/observe/dashboard-{module}-{layer}.{lang}.md` または PR comment に投稿可能。
   `/kiwa-test` の Step 5a から layer ごとに起動される他、 単体起動もできる。
 user_invocable: true
@@ -40,6 +40,7 @@ $ARGUMENTS
 - `--producer {skill}` — `kiwa layers --producer` にそのまま渡す `test_outputs` の鍵 (鍵が 2 つある layer では省略不可)
 - `--project-root {path}` — 生成先 (`{example}/...`) の起点。 `kiwa layers --project-root` にそのまま渡す (省略時は cwd)
 - `--vitest-json {path}` — 既存 vitest JSON 出力 (省略時は試走)
+- `--playwright-json {path}` — 既存 Playwright JSON 出力 (省略時は試走。 e2e を持たない project では走らせない)
 - `--out {path}` — dashboard 出力先 (省略時は `tests/reports/observe/dashboard-{module}-{layer}.{lang}.md`)
 
 layer は spec の場所を決めるだけでなく、 dashboard の本文と file 名の両方に入る。
@@ -202,6 +203,41 @@ VITEST_JSON = --vitest-json が渡っていればその値
               渡っていなければ $PROJECT_ROOT/tests/reports/vitest-results.json
 ```
 
+#### Playwright の結果も同じ run として集める
+
+**vitest だけを読むと e2e が観測から丸ごと抜ける**。 `e2e-generic` layer は 28 組合せ /
+50 test あり、そこが 1 件も dashboard に出ない状態だった (#2158)。
+
+対象 project が `playwright.config.ts` と `tests/e2e/` を **両方** 持つ時だけ走らせる。
+
+```bash
+pnpm -C "$PROJECT_ROOT" test:e2e
+```
+
+**出力先は本 skill が組み立てない**。 config 側が `outputFile` で決めており、
+`tests/e2e/` を持つ 20 example がその宣言を持つ (#2155)。
+path を 2 箇所で決めると、config を変えた時に読み先だけが古くなる = **本 skill でも下の
+規則ブロック 1 箇所にしか書かない**。
+
+```text
+PLAYWRIGHT_JSON = --playwright-json が渡っていればその値
+                  渡っていなければ $PROJECT_ROOT/tests/reports/playwright-results.json
+```
+
+`--playwright-json` 指定時は **走らせず** 渡された path をそのまま読む (vitest 側と同じ規則)。
+
+**走らせない形と、走らせて 0 件の形を分けない**。 どちらも record 0 件として続行する。
+
+| 形 | 扱い |
+|---|---|
+| `playwright.config.ts` が無い | 走らせない。 record 0 件 |
+| `tests/e2e/` が無い | 走らせない。 record 0 件 |
+| 走らせたが JSON が無い | record 0 件 |
+| JSON はあるが test 0 件 | record 0 件 |
+
+止めない理由は vitest 側の `--passWithNoTests` と同じ。 e2e を持たない layer で 0 件は
+正常なので、そこで観測を止めると dashboard が 1 枚も出なくなる。
+
 #### 絞らないと観測対象の外を集める
 
 chain は本 skill を repo root から起動する (`/kiwa-test` Step 5a が `--project-root examples/{example}`
@@ -266,6 +302,7 @@ import {
   analyzeSpecCoverage,
   collectRunHistory,
   detectFlaky,
+  fromPlaywrightJson,
   fromVitestJson,
   renderDashboard,
 } from '@kiwa-lab/observability';
@@ -332,7 +369,30 @@ const report = JSON.parse(reportRaw);
 const runId = report.startTime
   ? String(report.startTime)
   : createHash('sha1').update(reportRaw).digest('hex').slice(0, 12);
-const records = fromVitestJson(report, { runId });
+
+// Playwright の結果も **同じ runId** で足す (§ Step 0 の PLAYWRIGHT_JSON 規則)。
+//
+// runId を別々に採ってはいけない。 同じ観測が 2 run として数えられ、 detectFlaky の
+// minRuns が実態より早く成立する = 1 回しか走らせていないのに「3 回走った」 ことになる。
+//
+// file が無い形は 0 件で続行する。 e2e を持たない project と、 e2e を 1 度も走らせて
+// いない project の両方がここへ来る (§ Step 0 の表)。
+async function readPlaywrightRecords(path) {
+  if (!path) return [];
+  let raw;
+  try {
+    raw = await readFile(path, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return [];
+    throw err;
+  }
+  return fromPlaywrightJson(JSON.parse(raw), { runId });
+}
+
+const records = [
+  ...fromVitestJson(report, { runId }),
+  ...(await readPlaywrightRecords(PLAYWRIGHT_JSON)),
+];
 
 // 過去の run を読む。 これが無いと同じ test の run は常に 1 回で、 minRuns に届かず
 // flaky は永久に判定されない (#1918)。

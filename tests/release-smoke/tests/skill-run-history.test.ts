@@ -43,6 +43,13 @@ interface Observation {
   retryOf?: 'passed' | 'failed';
   /** この観測の直前に history を壊す。 */
   corruptHistory?: true;
+  /**
+   * Playwright reporter の結果も同時に渡す (#2158)。
+   *
+   * 省略した観測は Playwright の JSON を **置かない**。 script は file 不在を 0 件として
+   * 続行するので、e2e を持たない project の形がそのまま再現される。
+   */
+  playwrightStatuses?: Record<string, 'expected' | 'unexpected'>;
 }
 
 const MODULE = 'mint-nft';
@@ -92,6 +99,28 @@ const SCENARIOS = {
   writesJudgedWindow: [pass(20_000, 'T-K-001'), pass(21_000, 'T-K-001')],
   rejectsUnusableProducer: [pass(16_000, 'T-I-001', { producer: '../escape' })],
   brokenHistory: [pass(8000, 'T-D-001'), pass(9000, 'T-D-001', { corruptHistory: true })],
+  /**
+   * vitest と Playwright を同じ観測で渡す (#2158)。
+   *
+   * 2 つを別 run として数えると 1 回の観測で minRuns 3 に届いてしまう。 3 回とも
+   * 両方を渡し、3 回目で初めて判定が成立することを見る。
+   */
+  playwrightJoinsSameRun: [
+    pass(24_000, 'T-N-001', { playwrightStatuses: { 'T-E2E-001': 'expected' } }),
+    pass(25_000, 'T-N-001', { playwrightStatuses: { 'T-E2E-001': 'expected' } }),
+    pass(26_000, 'T-N-001', { playwrightStatuses: { 'T-E2E-001': 'expected' } }),
+  ],
+  /**
+   * **同じ testId** を両方の reporter から出す (#2158)。
+   *
+   * testId が違うと runId を別々に採っても run 数は変わらないため、runId 共有の
+   * 識別力が出ない (変異試験で実際に残存した)。 同じ id なら、別 runId にした瞬間
+   * 1 回の観測が 2 run になり、2 回目で minRuns 3 に届いてしまう。
+   */
+  playwrightSharesRunId: [
+    pass(27_000, 'T-O-001', { playwrightStatuses: { 'T-O-001': 'expected' } }),
+    pass(28_000, 'T-O-001', { playwrightStatuses: { 'T-O-001': 'expected' } }),
+  ],
 } satisfies Record<string, Observation[]>;
 
 type Scenario = keyof typeof SCENARIOS;
@@ -113,6 +142,23 @@ function report(o: Observation): string {
       {
         testFilePath: 'tests/unit/sample.test.ts',
         assertionResults: o.repeatIds ? [...withRetry, ...withRetry] : withRetry,
+      },
+    ],
+  });
+}
+
+/** Playwright reporter が出す形の最小 JSON。 */
+function playwrightReport(o: Observation): string {
+  return JSON.stringify({
+    stats: { startTime: new Date(o.startTime ?? 0).toISOString() },
+    suites: [
+      {
+        title: 'e2e.spec.ts',
+        specs: Object.entries(o.playwrightStatuses ?? {}).map(([id, status]) => ({
+          title: `${id} sample`,
+          tests: [{ status, results: [{ status, duration: 1 }] }],
+        })),
+        suites: [],
       },
     ],
   });
@@ -147,11 +193,16 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
         const producer = o.producer ?? DEFAULT_PRODUCER;
         const vitestJson = resolve(project, `report-${i}.json`);
         writeFileSync(vitestJson, report(o), 'utf-8');
+        // Playwright を持たない観測では file を置かない。 script は不在を 0 件として
+        // 続行するので、e2e を持たない project の形がそのまま通る (#2158)。
+        const playwrightJson = resolve(project, `playwright-${i}.json`);
+        if (o.playwrightStatuses) writeFileSync(playwrightJson, playwrightReport(o), 'utf-8');
         const out = resolve(project, `dashboard-${i}.md`);
         const scriptPath = resolve(scratch, `${name}-${i}.mjs`);
         const header = [
           `const PROJECT_ROOT = ${JSON.stringify(project)};`,
           `const VITEST_JSON = ${JSON.stringify(vitestJson)};`,
+          `const PLAYWRIGHT_JSON = ${JSON.stringify(playwrightJson)};`,
           `const SPEC_PATH = ${JSON.stringify(resolve(REPO_ROOT, 'tests/spec/contract/test-spec-mint-nft.ja.md'))};`,
           `const TEST_PATHS = [${JSON.stringify(resolve(REPO_ROOT, 'tests/fixtures/mint-nft/contract-test/MintNft.t.sol'))}];`,
           `const MODULE = ${JSON.stringify(MODULE)};`,
@@ -243,6 +294,44 @@ writeFileSync(process.argv[3], JSON.stringify(results), 'utf8');
     const third = dashboard('reachesMinRuns', 2);
     expect(third, '3 回目でも判定していない').not.toContain('flaky は判定していない');
     expect(third, '判定した上で 0 件の文言が出ていない').toContain('No flaky tests detected.');
+  });
+
+  it('vitest と Playwright を 1 run として数える (#2158)', () => {
+    // dashboard は testId を個別に出さない (Summary の件数と flaky 表だけ)。
+    // **件数で見る** = vitest 側 1 件だけなら 1、Playwright が合流すれば 2。
+    const first = dashboard('playwrightJoinsSameRun', 0);
+    expect(first, 'Summary が読み取れない').toMatch(/\| total records \| (\d+) \|/);
+    expect(
+      /\| total records \| (\d+) \|/.exec(first)?.[1],
+      'Playwright の record が合流していない (vitest 側 1 件のみ)',
+    ).toBe('2');
+    expect(first, 'この run の結果を数えていない').toContain('| passes | 2 |');
+
+    // **2 つを別 run として数えると 1 回目で minRuns 3 に届く**。 3 回目まで
+    // 判定が成立しないことが、同じ runId で束ねている証拠になる。
+    expect(first, '1 回目で判定してしまっている').toContain('flaky は判定していない');
+    expect(dashboard('playwrightJoinsSameRun', 1), '2 回目で判定してしまっている').toContain(
+      'flaky は判定していない',
+    );
+    expect(
+      dashboard('playwrightJoinsSameRun', 2),
+      '3 回目でも判定していない',
+    ).not.toContain('flaky は判定していない');
+  });
+
+  it('同じ testId を両方の reporter が出しても 1 run と数える (#2158)', () => {
+    // 同じ id なので、runId を共有していれば 1 観測 = 1 run。 2 回観測しても
+    // minRuns 3 には届かない。
+    //
+    // runId を別々に採ると 1 観測が 2 run になり、**2 回目で 4 run** に達して
+    // 判定が成立してしまう。 その差がここに出る。
+    expect(dashboard('playwrightSharesRunId', 0), '1 回目で判定してしまっている').toContain(
+      '最大 1 回しか無い',
+    );
+    expect(
+      dashboard('playwrightSharesRunId', 1),
+      '2 回目で判定が成立している (1 観測が 2 run に化けている)',
+    ).toContain('最大 2 回しか無い');
   });
 
   it('3 回のうち 1 回だけ失敗した test を flaky として出す', () => {
