@@ -170,6 +170,7 @@ pnpm exec vitest run --root "$PROJECT_ROOT" --passWithNoTests \
   --exclude '**/.{idea,git,cache,output,temp}/**' \
   --exclude '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*' \
   --exclude '**/.vitest-dist/**' \
+  --exclude '**/tests/e2e/**' \
   --reporter=json --outputFile=tests/reports/vitest-results.json
 ```
 
@@ -181,9 +182,13 @@ compile してからそこだけを走らせる。 その残骸が消えてい�
 例自身の `test` script は毎回 `rmSync` してから走らせるので二重にならない。 本 skill は
 別経路から起動するため、 残骸を拾う側になる。
 
+**Playwright の tree も除く**。 Vitest の既定 include は `*.spec.ts` を拾うため、`tests/e2e/` を
+除かないと Playwright の `test.describe()` を Vitest が import して runner 不一致で停止する。
+Playwright 側は下の独立した試走で集めるので、ここで除いても観測からは落ちない。
+
 `--exclude` を渡すと既定値を置き換えるため、 **Vitest 3.2 の既定 exclude 5 件を全て残した上で**
-`.vitest-dist` を足す。 `node_modules` だけを残すと `dist` / `cypress` / cache / 各種 config の
-除外が外れ、 別の build 出力や test を再び収集する。
+`.vitest-dist` と `tests/e2e` を足す。 `node_modules` だけを残すと `dist` / `cypress` / cache /
+各種 config の除外が外れ、別の build 出力や test を再び収集する。
 
 `--outputFile` は **`--root` からの相対** で解決される。 repo root からの相対で書くと
 `$PROJECT_ROOT/$PROJECT_ROOT/tests/...` に書かれる (実測)。 Step 1 は
@@ -205,38 +210,48 @@ VITEST_JSON = --vitest-json が渡っていればその値
 
 #### Playwright の結果も同じ run として集める
 
-**vitest だけを読むと e2e が観測から丸ごと抜ける**。 `e2e-generic` layer は 28 組合せ /
-50 test あり、そこが 1 件も dashboard に出ない状態だった (#2158)。
+**vitest だけを読むと e2e が観測から丸ごと抜ける**。 2026-08-22 時点の
+`e2e-generic` layer は 28 spec / 50 test あり、そこが 1 件も dashboard に出ない状態だった
+(#2158)。 この数は修正時点の棚卸しで、将来の固定件数ではない。
 
 対象 project が `playwright.config.ts` と `tests/e2e/` を **両方** 持つ時だけ走らせる。
 
-```bash
-pnpm -C "$PROJECT_ROOT" test:e2e
-```
-
-**出力先は本 skill が組み立てない**。 config 側が `outputFile` で決めており、
-`tests/e2e/` を持つ 20 example がその宣言を持つ (#2155)。
-path を 2 箇所で決めると、config を変えた時に読み先だけが古くなる = **本 skill でも下の
-規則ブロック 1 箇所にしか書かない**。
+**出力先の既定は config と本 skill が共有する契約**。 `tests/e2e/` を持つ 20 example の
+config が `outputFile` を宣言し (#2155)、本 skill は下の規則ブロック 1 箇所だけで同じ既定を
+読む。 writer と reader の 2 箇所に値があるため、release-smoke が全 config の `outputFile` と
+本規則をそれぞれ同じ path に固定し、片側だけの変更を落とす。
 
 ```text
 PLAYWRIGHT_JSON = --playwright-json が渡っていればその値
-                  渡っていなければ $PROJECT_ROOT/tests/reports/playwright-results.json
+                  渡っておらず config と tests/e2e/ があれば
+                    $PROJECT_ROOT/tests/reports/playwright-results.json
+                  それ以外は null
 ```
 
 `--playwright-json` 指定時は **走らせず** 渡された path をそのまま読む (vitest 側と同じ規則)。
+指定した file が無ければ入力誤りなので中断する。
 
-**走らせない形と、走らせて 0 件の形を分けない**。 どちらも record 0 件として続行する。
+試走する時は **前回の JSON を先に消す**。 Playwright が reporter 起動前に落ちた時、古い file が
+残っていると今回の結果として読んでしまうため。
+
+```bash
+rm -f "$PLAYWRIGHT_JSON"
+pnpm -C "$PROJECT_ROOT" test:e2e
+```
+
+command の非 0 だけでは止めない。 test failure でも JSON reporter は結果を書くため、JSON が
+あれば失敗 record を dashboard に取り込む。試走したのに JSON が無ければ reporter 起動前の失敗
+なので中断し、command の exit code と stderr を返す。
 
 | 形 | 扱い |
 |---|---|
-| `playwright.config.ts` が無い | 走らせない。 record 0 件 |
-| `tests/e2e/` が無い | 走らせない。 record 0 件 |
-| 走らせたが JSON が無い | record 0 件 |
+| `playwright.config.ts` が無い | 走らせない。 `PLAYWRIGHT_JSON = null`、record 0 件 |
+| `tests/e2e/` が無い | 走らせない。 `PLAYWRIGHT_JSON = null`、record 0 件 |
+| 走らせたが JSON が無い | 中断。古い結果や未実行を成功にしない |
 | JSON はあるが test 0 件 | record 0 件 |
 
-止めない理由は vitest 側の `--passWithNoTests` と同じ。 e2e を持たない layer で 0 件は
-正常なので、そこで観測を止めると dashboard が 1 枚も出なくなる。
+config / dir 不在と test 0 件を止めない理由は vitest 側の `--passWithNoTests` と同じ。
+e2e を持たない project と、実行できたが対象 test が無い形は正常な 0 件として扱う。
 
 #### 絞らないと観測対象の外を集める
 
@@ -372,20 +387,15 @@ const runId = report.startTime
 
 // Playwright の結果も **同じ runId** で足す (§ Step 0 の PLAYWRIGHT_JSON 規則)。
 //
-// runId を別々に採ってはいけない。 同じ観測が 2 run として数えられ、 detectFlaky の
-// minRuns が実態より早く成立する = 1 回しか走らせていないのに「3 回走った」 ことになる。
+// runId を別々に採ってはいけない。 両 reporter が同じ testId を出す時、同じ観測がその testId の
+// 2 run として数えられ、detectFlaky の minRuns が実態より早く成立する。 minRuns 3 なら
+// 1 回目が 2 run、2 回目で 4 run となり、本来 3 観測目の判定が 2 観測目に始まる。
 //
-// file が無い形は 0 件で続行する。 e2e を持たない project と、 e2e を 1 度も走らせて
-// いない project の両方がここへ来る (§ Step 0 の表)。
+// path が null の形は 0 件で続行する。 e2e を持たない project がここへ来る。
+// path があるのに file が無ければ readFile の error で止め、未実行を成功にしない。
 async function readPlaywrightRecords(path) {
   if (!path) return [];
-  let raw;
-  try {
-    raw = await readFile(path, 'utf8');
-  } catch (err) {
-    if (err.code === 'ENOENT') return [];
-    throw err;
-  }
+  const raw = await readFile(path, 'utf8');
   return fromPlaywrightJson(JSON.parse(raw), { runId });
 }
 

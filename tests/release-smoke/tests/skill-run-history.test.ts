@@ -21,7 +21,7 @@ const STEP_ONE = /^### Step 1\b/m;
  *
  * ## 1 process にまとめる (#1920)
  *
- * 観測 26 回をそれぞれ `node` で起動していた (実測 2341ms)。 script は top-level await を持つ ESM
+ * 観測 32 回をそれぞれ `node` で起動する代わりに、script は top-level await を持つ ESM
  * module で、 `process.exit` も `process.chdir` も使わない。 **観測ごとに別 file へ書けば、 逐次
  * `await import()` が 1 process 内で同じ回数だけ実行する** (ESM の module cache は URL 単位)。
  *
@@ -43,11 +43,13 @@ interface Observation {
   retryOf?: 'passed' | 'failed';
   /** この観測の直前に history を壊す。 */
   corruptHistory?: true;
+  /** Playwright 入力を要求するが file を置かない。 */
+  missingPlaywrightJson?: true;
   /**
    * Playwright reporter の結果も同時に渡す (#2158)。
    *
-   * 省略した観測は Playwright の JSON を **置かない**。 script は file 不在を 0 件として
-   * 続行するので、e2e を持たない project の形がそのまま再現される。
+   * 省略した観測は `PLAYWRIGHT_JSON = null` にする。 script は null を 0 件として続行し、
+   * path を要求したのに file が無い形とは区別する。
    */
   playwrightStatuses?: Record<string, 'expected' | 'unexpected'>;
 }
@@ -99,11 +101,12 @@ const SCENARIOS = {
   writesJudgedWindow: [pass(20_000, 'T-K-001'), pass(21_000, 'T-K-001')],
   rejectsUnusableProducer: [pass(16_000, 'T-I-001', { producer: '../escape' })],
   brokenHistory: [pass(8000, 'T-D-001'), pass(9000, 'T-D-001', { corruptHistory: true })],
+  missingPlaywrightJson: [pass(29_000, 'T-P-001', { missingPlaywrightJson: true })],
   /**
    * vitest と Playwright を同じ観測で渡す (#2158)。
    *
-   * 2 つを別 run として数えると 1 回の観測で minRuns 3 に届いてしまう。 3 回とも
-   * 両方を渡し、3 回目で初めて判定が成立することを見る。
+   * testId が異なる 2 reporter の record を両方取り込み、それぞれが 3 観測目で
+   * minRuns 3 に届くことを見る。runId 共有そのものは次の scenario が識別する。
    */
   playwrightJoinsSameRun: [
     pass(24_000, 'T-N-001', { playwrightStatuses: { 'T-E2E-001': 'expected' } }),
@@ -193,8 +196,8 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
         const producer = o.producer ?? DEFAULT_PRODUCER;
         const vitestJson = resolve(project, `report-${i}.json`);
         writeFileSync(vitestJson, report(o), 'utf-8');
-        // Playwright を持たない観測では file を置かない。 script は不在を 0 件として
-        // 続行するので、e2e を持たない project の形がそのまま通る (#2158)。
+        // Playwright を持たない観測は path 自体を null にする。要求した path が無い形とは
+        // 分けないと、reporter 起動前の失敗が record 0 件へ化ける (#2158 review)。
         const playwrightJson = resolve(project, `playwright-${i}.json`);
         if (o.playwrightStatuses) writeFileSync(playwrightJson, playwrightReport(o), 'utf-8');
         const out = resolve(project, `dashboard-${i}.md`);
@@ -202,7 +205,9 @@ describe('kiwa-observe が run 履歴を持ち越す', () => {
         const header = [
           `const PROJECT_ROOT = ${JSON.stringify(project)};`,
           `const VITEST_JSON = ${JSON.stringify(vitestJson)};`,
-          `const PLAYWRIGHT_JSON = ${JSON.stringify(playwrightJson)};`,
+          `const PLAYWRIGHT_JSON = ${
+            o.playwrightStatuses || o.missingPlaywrightJson ? JSON.stringify(playwrightJson) : 'null'
+          };`,
           `const SPEC_PATH = ${JSON.stringify(resolve(REPO_ROOT, 'tests/spec/contract/test-spec-mint-nft.ja.md'))};`,
           `const TEST_PATHS = [${JSON.stringify(resolve(REPO_ROOT, 'tests/fixtures/mint-nft/contract-test/MintNft.t.sol'))}];`,
           `const MODULE = ${JSON.stringify(MODULE)};`,
@@ -307,8 +312,8 @@ writeFileSync(process.argv[3], JSON.stringify(results), 'utf8');
     ).toBe('2');
     expect(first, 'この run の結果を数えていない').toContain('| passes | 2 |');
 
-    // **2 つを別 run として数えると 1 回目で minRuns 3 に届く**。 3 回目まで
-    // 判定が成立しないことが、同じ runId で束ねている証拠になる。
+    // testId が違うので、runId を別々にしても各 test の run 数は変わらない。
+    // この scenario は合流と通常の判定時期を見て、共有自体は次の scenario が見る。
     expect(first, '1 回目で判定してしまっている').toContain('flaky は判定していない');
     expect(dashboard('playwrightJoinsSameRun', 1), '2 回目で判定してしまっている').toContain(
       'flaky は判定していない',
@@ -432,6 +437,14 @@ writeFileSync(process.argv[3], JSON.stringify(results), 'utf8');
     // 行き止まりになる。
     expect(failures[1], '消すべき file を message に書いていない').toContain(
       'history-mint-nft-unit-kiwa-vitest.json',
+    );
+  });
+
+  it('要求した Playwright JSON が無い時は record 0 件へ倒さない', () => {
+    const [failure] = observed.missingPlaywrightJson.failures;
+    expect(failure, '要求した JSON の不在を record 0 件として続行している').not.toBeNull();
+    expect(failure, '無い Playwright JSON の path が error に出ていない').toContain(
+      'playwright-0.json',
     );
   });
 });

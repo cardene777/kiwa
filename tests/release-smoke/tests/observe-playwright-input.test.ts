@@ -8,7 +8,8 @@
  * `fromPlaywrightJson` を export しているのに、skill が生成する dashboard script は
  * `fromVitestJson` しか呼んでいなかった。
  *
- * 結果として `e2e-generic` layer の 28 組合せ / 50 test が dashboard に 1 件も出ない。
+ * 結果として修正時点の `e2e-generic` layer 28 spec / 50 test が dashboard に 1 件も出なかった。
+ * 件数は 2026-08-22 の棚卸しで、将来の固定値ではない。
  *
  * ## 2 つの層を分けて見る
  *
@@ -24,7 +25,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   collectRunHistory,
-  detectFlaky,
   fromPlaywrightJson,
   fromVitestJson,
   type PlaywrightJsonReport,
@@ -79,11 +79,12 @@ describe('kiwa-observe が Playwright の結果を読む (#2158)', () => {
     expect(options, 'option の宣言が無い').toContain('--playwright-json');
   });
 
-  it('T-OPW-004 読み先を skill 側で組み立てず config の規約に従う', () => {
+  it('T-OPW-004 writer と reader が同じ既定 path の契約に従う', () => {
     const body = step0();
-    // path を 2 箇所で決めると、config を変えた時に読み先だけ古くなる。
-    // **出現数まで見る**。 説明文と規則ブロックの両方に書くと、片方を変えても
-    // 検査が通る (変異試験で実際に残存した)。
+    // writer (config) と reader (skill) は同じ既定 path の契約を共有する。
+    // **skill 内の出現数まで見る**。 説明文と規則ブロックの両方に値を書くと、片方を
+    // 変えても検査が通る (変異試験で実際に残存した)。 config 側の同じ値は
+    // playwright-json-reporter.test.ts が全対象について固定する。
     expect(
       body.match(/tests\/reports\/playwright-results\.json/g) ?? [],
       '既定の読み先は規則ブロック 1 箇所にだけ書く',
@@ -97,18 +98,20 @@ describe('kiwa-observe が Playwright の結果を読む (#2158)', () => {
       /playwright\.config\.ts[^\n]*tests\/e2e\/[^\n]*だけ走らせる/,
     );
 
-    // 「無い」 を異常にすると e2e を持たない layer で観測が止まる。
-    // **表の全行**を見る。 1 行だけ異常に変えても他の行が同じ語を持つため、
-    // 語の有無では落ちない (変異試験で実際に残存した)。
+    // config / dir 不在と test 0 件は正常な 0 件。試走済みなのに JSON が無い形だけは、
+    // reporter 起動前の失敗や古い結果の再利用を隠すため中断する。
     const rows = [...body.matchAll(/^\| (?!形\b)(?![-\s|]+$)([^|]+)\|([^|]+)\|$/gm)]
       .map((m) => [m[1]!.trim(), m[2]!.trim()] as const)
       .filter(([, how]) => how !== '扱い');
-    expect(rows.length, '走らせない / 0 件の扱いを述べた表が無い').toBeGreaterThanOrEqual(4);
-    const abnormal = rows.filter(([, how]) => !how.includes('record 0 件'));
-    expect(
-      abnormal,
-      `0 件で続行しない形がある (観測が止まる): ${JSON.stringify(abnormal)}`,
-    ).toEqual([]);
+    expect(rows, 'Playwright 入力 4 形の扱いが変わっている').toEqual([
+      ['`playwright.config.ts` が無い', '走らせない。 `PLAYWRIGHT_JSON = null`、record 0 件'],
+      ['`tests/e2e/` が無い', '走らせない。 `PLAYWRIGHT_JSON = null`、record 0 件'],
+      ['走らせたが JSON が無い', '中断。古い結果や未実行を成功にしない'],
+      ['JSON はあるが test 0 件', 'record 0 件'],
+    ]);
+    expect(body, '古い JSON の削除から Playwright 試走までが配線されていない').toMatch(
+      /rm -f "\$PLAYWRIGHT_JSON"\s*\npnpm -C "\$PROJECT_ROOT" test:e2e/,
+    );
   });
 });
 
@@ -156,11 +159,9 @@ describe('runId を共有しないと 1 回の観測が 2 run になる (#2158)'
     expect(records, '両方の reporter から 1 件ずつ取れている').toHaveLength(2);
     expect(new Set(records.map((r) => r.runId)).size, 'run は 1 つ').toBe(1);
 
-    const history = collectRunHistory({ records });
-    // minRuns 2 に届かないので「判定していない」 が正しい。
-    expect(detectFlaky({ history, minRuns: 2, threshold: 0.1 }), '1 run で flaky 判定はしない').toEqual(
-      [],
-    );
+    // converter は runId を運ぶだけで、重複除去は skill の Step 1 が担う。ここでは
+    // 同じ観測 ID が両方へ伝播するという converter 境界だけを見る。
+    expect(collectRunHistory({ records }).records.map((r) => r.runId)).toEqual(['run-1', 'run-1']);
   });
 
   it('T-OPW-102 別々の runId にすると同じ観測が 2 run に化ける', () => {

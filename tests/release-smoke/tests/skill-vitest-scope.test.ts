@@ -45,6 +45,8 @@ interface Report {
 const SCOPED_RUNS = {
   /** test を持つ project。 集まること自体も見る。 */
   withTests: 'examples/dogfood-dapp-e2e-reorg',
+  /** Vitest と Playwright の両方を持つ project。Vitest は tests/e2e を読まない。 */
+  withPlaywright: 'examples/dogfood-security-csp-headers-app',
   /** runner が vitest でない project。 0 件で exit 0 になることを見る。 */
   withoutTests: 'examples/mint-nft',
 } as const;
@@ -72,6 +74,8 @@ describe('kiwa-observe の Step 0 が観測対象に範囲を絞る', () => {
               '--root',
               projectRoot,
               '--passWithNoTests',
+              '--exclude',
+              '**/tests/e2e/**',
               '--reporter=json',
               `--outputFile=${outputFile}`,
             ],
@@ -100,6 +104,21 @@ describe('kiwa-observe の Step 0 が観測対象に範囲を絞る', () => {
     // vitest は test file が 1 件も無いと exit 1 で終わる (実測)。 runner が vitest でない layer では
     // 0 件が正常なので、 失敗にすると観測がそこで止まる。
     expect(stepZeroCommand(), '--passWithNoTests を渡していない').toContain('--passWithNoTests');
+  });
+
+  it('Vitest が Playwright の tests/e2e tree を収集しない', () => {
+    const command = stepZeroCommand();
+    expect(command, 'Playwright tree の除外が無い').toContain("--exclude '**/tests/e2e/**'");
+
+    const projectRoot = SCOPED_RUNS.withPlaywright;
+    expect(out.withPlaywright.numTotalTests ?? 0, 'Vitest 側の test まで落としている').toBeGreaterThan(0);
+    const playwrightFiles = out.withPlaywright.testResults
+      .map((f) => f.name ?? '')
+      .filter((name) => name.includes(`/${projectRoot}/tests/e2e/`));
+    expect(
+      playwrightFiles,
+      `Vitest が Playwright file を収集している:\n${playwrightFiles.join('\n')}`,
+    ).toEqual([]);
   });
 
   it('結果を JSON で書き出す reporter を渡す', () => {
