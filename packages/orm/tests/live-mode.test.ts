@@ -17,6 +17,7 @@ import { eq } from 'drizzle-orm';
 import { pgTable, serial, text, integer } from 'drizzle-orm/pg-core';
 import { setupOrmEnv, expectQuery, expectRowCount } from '../src/index.js';
 import type { OrmTestEnvLive } from '../src/index.js';
+import { ensureLiveImages, openDockerImageClient } from './helpers/ensure-docker-images.js';
 
 const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -43,6 +44,15 @@ let dockerAvailable = false;
 let shared: OrmTestEnvLive<AppSchema> | null = null;
 /** `setupOrmEnv` 自身が migration を適用したか。 reset が走る前に採る。 */
 let migrationAppliedBySetup: boolean | null = null;
+
+// image の先読み。 pull は回線速度に依存するため、判定を持つ下の hook とは
+// **別の budget** で行う。 分けないと「pull を待っていた」 と「container が起きない」 が
+// 同じ `Hook timed out` になり、原因を読み分けられない (Issue #2159)。
+beforeAll(async () => {
+  const client = await openDockerImageClient();
+  if (client === null) return; // dockerode が無い形は下の hook が skip として扱う
+  await ensureLiveImages(client);
+}, 600_000);
 
 beforeAll(async () => {
   try {
