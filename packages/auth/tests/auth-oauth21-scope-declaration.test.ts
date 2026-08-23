@@ -1,25 +1,26 @@
 /**
- * `scopes` の 3 状態を確かめる (Issue #2169)。
+ * `scopes` を宣言しない相手には scope を発行しない (Issue #2169)。
  *
- * mock AS は `scopes` を任意 field にしているが、 以前は `?? []` で `undefined` と
- * `[]` を同じ値に潰していた。 その結果、
- *
- * - 宣言していない user / client に対して **任意の scope が通る**
- * - 「1 つも許可しない」 を表現する手段が無い
- *
- * の 2 つが同時に起きていた。 前者は generator-verifier が finding #15 として検出し、
- * 「未登録 scope の無制限認可」 と呼んだ。
+ * mock AS は `user.scopes ?? []` としてから `length > 0` で検査を gate していたため、
+ * **何も宣言していない user / client に対して任意の scope が通っていた**。
+ * `users: [{ subject: 'user-1' }]` を preseed して `scope: 'openid email admin'` を
+ * 要求すると、 どこにも `admin` を許した宣言が無いのに発行される状態だった。
+ * generator-verifier が finding #15 として検出し「未登録 scope の無制限認可」 と呼んだ。
  *
  * 直し方は 3 案あった。
  *
  * | # | 案 | 採否 |
  * |---|---|---|
- * | 1 | doc を実装に合わせる (未登録は常に無制限) | 「1 つも許可しない」 を表現できないままになる |
- * | 2 | 実装を doc に合わせる (未登録は空集合として全拒否) | 既存の検査が scope を省く形を「制約なし」 として使っている |
- * | 3 | **未指定と空配列を区別する** | 採用 |
+ * | 1 | doc を実装に合わせる (未登録は常に無制限) | 穴をそのまま仕様にする |
+ * | 2 | **省略を空集合として扱う** | 採用 |
+ * | 3 | 未指定と空配列を区別する (未指定は無制限のまま) | 未指定側が素通しなので穴が残る |
  *
- * 案 3 を採ったのは、 既存の使い方を壊さずに欠けていた表現を足せるため。
- * 実測で `scopes: []` を渡す code は repo に 1 件も無かった。
+ * 一度は案 3 を採ったが、 review が axis `security` で「区別しても未指定側が素通しなら
+ * 元の穴は残る」 と指摘した。 実測すると案 2 で壊れる既存の検査は 3 件だけで、
+ * いずれも「宣言せずに要求する」 形だった = **塞ぐべき形そのもの**。
+ *
+ * 採った規則は 1 つ。 **要求した scope は user と client の双方が宣言していなければ通らない**。
+ * 要求しない経路は双方の交差を返すので、 scope に関心の無い検査は今までどおり省略できる。
  */
 import { describe, expect, it } from 'vitest';
 
@@ -63,22 +64,60 @@ function grantedScope(server: AuthorizationServer, scope?: string): string | und
   }).scope;
 }
 
-describe('AuthorizationUser.scopes — 未指定 / 空配列 / 集合 の 3 状態 (#2169)', () => {
-  it('T-SCOPE-001 未指定の user は制約を受けない', () => {
-    // 集合を宣言していない = 絞る根拠が無い。 test が scope に関心を持たない時の既定。
+describe('要求した scope は宣言が要る (#2169)', () => {
+  it('T-SCOPE-001 双方が宣言していれば通る', () => {
+    const server = makeServer({
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid', 'email'] }],
+      users: [{ subject: 'user-1', scopes: ['openid', 'email'] }],
+    });
+
+    expect(grantedScope(server, 'openid email')).toBe('openid email');
+  });
+
+  it('T-SCOPE-002 user が宣言していない scope は user 側の理由で拒否する', () => {
+    // **これが finding #15 の形**。 以前は user が何も宣言していないと検査を飛ばし、
+    // `admin` がそのまま発行されていた。
+    const server = makeServer({
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid', 'admin'] }],
+      users: [{ subject: 'user-1', scopes: ['openid'] }],
+    });
+
+    expect(() => grantedScope(server, 'admin')).toThrow(
+      /user "user-1" not entitled to scope "admin"/,
+    );
+  });
+
+  it('T-SCOPE-003 client が宣言していない scope は client 側の理由で拒否する', () => {
+    const server = makeServer({
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid'] }],
+      users: [{ subject: 'user-1', scopes: ['openid', 'admin'] }],
+    });
+
+    expect(() => grantedScope(server, 'admin')).toThrow(
+      /client "client-A" not registered for scope "admin"/,
+    );
+  });
+
+  it('T-SCOPE-004 user 側の理由が client 側より先に出る', () => {
+    // 双方とも宣言していない時にどちらの案内が出るかを固定する。
+    // 順序が入れ替わると、 何を直せばよいかの案内が変わる。
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
       users: [{ subject: 'user-1' }],
     });
 
-    expect(grantedScope(server, 'openid email'), '要求がそのまま通る').toBe('openid email');
+    expect(() => grantedScope(server, 'admin')).toThrow(
+      /user "user-1" not entitled to scope "admin"/,
+    );
   });
+});
 
-  it('T-SCOPE-002 空配列の user は要求した scope を拒否する', () => {
-    // **未指定との違いがここに出る**。 潰していた頃は同じ結果 (無制限) だった。
+describe('宣言しない相手には発行しない (#2169)', () => {
+  it('T-SCOPE-011 user が宣言していなければ要求した scope は通らない', () => {
+    // 以前は「制約なし」 として素通ししていた形。 案 3 を退けた理由がここ。
     const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
-      users: [{ subject: 'user-1', scopes: [] }],
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid'] }],
+      users: [{ subject: 'user-1' }],
     });
 
     expect(() => grantedScope(server, 'openid')).toThrow(
@@ -86,43 +125,9 @@ describe('AuthorizationUser.scopes — 未指定 / 空配列 / 集合 の 3 状�
     );
   });
 
-  it('T-SCOPE-003 集合を宣言した user は集合の外を拒否する', () => {
+  it('T-SCOPE-012 client が宣言していなければ要求した scope は通らない', () => {
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
-      users: [{ subject: 'user-1', scopes: ['openid'] }],
-    });
-
-    expect(grantedScope(server, 'openid'), '集合の内側は通る').toBe('openid');
-    expect(() => grantedScope(server, 'admin')).toThrow(
-      /user "user-1" not entitled to scope "admin"/,
-    );
-  });
-
-  it('T-SCOPE-004 空配列の user は要求なしでも空 scope になる', () => {
-    // 要求なしの経路は user の集合をそのまま返す。 空配列なら空文字。
-    const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
-      users: [{ subject: 'user-1', scopes: [] }],
-    });
-
-    expect(grantedScope(server)).toBe('');
-  });
-});
-
-describe('ClientRegistration.scopes — 同じ 3 状態 (#2169)', () => {
-  it('T-SCOPE-011 未指定の client は user 側の集合を絞らない', () => {
-    const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
-      users: [{ subject: 'user-1', scopes: ['openid', 'profile'] }],
-    });
-
-    expect(grantedScope(server), '要求なしなら user の集合がそのまま出る').toBe('openid profile');
-    expect(grantedScope(server, 'openid'), '要求ありなら user 側だけが効く').toBe('openid');
-  });
-
-  it('T-SCOPE-012 空配列の client は要求した scope を拒否する', () => {
-    const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: [] }],
       users: [{ subject: 'user-1', scopes: ['openid'] }],
     });
 
@@ -131,44 +136,64 @@ describe('ClientRegistration.scopes — 同じ 3 状態 (#2169)', () => {
     );
   });
 
-  it('T-SCOPE-013 空配列の client は要求なしでも交差が空になる', () => {
-    // **未指定との違いがここに出る**。 未指定なら user の集合がそのまま出る
-    // (T-SCOPE-011) が、 空配列は交差を取って空になる。
+  it('T-SCOPE-013 空配列は省略と同じ扱いになる', () => {
+    // 2 つを区別しない。 区別する案 (案 3) は未指定側が素通しになるため退けた。
+    const omitted = makeServer({
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid'] }],
+      users: [{ subject: 'user-1' }],
+    });
+    const empty = makeServer({
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid'] }],
+      users: [{ subject: 'user-1', scopes: [] }],
+    });
+
+    const messageOf = (server: AuthorizationServer): string => {
+      try {
+        grantedScope(server, 'openid');
+        return '';
+      } catch (caught) {
+        return (caught as Error).message;
+      }
+    };
+
+    expect(messageOf(omitted), '省略でも拒否される').toMatch(/not entitled to scope "openid"/);
+    expect(messageOf(empty), '空配列でも同じ理由で拒否される').toBe(messageOf(omitted));
+  });
+});
+
+describe('要求しない経路は交差を返す (#2169)', () => {
+  it('T-SCOPE-021 双方が宣言していれば交差が出る', () => {
     const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: [] }],
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid'] }],
+      users: [{ subject: 'user-1', scopes: ['openid', 'profile'] }],
+    });
+
+    expect(grantedScope(server), 'client が許す側だけが残る').toBe('openid');
+  });
+
+  it('T-SCOPE-022 client が宣言していなければ交差は空になる', () => {
+    // **要求あり経路と揃えた**。 以前は client が空なら交差を取らずに user の集合を
+    // そのまま返しており、 宣言していない client に scope が載っていた。
+    const server = makeServer({
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
       users: [{ subject: 'user-1', scopes: ['openid', 'profile'] }],
     });
 
     expect(grantedScope(server)).toBe('');
   });
 
-  it('T-SCOPE-014 集合を宣言した client は交差だけを出す', () => {
+  it('T-SCOPE-023 user が宣言していなければ交差は空になる', () => {
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid'] }],
-      users: [{ subject: 'user-1', scopes: ['openid', 'profile'] }],
-    });
-
-    expect(grantedScope(server), '要求なしなら交差').toBe('openid');
-    expect(() => grantedScope(server, 'profile')).toThrow(
-      /client "client-A" not registered for scope "profile"/,
-    );
-  });
-});
-
-describe('双方が未指定の形 (#2169)', () => {
-  it('T-SCOPE-021 双方未指定なら要求がそのまま通る', () => {
-    // 誰も制約を宣言していない = 拒否の根拠が無い。 これが本 Issue で
-    // 「無制限認可」 と呼ばれた挙動で、 **意図した既定として残す**。
-    // 拒否したい test は `scopes: []` を渡す (T-SCOPE-002 / T-SCOPE-012)。
-    const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
       users: [{ subject: 'user-1' }],
     });
 
-    expect(grantedScope(server, 'openid email admin')).toBe('openid email admin');
+    expect(grantedScope(server)).toBe('');
   });
 
-  it('T-SCOPE-022 双方未指定 + 要求なしなら空 scope', () => {
+  it('T-SCOPE-024 scope に関心の無い検査は今までどおり省略できる', () => {
+    // 要求しなければ throw しない。 省略を空集合にしても、 scope を使わない検査は
+    // 書き換え不要という保証。
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
       users: [{ subject: 'user-1' }],

@@ -252,9 +252,9 @@ export interface ClientRegistration {
   clientId: string;
   redirectUris: readonly string[];
   /**
-   * Scopes this client is registered for. Follows the same three states as
-   * `AuthorizationUser.scopes` — omitted means no constraint, `[]` means the
-   * client is registered for nothing (#2169).
+   * Scopes this client is registered for, with the same rule as
+   * `AuthorizationUser.scopes` — omitting it means the empty set, so a client
+   * that declares nothing can be granted nothing (#2169).
    */
   scopes?: readonly string[];
   /** Public / confidential distinction. `public` requires PKCE (still). */
@@ -264,16 +264,13 @@ export interface ClientRegistration {
 /**
  * User account preseeded on the mock AS.
  *
- * `scopes` distinguishes three states, and the difference matters (#2169).
+ * `scopes` is the set the AS may grant this user, and **omitting it means the
+ * empty set** (#2169). A requested scope has to appear here, or the request is
+ * rejected — the mock never grants a scope nobody declared.
  *
- * | value | meaning |
- * |---|---|
- * | omitted | no set declared — the mock applies no constraint |
- * | `[]` | declared empty — every requested scope is rejected |
- * | `['a', 'b']` | the canonical set the AS may grant |
- *
- * Omitting is the convenient default for tests that do not care about scopes.
- * Pass `[]` when the test is about a user who is entitled to nothing.
+ * Tests that do not care about scopes can keep omitting it as long as they do
+ * not request one; the no-scope path yields an empty grant. Tests that request
+ * a scope must declare it.
  */
 export interface AuthorizationUser {
   subject: string;
