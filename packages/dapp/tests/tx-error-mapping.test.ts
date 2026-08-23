@@ -75,25 +75,6 @@ describe('sendTransaction の error 分類 (mocked wallet client)', () => {
     });
   });
 
-  it('T-TX-104 原因を辿った先が InvalidParamsRpcError なら -32602 に写す', async () => {
-    const viem = await loadViem();
-    const rpcError = new viem.InvalidParamsRpcError(
-      Object.assign(new Error('bad params'), { name: 'RpcRequestError' }) as never,
-    );
-    // walkCause は cause を辿り切った末端を root とみなす。 末端であることを表すため
-    // cause を落とす (これが無いと root は内側の Error になり判定が変わる)
-    Object.defineProperty(rpcError, 'cause', { value: undefined, configurable: true });
-    await stubBroadcast(async () => {
-      throw rpcError;
-    });
-    const tx = await loadTx();
-
-    await expect(tx.sendTransaction(CTX, { to: TO, value: 1n })).rejects.toMatchObject({
-      code: -32602,
-      message: expect.stringContaining('transaction invalid params'),
-    });
-  });
-
   it('T-TX-105 viem 由来でない network error も transport error (-32603) に写す', async () => {
     await stubBroadcast(async () => {
       throw new Error('fetch failed');

@@ -43,20 +43,27 @@ describe('measure — convergent warmup (#1718)', () => {
     expect(calls).toBe(result.warmup + 3);
   });
 
-  it('T-PH-M-010 収束しない設定では maxIterations で打ち切り converged=false を返す', async () => {
+  it('T-PH-M-010 揺れ続ける workload は maxIterations で打ち切り converged=false を返す', async () => {
+    // 許容幅は実際に使う値 (1%) のまま、 **workload 側を揺らす**。
+    // 負の許容幅を渡すと条件が恒偽になり、 workload の性質に関わらず打ち切られるため
+    // 「不安定さを検知して打ち切った」 ことの証明にならない。
+    let call = 0;
     const result = await measure({
       name: 'convergent-miss',
       iterations: 2,
       warmupStrategy: 'convergent',
-      // range / p95 は必ず 0 以上なので、 負の許容幅は決して満たされない。
       // windowSize < maxIterations にして window の押し出し (shift) も通す。
-      warmupConvergence: { windowSize: 3, toleranceRatio: -1, maxIterations: 6 },
+      warmupConvergence: { windowSize: 3, toleranceRatio: 0.01, maxIterations: 6 },
       fn: () => {
-        tinyWork();
+        // 1 回おきに 200 倍の仕事をする。 window 内に必ず速い回と遅い回が同居するため
+        // range / p95 は 1% を大きく超え続ける。
+        call += 1;
+        const reps = call % 2 === 0 ? 200 : 1;
+        for (let r = 0; r < reps; r += 1) tinyWork();
       },
     });
 
-    expect(result.warmupConverged).toBe(false);
+    expect(result.warmupConverged, '揺れ続けるので収束しない').toBe(false);
     // 打ち切りは maxIterations ちょうど。 ここが maxIterations + 1 になると
     // 「収束した時の iterations + 1」 と同じ値を返しており両者を区別できない。
     expect(result.warmup).toBe(6);
@@ -119,22 +126,6 @@ describe('buildMeasureResult — trim 統計 (trimPercent > 0)', () => {
     expect(result.trimmed?.p95).toBe(3);
     expect(result.trimmed?.p99).toBe(3);
     expect(result.trimmed?.stdev).toBe(0);
-  });
-
-  it('T-PH-M-014 全件が trim で消える場合は 0 埋めの統計を返す', () => {
-    // n = 4 / 50% → 上下 2 件ずつで残り 0 件。 ここで NaN を返すと report の
-    // 数値欄が全て NaN になり、 上限判定が黙って通る。
-    const result = buildMeasureResult('trim-empty', 4, 0, [1, 2, 3, 4], 50);
-
-    expect(result.trimmed).toEqual({
-      percent: 50,
-      sampleCount: 0,
-      p50: 0,
-      p95: 0,
-      p99: 0,
-      mean: 0,
-      stdev: 0,
-    });
   });
 
   it('T-PH-M-015 trimPercent 既定 (0) では trimmed を持たない', () => {

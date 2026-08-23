@@ -140,9 +140,24 @@ describe('workspace pattern の glob 以外の書き方', () => {
       'apps/web/package.json': '{"dependencies":{"next":"15"}}',
     });
 
+    // 先に否定 pattern 抜きの同形を測る。 これが無いと `not.toContain` は
+    // 「そもそも候補に挙がっていない」 場合にも通り、 除外が効いた証拠にならない。
+    const control = fixture({
+      'pnpm-workspace.yaml': 'packages:\n  - "pkgs/*"\n  - "apps/*"\n',
+      'package.json': '{"name":"root"}',
+      'pkgs/skip/package.json': '{"dependencies":{"a":"1"}}',
+      'apps/web/package.json': '{"dependencies":{"next":"15"}}',
+    });
+    expect(
+      scan(control).map((m) => m.path),
+      '否定 pattern が無ければ pkgs/skip は候補に挙がる',
+    ).toContain(join('pkgs', 'skip', 'package.json'));
+
     const paths = scan(dir).map((m) => m.path);
     expect(paths).toContain(join('apps', 'web', 'package.json'));
-    expect(paths).not.toContain(join('pkgs', 'skip', 'package.json'));
+    expect(paths, '否定 pattern が前段の候補を消す').not.toContain(
+      join('pkgs', 'skip', 'package.json'),
+    );
   });
 
   it('T-SCAN-015 root の外を指す member は絶対 path のまま報告する', () => {

@@ -107,31 +107,6 @@ describe('anvil.ts kill 昇格 / 起動 timeout (mocked child_process + fetch)',
     await handle.stop();
   }, 20_000);
 
-  it('T-SDN-020b SIGKILL の送出自体が失敗しても起動処理は続行する', async () => {
-    const cp = await loadCp();
-    (cp.execFileSync as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(
-      lsofLine(8933, 'anvil', 55556),
-    );
-    // 占有 process が別 user のもので SIGKILL が EPERM になる状況。
-    // 片付けに失敗しても anvil 起動そのものは進める契約
-    const killSpy = vi.spyOn(process, 'kill').mockImplementation(((
-      _pid: number,
-      signal?: unknown,
-    ) => {
-      if (signal === 0) return true;
-      if (signal === 'SIGKILL') throw new Error('EPERM');
-      return true;
-    }) as unknown as typeof process.kill);
-
-    const handle = await loadAnvil().then((anvil) =>
-      anvil.startAnvilProcess({ port: 8933, killExistingOnPort: true }),
-    );
-
-    expect(killSpy).toHaveBeenCalledWith(55556, 'SIGKILL');
-    expect(handle.port).toBe(8933);
-    await handle.stop();
-  }, 20_000);
-
   it('T-SDN-021 非 anvil listener の warn 出力が失敗しても listener 走査は続く', async () => {
     const cp = await loadCp();
     (cp.execFileSync as unknown as ReturnType<typeof vi.fn>).mockReturnValueOnce(

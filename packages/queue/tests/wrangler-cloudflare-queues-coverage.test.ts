@@ -14,6 +14,7 @@
  * miniflare 側の env は実物を使う。 確かめたいのは wrangler adapter の組み立てで、
  * message lifecycle の正しさは miniflare 側の検査が別に持つ。
  */
+import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CloudflareQueueBatch } from '../src/index.js';
 
@@ -32,23 +33,24 @@ const __children: FakeChild[] = [];
 /** `kill()` を失敗させて stop() の握り潰し経路を通すための切替。 */
 let __killThrows = false;
 
-class FakeChild {
+/** `kill()` が呼ばれた瞬間に走る観測 hook。 停止順序の検査だけが使う。 */
+let __onKill: (() => void) | null = null;
+
+/**
+ * `child_process.spawn` の戻り値の代替。
+ *
+ * listener は Map ではなく実 `EventEmitter` が保持する。 Map で持つと `once` が
+ * 1 度で外れる挙動を再現できず、 listener を手で取り出して呼ぶ形になるため
+ * 「除去されたか」 を検査できない。
+ */
+class FakeChild extends EventEmitter {
   readonly killSignals: string[] = [];
-  readonly onceListeners = new Map<string, (...args: unknown[]) => void>();
-  readonly onListeners = new Map<string, (...args: unknown[]) => void>();
 
   kill(signal?: string): boolean {
     this.killSignals.push(signal ?? '');
+    __onKill?.();
     if (__killThrows) throw new Error('kill refused');
     return true;
-  }
-
-  once(event: string, listener: (...args: unknown[]) => void): void {
-    this.onceListeners.set(event, listener);
-  }
-
-  on(event: string, listener: (...args: unknown[]) => void): void {
-    this.onListeners.set(event, listener);
   }
 }
 
@@ -94,6 +96,7 @@ beforeEach(() => {
   __children.length = 0;
   __fetchCalls.length = 0;
   __killThrows = false;
+  __onKill = null;
 });
 
 afterEach(async () => {
@@ -290,20 +293,31 @@ describe('createWranglerCloudflareQueuesEnv — wrangler の起動', () => {
     expect(__children[0]?.killSignals).toEqual(['SIGTERM']);
   });
 
-  it('T-CFQ-043 起動した process の error は stop 前だけ warn する', async () => {
+  it('T-CFQ-043 stop 前の error は warn し、 listener は once で外れる', async () => {
+    stubFetch(async () => ({ status: 200 }));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await setupCloudflareQueuesEnv({ mode: 'wrangler' });
+
+    expect(__children[0]?.listenerCount('error'), '起動時に error を購読する').toBe(1);
+    __children[0]?.emit('error', new Error('spawn ENOENT'));
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]?.[0]).toContain('wrangler dev exited with error');
+    expect(__children[0]?.listenerCount('error'), 'once なので 1 度で外れる').toBe(0);
+  });
+
+  it('T-CFQ-043b stop 後に届いた error は warn しない', async () => {
     stubFetch(async () => ({ status: 200 }));
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const env = await setupCloudflareQueuesEnv({ mode: 'wrangler' });
 
-    const onError = __children[0]?.onceListeners.get('error');
-    expect(onError).toBeTypeOf('function');
-    onError?.(new Error('spawn ENOENT'));
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain('wrangler dev exited with error');
-
+    // listener を未消費のまま stop する。 `once` は発火するまで残るため、
+    // 「停止後に SIGTERM 由来の error が届く」 実際の順序をそのまま再現できる。
     await env.stop();
-    onError?.(new Error('SIGTERM'));
-    expect(warn).toHaveBeenCalledTimes(1);
+    expect(__children[0]?.listenerCount('error'), 'stop は listener を外さない').toBe(1);
+
+    __children[0]?.emit('error', new Error('SIGTERM'));
+    expect(warn, 'stopped 判定で握り潰す').not.toHaveBeenCalled();
   });
 
   it('T-CFQ-044 stop() は in-process 側を止めてから process を落とす', async () => {
@@ -311,8 +325,20 @@ describe('createWranglerCloudflareQueuesEnv — wrangler の起動', () => {
     const env = await setupCloudflareQueuesEnv({ mode: 'wrangler' });
     await env.send('emails', { n: 1 });
 
+    // kill の瞬間に in-process 側へ送る。 逆順 (kill が先) なら送信は成功してしまうため、
+    // この 1 点だけが順序を固定する。 停止後の 2 状態を見るだけでは逆順でも通る。
+    let atKill: Promise<unknown> | null = null;
+    __onKill = () => {
+      atKill = env.send('emails', { n: 2 });
+    };
+
     await env.stop();
+
     expect(__children[0]?.killSignals).toEqual(['SIGTERM']);
-    await expect(env.send('emails', { n: 2 })).rejects.toThrow(/after stop/);
+    expect(atKill, 'kill 時点で送信を試せている').not.toBeNull();
+    await expect(
+      atKill as unknown as Promise<unknown>,
+      'kill の時点で in-process 側は既に停止済',
+    ).rejects.toThrow(/after stop/);
   });
 });

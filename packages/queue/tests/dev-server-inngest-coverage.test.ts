@@ -15,6 +15,7 @@
  * 差し替えるのはこの 2 つだけで、 adapter 自身と in-process 側の stub env は実物を使う。
  * 確かめたいのは adapter の組み立てであって、 `child_process` や `fetch` の挙動ではない。
  */
+import { EventEmitter } from 'node:events';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
@@ -33,24 +34,49 @@ const __children: FakeChild[] = [];
 /** `kill()` を失敗させて stop() の握り潰し経路を通すための切替。 */
 let __killThrows = false;
 
+/**
+ * 片付けの順序を記録する共有の台帳。
+ *
+ * `stop()` は in-process 側を止めてから process を落とす。 停止後の 2 状態だけを見ると
+ * **逆順にしても通る**ため、両方が起きた順を 1 本の列に積む。
+ */
+const __stopOrder: string[] = [];
+/** `kill()` が呼ばれた瞬間に走る観測 hook。 順序検査だけが使う。 */
+let __onKill: (() => void) | null = null;
+
 class FakeChild {
   /** `kill()` に渡された signal。 停止要求の中身を検査するために持つ。 */
   readonly killSignals: string[] = [];
-  readonly onceListeners = new Map<string, (...args: unknown[]) => void>();
-  readonly onListeners = new Map<string, (...args: unknown[]) => void>();
+  /**
+   * listener は実 `EventEmitter` に載せる。
+   *
+   * Map に持って直接呼ぶ形にすると、`once` の listener が最初の発火で外れないため
+   * **実装では起こり得ない二重発火**を test 側で作れてしまう (実 `proc.once('error')` は
+   * 1 度きり)。 実物に載せれば除去の意味論も一緒に検査できる。
+   */
+  readonly emitter = new EventEmitter();
 
   kill(signal?: string): boolean {
     this.killSignals.push(signal ?? '');
+    // kill が呼ばれた瞬間に in-process 側が既に止まっているかを問う。
+    // 停止後の 2 状態だけを見ると逆順でも通るため、この 1 点で順序を固定する。
+    __onKill?.();
+    __stopOrder.push('process');
     if (__killThrows) throw new Error('kill refused');
     return true;
   }
 
   once(event: string, listener: (...args: unknown[]) => void): void {
-    this.onceListeners.set(event, listener);
+    this.emitter.once(event, listener);
   }
 
   on(event: string, listener: (...args: unknown[]) => void): void {
-    this.onListeners.set(event, listener);
+    this.emitter.on(event, listener);
+  }
+
+  /** 実 EventEmitter へ流す。 `once` の除去が効くので二重発火は起こらない。 */
+  emit(event: string, ...args: unknown[]): boolean {
+    return this.emitter.emit(event, ...args);
   }
 }
 
@@ -122,6 +148,8 @@ type LiveEnv = Awaited<ReturnType<typeof setupInngestEnv>>;
 const envs: LiveEnv[] = [];
 
 beforeEach(() => {
+  __onKill = null;
+  __stopOrder.length = 0;
   __spawnCalls.length = 0;
   __children.length = 0;
   __fetchCalls.length = 0;
@@ -196,8 +224,12 @@ describe('createDevServerInngestEnv — 既存 dev-server への接続', () => {
   });
 
   it('T-INNGEST-025 registerFunction した handler は POST 成功後に in-process で走る', async () => {
+    // **両側に marker を置く**。 handler だけを記録すると、実装が POST と handler を
+    // 逆順にしても `['handler']` のまま通る = 順序を主張しながら順序を見ていない形になる。
+    const order: string[] = [];
     stubFetch(async (url) => {
       if (url.endsWith('/health')) return response({ status: 200 });
+      order.push('post');
       return response({ status: 200, json: async () => ({ ids: ['evt-1'] }) });
     });
     const env = await setupInngestEnv({
@@ -206,7 +238,6 @@ describe('createDevServerInngestEnv — 既存 dev-server への接続', () => {
     });
     envs.push(env);
 
-    const order: string[] = [];
     env.registerFunction<{ x: number }, number>({
       id: 'double-x',
       event: 'math/double',
@@ -221,9 +252,8 @@ describe('createDevServerInngestEnv — 既存 dev-server への接続', () => {
       returnValue: 42,
     });
     expect(snap.state).toBe('completed');
-    // handler が走ったのは POST の後。 順序が逆だと dev-server が受理していない event を
-    // 処理済みとして観測することになる。
-    expect(order).toEqual(['handler']);
+    // 順序が逆だと dev-server が受理していない event を処理済みとして観測することになる。
+    expect(order, 'POST が handler より先に走る').toEqual(['post', 'handler']);
     expect(__fetchCalls[1]?.url).toBe('http://dev.test:8288/e/test-key');
   });
 
@@ -384,24 +414,41 @@ describe('createDevServerInngestEnv — dev-server の起動', () => {
     expect(__children[0]?.killSignals).toEqual(['SIGTERM']);
   });
 
-  it('T-INNGEST-035 起動した process の error は stop 前だけ warn する', async () => {
+  it('T-INNGEST-035 起動した process の error は warn する', async () => {
+    alwaysOk();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const env = await setupInngestEnv({ mode: 'dev-server' });
+    envs.push(env);
+
+    // 実 EventEmitter へ流す。 実装は `proc.once('error', ...)` なので listener は
+    // 1 度きり = 同じ child に 2 度 emit しても 2 度目は誰も受け取らない。
+    expect(__children[0]?.emit('error', new Error('spawn ENOENT')), '1 度目は listener が受ける').toBe(true);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]?.[0]).toContain('Inngest dev-server exited with error');
+
+    // `once` なので listener は 1 度目で外れる。 実 EventEmitter は listener の無い
+    // `error` を throw するため、**2 度目が throw すること自体**が除去の証拠になる。
+    expect(
+      () => __children[0]?.emit('error', new Error('again')),
+      '2 度目は once で外れている (listener 不在の error は throw する)',
+    ).toThrow('again');
+    expect(warn, 'once なので warn は増えない').toHaveBeenCalledTimes(1);
+  });
+
+  it('T-INNGEST-035b stop 後に初めて起きた error は黙る', async () => {
     alwaysOk();
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const env = await setupInngestEnv({ mode: 'dev-server' });
 
-    const onError = __children[0]?.onceListeners.get('error');
-    expect(onError).toBeTypeOf('function');
-    onError?.(new Error('spawn ENOENT'));
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn.mock.calls[0]?.[0]).toContain('Inngest dev-server exited with error');
-
-    // stop() 後の error は意図した停止の副作用なので黙る。
+    // **stop 前に 1 度も emit しない**。 同じ child で 2 度目を撃つ形は `once` では
+    // 作れないため、stop 後分岐は「初回 emit が stop の後」 でしか到達しない。
     await env.stop();
-    onError?.(new Error('SIGTERM'));
-    expect(warn).toHaveBeenCalledTimes(1);
+    expect(__children[0]?.emit('error', new Error('SIGTERM')), 'listener はまだ生きている').toBe(true);
+    expect(warn, 'stop 後の error は意図した停止の副作用なので黙る').not.toHaveBeenCalled();
   });
 
   it('T-INNGEST-036 stop() は in-process 側を止めてから process を落とす', async () => {
+    // 停止後の 2 状態だけを見ると逆順でも通る。 起きた順を 1 本の列に積んで比べる。
     alwaysOk();
     const env = await setupInngestEnv({ mode: 'dev-server' });
     env.registerFunction({
@@ -412,8 +459,27 @@ describe('createDevServerInngestEnv — dev-server の起動', () => {
     await env.sendEvent('stop/event', {});
     await env.assertFunctionRan('noop');
 
+    __stopOrder.length = 0;
+    // in-process 側が止まると `registerFunction` は throw する (stub env の契約)。
+    // kill の瞬間にそれを問えば、逆順にした時だけ落ちる。
+    __onKill = () => {
+      let innerStopped = false;
+      try {
+        env.registerFunction({ id: 'probe', event: 'probe/e', handler: async () => 'x' });
+      } catch {
+        innerStopped = true;
+      }
+      __stopOrder.push(innerStopped ? 'inner' : 'inner-still-running');
+      __stopOrder.push('process');
+    };
+
     await env.stop();
+
     expect(__children[0]?.killSignals).toEqual(['SIGTERM']);
     await expect(env.sendEvent('stop/event', {})).rejects.toThrow(/after stop/);
+    expect(
+      __stopOrder,
+      'kill の時点で in-process 側が既に止まっている (逆順なら inner-still-running になる)',
+    ).toEqual(['inner', 'process', 'process']);
   });
 });

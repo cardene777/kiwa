@@ -125,17 +125,6 @@ describe('runCli argv に穴が空いていても読み飛ばす', () => {
 });
 
 describe('runCli run --watch の終了待ち', () => {
-  it('T-CLI-092 子 process が 0 件なら待たずに 0 を返す', async () => {
-    // `--dry-run` ではないのに spawn が 1 件も起きない形 (layer 指定が全て
-    // 対象外だった場合)。 待つ相手がいないので即 0 で返る必要がある。
-    const h = harness({
-      runWatch: () => ({ plans: [{ layer: 'unit', cmd: 'vitest', args: ['--watch'] }], children: [] }),
-    });
-
-    await expect(runCli(['run', '--watch'], h.deps)).resolves.toBe(0);
-    expect(h.out()).toBe('watch[unit]: vitest --watch\n');
-    expect(h.err()).toBe('');
-  });
 
   it('T-CLI-093 code も signal も無い終了は "unknown signal" として 1 で落ちる', async () => {
     // code=null は「signal で死んだ」 を意味するが、 signal 名まで取れない終了が

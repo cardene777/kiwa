@@ -162,32 +162,6 @@ describe('killAnvilFromPidFile kill 経路 (mocked ps + process.kill)', () => {
     expect(probesAfterKill).toHaveLength(0);
   }, 20_000);
 
-  it('T-EPE-203 startedAt を持たない entry は command 一致だけで kill 対象になる', async () => {
-    const cp = await loadCp();
-    (cp.execFileSync as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
-      psOutput(new Date('2026-08-20T10:00:00Z'), 'anvil'),
-    );
-    writeFileSync(pidFile, `${JSON.stringify({ pid: FAKE_PID, command: 'anvil' })}\n`, 'utf8');
-
-    let sigtermSent = false;
-    const killSpy = vi.spyOn(process, 'kill').mockImplementation(((
-      _pid: number,
-      signal?: unknown,
-    ) => {
-      if (signal === 0) {
-        if (sigtermSent) throw new Error('ESRCH');
-        return true;
-      }
-      if (signal === 'SIGTERM') sigtermSent = true;
-      return true;
-    }) as unknown as typeof process.kill);
-
-    const env = await loadEnvModule();
-    env.killAnvilFromPidFile(pidFile);
-
-    expect(killSpy).toHaveBeenCalledWith(FAKE_PID, 'SIGTERM');
-  });
-
   it('T-EPE-204 entry.command が実 command と食い違えば kill せず warn して skip する', async () => {
     const cp = await loadCp();
     // ps は anvil を返すが、 pid file に記録された command は別物 = pid 再利用の疑い

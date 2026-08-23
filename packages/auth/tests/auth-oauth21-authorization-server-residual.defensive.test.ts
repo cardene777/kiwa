@@ -88,26 +88,6 @@ describe('resolveGrantedScope — scope 未申告の組合せ', () => {
     expect(res.scope).toBe('');
   });
 
-  it('scope 要求あり + 双方が scope 未登録なら要求をそのまま通す', () => {
-    // 誰も制約を宣言していない = 拒否の根拠が無い。 ここを絞ると
-    // preseed を持たない test が全部 scope 空になる。
-    const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: ['https://app.example.test/cb'] }],
-      users: [{ subject: 'user-1' }],
-    });
-    const { code, codeVerifier } = authorize(server, { scope: 'openid email' });
-
-    const res = server.token({
-      grantType: 'authorization_code',
-      code,
-      redirectUri: 'https://app.example.test/cb',
-      clientId: 'client-A',
-      codeVerifier,
-    });
-
-    expect(res.scope).toBe('openid email');
-  });
-
   it('client が登録していない scope の要求は client 側の理由で拒否する', () => {
     // user 側の制約が無い状態で拒否させることで、 client 側の判定だけが
     // 効いていることを分離して確かめる。

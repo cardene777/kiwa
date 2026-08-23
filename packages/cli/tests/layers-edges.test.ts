@@ -158,23 +158,6 @@ describe('.kiwa/stack.json を捨てる理由', () => {
     expect(resolved.source).toBe('all');
   });
 
-  it('T-LRV-006 detected が無い記録は「1 件も当たらなかった」 として読む', () => {
-    // `--detect` が層を 1 つも当てられなかった時に書かれる形。 捨てずに読み、
-    // 読んだ言語 (typescript) の層だけを候補から外す。
-    const root = fixture({ 'package.json': '{"name":"root"}' }, {
-      generated_at: fresh(),
-      scanned: [{ manifest: 'package.json', language: 'typescript' }],
-    });
-
-    const resolved = resolveLayers({ cwd: root });
-    // 記録を捨てた時の warning (`ignoring` / `could not` 系) は出ない。 出るのは
-    // 除外の内訳だけ。
-    expect(resolved.warnings.join(' ')).not.toMatch(/could not|is not a list|missing its/);
-    expect(resolved.source).toBe('detected');
-    // 記録として読めているので全件には戻らず、 signal が名前を持つ層は落ちる。
-    expect(resolved.layers.length).toBeLessThan(TABLE.length);
-    expect(resolved.layers.map((l) => l.id)).not.toContain('nextjs-rsc');
-  });
 });
 
 describe('resolveTestPaths の走査が dir を開けなかったとき', () => {

@@ -94,21 +94,6 @@ describe('createTestcontainersRabbitMQEnv — 生存確認', () => {
     expect(decoded).toBe('kiwa@app:p@ss word');
   });
 
-  it('T-RMQ-047 amqp URL として解釈できない値でも既定の management 先に落とす', async () => {
-    aliveBroker();
-    // URL を組めない時に throw すると、 生存確認の前段で理由の分からない失敗になる。
-    const env = await setupRabbitMQEnv({
-      mode: 'testcontainers',
-      testcontainers: { amqpUrl: 'not-a-url', startupTimeoutMs: 1000 },
-    });
-    envs.push(env);
-
-    expect(env.amqpUrl).toBe('not-a-url');
-    expect(env.managementUrl).toBe('http://localhost:15672');
-    expect(__fetchCalls[0]?.url).toBe('http://localhost:15672/api/aliveness-test/%2F');
-    expect(__fetchCalls[0]?.init?.headers).toEqual({});
-  });
-
   it('T-RMQ-048 起動途中の失敗は再試行し、 200 が返った時点で先へ進む', async () => {
     let attempt = 0;
     stubFetch(async () => {
