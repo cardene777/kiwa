@@ -251,14 +251,29 @@ export interface IntrospectionResponse {
 export interface ClientRegistration {
   clientId: string;
   redirectUris: readonly string[];
+  /**
+   * Scopes this client is registered for. Follows the same three states as
+   * `AuthorizationUser.scopes` — omitted means no constraint, `[]` means the
+   * client is registered for nothing (#2169).
+   */
   scopes?: readonly string[];
   /** Public / confidential distinction. `public` requires PKCE (still). */
   clientType?: 'public' | 'confidential';
 }
 
 /**
- * User account preseeded on the mock AS. Every user has a subject id and a
- * canonical set of scopes the AS is allowed to grant.
+ * User account preseeded on the mock AS.
+ *
+ * `scopes` distinguishes three states, and the difference matters (#2169).
+ *
+ * | value | meaning |
+ * |---|---|
+ * | omitted | no set declared — the mock applies no constraint |
+ * | `[]` | declared empty — every requested scope is rejected |
+ * | `['a', 'b']` | the canonical set the AS may grant |
+ *
+ * Omitting is the convenient default for tests that do not care about scopes.
+ * Pass `[]` when the test is about a user who is entitled to nothing.
  */
 export interface AuthorizationUser {
   subject: string;

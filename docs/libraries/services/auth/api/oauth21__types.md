@@ -78,7 +78,7 @@ export interface AuthorizationResponse {
 
 #### <code v-pre>AuthorizationServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L272) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L287) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `AuthorizationServer` return shape from `createAuthorizationServer`. Exposes the RFC 6749 / 9700 / 7662 endpoint surface as plain methods.
 
@@ -113,7 +113,7 @@ export interface AuthorizationServer {
 
 #### <code v-pre>AuthorizationServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L302) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L317) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `createAuthorizationServer`.
 
@@ -145,9 +145,9 @@ export interface AuthorizationServerOptions {
 
 #### <code v-pre>AuthorizationUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L263) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L278) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
-User account preseeded on the mock AS. Every user has a subject id and a canonical set of scopes the AS is allowed to grant.
+User account preseeded on the mock AS. `scopes` distinguishes three states, and the difference matters (#2169). | value | meaning | |---|---| | omitted | no set declared — the mock applies no constraint | | `[]` | declared empty — every requested scope is rejected | | `['a', 'b']` | the canonical set the AS may grant | Omitting is the convenient default for tests that do not care about scopes. Pass `[]` when the test is about a user who is entitled to nothing.
 
 ```ts
 export interface AuthorizationUser {
@@ -166,6 +166,11 @@ Client registration accepted by the mock AS. Real deployments manage clients thr
 export interface ClientRegistration {
     clientId: string;
     redirectUris: readonly string[];
+    /**
+     * Scopes this client is registered for. Follows the same three states as
+     * `AuthorizationUser.scopes` — omitted means no constraint, `[]` means the
+     * client is registered for nothing (#2169).
+     */
     scopes?: readonly string[];
     /** Public / confidential distinction. `public` requires PKCE (still). */
     clientType?: 'public' | 'confidential';
@@ -280,7 +285,7 @@ export type OAuth21GrantType = 'authorization_code' | 'refresh_token';
 
 #### <code v-pre>OAuth21TestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L336) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L351) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `setupOAuth21Env` return shape. Exposes the AS plus the standalone helpers so a test can drive PKCE + DPoP without importing the module leaves.
 
@@ -376,7 +381,7 @@ export interface RefreshToken {
 
 #### <code v-pre>SetupOAuth21EnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L330) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L345) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `setupOAuth21Env`. Composes the AS options with helpers for PKCE + DPoP.
 

@@ -113,26 +113,27 @@ export function createAuthorizationServer(
     user: AuthorizationUser,
     requested: string | undefined,
   ): string {
+    // `undefined` と `[]` は別の意味を持つ。 前者は「集合を宣言していない」 =
+    // この mock は制約をかけない。 後者は「1 つも許可しない」 = 明示的な空集合。
+    // 両者を `?? []` で潰すと、 後者を表現する手段が無くなる (#2169)。
+    const userScopes = user.scopes;
+    const clientScopes = client.scopes;
+
     if (!requested || requested.length === 0) {
       // Default scope = intersection of client allowed and user granted, or
       // just user granted, or empty.
-      const userScopes = user.scopes ?? [];
-      const clientScopes = client.scopes ?? [];
-      if (clientScopes.length === 0) return userScopes.join(' ');
-      return userScopes
-        .filter((scope) => clientScopes.includes(scope))
-        .join(' ');
+      const granted = userScopes ?? [];
+      if (clientScopes === undefined) return granted.join(' ');
+      return granted.filter((scope) => clientScopes.includes(scope)).join(' ');
     }
     const requestedScopes = requested.split(' ').filter(Boolean);
-    const userScopes = user.scopes ?? [];
-    const clientScopes = client.scopes ?? [];
     for (const scope of requestedScopes) {
-      if (userScopes.length > 0 && !userScopes.includes(scope)) {
+      if (userScopes !== undefined && !userScopes.includes(scope)) {
         throw new Error(
           `authorization-server: user "${user.subject}" not entitled to scope "${scope}"`,
         );
       }
-      if (clientScopes.length > 0 && !clientScopes.includes(scope)) {
+      if (clientScopes !== undefined && !clientScopes.includes(scope)) {
         throw new Error(
           `authorization-server: client "${client.clientId}" not registered for scope "${scope}"`,
         );
