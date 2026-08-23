@@ -1,0 +1,146 @@
+{
+  "@kiwa-lab/a11y": {
+    "lines": 100,
+    "branches": 100,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/ai-llm": {
+    "lines": 99.73,
+    "branches": 96.4,
+    "functions": 100,
+    "statements": 99.73
+  },
+  "@kiwa-lab/api": {
+    "lines": 100,
+    "branches": 95.28,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/cache": {
+    "lines": 99.22,
+    "branches": 95.72,
+    "functions": 100,
+    "statements": 99.22
+  },
+  "@kiwa-lab/cli": {
+    "lines": 100,
+    "branches": 96.57,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/cli-test": {
+    "lines": 100,
+    "branches": 96.29,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/component": {
+    "lines": 100,
+    "branches": 100,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/core": {
+    "lines": 98.09,
+    "branches": 92.89,
+    "functions": 100,
+    "statements": 98.09
+  },
+  "@kiwa-lab/dapp": {
+    "lines": 98.83,
+    "branches": 95.75,
+    "functions": 99.41,
+    "statements": 98.83
+  },
+  "@kiwa-lab/data": {
+    "lines": 100,
+    "branches": 100,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/e2e": {
+    "lines": 100,
+    "branches": 93.84,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/edge": {
+    "lines": 100,
+    "branches": 100,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/hono": {
+    "lines": 100,
+    "branches": 99.32,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/lean": {
+    "lines": 99.85,
+    "branches": 96.64,
+    "functions": 100,
+    "statements": 99.85
+  },
+  "@kiwa-lab/nextjs": {
+    "lines": 100,
+    "branches": 100,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/observability": {
+    "lines": 99.82,
+    "branches": 99.54,
+    "functions": 100,
+    "statements": 99.82
+  },
+  "@kiwa-lab/perf-harness": {
+    "lines": 100,
+    "branches": 94.9,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/quality-metrics": {
+    "lines": 99.23,
+    "branches": 94.59,
+    "functions": 100,
+    "statements": 99.23
+  },
+  "@kiwa-lab/queue": {
+    "lines": 99.5,
+    "branches": 94.2,
+    "functions": 100,
+    "statements": 99.5
+  },
+  "@kiwa-lab/realtime": {
+    "lines": 99.5,
+    "branches": 97.44,
+    "functions": 98.4,
+    "statements": 99.5
+  },
+  "@kiwa-lab/search": {
+    "lines": 99.27,
+    "branches": 93.75,
+    "functions": 100,
+    "statements": 99.27
+  },
+  "@kiwa-lab/security": {
+    "lines": 100,
+    "branches": 98.67,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/skill-test": {
+    "lines": 100,
+    "branches": 98,
+    "functions": 100,
+    "statements": 100
+  },
+  "@kiwa-lab/ui": {
+    "lines": 100,
+    "branches": 97.24,
+    "functions": 100,
+    "statements": 100
+  }
+}

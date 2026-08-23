@@ -18,7 +18,7 @@
  * `scripts/lib/artifact-freshness.mjs` carries why that comparison is not a
  * plain mtime check.
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkArtifactFreshness, staleMessage } from './lib/artifact-freshness.mjs';
@@ -122,6 +122,49 @@ const THRESHOLDS = {
   functions: 90,
 };
 
+/**
+ * 到達した最高値の記録先。
+ *
+ * 固定閾値だけでは、実測との間にある余白がそのまま「静かに下がってよい幅」 になる
+ * (#2177)。 kiwa の line は 99.65% だが閾値は 90% なので、10 point 落ちても gate は緑だった。
+ *
+ * library として様々な環境で使われる以上、この repo で 100% を出すこと自体に意味は薄い。
+ * 意味があるのは **覆った範囲が静かに剥がれないこと**で、それを守るのが高水位。
+ *
+ * 3 つ知っておくこと。
+ *
+ * 1. **更新は上げる方向にしか効かない**。 `--update-high-water` は高い方を採るので、
+ *    実測が下がっても記録は動かない。 意図的に下げる (code を消した等) 場合は file を手で直す。
+ *    自動で下げると「下がった値を baseline にして常に緑」 になる。
+ * 2. **鮮度ゲートで落ちた package は記録されない**。 判定より前に `continue` するため。
+ *    初回の記録は全 package が fresh な状態で取る。
+ * 3. **記録が無い package は固定閾値だけで判定する**。 新規 package が gate を素通りしない
+ *    ように、固定閾値の側は残してある。
+ */
+const HIGH_WATER_PATH = resolve(REPO_ROOT, 'coverage-high-water.json');
+
+/** 実測が高水位を上回った時に記録を更新する。 gate の実行では更新しない。 */
+const UPDATE_HIGH_WATER = process.argv.includes('--update-high-water');
+
+/**
+ * 端数の許容。 固定閾値側と同じ値を使う。
+ *
+ * 揃えないと、同じ丸め差が片方だけで落ちる。
+ */
+const EPSILON = 0.0001;
+
+function loadHighWater() {
+  if (!existsSync(HIGH_WATER_PATH)) return {};
+  try {
+    const raw = JSON.parse(readFileSync(HIGH_WATER_PATH, 'utf8'));
+    return raw && typeof raw === 'object' ? raw : {};
+  } catch {
+    // 壊れた記録は「記録なし」 に倒す。 gate を止めるのは coverage の劣化だけにしたい。
+    process.stderr.write(`warning: ${HIGH_WATER_PATH} を読めないため高水位判定を行いません\n`);
+    return {};
+  }
+}
+
 function loadSummary(pkgDir) {
   const summaryPath = resolve(REPO_ROOT, pkgDir, 'coverage/coverage-summary.json');
   if (!existsSync(summaryPath)) {
@@ -182,6 +225,10 @@ function freshnessProblem(pkg, pkgDir) {
   });
 }
 
+const highWater = loadHighWater();
+const nextHighWater = { ...highWater };
+const METRICS = ['lines', 'branches', 'functions', 'statements'];
+
 const failures = [];
 const rows = [];
 for (const pkg of PACKAGES) {
@@ -199,14 +246,42 @@ for (const pkg of PACKAGES) {
     continue;
   }
   const t = result.total;
-  const metrics = ['lines', 'branches', 'functions', 'statements'];
-  const failed = metrics.filter((m) => (t[m]?.pct ?? 0) + 0.0001 < THRESHOLDS[m]);
+  // 固定閾値は新規 package の下限として残す。 高水位は「一度到達した値」 を守る。
+  const belowThreshold = METRICS.filter((m) => (t[m]?.pct ?? 0) + EPSILON < THRESHOLDS[m]);
+
+  // 高水位を持たない package は固定閾値だけで判定する。 初回の記録は
+  // `--update-high-water` で作る。
+  const marks = highWater[pkg] ?? null;
+  const belowHighWater = marks
+    ? METRICS.filter((m) => typeof marks[m] === 'number' && (t[m]?.pct ?? 0) + EPSILON < marks[m])
+    : [];
+
+  // 上回った分だけ記録を更新する。 **下回った値は焼き付けない** = 更新は明示 command でのみ
+  // 走り、その時も高い方だけを採る。 これが無いと「下がった値を baseline にして常に緑」 になる。
+  if (UPDATE_HIGH_WATER) {
+    const updated = { ...(marks ?? {}) };
+    for (const m of METRICS) {
+      const pct = t[m]?.pct;
+      if (typeof pct !== 'number') continue;
+      if (typeof updated[m] !== 'number' || pct > updated[m]) updated[m] = pct;
+    }
+    nextHighWater[pkg] = updated;
+  }
+
+  const failed = [...belowThreshold, ...belowHighWater.filter((m) => !belowThreshold.includes(m))];
+  const mark = marks ? '' : ' (高水位なし)';
   rows.push(
-    `| ${pkg} | ${t.lines.pct.toFixed(1)} | ${t.branches.pct.toFixed(1)} | ${t.functions.pct.toFixed(1)} | ${t.statements.pct.toFixed(1)} | ${failed.length === 0 ? '✅' : '❌ ' + failed.join(',')} |`,
+    `| ${pkg} | ${t.lines.pct.toFixed(1)} | ${t.branches.pct.toFixed(1)} | ${t.functions.pct.toFixed(1)} | ${t.statements.pct.toFixed(1)} | ${failed.length === 0 ? '✅' + mark : '❌ ' + failed.join(',')} |`,
   );
   if (failed.length > 0) {
-    failures.push({ pkg, failed, totals: t });
+    failures.push({ pkg, failed, totals: t, belowThreshold, belowHighWater, marks });
   }
+}
+
+if (UPDATE_HIGH_WATER) {
+  const sorted = Object.fromEntries(Object.entries(nextHighWater).sort(([a], [b]) => a.localeCompare(b)));
+  writeFileSync(HIGH_WATER_PATH, `${JSON.stringify(sorted, null, 2)}\n`);
+  process.stderr.write(`\n高水位を更新しました: ${HIGH_WATER_PATH}\n`);
 }
 
 const header = [
@@ -217,6 +292,9 @@ const report = [
   `# Coverage gate report`,
   '',
   `Thresholds: lines >= ${THRESHOLDS.lines}%, branches >= ${THRESHOLDS.branches}%, functions >= ${THRESHOLDS.functions}%, statements >= ${THRESHOLDS.statements}%`,
+  '',
+  `High-water: ${HIGH_WATER_PATH.replace(REPO_ROOT + '/', '')} に記録した最高値を下回っても落とす。`,
+  `更新は \`node scripts/check-coverage-gates.mjs --update-high-water\` のみ (gate の実行では更新しない)。`,
   '',
   ...header,
   ...rows,
@@ -233,7 +311,15 @@ process.stderr.write('\nCoverage gate failed for:\n');
 for (const f of failures) {
   if (f.failed) {
     const detail = f.failed
-      .map((m) => `${m}=${f.totals[m].pct.toFixed(2)}% (need ${THRESHOLDS[m]}%)`)
+      .map((m) => {
+        const pct = f.totals[m].pct.toFixed(2);
+        // どちらの下限を割ったかを書き分ける。 「閾値は満たすが下がった」 と
+        // 「閾値そのものを割った」 は直し方が違う。
+        if (f.belowHighWater?.includes(m) && !f.belowThreshold?.includes(m)) {
+          return `${m}=${pct}% (下がった: 高水位 ${f.marks[m]}%)`;
+        }
+        return `${m}=${pct}% (need ${THRESHOLDS[m]}%)`;
+      })
       .join(', ');
     process.stderr.write(`  - ${f.pkg}: ${detail}\n`);
   } else {
