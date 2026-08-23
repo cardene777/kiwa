@@ -259,9 +259,11 @@ describe('createDevServerInngestEnv — 既存 dev-server への接続', () => {
 
   it('T-INNGEST-026 応答 JSON に ids が無い / 壊れている時は空 id に落とす', async () => {
     let call = 0;
-    stubFetch(async (url) => {
+    const posted: Array<{ url: string; body: unknown }> = [];
+    stubFetch(async (url, init) => {
       if (url.endsWith('/health')) return response({ status: 200 });
       call += 1;
+      posted.push({ url, body: JSON.parse(String((init as RequestInit | undefined)?.body ?? 'null')) });
       // 1 回目 = ids を持たない JSON、 2 回目 = JSON として読めない応答。
       if (call === 1) return response({ status: 200, json: async () => ({}) });
       return response({
@@ -280,6 +282,14 @@ describe('createDevServerInngestEnv — 既存 dev-server への接続', () => {
     // どちらも throw せず空文字に落ちる。 id が取れないことは送信の失敗ではない。
     expect(await env.sendEvent('a/b', {})).toBe('');
     expect(await env.sendEvent('a/b', {})).toBe('');
+
+    // '' が「送信できなかった」 と読まれないことを、 実際に飛んだ POST で示す。
+    // 送信は 2 回とも成立していて、 欠けているのは dev-server が返す id だけ。
+    expect(posted.map((p) => p.url), '2 回とも /e/ に POST している').toEqual([
+      'http://dev.test:8288/e/test-key',
+      'http://dev.test:8288/e/test-key',
+    ]);
+    expect(posted[0]?.body, 'payload は欠けていない').toMatchObject({ name: 'a/b', data: {} });
   });
 
   it('T-INNGEST-027 非 2xx は event 名 / status / body を含めて throw する', async () => {
@@ -459,15 +469,22 @@ describe('createDevServerInngestEnv — dev-server の起動', () => {
     await env.sendEvent('stop/event', {});
     await env.assertFunctionRan('noop');
 
+    // 対照 = 停止前の同じ呼出は通る。 これが無いと、 別の理由で常に throw する呼出を
+    // 「停止していた証拠」 と読んでしまう。
+    env.registerFunction({ id: 'probe-before', event: 'probe/e', handler: async () => 'x' });
+
     __stopOrder.length = 0;
-    // in-process 側が止まると `registerFunction` は throw する (stub env の契約)。
-    // kill の瞬間にそれを問えば、逆順にした時だけ落ちる。
+    // in-process 側が止まると `registerFunction` は停止後専用の error を投げる
+    // (stub env の契約)。 kill の瞬間にそれを問えば、逆順にした時だけ落ちる。
+    let probeError: unknown = null;
     __onKill = () => {
       let innerStopped = false;
       try {
         env.registerFunction({ id: 'probe', event: 'probe/e', handler: async () => 'x' });
-      } catch {
-        innerStopped = true;
+      } catch (caught) {
+        // 捕まえた error の中身まで見る。 id 重複などの別 error を停止と誤読しない。
+        probeError = caught;
+        innerStopped = caught instanceof Error && /after stop/.test(caught.message);
       }
       __stopOrder.push(innerStopped ? 'inner' : 'inner-still-running');
       __stopOrder.push('process');
@@ -477,6 +494,8 @@ describe('createDevServerInngestEnv — dev-server の起動', () => {
 
     expect(__children[0]?.killSignals).toEqual(['SIGTERM']);
     await expect(env.sendEvent('stop/event', {})).rejects.toThrow(/after stop/);
+    expect(probeError, 'kill 時点の失敗は停止由来の error である').toBeInstanceOf(Error);
+    expect((probeError as Error).message).toMatch(/after stop/);
     expect(
       __stopOrder,
       'kill の時点で in-process 側が既に止まっている (逆順なら inner-still-running になる)',

@@ -296,7 +296,8 @@ describe('createWranglerCloudflareQueuesEnv — wrangler の起動', () => {
   it('T-CFQ-043 stop 前の error は warn し、 listener は once で外れる', async () => {
     stubFetch(async () => ({ status: 200 }));
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    await setupCloudflareQueuesEnv({ mode: 'wrangler' });
+    const env = await setupCloudflareQueuesEnv({ mode: 'wrangler' });
+    envs.push(env);
 
     expect(__children[0]?.listenerCount('error'), '起動時に error を購読する').toBe(1);
     __children[0]?.emit('error', new Error('spawn ENOENT'));
@@ -310,6 +311,7 @@ describe('createWranglerCloudflareQueuesEnv — wrangler の起動', () => {
     stubFetch(async () => ({ status: 200 }));
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const env = await setupCloudflareQueuesEnv({ mode: 'wrangler' });
+    envs.push(env);
 
     // listener を未消費のまま stop する。 `once` は発火するまで残るため、
     // 「停止後に SIGTERM 由来の error が届く」 実際の順序をそのまま再現できる。
