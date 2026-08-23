@@ -31,9 +31,15 @@ function summarize(input: DashboardInput): {
   };
 }
 
-/** ms を読める単位にする。 1 秒未満は ms、それ以上は秒。 */
+/**
+ * ms を読める単位にする。 1 秒未満は ms、それ以上は秒。
+ *
+ * **必ず丸める**。 vitest の `duration` は浮動小数で来るので、そのまま書くと
+ * `31.437960999999746ms` のような桁が出る (実データで確認した)。 ms 単位より細かい差は
+ * 遅い test を探す用途では意味を持たない。
+ */
 function formatMs(ms: number): string {
-  return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
+  return ms < 1000 ? `${Math.round(ms)}ms` : `${(ms / 1000).toFixed(1)}s`;
 }
 
 /**

@@ -230,6 +230,28 @@ describe('dashboard の Execution time section (#2186)', () => {
     expect(rows.length, '上位の件数が slowestLimit と一致しない').toBe(2);
   });
 
+  it('T-SLW-028 浮動小数の duration を丸めて書く', () => {
+    // vitest の `duration` は浮動小数で来る。 丸めないと `31.437960999999746ms` のような
+    // 桁が出る (実データで確認した)。 ms より細かい差は遅い test を探す用途で意味を持たない。
+    const md = renderDashboard({
+      ...base,
+      history: history(
+        rec({ testId: 'a', durationMs: 10.11970800000006, runId: 'run-2', startedAt: 2000 }),
+        rec({ testId: 'b', durationMs: 21.318252999999686, runId: 'run-2', startedAt: 2000 }),
+      ),
+      flakyHistory: history(
+        rec({ testId: 'a', durationMs: 108.17333199999985, runId: 'run-1', startedAt: 1000 }),
+        rec({ testId: 'a', durationMs: 10.11970800000006, runId: 'run-2', startedAt: 2000 }),
+        rec({ testId: 'b', durationMs: 21.318252999999686, runId: 'run-2', startedAt: 2000 }),
+      ),
+    });
+    const section = md.slice(md.indexOf('## Execution time'), md.indexOf('## Code coverage'));
+    expect(section, '合計が丸められていない').toContain('| total | 31ms |');
+    expect(section, '上位の値が丸められていない').toContain('| b | 21ms |');
+    expect(section, '差が丸められていない').toContain('-77ms');
+    expect(section, '浮動小数の桁が残っている').not.toMatch(/\d+\.\d{3,}ms/);
+  });
+
   it('T-SLW-026 速くなった run を負の差として書く', () => {
     // 遅くなる側だけを試すと、速くなった時の表示が 1 度も走らない。
     // この仕組みは「速くなった」 を見るためにあるので、そちらこそ確かめる。
