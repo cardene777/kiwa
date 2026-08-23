@@ -24,6 +24,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
@@ -103,6 +104,41 @@ function walkTests(dir: string): string[] {
   return out;
 }
 
+/**
+ * その file が `@playwright/test` から **値** を取り込むか。
+ *
+ * 正規表現では判定できない。 `import { type Page } from '...'` は行頭が
+ * `import type` ではないので runtime に見えるが、 取り込む binding は 0 個で
+ * 値は 1 つも来ない。 逆に side-effect import (`import '...'`) と double quote の
+ * 形は行頭の pattern から漏れる (#2174 r2-f5)。
+ *
+ * AST なら import clause と各 specifier の `isTypeOnly` をそのまま読める。
+ */
+function importsPlaywrightAtRuntime(path: string): boolean {
+  const source = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true);
+  for (const stmt of source.statements) {
+    if (!ts.isImportDeclaration(stmt)) continue;
+    if (!ts.isStringLiteral(stmt.moduleSpecifier)) continue;
+    if (stmt.moduleSpecifier.text !== '@playwright/test') continue;
+
+    const clause = stmt.importClause;
+    // `import '@playwright/test'` — binding は無いが評価される = 値の取り込み。
+    if (!clause) return true;
+    // `import type { ... }` — 型のみ。
+    if (clause.isTypeOnly) continue;
+    // `import def from` — default binding は値。
+    if (clause.name) return true;
+
+    const bindings = clause.namedBindings;
+    if (!bindings) continue;
+    // `import * as ns from` — 名前空間は値。
+    if (ts.isNamespaceImport(bindings)) return true;
+    // `import { a, type B } from` — `isTypeOnly` でない specifier が 1 つでもあれば値。
+    if (bindings.elements.some((el) => !el.isTypeOnly)) return true;
+  }
+  return false;
+}
+
 describe('mutation cost doc — 表の設定値が config と一致する (#2168)', () => {
   it('T-MCD-001 表が package 行を 1 件以上持つ', () => {
     // 空の表に対して forEach を回すと assert に 1 度も到達せず、必ず通る。
@@ -130,11 +166,16 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     const configs = readAllConfigs();
     expect(configs.length, 'stryker config を 1 つも読めていない').toBeGreaterThan(0);
 
+    // 名前だけを比べると、 e2e が 2 から 1 に変わっても通る。 値まで組で比べる。
     const lowered = configs
       .filter((c) => c.concurrency !== null && c.concurrency < 4)
-      .map((c) => c.pkg)
-      .sort();
-    expect(lowered, 'concurrency < 4 の package が本文の列挙と違う').toEqual(['dapp', 'e2e', 'ui']);
+      .map((c) => [c.pkg, c.concurrency] as const)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    expect(lowered, 'concurrency < 4 の package と値が本文の列挙と違う').toEqual([
+      ['dapp', 2],
+      ['e2e', 2],
+      ['ui', 2],
+    ]);
   });
 
   it('T-MCD-004 timeoutMS を明示する package が本文の列挙と一致する', () => {
@@ -160,7 +201,7 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     const files = walkTests(dir);
     expect(files.length, 'dapp の test file を 1 つも読めていない').toBeGreaterThan(0);
 
-    // 起動経路は launch / launchPersistentContext / launchServer / connect の 4 形。
+    // 起動経路は launch / launchPersistentContext / launchServer / connectOverCDP / connect の 5 形。
     const launcher =
       /\b(chromium|firefox|webkit)\s*\.\s*(launch|launchPersistentContext|launchServer|connectOverCDP|connect)\s*\(/;
     const launching = files
@@ -176,13 +217,7 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     const files = readdirSync(dir).filter((f) => f.endsWith('.ts'));
     expect(files.length, 'dapp の src file を 1 つも読めていない').toBeGreaterThan(0);
 
-    const runtime = files
-      .filter((f) => {
-        const body = readFileSync(resolve(dir, f), 'utf8');
-        // `import type { ... } from` は型のみ。 それ以外の import 文を runtime とみなす。
-        return /^import\s+(?!type\s)[^;]*from\s+'@playwright\/test';/m.test(body);
-      })
-      .sort();
+    const runtime = files.filter((f) => importsPlaywrightAtRuntime(resolve(dir, f))).sort();
     expect(runtime, '@playwright/test を runtime import する src file が本文と違う').toEqual([
       'balance-change.ts',
       'expect-custom-error.ts',

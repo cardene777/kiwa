@@ -523,8 +523,10 @@ expensive files in the table — 1.367 s each. Both land above a capacity-second
 package is not free, and every file that reaches it pays on load. **No browser is launched** —
 the launcher API is never called from `dapp`'s tests — but the import graph is paid for anyway.
 
-`queue`'s test cost has a different source: its tests build their doubles, stub timers, and drive
-scheduler ticks inside each test body, so the work repeats per test rather than per file.
+`queue`'s test cost sits in the tests themselves rather than in loading. Its scheduler tests stub
+timers and drive ticks inside each test body, and across the suite the setup a test needs is built
+per test rather than shared per file. What the measurement shows is only the outcome — 41.72 ms
+per test against `cli`'s 1.47 — not that any one file's pattern causes it.
 
 § A slow test can also be a weak one records the same mechanism from a third angle — `orm`'s two
 container-backed files paid a full container startup per mutant, which is why they are excluded
@@ -538,8 +540,9 @@ runner work, halving the configured concurrency roughly doubles the wall time �
 costs of the same order.
 
 `dapp` and `e2e` also set `timeoutMS` to 60,000, well above Stryker's default. A timed-out mutant
-holds a runner for at least that long — Stryker's budget is `timeoutFactor × net + timeoutMS` — so
-`dapp`'s 17 timeouts account for **at least 17 runner-minutes** of its 112 nominal
+holds a runner for at least that long — Stryker's budget is at least
+`timeoutFactor × net + timeoutMS`, and the implementation adds its own measured overhead on top —
+so `dapp`'s 17 timeouts account for **at least 17 runner-minutes** of its 112 nominal
 runner-minutes. The true figure is higher and this document does not measure it.
 
 #### `dapp`'s settings are inherited, not chosen
