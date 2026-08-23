@@ -102,7 +102,14 @@ export interface AuthorizationServer {
      * production ASes never expose this.
      */
     listAccessTokens(): readonly AccessToken[];
-    /** Snapshot every refresh token, including revoked ones. */
+    /**
+     * Snapshot every refresh token, including revoked ones.
+     *
+     * Both snapshot methods copy the elements as well as the array (#2179).
+     * `readonly T[]` freezes the array, not what it holds, so returning the
+     * stored objects would let a caller rewrite a token's `scope` and have the
+     * refresh path grant it.
+     */
     listRefreshTokens(): readonly RefreshToken[];
     /** Snapshot the set of jti values the AS has seen. */
     listSeenJtis(): readonly string[];
@@ -113,7 +120,7 @@ export interface AuthorizationServer {
 
 #### <code v-pre>AuthorizationServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L314) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L321) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `createAuthorizationServer`.
 
@@ -285,7 +292,7 @@ export type OAuth21GrantType = 'authorization_code' | 'refresh_token';
 
 #### <code v-pre>OAuth21TestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L348) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L355) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `setupOAuth21Env` return shape. Exposes the AS plus the standalone helpers so a test can drive PKCE + DPoP without importing the module leaves.
 
@@ -381,7 +388,7 @@ export interface RefreshToken {
 
 #### <code v-pre>SetupOAuth21EnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L342) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L349) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `setupOAuth21Env`. Composes the AS options with helpers for PKCE + DPoP.
 

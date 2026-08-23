@@ -300,7 +300,14 @@ export interface AuthorizationServer {
    * production ASes never expose this.
    */
   listAccessTokens(): readonly AccessToken[];
-  /** Snapshot every refresh token, including revoked ones. */
+  /**
+   * Snapshot every refresh token, including revoked ones.
+   *
+   * Both snapshot methods copy the elements as well as the array (#2179).
+   * `readonly T[]` freezes the array, not what it holds, so returning the
+   * stored objects would let a caller rewrite a token's `scope` and have the
+   * refresh path grant it.
+   */
   listRefreshTokens(): readonly RefreshToken[];
   /** Snapshot the set of jti values the AS has seen. */
   listSeenJtis(): readonly string[];

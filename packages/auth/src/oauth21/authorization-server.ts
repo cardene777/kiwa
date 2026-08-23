@@ -453,14 +453,18 @@ export function createAuthorizationServer(
     revoke,
     introspect,
     listAccessTokens(): readonly AccessToken[] {
-      return Array.from(accessTokens.values());
+      // 要素も copy して返す (#2179)。 `readonly T[]` が凍らせるのは配列であって要素では
+      // ないため、 内部の実体をそのまま渡すと呼出側が `scope` を書き換えられる。 refresh は
+      // 保存済みの値を信頼するので、 書き換えは「宣言されていない scope の発行」 に化ける。
+      // field は全て primitive なので浅い copy で足りる。
+      return Array.from(accessTokens.values(), (token) => ({ ...token }));
     },
     listRefreshTokens(): readonly RefreshToken[] {
       // Includes the rotated + revoked tokens so tests can assert the full
-      // family history.
+      // family history. 要素の copy を返す理由は listAccessTokens と同じ (#2179)。
       return [
-        ...Array.from(refreshTokens.values()),
-        ...Array.from(rotatedRefreshTokens.values()),
+        ...Array.from(refreshTokens.values(), (token) => ({ ...token })),
+        ...Array.from(rotatedRefreshTokens.values(), (token) => ({ ...token })),
       ];
     },
     listSeenJtis(): readonly string[] {
