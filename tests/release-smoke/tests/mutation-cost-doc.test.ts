@@ -2,22 +2,26 @@
 // the configs it describes (Issue #2168).
 //
 // The table mixes two kinds of number. Measurements (ms per test, collect
-// seconds, run durations) are observations — nothing in the repo can derive
-// them, and they are only ever as fresh as the run that produced them. Settings
-// (concurrency, `timeoutMS`) are different: they are read straight out of each
-// `stryker.config.mjs`, so a config change silently makes the prose wrong.
+// seconds, run durations, mutant counts) are observations of one run — nothing
+// in a fresh checkout can derive them, and `mutation-report/` is gitignored.
+// Settings (concurrency, `timeoutMS`) are different: they are read straight out
+// of each `stryker.config.mjs`, so a config change silently makes the prose
+// wrong.
 //
 // `rules/quality.md § 導出可能記述は人手で書かない` asks for one of three routes
-// when writing a derivable value. This file is route 1 for the settings half:
-// walk the configs and compare. The measurements stay as written, which is why
-// the section names the command that produced each column.
+// when writing a derivable value. This file is route 1 for the settings half.
+//
+// The population matters. #2174 review round 1 found that asserting "only
+// `dapp` lowers concurrency" against the *table's* package set was already
+// false repo-wide: `e2e` and `ui` also run at 2, and `e2e` also sets
+// `timeoutMS`. Claims about configs are checked against every config.
 //
 // When it fails, the fix is one of:
-//   1. the config changed on purpose — update the table row
+//   1. the config changed on purpose — update the table row and the prose
 //   2. the table was wrong — fix the number
 //   3. a package left the table — remove its row or add the package back
-import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
@@ -27,14 +31,15 @@ import { repoRoot } from './repo-root.js';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = repoRoot(HERE);
 const DOC = resolve(REPO_ROOT, 'docs/quality/mutation-thresholds.md');
+const PACKAGES = resolve(REPO_ROOT, 'packages');
 
 /** The heading the cost table lives under. */
-const SECTION = "### Why one package's mutants cost ten times another's (#2168)";
+const SECTION = '### Why per-mutant cost varies so much between packages (#2168)';
 
 /**
  * Pull the cost table's package rows out of the section.
  *
- * The row shape is `| \`pkg\` | ms | collect | concurrency | mutants | run | rsm |`.
+ * The row shape is `| \`pkg\` | ms | collect | concurrency | mutants | run | cap |`.
  * Reading the section rather than the whole file keeps the other tables in this
  * document (tiers, overrides, widening) out of the match.
  */
@@ -43,7 +48,7 @@ function readCostRows(): Array<{ pkg: string; concurrency: number }> {
   const start = doc.indexOf(SECTION);
   expect(start, `見出し「${SECTION}」 が docs に無い`).toBeGreaterThan(-1);
 
-  // The section ends at the next `###` heading, or at the end of the file.
+  // The section ends at the next `### ` heading, or at the end of the file.
   const after = doc.slice(start + SECTION.length);
   const end = after.indexOf('\n### ');
   const section = end === -1 ? after : after.slice(0, end);
@@ -56,11 +61,46 @@ function readCostRows(): Array<{ pkg: string; concurrency: number }> {
   return rows;
 }
 
-/** `concurrency: N` as the package's Stryker config declares it. */
-function configConcurrency(pkg: string): number | null {
-  const path = resolve(REPO_ROOT, `packages/${pkg}/stryker.config.mjs`);
-  const m = /^\s*concurrency:\s*(\d+)\s*,/m.exec(readFileSync(path, 'utf8'));
-  return m ? Number(m[1]) : null;
+interface ConfigRow {
+  pkg: string;
+  concurrency: number | null;
+  timeoutMS: number | null;
+}
+
+/** Every package that carries a Stryker config, with the settings it declares. */
+function readAllConfigs(): ConfigRow[] {
+  const out: ConfigRow[] = [];
+  for (const pkg of readdirSync(PACKAGES)) {
+    const path = join(PACKAGES, pkg, 'stryker.config.mjs');
+    let body: string;
+    try {
+      body = readFileSync(path, 'utf8');
+    } catch {
+      continue;
+    }
+    const c = /^\s*concurrency:\s*(\d+)\s*,/m.exec(body);
+    const t = /^\s*timeoutMS:\s*(\d+)\s*,/m.exec(body);
+    out.push({
+      pkg,
+      concurrency: c ? Number(c[1]) : null,
+      timeoutMS: t ? Number(t[1]) : null,
+    });
+  }
+  return out;
+}
+
+/** Every `*.test.ts` under a directory, including subdirectories. */
+function walkTests(dir: string): string[] {
+  const out: string[] = [];
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) {
+      out.push(...walkTests(path));
+    } else if (name.endsWith('.test.ts')) {
+      out.push(path);
+    }
+  }
+  return out;
 }
 
 describe('mutation cost doc — 表の設定値が config と一致する (#2168)', () => {
@@ -72,51 +112,82 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
 
   it('T-MCD-002 各行の concurrency が stryker.config.mjs と一致する', () => {
     const rows = readCostRows();
-    let compared = 0;
+    // 下限は rows.length 側に課す。 突き合わせ件数と行数の一致は loop が必ず
+    // 1 回ずつ増やすので空集合でも成立し、下限にならない (#2174 r1-f10)。
+    expect(rows.length, '突き合わせる行が 1 つも無い').toBeGreaterThan(0);
+
+    const byPkg = new Map(readAllConfigs().map((c) => [c.pkg, c.concurrency]));
     for (const { pkg, concurrency } of rows) {
-      const actual = configConcurrency(pkg);
-      expect(actual, `packages/${pkg}/stryker.config.mjs に concurrency が無い`).not.toBeNull();
-      expect(concurrency, `${pkg} の concurrency が表と config で違う`).toBe(actual);
-      compared += 1;
+      expect(byPkg.has(pkg), `packages/${pkg}/stryker.config.mjs が無い`).toBe(true);
+      expect(concurrency, `${pkg} の concurrency が表と config で違う`).toBe(byPkg.get(pkg));
     }
-    expect(compared, '1 行も突き合わせていない').toBe(rows.length);
   });
 
-  it('T-MCD-003 concurrency を下げているのは dapp だけ (config 側で見る)', () => {
-    // 「dapp は 2、 他は 4」 は **config についての** 主張なので、 表ではなく config を
-    // 母集団にする。 表を読むと T-MCD-002 と同じ入力を見ることになり、 config 側だけが
-    // 変わった形を 1 件も捕まえられない (実測で 0 件 FAIL だった)。
-    const lowered = readCostRows()
-      .map((r) => [r.pkg, configConcurrency(r.pkg)] as const)
-      .filter(([, c]) => c !== null && c < 4)
-      .map(([pkg]) => pkg);
-    expect(lowered, 'concurrency < 4 の package が dapp 以外にある').toEqual(['dapp']);
+  it('T-MCD-003 concurrency を下げている package が本文の列挙と一致する', () => {
+    // 本文は「dapp / e2e / ui の 3 つが 2 で走る」 と書く。 母集団は **全 config** で、
+    // 表の package 集合ではない。 表を母集団にすると、表に載っていない package が
+    // 下げても気付けない (#2174 r1-f6 で実際に外していた)。
+    const configs = readAllConfigs();
+    expect(configs.length, 'stryker config を 1 つも読めていない').toBeGreaterThan(0);
+
+    const lowered = configs
+      .filter((c) => c.concurrency !== null && c.concurrency < 4)
+      .map((c) => c.pkg)
+      .sort();
+    expect(lowered, 'concurrency < 4 の package が本文の列挙と違う').toEqual(['dapp', 'e2e', 'ui']);
   });
 
-  it('T-MCD-004 dapp だけが timeoutMS を明示している', () => {
-    // 本文は「dapp は timeoutMS 60000、 既定は 5000」 と書く。
-    // 他 package が明示し始めたら、 その主張が成り立たなくなる。
-    const rows = readCostRows();
-    const explicit: Array<[string, number]> = [];
-    for (const { pkg } of rows) {
-      const path = resolve(REPO_ROOT, `packages/${pkg}/stryker.config.mjs`);
-      const m = /^\s*timeoutMS:\s*(\d+)\s*,/m.exec(readFileSync(path, 'utf8'));
-      if (m) explicit.push([pkg, Number(m[1])]);
-    }
-    expect(explicit, 'timeoutMS を明示するのは dapp の 60000 だけ').toEqual([['dapp', 60000]]);
+  it('T-MCD-004 timeoutMS を明示する package が本文の列挙と一致する', () => {
+    // 本文は「dapp と e2e が 60000 を置く」 と書く。 既定値そのものは本文から外した =
+    // Stryker の schema default を検査で確かめる手段が無く、literal が腐る (#2174 r1-f8)。
+    const configs = readAllConfigs();
+    expect(configs.length, 'stryker config を 1 つも読めていない').toBeGreaterThan(0);
+
+    const explicit = configs
+      .filter((c) => c.timeoutMS !== null)
+      .map((c) => [c.pkg, c.timeoutMS] as const)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    expect(explicit, 'timeoutMS を明示する package が本文の列挙と違う').toEqual([
+      ['dapp', 60000],
+      ['e2e', 60000],
+    ]);
   });
 
-  it('T-MCD-005 dapp の Stryker 対象 test は実 browser を起こさない', () => {
-    // 本文は「その shape は今の package が持つものではない」 と書く。
-    // 実起動が 1 件でも入ったら主張が崩れるので、 呼出の形で見る。
+  it('T-MCD-005 dapp の test は browser launcher を呼ばない (subdir 込み)', () => {
+    // Stryker の include は `.vitest-dist/tests/**/*.test.js` で再帰的。 直下だけを
+    // 見ると subdir に起動が入っても通る (#2174 r1-f7)。
     const dir = resolve(REPO_ROOT, 'packages/dapp/tests');
-    const files = readdirSync(dir).filter((f) => f.endsWith('.test.ts'));
+    const files = walkTests(dir);
     expect(files.length, 'dapp の test file を 1 つも読めていない').toBeGreaterThan(0);
 
-    const launching = files.filter((f) => {
-      const body = readFileSync(resolve(dir, f), 'utf8');
-      return /\b(chromium|firefox|webkit)\s*\.\s*launch(PersistentContext)?\s*\(/.test(body);
-    });
+    // 起動経路は launch / launchPersistentContext / launchServer / connect の 4 形。
+    const launcher =
+      /\b(chromium|firefox|webkit)\s*\.\s*(launch|launchPersistentContext|launchServer|connectOverCDP|connect)\s*\(/;
+    const launching = files
+      .filter((f) => launcher.test(readFileSync(f, 'utf8')))
+      .map((f) => f.slice(dir.length + 1));
     expect(launching, '実 browser を起こす test が dapp に入った').toEqual([]);
+  });
+
+  it('T-MCD-006 dapp の src が @playwright/test を runtime import している', () => {
+    // 本文は「4 module が型ではなく runtime で取り込む」 を collect の重さの根拠にする。
+    // 型参照だけに変わったら根拠が崩れるので、実物から数える (#2174 r1-f5)。
+    const dir = resolve(REPO_ROOT, 'packages/dapp/src');
+    const files = readdirSync(dir).filter((f) => f.endsWith('.ts'));
+    expect(files.length, 'dapp の src file を 1 つも読めていない').toBeGreaterThan(0);
+
+    const runtime = files
+      .filter((f) => {
+        const body = readFileSync(resolve(dir, f), 'utf8');
+        // `import type { ... } from` は型のみ。 それ以外の import 文を runtime とみなす。
+        return /^import\s+(?!type\s)[^;]*from\s+'@playwright\/test';/m.test(body);
+      })
+      .sort();
+    expect(runtime, '@playwright/test を runtime import する src file が本文と違う').toEqual([
+      'balance-change.ts',
+      'expect-custom-error.ts',
+      'expect-event.ts',
+      'fixture.ts',
+    ]);
   });
 });

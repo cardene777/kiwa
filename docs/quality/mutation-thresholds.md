@@ -472,65 +472,91 @@ subset of files, cover them, land it, repeat. The scope only ever grows, and the
 the tier default throughout. A temporary override with a "raise it back later" note is exactly the
 shape #1941 removed, and it survived four milestones before anyone returned to it.
 
-### Why one package's mutants cost ten times another's (#2168)
+### Why per-mutant cost varies so much between packages (#2168)
 
 Regeneration times spread far wider than mutant counts do. `dapp` has fewer mutants than `queue`
-and took three and a half times as long; against `cli` it is ten times the cost per mutant.
-Estimating a run by scaling from another package's mutant count is what produced the "about six
-minutes" figure for a run that took fifty-six.
+and took three and a half times as long. Estimating a run by scaling from another package's mutant
+count is what produced the "about six minutes" figure for a run that took fifty-six.
 
-Two independent terms set the price, and a package can be expensive through either one.
+Every number below is an **observation of one run on one machine**, not a property the repo can
+derive. Mutant counts come from each package's `mutation-report/mutation.json`, which is a
+gitignored local artefact; the durations come from the runs recorded in #2167 and #2172. Re-measure
+before relying on them.
 
-| package | ms per test | collect seconds per test file | concurrency | mutants | run | runner-seconds per mutant |
+| package | ms per test | collect seconds per test file | concurrency | mutants | run | capacity-seconds per mutant |
 |---|---|---|---|---|---|---|
-| `cli` | 1.47 | 0.067 | 4 | 2,625 | 2m58s | **0.27** |
+| `cli` | 1.47 | 0.067 | 4 | 2,625 | 2m58s | 0.27 |
 | `core` | 1.85 | 0.222 | 4 | 467 | — | — |
-| `orm` | 9.05 | — | 4 | 2,871 | 6m59s | **0.58** |
-| `auth` | 5.39 | 0.304 | 4 | 6,171 | 20m37s | **0.80** |
-| `queue` | 41.72 | 0.186 | 4 | 2,839 | 16m06s | **1.36** |
-| `dapp` | 22.75 | 1.367 | 2 | 2,473 | 56m05s | **2.72** |
+| `orm` | 9.05 | — | 4 | 2,871 | 6m59s | 0.58 |
+| `auth` | 5.39 | 0.304 | 4 | 6,171 | 20m37s | 0.80 |
+| `queue` | 41.72 | 0.186 | 4 | 2,839 | 16m06s | 1.36 |
+| `dapp` | 22.75 | 1.367 | 2 | 2,473 | 56m05s | 2.72 |
 
-`ms per test` is `stryker run --dryRunOnly`'s reported `net` divided by the test count — the time
-the tests themselves take, with Stryker's startup reported separately. `collect` comes from
-vitest's own summary line, summed across workers, divided by the package's test file count.
-`runner-seconds per mutant` is wall time multiplied by concurrency, divided by mutants; it orders
-the packages the way the two cost terms do, not the way mutant counts do.
+`ms per test` is `stryker run --dryRunOnly --reporters progress`'s reported `net` divided by the
+test count. `collect seconds per test file` is vitest's own `collect` figure — summed across
+workers — divided by the package's test file count. `capacity-seconds per mutant` is wall time
+multiplied by the configured concurrency, divided by mutants.
 
-**`queue` and `dapp` are expensive for opposite reasons.** `queue`'s tests are the slowest in the
-repo (41.72 ms each) while its files load cheaply (0.186 s each). `dapp`'s tests are half that
-speed but its files are the most expensive to load in the repo — 1.367 s each, twenty times
-`cli`. Under per-test coverage analysis Stryker pays both per covering test per mutant, so either
-term alone is enough to put a package above a second per mutant.
+#### What these three columns are not
 
-What makes a test slow is setup that repeats: `queue` stands up in-process brokers, spawn stubs,
-and timer machinery in `beforeEach`. What makes a file slow to load is its import graph: `dapp`
-pulls in viem and the Playwright types. § A slow test can also be a weak one records the same
-mechanism from the other end — `orm`'s two container-backed files paid a full container startup
-per mutant, which is why they are excluded from Stryker's view but not from `pnpm test`.
+**The first two are suite-wide simple averages, and Stryker does not run the suite.** Under
+per-test coverage analysis it runs the tests covering each mutant, and loads the files those tests
+live in. The real cost is therefore weighted by which tests cover which mutants, and the averages
+here only stand in for it. They order the packages the same way the measured runs do, which is
+what makes them useful as a first look — but they cannot on their own establish that one term
+rather than the other caused a given package's total.
 
-**Concurrency multiplies whatever those terms come to.** `dapp` runs at 2 where every other
-package runs at 4, so its wall time is twice its runner time.
+**The third assumes every runner is busy the whole time.** It is nominal capacity consumed per
+mutant, not measured busy time; idle runners are counted as working. Read it as "how much of the
+configured parallel capacity this package's run consumed per mutant", and compare it only between
+packages, never against a wall-clock budget.
 
-**Timeouts are priced separately.** `dapp` sets `timeoutMS: 60000` against the default 5,000, so
-each timed-out mutant occupies a runner for a minute. At the 17 timeouts its run produces that is
-about 17 minutes of runner time, a fifth of the total.
+#### The two terms
 
-#### The two `dapp` settings are inherited, not chosen
+`queue` and `dapp` sit at opposite ends of both. `queue` has the slowest tests in the table
+(41.72 ms each) and cheap files (0.186 s each). `dapp` has tests at half that speed and the most
+expensive files in the table — 1.367 s each. Both land above a capacity-second per mutant.
 
-Both arrived in the commit that first gave the package a Stryker config, when it was named `e2e`
-and ran Playwright. Neither the config header nor the commit explains them, and the shape they
-suit — a browser per runner, a minute for a page to settle — is not the shape the package has now.
-Its Stryker-scoped tests launch no browser; the four files that reference `@playwright/test` use
-it for types or substitute it.
+`dapp`'s file cost has a visible source. Four of its implementation modules import
+`@playwright/test` at runtime rather than for types: `fixture.ts` takes `test`, and
+`balance-change.ts` / `expect-custom-error.ts` / `expect-event.ts` take `expect`. Loading that
+package is not free, and every file that reaches it pays on load. **No browser is launched** —
+the launcher API is never called from `dapp`'s tests — but the import graph is paid for anyway.
+
+`queue`'s test cost has a different source: its tests build their doubles, stub timers, and drive
+scheduler ticks inside each test body, so the work repeats per test rather than per file.
+
+§ A slow test can also be a weak one records the same mechanism from a third angle — `orm`'s two
+container-backed files paid a full container startup per mutant, which is why they are excluded
+from Stryker's view but not from `pnpm test`.
+
+#### Concurrency
+
+Three packages run Stryker at 2 rather than 4: `dapp`, `e2e`, and `ui`. For a fixed amount of
+runner work, halving the configured concurrency roughly doubles the wall time — which is why
+`dapp`'s 2,473 mutants take longer in wall time than `queue`'s 2,839 despite both facing per-mutant
+costs of the same order.
+
+`dapp` and `e2e` also set `timeoutMS` to 60,000, well above Stryker's default. A timed-out mutant
+holds a runner for at least that long — Stryker's budget is `timeoutFactor × net + timeoutMS` — so
+`dapp`'s 17 timeouts account for **at least 17 runner-minutes** of its 112 nominal
+runner-minutes. The true figure is higher and this document does not measure it.
+
+#### `dapp`'s settings are inherited, not chosen
+
+`dapp` was named `e2e` when it first got a Stryker config, and it ran Playwright then. Both
+settings arrived in that commit, and neither the config header nor the commit explains them. The
+shape they suit — a browser per runner, a minute for a page to settle — still fits `e2e` and `ui`,
+which drive browsers today. It no longer fits `dapp`, whose tests launch none.
 
 Changing them is out of scope here, because this section exists to explain the spread rather than
 to act on it. #2171 carries the change and the measurement it needs.
 
 #### What to do with an estimate
 
-Scale from **runner-seconds per mutant** for the same package, not from another package's total.
-A package with no prior run has no basis for an estimate; take its dry-run net and its collect
-time first, divide by the test count and the file count, and place it in the table above.
+Scale from **that package's own** previous run, not from another package's total. A package with
+no prior run has no basis for one; take its dry-run `net` and its `collect` figure first, divide by
+the test count and the file count, and place it in the table above.
 
 ## Baseline snapshots
 
