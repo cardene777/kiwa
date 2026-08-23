@@ -113,26 +113,26 @@ export function createAuthorizationServer(
     user: AuthorizationUser,
     requested: string | undefined,
   ): string {
-    if (!requested || requested.length === 0) {
-      // Default scope = intersection of client allowed and user granted, or
-      // just user granted, or empty.
-      const userScopes = user.scopes ?? [];
-      const clientScopes = client.scopes ?? [];
-      if (clientScopes.length === 0) return userScopes.join(' ');
-      return userScopes
-        .filter((scope) => clientScopes.includes(scope))
-        .join(' ');
-    }
-    const requestedScopes = requested.split(' ').filter(Boolean);
+    // `scopes` は「発行を許される集合」 で、 省略は **空集合** を意味する (#2169)。
+    // 以前は空集合なら検査そのものを飛ばしていたため、 何も宣言していない user /
+    // client に対して任意の scope が通っていた。 **要求した各 scope は user と client の
+    // 双方が許可していなければならない**、 という形に揃える (どちらか一方ではない)。
     const userScopes = user.scopes ?? [];
     const clientScopes = client.scopes ?? [];
+
+    if (!requested || requested.length === 0) {
+      // Default scope = intersection of what the client may ask for and what
+      // the user granted. Either side declaring nothing yields nothing.
+      return userScopes.filter((scope) => clientScopes.includes(scope)).join(' ');
+    }
+    const requestedScopes = requested.split(' ').filter(Boolean);
     for (const scope of requestedScopes) {
-      if (userScopes.length > 0 && !userScopes.includes(scope)) {
+      if (!userScopes.includes(scope)) {
         throw new Error(
           `authorization-server: user "${user.subject}" not entitled to scope "${scope}"`,
         );
       }
-      if (clientScopes.length > 0 && !clientScopes.includes(scope)) {
+      if (!clientScopes.includes(scope)) {
         throw new Error(
           `authorization-server: client "${client.clientId}" not registered for scope "${scope}"`,
         );

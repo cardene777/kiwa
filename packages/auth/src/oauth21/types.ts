@@ -251,14 +251,26 @@ export interface IntrospectionResponse {
 export interface ClientRegistration {
   clientId: string;
   redirectUris: readonly string[];
+  /**
+   * Scopes this client is registered for, with the same rule as
+   * `AuthorizationUser.scopes` — omitting it means the empty set, so a client
+   * that declares nothing can be granted nothing (#2169).
+   */
   scopes?: readonly string[];
   /** Public / confidential distinction. `public` requires PKCE (still). */
   clientType?: 'public' | 'confidential';
 }
 
 /**
- * User account preseeded on the mock AS. Every user has a subject id and a
- * canonical set of scopes the AS is allowed to grant.
+ * User account preseeded on the mock AS.
+ *
+ * `scopes` is the set the AS may grant this user, and **omitting it means the
+ * empty set** (#2169). A requested scope has to appear here, or the request is
+ * rejected — the mock never grants a scope nobody declared.
+ *
+ * Tests that do not care about scopes can keep omitting it as long as they do
+ * not request one; the no-scope path yields an empty grant. Tests that request
+ * a scope must declare it.
  */
 export interface AuthorizationUser {
   subject: string;

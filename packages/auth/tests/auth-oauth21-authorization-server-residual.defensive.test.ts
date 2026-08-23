@@ -49,27 +49,7 @@ function authorize(
   return { code: res.code, codeVerifier };
 }
 
-describe('resolveGrantedScope — scope 未申告の組合せ', () => {
-  it('scope 要求なし + client が scope 未登録なら user 側の scope をそのまま許す', () => {
-    // client が scope を宣言していない = 絞り込む集合が無いので intersection を
-    // 取らずに user 側を返す経路。 交差を取ると空文字になってしまう。
-    const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: ['https://app.example.test/cb'] }],
-      users: [{ subject: 'user-1', scopes: ['openid', 'profile'] }],
-    });
-    const { code, codeVerifier } = authorize(server);
-
-    const res = server.token({
-      grantType: 'authorization_code',
-      code,
-      redirectUri: 'https://app.example.test/cb',
-      clientId: 'client-A',
-      codeVerifier,
-    });
-
-    expect(res.scope).toBe('openid profile');
-  });
-
+describe('resolveGrantedScope — scope 未申告と client 側の拒否', () => {
   it('scope 要求なし + user も client も scope 未登録なら空 scope で発行する', () => {
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: ['https://app.example.test/cb'] }],
@@ -89,8 +69,9 @@ describe('resolveGrantedScope — scope 未申告の組合せ', () => {
   });
 
   it('client が登録していない scope の要求は client 側の理由で拒否する', () => {
-    // user 側の制約が無い状態で拒否させることで、 client 側の判定だけが
-    // 効いていることを分離して確かめる。
+    // client 側の判定だけを分離するため、 user 側は要求する scope を両方とも
+    // 宣言しておく。 #2169 より前は user を空にすれば user 側の判定が飛んだが、
+    // 現在は省略が空集合なので user 側で先に落ちてしまう。
     const server = makeServer({
       clients: [
         {
@@ -99,7 +80,7 @@ describe('resolveGrantedScope — scope 未申告の組合せ', () => {
           scopes: ['openid'],
         },
       ],
-      users: [{ subject: 'user-1' }],
+      users: [{ subject: 'user-1', scopes: ['openid', 'admin'] }],
     });
 
     expect(() => authorize(server, { scope: 'openid admin' })).toThrow(
@@ -224,7 +205,13 @@ describe('authorize / token の入口 validation', () => {
 describe('resource indicator (RFC 8707) の伝播', () => {
   it('authorize で渡した resource が access / refresh / introspect まで届く', () => {
     const server = makeServer({
-      clients: [{ clientId: 'client-A', redirectUris: ['https://app.example.test/cb'] }],
+      clients: [
+        {
+          clientId: 'client-A',
+          redirectUris: ['https://app.example.test/cb'],
+          scopes: ['openid'],
+        },
+      ],
       users: [{ subject: 'user-1', scopes: ['openid'] }],
     });
     const { code, codeVerifier } = authorize(server, {
