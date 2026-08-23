@@ -14,7 +14,7 @@ title: "@kiwa-lab/orm setup-orm-env の API 契約"
 
 #### <code v-pre>setupOrmEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/orm/src/setup-orm-env.ts#L696) <code v-pre>packages/orm/src/setup-orm-env.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/orm/src/setup-orm-env.ts#L795) <code v-pre>packages/orm/src/setup-orm-env.ts</code>
 
 ```ts
 export declare function setupOrmEnv<TSchema extends DrizzleSchema = DrizzleSchema>(opts: MockSqliteOptions<TSchema>): Promise<OrmTestEnvMockT<TSchema>>;
