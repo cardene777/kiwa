@@ -1,0 +1,198 @@
+// coverage を測る skill が同じ目標を掲げていることを検査する (Issue #2184)。
+//
+// 4 skill のうち `kiwa-vitest` だけが 80% で止まる設計だった。 しかも同じ file の中で
+// Step 5 は「production target 100%」 と書き、完了条件は「threshold 達成 (default 80%)」 と
+// 書いていた。 **完了条件が gate になる**ので実効は 80% で、Step 5 の記述は読まれるだけだった。
+//
+// `kiwa-vitest` は TypeScript 単体テストを担う skill = packages/* の library 本体を覆う
+// 唯一の経路で、100% を目指す仕組みがいちばん必要な場所にだけ入っていなかった。
+//
+// 揃っているかだけでなく **その値が 100 であること** も見る。 揃っていることだけを見ると、
+// 4 つとも 50% に下げる変更が通る。
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { describe, expect, it } from 'vitest';
+
+import { repoRoot } from './repo-root.js';
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = repoRoot(HERE);
+const SKILLS_DIR = resolve(REPO_ROOT, '.claude/skills');
+
+/**
+ * coverage を測る skill。
+ *
+ * `kiwa-e2e` / `kiwa-play` は coverage を測らないので入れない。 増えた時にここへ足す。
+ * 一覧を人手で持つのは、「coverage を測る skill か」 を静的に判定する手が無いため
+ * (`--coverage` の出現で拾うと、説明文で言及しただけの skill が入る)。 代わりに
+ * T-SCT-004 が「一覧の外に `--coverage-threshold` を宣言する skill がいないか」 を見る。
+ */
+const COVERAGE_SKILLS = ['kiwa-api', 'kiwa-forge', 'kiwa-hardhat', 'kiwa-vitest'] as const;
+
+/**
+ * 4 metric すべてに metric 別 override を宣言することを要求する。
+ *
+ * 完了条件の文面で metric 名を要求する形にはしない。 `全 4 metric` と書く skill と
+ * `Lines / Stmts / Branches / Funcs` と並べる skill があり、どちらも 4 つを見ている。
+ * 文面の一致を要求すると、正しい skill を表記の違いだけで落とす。
+ *
+ * 代わりに **option の宣言** を見る。 これは metric ごとに 1 つずつ存在するかどうかで、
+ * 表記の揺れが無く、かつ「4 つを判定の対象にしている」 ことの直接の証拠になる。
+ * `kiwa-vitest` が Branches を落としていた時、この宣言も無かった。
+ *
+ * `funcs` と `functions` は skill によって綴りが違う (`solidity-coverage` は Functions、
+ * vitest は Funcs) ので、どちらでも通す。
+ */
+const REQUIRED_METRIC_OPTIONS: readonly (readonly string[])[] = [
+  ['--coverage-lines'],
+  ['--coverage-statements'],
+  ['--coverage-branches'],
+  ['--coverage-funcs', '--coverage-functions'],
+];
+
+const REQUIRED_THRESHOLD = 100;
+
+function skillBody(skill: string): string {
+  return readFileSync(resolve(SKILLS_DIR, skill, 'SKILL.md'), 'utf8');
+}
+
+/** `--coverage-threshold {N}` の option 宣言行から既定値を取り出す。 */
+function declaredDefault(skill: string): number | null {
+  for (const line of skillBody(skill).split('\n')) {
+    if (!line.includes('`--coverage-threshold {N}`')) continue;
+    const match = /default\s+(\d+)\s*%/.exec(line);
+    if (match?.[1] !== undefined) return Number(match[1]);
+    return null;
+  }
+  return null;
+}
+
+/** `## 完了条件` section を取り出す (次の `## ` 見出しまで)。 */
+function completionSection(skill: string): string | null {
+  const lines = skillBody(skill).split('\n');
+  const start = lines.findIndex((line) => line.trim() === '## 完了条件');
+  if (start === -1) return null;
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => line.startsWith('## '));
+  return (end === -1 ? rest : rest.slice(0, end)).join('\n');
+}
+
+/** 完了条件の中で coverage について述べている行だけを返す。 */
+function coverageCriteria(skill: string): string {
+  const section = completionSection(skill);
+  if (section === null) return '';
+  return section
+    .split('\n')
+    .filter((line) => /coverage|カバレッジ/i.test(line))
+    .join('\n');
+}
+
+describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
+  it('T-SCT-001 対象 skill を全件読めている', () => {
+    // 走査対象が 0 件なら以下は全て素通りする。 skill dir を移した時に
+    // 「揃っている」 ではなく「見ていない」 で通る形を先に止める。
+    const missing = COVERAGE_SKILLS.filter(
+      (skill) => !existsSync(resolve(SKILLS_DIR, skill, 'SKILL.md')),
+    );
+    expect(missing, 'SKILL.md を読めない skill がある').toEqual([]);
+    expect(COVERAGE_SKILLS.length, '対象 skill が 0 件 (検査が空振りしている)').toBeGreaterThan(0);
+  });
+
+  it('T-SCT-002 全 skill が `--coverage-threshold` の既定を 100% と宣言する', () => {
+    // 「揃っている」 だけを見ると 4 つとも 50% に下げる変更が通る。 値そのものを固定する。
+    const wrong = COVERAGE_SKILLS.map((skill) => ({ skill, value: declaredDefault(skill) }))
+      .filter((entry) => entry.value !== REQUIRED_THRESHOLD)
+      .map((entry) => `${entry.skill}: ${entry.value ?? '宣言が読めない'}`)
+      .sort();
+    expect(wrong, `--coverage-threshold の既定が ${REQUIRED_THRESHOLD}% でない skill がある`).toEqual(
+      [],
+    );
+  });
+
+  it('T-SCT-003 全 skill が 4 metric すべての override を宣言する', () => {
+    // 本 Issue の主眼。 `kiwa-vitest` は Branches を完了条件から落としており、
+    // metric 別 override の宣言も持っていなかった。 分岐は短絡評価や防御的分岐で
+    // 100% に届かないことが最も起きやすい metric で、見ない設計にすると
+    // 「不可能」分類で判断する場ごと消える。
+    // **option 宣言の行に限って探す**。 file 全体を grep する形にしていた時、
+    // Step 5 の threshold 表にも同じ文字列が出るため、宣言を丸ごと消しても表が
+    // 残っていれば通った (変異試験で実測)。 宣言と説明は別物で、守りたいのは前者。
+    const problems: string[] = [];
+    for (const skill of COVERAGE_SKILLS) {
+      const declarations = skillBody(skill)
+        .split('\n')
+        .filter((line) => line.trimStart().startsWith('- `--'))
+        .join('\n');
+      for (const spellings of REQUIRED_METRIC_OPTIONS) {
+        if (!spellings.some((option) => declarations.includes(`\`${option} {N}\``))) {
+          problems.push(`${skill}: ${spellings[0]} の宣言が無い`);
+        }
+      }
+    }
+    expect(problems.sort(), 'metric 別 override を宣言していない skill がある').toEqual([]);
+  });
+
+  it('T-SCT-003b 全 skill の完了条件が 4 metric と逃げ道の両方に触れる', () => {
+    // 目標を上げるだけだと、届かない package で loop が終わらない。 kiwa-forge が
+    // 既に持っている「残 uncovered が全て不可能分類なら可」 の逃げ道を全 skill に要求する。
+    //
+    // metric の書き方は「全 4 metric」 と列挙の 2 通りを許す (T-SCT-003 が宣言側で
+    // 4 つを固定しているので、こちらは「4 つを見ると書いてあるか」 だけを見る)。
+    const problems: string[] = [];
+    for (const skill of COVERAGE_SKILLS) {
+      const criteria = coverageCriteria(skill);
+      if (criteria === '') {
+        problems.push(`${skill}: 完了条件に coverage の行が無い`);
+        continue;
+      }
+      const namesAll = ['Lines', 'Branches'].every((metric) => criteria.includes(metric));
+      if (!/全\s*4\s*metric/.test(criteria) && !namesAll) {
+        problems.push(`${skill}: 完了条件が 4 metric を見ると読み取れない`);
+      }
+      if (!/不可能/.test(criteria)) {
+        problems.push(`${skill}: 完了条件に「不可能」分類の逃げ道が無い`);
+      }
+    }
+    expect(problems.sort(), '完了条件の形が揃っていない skill がある').toEqual([]);
+  });
+
+  it('T-SCT-004 一覧の外に `--coverage-threshold` を宣言する skill がいない', () => {
+    // 一覧を人手で持つ以上、一覧から漏れた skill が検査の外に落ちる。
+    // 宣言を持つ skill を実物から数え直して突き合わせる
+    // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。
+    const declaring: string[] = [];
+    for (const skill of readdirSkills()) {
+      if (declaredDefault(skill) !== null) declaring.push(skill);
+    }
+    expect(declaring.sort(), '`--coverage-threshold` を宣言する skill の一覧が実物とずれている').toEqual(
+      [...COVERAGE_SKILLS].sort(),
+    );
+  });
+
+  it('T-SCT-005 完了条件と Step 5 の目標値が矛盾しない', () => {
+    // 同じ file の中で Step 5 が 100% を書き、完了条件が 80% を書いていた
+    // (完了条件が gate なので実効は 80%)。 本文が別の threshold を名指ししていないか見る。
+    const conflicts: string[] = [];
+    for (const skill of COVERAGE_SKILLS) {
+      for (const [index, line] of skillBody(skill).split('\n').entries()) {
+        // 「default N%」 の形で REQUIRED_THRESHOLD 以外を書いた行を拾う。
+        // metric 別 override の説明 (`--coverage-lines {N}`) は値を書かないので当たらない。
+        const match = /default(?:\s+is)?\s+(\d+)\s*%/.exec(line);
+        const value = match?.[1];
+        if (value !== undefined && Number(value) !== REQUIRED_THRESHOLD) {
+          conflicts.push(`${skill}/SKILL.md:${index + 1} -> default ${value}%`);
+        }
+      }
+    }
+    expect(conflicts.sort(), '本文が別の既定値を名指ししている').toEqual([]);
+  });
+});
+
+function readdirSkills(): string[] {
+  if (!existsSync(SKILLS_DIR)) return [];
+  return readdirSync(SKILLS_DIR)
+    .filter((name) => existsSync(resolve(SKILLS_DIR, name, 'SKILL.md')))
+    .sort();
+}
