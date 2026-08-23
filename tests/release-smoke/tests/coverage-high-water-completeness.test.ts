@@ -27,27 +27,26 @@ const HIGH_WATER = resolve(REPO_ROOT, 'coverage-high-water.json');
 /**
  * 記録を持たないことを許す package と、その理由。
  *
- * **空にするのが目標**。 ここに残っている限り、その package は coverage が下がっても
- * 固定閾値 (lines 90 / branches 80) までしか守られない。
+ * **空が正常**。 ここに載っている限り、その package は coverage が下がっても固定閾値
+ * (lines 90 / branches 80) までしか守られない。
+ *
+ * 載せる時は理由と、いつ外れるかを書く。 ただし comment は作業待ち行列にならないので、
+ * T-HWC-004 が「coverage が読めるようになったら例外を外せ」 を機械的に見る (#2181 r2-f3)。
  */
-const WITHOUT_RECORD: Record<string, string> = {
-  '@kiwa-lab/auth':
-    'worktree で typecheck が通らず coverage を測れなかった。 PR #2180 が merge されて ' +
-    'main の coverage が fresh になった時点で --update-high-water を回して記録を足す',
-};
+const WITHOUT_RECORD: Record<string, string> = {};
 
-/** gate script が判定する package の一覧。 script 自身から取る。 */
-async function gatePackages(): Promise<string[]> {
+/**
+ * gate が判定する package の一覧。
+ *
+ * **module から import する**。 以前は gate script を正規表現で読んでいたが、
+ * key の引用符を変えるだけで 1 件だけ静かに落ち、記録を消しても検査が通った
+ * (#2181 r2-f2)。 同じ値を gate も検査も import すれば、その食い違いが起きない。
+ */
+async function gateInputs(): Promise<{ packages: string[]; dirs: Record<string, string> }> {
   const mod = (await import(
     pathToFileURL(resolve(REPO_ROOT, 'scripts/lib/gate-inputs.mjs')).href
-  )) as Record<string, unknown>;
-  void mod;
-  // `PACKAGES` は gate script が持つので、そちらを読む。 二重管理を避けるため
-  // 一覧を手で書かない (`rules/quality.md § 導出可能記述は人手で書かない`)。
-  const source = readFileSync(resolve(REPO_ROOT, 'scripts/check-coverage-gates.mjs'), 'utf8');
-  const block = /const PKG_DIRS = \{([\s\S]*?)\n\};/.exec(source);
-  expect(block, 'check-coverage-gates.mjs から PKG_DIRS を読めない').not.toBeNull();
-  return [...block![1]!.matchAll(/'(@kiwa-lab\/[a-z0-9-]+)'\s*:/g)].map((m) => m[1]!);
+  )) as { COVERAGE_PACKAGES: string[]; COVERAGE_PKG_DIRS: Record<string, string> };
+  return { packages: mod.COVERAGE_PACKAGES, dirs: mod.COVERAGE_PKG_DIRS };
 }
 
 describe('coverage 高水位の記録が全 package を覆う (#2177)', () => {
@@ -57,14 +56,16 @@ describe('coverage 高水位の記録が全 package を覆う (#2177)', () => {
     expect(existsSync(HIGH_WATER), `${HIGH_WATER} が無い`).toBe(true);
   });
 
-  it('T-HWC-002 gate が判定する package を 1 件以上読めている', async () => {
-    // 空振り防止。 正規表現が外れると以降の検査が全て空集合で通る。
-    const packages = await gatePackages();
-    expect(packages.length, 'PKG_DIRS から package を 1 つも読めていない').toBeGreaterThan(0);
+  it('T-HWC-002 判定順と dir 一覧が同じ集合である', async () => {
+    // 下限 1 件では**部分的な取りこぼし**を捕まえられない (#2181 r2-f2)。
+    // 2 つの export が同じ集合であることまで見る。 片方だけ package を足した形も落ちる。
+    const { packages, dirs } = await gateInputs();
+    expect(packages.length, 'package を 1 つも読めていない').toBeGreaterThan(0);
+    expect([...packages].sort(), '判定順と dir 一覧の集合が違う').toEqual(Object.keys(dirs).sort());
   });
 
   it('T-HWC-003 記録を持たない package は例外に列挙されている', async () => {
-    const packages = await gatePackages();
+    const { packages } = await gateInputs();
     const recorded = JSON.parse(readFileSync(HIGH_WATER, 'utf8')) as Record<string, unknown>;
 
     const missing = packages.filter((pkg) => !(pkg in recorded)).sort();
@@ -75,7 +76,28 @@ describe('coverage 高水位の記録が全 package を覆う (#2177)', () => {
     expect(missing, '記録の無い package が例外一覧と一致しない').toEqual(allowed);
   });
 
-  it('T-HWC-004 例外には理由が書かれている', () => {
+  it('T-HWC-004 例外は coverage が測れるようになった時点で失効する', async () => {
+    // **例外に期限が要る** (#2181 r2-f3)。 理由文に「PR #2180 が merge されたら」 と
+    // 書いても、その条件が来たことを誰も検知しない。 comment は作業待ち行列にならない。
+    //
+    // 判定材料は「その package の coverage が読めるか」。 読めるなら記録を作れる状態なので、
+    // 例外を残す理由が消えている。
+    const { dirs } = await gateInputs();
+    const stillUnmeasurable: string[] = [];
+    const nowMeasurable: string[] = [];
+    for (const pkg of Object.keys(WITHOUT_RECORD)) {
+      const summary = resolve(REPO_ROOT, dirs[pkg] ?? '', 'coverage/coverage-summary.json');
+      (existsSync(summary) ? nowMeasurable : stillUnmeasurable).push(pkg);
+    }
+    void stillUnmeasurable;
+    expect(
+      nowMeasurable,
+      'coverage が読めるようになった package が例外に残っている。 ' +
+        '`node scripts/check-coverage-gates.mjs --update-high-water` で記録を足し、例外から外す',
+    ).toEqual([]);
+  });
+
+  it('T-HWC-004b 例外には理由が書かれている', () => {
     const withoutReason = Object.entries(WITHOUT_RECORD)
       .filter(([, reason]) => reason.trim().length < 20)
       .map(([pkg]) => pkg);

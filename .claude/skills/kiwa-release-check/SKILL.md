@@ -48,9 +48,15 @@ node scripts/release-readiness-check.mjs
   - 記録の無い lib は固定閾値だけで判定し、report に `(高水位なし)` と出る。
     **記録の欠落は release-smoke の `coverage-high-water-completeness` が別途 fail させる** =
     gate 側を fail-open にしたまま、欠けた状態が既定として固定されるのを防ぐ
-  - 記録 file が壊れている (JSON として読めない / object でない / 値が数値でない) 場合は
-    exit 2 で落ちる。 file が **無い** 場合だけ「記録なし」 に倒す = 前者は誰かが壊した状態で、
-    coverage の劣化と同じく人が見るべき事象のため
+  - 記録 file が壊れている場合は exit 2 で落ちる。 判定は 5 点で、
+    JSON として読めない / object でない / entry が object でない /
+    **4 metric (lines / branches / functions / statements) が揃っていない** /
+    値が数値でない or 0-100 の範囲外。 file が **無い** 場合だけ「記録なし」 に倒す =
+    前者は誰かが壊した状態で、coverage の劣化と同じく人が見るべき事象のため
+  - 4 metric を必須にするのは、 key を消すとその metric だけ判定から外れ、
+    次の `--update-high-water` で今の低い実測値に作り直されるため
+  - 判定対象の package 一覧は `scripts/lib/gate-inputs.mjs` の `COVERAGE_PACKAGES` /
+    `COVERAGE_PKG_DIRS` が SSOT。 gate も completeness 検査も同じ値を import する
   - 全 kiwa lib で verify、 未達 lib は fail 報告。 fail の理由は
     「閾値を割った」 と「下がった (高水位 N%)」 を書き分ける
 - **Gate 2 = mutation MSI** (`scripts/check-mutation-gates.mjs`)

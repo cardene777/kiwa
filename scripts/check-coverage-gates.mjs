@@ -23,7 +23,10 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkArtifactFreshness, staleMessage } from './lib/artifact-freshness.mjs';
 import { compareArtifactInputs } from './lib/input-fingerprint.mjs';
-import { COVERAGE_INPUT_DIRS } from './lib/gate-inputs.mjs';
+import { COVERAGE_INPUT_DIRS, COVERAGE_PACKAGES, COVERAGE_PKG_DIRS } from './lib/gate-inputs.mjs';
+
+const PACKAGES = COVERAGE_PACKAGES;
+const PKG_DIRS = COVERAGE_PKG_DIRS;
 
 // Default to the repo containing this script, but allow CWD override for tests / CI.
 // `fileURLToPath`, not `.pathname`: a `file:` URL keeps percent-encoding, so a
@@ -36,63 +39,7 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
   ? process.cwd()
   : SCRIPT_ROOT;
 
-const PACKAGES = [
-  '@kiwa-lab/core',
-  '@kiwa-lab/api',
-  '@kiwa-lab/ui',
-  '@kiwa-lab/data',
-  '@kiwa-lab/cli-test',
-  '@kiwa-lab/observability',
-  '@kiwa-lab/e2e',
-  '@kiwa-lab/cli',
-  '@kiwa-lab/dapp',
-  '@kiwa-lab/a11y',
-  '@kiwa-lab/nextjs',
-  '@kiwa-lab/edge',
-  '@kiwa-lab/hono',
-  '@kiwa-lab/auth',
-  '@kiwa-lab/search',
-  '@kiwa-lab/security',
-  '@kiwa-lab/realtime',
-  '@kiwa-lab/cache',
-  '@kiwa-lab/ai-llm',
-  '@kiwa-lab/component',
-  '@kiwa-lab/perf-harness',
-  '@kiwa-lab/quality-metrics',
-  '@kiwa-lab/lean',
-  '@kiwa-lab/queue',
-  '@kiwa-lab/orm',
-  '@kiwa-lab/skill-test',
-];
 
-const PKG_DIRS = {
-  '@kiwa-lab/core': 'packages/core',
-  '@kiwa-lab/api': 'packages/api',
-  '@kiwa-lab/ui': 'packages/ui',
-  '@kiwa-lab/data': 'packages/data',
-  '@kiwa-lab/cli-test': 'packages/cli-test',
-  '@kiwa-lab/observability': 'packages/observability',
-  '@kiwa-lab/e2e': 'packages/e2e',
-  '@kiwa-lab/cli': 'packages/cli',
-  '@kiwa-lab/dapp': 'packages/dapp',
-  '@kiwa-lab/a11y': 'packages/a11y',
-  '@kiwa-lab/nextjs': 'packages/nextjs',
-  '@kiwa-lab/edge': 'packages/edge',
-  '@kiwa-lab/hono': 'packages/hono',
-  '@kiwa-lab/auth': 'packages/auth',
-  '@kiwa-lab/search': 'packages/search',
-  '@kiwa-lab/security': 'packages/security',
-  '@kiwa-lab/realtime': 'packages/realtime',
-  '@kiwa-lab/cache': 'packages/cache',
-  '@kiwa-lab/ai-llm': 'packages/ai-llm',
-  '@kiwa-lab/component': 'packages/component',
-  '@kiwa-lab/perf-harness': 'packages/perf-harness',
-  '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
-  '@kiwa-lab/lean': 'packages/lean',
-  '@kiwa-lab/queue': 'packages/queue',
-  '@kiwa-lab/orm': 'packages/orm',
-  '@kiwa-lab/skill-test': 'packages/skill-test',
-};
 
 // Lines / functions / statements stay at 90. Branches stay at 80 because the
 // dynamic-import error paths in optional-peer-dep wrappers (msw / pixelmatch
@@ -153,6 +100,9 @@ const UPDATE_HIGH_WATER = process.argv.includes('--update-high-water');
  */
 const EPSILON = 0.0001;
 
+/** 記録に必ず要る metric。 欠けていると判定がその分だけ消える。 */
+const REQUIRED_METRICS = ['lines', 'branches', 'functions', 'statements'];
+
 /**
  * 記録を読む。 **「file が無い」 と「file はあるが読めない」 を分ける**。
  *
@@ -186,10 +136,24 @@ function loadHighWater() {
     if (marks === null || typeof marks !== 'object' || Array.isArray(marks)) {
       fatal(`${HIGH_WATER_PATH} の "${pkg}" が object ではありません`);
     }
+    // **存在する値だけを見ると素通りする** (#2181 r2-f1)。 空 object は loop が 0 回で
+    // 通り、 metric key を消せばその metric だけ判定から外れる。 その後
+    // `--update-high-water` を回すと、今の低い実測値で作り直される = 「下がった値を
+    // baseline にしない」 という設計の要点が key を消す経路で成立しなくなる。
+    // だから **4 metric が揃っていること** を必須にする。
+    for (const metric of REQUIRED_METRICS) {
+      if (!(metric in marks)) {
+        fatal(`${HIGH_WATER_PATH} の "${pkg}" に "${metric}" がありません`);
+      }
+    }
     for (const [metric, value] of Object.entries(marks)) {
+      // 1 文字の書き換え (`99.65` → `"99.65"`) で 1 metric だけ無効化できた形を塞ぐ。
+      // 未知の metric は将来の拡張なので、数値であれば通す。
       if (typeof value !== 'number' || !Number.isFinite(value)) {
-        // 1 文字の書き換え (`99.65` → `"99.65"`) で 1 metric だけ無効化できた形を塞ぐ。
         fatal(`${HIGH_WATER_PATH} の "${pkg}.${metric}" が数値ではありません (${JSON.stringify(value)})`);
+      }
+      if (value < 0 || value > 100) {
+        fatal(`${HIGH_WATER_PATH} の "${pkg}.${metric}" が 0-100 の範囲外です (${value})`);
       }
     }
   }
