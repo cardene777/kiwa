@@ -95,6 +95,12 @@
     "functions": 100,
     "statements": 99.82
   },
+  "@kiwa-lab/orm": {
+    "lines": 99.11,
+    "branches": 94.5,
+    "functions": 100,
+    "statements": 99.11
+  },
   "@kiwa-lab/perf-harness": {
     "lines": 100,
     "branches": 94.9,

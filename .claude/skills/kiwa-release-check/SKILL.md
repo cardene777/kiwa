@@ -45,7 +45,12 @@ node scripts/release-readiness-check.mjs
   - 実測が高水位を上回った時の更新は `node scripts/check-coverage-gates.mjs --update-high-water`。
     **gate の実行では更新しない** = 下がった値を baseline に焼き付けないため
   - 更新は上げる方向にしか効かない。 意図的に下げる (code を消した等) 場合は file を手で直す
-  - 記録の無い lib は固定閾値だけで判定し、report に `(高水位なし)` と出る
+  - 記録の無い lib は固定閾値だけで判定し、report に `(高水位なし)` と出る。
+    **記録の欠落は release-smoke の `coverage-high-water-completeness` が別途 fail させる** =
+    gate 側を fail-open にしたまま、欠けた状態が既定として固定されるのを防ぐ
+  - 記録 file が壊れている (JSON として読めない / object でない / 値が数値でない) 場合は
+    exit 2 で落ちる。 file が **無い** 場合だけ「記録なし」 に倒す = 前者は誰かが壊した状態で、
+    coverage の劣化と同じく人が見るべき事象のため
   - 全 kiwa lib で verify、 未達 lib は fail 報告。 fail の理由は
     「閾値を割った」 と「下がった (高水位 N%)」 を書き分ける
 - **Gate 2 = mutation MSI** (`scripts/check-mutation-gates.mjs`)

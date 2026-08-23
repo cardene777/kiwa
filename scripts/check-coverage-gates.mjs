@@ -153,16 +153,55 @@ const UPDATE_HIGH_WATER = process.argv.includes('--update-high-water');
  */
 const EPSILON = 0.0001;
 
+/**
+ * 記録を読む。 **「file が無い」 と「file はあるが読めない」 を分ける**。
+ *
+ * 前者は正当な初期状態なので `{}` に倒す。 後者は誰かが壊した状態で、 coverage の劣化と
+ * 同じく人が見るべき事象なので落とす (#2181 r1-f1)。
+ *
+ * 分けないと迂回できる。 fail-open にしていた間、 **file を壊す / 中身を配列にする /
+ * 値を文字列にする** のいずれでも高水位判定が消え、 固定閾値までの低下がそのまま通った。
+ * 3 形のうち 2 形は警告すら出ない。
+ *
+ * file を消す経路だけは script では止められない。 「記録なし = 固定閾値のみ」 は
+ * 新規 package のための正当な経路と同じ形だから。 **そこは git 追跡と review が守る** =
+ * 記録が追跡下にあれば削除も破損も値の書き換えも diff に出る。
+ */
 function loadHighWater() {
   if (!existsSync(HIGH_WATER_PATH)) return {};
+
+  let raw;
   try {
-    const raw = JSON.parse(readFileSync(HIGH_WATER_PATH, 'utf8'));
-    return raw && typeof raw === 'object' ? raw : {};
-  } catch {
-    // 壊れた記録は「記録なし」 に倒す。 gate を止めるのは coverage の劣化だけにしたい。
-    process.stderr.write(`warning: ${HIGH_WATER_PATH} を読めないため高水位判定を行いません\n`);
-    return {};
+    raw = JSON.parse(readFileSync(HIGH_WATER_PATH, 'utf8'));
+  } catch (err) {
+    fatal(`${HIGH_WATER_PATH} を JSON として読めません: ${err.message}`);
   }
+  // 配列も `typeof === 'object'` を通る。 通すと全 package の記録が undefined になり、
+  // 高水位判定が丸ごと消える。
+  if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
+    fatal(`${HIGH_WATER_PATH} は package 名を key に持つ object でなければなりません`);
+  }
+
+  for (const [pkg, marks] of Object.entries(raw)) {
+    if (marks === null || typeof marks !== 'object' || Array.isArray(marks)) {
+      fatal(`${HIGH_WATER_PATH} の "${pkg}" が object ではありません`);
+    }
+    for (const [metric, value] of Object.entries(marks)) {
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        // 1 文字の書き換え (`99.65` → `"99.65"`) で 1 metric だけ無効化できた形を塞ぐ。
+        fatal(`${HIGH_WATER_PATH} の "${pkg}.${metric}" が数値ではありません (${JSON.stringify(value)})`);
+      }
+    }
+  }
+  return raw;
+}
+
+/** 記録が壊れている時に落とす。 coverage の劣化と同じく人が見るべき事象。 */
+function fatal(message) {
+  process.stderr.write(`\n高水位の記録が壊れています。\n  ${message}\n`);
+  process.stderr.write(`  記録を直すか、初期化するなら file を削除してから\n`);
+  process.stderr.write(`  node scripts/check-coverage-gates.mjs --update-high-water\n`);
+  process.exit(2);
 }
 
 function loadSummary(pkgDir) {
@@ -315,10 +354,15 @@ for (const f of failures) {
         const pct = f.totals[m].pct.toFixed(2);
         // どちらの下限を割ったかを書き分ける。 「閾値は満たすが下がった」 と
         // 「閾値そのものを割った」 は直し方が違う。
-        if (f.belowHighWater?.includes(m) && !f.belowThreshold?.includes(m)) {
-          return `${m}=${pct}% (下がった: 高水位 ${f.marks[m]}%)`;
-        }
-        return `${m}=${pct}% (need ${THRESHOLDS[m]}%)`;
+        //
+        // **両方割った時は両方を出す** (#2181 r1-f3)。 固定閾値だけを出すと、
+        // そこまで直して再実行して初めて高水位不足が現れ、2 往復になる。
+        const hitThreshold = f.belowThreshold?.includes(m);
+        const hitHighWater = f.belowHighWater?.includes(m);
+        const reasons = [];
+        if (hitThreshold) reasons.push(`閾値 ${THRESHOLDS[m]}%`);
+        if (hitHighWater) reasons.push(`高水位 ${f.marks[m]}%`);
+        return `${m}=${pct}% (下限を割った: ${reasons.join(' / ')})`;
       })
       .join(', ');
     process.stderr.write(`  - ${f.pkg}: ${detail}\n`);
