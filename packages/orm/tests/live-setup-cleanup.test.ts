@@ -35,6 +35,9 @@ interface Moment {
 const __moments: Moment[] = [];
 
 /** いま組み立て中の driver と container。 瞬間ごとに相手の状態を問うために覗く。 */
+const DRIVER_CLOSE_FAILURE = 'fake driver refused to close';
+const CONTAINER_STOP_FAILURE = 'fake container refused to stop';
+
 let __currentDriver: { closed: boolean } | null = null;
 let __currentContainer: { stopped: boolean } | null = null;
 
@@ -60,6 +63,15 @@ const START_FAILURE = 'Cannot connect to the Docker daemon at unix:///var/run/do
 
 /** driver factory を失敗させる切替。 */
 let __driverFactoryFails = false;
+/**
+ * 片付け自体を失敗させる切替 (#2178 r1-f1)。
+ *
+ * これが無いと `closeQuietly` の握り潰しを外しても 1 件も落ちない。 実測で確認した =
+ * helper の `try` / `catch` を外して 24 件すべて通った。 片付けが必ず成功する fake しか
+ * 持っていなかったため、 「片付けの例外が元の理由を上書きしないこと」 を誰も見ていなかった。
+ */
+let __driverCloseFails = false;
+let __containerStopFails = false;
 const FACTORY_FAILURE = 'driver factory exploded';
 
 /** この文字列を含む SQL が driver へ届いた時に投げる。 inline SQL の失敗に使う。 */
@@ -102,6 +114,7 @@ class FakePostgresContainer implements StartedContainer {
     recordContainerStop(this);
     this.stopped = true;
     this.stops += 1;
+    if (__containerStopFails) throw new Error(CONTAINER_STOP_FAILURE);
   }
 }
 
@@ -122,6 +135,7 @@ class FakeMySqlContainer implements StartedContainer {
     recordContainerStop(this);
     this.stopped = true;
     this.stops += 1;
+    if (__containerStopFails) throw new Error(CONTAINER_STOP_FAILURE);
   }
 }
 
@@ -160,6 +174,7 @@ class FakePostgresSql implements ClosableDriver {
     recordDriverClose(this);
     this.closed = true;
     this.closes += 1;
+    if (__driverCloseFails) throw new Error(DRIVER_CLOSE_FAILURE);
   }
 }
 
@@ -311,16 +326,24 @@ class FakePgPool implements ClosableDriver {
  */
 vi.mock('pg', () => ({ Pool: FakePgPool, default: { Pool: FakePgPool } }));
 
-/** `prisma db push` の起動。 0 以外にすると失敗経路、 投げると起動そのものの失敗。 */
-let __spawnStatus = 0;
-let __spawnThrows = false;
+/**
+ * `prisma db push` の起動。 0 以外にすると失敗経路、 `__spawnFailsToStart` で起動失敗。
+ *
+ * **起動失敗は throw ではない**。 実物の `spawnSync` は ENOENT を投げず、
+ * `status: null` と `error` に載せて返す (#2178 r1-f2)。 throw で模すと、
+ * 実依存では到達しない経路を検査することになる。
+ */
+let __spawnStatus: number | null = 0;
+let __spawnFailsToStart = false;
 const __spawnCalls: string[][] = [];
 
 vi.mock('node:child_process', () => ({
   spawnSync: (cmd: string, args: string[]) => {
     void cmd;
     __spawnCalls.push(args);
-    if (__spawnThrows) throw new Error(SPAWN_FAILURE);
+    if (__spawnFailsToStart) {
+      return { status: null, stdout: '', stderr: '', error: new Error(SPAWN_FAILURE) };
+    }
     return {
       status: __spawnStatus,
       stdout: __spawnStatus === 0 ? 'pushed' : '',
@@ -424,9 +447,11 @@ beforeEach(() => {
   __currentContainer = null;
   __startFails = false;
   __driverFactoryFails = false;
+  __driverCloseFails = false;
+  __containerStopFails = false;
   __failingStatement = null;
   __spawnStatus = 0;
-  __spawnThrows = false;
+  __spawnFailsToStart = false;
   __previousDatabaseUrl = process.env[ENV_NAME];
   delete process.env[ENV_NAME];
 });
@@ -440,6 +465,34 @@ describe('setupOrmEnv — drizzle + live + postgres の起動後の失敗 (#2173
   it('T-LSC-001 seed が投げたら driver を閉じてから container を止め、 同じ理由を投げ直す', async () => {
     await expect(drizzleLive('postgres', { seed: explodingSeed }), '元の理由を投げ直す').rejects.toThrow(SEED_FAILURE);
     expectCleanedUp();
+  });
+
+  it('T-LSC-001b driver の後始末が投げても元の理由が残り、 container は止まる', async () => {
+    // **片付けの例外を握り潰していることの検査**。 これが無いと `closeQuietly` の
+    // `try` / `catch` を外しても 1 件も落ちない (#2178 r1-f1、 実測で確認した)。
+    __driverCloseFails = true;
+
+    const caught = await drizzleLive('postgres', { seed: explodingSeed }).then(
+      () => null,
+      (err: unknown) => err as Error,
+    );
+
+    expect(caught?.message, '元の理由が片付けの例外に上書きされない').toContain(SEED_FAILURE);
+    expect(caught?.message, '片付けの理由は表に出ない').not.toContain(DRIVER_CLOSE_FAILURE);
+    expect(__currentContainer?.stopped, 'driver が投げても container は止まる').toBe(true);
+  });
+
+  it('T-LSC-001c container の停止が投げても元の理由が残る', async () => {
+    __containerStopFails = true;
+
+    const caught = await drizzleLive('postgres', { seed: explodingSeed }).then(
+      () => null,
+      (err: unknown) => err as Error,
+    );
+
+    expect(caught?.message, '元の理由が片付けの例外に上書きされない').toContain(SEED_FAILURE);
+    expect(caught?.message, '片付けの理由は表に出ない').not.toContain(CONTAINER_STOP_FAILURE);
+    expect(__currentDriver?.closed, 'container が投げる前に driver は閉じている').toBe(true);
   });
 
   it('T-LSC-002 driver factory が投げたら container を止める', async () => {
@@ -505,9 +558,9 @@ describe('setupOrmEnv — prisma + live + postgres の起動後の失敗 (#2173)
     expect(ENV_NAME in process.env, '元が無いので削除して戻す').toBe(false);
   });
 
-  it('T-LSC-203 db push の起動そのものが投げたら container を止め、 環境変数も戻す', async () => {
+  it('T-LSC-203 db push を起こせなかったら container を止め、 環境変数も戻す', async () => {
     process.env[ENV_NAME] = 'postgres://previous@127.0.0.1:5432/prev';
-    __spawnThrows = true;
+    __spawnFailsToStart = true;
 
     await expect(prismaLive('postgres')).rejects.toThrow(SPAWN_FAILURE);
 
@@ -534,9 +587,9 @@ describe('setupOrmEnv — prisma + live + mysql の起動後の失敗 (#2173)', 
     expect(ENV_NAME in process.env, '元が無いので削除して戻す').toBe(false);
   });
 
-  it('T-LSC-303 db push の起動そのものが投げたら container を止め、 環境変数も戻す', async () => {
+  it('T-LSC-303 db push を起こせなかったら container を止め、 環境変数も戻す', async () => {
     process.env[ENV_NAME] = 'mysql://previous@127.0.0.1:3306/prev';
-    __spawnThrows = true;
+    __spawnFailsToStart = true;
 
     await expect(prismaLive('mysql')).rejects.toThrow(SPAWN_FAILURE);
 
