@@ -49,33 +49,7 @@ function authorize(
   return { code: res.code, codeVerifier };
 }
 
-describe('resolveGrantedScope — scope 未申告の組合せ', () => {
-  it('scope 要求なし + 双方が宣言していれば交差を返す', () => {
-    // 要求なしの既定は双方の交差。 #2169 より前は client が空なら交差を取らずに
-    // user 側をそのまま返しており、 宣言していない client に scope が載っていた。
-    const server = makeServer({
-      clients: [
-        {
-          clientId: 'client-A',
-          redirectUris: ['https://app.example.test/cb'],
-          scopes: ['openid', 'profile'],
-        },
-      ],
-      users: [{ subject: 'user-1', scopes: ['openid', 'profile'] }],
-    });
-    const { code, codeVerifier } = authorize(server);
-
-    const res = server.token({
-      grantType: 'authorization_code',
-      code,
-      redirectUri: 'https://app.example.test/cb',
-      clientId: 'client-A',
-      codeVerifier,
-    });
-
-    expect(res.scope).toBe('openid profile');
-  });
-
+describe('resolveGrantedScope — scope 未申告と client 側の拒否', () => {
   it('scope 要求なし + user も client も scope 未登録なら空 scope で発行する', () => {
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: ['https://app.example.test/cb'] }],

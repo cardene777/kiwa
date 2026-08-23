@@ -74,9 +74,9 @@ describe('要求した scope は宣言が要る (#2169)', () => {
     expect(grantedScope(server, 'openid email')).toBe('openid email');
   });
 
-  it('T-SCOPE-002 user が宣言していない scope は user 側の理由で拒否する', () => {
-    // **これが finding #15 の形**。 以前は user が何も宣言していないと検査を飛ばし、
-    // `admin` がそのまま発行されていた。
+  it('T-SCOPE-002 宣言集合の外側は user 側の理由で拒否する', () => {
+    // **非空の宣言集合の外側**を拒否する形。 これは旧実装でも通る (旧実装が飛ばしたのは
+    // 集合が空の時だけ)。 finding #15 そのものの再現は T-SCOPE-011 が持つ。
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: [REDIRECT], scopes: ['openid', 'admin'] }],
       users: [{ subject: 'user-1', scopes: ['openid'] }],
@@ -98,16 +98,18 @@ describe('要求した scope は宣言が要る (#2169)', () => {
     );
   });
 
-  it('T-SCOPE-004 user 側の理由が client 側より先に出る', () => {
-    // 双方とも宣言していない時にどちらの案内が出るかを固定する。
-    // 順序が入れ替わると、 何を直せばよいかの案内が変わる。
+  it('T-SCOPE-004 双方とも宣言していなければ拒否する', () => {
+    // **どちらの理由が先に出るかは固定しない**。 本 PR の契約は「双方の宣言が要る」 までで、
+    // 報告の優先順位は定めていない。 固定すると client-first や両者を列挙する等価な実装を
+    // 落としてしまう (#2176 gv-06)。
+    // 主体ごとの message は T-SCOPE-002 / T-SCOPE-003 が引き続き見る。
     const server = makeServer({
       clients: [{ clientId: 'client-A', redirectUris: [REDIRECT] }],
       users: [{ subject: 'user-1' }],
     });
 
-    expect(() => grantedScope(server, 'admin')).toThrow(
-      /user "user-1" not entitled to scope "admin"/,
+    expect(() => grantedScope(server, 'admin'), '拒否されること自体は固定する').toThrow(
+      /not entitled to scope "admin"|not registered for scope "admin"/,
     );
   });
 });
