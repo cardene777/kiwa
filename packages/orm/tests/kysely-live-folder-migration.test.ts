@@ -174,10 +174,13 @@ async function setupKysely(
   dialect: 'postgres' | 'mysql',
   overrides: Record<string, unknown> = {},
 ): Promise<KyselyLiveEnv> {
+  // `schema` は `LiveKysely*Options` の必須 field。 省くと型を二重 cast で
+  // 潜り抜けることになり、 公開 API では組めない入力を検査してしまう。
   const env = await setupOrmEnv({
     mode: 'live',
     orm: 'kysely',
     dialect,
+    schema: {} as Db,
     ...overrides,
   } as unknown as Parameters<typeof setupOrmEnv>[0]);
   return env as unknown as KyselyLiveEnv;

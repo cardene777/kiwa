@@ -130,7 +130,7 @@ describe('setupOrmEnv — container package が入っていない時の案内 (#
   });
 
   it('T-DEP-005 kysely + postgres は pg と kysely も並べる', async () => {
-    const message = await messageOf({ mode: 'live', orm: 'kysely', dialect: 'postgres' });
+    const message = await messageOf({ mode: 'live', orm: 'kysely', dialect: 'postgres', schema: {} });
 
     expect(message).toContain('@kiwa-lab/orm: live Kysely (Postgres) mode requires');
     // kysely 経路の driver は `pg` (drizzle 側の `postgres` ではない)。
@@ -142,7 +142,7 @@ describe('setupOrmEnv — container package が入っていない時の案内 (#
   });
 
   it('T-DEP-006 kysely + mysql は mysql2 と kysely を並べる', async () => {
-    const message = await messageOf({ mode: 'live', orm: 'kysely', dialect: 'mysql' });
+    const message = await messageOf({ mode: 'live', orm: 'kysely', dialect: 'mysql', schema: {} });
 
     expect(message).toContain('@kiwa-lab/orm: live Kysely (MySQL) mode requires');
     expect(message).toContain("'mysql2'");
@@ -172,8 +172,8 @@ describe('setupOrmEnv — container package が入っていない時の案内 (#
         prismaClient: DummyPrismaClient,
         schemaPath: '/tmp/schema.prisma',
       },
-      { mode: 'live', orm: 'kysely', dialect: 'postgres' },
-      { mode: 'live', orm: 'kysely', dialect: 'mysql' },
+      { mode: 'live', orm: 'kysely', dialect: 'postgres', schema: {} },
+      { mode: 'live', orm: 'kysely', dialect: 'mysql', schema: {} },
     ];
     const messages: string[] = [];
     for (const opts of cases) {
