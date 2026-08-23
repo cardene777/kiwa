@@ -105,18 +105,40 @@ function walkTests(dir: string): string[] {
 }
 
 /**
- * その file が `@playwright/test` から **値** を取り込むか。
+ * その file が `@playwright/test` から **値の binding を宣言している** か。
  *
  * 正規表現では判定できない。 `import { type Page } from '...'` は行頭が
  * `import type` ではないので runtime に見えるが、 取り込む binding は 0 個で
  * 値は 1 つも来ない。 逆に side-effect import (`import '...'`) と double quote の
- * 形は行頭の pattern から漏れる (#2174 r2-f5)。
+ * 形は行頭の pattern から漏れる (#2174 r2-f5)。 AST なら import clause と各
+ * specifier の `isTypeOnly` をそのまま読める。
  *
- * AST なら import clause と各 specifier の `isTypeOnly` をそのまま読める。
+ * **判定するのは宣言であって emit 後の依存ではない** (#2174 r3-f1)。
+ * `verbatimModuleSyntax` が false の時、 型位置でしか使わない値 import は
+ * TypeScript が消去するため、 ここで「値」 と答えた file が emit 後には
+ * 依存を持たないことがありうる。 emit 後まで見るには dapp の compiler options で
+ * 変換した出力を読む必要があり、 release-smoke から別 package の build に
+ * 依存することになる。 docs 側の記述も「declare value imports」 に合わせてあり、
+ * この検査はその文言をそのまま守る。
+ *
+ * 値の re-export (`export { expect } from '...'`) も宣言なので数える。
  */
 function importsPlaywrightAtRuntime(path: string): boolean {
   const source = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true);
   for (const stmt of source.statements) {
+    // `export { x } from '@playwright/test'` — 値の re-export も module を引く。
+    if (ts.isExportDeclaration(stmt)) {
+      const spec = stmt.moduleSpecifier;
+      if (!spec || !ts.isStringLiteral(spec) || spec.text !== '@playwright/test') continue;
+      if (stmt.isTypeOnly) continue;
+      const clause = stmt.exportClause;
+      // `export * from` は clause を持たない = 値を通す。
+      if (!clause) return true;
+      if (ts.isNamespaceExport(clause)) return true;
+      if (clause.elements.some((el) => !el.isTypeOnly)) return true;
+      continue;
+    }
+
     if (!ts.isImportDeclaration(stmt)) continue;
     if (!ts.isStringLiteral(stmt.moduleSpecifier)) continue;
     if (stmt.moduleSpecifier.text !== '@playwright/test') continue;
@@ -210,15 +232,15 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     expect(launching, '実 browser を起こす test が dapp に入った').toEqual([]);
   });
 
-  it('T-MCD-006 dapp の src が @playwright/test を runtime import している', () => {
-    // 本文は「4 module が型ではなく runtime で取り込む」 を collect の重さの根拠にする。
-    // 型参照だけに変わったら根拠が崩れるので、実物から数える (#2174 r1-f5)。
+  it('T-MCD-006 dapp の src が @playwright/test の値 binding を宣言している', () => {
+    // 本文は「4 module が value import を宣言する」 と書く。 型参照だけに変わったら
+    // その記述が実物とずれるので、実物から数える (#2174 r1-f5 / r3-f1)。
     const dir = resolve(REPO_ROOT, 'packages/dapp/src');
     const files = readdirSync(dir).filter((f) => f.endsWith('.ts'));
     expect(files.length, 'dapp の src file を 1 つも読めていない').toBeGreaterThan(0);
 
     const runtime = files.filter((f) => importsPlaywrightAtRuntime(resolve(dir, f))).sort();
-    expect(runtime, '@playwright/test を runtime import する src file が本文と違う').toEqual([
+    expect(runtime, '@playwright/test の値 binding を宣言する src file が本文と違う').toEqual([
       'balance-change.ts',
       'expect-custom-error.ts',
       'expect-event.ts',

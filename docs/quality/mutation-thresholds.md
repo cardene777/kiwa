@@ -517,16 +517,18 @@ packages, never against a wall-clock budget.
 (41.72 ms each) and cheap files (0.186 s each). `dapp` has tests at half that speed and the most
 expensive files in the table — 1.367 s each. Both land above a capacity-second per mutant.
 
-`dapp`'s file cost has a visible source. Four of its implementation modules import
-`@playwright/test` at runtime rather than for types: `fixture.ts` takes `test`, and
-`balance-change.ts` / `expect-custom-error.ts` / `expect-event.ts` take `expect`. Loading that
-package is not free, and every file that reaches it pays on load. **No browser is launched** —
-the launcher API is never called from `dapp`'s tests — but the import graph is paid for anyway.
+`dapp` pulls a large dependency into its module graph. Four of its implementation modules declare
+value imports of `@playwright/test` — `fixture.ts` binds `test`, and `balance-change.ts` /
+`expect-custom-error.ts` / `expect-event.ts` bind `expect` — so the package is reachable from the
+implementation rather than only from the tests. **No browser is launched**: the launcher API is
+never called from `dapp`'s tests. Whether that graph is what the 1.367 s is made of has not been
+measured, only that the two coexist.
 
-`queue`'s test cost sits in the tests themselves rather than in loading. Its scheduler tests stub
-timers and drive ticks inside each test body, and across the suite the setup a test needs is built
-per test rather than shared per file. What the measurement shows is only the outcome — 41.72 ms
-per test against `cli`'s 1.47 — not that any one file's pattern causes it.
+`queue` shows the opposite split: its files are cheap to load and its tests are the slowest in the
+table (41.72 ms each against `cli`'s 1.47). The source of that is likewise unmeasured. Three
+review rounds went into narrowing a proposed explanation about per-test setup, and the honest
+end state is that **the measurement says where the cost is, not what causes it**. Anyone acting on
+this should profile the package rather than trust an inferred cause.
 
 § A slow test can also be a weak one records the same mechanism from a third angle — `orm`'s two
 container-backed files paid a full container startup per mutant, which is why they are excluded
