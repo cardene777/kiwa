@@ -128,6 +128,27 @@ describe('buildMeasureResult — trim 統計 (trimPercent > 0)', () => {
     expect(result.trimmed?.stdev).toBe(0);
   });
 
+  it('T-PH-M-014 trim で全件消える場合は sampleCount 0 の統計を返す', () => {
+    // n = 4 / 50% → 上下 2 件ずつで残り 0 件。 ここで NaN を返すと report の
+    // 数値欄が全て NaN になり、 上限判定が黙って通る。
+    const result = buildMeasureResult('trim-empty', 4, 0, [1, 2, 3, 4], 50);
+
+    // 0 が「速い測定結果」 と読まれないことを、 同じ result の trim 前統計と
+    // 並べて確かめる。 trim 前は非ゼロで、 0 は `sampleCount: 0` に属している。
+    expect(result.trimmed?.sampleCount, '残り 0 件であることが結果に現れる').toBe(0);
+    expect(result.p95, 'trim 前の統計は実測値のまま').toBeGreaterThan(0);
+
+    expect(result.trimmed).toEqual({
+      percent: 50,
+      sampleCount: 0,
+      p50: 0,
+      p95: 0,
+      p99: 0,
+      mean: 0,
+      stdev: 0,
+    });
+  });
+
   it('T-PH-M-015 trimPercent 既定 (0) では trimmed を持たない', () => {
     const result = buildMeasureResult('trim-off', 4, 0, [1, 2, 3, 4]);
     expect(result.trimmed).toBeUndefined();
