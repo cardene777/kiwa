@@ -37,6 +37,20 @@ function splitSqlStatements(source: Exclude<MigrationSource, { folder: string }>
   return out;
 }
 
+/**
+ * container を起こした後の失敗経路で、 片付けを 1 手だけ実行する。
+ *
+ * 失敗しても投げない。 呼出側は捕らえた理由をそのまま投げ直すため、 ここで投げると
+ * 「なぜ setup が失敗したか」 が片付けの失敗にすり替わる。
+ */
+async function closeQuietly(close: () => Promise<unknown>): Promise<void> {
+  try {
+    await close();
+  } catch {
+    /* 元の理由を隠さない */
+  }
+}
+
 async function setupMockSqlite<TSchema extends DrizzleSchema>(
   opts: MockSqliteOptions<TSchema>,
 ): Promise<OrmTestEnv<TSchema>> {
@@ -111,39 +125,51 @@ async function setupLivePostgres<TSchema extends DrizzleSchema>(
     url: string,
     opts: { max: number; onnotice?: () => void },
   ) => import('postgres').Sql;
-  const raw = sqlFactory(connectionUri, { max: 4, onnotice: () => undefined });
-  const db = drizzleModule.drizzle(raw, { schema: opts.schema });
+  // container を起こした後に投げると container と driver が残る。 driver factory /
+  // migration / seed のどこで投げても、 片付けてから同じ理由を投げ直す。
+  let startedRaw: import('postgres').Sql | undefined;
+  try {
+    const raw = sqlFactory(connectionUri, { max: 4, onnotice: () => undefined });
+    startedRaw = raw;
+    const db = drizzleModule.drizzle(raw, { schema: opts.schema });
 
-  if (typeof opts.migrations !== 'undefined') {
-    if (isFolderMigration(opts.migrations)) {
-      const { migrate } = await import('drizzle-orm/postgres-js/migrator');
-      await migrate(db, { migrationsFolder: opts.migrations.folder });
-    } else {
-    for (const stmt of splitSqlStatements(opts.migrations)) {
-      // postgres.js `sql.unsafe` accepts arbitrary DDL and returns a Promise.
-      await raw.unsafe(stmt);
-    }
-    }
-  }
-  if (typeof opts.seed === 'function') {
-    await opts.seed(db);
-  }
-
-  return {
-    mode: 'live',
-    orm: 'drizzle',
-    dialect: 'postgres',
-    db,
-    raw,
-    connectionUri,
-    stop: async () => {
-      try {
-        await raw.end({ timeout: 5 });
-      } finally {
-        await container.stop();
+    if (typeof opts.migrations !== 'undefined') {
+      if (isFolderMigration(opts.migrations)) {
+        const { migrate } = await import('drizzle-orm/postgres-js/migrator');
+        await migrate(db, { migrationsFolder: opts.migrations.folder });
+      } else {
+        for (const stmt of splitSqlStatements(opts.migrations)) {
+          // postgres.js `sql.unsafe` accepts arbitrary DDL and returns a Promise.
+          await raw.unsafe(stmt);
+        }
       }
-    },
-  };
+    }
+    if (typeof opts.seed === 'function') {
+      await opts.seed(db);
+    }
+
+    return {
+      mode: 'live',
+      orm: 'drizzle',
+      dialect: 'postgres',
+      db,
+      raw,
+      connectionUri,
+      stop: async () => {
+        try {
+          await raw.end({ timeout: 5 });
+        } finally {
+          await container.stop();
+        }
+      },
+    };
+  } catch (caught) {
+    // 片付けの順は stop() と同じ = driver を先、 container を後。
+    const raw = startedRaw;
+    if (typeof raw !== 'undefined') await closeQuietly(() => raw.end({ timeout: 5 }));
+    await closeQuietly(() => container.stop());
+    throw caught;
+  }
 }
 
 async function setupLiveMysql<TSchema extends DrizzleSchema>(
@@ -182,42 +208,54 @@ async function setupLiveMysql<TSchema extends DrizzleSchema>(
   const createPoolFn = (typeof directCreatePool === 'function' ? directCreatePool : defaultExport?.createPool) as unknown as (
     uri: string,
   ) => import('mysql2/promise').Pool;
-  if (typeof createPoolFn !== 'function') {
-    throw new Error('@kiwa-lab/orm: could not resolve mysql2/promise createPool export.');
-  }
-  const raw = createPoolFn(connectionUri);
-  const db = drizzleModule.drizzle(raw, { schema: opts.schema, mode: 'default' });
-
-  if (typeof opts.migrations !== 'undefined') {
-    if (isFolderMigration(opts.migrations)) {
-      const { migrate } = await import('drizzle-orm/mysql2/migrator');
-      await migrate(db, { migrationsFolder: opts.migrations.folder });
-    } else {
-    for (const stmt of splitSqlStatements(opts.migrations)) {
-      // mysql2 `query` accepts arbitrary DDL.
-      await raw.query(stmt);
+  // container を起こした後に投げると container と pool が残る。 export の解決 /
+  // driver factory / migration / seed のどこで投げても、 片付けてから投げ直す。
+  let startedRaw: import('mysql2/promise').Pool | undefined;
+  try {
+    if (typeof createPoolFn !== 'function') {
+      throw new Error('@kiwa-lab/orm: could not resolve mysql2/promise createPool export.');
     }
-    }
-  }
-  if (typeof opts.seed === 'function') {
-    await opts.seed(db);
-  }
+    const raw = createPoolFn(connectionUri);
+    startedRaw = raw;
+    const db = drizzleModule.drizzle(raw, { schema: opts.schema, mode: 'default' });
 
-  return {
-    mode: 'live',
-    orm: 'drizzle',
-    dialect: 'mysql',
-    db,
-    raw,
-    connectionUri,
-    stop: async () => {
-      try {
-        await raw.end();
-      } finally {
-        await container.stop();
+    if (typeof opts.migrations !== 'undefined') {
+      if (isFolderMigration(opts.migrations)) {
+        const { migrate } = await import('drizzle-orm/mysql2/migrator');
+        await migrate(db, { migrationsFolder: opts.migrations.folder });
+      } else {
+        for (const stmt of splitSqlStatements(opts.migrations)) {
+          // mysql2 `query` accepts arbitrary DDL.
+          await raw.query(stmt);
+        }
       }
-    },
-  };
+    }
+    if (typeof opts.seed === 'function') {
+      await opts.seed(db);
+    }
+
+    return {
+      mode: 'live',
+      orm: 'drizzle',
+      dialect: 'mysql',
+      db,
+      raw,
+      connectionUri,
+      stop: async () => {
+        try {
+          await raw.end();
+        } finally {
+          await container.stop();
+        }
+      },
+    };
+  } catch (caught) {
+    // 片付けの順は stop() と同じ = pool を先、 container を後。
+    const raw = startedRaw;
+    if (typeof raw !== 'undefined') await closeQuietly(() => raw.end());
+    await closeQuietly(() => container.stop());
+    throw caught;
+  }
 }
 
 async function setupMockPrismaSqlite<TClient>(
@@ -314,44 +352,59 @@ async function setupLivePrismaPostgres<TClient>(
   const connectionUri = container.getConnectionUri();
   const envName = opts.datasourceUrlEnv ?? 'DATABASE_URL';
   const previousEnv = process.env[envName];
-  process.env[envName] = connectionUri;
-
-
-  const result = pushSchemaWithRetry(spawnSync, opts.schemaPath, envName, connectionUri);
-  if (result.status !== 0) {
+  const restoreEnv = (): void => {
     if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
     else delete process.env[envName];
-    await container.stop();
-    throw new Error(
-      `@kiwa-lab/orm: prisma db push failed against testcontainers Postgres (status=${result.status}). Verify the schema.prisma datasource has provider="postgresql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
-    );
-  }
-
-  const client = new opts.prismaClient({ datasourceUrl: connectionUri });
-  if (typeof opts.seed === 'function') {
-    await opts.seed(client);
-  }
-
-  return {
-    mode: 'live',
-    orm: 'prisma',
-    dialect: 'postgres',
-    client,
-    connectionUri,
-    stop: async () => {
-      const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
-      if (typeof maybeDisconnect === 'function') {
-        try {
-          await maybeDisconnect.call(client);
-        } catch {
-          /* swallow */
-        }
-      }
-      if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
-      else delete process.env[envName];
-      await container.stop();
-    },
   };
+  process.env[envName] = connectionUri;
+
+  // container を起こした後に投げると container と client と環境変数が残る。 db push /
+  // client の生成 / seed のどこで投げても、 片付けてから同じ理由を投げ直す。
+  let startedClient: { $disconnect?: () => Promise<void> } | undefined;
+  try {
+    const result = pushSchemaWithRetry(spawnSync, opts.schemaPath, envName, connectionUri);
+    if (result.status !== 0) {
+      throw new Error(
+        `@kiwa-lab/orm: prisma db push failed against testcontainers Postgres (status=${result.status}). Verify the schema.prisma datasource has provider="postgresql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
+      );
+    }
+
+    const client = new opts.prismaClient({ datasourceUrl: connectionUri });
+    startedClient = client as unknown as { $disconnect?: () => Promise<void> };
+    if (typeof opts.seed === 'function') {
+      await opts.seed(client);
+    }
+
+    return {
+      mode: 'live',
+      orm: 'prisma',
+      dialect: 'postgres',
+      client,
+      connectionUri,
+      stop: async () => {
+        const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
+        if (typeof maybeDisconnect === 'function') {
+          try {
+            await maybeDisconnect.call(client);
+          } catch {
+            /* swallow */
+          }
+        }
+        restoreEnv();
+        await container.stop();
+      },
+    };
+  } catch (caught) {
+    // 片付けの順は stop() と同じ = client を切り、 環境変数を戻し、 最後に container。
+    const client = startedClient;
+    const disconnect = client?.$disconnect;
+    if (typeof disconnect === 'function' && typeof client !== 'undefined') {
+      await closeQuietly(() => disconnect.call(client));
+    }
+    restoreEnv();
+    await closeQuietly(() => container.stop());
+    throw caught;
+  }
 }
 
 async function setupLivePrismaMysql<TClient>(
@@ -382,44 +435,59 @@ async function setupLivePrismaMysql<TClient>(
   const connectionUri = container.getConnectionUri();
   const envName = opts.datasourceUrlEnv ?? 'DATABASE_URL';
   const previousEnv = process.env[envName];
-  process.env[envName] = connectionUri;
-
-
-  const result = pushSchemaWithRetry(spawnSync, opts.schemaPath, envName, connectionUri);
-  if (result.status !== 0) {
+  const restoreEnv = (): void => {
     if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
     else delete process.env[envName];
-    await container.stop();
-    throw new Error(
-      `@kiwa-lab/orm: prisma db push failed against testcontainers MySQL (status=${result.status}). Verify the schema.prisma datasource has provider="mysql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
-    );
-  }
-
-  const client = new opts.prismaClient({ datasourceUrl: connectionUri });
-  if (typeof opts.seed === 'function') {
-    await opts.seed(client);
-  }
-
-  return {
-    mode: 'live',
-    orm: 'prisma',
-    dialect: 'mysql',
-    client,
-    connectionUri,
-    stop: async () => {
-      const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
-      if (typeof maybeDisconnect === 'function') {
-        try {
-          await maybeDisconnect.call(client);
-        } catch {
-          /* swallow */
-        }
-      }
-      if (typeof previousEnv === 'string') process.env[envName] = previousEnv;
-      else delete process.env[envName];
-      await container.stop();
-    },
   };
+  process.env[envName] = connectionUri;
+
+  // container を起こした後に投げると container と client と環境変数が残る。 db push /
+  // client の生成 / seed のどこで投げても、 片付けてから同じ理由を投げ直す。
+  let startedClient: { $disconnect?: () => Promise<void> } | undefined;
+  try {
+    const result = pushSchemaWithRetry(spawnSync, opts.schemaPath, envName, connectionUri);
+    if (result.status !== 0) {
+      throw new Error(
+        `@kiwa-lab/orm: prisma db push failed against testcontainers MySQL (status=${result.status}). Verify the schema.prisma datasource has provider="mysql" + url = env("${envName}"). stderr=${result.stderr ?? ''}`,
+      );
+    }
+
+    const client = new opts.prismaClient({ datasourceUrl: connectionUri });
+    startedClient = client as unknown as { $disconnect?: () => Promise<void> };
+    if (typeof opts.seed === 'function') {
+      await opts.seed(client);
+    }
+
+    return {
+      mode: 'live',
+      orm: 'prisma',
+      dialect: 'mysql',
+      client,
+      connectionUri,
+      stop: async () => {
+        const maybeDisconnect = (client as unknown as { $disconnect?: () => Promise<void> }).$disconnect;
+        if (typeof maybeDisconnect === 'function') {
+          try {
+            await maybeDisconnect.call(client);
+          } catch {
+            /* swallow */
+          }
+        }
+        restoreEnv();
+        await container.stop();
+      },
+    };
+  } catch (caught) {
+    // 片付けの順は stop() と同じ = client を切り、 環境変数を戻し、 最後に container。
+    const client = startedClient;
+    const disconnect = client?.$disconnect;
+    if (typeof disconnect === 'function' && typeof client !== 'undefined') {
+      await closeQuietly(() => disconnect.call(client));
+    }
+    restoreEnv();
+    await closeQuietly(() => container.stop());
+    throw caught;
+  }
 }
 
 /**
@@ -525,53 +593,69 @@ async function setupLiveKyselyPostgres<TDatabase extends KyselyDatabase>(
 
   const connectionUri = container.getConnectionUri();
   const PoolCtor = ((pgModule as { default?: { Pool?: unknown } }).default?.Pool ?? (pgModule as { Pool?: unknown }).Pool) as new (config: { connectionString: string; max?: number }) => import('pg').Pool;
-  const raw = new PoolCtor({ connectionString: connectionUri, max: 4 });
-  let rawEnded = false;
-  const endRaw = async (): Promise<void> => {
-    if (rawEnded) return;
-    rawEnded = true;
-    await raw.end();
-  };
-  // Kysely owns its dialect pool after the first query. Keep that close and
-  // the explicit stop-path close idempotent because setup can return before a query runs.
-  const dialectPool = {
-    connect: raw.connect.bind(raw),
-    end: endRaw,
-  } as unknown as import('pg').Pool;
-  const db = new kyselyModule.Kysely<TDatabase>({ dialect: new kyselyModule.PostgresDialect({ pool: dialectPool }) });
+  // container を起こした後に投げると container と pool が残る。 driver の生成 /
+  // migration / seed のどこで投げても、 片付けてから同じ理由を投げ直す。
+  let startedEndRaw: (() => Promise<void>) | undefined;
+  let startedDb: import('kysely').Kysely<TDatabase> | undefined;
+  try {
+    const raw = new PoolCtor({ connectionString: connectionUri, max: 4 });
+    let rawEnded = false;
+    const endRaw = async (): Promise<void> => {
+      if (rawEnded) return;
+      rawEnded = true;
+      await raw.end();
+    };
+    startedEndRaw = endRaw;
+    // Kysely owns its dialect pool after the first query. Keep that close and
+    // the explicit stop-path close idempotent because setup can return before a query runs.
+    const dialectPool = {
+      connect: raw.connect.bind(raw),
+      end: endRaw,
+    } as unknown as import('pg').Pool;
+    const db = new kyselyModule.Kysely<TDatabase>({ dialect: new kyselyModule.PostgresDialect({ pool: dialectPool }) });
+    startedDb = db;
 
-  if (typeof opts.migrations !== 'undefined') {
-    if (isFolderMigration(opts.migrations)) {
-      await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
-    } else {
-      for (const stmt of splitSqlStatements(opts.migrations)) {
-        await raw.query(stmt);
-      }
-    }
-  }
-  if (typeof opts.seed === 'function') {
-    await opts.seed(db);
-  }
-
-  return {
-    mode: 'live',
-    orm: 'kysely',
-    dialect: 'postgres',
-    db,
-    raw,
-    connectionUri,
-    stop: async () => {
-      try {
-        await db.destroy();
-      } finally {
-        try {
-          await endRaw();
-        } finally {
-          await container.stop();
+    if (typeof opts.migrations !== 'undefined') {
+      if (isFolderMigration(opts.migrations)) {
+        await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
+      } else {
+        for (const stmt of splitSqlStatements(opts.migrations)) {
+          await raw.query(stmt);
         }
       }
-    },
-  };
+    }
+    if (typeof opts.seed === 'function') {
+      await opts.seed(db);
+    }
+
+    return {
+      mode: 'live',
+      orm: 'kysely',
+      dialect: 'postgres',
+      db,
+      raw,
+      connectionUri,
+      stop: async () => {
+        try {
+          await db.destroy();
+        } finally {
+          try {
+            await endRaw();
+          } finally {
+            await container.stop();
+          }
+        }
+      },
+    };
+  } catch (caught) {
+    // 片付けの順は stop() と同じ = kysely を先、 pool を次、 container を最後。
+    const db = startedDb;
+    const endRaw = startedEndRaw;
+    if (typeof db !== 'undefined') await closeQuietly(() => db.destroy());
+    if (typeof endRaw !== 'undefined') await closeQuietly(endRaw);
+    await closeQuietly(() => container.stop());
+    throw caught;
+  }
 }
 
 async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
@@ -598,7 +682,7 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
   } catch (caught) {
     const msg = caught instanceof Error ? caught.message : String(caught);
     throw new Error(
-      `@kiwa-lab/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running. Original error: ${msg}`,
+      `@kiwa-lab/orm: failed to start MySQL testcontainer (image=${image}). Verify the Docker daemon is running (\`docker ps\` should succeed). Original error: ${msg}`,
     );
   }
 
@@ -608,65 +692,80 @@ async function setupLiveKyselyMysql<TDatabase extends KyselyDatabase>(
   const createPoolFn = (typeof directCreatePool === 'function' ? directCreatePool : defaultExport?.createPool) as unknown as (
     uri: string,
   ) => import('mysql2/promise').Pool;
-  if (typeof createPoolFn !== 'function') {
-    await container.stop();
-    throw new Error('@kiwa-lab/orm: could not resolve mysql2/promise createPool export.');
-  }
-  const raw = createPoolFn(connectionUri);
-  let rawEnded = false;
-  const endRaw = async (): Promise<void> => {
-    if (rawEnded) return;
-    rawEnded = true;
-    await raw.end();
-  };
-  // `mysql2/promise` exposes the callback pool under `.pool`; Kysely calls
-  // getConnection/end with callbacks, while env.raw remains the promise facade.
-  const callbackPool = raw.pool;
-  const dialectPool = {
-    getConnection: callbackPool.getConnection.bind(callbackPool),
-    end: (callback: (error: Error | null) => void): void => {
-      void endRaw().then(
-        () => callback(null),
-        (caught: unknown) => callback(caught instanceof Error ? caught : new Error(String(caught))),
-      );
-    },
-  };
-  const db = new kyselyModule.Kysely<TDatabase>({
-    dialect: new kyselyModule.MysqlDialect({ pool: dialectPool } as unknown as ConstructorParameters<typeof kyselyModule.MysqlDialect>[0]),
-  });
-
-  if (typeof opts.migrations !== 'undefined') {
-    if (isFolderMigration(opts.migrations)) {
-      await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
-    } else {
-      for (const stmt of splitSqlStatements(opts.migrations)) {
-        await raw.query(stmt);
-      }
+  // container を起こした後に投げると container と pool が残る。 export の解決 /
+  // driver の生成 / migration / seed のどこで投げても、 片付けてから投げ直す。
+  let startedEndRaw: (() => Promise<void>) | undefined;
+  let startedDb: import('kysely').Kysely<TDatabase> | undefined;
+  try {
+    if (typeof createPoolFn !== 'function') {
+      throw new Error('@kiwa-lab/orm: could not resolve mysql2/promise createPool export.');
     }
-  }
-  if (typeof opts.seed === 'function') {
-    await opts.seed(db);
-  }
+    const raw = createPoolFn(connectionUri);
+    let rawEnded = false;
+    const endRaw = async (): Promise<void> => {
+      if (rawEnded) return;
+      rawEnded = true;
+      await raw.end();
+    };
+    startedEndRaw = endRaw;
+    // `mysql2/promise` exposes the callback pool under `.pool`; Kysely calls
+    // getConnection/end with callbacks, while env.raw remains the promise facade.
+    const callbackPool = raw.pool;
+    const dialectPool = {
+      getConnection: callbackPool.getConnection.bind(callbackPool),
+      end: (callback: (error: Error | null) => void): void => {
+        void endRaw().then(
+          () => callback(null),
+          (caught: unknown) => callback(caught instanceof Error ? caught : new Error(String(caught))),
+        );
+      },
+    };
+    const db = new kyselyModule.Kysely<TDatabase>({
+      dialect: new kyselyModule.MysqlDialect({ pool: dialectPool } as unknown as ConstructorParameters<typeof kyselyModule.MysqlDialect>[0]),
+    });
+    startedDb = db;
 
-  return {
-    mode: 'live',
-    orm: 'kysely',
-    dialect: 'mysql',
-    db,
-    raw,
-    connectionUri,
-    stop: async () => {
-      try {
-        await db.destroy();
-      } finally {
-        try {
-          await endRaw();
-        } finally {
-          await container.stop();
+    if (typeof opts.migrations !== 'undefined') {
+      if (isFolderMigration(opts.migrations)) {
+        await applyKyselyFolderMigrations(db as unknown as import('kysely').Kysely<KyselyDatabase>, opts.migrations.folder);
+      } else {
+        for (const stmt of splitSqlStatements(opts.migrations)) {
+          await raw.query(stmt);
         }
       }
-    },
-  };
+    }
+    if (typeof opts.seed === 'function') {
+      await opts.seed(db);
+    }
+
+    return {
+      mode: 'live',
+      orm: 'kysely',
+      dialect: 'mysql',
+      db,
+      raw,
+      connectionUri,
+      stop: async () => {
+        try {
+          await db.destroy();
+        } finally {
+          try {
+            await endRaw();
+          } finally {
+            await container.stop();
+          }
+        }
+      },
+    };
+  } catch (caught) {
+    // 片付けの順は stop() と同じ = kysely を先、 pool を次、 container を最後。
+    const db = startedDb;
+    const endRaw = startedEndRaw;
+    if (typeof db !== 'undefined') await closeQuietly(() => db.destroy());
+    if (typeof endRaw !== 'undefined') await closeQuietly(endRaw);
+    await closeQuietly(() => container.stop());
+    throw caught;
+  }
 }
 
 /**
