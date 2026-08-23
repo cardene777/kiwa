@@ -347,6 +347,7 @@ describe('items API (mock mode)', () => {
 - `pnpm exec vitest run --coverage` で production target が threshold 達成 (default 100%)、 もしくは残 uncovered が全て「不可能」分類と report で明示
 - `tests/reports/integration/coverage-report-{module}.md` が 4 section format で Write 済
 - 観点別 `describe` ブロックが spec の観点一覧と一致
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
 
 ## references
 

@@ -286,6 +286,7 @@ describe('integration', () => {
 - `pnpm exec vitest run --coverage` で production target (`src/` 配下) の Lines / Stmts / Funcs が threshold 達成 (default 80%)
 - `tests/reports/unit/coverage-report-{module}.md` が 4 section format で Write 済
 - 観点別 `describe` ブロックが spec の観点一覧と一致
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
 
 ## references
 

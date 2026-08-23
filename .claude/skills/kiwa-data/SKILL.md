@@ -189,6 +189,7 @@ describe('cron schedule (fake clock)', () => {
 
 - Layer 1 spec の Automation=yes 全 TC が `tests/{module}.data.test.ts` に Write 済
 - `pnpm exec vitest run` 全 PASS (failure 0 件)
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
 - Topic 別 `describe` グループが spec の Topic 一覧と一致
 - DLQ / idempotency / fake clock / cron schedule の観点が cover されている
 

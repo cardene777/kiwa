@@ -418,6 +418,7 @@ review 結果は kiwa-forge と同形式 (PASS / CONDITIONAL / FAIL critical な
 - Step 0 が定める coverage report path が 4 section format で Write 済 (final + round 別)
 - 観点別 grouping (`describe('観点 N: {name}', () => {...})`) が spec と一致
 - 「停滞」判定や `hardhat coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
 
 ## references
 

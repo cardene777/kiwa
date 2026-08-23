@@ -1,4 +1,5 @@
 import { flakyEligibility } from './flaky.js';
+import { analyzeSlowest } from './slowest.js';
 import type { DashboardInput } from './types.js';
 
 function summarize(input: DashboardInput): {
@@ -28,6 +29,25 @@ function summarize(input: DashboardInput): {
     // skip しか無い run と、 全部通った run が同じ `100.0%` になっていた (#1909)。
     passRate: denom > 0 ? passes / denom : null,
   };
+}
+
+/** ms を読める単位にする。 1 秒未満は ms、それ以上は秒。 */
+function formatMs(ms: number): string {
+  return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
+}
+
+/**
+ * 差を「向き付きの絶対値 + 比」 で書く。
+ *
+ * 比が出せない場合 (比較対象なし / 前 run が 0ms) は絶対値だけを書く。 `Infinity` や
+ * `NaN` を表示に出さない。
+ */
+function formatDelta(deltaMs: number | null, deltaRatio: number | null): string {
+  if (deltaMs === null) return 'n/a (比較対象なし)';
+  const sign = deltaMs > 0 ? '+' : deltaMs < 0 ? '-' : '±';
+  const abs = formatMs(Math.abs(deltaMs));
+  if (deltaRatio === null) return `${sign}${abs} (比は出せない: 前 run が 0ms)`;
+  return `${sign}${abs} (${deltaRatio > 0 ? '+' : ''}${(deltaRatio * 100).toFixed(1)}%)`;
 }
 
 export function renderDashboard(input: DashboardInput): string {
@@ -96,6 +116,50 @@ export function renderDashboard(input: DashboardInput): string {
     }
   }
   lines.push('');
+
+  lines.push('## Execution time');
+  lines.push('');
+  // 集めている `durationMs` を出す。 遅い test がどれかを見る経路が他に無い (#2186)。
+  const timing = analyzeSlowest({
+    history: input.history,
+    ...(input.slowestLimit === undefined ? {} : { limit: input.slowestLimit }),
+    ...(input.flakyHistory === undefined ? {} : { cumulative: input.flakyHistory }),
+  });
+  lines.push('| metric | value |');
+  lines.push('|---|---|');
+  lines.push(`| total | ${formatMs(timing.totalMs)} |`);
+  lines.push(`| measured records | ${timing.measured} |`);
+  lines.push(`| unmeasured records | ${timing.unmeasured} |`);
+  lines.push(
+    `| previous run total | ${timing.previousTotalMs === null ? 'n/a (比較対象なし)' : formatMs(timing.previousTotalMs)} |`,
+  );
+  lines.push(`| delta | ${formatDelta(timing.deltaMs, timing.deltaRatio)} |`);
+  lines.push('');
+  if (timing.measured === 0) {
+    // **「速い」 と書かない**。 duration を出さない reporter 設定では全 record が 0 になり、
+    // 合計 0ms は「速い」 ではなく「測っていない」 を意味する。
+    lines.push(
+      input.history.records.length === 0
+        ? 'test の実行結果を 1 件も受け取っていない。 実行時間は測っていない.'
+        : 'duration を持つ record が 1 件も無い。 reporter が実行時間を出していない可能性がある.',
+    );
+    lines.push('');
+  } else {
+    lines.push(`| testId | duration | name |`);
+    lines.push(`|---|---|---|`);
+    for (const slow of timing.slowest) {
+      lines.push(`| ${slow.testId} | ${formatMs(slow.durationMs)} | ${slow.fullName} |`);
+    }
+    lines.push('');
+    if (timing.unmeasured > 0) {
+      // 一覧が全件を覆っていないことを書く。 書かないと「上位 N がこの suite の遅い順」 と
+      // 読まれるが、実際は測れた record の中の順序でしかない。
+      lines.push(
+        `duration を持たない record が ${timing.unmeasured} 件ある。 上位は測れた ${timing.measured} 件の中の順序.`,
+      );
+      lines.push('');
+    }
+  }
 
   lines.push('## Code coverage');
   lines.push('');
