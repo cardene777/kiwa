@@ -195,6 +195,30 @@ type NonPrimitiveKeys<T> = {
   [K in keyof T]-?: NonNullable<T[K]> extends Primitive ? never : K;
 }[keyof T];
 
+/**
+ * 「primitive」 または「primitive の readonly 配列」 でない field 名を返す。
+ *
+ * `ClientRegistration` / `AuthorizationUser` 用 (#2180 r1-f2 の派生)。 この 2 型は
+ * `redirectUris` / `scopes` という配列 field を持つので `NonPrimitiveKeys` は使えない
+ * (正しい実装で落ちてしまう)。
+ *
+ * 守りたいのは **copy の深さと field の形が食い違わないこと**。 登録経路は配列 field を
+ * 名指しで copy しているため、`metadata: Record<string, unknown>` のような field が
+ * 足されると **その field だけ素通しして呼出側と参照を共有する** = #2179 で塞いだ穴が戻る。
+ *
+ * 配列 field を 1 つ足すだけなら copy の追加で済むが、object field を足すなら copy の形を
+ * 変えないといけない。 後者を compile で止める。
+ */
+type DeepNonCopyableKeys<T> = {
+  [K in keyof T]-?: NonNullable<T[K]> extends Primitive
+    ? never
+    : NonNullable<T[K]> extends readonly (infer E)[]
+      ? NonNullable<E> extends Primitive
+        ? never
+        : K
+      : K;
+}[keyof T];
+
 export interface AccessToken {
   token: string;
   tokenType: 'Bearer' | 'DPoP';
@@ -246,6 +270,21 @@ const _accessTokenIsFlat: _AssertAccessTokenAllPrimitive = true;
 const _refreshTokenIsFlat: _AssertRefreshTokenAllPrimitive = true;
 void _accessTokenIsFlat;
 void _refreshTokenIsFlat;
+
+/**
+ * 登録経路が copy できる形に留まっていることを強制する (#2180)。
+ *
+ * 落ちたら選ぶのは 2 つ。 field を primitive か primitive の配列にするか、
+ * `authorization-server.ts` の `ownClient()` / `ownUser()` の copy を深くするか。
+ * **名指し copy のまま足してはいけない** = その field だけ呼出側と参照を共有する。
+ */
+type _AssertClientCopyable = DeepNonCopyableKeys<ClientRegistration> extends never ? true : never;
+type _AssertUserCopyable = DeepNonCopyableKeys<AuthorizationUser> extends never ? true : never;
+
+const _clientIsCopyable: _AssertClientCopyable = true;
+const _userIsCopyable: _AssertUserCopyable = true;
+void _clientIsCopyable;
+void _userIsCopyable;
 
 /**
  * Response to a successful `/token` call. Mirrors the RFC 6749 token response
