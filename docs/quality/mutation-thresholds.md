@@ -472,6 +472,66 @@ subset of files, cover them, land it, repeat. The scope only ever grows, and the
 the tier default throughout. A temporary override with a "raise it back later" note is exactly the
 shape #1941 removed, and it survived four milestones before anyone returned to it.
 
+### Why one package's mutants cost ten times another's (#2168)
+
+Regeneration times spread far wider than mutant counts do. `dapp` has fewer mutants than `queue`
+and took three and a half times as long; against `cli` it is ten times the cost per mutant.
+Estimating a run by scaling from another package's mutant count is what produced the "about six
+minutes" figure for a run that took fifty-six.
+
+Two independent terms set the price, and a package can be expensive through either one.
+
+| package | ms per test | collect seconds per test file | concurrency | mutants | run | runner-seconds per mutant |
+|---|---|---|---|---|---|---|
+| `cli` | 1.47 | 0.067 | 4 | 2,625 | 2m58s | **0.27** |
+| `core` | 1.85 | 0.222 | 4 | 467 | — | — |
+| `orm` | 9.05 | — | 4 | 2,871 | 6m59s | **0.58** |
+| `auth` | 5.39 | 0.304 | 4 | 6,171 | 20m37s | **0.80** |
+| `queue` | 41.72 | 0.186 | 4 | 2,839 | 16m06s | **1.36** |
+| `dapp` | 22.75 | 1.367 | 2 | 2,473 | 56m05s | **2.72** |
+
+`ms per test` is `stryker run --dryRunOnly`'s reported `net` divided by the test count — the time
+the tests themselves take, with Stryker's startup reported separately. `collect` comes from
+vitest's own summary line, summed across workers, divided by the package's test file count.
+`runner-seconds per mutant` is wall time multiplied by concurrency, divided by mutants; it orders
+the packages the way the two cost terms do, not the way mutant counts do.
+
+**`queue` and `dapp` are expensive for opposite reasons.** `queue`'s tests are the slowest in the
+repo (41.72 ms each) while its files load cheaply (0.186 s each). `dapp`'s tests are half that
+speed but its files are the most expensive to load in the repo — 1.367 s each, twenty times
+`cli`. Under per-test coverage analysis Stryker pays both per covering test per mutant, so either
+term alone is enough to put a package above a second per mutant.
+
+What makes a test slow is setup that repeats: `queue` stands up in-process brokers, spawn stubs,
+and timer machinery in `beforeEach`. What makes a file slow to load is its import graph: `dapp`
+pulls in viem and the Playwright types. § A slow test can also be a weak one records the same
+mechanism from the other end — `orm`'s two container-backed files paid a full container startup
+per mutant, which is why they are excluded from Stryker's view but not from `pnpm test`.
+
+**Concurrency multiplies whatever those terms come to.** `dapp` runs at 2 where every other
+package runs at 4, so its wall time is twice its runner time.
+
+**Timeouts are priced separately.** `dapp` sets `timeoutMS: 60000` against the default 5,000, so
+each timed-out mutant occupies a runner for a minute. At the 17 timeouts its run produces that is
+about 17 minutes of runner time, a fifth of the total.
+
+#### The two `dapp` settings are inherited, not chosen
+
+Both arrived in the commit that first gave the package a Stryker config, when it was named `e2e`
+and ran Playwright. Neither the config header nor the commit explains them, and the shape they
+suit — a browser per runner, a minute for a page to settle — is not the shape the package has now.
+Its Stryker-scoped tests launch no browser; the four files that reference `@playwright/test` use
+it for types or substitute it.
+
+Changing them is out of scope here, because this section exists to explain the spread rather than
+to act on it. #2171 carries the change and the measurement it needs.
+
+#### What to do with an estimate
+
+Scale from **runner-seconds per mutant** for the same package, not from another package's total.
+A package with no prior run has no basis for an estimate; take its dry-run net and its collect
+time first, divide by the test count and the file count, and place it in the table above.
+
 ## Baseline snapshots
 
 Each package writes a per-package baseline JSON to `.mutation-baseline/<pkg>.json` (folder is tracked). The baseline is the last known green mutation report — kill-rate + surviving-mutant list + timestamp. Baseline refresh happens in-PR when kill-rate improves, and is written by the same PR that raises test coverage — never as a standalone commit.
