@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join } from 'node:path';
 import {
   BASELINE_SCHEMA,
   buildMeasureResult,
@@ -73,28 +73,36 @@ describe('runPerf3LayerLive — 全 op が env 欠落で飛んだ実行', () => 
     // 実在しない env 名を要求させる = credential を持たない環境と同じ状態を作る。
     // これにより実 API へは 1 度も出ない。
     const requiredEnv = ['KIWA_PERF_HARNESS_ABSENT_ENV_FOR_TEST'];
+    const envName = requiredEnv[0] as string;
+    const hadOriginal = Object.prototype.hasOwnProperty.call(process.env, envName);
+    const original = process.env[envName];
+    delete process.env[envName];
     expect(process.env[requiredEnv[0] as string]).toBeUndefined();
+    try {
+      const result = await runPerf3LayerLive({
+        moduleName: 'edge-live',
+        ops: [{ name: 'alpha', fn: () => {}, serialP95CapMs: 1000, requiredEnv }],
+        reportPath,
+        baselinePath: join(dir, 'baseline.json'),
+        serialIterations: 2,
+        serialWarmup: 0,
+      });
 
-    const result = await runPerf3LayerLive({
-      moduleName: 'edge-live',
-      ops: [{ name: 'alpha', fn: () => {}, serialP95CapMs: 1000, requiredEnv }],
-      reportPath,
-      baselinePath: join(dir, 'baseline.json'),
-      serialIterations: 2,
-      serialWarmup: 0,
-    });
-
-    expect(result.anySkipped).toBe(true);
-    expect(result.outcomes).toHaveLength(1);
-    expect(result.outcomes[0]?.skipped).toBe(true);
-    expect(result.outcomes[0]?.skipReason).toContain('LIVE_ENV_MISSING');
-    // 測っていない実行が「上限内で通った」 と読めてはいけない。 report 本文に
-    // 測定が 0 件だったことが出ることを固定する。
-    const report = readFileSync(reportPath, 'utf8');
-    expect(report).toContain('No live ops ran this pass');
-    // 測っていないので baseline も作らない。
-    expect(result.baselineSeeded).toBe(false);
-    expect(existsSync(join(dir, 'baseline.json'))).toBe(false);
+      expect(result.anySkipped).toBe(true);
+      expect(result.outcomes).toHaveLength(1);
+      expect(result.outcomes[0]?.skipped).toBe(true);
+      expect(result.outcomes[0]?.skipReason).toContain('LIVE_ENV_MISSING');
+      // 測っていない実行が「上限内で通った」 と読めてはいけない。 report 本文に
+      // 測定が 0 件だったことが出ることを固定する。
+      const report = readFileSync(reportPath, 'utf8');
+      expect(report).toContain('No live ops ran this pass');
+      // 測っていないので baseline も作らない。
+      expect(result.baselineSeeded).toBe(false);
+      expect(existsSync(join(dir, 'baseline.json'))).toBe(false);
+    } finally {
+      if (hadOriginal && original !== undefined) process.env[envName] = original;
+      else delete process.env[envName];
+    }
   });
 });
 
@@ -129,7 +137,7 @@ describe('resolveBaselineRoot — 実在しない起点', () => {
     // 解けなくても例外にせず絶対 path を返す。 ここで投げると、 baseline を
     // まだ作っていない実行が置き場を決められず測定そのものが始まらない。
     expect(typeof root).toBe('string');
-    expect(root.startsWith('/')).toBe(true);
+    expect(isAbsolute(root)).toBe(true);
   });
 });
 

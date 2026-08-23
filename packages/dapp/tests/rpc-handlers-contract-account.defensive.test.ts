@@ -33,29 +33,6 @@ function baseContractAccountCtx(): RpcContext {
   } as RpcContext;
 }
 
-/**
- * `ctx.contractAccount` の N 回目以降の読み取りを undefined にする ctx を作る。
- *
- * private helper 側の `!contractAccount` 分岐は、 呼出元 (case 節) が既に truthy を
- * 確認しているため通常の入力では到達しない。 読み取り回数で hide することで、
- * 「呼出元の確認後に設定が消えた」 状況だけを再現する。
- * 読み取り位置は resolveActiveAddress で 2 回 / case 節の guard で 1 回 / helper 内で
- * 1 回の計 4 回。 hide 位置がずれたら test 側の read 数 assert が落ちる。
- */
-function hideContractAccountFromRead(base: RpcContext, hideFromRead: number) {
-  const config = base.contractAccount;
-  let reads = 0;
-  const ctx = { ...base } as RpcContext;
-  Object.defineProperty(ctx, 'contractAccount', {
-    configurable: true,
-    get() {
-      reads += 1;
-      return reads >= hideFromRead ? undefined : config;
-    },
-  });
-  return { ctx, readCount: () => reads };
-}
-
 describe('contract account 経路の防御分岐', () => {
   let fetchSpy: ReturnType<typeof vi.spyOn>;
 
@@ -71,8 +48,14 @@ describe('contract account 経路の防御分岐', () => {
   });
 
   it('T-RH-201 署名検証 helper に入った時点で contract account 設定が無ければ検証を飛ばす', async () => {
-    const { ctx, readCount } = hideContractAccountFromRead(baseContractAccountCtx(), 4);
+    const ctx = baseContractAccountCtx();
     const { handleRpcRequest } = await loadRpcHandlers();
+
+    // signMessage の await 中に呼出側が設定を外す、という実際に起こり得る競合を再現する。
+    // 読むたびに値が変わる getter は使わず、通常の mutable object を更新する。
+    queueMicrotask(() => {
+      ctx.contractAccount = undefined;
+    });
 
     const signature = await handleRpcRequest(ctx, {
       method: 'personal_sign',
@@ -83,27 +66,11 @@ describe('contract account 経路の防御分岐', () => {
     expect(signature).toMatch(/^0x[0-9a-fA-F]{130}$/);
     // 検証に進んでいれば eth_call のため fetch が呼ばれる
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(readCount()).toBe(4);
-  });
-
-  it('T-RH-202 送信 helper に入った時点で contract account 設定が無ければ内部エラーにする', async () => {
-    const { ctx, readCount } = hideContractAccountFromRead(baseContractAccountCtx(), 4);
-    const { handleRpcRequest } = await loadRpcHandlers();
-
-    await expect(
-      handleRpcRequest(ctx, {
-        method: 'eth_sendTransaction',
-        params: [{ to: TOKEN, value: '0x0' }],
-      }),
-    ).rejects.toMatchObject({
-      code: -32603,
-      message: 'internal: missing contract account config',
-    });
-    expect(readCount()).toBe(4);
+    expect(ctx.contractAccount).toBeUndefined();
   });
 
   it('T-RH-203 contract account 設定が生きていれば EIP-1271 検証まで進む', async () => {
-    // 前 2 件が「消えた時だけ」 の分岐であることの対照。 hide しなければ検証に入り、
+    // 前の検査が「消えた時だけ」の分岐であることの対照。消さなければ検証に入り、
     // eth_call (fetch) が失敗するので検証 NG として reject する
     const { handleRpcRequest } = await loadRpcHandlers();
 

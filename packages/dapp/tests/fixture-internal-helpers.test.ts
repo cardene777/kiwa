@@ -79,19 +79,14 @@ function makeTracker() {
 describe('fixture body callbacks (fake Playwright fixture 経由)', () => {
   let emitted: EmittedEvent[];
   let evaluated: Array<{ arg: unknown }>;
-  let originalWindow: unknown;
-  let originalRaf: unknown;
 
   beforeEach(async () => {
     // fixture.ts の import 時に base.extend が走って定義が捕まる
     await import('../src/fixture.js');
     emitted = [];
     evaluated = [];
-    const globals = globalThis as Record<string, unknown>;
-    originalWindow = globals.window;
-    originalRaf = globals.requestAnimationFrame;
     // page 側 script が触る browser global を構造的に再現する
-    globals.window = {
+    vi.stubGlobal('window', {
       __dappE2eEmitters: new Proxy(
         {},
         {
@@ -102,17 +97,15 @@ describe('fixture body callbacks (fake Playwright fixture 経由)', () => {
             },
         },
       ),
-    };
-    globals.requestAnimationFrame = (cb: (t: number) => void) => {
+    });
+    vi.stubGlobal('requestAnimationFrame', (cb: (t: number) => void) => {
       cb(0);
       return 0;
-    };
+    });
   });
 
   afterEach(() => {
-    const globals = globalThis as Record<string, unknown>;
-    globals.window = originalWindow;
-    globals.requestAnimationFrame = originalRaf;
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 

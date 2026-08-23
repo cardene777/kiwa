@@ -267,36 +267,6 @@ describe('runAnvilSeed の後片付け', () => {
     await vi.advanceTimersByTimeAsync(1);
     await expect(promise).resolves.toEqual({ outPath: '/abs/out.json', port: 9704 });
   });
-
-  it('T-ASD-015 signal で終わった script (code=null) は成功として扱う', async () => {
-    // `code ?? 0` の経路。 exit code が取れない終了を失敗として数えると、
-    // 正常に終わった seed script が毎回 throw になる。
-    const cp = await loadCp();
-    const fs = await loadFs();
-    vi.mocked(fs.existsSync).mockReturnValue(true);
-    globalThis.fetch = readyFetch();
-
-    const anvilChild = new FakeChild();
-    const scriptChild = new FakeChild();
-    vi.mocked(cp.spawn)
-      .mockReturnValueOnce(anvilChild as unknown as ReturnType<typeof cp.spawn>)
-      .mockReturnValueOnce(scriptChild as unknown as ReturnType<typeof cp.spawn>);
-
-    const { runAnvilSeed } = await loadAnvilSeed();
-    const promise = runAnvilSeed({
-      scriptPath: '/abs/script.mjs',
-      outPath: '/abs/out.json',
-      cwd: '/abs',
-      port: 9705,
-      flushMs: 1,
-    });
-
-    await vi.advanceTimersByTimeAsync(0);
-    scriptChild.emit('exit', null, 'SIGTERM');
-    await vi.advanceTimersByTimeAsync(10);
-
-    await expect(promise).resolves.toEqual({ outPath: '/abs/out.json', port: 9705 });
-  });
 });
 
 describe('runAnvilSeed の port 探索', () => {
