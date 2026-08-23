@@ -89,6 +89,131 @@ describe('listAccessTokens は要素も copy して返す (#2179)', () => {
   });
 });
 
+describe('登録した参照を後から書き換えても認可判定に届かない (#2179)', () => {
+  // **入口側**の検査。 出口 (`list*` の返り値) を copy しても、 登録時に呼出側の参照を
+  // そのまま保持していると、 `scopes.push('admin')` するだけで
+  // 「宣言されていない scope は発行しない」 が破れる (#2180 r1-f1)。
+  //
+  // `readonly string[]` は止められない = 呼出側が非 readonly の参照を持っていればよい。
+
+  const REDIRECT_LOCAL = 'https://app.example.test/cb';
+
+  function authorizeWith(server: AuthorizationServer, scope: string): void {
+    const { codeChallenge } = createPkceChallenge();
+    server.authorize(
+      {
+        responseType: 'code',
+        clientId: 'client-A',
+        redirectUri: REDIRECT_LOCAL,
+        state: 'state-1',
+        codeChallenge,
+        codeChallengeMethod: 'S256',
+        scope,
+      },
+      'user-1',
+    );
+  }
+
+  it('T-SNAP-021 options で渡した scopes を後から足しても発行されない', () => {
+    const clientScopes = ['openid'];
+    const userScopes = ['openid'];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({
+      issuer: 'https://as.example.test',
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: clientScopes }],
+      users: [{ subject: 'user-1', scopes: userScopes }],
+    });
+
+    clientScopes.push('admin');
+    userScopes.push('admin');
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not entitled to scope "admin"/);
+  });
+
+  it('T-SNAP-022 registerClient / registerUser で渡した scopes も同じ', () => {
+    const clientScopes = ['openid'];
+    const userScopes = ['openid'];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
+    server.registerClient({
+      clientId: 'client-A',
+      redirectUris: [REDIRECT_LOCAL],
+      scopes: clientScopes,
+    });
+    server.registerUser({ subject: 'user-1', scopes: userScopes });
+
+    clientScopes.push('admin');
+    userScopes.push('admin');
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not entitled to scope "admin"/);
+  });
+
+  it('T-SNAP-021b client 側だけを足した形も止まる', () => {
+    // **user 側と分けて当てる**。 両方を同時に足すと user 側の判定が先に落ちるため、
+    // client 側の copy を外す変異で 1 件も落ちなかった (実測)。
+    // 「他の検査が覆っている」 形なので、client 側だけを突く入力を用意する。
+    const clientScopes = ['openid'];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({
+      issuer: 'https://as.example.test',
+      clients: [{ clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: clientScopes }],
+      // user 側は最初から admin を持つので、user 側の判定では落ちない。
+      users: [{ subject: 'user-1', scopes: ['openid', 'admin'] }],
+    });
+
+    clientScopes.push('admin');
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not registered for scope "admin"/);
+  });
+
+  it('T-SNAP-022b user 側だけを足した形も止まる', () => {
+    const userScopes = ['openid'];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({
+      issuer: 'https://as.example.test',
+      // client 側は最初から admin を持つので、client 側の判定では落ちない。
+      clients: [
+        { clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: ['openid', 'admin'] },
+      ],
+      users: [{ subject: 'user-1', scopes: userScopes }],
+    });
+
+    userScopes.push('admin');
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not entitled to scope "admin"/);
+  });
+
+  it('T-SNAP-023 redirectUris を後から足しても受け付けない', () => {
+    // `scopes` と同じ形が `redirectUris` にもある。 後から足した宛先へ code を
+    // 送れると、 認可された宛先の宣言が意味を持たなくなる。
+    const redirectUris = [REDIRECT_LOCAL];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({
+      issuer: 'https://as.example.test',
+      clients: [{ clientId: 'client-A', redirectUris, scopes: ['openid'] }],
+      users: [{ subject: 'user-1', scopes: ['openid'] }],
+    });
+
+    redirectUris.push('https://evil.example.test/cb');
+
+    const { codeChallenge } = createPkceChallenge();
+    expect(() =>
+      server.authorize(
+        {
+          responseType: 'code',
+          clientId: 'client-A',
+          redirectUri: 'https://evil.example.test/cb',
+          state: 'state-1',
+          codeChallenge,
+          codeChallengeMethod: 'S256',
+          scope: 'openid',
+        },
+        'user-1',
+      ),
+    ).toThrow();
+  });
+});
+
 describe('listRefreshTokens は要素も copy して返す (#2179)', () => {
   it('T-SNAP-011 返した要素の scope を書き換えても refresh は宣言済の scope しか出さない', () => {
     // **これが本 Issue の核心**。 `scope` を `admin` に書き換えてから refresh すると、

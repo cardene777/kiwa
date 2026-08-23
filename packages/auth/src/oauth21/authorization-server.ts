@@ -55,11 +55,37 @@ export function createAuthorizationServer(
   const rotatedRefreshTokens = new Map<string, RefreshToken>();
   const seenJtis = new Set<string>();
 
+  /**
+   * 登録された値を内部に取り込む時の copy (#2179)。
+   *
+   * **入口も塞ぐ**。 `list*` が返す参照を copy しても (出口)、 登録時に呼出側の参照を
+   * そのまま保持していると (入口)、 登録後に `scopes.push('admin')` するだけで
+   * 「宣言されていない scope は発行しない」 が破れる。 `readonly string[]` は
+   * 呼出側が非 readonly の参照を持っていれば止められない。
+   *
+   * 配列 field (`scopes` / `redirectUris`) も個別に copy する。 object を copy しても
+   * 中の配列が同一参照なら意味が無い。
+   */
+  function ownClient(client: ClientRegistration): ClientRegistration {
+    return {
+      ...client,
+      redirectUris: [...client.redirectUris],
+      ...(client.scopes === undefined ? {} : { scopes: [...client.scopes] }),
+    };
+  }
+
+  function ownUser(user: AuthorizationUser): AuthorizationUser {
+    return {
+      ...user,
+      ...(user.scopes === undefined ? {} : { scopes: [...user.scopes] }),
+    };
+  }
+
   for (const client of options.clients ?? []) {
-    clients.set(client.clientId, client);
+    clients.set(client.clientId, ownClient(client));
   }
   for (const user of options.users ?? []) {
-    users.set(user.subject, user);
+    users.set(user.subject, ownUser(user));
   }
 
   function registerClient(client: ClientRegistration): void {
@@ -68,7 +94,7 @@ export function createAuthorizationServer(
         `registerClient: client "${client.clientId}" already registered`,
       );
     }
-    clients.set(client.clientId, client);
+    clients.set(client.clientId, ownClient(client));
   }
 
   function registerUser(user: AuthorizationUser): void {
@@ -77,7 +103,7 @@ export function createAuthorizationServer(
         `registerUser: user "${user.subject}" already registered`,
       );
     }
-    users.set(user.subject, user);
+    users.set(user.subject, ownUser(user));
   }
 
   function requireClient(clientId: string): ClientRegistration {
@@ -456,7 +482,10 @@ export function createAuthorizationServer(
       // 要素も copy して返す (#2179)。 `readonly T[]` が凍らせるのは配列であって要素では
       // ないため、 内部の実体をそのまま渡すと呼出側が `scope` を書き換えられる。 refresh は
       // 保存済みの値を信頼するので、 書き換えは「宣言されていない scope の発行」 に化ける。
-      // field は全て primitive なので浅い copy で足りる。
+      //
+      // 浅い copy で足りるのは **全 field が primitive だから**で、 それは
+      // `AssertAllPrimitive` が型で強制する。 object / 配列の field を足すと compile が
+      // 落ちるので、 この copy が静かに穴を戻すことはない (#2180 r1-f2)。
       return Array.from(accessTokens.values(), (token) => ({ ...token }));
     },
     listRefreshTokens(): readonly RefreshToken[] {

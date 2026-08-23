@@ -19,5 +19,20 @@ server.listRefreshTokens()[0].scope = 'admin';
 
 `revoked` を `false` に戻して失効を取り消す形も同じ経路で起きた。
 
-**挙動の変更**。 返り値の要素を書き換えて内部状態を操作していた test は効かなくなる。
-内部状態を変えたい場合は公開 API (`revoke()` など) を使う。 列挙して読むだけの test は影響しない。
+登録側も同じ形だった。 `createAuthorizationServer({ clients, users })` と
+`registerClient()` / `registerUser()` は呼出側の object をそのまま保持していたため、
+**登録した後に `scopes.push('admin')` するだけで**同じことが起きた。 4 経路とも
+object と配列 field (`scopes` / `redirectUris`) を copy して取り込む形にした。
+
+**挙動の変更**。 参照を書き換えて内部状態を操作していた test は効かなくなる。 操作別の移行先は
+以下のとおり。
+
+| したいこと | 移行先 |
+|---|---|
+| token の `scope` を変える | `clients` / `users` に scope を宣言して token を発行し直す |
+| token を失効させる | `revoke(token, clientId)` |
+| 全部消す | `reset()` |
+| 登録済みの client / user を変える | **手段は無い**。 別の `createAuthorizationServer()` を組む |
+
+**状態を変える公開 API は `revoke()` と `reset()` の 2 つだけ**で、`scope` を後から変える API は
+無い。 列挙して読むだけの test は影響しない。
