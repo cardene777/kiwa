@@ -105,7 +105,7 @@ function walkTests(dir: string): string[] {
 }
 
 /**
- * その file が `@playwright/test` から **値の binding を宣言している** か。
+ * その file が `@playwright/test` から宣言する **値 binding の名前**。
  *
  * 正規表現では判定できない。 `import { type Page } from '...'` は行頭が
  * `import type` ではないので runtime に見えるが、 取り込む binding は 0 個で
@@ -113,52 +113,75 @@ function walkTests(dir: string): string[] {
  * 形は行頭の pattern から漏れる (#2174 r2-f5)。 AST なら import clause と各
  * specifier の `isTypeOnly` をそのまま読める。
  *
+ * **真偽ではなく名前を返す** (#2174 r4-f1)。 「値を取り込むか」 だけを見ると、
+ * `fixture.ts` が `test` の import をやめて `export { expect } from '...'` に
+ * 変わっても検査は通る。 docs は「`fixture.ts` binds `test`」 と書くので、
+ * 名前まで突き合わせないと文言を守れない。
+ *
  * **判定するのは宣言であって emit 後の依存ではない** (#2174 r3-f1)。
  * `verbatimModuleSyntax` が false の時、 型位置でしか使わない値 import は
  * TypeScript が消去するため、 ここで「値」 と答えた file が emit 後には
  * 依存を持たないことがありうる。 emit 後まで見るには dapp の compiler options で
  * 変換した出力を読む必要があり、 release-smoke から別 package の build に
- * 依存することになる。 docs 側の記述も「declare value imports」 に合わせてあり、
- * この検査はその文言をそのまま守る。
- *
- * 値の re-export (`export { expect } from '...'`) も宣言なので数える。
+ * 依存することになる。 docs 側の記述も source-level の宣言に合わせてある。
  */
-function importsPlaywrightAtRuntime(path: string): boolean {
+function playwrightValueBindings(path: string): string[] {
   const source = ts.createSourceFile(path, readFileSync(path, 'utf8'), ts.ScriptTarget.Latest, true);
+  const names: string[] = [];
+
+  const isTarget = (spec: ts.Expression | undefined): boolean =>
+    spec !== undefined && ts.isStringLiteral(spec) && spec.text === '@playwright/test';
+
   for (const stmt of source.statements) {
-    // `export { x } from '@playwright/test'` — 値の re-export も module を引く。
-    if (ts.isExportDeclaration(stmt)) {
-      const spec = stmt.moduleSpecifier;
-      if (!spec || !ts.isStringLiteral(spec) || spec.text !== '@playwright/test') continue;
-      if (stmt.isTypeOnly) continue;
-      const clause = stmt.exportClause;
-      // `export * from` は clause を持たない = 値を通す。
-      if (!clause) return true;
-      if (ts.isNamespaceExport(clause)) return true;
-      if (clause.elements.some((el) => !el.isTypeOnly)) return true;
+    if (ts.isImportDeclaration(stmt)) {
+      if (!isTarget(stmt.moduleSpecifier)) continue;
+      const clause = stmt.importClause;
+      // `import '@playwright/test'` — binding は無いが評価される。
+      if (!clause) {
+        names.push('(side-effect)');
+        continue;
+      }
+      // `import type { ... }` — 型のみ。
+      if (clause.isTypeOnly) continue;
+      // `import def from` — default binding は値。
+      if (clause.name) names.push('default');
+      const bindings = clause.namedBindings;
+      if (!bindings) continue;
+      // `import * as ns from` — 名前空間は値。
+      if (ts.isNamespaceImport(bindings)) {
+        names.push('*');
+        continue;
+      }
+      // `import { a, type B } from` — `isTypeOnly` でない specifier だけが値。
+      // 記録するのは元の名前 (`test as base` なら `test`)。
+      for (const el of bindings.elements) {
+        if (el.isTypeOnly) continue;
+        names.push((el.propertyName ?? el.name).text);
+      }
       continue;
     }
 
-    if (!ts.isImportDeclaration(stmt)) continue;
-    if (!ts.isStringLiteral(stmt.moduleSpecifier)) continue;
-    if (stmt.moduleSpecifier.text !== '@playwright/test') continue;
-
-    const clause = stmt.importClause;
-    // `import '@playwright/test'` — binding は無いが評価される = 値の取り込み。
-    if (!clause) return true;
-    // `import type { ... }` — 型のみ。
-    if (clause.isTypeOnly) continue;
-    // `import def from` — default binding は値。
-    if (clause.name) return true;
-
-    const bindings = clause.namedBindings;
-    if (!bindings) continue;
-    // `import * as ns from` — 名前空間は値。
-    if (ts.isNamespaceImport(bindings)) return true;
-    // `import { a, type B } from` — `isTypeOnly` でない specifier が 1 つでもあれば値。
-    if (bindings.elements.some((el) => !el.isTypeOnly)) return true;
+    // `export { x } from '@playwright/test'` — 値の re-export は import とは別種の
+    // 宣言。 混ぜると docs の「binds」 と噛み合わないので接頭辞で区別する。
+    if (ts.isExportDeclaration(stmt)) {
+      if (!isTarget(stmt.moduleSpecifier)) continue;
+      if (stmt.isTypeOnly) continue;
+      const clause = stmt.exportClause;
+      if (!clause) {
+        names.push('re-export:*');
+        continue;
+      }
+      if (ts.isNamespaceExport(clause)) {
+        names.push('re-export:*');
+        continue;
+      }
+      for (const el of clause.elements) {
+        if (el.isTypeOnly) continue;
+        names.push(`re-export:${(el.propertyName ?? el.name).text}`);
+      }
+    }
   }
-  return false;
+  return names.sort();
 }
 
 describe('mutation cost doc — 表の設定値が config と一致する (#2168)', () => {
@@ -232,19 +255,24 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     expect(launching, '実 browser を起こす test が dapp に入った').toEqual([]);
   });
 
-  it('T-MCD-006 dapp の src が @playwright/test の値 binding を宣言している', () => {
-    // 本文は「4 module が value import を宣言する」 と書く。 型参照だけに変わったら
-    // その記述が実物とずれるので、実物から数える (#2174 r1-f5 / r3-f1)。
+  it('T-MCD-006 dapp の src が宣言する @playwright/test の値 binding が本文と一致する', () => {
+    // 本文は「fixture.ts が test を、 他 3 file が expect を bind する」 と書く。
+    // 真偽だけを見ると binding の中身が入れ替わっても通るので、 名前まで比べる
+    // (#2174 r1-f5 / r3-f1 / r4-f1)。
     const dir = resolve(REPO_ROOT, 'packages/dapp/src');
     const files = readdirSync(dir).filter((f) => f.endsWith('.ts'));
     expect(files.length, 'dapp の src file を 1 つも読めていない').toBeGreaterThan(0);
 
-    const runtime = files.filter((f) => importsPlaywrightAtRuntime(resolve(dir, f))).sort();
-    expect(runtime, '@playwright/test の値 binding を宣言する src file が本文と違う').toEqual([
-      'balance-change.ts',
-      'expect-custom-error.ts',
-      'expect-event.ts',
-      'fixture.ts',
+    const declared = files
+      .map((f) => [f, playwrightValueBindings(resolve(dir, f))] as const)
+      .filter(([, names]) => names.length > 0)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+
+    expect(declared, '@playwright/test の値 binding を宣言する src file と名前が本文と違う').toEqual([
+      ['balance-change.ts', ['expect']],
+      ['expect-custom-error.ts', ['expect']],
+      ['expect-event.ts', ['expect']],
+      ['fixture.ts', ['test']],
     ]);
   });
 });

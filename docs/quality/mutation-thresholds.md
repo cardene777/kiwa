@@ -517,12 +517,12 @@ packages, never against a wall-clock budget.
 (41.72 ms each) and cheap files (0.186 s each). `dapp` has tests at half that speed and the most
 expensive files in the table — 1.367 s each. Both land above a capacity-second per mutant.
 
-`dapp` pulls a large dependency into its module graph. Four of its implementation modules declare
-value imports of `@playwright/test` — `fixture.ts` binds `test`, and `balance-change.ts` /
-`expect-custom-error.ts` / `expect-event.ts` bind `expect` — so the package is reachable from the
-implementation rather than only from the tests. **No browser is launched**: the launcher API is
-never called from `dapp`'s tests. Whether that graph is what the 1.367 s is made of has not been
-measured, only that the two coexist.
+`dapp`'s implementation names a large dependency. Four of its modules declare value imports of
+`@playwright/test` at the source level — `fixture.ts` binds `test`, and `balance-change.ts` /
+`expect-custom-error.ts` / `expect-event.ts` bind `expect` — so the dependency is named by the
+implementation and not only by the tests. What the emitted JavaScript keeps is not checked here.
+**No browser is launched**: the launcher API is never called from `dapp`'s tests. Whether these
+declarations are what the 1.367 s is made of has not been measured, only that the two coexist.
 
 `queue` shows the opposite split: its files are cheap to load and its tests are the slowest in the
 table (41.72 ms each against `cli`'s 1.47). The source of that is likewise unmeasured. Three
