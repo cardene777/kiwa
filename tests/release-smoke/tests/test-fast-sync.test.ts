@@ -13,7 +13,7 @@
 // 関数そのものの性質を見る。 期待値の script 文字列は書き写さない
 // (`rules/quality.md § 導出可能記述は人手で書かない`)。
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -29,7 +29,7 @@ const SCRIPT = resolve(REPO_ROOT, 'scripts/sync-test-fast.mjs');
 interface Result {
   name: string;
   file: string;
-  status: 'ok' | 'drift' | 'missing' | 'skipped';
+  status: 'ok' | 'drift' | 'missing' | 'skipped' | 'orphan';
   reason?: string;
   expected?: string;
   actual?: string;
@@ -38,7 +38,7 @@ interface Result {
 interface Module {
   parseScript: (script: string) => string[][];
   deriveFast: (script: string) => string | null;
-  inspect: () => Result[];
+  inspect: (root?: string) => Result[];
   packageDirs: () => string[];
   EXCLUDED: Map<string, string>;
   blankReasons: (excluded?: Map<string, string>) => string[];
@@ -87,8 +87,10 @@ describe('packages の test:fast が test から導出された形のままで�
     const all = results();
     expect(all.length, 'packages を 1 件も見ていない').toBeGreaterThan(0);
 
+    // `orphan` (導出できない `test` なのに `test:fast` が残っている) も落とす。 除くと、
+    // `test` を導出の当たらない形に書き換えた瞬間に古い `test:fast` が無検査で残る。
     const stale = all
-      .filter((r) => r.status === 'drift' || r.status === 'missing')
+      .filter((r) => r.status === 'drift' || r.status === 'missing' || r.status === 'orphan')
       .map((r) => `${r.name} (${r.status})`);
     expect(stale, `test:fast が導出結果と違う:\n${stale.join('\n')}`).toEqual([]);
   });
@@ -153,6 +155,45 @@ describe('packages の test:fast が test から導出された形のままで�
       restored = (error as { status?: number }).status ?? 0;
     }
     expect(restored, '検査が package.json を戻していない').toBe(0);
+  });
+
+  it('置き去りがあると非 0 で終わる', () => {
+    // `orphan` は書いて直せないので、 `--write` を通した後も 1 で終わる必要がある。
+    // JSON に出るだけで exit code に出ないと、 呼出側 (人 / 別 script) は素通しする
+    // (変異試験 M11 が実際に生き残った)。
+    const target = results().find((r) => r.status === 'ok');
+    expect(target, '導出対象の package が 1 件も無い').toBeDefined();
+
+    const file = target!.file;
+    const backup = mkdtempSync(join(tmpdir(), 'kiwa-test-fast-'));
+    temps.push(backup);
+    const saved = join(backup, 'package.json');
+    copyFileSync(file, saved);
+
+    try {
+      // `test` を導出の当たらない形にすると、 残った `test:fast` が置き去りになる。
+      const pkg = JSON.parse(readFileSync(file, 'utf-8')) as { scripts: Record<string, string> };
+      pkg.scripts['test'] = 'forge test';
+      writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
+
+      const reported = runJson();
+      const orphans = reported.results.filter((r) => r.status === 'orphan').map((r) => r.name);
+      expect(orphans, '置き去りを orphan として報告していない').toContain(target!.name);
+      expect(reported.status, '置き去りがあるのに 0 で終わった').toBe(1);
+
+      // `--write` でも黙らない。 消してよいかは script が決められない。
+      let written = 0;
+      try {
+        execFileSync(process.execPath, [SCRIPT, '--write'], { cwd: REPO_ROOT, encoding: 'utf-8' });
+      } catch (error) {
+        written = (error as { status?: number }).status ?? 0;
+      }
+      expect(written, '--write が置き去りを黙らせた').toBe(1);
+    } finally {
+      copyFileSync(saved, file);
+    }
+
+    expect(runJson().status, '検査が package.json を戻していない').toBe(0);
   });
 
   it('報告 mode は package.json を書き換えない', () => {
@@ -221,6 +262,31 @@ describe('導出そのものの性質 (#2202)', () => {
     expect(fast, '元の除外を落としている').toContain("--exclude '**/.stryker-tmp/**'");
   });
 
+  it('位置引数より前にある flag の値を path と誤認しない', async () => {
+    // Vitest は flag を file filter より前にも置ける。 最初の非 flag 語だけを見ると
+    // `jsdom` を path として変換し、 本物の `.vitest-dist/tests` が残る。 同期検査はその
+    // 誤導出と一致して緑になるため、 有効な並び替えを fixture で固定する。
+    const { deriveFast } = await load();
+    const fast = deriveFast(
+      'vitest run --environment jsdom .vitest-dist/tests --testTimeout 15000',
+    )!;
+    expect(fast, 'flag 値を source path にしている').toContain('--environment jsdom');
+    expect(fast, 'compile 済 path が残っている').not.toContain('.vitest-dist/tests');
+    expect(fast, 'source の位置引数になっていない').toContain('vitest run --environment jsdom tests ');
+  });
+
+  it('複数の compile 済位置引数をすべて source 側に戻す', async () => {
+    // Vitest は file filter を複数受け取る。 先頭だけ変換すると 2 本目は exclude され、
+    // fast route の収集範囲が完全実行より静かに狭くなる。
+    const { deriveFast } = await load();
+    const fast = deriveFast(
+      'vitest run .vitest-dist/tests/a.test.js .vitest-dist/tests/b.test.js --environment node',
+    )!;
+    expect(fast, '1 本目を source 側に戻していない').toContain('tests/a.test.ts');
+    expect(fast, '2 本目を source 側に戻していない').toContain('tests/b.test.ts');
+    expect(fast, 'compile 済 path が残っている').not.toContain('.vitest-dist/tests');
+  });
+
   it('leg が 2 本ある script で 2 本とも導出する', async () => {
     // `ui` がこの形。 1 本に畳むと、 畳まれた側の test が `test:fast` から丸ごと消える。
     const { deriveFast } = await load();
@@ -251,6 +317,44 @@ describe('導出そのものの性質 (#2202)', () => {
     const legs = parseScript(`node -e "a && b" && vitest run .vitest-dist/tests`);
     expect(legs.length, '引用符の内側で切っている').toBe(2);
     expect(legs[0]!, '引用符の中身を語として保っていない').toEqual(['node', '-e', 'a && b']);
+  });
+
+  it('compile 済 path を走らせない test script は導出しない', async () => {
+    // 導出は `.vitest-dist/...` を source に戻す形なので、 その path が無い script には
+    // 当たらない。 **throw させない** = `inspect` が全 package を回す途中で落ちると、
+    // その package 以降の判定ごと消える。
+    const { deriveFast } = await load();
+    expect(deriveFast('vitest run tests --environment node'), '当たらない形から導出している').toBeNull();
+    expect(
+      deriveFast('tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests'),
+      '当たる形から導出していない',
+    ).not.toBeNull();
+  });
+
+  it('導出できない test に test:fast が残っていると orphan として報告する', async () => {
+    // 「対象外」 と「置き去り」 を分ける。 混ぜると、 `test` を書き換えた瞬間に古い
+    // `test:fast` が誰にも見られないまま残り、 開発者は古い flag で走り続ける。
+    const { inspect } = await load();
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-test-fast-root-'));
+    temps.push(root);
+    const write = (name: string, scripts: Record<string, string>): void => {
+      const dir = join(root, 'packages', name);
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, 'package.json'), `${JSON.stringify({ name, scripts }, null, 2)}\n`);
+    };
+
+    write('leftover', { test: 'forge test', 'test:fast': 'vitest run tests --changed main' });
+    write('clean', { test: 'forge test' });
+    write('derived', {
+      test: 'vitest run .vitest-dist/tests --environment node',
+      'test:fast':
+        "vitest run tests --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --environment node",
+    });
+
+    const byName = new Map(inspect(root).map((r) => [r.name, r]));
+    expect(byName.get('leftover')?.status, '置き去りを orphan にしていない').toBe('orphan');
+    expect(byName.get('clean')?.status, '置き去りの無い対象外まで orphan にしている').toBe('skipped');
+    expect(byName.get('derived')?.status, '導出できる package を取りこぼしている').toBe('ok');
   });
 
   it('vitest を起動しない test script は導出しない', async () => {

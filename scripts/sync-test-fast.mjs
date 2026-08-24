@@ -147,30 +147,42 @@ export function toFastLeg(leg) {
       out.push(`--exclude=${quoteToken(toSourceGlob(token.slice('--exclude='.length)))}`);
       continue;
     }
-    if (!token.startsWith('-') && !positionalSeen) {
+    // Vitest は flag を file filter より前にも置ける。 単に「最初の - で始まらない語」
+    // を位置引数とすると、 `--environment jsdom .vitest-dist/tests` の jsdom を path と
+    // 誤認し、 本物の compile 済 path を fast route に残してしまう。 本 script が変換
+    // すべき path は OUT_DIR 配下と決まっているので、 その所属で識別する。
+    if (!token.startsWith('-') && token.startsWith(`${OUT_DIR}/`)) {
       out.push(quoteToken(toSourcePath(token)));
-      out.push('--changed', CHANGED_BASE);
-      out.push('--exclude', quoteToken(`**/${OUT_DIR}/**`));
-      positionalSeen = true;
+      if (!positionalSeen) {
+        out.push('--changed', CHANGED_BASE);
+        out.push('--exclude', quoteToken(`**/${OUT_DIR}/**`));
+        positionalSeen = true;
+      }
       continue;
     }
     out.push(quoteToken(token));
   }
 
-  if (!positionalSeen) throw new Error(`vitest の leg に位置引数が無い: ${leg.join(' ')}`);
-  return out.join(' ');
+  // compile 済 path を 1 つも持たない leg は導出の対象外。 **throw しない** = `inspect` が
+  // 全 package を回す途中で落ちると、 その package 以降の判定ごと消える。 導出できない
+  // ことは異常ではなく、 source を直接走らせる `test` は既に絞れる形をしている。
+  return positionalSeen ? out.join(' ') : null;
 }
 
 /**
  * その package の `test` から `test:fast` を導出する。
  *
- * vitest を起動しない `test` (Foundry / Playwright 等) は `null` を返す = 導出しない。
+ * `null` を返すのは 3 形。 vitest を起動しない (Foundry / Playwright 等)、 `vitest` の
+ * 直後が `run` でない、 compile 済 path を走らせていない。 いずれも本 script の導出が
+ * 当たらない形で、 `inspect` 側が「対象外」 と「置き去りの `test:fast`」 に振り分ける。
  */
 export function deriveFast(testScript) {
   const legs = parseScript(testScript).filter((leg) => leg[0] === 'vitest');
   if (legs.length === 0) return null;
   if (legs.some((leg) => leg[1] !== 'run')) return null;
-  return legs.map(toFastLeg).join(' && ');
+  const fast = legs.map(toFastLeg);
+  if (fast.some((leg) => leg === null)) return null;
+  return fast.join(' && ');
 }
 
 /** `packages/*` のうち package.json を持つもの。 */
@@ -193,23 +205,32 @@ export function packageDirs(root = REPO_ROOT) {
 /**
  * 各 package の判定。
  *
- * `status` は 4 値。 `ok` = 導出結果と一致、 `drift` = 中身が違う、 `missing` = 未設定、
- * `skipped` = 対象外 (`EXCLUDED` に理由あり / `test` が vitest を起動しない / `test` が無い)。
+ * `status` は 5 値。 `ok` = 導出結果と一致、 `drift` = 中身が違う、 `missing` = 未設定、
+ * `skipped` = 対象外 (`EXCLUDED` に理由あり / `test` が無い / 導出が当たらない `test`)、
+ * `orphan` = 導出できない `test` なのに `test:fast` が残っている。
+ *
+ * **`orphan` を `skipped` に混ぜない**。 混ぜると、 `test` を導出の当たらない形に書き換えた
+ * 瞬間に、 古い `test:fast` が誰にも見られないまま残る = 開発者は古い flag で走り続ける。
+ * どちらも「導出できない」 が、 前者は何も無い状態で後者は置き去りがある状態になる。
  */
 export function inspect(root = REPO_ROOT) {
   return packageDirs(root).map((name) => {
     const file = join(root, 'packages', name, 'package.json');
     const pkg = JSON.parse(readFileSync(file, 'utf-8'));
     const test = pkg.scripts?.test;
+    const actual = pkg.scripts?.['test:fast'];
     const excluded = EXCLUDED.get(name);
     if (excluded !== undefined) return { name, file, status: 'skipped', reason: excluded };
     if (test === undefined) return { name, file, status: 'skipped', reason: 'test script が無い' };
 
     const expected = deriveFast(test);
     if (expected === null) {
-      return { name, file, status: 'skipped', reason: 'test script が vitest run を起動しない' };
+      const reason = 'test script から test:fast を導出できない (vitest run が compile 済 path を走らせていない)';
+      // 置き去りは自動で消さない。 消すのは人が決めることで、 script は残っていることを報告する。
+      return actual === undefined
+        ? { name, file, status: 'skipped', reason }
+        : { name, file, status: 'orphan', reason, actual };
     }
-    const actual = pkg.scripts?.['test:fast'];
     if (actual === undefined) return { name, file, status: 'missing', expected };
     if (actual !== expected) return { name, file, status: 'drift', expected, actual };
     return { name, file, status: 'ok', expected };
@@ -236,30 +257,40 @@ function main(argv) {
   const asJson = argv.includes('--json');
   const results = inspect();
   const stale = results.filter((r) => r.status === 'missing' || r.status === 'drift');
+  const orphans = results.filter((r) => r.status === 'orphan');
 
   if (write) {
     for (const result of stale) writeFast(result.file, result.expected);
   }
 
+  // **`--write` は置き去りを黙らせない**。 書ける形 (`missing` / `drift`) は書けば直るが、
+  // `orphan` は「消してよいか」 を script が決められないため、 書いた後も 1 で終わる。
+  const exit = () => (orphans.length > 0 || (!write && stale.length > 0) ? 1 : 0);
+
   if (asJson) {
     console.log(JSON.stringify(results, null, 2));
-    return write || stale.length === 0 ? 0 : 1;
+    return exit();
   }
 
   const counts = {};
   for (const result of results) counts[result.status] = (counts[result.status] ?? 0) + 1;
   console.log(
-    `test:fast — ok ${counts.ok ?? 0} / missing ${counts.missing ?? 0} / drift ${counts.drift ?? 0} / skipped ${counts.skipped ?? 0}`,
+    `test:fast — ok ${counts.ok ?? 0} / missing ${counts.missing ?? 0} / drift ${counts.drift ?? 0} / orphan ${counts.orphan ?? 0} / skipped ${counts.skipped ?? 0}`,
   );
   for (const result of results) {
     if (result.status === 'skipped') console.log(`  skipped ${result.name} — ${result.reason}`);
+  }
+  for (const result of orphans) {
+    console.log(`  orphan ${result.name} — ${result.reason}`);
+    console.log(`    残っている値 ${result.actual}`);
+    console.log('    どうするかは人が決める (test を戻すか、 test:fast を消す)');
   }
   for (const result of stale) {
     console.log(`  ${write ? 'wrote' : result.status} ${result.name}`);
     if (!write) console.log(`    期待 ${result.expected}`);
     if (!write && result.actual !== undefined) console.log(`    実際 ${result.actual}`);
   }
-  return write || stale.length === 0 ? 0 : 1;
+  return exit();
 }
 
 if (isMainModule(process.argv[1], import.meta.url)) {
