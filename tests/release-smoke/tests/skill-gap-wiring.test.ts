@@ -187,10 +187,29 @@ describe('一括置換が他 skill の option を壊していない', () => {
    */
   function offendingLines(skill: string, src: string): string[] {
     if (COMMON.has(skill)) return [];
-    return src
-      .split('\n')
-      .filter((line) => line.includes('--metric') && !/\/kiwa-(gap|loop|verdict)\b/.test(line))
-      .map((line) => `${skill}: ${line.trim().slice(0, 70)}`);
+    const offenders: string[] = [];
+    for (const line of src.split('\n')) {
+      if (!line.includes('--metric')) continue;
+      // **共通 skill を「言及している」 だけでは免除しない** (codex review r2-f2)。
+      // 行に `/kiwa-gap` が出ていれば通す形にすると、その行に自分の
+      // `--metric` 宣言を混ぜるだけで検査を抜けられる。
+      //
+      // 免除するのは **共通 skill の呼出として `--metric` が並んでいる** 形だけ。
+      // 呼出名と `--metric` の間に他の option は入ってよいが、別の `/` 始まりの
+      // 語や文の区切りは挟めない。
+      const invocation = /\/kiwa-(?:gap|loop|verdict)((?:\s+--[a-z][a-z0-9-]*(?:[ =][^\s`]+)?)*)/g;
+      let exempt = false;
+      for (const m of line.matchAll(invocation)) {
+        if ((m[1] ?? '').includes('--metric')) exempt = true;
+      }
+      if (exempt) {
+        // 呼出の外にも `--metric` が残っていないかを見る。 呼出部分を消してから数える。
+        const rest = line.replace(invocation, ' ');
+        if (!rest.includes('--metric')) continue;
+      }
+      offenders.push(`${skill}: ${line.trim().slice(0, 70)}`);
+    }
+    return offenders;
   }
 
   it('T-SKG-013 --metric が共通 skill の外に漏れていない', () => {
@@ -229,4 +248,33 @@ describe('一括置換が他 skill の option を壊していない', () => {
       expect(m?.[1] ?? '', `${skill} が --target の宣言を失っている`).toContain('`--target');
     }
   });
+
+  it('T-SKG-016 共通 skill を名前だけ添えた --metric は素通しにしない', () => {
+    // **codex review r2-f2 の陰性対照側**。 免除条件が「行に `/kiwa-gap` があること」
+    // だと、自分の `--metric` 宣言をその行に混ぜるだけで検査を抜けられる。
+    //
+    // 実 file を汚さず、判定関数そのものに敵対的な入力を与えて確かめる。
+    const adversarial = [
+      '- `--metric {a|b}` — 本 skill の option (`/kiwa-gap` とは無関係)',
+      '`/kiwa-gap` を参照。 なお本 skill は `--metric` を独自に取る',
+    ];
+    for (const line of adversarial) {
+      expect(
+        offendingLines('kiwa-vitest', line),
+        `免除条件を抜けられる: ${line}`,
+      ).not.toEqual([]);
+    }
+  });
+
+  it('T-SKG-017 正しい呼出行は素通しする', () => {
+    // T-SKG-016 の対。 これが無いと、全ての `--metric` 行を offender にする実装が通る。
+    const legit = [
+      '- `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件を確認',
+      '`/kiwa-loop --metric duration --report {json}` を回す',
+    ];
+    for (const line of legit) {
+      expect(offendingLines('kiwa-vitest', line), `正しい呼出を落としている: ${line}`).toEqual([]);
+    }
+  });
+
 });

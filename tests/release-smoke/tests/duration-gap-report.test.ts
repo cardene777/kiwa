@@ -493,4 +493,38 @@ describe('duration-gap-report', () => {
     expect(out.files[0]?.lever).toBe('compile');
   });
 
+
+  it('T-DGR-028 片方が 0 の重複は unmeasured に残さない', () => {
+    // **codex review r2-f1**。 素の `npx vitest run` は source と compile 後の
+    // 両方を拾い、どちらかの所要が 0 になることがある。 0 の側を先に `unmeasured` へ
+    // 入れてから畳むと、**同じ file が `files` と `unmeasured` の両方に出る**。
+    //
+    // duration の達成条件は「回帰 0 件 かつ 未測定 0 件」 なので、この形が 1 件でも
+    // あると `/kiwa-loop` は永久に Step 5 へ到達できず baseline を更新できない。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/a.test.js', ms: 0 },
+      { rel: 'tests/a.test.ts', ms: 3000 },
+    ]);
+    const out = JSON.parse(run(root, report)) as {
+      files: { file: string; ms: number }[];
+      unmeasured: string[];
+    };
+
+    expect(out.files.map((f) => f.file)).toEqual(['tests/a.test.ts']);
+    expect(out.unmeasured, '測れた file が unmeasured に残っている').toEqual([]);
+  });
+
+  it('T-DGR-029 両方 0 の重複は unmeasured に残す', () => {
+    // T-DGR-028 の対。 「畳んだら常に消す」 実装だと、本当に測れていない file が
+    // 黙って消えて「速い」 と読める状態になる。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/a.test.js', ms: 0 },
+      { rel: 'tests/a.test.ts', ms: 0 },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: unknown[]; unmeasured: string[] };
+
+    expect(out.files).toEqual([]);
+    expect(out.unmeasured).toEqual(['tests/a.test.ts']);
+  });
+
 });

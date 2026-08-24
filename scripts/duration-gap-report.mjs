@@ -239,26 +239,32 @@ function build() {
 
   const results = Array.isArray(report.testResults) ? report.testResults : [];
   const merged = new Map();
-  const unmeasured = new Set();
+  const seen = new Set();
 
   for (const tr of results) {
     if (!tr || typeof tr.name !== 'string') continue;
     const file = toSource(tr.name);
     const ms = Number(tr.endTime) - Number(tr.startTime);
     const tests = Array.isArray(tr.assertionResults) ? tr.assertionResults.length : 0;
+    seen.add(file);
 
-    if (!Number.isFinite(ms) || ms <= 0) {
-      // 0 を「速い」 と読ませない。 duration を出さない reporter 設定では全 file が
-      // 0 になるので、別枠に出して件数を見せる。
-      unmeasured.add(file);
-      continue;
-    }
+    // 0 を「速い」 と読ませない。 duration を出さない reporter 設定では全 file が
+    // 0 になるので、後段で別枠に出す。
+    if (!Number.isFinite(ms) || ms <= 0) continue;
 
     // 重複は **遅い側** を採る。 速い方を採ると「速くなった」 と誤報する。
     const prev = merged.get(file);
     if (!prev || ms > prev.ms) merged.set(file, { ms, tests, abs: tr.name });
     else if (prev && tests > prev.tests) merged.set(file, { ...prev, tests });
   }
+
+  // **畳んだ後に導く**。 source と compile 後は同じ file に正規化されるが、片方だけ 0 に
+  // なることがある (実測で素の `npx vitest run` が両方を拾う)。 0 の側を先に `unmeasured` へ
+  // 入れると、同じ file が `files` と `unmeasured` の両方に出る。
+  //
+  // duration の達成条件は「回帰 0 件 かつ 未測定 0 件」 なので、この形が 1 件でもあると
+  // `/kiwa-loop` は永久に達成へ到達できず baseline を更新できない (codex review r2-f1)。
+  const unmeasured = new Set([...seen].filter((file) => !merged.has(file)));
 
   const baseline = readBaseline();
   const files = [];
