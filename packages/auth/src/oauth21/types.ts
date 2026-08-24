@@ -175,6 +175,47 @@ export type TokenRequest =
     };
 
 /**
+ * 全 field が primitive であることを型で強制する (#2180 r1-f2)。
+ *
+ * `listAccessTokens()` / `listRefreshTokens()` は要素を **浅く** copy して返す (#2179)。
+ * それで足りるのは field が全て primitive だからで、object や配列の field を足すと
+ * spread が内部参照を再公開して穴が戻る。
+ *
+ * コメントで注意するだけでは静かに戻るので、**足した時点で compile を落とす**。
+ * `NonPrimitiveKeys<T>` は非 primitive な field 名を返し、下の `never` 代入が失敗する。
+ */
+type Primitive = string | number | boolean | bigint | symbol | null | undefined;
+
+type NonPrimitiveKeys<T> = {
+  [K in keyof T]-?: NonNullable<T[K]> extends Primitive ? never : K;
+}[keyof T];
+
+
+/**
+ * 「primitive」 または「primitive の readonly 配列」 でない field 名を返す。
+ *
+ * `ClientRegistration` / `AuthorizationUser` 用 (#2180 r1-f2 の派生)。 この 2 型は
+ * `redirectUris` / `scopes` という配列 field を持つので `NonPrimitiveKeys` は使えない
+ * (正しい実装で落ちてしまう)。
+ *
+ * 守りたいのは **copy の深さと field の形が食い違わないこと**。 登録経路は配列 field を
+ * 名指しで copy しているため、`metadata: Record<string, unknown>` のような field が
+ * 足されると **その field だけ素通しして呼出側と参照を共有する** = #2179 で塞いだ穴が戻る。
+ *
+ * 配列 field を 1 つ足すだけなら copy の追加で済むが、object field を足すなら copy の形を
+ * 変えないといけない。 後者を compile で止める。
+ */
+type DeepNonCopyableKeys<T> = {
+  [K in keyof T]-?: NonNullable<T[K]> extends Primitive
+    ? never
+    : NonNullable<T[K]> extends readonly (infer E)[]
+      ? NonNullable<E> extends Primitive
+        ? never
+        : K
+      : K;
+}[keyof T];
+
+/**
  * Access token minted by `/token`. Contains just enough state for the mock
  * to answer `/introspect` and `/revoke` — a real JWT would encode this into
  * claims, the mock keeps a plain record for test ergonomics.
@@ -215,6 +256,36 @@ export interface RefreshToken {
   /** Resource indicator, when bound. */
   resource?: string;
 }
+
+/**
+ * 上の 2 型に非 primitive な field を足すと、ここで compile が落ちる。
+ *
+ * 落ちたら選ぶのは 2 つ。 field を primitive に直すか、`listAccessTokens()` /
+ * `listRefreshTokens()` の copy を深くするか。 **浅い copy のまま足してはいけない** =
+ * 内部参照が再公開され、#2179 で塞いだ穴が戻る。
+ */
+type _AssertAccessTokenAllPrimitive = NonPrimitiveKeys<AccessToken> extends never ? true : never;
+type _AssertRefreshTokenAllPrimitive = NonPrimitiveKeys<RefreshToken> extends never ? true : never;
+
+const _accessTokenIsFlat: _AssertAccessTokenAllPrimitive = true;
+const _refreshTokenIsFlat: _AssertRefreshTokenAllPrimitive = true;
+void _accessTokenIsFlat;
+void _refreshTokenIsFlat;
+
+/**
+ * 登録経路が copy できる形に留まっていることを強制する (#2180)。
+ *
+ * 落ちたら選ぶのは 2 つ。 field を primitive か primitive の配列にするか、
+ * `authorization-server.ts` の `ownClient()` / `ownUser()` の copy を深くするか。
+ * **名指し copy のまま足してはいけない** = その field だけ呼出側と参照を共有する。
+ */
+type _AssertClientCopyable = DeepNonCopyableKeys<ClientRegistration> extends never ? true : never;
+type _AssertUserCopyable = DeepNonCopyableKeys<AuthorizationUser> extends never ? true : never;
+
+const _clientIsCopyable: _AssertClientCopyable = true;
+const _userIsCopyable: _AssertUserCopyable = true;
+void _clientIsCopyable;
+void _userIsCopyable;
 
 /**
  * Response to a successful `/token` call. Mirrors the RFC 6749 token response
@@ -296,11 +367,26 @@ export interface AuthorizationServer {
   /** Introspect a token per RFC 7662. */
   introspect(token: string): IntrospectionResponse;
   /**
-   * Snapshot every currently-active access token. Test-only inspection —
-   * production ASes never expose this.
+   * Snapshot every access token the AS still holds, **including expired ones**.
+   * Test-only inspection — production ASes never expose this.
+   *
+   * The list is not filtered by `expiresAt` (#2180). `introspect()` reports an
+   * expired token as `active: false`, so the two answer different questions:
+   * this one is what the AS is holding, that one is the current validity.
+   *
+   * **Not an issuance record.** `revoke()` removes an access token from the
+   * registry outright, while a revoked refresh token stays with `revoked: true`.
+   * Counting this list across a `revoke()` therefore undercounts what was issued.
    */
   listAccessTokens(): readonly AccessToken[];
-  /** Snapshot every refresh token, including revoked ones. */
+  /**
+   * Snapshot every refresh token, including revoked and rotated ones.
+   *
+   * Both snapshot methods copy the elements as well as the array (#2179).
+   * `readonly T[]` freezes the array, not what it holds, so returning the
+   * stored objects would let a caller rewrite a token's `scope` and have the
+   * refresh path grant it.
+   */
   listRefreshTokens(): readonly RefreshToken[];
   /** Snapshot the set of jti values the AS has seen. */
   listSeenJtis(): readonly string[];

@@ -55,11 +55,54 @@ export function createAuthorizationServer(
   const rotatedRefreshTokens = new Map<string, RefreshToken>();
   const seenJtis = new Set<string>();
 
+  /**
+   * 登録された値を内部に取り込む時の copy (#2179)。
+   *
+   * **入口も塞ぐ**。 `list*` が返す参照を copy しても (出口)、 登録時に呼出側の参照を
+   * そのまま保持していると (入口)、 登録後に `scopes.push('admin')` するだけで
+   * 「宣言されていない scope は発行しない」 が破れる。 `readonly string[]` は
+   * 呼出側が非 readonly の参照を持っていれば止められない。
+   *
+   * 配列 field (`scopes` / `redirectUris`) も個別に copy する。 object を copy しても
+   * 中の配列が同一参照なら意味が無い。
+   */
+  /**
+   * 配列 field を **名指しせず** copy する。
+   *
+   * 名指しの形 (`redirectUris: [...client.redirectUris]` を並べる) にしていたが、
+   * **新しい配列 field を足すと copy が追従しない**。 型側の `DeepNonCopyableKeys` は
+   * 「primitive の readonly 配列」 を許すので compile も通り、検査も通り、その field
+   * だけ呼出側と参照を共有する = #2179 で塞いだ穴がその field で戻る。
+   *
+   * この package は Dynamic Client Registration (`src/oidc/dcr.ts`) を持つので、
+   * RFC 7591 系の配列 field (`grant_types` / `response_types` / `audience` 等) を
+   * 足すのは現実的な次の変更になる。 実測でも `audiences?: readonly string[]` を
+   * 足すと compile が沈黙したまま、登録後の `push` が内部の判定を変えた。
+   *
+   * 走査すれば配列 field が増えても copy が自動で追従する。 object field は
+   * `DeepNonCopyableKeys` が compile で止め続けるので、型と copy の責務が噛み合う。
+   */
+  function ownArrays<T extends object>(value: T): T {
+    const copy = { ...value } as Record<string, unknown>;
+    for (const [key, val] of Object.entries(copy)) {
+      if (Array.isArray(val)) copy[key] = [...val];
+    }
+    return copy as T;
+  }
+
+  function ownClient(client: ClientRegistration): ClientRegistration {
+    return ownArrays(client);
+  }
+
+  function ownUser(user: AuthorizationUser): AuthorizationUser {
+    return ownArrays(user);
+  }
+
   for (const client of options.clients ?? []) {
-    clients.set(client.clientId, client);
+    clients.set(client.clientId, ownClient(client));
   }
   for (const user of options.users ?? []) {
-    users.set(user.subject, user);
+    users.set(user.subject, ownUser(user));
   }
 
   function registerClient(client: ClientRegistration): void {
@@ -68,7 +111,7 @@ export function createAuthorizationServer(
         `registerClient: client "${client.clientId}" already registered`,
       );
     }
-    clients.set(client.clientId, client);
+    clients.set(client.clientId, ownClient(client));
   }
 
   function registerUser(user: AuthorizationUser): void {
@@ -77,7 +120,7 @@ export function createAuthorizationServer(
         `registerUser: user "${user.subject}" already registered`,
       );
     }
-    users.set(user.subject, user);
+    users.set(user.subject, ownUser(user));
   }
 
   function requireClient(clientId: string): ClientRegistration {
@@ -453,14 +496,21 @@ export function createAuthorizationServer(
     revoke,
     introspect,
     listAccessTokens(): readonly AccessToken[] {
-      return Array.from(accessTokens.values());
+      // 要素も copy して返す (#2179)。 `readonly T[]` が凍らせるのは配列であって要素では
+      // ないため、 内部の実体をそのまま渡すと呼出側が `scope` を書き換えられる。 refresh は
+      // 保存済みの値を信頼するので、 書き換えは「宣言されていない scope の発行」 に化ける。
+      //
+      // 浅い copy で足りるのは **全 field が primitive だから**で、 それは
+      // `NonPrimitiveKeys` が型で強制する。 object / 配列の field を足すと compile が
+      // 落ちるので、 この copy が静かに穴を戻すことはない (#2180 r1-f2)。
+      return Array.from(accessTokens.values(), (token) => ({ ...token }));
     },
     listRefreshTokens(): readonly RefreshToken[] {
       // Includes the rotated + revoked tokens so tests can assert the full
-      // family history.
+      // family history. 要素の copy を返す理由は listAccessTokens と同じ (#2179)。
       return [
-        ...Array.from(refreshTokens.values()),
-        ...Array.from(rotatedRefreshTokens.values()),
+        ...Array.from(refreshTokens.values(), (token) => ({ ...token })),
+        ...Array.from(rotatedRefreshTokens.values(), (token) => ({ ...token })),
       ];
     },
     listSeenJtis(): readonly string[] {
