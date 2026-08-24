@@ -221,11 +221,24 @@ function makeWorkspace(dirtyIn?: string): { root: string; trace: string } {
   return { root, trace };
 }
 
-/** The sweep, as the shell would see it: both streams and the exit code. */
+/**
+ * The sweep, as the shell would see it: both streams and the exit code.
+ *
+ * `KIWA_DEPS_PREBUILT` is removed from what the fixture inherits. These checks
+ * are about what the script sets, and the variable is already set in two of the
+ * places this file runs: the root `test` script exports it, and a sweep run with
+ * `--jobs N` passes it to every child — including this package. Inheriting it
+ * would make the `--jobs 1` fixture see `1` and the check would fail for a
+ * reason that has nothing to do with the script (measured: the check passed
+ * alone and failed inside `node scripts/test-all.mjs --jobs 4`).
+ */
 async function sweep(root: string, args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
+  const env = { ...process.env };
+  delete env.KIWA_DEPS_PREBUILT;
   try {
     const { stdout, stderr } = await execFileAsync(process.execPath, ['scripts/test-all.mjs', ...args], {
       cwd: root,
+      env,
       maxBuffer: 32 * 1024 * 1024,
     });
     return { code: 0, stdout, stderr };
