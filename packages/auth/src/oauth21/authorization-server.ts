@@ -66,19 +66,36 @@ export function createAuthorizationServer(
    * 配列 field (`scopes` / `redirectUris`) も個別に copy する。 object を copy しても
    * 中の配列が同一参照なら意味が無い。
    */
+  /**
+   * 配列 field を **名指しせず** copy する。
+   *
+   * 名指しの形 (`redirectUris: [...client.redirectUris]` を並べる) にしていたが、
+   * **新しい配列 field を足すと copy が追従しない**。 型側の `DeepNonCopyableKeys` は
+   * 「primitive の readonly 配列」 を許すので compile も通り、検査も通り、その field
+   * だけ呼出側と参照を共有する = #2179 で塞いだ穴がその field で戻る。
+   *
+   * この package は Dynamic Client Registration (`src/oidc/dcr.ts`) を持つので、
+   * RFC 7591 系の配列 field (`grant_types` / `response_types` / `audience` 等) を
+   * 足すのは現実的な次の変更になる。 実測でも `audiences?: readonly string[]` を
+   * 足すと compile が沈黙したまま、登録後の `push` が内部の判定を変えた。
+   *
+   * 走査すれば配列 field が増えても copy が自動で追従する。 object field は
+   * `DeepNonCopyableKeys` が compile で止め続けるので、型と copy の責務が噛み合う。
+   */
+  function ownArrays<T extends object>(value: T): T {
+    const copy = { ...value } as Record<string, unknown>;
+    for (const [key, val] of Object.entries(copy)) {
+      if (Array.isArray(val)) copy[key] = [...val];
+    }
+    return copy as T;
+  }
+
   function ownClient(client: ClientRegistration): ClientRegistration {
-    return {
-      ...client,
-      redirectUris: [...client.redirectUris],
-      ...(client.scopes === undefined ? {} : { scopes: [...client.scopes] }),
-    };
+    return ownArrays(client);
   }
 
   function ownUser(user: AuthorizationUser): AuthorizationUser {
-    return {
-      ...user,
-      ...(user.scopes === undefined ? {} : { scopes: [...user.scopes] }),
-    };
+    return ownArrays(user);
   }
 
   for (const client of options.clients ?? []) {
@@ -484,7 +501,7 @@ export function createAuthorizationServer(
       // 保存済みの値を信頼するので、 書き換えは「宣言されていない scope の発行」 に化ける。
       //
       // 浅い copy で足りるのは **全 field が primitive だから**で、 それは
-      // `AssertAllPrimitive` が型で強制する。 object / 配列の field を足すと compile が
+      // `NonPrimitiveKeys` が型で強制する。 object / 配列の field を足すと compile が
       // 落ちるので、 この copy が静かに穴を戻すことはない (#2180 r1-f2)。
       return Array.from(accessTokens.values(), (token) => ({ ...token }));
     },

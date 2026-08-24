@@ -210,7 +210,54 @@ describe('登録した参照を後から書き換えても認可判定に届か�
         },
         'user-1',
       ),
-    ).toThrow();
+    ).toThrow(/redirect_uri/);
+  });
+
+  it('T-SNAP-022c registerClient 経路の client 側だけを足した形も止まる', () => {
+    // **`options.clients` 経路と `registerClient` 経路は別の入口**。 T-SNAP-021b は
+    // 前者しか突いておらず、`registerClient` の中の copy を外す変異で 1 件も落ちなかった
+    // (実測 = 全 1256 件 pass)。 T-SNAP-022 は後者を通るが両側を同時に足すので、
+    // user 側の判定が先に落ちて client 側に到達しない。
+    const clientScopes = ['openid'];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
+    server.registerClient({
+      clientId: 'client-A',
+      redirectUris: [REDIRECT_LOCAL],
+      scopes: clientScopes,
+    });
+    // user 側は最初から admin を持つので、user 側の判定では落ちない。
+    server.registerUser({ subject: 'user-1', scopes: ['openid', 'admin'] });
+
+    clientScopes.push('admin');
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not registered for scope "admin"/);
+  });
+
+  it('T-SNAP-023b registerClient 経路の redirectUris も後から足せない', () => {
+    const redirectUris = [REDIRECT_LOCAL];
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
+    server.registerClient({ clientId: 'client-A', redirectUris, scopes: ['openid'] });
+    server.registerUser({ subject: 'user-1', scopes: ['openid'] });
+
+    redirectUris.push('https://evil.example.test/cb');
+
+    const { codeChallenge } = createPkceChallenge();
+    expect(() =>
+      server.authorize(
+        {
+          responseType: 'code',
+          clientId: 'client-A',
+          redirectUri: 'https://evil.example.test/cb',
+          state: 'state-1',
+          codeChallenge,
+          codeChallengeMethod: 'S256',
+          scope: 'openid',
+        },
+        'user-1',
+      ),
+    ).toThrow(/redirect_uri/);
   });
 });
 

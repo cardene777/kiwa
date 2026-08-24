@@ -175,11 +175,6 @@ export type TokenRequest =
     };
 
 /**
- * Access token minted by `/token`. Contains just enough state for the mock
- * to answer `/introspect` and `/revoke` — a real JWT would encode this into
- * claims, the mock keeps a plain record for test ergonomics.
- */
-/**
  * 全 field が primitive であることを型で強制する (#2180 r1-f2)。
  *
  * `listAccessTokens()` / `listRefreshTokens()` は要素を **浅く** copy して返す (#2179)。
@@ -187,13 +182,14 @@ export type TokenRequest =
  * spread が内部参照を再公開して穴が戻る。
  *
  * コメントで注意するだけでは静かに戻るので、**足した時点で compile を落とす**。
- * `AssertAllPrimitive<T>` は非 primitive な field 名を返し、下の `never` 代入が失敗する。
+ * `NonPrimitiveKeys<T>` は非 primitive な field 名を返し、下の `never` 代入が失敗する。
  */
 type Primitive = string | number | boolean | bigint | symbol | null | undefined;
 
 type NonPrimitiveKeys<T> = {
   [K in keyof T]-?: NonNullable<T[K]> extends Primitive ? never : K;
 }[keyof T];
+
 
 /**
  * 「primitive」 または「primitive の readonly 配列」 でない field 名を返す。
@@ -219,6 +215,11 @@ type DeepNonCopyableKeys<T> = {
       : K;
 }[keyof T];
 
+/**
+ * Access token minted by `/token`. Contains just enough state for the mock
+ * to answer `/introspect` and `/revoke` — a real JWT would encode this into
+ * claims, the mock keeps a plain record for test ergonomics.
+ */
 export interface AccessToken {
   token: string;
   tokenType: 'Bearer' | 'DPoP';
@@ -366,12 +367,16 @@ export interface AuthorizationServer {
   /** Introspect a token per RFC 7662. */
   introspect(token: string): IntrospectionResponse;
   /**
-   * Snapshot every issued access token, **including expired ones**. Test-only
-   * inspection — production ASes never expose this.
+   * Snapshot every access token the AS still holds, **including expired ones**.
+   * Test-only inspection — production ASes never expose this.
    *
    * The list is not filtered by `expiresAt` (#2180). `introspect()` reports an
    * expired token as `active: false`, so the two answer different questions:
-   * this one is the issuance history, that one is the current validity.
+   * this one is what the AS is holding, that one is the current validity.
+   *
+   * **Not an issuance record.** `revoke()` removes an access token from the
+   * registry outright, while a revoked refresh token stays with `revoked: true`.
+   * Counting this list across a `revoke()` therefore undercounts what was issued.
    */
   listAccessTokens(): readonly AccessToken[];
   /**
