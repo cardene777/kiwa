@@ -25,7 +25,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
@@ -166,7 +166,7 @@ function brokenSymlinks(entries: readonly Entry[], repoRootPath: string, skillsR
     // 参照は解決するので、 名前を見ない限り T-SRI-003 も T-SRI-006 も通る。 読み手は
     // `coverage-classify.md` を Read して分類 rule を期待するのに、 届くのが言語選択の
     // 説明になる形が素通りする。
-    const target = real.slice(real.lastIndexOf('/') + 1);
+    const target = basename(real);
     if (target !== entry.name) {
       broken.push(`${entry.rel} (別名の実体を指す: ${target})`);
     }
