@@ -5,7 +5,7 @@
 // threshold が 80% で止まっていたのは、同じ file の Step 5 に「production target 100%」 と
 // 書いてあったのに完了条件が 80% だったから = 完了条件が gate で、Step の記述は読まれるだけ
 // だった。 だから完了条件の側を機械で見る。
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, lstatSync, readFileSync, readdirSync, readlinkSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -46,6 +46,22 @@ function generatorSkills(): string[] {
       return /^## 既存 test の再利用$/m.test(readFileSync(p, 'utf8'));
     })
     .sort();
+}
+
+/**
+ * contract に従う skill。
+ *
+ * **生成 skill だけでは足りない** (codex review r1-f2)。 `kiwa-test` は chain を一括実行し、
+ * `kiwa-design` は何を test するかを決める = どちらも `## 既存 test の再利用` を持たないため
+ * `generatorSkills()` から漏れる。 漏れたまま配線すると、その 1 行を消しても検査が通る。
+ *
+ * 導出できる集合 (生成 skill) に、導出できない 2 件を明示的に足す。 名前を書くのは
+ * 「chain を回す側 / 設計する側」 という役割が file 内の見出しからは導けないため。
+ */
+const EXTRA_CONSUMERS = ['kiwa-design', 'kiwa-test'] as const;
+
+function contractConsumers(): string[] {
+  return [...new Set([...generatorSkills(), ...EXTRA_CONSUMERS])].sort();
 }
 
 describe('共通 skill が実在する', () => {
@@ -142,27 +158,54 @@ describe('test を生成する skill が共通 skill へ配線されている', 
       .toBeGreaterThan(0);
   });
 
-  it('T-SKG-008 完了条件が /kiwa-gap --metric coverage を要求する', () => {
-    const missing = generatorSkills().filter(
-      (s) => !completion(read(s)).includes('/kiwa-gap --metric coverage'),
+  it('T-SKG-008 完了条件が contract を参照する', () => {
+    // **判定基準を各 skill に書き写さない**。 以前は 2 行 × 18 skill = 34 行の複製で、
+    // 相異なる行は 4 種しか無かった = 1 箇所直して 17 箇所が古いまま残る形だった。
+    //
+    // 参照 1 行に置き換え、判定基準は `_shared/references/coverage-contract.md` に一本化する。
+    const missing = contractConsumers().filter(
+      (s) => !completion(read(s)).includes('references/coverage-contract.md'),
     );
-    expect(missing, 'coverage の gap 参照が完了条件に無い skill').toEqual([]);
+    expect(missing, 'contract 参照が完了条件に無い skill').toEqual([]);
+
+    // 導出できない 2 件が母集団に入っていることまで見る = 足し忘れると全部通る。
+    //
+    // **`for` で回さない** (変異試験で実測)。 `EXTRA_CONSUMERS` を空にすると loop が
+    // 0 周して assert に到達せず、母集団を空にする変異が素通りした。
+    // 集合そのものを比較する形にすると、空にした時点で落ちる。
+    expect(
+      [...EXTRA_CONSUMERS].sort(),
+      '導出できない consumer の一覧が空になっている',
+    ).toEqual(['kiwa-design', 'kiwa-test']);
+    for (const extra of EXTRA_CONSUMERS) {
+      expect(contractConsumers(), `${extra} が母集団に無い`).toContain(extra);
+    }
   });
 
-  it('T-SKG-009 完了条件が /kiwa-gap --metric duration を要求する', () => {
-    const missing = generatorSkills().filter(
-      (s) => !completion(read(s)).includes('/kiwa-gap --metric duration'),
-    );
-    expect(missing, 'duration の gap 参照が完了条件に無い skill').toEqual([]);
+  it('T-SKG-009 判定基準を完了条件に書き写していない', () => {
+    // 陰性対照。 参照を書いた上で判定基準も並べると、複製が復活する。
+    const offenders = contractConsumers().filter((s) => {
+      const c = completion(read(s));
+      return c.includes('/kiwa-gap --metric') || c.includes('/kiwa-verdict');
+    });
+    expect(offenders, '完了条件に判定基準が書き写されている skill').toEqual([]);
   });
 
-  it('T-SKG-010 完了条件が残った未達の行き先を要求する', () => {
-    // 「gap を見た」 だけでは、見て何もしなかった run と区別できない。
-    // 0 件か、`/kiwa-verdict` の分類つきで記録することまでを条件にする。
-    const missing = generatorSkills().filter(
-      (s) => !completion(read(s)).includes('/kiwa-verdict'),
+  it('T-SKG-010 contract が 4 分類と 100% 目標を持つ', () => {
+    // 参照先が空でないことを見る = 参照 1 行だけを固定すると、中身が消えても通る。
+    const contract = readFileSync(
+      resolve(SKILLS_DIR, '_shared/references/coverage-contract.md'),
+      'utf8',
     );
-    expect(missing, '残った未達の行き先が完了条件に無い skill').toEqual([]);
+    expect(contract).toMatch(/カバレッジは 100% を目指す/);
+    for (const label of [
+      '別の gate が覆っている',
+      '実装が到達不能',
+      '入力を組めない',
+      '単に書いていない',
+    ]) {
+      expect(contract, `分類「${label}」 が無い`).toContain(label);
+    }
   });
 
   it('T-SKG-011 dashboard を直接読む古い経路が残っていない', () => {
@@ -372,4 +415,222 @@ describe('一括置換が他 skill の option を壊していない', () => {
     expect(read('kiwa-loop')).toMatch(/duration では Step 3 を行わない/);
   });
 
+});
+
+
+  /**
+   * `## 手順` 節の fenced block から、**command として書かれた行**を取り出す。
+   *
+   * 3 つの正規化を行う。
+   *
+   * | 正規化 | なぜ要るか |
+   * |---|---|
+   * | 行末の `←` 以降を落とす | 落とさないと `--package` の値が消えても次の語を値と読む |
+   * | 先頭の序数 (`1.` / `2.`) を落とす | 番号は手順の順序で、command の一部ではない |
+   * | 節内の fence を全部見る | 1 つ目だけ見ると、手順を 2 block に分ける形で漏れる |
+   *
+   * fence は **language tag と 3 空白までの字下げを許す** (codex review r3-f2)。
+   * この repo は `” ```bash ”` を多用しており、tag を付けただけで検査が落ちると
+   * 手順を変えていないのに release が止まる。
+   */
+  function procedureBlock(contract: string): string[] {
+    // `## 手順` から次の level-2 見出しまでを節とする。
+    //
+    // **正規表現で節を切らない**。 `\Z` は JavaScript に無く、`$` は `m` flag の下で
+    // 行末に当たるため `(?=^## |$)` は最初の行末で止まり、節が常に空になる。
+    // 実測で「tag なし」 の fixture が 0 件を返した = 検査が空振りしていた。
+    const head = contract.indexOf('## 手順');
+    if (head < 0) return [];
+    const rest = contract.slice(head + '## 手順'.length);
+    const next = rest.search(/^## /m);
+    const section = next === -1 ? rest : rest.slice(0, next);
+    const lines: string[] = [];
+    let inFence = false;
+    for (const raw of section.split('\n')) {
+      // 開始も終了も、字下げ 3 まで + 任意の info string を許す。
+      if (/^ {0,3}```/.test(raw)) {
+        inFence = !inFence;
+        continue;
+      }
+      if (!inFence) continue;
+      const body = (raw.split('←')[0] ?? '').trim().replace(/^\d+[.)]\s*/, '');
+      if (body !== '') lines.push(body);
+    }
+    return lines;
+  }
+
+  /** 手順の 1 行が、その command の呼出そのものかを見る。 */
+  function invokes(line: string, skill: string, extra: RegExp): boolean {
+    // **行頭から見る** (codex review r3-f1)。 部分一致だと `echo /kiwa-loop …` や
+    // `# /kiwa-loop …` のような、実行しない形が契約を満たしてしまう。
+    const m = new RegExp(`^/${skill}\\s+(.*)$`).exec(line);
+    return m !== null && extra.test(m[1] ?? '');
+  }
+
+  it('T-SKG-024 contract の手順が実際に動く形になっている', () => {
+    // **codex review r1-f1**。 `/kiwa-loop --metric coverage` を `--package` 無しで
+    // 書いていた。 `/kiwa-loop` は coverage で `--package` が無いと止まるので、
+    // 契約に従っても remediation loop に入れない。
+    //
+    // **説明文を拾わない** (r2-f1)。 前版は contract 全体から最初の `/kiwa-loop` を
+    // 取っていたため、手順の直後の説明段落が両方の語を含み、手順を丸ごと消しても通った。
+    //
+    // **行頭から見る** (r3-f1)。 部分一致だと `echo /kiwa-loop …` が通る。
+    const contract = readFileSync(
+      resolve(SKILLS_DIR, '_shared/references/coverage-contract.md'),
+      'utf8',
+    );
+    const steps = procedureBlock(contract);
+    expect(steps.length, '## 手順 の fenced block を取り出せない (検査が空振りしている)')
+      .toBeGreaterThan(0);
+
+    // 値まで見る = `--package` だけ書いて値が無い形を通さない。
+    const wanted: [string, RegExp][] = [
+      ['kiwa-gap', /^--metric\s+coverage\s+--package\s+(?!-)\S+/],
+      ['kiwa-loop', /^--metric\s+coverage\s+--package\s+(?!-)\S+/],
+      ['kiwa-verdict', /^--metric\s+coverage\b/],
+    ];
+    for (const [skill, extra] of wanted) {
+      const hit = steps.filter((l) => invokes(l, skill, extra));
+      expect(hit.length, `手順に /${skill} の呼出が 1 件だけ無い`).toBe(1);
+    }
+  });
+
+  it('T-SKG-024b 通してはいけない形を通さない (陰性対照)', () => {
+    // 判定関数に直接、壊した contract を与える。 実 file を汚さずに確かめる。
+    const extra = /^--metric\s+coverage\s+--package\s+(?!-)\S+/;
+    const broken: [string, string][] = [
+      ['Step 2 が無い', '## 手順\n\n```\n1. /kiwa-gap  --metric coverage --package {pkg}\n```\n'],
+      ['--package の値が無い', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package    ← 説明\n```\n'],
+      ['手順が空', '## 手順\n\n```\n(手順なし)\n```\n'],
+      ['echo を前置', '## 手順\n\n```\n2. echo /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['comment 化', '## 手順\n\n```\n2. # /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['散文の前置', '## 手順\n\n```\n2. まず /kiwa-loop --metric coverage --package {pkg} を実行\n```\n'],
+      // **値が flag だと path にならない** (codex review r4-f1)。 `--package` の次の token を
+      // そのまま package dir として扱うので、`--dry-run` を対象にしてしまう。
+      ['値が別の flag', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package --dry-run\n```\n'],
+      ['値が短い flag', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package -p\n```\n'],
+    ];
+    for (const [label, src] of broken) {
+      const hit = procedureBlock(src).filter((l) => invokes(l, 'kiwa-loop', extra));
+      expect(hit.length, `通してはいけない形: ${label}`).toBe(0);
+    }
+  });
+
+  it('T-SKG-024c 正しい書き方の変化形を落とさない (陽性対照)', () => {
+    // **落とし過ぎない**ことを反対側から見る (codex review r3-f2)。
+    // この repo は language tag 付きの fence を多用する。
+    const extra = /^--metric\s+coverage\s+--package\s+(?!-)\S+/;
+    const ok: [string, string][] = [
+      ['tag なし', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['bash tag', '## 手順\n\n```bash\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['text tag', '## 手順\n\n```text\n/kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['字下げ 3', '## 手順\n\n   ```\n   2. /kiwa-loop --metric coverage --package {pkg}\n   ```\n'],
+      ['序数なし', '## 手順\n\n```\n/kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      // **placeholder 以外の実 path も通す** (codex review r5-f1)。 Round 4 で
+      // `(?!-)\\S+` に締めた時、`{pkg}` の fixture しか無かったため
+      // 「実 path を落としていない」 ことの証跡が検査に残っていなかった。
+      [
+        '実 path',
+        '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package packages/auth\n```\n',
+      ],
+      [
+        '前置きの散文あり',
+        '## 手順\n\n次を順に実行する。\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n',
+      ],
+      [
+        'fence が 2 つ',
+        '## 手順\n\n```\n1. /kiwa-gap --metric coverage --package {pkg}\n```\n\n続けて。\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n',
+      ],
+    ];
+    for (const [label, src] of ok) {
+      const hit = procedureBlock(src).filter((l) => invokes(l, 'kiwa-loop', extra));
+      expect(hit.length, `落としてはいけない形: ${label}`).toBe(1);
+    }
+  });
+
+  it('T-SKG-025 consumer が別 consumer の references を名指ししない', () => {
+    // **codex review r1-f3**。 移設後も 16 skill が
+    // `.claude/skills/kiwa-design/references/existing-test-reuse.md` を名指ししていた。
+    // kiwa-design に symlink が残っているので動くだけで、その skill を消すと全部壊れる。
+    const offenders: string[] = [];
+    for (const skill of readdirSync(SKILLS_DIR)) {
+      const p = resolve(SKILLS_DIR, skill, 'SKILL.md');
+      if (!existsSync(p)) continue;
+      for (const m of readFileSync(p, 'utf8').matchAll(
+        /\.claude\/skills\/(kiwa-[a-z-]+)\/references\/([a-z0-9-]+\.md)/g,
+      )) {
+        offenders.push(`${skill}: ${m[1]}/references/${m[2]}`);
+      }
+    }
+    expect(offenders, 'consumer skill の references を名指ししている').toEqual([]);
+  });
+
+describe('共有 component の置き場所', () => {
+  const SHARED = resolve(SKILLS_DIR, '_shared/references');
+
+  it('T-SKG-019 _shared は SKILL.md を持たない', () => {
+    // 持つと skill として数えられ、`/` から起動できる空の skill が現れる。
+    // skill の列挙は SKILL.md の有無で判定する (rebuild-plugin-metadata.mjs と同じ形)。
+    expect(existsSync(resolve(SKILLS_DIR, '_shared/SKILL.md'))).toBe(false);
+  });
+
+  it('T-SKG-020 2 skill 以上が参照する reference の実体は _shared にある', () => {
+    // **消費者の 1 つに実体を置かない**。 実際 `doc-language-selection.md` は 8 skill が
+    // 使うのに実体が `kiwa-forge` (Solidity の test skill) の中にあった。
+    const bodies = new Map<string, string[]>();
+    for (const skill of readdirSync(SKILLS_DIR)) {
+      const dir = resolve(SKILLS_DIR, skill, 'references');
+      if (!existsSync(dir)) continue;
+      for (const name of readdirSync(dir)) {
+        if (!name.endsWith('.md')) continue;
+        if (lstatSync(resolve(dir, name)).isSymbolicLink()) continue;
+        bodies.set(name, [...(bodies.get(name) ?? []), skill]);
+      }
+    }
+    const offenders: string[] = [];
+    for (const [name, owners] of bodies) {
+      if (owners.includes('_shared')) continue;
+      const refs = readdirSync(SKILLS_DIR).filter((s) =>
+        existsSync(resolve(SKILLS_DIR, s, 'references', name)),
+      );
+      if (refs.length > 1) offenders.push(`${name}: ${owners.join(',')} に実体、${refs.length} skill が参照`);
+    }
+    expect(offenders, '2 skill 以上が参照するのに実体が _shared に無い').toEqual([]);
+  });
+
+  it('T-SKG-021 symlink は _shared を直接指す', () => {
+    // 別の skill を経由させない。 中間の skill を消すと全部壊れる。
+    const offenders: string[] = [];
+    for (const skill of readdirSync(SKILLS_DIR)) {
+      const dir = resolve(SKILLS_DIR, skill, 'references');
+      if (!existsSync(dir)) continue;
+      for (const name of readdirSync(dir)) {
+        const p = resolve(dir, name);
+        if (!lstatSync(p).isSymbolicLink()) continue;
+        const target = readlinkSync(p);
+        if (!target.includes('_shared')) offenders.push(`${skill}/${name} -> ${target}`);
+      }
+    }
+    expect(offenders, '_shared を経由しない symlink がある').toEqual([]);
+  });
+
+  it('T-SKG-022 実体が 1 つずつしか無い', () => {
+    // 空振り防止も兼ねる = _shared が空なら 0 件になって気付ける。
+    const names = readdirSync(SHARED).filter((n) => n.endsWith('.md'));
+    expect(names.length, '_shared に reference が 1 件も無い').toBeGreaterThan(0);
+    for (const name of names) {
+      const bodies = readdirSync(SKILLS_DIR).filter((s) => {
+        const p = resolve(SKILLS_DIR, s, 'references', name);
+        return s !== '_shared' && existsSync(p) && !lstatSync(p).isSymbolicLink();
+      });
+      expect(bodies, `${name} の実体が _shared の外にもある`).toEqual([]);
+    }
+  });
+
+  it('T-SKG-023 切り出しの判別ルールが component-boundary に書かれている', () => {
+    const src = readFileSync(resolve(SHARED, 'component-boundary.md'), 'utf8');
+    expect(src).toMatch(/動くのか、決めるのか/);
+    expect(src).toMatch(/2 件目が現れた時点で `_shared\/` へ移す/);
+  });
 });

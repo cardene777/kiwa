@@ -1,1 +1,1 @@
-../../kiwa-forge/references/doc-language-selection.md
+../../_shared/references/doc-language-selection.md

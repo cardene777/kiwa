@@ -716,7 +716,7 @@ mode column が `jsdom` = Vitest 環境で axe-core を DOM に走らす、 `pla
 | Automation | `yes` / `no` / `manual` |
 | Action | 対象 Server Action の identifier (`login` / `createPost` / `deleteUser` 等) |
 
-`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs/invokeServerAction` の引数に機械変換する。 action は `redirect()` / `cookies().set()` / `revalidatePath()` を直接 import せず、 **injectable seam** 経由で env を受け取る形に refactor 済みであることが前提 (詳細 = `.claude/skills/kiwa-nextjs/references/server-action-seam.md`)。
+`/kiwa-nextjs` Layer 2 skill が本 9 column を `@kiwa-lab/nextjs/invokeServerAction` の引数に機械変換する。 action は `redirect()` / `cookies().set()` / `revalidatePath()` を直接 import せず、 **injectable seam** 経由で env を受け取る形に refactor 済みであることが前提 (詳細 = `references/server-action-seam.md`)。
 
 出力 path 規約 は `tests/spec/integration/test-spec-{module}.nextjs.md` (`.nextjs.md` suffix で `@kiwa-lab/nextjs` 経路向けと識別)。
 
@@ -1052,6 +1052,7 @@ path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec �
 - Layer 2 連携先 skill を末尾で 1 件以上推奨 (`--layer` 指定で自動的に推奨 skill が絞られる)
 - `## 既存 test との対応` が全 TC 分の行を持ち、 各行の判定が `既覆 (候補)` / `未覆` / `不明` のいずれか
 - 「自動化すべきテスト」 の並びが `未覆` / `不明` から始まっている
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## references
 
@@ -1071,4 +1072,4 @@ path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec �
 
 - 仕様書 SSOT: `docs/SKILL-DESIGN.md` / `docs/SKILL-DESIGN.ja.md`
 - 既存 e2e skill (Layer 2 候補): `.claude/skills/kiwa-play/SKILL.md`
-- 偽陽性 self-check: `.claude/skills/kiwa-play/references/adversarial-pitfalls.md`
+- 偽陽性 self-check: `references/adversarial-pitfalls.md`

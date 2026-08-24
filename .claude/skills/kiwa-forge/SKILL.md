@@ -186,7 +186,7 @@ format。
 Layer 1 spec の各ケース行を 観点別に forge helper へ変換 (詳細マッピングは `references/foundry-mapping.md`)。
 
 assert の識別力判定と Layer 1 への引き継ぎは
-`.claude/skills/kiwa-design/references/assertion-discrimination.md` が SSOT。
+`references/assertion-discrimination.md` が SSOT。
 Step 3 では同 file を Read し、spec の `期待結果` を正確に表す assert を選ぶ。
 Layer 1 が緩い場合は現在の実装値から期待値を発明せず、同 file の規範どおり報告する。
 revert の種別が spec にある場合、`vm.expectRevert()` は引数なしにせず selector または
@@ -422,8 +422,7 @@ report 出力先: `/kiwa-review` Step 0 の言語別出力 path (`test-review` m
 - Step 0 が定める coverage report path が 4 section format で Write 済 (final + round 別)
 - 観点別 grouping (`// 観点 N: {name}` コメント) が spec と一致
 - 「停滞」判定や `forge coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
-- カバレッジの残りを確認済 = `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件、または `/kiwa-loop` を回した上で残った分を `/kiwa-verdict` の 4 分類つきで report に記録 (#2193)。 **`unknown` や「埋められない」 で終わらせない**
-- 遅い test の上位を確認済 = `/kiwa-gap --metric duration --report {vitest json}` を実行し、lever 別の偏りを読んで対処したか、対処しない理由を report に記録 (#2186 / #2193)。**遅い順ではなく lever 別の合計を見る** = 実測で release-smoke は 164.6s のうち 131.1s (80%) が `subprocess` に集中しており、偏りを見れば直す手が 1 つに絞れる
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## references
 
@@ -446,7 +445,7 @@ section を持たない仕様書は全 TC を `不明` として扱う。
 既存 test file があればそこに追記し、 無ければ本 skill の既定出力先へ新規 Write する。
 **既存 test の削除と期待値の書き換えは行わない**。
 
-判定の読み方 / 追記先の決め方 / 禁止事項の全文は `.claude/skills/kiwa-design/references/existing-test-reuse.md` を Read する。
+判定の読み方 / 追記先の決め方 / 禁止事項の全文は `references/existing-test-reuse.md` を Read する。
 
 ## 関連 link
 
