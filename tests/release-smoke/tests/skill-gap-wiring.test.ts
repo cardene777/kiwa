@@ -316,10 +316,10 @@ describe('一括置換が他 skill の option を壊していない', () => {
     return (m?.[0] ?? '').split('\n').filter((l) => /^\|\s*[23]\s*\|/.test(l));
   }
 
-  /** Step 3 の差分表の行だけを取り出す。 */
-  function deltaRows(src: string): string[] {
-    const m = /\|\s*差\s*\|\s*扱い\s*\|[\s\S]*?\n\n/.exec(src);
-    return (m?.[0] ?? '').split('\n').filter((l) => l.startsWith('| '));
+  /** Step 3 の差分表を、見出しを含めて丸ごと取り出す。 */
+  function deltaTable(src: string): string[] {
+    const m = /\|\s*差\s*\|[^\n]*\|\n(?:\|[^\n]*\|\n)+/.exec(src);
+    return (m?.[0] ?? '').trim().split('\n');
   }
 
   it('T-SKG-003e 停止条件 2 / 3 の行そのものが coverage 限定になっている', () => {
@@ -343,19 +343,26 @@ describe('一括置換が他 skill の option を壊していない', () => {
     }
   });
 
-  it('T-SKG-003g Step 3 の差分表が duration を対象にしていない', () => {
+  it('T-SKG-003g Step 3 の差分表を丸ごと固定する', () => {
     // 差分表 (減った / 変わらない / 増えた) は改善の有無を判定する。 duration に
     // 当てると、負荷で動いた値を「改善」「悪化」 と読むことになる。
-    const src = read('kiwa-loop');
-    const rows = deltaRows(src);
+    //
+    // **`duration` の語が無いことだけを見ない** (codex review r3-f1)。 適用範囲を
+    // `両方` のような別の語に変えれば、`duration` を 1 文字も書かずに表を duration へ
+    // 広げられる。 実測で前版はその形を素通しした。
+    //
+    // 表を丸ごと固定する = 適用範囲も行の中身も、1 文字変えれば落ちる。
+    const table = deltaTable(read('kiwa-loop'));
 
-    expect(rows.length, '差分表を取り出せない (検査が空振りしている)').toBeGreaterThan(3);
-    for (const row of rows) {
-      expect(row, `差分表の行が duration を名指ししている: ${row.trim().slice(0, 50)}`)
-        .not.toContain('duration');
-    }
-    // 表の直後に適用範囲が書かれていることまで見る。
-    expect(src).toMatch(/この表は coverage だけに適用する/);
+    expect(table, '差分表を取り出せない (検査が空振りしている)').toEqual([
+      '| 差 | 扱い (coverage のみ) |',
+      '|---|---|',
+      '| 減った | 1 歩進んだ。 round を進めて Step 2 へ |',
+      '| 変わらない | 改善 0。 連続回数を +1 |',
+      '| 増えた | 悪化。 その round の変更を見直す (test を消していないか確認する) |',
+    ]);
+    // 表の直後の説明も残っていることを見る。
+    expect(read('kiwa-loop')).toMatch(/この表は coverage だけに適用する/);
   });
 
   it('T-SKG-003f duration の再測手順が coverage 限定になっている', () => {
