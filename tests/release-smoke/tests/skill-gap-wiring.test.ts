@@ -527,6 +527,13 @@ describe('一括置換が他 skill の option を壊していない', () => {
       ['text tag', '## 手順\n\n```text\n/kiwa-loop --metric coverage --package {pkg}\n```\n'],
       ['字下げ 3', '## 手順\n\n   ```\n   2. /kiwa-loop --metric coverage --package {pkg}\n   ```\n'],
       ['序数なし', '## 手順\n\n```\n/kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      // **placeholder 以外の実 path も通す** (codex review r5-f1)。 Round 4 で
+      // `(?!-)\\S+` に締めた時、`{pkg}` の fixture しか無かったため
+      // 「実 path を落としていない」 ことの証跡が検査に残っていなかった。
+      [
+        '実 path',
+        '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package packages/auth\n```\n',
+      ],
       [
         '前置きの散文あり',
         '## 手順\n\n次を順に実行する。\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n',
