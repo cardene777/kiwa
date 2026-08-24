@@ -1,25 +1,18 @@
-// `test:fast` が完全実行と同じ範囲を集めることを固定する (Issue #2200)。
+// compile を挟んでも集める範囲が変わらないことを固定する (Issue #2200 / #2204)。
 //
-// `tests/release-smoke` の 2 つの script は走らせ方が違う。 `test` は `tsc` が `.vitest-dist/`
-// へ吐いた `.js` を走らせ、 `test:fast` は `tests/` の `.ts` を直接走らせる。 前者は毎回全件、
-// 後者は `--changed` が選んだ分だけになる。
+// #2204 で `test` から compile 段を外し、 source を直接走らせる形にした。 compile 済 file を
+// 走らせる経路は消えていない = `test:cov` / `test:mutation` / `test:taxonomy` が今も自前で
+// `tsc` を掛けて `.vitest-dist/` を走らせる。
 //
-// **ずれは静かに出る**。 `vitest` の位置引数は path の部分一致なので、 `vitest run tests` は
-// `.vitest-dist/tests/*.test.js` にも一致する。 除外を書き忘れれば同じ test を 2 重に集め、
-// 位置引数を書き間違えれば 1 件も集めない。 後者は `--changed` と併せると **exit 0 で終わる**
-// (実測 = 位置引数を `tesXts` に壊し、 変更を 1 件持たせた状態で exit 0)。 「速くなった」 と
-// 「走っていない」 が同じ見た目になる。
+// **つまり 2 つの経路が並んだまま分かれた**。 開発者が回すのは source 側、 coverage と変異
+// 試験が測るのは compile 側で、 集める範囲がずれると **測っている対象と走らせている対象が
+// 別物になる**。 どちらも緑に見えるので、 ずれても気付けない。
 //
-// そこで両 route を `vitest list` で実際に走らせ、 leg ごとに file 数 / test 数 / file 名を
-// 突き合わせる。 期待値は書かない = 両 route の実測どうしを比べる。 数を書くと実物とずれる
-// (`rules/quality.md § 導出可能記述は人手で書かない`)。
+// そこで同じ起動形を 2 通り (source のまま / scratch に compile して) 走らせ、 leg ごとに
+// file 数 / test 数 / file 名を突き合わせる。 期待値は書かない = 両者の実測どうしを比べる。
 //
-// 起動引数も書き写さず `package.json` の script から取り出す。 写すと script を直した時に
-// 検査だけが古い引数を見続ける。
-//
-// `.vitest-dist` 側は本 file の中で scratch outDir へ compile し直す。 手元の `.vitest-dist` が
-// 古いだけで落ちる形にしない = `test:fast` は compile しないので、 test file を足した直後の
-// `.vitest-dist` は必ず古い。
+// 起動引数は `package.json` の `test` から取り出す。 写すと script を直した時に検査だけが
+// 古い引数を見続ける。
 //
 // `vitest list --filesOnly` は使わない。 実測で root が repo root に解決され、 位置引数
 // `tests` に一致する file を 4129 件 (`.claude/` 配下 2359 件を含む) 集める。 `run` と収集
@@ -93,55 +86,40 @@ function parseScript(script: string): Leg[] {
   return legs;
 }
 
-interface Scripts {
-  full: Leg[];
-  fast: Leg[];
-}
-
-function scripts(): Scripts {
+/** `test` の leg 列。 source 側の起動形はここから取る。 */
+function testLegs(): Leg[] {
   const pkg = JSON.parse(readFileSync(resolve(PACKAGE_DIR, 'package.json'), 'utf-8')) as {
     scripts?: Record<string, string>;
   };
-  const full = pkg.scripts?.['test'];
-  const fast = pkg.scripts?.['test:fast'];
-  if (full === undefined) throw new Error('package.json に test script が無い');
-  if (fast === undefined) throw new Error('package.json に test:fast script が無い');
-  return { full: parseScript(full), fast: parseScript(fast) };
+  const test = pkg.scripts?.['test'];
+  if (test === undefined) throw new Error('package.json に test script が無い');
+  return parseScript(test);
 }
 
-const SCRIPTS = scripts();
+const SCRIPT_LEGS = testLegs();
 
 /** その script の中で `vitest` を起動する leg。 */
 function vitestLegs(legs: Leg[]): Leg[] {
   return legs.filter((leg) => leg[0] === 'vitest');
 }
 
-const FULL_RUNS = vitestLegs(SCRIPTS.full);
-const FAST_RUNS = vitestLegs(SCRIPTS.fast);
+const SOURCE_RUNS = vitestLegs(SCRIPT_LEGS);
 
-/** 完全実行が `.vitest-dist/` を作る `tsc` の leg。 */
-function compileLeg(): Leg {
-  const leg = SCRIPTS.full.find((tokens) => tokens[0] === 'tsc');
-  if (leg === undefined) throw new Error('test script に tsc の leg が無い');
-  return leg;
-}
+/**
+ * compile 側の経路が使う TypeScript project。
+ *
+ * `scripts/package-mutation.mjs` の `TS_PROJECT` と `scripts/kiwa-taxonomy-run.mjs` が同じ名前を
+ * 使う。 3 箇所で共有する repo の約束なので、 ここでも同じ名前を見る。 実在しなければ落ちる。
+ */
+const COMPILE_PROJECT = 'tsconfig.vitest.json';
 
-/** `tsc -p <file>` が指す project file。 */
-function compileProject(): string {
-  const leg = compileLeg();
-  const at = leg.indexOf('-p');
-  const project = at >= 0 ? leg[at + 1] : undefined;
-  if (project === undefined) throw new Error('tsc の leg が -p <project> を持たない');
-  return project;
-}
-
-/** compile 済 test の置き場。 除外 pattern も retarget もここから導く。 */
+/** compile 済 test の置き場。 project の `outDir` から取る。 */
 function outDir(): string {
-  const project = JSON.parse(readFileSync(resolve(PACKAGE_DIR, compileProject()), 'utf-8')) as {
+  const project = JSON.parse(readFileSync(resolve(PACKAGE_DIR, COMPILE_PROJECT), 'utf-8')) as {
     compilerOptions?: { outDir?: string };
   };
   const dir = project.compilerOptions?.outDir;
-  if (dir === undefined) throw new Error(`${compileProject()} が outDir を持たない`);
+  if (dir === undefined) throw new Error(`${COMPILE_PROJECT} が outDir を持たない`);
   return dir;
 }
 
@@ -190,11 +168,35 @@ function listArgs(leg: Leg): string[] {
   return out;
 }
 
-/** compile 済 route の引数を scratch outDir 側へ向け直す。 */
-function retarget(args: string[], scratch: string): string[] {
-  return args.map((arg) =>
-    arg.startsWith(`${OUT_DIR}/`) ? `${scratch}${arg.slice(OUT_DIR.length)}` : arg,
-  );
+/**
+ * source 側の引数を、 scratch に compile した側へ向け直す。
+ *
+ * 位置引数 (`tests` / `tests/x.test.ts`) を `<scratch>/tests` 配下の `.js` に写す。 除外 glob も
+ * 同じく `.ts` から `.js` に合わせる = 合わせないと、 除外したはずの file が compile 側にだけ
+ * 残って件数がずれる。
+ */
+function toCompiled(args: string[], scratch: string): string[] {
+  const out: string[] = [];
+  let positionalSeen = false;
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i]!;
+    if (arg === '--exclude' && args[i + 1] !== undefined) {
+      const glob = args[i + 1]!;
+      i += 1;
+      // compile 先は `<outDir>/` 配下に掘るので、 source 側が持つ「compile 済 dir を除外」 を
+      // そのまま運ぶと **compile 側が 0 件になる** (実測で 82 対 0 になった)。
+      if (glob === `**/${OUT_DIR}/**`) continue;
+      out.push('--exclude', glob.replace(/\.test\.ts$/, '.test.js'));
+      continue;
+    }
+    if (!arg.startsWith('-') && !positionalSeen) {
+      out.push(`${scratch}/${arg.replace(/\.test\.ts$/, '.test.js')}`);
+      positionalSeen = true;
+      continue;
+    }
+    out.push(arg);
+  }
+  return out;
 }
 
 interface Collected {
@@ -248,7 +250,7 @@ function testFileStems(): string[] {
   return found.sort();
 }
 
-describe('test:fast が完全実行と同じ範囲を集める (#2200)', () => {
+describe('compile を挟んでも集める範囲が変わらない (#2200 / #2204)', () => {
   let source: Collected[] = [];
   let compiled: Collected[] = [];
 
@@ -257,17 +259,26 @@ describe('test:fast が完全実行と同じ範囲を集める (#2200)', () => {
     scratchDir = mkdtempSync(resolve(PACKAGE_DIR, OUT_DIR, '.equiv-'));
     scratchRel = `${OUT_DIR}/${scratchDir.slice(scratchDir.lastIndexOf('/') + 1)}`;
 
-    // compile と source 側の収集は互いに依存しない。 compile は完全実行と同じ leg を使い、
-    // 出力先だけ差し替える。
+    // compile と source 側の収集は互いに依存しない。 compile 先は scratch に閉じるので、
+    // `test:cov` 等が使う `.vitest-dist/tests` を踏まない。
     const [sourceResults, compiledResults] = await Promise.all([
-      listRoute(FAST_RUNS, (args) => args),
+      listRoute(SOURCE_RUNS, (args) => args),
       (async () => {
-        await execFileAsync(
-          'pnpm',
-          ['exec', ...compileLeg(), '--outDir', scratchRel],
-          { cwd: PACKAGE_DIR, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 },
-        );
-        return listRoute(FULL_RUNS, (args) => retarget(args, scratchRel));
+        try {
+          await execFileAsync(
+            'pnpm',
+            ['exec', 'tsc', '-p', COMPILE_PROJECT, '--outDir', scratchRel],
+            { cwd: PACKAGE_DIR, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 },
+          );
+        } catch (error) {
+          // **理由を捨てない**。 `Command failed` だけだと、 型エラーなのか出力先の衝突なのか
+          // 環境の問題なのかが読めず、 次の一手が決まらない
+          // (`rules/quality.md § 失敗の記録は理由か在り処を持つ`)。
+          const failure = error as { stdout?: string; stderr?: string };
+          const detail = `${failure.stdout ?? ''}${failure.stderr ?? ''}`.trim();
+          throw new Error(`compile に失敗した (outDir=${scratchRel})\n${detail || '(出力なし)'}`);
+        }
+        return listRoute(SOURCE_RUNS, (args) => toCompiled(args, scratchRel));
       })(),
     ]);
     source = sourceResults;
@@ -278,67 +289,30 @@ describe('test:fast が完全実行と同じ範囲を集める (#2200)', () => {
     if (scratchDir !== '') rmSync(scratchDir, { recursive: true, force: true });
   });
 
-  it('両 script が同じ数の vitest 起動を持つ', () => {
-    // leg 数が違えば、 片方にしか無い leg の中身は誰とも比べられない。 下の照合はすべて
-    // leg 単位なので、 ここが最初の前提になる。
-    expect(FULL_RUNS.length, '完全実行が vitest を 1 度も起動していない').toBeGreaterThan(0);
-    expect(FAST_RUNS.length, 'test:fast の leg 数が完全実行と違う').toBe(FULL_RUNS.length);
+  it('source 側の起動が 1 つ以上ある', () => {
+    // 以下の照合はすべて leg 単位なので、 leg が 0 本だと空集合どうしを比べて必ず通る。
+    expect(SOURCE_RUNS.length, 'test が vitest を 1 度も起動していない').toBeGreaterThan(0);
   });
 
-  it('test:fast のどの leg も compile 済 dir を除外する', () => {
-    // 除外が無いと、 位置引数の部分一致で `.vitest-dist/tests/*.test.js` も集まる。 同じ test を
-    // 2 度走らせるので、 落ちずに遅くなるだけになる。
+  it('test が compile 済 dir を除外する', () => {
+    // `test` は compile しなくなったが、 手元には前の compile の残骸が残っている。 位置引数は
+    // path の部分一致なので、 除外しないと `.vitest-dist/tests/*.test.js` を拾って 2 重に走る。
     //
     // leg ごとに見る。 全 leg の除外を 1 つに畳むと、 片方の leg から除外が消えても集合は
     // 変わらない (`docs/quality/check-authoring.md` § 形 2)。
-    expect(FAST_RUNS.length, 'test:fast が vitest を 1 度も起動していない').toBeGreaterThan(0);
-    for (const [i, leg] of FAST_RUNS.entries()) {
-      expect(excludes(leg), `test:fast の leg ${i + 1} が ${OUT_DIR} を除外していない`).toContain(
+    for (const [i, leg] of SOURCE_RUNS.entries()) {
+      expect(excludes(leg), `test の leg ${i + 1} が ${OUT_DIR} を除外していない`).toContain(
         `**/${OUT_DIR}/**`,
       );
     }
   });
 
-  it('test:fast の base を環境変数で差し替えられる', () => {
-    // 書いてある形ではなく、 sh が実際にどう展開するかで見る。 literal を照合すると
-    // 「それらしい文字列がある」 ことしか判らない。
-    expect(FAST_RUNS.length, 'test:fast が vitest を 1 度も起動していない').toBeGreaterThan(0);
-    for (const [i, leg] of FAST_RUNS.entries()) {
-      const base = flagValue(leg, '--changed');
-      expect(base, `test:fast の leg ${i + 1} が --changed を渡していない`).toBeDefined();
-      const expand = (value: string | undefined): string =>
-        execFileSync('sh', ['-c', `printf '%s' "${base!}"`], {
-          encoding: 'utf-8',
-          env: value === undefined ? process.env : { ...process.env, KIWA_FAST_BASE: value },
-        });
-      expect(expand(undefined), `test:fast の leg ${i + 1} の既定 base が main でない`).toBe('main');
-      expect(expand('probe-ref'), `test:fast の leg ${i + 1} の base を差し替えられない`).toBe(
-        'probe-ref',
-      );
-      expect(expand(''), `test:fast の leg ${i + 1} が空の base を既定へ戻さない`).toBe('main');
-    }
-  });
-
-  it('完全実行は変更で絞らない', () => {
+  it('test は変更で絞らない', () => {
     // `test` に `--changed` が入ると、 完全実行のつもりの run が黙って狭まる。 畳んだ値に
     // 対する否定なので、 1 leg でも持てば現れる。
-    expect(FULL_RUNS.length, '完全実行が vitest を 1 度も起動していない').toBeGreaterThan(0);
-    const tokens = FULL_RUNS.flat().filter((token) => token.startsWith('--changed'));
-    expect(tokens, `完全実行が変更で絞っている: ${tokens.join(' ')}`).toEqual([]);
-  });
-
-  it('対応する leg が同じ timeout を使う', () => {
-    // 完全実行は leg ごとに timeout を分けている (長い 1 file を別 leg に出している)。 fast 側が
-    // 同じ分け方を持たないと、 その file が選ばれた回だけ別の基準で落ちる。
-    expect(FAST_RUNS.length, 'test:fast が vitest を 1 度も起動していない').toBeGreaterThan(0);
-    for (const [i, leg] of FAST_RUNS.entries()) {
-      const full = FULL_RUNS[i];
-      expect(full, `完全実行に leg ${i + 1} が無い`).toBeDefined();
-      expect(
-        flagValue(leg, '--testTimeout'),
-        `test:fast の leg ${i + 1} の timeout が完全実行と違う`,
-      ).toBe(flagValue(full!, '--testTimeout'));
-    }
+    expect(SOURCE_RUNS.length, 'test が vitest を 1 度も起動していない').toBeGreaterThan(0);
+    const tokens = SOURCE_RUNS.flat().filter((token) => token.startsWith('--changed'));
+    expect(tokens, `test が変更で絞っている: ${tokens.join(' ')}`).toEqual([]);
   });
 
   it('leg ごとに同じ数の file を集める', () => {
@@ -346,7 +320,7 @@ describe('test:fast が完全実行と同じ範囲を集める (#2200)', () => {
     expect(compiled.length, 'compile 側の収集が 0 leg').toBe(source.length);
     for (const [i, one] of source.entries()) {
       expect(one.files, `source 側の leg ${i + 1} が file を 1 件も集めていない`).toBeGreaterThan(0);
-      expect(one.files, `leg ${i + 1} の file 数が route 間でずれている`).toBe(compiled[i]!.files);
+      expect(one.files, `leg ${i + 1} の file 数が経路間でずれている`).toBe(compiled[i]!.files);
     }
   });
 
@@ -356,7 +330,7 @@ describe('test:fast が完全実行と同じ範囲を集める (#2200)', () => {
     expect(source.length, 'source 側の収集が 0 leg').toBeGreaterThan(0);
     for (const [i, one] of source.entries()) {
       expect(one.tests, `source 側の leg ${i + 1} が test を 1 件も集めていない`).toBeGreaterThan(0);
-      expect(one.tests, `leg ${i + 1} の test 数が route 間でずれている`).toBe(compiled[i]!.tests);
+      expect(one.tests, `leg ${i + 1} の test 数が経路間でずれている`).toBe(compiled[i]!.tests);
     }
   });
 
@@ -364,18 +338,16 @@ describe('test:fast が完全実行と同じ範囲を集める (#2200)', () => {
     // 件数が同じでも中身が入れ替わっている形を落とす。
     expect(source.length, 'source 側の収集が 0 leg').toBeGreaterThan(0);
     for (const [i, one] of source.entries()) {
-      expect(one.stems, `leg ${i + 1} が route 間で違う file を集めている`).toEqual(
-        compiled[i]!.stems,
-      );
+      expect(one.stems, `leg ${i + 1} が経路間で違う file を集めている`).toEqual(compiled[i]!.stems);
     }
   });
 
-  it('test:fast の全 leg で tests/ の test file を残さず覆う', () => {
-    // leg 単位の一致だけでは、 どちらの route からも漏れた file を見つけられない。 新しく足した
-    // file が両 leg の間に落ちる形がこれに当たる。
+  it('全 leg で tests/ の test file を残さず覆う', () => {
+    // leg 単位の一致だけでは、 どちらの経路からも漏れた file を見つけられない。 新しく足した
+    // file が 2 leg の間に落ちる形がこれに当たる。
     const onDisk = testFileStems();
     expect(onDisk.length, 'tests/ に test file が 1 件も無い').toBeGreaterThan(0);
     const collected = [...new Set(source.flatMap((one) => one.stems))].sort();
-    expect(collected, 'test:fast が集めない test file がある').toEqual(onDisk);
+    expect(collected, 'test が集めない test file がある').toEqual(onDisk);
   });
 });

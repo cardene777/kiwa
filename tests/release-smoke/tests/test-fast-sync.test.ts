@@ -37,6 +37,7 @@ interface Result {
 
 interface Module {
   parseScript: (script: string) => string[][];
+  deriveTest: (script: string) => string | null;
   deriveFast: (script: string) => string | null;
   inspect: (root?: string) => Result[];
   packageDirs: () => string[];
@@ -114,11 +115,10 @@ describe('packages の test:fast が test から導出された形のままで�
 
   it('報告 mode は drift があると非 0 で終わる', () => {
     // 呼出側 (人 / 別 script) は exit code で判断する。 0 を返すと drift を見逃す。
-    const pkgDir = resolve(REPO_ROOT, 'packages');
     const target = results().find((r) => r.status === 'ok');
     expect(target, '導出対象の package が 1 件も無い').toBeDefined();
 
-    const file = join(pkgDir, target!.name, 'package.json');
+    const file = target!.file;
     const backup = mkdtempSync(join(tmpdir(), 'kiwa-test-fast-'));
     temps.push(backup);
     const saved = join(backup, 'package.json');
@@ -228,6 +228,43 @@ describe('packages の test:fast が test から導出された形のままで�
   });
 });
 
+describe('compile を要る経路だけが compile する (#2204)', () => {
+  it('どの target の test も tsc を呼ばない', () => {
+    // #2204 の本体。 `test` は source を直接走らせる = 26 package で 71.9 秒あった固定費が消える。
+    const offenders = results()
+      .filter((r) => r.status !== 'skipped')
+      .map((r) => ({ name: r.name, test: JSON.parse(readFileSync(r.file, 'utf-8')).scripts.test }))
+      .filter((r) => /\btsc\b/.test(r.test))
+      .map((r) => r.name);
+    expect(offenders.length + results().filter((r) => r.status !== 'skipped').length, '対象 target が 0 件').toBeGreaterThan(0);
+    expect(offenders, `test が compile を挟んでいる: ${offenders.join(' ')}`).toEqual([]);
+  });
+
+  it('coverage の経路は自前で compile する', () => {
+    // `test` から compile を外したので、 compile 済 file を測る経路は自分で作る必要がある。
+    // 持っていないと **coverage が古い compile 結果を測る**。
+    const withCov = results()
+      .filter((r) => r.status !== 'skipped')
+      .map((r) => ({ name: r.name, cov: JSON.parse(readFileSync(r.file, 'utf-8')).scripts['test:cov'] }))
+      .filter((r) => r.cov !== undefined);
+    expect(withCov.length, 'test:cov を持つ package が 1 件も無い').toBeGreaterThan(0);
+    const missing = withCov.filter((r) => !/tsc -p/.test(r.cov)).map((r) => r.name);
+    expect(missing, `test:cov が compile を持たない: ${missing.join(' ')}`).toEqual([]);
+  });
+
+  it('変異試験と taxonomy の経路は自前で compile する', () => {
+    // どちらも script 側が remove / compile / run を持つ。 `test` に依存していないことを、
+    // 実 file の中身で確かめる (名前だけの照合では、 中で compile を外しても気付けない)。
+    const mutation = readFileSync(resolve(REPO_ROOT, 'scripts/package-mutation.mjs'), 'utf-8');
+    expect(mutation, '変異試験の経路が compile を持たない').toContain('tsconfig.vitest.json');
+    expect(mutation, '変異試験の経路が tsc を呼ばない').toMatch(/['"]tsc['"]/);
+
+    const taxonomy = readFileSync(resolve(REPO_ROOT, 'scripts/kiwa-taxonomy-run.mjs'), 'utf-8');
+    expect(taxonomy, 'taxonomy の経路が compile を持たない').toContain('tsconfig.vitest.json');
+    expect(taxonomy, 'taxonomy の経路が tsc を呼ばない').toMatch(/['"]tsc['"]/);
+  });
+});
+
 describe('導出そのものの性質 (#2202)', () => {
   const BASE =
     "node ../../scripts/build-deps.mjs @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/.stryker-tmp/**' --environment jsdom --testTimeout 15000";
@@ -319,16 +356,15 @@ describe('導出そのものの性質 (#2202)', () => {
     expect(legs[0]!, '引用符の中身を語として保っていない').toEqual(['node', '-e', 'a && b']);
   });
 
-  it('compile 済 path を走らせない test script は導出しない', async () => {
-    // 導出は `.vitest-dist/...` を source に戻す形なので、 その path が無い script には
-    // 当たらない。 **throw させない** = `inspect` が全 package を回す途中で落ちると、
-    // その package 以降の判定ごと消える。
-    const { deriveFast } = await load();
-    expect(deriveFast('vitest run tests --environment node'), '当たらない形から導出している').toBeNull();
-    expect(
-      deriveFast('tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests'),
-      '当たる形から導出していない',
-    ).not.toBeNull();
+  it('既に source 直走の test script も同じ結果に落ちる', async () => {
+    // #2204 で `test` から compile 段を外したので、 導出の入力は既に source 直走になる。
+    // **何度掛けても同じ結果になる** ことが、 script を繰り返し実行できる条件そのもの。
+    const { deriveTest } = await load();
+    const compiled =
+      "node -e \"x .vitest-dist x\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node";
+    const once = deriveTest(compiled)!;
+    expect(once, 'compile 段が残っている').not.toContain('tsc -p');
+    expect(deriveTest(once), '2 度掛けると結果が変わる').toBe(once);
   });
 
   it('導出できない test に test:fast が残っていると orphan として報告する', async () => {
@@ -346,12 +382,12 @@ describe('導出そのものの性質 (#2202)', () => {
     write('leftover', { test: 'forge test', 'test:fast': 'vitest run tests --changed main' });
     write('clean', { test: 'forge test' });
     write('derived', {
-      test: 'vitest run .vitest-dist/tests --environment node',
+      test: "vitest run tests --exclude '**/.vitest-dist/**' --environment node",
       'test:fast':
         "vitest run tests --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --environment node",
     });
 
-    const byName = new Map(inspect(root).map((r) => [r.name, r]));
+    const byName = new Map(inspect(root).map((r) => [r.name.replace('packages/', ''), r]));
     expect(byName.get('leftover')?.status, '置き去りを orphan にしていない').toBe('orphan');
     expect(byName.get('clean')?.status, '置き去りの無い対象外まで orphan にしている').toBe('skipped');
     expect(byName.get('derived')?.status, '導出できる package を取りこぼしている').toBe('ok');
