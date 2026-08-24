@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.34-3 — a Next.js 15.4 + React 19.1 App Router app that drives Server Action + form action + useFormStatus + useOptimistic + revalidatePath + revalidateTag + redirect + progressive enhancement across a provider-neutral surface backed by @kiwa-lab/component v0.3 form-action-advanced semantics + @kiwa-lab/nextjs v1.2 server-action-advanced semantics, runnable in both KIWA_MODE=real (Playwright + Chromium headless when SERVER_ACTION_BROWSER_READY=1) and KIWA_MODE=mock (in-memory session harness) so behavioural fidelity feeds @kiwa-lab/quality-metrics.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/component @kiwa-lab/core @kiwa-lab/nextjs @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --hookTimeout 30000",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/component @kiwa-lab/core @kiwa-lab/nextjs @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/e2e/**' --environment node --hookTimeout 30000",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose --hookTimeout 30000"

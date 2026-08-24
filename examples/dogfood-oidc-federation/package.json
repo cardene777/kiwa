@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.22-5 — a Deno + Hono self-hosted OpenID Provider (OP) + Nuxt 3 Relying Party (RP) that exercises the OIDC Core 1.0 + Discovery 1.0 + RFC 7591 DCR + JWKS rotation + Federation 1.0 §7 endpoint surface. v1.21-4 landed the 16-axis mock fidelity harness (Sub-Issues a/b/c/d — OP surface + DCR + id_token verify + Federation trust chain + rotation e2e); v1.22-1 layered the Keycloak testcontainers real driver so axes 1 + 3 (discovery + JWKS) get live coverage; v1.22-3 landed the Nuxt 3 RP full journey + jsdom axe-core WCAG 2.1 AA gate; v1.22-5 (this state) lands real JWKS rotation e2e via Keycloak's admin REST API + jose RS256 verify so axes 4a-4d gain live coverage under KIWA_MODE=real + OIDC_BOOTSTRAP=1. Axes 2 / 5-16 stay on the mock-as-reference matrix documented in docs/quality-reports/auth/oidc-federation.md. Drivable under KIWA_MODE=mock (@kiwa-lab/auth setupOidcEnv) by default.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/auth @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/auth @kiwa-lab/core && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },

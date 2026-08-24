@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app 1 (v1.13-3) — a Supabase Realtime chat + presence + typing indicator app that exercises broadcast, presence tracking, and typing debounce across a provider-neutral interface, drivable in both KIWA_MODE=real (calls @supabase/supabase-js when SUPABASE_URL + SUPABASE_ANON_KEY are set) and KIWA_MODE=mock (@kiwa-lab/realtime createSupabaseRealtimeMock) so behavioural fidelity feeds @kiwa-lab/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/realtime @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/realtime @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/perf/**' --environment node",
     "pretest:perf": "pnpm -F @kiwa-lab/realtime -F @kiwa-lab/core -F @kiwa-lab/quality-metrics -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"

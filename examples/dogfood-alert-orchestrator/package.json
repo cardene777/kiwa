@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app (v1.17-3) — Node.js Prometheus AlertManager style alert orchestrator driven behind a provider-neutral surface. 10 alert rules (threshold / rate / anomaly) evaluated + 3-level routing tree (severity → team → channel) + time-based silence with regex matcher + escalation ladder (L1 30s → L2 5min → L3 30min). @kiwa-lab/observability AlertRouter backs the mock adapter (KIWA_MODE=mock, default); the real adapter posts fires to a live Prometheus AlertManager HTTP API (KIWA_MODE=real, ALERTMANAGER_URL set). The fidelity harness diffs alert lifecycle traces (fire → route → silence → escalate → resolve) across mock vs real, feeding @kiwa-lab/quality-metrics 7-axis release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/observability @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/observability @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/perf/**' --environment node",
     "pretest:perf": "pnpm -F @kiwa-lab/observability -F @kiwa-lab/core -F @kiwa-lab/quality-metrics -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"

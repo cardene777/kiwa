@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v2.4-2 — @kiwa-lab/realtime v2.1 session-orchestrator の 4 pattern workflow reference。 depth-5 pattern 5 例目発生 dogfood = systematic law 昇格 candidate。",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/realtime && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/realtime && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },

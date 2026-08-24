@@ -156,7 +156,7 @@ export function toSourceGlob(glob) {
  *
  * **既に source 直走の leg はそのまま通す** = 本 script は何度掛けても同じ結果になる。
  */
-export function toSourceLeg(leg) {
+export function toSourceLeg(leg, extraExcludes = []) {
   const out = ['vitest', 'run'];
   const args = leg.slice(2);
   const excludes = new Set();
@@ -188,6 +188,11 @@ export function toSourceLeg(leg) {
       if (!positionalSeen) {
         out.push('--exclude', quoteToken(OUT_DIR_GLOB));
         excludes.add(OUT_DIR_GLOB);
+        for (const glob of extraExcludes) {
+          if (excludes.has(glob)) continue;
+          out.push('--exclude', quoteToken(glob));
+          excludes.add(glob);
+        }
         positionalSeen = true;
       }
       continue;
@@ -229,19 +234,43 @@ export function isCompileLeg(leg) {
 }
 
 /**
+ * `tsconfig.vitest.json` が compile から外している path。
+ *
+ * **compile 経路はここを見ていない**。 `tests/e2e/**` を外している example では、 Playwright の
+ * spec が compile 済 dir に現れないため vitest は集めなかった。 source を直接走らせると集めて
+ * しまい、 `Playwright Test did not expect test.describe()` で落ちる (実測で 20 example)。
+ *
+ * compile が見ていなかった範囲を、 除外として source 側へ引き継ぐ。 手で書き写さず project から
+ * 読む = 片方だけ直して drift する形にしない。
+ */
+export function compileExcludes(dir) {
+  try {
+    const project = JSON.parse(readFileSync(join(dir, 'tsconfig.vitest.json'), 'utf-8'));
+    const list = project.exclude;
+    if (!Array.isArray(list)) return [];
+    // `tests/e2e/**/*` のような tsconfig の書き方を、 vitest が読む glob に寄せる。
+    return list.map((glob) => glob.replace(/\/\*$/, '')).filter((glob) => glob.length > 0);
+  } catch {
+    return [];
+  }
+}
+
+/**
  * `test` を source 直走の形に導出する。
  *
  * compile 段を落とし、vitest の leg を source 側に向ける。 依存 build の leg
  * (`build-deps.mjs`) は残す = compile とは別の役目で、共有依存の `dist/` を作る。
  */
-export function deriveTest(testScript) {
+export function deriveTest(testScript, extraExcludes = []) {
   const legs = parseScript(testScript);
   const kept = legs.filter((leg) => !isCompileLeg(leg));
   const vitestLegs = kept.filter((leg) => leg[0] === 'vitest');
   if (vitestLegs.length === 0) return null;
   if (vitestLegs.some((leg) => leg[1] !== 'run')) return null;
 
-  const rendered = kept.map((leg) => (leg[0] === 'vitest' ? toSourceLeg(leg) : leg.map(quoteToken).join(' ')));
+  const rendered = kept.map((leg) =>
+    leg[0] === 'vitest' ? toSourceLeg(leg, extraExcludes) : leg.map(quoteToken).join(' '),
+  );
   if (rendered.some((leg) => leg === null)) return null;
   return rendered.join(' && ');
 }
@@ -252,8 +281,8 @@ export function deriveTest(testScript) {
  * `test` が既に source 直走になったので、**変更で絞る flag を足すだけ**。 compile 済 path を
  * 戻す仕事は `deriveTest` が持つ。
  */
-export function deriveFast(testScript) {
-  const source = deriveTest(testScript);
+export function deriveFast(testScript, extraExcludes = []) {
+  const source = deriveTest(testScript, extraExcludes);
   if (source === null) return null;
   // **依存 build の leg は落とす** (#2202 の判断)。 `test:fast` は手元で回す絞り込みで、
   // 共有依存は既に build 済という前提に立つ。 入れると 1 回ごとに数秒の固定費が戻る。
@@ -289,20 +318,46 @@ export function deriveFast(testScript) {
  */
 export const EXTRA_TARGETS = ['tests/release-smoke'];
 
+/**
+ * `test:fast` を配る対象か。
+ *
+ * `examples/*` には配らない (#2206)。 手元で変更ぶんだけ回すのは package 側の作業で、
+ * examples は sweep でしか走らせない = 使われない script を 116 個増やすことになる。
+ * compile 段の除去 (`test` 側) は examples にも当てる。
+ */
+export function wantsFast(rel) {
+  return !rel.startsWith('examples/');
+}
+
 export function packageDirs(root = REPO_ROOT) {
-  const base = join(root, 'packages');
-  const fromPackages = readdirSync(base, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => `packages/${entry.name}`)
-    .filter((rel) => {
-      try {
-        readFileSync(join(root, rel, 'package.json'), 'utf-8');
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .sort();
+  const readable = (rel) => {
+    try {
+      readFileSync(join(root, rel, 'package.json'), 'utf-8');
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  // 無い dir は 0 件として扱う。 fixture の repo は `packages/` しか持たないことがあり、
+  // そこで throw すると呼出側が判定そのものを受け取れない。
+  const under = (dir) => {
+    let entries;
+    try {
+      entries = readdirSync(join(root, dir), { withFileTypes: true });
+    } catch {
+      return [];
+    }
+    return entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `${dir}/${entry.name}`)
+      .filter(readable)
+      .sort();
+  };
+
+  // **`examples/*` も対象** (#2206)。 sweep の 171 target のうち 145 が examples で、
+  // 固定費の除去が効くのはここが大半を占める。 同じ形を持たない script は導出が `null` を
+  // 返すため、 理由付きで `skipped` に落ちる。
+  const fromPackages = [...under('packages'), ...under('examples')];
   const extras = EXTRA_TARGETS.filter((rel) => {
     try {
       readFileSync(join(root, rel, 'package.json'), 'utf-8');
@@ -334,13 +389,29 @@ export function inspect(root = REPO_ROOT) {
     if (excluded !== undefined) return { name, file, status: 'skipped', reason: excluded };
     if (test === undefined) return { name, file, status: 'skipped', reason: 'test script が無い' };
 
-    const expectedTest = deriveTest(test);
-    const expectedFast = deriveFast(test);
+    const extra = compileExcludes(join(root, name));
+    const expectedTest = deriveTest(test, extra);
+    const expectedFast = deriveFast(test, extra);
     if (expectedTest === null || expectedFast === null) {
       const reason = 'test script から導出できない (vitest run を起動していない)';
       return actualFast === undefined
         ? { name, file, status: 'skipped', reason }
         : { name, file, status: 'orphan', reason, actualFast };
+    }
+    if (!wantsFast(name)) {
+      // `test` だけを見る。 `test:fast` を持っていたら置き去りなので報告する。
+      if (actualFast !== undefined) {
+        return {
+          name,
+          file,
+          status: 'orphan',
+          reason: 'examples に test:fast は配らない',
+          actualFast,
+        };
+      }
+      return test === expectedTest
+        ? { name, file, status: 'ok', expectedTest }
+        : { name, file, status: 'drift', expectedTest, actualTest: test };
     }
     if (actualFast === undefined) {
       return { name, file, status: 'missing', expectedTest, expectedFast, actualTest: test };
@@ -368,7 +439,8 @@ function writeScripts(file, expectedTest, expectedFast) {
   for (const [key, value] of Object.entries(pkg.scripts)) {
     if (key === 'test:fast') continue;
     scripts[key] = key === 'test' ? expectedTest : value;
-    if (key === 'test') scripts['test:fast'] = expectedFast;
+    // `expectedFast` が無い対象 (examples) には配らない。
+    if (key === 'test' && expectedFast !== undefined) scripts['test:fast'] = expectedFast;
   }
   pkg.scripts = scripts;
   const trailing = source.endsWith('\n') ? '\n' : '';

@@ -22,8 +22,28 @@ import { checkLeanTable, generateLeanSpec, verifyLeanSpec } from '@kiwa-lab/lean
 import { ROOT_NAMESPACE, SPECS_DIR, renderLeanProject } from '../src/lean-project.js';
 import { ALL_SPECS } from '../src/orchestrator-specs.js';
 
-/** This runs from `.vitest-dist/tests`; the package root is two directories up. */
-const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
+/**
+ * The package root, found by looking rather than by counting.
+ *
+ * This file runs from two places: `tests/` when `test` runs the sources directly (#2206), and
+ * `.vitest-dist/tests/` when the taxonomy or coverage routes compile first. The two are one
+ * directory apart, so a fixed number of hops is right for one and points at `examples/` for the
+ * other — which is where `ENOENT: .../examples/specs/KiwaSpecs` came from.
+ *
+ * `package.json` is the marker: it exists at the package root and nowhere below it here.
+ */
+function packageRoot(from: string): string {
+  let dir = from;
+  for (let up = 0; up < 8; up += 1) {
+    if (existsSync(join(dir, 'package.json'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error(`package.json not found above ${from}`);
+}
+
+const PACKAGE_ROOT = packageRoot(dirname(fileURLToPath(import.meta.url)));
 const SPECS_ROOT = join(PACKAGE_ROOT, SPECS_DIR);
 
 function toolInstalled(bin: string): boolean {

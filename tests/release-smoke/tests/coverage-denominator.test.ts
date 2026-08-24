@@ -204,5 +204,7 @@ describe('coverage の分母に測る意味の無い file が入っていない'
       strictImports,
       'strict-abi-typing は import されない型検査専用 file としてのみ coverage 除外できる',
     ).toEqual([]);
-  });
+    // **明示の timeout を置く**。 repo 全体を走査するため、単体 3.6 秒でも sweep の並列下では
+    // 30 秒を超える (実測でここが `Test timed out in 30000ms` で落ちた)。
+  }, 120_000);
 });

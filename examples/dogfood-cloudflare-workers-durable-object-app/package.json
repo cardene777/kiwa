@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.24-2 — a Cloudflare Workers Durable Object realtime chat room app that exercises the durable-object axis (createDurableObject / requestDurableObject / fireAlarm / writeStorage) + websocket-edge axis (upgrade-requested / accepted / message / closed) + Hibernation API + storage transactional + 24-h alarm-based purge. Drivable in both KIWA_MODE=real (Miniflare + wrangler dev + WRANGLER_KEY env-gate) and KIWA_MODE=mock (@kiwa-lab/edge v0.2 8 axis semantics) so behavioural fidelity feeds the release gate 7 axis.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/edge @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/edge @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },

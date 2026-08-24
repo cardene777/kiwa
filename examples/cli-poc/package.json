@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/cli-test @kiwa-lab/cli @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 15000",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/cli-test @kiwa-lab/cli @kiwa-lab/core && vitest run tests --exclude '**/.vitest-dist/**' --environment node --testTimeout 15000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

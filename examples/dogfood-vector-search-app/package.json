@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app (v1.26-4) — a SvelteKit + Kysely + Postgres 16 pgvector + Redis embedding cache app that exercises 4 patterns (IVFFlat / HNSW index build with dimension guard / semantic k-NN search with cosine + L2 distance / hybrid semantic + BM25 keyword search with tunable weight / embedding cache hit-rate observation with on-demand re-index) driven by @kiwa-lab/orm's vector-store semantics in KIWA_MODE=mock and testcontainers Postgres 16 + pgvector + Redis 7 in KIWA_MODE=real (env-skip VECTOR_KEY). Behavioural fidelity feeds @kiwa-lab/quality-metrics 7-axis release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/orm @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/orm @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/perf/**' --environment node",
     "pretest:perf": "pnpm -F @kiwa-lab/orm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"

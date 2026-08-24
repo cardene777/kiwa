@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app 3 (v1.13-5) — a Socket.io / SSE notification app that exercises server-to-client push, room-scoped delivery, reconnect + pending-event replay and queue-overflow backpressure across a provider-neutral interface, drivable in both KIWA_MODE=real (calls socket.io-client when SOCKETIO_URL is set) and KIWA_MODE=mock (@kiwa-lab/realtime createSocketioMock) so behavioural fidelity feeds @kiwa-lab/quality-metrics 7-axis release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/realtime @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/realtime @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/perf/**' --environment node",
     "pretest:perf": "pnpm -F @kiwa-lab/realtime -F @kiwa-lab/core -F @kiwa-lab/quality-metrics -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"

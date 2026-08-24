@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.38-4 — an Agent orchestration service that drives an LLM planning + tool-use + reflection surface backed by @kiwa-lab/ai-llm v0.4 semantics (agent-orchestration ReAct / Tree-of-Thought / reflect-and-correct / tool selection + Vercel AI SDK provider mock), runnable in both KIWA_MODE=real (Vercel AI SDK + Anthropic Messages API when ANTHROPIC_API_KEY + KIWA_LLM_BUDGET_USD are set) and KIWA_MODE=mock (in-memory state machine + tool ranker) so behavioural fidelity feeds @kiwa-lab/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/ai-llm @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/ai-llm @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },
