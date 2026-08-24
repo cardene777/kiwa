@@ -82,8 +82,9 @@ packages had been failing since a rewrite in `@kiwa-lab/mobile` and
 alphabet failed first.
 
 `pnpm test:all` runs every package that has a `test` script and reports each
-failure. It takes about three quarters of an hour, and prints a line per
-package as it goes:
+failure. Measured on 166 packages it takes about 21 minutes serially and about
+5 with `--jobs 4` (see below); both numbers move with the machine. It prints a
+line per package as it goes:
 
 ```
 $ pnpm test:all

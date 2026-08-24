@@ -303,6 +303,10 @@ are running. The sweep still reads the tree around the whole run, still fails, a
 names the paths — but finding the owner means re-running with `--jobs 1`. It prints that
 instruction rather than leaving the reader to work it out.
 
+Measured on 166 packages: 1244 s at `--jobs 1` against 294 s at `--jobs 4`, with the
+same verdict line (`green: 166   red: 0   dirty: 0   not run: 0`) from both. The floor
+is the serial lanes, so raising `--jobs` past that stops helping.
+
 Exit codes distinguish the two ways a run can end badly: 1 means the sweep found
 failures, 4 means the invocation was wrong (`--jobs 0`, a flag with no value, an `--only`
 that matches nothing). Both used to be 1, so a caller that retries on failure would retry
@@ -312,7 +316,7 @@ a typo forever.
 
 | Option | Why not |
 |---|---|
-| Run everything sequentially (`scripts/test-all.mjs`) | A sequential sweep takes the better part of an hour, and the parallel one takes minutes. The sweep is for reporting every failure, not for speed; since #2215 it takes `--jobs N` and is no longer serial by necessity |
+| Run everything sequentially (`scripts/test-all.mjs`) | The sweep is for reporting every failure, not for speed. Measured on 166 packages it takes 1244 s serially against 294 s with `--jobs 4`; since #2215 it takes that flag and is no longer serial by necessity |
 | Serialise every package that mentions `anvil` | 21 packages and examples match. Most are gated on the binary being present, and serialising them all costs far more than the two that actually contend |
 | Give `getFreePort` a retry loop | The failure was the test timeout, not port exhaustion. `getFreePort` already retries 50 times and serialises its own allocations through a promise chain |
 | Raise the browser timeout instead of serialising | `e2e` and `ui` already use 30 s and still exceeded it under full parallel load. The launch is genuinely starved, not merely slow |

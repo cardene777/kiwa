@@ -34,8 +34,8 @@
  * run.
  *
  * A line is printed as each package finishes, with how long it took. A sweep of
- * this repository takes the better part of an hour; a script that prints
- * nothing until the end cannot be told apart from one that has hung.
+ * this repository takes about twenty minutes; a script that prints nothing until
+ * the end cannot be told apart from one that has hung.
  *
  * Usage:
  *   node scripts/test-all.mjs                       summary, first error per package
