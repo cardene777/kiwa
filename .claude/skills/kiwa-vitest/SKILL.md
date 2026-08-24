@@ -38,7 +38,8 @@ $ARGUMENTS
 - `--input-spec {path}` — Layer 1 spec の path (省略時は下記 § 入力 spec の path は CLI から受け取る で解決)
 - `--project-root {path}` — 生成先 (`{example}/...`) の起点。 `kiwa layers --project-root` にそのまま渡す (省略時は cwd)
 - `--target {path}` — 対象実装 file (`src/lib/*.ts` 等、 grep で識別)
-- `--coverage-threshold {N}` — vitest coverage 目標 (default 80%)
+- `--coverage-threshold {N}` — vitest coverage の全 metric 共通 threshold (default 100%、 production target のみ評価対象)
+- `--coverage-lines {N}` / `--coverage-statements {N}` / `--coverage-branches {N}` / `--coverage-funcs {N}` — metric 別 threshold override (指定時は `--coverage-threshold` より優先)
 - `--lang {ja|en|<ISO 639-1>}` — coverage report 生成言語 (省略時は起動元が渡した値、 単体起動なら `ja`)
 - `--no-review` — Step 6 の kiwa-review 自動呼出を skip (CI 用)
 
@@ -209,7 +210,26 @@ Layer 1 が緩い場合は現在の実装値から期待値を発明せず、同
 
 ### Step 5: coverage 評価 + auto loop + report
 
-`pnpm exec vitest run --coverage` で coverage 計測。 file カテゴリ分類は `kiwa-forge/SKILL.md` § Step 5 と同 pattern (production / test 自身 / mock helper / script)。 production target 100% or 「不可能」 判定 or 「停滞」 (delta 0 が 2 round 連続) で Step 5c へ。
+`pnpm exec vitest run --coverage` で coverage 計測。 file カテゴリ分類は `references/coverage-classify.md` を Read (kiwa-{forge,hardhat,api} 共用 SSOT)。
+
+threshold は **production target (`src/` 配下) に対してのみ** 適用。 default は 100%:
+
+| metric | default | override |
+|---|---|---|
+| Lines | 100% | `--coverage-lines {N}` |
+| Statements | 100% | `--coverage-statements {N}` |
+| Branches | 100% | `--coverage-branches {N}` (短絡評価 / unreachable で下回る場合は「不可能」分類で逃がす) |
+| Funcs | 100% | `--coverage-funcs {N}` |
+
+**`Branches` を落とさない**。 分岐は短絡評価や防御的分岐で 100% に届かないことが最も起きやすい metric で、だからこそ「不可能」分類と override を用意している。 見ない設計にすると、その判断の場ごと消える。
+
+loop の終了条件は 3 つ。 いずれかを満たしたら Step 5c へ。
+
+1. production target 全 4 metric が threshold 到達
+2. 残 uncovered (production 側) が全て「削除候補 / defensive / 外部依存 / 計測除外」 分類 = threshold 到達は理論不能と確定
+3. 「停滞」 = delta 0 が 2 round 連続
+
+3 だけは **未到達のまま抜ける**経路なので、report Section 1 に理由を明示してユーザーに報告する。 test-passed marker は作らない。
 
 report 4 section (`tests/reports/unit/coverage-report-{module}.md`)。
 
@@ -283,7 +303,8 @@ describe('integration', () => {
 - `既覆 (候補)` の TC は候補 test を Read した上で「重複のため書かない」 / 「実際は未覆だったので書いた」 のどちらかを報告済
 - 既存 test file の `it` を 1 件も削除 / 書き換えていない
 - `pnpm exec vitest run` 全 PASS (failure 0 件)
-- `pnpm exec vitest run --coverage` で production target (`src/` 配下) の Lines / Stmts / Funcs が threshold 達成 (default 80%)
+- `pnpm exec vitest run --coverage` で **production target (`src/` 配下) 全 4 metric (Lines / Stmts / Branches / Funcs) が threshold 達成 (default 100%)** もしくは 「残 uncovered が全て不可能分類」 と report で明示
+- 「停滞」判定や `vitest --coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
 - `tests/reports/unit/coverage-report-{module}.md` が 4 section format で Write 済
 - 観点別 `describe` ブロックが spec の観点一覧と一致
 
