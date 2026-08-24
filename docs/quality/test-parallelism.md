@@ -248,11 +248,57 @@ phase look identical from the test output; the difference showed up in the timin
 If the sweep fails on a container timeout, check `docker ps` before reading it as a
 regression.
 
+### `scripts/test-all.mjs --jobs N`
+
+The reporting sweep was serial for the reason in group 4: 171 targets rewriting the
+`dist/` of every shared dependency. Its own header said so, and pointed at
+`typecheck-all.mjs`, which kept a `--jobs` flag and invented red packages that passed
+when run alone.
+
+`--jobs N` runs it in parallel by removing that cause rather than hoping. The sweep
+builds the workspace once up front and sets `KIWA_DEPS_PREBUILT=1` for every child,
+which is the same fix the root `test` script uses (§ One build up front instead of 1036).
+The default stays 1, so the sweep behaves exactly as before unless the flag is given.
+
+What is left after the build is removed are the two resources that cannot be split, and
+each gets a lane of its own that stays serial while the rest run `N` at a time.
+
+| Lane | How membership is decided | Members today |
+|---|---|---|
+| Docker | Read from `package.json`: a target that declares `testcontainers` or `@testcontainers/*` | 7 |
+| Chromium | A written list, `CHROMIUM_LANE` in the script | `packages/e2e`, `packages/ui`, `examples/full-stack-poc` |
+
+The two are decided differently because only one of them can be read. A dependency on
+`testcontainers` is a declaration in a file, and reading it keeps the lane right the day
+a package starts using containers. It over-serialises: the measurements above found two
+targets that actually start a container, and seven declare the dependency. That is five
+targets running one after another for no reason, and it is the price of a lane that
+cannot silently go stale.
+
+Chromium has no such declaration. 46 targets depend on `@playwright/test` and all but
+three keep their Playwright specs out of the vitest run, so the dependency says nothing
+about whether `pnpm test` launches a browser. The three are named, and naming them means
+a rename can quietly empty the lane — so the script refuses to start when a name matches
+nothing in the workspace. It is checked against the whole workspace rather than against
+the targets being run, or `--only lean --jobs 4` would refuse to start for lack of a
+browser it was never going to launch.
+
+**Parallel mode cannot say which package dirtied the tree.** Attribution comes from
+reading `git status` before and after each package, and that means nothing when several
+are running. The sweep still reads the tree around the whole run, still fails, and still
+names the paths — but finding the owner means re-running with `--jobs 1`. It prints that
+instruction rather than leaving the reader to work it out.
+
+Exit codes distinguish the two ways a run can end badly: 1 means the sweep found
+failures, 4 means the invocation was wrong (`--jobs 0`, a flag with no value, an `--only`
+that matches nothing). Both used to be 1, so a caller that retries on failure would retry
+a typo forever.
+
 ## Rejected
 
 | Option | Why not |
 |---|---|
-| Run everything sequentially (`scripts/test-all.mjs`) | A sequential sweep takes the better part of an hour. The parallel one takes minutes |
+| Run everything sequentially (`scripts/test-all.mjs`) | A sequential sweep takes the better part of an hour, and the parallel one takes minutes. The sweep is for reporting every failure, not for speed; since #2215 it takes `--jobs N` and is no longer serial by necessity |
 | Serialise every package that mentions `anvil` | 21 packages and examples match. Most are gated on the binary being present, and serialising them all costs far more than the two that actually contend |
 | Give `getFreePort` a retry loop | The failure was the test timeout, not port exhaustion. `getFreePort` already retries 50 times and serialises its own allocations through a promise chain |
 | Raise the browser timeout instead of serialising | `e2e` and `ui` already use 30 s and still exceeded it under full parallel load. The launch is genuinely starved, not merely slow |

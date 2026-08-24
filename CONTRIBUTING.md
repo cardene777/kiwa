@@ -120,9 +120,30 @@ Four verdicts, and only one of them means the package is fine:
   `git status --porcelain` at the repository root: a test that writes outside
   the repository, or into an ignored path, is invisible to it.
 
-It exits 1 when anything is red, blocked or dirty. Like `typecheck:all`, it is
-sequential on purpose: many `test` scripts build the workspace packages they
-depend on, so two at once rewrite the same `dist` while the other reads it.
+It exits 1 when anything is red, blocked or dirty, and 4 when the invocation
+itself was wrong — `--jobs 0`, a flag with no value, an `--only` that matches
+nothing. Retrying on 1 can make sense; retrying on 4 cannot.
+
+### Running the sweep in parallel
+
+`pnpm test:all -- --jobs 4` runs four packages at a time. The default is 1, so
+nothing changes unless you ask.
+
+It was serial because many `test` scripts build the workspace packages they
+depend on, so two at once rewrite the same `dist` while the other reads it. The
+parallel path removes that cause instead of hoping: it builds the workspace once
+up front and sets `KIWA_DEPS_PREBUILT=1`, which makes `scripts/build-deps.mjs` a
+no-op in every child. What is left is two groups that contend on something the
+machine has one of, and each gets a lane that stays serial — the targets that
+declare `testcontainers`, and the three that launch a browser.
+
+**Parallel mode cannot tell you which package dirtied the tree.** That answer
+comes from reading `git status` before and after each package, which means
+nothing when several are running. The sweep still fails and still names the
+paths; finding the owner means re-running with `--jobs 1`, and it says so.
+
+Pick `--jobs` from what the machine has. Every target runs its own vitest, which
+starts workers of its own, so 4 already keeps eight cores busy.
 
 **Four packages are flaky, and they are the ones that start containers:**
 `orm-drizzle-mysql-poc`, `orm-drizzle-postgres-poc`, `orm-prisma-mysql-poc` and
