@@ -30,6 +30,12 @@ export {
   type FlakyEligibility,
 } from './flaky.js';
 export { analyzeSpecCoverage, type AnalyzeSpecCoverageOptions } from './spec-coverage.js';
+export {
+  analyzeSlowest,
+  type AnalyzeSlowestOptions,
+  type SlowestAnalysis,
+  type SlowestTest,
+} from './slowest.js';
 export { renderDashboard } from './dashboard.js';
 export {
   fromIstanbulCoverageSummary,

@@ -537,14 +537,23 @@ vitest report の `startTime` を使い、 無い report は中身の hash を�
 
 ### Step 2: 結果サマリを user に提示
 
-dashboard 内の `Summary` / `Flaky tests` / `Spec coverage gaps` を一覧する。
+dashboard 内の `Summary` / `Flaky tests` / `Execution time` / `Spec coverage gaps` を一覧する。
 gap が 0 でなければ「missing TC を test 化」 / 「extra TC を spec に追加」 のアクションを提案する。
+
+`Execution time` は上位の遅い test と、直前の run との合計時間の差を出す (#2186)。
+**差が正の時は、遅くなった原因に心当たりがあるかを user に問う**。 前 run と条件 (並列数 /
+マシンの負荷) が違えば同じ test でも倍違うので、差そのものを異常とは扱わない。 判断材料として出す。
+
+`measured records` が 0 の時は「速い」 ではなく「測っていない」。 reporter が duration を
+出していない可能性を報告する = 合計 0ms を成果と読ませない。
 
 ## 完了条件
 
 - vitest 実行が成功 (failure があっても dashboard は生成する)
 - dashboard markdown が指定 path に Write 済
+- dashboard が `Execution time` section を持ち、遅い test の上位と前 run との差が読める
 - gap / flaky が検出された場合は対応提案を user に提示
+- `Execution time` の差が正の場合、遅い test の上位を user に提示済 (対処は user 判断)
 
 ## references
 

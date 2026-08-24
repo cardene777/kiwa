@@ -40,6 +40,8 @@ export interface SpecCoverageGap {
 
 export interface DashboardInput {
   history: RunHistory;
+  /** Execution time section に出す遅い test の件数。 既定 5。 */
+  slowestLimit?: number;
   flaky: FlakyTest[];
   gaps: SpecCoverageGap[];
   coverage?: import('./coverage.js').CoverageSummary;

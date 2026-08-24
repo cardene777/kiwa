@@ -22,7 +22,7 @@ export declare function collectRunHistory(opts: CollectRunHistoryOptions): RunHi
 
 #### <code v-pre>fromPlaywrightJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L177) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L178) <code v-pre>packages/observability/src/collect.ts</code>
 
 Playwright の JSON レポートを `TestRunRecord[]` へ写す。 `fromVitestJson` と対になる入口で、返す形も同じ。 違いは入力の木構造だけ。 **`results` が空の test も 1 件として数える**。 Playwright は未実行の test にも `status: 'skipped'` を付けるため、落とすと「実行していない」 が 「存在しない」 に化けて突き合わせが実物とずれる。
 
@@ -32,7 +32,7 @@ export declare function fromPlaywrightJson(report: PlaywrightJsonReport, opts: F
 
 #### <code v-pre>fromVitestJson</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L58) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L59) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export declare function fromVitestJson(report: VitestStyleReport, opts: FromVitestJsonOptions): TestRunRecord[];
@@ -57,7 +57,7 @@ export interface CollectRunHistoryOptions {
 
 #### <code v-pre>FromPlaywrightJsonOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L120) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L121) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface FromPlaywrightJsonOptions {
@@ -67,7 +67,7 @@ export interface FromPlaywrightJsonOptions {
 
 #### <code v-pre>FromVitestJsonOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L52) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L53) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface FromVitestJsonOptions {
@@ -77,7 +77,7 @@ export interface FromVitestJsonOptions {
 
 #### <code v-pre>PlaywrightJsonReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L115) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L116) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonReport {
@@ -90,7 +90,7 @@ export interface PlaywrightJsonReport {
 
 #### <code v-pre>PlaywrightJsonResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L92) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L93) <code v-pre>packages/observability/src/collect.ts</code>
 
 Playwright `JSONReport` の最小形。 実 `JSONReport` は `config` 等も持つが、突き合わせに要るのは suite の木と各 test の状態だけなので、読む field に絞って宣言する。 絞ることで、Playwright 側が無関係な field を増やしても壊れない。
 
@@ -103,7 +103,7 @@ export interface PlaywrightJsonResult {
 
 #### <code v-pre>PlaywrightJsonSpec</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L103) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L104) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonSpec {
@@ -114,7 +114,7 @@ export interface PlaywrightJsonSpec {
 
 #### <code v-pre>PlaywrightJsonSuite</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L108) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L109) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonSuite {
@@ -127,7 +127,7 @@ export interface PlaywrightJsonSuite {
 
 #### <code v-pre>PlaywrightJsonTest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L97) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L98) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface PlaywrightJsonTest {
@@ -139,7 +139,7 @@ export interface PlaywrightJsonTest {
 
 #### <code v-pre>VitestStyleAssertionResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L35) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L36) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface VitestStyleAssertionResult {
@@ -152,7 +152,7 @@ export interface VitestStyleAssertionResult {
 
 #### <code v-pre>VitestStyleReport</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L47) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L48) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface VitestStyleReport {
@@ -163,7 +163,7 @@ export interface VitestStyleReport {
 
 #### <code v-pre>VitestStyleTestResult</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L42) <code v-pre>packages/observability/src/collect.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/collect.ts#L43) <code v-pre>packages/observability/src/collect.ts</code>
 
 ```ts
 export interface VitestStyleTestResult {

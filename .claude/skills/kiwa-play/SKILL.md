@@ -395,6 +395,7 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 - 拡張の場合 — 既存 test の regression 0 件、 新規 test も含めて全 PASS
 - 4 round 連続 PASS で flaky 0 件 (公開前は必須)
 - contract 変更を伴う場合 — adversarial review 1 round 推奨
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
 
 ## references
 

@@ -221,6 +221,7 @@ buildRealDriverConfig はendpointとtimeoutの設定値を作るhelperです。K
 | [index.ts](./api/index) | 1 | 0 |
 | [log-correlation.ts](./api/log-correlation) | 2 | 2 |
 | [real-driver.ts](./api/real-driver) | 5 | 2 |
+| [slowest.ts](./api/slowest) | 1 | 3 |
 | [spec-coverage.ts](./api/spec-coverage) | 1 | 1 |
 | [telemetry.ts](./api/telemetry) | 4 | 9 |
 | [trace-flame.ts](./api/trace-flame) | 4 | 2 |

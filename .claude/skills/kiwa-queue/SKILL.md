@@ -155,6 +155,7 @@ describe("{module} — queue happy path", () => {
 - test file が `{output}` に Write されている
 - `vitest run` が exit 0
 - kiwa-review test-review report が生成されている (`--no-review` 未指定時)
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (testcontainers / dev-server 等の本質的な遅さ) を report に記録 (#2186)
 
 ## 他 kiwa skill との chain 連携
 

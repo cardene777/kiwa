@@ -202,6 +202,7 @@ describe('Counter (interaction mode)', () => {
 
 - Layer 1 spec の Automation=yes 全 TC が `tests/{module}.test.tsx` に Write 済
 - `pnpm exec vitest run --environment jsdom` 全 PASS (failure 0 件)
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
 - 観点別 `describe` ブロックが spec の観点一覧と一致
 - Mode column が `render` / `interaction` / `snapshot` のいずれかで `setupComponentEnv` が起動できている
 

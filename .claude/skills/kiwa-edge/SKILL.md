@@ -135,6 +135,13 @@ it('{ID} {Observation}', async () => {
 });
 ```
 
+## 完了条件
+
+- `tests/{module}.edge.test.ts` が Write され、 spec の Automation=yes 全 TC が変換済
+- `pnpm exec vitest run tests/{module}.edge.test.ts` が exit 0
+- kiwa-review test-review report が生成されている (`--no-review` 未指定時)
+- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由を report に記録 (#2186)
+
 ## 既存 test の再利用
 
 Layer 1 (`/kiwa-design`) が仕様書に書く `## 既存 test との対応` を読み、 **`未覆` / `不明` の TC だけ** を書く。
