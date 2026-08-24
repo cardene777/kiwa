@@ -311,8 +311,9 @@ function build() {
   // なることがある (実測で素の `npx vitest run` が両方を拾う)。 0 の側を先に `unmeasured` へ
   // 入れると、同じ file が `files` と `unmeasured` の両方に出る。
   //
-  // duration の達成条件は「回帰 0 件 かつ 未測定 0 件」 なので、この形が 1 件でもあると
-  // `/kiwa-loop` は永久に達成へ到達できず baseline を更新できない (codex review r2-f1)。
+  // 両方に出ると読み手が「測れているのに測れていない」 と読むことになる。
+  // duration に達成条件も baseline も無い (Issue #2196) が、診断としての正しさは要る =
+  // `unmeasured` は「本当に測れていない file」 だけを指す必要がある。
   const unmeasured = new Set([...seen].filter((file) => !merged.has(file)));
 
   const files = [];

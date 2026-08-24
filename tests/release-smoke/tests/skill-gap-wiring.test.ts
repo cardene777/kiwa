@@ -310,12 +310,24 @@ describe('一括置換が他 skill の option を壊していない', () => {
   });
 
 
-  it('T-SKG-003e duration に増減の判定を課していない', () => {
-    // **codex review r1-f2**。 「duration に達成条件は無い」 と書きながら、
-    // Step 3 の差分表 (減った / 変わらない / 増えた) が duration にも適用される形で
-    // 残っていた。 従うと外したはずの判定が戻る。
+  /** `## 停止条件` / `### Step 4` の表本体だけを取り出す。 */
+  function stopTable(src: string): string[] {
+    const m = /\|\s*#\s*\|\s*条件\s*\|\s*適用\s*\|[\s\S]*?\n\n/.exec(src);
+    return (m?.[0] ?? '').split('\n').filter((l) => /^\|\s*[23]\s*\|/.test(l));
+  }
+
+  /** Step 3 の差分表の行だけを取り出す。 */
+  function deltaRows(src: string): string[] {
+    const m = /\|\s*差\s*\|\s*扱い\s*\|[\s\S]*?\n\n/.exec(src);
+    return (m?.[0] ?? '').split('\n').filter((l) => l.startsWith('| '));
+  }
+
+  it('T-SKG-003e 停止条件 2 / 3 の行そのものが coverage 限定になっている', () => {
+    // **codex review r2-f1**。 前版は file 全体から `coverage のみ` を探すだけで、
+    // 表の行を duration にも適用する形へ戻しても通ってしまった = 守るつもりのものを
+    // 守っていなかった。
     //
-    // 差分表と停止条件 2 / 3 が coverage 限定であることを明記させる。
+    // 行を取り出して、その行に `coverage のみ` があることを見る。
     for (const [name, src] of [
       ['kiwa-loop/SKILL.md', read('kiwa-loop')],
       [
@@ -323,11 +335,27 @@ describe('一括置換が他 skill の option を壊していない', () => {
         readFileSync(resolve(SKILLS_DIR, 'kiwa-loop/references/loop-stop-conditions.md'), 'utf8'),
       ],
     ] as const) {
-      expect(src, `${name} が適用範囲を書いていない`).toContain('coverage のみ');
-      expect(src, `${name} が duration の 1 round 停止を書いていない`).toMatch(
-        /duration は \*\*条件 1 だけ/,
-      );
+      const rows = stopTable(src);
+      expect(rows.length, `${name} の停止条件表から行 2 / 3 を取り出せない`).toBe(2);
+      for (const row of rows) {
+        expect(row, `${name}: ${row.trim().slice(0, 50)}`).toContain('coverage のみ');
+      }
     }
+  });
+
+  it('T-SKG-003g Step 3 の差分表が duration を対象にしていない', () => {
+    // 差分表 (減った / 変わらない / 増えた) は改善の有無を判定する。 duration に
+    // 当てると、負荷で動いた値を「改善」「悪化」 と読むことになる。
+    const src = read('kiwa-loop');
+    const rows = deltaRows(src);
+
+    expect(rows.length, '差分表を取り出せない (検査が空振りしている)').toBeGreaterThan(3);
+    for (const row of rows) {
+      expect(row, `差分表の行が duration を名指ししている: ${row.trim().slice(0, 50)}`)
+        .not.toContain('duration');
+    }
+    // 表の直後に適用範囲が書かれていることまで見る。
+    expect(src).toMatch(/この表は coverage だけに適用する/);
   });
 
   it('T-SKG-003f duration の再測手順が coverage 限定になっている', () => {

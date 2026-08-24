@@ -443,8 +443,9 @@ describe('duration-gap-report', () => {
     // 両方を拾い、どちらかの所要が 0 になることがある。 0 の側を先に `unmeasured` へ
     // 入れてから畳むと、**同じ file が `files` と `unmeasured` の両方に出る**。
     //
-    // duration の達成条件は「回帰 0 件 かつ 未測定 0 件」 なので、この形が 1 件でも
-    // あると `/kiwa-loop` は永久に Step 5 へ到達できず baseline を更新できない。
+    // 両方に出ると読み手が「測れているのに測れていない」 と読む。 duration に
+    // 達成条件も baseline も無い (Issue #2196) が、診断としての正しさは要る =
+    // `unmeasured` は本当に測れていない file だけを指す必要がある。
     const { root, report } = fixture([
       { rel: '.vitest-dist/tests/a.test.js', ms: 0 },
       { rel: 'tests/a.test.ts', ms: 3000 },
@@ -476,8 +477,8 @@ describe('duration-gap-report', () => {
     // **codex review r3-f1**。 `toSource()` が全ての `.js` を `.ts` に書き換えていたため、
     // `tests/a.test.js` と `tests/a.test.ts` という **別々の file** が同じ名前に潰れた。
     //
-    // 片方が 0 秒だと、Round 2 で入れた `seen - merged` が「測れた」 側に吸収して
-    // 本当に測れていない file を消す = gate が達成を報告して baseline を更新する。
+    // 片方が 0 秒だと `seen - merged` が「測れた」 側に吸収し、本当に測れていない file が
+    // 診断から消える = 読み手は「全部測れた」 と読むが実際は 1 件測れていない。
     const { root, report } = fixture([
       { rel: 'tests/a.test.js', ms: 0 },
       { rel: 'tests/a.test.ts', ms: 3000 },
