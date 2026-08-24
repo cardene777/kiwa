@@ -471,6 +471,38 @@ describe('generateLeanSpec — input validation', () => {
     expect(() => generateLeanSpec(dup)).toThrow(/duplicate transition/);
   });
 
+  it('T-LEAN-045 emits one theorem per state, whichever of the three shapes applies', () => {
+    // `generate()` は定理 block が空にならない前提で書かれている (#2195)。 その前提は
+    // 「state 1 つにつき必ず 1 件」 が保つので、3 経路すべてを 1 つの spec で通して数える。
+    //
+    // 3 経路 = 終端 (`_absorbing`) / 非終端で脱出できない (`_no_escape`) / 脱出できる
+    // (`_can_leave`)。 1 つでも push を落とすと state 数と定理数がずれて落ちる。
+    const spec: OrchestratorSpec = {
+      moduleName: 'M',
+      namespace: 'M',
+      states: ['start', 'stuck', 'done'],
+      events: ['go', 'stay'],
+      // 全 cell (3 state × 2 event) を宣言する = 未宣言があると generate 前の検査が落とす。
+      transitions: [
+        // start は go で抜けられる = `_can_leave`
+        { from: 'start', event: 'go', to: 'stuck' },
+        { from: 'start', event: 'stay', to: 'start' },
+        // stuck は event を受けるが自分に戻るだけ = `_no_escape`
+        { from: 'stuck', event: 'stay', to: 'stuck' },
+        { from: 'stuck', event: 'go', to: 'stuck' },
+        // done はどの event でも動かない = `_absorbing`
+        { from: 'done', event: 'go', invalid: true },
+        { from: 'done', event: 'stay', invalid: true },
+      ],
+    };
+    const { source } = generateLeanSpec(spec);
+    const theorems = source.match(/^theorem /gm) ?? [];
+    expect(theorems.length, '定理の数が state の数と違う').toBe(spec.states.length);
+    expect(source, 'can_leave の定理が無い').toContain('start_can_leave');
+    expect(source, 'no_escape の定理が無い').toContain('stuck_no_escape');
+    expect(source, 'absorbing の定理が無い').toContain('done_absorbing');
+  });
+
   it('T-LEAN-044 rejects an empty state or event list', () => {
     const base = { moduleName: 'M', namespace: 'M', transitions: [] };
     expect(() => generateLeanSpec({ ...base, states: [], events: ['e'] })).toThrow(/at least one state/);
