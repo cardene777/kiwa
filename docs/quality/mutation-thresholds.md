@@ -564,6 +564,44 @@ Scale from **that package's own** previous run, not from another package's total
 no prior run has no basis for one; take its dry-run `net` and its `collect` figure first, divide by
 the test count and the file count, and place it in the table above.
 
+## Reading a change in timeout count (#2171)
+
+A raw timeout count answers two opposite questions with the same number.
+
+`dapp` was measured three ways to settle its `concurrency` and `timeoutMS`, and both
+changes raised the timeout count — for opposite reasons.
+
+| run | settings | wall | MSI | killed | survived | timeout |
+|---|---|---|---|---|---|---|
+| baseline | c2 / t60000 | 56m05s | 80.43 | 1874 | 460 | 17 |
+| A | c2 / default | 49m | 80.73 | 1843 | 453 | 55 |
+| B | c4 / t60000 | 32m | 80.90 | 1875 | 449 | 27 |
+
+Counting per-mutant transitions separates them.
+
+```
+run A:  Killed   -> Timeout   32     Survived -> Timeout    6     Survived -> Killed  1
+run B:  Survived -> Timeout   10     Survived -> Killed     1
+```
+
+`Killed -> Timeout` is **detection lost**: a mutant the tests actually caught is now
+indistinguishable from a hang. `Survived -> Timeout` is **detection gained**: a mutant that
+used to escape now does not. Run A did the first thirty-two times; run B never did it once.
+
+So when a settings change moves the timeout count, compare transitions and not totals. An
+acceptance criterion phrased as "timeout count must not exceed the baseline" fails run B,
+which is strictly better than the baseline on every other axis.
+
+The comparison needs a negative control, because a transition count is a claim about a
+difference. Diffing baseline against itself yields zero transitions; diffing it against run B
+yields eleven. Without the first number the second one proves nothing about the method.
+
+`timeoutMS` stayed at 60,000 for `dapp` because its suite spawns `anvil`
+(`src/anvil.ts` calls `spawn('anvil')`, and eight test files start one). The value looks like a
+leftover from the Playwright era, and it is — but the class of cost it covers did not go away
+with the browser. The thirty-eight extra timeouts in run A land in `anvil.js` (3 → 16),
+`anvil-pool.js` (0 → 14) and `fixture.js` (4 → 12).
+
 ## Baseline snapshots
 
 Each package writes a per-package baseline JSON to `.mutation-baseline/<pkg>.json` (folder is tracked). The baseline is the last known green mutation report — kill-rate + surviving-mutant list + timestamp. Baseline refresh happens in-PR when kill-rate improves, and is written by the same PR that raises test coverage — never as a standalone commit.
