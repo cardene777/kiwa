@@ -34,8 +34,8 @@
  * run.
  *
  * A line is printed as each package finishes, with how long it took. A sweep of
- * this repository takes the better part of an hour; a script that prints
- * nothing until the end cannot be told apart from one that has hung.
+ * this repository takes about twenty minutes; a script that prints nothing until
+ * the end cannot be told apart from one that has hung.
  *
  * Usage:
  *   node scripts/test-all.mjs                       summary, first error per package
@@ -43,13 +43,31 @@
  *   node scripts/test-all.mjs --allow-missing-tools  exit 0 even if a tool is absent
  *   node scripts/test-all.mjs --only nextjs        only packages whose path matches
  *   node scripts/test-all.mjs --timeout 600        seconds per package (default 900)
+ *   node scripts/test-all.mjs --jobs 4            run four packages at a time
  *
- * Exits 1 when any package is red, blocked, or left the working tree dirty.
+ * Exits 1 when any package is red, blocked, or left the working tree dirty, and
+ * 4 when the invocation itself was wrong (a flag with no value, `--jobs 0`, a
+ * `--only` that matches nothing). Retrying on 1 can make sense; retrying on 4
+ * cannot.
  *
- * Sequential, always. Many `test` scripts build the workspace packages they
+ * Sequential by default. Many `test` scripts build the workspace packages they
  * depend on, so two of them at once rewrite the same `dist` while the other
  * reads it. `typecheck-all.mjs` kept a `--jobs` flag and it invented red
- * packages that passed when run alone; this one does not offer the choice.
+ * packages that passed when run alone.
+ *
+ * `--jobs N` runs anyway, by removing that cause rather than hoping: the sweep
+ * builds the workspace once up front and sets `KIWA_DEPS_PREBUILT=1`, which
+ * makes `scripts/build-deps.mjs` a no-op in every child, so no two targets
+ * write the same `dist`. What is left is the two groups measured in
+ * `docs/quality/test-parallelism.md` that contend on a machine-wide resource —
+ * the Docker daemon and Chromium — and each of those gets a lane of its own
+ * that stays serial.
+ *
+ * Parallel mode gives up one thing, and says so while it runs: it cannot tell
+ * you *which* package dirtied the tree. Attribution comes from reading
+ * `git status` before and after each package, which means nothing when several
+ * are running. The sweep still fails on a dirty tree, and names the paths;
+ * finding the owner means re-running with `--jobs 1`.
  */
 
 import { execFile, spawn } from 'node:child_process';
@@ -513,6 +531,7 @@ export function runCommand({
   command,
   args,
   cwd,
+  env,
   timeoutMs,
   maxBytes = 64 * 1024 * 1024,
   tailBytes = 256 * 1024,
@@ -523,7 +542,7 @@ export function runCommand({
   return new Promise((resolve) => {
     let child;
     try {
-      child = spawn(command, args, { cwd, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+      child = spawn(command, args, { cwd, env, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
     } catch (error) {
       resolve({
         ok: false,
@@ -673,8 +692,8 @@ export function runCommand({
 }
 
 /** Run one package's `test`. Resolves with the result rather than throwing. */
-async function runTest({ dir, name }, timeoutMs) {
-  const run = await runCommand({ command: 'pnpm', args: ['test'], cwd: dir, timeoutMs });
+async function runTest({ dir, name }, timeoutMs, env) {
+  const run = await runCommand({ command: 'pnpm', args: ['test'], cwd: dir, env, timeoutMs });
   return { name, dir: relative(ROOT, dir), ...run };
 }
 
@@ -711,6 +730,20 @@ export function failureLines(output) {
  * positive number, and only the caller's own validation can say so.
  */
 /**
+ * The invocation was wrong, as opposed to the sweep having found failures.
+ *
+ * Both used to exit 1, so a typo in a flag and six red packages were the same
+ * event to anything reading the exit code. A caller that retries on failure
+ * would retry the typo forever.
+ */
+export class UsageError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'UsageError';
+  }
+}
+
+/**
  * Parse `--timeout` and refuse values that `setTimeout` would silently clamp.
  *
  * `setTimeout` takes a 32-bit signed integer of milliseconds. Larger values
@@ -720,40 +753,171 @@ export function failureLines(output) {
  */
 export function validateTimeout(raw) {
   const seconds = Number(raw);
-  if (!Number.isFinite(seconds) || seconds <= 0) throw new Error('--timeout takes seconds');
-  if (seconds * 1000 > 2_147_483_647) throw new Error('--timeout exceeds 2147483 seconds');
+  if (!Number.isFinite(seconds) || seconds <= 0) throw new UsageError('--timeout takes seconds');
+  if (seconds * 1000 > 2_147_483_647) throw new UsageError('--timeout exceeds 2147483 seconds');
   return seconds;
+}
+
+/**
+ * Parse `--jobs` and refuse anything that is not a count of workers.
+ *
+ * A zero or a fraction would produce a pool that never starts a task, and the
+ * sweep would sit there reporting nothing. Say so instead of hanging.
+ */
+export function validateJobs(raw) {
+  const jobs = Number(raw);
+  if (!Number.isInteger(jobs) || jobs < 1) throw new UsageError('--jobs takes a positive integer');
+  return jobs;
+}
+
+/**
+ * Targets that must not run beside another target in the same lane.
+ *
+ * The docker lane is read from the dependency list: a target that pulls
+ * `testcontainers` starts a container, and the daemon is one per machine.
+ * Reading it keeps the lane correct when a package starts using containers.
+ *
+ * The chromium lane cannot be read the same way. 46 targets depend on
+ * `@playwright/test`, and the dependency says nothing about whether `pnpm test`
+ * launches a browser. These three are the ones the repository has measured as
+ * contending (`docs/quality/test-parallelism.md` group 5), so they are named.
+ *
+ * **`playwright test` in the test command is not the criterion**, though it
+ * looks like the readable signal the docker lane has. 17 examples run it, and
+ * the root `test` script runs all 17 in its *parallel* phase — they were group 1
+ * (a shared chain port), fixed by giving each one its own number, not group 5.
+ * Serialising them would contradict the measurement and cost far more than it
+ * saves. `--jobs N` is also strictly less concurrent than the root script, which
+ * runs those 17 at `--workspace-concurrency` = core count, so the lane cannot
+ * need to be wider than the root script's own serial phase.
+ *
+ * Naming them means a rename can empty the lane silently, so `laneMembership`
+ * reports the names it could not find and the caller refuses to run. What the
+ * root script serialises and what this lane serialises are pinned to each other
+ * by `tests/release-smoke/tests/test-all-parallel.test.ts`.
+ */
+export const CHROMIUM_LANE = ['packages/e2e', 'packages/ui', 'examples/full-stack-poc'];
+
+function dependsOnContainers(dir) {
+  try {
+    const pkg = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf-8'));
+    const deps = Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
+    return deps.some((name) => name === 'testcontainers' || name.startsWith('@testcontainers/'));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Split the targets into one free set and the serial lanes.
+ *
+ * `missing` names the chromium entries that matched nothing, and it is measured
+ * against `roster` — every package in the workspace — rather than against the
+ * targets being run. An empty lane is not the same as a lane whose members were
+ * renamed, and only the second one means the sweep is about to run browsers side
+ * by side; measuring it against a `--only` selection would confuse the two and
+ * make `--only lean --jobs 4` refuse to start.
+ */
+export function laneMembership(packages, root, { roster = packages, dependsOn = dependsOnContainers } = {}) {
+  const chromium = [];
+  const docker = [];
+  const free = [];
+  for (const pkg of packages) {
+    const rel = relative(root, pkg.dir);
+    if (CHROMIUM_LANE.includes(rel)) chromium.push(pkg);
+    else if (dependsOn(pkg.dir)) docker.push(pkg);
+    else free.push(pkg);
+  }
+  const known = new Set(roster.map((pkg) => relative(root, pkg.dir)));
+  const missing = CHROMIUM_LANE.filter((name) => !known.has(name));
+  return { free, docker, chromium, missing };
+}
+
+/**
+ * Run `task` over `items`, at most `limit` at a time, in the order given.
+ *
+ * Results come back in the order of `items`, not the order they finished, so
+ * the summary reads the same whatever the machine did.
+ */
+export async function pool(items, limit, task) {
+  const results = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    for (;;) {
+      const index = next;
+      next += 1;
+      if (index >= items.length) return;
+      results[index] = await task(items[index], index);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
+/**
+ * Share one concurrency limit across otherwise independent producers.
+ *
+ * The Docker and Chromium lanes each have their own serial loop, while the free
+ * lane has a pool. Without a shared limit, `--jobs 4` can run six targets: four
+ * free, one Docker and one Chromium. A released slot is transferred to the
+ * oldest waiter so a busy producer cannot jump the queue.
+ */
+export function limitConcurrency(limit) {
+  let available = limit;
+  const waiting = [];
+  const acquire = () => {
+    if (available > 0) {
+      available -= 1;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => waiting.push(resolve));
+  };
+  const release = () => {
+    const next = waiting.shift();
+    if (next) next();
+    else available += 1;
+  };
+
+  return async (task) => {
+    await acquire();
+    try {
+      return await task();
+    } finally {
+      release();
+    }
+  };
 }
 
 export function argValue(argv, flag, fallback) {
   const at = argv.indexOf(flag);
   if (at === -1) return fallback;
   // `--only nextjs --only safe` used to run the `nextjs` subset and say nothing.
-  if (argv.indexOf(flag, at + 1) !== -1) throw new Error(`${flag} given more than once`);
+  if (argv.indexOf(flag, at + 1) !== -1) throw new UsageError(`${flag} given more than once`);
   const value = argv[at + 1];
   const looksLikeFlag = value !== undefined && value.startsWith('-') && Number.isNaN(Number(value));
   // An empty string is a value the caller supplied, and it is not one that
   // means anything here. `--only ""` used to filter for the empty string, match
   // every path, and run the full sweep.
-  if (value === undefined || value === '' || looksLikeFlag) throw new Error(`${flag} needs a value`);
+  if (value === undefined || value === '' || looksLikeFlag) throw new UsageError(`${flag} needs a value`);
   return value;
 }
 
 async function main() {
   const refuse = unsupportedPlatform(process.platform);
-  if (refuse) throw new Error(refuse);
+  if (refuse) throw new UsageError(refuse);
 
   const verbose = process.argv.includes('--verbose');
   const allowMissingTools = process.argv.includes('--allow-missing-tools');
   const only = argValue(process.argv, '--only', null);
   const timeoutSec = validateTimeout(argValue(process.argv, '--timeout', '900'));
+  const jobs = validateJobs(argValue(process.argv, '--jobs', '1'));
 
   const all = discoverPackages(await listProjects(), ROOT);
   const packages = only ? all.filter((p) => relative(ROOT, p.dir).includes(only)) : all;
   // Running nothing is not the same as everything passing. A typo in `--only`
   // used to print `testing 0 packages` and exit 0.
   if (packages.length === 0) {
-    throw new Error(only ? `--only ${only} matched none of ${all.length} packages` : 'no packages have a test script');
+    throw new UsageError(only ? `--only ${only} matched none of ${all.length} packages` : 'no packages have a test script');
   }
 
   // Dirt that is already here cannot be blamed on the package that runs first,
@@ -768,7 +932,23 @@ async function main() {
     process.stdout.write('a package that rewrites one of these is still reported, by its fingerprint.\n\n');
   }
 
-  process.stdout.write(`testing ${packages.length} packages, one at a time\n\n`);
+  const lanes = jobs === 1 ? null : laneMembership(packages, ROOT, { roster: all });
+  if (lanes && lanes.missing.length > 0) {
+    // An empty lane and a renamed lane look the same from the outside, and only
+    // the second one means browsers are about to run side by side.
+    throw new Error(`chromium lane names ${lanes.missing.join(', ')}, which matched no package`);
+  }
+
+  if (jobs === 1) {
+    process.stdout.write(`testing ${packages.length} packages, one at a time\n\n`);
+  } else {
+    process.stdout.write(
+      `testing ${packages.length} packages, ${jobs} at a time ` +
+        `(${lanes.docker.length} in the docker lane, ${lanes.chromium.length} in the chromium lane, both serial)\n`,
+    );
+    // Lines arrive as packages finish, so the order is not the order above.
+    process.stdout.write('lines are in finishing order, and the tree is checked once at the end\n\n');
+  }
 
   const red = [];
   const blocked = [];
@@ -776,15 +956,11 @@ async function main() {
   let green = 0;
   let dirtyOnly = 0;
   const width = String(packages.length).length;
+  let finished = 0;
 
-  for (const [index, pkg] of packages.entries()) {
-    const counter = `[${String(index + 1).padStart(width)}/${packages.length}]`;
-    const started = Date.now();
-    const before = await porcelain();
-    const result = await runTest(pkg, timeoutSec * 1000);
-    const after = await porcelain();
-    const touched = dirtiedPaths(before, after);
-    const took = `${((Date.now() - started) / 1000).toFixed(1)}s`;
+  const render = (result, touched, took) => {
+    finished += 1;
+    const counter = `[${String(finished).padStart(width)}/${packages.length}]`;
 
     // Listed wherever it lands, so the dirty section names every package that
     // wrote into the repository, red or not.
@@ -799,17 +975,17 @@ async function main() {
     if (verdict === 'green') {
       green += 1;
       process.stdout.write(`${counter} ok    ${result.dir}  ${took}\n`);
-      continue;
+      return;
     }
     if (verdict === 'dirty') {
       dirtyOnly += 1;
       process.stdout.write(`${counter} DIRTY ${result.dir}  ${took}\n`);
-      continue;
+      return;
     }
     if (verdict === 'blocked') {
       blocked.push({ ...result, cause });
       process.stdout.write(`${counter} SKIP  ${result.dir}  (needs ${cause.tool})  ${took}\n`);
-      continue;
+      return;
     }
 
     red.push(result);
@@ -831,6 +1007,51 @@ async function main() {
     for (const line of verbose ? failureLines(result.output) : failureLines(result.output).slice(0, 1)) {
       process.stdout.write(`        ${line.slice(0, 150)}\n`);
     }
+  };
+
+  let sweepDirt = [];
+  if (jobs === 1) {
+    for (const pkg of packages) {
+      const started = Date.now();
+      const before = await porcelain();
+      const result = await runTest(pkg, timeoutSec * 1000);
+      const after = await porcelain();
+      render(result, dirtiedPaths(before, after), `${((Date.now() - started) / 1000).toFixed(1)}s`);
+    }
+  } else {
+    // **Build the shared dependencies once, up front.** That is the whole reason
+    // this can run in parallel at all: `scripts/build-deps.mjs` does nothing when
+    // `KIWA_DEPS_PREBUILT` is set, so no two targets rewrite the same `dist`.
+    process.stdout.write('building the workspace once, so no target rebuilds a shared dist\n');
+    const build = await runCommand({
+      command: 'pnpm',
+      args: ['--filter', './packages/**', 'build'],
+      cwd: ROOT,
+      timeoutMs: timeoutSec * 1000,
+    });
+    if (!build.ok) throw new Error('the up-front build failed; parallel mode needs it to succeed');
+    const env = { ...process.env, KIWA_DEPS_PREBUILT: '1' };
+
+    // The tree is measured once around the whole phase. Which target wrote a
+    // path cannot be told when several run at once, so the sweep reports the
+    // paths without a name and says to re-run with `--jobs 1` to find the owner.
+    const before = await porcelain();
+    const runOne = async (pkg) => {
+      const started = Date.now();
+      const result = await runTest(pkg, timeoutSec * 1000, env);
+      render(result, [], `${((Date.now() - started) / 1000).toFixed(1)}s`);
+    };
+    const withSlot = limitConcurrency(jobs);
+    const limitedRunOne = (pkg) => withSlot(() => runOne(pkg));
+    const serially = async (list) => {
+      for (const pkg of list) await limitedRunOne(pkg);
+    };
+    await Promise.all([
+      serially(lanes.docker),
+      serially(lanes.chromium),
+      pool(lanes.free, jobs, limitedRunOne),
+    ]);
+    sweepDirt = dirtiedPaths(before, await porcelain());
   }
 
   if (blocked.length > 0) {
@@ -866,15 +1087,31 @@ async function main() {
     throw new Error(`verdicts do not add up: ${counted} of ${packages.length} packages`);
   }
 
+  if (sweepDirt.length > 0) {
+    process.stdout.write('\nthe working tree changed during the sweep, and with several packages\n');
+    process.stdout.write('running at once there is no way to say which one wrote these:\n\n');
+    for (const path of sweepDirt.slice(0, 20)) process.stdout.write(`  ${path}\n`);
+    if (sweepDirt.length > 20) process.stdout.write(`  ... and ${sweepDirt.length - 20} more\n`);
+    process.stdout.write('\nre-run with --jobs 1 to find the package responsible.\n');
+  }
+
   const failed = sweepFailed({
     red: red.length,
-    dirty: dirty.length,
+    // Unattributed dirt still fails the sweep. Parallel mode gives up the name,
+    // not the verdict.
+    dirty: dirty.length + sweepDirt.length,
     blocked: blocked.length,
     allowMissingTools,
   });
   process.stdout.write(
     `\ngreen: ${green}   red: ${red.length}   dirty: ${dirtyOnly}   not run: ${blocked.length}\n`,
   );
+  if (sweepDirt.length > 0) {
+    // The four counters are per package, and unattributed dirt belongs to no
+    // package. Printing it beside them keeps a reader who only looks at the last
+    // line from reading `dirty: 0` on a run that failed because of dirt.
+    process.stdout.write(`unattributed dirt: ${sweepDirt.length} path(s)\n`);
+  }
   if (dirty.length > dirtyOnly) {
     process.stdout.write(
       `${dirty.length - dirtyOnly} package(s) counted red or blocked also dirtied the tree.\n`,
@@ -887,7 +1124,10 @@ async function main() {
 const isEntry = isMainModule(process.argv[1], import.meta.url);
 if (isEntry) {
   main().catch((err) => {
-    process.stderr.write(`[test-all] ${err.stack ?? err.message ?? err}\n`);
-    process.exit(1);
+    // A usage error prints its message alone: a stack trace of the argument
+    // parser tells the reader nothing about the flag they mistyped.
+    const usage = err instanceof UsageError;
+    process.stderr.write(`[test-all] ${usage ? err.message : (err.stack ?? err.message ?? err)}\n`);
+    process.exit(usage ? 4 : 1);
   });
 }

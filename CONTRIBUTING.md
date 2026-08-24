@@ -82,20 +82,21 @@ packages had been failing since a rewrite in `@kiwa-lab/mobile` and
 alphabet failed first.
 
 `pnpm test:all` runs every package that has a `test` script and reports each
-failure. It takes about three quarters of an hour, and prints a line per
-package as it goes:
+failure. Measured on 166 packages it takes about 21 minutes serially and about
+5 with `--jobs 4` (see below); both numbers move with the machine. It prints a
+line per package as it goes:
 
 ```
 $ pnpm test:all
-testing 171 packages, one at a time
+testing 166 packages, one at a time
 
-[  1/171] ok    examples/auth-auth0-poc  6.6s
-[122/171] ok    examples/orm-drizzle-mysql-poc  25.1s
-[127/171] ok    examples/orm-prisma-mysql-poc  65.9s
-[171/171] ok    tests/release-smoke  60.1s
+[  1/166] ok    examples/auth-auth0-poc  2.5s
+[122/166] ok    examples/orm-drizzle-postgres-poc  12.2s
+[127/166] ok    examples/orm-prisma-postgres-poc  20.7s
+[166/166] ok    tests/release-smoke  62.5s
 ...
 
-green: 171   red: 0   dirty: 0   not run: 0
+green: 166   red: 0   dirty: 0   not run: 0
 ```
 
 The four counters add up to the number of packages, always: one verdict each.
@@ -120,9 +121,31 @@ Four verdicts, and only one of them means the package is fine:
   `git status --porcelain` at the repository root: a test that writes outside
   the repository, or into an ignored path, is invisible to it.
 
-It exits 1 when anything is red, blocked or dirty. Like `typecheck:all`, it is
-sequential on purpose: many `test` scripts build the workspace packages they
-depend on, so two at once rewrite the same `dist` while the other reads it.
+It exits 1 when anything is red, blocked or dirty, and 4 when the invocation
+itself was wrong — `--jobs 0`, a flag with no value, an `--only` that matches
+nothing. Retrying on 1 can make sense; retrying on 4 cannot.
+
+### Running the sweep in parallel
+
+`pnpm test:all -- --jobs 4` runs four packages at a time. The default is 1, so
+nothing changes unless you ask.
+
+It was serial because many `test` scripts build the workspace packages they
+depend on, so two at once rewrite the same `dist` while the other reads it. The
+parallel path removes that cause instead of hoping: it builds the workspace once
+up front and sets `KIWA_DEPS_PREBUILT=1`, which makes `scripts/build-deps.mjs` a
+no-op in every child. What is left is two groups that contend on something the
+machine has one of, and each gets a lane that stays serial — the targets that
+declare `testcontainers`, and the three that launch a browser. Across all lanes
+together, no more than `--jobs` targets run at a time.
+
+**Parallel mode cannot tell you which package dirtied the tree.** That answer
+comes from reading `git status` before and after each package, which means
+nothing when several are running. The sweep still fails and still names the
+paths; finding the owner means re-running with `--jobs 1`, and it says so.
+
+Pick `--jobs` from what the machine has. Every target runs its own vitest, which
+starts workers of its own, so 4 already keeps eight cores busy.
 
 **Four packages are flaky, and they are the ones that start containers:**
 `orm-drizzle-mysql-poc`, `orm-drizzle-postgres-poc`, `orm-prisma-mysql-poc` and
@@ -282,13 +305,18 @@ with esbuild and never looks at a type.
 `pnpm typecheck:coverage` finds test files that nothing compiles, and exits 1 if
 there are any:
 
-On `main` it finds none:
+On `main` it currently finds 11, and exits 1:
 
 ```
 $ pnpm typecheck:coverage
-packages with test files: 171
-packages whose tests nothing compiles: 0
+packages with test files: 166
+packages whose tests nothing compiles: 11
 ```
+
+Those 11 are tracked in #2218. They lost their only type check when #2205 and
+#2207 took the compile step out of `test` for speed — vitest transforms with
+esbuild and never looks at a type. It is not wired into `pnpm test`, so a sweep
+stays green while this stays red.
 
 When it does find one, it names the package and the files nothing compiles:
 
