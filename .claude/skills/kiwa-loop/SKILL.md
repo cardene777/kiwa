@@ -57,16 +57,15 @@ $ARGUMENTS
 | metric | 記録する値 | 達成の条件 |
 |---|---|---|
 | coverage | `uncovered` (残り件数) | `uncovered === 0` |
-| duration | `regressions` の件数と `totalMs` | `regressions` が 0 件、かつ `unmeasured` が 0 件 |
+| duration | 遅い順の並びと lever 別の偏り | **持たない** |
 
-**duration は `totalMs === 0` を達成にしない**。 test が 1 件でもあれば所要は正で、
-budget を定義していないため 0 には決して届かない = Step 5 に到達できず baseline を
-永久に更新できなくなる。
+**duration に達成条件は無い** (Issue #2196)。 wall time の絶対値が判定材料にならないことを
+実測で確かめた = 同じ code で 11.5 / 29.9 / 30.6 / 69.9 秒と 6 倍振れる。
 
-duration の達成は「baseline より 30% 以上遅い file が 1 件も無く、測れなかった file も
-無い」 状態を指す。 `totalMs` は進捗の目安として記録するだけで、判定には使わない。
+したがって duration では **1 round だけ回して止まる**。 gap の先頭 1 件を直し、
+何をどう変えたかを report に書いて終わる。 「速くなったか」 は測らない。
 
-達成済なら Step 5 へ飛ぶ。
+coverage が達成済なら Step 5 へ飛ぶ。
 
 ### Step 2 — 一番安い 1 件を埋める
 
@@ -90,37 +89,43 @@ gap の先頭 1 件だけを対象にする。 **まとめて埋めない**。
 **既存 test を削除しない / 期待値を書き換えない**。 詳細は
 `references/existing-test-reuse.md` が SSOT (実体は `/kiwa-design` 側)。
 
-### Step 3 — 再測する
+### Step 3 — 再測する (coverage のみ)
 
-**測定 file を作り直してから** Step 1 と同じ command を回す。
-作り直さないと同じ値が返り、進んだのに進んでいないと判定する。
+**duration では Step 3 を行わない**。 1 round で止まるので再測する相手が無く、
+再測しても差を判定できない (絶対値が 6 倍振れる)。 Step 2 で何をどう変えたかを
+report に書いて Step 5 へ進む。
 
-| metric | 作り直すもの |
-|---|---|
-| coverage | `<pkg>` の `test:cov` を走らせて `coverage-final.json` を更新する |
-| duration | vitest を `--reporter=json --outputFile=<新しい path>` で走らせ、**その path を渡す** |
+以下は coverage の手順。
 
-duration で report を作り直さないのは特に見落としやすい。 `/kiwa-gap` は test を走らせない
-ので、Step 2 で test を書き換えても `--report` が指す JSON は**前 round のまま**になる。
-毎 round 新しい path に出し、その path を渡す。
+`<pkg>` の `test:cov` を走らせて `coverage-final.json` を更新してから、Step 1 と同じ
+command を回す。 更新しないと同じ値が返り、進んだのに進んでいないと判定する。
 
 前 round との差を記録する。
 
-| 差 | 扱い |
+| 差 | 扱い (coverage のみ) |
 |---|---|
 | 減った | 1 歩進んだ。 round を進めて Step 2 へ |
 | 変わらない | 改善 0。 連続回数を +1 |
 | 増えた | 悪化。 その round の変更を見直す (test を消していないか確認する) |
 
+**この表は coverage だけに適用する**。 duration に当てると、負荷で動いた値を
+「改善」 や「悪化」 と読むことになる = 本 skill が外したはずの判定が戻る。
+
+適用範囲は **表の見出し** が持つ (`扱い (coverage のみ)`)。 行ごとの注記に置くと、
+1 行だけ書き換えて duration へ広げられる。 T-SKG-003g が見出しと 3 行を丸ごと固定する。
+
 ### Step 4 — 停止条件を見る
 
 `references/loop-stop-conditions.md` が SSOT。 3 条件のいずれかで止める。
 
-| # | 条件 | 次の動き |
-|---|---|---|
-| 1 | coverage は `uncovered === 0` / duration は `regressions` と `unmeasured` が 0 件 | Step 5 (達成) |
-| 2 | 改善 0 が 2 round 連続 | Step 6 (判断を仰ぐ) |
-| 3 | round が上限 (既定 5) に達した | Step 6 (判断を仰ぐ) |
+duration は **条件 1 だけを使う** (1 round 完了で必ず止まる)。 条件 2 と 3 は改善の
+有無を数えるが、duration では改善を測れないため適用しない。
+
+| # | 条件 | 適用 | 次の動き |
+|---|---|---|---|
+| 1 | coverage は `uncovered === 0` / duration は 1 round 完了 | 両方 | Step 5 |
+| 2 | 改善 0 が 2 round 連続 | coverage のみ | Step 6 (判断を仰ぐ) |
+| 3 | round が上限 (既定 5) に達した | coverage のみ | Step 6 (判断を仰ぐ) |
 
 条件 2 を「1 round」 にしない。 1 round の改善 0 は、埋め方を変えれば進むことがある。
 2 round 続いたら機械的にはこれ以上進めないとみなす。
@@ -130,9 +135,10 @@ duration で report を作り直さないのは特に見落としやすい。 `/
 ratchet を更新する。
 
 ```bash
-node scripts/check-coverage-gates.mjs --update-high-water     # coverage
-node scripts/duration-gap-report.mjs --report <path> --update-baseline   # duration
+node scripts/check-coverage-gates.mjs --update-high-water   # coverage のみ
 ```
+
+**duration には ratchet が無い**。 更新するものが無いので何も実行しない。
 
 round ごとの経過表を report に書き、応答にも出す。
 

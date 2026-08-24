@@ -63,25 +63,39 @@ describe('共通 skill が実在する', () => {
     expect(src).toMatch(/上限 \(既定 5\)|round が上限/);
   });
 
-  it('T-SKG-003b duration の達成条件が totalMs === 0 でない', () => {
-    // **codex review r1-f2**。 `totalMs === 0` を達成にすると、test が 1 件でもあれば
-    // 所要は正なので**永久に達成できず** baseline を更新できない。
-    // 達成は「回帰 0 件かつ測れなかった file 0 件」 で判定する。
+  it('T-SKG-003b duration が達成条件を持たないと明記する', () => {
+    // **Issue #2196**。 当初は `totalMs === 0` を達成にしていたが到達不能で、
+    // 次に「回帰 0 件かつ未測定 0 件」 に変えたが、その回帰判定そのものが
+    // 使えないと実測で分かった (同じ code で 6 倍振れる)。
+    //
+    // duration に達成条件は **持たない**。 持たないことを明記させる = 次に触る人が
+    // 「条件が書いてないから足そう」 と考えて同じ道を戻らないようにする。
     for (const file of [
       read('kiwa-loop'),
       readFileSync(resolve(SKILLS_DIR, 'kiwa-loop/references/loop-stop-conditions.md'), 'utf8'),
     ]) {
-      expect(file).toMatch(/`regressions` が 0 件、かつ `unmeasured` が 0 件/);
-      expect(file, 'totalMs を達成条件にしないと明記していない').toMatch(/totalMs === 0/);
+      expect(file, '達成条件を持たないと明記していない').toMatch(/duration に達成条件は無い/);
+      expect(file, '振れ幅の実測が書かれていない').toMatch(/6 倍振れる/);
     }
   });
 
-  it('T-SKG-003c duration の再測が report を作り直すと明記する', () => {
-    // **codex review r1-f1**。 `/kiwa-gap` は test を走らせないので、report を
-    // 作り直さないと毎 round 同じ値を読み、進んだのに進んでいないと判定する。
+  it('T-SKG-003d duration の ratchet 更新が残っていない', () => {
+    // 陰性対照。 baseline を消したので `--update-baseline` の指示が残っていると
+    // 存在しない flag を呼ぶ手順になる。
+    for (const skill of COMMON_SKILLS) {
+      expect(read(skill), `${skill} に --update-baseline が残っている`).not.toContain(
+        '--update-baseline',
+      );
+    }
+  });
+
+  it('T-SKG-003c coverage の再測が測定 file を作り直すと明記する', () => {
+    // `/kiwa-gap` は test を走らせないので、`coverage-final.json` を作り直さないと
+    // 毎 round 同じ値を読み、進んだのに進んでいないと判定する。
+    //
+    // duration 側は Issue #2196 で 1 round 停止にしたため再測しない (T-SKG-003f)。
     const src = read('kiwa-loop');
-    expect(src).toMatch(/--reporter=json --outputFile=<新しい path>/);
-    expect(src).toMatch(/前 round のまま/);
+    expect(src).toMatch(/`test:cov` を走らせて `coverage-final\.json` を更新/);
   });
 
   it('T-SKG-003 /kiwa-verdict が 4 分類を持つ', () => {
@@ -293,6 +307,69 @@ describe('一括置換が他 skill の option を壊していない', () => {
       offendingLines('kiwa-vitest', '  --metric coverage --package {pkg}` を実行し'),
       '折り返し行が offender になっていない',
     ).not.toEqual([]);
+  });
+
+
+  /** `## 停止条件` / `### Step 4` の表本体だけを取り出す。 */
+  function stopTable(src: string): string[] {
+    const m = /\|\s*#\s*\|\s*条件\s*\|\s*適用\s*\|[\s\S]*?\n\n/.exec(src);
+    return (m?.[0] ?? '').split('\n').filter((l) => /^\|\s*[23]\s*\|/.test(l));
+  }
+
+  /** Step 3 の差分表を、見出しを含めて丸ごと取り出す。 */
+  function deltaTable(src: string): string[] {
+    const m = /\|\s*差\s*\|[^\n]*\|\n(?:\|[^\n]*\|\n)+/.exec(src);
+    return (m?.[0] ?? '').trim().split('\n');
+  }
+
+  it('T-SKG-003e 停止条件 2 / 3 の行そのものが coverage 限定になっている', () => {
+    // **codex review r2-f1**。 前版は file 全体から `coverage のみ` を探すだけで、
+    // 表の行を duration にも適用する形へ戻しても通ってしまった = 守るつもりのものを
+    // 守っていなかった。
+    //
+    // 行を取り出して、その行に `coverage のみ` があることを見る。
+    for (const [name, src] of [
+      ['kiwa-loop/SKILL.md', read('kiwa-loop')],
+      [
+        'loop-stop-conditions.md',
+        readFileSync(resolve(SKILLS_DIR, 'kiwa-loop/references/loop-stop-conditions.md'), 'utf8'),
+      ],
+    ] as const) {
+      const rows = stopTable(src);
+      expect(rows.length, `${name} の停止条件表から行 2 / 3 を取り出せない`).toBe(2);
+      for (const row of rows) {
+        expect(row, `${name}: ${row.trim().slice(0, 50)}`).toContain('coverage のみ');
+      }
+    }
+  });
+
+  it('T-SKG-003g Step 3 の差分表を丸ごと固定する', () => {
+    // 差分表 (減った / 変わらない / 増えた) は改善の有無を判定する。 duration に
+    // 当てると、負荷で動いた値を「改善」「悪化」 と読むことになる。
+    //
+    // **`duration` の語が無いことだけを見ない** (codex review r3-f1)。 適用範囲を
+    // `両方` のような別の語に変えれば、`duration` を 1 文字も書かずに表を duration へ
+    // 広げられる。 実測で前版はその形を素通しした。
+    //
+    // 表を丸ごと固定する = 適用範囲も行の中身も、1 文字変えれば落ちる。
+    const table = deltaTable(read('kiwa-loop'));
+
+    expect(table, '差分表を取り出せない (検査が空振りしている)').toEqual([
+      '| 差 | 扱い (coverage のみ) |',
+      '|---|---|',
+      '| 減った | 1 歩進んだ。 round を進めて Step 2 へ |',
+      '| 変わらない | 改善 0。 連続回数を +1 |',
+      '| 増えた | 悪化。 その round の変更を見直す (test を消していないか確認する) |',
+    ]);
+    // 表の直後の説明も残っていることを見る。
+    expect(read('kiwa-loop')).toMatch(/この表は coverage だけに適用する/);
+  });
+
+  it('T-SKG-003f duration の再測手順が coverage 限定になっている', () => {
+    // 陰性対照側。 Step 3 が duration にも再測を求めると、1 round で止まる設計と
+    // 食い違う (再測する相手が無い)。
+    expect(read('kiwa-loop')).toMatch(/### Step 3 — 再測する \(coverage のみ\)/);
+    expect(read('kiwa-loop')).toMatch(/duration では Step 3 を行わない/);
   });
 
 });

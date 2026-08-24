@@ -4,13 +4,24 @@
  *
  * 遅い test を「何をすれば速くなるか」 で分類して返す。
  *
- * ## coverage 側との 2 つの違い
+ * ## 判定はしない (Issue #2196)
  *
- * 1. **判定材料が noise を持つ**。 coverage は決定的だが wall time は負荷で動く。
- *    実測で `@kiwa-lab/orm` の分岐が並列測定時だけ 94.49% になり、直列だと 2 回とも
- *    94.5% だった。 時間は更に振れるので margin (既定 30%) の内側は回帰にしない。
- * 2. **ratchet の向きが逆**。 coverage の `--update-high-water` は高い方を残すが、
- *    こちらの `--update-baseline` は **低い方** を残す。 遅い値を焼き付けたら常に緑になる。
+ * coverage 側は ratchet で「下がったら落とす」 gate を持つが、**こちらは持たない**。
+ * wall time の絶対値が判定材料にならないことを実測で確かめた。
+ *
+ * | 何を測るか | 安定性 |
+ * |---|---|
+ * | 絶対値 (wall time) | 同じ code で 11.5 / 29.9 / 30.6 / 69.9 秒 = **6 倍** |
+ * | CPU 時間 (user + sys) | 平常 5 回で 6.49 - 9.02 秒 = 1.39 倍 |
+ * | 静的な呼出箇所数 | cost と相関しない (70 箇所で 6.3 秒 / 数箇所で最遅) |
+ * | **順位** | 4 run の順位相関 **0.93 - 0.97**、上位 10 の共通 7 件 |
+ *
+ * 順位は安定するので「次にどこを直すか」 は返せる。 絶対値は振れるので
+ * 「遅くなったか」 は判定できない。 材料の安定性が違うため、片方が使えても
+ * もう片方が使えるとは限らない。
+ *
+ * 実測で回帰と判定された 9 件は全て負荷差で、最小のものは 10ms が 35ms になっただけ
+ * だった。 gate を残すと noise が毎回出て報告そのものが読まれなくなる。
  *
  * ## 入力
  *
@@ -31,7 +42,7 @@
  *
  * 直し方が違うので、遅い順に並べるだけでは足りない。
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -44,19 +55,9 @@ const REPO_ROOT = process.env.KIWA_GATE_ROOT
     ? process.cwd()
     : SCRIPT_ROOT;
 
-const BASELINE_PATH = resolve(REPO_ROOT, 'test-duration-baseline.json');
 
-/**
- * 回帰と判定する増加率。
- *
- * **伸ばす方向にしか変えない**。 縮めると noise で毎回赤くなり、報告そのものが
- * 読まれなくなる。 30% は `tests/release-smoke` の実測 (同じ file を 4 回回して
- * 最速と最遅の比が 1.18) に余裕を持たせた値。
- */
-const MARGIN = 0.3;
 
 const AS_JSON = process.argv.includes('--json');
-const UPDATE = process.argv.includes('--update-baseline');
 const REPORT = argValue('--report');
 
 function argValue(flag) {
@@ -64,9 +65,24 @@ function argValue(flag) {
   return i >= 0 ? process.argv[i + 1] : null;
 }
 
+// **退役した flag は大声で落とす**。 黙って成功すると「baseline を更新した」 と
+// 誤解したまま先へ進む (codex review r1-f1)。 exit 0 で通常の report が出るので、
+// 更新されていないことに気付く手掛かりが 1 つも無い。
+const RETIRED = ['--update-baseline'];
+const usedRetired = RETIRED.filter((flag) => process.argv.includes(flag));
+if (usedRetired.length > 0) {
+  process.stderr.write(
+    `${usedRetired.join(' / ')} は廃止された (Issue #2196)。\n` +
+      '  duration に baseline は無い。 wall time は同じ code で 6 倍振れるため判定に使えず、\n' +
+      '  本 script は遅い順に並べて lever で分類する診断だけを返す。\n' +
+      '  flag を外して実行する。\n',
+  );
+  process.exit(2);
+}
+
 if (!REPORT) {
   process.stderr.write(
-    'usage: node scripts/duration-gap-report.mjs --report <vitest json> [--json] [--update-baseline]\n' +
+    'usage: node scripts/duration-gap-report.mjs --report <vitest json> [--json]\n' +
       '  --report は必須。 省略時に空の結果を返すと「遅い test は無い」 と読めるため止める。\n' +
       '  report は `vitest run --reporter=json --outputFile=<path>` で作る。\n',
   );
@@ -260,15 +276,6 @@ function toSource(absPath) {
   return stripped;
 }
 
-function readBaseline() {
-  if (!existsSync(BASELINE_PATH)) return {};
-  try {
-    const raw = JSON.parse(readFileSync(BASELINE_PATH, 'utf8'));
-    return raw && typeof raw === 'object' ? raw : {};
-  } catch {
-    return {};
-  }
-}
 
 function build() {
   let report;
@@ -304,57 +311,25 @@ function build() {
   // なることがある (実測で素の `npx vitest run` が両方を拾う)。 0 の側を先に `unmeasured` へ
   // 入れると、同じ file が `files` と `unmeasured` の両方に出る。
   //
-  // duration の達成条件は「回帰 0 件 かつ 未測定 0 件」 なので、この形が 1 件でもあると
-  // `/kiwa-loop` は永久に達成へ到達できず baseline を更新できない (codex review r2-f1)。
+  // 両方に出ると読み手が「測れているのに測れていない」 と読むことになる。
+  // duration に達成条件も baseline も無い (Issue #2196) が、診断としての正しさは要る =
+  // `unmeasured` は「本当に測れていない file」 だけを指す必要がある。
   const unmeasured = new Set([...seen].filter((file) => !merged.has(file)));
 
-  const baseline = readBaseline();
   const files = [];
-  const regressions = [];
-  const withoutBaseline = [];
 
   for (const [file, info] of merged) {
     const lever = classify(info.abs);
     const msPerTest = info.tests > 0 ? Math.round((info.ms / info.tests) * 100) / 100 : null;
     files.push({ file, ms: info.ms, tests: info.tests, msPerTest, lever: lever.name, fix: lever.fix });
-
-    // 比較対象が無い場合を先に分ける。 0 として扱うと必ず回帰になる
-    // (`rules/quality.md § 判定できなかったことを値に潰さない`)。
-    //
-    // `continue` で抜ける形にはしない = 無効な `base` との比較は NaN になって常に false
-    // なので、`continue` を消しても挙動が変わらず **検査が落ちない**。 変異試験でそれを
-    // 確認したため、判定を 1 箇所に寄せて分岐の意図を code に残す。
-    const base = baseline[file];
-    const comparable = typeof base === 'number' && Number.isFinite(base) && base > 0;
-    if (!comparable) {
-      withoutBaseline.push(file);
-    } else if (info.ms > base * (1 + MARGIN)) {
-      regressions.push({ file, ms: info.ms, baselineMs: base, lever: lever.name });
-    }
   }
 
   files.sort((a, b) => b.ms - a.ms || a.file.localeCompare(b.file));
-  regressions.sort((a, b) => b.ms / b.baselineMs - a.ms / a.baselineMs);
-  withoutBaseline.sort();
 
-  if (UPDATE) {
-    const next = { ...baseline };
-    for (const f of files) {
-      const base = next[f.file];
-      // **低い方だけを採る**。 coverage 側の `--update-high-water` と符号が逆で、
-      // 遅い値を焼き付けたら常に緑になる。
-      if (typeof base !== 'number' || f.ms < base) next[f.file] = f.ms;
-    }
-    const ordered = Object.fromEntries(Object.entries(next).sort(([a], [b]) => a.localeCompare(b)));
-    writeFileSync(BASELINE_PATH, `${JSON.stringify(ordered, null, 2)}\n`);
-  }
 
   return {
-    margin: MARGIN,
     totalMs: files.reduce((sum, f) => sum + f.ms, 0),
     files,
-    regressions,
-    withoutBaseline,
     unmeasured: [...unmeasured].sort(),
   };
 }
@@ -363,15 +338,13 @@ function toMarkdown(r) {
   const out = ['# duration gap report', ''];
   const sec = (ms) => `${(ms / 1000).toFixed(2)}s`;
 
-  out.push(`合計 ${sec(r.totalMs)} / ${r.files.length} file。 回帰の判定は baseline の ${Math.round(r.margin * 100)}% 増から。`, '');
-
-  if (r.regressions.length > 0) {
-    out.push('## 回帰', '', '| file | 今回 | baseline | lever |', '|---|---|---|---|');
-    for (const g of r.regressions) {
-      out.push(`| \`${g.file}\` | ${sec(g.ms)} | ${sec(g.baselineMs)} | ${g.lever} |`);
-    }
-    out.push('');
-  }
+  out.push(
+    `合計 ${sec(r.totalMs)} / ${r.files.length} file。`,
+    '',
+    '**絶対値は判定に使わない**。 同じ code で 6 倍振れる (Issue #2196)。',
+    '読むのは順位と lever 別の偏りで、その 2 つは負荷が変わっても保たれる。',
+    '',
+  );
 
   out.push('## 遅い順', '', '| file | 所要 | 件数 | 1 件 | lever | 直し方 |', '|---|---|---|---|---|---|');
   for (const f of r.files.slice(0, 25)) {
@@ -392,9 +365,6 @@ function toMarkdown(r) {
     out.push('');
   }
 
-  if (r.withoutBaseline.length > 0) {
-    out.push('## baseline を持たない file', '', `${r.withoutBaseline.length} 件。 \`--update-baseline\` で記録する。`, '');
-  }
 
   return out.join('\n');
 }

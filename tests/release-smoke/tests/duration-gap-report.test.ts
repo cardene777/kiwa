@@ -12,7 +12,7 @@
 // `coverage-denominator` は `ts.createSourceFile` で全 package を parse し、
 // `input-fingerprint` は一時 dir を 18 箇所с作る。 遅さの出所が違えば直し方も違う。
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -91,9 +91,6 @@ function run(root: string, report: string, args: string[] = []) {
   });
 }
 
-function baseline(root: string, data: Record<string, number>) {
-  writeFileSync(join(root, 'test-duration-baseline.json'), JSON.stringify(data, null, 2));
-}
 
 describe('duration-gap-report', () => {
   it('T-DGR-001 遅い file を先に出す', () => {
@@ -220,73 +217,11 @@ describe('duration-gap-report', () => {
     for (const f of out.files) expect(known).toContain(f.lever);
   });
 
-  it('T-DGR-010 baseline より遅くなったら回帰として出す', () => {
-    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 5000 }]);
-    baseline(root, { 'tests/a.test.ts': 1000 });
-    const out = JSON.parse(run(root, report)) as {
-      regressions: { file: string; ms: number; baselineMs: number }[];
-    };
 
-    expect(out.regressions).toHaveLength(1);
-    expect(out.regressions[0]?.baselineMs).toBe(1000);
-  });
 
-  it('T-DGR-011 margin の内側の増加は回帰にしない', () => {
-    // 陰性対照。 時間は負荷で振れるので、margin が無いと毎回 1 件は赤くなる。
-    // 既定 margin は 30%。 1000ms → 1250ms は内側。
-    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 1250 }]);
-    baseline(root, { 'tests/a.test.ts': 1000 });
-    const out = JSON.parse(run(root, report)) as { regressions: unknown[] };
 
-    expect(out.regressions).toEqual([]);
-  });
 
-  it('T-DGR-012 margin の外側は回帰にする', () => {
-    // T-DGR-011 と対。 境界のすぐ外を見ないと、margin を無限にする実装が通る。
-    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 1400 }]);
-    baseline(root, { 'tests/a.test.ts': 1000 });
-    const out = JSON.parse(run(root, report)) as { regressions: { file: string }[] };
 
-    expect(out.regressions.map((r) => r.file)).toEqual(['tests/a.test.ts']);
-  });
-
-  it('T-DGR-013 --update-baseline は速くなった時だけ書く', () => {
-    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 400 }]);
-    baseline(root, { 'tests/a.test.ts': 1000 });
-    run(root, report, ['--update-baseline']);
-    const after = JSON.parse(
-      readFileSync(join(root, 'test-duration-baseline.json'), 'utf8'),
-    ) as Record<string, number>;
-
-    expect(after['tests/a.test.ts']).toBe(400);
-  });
-
-  it('T-DGR-014 --update-baseline は遅くなった値を焼き付けない', () => {
-    // **これが無いと ratchet が意味を失う**。 遅い値を baseline にすれば常に緑になる。
-    // coverage 側の `--update-high-water` が高い方だけを採るのと同じ向き (符号が逆)。
-    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 9000 }]);
-    baseline(root, { 'tests/a.test.ts': 1000 });
-    run(root, report, ['--update-baseline']);
-    const after = JSON.parse(
-      readFileSync(join(root, 'test-duration-baseline.json'), 'utf8'),
-    ) as Record<string, number>;
-
-    expect(after['tests/a.test.ts']).toBe(1000);
-  });
-
-  it('T-DGR-015 baseline を持たない file は回帰にしない', () => {
-    // 初回は比較対象が無い。 0 として扱うと必ず回帰になる
-    // (`rules/quality.md § 判定できなかったことを値に潰さない`)。
-    const { root, report } = fixture([{ rel: 'tests/new.test.ts', ms: 5000 }]);
-    baseline(root, { 'tests/other.test.ts': 1000 });
-    const out = JSON.parse(run(root, report)) as {
-      regressions: unknown[];
-      withoutBaseline: string[];
-    };
-
-    expect(out.regressions).toEqual([]);
-    expect(out.withoutBaseline).toEqual(['tests/new.test.ts']);
-  });
 
   it('T-DGR-016 測れなかった file を 0 として速い側に置かない', () => {
     // duration を出さない reporter 設定では全 file が 0 になる。 その状態を
@@ -508,8 +443,9 @@ describe('duration-gap-report', () => {
     // 両方を拾い、どちらかの所要が 0 になることがある。 0 の側を先に `unmeasured` へ
     // 入れてから畳むと、**同じ file が `files` と `unmeasured` の両方に出る**。
     //
-    // duration の達成条件は「回帰 0 件 かつ 未測定 0 件」 なので、この形が 1 件でも
-    // あると `/kiwa-loop` は永久に Step 5 へ到達できず baseline を更新できない。
+    // 両方に出ると読み手が「測れているのに測れていない」 と読む。 duration に
+    // 達成条件も baseline も無い (Issue #2196) が、診断としての正しさは要る =
+    // `unmeasured` は本当に測れていない file だけを指す必要がある。
     const { root, report } = fixture([
       { rel: '.vitest-dist/tests/a.test.js', ms: 0 },
       { rel: 'tests/a.test.ts', ms: 3000 },
@@ -541,8 +477,8 @@ describe('duration-gap-report', () => {
     // **codex review r3-f1**。 `toSource()` が全ての `.js` を `.ts` に書き換えていたため、
     // `tests/a.test.js` と `tests/a.test.ts` という **別々の file** が同じ名前に潰れた。
     //
-    // 片方が 0 秒だと、Round 2 で入れた `seen - merged` が「測れた」 側に吸収して
-    // 本当に測れていない file を消す = gate が達成を報告して baseline を更新する。
+    // 片方が 0 秒だと `seen - merged` が「測れた」 側に吸収し、本当に測れていない file が
+    // 診断から消える = 読み手は「全部測れた」 と読むが実際は 1 件測れていない。
     const { root, report } = fixture([
       { rel: 'tests/a.test.js', ms: 0 },
       { rel: 'tests/a.test.ts', ms: 3000 },
@@ -641,6 +577,66 @@ describe('duration-gap-report', () => {
     const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
 
     expect(out.files.map((f) => f.file)).toEqual(['tests/a.test.js']);
+  });
+
+
+  it('T-DGR-037 baseline も回帰も返さない (診断に徹する)', () => {
+    // **wall time の絶対値は判定材料にならない** (Issue #2196)。 実測で同じ code が
+    // 11.5s / 29.9s / 30.6s / 69.9s と 6 倍振れた (計測時 load average 55.8)。
+    //
+    // 一方 **順位は安定する** = 4 run の順位相関 0.93-0.97、上位 10 の共通 7 件。
+    // だから「遅い順に並べる」 診断は残し、「遅くなった」 判定は外す。
+    //
+    // gate を残すと noise しか出ない = 実測で回帰と判定された 9 件は全て負荷差で、
+    // 最小のものは 10ms が 35ms になっただけだった。
+    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 5000 }]);
+    const out = JSON.parse(run(root, report)) as Record<string, unknown>;
+
+    expect(out).not.toHaveProperty('regressions');
+    expect(out).not.toHaveProperty('withoutBaseline');
+    expect(out).not.toHaveProperty('margin');
+    expect(out.files, '診断そのものが消えている').not.toEqual([]);
+  });
+
+  it('T-DGR-038 --update-baseline は非 0 で落ちる', () => {
+    // **黙って成功させない** (codex review r1-f1)。 flag を無視して exit 0 で通常の
+    // report を返すと、「baseline を更新した」 と誤解したまま先へ進む。 更新されて
+    // いないことに気付く手掛かりが 1 つも無い。
+    const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 5000 }]);
+    let code = 0;
+    let stderr = '';
+    try {
+      run(root, report, ['--update-baseline']);
+    } catch (err) {
+      const e = err as { status: number; stderr: string };
+      code = e.status;
+      stderr = e.stderr;
+    }
+
+    expect(code, '廃止 flag が黙って通っている').not.toBe(0);
+    expect(stderr).toMatch(/廃止された/);
+    expect(existsSync(join(root, 'test-duration-baseline.json'))).toBe(false);
+  });
+
+  it('T-DGR-039 filesystem lever を writeFileSync 単独でも分類する', () => {
+    // **変異試験で見つけた**。 lever の判定から `writeFileSync` を外しても 1 件も
+    // 落ちなかった = `filesystem` を当てる fixture が `mkdtempSync` しか使っておらず、
+    // 列挙の他の要素を 1 つも通していなかった。
+    const { root, report } = fixture([
+      { rel: 'tests/a.test.ts', ms: 5000, body: 'writeFileSync("x", "y");\n' },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('filesystem');
+  });
+
+  it('T-DGR-040 filesystem lever を mkdirSync / readdirSync 単独でも分類する', () => {
+    // 列挙の残り 2 要素。 4 要素それぞれを単独で通さないと、外しても落ちない要素が残る。
+    for (const call of ['mkdirSync("x");', 'readdirSync("x");']) {
+      const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 5000, body: `${call}\n` }]);
+      const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+      expect(out.files[0]?.lever, call).toBe('filesystem');
+    }
   });
 
 });
