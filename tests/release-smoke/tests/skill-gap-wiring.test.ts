@@ -419,17 +419,52 @@ describe('一括置換が他 skill の option を壊していない', () => {
 
 
   /**
-   * `## 手順` の fenced block の中身を、**行末の説明を落として** 取り出す。
+   * `## 手順` 節の fenced block から、**command として書かれた行**を取り出す。
    *
-   * 説明は `←` の後ろに書く。 落とさないと `--package` の値が消えても次の語
-   * (`←`) を値と読んでしまい、`--package` だけの形を通す (変異試験で実測)。
+   * 3 つの正規化を行う。
+   *
+   * | 正規化 | なぜ要るか |
+   * |---|---|
+   * | 行末の `←` 以降を落とす | 落とさないと `--package` の値が消えても次の語を値と読む |
+   * | 先頭の序数 (`1.` / `2.`) を落とす | 番号は手順の順序で、command の一部ではない |
+   * | 節内の fence を全部見る | 1 つ目だけ見ると、手順を 2 block に分ける形で漏れる |
+   *
+   * fence は **language tag と 3 空白までの字下げを許す** (codex review r3-f2)。
+   * この repo は `” ```bash ”` を多用しており、tag を付けただけで検査が落ちると
+   * 手順を変えていないのに release が止まる。
    */
   function procedureBlock(contract: string): string[] {
-    const m = /^## 手順\n+```\n([\s\S]*?)```/m.exec(contract);
-    return (m?.[1] ?? '')
-      .split('\n')
-      .map((l) => l.split('←')[0]?.trimEnd() ?? '')
-      .filter((l) => l.trim() !== '');
+    // `## 手順` から次の level-2 見出しまでを節とする。
+    //
+    // **正規表現で節を切らない**。 `\Z` は JavaScript に無く、`$` は `m` flag の下で
+    // 行末に当たるため `(?=^## |$)` は最初の行末で止まり、節が常に空になる。
+    // 実測で「tag なし」 の fixture が 0 件を返した = 検査が空振りしていた。
+    const head = contract.indexOf('## 手順');
+    if (head < 0) return [];
+    const rest = contract.slice(head + '## 手順'.length);
+    const next = rest.search(/^## /m);
+    const section = next === -1 ? rest : rest.slice(0, next);
+    const lines: string[] = [];
+    let inFence = false;
+    for (const raw of section.split('\n')) {
+      // 開始も終了も、字下げ 3 まで + 任意の info string を許す。
+      if (/^ {0,3}```/.test(raw)) {
+        inFence = !inFence;
+        continue;
+      }
+      if (!inFence) continue;
+      const body = (raw.split('←')[0] ?? '').trim().replace(/^\d+[.)]\s*/, '');
+      if (body !== '') lines.push(body);
+    }
+    return lines;
+  }
+
+  /** 手順の 1 行が、その command の呼出そのものかを見る。 */
+  function invokes(line: string, skill: string, extra: RegExp): boolean {
+    // **行頭から見る** (codex review r3-f1)。 部分一致だと `echo /kiwa-loop …` や
+    // `# /kiwa-loop …` のような、実行しない形が契約を満たしてしまう。
+    const m = new RegExp(`^/${skill}\\s+(.*)$`).exec(line);
+    return m !== null && extra.test(m[1] ?? '');
   }
 
   it('T-SKG-024 contract の手順が実際に動く形になっている', () => {
@@ -437,12 +472,10 @@ describe('一括置換が他 skill の option を壊していない', () => {
     // 書いていた。 `/kiwa-loop` は coverage で `--package` が無いと止まるので、
     // 契約に従っても remediation loop に入れない。
     //
-    // **説明文を拾わない** (codex review r2-f1)。 前版は contract 全体から最初の
-    // `/kiwa-loop` を取っていたため、手順の直後の説明段落
-    // (「`--package` を省かない」) が両方の語を含み、**手順を丸ごと消しても通った**。
-    // 実測で 0 件 FAIL を確認した。
+    // **説明文を拾わない** (r2-f1)。 前版は contract 全体から最初の `/kiwa-loop` を
+    // 取っていたため、手順の直後の説明段落が両方の語を含み、手順を丸ごと消しても通った。
     //
-    // 手順は `## 手順` の fenced block の中にしかないので、そこだけを見る。
+    // **行頭から見る** (r3-f1)。 部分一致だと `echo /kiwa-loop …` が通る。
     const contract = readFileSync(
       resolve(SKILLS_DIR, '_shared/references/coverage-contract.md'),
       'utf8',
@@ -452,29 +485,56 @@ describe('一括置換が他 skill の option を壊していない', () => {
       .toBeGreaterThan(0);
 
     // 値まで見る = `--package` だけ書いて値が無い形を通さない。
-    const wanted = [
-      /\/kiwa-gap\s+--metric\s+coverage\s+--package\s+\S+/,
-      /\/kiwa-loop\s+--metric\s+coverage\s+--package\s+\S+/,
-      /\/kiwa-verdict\s+--metric\s+coverage/,
+    const wanted: [string, RegExp][] = [
+      ['kiwa-gap', /^--metric\s+coverage\s+--package\s+\S+/],
+      ['kiwa-loop', /^--metric\s+coverage\s+--package\s+\S+/],
+      ['kiwa-verdict', /^--metric\s+coverage\b/],
     ];
-    for (const re of wanted) {
-      const hit = steps.filter((l) => re.test(l));
-      expect(hit.length, `手順に ${re.source} を満たす行が 1 件だけ無い`).toBe(1);
+    for (const [skill, extra] of wanted) {
+      const hit = steps.filter((l) => invokes(l, skill, extra));
+      expect(hit.length, `手順に /${skill} の呼出が 1 件だけ無い`).toBe(1);
     }
   });
 
-  it('T-SKG-024b 手順を消すと落ちる (陰性対照)', () => {
+  it('T-SKG-024b 通してはいけない形を通さない (陰性対照)', () => {
     // 判定関数に直接、壊した contract を与える。 実 file を汚さずに確かめる。
-    const broken = [
-      '## 手順\n\n```\n1. /kiwa-gap  --metric coverage --package {pkg}\n```\n',
-      '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package    ← 説明\n```\n',
-      '## 手順\n\n```\n(手順なし)\n```\n',
+    const extra = /^--metric\s+coverage\s+--package\s+\S+/;
+    const broken: [string, string][] = [
+      ['Step 2 が無い', '## 手順\n\n```\n1. /kiwa-gap  --metric coverage --package {pkg}\n```\n'],
+      ['--package の値が無い', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package    ← 説明\n```\n'],
+      ['手順が空', '## 手順\n\n```\n(手順なし)\n```\n'],
+      ['echo を前置', '## 手順\n\n```\n2. echo /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['comment 化', '## 手順\n\n```\n2. # /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['散文の前置', '## 手順\n\n```\n2. まず /kiwa-loop --metric coverage --package {pkg} を実行\n```\n'],
     ];
-    for (const src of broken) {
-      const steps = procedureBlock(src);
-      const ok = /\/kiwa-loop\s+--metric\s+coverage\s+--package\s+\S+/;
-      expect(steps.filter((l) => ok.test(l)).length, `通してはいけない形: ${src.slice(0, 40)}`)
-        .toBe(0);
+    for (const [label, src] of broken) {
+      const hit = procedureBlock(src).filter((l) => invokes(l, 'kiwa-loop', extra));
+      expect(hit.length, `通してはいけない形: ${label}`).toBe(0);
+    }
+  });
+
+  it('T-SKG-024c 正しい書き方の変化形を落とさない (陽性対照)', () => {
+    // **落とし過ぎない**ことを反対側から見る (codex review r3-f2)。
+    // この repo は language tag 付きの fence を多用する。
+    const extra = /^--metric\s+coverage\s+--package\s+\S+/;
+    const ok: [string, string][] = [
+      ['tag なし', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['bash tag', '## 手順\n\n```bash\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['text tag', '## 手順\n\n```text\n/kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      ['字下げ 3', '## 手順\n\n   ```\n   2. /kiwa-loop --metric coverage --package {pkg}\n   ```\n'],
+      ['序数なし', '## 手順\n\n```\n/kiwa-loop --metric coverage --package {pkg}\n```\n'],
+      [
+        '前置きの散文あり',
+        '## 手順\n\n次を順に実行する。\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n',
+      ],
+      [
+        'fence が 2 つ',
+        '## 手順\n\n```\n1. /kiwa-gap --metric coverage --package {pkg}\n```\n\n続けて。\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n',
+      ],
+    ];
+    for (const [label, src] of ok) {
+      const hit = procedureBlock(src).filter((l) => invokes(l, 'kiwa-loop', extra));
+      expect(hit.length, `落としてはいけない形: ${label}`).toBe(1);
     }
   });
 
