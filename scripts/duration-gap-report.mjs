@@ -215,7 +215,13 @@ function classify(absPath) {
  */
 function toSource(absPath) {
   const rel = relative(REPO_ROOT, absPath).split('\\').join('/');
-  return rel.replace('/.vitest-dist/', '/').replace(/^\.vitest-dist\//, '').replace(/\.js$/, '.ts');
+  const stripped = rel.replace('/.vitest-dist/', '/').replace(/^\.vitest-dist\//, '');
+
+  // **`.vitest-dist` を通った path だけ拡張子を戻す**。 全ての `.js` を `.ts` にすると、
+  // `tests/a.test.js` と `tests/a.test.ts` という別々の file が同じ名前に潰れる。
+  // 片方が 0 秒だと `seen - merged` が測れた側へ吸収し、測れていない file が消える
+  // (codex review r3-f1)。
+  return stripped === rel ? stripped : stripped.replace(/\.js$/, '.ts');
 }
 
 function readBaseline() {

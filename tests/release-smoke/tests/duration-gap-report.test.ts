@@ -527,4 +527,35 @@ describe('duration-gap-report', () => {
     expect(out.unmeasured).toEqual(['tests/a.test.ts']);
   });
 
+
+  it('T-DGR-030 .vitest-dist の外の .js を .ts に潰さない', () => {
+    // **codex review r3-f1**。 `toSource()` が全ての `.js` を `.ts` に書き換えていたため、
+    // `tests/a.test.js` と `tests/a.test.ts` という **別々の file** が同じ名前に潰れた。
+    //
+    // 片方が 0 秒だと、Round 2 で入れた `seen - merged` が「測れた」 側に吸収して
+    // 本当に測れていない file を消す = gate が達成を報告して baseline を更新する。
+    const { root, report } = fixture([
+      { rel: 'tests/a.test.js', ms: 0 },
+      { rel: 'tests/a.test.ts', ms: 3000 },
+    ]);
+    const out = JSON.parse(run(root, report)) as {
+      files: { file: string }[];
+      unmeasured: string[];
+    };
+
+    expect(out.files.map((f) => f.file)).toEqual(['tests/a.test.ts']);
+    expect(out.unmeasured, '測れていない .js が消えている').toEqual(['tests/a.test.js']);
+  });
+
+  it('T-DGR-031 .vitest-dist の中の .js は従来どおり .ts に戻す', () => {
+    // T-DGR-030 の対。 「`.js` は一切変換しない」 実装だと compile 後と source が
+    // 別 file になり、同じ test を 2 回計上する (T-DGR-002 が守る形が壊れる)。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/b.test.js', ms: 4000 },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
+
+    expect(out.files.map((f) => f.file)).toEqual(['tests/b.test.ts']);
+  });
+
 });

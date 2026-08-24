@@ -197,6 +197,13 @@ describe('一括置換が他 skill の option を壊していない', () => {
       // 免除するのは **共通 skill の呼出として `--metric` が並んでいる** 形だけ。
       // 呼出名と `--metric` の間に他の option は入ってよいが、別の `/` 始まりの
       // 語や文の区切りは挟めない。
+      //
+      // **呼出は 1 物理行に書く** (codex review r3-f2)。 折り返した形
+      // (`` `/kiwa-gap` `` の次の行に `--metric coverage`) は offender になる。
+      // 複数行にまたがる command span を解析する形は採らない = Markdown の
+      // code span / fence / 表 cell / 箇条書きの継続行がそれぞれ違う畳まれ方をし、
+      // 静的に「同じ呼出の続き」 を判定する手が定まらない。
+      // 1 行に収める制約は SKILL.md 側で守れるので、判定を単純に保つ。
       const invocation = /\/kiwa-(?:gap|loop|verdict)((?:\s+--[a-z][a-z0-9-]*(?:[ =][^\s`]+)?)*)/g;
       let exempt = false;
       for (const m of line.matchAll(invocation)) {
@@ -275,6 +282,17 @@ describe('一括置換が他 skill の option を壊していない', () => {
     for (const line of legit) {
       expect(offendingLines('kiwa-vitest', line), `正しい呼出を落としている: ${line}`).toEqual([]);
     }
+  });
+
+
+  it('T-SKG-018 折り返した呼出は offender になる (1 行制約)', () => {
+    // 制約を検査で固定する。 **将来「折り返しも通したい」 と思った時、この検査が
+    // 落ちて判断を求める**。 制約を code comment だけに書くと、次に触る人が
+    // 気付かないまま折り返して release-smoke が落ちる理由が読めなくなる。
+    expect(
+      offendingLines('kiwa-vitest', '  --metric coverage --package {pkg}` を実行し'),
+      '折り返し行が offender になっていない',
+    ).not.toEqual([]);
   });
 
 });

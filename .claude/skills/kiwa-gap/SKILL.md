@@ -116,6 +116,21 @@ comment 内の言及で誤判定する (実測で `mutation-gate-coverage.test.t
 `inherent` は `unknown` ではない。 「分類できなかった」 を「直し方が無い」 と読ませないため、
 対処のある lever と対処を決めていない file を名前で区別する。
 
+## 呼出は 1 行に書く
+
+生成 skill の完了条件に `/kiwa-gap` の呼出を書く時は、**呼出名から option まで 1 物理行**に
+収める。 折り返すと `skill-gap-wiring.test.ts` の T-SKG-013 が offender として報告する。
+
+```
+- `/kiwa-gap --metric coverage --package {pkg}` を実行し、…    ← よい
+- `/kiwa-gap`
+  `--metric coverage --package {pkg}` を実行し、…              ← 落ちる
+```
+
+複数行にまたがる呼出を解析する形は採らない。 Markdown の code span / fence / 表 cell /
+箇条書きの継続行がそれぞれ違う畳まれ方をし、静的に「同じ呼出の続き」 を判定する手が
+定まらないため。 1 行に収める制約は書き手が守れるので、判定を単純に保つ。
+
 ## 出力 path 早見
 
 | target | 出力 path |
