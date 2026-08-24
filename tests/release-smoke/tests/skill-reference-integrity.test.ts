@@ -11,7 +11,18 @@
 // **shasum では分からない** = shasum は symlink を辿るので、実体と symlink が同じ値を返す。
 // 本 Issue の調査でも最初これを「同じ中身の物理 copy が 6 個」 と誤読した。 したがって
 // T-SRI-005 は symlink を辿らずに種別を見る。
-import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  realpathSync,
+  rmSync,
+  statSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,6 +53,15 @@ const SKILL_ROOTED = /`(references\/[A-Za-z0-9._-]+\.md)`/g;
 type Form = 'repo-rooted' | 'skill-rooted';
 type Reference = { skill: string; raw: string; resolved: string; line: number; form: Form };
 type Entry = { rel: string; name: string; isSymlink: boolean };
+
+/** symlink は辿り、参照先が通常 file の時だけ true。 壊れた link も false に畳む。 */
+function isFile(path: string): boolean {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
 
 function skillDirs(): string[] {
   if (!existsSync(SKILLS_DIR)) return [];
@@ -142,10 +162,21 @@ describe('skill の reference が実在する (#2182)', () => {
 
   it('T-SRI-003 全ての reference が実在する file を指す', () => {
     const missing = collectReferences()
-      .filter((ref) => !existsSync(ref.resolved))
+      .filter((ref) => !isFile(ref.resolved))
       .map((ref) => `${ref.skill}/SKILL.md:${ref.line} -> ${ref.raw}`)
       .sort();
     expect(missing, '参照先が実在しない reference がある').toEqual([]);
+  });
+
+  it('T-SRI-009 .md という名前の directory を reference file として扱わない', () => {
+    const root = mkdtempSync(resolve(tmpdir(), 'kiwa-skill-reference-'));
+    try {
+      const directory = resolve(root, 'not-a-file.md');
+      mkdirSync(directory);
+      expect(isFile(directory), 'directory が通常 file として判定されている').toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it('T-SRI-008 同じ行に 2 形式が並んでも両方を対象にする', () => {
@@ -231,6 +262,10 @@ describe('skill の reference が実在する (#2182)', () => {
       const path = resolve(REPO_ROOT, entry.rel);
       if (!existsSync(path)) {
         broken.push(`${entry.rel} (参照先が無い)`);
+        continue;
+      }
+      if (!isFile(path)) {
+        broken.push(`${entry.rel} (参照先が通常 file ではない)`);
         continue;
       }
       const real = realpathSync(path);
