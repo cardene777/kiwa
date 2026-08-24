@@ -58,15 +58,46 @@ function skillBody(skill: string): string {
   return readFileSync(resolve(SKILLS_DIR, skill, 'SKILL.md'), 'utf8');
 }
 
-/** `--coverage-threshold {N}` の option 宣言行から既定値を取り出す。 */
-function declaredDefault(skill: string): number | null {
-  for (const line of skillBody(skill).split('\n')) {
+/**
+ * `--coverage-threshold {N}` を宣言しているか。
+ *
+ * **値が読めるかとは別に判定する** (#2184 r1-f1)。 一体にしていた間、既定値を日本語で
+ * 書いた skill が「宣言していない」 と扱われ、T-SCT-004 の一覧照合から静かに落ちていた =
+ * その skill は T-SCT-002 / 003 / 003b のどれにも入らない。
+ *
+ * この repo は house style として日本語を混ぜる (option 宣言の `省略時` が 4 skill で
+ * 26 回)。 英語の `default N%` を検出条件にすると、house style に従った skill ほど
+ * 検査の外に落ちる。
+ */
+export function declaresThresholdIn(body: string): boolean {
+  return body
+    .split('\n')
+    .some((line) => line.trimStart().startsWith('- `--') && line.includes('`--coverage-threshold {N}`'));
+}
+
+function declaresThreshold(skill: string): boolean {
+  return declaresThresholdIn(skillBody(skill));
+}
+
+/**
+ * 宣言行から既定値を取り出す。 読めなければ `null`。
+ *
+ * **全ての宣言行を見る**。 最初の 1 行で諦めると、宣言と既定値が 2 行に分かれた形で
+ * 読めなくなる。 `null` は「宣言が無い」 ではなく「値を読めない」 を表し、その区別は
+ * T-SCT-002 が落とす側で扱う。
+ */
+export function declaredDefaultIn(body: string): number | null {
+  for (const line of body.split('\n')) {
     if (!line.includes('`--coverage-threshold {N}`')) continue;
-    const match = /default\s+(\d+)\s*%/.exec(line);
+    // 英語と日本語の両方を受ける。 `既定 100%` / `default 100%` / `省略時は 100%`。
+    const match = /(?:default(?:\s+is)?|既定(?:は|値は)?|省略時(?:は)?)\s*(\d+)\s*%/.exec(line);
     if (match?.[1] !== undefined) return Number(match[1]);
-    return null;
   }
   return null;
+}
+
+function declaredDefault(skill: string): number | null {
+  return declaredDefaultIn(skillBody(skill));
 }
 
 /** `## 完了条件` section を取り出す (次の `## ` 見出しまで)。 */
@@ -89,6 +120,28 @@ function coverageCriteria(skill: string): string {
     .join('\n');
 }
 
+/**
+ * `--coverage-threshold` を宣言する skill を数える。
+ *
+ * 本文の取得を引数にするのは、fixture を通して識別力を測るため
+ * (実 skill は全て既定値を読める形で書いているので、判定を狭めても実 file では落ちない)。
+ */
+export function listDeclaringSkills(bodyOf: (skill: string) => string, skills = readdirSkills()): string[] {
+  return skills.filter((skill) => declaresThresholdIn(bodyOf(skill))).sort();
+}
+
+/** 完了条件の文面が 4 metric を見ると読み取れるか。 */
+export function seesAllMetrics(criteria: string): boolean {
+  const spellings: readonly (readonly string[])[] = [
+    ['Lines'],
+    ['Stmts', 'Statements'],
+    ['Branches'],
+    ['Funcs', 'Functions'],
+  ];
+  const namesAll = spellings.every((names) => names.some((n) => criteria.includes(n)));
+  return /全\s*4\s*metric/.test(criteria) || namesAll;
+}
+
 describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
   it('T-SCT-001 対象 skill を全件読めている', () => {
     // 走査対象が 0 件なら以下は全て素通りする。 skill dir を移した時に
@@ -104,7 +157,7 @@ describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
     // 「揃っている」 だけを見ると 4 つとも 50% に下げる変更が通る。 値そのものを固定する。
     const wrong = COVERAGE_SKILLS.map((skill) => ({ skill, value: declaredDefault(skill) }))
       .filter((entry) => entry.value !== REQUIRED_THRESHOLD)
-      .map((entry) => `${entry.skill}: ${entry.value ?? '宣言が読めない'}`)
+      .map((entry) => `${entry.skill}: ${entry.value ?? '既定値を読み取れない'}`)
       .sort();
     expect(wrong, `--coverage-threshold の既定が ${REQUIRED_THRESHOLD}% でない skill がある`).toEqual(
       [],
@@ -147,8 +200,15 @@ describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
         problems.push(`${skill}: 完了条件に coverage の行が無い`);
         continue;
       }
-      const namesAll = ['Lines', 'Branches'].every((metric) => criteria.includes(metric));
-      if (!/全\s*4\s*metric/.test(criteria) && !namesAll) {
+      // 書き方は 2 通りある。 「全 4 metric」 と書くか、4 つを並べるか。
+      //
+      // **並べる側も 4 つ要求する** (#2184 r1-f3)。 `Lines` と `Branches` の 2 名だけを
+      // 見ていたが、その形は「Lines / Branches だけ並べて Stmts / Funcs を落とす」 完了条件を
+      // 通す。 4 skill が全て「全 4 metric」 と書くため短絡で結果を決めておらず、
+      // 判定として一度も効いていなかった (実測 = 4 skill 中 3 件で false)。
+      //
+      // 綴りの揺れは受ける (`Stmts` / `Statements`、`Funcs` / `Functions`)。
+      if (!seesAllMetrics(criteria)) {
         problems.push(`${skill}: 完了条件が 4 metric を見ると読み取れない`);
       }
       if (!/不可能/.test(criteria)) {
@@ -162,13 +222,74 @@ describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
     // 一覧を人手で持つ以上、一覧から漏れた skill が検査の外に落ちる。
     // 宣言を持つ skill を実物から数え直して突き合わせる
     // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。
-    const declaring: string[] = [];
-    for (const skill of readdirSkills()) {
-      if (declaredDefault(skill) !== null) declaring.push(skill);
-    }
+    // **値が読めるかではなく、宣言の有無で数える**。 値を読めない skill を一覧から
+    // 落とすと、その skill は他の全 gate からも消える (T-SCT-007 が固定する)。
+    const declaring = listDeclaringSkills((skill) => skillBody(skill));
     expect(declaring.sort(), '`--coverage-threshold` を宣言する skill の一覧が実物とずれている').toEqual(
       [...COVERAGE_SKILLS].sort(),
     );
+  });
+
+  it('T-SCT-006 判定が house style の書き方を取りこぼさない', () => {
+    // **実 skill を母集団にすると識別力が測れない** (#2184 r1-f1 / r1-f3)。 4 skill が
+    // たまたま全て英語の `default N%` と「全 4 metric」 で書いているため、判定を狭めても
+    // 落ちない = 次に日本語で書いた skill が来た時に初めて穴が開く。
+    //
+    // この repo は option 宣言で `省略時` を 4 skill で 26 回使う house style を持つ。
+    // fixture で書き方の幅を通す。
+    const declarations: [string, number | null][] = [
+      ['- `--coverage-threshold {N}` — 共通 threshold (default 100%)', 100],
+      ['- `--coverage-threshold {N}` — 共通 threshold (既定 100%)', 100],
+      ['- `--coverage-threshold {N}` — 共通 threshold (既定は 100%)', 100],
+      ['- `--coverage-threshold {N}` — 共通 threshold (省略時 100%)', 100],
+      ['- `--coverage-threshold {N}` — 共通 threshold (省略時は 100%)', 100],
+      ['- `--coverage-threshold {N}` — 共通 threshold (既定 50%)', 50],
+      ['- `--coverage-threshold {N}` — 共通 threshold', null],
+    ];
+    for (const [line, want] of declarations) {
+      expect(declaresThresholdIn(line), `宣言として検出できない: ${line}`).toBe(true);
+      expect(declaredDefaultIn(line), `既定値の読み取りが違う: ${line}`).toBe(want);
+    }
+
+    // 宣言と既定値が 2 行に分かれる形。 最初の 1 行で諦めると読めない。
+    const split = [
+      '- `--coverage-threshold {N}` — 共通 threshold',
+      '- `--coverage-threshold {N}` の既定は 100% で、production target のみ評価する',
+    ].join('\n');
+    expect(declaredDefaultIn(split), '2 行に分かれた既定値を読めていない').toBe(100);
+
+    // 4 metric の判定。 綴りの揺れを受け、2 名だけの形は通さない。
+    expect(seesAllMetrics('全 4 metric が threshold 達成'), '「全 4 metric」 を読めない').toBe(true);
+    expect(
+      seesAllMetrics('Lines / Stmts / Branches / Funcs が threshold 達成'),
+      '4 つ並べた形を読めない',
+    ).toBe(true);
+    expect(
+      seesAllMetrics('Lines / Statements / Branches / Functions が threshold 達成'),
+      '別綴りを読めない',
+    ).toBe(true);
+    expect(
+      seesAllMetrics('Lines / Branches が threshold 達成'),
+      '2 名だけの形を通している',
+    ).toBe(false);
+  });
+
+  it('T-SCT-007 既定値を読めない skill も一覧に数える', () => {
+    // **検出と値の取得を分ける** (#2184 r1-f1)。 一体にしていた間、既定値を読み取れない
+    // skill は「宣言していない」 と扱われて一覧照合から落ち、その skill は T-SCT-002 /
+    // 003 / 003b のどれにも入らなかった = 50% を掲げた skill が全 gate を素通りする。
+    //
+    // 実 skill は全て既定値を読める形で書いているので、fixture で分離する。
+    const bodies: Record<string, string> = {
+      'zz-readable': '- `--coverage-threshold {N}` — 共通 threshold (既定 100%)',
+      'zz-unreadable': '- `--coverage-threshold {N}` — 共通 threshold',
+      'zz-none': '- `--lang {ja|en}` — 出力言語',
+    };
+    const listed = listDeclaringSkills((skill) => bodies[skill] ?? '', Object.keys(bodies));
+    expect(listed, '既定値を読めない skill が一覧から落ちている').toEqual([
+      'zz-readable',
+      'zz-unreadable',
+    ]);
   });
 
   it('T-SCT-005 完了条件と Step 5 の目標値が矛盾しない', () => {
