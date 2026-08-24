@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node ../../scripts/build-deps.mjs @kiwa-lab/a11y @kiwa-lab/ai-llm @kiwa-lab/api @kiwa-lab/auth @kiwa-lab/cache @kiwa-lab/cli-test @kiwa-lab/component @kiwa-lab/core @kiwa-lab/data @kiwa-lab/e2e @kiwa-lab/edge @kiwa-lab/hono @kiwa-lab/lean @kiwa-lab/nextjs @kiwa-lab/observability @kiwa-lab/orm @kiwa-lab/quality-metrics @kiwa-lab/queue @kiwa-lab/realtime @kiwa-lab/search @kiwa-lab/security @kiwa-lab/ui @kiwa-lab/cli @kiwa-lab/dapp @kiwa-lab/skill-test @kiwa-lab/perf-harness && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/tsup-clean-race.test.js' --environment node --testTimeout 30000 && vitest run .vitest-dist/tests/tsup-clean-race.test.js --environment node --testTimeout 900000",
+    "test:fast": "vitest run tests --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --exclude '**/tsup-clean-race.test.ts' --environment node --testTimeout 30000 && vitest run tests/tsup-clean-race.test.ts --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --environment node --testTimeout 900000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
