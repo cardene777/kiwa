@@ -90,37 +90,88 @@ export function createAuthorizationServer(
     return copy as T;
   }
 
+  /**
+   * copy で情報が落ちる入力を登録の入口で拒否する (#2190)。
+   *
+   * `ownArrays()` の spread と `Object.entries()` は **own enumerable string key しか見ない**。
+   * 型に沿った正当な入力でも、 次の形は copy を通ると壊れる。 いずれも `tsc --noEmit` を通る
+   * ことを実測済。
+   *
+   * | 形 | copy を通ると |
+   * |---|---|
+   * | `class C implements ClientRegistration` (field が prototype 側) | 全 field が消える |
+   * | `Object.defineProperty(o, 'scopes', { enumerable: false })` | その field が消える |
+   * | `unique symbol` の配列 field | 走査されず、 copy が元の配列と同一参照になる |
+   *
+   * **落ちるのは登録時ではなく認可時**だった。 `authorize()` が `redirectUris.includes` で
+   * `TypeError` を投げるまで気付けず、 message も原因を指さない。 入口で落として何が悪いかを
+   * 言う方が、 同じ入力を投げた人が直せる。
+   *
+   * 判定は 2 つ。 copy を通って消えた own key が無いことと、 必須 field が残っていること。
+   * 前者が非 enumerable と symbol を、 後者が prototype 側に field を持つ class を捕まえる。
+   */
+  function assertCopyable(input: object, copied: object, label: string, required: readonly string[]): void {
+    const survived = new Set(Object.keys(copied));
+    const lost = Reflect.ownKeys(input)
+      .filter((key) => (typeof key === 'symbol' ? true : !survived.has(key)))
+      .map((key) => (typeof key === 'symbol' ? key.toString() : key));
+    if (lost.length > 0) {
+      throw new Error(
+        `${label}: field(s) ${lost.join(', ')} would be lost when copying the registration. ` +
+          'Pass a plain object literal — own enumerable string properties are the only ones copied.',
+      );
+    }
+    const missing = required.filter((key) => !survived.has(key));
+    if (missing.length > 0) {
+      throw new Error(
+        `${label}: field(s) ${missing.join(', ')} are not own enumerable properties of the input. ` +
+          'A class instance keeps them on the prototype, where the copy cannot see them. ' +
+          'Pass a plain object literal.',
+      );
+    }
+  }
+
   function ownClient(client: ClientRegistration): ClientRegistration {
-    return ownArrays(client);
+    const copied = ownArrays(client);
+    assertCopyable(client, copied, 'registerClient', ['clientId', 'redirectUris']);
+    return copied;
   }
 
   function ownUser(user: AuthorizationUser): AuthorizationUser {
-    return ownArrays(user);
+    const copied = ownArrays(user);
+    assertCopyable(user, copied, 'registerUser', ['subject']);
+    return copied;
   }
 
+  // **key は snapshot から採る** (#2190)。 `client.clientId` を別に読むと getter が 2 回走り、
+  // 1 回目と 2 回目で違う値を返す入力では **Map の key と保存値が食い違う**。
   for (const client of options.clients ?? []) {
-    clients.set(client.clientId, ownClient(client));
+    const owned = ownClient(client);
+    clients.set(owned.clientId, owned);
   }
   for (const user of options.users ?? []) {
-    users.set(user.subject, ownUser(user));
+    const owned = ownUser(user);
+    users.set(owned.subject, owned);
   }
 
   function registerClient(client: ClientRegistration): void {
-    if (clients.has(client.clientId)) {
+    const owned = ownClient(client);
+    if (clients.has(owned.clientId)) {
       throw new Error(
-        `registerClient: client "${client.clientId}" already registered`,
+        `registerClient: client "${owned.clientId}" already registered`,
       );
     }
-    clients.set(client.clientId, ownClient(client));
+    clients.set(owned.clientId, owned);
   }
 
   function registerUser(user: AuthorizationUser): void {
-    if (users.has(user.subject)) {
+    const owned = ownUser(user);
+    if (users.has(owned.subject)) {
       throw new Error(
-        `registerUser: user "${user.subject}" already registered`,
+        `registerUser: user "${owned.subject}" already registered`,
       );
     }
-    users.set(user.subject, ownUser(user));
+    users.set(owned.subject, owned);
   }
 
   function requireClient(clientId: string): ClientRegistration {
