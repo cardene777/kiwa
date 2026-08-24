@@ -49,6 +49,7 @@ export default {
     '.vitest-dist/src/semantics/service-mesh.js',
     '.vitest-dist/src/semantics/slo.js',
     '.vitest-dist/src/semantics/types.js',
+    '.vitest-dist/src/slowest.js',
     '.vitest-dist/src/spec-coverage.js',
     '.vitest-dist/src/telemetry.js',
     '.vitest-dist/src/trace-flame.js',

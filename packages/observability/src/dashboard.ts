@@ -39,7 +39,9 @@ function summarize(input: DashboardInput): {
  * 遅い test を探す用途では意味を持たない。
  */
 function formatMs(ms: number): string {
-  return ms < 1000 ? `${Math.round(ms)}ms` : `${(ms / 1000).toFixed(1)}s`;
+  // **丸めてから単位を選ぶ**。 生値で分岐すると 999.6 が `1000ms` になる (#2186 r1-f4)。
+  const rounded = Math.round(ms);
+  return rounded < 1000 ? `${rounded}ms` : `${(rounded / 1000).toFixed(1)}s`;
 }
 
 /**

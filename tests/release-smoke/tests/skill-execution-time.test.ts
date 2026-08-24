@@ -117,14 +117,20 @@ describe('test を生む skill が実行時間を見る (#2186)', () => {
     // 一覧を人手で持つ以上、漏れた skill が検査の外に落ちる。
     // 実物から数え直して突き合わせる (`rules/quality.md § 導出可能記述は人手で書かない`)。
     //
-    // 判定材料は「完了条件が test の実行結果を要求するか」。 test を生む skill は
-    // 例外なく「PASS」 か「全 PASS」 を完了条件に書いている。
+    // 判定材料は「完了条件が test の実行結果を要求するか」。
+    //
+    // **英語の `PASS` だけを見ない**。 この repo は完了条件を日本語で書くので、
+    // 「全て成功」 / 「failure 0 件」 と書いた skill が一覧から静かに落ちる = 実行時間の
+    // 完了条件を一度も要求されないまま新しい Layer 2 skill が増える (#2186 r1-f5)。
+    // 実際 option 宣言では `省略時` が 4 skill で 26 回使われており、house style として
+    // 日本語の言い回しが混ざる。
+    const RESULT_CLAIM = /\bPASS\b|\bpass\b|全て成功|すべて成功|全 PASS|failure 0/;
     const producing: string[] = [];
     for (const skill of readdirSkills()) {
       if (skill === OBSERVER_SKILL) continue;
       const criteria = completionSection(skill);
       if (criteria === null) continue;
-      if (/\bPASS\b|全 PASS|pass\b/.test(criteria) && /test|テスト/.test(criteria)) {
+      if (RESULT_CLAIM.test(criteria) && /test|テスト/.test(criteria)) {
         producing.push(skill);
       }
     }

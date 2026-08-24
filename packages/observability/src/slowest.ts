@@ -61,19 +61,38 @@ export interface AnalyzeSlowestOptions {
 
 const DEFAULT_LIMIT = 5;
 
-/** run ごとに record を束ね、各 run の開始時刻 (最小の `startedAt`) を添える。 */
-function groupByRun(records: readonly TestRunRecord[]): Map<string, { startedAt: number; totalMs: number }> {
-  const runs = new Map<string, { startedAt: number; totalMs: number }>();
-  for (const rec of records) {
+/**
+ * run ごとに record を束ね、開始時刻と **到着順** を添える。
+ *
+ * 到着順が要るのは、`startedAt` が同値になる形が実在するため。 `fromVitestJson` は
+ * `report.startTime ?? 0` を入れるので、`startTime` を持たない report
+ * (`kiwa-observe/SKILL.md` が明示的に扱う形、#1918) では **全 run が 0 になる**。
+ *
+ * 同値の時に開始時刻だけで選ぶと、`>` が先に来た方を残すので **最古の run** が
+ * 「直前の run」 になる。 実測で 100ms → 900ms → 500ms の 3 run を実経路
+ * (`fromVitestJson` → `collectRunHistory` → `renderDashboard`) に流すと、直前は 900ms
+ * なのに 100ms が選ばれ、44% の短縮が **+400% の劣化**として出た (#2186 r1-f1)。
+ *
+ * 到着順は `collectRunHistory` が append する順序で、`startedAt` が全て同じでも
+ * 前後関係を保つ。 順序を持たない history を直接渡した場合は前後関係そのものが無いので、
+ * その時に何が「直前」 かは決められない。
+ */
+function groupByRun(
+  records: readonly TestRunRecord[],
+): Map<string, { startedAt: number; arrival: number; totalMs: number }> {
+  const runs = new Map<string, { startedAt: number; arrival: number; totalMs: number }>();
+  records.forEach((rec, index) => {
     const found = runs.get(rec.runId);
     if (found === undefined) {
-      runs.set(rec.runId, { startedAt: rec.startedAt, totalMs: rec.durationMs });
-      continue;
+      runs.set(rec.runId, { startedAt: rec.startedAt, arrival: index, totalMs: rec.durationMs });
+      return;
     }
     // 開始時刻は最小を採る。 record の順序は保証されていないので、先頭の値を使わない。
     if (rec.startedAt < found.startedAt) found.startedAt = rec.startedAt;
+    // 到着順は最大を採る。 その run の record が最後に現れた位置が、その run の位置。
+    if (index > found.arrival) found.arrival = index;
     found.totalMs += rec.durationMs;
-  }
+  });
   return runs;
 }
 
@@ -89,13 +108,19 @@ export function analyzeSlowest(opts: AnalyzeSlowestOptions): SlowestAnalysis {
       ? opts.limit
       : DEFAULT_LIMIT;
 
+  // **`> 0` でない record は合計にも入れない**。 判定と加算で扱いが割れていると、
+  // 負の値を出す reporter で `total` が壊れた record が「測っていないだけ」 として報告される
+  // (−500 と +100 で `total -400ms` / `measured 1` / `unmeasured 1` になっていた、#2186 r1-f3)。
   let totalMs = 0;
   let measured = 0;
   let unmeasured = 0;
   for (const rec of records) {
-    totalMs += rec.durationMs;
-    if (rec.durationMs > 0) measured += 1;
-    else unmeasured += 1;
+    if (rec.durationMs > 0) {
+      totalMs += rec.durationMs;
+      measured += 1;
+    } else {
+      unmeasured += 1;
+    }
   }
 
   // 測れた record だけを並べる。 0 を混ぜると、duration を出さない reporter の時に
@@ -120,10 +145,19 @@ export function analyzeSlowest(opts: AnalyzeSlowestOptions): SlowestAnalysis {
     // この run に含まれない runId のうち、最も新しく始まったものを直前の run とみなす。
     // `history` が複数 runId を持つ形 (vitest と Playwright を 1 run に束ねる経路) でも、
     // その全てを「この run」 として除く。
-    let latest: { startedAt: number; totalMs: number } | null = null;
+    let latest: { startedAt: number; arrival: number; totalMs: number } | null = null;
     for (const [runId, info] of groupByRun(opts.cumulative.records)) {
       if (thisRunIds.has(runId)) continue;
-      if (latest === null || info.startedAt > latest.startedAt) latest = info;
+      if (latest === null) {
+        latest = info;
+        continue;
+      }
+      // 開始時刻が同値なら到着順で割る。 同値は `startTime` を持たない report で実際に起きる。
+      const newer =
+        info.startedAt !== latest.startedAt
+          ? info.startedAt > latest.startedAt
+          : info.arrival > latest.arrival;
+      if (newer) latest = info;
     }
     if (latest !== null) previousTotalMs = latest.totalMs;
   }
