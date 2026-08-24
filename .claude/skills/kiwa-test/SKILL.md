@@ -767,6 +767,7 @@ graph TD
 - `tests/reports/integrated/{example}-{module}-{target}.${DOC_LANG}.md` が Write 済
 - 各子 skill の report path が integrated report 内に link 集約
 - 生成 test が `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に退避済 (Step 5.5、 `--target` 範囲外と非選択 runner の subdir は対象外)
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## references
 

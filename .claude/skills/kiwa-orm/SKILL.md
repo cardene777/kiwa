@@ -247,8 +247,7 @@ it('{ID} {Observation}', async () => {
 - `tests/{module}.orm.test.ts` が Write され、 spec の Automation=yes 全 TC が変換済
 - `pnpm exec vitest run tests/{module}.orm.test.ts` が exit 0
 - kiwa-review test-review report が生成されている (`--no-review` 未指定時)
-- カバレッジの残りを確認済 = `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件、または `/kiwa-loop` を回した上で残った分を `/kiwa-verdict` の 4 分類つきで report に記録 (#2193)。 **`unknown` や「埋められない」 で終わらせない**
-- 遅い test の上位を確認済 = `/kiwa-gap --metric duration --report {vitest json}` を実行し、lever 別の偏りを読んで対処したか、対処しない理由を report に記録 (#2186 / #2193)。**遅い順ではなく lever 別の合計を見る** = 実測で release-smoke は 164.6s のうち 131.1s (80%) が `subprocess` に集中しており、偏りを見れば直す手が 1 つに絞れる
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## 既存 test の再利用
 

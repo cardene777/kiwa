@@ -395,8 +395,7 @@ review 結果は contract skill (kiwa-forge / kiwa-hardhat) と同形式。 repo
 - 拡張の場合 — 既存 test の regression 0 件、 新規 test も含めて全 PASS
 - 4 round 連続 PASS で flaky 0 件 (公開前は必須)
 - contract 変更を伴う場合 — adversarial review 1 round 推奨
-- カバレッジの残りを確認済 = `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件、または `/kiwa-loop` を回した上で残った分を `/kiwa-verdict` の 4 分類つきで report に記録 (#2193)。 **`unknown` や「埋められない」 で終わらせない**
-- 遅い test の上位を確認済 = `/kiwa-gap --metric duration --report {vitest json}` を実行し、lever 別の偏りを読んで対処したか、対処しない理由を report に記録 (#2186 / #2193)。**遅い順ではなく lever 別の合計を見る** = 実測で release-smoke は 164.6s のうち 131.1s (80%) が `subprocess` に集中しており、偏りを見れば直す手が 1 つに絞れる
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## references
 

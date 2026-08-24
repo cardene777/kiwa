@@ -1,1 +1,1 @@
-../../kiwa-design/references/existing-test-reuse.md
+../../_shared/references/existing-test-reuse.md

@@ -1052,6 +1052,7 @@ path suffix 競合なし (`.md` 無 = TS、 `contract/` = Solidity)、 3 spec �
 - Layer 2 連携先 skill を末尾で 1 件以上推奨 (`--layer` 指定で自動的に推奨 skill が絞られる)
 - `## 既存 test との対応` が全 TC 分の行を持ち、 各行の判定が `既覆 (候補)` / `未覆` / `不明` のいずれか
 - 「自動化すべきテスト」 の並びが `未覆` / `不明` から始まっている
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## references
 

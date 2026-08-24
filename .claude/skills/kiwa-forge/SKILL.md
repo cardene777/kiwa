@@ -422,8 +422,7 @@ report 出力先: `/kiwa-review` Step 0 の言語別出力 path (`test-review` m
 - Step 0 が定める coverage report path が 4 section format で Write 済 (final + round 別)
 - 観点別 grouping (`// 観点 N: {name}` コメント) が spec と一致
 - 「停滞」判定や `forge coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
-- カバレッジの残りを確認済 = `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件、または `/kiwa-loop` を回した上で残った分を `/kiwa-verdict` の 4 分類つきで report に記録 (#2193)。 **`unknown` や「埋められない」 で終わらせない**
-- 遅い test の上位を確認済 = `/kiwa-gap --metric duration --report {vitest json}` を実行し、lever 別の偏りを読んで対処したか、対処しない理由を report に記録 (#2186 / #2193)。**遅い順ではなく lever 別の合計を見る** = 実測で release-smoke は 164.6s のうち 131.1s (80%) が `subprocess` に集中しており、偏りを見れば直す手が 1 つに絞れる
+- カバレッジと実行時間は `references/coverage-contract.md` に従う (100% を目指し、届かない分は 4 分類の理由を report に記録済)
 
 ## references
 

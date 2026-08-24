@@ -1,1 +1,1 @@
-../../kiwa-loop/references/loop-stop-conditions.md
+../../_shared/references/loop-stop-conditions.md

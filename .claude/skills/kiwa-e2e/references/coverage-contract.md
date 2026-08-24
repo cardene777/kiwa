@@ -1,0 +1,1 @@
+../../_shared/references/coverage-contract.md
