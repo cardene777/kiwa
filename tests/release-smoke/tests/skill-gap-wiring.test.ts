@@ -418,24 +418,64 @@ describe('一括置換が他 skill の option を壊していない', () => {
 });
 
 
+  /**
+   * `## 手順` の fenced block の中身を、**行末の説明を落として** 取り出す。
+   *
+   * 説明は `←` の後ろに書く。 落とさないと `--package` の値が消えても次の語
+   * (`←`) を値と読んでしまい、`--package` だけの形を通す (変異試験で実測)。
+   */
+  function procedureBlock(contract: string): string[] {
+    const m = /^## 手順\n+```\n([\s\S]*?)```/m.exec(contract);
+    return (m?.[1] ?? '')
+      .split('\n')
+      .map((l) => l.split('←')[0]?.trimEnd() ?? '')
+      .filter((l) => l.trim() !== '');
+  }
+
   it('T-SKG-024 contract の手順が実際に動く形になっている', () => {
     // **codex review r1-f1**。 `/kiwa-loop --metric coverage` を `--package` 無しで
     // 書いていた。 `/kiwa-loop` は coverage で `--package` が無いと止まるので、
     // 契約に従っても remediation loop に入れない。
     //
-    // T-SKG-010 は見出しと分類 label しか見ないので検知しなかった。 command を
-    // 取り出して必須 option が揃っていることを見る。
+    // **説明文を拾わない** (codex review r2-f1)。 前版は contract 全体から最初の
+    // `/kiwa-loop` を取っていたため、手順の直後の説明段落
+    // (「`--package` を省かない」) が両方の語を含み、**手順を丸ごと消しても通った**。
+    // 実測で 0 件 FAIL を確認した。
+    //
+    // 手順は `## 手順` の fenced block の中にしかないので、そこだけを見る。
     const contract = readFileSync(
       resolve(SKILLS_DIR, '_shared/references/coverage-contract.md'),
       'utf8',
     );
-    const loop = /\/kiwa-loop[^\n]*/.exec(contract);
-    expect(loop, 'contract に /kiwa-loop の手順が無い').not.toBeNull();
-    expect(loop?.[0], '/kiwa-loop の手順に --package が無い').toContain('--package');
+    const steps = procedureBlock(contract);
+    expect(steps.length, '## 手順 の fenced block を取り出せない (検査が空振りしている)')
+      .toBeGreaterThan(0);
 
-    const gap = /\/kiwa-gap\s+--metric coverage[^\n]*/.exec(contract);
-    expect(gap, 'contract に /kiwa-gap の手順が無い').not.toBeNull();
-    expect(gap?.[0], '/kiwa-gap の手順に --package が無い').toContain('--package');
+    // 値まで見る = `--package` だけ書いて値が無い形を通さない。
+    const wanted = [
+      /\/kiwa-gap\s+--metric\s+coverage\s+--package\s+\S+/,
+      /\/kiwa-loop\s+--metric\s+coverage\s+--package\s+\S+/,
+      /\/kiwa-verdict\s+--metric\s+coverage/,
+    ];
+    for (const re of wanted) {
+      const hit = steps.filter((l) => re.test(l));
+      expect(hit.length, `手順に ${re.source} を満たす行が 1 件だけ無い`).toBe(1);
+    }
+  });
+
+  it('T-SKG-024b 手順を消すと落ちる (陰性対照)', () => {
+    // 判定関数に直接、壊した contract を与える。 実 file を汚さずに確かめる。
+    const broken = [
+      '## 手順\n\n```\n1. /kiwa-gap  --metric coverage --package {pkg}\n```\n',
+      '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package    ← 説明\n```\n',
+      '## 手順\n\n```\n(手順なし)\n```\n',
+    ];
+    for (const src of broken) {
+      const steps = procedureBlock(src);
+      const ok = /\/kiwa-loop\s+--metric\s+coverage\s+--package\s+\S+/;
+      expect(steps.filter((l) => ok.test(l)).length, `通してはいけない形: ${src.slice(0, 40)}`)
+        .toBe(0);
+    }
   });
 
   it('T-SKG-025 consumer が別 consumer の references を名指ししない', () => {
