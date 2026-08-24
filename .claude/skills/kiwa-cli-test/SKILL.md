@@ -175,7 +175,8 @@ describe('kiwa CLI (help / errors)', () => {
 
 - Layer 1 spec の Automation=yes 全 TC が `tests/{module}.cli.test.ts` に Write 済
 - `pnpm exec vitest run` 全 PASS
-- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
+- カバレッジの残りを確認済 = `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件、または `/kiwa-loop` を回した上で残った分を `/kiwa-verdict` の 4 分類つきで report に記録 (#2193)。 **`unknown` や「埋められない」 で終わらせない**
+- 遅い test の上位を確認済 = `/kiwa-gap --metric duration --report {vitest json}` を実行し、lever 別の偏りを読んで対処したか、対処しない理由を report に記録 (#2186 / #2193)。**遅い順ではなく lever 別の合計を見る** = 実測で release-smoke は 164.6s のうち 131.1s (80%) が `subprocess` に集中しており、偏りを見れば直す手が 1 つに絞れる
 - Topic 別 `describe` グループが spec の Topic 一覧と一致
 - exit code / stdout / stderr / file 副作用の観点が cover されている
 

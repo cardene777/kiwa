@@ -17,6 +17,12 @@
     "functions": 100,
     "statements": 100
   },
+  "@kiwa-lab/auth": {
+    "lines": 99.65,
+    "branches": 99.01,
+    "functions": 99.04,
+    "statements": 99.65
+  },
   "@kiwa-lab/cache": {
     "lines": 99.22,
     "branches": 95.72,
@@ -90,10 +96,10 @@
     "statements": 100
   },
   "@kiwa-lab/observability": {
-    "lines": 99.82,
-    "branches": 99.54,
+    "lines": 99.95,
+    "branches": 99.74,
     "functions": 100,
-    "statements": 99.82
+    "statements": 99.95
   },
   "@kiwa-lab/orm": {
     "lines": 99.11,

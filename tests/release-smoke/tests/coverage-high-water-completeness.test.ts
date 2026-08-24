@@ -33,13 +33,7 @@ const HIGH_WATER = resolve(REPO_ROOT, 'coverage-high-water.json');
  * 載せる時は理由と、いつ外れるかを書く。 ただし comment は作業待ち行列にならないので、
  * T-HWC-004 が「coverage が読めるようになったら例外を外せ」 を機械的に見る (#2181 r2-f3)。
  */
-const WITHOUT_RECORD: Record<string, string> = {
-  '@kiwa-lab/auth':
-    'worktree では workspace の型解決が揃わず coverage を測れない。 別 branch で測った値を ' +
-    '入れると、その branch が merge されるまで **到達できない値を要求する** ことになる ' +
-    '(下がっていないのに落ちる)。 PR #2180 が merge されて main で測れるようになった時点で ' +
-    '--update-high-water を回す。 T-HWC-004 がその時点で本 entry を失効させる',
-};
+const WITHOUT_RECORD: Record<string, string> = {};
 
 /**
  * gate が判定する package の一覧。
