@@ -172,6 +172,31 @@ Two things to know before you trust a number it prints:
   with `already used` for a reason that has nothing to do with it. Check any red
   package alone with `--only` before believing it.
 
+### Running only what changed
+
+`tests/release-smoke` has a second entry point, `test:fast`. It runs the
+TypeScript sources directly instead of the `tsc` output the full run uses, and
+passes vitest's `--changed` so that only the files your edits affect are
+collected.
+
+```
+$ pnpm -F kiwa-release-smoke test:fast                       # against main
+$ KIWA_FAST_BASE=HEAD pnpm -F kiwa-release-smoke test:fast   # uncommitted only
+```
+
+The base is `main` unless `KIWA_FAST_BASE` names another ref. Nothing changed
+means nothing runs, and that exits 0.
+
+**It is a filter, not a gate.** These checks read files rather than importing
+them, so an edit vitest cannot see in the module graph selects nothing, and the
+run is green having checked nothing about it. `pnpm -F kiwa-release-smoke test`
+is what decides whether the package is green.
+
+The two routes share no code, so nothing would notice them drifting apart on
+their own. `tests/release-smoke/tests/fast-route-equivalence.test.ts` runs both
+with `vitest list` and fails when they collect a different number of files, a
+different number of tests, or different files.
+
 ### What `pnpm test` actually needs
 
 Measured, by hiding each tool and running the sweep — not by reading
