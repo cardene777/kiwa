@@ -63,16 +63,29 @@ describe('共通 skill が実在する', () => {
     expect(src).toMatch(/上限 \(既定 5\)|round が上限/);
   });
 
-  it('T-SKG-003b duration の達成条件が totalMs === 0 でない', () => {
-    // **codex review r1-f2**。 `totalMs === 0` を達成にすると、test が 1 件でもあれば
-    // 所要は正なので**永久に達成できず** baseline を更新できない。
-    // 達成は「回帰 0 件かつ測れなかった file 0 件」 で判定する。
+  it('T-SKG-003b duration が達成条件を持たないと明記する', () => {
+    // **Issue #2196**。 当初は `totalMs === 0` を達成にしていたが到達不能で、
+    // 次に「回帰 0 件かつ未測定 0 件」 に変えたが、その回帰判定そのものが
+    // 使えないと実測で分かった (同じ code で 6 倍振れる)。
+    //
+    // duration に達成条件は **持たない**。 持たないことを明記させる = 次に触る人が
+    // 「条件が書いてないから足そう」 と考えて同じ道を戻らないようにする。
     for (const file of [
       read('kiwa-loop'),
       readFileSync(resolve(SKILLS_DIR, 'kiwa-loop/references/loop-stop-conditions.md'), 'utf8'),
     ]) {
-      expect(file).toMatch(/`regressions` が 0 件、かつ `unmeasured` が 0 件/);
-      expect(file, 'totalMs を達成条件にしないと明記していない').toMatch(/totalMs === 0/);
+      expect(file, '達成条件を持たないと明記していない').toMatch(/duration に達成条件は無い/);
+      expect(file, '振れ幅の実測が書かれていない').toMatch(/6 倍振れる/);
+    }
+  });
+
+  it('T-SKG-003d duration の ratchet 更新が残っていない', () => {
+    // 陰性対照。 baseline を消したので `--update-baseline` の指示が残っていると
+    // 存在しない flag を呼ぶ手順になる。
+    for (const skill of COMMON_SKILLS) {
+      expect(read(skill), `${skill} に --update-baseline が残っている`).not.toContain(
+        '--update-baseline',
+      );
     }
   });
 

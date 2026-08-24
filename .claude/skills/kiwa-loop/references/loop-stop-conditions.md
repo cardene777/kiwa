@@ -16,10 +16,17 @@
 | metric | 達成 |
 |---|---|
 | coverage | `uncovered === 0` |
-| duration | `regressions` が 0 件、かつ `unmeasured` が 0 件 |
+| duration | **達成の判定を持たない** |
 
-**duration を `totalMs === 0` にしない**。 test が 1 件でもあれば所要は正で、budget を
-定義していない以上 0 には決して届かない = 達成に到達できず baseline を永久に更新できない。
+**duration に達成条件は無い** (Issue #2196)。 wall time の絶対値が判定材料にならないことを
+実測で確かめた = 同じ code で 11.5 / 29.9 / 30.6 / 69.9 秒と 6 倍振れる。
+
+順位は安定する (4 run の順位相関 0.93-0.97) ので「次にどこを直すか」 は返せるが、
+「速くなったか」 は測れない。 材料の安定性が違うため、片方が使えてももう片方が
+使えるとは限らない。
+
+したがって duration の `/kiwa-loop` は **1 round だけ回して止まる** = gap の先頭 1 件を
+直し、直したことを report に記録して終わる。 収束の判定はしない。
 
 ### なぜ 2 round か
 
@@ -92,7 +99,7 @@ lever ごとに「直せるか」 の判定が違う。
 | 1 | 書き方で直せる | lever が `subprocess` / `compile` / `filesystem` / `wall-clock` | lever の直し方に沿って書き換える |
 | 2 | 検証対象そのものが遅い | lever が `real-io` で、実 driver の挙動を検証している | budget に計上して記録する |
 | 3 | 分類できていない | lever が `inherent` | source を読んで lever を特定するか、lever 一覧に追加する |
-| 4 | 既に直っている | baseline より速い | 何もしない。 `--update-baseline` の対象 |
+| 4 | 直したか判定できない | 絶対値が 6 倍振れる | 直した内容を report に書いて終わる |
 
 分類 3 を放置しない。 `inherent` は「直し方が無い」 ではなく「まだ調べていない」。
 

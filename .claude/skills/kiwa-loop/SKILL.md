@@ -57,16 +57,15 @@ $ARGUMENTS
 | metric | 記録する値 | 達成の条件 |
 |---|---|---|
 | coverage | `uncovered` (残り件数) | `uncovered === 0` |
-| duration | `regressions` の件数と `totalMs` | `regressions` が 0 件、かつ `unmeasured` が 0 件 |
+| duration | 遅い順の並びと lever 別の偏り | **持たない** |
 
-**duration は `totalMs === 0` を達成にしない**。 test が 1 件でもあれば所要は正で、
-budget を定義していないため 0 には決して届かない = Step 5 に到達できず baseline を
-永久に更新できなくなる。
+**duration に達成条件は無い** (Issue #2196)。 wall time の絶対値が判定材料にならないことを
+実測で確かめた = 同じ code で 11.5 / 29.9 / 30.6 / 69.9 秒と 6 倍振れる。
 
-duration の達成は「baseline より 30% 以上遅い file が 1 件も無く、測れなかった file も
-無い」 状態を指す。 `totalMs` は進捗の目安として記録するだけで、判定には使わない。
+したがって duration では **1 round だけ回して止まる**。 gap の先頭 1 件を直し、
+何をどう変えたかを report に書いて終わる。 「速くなったか」 は測らない。
 
-達成済なら Step 5 へ飛ぶ。
+coverage が達成済なら Step 5 へ飛ぶ。
 
 ### Step 2 — 一番安い 1 件を埋める
 
@@ -118,7 +117,7 @@ duration で report を作り直さないのは特に見落としやすい。 `/
 
 | # | 条件 | 次の動き |
 |---|---|---|
-| 1 | coverage は `uncovered === 0` / duration は `regressions` と `unmeasured` が 0 件 | Step 5 (達成) |
+| 1 | coverage は `uncovered === 0` / duration は 1 round 完了 | Step 5 |
 | 2 | 改善 0 が 2 round 連続 | Step 6 (判断を仰ぐ) |
 | 3 | round が上限 (既定 5) に達した | Step 6 (判断を仰ぐ) |
 
@@ -130,9 +129,10 @@ duration で report を作り直さないのは特に見落としやすい。 `/
 ratchet を更新する。
 
 ```bash
-node scripts/check-coverage-gates.mjs --update-high-water     # coverage
-node scripts/duration-gap-report.mjs --report <path> --update-baseline   # duration
+node scripts/check-coverage-gates.mjs --update-high-water   # coverage のみ
 ```
+
+**duration には ratchet が無い**。 更新するものが無いので何も実行しない。
 
 round ごとの経過表を report に書き、応答にも出す。
 

@@ -71,7 +71,7 @@ lever ごとに「直せるか」 の判定が違う。
 | 1 | 書き方で直せる | lever が `subprocess` / `compile` / `filesystem` / `wall-clock` | lever の直し方に沿って書き換える |
 | 2 | 検証対象そのものが遅い | lever が `real-io` で、実 driver の挙動を検証している | budget に計上して記録する |
 | 3 | 分類できていない | lever が `inherent` | source を読んで lever を特定するか、lever 一覧に追加する |
-| 4 | 既に直っている | baseline より速い | 何もしない。 `--update-baseline` の対象 |
+| 4 | 直したか判定できない | 絶対値が 6 倍振れる (Issue #2196) | 直した内容を report に書いて終わる |
 
 分類 3 を放置しない。 `inherent` は「直し方が無い」 ではなく「まだ調べていない」。
 実測で `tests/release-smoke` の `inherent` は 22 file / 合計 1.3 秒だったので、
@@ -125,7 +125,7 @@ lever ごとに「直せるか」 の判定が違う。
 - 分類 2 (実装の欠陥) が応答の先頭に書かれている (該当があれば)
 - 20 件で打ち切った場合、打ち切った件数を report に明記した
 - 実装 file を 1 行も変更していない
-- `coverage-high-water.json` / `test-duration-baseline.json` を書き換えていない
+- `coverage-high-water.json` を書き換えていない
 
 ## references
 

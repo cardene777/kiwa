@@ -21,7 +21,10 @@ allowed-tools: Bash, Read, Glob, Grep, Write
 ratchet 登録 25 package のうち 20 package が 100% 未満で止まっていた。
 
 実行時間側は仕組みが 1 つも無かった。 `/kiwa-observe` の dashboard に表示があるだけで、
-baseline も回帰判定も無い = 遅くなっても誰も気付かない。
+baseline も回帰判定も無かった。
+
+**判定は今も持たない**。 wall time の絶対値は同じ code で 6 倍振れるため gate を作れない
+(Issue #2196)。 順位と lever 別の偏りだけが負荷に依らず保たれるので、そこを返す。
 
 ## 前提
 
@@ -141,8 +144,8 @@ comment 内の言及で誤判定する (実測で `mutation-gate-coverage.test.t
 
 ## 責務外
 
-- **判定しない**。 gate は `scripts/check-coverage-gates.mjs` と
-  `scripts/duration-gap-report.mjs --update-baseline` の責務で、本 skill は読むだけ
+- **判定しない**。 coverage の gate は `scripts/check-coverage-gates.mjs` の責務。
+  duration には gate が無い (絶対値が振れるため、Issue #2196)
 - **埋めない**。 test を書くのは生成 skill (`/kiwa-vitest` / `/kiwa-forge` 等)
 - **仕分けない**。 埋まらなかったものの分類は `/kiwa-verdict`
 - **実装を消さない**。 dead code の判定も削除も行わない
@@ -155,7 +158,7 @@ comment 内の言及で誤判定する (実測で `mutation-gate-coverage.test.t
 - script が非 0 で終わった場合、その理由をそのまま報告して止めた
 - 応答に「総量」「偏り」「次の 1 件」 の 3 点が書かれている
 - report file が `--out` (または既定 path) に Write 済
-- `coverage-high-water.json` / `test-duration-baseline.json` を書き換えていない
+- `coverage-high-water.json` を書き換えていない
 
 ## references
 
