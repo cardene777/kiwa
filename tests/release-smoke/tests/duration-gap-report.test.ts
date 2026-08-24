@@ -40,6 +40,8 @@ type FileSpec = {
   tests?: number;
   /** file の中身。 lever 判定はここを静的に読む。 */
   body?: string;
+  /** compile 後の path を渡す時、対応する source をこの path に置く。 */
+  source?: string;
 };
 
 /** vitest の `--reporter=json` 出力を fixture で組む。 */
@@ -48,6 +50,13 @@ function writeReport(root: string, files: FileSpec[]) {
     const abs = join(root, f.rel);
     mkdirSync(dirname(abs), { recursive: true });
     writeFileSync(abs, f.body ?? 'import { it } from "vitest";\nit("x", () => {});\n');
+    // compile 後の path を渡す fixture では、対応する source も置けるようにする。
+    // 拡張子の戻し先は「実在する source」 で決めるため、置かないと戻せない。
+    if (f.source !== undefined) {
+      const srcAbs = join(root, f.source);
+      mkdirSync(dirname(srcAbs), { recursive: true });
+      writeFileSync(srcAbs, 'export {};\n');
+    }
     return {
       name: abs,
       startTime: 1_000_000,
@@ -551,11 +560,87 @@ describe('duration-gap-report', () => {
     // T-DGR-030 の対。 「`.js` は一切変換しない」 実装だと compile 後と source が
     // 別 file になり、同じ test を 2 回計上する (T-DGR-002 が守る形が壊れる)。
     const { root, report } = fixture([
-      { rel: '.vitest-dist/tests/b.test.js', ms: 4000 },
+      { rel: '.vitest-dist/tests/b.test.js', ms: 4000, source: 'tests/b.test.ts' },
     ]);
     const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
 
     expect(out.files.map((f) => f.file)).toEqual(['tests/b.test.ts']);
+  });
+
+
+  it('T-DGR-032 compile 後の .js は実在する source の拡張子に戻す', () => {
+    // **codex review r4-f1**。 `.vitest-dist` を通った `.js` を一律 `.ts` に戻していたため、
+    // `browser.test.tsx` から出た `browser.test.js` を `browser.test.ts` と誤認した。
+    //
+    // `packages/ui` は `jsx: "react-jsx"` で `.test.tsx` を 4 file 持つ (実測)。
+    // 存在しない path を baseline に書くと、次の run で「別 file」 として扱われ
+    // ratchet が効かなくなる。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/a.test.js', ms: 4000, source: 'tests/a.test.tsx' },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
+
+    expect(out.files.map((f) => f.file)).toEqual(['tests/a.test.tsx']);
+  });
+
+  it('T-DGR-033 .tsx の source と compile 後を 1 件に畳む', () => {
+    // 両方を含む report で同じ suite が 2 件に割れないことを見る。
+    const { root, report } = fixture([
+      { rel: 'tests/a.test.tsx', ms: 3000 },
+      { rel: '.vitest-dist/tests/a.test.js', ms: 3100, source: 'tests/a.test.tsx' },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { file: string; ms: number }[] };
+
+    expect(out.files).toHaveLength(1);
+    expect(out.files[0]?.file).toBe('tests/a.test.tsx');
+    expect(out.files[0]?.ms).toBe(3100);
+  });
+
+  it('T-DGR-034 .mjs / .cjs も実在する source に戻す', () => {
+    // `.mts` → `.mjs` / `.cts` → `.cjs` の対応。 拡張子ごとに分岐を書かず、
+    // 実在する source を探す形にしたので同じ経路で通る。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/m.test.mjs', ms: 2000, source: 'tests/m.test.mts' },
+      { rel: '.vitest-dist/tests/c.test.cjs', ms: 1000, source: 'tests/c.test.cts' },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
+
+    expect(out.files.map((f) => f.file).sort()).toEqual(['tests/c.test.cts', 'tests/m.test.mts']);
+  });
+
+  it('T-DGR-035 source を特定できなければ拡張子を変えない', () => {
+    // **推測で `.ts` に倒さない**。 source が消えている / 別 dir にある場合、
+    // 存在しない `.ts` を作ると baseline がその名前で固定され、次の run で
+    // 別 file 扱いになって ratchet が効かなくなる。
+    //
+    // 拡張子は compile 後のまま残す。 `.vitest-dist` の除去は別の話で、
+    // これは source と compile 後を 1 件に畳むための正規化なので常に行う
+    // (畳まないと同じ suite が 2 件に割れる、T-DGR-002)。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/orphan.test.js', ms: 5000 },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
+
+    expect(out.files.map((f) => f.file)).toEqual(['tests/orphan.test.js']);
+  });
+
+
+  it('T-DGR-036 source が 2 つ実在する時は拡張子を変えない', () => {
+    // **変異試験で見つけた**。 候補の並びを `['.ts', '.tsx']` から `['.tsx', '.ts']` に
+    // 入れ替えても 1 件も落ちなかった = 両方実在する形を通す検査が無く、
+    // **並び順という実装の都合が baseline の key を決めていた**。
+    //
+    // どちらが元かは compile 後の path からは決まらないので、推測せず compile 後の
+    // 拡張子のまま残す。 これで並び順に依存しなくなる。
+    const { root, report } = fixture([
+      { rel: '.vitest-dist/tests/a.test.js', ms: 3000, source: 'tests/a.test.ts' },
+    ]);
+    // 同じ basename の `.tsx` も置く = 曖昧な状態を作る。
+    writeFileSync(join(root, 'tests/a.test.tsx'), 'export {};\n');
+
+    const out = JSON.parse(run(root, report)) as { files: { file: string }[] };
+
+    expect(out.files.map((f) => f.file)).toEqual(['tests/a.test.js']);
   });
 
 });

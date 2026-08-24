@@ -213,15 +213,51 @@ function classify(absPath) {
  * (実測で 155 file のうち 76 file が compile 後だった)。 そのまま数えると同じ test を
  * 2 回計上し、合計が倍に見える。
  */
+/**
+ * compile 後の拡張子と、その元になりうる source 拡張子。
+ *
+ * **`.js` → `.ts` の 1 対 1 に決め打たない** (codex review r4-f1)。 `packages/ui` は
+ * `jsx: "react-jsx"` で `.test.tsx` を持ち、その compile 後は `.js` になる。
+ * 一律 `.ts` に戻すと存在しない path を baseline に書き、次の run で「別 file」 として
+ * 扱われて ratchet が効かなくなる。
+ */
+const SOURCE_EXTENSIONS = {
+  '.js': ['.ts', '.tsx'],
+  '.mjs': ['.mts'],
+  '.cjs': ['.cts'],
+};
+
 function toSource(absPath) {
   const rel = relative(REPO_ROOT, absPath).split('\\').join('/');
   const stripped = rel.replace('/.vitest-dist/', '/').replace(/^\.vitest-dist\//, '');
 
-  // **`.vitest-dist` を通った path だけ拡張子を戻す**。 全ての `.js` を `.ts` にすると、
-  // `tests/a.test.js` と `tests/a.test.ts` という別々の file が同じ名前に潰れる。
-  // 片方が 0 秒だと `seen - merged` が測れた側へ吸収し、測れていない file が消える
+  // `.vitest-dist` を通っていない path はそのまま。 全ての `.js` を書き換えると、
+  // `tests/a.test.js` と `tests/a.test.ts` という別々の file が同じ名前に潰れる
   // (codex review r3-f1)。
-  return stripped === rel ? stripped : stripped.replace(/\.js$/, '.ts');
+  if (stripped === rel) return stripped;
+
+  const dot = stripped.lastIndexOf('.');
+  const ext = dot >= 0 ? stripped.slice(dot) : '';
+  const base = dot >= 0 ? stripped.slice(0, dot) : stripped;
+  const candidates = SOURCE_EXTENSIONS[ext] ?? [];
+
+  // **実在する source を探して決める**。 推測で倒すと存在しない path を作る。
+  const found = candidates.filter((c) => existsSync(resolve(REPO_ROOT, `${base}${c}`)));
+
+  // 1 件に定まった時だけ戻す。
+  //
+  // **2 件以上ある時は推測しない**。 `a.test.ts` と `a.test.tsx` が同居していると
+  // どちらが元かは compile 後の path からは決まらず、候補の並び順で決まってしまう
+  // (変異試験で並びを入れ替えると解決先が変わることを実測した)。
+  // 並び順という実装の都合が baseline の key を決める形にはしない。
+  //
+  // 0 件の時も同じ = source が消えている / 別 dir にある。 存在しない path を
+  // 作ると baseline がその名前で固定され、次の run で別 file 扱いになる。
+  if (found.length === 1) return `${base}${found[0]}`;
+
+  // 拡張子は compile 後のまま残す。 `.vitest-dist` の除去は別の話で、source と
+  // compile 後を 1 件に畳むための正規化なので常に行う。
+  return stripped;
 }
 
 function readBaseline() {
