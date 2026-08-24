@@ -218,7 +218,10 @@ describe('登録した参照を後から書き換えても認可判定に届か�
     expect(() => authorizeWith(userSide, 'admin')).toThrow(/not entitled to scope "admin"/);
   });
 
-  it('T-SNAP-024b registerClient / registerUser 経路の再代入も届かない', () => {
+  it('T-SNAP-024b registerClient 経路の再代入も届かない', () => {
+    // **client 側だけを突く**。 user を inline literal で最初から admin にすることで、
+    // user 側の判定に落ちる前に client 側の判定へ到達させる。
+    // `registerUser` 経路は T-SNAP-024c が別に当てる (#2179 r2-f1)。
     const client = { clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: ['openid'] };
     __resetOAuth21Counters();
     const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
@@ -245,6 +248,29 @@ describe('登録した参照を後から書き換えても認可判定に届か�
         'user-1',
       ),
     ).toThrow(/redirect_uri/);
+  });
+
+  it('T-SNAP-024c registerUser 経路の再代入も届かない', () => {
+    // **`registerUser` 経路だけを突く** (#2179 r2-f1)。 T-SNAP-024 の user 側は
+    // `options.users` 経路で、T-SNAP-024b は client 側しか突いていない。
+    //
+    // 実測 = `registerUser` の呼出側だけを「元 object を保持し配列だけ差し替える」 形に
+    // 変異させると、1260 件が 1 件も落ちなかった。
+    //
+    // client は最初から admin を持たせる = client 側の判定で落ちる前に user 側へ到達させる。
+    const user = { subject: 'user-1', scopes: ['openid'] };
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
+    server.registerClient({
+      clientId: 'client-A',
+      redirectUris: [REDIRECT_LOCAL],
+      scopes: ['openid', 'admin'],
+    });
+    server.registerUser(user);
+
+    user.scopes = ['openid', 'admin'];
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not entitled to scope "admin"/);
   });
 
   it('T-SNAP-023 redirectUris を後から足しても受け付けない', () => {
