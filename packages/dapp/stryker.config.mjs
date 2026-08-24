@@ -27,6 +27,28 @@
  * root from `process.cwd()`, which is the package dir under `pnpm test` and the
  * sandbox dir under Stryker. It now resolves from the repo root, as does
  * `injector.test.ts`, which carried the same form without having surfaced yet.
+ *
+ * `concurrency` is 4 and `timeoutMS` is 60,000, both measured rather than
+ * inherited (#2171). The pair arrived from the Playwright era with no recorded
+ * reason, so three full runs were compared.
+ *
+ *   baseline  c2 / t60000   56m05s   MSI 80.43   killed 1874   survived 460   timeout 17
+ *   run A     c2 / default  49m      MSI 80.73   killed 1843   survived 453   timeout 55
+ *   run B     c4 / t60000   32m      MSI 80.90   killed 1875   survived 449   timeout 27
+ *
+ * `timeoutMS` stays at 60,000 because the suite does spawn a slow external
+ * process — not a browser, but `anvil` (`src/anvil.ts` calls `spawn('anvil')`,
+ * and eight test files start one). Dropping to the default moved **32 mutants
+ * from Killed to Timeout**: kills the tests had actually made, relabelled as
+ * hangs. The timeout is doing real work, not carrying a dead assumption.
+ *
+ * `concurrency` goes to 4 because doing so lost nothing. Not one mutant moved
+ * from Killed to Timeout; the 10 extra timeouts all came out of Survived, so
+ * they are mutants that used to escape and now do not. Wall time drops 43 %.
+ *
+ * The raw timeout count therefore reads the same for two opposite outcomes.
+ * Compare the transitions, not the totals: Killed→Timeout means detection was
+ * lost, Survived→Timeout means detection was gained.
  */
 export default {
   packageManager: 'pnpm',
@@ -67,6 +89,6 @@ export default {
   htmlReporter: { fileName: 'mutation-report/index.html' },
   jsonReporter: { fileName: 'mutation-report/mutation.json' },
   warnings: { unknownOptions: false },
-  concurrency: 2,
+  concurrency: 4,
   timeoutMS: 60000,
 };
