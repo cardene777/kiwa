@@ -13,7 +13,16 @@
 // 関数そのものの性質を見る。 期待値の script 文字列は書き写さない
 // (`rules/quality.md § 導出可能記述は人手で書かない`)。
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -236,11 +245,14 @@ describe('compile を要る経路だけが compile する (#2204)', () => {
       .map((r) => ({ name: r.name, test: JSON.parse(readFileSync(r.file, 'utf-8')).scripts.test }))
       .filter((r) => /\btsc\b/.test(r.test))
       .map((r) => r.name);
-    expect(offenders.length + results().filter((r) => r.status !== 'skipped').length, '対象 target が 0 件').toBeGreaterThan(0);
+    expect(
+      results().filter((r) => r.status !== 'skipped').length,
+      '対象 target が 0 件',
+    ).toBeGreaterThan(0);
     expect(offenders, `test が compile を挟んでいる: ${offenders.join(' ')}`).toEqual([]);
   });
 
-  it('coverage の経路は自前で compile する', () => {
+  it('coverage の経路は clean build を作ってから compile 済 test を走らせる', async () => {
     // `test` から compile を外したので、 compile 済 file を測る経路は自分で作る必要がある。
     // 持っていないと **coverage が古い compile 結果を測る**。
     const withCov = results()
@@ -248,20 +260,119 @@ describe('compile を要る経路だけが compile する (#2204)', () => {
       .map((r) => ({ name: r.name, cov: JSON.parse(readFileSync(r.file, 'utf-8')).scripts['test:cov'] }))
       .filter((r) => r.cov !== undefined);
     expect(withCov.length, 'test:cov を持つ package が 1 件も無い').toBeGreaterThan(0);
-    const missing = withCov.filter((r) => !/tsc -p/.test(r.cov)).map((r) => r.name);
-    expect(missing, `test:cov が compile を持たない: ${missing.join(' ')}`).toEqual([]);
+    const { parseScript } = await load();
+    const broken = withCov
+      .filter((r) => {
+        const legs = parseScript(r.cov);
+        const cleanAt = legs.findIndex(
+          (leg) =>
+            leg[0] === 'node' &&
+            leg.includes('-e') &&
+            leg.some((token) => token.includes('.vitest-dist')),
+        );
+        const compileAt = legs.findIndex(
+          (leg) => leg[0] === 'tsc' && leg[1] === '-p' && leg[2] === 'tsconfig.vitest.json',
+        );
+        const runAt = legs.findIndex(
+          (leg) =>
+            leg[0] === 'vitest' &&
+            leg[1] === 'run' &&
+            leg.some((token) => token.startsWith('.vitest-dist/')),
+        );
+        return cleanAt < 0 || compileAt <= cleanAt || runAt <= compileAt;
+      })
+      .map((r) => r.name);
+    expect(broken, `test:cov の clean / compile / run 順が壊れている: ${broken.join(' ')}`).toEqual(
+      [],
+    );
   });
 
-  it('変異試験と taxonomy の経路は自前で compile する', () => {
-    // どちらも script 側が remove / compile / run を持つ。 `test` に依存していないことを、
-    // 実 file の中身で確かめる (名前だけの照合では、 中で compile を外しても気付けない)。
-    const mutation = readFileSync(resolve(REPO_ROOT, 'scripts/package-mutation.mjs'), 'utf-8');
-    expect(mutation, '変異試験の経路が compile を持たない').toContain('tsconfig.vitest.json');
-    expect(mutation, '変異試験の経路が tsc を呼ばない').toMatch(/['"]tsc['"]/);
+  it('変異試験は remove / compile / run をこの順で実行する', async () => {
+    const runner = (await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
+    )) as {
+      runPackageMutation: (args: Record<string, unknown>) => number;
+    };
+    const calls: string[] = [];
+    const code = runner.runPackageMutation({
+      cwd: '/tmp/kiwa-mutation-order',
+      rm: (path: string) => calls.push(`rm ${path.slice(path.lastIndexOf('/') + 1)}`),
+      run: (command: string, args: string[]) => {
+        calls.push(`${command} ${args.join(' ')}`);
+        return 0;
+      },
+      setupProblems: () => [],
+      record: () => ({ ok: true }),
+    });
+    expect(code).toBe(0);
+    expect(calls).toEqual([
+      'rm .vitest-dist',
+      'rm mutation-report',
+      'tsc -p tsconfig.vitest.json',
+      'stryker run',
+    ]);
+  });
 
-    const taxonomy = readFileSync(resolve(REPO_ROOT, 'scripts/kiwa-taxonomy-run.mjs'), 'utf-8');
-    expect(taxonomy, 'taxonomy の経路が compile を持たない').toContain('tsconfig.vitest.json');
-    expect(taxonomy, 'taxonomy の経路が tsc を呼ばない').toMatch(/['"]tsc['"]/);
+  it('taxonomy は stale build を消してから compile 済 test を走らせる', () => {
+    // source 直走の `test` は `.vitest-dist` を消さない。 taxonomy が自分で消さなければ、
+    // 削除済み test の JavaScript が残る。 fake pnpm で command 境界を観測し、 stale file が
+    // compile 起動前に消えることも同じ実行で確かめる。
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-compile-'));
+    temps.push(root);
+    const packagesDir = join(root, 'packages');
+    const pkgDir = join(packagesDir, 'demo');
+    const testDir = join(pkgDir, 'tests/fidelity');
+    const stale = join(pkgDir, '.vitest-dist/tests/fidelity/deleted.fidelity.test.js');
+    const binDir = join(root, 'bin');
+    mkdirSync(testDir, { recursive: true });
+    mkdirSync(dirname(stale), { recursive: true });
+    mkdirSync(binDir, { recursive: true });
+    writeFileSync(join(pkgDir, 'package.json'), '{"name":"demo"}\n');
+    writeFileSync(
+      join(testDir, 'demo.fidelity.test.ts'),
+      Array.from(
+        { length: 5 },
+        (_, i) => `it('case ${i}', () => { expect(${i + 1}).toBeGreaterThan(0); });`,
+      ).join('\n'),
+    );
+    writeFileSync(stale, 'stale\n');
+
+    const calls = join(root, 'calls.txt');
+    const fakePnpm = join(binDir, 'pnpm');
+    writeFileSync(
+      fakePnpm,
+      '#!/bin/sh\nprintf \'%s\\n\' "$*" >> "$KIWA_TAXONOMY_CALLS"\ncase "$*" in\n  *" vitest "*) printf \'{"numPassedTests":5,"numFailedTests":0,"numTotalTests":5}\' ;;\nesac\n',
+    );
+    chmodSync(fakePnpm, 0o755);
+
+    execFileSync(
+      process.execPath,
+      [
+        resolve(REPO_ROOT, 'scripts/kiwa-taxonomy-run.mjs'),
+        '--category',
+        'fidelity',
+        '--lib',
+        'demo',
+        '--packages-dir',
+        packagesDir,
+        '--format',
+        'json',
+      ],
+      {
+        cwd: REPO_ROOT,
+        env: {
+          ...process.env,
+          PATH: `${binDir}:${process.env.PATH ?? ''}`,
+          KIWA_TAXONOMY_CALLS: calls,
+        },
+      },
+    );
+
+    expect(existsSync(stale), 'taxonomy が前回の compile 結果を残している').toBe(false);
+    expect(readFileSync(calls, 'utf-8').trim().split('\n')).toEqual([
+      'exec -- tsc -p tsconfig.vitest.json',
+      'exec -- vitest run .vitest-dist/tests/fidelity --exclude **/*.real.fidelity.test.js --reporter=json',
+    ]);
   });
 });
 
