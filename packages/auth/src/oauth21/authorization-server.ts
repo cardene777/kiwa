@@ -20,6 +20,20 @@ import type {
   TokenResponse,
 } from './types.js';
 
+type RegistrationFieldMap<T> = { [K in keyof Required<T>]: true };
+
+const CLIENT_REGISTRATION_FIELDS = Reflect.ownKeys({
+  clientId: true,
+  redirectUris: true,
+  scopes: true,
+  clientType: true,
+} satisfies RegistrationFieldMap<ClientRegistration>);
+
+const AUTHORIZATION_USER_FIELDS = Reflect.ownKeys({
+  subject: true,
+  scopes: true,
+} satisfies RegistrationFieldMap<AuthorizationUser>);
+
 /**
  * Mock Authorization Server implementing the RFC 9700 (OAuth 2.1) endpoint
  * surface: `/authorize`, `/token`, `/revoke`, `/introspect`. The mock keeps
@@ -107,25 +121,44 @@ export function createAuthorizationServer(
    * `TypeError` を投げるまで気付けず、 message も原因を指さない。 入口で落として何が悪いかを
    * 言う方が、 同じ入力を投げた人が直せる。
    *
-   * 判定は 2 つ。 copy を通って消えた own key が無いことと、 必須 field が残っていること。
-   * 前者が非 enumerable と symbol を、 後者が prototype 側に field を持つ class を捕まえる。
+   * 判定は 2 つ。 copy を通って消えた own key / 共有参照のまま残る symbol 配列が無いことと、
+   * interface の全 field のうち、入力に存在するものが own key として残っていること。 前者が
+   * 非 enumerable と symbol 配列を、 後者が prototype 側に field を持つ class / plain object
+   * を捕まえる。 enumerable な symbol primitive は spread が値を copy するので拒否しない。
+   * field 一覧は型へ exhaustiveness check を掛け、 optional field の追加漏れも compile で止める。
    */
-  function assertCopyable(input: object, copied: object, label: string, required: readonly string[]): void {
-    const survived = new Set(Object.keys(copied));
-    const lost = Reflect.ownKeys(input)
-      .filter((key) => (typeof key === 'symbol' ? true : !survived.has(key)))
+  function assertCopyable(
+    input: object,
+    copied: object,
+    label: string,
+    fields: readonly (string | symbol)[],
+    required: readonly (string | symbol)[],
+  ): void {
+    const copiedKeys = new Set(Reflect.ownKeys(copied));
+    const unsafe = Reflect.ownKeys(input)
+      .filter(
+        (key) =>
+          !copiedKeys.has(key) ||
+          (typeof key === 'symbol' && Array.isArray(Reflect.get(copied, key))),
+      )
       .map((key) => (typeof key === 'symbol' ? key.toString() : key));
-    if (lost.length > 0) {
+    if (unsafe.length > 0) {
       throw new Error(
-        `${label}: field(s) ${lost.join(', ')} would be lost when copying the registration. ` +
-          'Pass a plain object literal — own enumerable string properties are the only ones copied.',
+        `${label}: field(s) ${unsafe.join(', ')} would be lost when copying or retain a shared array reference. ` +
+          'Pass registration data as own enumerable properties; array-valued symbol properties are not supported.',
       );
     }
-    const missing = required.filter((key) => !survived.has(key));
-    if (missing.length > 0) {
+    const missing = new Set(
+      fields.filter((key) => Reflect.has(input, key) && !copiedKeys.has(key)),
+    );
+    for (const key of required) {
+      if (!copiedKeys.has(key)) missing.add(key);
+    }
+    if (missing.size > 0) {
+      const missingLabels = [...missing].map(String).join(', ');
       throw new Error(
-        `${label}: field(s) ${missing.join(', ')} are not own enumerable properties of the input. ` +
-          'A class instance keeps them on the prototype, where the copy cannot see them. ' +
+        `${label}: field(s) ${missingLabels} are not own enumerable properties of the input. ` +
+          'A class or inherited plain object can keep them on the prototype, where the copy cannot see them. ' +
           'Pass a plain object literal.',
       );
     }
@@ -133,13 +166,16 @@ export function createAuthorizationServer(
 
   function ownClient(client: ClientRegistration): ClientRegistration {
     const copied = ownArrays(client);
-    assertCopyable(client, copied, 'registerClient', ['clientId', 'redirectUris']);
+    assertCopyable(client, copied, 'registerClient', CLIENT_REGISTRATION_FIELDS, [
+      'clientId',
+      'redirectUris',
+    ]);
     return copied;
   }
 
   function ownUser(user: AuthorizationUser): AuthorizationUser {
     const copied = ownArrays(user);
-    assertCopyable(user, copied, 'registerUser', ['subject']);
+    assertCopyable(user, copied, 'registerUser', AUTHORIZATION_USER_FIELDS, ['subject']);
     return copied;
   }
 

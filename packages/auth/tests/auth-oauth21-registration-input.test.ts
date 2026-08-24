@@ -51,6 +51,20 @@ describe('登録入力の形が copy 経路と噛み合う (#2190)', () => {
     );
   });
 
+  it('T-REG-001b optional field だけを継承した plain object も拒否する', () => {
+    // required field が own key なら required 検査だけは通る。 prototype の scopes まで
+    // 確認しない実装では登録を受け入れた後に権限情報だけが snapshot から消える。
+    const client = Object.assign(
+      Object.create({ scopes: ['openid'] }) as ClientRegistration,
+      { clientId: 'client-inherited-scopes', redirectUris: [REDIRECT] },
+    );
+
+    const server = makeServer();
+    expect(() => server.registerClient(client), '継承した scopes を見落としている').toThrow(
+      /not own enumerable properties/,
+    );
+  });
+
   it('T-REG-002 enumerable: false の field を持つ入力を拒否する', () => {
     // spread はこの field を落とす。 型の上では在るのに保存側から消えるので、 scope 判定が
     // 「宣言されていない」 側へ倒れる。
@@ -86,22 +100,48 @@ describe('登録入力の形が copy 経路と噛み合う (#2190)', () => {
     );
   });
 
+  it('T-REG-003b enumerable な symbol primitive は拒否しない', () => {
+    // object spread は enumerable な symbol key も copy する。 配列と違って primitive は
+    // 共有参照を残さないので、 安全な metadata まで一律に拒否してはいけない。
+    const marker = Symbol('metadata');
+    const client = {
+      clientId: 'client-symbol-primitive',
+      redirectUris: [REDIRECT],
+      [marker]: 'diagnostic-only',
+    } as ClientRegistration & { [marker]: string };
+
+    const server = makeServer();
+    expect(
+      () => server.registerClient(client),
+      'copy 済みの symbol primitive を拒否している',
+    ).not.toThrow();
+  });
+
   it('T-REG-004 getter を 2 回評価しない', () => {
     // key を `client.clientId` から別に読むと getter が 2 回走る。 1 回目と 2 回目で違う値を
     // 返す入力では **Map の key と保存値が食い違い**、 その client を引けなくなる。
-    let reads = 0;
+    let clientReads = 0;
     const client = {
       get clientId(): string {
-        reads += 1;
-        return `key-${reads}`;
+        clientReads += 1;
+        return `key-${clientReads}`;
       },
       redirectUris: [REDIRECT],
     } as ClientRegistration;
+    let userReads = 0;
+    const user = {
+      get subject(): string {
+        userReads += 1;
+        return `user-${userReads}`;
+      },
+    } as AuthorizationUser;
 
     const server = makeServer();
     server.registerClient(client);
+    server.registerUser(user);
 
-    expect(reads, 'getter を 2 回以上評価している').toBe(1);
+    expect(clientReads, 'client getter を 2 回以上評価している').toBe(1);
+    expect(userReads, 'user getter を 2 回以上評価している').toBe(1);
     // key と保存値が一致する = 登録した id でそのまま引ける。
     expect(() =>
       server.authorize(
@@ -115,7 +155,46 @@ describe('登録入力の形が copy 経路と噛み合う (#2190)', () => {
         },
         'user-1',
       ),
-    ).not.toThrow(/unknown client_id/);
+    ).not.toThrow(/unknown (client_id|subject)/);
+  });
+
+  it('T-REG-004b options の getter も 2 回評価しない', () => {
+    // constructor の preseed loop は registerClient / registerUser と別の実装経路。
+    // snapshot ではなく入力から Map key を再読込する変異を、 client / user の双方で止める。
+    let clientReads = 0;
+    const client = {
+      get clientId(): string {
+        clientReads += 1;
+        return `option-client-${clientReads}`;
+      },
+      redirectUris: [REDIRECT],
+    } as ClientRegistration;
+    let userReads = 0;
+    const user = {
+      get subject(): string {
+        userReads += 1;
+        return `option-user-${userReads}`;
+      },
+    } as AuthorizationUser;
+
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ clients: [client], users: [user] });
+
+    expect(clientReads, 'options client getter を 2 回以上評価している').toBe(1);
+    expect(userReads, 'options user getter を 2 回以上評価している').toBe(1);
+    expect(() =>
+      server.authorize(
+        {
+          responseType: 'code',
+          clientId: 'option-client-1',
+          redirectUri: REDIRECT,
+          state: 's',
+          codeChallenge: 'x'.repeat(43),
+          codeChallengeMethod: 'S256',
+        },
+        'option-user-1',
+      ),
+    ).not.toThrow(/unknown (client_id|subject)/);
   });
 
   it('T-REG-005 素の object literal は通る', () => {
@@ -126,6 +205,34 @@ describe('登録入力の形が copy 経路と噛み合う (#2190)', () => {
     ).not.toThrow();
     expect(() =>
       server.registerUser({ subject: 'user-D', scopes: ['openid'] } as AuthorizationUser),
+    ).not.toThrow();
+
+    const nullPrototypeClient = Object.assign(Object.create(null) as ClientRegistration, {
+      clientId: 'client-null-prototype',
+      redirectUris: [REDIRECT],
+    });
+    expect(
+      () => server.registerClient(nullPrototypeClient),
+      'null prototype を拒否している',
+    ).not.toThrow();
+
+    const inheritedMetadataClient = Object.assign(
+      Object.create({ fixtureSource: 'inherited' }) as ClientRegistration,
+      { clientId: 'client-custom-prototype', redirectUris: [REDIRECT] },
+    );
+    expect(
+      () => server.registerClient(inheritedMetadataClient),
+      'own field を持つ custom prototype object を拒否している',
+    ).not.toThrow();
+
+    const indexedClient: ClientRegistration & Record<string, string | readonly string[]> = {
+      clientId: 'client-indexed',
+      redirectUris: [REDIRECT],
+      diagnosticLabel: 'fixture',
+    };
+    expect(
+      () => server.registerClient(indexedClient),
+      'string index signature を拒否している',
     ).not.toThrow();
   });
 
