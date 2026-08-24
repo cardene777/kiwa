@@ -96,10 +96,19 @@ export function declaredDefaultIn(body: string): number | null {
   return null;
 }
 
-/** 本文に書かれた coverage 既定値を、英語 / 日本語の両表記から全件取り出す。 */
+/**
+ * 本文に書かれた coverage 既定値を、英語 / 日本語の両表記から全件取り出す。
+ *
+ * **英語の語に日本語の助詞が続く形も受ける** (#2184 r2-f1)。 実 skill は
+ * `default は 100%` を 4 箇所で使っており、`default(?:\s+is)?` だけでは 1 件も拾えなかった。
+ * house style は語を混ぜるので、語幹と助詞を別々に受ける。
+ *
+ * 語幹 = `default` / `既定` / `省略時`。 助詞 = `は` / `値は` / `is` のいずれか任意。
+ */
 export function statedDefaultsIn(body: string): number[] {
-  return [...body.matchAll(/(?:default(?:\s+is)?|既定(?:は|値は)?|省略時(?:は)?)\s*(\d+)\s*%/g)]
-    .map((match) => Number(match[1]));
+  return [...body.matchAll(/(?:default|既定|省略時)(?:\s+is|\s*値?は)?\s*(\d+)\s*%/g)].map(
+    (match) => Number(match[1]),
+  );
 }
 
 function declaredDefault(skill: string): number | null {
@@ -319,6 +328,20 @@ describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
 
     const offending = values.filter((v) => v !== 100);
     expect(offending, '先頭が 100 なら後続の矛盾を見逃している').toEqual([80]);
+
+    // **実 skill が実際に使っている表記を通す** (#2184 r2-f1)。 4 skill が
+    // `default は 100%` の形で書いており、英語の語に日本語の助詞が続く。
+    // `default(?:\s+is)?` だけを受ける形では 1 件も拾えていなかった。
+    for (const written of [
+      'threshold は **production target に対してのみ** 適用。 default は 80%:',
+      'threshold は default 80% で運用する',
+      'threshold の default 値は 80% とする',
+      'threshold は 既定 80%',
+      'threshold は 省略時 80%',
+      'threshold default is 80%',
+    ]) {
+      expect(statedDefaultsIn(written), `この表記の既定値を拾えていない: ${written}`).toEqual([80]);
+    }
   });
 
   it('T-SCT-005 完了条件と Step 5 の目標値が矛盾しない', () => {
