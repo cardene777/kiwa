@@ -183,6 +183,70 @@ describe('登録した参照を後から書き換えても認可判定に届か�
     expect(() => authorizeWith(server, 'admin')).toThrow(/not entitled to scope "admin"/);
   });
 
+  it('T-SNAP-024 登録後に property を再代入しても届かない (client / user 両側)', () => {
+    // **`push` だけでは足りない** (#2179 gv-10)。 配列 field だけを copy して元 object を
+    // 保持する実装は、`push` の検査を通る一方 `client.scopes = [...]` の再代入が内部へ届く。
+    // 実測で「元 object を保持し配列 property だけ clone へ差し替える」 変異を当てると、
+    // 既存の 5 件はいずれも落ちなかった。
+    //
+    // client 側と user 側を分けて当てる = 片側の判定が先に落ちてもう片側を隠すため。
+    const client = { clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: ['openid'] };
+    __resetOAuth21Counters();
+    const clientSide = createAuthorizationServer({
+      issuer: 'https://as.example.test',
+      clients: [client],
+      // user 側は最初から admin を持つので、user 側の判定では落ちない。
+      users: [{ subject: 'user-1', scopes: ['openid', 'admin'] }],
+    });
+
+    client.scopes = ['openid', 'admin'];
+
+    expect(() => authorizeWith(clientSide, 'admin')).toThrow(/not registered for scope "admin"/);
+
+    const user = { subject: 'user-1', scopes: ['openid'] };
+    __resetOAuth21Counters();
+    const userSide = createAuthorizationServer({
+      issuer: 'https://as.example.test',
+      clients: [
+        { clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: ['openid', 'admin'] },
+      ],
+      users: [user],
+    });
+
+    user.scopes = ['openid', 'admin'];
+
+    expect(() => authorizeWith(userSide, 'admin')).toThrow(/not entitled to scope "admin"/);
+  });
+
+  it('T-SNAP-024b registerClient / registerUser 経路の再代入も届かない', () => {
+    const client = { clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: ['openid'] };
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
+    server.registerClient(client);
+    server.registerUser({ subject: 'user-1', scopes: ['openid', 'admin'] });
+
+    client.scopes = ['openid', 'admin'];
+    client.redirectUris = [REDIRECT_LOCAL, 'https://evil.example.test/cb'];
+
+    expect(() => authorizeWith(server, 'admin')).toThrow(/not registered for scope "admin"/);
+
+    const { codeChallenge } = createPkceChallenge();
+    expect(() =>
+      server.authorize(
+        {
+          responseType: 'code',
+          clientId: 'client-A',
+          redirectUri: 'https://evil.example.test/cb',
+          state: 'state-1',
+          codeChallenge,
+          codeChallengeMethod: 'S256',
+          scope: 'openid',
+        },
+        'user-1',
+      ),
+    ).toThrow(/redirect_uri/);
+  });
+
   it('T-SNAP-023 redirectUris を後から足しても受け付けない', () => {
     // `scopes` と同じ形が `redirectUris` にもある。 後から足した宛先へ code を
     // 送れると、 認可された宛先の宣言が意味を持たなくなる。
