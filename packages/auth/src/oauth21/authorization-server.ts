@@ -20,6 +20,20 @@ import type {
   TokenResponse,
 } from './types.js';
 
+type RegistrationFieldMap<T> = { [K in keyof Required<T>]: true };
+
+const CLIENT_REGISTRATION_FIELDS = Reflect.ownKeys({
+  clientId: true,
+  redirectUris: true,
+  scopes: true,
+  clientType: true,
+} satisfies RegistrationFieldMap<ClientRegistration>);
+
+const AUTHORIZATION_USER_FIELDS = Reflect.ownKeys({
+  subject: true,
+  scopes: true,
+} satisfies RegistrationFieldMap<AuthorizationUser>);
+
 /**
  * Mock Authorization Server implementing the RFC 9700 (OAuth 2.1) endpoint
  * surface: `/authorize`, `/token`, `/revoke`, `/introspect`. The mock keeps
@@ -90,37 +104,110 @@ export function createAuthorizationServer(
     return copy as T;
   }
 
+  /**
+   * copy で情報が落ちる入力を登録の入口で拒否する (#2190)。
+   *
+   * `ownArrays()` の spread と `Object.entries()` は **own enumerable string key しか見ない**。
+   * 型に沿った正当な入力でも、 次の形は copy を通ると壊れる。 いずれも `tsc --noEmit` を通る
+   * ことを実測済。
+   *
+   * | 形 | copy を通ると |
+   * |---|---|
+   * | `class C implements ClientRegistration` (field が prototype 側) | 全 field が消える |
+   * | `Object.defineProperty(o, 'scopes', { enumerable: false })` | その field が消える |
+   * | `unique symbol` の配列 field | 走査されず、 copy が元の配列と同一参照になる |
+   *
+   * **落ちるのは登録時ではなく認可時**だった。 `authorize()` が `redirectUris.includes` で
+   * `TypeError` を投げるまで気付けず、 message も原因を指さない。 入口で落として何が悪いかを
+   * 言う方が、 同じ入力を投げた人が直せる。
+   *
+   * 判定は 2 つ。 copy を通って消えた own key / 共有参照のまま残る symbol 配列が無いことと、
+   * interface の全 field のうち、入力に存在するものが own key として残っていること。 前者が
+   * 非 enumerable と symbol 配列を、 後者が prototype 側に field を持つ class / plain object
+   * を捕まえる。 enumerable な symbol primitive は spread が値を copy するので拒否しない。
+   * field 一覧は型へ exhaustiveness check を掛け、 optional field の追加漏れも compile で止める。
+   */
+  function assertCopyable(
+    input: object,
+    copied: object,
+    label: string,
+    fields: readonly (string | symbol)[],
+    required: readonly (string | symbol)[],
+  ): void {
+    const copiedKeys = new Set(Reflect.ownKeys(copied));
+    const unsafe = Reflect.ownKeys(input)
+      .filter(
+        (key) =>
+          !copiedKeys.has(key) ||
+          (typeof key === 'symbol' && Array.isArray(Reflect.get(copied, key))),
+      )
+      .map((key) => (typeof key === 'symbol' ? key.toString() : key));
+    if (unsafe.length > 0) {
+      throw new Error(
+        `${label}: field(s) ${unsafe.join(', ')} would be lost when copying or retain a shared array reference. ` +
+          'Pass registration data as own enumerable properties; array-valued symbol properties are not supported.',
+      );
+    }
+    const missing = new Set(
+      fields.filter((key) => Reflect.has(input, key) && !copiedKeys.has(key)),
+    );
+    for (const key of required) {
+      if (!copiedKeys.has(key)) missing.add(key);
+    }
+    if (missing.size > 0) {
+      const missingLabels = [...missing].map(String).join(', ');
+      throw new Error(
+        `${label}: field(s) ${missingLabels} are not own enumerable properties of the input. ` +
+          'A class or inherited plain object can keep them on the prototype, where the copy cannot see them. ' +
+          'Pass a plain object literal.',
+      );
+    }
+  }
+
   function ownClient(client: ClientRegistration): ClientRegistration {
-    return ownArrays(client);
+    const copied = ownArrays(client);
+    assertCopyable(client, copied, 'registerClient', CLIENT_REGISTRATION_FIELDS, [
+      'clientId',
+      'redirectUris',
+    ]);
+    return copied;
   }
 
   function ownUser(user: AuthorizationUser): AuthorizationUser {
-    return ownArrays(user);
+    const copied = ownArrays(user);
+    assertCopyable(user, copied, 'registerUser', AUTHORIZATION_USER_FIELDS, ['subject']);
+    return copied;
   }
 
+  // **key は snapshot から採る** (#2190)。 `client.clientId` を別に読むと getter が 2 回走り、
+  // 1 回目と 2 回目で違う値を返す入力では **Map の key と保存値が食い違う**。
   for (const client of options.clients ?? []) {
-    clients.set(client.clientId, ownClient(client));
+    const owned = ownClient(client);
+    clients.set(owned.clientId, owned);
   }
   for (const user of options.users ?? []) {
-    users.set(user.subject, ownUser(user));
+    const owned = ownUser(user);
+    users.set(owned.subject, owned);
   }
 
   function registerClient(client: ClientRegistration): void {
-    if (clients.has(client.clientId)) {
+    const owned = ownClient(client);
+    if (clients.has(owned.clientId)) {
       throw new Error(
-        `registerClient: client "${client.clientId}" already registered`,
+        `registerClient: client "${owned.clientId}" already registered`,
       );
     }
-    clients.set(client.clientId, ownClient(client));
+    clients.set(owned.clientId, owned);
   }
 
   function registerUser(user: AuthorizationUser): void {
-    if (users.has(user.subject)) {
+    const owned = ownUser(user);
+    if (users.has(owned.subject)) {
       throw new Error(
-        `registerUser: user "${user.subject}" already registered`,
+        `registerUser: user "${owned.subject}" already registered`,
       );
     }
-    users.set(user.subject, ownUser(user));
+    users.set(owned.subject, owned);
   }
 
   function requireClient(clientId: string): ClientRegistration {
