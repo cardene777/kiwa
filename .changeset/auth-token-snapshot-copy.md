@@ -31,8 +31,9 @@ object と配列 field (`scopes` / `redirectUris`) を copy して取り込む�
 |---|---|
 | token の `scope` を変える | `clients` / `users` に scope を宣言して token を発行し直す |
 | token を失効させる | `revoke(token, clientId)` |
-| 全部消す | `reset()` |
+| 発行済みを全部消す | `reset()` — 消えるのは code / access / refresh / rotated / JTI で、**登録済みの client と user は残る** (同じ client・user で再発行できる) |
 | 登録済みの client / user を変える | **手段は無い**。 別の `createAuthorizationServer()` を組む |
 
-**状態を変える公開 API は `revoke()` と `reset()` の 2 つだけ**で、`scope` を後から変える API は
-無い。 列挙して読むだけの test は影響しない。
+**発行済みの状態を変える公開 API は `revoke()` と `reset()` の 2 つだけ**で、`scope` を後から
+変える API は無い。 登録そのものを増やす `registerClient()` / `registerUser()` は別軸の公開 API で、
+既存の登録を書き換える手段は持たない。 列挙して読むだけの test は影響しない。

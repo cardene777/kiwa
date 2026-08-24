@@ -408,6 +408,33 @@ describe('listRefreshTokens は要素も copy して返す (#2179)', () => {
     ).toThrow();
   });
 
+  it('T-SNAP-014 revoke した access token は一覧から消える', () => {
+    // access と refresh で失効の残り方が違う (#2180 で JSDoc に明記済)。 access は registry から
+    // 消し、 refresh は `revoked: true` で残す。
+    //
+    // **この非対称を確かめる検査が無かった** (#2192)。 既存は `introspect().active === false` まで
+    // で、 access token が一覧から消えることは見ていない = access も `revoked: true` で残す実装に
+    // 変えても検査は通る。
+    //
+    // 将来 access も残す設計へ変えるなら、 この検査は意図して落ちる。 その時は非対称を解いた
+    // 判断ごと JSDoc と併せて直す。
+    const server = makeServer();
+    const { accessToken } = issue(server);
+
+    expect(
+      server.listAccessTokens().map((entry) => entry.token),
+      'revoke 前に一覧へ出ていない',
+    ).toContain(accessToken);
+
+    server.revoke(accessToken, 'client-A');
+
+    expect(
+      server.listAccessTokens().map((entry) => entry.token),
+      'revoke した access token が一覧に残っている',
+    ).not.toContain(accessToken);
+    expect(server.introspect({ token: accessToken }).active, '失効していない').toBe(false);
+  });
+
   it('T-SNAP-013 rotate 済の要素も copy されている', () => {
     // 戻り値は active と rotated の 2 群を連結する。 **両方に copy が要る**ので、
     // 片方だけ copy した形をここで落とす。
@@ -418,7 +445,19 @@ describe('listRefreshTokens は要素も copy して返す (#2179)', () => {
     server.token({ grantType: 'refresh_token', refreshToken: original, clientId: 'client-A' });
 
     const listed = server.listRefreshTokens();
-    expect(listed.length, 'rotate 前と後の 2 件が並ぶ').toBeGreaterThan(1);
+    // **件数では識別できない** (#2192)。 rotated 側を active の重複に置き換える実装でも
+    // `length > 1` は通り、 全要素 copy の assertion も通る = 「rotated が居る」 ことを
+    // 1 度も確かめていない状態になる (実測で変異が生存した)。
+    //
+    // rotated と active は同じ形で返るため、 区別できるのは `revoked` field だけ。 元 token が
+    // rotated 側として残っていることと、 新 token が active 側に居ることを別々に見る。
+    const rotated = listed.filter((entry) => entry.revoked);
+    const active = listed.filter((entry) => !entry.revoked);
+    expect(rotated.map((entry) => entry.token), 'rotate 前の token が失効側に残っていない').toEqual([
+      original,
+    ]);
+    expect(active.length, 'rotate 後の token が有効側に居ない').toBe(1);
+    expect(active[0]!.token, '有効側が rotate 前の token のまま').not.toBe(original);
 
     for (const entry of listed) entry.scope = 'admin';
 
