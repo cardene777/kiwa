@@ -21,7 +21,7 @@
  * 出力 = lib × 該当 category の matrix (table or JSON)、 exit code 0 = 全 pass、 1 = 1 件でも fail。
  */
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 // readFileSync is used by analyzeTestFile
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -29,6 +29,7 @@ import { isMainModule } from './lib/is-main-module.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CONFIG_PATH = join(ROOT, 'tests/release-smoke/test-taxonomy.config.json');
+const BUILD_DIR = '.vitest-dist';
 /**
  * lib を探す既定の root。 `--packages-dir` で差し替えられる。
  *
@@ -314,6 +315,11 @@ function runOneCell(lib, category, includeReal = false, config = null, packagesD
     return runPerfCell(libDir, includeReal);
   }
 
+  // `test` は #2204 から source を直接走らせ、 この directory を消さない。 taxonomy 自身が
+  // clean にしないと、削除済み test の古い JavaScript が残り、現在の source に無い test まで
+  // 実行対象になる。
+  rmSync(join(libDir, BUILD_DIR), { recursive: true, force: true });
+
   const build = spawnSync('pnpm', ['exec', '--', 'tsc', '-p', 'tsconfig.vitest.json'], {
     cwd: libDir,
     stdio: 'pipe',
@@ -324,7 +330,7 @@ function runOneCell(lib, category, includeReal = false, config = null, packagesD
     return { status: 'compile-fail', passed: 0, failed: 0, total: 0, stderr: build.stderr };
   }
 
-  const distDir = `.vitest-dist/tests/${category}`;
+  const distDir = `${BUILD_DIR}/tests/${category}`;
   // includeReal=false 時 (default) = real driver test を exclude、
   // includeReal=true 時 = real driver test を含めて実行、 KIWA_MODE=real env 併用が前提。
   const vitestArgs = ['exec', '--', 'vitest', 'run', distDir];

@@ -386,10 +386,14 @@ describe('the real repository', () => {
   let shared: Awaited<ReturnType<Awaited<ReturnType<typeof loadScript>>['reportAll']>>;
   let helpers: Awaited<ReturnType<typeof loadScript>>;
 
+  // **hook に明示の timeout を置く**。 `reportAll()` は repo 全体を走査するので、単体では
+  // 3.6 秒でも sweep の並列下では 10 秒の既定を超える (実測でここが `Hook timed out in
+  // 10000ms` で落ちた)。 `--testTimeout` は hook を覆わない
+  // (`docs/quality/test-parallelism.md` § Timeouts sized for a loaded machine の群 6)。
   beforeAll(async () => {
     helpers = await loadScript();
     shared = await helpers.reportAll();
-  });
+  }, 120_000);
 
   it('classifies every source line into exactly one bucket', () => {
     const { walkSources, countLines } = helpers;

@@ -13,7 +13,16 @@
 // 関数そのものの性質を見る。 期待値の script 文字列は書き写さない
 // (`rules/quality.md § 導出可能記述は人手で書かない`)。
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -37,6 +46,7 @@ interface Result {
 
 interface Module {
   parseScript: (script: string) => string[][];
+  deriveTest: (script: string) => string | null;
   deriveFast: (script: string) => string | null;
   inspect: (root?: string) => Result[];
   packageDirs: () => string[];
@@ -114,11 +124,10 @@ describe('packages の test:fast が test から導出された形のままで�
 
   it('報告 mode は drift があると非 0 で終わる', () => {
     // 呼出側 (人 / 別 script) は exit code で判断する。 0 を返すと drift を見逃す。
-    const pkgDir = resolve(REPO_ROOT, 'packages');
     const target = results().find((r) => r.status === 'ok');
     expect(target, '導出対象の package が 1 件も無い').toBeDefined();
 
-    const file = join(pkgDir, target!.name, 'package.json');
+    const file = target!.file;
     const backup = mkdtempSync(join(tmpdir(), 'kiwa-test-fast-'));
     temps.push(backup);
     const saved = join(backup, 'package.json');
@@ -228,6 +237,151 @@ describe('packages の test:fast が test から導出された形のままで�
   });
 });
 
+describe('compile を要る経路だけが compile する (#2204)', () => {
+  it('どの target の test も tsc を呼ばない', () => {
+    // #2204 の本体。 `test` は source を直接走らせる = 26 package で 71.9 秒あった固定費が消える。
+    const offenders = results()
+      .filter((r) => r.status !== 'skipped')
+      .map((r) => ({ name: r.name, test: JSON.parse(readFileSync(r.file, 'utf-8')).scripts.test }))
+      .filter((r) => /\btsc\b/.test(r.test))
+      .map((r) => r.name);
+    expect(
+      results().filter((r) => r.status !== 'skipped').length,
+      '対象 target が 0 件',
+    ).toBeGreaterThan(0);
+    expect(offenders, `test が compile を挟んでいる: ${offenders.join(' ')}`).toEqual([]);
+  });
+
+  it('coverage の経路は clean build を作ってから compile 済 test を走らせる', async () => {
+    // `test` から compile を外したので、 compile 済 file を測る経路は自分で作る必要がある。
+    // 持っていないと **coverage が古い compile 結果を測る**。
+    const withCov = results()
+      .filter((r) => r.status !== 'skipped')
+      .map((r) => ({ name: r.name, cov: JSON.parse(readFileSync(r.file, 'utf-8')).scripts['test:cov'] }))
+      .filter((r) => r.cov !== undefined);
+    expect(withCov.length, 'test:cov を持つ package が 1 件も無い').toBeGreaterThan(0);
+    const { parseScript } = await load();
+    const broken = withCov
+      .filter((r) => {
+        const legs = parseScript(r.cov);
+        const cleanAt = legs.findIndex(
+          (leg) =>
+            leg[0] === 'node' &&
+            leg.includes('-e') &&
+            leg.some((token) => token.includes('.vitest-dist')),
+        );
+        const compileAt = legs.findIndex(
+          (leg) => leg[0] === 'tsc' && leg[1] === '-p' && leg[2] === 'tsconfig.vitest.json',
+        );
+        const runAt = legs.findIndex(
+          (leg) =>
+            leg[0] === 'vitest' &&
+            leg[1] === 'run' &&
+            leg.some((token) => token.startsWith('.vitest-dist/')),
+        );
+        return cleanAt < 0 || compileAt <= cleanAt || runAt <= compileAt;
+      })
+      .map((r) => r.name);
+    expect(broken, `test:cov の clean / compile / run 順が壊れている: ${broken.join(' ')}`).toEqual(
+      [],
+    );
+  });
+
+  it('変異試験は remove / compile / run をこの順で実行する', async () => {
+    const runner = (await import(
+      pathToFileURL(resolve(REPO_ROOT, 'scripts/package-mutation.mjs')).href
+    )) as {
+      runPackageMutation: (args: Record<string, unknown>) => number;
+    };
+    const calls: string[] = [];
+    const code = runner.runPackageMutation({
+      cwd: '/tmp/kiwa-mutation-order',
+      rm: (path: string) => calls.push(`rm ${path.slice(path.lastIndexOf('/') + 1)}`),
+      run: (command: string, args: string[]) => {
+        calls.push(`${command} ${args.join(' ')}`);
+        return 0;
+      },
+      setupProblems: () => [],
+      record: () => ({ ok: true }),
+    });
+    expect(code).toBe(0);
+    expect(calls).toEqual([
+      'rm .vitest-dist',
+      'rm mutation-report',
+      'tsc -p tsconfig.vitest.json',
+      'stryker run',
+    ]);
+  });
+
+  it('taxonomy は stale build を消してから compile 済 test を走らせる', () => {
+    // source 直走の `test` は `.vitest-dist` を消さない。 taxonomy が自分で消さなければ、
+    // 削除済み test の JavaScript が残る。 fake pnpm で command 境界を観測し、 stale file が
+    // compile 起動前に消えることも同じ実行で確かめる。
+    const root = mkdtempSync(join(tmpdir(), 'kiwa-taxonomy-compile-'));
+    temps.push(root);
+    const packagesDir = join(root, 'packages');
+    const pkgDir = join(packagesDir, 'demo');
+    const testDir = join(pkgDir, 'tests/fidelity');
+    const stale = join(pkgDir, '.vitest-dist/tests/fidelity/deleted.fidelity.test.js');
+    const binDir = join(root, 'bin');
+    mkdirSync(testDir, { recursive: true });
+    mkdirSync(dirname(stale), { recursive: true });
+    mkdirSync(binDir, { recursive: true });
+    writeFileSync(join(pkgDir, 'package.json'), '{"name":"demo"}\n');
+    writeFileSync(
+      join(testDir, 'demo.fidelity.test.ts'),
+      Array.from(
+        { length: 5 },
+        (_, i) => `it('case ${i}', () => { expect(${i + 1}).toBeGreaterThan(0); });`,
+      ).join('\n'),
+    );
+    writeFileSync(stale, 'stale\n');
+
+    const calls = join(root, 'calls.txt');
+    const fakePnpm = join(binDir, 'pnpm');
+    // **呼出の瞬間に stale file が在るかを記録する**。 最後に消えていることだけを見ると、
+    // 削除を vitest の後ろへ動かす変異を通してしまう (Round 2 の指摘)。 compile が始まった
+    // 時点で既に消えていることを、 その場で観測する。
+    writeFileSync(
+      fakePnpm,
+      '#!/bin/sh\nif [ -e "$KIWA_TAXONOMY_STALE" ]; then stale=present; else stale=absent; fi\nprintf \'%s\\t%s\\n\' "$*" "$stale" >> "$KIWA_TAXONOMY_CALLS"\ncase "$*" in\n  *" vitest "*) printf \'{"numPassedTests":5,"numFailedTests":0,"numTotalTests":5}\' ;;\nesac\n',
+    );
+    chmodSync(fakePnpm, 0o755);
+
+    execFileSync(
+      process.execPath,
+      [
+        resolve(REPO_ROOT, 'scripts/kiwa-taxonomy-run.mjs'),
+        '--category',
+        'fidelity',
+        '--lib',
+        'demo',
+        '--packages-dir',
+        packagesDir,
+        '--format',
+        'json',
+      ],
+      {
+        cwd: REPO_ROOT,
+        env: {
+          ...process.env,
+          PATH: `${binDir}:${process.env.PATH ?? ''}`,
+          KIWA_TAXONOMY_CALLS: calls,
+          KIWA_TAXONOMY_STALE: stale,
+        },
+      },
+    );
+
+    expect(existsSync(stale), 'taxonomy が前回の compile 結果を残している').toBe(false);
+    // 順序まで固定する。 `absent` は「その呼出の時点で既に消えていた」 ことを表す = 削除が
+    // compile より前にあることの直接の証跡で、 削除を後ろへ動かすと `present` に変わる。
+    expect(readFileSync(calls, 'utf-8').trim().split('\n')).toEqual([
+      'exec -- tsc -p tsconfig.vitest.json\tabsent',
+      'exec -- vitest run .vitest-dist/tests/fidelity --exclude **/*.real.fidelity.test.js --reporter=json\tabsent',
+    ]);
+  });
+});
+
 describe('導出そのものの性質 (#2202)', () => {
   const BASE =
     "node ../../scripts/build-deps.mjs @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/.stryker-tmp/**' --environment jsdom --testTimeout 15000";
@@ -319,16 +473,15 @@ describe('導出そのものの性質 (#2202)', () => {
     expect(legs[0]!, '引用符の中身を語として保っていない').toEqual(['node', '-e', 'a && b']);
   });
 
-  it('compile 済 path を走らせない test script は導出しない', async () => {
-    // 導出は `.vitest-dist/...` を source に戻す形なので、 その path が無い script には
-    // 当たらない。 **throw させない** = `inspect` が全 package を回す途中で落ちると、
-    // その package 以降の判定ごと消える。
-    const { deriveFast } = await load();
-    expect(deriveFast('vitest run tests --environment node'), '当たらない形から導出している').toBeNull();
-    expect(
-      deriveFast('tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests'),
-      '当たる形から導出していない',
-    ).not.toBeNull();
+  it('既に source 直走の test script も同じ結果に落ちる', async () => {
+    // #2204 で `test` から compile 段を外したので、 導出の入力は既に source 直走になる。
+    // **何度掛けても同じ結果になる** ことが、 script を繰り返し実行できる条件そのもの。
+    const { deriveTest } = await load();
+    const compiled =
+      "node -e \"x .vitest-dist x\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node";
+    const once = deriveTest(compiled)!;
+    expect(once, 'compile 段が残っている').not.toContain('tsc -p');
+    expect(deriveTest(once), '2 度掛けると結果が変わる').toBe(once);
   });
 
   it('導出できない test に test:fast が残っていると orphan として報告する', async () => {
@@ -346,12 +499,12 @@ describe('導出そのものの性質 (#2202)', () => {
     write('leftover', { test: 'forge test', 'test:fast': 'vitest run tests --changed main' });
     write('clean', { test: 'forge test' });
     write('derived', {
-      test: 'vitest run .vitest-dist/tests --environment node',
+      test: "vitest run tests --exclude '**/.vitest-dist/**' --environment node",
       'test:fast':
         "vitest run tests --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --environment node",
     });
 
-    const byName = new Map(inspect(root).map((r) => [r.name, r]));
+    const byName = new Map(inspect(root).map((r) => [r.name.replace('packages/', ''), r]));
     expect(byName.get('leftover')?.status, '置き去りを orphan にしていない').toBe('orphan');
     expect(byName.get('clean')?.status, '置き去りの無い対象外まで orphan にしている').toBe('skipped');
     expect(byName.get('derived')?.status, '導出できる package を取りこぼしている').toBe('ok');
