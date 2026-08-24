@@ -158,6 +158,17 @@ function brokenSymlinks(entries: readonly Entry[], repoRootPath: string, skillsR
     const real = realpathSync(path);
     if (!real.startsWith(root)) {
       broken.push(`${entry.rel} (skill dir の外を指す: ${real})`);
+      continue;
+    }
+    // **名前の一致まで見る** (#2189)。 共用 reference は「同じ名前の file を 1 本の実体に
+    // 集める」 形で運用しており、 別名の先を指す symlink はその前提が破れた状態を指す。
+    //
+    // 参照は解決するので、 名前を見ない限り T-SRI-003 も T-SRI-006 も通る。 読み手は
+    // `coverage-classify.md` を Read して分類 rule を期待するのに、 届くのが言語選択の
+    // 説明になる形が素通りする。
+    const target = real.slice(real.lastIndexOf('/') + 1);
+    if (target !== entry.name) {
+      broken.push(`${entry.rel} (別名の実体を指す: ${target})`);
     }
   }
   return broken.sort();
@@ -322,7 +333,7 @@ describe('skill の reference が実在する (#2182)', () => {
 
   it('T-SRI-010 dir を指す symlink を「実体を指している」 と読まない', () => {
     // 実 skill に dir を指す symlink は無いので、**判定を実 file で測れない**。
-    // 検査を外しても実 file では落ちないため、fixture で 4 形を通して固定する
+    // 検査を外しても実 file では落ちないため、fixture で 5 形を通して固定する
     // (#2182 r2-f1)。
     const root = mkdtempSync(resolve(tmpdir(), 'kiwa-skill-symlink-'));
     try {
@@ -331,10 +342,15 @@ describe('skill の reference が実在する (#2182)', () => {
       mkdirSync(refs, { recursive: true });
 
       writeFileSync(resolve(refs, 'real.md'), '# real\n');
+      // **同名の実体を別 dir に置く** (#2189)。 共用 reference の実運用と同じ形で、
+      // 名前の判定を足しても落ちない 1 本を fixture に残す。
+      const shared = resolve(skills, 'yy/references');
+      mkdirSync(shared, { recursive: true });
+      writeFileSync(resolve(shared, 'to-file.md'), '# shared\n');
       const dir = resolve(refs, 'a-dir.md');
       mkdirSync(dir);
 
-      symlinkSync(resolve(refs, 'real.md'), resolve(refs, 'to-file.md'));
+      symlinkSync(resolve(shared, 'to-file.md'), resolve(refs, 'to-file.md'));
       symlinkSync(dir, resolve(refs, 'to-dir.md'));
       symlinkSync(resolve(refs, 'nope.md'), resolve(refs, 'to-nothing.md'));
       // **skill dir の外の「通常 file」 を指す**。 dir を指す形にすると `isFile` の側で
@@ -342,17 +358,25 @@ describe('skill の reference が実在する (#2182)', () => {
       const outside = resolve(root, 'outside.md');
       writeFileSync(outside, '# outside\n');
       symlinkSync(outside, resolve(refs, 'to-outside.md'));
+      // **skill dir の中の、名前が違う通常 file を指す** (#2189)。 範囲内なので範囲外の判定は
+      // 通り、 実体もあるので存在と種別の判定も通る = 名前を見る判定だけが落とせる形。
+      symlinkSync(resolve(refs, 'real.md'), resolve(refs, 'to-renamed.md'));
 
-      const entries: Entry[] = ['to-file.md', 'to-dir.md', 'to-nothing.md', 'to-outside.md'].map(
-        (name) => ({ rel: `skills/zz/references/${name}`, name, isSymlink: true }),
-      );
+      const entries: Entry[] = [
+        'to-file.md',
+        'to-dir.md',
+        'to-nothing.md',
+        'to-outside.md',
+        'to-renamed.md',
+      ].map((name) => ({ rel: `skills/zz/references/${name}`, name, isSymlink: true }));
       const broken = brokenSymlinks(entries, root, realpathSync(skills));
 
-      // 通常 file を指す 1 本だけが残り、他 3 本は理由付きで拒否される。
+      // 同名の実体を指す 1 本だけが残り、他 4 本は理由付きで拒否される。
       expect(broken.map((b) => b.split(' ')[0]).sort(), '拒否する symlink の種類が違う').toEqual([
         'skills/zz/references/to-dir.md',
         'skills/zz/references/to-nothing.md',
         'skills/zz/references/to-outside.md',
+        'skills/zz/references/to-renamed.md',
       ]);
       expect(
         broken.find((b) => b.includes('to-dir.md')),
@@ -368,6 +392,17 @@ describe('skill の reference が実在する (#2182)', () => {
         broken.find((b) => b.includes('to-nothing.md')),
         '壊れた symlink を「参照先が無い」 として拒否していない',
       ).toContain('参照先が無い');
+      expect(
+        broken.find((b) => b.includes('to-renamed.md')),
+        '別名の実体を指す symlink を名前不一致として拒否していない',
+      ).toContain('別名の実体を指す');
+
+      // 同名を指す 1 本は落とさない (陰性対照)。 名前の判定を「常に落とす」 形にすると、
+      // 正しい共用 reference 11 本が全て拒否される。
+      expect(
+        broken.find((b) => b.includes('to-file.md')),
+        '同名の実体を指す symlink まで拒否している',
+      ).toBeUndefined();
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
