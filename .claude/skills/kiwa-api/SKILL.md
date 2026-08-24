@@ -155,7 +155,7 @@ input spec の path は § 入力 spec の path は CLI から受け取る で�
 
 ### Step 2: 対象実装 file 確認
 
-`--target` で指定された file (or `--module {name}` から推測した `app/api/{name}/route.ts`) を Read。 HTTP handler の export 名 (`GET` / `POST` / `PUT` / `DELETE` / `PATCH`) を確認、 spec の「API 契約」 と整合しているか check。 不整合は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
+`--metric` で指定された file (or `--module {name}` から推測した `app/api/{name}/route.ts`) を Read。 HTTP handler の export 名 (`GET` / `POST` / `PUT` / `DELETE` / `PATCH`) を確認、 spec の「API 契約」 と整合しているか check。 不整合は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
 
 ### Step 3: 観点別 integration helper 変換
 
@@ -366,7 +366,8 @@ describe('items API (mock mode)', () => {
 - 「停滞」判定や `vitest --coverage` 失敗時は test-passed marker を作らず、 report Section 1 に理由を明示してユーザーに報告
 - `tests/reports/integration/coverage-report-{module}.md` が 4 section format で Write 済
 - 観点別 `describe` ブロックが spec の観点一覧と一致
-- 遅い test の上位を確認済 = `/kiwa-observe` の dashboard `Execution time` section (または runner の実行時間出力) を読み、遅い test に対処したか、対処しない理由 (実 anvil / 実 browser 等の本質的な遅さ) を report に記録 (#2186)
+- カバレッジの残りを確認済 = `/kiwa-gap --metric coverage --package {pkg}` を実行し、未達 0 件、または `/kiwa-loop` を回した上で残った分を `/kiwa-verdict` の 4 分類つきで report に記録 (#2193)。 **`unknown` や「埋められない」 で終わらせない**
+- 遅い test の上位を確認済 = `/kiwa-gap --metric duration --report {vitest json}` を実行し、lever 別の偏りを読んで対処したか、対処しない理由を report に記録 (#2186 / #2193)。**遅い順ではなく lever 別の合計を見る** = 実測で release-smoke は 164.6s のうち 131.1s (80%) が `subprocess` に集中しており、偏りを見れば直す手が 1 つに絞れる
 
 ## references
 
