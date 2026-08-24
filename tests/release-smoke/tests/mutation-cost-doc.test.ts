@@ -257,11 +257,30 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
 
     // nominal runner-minutes は wall time × concurrency。 wall の分だけ更新して古い
     // capacity が本文に残る形を止める。
+    // **対象の文を取り出してから照合する** (#2171 r2-f1)。 文書全体を部分文字列で
+    // 探す形は、別の package について同じ数字が書かれた時に通ってしまう。
+    //
+    // 文は `so \`dapp\`'s N timeouts account for ... of its M nominal runner-minutes.` の形。
+    // N は timeout 件数、M は wall × concurrency ÷ 60。 **両方を同じ文から取る** =
+    // 片方だけ更新されて食い違う形を落とす。
     const runB = measured.runs.runB;
-    const nominalRunnerMinutes = Math.round((runB.wallSeconds * runB.concurrency) / 60);
-    const normalizedDoc = doc.replace(/\s+/g, ' ');
-    if (!normalizedDoc.includes(`${nominalRunnerMinutes} nominal runner-minutes`)) {
-      mismatches.push(`runB nominal runner-minutes ${nominalRunnerMinutes} が節に無い`);
+    const sentence =
+      /`dapp`'s\s+(\d+)\s+timeouts\s+account\s+for[\s\S]*?of\s+its\s+(\d+)\s+nominal\s+runner-minutes/.exec(
+        doc.replace(/\s+/g, ' '),
+      );
+    if (sentence === null) {
+      mismatches.push('dapp の timeout 文を節から取り出せない');
+    } else {
+      const writtenTimeouts = Number(sentence[1]);
+      const writtenNominal = Number(sentence[2]);
+      const actualTimeouts = runB.status.Timeout ?? 0;
+      const actualNominal = Math.round((runB.wallSeconds * runB.concurrency) / 60);
+      if (writtenTimeouts !== actualTimeouts) {
+        mismatches.push(`dapp の timeout 件数: doc ${writtenTimeouts} / 実測 ${actualTimeouts}`);
+      }
+      if (writtenNominal !== actualNominal) {
+        mismatches.push(`dapp の nominal runner-minutes: doc ${writtenNominal} / 実測 ${actualNominal}`);
+      }
     }
 
     // 遷移の件数も同じく突き合わせる。 節は英数字ではなく綴りで書く箇所があるので、
