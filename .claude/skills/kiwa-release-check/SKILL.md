@@ -38,8 +38,27 @@ node scripts/release-readiness-check.mjs
 内部で以下 6 gate を順次実行、 各 gate の pass/fail を判定。
 
 - **Gate 1 = coverage** (`scripts/check-coverage-gates.mjs`)
-  - Lines/Statements ≥ 90% + Functions ≥ 90% + Branches ≥ 80%
-  - 全 kiwa lib で verify、 未達 lib は fail 報告
+  - **固定閾値** = Lines/Statements ≥ 90% + Functions ≥ 90% + Branches ≥ 80%
+  - **高水位** = `coverage-high-water.json` に記録した最高値を下回っても fail (#2177)
+  - 2 つは AND で、どちらか一方でも割れば fail。 固定閾値は新規 lib の下限、
+    高水位は「一度到達した範囲が静かに剥がれないこと」 を守る
+  - 実測が高水位を上回った時の更新は `node scripts/check-coverage-gates.mjs --update-high-water`。
+    **gate の実行では更新しない** = 下がった値を baseline に焼き付けないため
+  - 更新は上げる方向にしか効かない。 意図的に下げる (code を消した等) 場合は file を手で直す
+  - 記録の無い lib は固定閾値だけで判定し、report に `(高水位なし)` と出る。
+    **記録の欠落は release-smoke の `coverage-high-water-completeness` が別途 fail させる** =
+    gate 側を fail-open にしたまま、欠けた状態が既定として固定されるのを防ぐ
+  - 記録 file が壊れている場合は exit 2 で落ちる。 判定は 5 点で、
+    JSON として読めない / object でない / entry が object でない /
+    **4 metric (lines / branches / functions / statements) が揃っていない** /
+    値が数値でない or 0-100 の範囲外。 file が **無い** 場合だけ「記録なし」 に倒す =
+    前者は誰かが壊した状態で、coverage の劣化と同じく人が見るべき事象のため
+  - 4 metric を必須にするのは、 key を消すとその metric だけ判定から外れ、
+    次の `--update-high-water` で今の低い実測値に作り直されるため
+  - 判定対象の package 一覧は `scripts/lib/gate-inputs.mjs` の `COVERAGE_PACKAGES` /
+    `COVERAGE_PKG_DIRS` が SSOT。 gate も completeness 検査も同じ値を import する
+  - 全 kiwa lib で verify、 未達 lib は fail 報告。 fail の理由は
+    「閾値を割った」 と「下がった (高水位 N%)」 を書き分ける
 - **Gate 2 = mutation MSI** (`scripts/check-mutation-gates.mjs`)
   - test の kill/survive ratio = test 品質軸、 tier 別 threshold (Core 80 / Framework 70 / SaaS 65 / Test-type 60)
   - v2 (2026-07-14) = default 実行に格上げ (事前生成済 mutation.json を read する軽量 gate、 数秒)
@@ -112,6 +131,8 @@ skill 起動時に user が付けられる option。
 
 - release-readiness-check tool 実行完了
 - 全 gate の pass/fail 判定完了
+- Gate 1 が高水位を下回った lib を報告した場合、**下げてよいかを判断してから**進む
+  (code を消したなら `coverage-high-water.json` を手で直す、そうでなければ test を戻す)
 - summary table + release-ready / release-blocked 判定を user に報告
 - exit code = 0 (all pass) or 1 (any fail)
 

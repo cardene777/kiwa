@@ -34,3 +34,70 @@ export const COVERAGE_INPUT_DIRS = ['src', 'tests'];
 
 /** Mutation reads the same set today; kept separate so they can diverge. */
 export const MUTATION_INPUT_DIRS = ['src', 'tests'];
+
+/**
+ * coverage gate が判定する package と、その dir。
+ *
+ * `check-coverage-gates.mjs` が持っていたものをここへ移した (#2181 r2-f2)。
+ * 検査側が script を正規表現で読む形にしていたところ、**引用符を変えるだけで 1 件だけ
+ * 静かに落ちる**取りこぼしがあった。 一覧を module として export し、gate も検査も
+ * 同じ値を import すれば、その種の食い違いが起きない。
+ */
+export const COVERAGE_PKG_DIRS = {
+  '@kiwa-lab/core': 'packages/core',
+  '@kiwa-lab/api': 'packages/api',
+  '@kiwa-lab/ui': 'packages/ui',
+  '@kiwa-lab/data': 'packages/data',
+  '@kiwa-lab/cli-test': 'packages/cli-test',
+  '@kiwa-lab/observability': 'packages/observability',
+  '@kiwa-lab/e2e': 'packages/e2e',
+  '@kiwa-lab/cli': 'packages/cli',
+  '@kiwa-lab/dapp': 'packages/dapp',
+  '@kiwa-lab/a11y': 'packages/a11y',
+  '@kiwa-lab/nextjs': 'packages/nextjs',
+  '@kiwa-lab/edge': 'packages/edge',
+  '@kiwa-lab/hono': 'packages/hono',
+  '@kiwa-lab/auth': 'packages/auth',
+  '@kiwa-lab/search': 'packages/search',
+  '@kiwa-lab/security': 'packages/security',
+  '@kiwa-lab/realtime': 'packages/realtime',
+  '@kiwa-lab/cache': 'packages/cache',
+  '@kiwa-lab/ai-llm': 'packages/ai-llm',
+  '@kiwa-lab/component': 'packages/component',
+  '@kiwa-lab/perf-harness': 'packages/perf-harness',
+  '@kiwa-lab/quality-metrics': 'packages/quality-metrics',
+  '@kiwa-lab/lean': 'packages/lean',
+  '@kiwa-lab/queue': 'packages/queue',
+  '@kiwa-lab/orm': 'packages/orm',
+  '@kiwa-lab/skill-test': 'packages/skill-test',
+};
+
+/** 判定順。 `COVERAGE_PKG_DIRS` の key と同じ集合でなければならない。 */
+export const COVERAGE_PACKAGES = [
+  '@kiwa-lab/core',
+  '@kiwa-lab/api',
+  '@kiwa-lab/ui',
+  '@kiwa-lab/data',
+  '@kiwa-lab/cli-test',
+  '@kiwa-lab/observability',
+  '@kiwa-lab/e2e',
+  '@kiwa-lab/cli',
+  '@kiwa-lab/dapp',
+  '@kiwa-lab/a11y',
+  '@kiwa-lab/nextjs',
+  '@kiwa-lab/edge',
+  '@kiwa-lab/hono',
+  '@kiwa-lab/auth',
+  '@kiwa-lab/search',
+  '@kiwa-lab/security',
+  '@kiwa-lab/realtime',
+  '@kiwa-lab/cache',
+  '@kiwa-lab/ai-llm',
+  '@kiwa-lab/component',
+  '@kiwa-lab/perf-harness',
+  '@kiwa-lab/quality-metrics',
+  '@kiwa-lab/lean',
+  '@kiwa-lab/queue',
+  '@kiwa-lab/orm',
+  '@kiwa-lab/skill-test',
+];
