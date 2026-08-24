@@ -288,18 +288,33 @@ describe('lane の割り当て', () => {
     }
   }, 120_000);
 
-  it('T-PAR-003c playwright test を走らせる target は直列にしない', () => {
+  it('T-PAR-003c playwright test を走らせる target は直列にしない', async () => {
     // 「test command が playwright test を含む」 は docker lane の宣言のように
     // 読める signal だが、判定に使うと 17 件を直列に落とす。 root の test script は
     // その 17 件を並列 phase で回している (group 1 = 共有 port の問題で、port を
     // 一意にして解決済) ので、直列にすると実測と矛盾する。 `--jobs N` は root の
     // `--workspace-concurrency` = core 数より必ず薄いため、lane が root の直列
     // phase より広くなる必要はない。
-    const direct = rootTestPhases()
-      .filter((phase) => !phase.serial)
-      .flatMap((phase) => phase.targets);
-    expect(rootTestSerialTargets().some((name) => direct.includes(name))).toBe(false);
-  });
+    //
+    // 並列 phase を `-F` で数えてはいけない (r2 の指摘)。 root の並列 phase は
+    // `--filter='!x'` の除外形で書かれていて `-F` を 1 つも持たないので、
+    // そちらから引くと集合が空になり、何を壊しても通る検査になる。
+    const packages = await workspaceTargets();
+    const direct = packages.filter((pkg: Target) => {
+      const manifest = JSON.parse(readFileSync(join(pkg.dir, 'package.json'), 'utf-8')) as {
+        scripts?: { test?: string };
+      };
+      return manifest.scripts?.test?.includes('playwright test') === true;
+    });
+    expect(direct.length, 'playwright test を走らせる target が 1 件も無い (検査が空振り)').toBeGreaterThan(0);
+
+    const serial = new Set(rootTestSerialTargets());
+    const free = new Set(laneMembership(packages, REPO_ROOT).free.map((p: Target) => p.dir));
+    for (const pkg of direct) {
+      expect(serial.has(pkg.name), `${pkg.name} を root は直列にしている (前提が変わった)`).toBe(false);
+      expect(free.has(pkg.dir), `${pkg.name} を root は並列で回すのに sweep が直列 lane に落とす`).toBe(true);
+    }
+  }, 120_000);
 
   it('T-PAR-004 testcontainers に依存する target は 1 件残らず docker lane に入る', async () => {
     const packages = await workspaceTargets();
