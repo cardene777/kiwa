@@ -339,9 +339,12 @@ describe('compile を要る経路だけが compile する (#2204)', () => {
 
     const calls = join(root, 'calls.txt');
     const fakePnpm = join(binDir, 'pnpm');
+    // **呼出の瞬間に stale file が在るかを記録する**。 最後に消えていることだけを見ると、
+    // 削除を vitest の後ろへ動かす変異を通してしまう (Round 2 の指摘)。 compile が始まった
+    // 時点で既に消えていることを、 その場で観測する。
     writeFileSync(
       fakePnpm,
-      '#!/bin/sh\nprintf \'%s\\n\' "$*" >> "$KIWA_TAXONOMY_CALLS"\ncase "$*" in\n  *" vitest "*) printf \'{"numPassedTests":5,"numFailedTests":0,"numTotalTests":5}\' ;;\nesac\n',
+      '#!/bin/sh\nif [ -e "$KIWA_TAXONOMY_STALE" ]; then stale=present; else stale=absent; fi\nprintf \'%s\\t%s\\n\' "$*" "$stale" >> "$KIWA_TAXONOMY_CALLS"\ncase "$*" in\n  *" vitest "*) printf \'{"numPassedTests":5,"numFailedTests":0,"numTotalTests":5}\' ;;\nesac\n',
     );
     chmodSync(fakePnpm, 0o755);
 
@@ -364,14 +367,17 @@ describe('compile を要る経路だけが compile する (#2204)', () => {
           ...process.env,
           PATH: `${binDir}:${process.env.PATH ?? ''}`,
           KIWA_TAXONOMY_CALLS: calls,
+          KIWA_TAXONOMY_STALE: stale,
         },
       },
     );
 
     expect(existsSync(stale), 'taxonomy が前回の compile 結果を残している').toBe(false);
+    // 順序まで固定する。 `absent` は「その呼出の時点で既に消えていた」 ことを表す = 削除が
+    // compile より前にあることの直接の証跡で、 削除を後ろへ動かすと `present` に変わる。
     expect(readFileSync(calls, 'utf-8').trim().split('\n')).toEqual([
-      'exec -- tsc -p tsconfig.vitest.json',
-      'exec -- vitest run .vitest-dist/tests/fidelity --exclude **/*.real.fidelity.test.js --reporter=json',
+      'exec -- tsc -p tsconfig.vitest.json\tabsent',
+      'exec -- vitest run .vitest-dist/tests/fidelity --exclude **/*.real.fidelity.test.js --reporter=json\tabsent',
     ]);
   });
 });
