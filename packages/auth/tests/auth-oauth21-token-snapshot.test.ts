@@ -218,10 +218,13 @@ describe('登録した参照を後から書き換えても認可判定に届か�
     expect(() => authorizeWith(userSide, 'admin')).toThrow(/not entitled to scope "admin"/);
   });
 
-  it('T-SNAP-024b registerClient 経路の再代入も届かない', () => {
-    // **client 側だけを突く**。 user を inline literal で最初から admin にすることで、
-    // user 側の判定に落ちる前に client 側の判定へ到達させる。
-    // `registerUser` 経路は T-SNAP-024c が別に当てる (#2179 r2-f1)。
+  it('T-SNAP-024b registerClient 経路の scopes 再代入が届かない', () => {
+    // **1 検査 = 1 不変条件** (#2179 r3-f1)。 scopes と redirectUris を同じ検査に置くと、
+    // 前の `expect` が落ちた時点で throw して**後ろの assertion が 1 度も走らない**。
+    // scopes だけ漏れる regression が redirect の穴を隠す。
+    //
+    // 再代入するのも `scopes` だけにする = 変異と assertion を 1 対 1 にする。
+    // user は inline literal で最初から admin にし、user 側の判定に落ちる前に到達させる。
     const client = { clientId: 'client-A', redirectUris: [REDIRECT_LOCAL], scopes: ['openid'] };
     __resetOAuth21Counters();
     const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
@@ -229,9 +232,24 @@ describe('登録した参照を後から書き換えても認可判定に届か�
     server.registerUser({ subject: 'user-1', scopes: ['openid', 'admin'] });
 
     client.scopes = ['openid', 'admin'];
-    client.redirectUris = [REDIRECT_LOCAL, 'https://evil.example.test/cb'];
 
     expect(() => authorizeWith(server, 'admin')).toThrow(/not registered for scope "admin"/);
+  });
+
+  it('T-SNAP-024d registerClient 経路の redirectUris 再代入が届かない', () => {
+    // T-SNAP-024b と対。 client は最初から admin を持たせ、scope の判定で落ちる前に
+    // redirect_uri の判定へ到達させる。
+    const client = {
+      clientId: 'client-A',
+      redirectUris: [REDIRECT_LOCAL],
+      scopes: ['openid', 'admin'],
+    };
+    __resetOAuth21Counters();
+    const server = createAuthorizationServer({ issuer: 'https://as.example.test' });
+    server.registerClient(client);
+    server.registerUser({ subject: 'user-1', scopes: ['openid', 'admin'] });
+
+    client.redirectUris = [REDIRECT_LOCAL, 'https://evil.example.test/cb'];
 
     const { codeChallenge } = createPkceChallenge();
     expect(() =>
@@ -243,7 +261,7 @@ describe('登録した参照を後から書き換えても認可判定に届か�
           state: 'state-1',
           codeChallenge,
           codeChallengeMethod: 'S256',
-          scope: 'openid',
+          scope: 'admin',
         },
         'user-1',
       ),
