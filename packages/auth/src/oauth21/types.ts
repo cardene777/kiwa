@@ -212,15 +212,21 @@ type NonPrimitiveKeys<T> = {
  * copy 経路の `[...val]` は **付随 property を落とす** = 型 gate が「copy 可能」 と判定した
  * field の情報が保存時に失われる (#2191)。
  *
- * 素の配列なら `readonly E[]` が元の型に代入できる。 付随 property を持つ intersection は
- * その property を満たせないので代入できず、 ここで false になる。
+ * 素の配列なら `readonly E[]` が元の型に代入できる。 required な付随 property を持つ
+ * intersection はその property を満たせないので、 最初の条件で false になる。
+ * optional な付随 property は代入だけでは見抜けないため、 配列にない key が残っていないことも
+ * 確認する。 optional でも実値に存在すれば `[...val]` で失われるため、 同じく拒否が必要になる。
  *
  * **branded type (`readonly string[] & { __brand: 'Scopes' }`) も同じ理由で拒否する**。
  * brand は付随 property を持たないので copy は壊れないが、 「壊れる intersection」 と
  * 「壊れない intersection」 を型で区別する条件を足すほど、 落ちた時に compile error から
  * 理由を読めなくなる。 branded を使いたくなった時に、 その形だけを通す条件を足す。
  */
-type IsPlainArray<V, E> = readonly E[] extends V ? true : false;
+type IsPlainArray<V, E> = readonly E[] extends V
+  ? Exclude<keyof V, keyof readonly E[]> extends never
+    ? true
+    : false
+  : false;
 
 /**
  * その値の型が copy 経路で壊れないか。
@@ -345,6 +351,11 @@ interface _GateRejects {
   withMetadata: readonly string[] & { metadata: object };
 }
 
+interface _GateRejectsOptionalMetadata {
+  /** optional でも実値にあれば copy で落ちる。 代入方向だけの判定では通ってしまう形 */
+  withOptionalMetadata: readonly string[] & { metadata?: object };
+}
+
 interface _GateRejectsObject {
   /** 素の object。 名指し copy では素通しする */
   nested: { a: string };
@@ -359,11 +370,16 @@ type _AssertAccepts = DeepNonCopyableKeys<_GateAccepts> extends never ? true : n
 const _gateAccepts: _AssertAccepts = true;
 void _gateAccepts;
 
-// 以下 3 つは gate が拒否する形。 拒否しなくなると `never` に代入できてしまい、
+// 以下 4 つは gate が拒否する形。 拒否しなくなると `never` に代入できてしまい、
 // `@ts-expect-error` が「error が出なかった」 で落ちる。
 // @ts-expect-error 付随 property を持つ配列は copy が壊れるので拒否する
 const _gateRejectsMetadata: DeepNonCopyableKeys<_GateRejects> extends never ? true : never = true;
 void _gateRejectsMetadata;
+// @ts-expect-error optional な付随 property も実値にあれば copy が壊れるので拒否する
+const _gateRejectsOptionalMetadata: DeepNonCopyableKeys<_GateRejectsOptionalMetadata> extends never
+  ? true
+  : never = true;
+void _gateRejectsOptionalMetadata;
 // @ts-expect-error 素の object は名指し copy が素通しするので拒否する
 const _gateRejectsObject: DeepNonCopyableKeys<_GateRejectsObject> extends never ? true : never = true;
 void _gateRejectsObject;
