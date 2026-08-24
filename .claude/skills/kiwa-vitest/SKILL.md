@@ -138,7 +138,7 @@ section が無い spec (本経路より前に生成されたもの) は全 TC �
 
 ### Step 2: 対象実装 file 確認
 
-`--metric` で指定された file (or `--module {name}` から推測した `src/lib/{name}.ts`) を Read。 export 一覧を grep し、 TC の「操作手順」 で参照されている関数 / hook が実在することを確認する。 不在の関数 / hook は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
+`--target` で指定された file (or `--module {name}` から推測した `src/lib/{name}.ts`) を Read。 export 一覧を grep し、 TC の「操作手順」 で参照されている関数 / hook が実在することを確認する。 不在の関数 / hook は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
 
 併せて **追記先になる既存 test file を特定する** (Issue #2000)。 探索は `/kiwa-design` § Step 2 § 既存 test の探索 と同じ 2 段で、 対象 package を `$PKG_DIR` として実行する。
 

@@ -155,7 +155,7 @@ input spec の path は § 入力 spec の path は CLI から受け取る で�
 
 ### Step 2: 対象実装 file 確認
 
-`--metric` で指定された file (or `--module {name}` から推測した `app/api/{name}/route.ts`) を Read。 HTTP handler の export 名 (`GET` / `POST` / `PUT` / `DELETE` / `PATCH`) を確認、 spec の「API 契約」 と整合しているか check。 不整合は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
+`--target` で指定された file (or `--module {name}` から推測した `app/api/{name}/route.ts`) を Read。 HTTP handler の export 名 (`GET` / `POST` / `PUT` / `DELETE` / `PATCH`) を確認、 spec の「API 契約」 と整合しているか check。 不整合は spec の「不足している仕様」 に bullet 追加して飛ばさず止める。
 
 ### Step 3: 観点別 integration helper 変換
 

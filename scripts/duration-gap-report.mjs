@@ -132,16 +132,49 @@ function codeOnly(src) {
   return src.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/[^\n]*/g, '$1');
 }
 
-/** import / require の module 指定子を集める。 */
+/**
+ * import / require の module 指定子のうち、**値として取り込むもの** を集める。
+ *
+ * type-only import は落とす。 型だけの import は browser も container も起動しないため、
+ * module 名の一致だけで `real-io` に倒すと本当の原因を隠して誤った直し方を勧める
+ * (この repo の TS file は `import type { Page } from '@playwright/test'` を書く)。
+ *
+ * 落とす形は 2 つ。
+ *
+ * | 形 | 例 |
+ * |---|---|
+ * | 文全体が type-only | `import type { Page } from '@playwright/test'` |
+ * | 名前が全て `type` 付き | `import { type Page } from '@playwright/test'` |
+ *
+ * 混在 (`import { type Page, chromium } from ...`) は値の取り込みがあるので残す。
+ */
 function moduleSpecifiers(code) {
   const found = new Set();
-  const patterns = [
-    /\bfrom\s*['"]([^'"]+)['"]/g,
+
+  // `import ... from '<mod>'` を句ごとに見る。 句の中身で type-only かを判定する。
+  for (const m of code.matchAll(/\bimport\b([\s\S]*?)\bfrom\s*['"]([^'"]+)['"]/g)) {
+    const clause = m[1];
+    const mod = m[2];
+    if (/^\s*type\b/.test(clause)) continue;
+    const braces = /\{([\s\S]*?)\}/.exec(clause);
+    if (braces) {
+      const names = braces[1]
+        .split(',')
+        .map((n) => n.trim())
+        .filter(Boolean);
+      const hasValue = names.some((n) => !/^type\s/.test(n));
+      const outsideBraces = clause.replace(/\{[\s\S]*?\}/, '').replace(/[,\s]/g, '');
+      if (!hasValue && outsideBraces === '') continue;
+    }
+    found.add(mod);
+  }
+
+  // 副作用 import と動的 import と require。 いずれも値を取り込む形しかない。
+  for (const re of [
     /\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     /\brequire\s*\(\s*['"]([^'"]+)['"]\s*\)/g,
     /\bimport\s+['"]([^'"]+)['"]/g,
-  ];
-  for (const re of patterns) {
+  ]) {
     for (const m of code.matchAll(re)) found.add(m[1]);
   }
   return found;

@@ -390,4 +390,107 @@ describe('duration-gap-report', () => {
     expect(out.files[0]?.lever).toBe('real-io');
   });
 
+
+  it('T-DGR-023 type-only import では real-io にしない', () => {
+    // **型だけの import は browser を起動しない**。 この repo の TS file は
+    // `import type { Page } from '@playwright/test'` を書くので、module 指定子の
+    // 一致だけで判定すると本当の原因 (子プロセス起動) を隠して
+    // 「共有 fixture へ寄せろ」 と誤った直し方を勧める。
+    const { root, report } = fixture([
+      {
+        rel: 'tests/a.test.ts',
+        ms: 5000,
+        body:
+          'import type { Page } from "@playwright/test";\n' +
+          'import { execFileSync } from "node:child_process";\n' +
+          'export function f(p: Page) { execFileSync("node", []); return p; }\n',
+      },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('subprocess');
+  });
+
+  it('T-DGR-024 値として import していれば real-io のまま', () => {
+    // T-DGR-023 の対。 これが無いと real-io を返さない実装が両方通る。
+    const { root, report } = fixture([
+      {
+        rel: 'tests/a.test.ts',
+        ms: 5000,
+        body:
+          'import { chromium } from "@playwright/test";\n' +
+          'import { execFileSync } from "node:child_process";\n' +
+          'await chromium.launch();\nexecFileSync("node", []);\n',
+      },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('real-io');
+  });
+
+  it('T-DGR-025 名前ごとの type 指定も値 import とみなさない', () => {
+    // `import { type Page, chromium }` は混在形。 `type` が付いた名前だけを
+    // 落とすので、値として使う `chromium` があれば real-io のまま。
+    const { root, report } = fixture([
+      {
+        rel: 'tests/a.test.ts',
+        ms: 5000,
+        body:
+          'import { type Page } from "@playwright/test";\n' +
+          'import { mkdtempSync } from "node:fs";\n' +
+          'mkdtempSync("x");\n',
+      },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('filesystem');
+  });
+
+
+  it('T-DGR-026 type と値が混在する import は値として数える', () => {
+    // **変異試験で見つけた**。 「type-only なら落とす」 を「brace があれば落とす」 に
+    // 変えても 1 件も落ちなかった = 混在形 (`import { type Page, chromium }`) を
+    // 通す検査が無かった。
+    //
+    // 混在形を落とすと、値として browser を起動している file が real-io から外れ、
+    // 「子プロセスが原因」 と誤った直し方を勧める。
+    const { root, report } = fixture([
+      {
+        rel: 'tests/a.test.ts',
+        ms: 5000,
+        body:
+          // **呼出を置かない**。 `chromium.launch()` を書くと real-io の `calls` 側が
+          // 一致してしまい、module 指定子の判定を壊しても落ちない (変異試験で実測)。
+          // module 指定子だけが手掛かりになる形にする。
+          'import { type Page, request } from "@playwright/test";\n' +
+          'import { execFileSync } from "node:child_process";\n' +
+          'export function f(p: Page) { execFileSync("node", []); return request; }\n',
+      },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('real-io');
+  });
+
+  it('T-DGR-027 brace の外に名前がある import を値として数える', () => {
+    // brace の外に名前がある形。 `outsideBraces` の判定を落とすとここが通らなくなる。
+    const { root, report } = fixture([
+      {
+        rel: 'tests/a.test.ts',
+        ms: 5000,
+        // brace の**外**に名前があり、中は type だけ。 `outsideBraces` の判定を
+        // 外すと値の取り込みを見落とす (変異試験で実測)。
+        // `createSourceFile` を書かないのは、書くと `calls` 側が覆って
+        // module 指定子の判定を壊しても落ちないため。
+        body:
+          'import ts, { type Node } from "typescript";\n' +
+          'import { mkdtempSync } from "node:fs";\n' +
+          'export function f(n: Node) { mkdtempSync("x"); return ts; }\n',
+      },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('compile');
+  });
+
 });

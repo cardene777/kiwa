@@ -58,9 +58,30 @@ describe('共通 skill が実在する', () => {
   it('T-SKG-002 /kiwa-loop が停止条件 3 つを持つ', () => {
     // 停止条件が欠けると「回せば進む」 前提で無限に回る。 3 つとも要る。
     const src = read('kiwa-loop');
-    expect(src).toMatch(/未達 0 件/);
+    expect(src).toMatch(/uncovered === 0/);
     expect(src).toMatch(/改善 0 が \*\*2 round 連続\*\*|改善 0 が 2 round 連続/);
     expect(src).toMatch(/上限 \(既定 5\)|round が上限/);
+  });
+
+  it('T-SKG-003b duration の達成条件が totalMs === 0 でない', () => {
+    // **codex review r1-f2**。 `totalMs === 0` を達成にすると、test が 1 件でもあれば
+    // 所要は正なので**永久に達成できず** baseline を更新できない。
+    // 達成は「回帰 0 件かつ測れなかった file 0 件」 で判定する。
+    for (const file of [
+      read('kiwa-loop'),
+      readFileSync(resolve(SKILLS_DIR, 'kiwa-loop/references/loop-stop-conditions.md'), 'utf8'),
+    ]) {
+      expect(file).toMatch(/`regressions` が 0 件、かつ `unmeasured` が 0 件/);
+      expect(file, 'totalMs を達成条件にしないと明記していない').toMatch(/totalMs === 0/);
+    }
+  });
+
+  it('T-SKG-003c duration の再測が report を作り直すと明記する', () => {
+    // **codex review r1-f1**。 `/kiwa-gap` は test を走らせないので、report を
+    // 作り直さないと毎 round 同じ値を読み、進んだのに進んでいないと判定する。
+    const src = read('kiwa-loop');
+    expect(src).toMatch(/--reporter=json --outputFile=<新しい path>/);
+    expect(src).toMatch(/前 round のまま/);
   });
 
   it('T-SKG-003 /kiwa-verdict が 4 分類を持つ', () => {
@@ -145,6 +166,67 @@ describe('test を生成する skill が共通 skill へ配線されている', 
     const gens = generatorSkills();
     for (const s of COMMON_SKILLS) {
       expect(gens, `${s} が生成 skill に数えられている`).not.toContain(s);
+    }
+  });
+});
+
+describe('一括置換が他 skill の option を壊していない', () => {
+  const COMMON = new Set<string>(COMMON_SKILLS);
+
+  /**
+   * `--metric` を書いてよい場所。
+   *
+   * **「宣言していない option を手順で使っていないか」 という広い検査にはしない**。
+   * 実測で 30 件当たり、その大半が他 tool の flag への正当な言及だった
+   * (`vitest --coverage` / `jq --json` / `forge --report-file` / `kiwa layers --layer`)。
+   * 静的に「自分の option か他 tool の flag か」 を見分ける手が無く、
+   * 広い検査は noise が勝って読まれなくなる。
+   *
+   * 代わりに **実際に壊れた形** を突く。 `--metric` は本 PR が足した option で、
+   * 共通 skill 3 個か、それを名指しで呼ぶ行にしか現れないはず。
+   */
+  function offendingLines(skill: string, src: string): string[] {
+    if (COMMON.has(skill)) return [];
+    return src
+      .split('\n')
+      .filter((line) => line.includes('--metric') && !/\/kiwa-(gap|loop|verdict)\b/.test(line))
+      .map((line) => `${skill}: ${line.trim().slice(0, 70)}`);
+  }
+
+  it('T-SKG-013 --metric が共通 skill の外に漏れていない', () => {
+    // **一括置換で踏んだ**。 `--target` を `--metric` へ機械的に置き換えた時、
+    // `kiwa-api` / `kiwa-test` / `kiwa-vitest` が自分の option として持っていた
+    // `--target` まで書き換わり、宣言と手順が食い違った。
+    //
+    // 配線の検査 (T-SKG-008..010) は完了条件に gap の呼出があるかしか見ないので、
+    // この形を 1 件も検出しなかった。
+    const offenders = readdirSync(SKILLS_DIR).flatMap((skill) => {
+      const p = resolve(SKILLS_DIR, skill, 'SKILL.md');
+      return existsSync(p) ? offendingLines(skill, readFileSync(p, 'utf8')) : [];
+    });
+    expect(offenders, '共通 skill 以外が --metric を使っている').toEqual([]);
+  });
+
+  it('T-SKG-014 --metric を含む行を 1 件以上見つけている', () => {
+    // 空振り防止。 抽出が壊れて 0 件になると T-SKG-013 が常に通る。
+    const total = readdirSync(SKILLS_DIR)
+      .map((s) => resolve(SKILLS_DIR, s, 'SKILL.md'))
+      .filter((p) => existsSync(p))
+      .reduce(
+        (n, p) => n + readFileSync(p, 'utf8').split('\n').filter((l) => l.includes('--metric')).length,
+        0,
+      );
+    expect(total, '--metric を含む行が 1 件も無い (抽出が空振りしている)').toBeGreaterThan(0);
+  });
+
+  it('T-SKG-015 --target を持つ skill がその宣言を保っている', () => {
+    // 陰性対照側。 置換の巻き添えで消えた 3 skill を名指しで固定する。
+    // 名前を書くのは、これが「置換で消えた実例」 の記録だから (再発時に何が
+    // 壊れたかが検査から読める)。
+    for (const skill of ['kiwa-api', 'kiwa-test', 'kiwa-vitest']) {
+      const src = readFileSync(resolve(SKILLS_DIR, skill, 'SKILL.md'), 'utf8');
+      const m = /^## オプション\n([\s\S]*?)(?=^## |\Z)/m.exec(src);
+      expect(m?.[1] ?? '', `${skill} が --target の宣言を失っている`).toContain('`--target');
     }
   });
 });

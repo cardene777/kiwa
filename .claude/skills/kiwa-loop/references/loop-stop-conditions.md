@@ -7,9 +7,19 @@
 
 | # | 条件 | 次の動き |
 |---|---|---|
-| 1 | 未達 0 件 / budget 内 | 達成。 ratchet を更新する |
+| 1 | 達成 (下表) | ratchet を更新する |
 | 2 | 改善 0 が **2 round 連続** | 止めて分類を添えて判断を仰ぐ |
 | 3 | round が上限 (既定 5) に達した | 同上 |
+
+### 達成の条件は metric で違う
+
+| metric | 達成 |
+|---|---|
+| coverage | `uncovered === 0` |
+| duration | `regressions` が 0 件、かつ `unmeasured` が 0 件 |
+
+**duration を `totalMs === 0` にしない**。 test が 1 件でもあれば所要は正で、budget を
+定義していない以上 0 には決して届かない = 達成に到達できず baseline を永久に更新できない。
 
 ### なぜ 2 round か
 

@@ -55,7 +55,7 @@ $ARGUMENTS
 
 **自前で組み立てず `kiwa layers` に訊く**。 本 skill は orchestrator で、 target ごとに扱う layer が変わる。
 
-| `--metric` | 解決する layer |
+| `--target` | 解決する layer |
 |---|---|
 | `contract` | `contract` |
 | `dapp` | `e2e` |
@@ -149,7 +149,7 @@ HAS_HARDHAT=$(find "$ROOT/examples/$EXAMPLE" -maxdepth 1 -name 'hardhat.config.*
 
 ### Step 1b: target 選択 (skill 起動時 1 回)
 
-`--metric` 引数指定時は skip、 省略時は AskUserQuestion で確認:
+`--target` 引数指定時は skip、 省略時は AskUserQuestion で確認:
 
 ```text
 question: "実行する test 範囲を選択してください"
@@ -481,7 +481,7 @@ Step 5b (result-review) の **前** に置く。 result-review は統合 report 
 /kiwa-observe --module {module} --layer {layer} --lang ${DOC_LANG} --producer {producer} --project-root examples/{example} --out tests/reports/observe/dashboard-{example}-{module}-{layer}.${DOC_LANG}.md
 ```
 
-`--layer` は `$LAYERS` の各値をそのまま渡す。 Step 2.5 で `--metric` から解決した同じ list で、 ここで組み直さない = 2 箇所で解決すると target の解釈が割れる。
+`--layer` は `$LAYERS` の各値をそのまま渡す。 Step 2.5 で `--target` から解決した同じ list で、 ここで組み直さない = 2 箇所で解決すると target の解釈が割れる。
 
 `--producer` は `test_outputs` の鍵。 実測すると鍵が 2 つある layer は `contract` の 1 つだけで、 残りは 1 つに定まる。 どちらの成果物を観測するかを知っているのは `$RUNNER` を持つ本 skill だけなので、 明示して渡す。
 
@@ -762,11 +762,11 @@ graph TD
 
 ## 完了条件
 
-- `--metric` で指定された範囲 (contract / dapp / both) の全 step が PASS or 意図的 skip
+- `--target` で指定された範囲 (contract / dapp / both) の全 step が PASS or 意図的 skip
 - `--runner` (contract 関連 target のみ) で選択された runner の test chain が PASS、 非選択 runner は report 内で skipped と明示
 - `tests/reports/integrated/{example}-{module}-{target}.${DOC_LANG}.md` が Write 済
 - 各子 skill の report path が integrated report 内に link 集約
-- 生成 test が `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に退避済 (Step 5.5、 `--metric` 範囲外と非選択 runner の subdir は対象外)
+- 生成 test が `tests/fixtures/{example}/{contract-test, hardhat-test, e2e-test}/` に退避済 (Step 5.5、 `--target` 範囲外と非選択 runner の subdir は対象外)
 
 ## references
 

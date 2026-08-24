@@ -52,9 +52,21 @@ $ARGUMENTS
 /kiwa-gap --metric <metric> [--package <pkg>] [--report <path>] --json
 ```
 
-返り値の `uncovered` (coverage) または `totalMs` (duration) を **round 0 の値** として記録する。
+返り値を **round 0 の値** として記録する。 metric で見るものが違う。
 
-0 件なら「既に達成済」 として Step 5 へ飛ぶ。
+| metric | 記録する値 | 達成の条件 |
+|---|---|---|
+| coverage | `uncovered` (残り件数) | `uncovered === 0` |
+| duration | `regressions` の件数と `totalMs` | `regressions` が 0 件、かつ `unmeasured` が 0 件 |
+
+**duration は `totalMs === 0` を達成にしない**。 test が 1 件でもあれば所要は正で、
+budget を定義していないため 0 には決して届かない = Step 5 に到達できず baseline を
+永久に更新できなくなる。
+
+duration の達成は「baseline より 30% 以上遅い file が 1 件も無く、測れなかった file も
+無い」 状態を指す。 `totalMs` は進捗の目安として記録するだけで、判定には使わない。
+
+達成済なら Step 5 へ飛ぶ。
 
 ### Step 2 — 一番安い 1 件を埋める
 
@@ -80,8 +92,17 @@ gap の先頭 1 件だけを対象にする。 **まとめて埋めない**。
 
 ### Step 3 — 再測する
 
-Step 1 と同じ command を回す。 coverage なら `<pkg>` の `test:cov` を先に走らせて
-`coverage-final.json` を更新する (更新しないと同じ値が返り、進んだのに進んでいないと判定する)。
+**測定 file を作り直してから** Step 1 と同じ command を回す。
+作り直さないと同じ値が返り、進んだのに進んでいないと判定する。
+
+| metric | 作り直すもの |
+|---|---|
+| coverage | `<pkg>` の `test:cov` を走らせて `coverage-final.json` を更新する |
+| duration | vitest を `--reporter=json --outputFile=<新しい path>` で走らせ、**その path を渡す** |
+
+duration で report を作り直さないのは特に見落としやすい。 `/kiwa-gap` は test を走らせない
+ので、Step 2 で test を書き換えても `--report` が指す JSON は**前 round のまま**になる。
+毎 round 新しい path に出し、その path を渡す。
 
 前 round との差を記録する。
 
@@ -97,7 +118,7 @@ Step 1 と同じ command を回す。 coverage なら `<pkg>` の `test:cov` を
 
 | # | 条件 | 次の動き |
 |---|---|---|
-| 1 | 未達 0 件 / budget 内 | Step 5 (達成) |
+| 1 | coverage は `uncovered === 0` / duration は `regressions` と `unmeasured` が 0 件 | Step 5 (達成) |
 | 2 | 改善 0 が 2 round 連続 | Step 6 (判断を仰ぐ) |
 | 3 | round が上限 (既定 5) に達した | Step 6 (判断を仰ぐ) |
 
