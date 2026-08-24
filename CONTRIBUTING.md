@@ -135,7 +135,8 @@ parallel path removes that cause instead of hoping: it builds the workspace once
 up front and sets `KIWA_DEPS_PREBUILT=1`, which makes `scripts/build-deps.mjs` a
 no-op in every child. What is left is two groups that contend on something the
 machine has one of, and each gets a lane that stays serial — the targets that
-declare `testcontainers`, and the three that launch a browser.
+declare `testcontainers`, and the three that launch a browser. Across all lanes
+together, no more than `--jobs` targets run at a time.
 
 **Parallel mode cannot tell you which package dirtied the tree.** That answer
 comes from reading `git status` before and after each package, which means

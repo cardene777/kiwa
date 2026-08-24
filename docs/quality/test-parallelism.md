@@ -261,12 +261,13 @@ which is the same fix the root `test` script uses (§ One build up front instead
 The default stays 1, so the sweep behaves exactly as before unless the flag is given.
 
 What is left after the build is removed are the two resources that cannot be split, and
-each gets a lane of its own that stays serial while the rest run `N` at a time.
+each gets a lane of its own that stays serial. Across all lanes together, no more than
+`N` targets run at a time.
 
 | Lane | How membership is decided | Members today |
 |---|---|---|
 | Docker | Read from `package.json`: a target that declares `testcontainers` or `@testcontainers/*` | 7 |
-| Chromium | A written list, `CHROMIUM_LANE` in the script | `packages/e2e`, `packages/ui`, `examples/full-stack-poc` |
+| Chromium | A written list, `CHROMIUM_LANE` in the script, pinned to the root `test` script's serial phase by a check | `packages/e2e`, `packages/ui`, `examples/full-stack-poc` |
 
 The two are decided differently because only one of them can be read. A dependency on
 `testcontainers` is a declaration in a file, and reading it keeps the lane right the day
@@ -275,13 +276,26 @@ targets that actually start a container, and seven declare the dependency. That 
 targets running one after another for no reason, and it is the price of a lane that
 cannot silently go stale.
 
-Chromium has no such declaration. 46 targets depend on `@playwright/test` and all but
-three keep their Playwright specs out of the vitest run, so the dependency says nothing
-about whether `pnpm test` launches a browser. The three are named, and naming them means
-a rename can quietly empty the lane — so the script refuses to start when a name matches
-nothing in the workspace. It is checked against the whole workspace rather than against
-the targets being run, or `--only lean --jobs 4` would refuse to start for lack of a
-browser it was never going to launch.
+Chromium has no such declaration. 46 targets depend on `@playwright/test` and the
+dependency says nothing about whether `pnpm test` launches a browser. The three named are
+the ones measured as contending (group 5 above). Naming them means a rename can quietly
+empty the lane — so the script refuses to start when a name matches nothing in the
+workspace. It is checked against the whole workspace rather than against the targets being
+run, or `--only lean --jobs 4` would refuse to start for lack of a browser it was never
+going to launch.
+
+**`playwright test` in the test command is not the criterion**, though it looks like the
+readable signal the docker lane has. 17 examples run it, and the root `test` script runs
+all 17 in its *parallel* phase: they were group 1 (a shared chain port), fixed by giving
+each one its own number, not group 5. Serialising them would contradict the measurement
+above and cost far more than it saves. `--jobs N` is also strictly less concurrent than
+the root script, which runs those 17 at `--workspace-concurrency` = core count, so the
+lane never needs to be wider than the root script's own serial phase.
+
+That relationship is what pins the written list. A check reads the root `test` script,
+takes every target inside a `--workspace-concurrency=1` phase, and requires each one to
+land in a serial lane here. The list cannot go stale without the root script changing
+first, and if it does, the check names the target that fell through.
 
 **Parallel mode cannot say which package dirtied the tree.** Attribution comes from
 reading `git status` before and after each package, and that means nothing when several

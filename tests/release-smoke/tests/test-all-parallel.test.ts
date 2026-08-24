@@ -35,8 +35,15 @@ type Lanes = { free: Target[]; docker: Target[]; chromium: Target[]; missing: st
 
 // Declared here rather than imported: the script is JavaScript, and the shape
 // this test relies on is worth stating where the test can be read.
-const { CHROMIUM_LANE, discoverPackages, laneMembership, parseProjectList, pool, validateJobs } =
-  (await import(pathToFileURL(SCRIPT).href)) as {
+const {
+  CHROMIUM_LANE,
+  discoverPackages,
+  laneMembership,
+  limitConcurrency,
+  parseProjectList,
+  pool,
+  validateJobs,
+} = (await import(pathToFileURL(SCRIPT).href)) as {
     CHROMIUM_LANE: readonly string[];
     discoverPackages: (projects: unknown, root: string) => Target[];
     laneMembership: (
@@ -44,10 +51,11 @@ const { CHROMIUM_LANE, discoverPackages, laneMembership, parseProjectList, pool,
       root: string,
       opts?: { roster?: Target[]; dependsOn?: (dir: string) => boolean },
     ) => Lanes;
+    limitConcurrency: <R>(limit: number) => (task: () => Promise<R>) => Promise<R>;
     parseProjectList: (text: string) => unknown;
     pool: <T, R>(items: T[], limit: number, task: (item: T, index: number) => Promise<R>) => Promise<R[]>;
     validateJobs: (raw: string) => number;
-  };
+};
 
 /** One `pnpm test` in the fixture, as its own script recorded it. */
 type Trace = { name: string; phase: 'start' | 'end'; at: number; prebuilt: string };
@@ -109,6 +117,47 @@ const DOCKER = [
   'examples/orm-drizzle-mysql-poc',
   'examples/orm-drizzle-postgres-poc',
 ];
+
+/** workspace の全 target (`pnpm ls` を 1 度だけ引く)。 */
+let targetsCache: Target[] | null = null;
+async function workspaceTargets(): Promise<Target[]> {
+  if (targetsCache) return targetsCache;
+  const { stdout } = await execFileAsync('pnpm', ['ls', '-r', '--depth', '-1', '--json'], {
+    cwd: REPO_ROOT,
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  targetsCache = discoverPackages(parseProjectList(stdout), REPO_ROOT);
+  return targetsCache;
+}
+
+/**
+ * root の `test` を `&&` 区切りの phase に切り分ける。
+ *
+ * 直列 phase は `pnpm --workspace-concurrency=1 -F a -F b test` の形。 名前が
+ * script のどこかに現れるかだけを見ると、`--workspace-concurrency=1` を外して
+ * 並列に戻す変更を見逃す。
+ */
+function rootTestPhases(): { raw: string; serial: boolean; targets: string[] }[] {
+  const script =
+    (JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')) as { scripts?: Record<string, string> })
+      .scripts?.test ?? '';
+  return script
+    .split('&&')
+    .map((raw) => raw.trim())
+    .filter((raw) => /\bpnpm\b/.test(raw) && / test\b|test'?$/.test(raw))
+    .map((raw) => ({
+      raw,
+      serial: /--workspace-concurrency=1\b/.test(raw),
+      targets: [...raw.matchAll(/-F\s+(\S+)/g)].map((m) => m[1] ?? ''),
+    }));
+}
+
+/** root の `test` が直列に回している target の package 名。 */
+function rootTestSerialTargets(): string[] {
+  return rootTestPhases()
+    .filter((phase) => phase.serial)
+    .flatMap((phase) => phase.targets);
+}
 
 const roots: string[] = [];
 
@@ -216,11 +265,7 @@ describe('--jobs の引数検証', () => {
 
 describe('lane の割り当て', () => {
   it('T-PAR-003 chromium lane の 3 件が実在する (rename で lane が空になっていない)', async () => {
-    const { stdout } = await execFileAsync('pnpm', ['ls', '-r', '--depth', '-1', '--json'], {
-      cwd: REPO_ROOT,
-      maxBuffer: 64 * 1024 * 1024,
-    });
-    const packages = discoverPackages(parseProjectList(stdout), REPO_ROOT);
+    const packages = await workspaceTargets();
     expect(packages.length, 'workspace の target を 1 件も拾えていない (検査が空振り)').toBeGreaterThan(0);
 
     const lanes = laneMembership(packages, REPO_ROOT);
@@ -228,12 +273,36 @@ describe('lane の割り当て', () => {
     expect(lanes.chromium.map((p: Target) => relative(REPO_ROOT, p.dir)).sort()).toEqual([...CHROMIUM_LANE].sort());
   }, 120_000);
 
+  it('T-PAR-003b root の test script が直列にする target は sweep でも直列 lane に入る', async () => {
+    // lane を手書きの一覧で持つ以上、実測 SSOT からずれていないことを別に固定する。
+    // 突き合わせ先は `docs/quality/test-parallelism.md` の文章ではなく root の
+    // `test` script = 実際に毎回走っている設定そのもの。
+    const serial = rootTestSerialTargets();
+    expect(serial.length, 'root の test script に直列 phase が 1 つも無い (検査が空振り)').toBeGreaterThan(0);
+
+    const packages = await workspaceTargets();
+    const lanes = laneMembership(packages, REPO_ROOT);
+    const inLane = new Set([...lanes.docker, ...lanes.chromium].map((p: Target) => p.name));
+    for (const name of serial) {
+      expect(inLane.has(name), `${name} を root は直列にしているのに sweep は free lane で回す`).toBe(true);
+    }
+  }, 120_000);
+
+  it('T-PAR-003c playwright test を走らせる target は直列にしない', () => {
+    // 「test command が playwright test を含む」 は docker lane の宣言のように
+    // 読める signal だが、判定に使うと 17 件を直列に落とす。 root の test script は
+    // その 17 件を並列 phase で回している (group 1 = 共有 port の問題で、port を
+    // 一意にして解決済) ので、直列にすると実測と矛盾する。 `--jobs N` は root の
+    // `--workspace-concurrency` = core 数より必ず薄いため、lane が root の直列
+    // phase より広くなる必要はない。
+    const direct = rootTestPhases()
+      .filter((phase) => !phase.serial)
+      .flatMap((phase) => phase.targets);
+    expect(rootTestSerialTargets().some((name) => direct.includes(name))).toBe(false);
+  });
+
   it('T-PAR-004 testcontainers に依存する target は 1 件残らず docker lane に入る', async () => {
-    const { stdout } = await execFileAsync('pnpm', ['ls', '-r', '--depth', '-1', '--json'], {
-      cwd: REPO_ROOT,
-      maxBuffer: 64 * 1024 * 1024,
-    });
-    const packages = discoverPackages(parseProjectList(stdout), REPO_ROOT);
+    const packages = await workspaceTargets();
     const declares = packages.filter((pkg: Target) => {
       const manifest = JSON.parse(readFileSync(join(pkg.dir, 'package.json'), 'utf-8')) as {
         dependencies?: Record<string, string>;
@@ -304,6 +373,26 @@ describe('worker pool', () => {
     });
     expect(seen.sort()).toEqual([1, 2]);
   });
+
+  it('T-PAR-009 独立した producer 間でも合計の limit を超えない', async () => {
+    let live = 0;
+    let peak = 0;
+    const withSlot = limitConcurrency(3);
+    const run = () =>
+      withSlot(async () => {
+        live += 1;
+        peak = Math.max(peak, live);
+        await new Promise((r) => setTimeout(r, 5));
+        live -= 1;
+      });
+
+    await Promise.all([
+      Promise.all(Array.from({ length: 8 }, run)),
+      Promise.all(Array.from({ length: 8 }, run)),
+      Promise.all(Array.from({ length: 8 }, run)),
+    ]);
+    expect(peak).toBe(3);
+  });
 });
 
 describe('fixture workspace で実際に並列に回す', () => {
@@ -356,7 +445,7 @@ describe('fixture workspace で実際に並列に回す', () => {
     const free = laneOf(FREE);
     expect(peakConcurrency(free(parallelTrace))).toBeGreaterThan(1);
     expect(peakConcurrency(free(parallelTrace))).toBeLessThanOrEqual(4);
-    expect(peakConcurrency(parallelTrace), 'lane を足しても jobs + 2 を超えない').toBeLessThanOrEqual(4 + 2);
+    expect(peakConcurrency(parallelTrace), 'lane を足しても --jobs の全体上限を超えない').toBeLessThanOrEqual(4);
     expect(peakConcurrency(serialTrace), '直列経路が並列に走っている').toBe(1);
   });
 

@@ -778,13 +778,23 @@ export function validateJobs(raw) {
  * Reading it keeps the lane correct when a package starts using containers.
  *
  * The chromium lane cannot be read the same way. 46 targets depend on
- * `@playwright/test`, and all but three keep their Playwright specs out of the
- * vitest run — the dependency says nothing about whether `pnpm test` launches a
- * browser. These three are the ones measured to launch one
- * (`docs/quality/test-parallelism.md` group 5), so they are named here.
+ * `@playwright/test`, and the dependency says nothing about whether `pnpm test`
+ * launches a browser. These three are the ones the repository has measured as
+ * contending (`docs/quality/test-parallelism.md` group 5), so they are named.
+ *
+ * **`playwright test` in the test command is not the criterion**, though it
+ * looks like the readable signal the docker lane has. 17 examples run it, and
+ * the root `test` script runs all 17 in its *parallel* phase — they were group 1
+ * (a shared chain port), fixed by giving each one its own number, not group 5.
+ * Serialising them would contradict the measurement and cost far more than it
+ * saves. `--jobs N` is also strictly less concurrent than the root script, which
+ * runs those 17 at `--workspace-concurrency` = core count, so the lane cannot
+ * need to be wider than the root script's own serial phase.
  *
  * Naming them means a rename can empty the lane silently, so `laneMembership`
- * reports the names it could not find and the caller refuses to run.
+ * reports the names it could not find and the caller refuses to run. What the
+ * root script serialises and what this lane serialises are pinned to each other
+ * by `tests/release-smoke/tests/test-all-parallel.test.ts`.
  */
 export const CHROMIUM_LANE = ['packages/e2e', 'packages/ui', 'examples/full-stack-poc'];
 
@@ -842,6 +852,40 @@ export async function pool(items, limit, task) {
   };
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
   return results;
+}
+
+/**
+ * Share one concurrency limit across otherwise independent producers.
+ *
+ * The Docker and Chromium lanes each have their own serial loop, while the free
+ * lane has a pool. Without a shared limit, `--jobs 4` can run six targets: four
+ * free, one Docker and one Chromium. A released slot is transferred to the
+ * oldest waiter so a busy producer cannot jump the queue.
+ */
+export function limitConcurrency(limit) {
+  let available = limit;
+  const waiting = [];
+  const acquire = () => {
+    if (available > 0) {
+      available -= 1;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => waiting.push(resolve));
+  };
+  const release = () => {
+    const next = waiting.shift();
+    if (next) next();
+    else available += 1;
+  };
+
+  return async (task) => {
+    await acquire();
+    try {
+      return await task();
+    } finally {
+      release();
+    }
+  };
 }
 
 export function argValue(argv, flag, fallback) {
@@ -997,13 +1041,15 @@ async function main() {
       const result = await runTest(pkg, timeoutSec * 1000, env);
       render(result, [], `${((Date.now() - started) / 1000).toFixed(1)}s`);
     };
+    const withSlot = limitConcurrency(jobs);
+    const limitedRunOne = (pkg) => withSlot(() => runOne(pkg));
     const serially = async (list) => {
-      for (const pkg of list) await runOne(pkg);
+      for (const pkg of list) await limitedRunOne(pkg);
     };
     await Promise.all([
-      pool(lanes.free, jobs, runOne),
       serially(lanes.docker),
       serially(lanes.chromium),
+      pool(lanes.free, jobs, limitedRunOne),
     ]);
     sweepDirt = dirtiedPaths(before, await porcelain());
   }
