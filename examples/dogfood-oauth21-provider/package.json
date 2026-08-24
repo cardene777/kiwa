@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.22-2 — a Hono + Cloudflare Workers OAuth 2.1 Authorization Server (AS) that exercises the RFC 9700 endpoint surface (/authorize, /token, /revoke, /introspect, /.well-known/openid-configuration) with PKCE always mandatory, DPoP-bound tokens, refresh token rotation and revocation cascade. v1.21-3 landed the mock adapter + 20-point fidelity harness; v1.22-2 (this state) layers the oauth2-mock-server testcontainers real driver so discovery + /authorize + /token endpoints get live coverage against a real oauth2-mock-server instance under KIWA_MODE=real + OAUTH21_BOOTSTRAP=1. Drivable under KIWA_MODE=mock (@kiwa-lab/auth setupOAuth21Env) by default. Behavioural fidelity between the two drivers feeds the release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/auth @kiwa-lab/core && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/auth @kiwa-lab/core && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },

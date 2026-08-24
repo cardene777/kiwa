@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v2.2-2 — @kiwa-lab/auth v0.7 continuous-auth state machine の 4 pattern workflow reference (startWithBaselineRisk + escalateOnRiskSignal + completeStepUpAndDeescalate + terminateOnHijack)。 Auth pair pioneer record 更新 dogfood。",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/auth && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/auth && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },

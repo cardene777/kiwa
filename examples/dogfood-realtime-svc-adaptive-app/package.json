@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.45-4 — Simulcast + SVC + WebCodecs decoder + MoQ datagram adaptive delivery observability harness backed by @kiwa-lab/realtime v0.3 simulcast-svc + webcodecs-decoder + moq-datagram-media semantics.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/realtime && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/realtime && vitest run tests --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose"
   },

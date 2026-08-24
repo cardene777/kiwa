@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app v1.37-4 — a Trivy + Gitleaks style Software Bill Of Materials + secrets scanning service (CycloneDX + SPDX emission + OSV/NVD advisory lookup + SPDX license policy + TruffleHog / Gitleaks signatures + rotation SLA tracking) that drives an SBOM + secrets surface backed by @kiwa-lab/security v0.1 sbom + secrets-scan semantics, runnable in both KIWA_MODE=real (KIWA_ADVISORY_FEED_URL + KIWA_TRIVY_ENDPOINT + KIWA_GITLEAKS_ENDPOINT scanner endpoints) and KIWA_MODE=mock (in-memory feed + regex scan) so behavioural fidelity feeds @kiwa-lab/quality-metrics.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/security @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --hookTimeout 30000",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/core @kiwa-lab/security @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/e2e/**' --environment node --hookTimeout 30000",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose --hookTimeout 30000"

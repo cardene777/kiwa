@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/test --environment node",
+    "test": "vitest run test --exclude '**/.vitest-dist/**' --environment node",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

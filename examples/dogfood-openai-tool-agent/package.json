@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Dogfood app 2 (v1.12-3) — an OpenAI Chat Completions tool-use agent that exercises function calling, multi-tool orchestration (weather / calculator / search), and parallel tool calls, drivable in both KIWA_MODE=real (calls the real OpenAI chat/completions endpoint when OPENAI_API_KEY is set) and KIWA_MODE=mock (@kiwa-lab/ai-llm createOpenAIMock) so behavioural fidelity feeds @kiwa-lab/quality-metrics 11-axis release gate.",
   "scripts": {
-    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/ai-llm @kiwa-lab/core @kiwa-lab/quality-metrics && node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node",
+    "test": "node ../../scripts/build-deps.mjs @kiwa-lab/ai-llm @kiwa-lab/core @kiwa-lab/quality-metrics && vitest run tests --exclude '**/.vitest-dist/**' --exclude 'tests/perf/**' --environment node",
     "pretest:perf": "pnpm -F @kiwa-lab/ai-llm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "typecheck": "tsc --noEmit"

@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -11,8 +12,27 @@ import {
 
 const envs: CliTestEnv[] = [];
 const here = dirname(fileURLToPath(import.meta.url));
-// `.vitest-dist/tests/{this}` → 4 つ親 = kiwa repo root
-const KIWA_CLI = resolve(here, '../../../..', 'packages/cli/dist/bin.js');
+
+/**
+ * repo root を数えずに探す。
+ *
+ * 本 file は 2 箇所から走る = `test` は `tests/` を直接走らせ (#2206)、 taxonomy と coverage は
+ * `.vitest-dist/tests/` を走らせる。 1 階層違うので、 数える形は片方でしか当たらない。
+ *
+ * `pnpm-workspace.yaml` は repo root にだけあるので目印にする。
+ */
+function repoRoot(from: string): string {
+  let dir = from;
+  for (let up = 0; up < 8; up += 1) {
+    if (existsSync(resolve(dir, 'pnpm-workspace.yaml'))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error(`pnpm-workspace.yaml not found above ${from}`);
+}
+
+const KIWA_CLI = resolve(repoRoot(here), 'packages/cli/dist/bin.js');
 
 afterEach(async () => {
   while (envs.length > 0) {
