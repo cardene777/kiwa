@@ -1,0 +1,98 @@
+{
+  "issue": 2171,
+  "note": "Derived from packages/dapp/mutation-report/mutation.json for three runs. The raw reports are gitignored local artefacts; these counts are what the document cites, so they live in the repository.",
+  "mutantCount": 2473,
+  "runs": {
+    "baseline": {
+      "concurrency": 2,
+      "timeoutMS": 60000,
+      "wallSeconds": 3365,
+      "status": {
+        "Killed": 1874,
+        "NoCoverage": 120,
+        "RuntimeError": 2,
+        "Survived": 460,
+        "Timeout": 17
+      }
+    },
+    "runA": {
+      "concurrency": 2,
+      "timeoutMS": null,
+      "wallSeconds": 2984,
+      "status": {
+        "Killed": 1843,
+        "NoCoverage": 120,
+        "RuntimeError": 2,
+        "Survived": 453,
+        "Timeout": 55
+      }
+    },
+    "runB": {
+      "concurrency": 4,
+      "timeoutMS": 60000,
+      "wallSeconds": 1954,
+      "status": {
+        "Killed": 1875,
+        "NoCoverage": 120,
+        "RuntimeError": 2,
+        "Survived": 449,
+        "Timeout": 27
+      }
+    }
+  },
+  "transitions": {
+    "baseline -> runA": {
+      "Killed -> Timeout": 32,
+      "Survived -> Killed": 1,
+      "Survived -> Timeout": 6
+    },
+    "baseline -> runB": {
+      "Survived -> Killed": 1,
+      "Survived -> Timeout": 10
+    }
+  },
+  "timeoutsByFile": {
+    "baseline": {
+      "anvil.js": 3,
+      "e2e-prepare-env.js": 2,
+      "expect-custom-error.js": 1,
+      "fixture.js": 4,
+      "time.js": 1,
+      "tx.js": 4,
+      "wait-for-chain-state.js": 1,
+      "wait-for-wallet-connected.js": 1
+    },
+    "runA": {
+      "anvil-pool.js": 14,
+      "anvil.js": 16,
+      "deploy-contract.js": 1,
+      "e2e-prepare-env.js": 2,
+      "expect-custom-error.js": 1,
+      "fixture.js": 12,
+      "rpc-handlers.js": 1,
+      "time.js": 1,
+      "tx.js": 4,
+      "wait-for-chain-state.js": 2,
+      "wait-for-wallet-connected.js": 1
+    },
+    "runB": {
+      "anvil.js": 13,
+      "e2e-prepare-env.js": 2,
+      "expect-custom-error.js": 1,
+      "fixture.js": 4,
+      "time.js": 1,
+      "tx.js": 4,
+      "wait-for-chain-state.js": 1,
+      "wait-for-wallet-connected.js": 1
+    }
+  },
+  "identity": {
+    "keyForm": "<file path>#<mutant id>",
+    "distinctKeys": {
+      "baseline": 2473,
+      "runA": 2473,
+      "runB": 2473
+    },
+    "keySetsIdentical": true
+  }
+}

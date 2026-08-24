@@ -490,7 +490,7 @@ before relying on them.
 | `orm` | 9.05 | — | 4 | 2,871 | 6m59s | 0.58 |
 | `auth` | 5.39 | 0.304 | 4 | 6,171 | 20m37s | 0.80 |
 | `queue` | 41.72 | 0.186 | 4 | 2,839 | 16m06s | 1.36 |
-| `dapp` | 22.75 | 1.367 | 2 | 2,473 | 56m05s | 2.72 |
+| `dapp` | 22.75 | 1.367 | 4 | 2,473 | 32m34s | 3.16 |
 
 `ms per test` is `stryker run --dryRunOnly --reporters progress`'s reported `net` divided by the
 test count. `collect seconds per test file` is vitest's own `collect` figure — summed across
@@ -537,26 +537,30 @@ from Stryker's view but not from `pnpm test`.
 
 #### Concurrency
 
-Three packages run Stryker at 2 rather than 4: `dapp`, `e2e`, and `ui`. For a fixed amount of
-runner work, halving the configured concurrency roughly doubles the wall time — which is why
-`dapp`'s 2,473 mutants take longer in wall time than `queue`'s 2,839 despite both facing per-mutant
-costs of the same order.
+Two packages run Stryker at 2 rather than 4: `e2e` and `ui`. For a fixed amount of runner work,
+halving the configured concurrency roughly doubles the wall time.
+
+`dapp` used to be a third. Moving it to 4 took its run from 56m05s to 32m34s (#2171), which is what
+that relationship predicts. Its 2,473 mutants no longer take longer in wall time than `queue`'s
+2,839 — the two now sit in the order their per-mutant costs imply.
 
 `dapp` and `e2e` also set `timeoutMS` to 60,000, well above Stryker's default. A timed-out mutant
 holds a runner for at least that long — Stryker's budget is at least
 `timeoutFactor × net + timeoutMS`, and the implementation adds its own measured overhead on top —
-so `dapp`'s 17 timeouts account for **at least 17 runner-minutes** of its 112 nominal
+so `dapp`'s 27 timeouts account for **at least 27 runner-minutes** of its 128 nominal
 runner-minutes. The true figure is higher and this document does not measure it.
 
 #### `dapp`'s settings are inherited, not chosen
 
 `dapp` was named `e2e` when it first got a Stryker config, and it ran Playwright then. Both
-settings arrived in that commit, and neither the config header nor the commit explains them. The
-shape they suit — a browser per runner, a minute for a page to settle — still fits `e2e` and `ui`,
-which drive browsers today. It no longer fits `dapp`, whose tests launch none.
+settings arrived in that commit, and neither the config header nor the commit explains them.
 
-Changing them is out of scope here, because this section exists to explain the spread rather than
-to act on it. #2171 carries the change and the measurement it needs.
+**Measuring split the pair** (#2171). `concurrency` was inherited and worth changing; `timeoutMS`
+was inherited and worth keeping. The tests launch no browser, but `src/anvil.ts` calls
+`spawn('anvil')` and several test files start one, so the minute still covers a real external
+process. Dropping it to the default moved thirty-two mutants from Killed to Timeout.
+
+See § Reading a change in timeout count (#2171) for the three runs and how to read them.
 
 #### What to do with an estimate
 
@@ -568,39 +572,66 @@ the test count and the file count, and place it in the table above.
 
 A raw timeout count answers two opposite questions with the same number.
 
-`dapp` was measured three ways to settle its `concurrency` and `timeoutMS`, and both
-changes raised the timeout count — for opposite reasons.
+`dapp` was measured three ways to settle its `concurrency` and `timeoutMS`, and both changes
+raised the timeout count — for opposite reasons.
 
-| run | settings | wall | MSI | killed | survived | timeout |
-|---|---|---|---|---|---|---|
-| baseline | c2 / t60000 | 56m05s | 80.43 | 1874 | 460 | 17 |
-| A | c2 / default | 49m | 80.73 | 1843 | 453 | 55 |
-| B | c4 / t60000 | 32m | 80.90 | 1875 | 449 | 27 |
+Every figure in this section comes from
+[`measurements/2171-dapp-stryker-runs.json`](./measurements/2171-dapp-stryker-runs.json), which is
+tracked. The raw `mutation-report/mutation.json` files it was derived from are gitignored local
+artefacts and will not survive; `T-MCD-007` checks the numbers below against the tracked file.
+
+| run | settings | wall | killed | survived | timeout |
+|---|---|---|---|---|---|
+| baseline | c2 / t60000 | 56m05s | 1874 | 460 | 17 |
+| A | c2 / default | 49m44s | 1843 | 453 | 55 |
+| B | c4 / t60000 | 32m34s | 1875 | 449 | 27 |
 
 Counting per-mutant transitions separates them.
 
 ```
-run A:  Killed   -> Timeout   32     Survived -> Timeout    6     Survived -> Killed  1
-run B:  Survived -> Timeout   10     Survived -> Killed     1
+baseline -> runA:  Killed -> Timeout   32     Survived -> Timeout   6     Survived -> Killed  1
+baseline -> runB:                             Survived -> Timeout  10     Survived -> Killed  1
 ```
 
 `Killed -> Timeout` is **detection lost**: a mutant the tests actually caught is now
-indistinguishable from a hang. `Survived -> Timeout` is **detection gained**: a mutant that
-used to escape now does not. Run A did the first thirty-two times; run B never did it once.
+indistinguishable from a hang. `Survived -> Timeout` is **detection gained**: a mutant that used to
+escape now does not. Run A did the first thirty-two times; run B never did it once.
 
 So when a settings change moves the timeout count, compare transitions and not totals. An
-acceptance criterion phrased as "timeout count must not exceed the baseline" fails run B,
-which is strictly better than the baseline on every other axis.
+acceptance criterion phrased as "timeout count must not exceed the baseline" fails run B, which is
+better than the baseline on every other axis.
 
-The comparison needs a negative control, because a transition count is a claim about a
-difference. Diffing baseline against itself yields zero transitions; diffing it against run B
-yields eleven. Without the first number the second one proves nothing about the method.
+### The comparison only holds while mutant ids do
 
-`timeoutMS` stayed at 60,000 for `dapp` because its suite spawns `anvil`
-(`src/anvil.ts` calls `spawn('anvil')`, and eight test files start one). The value looks like a
-leftover from the Playwright era, and it is — but the class of cost it covers did not go away
-with the browser. The thirty-eight extra timeouts in run A land in `anvil.js` (3 → 16),
-`anvil-pool.js` (0 → 14) and `fixture.js` (4 → 12).
+Transitions are counted by pairing `<file path>#<mutant id>` across runs, and a Stryker report does
+not promise that an id means the same mutant in the next run — ids are assigned when mutants are
+generated. It held here because `mutate`, the sources and the Stryker version were identical across
+the three runs.
+
+**Check it before counting, every time.** Key sets must match exactly, every shared key must agree
+on `mutatorName`, `replacement` and `location`, and the totals must match. If any of the three
+breaks, stop: a shifted id still produces a plausible-looking transition table.
+
+A negative control is needed for the same reason a transition count is a claim about a difference.
+Diffing baseline against itself yields zero transitions; diffing it against run B yields eleven.
+Without the first number the second proves nothing about the method.
+
+### What each setting was worth
+
+`timeoutMS` stayed at 60,000. The suite launches no browser, but `src/anvil.ts` calls
+`spawn('anvil')` and several of its test files start one, so the minute still covers a real
+external process. **Run A is the evidence**: dropping to the default moved thirty-two mutants from
+Killed to Timeout. Run A's thirty-eight extra timeouts are spread over six files, of which
+`anvil.js` (+13), `anvil-pool.js` (+14) and `fixture.js` (+8) account for thirty-five.
+
+`concurrency` moved from 2 to 4, and **wall time is the reason**: 56m05s to 32m34s, a 42 % drop.
+Not one mutant moved from Killed to Timeout.
+
+**Do not read the MSI as evidence for it.** The covered-code MSI rose 80.43 → 80.90, but that is
+the ten `Survived -> Timeout` mutants plus one `Survived -> Killed` being counted in the numerator.
+All ten are in `anvil.js`, and they time out because four workers contend, not because the tests
+detect them. On a quieter machine they return to Survived and the MSI falls — which will look like
+a regression and is not one.
 
 ## Baseline snapshots
 

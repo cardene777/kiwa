@@ -32,23 +32,31 @@
  * inherited (#2171). The pair arrived from the Playwright era with no recorded
  * reason, so three full runs were compared.
  *
- *   baseline  c2 / t60000   56m05s   MSI 80.43   killed 1874   survived 460   timeout 17
- *   run A     c2 / default  49m      MSI 80.73   killed 1843   survived 453   timeout 55
- *   run B     c4 / t60000   32m      MSI 80.90   killed 1875   survived 449   timeout 27
+ *   baseline  c2 / t60000   56m05s   killed 1874   survived 460   timeout 17
+ *   run A     c2 / default  49m44s   killed 1843   survived 453   timeout 55
+ *   run B     c4 / t60000   32m34s   killed 1875   survived 449   timeout 27
  *
  * `timeoutMS` stays at 60,000 because the suite does spawn a slow external
  * process — not a browser, but `anvil` (`src/anvil.ts` calls `spawn('anvil')`,
- * and eight test files start one). Dropping to the default moved **32 mutants
- * from Killed to Timeout**: kills the tests had actually made, relabelled as
- * hangs. The timeout is doing real work, not carrying a dead assumption.
+ * and several test files start one). **Run A is the evidence**: dropping to the
+ * default moved 32 mutants from Killed to Timeout — kills the tests had actually
+ * made, relabelled as hangs. The timeout carries a real cost, not a dead
+ * assumption.
  *
- * `concurrency` goes to 4 because doing so lost nothing. Not one mutant moved
- * from Killed to Timeout; the 10 extra timeouts all came out of Survived, so
- * they are mutants that used to escape and now do not. Wall time drops 43 %.
+ * `concurrency` goes to 4 for the wall time: 56m05s to 32m34s, a 42 % drop. Not
+ * one mutant moved from Killed to Timeout.
+ *
+ * **Its 10 extra timeouts are not an improvement to bank.** They came out of
+ * Survived, all in `anvil.js`, and they time out because four workers contend —
+ * not because the tests detect them. On a quieter machine they return to
+ * Survived and the covered-code MSI falls from 80.90 back toward 80.43. That
+ * will look like a regression and is not one.
  *
  * The raw timeout count therefore reads the same for two opposite outcomes.
  * Compare the transitions, not the totals: Killed→Timeout means detection was
- * lost, Survived→Timeout means detection was gained.
+ * lost, Survived→Timeout means detection was gained. Full workings and the
+ * tracked measurement file are in
+ * docs/quality/mutation-thresholds.md § Reading a change in timeout count.
  */
 export default {
   packageManager: 'pnpm',

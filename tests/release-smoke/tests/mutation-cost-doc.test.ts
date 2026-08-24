@@ -158,11 +158,20 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
       .filter((c) => c.concurrency !== null && c.concurrency < 4)
       .map((c) => [c.pkg, c.concurrency] as const)
       .sort((a, b) => a[0].localeCompare(b[0]));
-    expect(lowered, 'concurrency < 4 の package と値が本文の列挙と違う').toEqual([
-      ['dapp', 2],
-      ['e2e', 2],
-      ['ui', 2],
-    ]);
+
+    // **期待値を本文から導く** (#2171)。 手書きの list にすると、本文・test・config の
+    // 3 つが同じ主張の写しになり、config と test だけ直して本文が取り残される形が通る
+    // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。
+    const doc = readFileSync(DOC, 'utf8');
+    const sentence = /\b(?:One|Two|Three|Four|Five) packages? runs? Stryker at (\d+) rather than \d+: ([^.]+)\./.exec(doc);
+    expect(sentence, '本文の「N packages run Stryker at X rather than Y: ...」 を読めない').not.toBeNull();
+    const at = Number(sentence?.[1]);
+    const named = [...(sentence?.[2] ?? '').matchAll(/`([a-z0-9-]+)`/g)]
+      .map((m) => [m[1] as string, at] as const)
+      .sort((a, b) => a[0].localeCompare(b[0]));
+    expect(named.length, '本文が package を 1 つも名指ししていない').toBeGreaterThan(0);
+
+    expect(lowered, 'concurrency < 4 の package と値が本文の列挙と違う').toEqual(named);
   });
 
   it('T-MCD-004 timeoutMS を明示する package が本文の列挙と一致する', () => {
@@ -195,6 +204,79 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
       .filter((f) => launcher.test(readFileSync(f, 'utf8')))
       .map((f) => f.slice(dir.length + 1));
     expect(launching, '実 browser を起こす test が dapp に入った').toEqual([]);
+  });
+
+  it('T-MCD-007 timeout 節の数値が追跡下の実測 file と一致する', () => {
+    // 節が引く数値は **gitignore された `mutation-report/mutation.json`** から導いたもので、
+    // 生 report は残らない。 導出済の値を追跡下に置き、doc の側をそこから検査する
+    // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。
+    const measured = JSON.parse(
+      readFileSync(resolve(REPO_ROOT, 'docs/quality/measurements/2171-dapp-stryker-runs.json'), 'utf8'),
+    ) as {
+      runs: Record<string, { status: Record<string, number> }>;
+      transitions: Record<string, Record<string, number>>;
+      timeoutsByFile: Record<string, Record<string, number>>;
+    };
+    const doc = readFileSync(DOC, 'utf8');
+    const start = doc.indexOf('## Reading a change in timeout count');
+    expect(start, 'timeout 節が見つからない').toBeGreaterThan(-1);
+    const section = doc.slice(start, doc.indexOf('\n## ', start + 1));
+
+    // 表の 3 行 (killed / survived / timeout) を実測と突き合わせる。
+    const rows: [string, string][] = [
+      ['baseline', 'baseline'],
+      ['A', 'runA'],
+      ['B', 'runB'],
+    ];
+    const mismatches: string[] = [];
+    for (const [label, key] of rows) {
+      const line = section
+        .split('\n')
+        .find((l) => l.startsWith(`| ${label} |`));
+      if (line === undefined) {
+        mismatches.push(`${label}: 表の行が無い`);
+        continue;
+      }
+      const cells = line.split('|').map((c) => c.trim());
+      const st = measured.runs[key]?.status ?? {};
+      for (const [offset, name] of [
+        [4, 'Killed'],
+        [5, 'Survived'],
+        [6, 'Timeout'],
+      ] as const) {
+        const written = Number(cells[offset]);
+        const actual = st[name] ?? 0;
+        if (written !== actual) mismatches.push(`${label}.${name}: doc ${cells[offset]} / 実測 ${actual}`);
+      }
+    }
+
+    // 遷移の件数も同じく突き合わせる。 節は英数字ではなく綴りで書く箇所があるので、
+    // 数字で書いた 2 行 (code block) だけを見る。
+    for (const [pair, moves] of Object.entries(measured.transitions)) {
+      const line = section.split('\n').find((l) => l.trim().startsWith(`${pair}:`));
+      if (line === undefined) {
+        mismatches.push(`${pair}: 遷移の行が無い`);
+        continue;
+      }
+      for (const [move, count] of Object.entries(moves)) {
+        const found = new RegExp(`${move.replace(/ /g, '\\s+')}\\s+${count}\\b`).test(line);
+        if (!found) mismatches.push(`${pair} の "${move} ${count}" が行に無い`);
+      }
+    }
+
+    // 節が名指しする file 別の増分。
+    const inc = (file: string): number =>
+      (measured.timeoutsByFile.runA?.[file] ?? 0) - (measured.timeoutsByFile.baseline?.[file] ?? 0);
+    for (const [file, written] of [
+      ['anvil.js', 13],
+      ['anvil-pool.js', 14],
+      ['fixture.js', 8],
+    ] as const) {
+      if (!section.includes(`\`${file}\` (+${written})`)) mismatches.push(`${file} の増分表記が節に無い`);
+      if (inc(file) !== written) mismatches.push(`${file}: doc +${written} / 実測 +${inc(file)}`);
+    }
+
+    expect(mismatches.sort(), 'timeout 節の数値が実測と食い違う').toEqual([]);
   });
 
   it('T-MCD-006 dapp の src の @playwright/test 参照が本文と一致する', () => {
