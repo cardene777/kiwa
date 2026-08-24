@@ -210,10 +210,15 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     // 節が引く数値は **gitignore された `mutation-report/mutation.json`** から導いたもので、
     // 生 report は残らない。 導出済の値を追跡下に置き、doc の側をそこから検査する
     // (`rules/quality.md § 導出可能記述は人手で書かない` の経路 1)。
+    type MeasuredRun = {
+      concurrency: number;
+      wallSeconds: number;
+      status: Record<string, number>;
+    };
     const measured = JSON.parse(
       readFileSync(resolve(REPO_ROOT, 'docs/quality/measurements/2171-dapp-stryker-runs.json'), 'utf8'),
     ) as {
-      runs: Record<string, { status: Record<string, number> }>;
+      runs: Record<string, MeasuredRun> & { runB: MeasuredRun };
       transitions: Record<string, Record<string, number>>;
       timeoutsByFile: Record<string, Record<string, number>>;
     };
@@ -248,6 +253,15 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
         const actual = st[name] ?? 0;
         if (written !== actual) mismatches.push(`${label}.${name}: doc ${cells[offset]} / 実測 ${actual}`);
       }
+    }
+
+    // nominal runner-minutes は wall time × concurrency。 wall の分だけ更新して古い
+    // capacity が本文に残る形を止める。
+    const runB = measured.runs.runB;
+    const nominalRunnerMinutes = Math.round((runB.wallSeconds * runB.concurrency) / 60);
+    const normalizedDoc = doc.replace(/\s+/g, ' ');
+    if (!normalizedDoc.includes(`${nominalRunnerMinutes} nominal runner-minutes`)) {
+      mismatches.push(`runB nominal runner-minutes ${nominalRunnerMinutes} が節に無い`);
     }
 
     // 遷移の件数も同じく突き合わせる。 節は英数字ではなく綴りで書く箇所があるので、

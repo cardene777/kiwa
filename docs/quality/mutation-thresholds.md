@@ -547,7 +547,7 @@ that relationship predicts. Its 2,473 mutants no longer take longer in wall time
 `dapp` and `e2e` also set `timeoutMS` to 60,000, well above Stryker's default. A timed-out mutant
 holds a runner for at least that long — Stryker's budget is at least
 `timeoutFactor × net + timeoutMS`, and the implementation adds its own measured overhead on top —
-so `dapp`'s 27 timeouts account for **at least 27 runner-minutes** of its 128 nominal
+so `dapp`'s 27 timeouts account for **at least 27 runner-minutes** of its 130 nominal
 runner-minutes. The true figure is higher and this document does not measure it.
 
 #### `dapp`'s settings are inherited, not chosen
