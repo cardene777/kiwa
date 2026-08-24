@@ -17,7 +17,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, beforeAll } from 'vitest';
 
 import { repoRoot } from './repo-root.js';
 
@@ -61,6 +61,20 @@ function runScript(args: string[], root?: string) {
     cwd: REPO_ROOT,
     env: root ? { ...process.env, KIWA_GATE_ROOT: root } : process.env,
   });
+}
+
+/**
+ * 引数なしの起動を **1 回だけ** 行い、結果を共有する。
+ *
+ * 実測で引数なし起動は 5s 前後かかり、それを 2 件の検査が独立に呼んでいた。
+ * 出力は同じなので 1 回で足りる (Issue #2193)。
+ *
+ * `runScript` をそのまま残すのは、fixture root を渡す検査が結果を共有できないため。
+ */
+let bareRunPromise: ReturnType<typeof runScript> | undefined;
+function bareRun() {
+  bareRunPromise ??= runScript([]);
+  return bareRunPromise;
 }
 
 afterAll(() => {
@@ -361,9 +375,25 @@ describe('reportForPackage — the separate reports', () => {
 });
 
 describe('the real repository', () => {
-  it('classifies every source line into exactly one bucket', async () => {
-    const { reportAll, walkSources, countLines } = await loadScript();
-    const report = await reportAll();
+  // **`reportAll()` を 1 回だけ走らせて共有する** (Issue #2193 の duration gap report が
+  // 本 file を `subprocess` lever の上位として挙げた)。
+  //
+  // 実測で本 file は 30.28s / 65 件、うち 8 件が 26.4s (87%) を占めていた。
+  // 4 件が同じ `reportAll()` を独立に呼び、repo 全体を 4 回走査していた。
+  //
+  // 共有しても検査の独立性は落ちない = `reportAll()` は読み取りだけで、
+  // どの検査も返り値を書き換えない。 書き換える検査を足す時はここを見直す。
+  let shared: Awaited<ReturnType<Awaited<ReturnType<typeof loadScript>>['reportAll']>>;
+  let helpers: Awaited<ReturnType<typeof loadScript>>;
+
+  beforeAll(async () => {
+    helpers = await loadScript();
+    shared = await helpers.reportAll();
+  });
+
+  it('classifies every source line into exactly one bucket', () => {
+    const { walkSources, countLines } = helpers;
+    const report = shared;
     expect(report.packages.length).toBeGreaterThan(0);
 
     for (const pkg of report.packages) {
@@ -376,9 +406,8 @@ describe('the real repository', () => {
     }
   });
 
-  it('totals what the per-package rows hold', async () => {
-    const { reportAll } = await loadScript();
-    const report = await reportAll();
+  it('totals what the per-package rows hold', () => {
+    const report = shared;
     const sum = (field: string) =>
       report.packages.reduce(
         (total: number, pkg: Record<string, number>) => total + (pkg[field] ?? 0),
@@ -391,19 +420,17 @@ describe('the real repository', () => {
     expect(report.typeOnlyLines).toBe(sum('typeOnlyLines'));
   });
 
-  it('keeps the CLI entrypoint visible instead of dropping it', async () => {
+  it('keeps the CLI entrypoint visible instead of dropping it', () => {
     // `cli/src/bin.ts` imports and calls, exporting nothing. It is the file the
     // export-counting test cannot see, and the doc names it for that reason.
-    const { reportAll } = await loadScript();
-    const named = (await reportAll()).runsWithoutExporting.map(
+    const named = shared.runsWithoutExporting.map(
       (row: { pkg: string; file: string }) => `${row.pkg}/${row.file}`,
     );
     expect(named).toContain('cli/bin.ts');
   });
 
-  it('finds no config naming something with nothing to mutate', async () => {
-    const { reportAll } = await loadScript();
-    const named = (await reportAll()).listedWithoutValue.map(
+  it('finds no config naming something with nothing to mutate', () => {
+    const named = shared.listedWithoutValue.map(
       (row: { pkg: string; file: string }) => `${row.pkg}/${row.file}`,
     );
     // `api` / `ui` / `a11y` each listed their `index.js` barrel until #1963
@@ -463,7 +490,7 @@ describe('the doc snapshot is internally consistent', () => {
 
 describe('the command line', () => {
   it('prints a per-package table, a total row, and every note', async () => {
-    const { stdout } = await runScript([]);
+    const { stdout } = await bareRun();
     expect(stdout).toMatch(/^package\s+impl\s+in mutate\s+uncovered\s+barrel\s+type-only$/m);
     expect(stdout).toMatch(/^total\s+[\d,]+\s+[\d,]+\s+[\d,]+\s+[\d,]+\s+[\d,]+$/m);
     const { NOTE_LABELS } = await loadScript();
@@ -471,7 +498,7 @@ describe('the command line', () => {
   });
 
   it('classifies every package the gate reads', async () => {
-    const { stdout } = await runScript([]);
+    const { stdout } = await bareRun();
     const counted = /(\d+) of (\d+) gate packages classified/.exec(stdout);
     expect(counted, 'gate package count line').not.toBeNull();
     const [, classified, known] = counted ?? [];
