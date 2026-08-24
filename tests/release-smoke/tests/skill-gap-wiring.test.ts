@@ -486,8 +486,8 @@ describe('一括置換が他 skill の option を壊していない', () => {
 
     // 値まで見る = `--package` だけ書いて値が無い形を通さない。
     const wanted: [string, RegExp][] = [
-      ['kiwa-gap', /^--metric\s+coverage\s+--package\s+\S+/],
-      ['kiwa-loop', /^--metric\s+coverage\s+--package\s+\S+/],
+      ['kiwa-gap', /^--metric\s+coverage\s+--package\s+(?!-)\S+/],
+      ['kiwa-loop', /^--metric\s+coverage\s+--package\s+(?!-)\S+/],
       ['kiwa-verdict', /^--metric\s+coverage\b/],
     ];
     for (const [skill, extra] of wanted) {
@@ -498,7 +498,7 @@ describe('一括置換が他 skill の option を壊していない', () => {
 
   it('T-SKG-024b 通してはいけない形を通さない (陰性対照)', () => {
     // 判定関数に直接、壊した contract を与える。 実 file を汚さずに確かめる。
-    const extra = /^--metric\s+coverage\s+--package\s+\S+/;
+    const extra = /^--metric\s+coverage\s+--package\s+(?!-)\S+/;
     const broken: [string, string][] = [
       ['Step 2 が無い', '## 手順\n\n```\n1. /kiwa-gap  --metric coverage --package {pkg}\n```\n'],
       ['--package の値が無い', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package    ← 説明\n```\n'],
@@ -506,6 +506,10 @@ describe('一括置換が他 skill の option を壊していない', () => {
       ['echo を前置', '## 手順\n\n```\n2. echo /kiwa-loop --metric coverage --package {pkg}\n```\n'],
       ['comment 化', '## 手順\n\n```\n2. # /kiwa-loop --metric coverage --package {pkg}\n```\n'],
       ['散文の前置', '## 手順\n\n```\n2. まず /kiwa-loop --metric coverage --package {pkg} を実行\n```\n'],
+      // **値が flag だと path にならない** (codex review r4-f1)。 `--package` の次の token を
+      // そのまま package dir として扱うので、`--dry-run` を対象にしてしまう。
+      ['値が別の flag', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package --dry-run\n```\n'],
+      ['値が短い flag', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package -p\n```\n'],
     ];
     for (const [label, src] of broken) {
       const hit = procedureBlock(src).filter((l) => invokes(l, 'kiwa-loop', extra));
@@ -516,7 +520,7 @@ describe('一括置換が他 skill の option を壊していない', () => {
   it('T-SKG-024c 正しい書き方の変化形を落とさない (陽性対照)', () => {
     // **落とし過ぎない**ことを反対側から見る (codex review r3-f2)。
     // この repo は language tag 付きの fence を多用する。
-    const extra = /^--metric\s+coverage\s+--package\s+\S+/;
+    const extra = /^--metric\s+coverage\s+--package\s+(?!-)\S+/;
     const ok: [string, string][] = [
       ['tag なし', '## 手順\n\n```\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n'],
       ['bash tag', '## 手順\n\n```bash\n2. /kiwa-loop --metric coverage --package {pkg}\n```\n'],
