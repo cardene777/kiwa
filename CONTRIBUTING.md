@@ -88,15 +88,15 @@ line per package as it goes:
 
 ```
 $ pnpm test:all
-testing 171 packages, one at a time
+testing 166 packages, one at a time
 
-[  1/171] ok    examples/auth-auth0-poc  6.6s
-[122/171] ok    examples/orm-drizzle-mysql-poc  25.1s
-[127/171] ok    examples/orm-prisma-mysql-poc  65.9s
-[171/171] ok    tests/release-smoke  60.1s
+[  1/166] ok    examples/auth-auth0-poc  2.5s
+[122/166] ok    examples/orm-drizzle-postgres-poc  12.2s
+[127/166] ok    examples/orm-prisma-postgres-poc  20.7s
+[166/166] ok    tests/release-smoke  62.5s
 ...
 
-green: 171   red: 0   dirty: 0   not run: 0
+green: 166   red: 0   dirty: 0   not run: 0
 ```
 
 The four counters add up to the number of packages, always: one verdict each.
@@ -305,13 +305,18 @@ with esbuild and never looks at a type.
 `pnpm typecheck:coverage` finds test files that nothing compiles, and exits 1 if
 there are any:
 
-On `main` it finds none:
+On `main` it currently finds 11, and exits 1:
 
 ```
 $ pnpm typecheck:coverage
-packages with test files: 171
-packages whose tests nothing compiles: 0
+packages with test files: 166
+packages whose tests nothing compiles: 11
 ```
+
+Those 11 are tracked in #2218. They lost their only type check when #2205 and
+#2207 took the compile step out of `test` for speed — vitest transforms with
+esbuild and never looks at a type. It is not wired into `pnpm test`, so a sweep
+stays green while this stays red.
 
 When it does find one, it names the package and the files nothing compiles:
 
