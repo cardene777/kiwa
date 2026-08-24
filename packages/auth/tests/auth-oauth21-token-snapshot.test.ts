@@ -432,7 +432,7 @@ describe('listRefreshTokens は要素も copy して返す (#2179)', () => {
       server.listAccessTokens().map((entry) => entry.token),
       'revoke した access token が一覧に残っている',
     ).not.toContain(accessToken);
-    expect(server.introspect({ token: accessToken }).active, '失効していない').toBe(false);
+    expect(server.introspect(accessToken).active, '失効していない').toBe(false);
   });
 
   it('T-SNAP-013 rotate 済の要素も copy されている', () => {
