@@ -62,10 +62,14 @@ report に理由を書く。
 ## 手順
 
 ```
-1. /kiwa-gap --metric coverage --package {pkg}     ← 残りを安い順に並べる
-2. gap があれば /kiwa-loop --metric coverage       ← 先頭 1 件を埋めて再測
-3. 残ったものを /kiwa-verdict で分類し report に書く
+1. /kiwa-gap  --metric coverage --package {pkg}    ← 残りを安い順に並べる
+2. /kiwa-loop --metric coverage --package {pkg}    ← 先頭 1 件を埋めて再測 (gap があれば)
+3. /kiwa-verdict --metric coverage                 ← 残ったものを分類し report に書く
 ```
+
+**`--package` を省かない**。 `/kiwa-loop` は `--metric coverage` で `--package` が無いと
+止まる = 全 package を 1 ループで回すと、どの package の何が進んだのか round ごとに
+追えなくなるため。 省いた手順を書くと、契約に従っても remediation loop に入れない。
 
 `/kiwa-loop` は「未達 0 件」「改善 0 が 2 round 連続」「上限 5 round」 のいずれかで必ず止まる。
 

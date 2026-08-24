@@ -827,7 +827,14 @@ describe('生成済 spec の 既存 test との対応 が全 TC を持つ', () =
 });
 
 describe('Layer 2 skill が既存 test の判定を読む', () => {
-  const REUSE_REF = '.claude/skills/kiwa-design/references/existing-test-reuse.md';
+  // 実体の場所と、SKILL.md での書かれ方は別物 (Issue #2199)。
+  //
+  // 実体は `_shared/` に 1 つだけ置く。 SKILL.md からは **各 skill 自身の
+  // `references/` 経由**で書く = 以前は `.claude/skills/kiwa-design/references/...` を
+  // 名指ししていたが、実体を移した後もその path が動くのは kiwa-design に symlink が
+  // 残っているからで、その skill を消すと全 consumer の指示が壊れる。
+  const REUSE_BODY = '.claude/skills/_shared/references/existing-test-reuse.md';
+  const REUSE_REF = 'references/existing-test-reuse.md';
 
   /**
    * `docs/layers.json` が宣言する Layer 2 skill。
@@ -850,8 +857,8 @@ describe('Layer 2 skill が既存 test の判定を読む', () => {
   }
 
   it('共有 contract が実在し 4 項目を持つ', () => {
-    expect(existsSync(resolve(REPO_ROOT, REUSE_REF)), `${REUSE_REF} が無い`).toBe(true);
-    const ref = read(REUSE_REF);
+    expect(existsSync(resolve(REPO_ROOT, REUSE_BODY)), `${REUSE_BODY} が無い`).toBe(true);
+    const ref = read(REUSE_BODY);
     for (const heading of [
       '## 1. 判定の読み方',
       '## 2. 対象の絞り方',
@@ -884,7 +891,7 @@ describe('Layer 2 skill が既存 test の判定を読む', () => {
   it('共有 contract が追記の単位を runtime 別に持つ', () => {
     // dogfood (#2007) で判明した = Solidity は `setUp` が contract 単位のため、 contract を
     // 足す形にすると前提を 2 箇所で保つことになる。 単位は runtime で違う。
-    const ref = read(REUSE_REF);
+    const ref = read(REUSE_BODY);
     expect(ref).toContain('### 追記の単位 (runtime で違う)');
     expect(ref).toContain('| solidity | **既存の test contract に `function test_*` を足す** |');
     expect(ref).toContain('| typescript | 既存 file の末尾に `describe` を 1 つ足す |');
@@ -893,7 +900,7 @@ describe('Layer 2 skill が既存 test の判定を読む', () => {
   it('共有 contract が追記してよい範囲を持つ', () => {
     // `vm.expectEmit` は test contract 側の event 宣言を要る。 「既存 test を書き換えない」 だけ
     // だと、 宣言を足してよいのかが読めない (#2007 の dogfood で詰まった点)。
-    const ref = read(REUSE_REF);
+    const ref = read(REUSE_BODY);
     expect(ref).toContain('### 追記してよい範囲');
     expect(ref).toContain('その test が動くために必要な宣言');
     expect(ref).toContain('`setUp` (JS なら `beforeEach`) は変えない');

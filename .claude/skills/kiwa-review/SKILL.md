@@ -186,7 +186,7 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 入力:
 - spec file を Read
 - 対応 test file は **`kiwa layers` に訊く**。 § test code の path も CLI から受け取る で解決する。
-- 11 観点 catalog (`.claude/skills/kiwa-design/references/viewpoints-catalog.md`) を Read
+- 11 観点 catalog (`references/viewpoints-catalog.md`) を Read
 - layer 別の専用観点を持つ 2 layer
   - `e2e-generic`: 9 column (Mode `static`/`fetch`/`node`/`ssr` + Route + Given + When + Then) を Layer 2 mapping と照合
   - `a11y`: 9 column (Mode `jsdom`/`playwright` + Component + WCAG-rule + Severity) を axe-core rule 適用率で照合
@@ -243,7 +243,7 @@ pnpm exec kiwa layers --json --layer "$LAYER" --lang "$DOC_LANG" --module "$MODU
 ##### 識別力の判定 (Issue #2127、 2A の「具体性」 軸と 2B の「assertion 品質」 軸に共通)
 
 判定基準、実測値、anti-pattern は
-`.claude/skills/kiwa-design/references/assertion-discrimination.md` が SSOT。
+`references/assertion-discrimination.md` が SSOT。
 review 実行時は同 file を Read し、2A の「入力 / 期待結果の具体性」と 2B の
 「assertion 品質」の score に同じ基準を適用する。 軸と weight は変更しない。
 
@@ -408,7 +408,7 @@ multiSelect: false
 
 ## 関連
 
-- 観点 SSOT: `.claude/skills/kiwa-design/references/viewpoints-catalog.md` (11 観点 catalog)
+- 観点 SSOT: `references/viewpoints-catalog.md` (11 観点 catalog)
 - spec format SSOT: `docs/SKILL-DESIGN.ja.md` (9 section 統一テンプレ)
 - 親 Issue (本 skill の motivation): #215 (mint-nft fixtures 化 docs 検証で gap 発見、 reviewer agent 欠落を補完)
 - 同並列 skill: `/kiwa-design` `/kiwa-forge` `/kiwa-hardhat` `/kiwa-play`

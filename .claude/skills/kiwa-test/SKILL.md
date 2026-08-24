@@ -776,5 +776,5 @@ graph TD
 ## 関連
 
 - 子 skill: `.claude/skills/kiwa-{design,forge,hardhat,play,review}/SKILL.md`
-- 観点 SSOT: `.claude/skills/kiwa-design/references/viewpoints-catalog.md` (11 観点)
+- 観点 SSOT: `references/viewpoints-catalog.md` (11 観点)
 - 親 Issue (本 skill の motivation): #215 (mint-nft fixtures 化 docs 検証で gap 発見、 1 コマンド化要望)

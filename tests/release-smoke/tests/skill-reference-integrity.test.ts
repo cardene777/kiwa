@@ -185,9 +185,21 @@ describe('skill の reference が実在する (#2182)', () => {
     for (const ref of collectReferences()) {
       byForm.set(ref.form, (byForm.get(ref.form) ?? 0) + 1);
     }
-    const forms: Form[] = ['repo-rooted', 'skill-rooted'];
-    const empty = forms.filter((form) => (byForm.get(form) ?? 0) === 0);
-    expect(empty, 'この書かれ方の reference を 1 件も抽出できていない').toEqual([]);
+
+    // `skill-rooted` (`` `references/x.md` ``) が抽出できていることを見る。
+    expect(
+      byForm.get('skill-rooted') ?? 0,
+      'skill dir 起点の reference を 1 件も抽出できていない',
+    ).toBeGreaterThan(0);
+
+    // **`repo-rooted` は 0 件が正しい** (Issue #2199)。 `.claude/skills/<skill>/references/...`
+    // の書き方は、実体を `_shared/` へ移した後に全廃した = その path が動くのは
+    // 名指しした skill に symlink が残っているからで、その skill を消すと全 consumer の
+    // 指示が壊れる。
+    //
+    // 0 件を許すと抽出が壊れた時に気付けないので、**書かれていないこと自体を assert する**。
+    // 抽出の生死は `skill-rooted` の件数が担う。
+    expect(byForm.get('repo-rooted') ?? 0, 'repo root 起点の reference が復活している').toBe(0);
   });
 
   it('T-SRI-003 全ての reference が実在する file を指す', () => {

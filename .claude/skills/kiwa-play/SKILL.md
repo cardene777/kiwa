@@ -208,7 +208,7 @@ Layer 1 出力 (解決済み spec path) を Read し、 「テストケース一
 | `優先度` | spec.ts 内のコメント (高 = `// HIGH-PRIORITY`) |
 | `自動化` (推奨/手動) | 「手動」のケースは spec.ts に含めず docs に分離 |
 
-観点 → Playwright helper の完全マッピングは `.claude/skills/kiwa-design/references/layer2-bridge.md` § Playwright を参照。
+観点 → Playwright helper の完全マッピングは `references/layer2-bridge.md` § Playwright を参照。
 
 #### 1.5.D 旧 template との backward-compat
 
@@ -421,7 +421,7 @@ section を持たない仕様書は全 TC を `不明` として扱う。
 既存 test file があればそこに追記し、 無ければ本 skill の既定出力先へ新規 Write する。
 **既存 test の削除と期待値の書き換えは行わない**。
 
-判定の読み方 / 追記先の決め方 / 禁止事項の全文は `.claude/skills/kiwa-design/references/existing-test-reuse.md` を Read する。
+判定の読み方 / 追記先の決め方 / 禁止事項の全文は `references/existing-test-reuse.md` を Read する。
 
 ## 関連 link
 

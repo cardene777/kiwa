@@ -48,6 +48,22 @@ function generatorSkills(): string[] {
     .sort();
 }
 
+/**
+ * contract に従う skill。
+ *
+ * **生成 skill だけでは足りない** (codex review r1-f2)。 `kiwa-test` は chain を一括実行し、
+ * `kiwa-design` は何を test するかを決める = どちらも `## 既存 test の再利用` を持たないため
+ * `generatorSkills()` から漏れる。 漏れたまま配線すると、その 1 行を消しても検査が通る。
+ *
+ * 導出できる集合 (生成 skill) に、導出できない 2 件を明示的に足す。 名前を書くのは
+ * 「chain を回す側 / 設計する側」 という役割が file 内の見出しからは導けないため。
+ */
+const EXTRA_CONSUMERS = ['kiwa-design', 'kiwa-test'] as const;
+
+function contractConsumers(): string[] {
+  return [...new Set([...generatorSkills(), ...EXTRA_CONSUMERS])].sort();
+}
+
 describe('共通 skill が実在する', () => {
   it('T-SKG-001 3 skill の SKILL.md がある', () => {
     for (const s of COMMON_SKILLS) {
@@ -147,15 +163,28 @@ describe('test を生成する skill が共通 skill へ配線されている', 
     // 相異なる行は 4 種しか無かった = 1 箇所直して 17 箇所が古いまま残る形だった。
     //
     // 参照 1 行に置き換え、判定基準は `_shared/references/coverage-contract.md` に一本化する。
-    const missing = generatorSkills().filter(
+    const missing = contractConsumers().filter(
       (s) => !completion(read(s)).includes('references/coverage-contract.md'),
     );
     expect(missing, 'contract 参照が完了条件に無い skill').toEqual([]);
+
+    // 導出できない 2 件が母集団に入っていることまで見る = 足し忘れると全部通る。
+    //
+    // **`for` で回さない** (変異試験で実測)。 `EXTRA_CONSUMERS` を空にすると loop が
+    // 0 周して assert に到達せず、母集団を空にする変異が素通りした。
+    // 集合そのものを比較する形にすると、空にした時点で落ちる。
+    expect(
+      [...EXTRA_CONSUMERS].sort(),
+      '導出できない consumer の一覧が空になっている',
+    ).toEqual(['kiwa-design', 'kiwa-test']);
+    for (const extra of EXTRA_CONSUMERS) {
+      expect(contractConsumers(), `${extra} が母集団に無い`).toContain(extra);
+    }
   });
 
   it('T-SKG-009 判定基準を完了条件に書き写していない', () => {
     // 陰性対照。 参照を書いた上で判定基準も並べると、複製が復活する。
-    const offenders = generatorSkills().filter((s) => {
+    const offenders = contractConsumers().filter((s) => {
       const c = completion(read(s));
       return c.includes('/kiwa-gap --metric') || c.includes('/kiwa-verdict');
     });
@@ -387,6 +416,44 @@ describe('一括置換が他 skill の option を壊していない', () => {
   });
 
 });
+
+
+  it('T-SKG-024 contract の手順が実際に動く形になっている', () => {
+    // **codex review r1-f1**。 `/kiwa-loop --metric coverage` を `--package` 無しで
+    // 書いていた。 `/kiwa-loop` は coverage で `--package` が無いと止まるので、
+    // 契約に従っても remediation loop に入れない。
+    //
+    // T-SKG-010 は見出しと分類 label しか見ないので検知しなかった。 command を
+    // 取り出して必須 option が揃っていることを見る。
+    const contract = readFileSync(
+      resolve(SKILLS_DIR, '_shared/references/coverage-contract.md'),
+      'utf8',
+    );
+    const loop = /\/kiwa-loop[^\n]*/.exec(contract);
+    expect(loop, 'contract に /kiwa-loop の手順が無い').not.toBeNull();
+    expect(loop?.[0], '/kiwa-loop の手順に --package が無い').toContain('--package');
+
+    const gap = /\/kiwa-gap\s+--metric coverage[^\n]*/.exec(contract);
+    expect(gap, 'contract に /kiwa-gap の手順が無い').not.toBeNull();
+    expect(gap?.[0], '/kiwa-gap の手順に --package が無い').toContain('--package');
+  });
+
+  it('T-SKG-025 consumer が別 consumer の references を名指ししない', () => {
+    // **codex review r1-f3**。 移設後も 16 skill が
+    // `.claude/skills/kiwa-design/references/existing-test-reuse.md` を名指ししていた。
+    // kiwa-design に symlink が残っているので動くだけで、その skill を消すと全部壊れる。
+    const offenders: string[] = [];
+    for (const skill of readdirSync(SKILLS_DIR)) {
+      const p = resolve(SKILLS_DIR, skill, 'SKILL.md');
+      if (!existsSync(p)) continue;
+      for (const m of readFileSync(p, 'utf8').matchAll(
+        /\.claude\/skills\/(kiwa-[a-z-]+)\/references\/([a-z0-9-]+\.md)/g,
+      )) {
+        offenders.push(`${skill}: ${m[1]}/references/${m[2]}`);
+      }
+    }
+    expect(offenders, 'consumer skill の references を名指ししている').toEqual([]);
+  });
 
 describe('共有 component の置き場所', () => {
   const SHARED = resolve(SKILLS_DIR, '_shared/references');

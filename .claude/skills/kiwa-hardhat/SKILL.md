@@ -441,7 +441,7 @@ section を持たない仕様書は全 TC を `不明` として扱う。
 既存 test file があればそこに追記し、 無ければ本 skill の既定出力先へ新規 Write する。
 **既存 test の削除と期待値の書き換えは行わない**。
 
-判定の読み方 / 追記先の決め方 / 禁止事項の全文は `.claude/skills/kiwa-design/references/existing-test-reuse.md` を Read する。
+判定の読み方 / 追記先の決め方 / 禁止事項の全文は `references/existing-test-reuse.md` を Read する。
 
 ## 関連 link
 

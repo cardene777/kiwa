@@ -186,7 +186,7 @@ format。
 Layer 1 spec の各ケース行を 観点別に forge helper へ変換 (詳細マッピングは `references/foundry-mapping.md`)。
 
 assert の識別力判定と Layer 1 への引き継ぎは
-`.claude/skills/kiwa-design/references/assertion-discrimination.md` が SSOT。
+`references/assertion-discrimination.md` が SSOT。
 Step 3 では同 file を Read し、spec の `期待結果` を正確に表す assert を選ぶ。
 Layer 1 が緩い場合は現在の実装値から期待値を発明せず、同 file の規範どおり報告する。
 revert の種別が spec にある場合、`vm.expectRevert()` は引数なしにせず selector または
@@ -445,7 +445,7 @@ section を持たない仕様書は全 TC を `不明` として扱う。
 既存 test file があればそこに追記し、 無ければ本 skill の既定出力先へ新規 Write する。
 **既存 test の削除と期待値の書き換えは行わない**。
 
-判定の読み方 / 追記先の決め方 / 禁止事項の全文は `.claude/skills/kiwa-design/references/existing-test-reuse.md` を Read する。
+判定の読み方 / 追記先の決め方 / 禁止事項の全文は `references/existing-test-reuse.md` を Read する。
 
 ## 関連 link
 
