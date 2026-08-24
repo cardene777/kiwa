@@ -205,14 +205,46 @@ type NonPrimitiveKeys<T> = {
  * 配列 field を 1 つ足すだけなら copy の追加で済むが、object field を足すなら copy の形を
  * 変えないといけない。 後者を compile で止める。
  */
-type DeepNonCopyableKeys<T> = {
-  [K in keyof T]-?: NonNullable<T[K]> extends Primitive
-    ? never
-    : NonNullable<T[K]> extends readonly (infer E)[]
+/**
+ * その配列型が「素の readonly 配列」 か。
+ *
+ * `readonly string[] & { metadata: object }` は `readonly (infer E)[]` に一致するが、
+ * copy 経路の `[...val]` は **付随 property を落とす** = 型 gate が「copy 可能」 と判定した
+ * field の情報が保存時に失われる (#2191)。
+ *
+ * 素の配列なら `readonly E[]` が元の型に代入できる。 付随 property を持つ intersection は
+ * その property を満たせないので代入できず、 ここで false になる。
+ *
+ * **branded type (`readonly string[] & { __brand: 'Scopes' }`) も同じ理由で拒否する**。
+ * brand は付随 property を持たないので copy は壊れないが、 「壊れる intersection」 と
+ * 「壊れない intersection」 を型で区別する条件を足すほど、 落ちた時に compile error から
+ * 理由を読めなくなる。 branded を使いたくなった時に、 その形だけを通す条件を足す。
+ */
+type IsPlainArray<V, E> = readonly E[] extends V ? true : false;
+
+/**
+ * その値の型が copy 経路で壊れないか。
+ *
+ * **union member ごとに分配する** (#2191)。 `V` を裸の型引数のまま `extends` に置くことで
+ * `string | readonly string[]` が member ごとに判定される。 分配しない形では、 各 member が
+ * 許容形でも union 全体は primitive にも配列にも `extends` しないため、 安全な field が
+ * `TS2322: Type 'true' is not assignable to type 'never'` で落ちていた。
+ *
+ * 混在 union (`string | { a: 1 }`) は `true | false` になり、 下の `extends true` が成立しない
+ * ので拒否側に落ちる。
+ */
+type IsCopyableValue<V> = V extends Primitive
+  ? true
+  : V extends readonly (infer E)[]
+    ? IsPlainArray<V, E> extends true
       ? NonNullable<E> extends Primitive
-        ? never
-        : K
-      : K;
+        ? true
+        : false
+      : false
+    : false;
+
+type DeepNonCopyableKeys<T> = {
+  [K in keyof T]-?: IsCopyableValue<NonNullable<T[K]>> extends true ? never : K;
 }[keyof T];
 
 /**
@@ -286,6 +318,58 @@ const _clientIsCopyable: _AssertClientCopyable = true;
 const _userIsCopyable: _AssertUserCopyable = true;
 void _clientIsCopyable;
 void _userIsCopyable;
+
+/**
+ * 型 gate の判定を両方向で固定する (#2191)。
+ *
+ * gate は 2 方向に外れうる。 安全な形を過剰に拒否する側と、 copy が壊れる形を許す側で、
+ * **どちらも実際の型を書いてみないと分からない**。 公開型に該当 field が無いため、 実物からは
+ * 測れない = ここに fixture を置く。
+ *
+ * 判定を緩めると下の `@ts-expect-error` が「error が出なかった」 で落ち、 判定を厳しくすると
+ * 上の代入が落ちる。 どちらへ動かしても compile が止まる。
+ */
+interface _GateAccepts {
+  /** union の member がいずれも許容形。 分配しないと落ちていた形 */
+  either: string | readonly string[];
+  /** optional。 `NonNullable` が undefined を外す */
+  maybe?: readonly string[];
+  /** 素の readonly 配列 */
+  plain: readonly string[];
+  /** primitive */
+  scalar: number;
+}
+
+interface _GateRejects {
+  /** 付随 property を持つ配列。 copy の `[...val]` が metadata を落とす */
+  withMetadata: readonly string[] & { metadata: object };
+}
+
+interface _GateRejectsObject {
+  /** 素の object。 名指し copy では素通しする */
+  nested: { a: string };
+}
+
+interface _GateRejectsMixed {
+  /** union に非許容 member が混ざる */
+  mixed: string | { a: string };
+}
+
+type _AssertAccepts = DeepNonCopyableKeys<_GateAccepts> extends never ? true : never;
+const _gateAccepts: _AssertAccepts = true;
+void _gateAccepts;
+
+// 以下 3 つは gate が拒否する形。 拒否しなくなると `never` に代入できてしまい、
+// `@ts-expect-error` が「error が出なかった」 で落ちる。
+// @ts-expect-error 付随 property を持つ配列は copy が壊れるので拒否する
+const _gateRejectsMetadata: DeepNonCopyableKeys<_GateRejects> extends never ? true : never = true;
+void _gateRejectsMetadata;
+// @ts-expect-error 素の object は名指し copy が素通しするので拒否する
+const _gateRejectsObject: DeepNonCopyableKeys<_GateRejectsObject> extends never ? true : never = true;
+void _gateRejectsObject;
+// @ts-expect-error 非許容 member を含む union は拒否する
+const _gateRejectsMixed: DeepNonCopyableKeys<_GateRejectsMixed> extends never ? true : never = true;
+void _gateRejectsMixed;
 
 /**
  * Response to a successful `/token` call. Mirrors the RFC 6749 token response
