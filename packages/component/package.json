@@ -57,6 +57,7 @@
   "scripts": {
     "build": "tsup || node -e \"const{rmSync}=require('node:fs');for(const f of ['dist/index.d.ts','dist/index.d.cts'])rmSync(f,{force:true});process.exit(1)\"",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --exclude '**/.stryker-tmp/**' --environment node",
+    "test:fast": "vitest run tests --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --exclude '**/.stryker-tmp/**' --environment node",
     "pretest:perf": "pnpm -F @kiwa-lab/perf-harness build",
     "test:perf": "vitest run -c vitest.perf.config.ts --reporter=verbose",
     "test:mutation": "node ../../scripts/package-mutation.mjs",

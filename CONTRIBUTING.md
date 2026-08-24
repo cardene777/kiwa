@@ -174,28 +174,41 @@ Two things to know before you trust a number it prints:
 
 ### Running only what changed
 
-`tests/release-smoke` has a second entry point, `test:fast`. It runs the
-TypeScript sources directly instead of the `tsc` output the full run uses, and
-passes vitest's `--changed` so that only the files your edits affect are
-collected.
+Every package under `packages/`, and `tests/release-smoke`, has a second entry
+point: `test:fast`. It runs the TypeScript sources directly instead of the `tsc`
+output the full run uses, and passes vitest's `--changed` so that only the files
+your edits affect are collected.
 
 ```
-$ pnpm -F kiwa-release-smoke test:fast                       # against main
-$ KIWA_FAST_BASE=HEAD pnpm -F kiwa-release-smoke test:fast   # uncommitted only
+$ pnpm -F @kiwa-lab/auth test:fast                           # against main
+$ KIWA_FAST_BASE=HEAD pnpm -F @kiwa-lab/auth test:fast       # uncommitted only
+$ pnpm -F kiwa-release-smoke test:fast
 ```
 
 The base is `main` unless `KIWA_FAST_BASE` names another ref. Nothing changed
 means nothing runs, and that exits 0.
 
-**It is a filter, not a gate.** These checks read files rather than importing
-them, so an edit vitest cannot see in the module graph selects nothing, and the
-run is green having checked nothing about it. `pnpm -F kiwa-release-smoke test`
-is what decides whether the package is green.
+**Do not edit `test:fast` by hand.** `scripts/sync-test-fast.mjs` derives it
+from each package's own `test`, so a flag added to `test` reaches `test:fast`
+by re-running the script. Written by hand, the two drift and the fast route
+keeps running under whatever flags it was born with.
 
-The two routes share no code, so nothing would notice them drifting apart on
-their own. `tests/release-smoke/tests/fast-route-equivalence.test.ts` runs both
+```
+$ node scripts/sync-test-fast.mjs           # report drift (exits 1 when stale)
+$ node scripts/sync-test-fast.mjs --write   # bring every package back in line
+```
+
+**It is a filter, not a gate.** An edit vitest cannot see in the module graph
+selects nothing, and the run is green having checked nothing about it — the
+release-smoke checks in particular read files rather than importing them, so
+most edits outside that package select none of them. `pnpm test` is what decides
+whether a package is green.
+
+Two checks keep the route honest, because the routes share no code and would
+otherwise drift unnoticed. `fast-route-equivalence.test.ts` runs both routes
 with `vitest list` and fails when they collect a different number of files, a
-different number of tests, or different files.
+different number of tests, or different files. `test-fast-sync.test.ts` fails
+when any package's `test:fast` is not what the script derives from its `test`.
 
 ### What `pnpm test` actually needs
 

@@ -55,6 +55,7 @@
     "build": "tsup || node -e \"const{rmSync}=require('node:fs');for(const f of ['dist/index.d.ts','dist/index.d.cts'])rmSync(f,{force:true});process.exit(1)\"",
     "pretest": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "test": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000",
+    "test:fast": "vitest run tests --changed ${KIWA_FAST_BASE:-main} --exclude '**/.vitest-dist/**' --environment node --testTimeout 30000",
     "pretest:cov": "pnpm -F @kiwa-lab/core -F @kiwa-lab/quality-metrics build",
     "test:cov": "node -e \"require('node:fs').rmSync('.vitest-dist',{recursive:true,force:true})\" && tsc -p tsconfig.vitest.json && vitest run .vitest-dist/tests --environment node --testTimeout 30000 --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reporter=text --coverage.reportsDirectory=coverage --coverage.include='.vitest-dist/src/**/*.js' --coverage.exclude='.vitest-dist/tests/**' --coverage.exclude='.vitest-dist/src/types.js' && node ../../scripts/record-artifact-inputs.mjs coverage",
     "test:a11y": "node ../../scripts/run-axe-baseline.mjs",

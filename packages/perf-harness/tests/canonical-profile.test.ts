@@ -13,7 +13,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
@@ -25,12 +25,15 @@ import {
   isComparableEnv,
   nonCanonicalEnvNotice,
 } from '../src/baseline.js';
+import { resolveKiwaRepoRoot } from '../src/three-layer.js';
 import type { BaselineEnv } from '../src/types.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-// compile 後は `.vitest-dist/tests/` から走るため 4 階層上が repo root
-// (`.vitest-dist/tests` → `.vitest-dist` → `perf-harness` → `packages` → root)。
-const REPO_ROOT = resolve(HERE, '..', '..', '..', '..');
+// 数えずに探す。 本 file は 2 箇所から走る = `test` は compile 済の
+// `.vitest-dist/tests/` から、 `test:fast` は source の `tests/` から起動する (#2202)。
+// 階層を数えると片方でしか当たらず、 外れた側は repo の外を指す
+// (`Desktop/projects/packages/...` を読んで ENOENT で落ちた)。
+const REPO_ROOT = resolveKiwaRepoRoot(HERE);
 
 function envWith(overrides: Partial<BaselineEnv>): BaselineEnv {
   return { ...captureEnv(), ...overrides };
