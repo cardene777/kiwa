@@ -90,10 +90,16 @@ export function declaredDefaultIn(body: string): number | null {
   for (const line of body.split('\n')) {
     if (!line.includes('`--coverage-threshold {N}`')) continue;
     // 英語と日本語の両方を受ける。 `既定 100%` / `default 100%` / `省略時は 100%`。
-    const match = /(?:default(?:\s+is)?|既定(?:は|値は)?|省略時(?:は)?)\s*(\d+)\s*%/.exec(line);
-    if (match?.[1] !== undefined) return Number(match[1]);
+    const [value] = statedDefaultsIn(line);
+    if (value !== undefined) return value;
   }
   return null;
+}
+
+/** 本文に書かれた coverage 既定値を、英語 / 日本語の両表記から全件取り出す。 */
+export function statedDefaultsIn(body: string): number[] {
+  return [...body.matchAll(/(?:default(?:\s+is)?|既定(?:は|値は)?|省略時(?:は)?)\s*(\d+)\s*%/g)]
+    .map((match) => Number(match[1]));
 }
 
 function declaredDefault(skill: string): number | null {
@@ -272,6 +278,14 @@ describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
       seesAllMetrics('Lines / Branches が threshold 達成'),
       '2 名だけの形を通している',
     ).toBe(false);
+
+    // 本文内の矛盾検出も house style を受ける。 宣言の parser だけを多言語化しても、
+    // 完了条件側の `既定 80%` を見逃すなら元の矛盾が再発する。
+    expect(statedDefaultsIn('threshold (default 100%) / 既定は 80% / 省略時 50%')).toEqual([
+      100,
+      80,
+      50,
+    ]);
   });
 
   it('T-SCT-007 既定値を読めない skill も一覧に数える', () => {
@@ -292,18 +306,33 @@ describe('coverage を測る skill が同じ目標を掲げる (#2184)', () => {
     ]);
   });
 
+  it('T-SCT-005b 1 行に複数の既定値が書かれても全件を拾う', () => {
+    // **最初の 1 件で打ち切らない** (#2184 r1-f1)。 1 行に 2 つ以上の既定値が並ぶ形
+    // (`threshold (default 100%) だが coverage は 既定 80%`) で先頭だけを見ると、
+    // 先頭が 100 なら後続の矛盾が黙って通る。
+    //
+    // 実 skill の本文は 1 行 1 値なので、**実 file では判定を狭めても落ちない**。
+    // fixture で固定する。
+    const line = '- `--coverage-threshold {N}` — threshold (default 100%)、 完了条件は 既定 80%';
+    const values = statedDefaultsIn(line);
+    expect(values, '1 行の複数値を全件拾えていない').toEqual([100, 80]);
+
+    const offending = values.filter((v) => v !== 100);
+    expect(offending, '先頭が 100 なら後続の矛盾を見逃している').toEqual([80]);
+  });
+
   it('T-SCT-005 完了条件と Step 5 の目標値が矛盾しない', () => {
     // 同じ file の中で Step 5 が 100% を書き、完了条件が 80% を書いていた
     // (完了条件が gate なので実効は 80%)。 本文が別の threshold を名指ししていないか見る。
     const conflicts: string[] = [];
     for (const skill of COVERAGE_SKILLS) {
       for (const [index, line] of skillBody(skill).split('\n').entries()) {
-        // 「default N%」 の形で REQUIRED_THRESHOLD 以外を書いた行を拾う。
+        // 英語 / 日本語どちらでも REQUIRED_THRESHOLD 以外を書いた行を拾う。
         // metric 別 override の説明 (`--coverage-lines {N}`) は値を書かないので当たらない。
-        const match = /default(?:\s+is)?\s+(\d+)\s*%/.exec(line);
-        const value = match?.[1];
-        if (value !== undefined && Number(value) !== REQUIRED_THRESHOLD) {
-          conflicts.push(`${skill}/SKILL.md:${index + 1} -> default ${value}%`);
+        for (const value of statedDefaultsIn(line)) {
+          if (value !== REQUIRED_THRESHOLD) {
+            conflicts.push(`${skill}/SKILL.md:${index + 1} -> default ${value}%`);
+          }
         }
       }
     }
