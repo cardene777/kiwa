@@ -16,7 +16,7 @@ title: "@kiwa-lab/auth oauth21__types の API 契約"
 
 #### <code v-pre>AccessToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L223) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L261) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Access token minted by `/token`. Contains just enough state for the mock to answer `/introspect` and `/revoke` — a real JWT would encode this into claims, the mock keeps a plain record for test ergonomics.
 
@@ -78,7 +78,7 @@ export interface AuthorizationResponse {
 
 #### <code v-pre>AuthorizationServer</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L355) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L455) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `AuthorizationServer` return shape from `createAuthorizationServer`. Exposes the RFC 6749 / 9700 / 7662 endpoint surface as plain methods.
 
@@ -128,7 +128,7 @@ export interface AuthorizationServer {
 
 #### <code v-pre>AuthorizationServerOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L400) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L500) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `createAuthorizationServer`.
 
@@ -160,7 +160,7 @@ export interface AuthorizationServerOptions {
 
 #### <code v-pre>AuthorizationUser</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L346) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L446) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 User account preseeded on the mock AS. `scopes` is the set the AS may grant this user, and **omitting it means the empty set** (#2169). A requested scope has to appear here, or the request is rejected — the mock never grants a scope nobody declared. Tests that do not care about scopes can keep omitting it as long as they do not request one; the no-scope path yields an empty grant. Tests that request a scope must declare it.
 
@@ -173,7 +173,7 @@ export interface AuthorizationUser {
 
 #### <code v-pre>ClientRegistration</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L322) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L422) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Client registration accepted by the mock AS. Real deployments manage clients through a Dynamic Client Registration endpoint (RFC 7591); the mock accepts the client shape at env construction to keep tests hermetic.
 
@@ -272,7 +272,7 @@ export interface DpopProofInput {
 
 #### <code v-pre>IntrospectionResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L307) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L407) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Introspection response per RFC 7662. The mock returns the minimal shape a resource server needs to authorize a request.
 
@@ -300,7 +300,7 @@ export type OAuth21GrantType = 'authorization_code' | 'refresh_token';
 
 #### <code v-pre>OAuth21TestEnv</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L434) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L534) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 `setupOAuth21Env` return shape. Exposes the AS plus the standalone helpers so a test can drive PKCE + DPoP without importing the module leaves.
 
@@ -373,7 +373,7 @@ export type PkceChallengeMethod = 'S256';
 
 #### <code v-pre>RefreshToken</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L245) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L283) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Refresh token minted alongside every access token. RFC 9700 §2.2 mandates refresh token rotation — every use of a refresh token invalidates the previous token and issues a fresh one. The mock records a monotonic `rotationCount` so tests can assert the rotation happened.
 
@@ -396,7 +396,7 @@ export interface RefreshToken {
 
 #### <code v-pre>SetupOAuth21EnvOptions</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L428) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L528) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Options accepted by `setupOAuth21Env`. Composes the AS options with helpers for PKCE + DPoP.
 
@@ -436,7 +436,7 @@ export type TokenRequest = {
 
 #### <code v-pre>TokenResponse</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L295) <code v-pre>packages/auth/src/oauth21/types.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/auth/src/oauth21/types.ts#L395) <code v-pre>packages/auth/src/oauth21/types.ts</code>
 
 Response to a successful `/token` call. Mirrors the RFC 6749 token response body verbatim so a caller wiring the mock behind a real HTTP client can treat it as-is.
 
