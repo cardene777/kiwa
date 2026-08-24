@@ -89,19 +89,16 @@ gap の先頭 1 件だけを対象にする。 **まとめて埋めない**。
 **既存 test を削除しない / 期待値を書き換えない**。 詳細は
 `references/existing-test-reuse.md` が SSOT (実体は `/kiwa-design` 側)。
 
-### Step 3 — 再測する
+### Step 3 — 再測する (coverage のみ)
 
-**測定 file を作り直してから** Step 1 と同じ command を回す。
-作り直さないと同じ値が返り、進んだのに進んでいないと判定する。
+**duration では Step 3 を行わない**。 1 round で止まるので再測する相手が無く、
+再測しても差を判定できない (絶対値が 6 倍振れる)。 Step 2 で何をどう変えたかを
+report に書いて Step 5 へ進む。
 
-| metric | 作り直すもの |
-|---|---|
-| coverage | `<pkg>` の `test:cov` を走らせて `coverage-final.json` を更新する |
-| duration | vitest を `--reporter=json --outputFile=<新しい path>` で走らせ、**その path を渡す** |
+以下は coverage の手順。
 
-duration で report を作り直さないのは特に見落としやすい。 `/kiwa-gap` は test を走らせない
-ので、Step 2 で test を書き換えても `--report` が指す JSON は**前 round のまま**になる。
-毎 round 新しい path に出し、その path を渡す。
+`<pkg>` の `test:cov` を走らせて `coverage-final.json` を更新してから、Step 1 と同じ
+command を回す。 更新しないと同じ値が返り、進んだのに進んでいないと判定する。
 
 前 round との差を記録する。
 
@@ -111,15 +108,21 @@ duration で report を作り直さないのは特に見落としやすい。 `/
 | 変わらない | 改善 0。 連続回数を +1 |
 | 増えた | 悪化。 その round の変更を見直す (test を消していないか確認する) |
 
+**この表は coverage だけに適用する**。 duration に当てると、負荷で動いた値を
+「改善」 や「悪化」 と読むことになる = 本 skill が外したはずの判定が戻る。
+
 ### Step 4 — 停止条件を見る
 
 `references/loop-stop-conditions.md` が SSOT。 3 条件のいずれかで止める。
 
-| # | 条件 | 次の動き |
-|---|---|---|
-| 1 | coverage は `uncovered === 0` / duration は 1 round 完了 | Step 5 |
-| 2 | 改善 0 が 2 round 連続 | Step 6 (判断を仰ぐ) |
-| 3 | round が上限 (既定 5) に達した | Step 6 (判断を仰ぐ) |
+duration は **条件 1 だけを使う** (1 round 完了で必ず止まる)。 条件 2 と 3 は改善の
+有無を数えるが、duration では改善を測れないため適用しない。
+
+| # | 条件 | 適用 | 次の動き |
+|---|---|---|---|
+| 1 | coverage は `uncovered === 0` / duration は 1 round 完了 | 両方 | Step 5 |
+| 2 | 改善 0 が 2 round 連続 | coverage のみ | Step 6 (判断を仰ぐ) |
+| 3 | round が上限 (既定 5) に達した | coverage のみ | Step 6 (判断を仰ぐ) |
 
 条件 2 を「1 round」 にしない。 1 round の改善 0 は、埋め方を変えれば進むことがある。
 2 round 続いたら機械的にはこれ以上進めないとみなす。

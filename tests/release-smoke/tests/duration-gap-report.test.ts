@@ -597,13 +597,45 @@ describe('duration-gap-report', () => {
     expect(out.files, '診断そのものが消えている').not.toEqual([]);
   });
 
-  it('T-DGR-038 --update-baseline を渡しても file を書かない', () => {
-    // 陰性対照。 flag を無視するだけでなく **file を作らない** ことを見る。
-    // 残っていると次に読む人が「baseline がある」 と誤解する。
+  it('T-DGR-038 --update-baseline は非 0 で落ちる', () => {
+    // **黙って成功させない** (codex review r1-f1)。 flag を無視して exit 0 で通常の
+    // report を返すと、「baseline を更新した」 と誤解したまま先へ進む。 更新されて
+    // いないことに気付く手掛かりが 1 つも無い。
     const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 5000 }]);
-    run(root, report, ['--update-baseline']);
+    let code = 0;
+    let stderr = '';
+    try {
+      run(root, report, ['--update-baseline']);
+    } catch (err) {
+      const e = err as { status: number; stderr: string };
+      code = e.status;
+      stderr = e.stderr;
+    }
 
+    expect(code, '廃止 flag が黙って通っている').not.toBe(0);
+    expect(stderr).toMatch(/廃止された/);
     expect(existsSync(join(root, 'test-duration-baseline.json'))).toBe(false);
+  });
+
+  it('T-DGR-039 filesystem lever を writeFileSync 単独でも分類する', () => {
+    // **変異試験で見つけた**。 lever の判定から `writeFileSync` を外しても 1 件も
+    // 落ちなかった = `filesystem` を当てる fixture が `mkdtempSync` しか使っておらず、
+    // 列挙の他の要素を 1 つも通していなかった。
+    const { root, report } = fixture([
+      { rel: 'tests/a.test.ts', ms: 5000, body: 'writeFileSync("x", "y");\n' },
+    ]);
+    const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+
+    expect(out.files[0]?.lever).toBe('filesystem');
+  });
+
+  it('T-DGR-040 filesystem lever を mkdirSync / readdirSync 単独でも分類する', () => {
+    // 列挙の残り 2 要素。 4 要素それぞれを単独で通さないと、外しても落ちない要素が残る。
+    for (const call of ['mkdirSync("x");', 'readdirSync("x");']) {
+      const { root, report } = fixture([{ rel: 'tests/a.test.ts', ms: 5000, body: `${call}\n` }]);
+      const out = JSON.parse(run(root, report)) as { files: { lever: string }[] };
+      expect(out.files[0]?.lever, call).toBe('filesystem');
+    }
   });
 
 });

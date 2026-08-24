@@ -42,7 +42,7 @@
  *
  * 直し方が違うので、遅い順に並べるだけでは足りない。
  */
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,6 +63,21 @@ const REPORT = argValue('--report');
 function argValue(flag) {
   const i = process.argv.indexOf(flag);
   return i >= 0 ? process.argv[i + 1] : null;
+}
+
+// **退役した flag は大声で落とす**。 黙って成功すると「baseline を更新した」 と
+// 誤解したまま先へ進む (codex review r1-f1)。 exit 0 で通常の report が出るので、
+// 更新されていないことに気付く手掛かりが 1 つも無い。
+const RETIRED = ['--update-baseline'];
+const usedRetired = RETIRED.filter((flag) => process.argv.includes(flag));
+if (usedRetired.length > 0) {
+  process.stderr.write(
+    `${usedRetired.join(' / ')} は廃止された (Issue #2196)。\n` +
+      '  duration に baseline は無い。 wall time は同じ code で 6 倍振れるため判定に使えず、\n' +
+      '  本 script は遅い順に並べて lever で分類する診断だけを返す。\n' +
+      '  flag を外して実行する。\n',
+  );
+  process.exit(2);
 }
 
 if (!REPORT) {

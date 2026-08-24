@@ -89,12 +89,13 @@ describe('共通 skill が実在する', () => {
     }
   });
 
-  it('T-SKG-003c duration の再測が report を作り直すと明記する', () => {
-    // **codex review r1-f1**。 `/kiwa-gap` は test を走らせないので、report を
-    // 作り直さないと毎 round 同じ値を読み、進んだのに進んでいないと判定する。
+  it('T-SKG-003c coverage の再測が測定 file を作り直すと明記する', () => {
+    // `/kiwa-gap` は test を走らせないので、`coverage-final.json` を作り直さないと
+    // 毎 round 同じ値を読み、進んだのに進んでいないと判定する。
+    //
+    // duration 側は Issue #2196 で 1 round 停止にしたため再測しない (T-SKG-003f)。
     const src = read('kiwa-loop');
-    expect(src).toMatch(/--reporter=json --outputFile=<新しい path>/);
-    expect(src).toMatch(/前 round のまま/);
+    expect(src).toMatch(/`test:cov` を走らせて `coverage-final\.json` を更新/);
   });
 
   it('T-SKG-003 /kiwa-verdict が 4 分類を持つ', () => {
@@ -306,6 +307,34 @@ describe('一括置換が他 skill の option を壊していない', () => {
       offendingLines('kiwa-vitest', '  --metric coverage --package {pkg}` を実行し'),
       '折り返し行が offender になっていない',
     ).not.toEqual([]);
+  });
+
+
+  it('T-SKG-003e duration に増減の判定を課していない', () => {
+    // **codex review r1-f2**。 「duration に達成条件は無い」 と書きながら、
+    // Step 3 の差分表 (減った / 変わらない / 増えた) が duration にも適用される形で
+    // 残っていた。 従うと外したはずの判定が戻る。
+    //
+    // 差分表と停止条件 2 / 3 が coverage 限定であることを明記させる。
+    for (const [name, src] of [
+      ['kiwa-loop/SKILL.md', read('kiwa-loop')],
+      [
+        'loop-stop-conditions.md',
+        readFileSync(resolve(SKILLS_DIR, 'kiwa-loop/references/loop-stop-conditions.md'), 'utf8'),
+      ],
+    ] as const) {
+      expect(src, `${name} が適用範囲を書いていない`).toContain('coverage のみ');
+      expect(src, `${name} が duration の 1 round 停止を書いていない`).toMatch(
+        /duration は \*\*条件 1 だけ/,
+      );
+    }
+  });
+
+  it('T-SKG-003f duration の再測手順が coverage 限定になっている', () => {
+    // 陰性対照側。 Step 3 が duration にも再測を求めると、1 round で止まる設計と
+    // 食い違う (再測する相手が無い)。
+    expect(read('kiwa-loop')).toMatch(/### Step 3 — 再測する \(coverage のみ\)/);
+    expect(read('kiwa-loop')).toMatch(/duration では Step 3 を行わない/);
   });
 
 });
