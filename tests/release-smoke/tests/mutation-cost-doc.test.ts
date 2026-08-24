@@ -264,8 +264,13 @@ describe('mutation cost doc — 表の設定値が config と一致する (#2168
     // N は timeout 件数、M は wall × concurrency ÷ 60。 **両方を同じ文から取る** =
     // 片方だけ更新されて食い違う形を落とす。
     const runB = measured.runs.runB;
+    // **1 文の内側に閉じる** (#2171 r3-f1)。 `[\s\S]*?` は `.` を含むので、間に別の文を
+    // 挟むだけで 2 つの数字が別の文へ分かれても一致した (実測で素通りを確認)。
+    //
+    // 文末の `.` を除いた文字クラスで繋ぐ = 区切りを跨げない。 backtick と `*` は
+    // 本文の強調に現れるので許す。
     const sentence =
-      /`dapp`'s\s+(\d+)\s+timeouts\s+account\s+for[\s\S]*?of\s+its\s+(\d+)\s+nominal\s+runner-minutes/.exec(
+      /`dapp`'s\s+(\d+)\s+timeouts\s+account\s+for[^.]*?of\s+its\s+(\d+)\s+nominal\s+runner-minutes/.exec(
         doc.replace(/\s+/g, ' '),
       );
     if (sentence === null) {
