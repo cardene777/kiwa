@@ -84,14 +84,19 @@ function groupByRun(
   records.forEach((rec, index) => {
     const found = runs.get(rec.runId);
     if (found === undefined) {
-      runs.set(rec.runId, { startedAt: rec.startedAt, arrival: index, totalMs: rec.durationMs });
+      runs.set(rec.runId, {
+        startedAt: rec.startedAt,
+        arrival: index,
+        totalMs: rec.durationMs > 0 ? rec.durationMs : 0,
+      });
       return;
     }
     // 開始時刻は最小を採る。 record の順序は保証されていないので、先頭の値を使わない。
     if (rec.startedAt < found.startedAt) found.startedAt = rec.startedAt;
     // 到着順は最大を採る。 その run の record が最後に現れた位置が、その run の位置。
     if (index > found.arrival) found.arrival = index;
-    found.totalMs += rec.durationMs;
+    // 比較対象も現在 run と同じ測定規約で集計する。負値を片側だけに入れると差が反転する。
+    if (rec.durationMs > 0) found.totalMs += rec.durationMs;
   });
   return runs;
 }

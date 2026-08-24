@@ -25,33 +25,36 @@ const SKILLS_DIR = resolve(REPO_ROOT, '.claude/skills');
  * (section を一覧に含めること) を T-SET-003 で見る。
  */
 const TEST_PRODUCING_SKILLS = [
+  'kiwa-a11y',
   'kiwa-api',
+  'kiwa-auth',
+  'kiwa-cache',
   'kiwa-cli-test',
   'kiwa-data',
   'kiwa-e2e',
+  'kiwa-edge',
   'kiwa-forge',
   'kiwa-hardhat',
+  'kiwa-nextjs',
+  'kiwa-orm',
   'kiwa-play',
+  'kiwa-queue',
   'kiwa-ui',
   'kiwa-vitest',
 ] as const;
 
 const OBSERVER_SKILL = 'kiwa-observe';
 
-/**
- * 完了条件に test の PASS を書くが、自分では test を生まない skill と、その理由。
- *
- * T-SET-004 の判定は「完了条件が test の PASS を要求するか」 という代理指標なので、
- * この 2 つを拾ってしまう。 除外に理由を書いて残す = 次に増えた時、ここに足すか
- * 判定を直すかを判断できる。
- */
-const NOT_PRODUCING: Record<string, string> = {
-  'kiwa-review': 'review skill。 PASS は review の判定結果で、test の実行結果ではない',
-  'kiwa-test': 'chain の統合実行 skill。 test を生むのは子 skill で、実行時間の記録も子が持つ',
-};
-
 function skillBody(skill: string): string {
   return readFileSync(resolve(SKILLS_DIR, skill, 'SKILL.md'), 'utf8');
+}
+
+/** YAML parser を増やさず、先頭 frontmatter の範囲だけを返す。 */
+function skillFrontmatter(skill: string): string {
+  const body = skillBody(skill);
+  if (!body.startsWith('---\n')) return '';
+  const end = body.indexOf('\n---\n', 4);
+  return end === -1 ? '' : body.slice(4, end);
 }
 
 /** `## 完了条件` section を取り出す (次の `## ` 見出しまで)。 */
@@ -117,25 +120,15 @@ describe('test を生む skill が実行時間を見る (#2186)', () => {
     // 一覧を人手で持つ以上、漏れた skill が検査の外に落ちる。
     // 実物から数え直して突き合わせる (`rules/quality.md § 導出可能記述は人手で書かない`)。
     //
-    // 判定材料は「完了条件が test の実行結果を要求するか」。
-    //
-    // **英語の `PASS` だけを見ない**。 この repo は完了条件を日本語で書くので、
-    // 「全て成功」 / 「failure 0 件」 と書いた skill が一覧から静かに落ちる = 実行時間の
-    // 完了条件を一度も要求されないまま新しい Layer 2 skill が増える (#2186 r1-f5)。
-    // 実際 option 宣言では `省略時` が 4 skill で 26 回使われており、house style として
-    // 日本語の言い回しが混ざる。
-    const RESULT_CLAIM = /\bPASS\b|\bpass\b|全て成功|すべて成功|全 PASS|failure 0/;
-    const producing: string[] = [];
-    for (const skill of readdirSkills()) {
-      if (skill === OBSERVER_SKILL) continue;
-      const criteria = completionSection(skill);
-      if (criteria === null) continue;
-      if (RESULT_CLAIM.test(criteria) && /test|テスト/.test(criteria)) {
-        producing.push(skill);
-      }
-    }
+    // 完了条件を代理指標にしない。完了条件そのものが無い `kiwa-edge` / `kiwa-nextjs` /
+    // `kiwa-orm` が検査対象から消えていたため、skill 自身が宣言する責務から導く。
+    const PRODUCER_DESCRIPTION =
+      /(?:test|テスト)[^。]*(?:変換|生成|実装)[^。]*skill|(?:test|テスト)[^。]*Write[^。]*Layer 2[^。]*test skill/i;
+    const producing = readdirSkills().filter((skill) =>
+      PRODUCER_DESCRIPTION.test(skillFrontmatter(skill)),
+    );
     expect(producing.sort(), 'test を生む skill の一覧が実物とずれている').toEqual(
-      [...TEST_PRODUCING_SKILLS, ...Object.keys(NOT_PRODUCING)].sort(),
+      [...TEST_PRODUCING_SKILLS].sort(),
     );
   });
 });

@@ -14,7 +14,7 @@ title: "@kiwa-lab/observability slowest の API 契約"
 
 #### <code v-pre>analyzeSlowest</code>
 
-[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/slowest.ts#L104) <code v-pre>packages/observability/src/slowest.ts</code>
+[ソース宣言](https://github.com/cardene777/kiwa/blob/main/packages/observability/src/slowest.ts#L109) <code v-pre>packages/observability/src/slowest.ts</code>
 
 遅い test と、直前の run との差を出す。 集めている `durationMs` を使うだけで、新しい計測は行わない。
 

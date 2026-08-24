@@ -88,6 +88,14 @@ describe('collectRunHistory', () => {
     expect(out.records.filter((r) => r.testId === 'T-A').length).toBe(2);
     expect(out.records.filter((r) => r.testId === 'T-B').length).toBe(2);
   });
+
+  it('T-OBS-COL-010 startedAt が同じ record は追記順を保つ', () => {
+    // startTime を持たない Vitest report は全件 0。testId ごとに束ねた順へ並べ替えると、
+    // run の到着順を使う前回比較が古い run を選ぶ。
+    const recs = [rec('T-A', 'passed', 0), rec('T-B', 'passed', 0), rec('T-A', 'failed', 0)];
+    const out = collectRunHistory({ records: recs, maxPerTest: 5 });
+    expect(out.records, '同時刻の record が testId 単位に並べ替えられている').toEqual(recs);
+  });
 });
 
 describe('fromVitestJson', () => {

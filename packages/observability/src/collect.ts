@@ -16,20 +16,21 @@ export function collectRunHistory(opts: CollectRunHistoryOptions): RunHistory {
     return { records: combined };
   }
 
-  const byTest = new Map<string, TestRunRecord[]>();
-  for (const rec of combined) {
-    const arr = byTest.get(rec.testId) ?? [];
-    arr.push(rec);
-    byTest.set(rec.testId, arr);
-  }
+  const byTest = new Map<string, Array<{ record: TestRunRecord; arrival: number }>>();
+  combined.forEach((record, arrival) => {
+    const arr = byTest.get(record.testId) ?? [];
+    arr.push({ record, arrival });
+    byTest.set(record.testId, arr);
+  });
 
-  const capped: TestRunRecord[] = [];
+  const capped: Array<{ record: TestRunRecord; arrival: number }> = [];
   for (const arr of byTest.values()) {
     const start = Math.max(0, arr.length - opts.maxPerTest);
     capped.push(...arr.slice(start));
   }
-  capped.sort((a, b) => a.startedAt - b.startedAt);
-  return { records: capped };
+  // startTime を持たない report は全件 0 になる。tie は追記順を保ち、run の前後を壊さない。
+  capped.sort((a, b) => a.record.startedAt - b.record.startedAt || a.arrival - b.arrival);
+  return { records: capped.map(({ record }) => record) };
 }
 
 export interface VitestStyleAssertionResult {

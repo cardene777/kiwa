@@ -8,8 +8,9 @@
 //   - 上位 N が全件を覆っていないことを書く
 import { describe, expect, it } from 'vitest';
 
-import { analyzeSlowest } from '../src/slowest.js';
+import { collectRunHistory } from '../src/collect.js';
 import { renderDashboard } from '../src/dashboard.js';
+import { analyzeSlowest } from '../src/slowest.js';
 import type { RunHistory, TestRunRecord } from '../src/types.js';
 
 function rec(over: Partial<TestRunRecord> & { testId: string }): TestRunRecord {
@@ -182,6 +183,21 @@ describe('analyzeSlowest (#2186)', () => {
     expect(result.previousTotalMs, 'run の位置に最後ではなく最初の出現を使っている').toBe(50);
   });
 
+  it('T-SLW-018 cap 後も同じ startedAt の直前 run を追記順で選ぶ', () => {
+    const current = history(rec({ testId: 'a', durationMs: 500, runId: 'run-3', startedAt: 0 }));
+    const cumulative = collectRunHistory({
+      records: [
+        rec({ testId: 'a', durationMs: 100, runId: 'run-1', startedAt: 0 }),
+        rec({ testId: 'c', durationMs: 50, runId: 'run-1', startedAt: 0 }),
+        rec({ testId: 'a', durationMs: 900, runId: 'run-2', startedAt: 0 }),
+        ...current.records,
+      ],
+      maxPerTest: 20,
+    });
+    const result = analyzeSlowest({ history: current, cumulative });
+    expect(result.previousTotalMs, 'cap が同時刻の run を testId 単位に並べ替えている').toBe(900);
+  });
+
   it('T-SLW-015 負の durationMs は合計にも入れない', () => {
     // 判定 (`> 0`) と加算で扱いが割れていると、負の値を出す reporter で合計が壊れた
     // record が「測っていないだけ」 として報告される (#2186 r1-f3)。
@@ -195,6 +211,21 @@ describe('analyzeSlowest (#2186)', () => {
     expect(result.measured).toBe(1);
     expect(result.unmeasured).toBe(1);
     expect(result.slowest.map((x) => x.testId)).toEqual(['pos']);
+  });
+
+  it('T-SLW-017 比較対象 run の負の durationMs も合計に入れない', () => {
+    // 現在 run だけ負値を除外すると、同じ入力でも比較対象側の合計だけが負になり、
+    // 実際は同じ 100ms なのに「500ms 遅くなった」 と誤表示される。
+    const current = history(rec({ testId: 'pos', durationMs: 100, runId: 'run-2', startedAt: 2000 }));
+    const cumulative = history(
+      rec({ testId: 'neg', durationMs: -500, runId: 'run-1', startedAt: 1000 }),
+      rec({ testId: 'pos', durationMs: 100, runId: 'run-1', startedAt: 1000 }),
+      ...current.records,
+    );
+    const result = analyzeSlowest({ history: current, cumulative });
+    expect(result.previousTotalMs, '比較対象だけ負値を加算している').toBe(100);
+    expect(result.deltaMs).toBe(0);
+    expect(result.deltaRatio).toBe(0);
   });
 
   it('T-SLW-009 前 run が 0ms の時に比を Infinity にしない', () => {
