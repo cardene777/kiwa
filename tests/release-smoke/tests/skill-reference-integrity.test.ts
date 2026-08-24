@@ -50,29 +50,44 @@ function skillDirs(): string[] {
     .sort();
 }
 
+/**
+ * 1 つの本文から reference を取り出す。
+ *
+ * 実 skill を走査する `collectReferences()` と、fixture を通す T-SRI-008 が同じ経路を使う =
+ * 検査の識別力を実 file の内容に依存させない。
+ */
+export function extractReferences(skill: string, body: string): Reference[] {
+  const found: Reference[] = [];
+
+  // **二重計上は起きないので dedup を置かない**。 `SKILL_ROOTED` は `references/` の
+  // 直前に backtick を要求するので、repo root 起点の literal の内側には決して当たらない
+  // (実測 = repo 全体で dedup 有り 86 件 / 無し 86 件、抑制は 0 件)。
+  //
+  // 置いていた dedup が実際にしていたのは逆のこと = 同じ行に repo root 起点の参照と、
+  // その suffix に一致する skill dir 起点の参照が並ぶと、**後者が `existsSync` に届く前に
+  // 落ちていた**。 「共用 SSOT は `.claude/skills/kiwa-forge/references/x.md`、自 skill の
+  // `references/x.md` を Read する」 と書いて local file を置かない形は、本 PR が直した
+  // `kiwa-api` / `kiwa-vitest` の欠陥そのもので、それを見逃していた (#2182 r1-f1)。
+  body.split('\n').forEach((text, index) => {
+    for (const match of text.matchAll(REPO_ROOTED)) {
+      const raw = match[1];
+      if (raw === undefined) continue;
+      found.push({ skill, raw, resolved: resolve(REPO_ROOT, raw), line: index + 1, form: 'repo-rooted' });
+    }
+    for (const match of text.matchAll(SKILL_ROOTED)) {
+      const raw = match[1];
+      if (raw === undefined) continue;
+      found.push({ skill, raw, resolved: resolve(SKILLS_DIR, skill, raw), line: index + 1, form: 'skill-rooted' });
+    }
+  });
+  return found;
+}
+
 /** SKILL.md 本文から reference を全件取り出し、それぞれの起点で解決する。 */
 function collectReferences(): Reference[] {
-  const found: Reference[] = [];
-  for (const skill of skillDirs()) {
-    const body = readFileSync(resolve(SKILLS_DIR, skill, 'SKILL.md'), 'utf8');
-    body.split('\n').forEach((text, index) => {
-      const seen = new Set<string>();
-      for (const match of text.matchAll(REPO_ROOTED)) {
-        const raw = match[1];
-        if (raw === undefined) continue;
-        seen.add(raw);
-        found.push({ skill, raw, resolved: resolve(REPO_ROOT, raw), line: index + 1, form: 'repo-rooted' });
-      }
-      for (const match of text.matchAll(SKILL_ROOTED)) {
-        const raw = match[1];
-        if (raw === undefined) continue;
-        // 同じ行の repo root 起点の記述に含まれる部分を二重に数えない。
-        if ([...seen].some((full) => full.endsWith(raw))) continue;
-        found.push({ skill, raw, resolved: resolve(SKILLS_DIR, skill, raw), line: index + 1, form: 'skill-rooted' });
-      }
-    });
-  }
-  return found;
+  return skillDirs().flatMap((skill) =>
+    extractReferences(skill, readFileSync(resolve(SKILLS_DIR, skill, 'SKILL.md'), 'utf8')),
+  );
 }
 
 // 各 skill の references dir 配下の entry を全件集める。
@@ -133,6 +148,41 @@ describe('skill の reference が実在する (#2182)', () => {
     expect(missing, '参照先が実在しない reference がある').toEqual([]);
   });
 
+  it('T-SRI-008 同じ行に 2 形式が並んでも両方を対象にする', () => {
+    // **この形が本 PR の直した欠陥そのもの**。 「共用 SSOT は <repo root 起点>、自 skill の
+    // <skill dir 起点> を Read する」 と書いて local file を置かないのが `kiwa-api` /
+    // `kiwa-vitest` の状態で、dedup を置いていた間は後者が `existsSync` に届く前に落ちていた。
+    //
+    // 実 file ではなく fixture を通す = 実 skill から該当の行が消えても識別力が残る。
+    const body = [
+      '# probe',
+      '',
+      '共用 SSOT は `.claude/skills/kiwa-forge/references/coverage-classify.md`、',
+      '自 skill の `references/coverage-classify.md` を Read する。',
+      '',
+      '1 行に両方を書く形も同じ = `.claude/skills/kiwa-forge/references/x.md` と `references/x.md`。',
+    ].join('\n');
+
+    const found = extractReferences('zz-fixture', body);
+    const byForm = found.reduce<Record<string, number>>((acc, ref) => {
+      acc[ref.form] = (acc[ref.form] ?? 0) + 1;
+      return acc;
+    }, {});
+    expect(byForm, '2 形式のどちらかを取りこぼしている').toEqual({
+      'repo-rooted': 2,
+      'skill-rooted': 2,
+    });
+
+    // skill dir 起点は **その skill の dir** を起点に解決する。 repo root 起点の値を
+    // 使い回すと、local file の不在を検出できない。
+    const local = found.filter((ref) => ref.form === 'skill-rooted');
+    for (const ref of local) {
+      expect(ref.resolved, 'skill dir 起点の解決先が自 skill の dir を向いていない').toBe(
+        resolve(SKILLS_DIR, 'zz-fixture', ref.raw),
+      );
+    }
+  });
+
   it('T-SRI-004 reference dir の entry を 1 件以上見つけられている', () => {
     // T-SRI-005 / 006 はどちらも集合が空なら通る。 実 file 側の走査が生きていることを見る。
     expect(
@@ -141,13 +191,25 @@ describe('skill の reference が実在する (#2182)', () => {
     ).toBeGreaterThan(0);
   });
 
-  it('T-SRI-005 同じ basename の実体が 2 箇所以上に無い', () => {
+  it('T-SRI-005 共用している reference の実体が 2 箇所以上に無い', () => {
     // 共用は symlink で実現されている前提を固定する。 同じ名前の**実体**が 2 つあれば、
     // それは symlink の張り忘れか copy であって、一致を保つ仕組みが無い状態になる。
     // symlink は何本あってもよい (実体を指しているかは T-SRI-006 が見る)。
+    //
+    // **対象は「共用している名前」 に限る** (#2182 r1-f2)。 全 skill 横断で basename の
+    // 一意性を課すと、`troubleshooting.md` のような一般名を 2 skill が **別の中身で**
+    // 正当に持つ形を落とす。 それは symlink にできない = 中身が違うのだから。
+    //
+    // 共用しているかは実物から導く = その名前の symlink が 1 本でもあれば共用している。
+    // 一覧を人手で持つと、共用を始めた reference が検査の外に落ちる。
+    const entries = referenceEntries();
+    const sharedNames = new Set(entries.filter((e) => e.isSymlink).map((e) => e.name));
+    expect(sharedNames.size, '共用している reference が 1 つも無い (検査が空振りしている)')
+      .toBeGreaterThan(0);
+
     const byName = new Map<string, string[]>();
-    for (const entry of referenceEntries()) {
-      if (entry.isSymlink) continue;
+    for (const entry of entries) {
+      if (entry.isSymlink || !sharedNames.has(entry.name)) continue;
       const paths = byName.get(entry.name) ?? [];
       paths.push(entry.rel);
       byName.set(entry.name, paths);
@@ -156,7 +218,7 @@ describe('skill の reference が実在する (#2182)', () => {
       .filter(([, paths]) => paths.length > 1)
       .map(([name, paths]) => `${name}: ${paths.sort().join(' / ')}`)
       .sort();
-    expect(duplicated, '同じ basename の実体が複数箇所にある (symlink にすべき)').toEqual([]);
+    expect(duplicated, '共用している basename の実体が複数箇所にある (symlink にすべき)').toEqual([]);
   });
 
   it('T-SRI-006 symlink が実在する実体を指し、その実体が skill dir 内にある', () => {
