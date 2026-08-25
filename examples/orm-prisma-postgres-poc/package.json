@@ -6,7 +6,7 @@
   "scripts": {
     "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
     "test": "node ../../scripts/build-deps.mjs @kiwa-lab/orm @kiwa-lab/core && pnpm prisma:generate && vitest run tests --exclude '**/.vitest-dist/**' --exclude node_modules --exclude dist --exclude .vitest-dist --exclude 'prisma/generated/**' --environment node",
-    "typecheck": "pnpm prisma:generate && tsc --noEmit"
+    "typecheck": "pnpm prisma:generate && tsc --noEmit && tsc --noEmit -p tsconfig.vitest.json"
   },
   "dependencies": {
     "@kiwa-lab/core": "workspace:*",

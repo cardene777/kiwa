@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node ../../scripts/build-deps.mjs @kiwa-lab/api @kiwa-lab/core && vitest run test --exclude '**/.vitest-dist/**' --environment node",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.vitest.json"
   },
   "dependencies": {
     "@kiwa-lab/api": "workspace:*",

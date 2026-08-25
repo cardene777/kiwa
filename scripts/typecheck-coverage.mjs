@@ -15,6 +15,7 @@
  * Exits 1 when a test file is compiled by nothing.
  */
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -88,9 +89,40 @@ function tsconfigsUsed(scripts) {
   return [...configs];
 }
 
+/**
+ * Where `tsc` lives for a package, as node would resolve it from there.
+ *
+ * `npx tsc` re-resolves the binary on every call and costs 484 ms against 67 ms
+ * for the same question asked of the file directly (measured). This script asks
+ * it once per config and there are about 200, so the difference is the run: 51 s
+ * against 12 s. That is what decides whether it can sit in front of a gate.
+ *
+ * Resolution starts at the package, not at the root, so a package pinning its
+ * own TypeScript is asked with the version it actually uses. A package that
+ * does not resolve one falls back to the root copy; failing to find either
+ * leaves the config unread, which the caller treats as "cannot tell".
+ */
+const tscCache = new Map();
+function tscFor(dir) {
+  if (tscCache.has(dir)) return tscCache.get(dir);
+  let found = null;
+  for (const from of [join(dir, 'package.json'), join(ROOT, 'package.json')]) {
+    try {
+      found = createRequire(from).resolve('typescript/bin/tsc');
+      break;
+    } catch {
+      // Try the next starting point; both failing means TypeScript is absent.
+    }
+  }
+  tscCache.set(dir, found);
+  return found;
+}
+
 function resolvedFiles(dir, config) {
+  const tsc = tscFor(dir);
+  if (tsc === null) return null;
   try {
-    const out = execFileSync('npx', ['tsc', '-p', config, '--showConfig'], {
+    const out = execFileSync(process.execPath, [tsc, '-p', config, '--showConfig'], {
       cwd: dir,
       encoding: 'utf-8',
       stdio: 'pipe',
@@ -104,6 +136,8 @@ function resolvedFiles(dir, config) {
 
 const packages = AREAS.flatMap((a) => (existsSync(join(ROOT, a)) ? findPackages(join(ROOT, a)) : []));
 const gaps = [];
+/** Configs `tsc --showConfig` refused, which leaves their package unanswerable. */
+const unreadable = [];
 let checked = 0;
 
 for (const { dir, scripts } of packages.sort((a, b) => a.dir.localeCompare(b.dir))) {
@@ -112,12 +146,27 @@ for (const { dir, scripts } of packages.sort((a, b) => a.dir.localeCompare(b.dir
   checked += 1;
 
   const covered = new Set();
+  let answerable = true;
   for (const config of tsconfigsUsed(scripts)) {
     if (!existsSync(join(dir, config))) continue;
     const files = resolvedFiles(dir, config);
-    if (files === null) continue;
+    // **"could not read" is not "read, and it covers nothing."** Both used to
+    // `continue`, so a machine where `tsc` cannot run at all reported every
+    // package as a regression, with the same words used for a real one. Keep
+    // them apart: an unreadable config makes this package unanswerable, and the
+    // run says so instead of blaming the package.
+    if (files === null) {
+      unreadable.push({ dir: relative(ROOT, dir), config });
+      answerable = false;
+      continue;
+    }
     for (const f of files) covered.add(join(dir, f));
   }
+
+  // A config that did not answer may be the one that covers the remaining
+  // tests. Do not also classify the package as a real coverage gap when its
+  // coverage is unknown; the unreadable list already makes the run fail.
+  if (!answerable) continue;
 
   const uncovered = tests.filter((t) => !covered.has(t));
   if (uncovered.length > 0) {
@@ -126,7 +175,15 @@ for (const { dir, scripts } of packages.sort((a, b) => a.dir.localeCompare(b.dir
 }
 
 console.log(`packages with test files: ${checked}`);
-console.log(`packages whose tests nothing compiles: ${gaps.length}\n`);
+console.log(`packages whose tests nothing compiles: ${gaps.length}`);
+console.log(`tsconfigs that could not be read: ${unreadable.length}\n`);
+
+if (unreadable.length > 0) {
+  console.log('  these configs did not answer, so their packages were not judged:');
+  for (const u of unreadable.slice(0, 10)) console.log(`    ${u.dir}/${u.config}`);
+  if (unreadable.length > 10) console.log(`    ... and ${unreadable.length - 10} more`);
+  console.log('');
+}
 
 for (const g of gaps) {
   console.log(`  ${g.dir}   ${g.uncovered.length}/${g.total}`);
@@ -134,4 +191,7 @@ for (const g of gaps) {
   if (g.uncovered.length > 3) console.log(`      ... and ${g.uncovered.length - 3} more`);
 }
 
-process.exit(gaps.length === 0 ? 0 : 1);
+// An unreadable config exits non-zero too. Reporting 0 gaps while some packages
+// were never judged reads as "everything is covered", which is the one thing
+// this script exists to stop.
+process.exit(gaps.length === 0 && unreadable.length === 0 ? 0 : 1);
