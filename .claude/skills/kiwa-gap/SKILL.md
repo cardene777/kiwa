@@ -32,7 +32,7 @@ baseline も回帰判定も無かった。
   「測っていない」 として別枠に出す (「gap 0 件」 と同じ形にしない)
 - `--metric duration` は vitest の `--reporter=json` 出力を要求する。 本 skill は test を
   走らせない = 測る役と読む役を分ける
-- coverage の行番号は **target による**。 `.vitest-dist` を作る 38 件 (主に `test:cov` を持つ
+- coverage の行番号は **target による**。 `.vitest-dist` を作る 27 件 (主に `test:cov` を持つ
   package) では compile 後の行番号になり、`tsconfig.vitest.json` が sourceMap を出さないため
   source の行に正確には戻せない (file path だけ戻す)。 作らない target では source の行番号が
   そのまま出る。 どちらかに決め打たず、その target が作るかで分岐する

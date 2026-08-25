@@ -21,12 +21,13 @@ compile 段は無い。 vitest が esbuild で transform して `tests/` をそ�
 
 ## 2. `.vitest-dist` は「あるかもしれない残骸」
 
-作るのは **`tsconfig.vitest.json` を `tsc` に渡す script を持つ target だけ** で、
-現在 38 件 (主に `test:cov`)。 残る 134 件のものは #2205 以前の残骸で、内容が古い。
+作るのは **`tsconfig.vitest.json` を emit 有効の `tsc` に渡す script を持つ target だけ** で、
+現在 27 件 (主に `test:cov`)。 それ以外に残るものは #2205 以前の残骸で、内容が古い。
 
 | 判定 | 意味 |
 |---|---|
 | その target に `tsc -p ...vitest...` を含む script がある | `.vitest-dist` は作り直される |
+| `--noEmit` 付きの `tsc -p ...vitest...` しかない | 出力しないため残骸 |
 | 無い | 残骸。 **走らせてはいけない** |
 
 **skill が `.vitest-dist` を走らせる形を案内しない**。 `tests/release-smoke` は後者で、
@@ -72,7 +73,7 @@ gate の判定材料にしない。 手元の往復を短くするためのも�
 
 ## 5. coverage の行番号は target によって意味が違う
 
-`.vitest-dist` を作る 38 件では compile 後の行番号になり、`tsconfig.vitest.json` が
+`.vitest-dist` を作る 27 件では compile 後の行番号になり、`tsconfig.vitest.json` が
 sourceMap を出さないので source の行には正確に戻せない。 file path だけ source に戻す。
 
 作らない target では source の行番号がそのまま出る。

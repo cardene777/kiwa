@@ -37,12 +37,13 @@ function skills(): { name: string; body: string }[] {
 }
 
 /**
- * Targets whose own scripts still hand `tsconfig.vitest.json` to `tsc`.
+ * Targets whose own scripts still hand `tsconfig.vitest.json` to an emitting
+ * `tsc` invocation. Type-only `--noEmit` invocations do not rebuild output.
  *
  * Those are the only ones where `.vitest-dist` is rebuilt, and therefore the
  * only ones where its contents describe the current sources.
  */
-function targetsThatCompileTests(): string[] {
+function targetsThatEmitCompiledTests(): string[] {
   const found: string[] = [];
   const walk = (dir: string, depth = 1): void => {
     if (depth > 3) return;
@@ -50,8 +51,14 @@ function targetsThatCompileTests(): string[] {
       const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf-8')) as {
         scripts?: Record<string, string>;
       };
-      const compiles = Object.values(manifest.scripts ?? {}).some(
-        (v) => typeof v === 'string' && /\btsc\b[^&|]*-p\s+\S*vitest/.test(v),
+      const compiles = Object.values(manifest.scripts ?? {}).some((script) =>
+        script.split(/\s*(?:&&|\|\||;)\s*/).some((command) => {
+          const usesVitestProject =
+            /\btsc\b/.test(command) &&
+            /(?:^|\s)(?:-p|--project)(?:\s+|=)\S*vitest/.test(command);
+          const disablesEmit = /(?:^|\s)--noEmit(?:\s|$)/.test(command);
+          return usesVitestProject && !disablesEmit;
+        }),
       );
       if (compiles) found.push(dir);
     } catch {
@@ -96,7 +103,7 @@ describe('skill が持つ test 実行の前提 (#2224)', () => {
 
   it('T-STE-002 契約に書いた件数が実物と一致する', () => {
     const body = readFileSync(REFERENCE, 'utf-8');
-    const derived = targetsThatCompileTests();
+    const derived = targetsThatEmitCompiledTests();
     expect(derived.length, '`.vitest-dist` を作る target を 1 件も拾えていない (検査が空振り)').toBeGreaterThan(0);
 
     // 件数を手で書いた以上、実物からずれたら落ちる形にしておく
