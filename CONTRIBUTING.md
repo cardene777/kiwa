@@ -305,18 +305,25 @@ with esbuild and never looks at a type.
 `pnpm typecheck:coverage` finds test files that nothing compiles, and exits 1 if
 there are any:
 
-On `main` it currently finds 11, and exits 1:
+On `main` it finds none:
 
 ```
 $ pnpm typecheck:coverage
 packages with test files: 166
-packages whose tests nothing compiles: 11
+packages whose tests nothing compiles: 0
+tsconfigs that could not be read: 0
 ```
 
-Those 11 are tracked in #2218. They lost their only type check when #2205 and
-#2207 took the compile step out of `test` for speed — vitest transforms with
-esbuild and never looks at a type. It is not wired into `pnpm test`, so a sweep
-stays green while this stays red.
+It also counts the configs it could not read, separately, and exits 1 for those
+too. "Could not read" is not "read, and it covers nothing": a machine where
+`tsc` cannot run at all would otherwise report every package as a regression, in
+the same words used for a real one.
+
+`tests/release-smoke` runs this on every sweep (#2218). It had gone red for
+weeks before that — #2205 and #2207 took the compile step out of `test` for
+speed, and for 11 packages that compile was the only thing that ever looked at a
+type in their tests. Being able to answer the question is not the same as asking
+it.
 
 When it does find one, it names the package and the files nothing compiles:
 
