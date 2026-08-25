@@ -325,6 +325,37 @@ failures, 4 means the invocation was wrong (`--jobs 0`, a flag with no value, an
 that matches nothing). Both used to be 1, so a caller that retries on failure would retry
 a typo forever.
 
+### `next build` を毎回やり直さない
+
+`examples/nextjs-*` 22 件が全 sweep の 532.5 秒 = 52% を占める。 各 target の
+`playwright.config.ts` が `webServer.command` に `pnpm build` を持ち、テストのたびに
+production build を丸ごと回していた。 `examples/nextjs-bridge` を単体で測ると 49.6 秒のうち
+15 秒がこの build で、`workers: 1` なので browser の並列度は関係ない。
+
+`scripts/next-build-cached.mjs` が入力の指紋を取り、前回と同じなら `.next` を再利用する。
+仕組みは `scripts/lib/input-fingerprint.mjs` (coverage 成果物で実運用中) と同じで、違うのは
+**git が見ない入力を足している**点にある。
+
+| 入力 | 読み方 | なぜ要るか |
+|---|---|---|
+| tracked な内容 (例 / `packages` / lockfile) | `computeInputFingerprint` | source が変われば build 結果も変わる |
+| env file (`.env*` と `.context/*.env`) | 名前を列挙して直接 hash | `tests/prepare-env.ts` が contract address を書き、`NEXT_PUBLIC_*` は **build 時に埋め込まれる** |
+| `NEXT_PUBLIC_*` の process env | `process.env` から集めて hash | `NEXT_PUBLIC_X=1 pnpm build` は file を経由しない |
+
+`NEXT_PUBLIC_*` の出所はこの 2 つしかないので、両方を覆えば埋め込み値は完全に覆える。
+env file は gitignore 済 (使い捨て chain の address を持つため) なので、git 由来の指紋だけでは
+昨日の address を埋めた build がそのまま配られる。
+
+**依存 package の `dist` は入力にしない**。 gitignore 済で、hash すると同じ source から
+build し直しただけで無効化される。 代わりに package の source を入力に含める = 成果物ではなく
+それを生んだ内容を指紋にする、という coverage gate と同じ論理。
+
+**分からない時は build する**。 `.next/BUILD_ID` が無い / 記録が無い / 記録が読めない /
+記録の schema を知らない / git が指紋を作れない、のいずれも build に倒す。 不要に build する
+費用は 15 秒で、入力が動いたのに skip する費用は「無いはずの code に対する緑」 になる。
+
+実測は `examples/nextjs-token-gating` で 17 秒 → 0 秒 (2 回目)。
+
 ## Rejected
 
 | Option | Why not |
