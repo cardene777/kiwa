@@ -25,13 +25,20 @@ allowed-tools: Bash, Read
 ## 実行
 
 ```bash
+KIWA_PLAN_ROOT="$(git rev-parse --show-toplevel)" \
 node --input-type=module -e "
-const m = await import('$(git rev-parse --show-toplevel)/scripts/lib/run-plan.mjs');
-const lanes = ['packages/orm','packages/e2e','packages/ui','examples/full-stack-poc',
-  'examples/orm-prisma-mysql-poc','examples/orm-prisma-postgres-poc',
-  'examples/orm-drizzle-mysql-poc','examples/orm-drizzle-postgres-poc',
-  'examples/dogfood-oauth21-provider','examples/dogfood-oidc-federation'];
-const snap = m.measure({ repoRoot: process.cwd(), serialLaneDirs: lanes });
+const repoRoot = process.env.KIWA_PLAN_ROOT;
+const m = await import(repoRoot + '/scripts/lib/run-plan.mjs');
+const runner = await import(repoRoot + '/scripts/test-all.mjs');
+const { execFileSync } = await import('node:child_process');
+const { relative } = await import('node:path');
+const projects = JSON.parse(execFileSync('pnpm', ['ls','-r','--depth','-1','--json'],
+  { cwd: repoRoot, encoding: 'utf-8' }));
+const packages = runner.discoverPackages(projects, repoRoot);
+const lanes = runner.laneMembership(packages, repoRoot, { roster: packages });
+const laneGroups = [lanes.chromium, lanes.docker]
+  .map(group => group.map(pkg => relative(repoRoot, pkg.dir)));
+const snap = m.measure({ repoRoot, serialLaneGroups: laneGroups });
 const plan = m.planJobs(snap);
 console.log('pnpm test:all -- --jobs ' + plan.jobs);
 console.log(plan.reason);
@@ -57,9 +64,12 @@ swap が上限 (swap 94% 使用) → 1。 他: cores 10 / memory 8 / load 4 / fl
 | メモリ余力 | `vm_stat` の free + inactive + speculative を 1 target 1.5GB で割る |
 | swap 使用率 | 80% 以上で 1、50% 以上でコア数の半分 |
 | load average (1 分) | `cores - load1` |
-| 直列車線の合計 | free 車線 ÷ 直列車線 (これ以上は壁時計が縮まない) |
+| 直列車線の床 | 全 target の合計時間 ÷ 最長の直列車線 (これ以上は壁時計が縮まない) |
 
 docker daemon の可否は **数値を変えない**。 落ちていれば docker 車線が blocked になるだけなので、理由に書くに留める。
+
+直列車線の所属は `scripts/test-all.mjs` の `laneMembership` から読む。 planner 側に package 名を
+複製しないため、testcontainers を使う target の増減と Chromium 車線の変更は runner と同時に反映される。
 
 ### メモリは swap を主指標にする
 

@@ -9,7 +9,7 @@
 // I/O tested separately with recorded output, because a check that runs
 // `vm_stat` and asserts on the result would assert on whatever the machine
 // happened to be doing.
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -30,6 +30,7 @@ type Snapshot = {
   dockerUp: boolean | null;
   freeLaneSeconds: number | null;
   serialLaneSeconds: number | null;
+  serialWorkSeconds: number | null;
 };
 
 const {
@@ -43,12 +44,16 @@ const {
 } = (await import(pathToFileURL(MODULE).href)) as {
   PER_TARGET_GB: number;
   caps: (s: Partial<Snapshot>) => { name: string; jobs: number; why: string }[];
-  measure: (o: { repoRoot: string; serialLaneDirs?: string[] }, io?: unknown) => Snapshot;
+  measure: (o: { repoRoot: string; serialLaneGroups?: string[][] }, io?: unknown) => Snapshot;
   planJobs: (s: Partial<Snapshot>) => { jobs: number; reason: string; binding: string };
   readLaneSeconds: (
     repoRoot: string,
-    serialLaneDirs: string[],
-  ) => { freeLaneSeconds: number | null; serialLaneSeconds: number | null };
+    serialLaneGroups: string[][],
+  ) => {
+    freeLaneSeconds: number | null;
+    serialLaneSeconds: number | null;
+    serialWorkSeconds: number | null;
+  };
   readReclaimableGb: (io?: unknown) => number | null;
   readSwapRatio: (io?: unknown) => number | null;
 };
@@ -62,6 +67,7 @@ const IDLE: Snapshot = {
   dockerUp: true,
   freeLaneSeconds: 900,
   serialLaneSeconds: 150,
+  serialWorkSeconds: 250,
 };
 
 const roots: string[] = [];
@@ -104,10 +110,19 @@ describe('並列度をどの測定値で決めるか (#2227)', () => {
   });
 
   it('T-RP-005 直列車線の床を超える値を返さない', () => {
-    // free 300 秒 / 直列 150 秒 = 2 を超えても壁時計は縮まない。
-    const bounded = planJobs({ ...IDLE, freeLaneSeconds: 300, serialLaneSeconds: 150 });
-    expect(bounded.jobs).toBe(2);
+    // 直列車線自身も 1 slot を使う。free 300 秒 + 直列 150 秒を 150 秒の床まで
+    // 縮めるには 3 slots が要る。
+    const bounded = planJobs({
+      ...IDLE,
+      freeLaneSeconds: 300,
+      serialLaneSeconds: 150,
+      serialWorkSeconds: 150,
+    });
+    expect(bounded.jobs).toBe(3);
     expect(bounded.binding).toBe('floor');
+
+    // 独立した直列車線は合算して床にしない。最長を床、両方を総仕事量にする。
+    expect(planJobs({ ...IDLE, freeLaneSeconds: 300, serialWorkSeconds: 250 }).jobs).toBe(4);
   });
 
   it('T-RP-006 測れなかった値は 1 に倒す (余裕があることにしない)', () => {
@@ -122,7 +137,12 @@ describe('並列度をどの測定値で決めるか (#2227)', () => {
   it('T-RP-007 床だけは測れなくても 1 に倒さない', () => {
     // 床は「これ以上上げても無駄」 を表すだけで、危険を表さない。
     // ここを 1 に倒すと、過去の sweep log が無い repo で常に逐次になる。
-    const plan = planJobs({ ...IDLE, freeLaneSeconds: null, serialLaneSeconds: null });
+    const plan = planJobs({
+      ...IDLE,
+      freeLaneSeconds: null,
+      serialLaneSeconds: null,
+      serialWorkSeconds: null,
+    });
     expect(plan.jobs).toBeGreaterThan(1);
     expect(caps({ ...IDLE, freeLaneSeconds: null }).map((c) => c.name)).not.toContain('floor');
   });
@@ -181,21 +201,31 @@ describe('測定 (#2227)', () => {
 
     // verdict 行が無い = 殺された run。 79/166 で止まった実 log は 12 秒の
     // 「直列車線」 を返し、機械が許す 12 倍の並列度を通してしまう。
-    writeFileSync(join(dir, 'jobs-1.log'), `${lines}\n`);
-    expect(readLaneSeconds(root, []).freeLaneSeconds, '途中の log を測定として読んでいる').toBeNull();
+    const older = join(dir, 'jobs-1.log');
+    const newer = join(dir, 'jobs-4.log');
+    writeFileSync(older, `${lines}\ngreen: 20   red: 0   dirty: 0   not run: 0\n`);
+    writeFileSync(newer, `${lines}\n`);
+    utimesSync(older, new Date(1_000), new Date(1_000));
+    utimesSync(newer, new Date(2_000), new Date(2_000));
+    expect(readLaneSeconds(root, []).freeLaneSeconds, '最新の途中 log を測定として読んでいる').toBeNull();
 
-    // verdict 行があれば読む。
-    writeFileSync(join(dir, 'jobs-1.log'), `${lines}\ngreen: 20   red: 0   dirty: 0   not run: 0\n`);
+    // 最新 log に verdict 行があれば読む。filename の昇順ではなく mtime で選ぶ。
+    writeFileSync(newer, `${lines}\ngreen: 20   red: 0   dirty: 0   not run: 0\n`);
+    utimesSync(newer, new Date(3_000), new Date(3_000));
     expect(readLaneSeconds(root, []).freeLaneSeconds).toBeCloseTo(100, 0);
 
-    // 直列車線に入る target はそちらに数える。
-    const withSerial = readLaneSeconds(root, ['examples/demo-0', 'examples/demo-1']);
+    // 独立した直列車線は別々に数え、最長車線と全直列仕事量を返す。
+    const withSerial = readLaneSeconds(root, [
+      ['examples/demo-0', 'examples/demo-1'],
+      ['examples/demo-2'],
+    ]);
     expect(withSerial.serialLaneSeconds).toBeCloseTo(10, 0);
-    expect(withSerial.freeLaneSeconds).toBeCloseTo(90, 0);
+    expect(withSerial.serialWorkSeconds).toBeCloseTo(15, 0);
+    expect(withSerial.freeLaneSeconds).toBeCloseTo(85, 0);
   });
 
   it('T-RP-012 実機で測って計画が返る', () => {
-    const snapshot = measure({ repoRoot: REPO_ROOT, serialLaneDirs: ['packages/orm'] });
+    const snapshot = measure({ repoRoot: REPO_ROOT, serialLaneGroups: [['packages/orm']] });
     expect(snapshot.cores, 'コア数を測れていない').toBeGreaterThan(0);
     const plan = planJobs(snapshot);
     expect(plan.jobs, '1 未満を返している').toBeGreaterThanOrEqual(1);

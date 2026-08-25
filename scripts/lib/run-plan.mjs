@@ -44,7 +44,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { cpus, loadavg } from 'node:os';
 import { join } from 'node:path';
 
@@ -107,11 +107,19 @@ export function caps(s) {
 
   // Beyond this the serial lanes are the wall clock, so more concurrency only
   // adds contention. Missing inputs skip it: this cap describes waste, not risk.
-  if (s.freeLaneSeconds != null && s.serialLaneSeconds != null && s.serialLaneSeconds > 0) {
+  if (
+    s.freeLaneSeconds != null &&
+    s.serialLaneSeconds != null &&
+    s.serialWorkSeconds != null &&
+    s.serialLaneSeconds > 0
+  ) {
     out.push({
       name: 'floor',
-      jobs: Math.max(1, Math.ceil(s.freeLaneSeconds / s.serialLaneSeconds)),
-      why: `直列車線 ${s.serialLaneSeconds}秒 が床`,
+      jobs: Math.max(
+        1,
+        Math.ceil((s.freeLaneSeconds + s.serialWorkSeconds) / s.serialLaneSeconds),
+      ),
+      why: `最長直列車線 ${s.serialLaneSeconds}秒 が床`,
     });
   }
 
@@ -206,19 +214,27 @@ export function readDockerUp(io = {}) {
  * does without the cap. Reading them from a log rather than from a written
  * number keeps them from going stale in prose.
  */
-export function readLaneSeconds(repoRoot, serialLaneDirs, io = {}) {
+export function readLaneSeconds(repoRoot, serialLaneGroups, io = {}) {
   const dir = join(repoRoot, '.context/scratch/sweep');
   const read = io.readFileSync ?? readFileSync;
   const exists = io.existsSync ?? existsSync;
   const list = io.readdirSync ?? readdirSync;
-  if (!exists(dir)) return { freeLaneSeconds: null, serialLaneSeconds: null };
+  const stat = io.statSync ?? statSync;
+  const none = {
+    freeLaneSeconds: null,
+    serialLaneSeconds: null,
+    serialWorkSeconds: null,
+  };
+  if (!exists(dir)) return none;
 
-  const none = { freeLaneSeconds: null, serialLaneSeconds: null };
   let body = '';
   try {
     const logs = list(dir).filter((n) => n.startsWith('jobs-') && n.endsWith('.log'));
     if (logs.length === 0) return none;
-    body = read(join(dir, logs.sort()[0]), 'utf-8');
+    const latest = logs
+      .map((name) => ({ name, mtimeMs: stat(join(dir, name)).mtimeMs }))
+      .sort((a, b) => b.mtimeMs - a.mtimeMs || b.name.localeCompare(a.name))[0];
+    body = read(join(dir, latest.name), 'utf-8');
   } catch {
     return none;
   }
@@ -228,9 +244,16 @@ export function readLaneSeconds(repoRoot, serialLaneDirs, io = {}) {
   // was killed and the totals below would describe whatever it got through.
   // Measured: a run killed at 79 of 166 targets yielded a 12 s "serial lane",
   // which would have allowed twelve times the concurrency the machine wanted.
-  if (!/^green:\s+\d+/m.test(body)) return none;
+  const verdict = body.match(
+    /^green:\s+(\d+)\s+red:\s+(\d+)\s+dirty:\s+(\d+)\s+not run:\s+(\d+)\s*$/m,
+  );
+  if (!verdict) return none;
 
-  let serial = 0;
+  const laneByTarget = new Map();
+  for (const [index, group] of serialLaneGroups.entries()) {
+    for (const target of group) laneByTarget.set(target, index);
+  }
+  const serial = serialLaneGroups.map(() => 0);
   let free = 0;
   let seen = 0;
   for (const m of body.matchAll(/^\[[^\]]+\]\s+\w+\s+(\S+)\s+([\d.]+)s\s*$/gm)) {
@@ -238,17 +261,26 @@ export function readLaneSeconds(repoRoot, serialLaneDirs, io = {}) {
     const value = Number(secs);
     if (!Number.isFinite(value)) continue;
     seen += 1;
-    if (serialLaneDirs.includes(target)) serial += value;
-    else free += value;
+    const lane = laneByTarget.get(target);
+    if (lane === undefined) free += value;
+    else serial[lane] += value;
   }
-  // A verdict line with no target lines is a log of a run that did nothing.
-  if (seen < 10) return none;
-  return { freeLaneSeconds: free, serialLaneSeconds: serial > 0 ? serial : null };
+  const expected = verdict.slice(1).reduce((sum, count) => sum + Number(count), 0);
+  // A verdict that does not agree with the parsed target lines is not a complete
+  // measurement in a format this module understands.
+  if (seen < 10 || seen !== expected) return none;
+  const serialWorkSeconds = serial.reduce((sum, seconds) => sum + seconds, 0);
+  const serialLaneSeconds = Math.max(0, ...serial);
+  return {
+    freeLaneSeconds: free,
+    serialLaneSeconds: serialLaneSeconds > 0 ? serialLaneSeconds : null,
+    serialWorkSeconds: serialWorkSeconds > 0 ? serialWorkSeconds : null,
+  };
 }
 
 /** Everything `planJobs` needs, measured from this machine. */
-export function measure({ repoRoot, serialLaneDirs = [] }, io = {}) {
-  const lanes = readLaneSeconds(repoRoot, serialLaneDirs, io);
+export function measure({ repoRoot, serialLaneGroups = [] }, io = {}) {
+  const lanes = readLaneSeconds(repoRoot, serialLaneGroups, io);
   return {
     cores: (io.cpus ?? cpus)().length || null,
     reclaimableGb: readReclaimableGb(io),
