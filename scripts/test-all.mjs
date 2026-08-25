@@ -44,6 +44,15 @@
  *   node scripts/test-all.mjs --only nextjs        only packages whose path matches
  *   node scripts/test-all.mjs --timeout 600        seconds per package (default 900)
  *   node scripts/test-all.mjs --jobs 4            run four packages at a time
+ *   node scripts/test-all.mjs --no-prebuild       skip the up-front workspace build
+ *
+ * The workspace is built once up front, and every target runs with
+ * `KIWA_DEPS_PREBUILT=1` so `scripts/build-deps.mjs` does nothing. That replaces
+ * one build per target with one build: 19 s against the 221 s of per-target
+ * builds a full sweep would otherwise do. It is skipped for a `--only` run,
+ * where the target list is short and the whole-workspace build would not pay
+ * — `--jobs` above 1 overrides that, because without it two targets rewrite the
+ * same `dist`.
  *
  * Exits 1 when any package is red, blocked, or left the working tree dirty, and
  * 4 when the invocation itself was wrong (a flag with no value, `--jobs 0`, a
@@ -888,6 +897,51 @@ export function limitConcurrency(limit) {
   };
 }
 
+/**
+ * Build the workspace packages once, so no target builds them again.
+ *
+ * Most `test` scripts start with `scripts/build-deps.mjs`, which builds the
+ * workspace packages that target depends on. `KIWA_DEPS_PREBUILT` makes it a
+ * no-op, so doing the build here replaces one build per target with one build.
+ *
+ * Measured: the whole workspace builds in 19 s, and the per-target builds it
+ * replaces cost 221 s across a full sweep — 17.8% of a run that has nothing to
+ * do with how many targets run at once.
+ *
+ * Returns whether it succeeded. The caller decides what a failure means: it is
+ * fatal in parallel mode (targets would rewrite the same `dist`), and merely
+ * slower when running one at a time.
+ */
+async function buildWorkspaceOnce(timeoutMs) {
+  process.stdout.write('building the workspace once, so no target rebuilds a shared dist\n');
+  const build = await runCommand({
+    command: 'pnpm',
+    args: ['--filter', './packages/**', 'build'],
+    cwd: ROOT,
+    timeoutMs,
+  });
+  return build.ok;
+}
+
+/**
+ * Whether the up-front build pays for this run.
+ *
+ * It costs 19 s and saves about 1.3 s per target, so a full sweep wins by a wide
+ * margin and a `--only` run of one or two targets does not. The rule follows
+ * that split rather than a measured threshold, which would drift: a whole sweep
+ * builds once, and a filtered run is the debugging path where the target list is
+ * short and the wait is the point.
+ *
+ * Parallel mode overrides it. Without the build, two targets rewrite the same
+ * `dist` while a third reads it, which is the reason the sweep was serial.
+ */
+export function shouldPrebuild({ filtered, jobs, optOut }) {
+  if (jobs > 1 && optOut) throw new UsageError('--no-prebuild cannot be used with --jobs above 1');
+  if (jobs > 1) return true;
+  if (optOut) return false;
+  return !filtered;
+}
+
 export function argValue(argv, flag, fallback) {
   const at = argv.indexOf(flag);
   if (at === -1) return fallback;
@@ -919,6 +973,26 @@ async function main() {
   if (packages.length === 0) {
     throw new UsageError(only ? `--only ${only} matched none of ${all.length} packages` : 'no packages have a test script');
   }
+
+  // **Before the tree is measured**, so the build's own output is not read as
+  // dirt that was already here.
+  const prebuild = shouldPrebuild({
+    filtered: only !== null,
+    jobs,
+    optOut: process.argv.includes('--no-prebuild'),
+  });
+  let prebuilt = false;
+  if (prebuild) {
+    prebuilt = await buildWorkspaceOnce(timeoutSec * 1000);
+    if (!prebuilt) {
+      // Parallel mode cannot go on: that build is the reason two targets do not
+      // rewrite the same `dist`. One at a time can, by letting each target build
+      // its own dependencies the way it did before this flag existed.
+      if (jobs > 1) throw new Error('the up-front build failed; parallel mode needs it to succeed');
+      process.stdout.write('the up-front build failed, so each package builds its own dependencies\n');
+    }
+  }
+  const env = prebuilt ? { ...process.env, KIWA_DEPS_PREBUILT: '1' } : undefined;
 
   // Dirt that is already here cannot be blamed on the package that runs first,
   // so the sweep ignores it — and therefore cannot see it. Say so, rather than
@@ -1014,24 +1088,11 @@ async function main() {
     for (const pkg of packages) {
       const started = Date.now();
       const before = await porcelain();
-      const result = await runTest(pkg, timeoutSec * 1000);
+      const result = await runTest(pkg, timeoutSec * 1000, env);
       const after = await porcelain();
       render(result, dirtiedPaths(before, after), `${((Date.now() - started) / 1000).toFixed(1)}s`);
     }
   } else {
-    // **Build the shared dependencies once, up front.** That is the whole reason
-    // this can run in parallel at all: `scripts/build-deps.mjs` does nothing when
-    // `KIWA_DEPS_PREBUILT` is set, so no two targets rewrite the same `dist`.
-    process.stdout.write('building the workspace once, so no target rebuilds a shared dist\n');
-    const build = await runCommand({
-      command: 'pnpm',
-      args: ['--filter', './packages/**', 'build'],
-      cwd: ROOT,
-      timeoutMs: timeoutSec * 1000,
-    });
-    if (!build.ok) throw new Error('the up-front build failed; parallel mode needs it to succeed');
-    const env = { ...process.env, KIWA_DEPS_PREBUILT: '1' };
-
     // The tree is measured once around the whole phase. Which target wrote a
     // path cannot be told when several run at once, so the sweep reports the
     // paths without a name and says to re-run with `--jobs 1` to find the owner.

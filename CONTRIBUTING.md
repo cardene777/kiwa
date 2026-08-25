@@ -132,12 +132,25 @@ nothing changes unless you ask.
 
 It was serial because many `test` scripts build the workspace packages they
 depend on, so two at once rewrite the same `dist` while the other reads it. The
-parallel path removes that cause instead of hoping: it builds the workspace once
-up front and sets `KIWA_DEPS_PREBUILT=1`, which makes `scripts/build-deps.mjs` a
+sweep removes that cause instead of hoping: it builds the workspace once up
+front and sets `KIWA_DEPS_PREBUILT=1`, which makes `scripts/build-deps.mjs` a
 no-op in every child. What is left is two groups that contend on something the
 machine has one of, and each gets a lane that stays serial — the targets that
 declare `testcontainers`, and the three that launch a browser. Across all lanes
 together, no more than `--jobs` targets run at a time.
+
+**That build is not part of `--jobs`.** It runs whatever the flag says, because
+replacing one build per target with one build is worth 221 s of a full sweep on
+its own — 17.8% that has nothing to do with how many targets run at once. It
+costs 19 s, so a `--only` run skips it: the target list is short there and the
+whole-workspace build would not pay. `--jobs` above 1 overrides that, since
+without the build two targets rewrite the same `dist`.
+
+`--no-prebuild` skips it explicitly. It cannot be combined with `--jobs` above 1,
+and the sweep exits 4 if you try. If the build fails on its own, a serial run
+says so and carries on with each package building its own dependencies; a
+parallel run stops, because there the build is a precondition rather than a
+saving.
 
 **Parallel mode cannot tell you which package dirtied the tree.** That answer
 comes from reading `git status` before and after each package, which means
