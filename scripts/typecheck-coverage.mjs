@@ -146,6 +146,7 @@ for (const { dir, scripts } of packages.sort((a, b) => a.dir.localeCompare(b.dir
   checked += 1;
 
   const covered = new Set();
+  let answerable = true;
   for (const config of tsconfigsUsed(scripts)) {
     if (!existsSync(join(dir, config))) continue;
     const files = resolvedFiles(dir, config);
@@ -156,10 +157,16 @@ for (const { dir, scripts } of packages.sort((a, b) => a.dir.localeCompare(b.dir
     // run says so instead of blaming the package.
     if (files === null) {
       unreadable.push({ dir: relative(ROOT, dir), config });
+      answerable = false;
       continue;
     }
     for (const f of files) covered.add(join(dir, f));
   }
+
+  // A config that did not answer may be the one that covers the remaining
+  // tests. Do not also classify the package as a real coverage gap when its
+  // coverage is unknown; the unreadable list already makes the run fail.
+  if (!answerable) continue;
 
   const uncovered = tests.filter((t) => !covered.has(t));
   if (uncovered.length > 0) {

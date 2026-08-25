@@ -134,6 +134,7 @@ describe('読めなかった config を「覆われている」 と読まない 
 
     // tsc が無いので config を 1 つも読めない。 これを「読んだが 0 件」 に潰すと
     // 覆われていない test を覆っていることにできてしまう。
+    expect(counter(stdout, 'packages whose tests nothing compiles:')).toBe(0);
     expect(counter(stdout, 'tsconfigs that could not be read:')).toBeGreaterThan(0);
     expect(code).toBe(1);
   }, 300_000);
