@@ -258,7 +258,20 @@ when run alone.
 `--jobs N` runs it in parallel by removing that cause rather than hoping. The sweep
 builds the workspace once up front and sets `KIWA_DEPS_PREBUILT=1` for every child,
 which is the same fix the root `test` script uses (§ One build up front instead of 1036).
-The default stays 1, so the sweep behaves exactly as before unless the flag is given.
+The default stays 1, so the order and the reporting are exactly as before unless the
+flag is given.
+
+**The up-front build is not tied to `--jobs`.** It ran only in parallel mode at first,
+which hid a saving behind a flag: measured on 166 targets, the per-target builds it
+replaces cost 221 s — 17.8% of a serial run, and none of it about concurrency. It now
+runs whatever `--jobs` says. A `--only` run skips it, because the build costs 19 s
+against roughly 1.3 s per target and a short target list cannot repay that; `--jobs`
+above 1 overrides the skip, since two targets without it rewrite the same `dist`.
+
+A failed build means different things in the two modes. Serial reports it and carries
+on — each package builds its own dependencies, which is what it did before the flag
+existed, so the failure costs time and not correctness. Parallel stops, because there
+the build is what keeps two targets off the same `dist`.
 
 What is left after the build is removed are the two resources that cannot be split, and
 each gets a lane of its own that stays serial. Across all lanes together, no more than

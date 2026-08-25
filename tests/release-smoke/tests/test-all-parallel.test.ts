@@ -42,6 +42,7 @@ const {
   limitConcurrency,
   parseProjectList,
   pool,
+  shouldPrebuild,
   validateJobs,
 } = (await import(pathToFileURL(SCRIPT).href)) as {
     CHROMIUM_LANE: readonly string[];
@@ -54,11 +55,12 @@ const {
     limitConcurrency: <R>(limit: number) => (task: () => Promise<R>) => Promise<R>;
     parseProjectList: (text: string) => unknown;
     pool: <T, R>(items: T[], limit: number, task: (item: T, index: number) => Promise<R>) => Promise<R[]>;
+    shouldPrebuild: (opts: { filtered: boolean; jobs: number; optOut: boolean }) => boolean;
     validateJobs: (raw: string) => number;
 };
 
 /** One `pnpm test` in the fixture, as its own script recorded it. */
-type Trace = { name: string; phase: 'start' | 'end'; at: number; prebuilt: string };
+type Trace = { name: string; phase: 'start' | 'end' | 'self-build'; at: number; prebuilt: string };
 
 /** The fixture members of one lane, by the name they record. */
 const laneOf = (names: readonly string[]) => (trace: Trace[]) => trace.filter((e) => names.includes(e.name));
@@ -72,7 +74,11 @@ function readTrace(file: string): Trace[] {
 
 /** The highest number of fixture packages that were running at the same moment. */
 function peakConcurrency(trace: Trace[]): number {
-  const events = [...trace].sort((a, b) => a.at - b.at || (a.phase === 'end' ? -1 : 1));
+  // `self-build` は区間の端ではないので数に入れない。 入れると 1 件で -1 され、
+  // 同時実行数が実際より少なく見える。
+  const events = [...trace]
+    .filter((e) => e.phase === 'start' || e.phase === 'end')
+    .sort((a, b) => a.at - b.at || (a.phase === 'end' ? -1 : 1));
   let live = 0;
   let peak = 0;
   for (const event of events) {
@@ -167,7 +173,11 @@ const roots: string[] = [];
  * `dirtyIn` names a package whose test also writes a file into the workspace,
  * which is what the sweep calls dirty.
  */
-function makeWorkspace(dirtyIn?: string): { root: string; trace: string } {
+function makeWorkspace(
+  dirtyIn?: string,
+  only?: readonly string[],
+  opts: { failBuild?: boolean } = {},
+): { root: string; trace: string } {
   const root = mkdtempSync(join(tmpdir(), 'test-all-jobs-'));
   roots.push(root);
   // Outside the workspace on purpose: a file the tests append to *inside* it is
@@ -184,7 +194,7 @@ function makeWorkspace(dirtyIn?: string): { root: string; trace: string } {
   writeFileSync(join(root, 'pnpm-workspace.yaml'), 'packages:\n  - "packages/*"\n  - "examples/*"\n');
   writeFileSync(join(root, 'package.json'), JSON.stringify({ name: 'fixture-root', private: true }));
 
-  for (const rel of [...FREE, ...CHROMIUM, ...DOCKER]) {
+  for (const rel of only ?? [...FREE, ...CHROMIUM, ...DOCKER]) {
     const dir = join(root, rel);
     mkdirSync(dir, { recursive: true });
     // Each test sleeps, so two that overlap are visible in the trace. Without
@@ -196,6 +206,10 @@ function makeWorkspace(dirtyIn?: string): { root: string; trace: string } {
       `  name: ${JSON.stringify(rel)}, phase, at: Date.now(),`,
       `  prebuilt: process.env.KIWA_DEPS_PREBUILT ?? '' }) + '\\n');`,
       `rec('start');`,
+      // 前段 build が効いていれば build-deps は何もしない。 効いていない時だけ
+      // 「自前で build した」 ことを記録して、検査から区別できるようにする。
+      `if (process.env.KIWA_DEPS_PREBUILT !== '1') fs.appendFileSync(${JSON.stringify(trace)}, JSON.stringify({`,
+      `  name: ${JSON.stringify(rel)}, phase: 'self-build', at: Date.now(), prebuilt: '' }) + '\\n');`,
       rel === dirtyIn ? `fs.writeFileSync(${JSON.stringify(join(root, 'leaked.txt'))}, 'x');` : '',
       `const until = Date.now() + 400; while (Date.now() < until) {}`,
       `rec('end');`,
@@ -210,7 +224,10 @@ function makeWorkspace(dirtyIn?: string): { root: string; trace: string } {
           private: true,
           // Only the docker lane declares it; the lane is read from here.
           devDependencies: DOCKER.includes(rel) ? { testcontainers: '^10.0.0' } : {},
-          scripts: { build: 'node -e 0', test: 'node run.cjs' },
+          scripts: {
+            build: opts.failBuild ? 'node -e "process.exit(1)"' : 'node -e 0',
+            test: 'node run.cjs',
+          },
         },
         null,
         2,
@@ -224,17 +241,21 @@ function makeWorkspace(dirtyIn?: string): { root: string; trace: string } {
 /**
  * The sweep, as the shell would see it: both streams and the exit code.
  *
- * `KIWA_DEPS_PREBUILT` is removed from what the fixture inherits. These checks
- * are about what the script sets, and the variable is already set in two of the
- * places this file runs: the root `test` script exports it, and a sweep run with
- * `--jobs N` passes it to every child — including this package. Inheriting it
- * would make the `--jobs 1` fixture see `1` and the check would fail for a
- * reason that has nothing to do with the script (measured: the check passed
- * alone and failed inside `node scripts/test-all.mjs --jobs 4`).
+ * `KIWA_DEPS_PREBUILT` is normally removed from what the fixture inherits. These
+ * checks are about what the script sets, and the variable is already set in two
+ * of the places this file runs: the root `test` script exports it, and a sweep
+ * run with `--jobs N` passes it to every child — including this package.
+ * `inheritPrebuilt` deliberately restores it for the opt-out and fallback
+ * checks: both paths must clear a caller's stale flag before running targets.
  */
-async function sweep(root: string, args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
+async function sweep(
+  root: string,
+  args: string[],
+  { inheritPrebuilt = false }: { inheritPrebuilt?: boolean } = {},
+): Promise<{ code: number; stdout: string; stderr: string }> {
   const env = { ...process.env };
-  delete env.KIWA_DEPS_PREBUILT;
+  if (inheritPrebuilt) env.KIWA_DEPS_PREBUILT = '1';
+  else delete env.KIWA_DEPS_PREBUILT;
   try {
     const { stdout, stderr } = await execFileAsync(process.execPath, ['scripts/test-all.mjs', ...args], {
       cwd: root,
@@ -457,13 +478,23 @@ describe('fixture workspace で実際に並列に回す', () => {
     expect(ran(parallelTrace)).toEqual(expected);
   });
 
-  it('T-PAR-012 並列時だけ KIWA_DEPS_PREBUILT=1 が全 target に渡る', () => {
+  it('T-PAR-012 前段 build 成功時は KIWA_DEPS_PREBUILT=1 が全 target に渡る', () => {
     expect(parallelTrace.length, 'trace が空 (検査が空振り)').toBeGreaterThan(0);
-    for (const event of parallelTrace) {
+    for (const event of parallelTrace.filter((e) => e.phase !== 'self-build')) {
       expect(event.prebuilt, `${event.name} が prebuilt flag を受け取っていない`).toBe('1');
     }
-    // 既定の直列経路は何も変わっていない。
-    for (const event of serialTrace) expect(event.prebuilt).toBe('');
+    // 逐次経路も前段 build を走らせるので、同じく 1 を観測する (#2220)。
+    for (const event of serialTrace.filter((e) => e.phase !== 'self-build')) {
+      expect(event.prebuilt, `${event.name} が逐次経路で prebuilt flag を受け取っていない`).toBe('1');
+    }
+  });
+
+  it('T-PAR-012b 前段 build が効いて、どの target も自前で build し直さない', () => {
+    // 「flag が渡った」 だけでは build-deps が止まった証明にならない。 fixture の
+    // 各 target は flag が立っていない時だけ self-build を記録するので、その 0 件が
+    // 実際に build を省いたことの証跡になる。
+    expect(parallelTrace.filter((e) => e.phase === 'self-build')).toEqual([]);
+    expect(serialTrace.filter((e) => e.phase === 'self-build')).toEqual([]);
   });
 
   it('T-PAR-013 free lane は実際に同時に走る', () => {
@@ -510,5 +541,70 @@ describe('汚した時の報告', () => {
     // 名指しできないことを黙って落とさず、次の一手まで書く。
     expect(parallel.stdout).toContain('--jobs 1');
     expect(parallel.stdout).toMatch(/which one wrote these/);
+  }, 300_000);
+});
+
+describe('前段 build を --jobs から切り離す (#2220)', () => {
+  it('T-PAR-030 前段 build を回すかは絞り込みと並列度で決まる', () => {
+    // 全件 sweep は必ず得をする (19 秒に対し 221 秒を置き換える)。
+    expect(shouldPrebuild({ filtered: false, jobs: 1, optOut: false })).toBe(true);
+    // --only は target が少ない debug 経路なので既定では回さない。
+    expect(shouldPrebuild({ filtered: true, jobs: 1, optOut: false })).toBe(false);
+    // 並列は絞り込みに関わらず必要 = 無いと 2 target が同じ dist を書き換える。
+    expect(shouldPrebuild({ filtered: true, jobs: 4, optOut: false })).toBe(true);
+    expect(shouldPrebuild({ filtered: false, jobs: 4, optOut: false })).toBe(true);
+    // 明示 opt-out は逐次でだけ効く。
+    expect(shouldPrebuild({ filtered: false, jobs: 1, optOut: true })).toBe(false);
+    expect(() => shouldPrebuild({ filtered: false, jobs: 4, optOut: true })).toThrow(/--no-prebuild/);
+  });
+
+  it('T-PAR-031 --no-prebuild を渡すと各 target が自前で build する', async () => {
+    // target 1 件の fixture で回す。 絞り込み (--only) を使うとそれ自体が前段 build を
+    // 止めるので、flag が効いたのか絞り込みが効いたのか区別できなくなる。
+    const { root, trace } = makeWorkspace(undefined, ['packages/free-a']);
+    await execFileAsync('git', ['init', '-q', '.'], { cwd: root });
+
+    const run = await sweep(root, ['--no-prebuild'], { inheritPrebuilt: true });
+    expect(run.code, `--no-prebuild で赤が出ている:\n${run.stdout}`).toBe(0);
+    expect(run.stdout).not.toContain('building the workspace once');
+
+    const selfBuilt = readTrace(trace).filter((e) => e.phase === 'self-build');
+    // 0 件だと「前段 build を止めた」 ことを確かめていない検査になる。
+    expect(selfBuilt.length, '前段 build を止めたのに自前 build が 1 件も起きていない').toBeGreaterThan(0);
+  }, 300_000);
+
+  it('T-PAR-032 --no-prebuild と --jobs 2 は同時に指定できない', async () => {
+    const { root } = makeWorkspace();
+    const run = await sweep(root, ['--no-prebuild', '--jobs', '2']);
+    expect(run.code, '並列で前段 build を外せてしまう').toBe(4);
+    expect(run.stderr).toContain('--no-prebuild');
+  }, 120_000);
+});
+
+describe('前段 build が失敗した時 (#2220)', () => {
+  it('T-PAR-033 逐次は止まらず、各 target が自前で build する', async () => {
+    // 既定経路に「build が失敗したら sweep 全体が止まる」 を持ち込まないための検査。
+    // 逐次実行は前段 build が無くても正しく動く (それが #2216 以前の姿) ので、
+    // 失敗は速度の話であって正しさの話ではない。
+    const { root, trace } = makeWorkspace(undefined, ['packages/free-a'], { failBuild: true });
+    await execFileAsync('git', ['init', '-q', '.'], { cwd: root });
+
+    const run = await sweep(root, [], { inheritPrebuilt: true });
+    expect(run.code, `build 失敗で sweep が止まっている:\n${run.stdout}`).toBe(0);
+    expect(run.stdout).toContain('each package builds its own dependencies');
+
+    const selfBuilt = readTrace(trace).filter((e) => e.phase === 'self-build');
+    expect(selfBuilt.length, '縮退したのに自前 build が 1 件も起きていない').toBeGreaterThan(0);
+  }, 300_000);
+
+  it('T-PAR-034 並列は止まる (dist の同時書換を許さない)', async () => {
+    // 並列では前段 build が正しさの前提。 無いまま走らせると 2 target が同じ dist を
+    // 書き換えるので、速度ではなく結果が壊れる。
+    const { root } = makeWorkspace(undefined, undefined, { failBuild: true });
+    await execFileAsync('git', ['init', '-q', '.'], { cwd: root });
+
+    const run = await sweep(root, ['--jobs', '2']);
+    expect(run.code, '前段 build が失敗したのに並列で走っている').toBe(1);
+    expect(run.stderr).toContain('parallel mode needs it to succeed');
   }, 300_000);
 });
