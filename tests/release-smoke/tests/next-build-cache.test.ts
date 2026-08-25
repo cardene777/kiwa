@@ -10,7 +10,7 @@
 // see: files it ignores (`.env.local`, `.context/*.env`, written by
 // `tests/prepare-env.ts`) and the process environment.
 import { execFile } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -105,9 +105,9 @@ describe('指紋が覆う入力', () => {
       untrackedInputDigest(example, {}),
     );
 
-    // 3. NEXT_PUBLIC 以外は build に埋め込まれないので digest を動かさない
-    expect(untrackedInputDigest(example, { HOME: '/somewhere' })).toBe(
-      untrackedInputDigest(example, {}),
+    // 3. next.config と static rendering は任意の process env を読める
+    expect(untrackedInputDigest(example, { FEATURE_FLAG: 'on' })).not.toBe(
+      untrackedInputDigest(example, { FEATURE_FLAG: 'off' }),
     );
   }, 120_000);
 });
@@ -189,10 +189,41 @@ describe('build するかの判定', () => {
     // 全部戻したので再び再利用できる = 上の 4 件が「常に false」 ではないことの確認
     expect(decide({ repoRoot: root, exampleDir: example, env }).reuse).toBe(true);
   }, 120_000);
+
+  it('T-NBC-005 rebuild 前の記録を消し、build 中に入力が変わった時は記録しない', async () => {
+    const { example } = await makeExample();
+    mkdirSync(join(example, '.next'), { recursive: true });
+    writeFileSync(join(example, '.next/BUILD_ID'), 'old-build\n');
+    writeFileSync(
+      join(example, '.next/inputs.sha'),
+      JSON.stringify({ version: CACHE_SCHEMA_VERSION, digest: 'stale' }),
+    );
+    writeFileSync(
+      join(example, 'build.mjs'),
+      [
+        "import { mkdirSync, writeFileSync } from 'node:fs';",
+        "writeFileSync('app/page.tsx', 'export default () => null; // changed during build\\n');",
+        "mkdirSync('.next', { recursive: true });",
+        "writeFileSync('.next/BUILD_ID', 'new-build\\n');",
+        '',
+      ].join('\n'),
+    );
+    writeFileSync(
+      join(example, 'package.json'),
+      JSON.stringify({ name: 'demo', scripts: { build: 'node build.mjs' } }),
+    );
+
+    const { stdout } = await execFileAsync('node', [SCRIPT], { cwd: example });
+    expect(stdout).toContain('inputs changed during the build');
+    expect(
+      existsSync(join(example, '.next/inputs.sha')),
+      'old build の sidecar が残ると、入力を戻した時に別の build を再利用できてしまう',
+    ).toBe(false);
+  }, 120_000);
 });
 
 describe('実 repo での配線', () => {
-  it('T-NBC-005 nextjs 系の webServer が wrapper を経由する', async () => {
+  it('T-NBC-006 nextjs 系の webServer が wrapper を経由する', async () => {
     const { readFileSync, readdirSync } = await import('node:fs');
     const examples = readdirSync(join(REPO_ROOT, 'examples')).filter((n) => n.startsWith('nextjs-'));
     expect(examples.length, 'nextjs 系の例を 1 件も拾えていない (検査が空振り)').toBeGreaterThan(10);

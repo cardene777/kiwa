@@ -13,22 +13,22 @@
  *
  * ## What counts as an input
  *
- * Three sources, because `NEXT_PUBLIC_*` values are **inlined at build time**
- * and they come from more than one place.
+ * Three sources, because environment values can affect `next build` through
+ * client inlining, static rendering, and `next.config.*`.
  *
  * | source | why it counts | how it is read |
  * |---|---|---|
  * | tracked content | the example, every workspace package, and the lockfile | `computeInputFingerprint` (git) |
  * | env files | `tests/prepare-env.ts` writes contract addresses into `.env.local` and `.context/*.env`, both ignored by git | hashed directly by name |
- * | `NEXT_PUBLIC_*` in the environment | `NEXT_PUBLIC_X=1 pnpm build` never touches a file | hashed from `process.env` |
+ * | process environment | `next.config.*` and statically rendered server code can read any key without touching a file | hashed from `process.env` |
  *
  * **The env files are the reason this is not just `compareArtifactInputs`.**
  * They are ignored by git on purpose (they hold addresses from a throwaway
  * chain), so the git-based fingerprint cannot see them, and a stale build with
  * yesterday's addresses would serve happily.
  *
- * `NEXT_PUBLIC_*` has exactly these two origins, so covering both covers every
- * value Next can inline.
+ * Hashing only `NEXT_PUBLIC_*` is not enough: server code can be rendered at
+ * build time, and `next.config.*` can read arbitrary environment keys.
  *
  * ## What is deliberately not an input
  *
@@ -51,7 +51,7 @@
  */
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { computeInputFingerprint } from './lib/input-fingerprint.mjs';
@@ -121,9 +121,10 @@ export function untrackedInputDigest(exampleDir, env, io = {}) {
     hash.update('file\0').update(rel).update('\0').update(body).update('\n');
   }
 
-  // `NEXT_PUBLIC_*` reaches a build through the environment as readily as
-  // through a file, and Next inlines both.
-  for (const key of Object.keys(env).filter((k) => k.startsWith('NEXT_PUBLIC_')).sort()) {
+  // Client inlining is only one route from the environment into a build.
+  // Static rendering and `next.config.*` can read arbitrary keys, so omitting
+  // the rest can pair a build with environment values it was not made from.
+  for (const key of Object.keys(env).sort()) {
     hash.update('env\0').update(key).update('\0').update(String(env[key])).update('\n');
   }
   return hash.digest('hex');
@@ -199,19 +200,31 @@ async function main() {
   }
 
   process.stdout.write(`[next-build-cached] building (${reason})\n`);
+  const beforeBuild = inputDigest({ repoRoot, exampleDir, env: process.env });
+  const sidecar = join(exampleDir, '.next', 'inputs.sha');
+
+  // The old record describes the old artefact. Remove it before touching
+  // `.next`, so a failed or unrecordable rebuild cannot later reuse a partial
+  // build when the inputs happen to return to the old digest.
+  rmSync(sidecar, { force: true });
   const built = spawnSync('pnpm', ['build'], { cwd: exampleDir, stdio: 'inherit' });
   if (built.status !== 0) process.exit(built.status ?? 1);
 
-  // **After the build, not before.** A digest written first would pair these
-  // inputs with whatever `.next` held when the build failed half way.
-  const digest = inputDigest({ repoRoot, exampleDir, env: process.env });
-  if (digest === null) {
+  // Record only a stable pair. A post-build digest alone can describe an edit
+  // made while Next was compiling, even though the output may contain the
+  // earlier content.
+  const afterBuild = inputDigest({ repoRoot, exampleDir, env: process.env });
+  if (beforeBuild === null || afterBuild === null) {
     process.stdout.write('[next-build-cached] built, but the inputs could not be recorded\n');
     return;
   }
+  if (beforeBuild !== afterBuild) {
+    process.stdout.write('[next-build-cached] built, but the inputs changed during the build\n');
+    return;
+  }
   writeFileSync(
-    join(exampleDir, '.next', 'inputs.sha'),
-    `${JSON.stringify({ version: CACHE_SCHEMA_VERSION, digest }, null, 2)}\n`,
+    sidecar,
+    `${JSON.stringify({ version: CACHE_SCHEMA_VERSION, digest: afterBuild }, null, 2)}\n`,
   );
 }
 

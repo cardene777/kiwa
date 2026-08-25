@@ -340,21 +340,28 @@ production build を丸ごと回していた。 `examples/nextjs-bridge` を単�
 |---|---|---|
 | tracked な内容 (例 / `packages` / lockfile) | `computeInputFingerprint` | source が変われば build 結果も変わる |
 | env file (`.env*` と `.context/*.env`) | 名前を列挙して直接 hash | `tests/prepare-env.ts` が contract address を書き、`NEXT_PUBLIC_*` は **build 時に埋め込まれる** |
-| `NEXT_PUBLIC_*` の process env | `process.env` から集めて hash | `NEXT_PUBLIC_X=1 pnpm build` は file を経由しない |
+| process env | `process.env` から集めて hash | client inlining 以外にも static rendering と `next.config.*` が任意の key を読める |
 
-`NEXT_PUBLIC_*` の出所はこの 2 つしかないので、両方を覆えば埋め込み値は完全に覆える。
 env file は gitignore 済 (使い捨て chain の address を持つため) なので、git 由来の指紋だけでは
-昨日の address を埋めた build がそのまま配られる。
+昨日の address を埋めた build がそのまま配られる。 process env は `NEXT_PUBLIC_*` だけに
+絞れない。server code の static rendering と `next.config.*` も build 時に任意の key を読める。
 
 **依存 package の `dist` は入力にしない**。 gitignore 済で、hash すると同じ source から
 build し直しただけで無効化される。 代わりに package の source を入力に含める = 成果物ではなく
 それを生んだ内容を指紋にする、という coverage gate と同じ論理。
 
 **分からない時は build する**。 `.next/BUILD_ID` が無い / 記録が無い / 記録が読めない /
-記録の schema を知らない / git が指紋を作れない、のいずれも build に倒す。 不要に build する
+記録の schema を知らない / git が指紋を作れない、のいずれも build に倒す。 rebuild 前には
+古い記録を消し、build 前後で指紋が変わった時は新しい記録を残さない。 不要に build する
 費用は 15 秒で、入力が動いたのに skip する費用は「無いはずの code に対する緑」 になる。
 
-実測は `examples/nextjs-token-gating` で 17 秒 → 0 秒 (2 回目)。
+**環境は全 key を hash する**。 `NEXT_PUBLIC_*` だけでは足りない = server code は build 時に
+render されることがあり、`next.config.*` は任意の key を読める。 その代償として、違う文脈から
+同じ target を回すと (env が違うので) build に戻る。 安全側に倒れるだけで、同じ command を
+繰り返す通常の使い方では当たる。
+
+実測は `examples/nextjs-token-gating` の wrapper 単体で 17 秒 → 0 秒、
+`examples/nextjs-safe-multisig` の `pnpm test` 全体を 3 回続けて 15 秒 → 7 秒 → 6 秒。
 
 ## Rejected
 
