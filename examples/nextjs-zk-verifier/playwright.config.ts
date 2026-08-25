@@ -13,7 +13,7 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'tsx tests/prepare-env.ts && pnpm build && pnpm start',
+    command: 'tsx tests/prepare-env.ts && node ../../scripts/next-build-cached.mjs && pnpm start',
     url: 'http://127.0.0.1:3049',
     timeout: 240_000,
     reuseExistingServer: false,

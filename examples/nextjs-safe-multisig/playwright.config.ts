@@ -12,7 +12,7 @@ export default defineConfig({
     headless: true,
   },
   webServer: {
-    command: 'pnpm build && pnpm start',
+    command: 'node ../../scripts/next-build-cached.mjs && pnpm start',
     url: 'http://127.0.0.1:3046',
     timeout: 240_000,
     reuseExistingServer: false,

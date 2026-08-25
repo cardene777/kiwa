@@ -160,6 +160,13 @@ paths; finding the owner means re-running with `--jobs 1`, and it says so.
 Pick `--jobs` from what the machine has. Every target runs its own vitest, which
 starts workers of its own, so 4 already keeps eight cores busy.
 
+**`examples/nextjs-*` reuse their previous `next build`.** Their
+`playwright.config.ts` calls `scripts/next-build-cached.mjs`, which rebuilds only
+when an input changed — the example's own sources, every workspace package's
+sources, the lockfile, the env files `tests/prepare-env.ts` writes, and the
+process environment. It prints which of the two it did and why, so
+a skipped build is never silent. Anything it cannot describe leads to a build.
+
 **Four packages are flaky, and they are the ones that start containers:**
 `orm-drizzle-mysql-poc`, `orm-drizzle-postgres-poc`, `orm-prisma-mysql-poc` and
 `orm-prisma-postgres-poc`. Two full sweeps taken the same day disagreed about
