@@ -4,7 +4,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync, rmSync, copyFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync, copyFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -324,6 +324,11 @@ export default {
     // isolation prevents the repo-root scripts/ path from finding it).
     const runnerCopy = join(dir, 'runner.mjs');
     copyFileSync(RUNNER, runnerCopy);
+    // The runner imports `./lib/is-main-module.mjs` (#1957), so the copy needs
+    // that file beside it. This test was not wired to any script, so it went
+    // red the day the import was added and nothing said so (#2217).
+    mkdirSync(join(dir, 'lib'), { recursive: true });
+    copyFileSync(join(repoRoot, 'scripts/lib/is-main-module.mjs'), join(dir, 'lib/is-main-module.mjs'));
     const res = spawnSync(process.execPath, [runnerCopy], {
       cwd: dir,
       encoding: 'utf8',
