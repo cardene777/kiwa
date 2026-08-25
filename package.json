@@ -29,6 +29,7 @@
     "docs:api-reference:write": "node scripts/sync-library-api-reference.mjs --write",
     "docs:consistency": "node scripts/check-docs-consistency.mjs",
     "docs:gen:test": "node --test scripts/docs-libraries-definition.test.mjs scripts/docs-sidebar.test.mjs scripts/docs-api-page-guard.test.mjs scripts/docs-sync-safety.test.mjs scripts/docs-sync-integration.test.mjs scripts/docs-api-reference-integration.test.mjs scripts/check-docs-consistency.test.mjs scripts/sync-override-roster.test.mjs",
+    "test:scripts": "node --test scripts/check-a11y-gates.test.mjs scripts/check-docs-consistency.test.mjs scripts/docs-api-page-guard.test.mjs scripts/docs-api-reference-integration.test.mjs scripts/docs-libraries-definition.test.mjs scripts/docs-sidebar.test.mjs scripts/docs-sync-integration.test.mjs scripts/docs-sync-safety.test.mjs scripts/mutation-baseline-refresh.test.mjs scripts/perf-prune-stale.test.mjs scripts/run-axe-baseline.test.mjs scripts/sync-override-roster.test.mjs scripts/test-all.test.mjs",
     "docs:build": "pnpm docs:gen:test && pnpm docs:consistency && pnpm docs:api-reference && pnpm docs:links && vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test:docs-e2e": "playwright test tests/docs-site-e2e",
