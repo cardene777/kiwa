@@ -105,3 +105,4 @@ skip したか build したかは必ず 1 行出る。
 | `/kiwa-observe` | 走査対象から build 出力を除く条件 (§ 2) |
 | `/kiwa-play` | Playwright 系 example の `pnpm test` が何をするか (§ 6) |
 | `/kiwa-ui` | vitest の環境指定がどこで決まるか (§ 1) |
+| `/kiwa-plan-run` | `test:all` の flag と直列車線の床 (§ 4) |
