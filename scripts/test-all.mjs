@@ -992,7 +992,14 @@ async function main() {
       process.stdout.write('the up-front build failed, so each package builds its own dependencies\n');
     }
   }
-  const env = prebuilt ? { ...process.env, KIWA_DEPS_PREBUILT: '1' } : undefined;
+  // This process may itself run under the root `test` script, which exports
+  // KIWA_DEPS_PREBUILT=1. That flag describes the caller's build, not this
+  // sweep's fixture or fallback. Keep it only when our own prebuild succeeded;
+  // otherwise `--no-prebuild` and the serial failure path must let every target
+  // build its dependencies for itself.
+  const env = { ...process.env };
+  if (prebuilt) env.KIWA_DEPS_PREBUILT = '1';
+  else delete env.KIWA_DEPS_PREBUILT;
 
   // Dirt that is already here cannot be blamed on the package that runs first,
   // so the sweep ignores it — and therefore cannot see it. Say so, rather than

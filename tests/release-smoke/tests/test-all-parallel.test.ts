@@ -241,17 +241,21 @@ function makeWorkspace(
 /**
  * The sweep, as the shell would see it: both streams and the exit code.
  *
- * `KIWA_DEPS_PREBUILT` is removed from what the fixture inherits. These checks
- * are about what the script sets, and the variable is already set in two of the
- * places this file runs: the root `test` script exports it, and a sweep run with
- * `--jobs N` passes it to every child — including this package. Inheriting it
- * would make the `--jobs 1` fixture see `1` and the check would fail for a
- * reason that has nothing to do with the script (measured: the check passed
- * alone and failed inside `node scripts/test-all.mjs --jobs 4`).
+ * `KIWA_DEPS_PREBUILT` is normally removed from what the fixture inherits. These
+ * checks are about what the script sets, and the variable is already set in two
+ * of the places this file runs: the root `test` script exports it, and a sweep
+ * run with `--jobs N` passes it to every child — including this package.
+ * `inheritPrebuilt` deliberately restores it for the opt-out and fallback
+ * checks: both paths must clear a caller's stale flag before running targets.
  */
-async function sweep(root: string, args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
+async function sweep(
+  root: string,
+  args: string[],
+  { inheritPrebuilt = false }: { inheritPrebuilt?: boolean } = {},
+): Promise<{ code: number; stdout: string; stderr: string }> {
   const env = { ...process.env };
-  delete env.KIWA_DEPS_PREBUILT;
+  if (inheritPrebuilt) env.KIWA_DEPS_PREBUILT = '1';
+  else delete env.KIWA_DEPS_PREBUILT;
   try {
     const { stdout, stderr } = await execFileAsync(process.execPath, ['scripts/test-all.mjs', ...args], {
       cwd: root,
@@ -474,7 +478,7 @@ describe('fixture workspace で実際に並列に回す', () => {
     expect(ran(parallelTrace)).toEqual(expected);
   });
 
-  it('T-PAR-012 並列時だけ KIWA_DEPS_PREBUILT=1 が全 target に渡る', () => {
+  it('T-PAR-012 前段 build 成功時は KIWA_DEPS_PREBUILT=1 が全 target に渡る', () => {
     expect(parallelTrace.length, 'trace が空 (検査が空振り)').toBeGreaterThan(0);
     for (const event of parallelTrace.filter((e) => e.phase !== 'self-build')) {
       expect(event.prebuilt, `${event.name} が prebuilt flag を受け取っていない`).toBe('1');
@@ -560,7 +564,7 @@ describe('前段 build を --jobs から切り離す (#2220)', () => {
     const { root, trace } = makeWorkspace(undefined, ['packages/free-a']);
     await execFileAsync('git', ['init', '-q', '.'], { cwd: root });
 
-    const run = await sweep(root, ['--no-prebuild']);
+    const run = await sweep(root, ['--no-prebuild'], { inheritPrebuilt: true });
     expect(run.code, `--no-prebuild で赤が出ている:\n${run.stdout}`).toBe(0);
     expect(run.stdout).not.toContain('building the workspace once');
 
@@ -585,7 +589,7 @@ describe('前段 build が失敗した時 (#2220)', () => {
     const { root, trace } = makeWorkspace(undefined, ['packages/free-a'], { failBuild: true });
     await execFileAsync('git', ['init', '-q', '.'], { cwd: root });
 
-    const run = await sweep(root, []);
+    const run = await sweep(root, [], { inheritPrebuilt: true });
     expect(run.code, `build 失敗で sweep が止まっている:\n${run.stdout}`).toBe(0);
     expect(run.stdout).toContain('each package builds its own dependencies');
 
