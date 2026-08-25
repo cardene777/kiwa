@@ -9,8 +9,8 @@
     {
       "name": "kiwa",
       "source": "./",
-      "description": "kiwa v2.19.0 — 28 skills in one plugin. Install it in a project and Claude Code can write a Layer 1 test spec with /kiwa-design, generate Foundry or Hardhat contract tests with /kiwa-forge and /kiwa-hardhat, drive dApp end-to-end runs on anvil forks with /kiwa-play, cover unit, API, component, data, CLI, and browser layers with /kiwa-vitest, /kiwa-api, /kiwa-ui, /kiwa-data, /kiwa-cli-test, and /kiwa-e2e, review spec and test coverage with /kiwa-review, and orchestrate the contract, dApp and browser chains with /kiwa-test.",
-      "version": "2.19.0",
+      "description": "kiwa v2.20.0 — 28 skills in one plugin. Install it in a project and Claude Code can write a Layer 1 test spec with /kiwa-design, generate Foundry or Hardhat contract tests with /kiwa-forge and /kiwa-hardhat, drive dApp end-to-end runs on anvil forks with /kiwa-play, cover unit, API, component, data, CLI, and browser layers with /kiwa-vitest, /kiwa-api, /kiwa-ui, /kiwa-data, /kiwa-cli-test, and /kiwa-e2e, review spec and test coverage with /kiwa-review, and orchestrate the contract, dApp and browser chains with /kiwa-test.",
+      "version": "2.20.0",
       "author": {
         "name": "cardene777",
         "email": "cardene777@gmail.com"
