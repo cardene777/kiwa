@@ -1,7 +1,7 @@
 /**
  * `scripts/check-plugin-version-bump.mjs` の検査。
  *
- * 判定 (`decide`) は git に触らないので、 4 通りの組合せを直接固定できる。
+ * 判定 (`decide`) は git に触らないので、 主要な組合せを直接固定できる。
  * 実 repo に対する走査 (`skillNamesAt`) は、 数え方が生成器の `readSkills()` と
  * 同じ基準 (`SKILL.md` を持つ dir だけ) であることを確かめる。
  *
@@ -10,7 +10,16 @@
  */
 import { strict as assert } from 'node:assert';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -18,6 +27,42 @@ import test from 'node:test';
 import { REPO_ROOT, decide, skillNamesAt, versionAt } from './check-plugin-version-bump.mjs';
 
 const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'check-plugin-version-bump.mjs');
+
+function withSkillAdditionRepo(fn) {
+  const root = mkdtempSync(path.join(os.tmpdir(), 'plugin-version-bump-'));
+  const runGit = (...args) => {
+    const result = spawnSync('git', args, { cwd: root, encoding: 'utf-8' });
+    assert.equal(result.status, 0, `git ${args.join(' ')} が失敗した\n${result.stdout}${result.stderr}`);
+  };
+
+  try {
+    mkdirSync(path.join(root, '.claude', 'skills', 'base-skill'), { recursive: true });
+    mkdirSync(path.join(root, '.claude-plugin'));
+    mkdirSync(path.join(root, 'scripts', 'lib'), { recursive: true });
+    writeFileSync(path.join(root, '.claude', 'skills', 'base-skill', 'SKILL.md'), '# base\n');
+    writeFileSync(path.join(root, '.claude-plugin', 'plugin.json'), '{"version":"1.0.0"}\n');
+    copyFileSync(SCRIPT, path.join(root, 'scripts', 'check-plugin-version-bump.mjs'));
+    copyFileSync(
+      path.join(REPO_ROOT, 'scripts', 'lib', 'is-main-module.mjs'),
+      path.join(root, 'scripts', 'lib', 'is-main-module.mjs'),
+    );
+
+    runGit('init', '-q');
+    runGit('config', 'user.email', 'test@example.invalid');
+    runGit('config', 'user.name', 'test');
+    runGit('add', '.');
+    runGit('commit', '-qm', 'base');
+
+    mkdirSync(path.join(root, '.claude', 'skills', 'added-skill'));
+    writeFileSync(path.join(root, '.claude', 'skills', 'added-skill', 'SKILL.md'), '# added\n');
+    runGit('add', '.');
+    runGit('commit', '-qm', 'add skill without version bump');
+
+    return fn({ root, script: path.join(root, 'scripts', 'check-plugin-version-bump.mjs') });
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
 
 test('skill が増えて version が据え置きなら落とす', () => {
   const result = decide({
@@ -40,6 +85,28 @@ test('skill が増えて version も上がっていれば通す', () => {
   });
   assert.equal(result.verdict, 'ok');
   assert.deepEqual(result.added, ['c']);
+});
+
+test('skill が増えて version が下がっていれば落とす', () => {
+  const result = decide({
+    baseSkills: new Set(['a', 'b']),
+    headSkills: new Set(['a', 'b', 'c']),
+    baseVersion: '2.20.0',
+    headVersion: '2.19.0',
+  });
+  assert.equal(result.verdict, 'stale-version');
+  assert.match(result.reason, /2\.20\.0 から 2\.19\.0 に下がっている/);
+});
+
+test('skill が増えて version が x.y.z 形式でなければ判定不能にする', () => {
+  const result = decide({
+    baseSkills: new Set(['a', 'b']),
+    headSkills: new Set(['a', 'b', 'c']),
+    baseVersion: '2.20.0',
+    headVersion: 'next',
+  });
+  assert.equal(result.verdict, 'undecidable');
+  assert.match(result.reason, /x\.y\.z/);
 });
 
 test('skill が増えていなければ version 据え置きでも通す', () => {
@@ -112,6 +179,30 @@ test('versionAt が HEAD の配布物 version を読める', () => {
   const version = versionAt('HEAD');
   assert.notEqual(version, null, 'HEAD の version を読めない');
   assert.match(version, /^\d+\.\d+\.\d+/, `version の形が想定外: ${version}`);
+});
+
+test('CLI は skill 追加と version 据え置きの実 git 差分を exit 1 にする', () => {
+  withSkillAdditionRepo(({ root, script }) => {
+    const result = spawnSync(process.execPath, [script, '--base', 'HEAD^'], {
+      encoding: 'utf-8',
+      cwd: root,
+    });
+    assert.equal(result.status, 1, `据え置きを通している\n${result.stdout}${result.stderr}`);
+    assert.match(result.stderr, /version が 1\.0\.0 のまま据え置かれている/);
+  });
+});
+
+test('実 repo の base と HEAD を比較する経路が起動する', () => {
+  const result = spawnSync(process.execPath, [SCRIPT], {
+    encoding: 'utf-8',
+    cwd: REPO_ROOT,
+  });
+  assert.equal(
+    result.status,
+    0,
+    `実 repo の version 検査が通らない\n${result.stdout}${result.stderr}`,
+  );
+  assert.match(result.stdout, /skill の増加なし|version は .* に上がっている|比較対象なし/);
 });
 
 test('存在しない ref は 判定できない として exit 2 で止まる', () => {

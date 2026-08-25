@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * skill を足したのに配布物の version を据え置いた PR を落とす。
+ * skill を足したのに配布物の version を上げなかった PR を落とす。
  *
  * Claude Code の plugin cache は version 名の dir で切られ (`cache/<market>/<plugin>/<version>/`)、
  * 更新の判断も version 番号だけを見る。 中身が変わっても version が同じなら
@@ -17,7 +17,7 @@
  *   node scripts/check-plugin-version-bump.mjs            # base は main
  *   node scripts/check-plugin-version-bump.mjs --base <ref>
  *
- * 終了 code は 0 = 問題なし / 1 = version 据え置き / 2 = 判定できない。
+ * 終了 code は 0 = 問題なし / 1 = version が上がっていない / 2 = 判定できない。
  * 判定できない場合を 0 に倒さないのは、 「比べていない」 を「問題なし」 と読ませないため。
  * ただし base と HEAD が同一 (main 上での実行) は比較対象が無いだけなので 0 を返す。
  */
@@ -72,12 +72,30 @@ export function versionAt(ref) {
   }
 }
 
+/** x.y.z 形式の version を比較する。 形式外なら null。 */
+function compareVersions(left, right) {
+  const parse = (version) => {
+    if (typeof version !== 'string') return null;
+    const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(version);
+    return match?.slice(1).map(Number) ?? null;
+  };
+
+  const leftParts = parse(left);
+  const rightParts = parse(right);
+  if (leftParts === null || rightParts === null) return null;
+
+  for (let i = 0; i < leftParts.length; i += 1) {
+    if (leftParts[i] !== rightParts[i]) return leftParts[i] > rightParts[i] ? 1 : -1;
+  }
+  return 0;
+}
+
 /**
  * 判定そのもの。 git に触らないので、 検査から直接呼べる。
  *
- * 落とすのは「skill が増えた」 かつ「version が同じ」 の組合せだけ。
- * 減った場合と入れ替わった場合は対象にしない = 削除は cache が古いままでも
- * 新しい skill が届かない形にはならず、 別の判断 (major/minor) が要るため。
+ * 落とすのは「skill が増えた」 かつ「version が上がっていない」 の組合せだけ。
+ * 削除だけの場合は対象にしない = cache が古いままでも新しい skill が
+ * 届かない形にはならないため。 入れ替わりは新名の skill を追加として扱う。
  */
 export function decide({ baseSkills, headSkills, baseVersion, headVersion }) {
   if (baseSkills === null || headSkills === null || baseVersion === null || headVersion === null) {
@@ -93,11 +111,18 @@ export function decide({ baseSkills, headSkills, baseVersion, headVersion }) {
     };
   }
 
-  if (headVersion === baseVersion) {
+  const versionOrder = compareVersions(headVersion, baseVersion);
+  if (versionOrder === null) {
+    return { verdict: 'undecidable', reason: 'version が x.y.z 形式ではない' };
+  }
+
+  if (versionOrder <= 0) {
     return {
       verdict: 'stale-version',
       reason:
-        `skill が ${added.length} 件増えたのに version が ${headVersion} のまま据え置かれている ` +
+        (versionOrder === 0
+          ? `skill が ${added.length} 件増えたのに version が ${headVersion} のまま据え置かれている `
+          : `skill が ${added.length} 件増えたのに version が ${baseVersion} から ${headVersion} に下がっている `) +
         `(追加: ${added.join(', ')})`,
       added,
     };
