@@ -6,9 +6,10 @@ skill が test を走らせる / test の出力を読む時に前提にしてよ
 **存在しない検査を 0 件として数える command を案内していた** (#2224)。
 新しい skill を書く時と、既存 skill の実行手順を直す時はここを読む。
 
-## 1. `pnpm -F <pkg> test` は source を直接走らせる
+## 1. Vitest target の `pnpm -F <pkg> test` は source を直接走らせる
 
-compile 段は無い。 vitest が esbuild で transform して `tests/` をそのまま実行する。
+Vitest を runner にする target には compile 段が無い。 vitest が esbuild で transform して
+`tests/` をそのまま実行する。
 
 ```
 "test": "vitest run tests --exclude '**/.vitest-dist/**' --environment node"
@@ -18,6 +19,9 @@ compile 段は無い。 vitest が esbuild で transform して `tests/` をそ�
 全 target から外した。 固定費が 1 target あたり 1.6 秒あり、全 sweep で 45 分 → 20.7 分になった。
 
 **型検査は `typecheck` が持つ**。 test は型を見ない。
+
+Playwright / Hardhat などを runner にする target はこの節の対象外。 `pnpm test` が各 target の
+runner を起動するので、Vitest に置き換えない。
 
 ## 2. `.vitest-dist` は「あるかもしれない残骸」
 

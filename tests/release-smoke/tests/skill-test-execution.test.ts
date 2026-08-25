@@ -37,6 +37,24 @@ function skills(): { name: string; body: string }[] {
 }
 
 /**
+ * Find guidance that passes `.vitest-dist` to `vitest run` as an input.
+ * Shell line continuations are one logical command. `--exclude` values are
+ * removed first because mentioning `.vitest-dist` there is the required form.
+ */
+function compiledTestRunGuidance(body: string): string[] {
+  return body
+    .replace(/\\\r?\n[ \t]*/g, ' ')
+    .split('\n')
+    .filter((line) => {
+      const withoutExcludes = line.replace(
+        /--exclude(?:=|\s+)(?:"[^"]*"|'[^']*'|\S+)/g,
+        '',
+      );
+      return /\bvitest\s+run\b/.test(withoutExcludes) && withoutExcludes.includes('.vitest-dist');
+    });
+}
+
+/**
  * Targets whose own scripts still hand `tsconfig.vitest.json` to an emitting
  * `tsc` invocation. Type-only `--noEmit` invocations do not rebuild output.
  *
@@ -86,19 +104,25 @@ describe('skill が持つ test 実行の前提 (#2224)', () => {
 
     const offenders: string[] = [];
     for (const { name, body } of all) {
-      for (const line of body.split('\n')) {
-        // 実行する形だけを見る。 除外指定 (`--exclude '**/.vitest-dist/**'`) や
-        // 「走らせるな」 と書いた説明文まで止めると、直した記述が落ちる。
-        //
-        // 語の切れ目は `run` の直後に置く。 `[\s'"`]` を必須にすると
-        // `vitest run .vitest-dist/tests` (空白 1 つ) が `\s+` に食われて
-        // 一致しない = 直そうとしている当の形をすり抜ける (変異 S1 で実測)。
-        if (/\bvitest\s+run\b[^\n]*?(?<![\w/*])\.vitest-dist/.test(line)) {
-          offenders.push(`${name}: ${line.trim()}`);
-        }
+      for (const line of compiledTestRunGuidance(body)) {
+        offenders.push(`${name}: ${line.trim()}`);
       }
     }
     expect(offenders, `.vitest-dist を走らせる案内が残っている:\n${offenders.join('\n')}`).toEqual([]);
+  });
+
+  it('T-STE-001a path の書き方と行継続で検査を迂回できない', () => {
+    const body = [
+      "npx vitest run tests --exclude '**/.vitest-dist/**' --environment node",
+      'npx vitest run ./.vitest-dist/tests',
+      'npx vitest run \\',
+      '  "$PWD/.vitest-dist/tests"',
+    ].join('\n');
+
+    expect(compiledTestRunGuidance(body)).toEqual([
+      'npx vitest run ./.vitest-dist/tests',
+      'npx vitest run  "$PWD/.vitest-dist/tests"',
+    ]);
   });
 
   it('T-STE-002 契約に書いた件数が実物と一致する', () => {

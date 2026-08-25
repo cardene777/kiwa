@@ -17,7 +17,7 @@ contract / api / e2e の間の test pyramid の中段 (UI component / hook / 状
 既存 `examples/*/src/components/*.tsx` や `hooks/*.ts` を実装 SSOT として読み、 UI test を生成する。
 
 
-> test の実行契約 (§ 1 = vitest の環境指定) は `_shared/references/test-execution.md` が SSOT。
+> test の実行契約 (§ 1 = Vitest target は source を直接実行) は `_shared/references/test-execution.md` が SSOT。
 
 ## 入力の trust boundary
 
