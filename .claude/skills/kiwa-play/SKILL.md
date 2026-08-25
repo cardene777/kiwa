@@ -16,6 +16,9 @@ allowed-tools: Bash, Read, Glob, Grep, Write, Edit
 
 dApp で「ユーザー操作 → wallet → contract → state 検証」の往復が必要な test を書く場面で本 skill を起動する。
 
+
+> test の実行契約 (§ 6 = Next.js Playwright example の `.next` 再利用) は `_shared/references/test-execution.md` が SSOT。
+
 ## 前提
 
 - Node.js 20+
