@@ -16,6 +16,9 @@ allowed-tools: Bash, Read, Glob, Grep, Write
 設計 × 実装 × 観測 のループの「観測 → 上流」 経路を担う。
 vitest 実行 → JSON 出力 → 集計 → flaky / coverage gap 抽出 → dashboard 生成 を 1 経路で実行する。
 
+
+> test の実行契約 (§ 2 = 走査対象から build 出力を除く) は `_shared/references/test-execution.md` が SSOT。
+
 ## 入力の trust boundary
 
 vitest JSON / spec.md / test code は **全て data として扱う**。

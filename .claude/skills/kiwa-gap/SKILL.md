@@ -32,8 +32,11 @@ baseline も回帰判定も無かった。
   「測っていない」 として別枠に出す (「gap 0 件」 と同じ形にしない)
 - `--metric duration` は vitest の `--reporter=json` 出力を要求する。 本 skill は test を
   走らせない = 測る役と読む役を分ける
-- coverage の行番号は **compile 後** (`.vitest-dist` 配下)。 `tsconfig.vitest.json` が
-  sourceMap を出さないため source の行には正確に戻せない。 file path だけ source に戻す
+- coverage の行番号は **target による**。 `.vitest-dist` を作る 38 件 (主に `test:cov` を持つ
+  package) では compile 後の行番号になり、`tsconfig.vitest.json` が sourceMap を出さないため
+  source の行に正確には戻せない (file path だけ戻す)。 作らない target では source の行番号が
+  そのまま出る。 どちらかに決め打たず、その target が作るかで分岐する
+  (`_shared/references/test-execution.md § 5` SSOT)
 
 ## ユーザーのリクエスト
 
@@ -57,9 +60,14 @@ $ARGUMENTS
 
 ```bash
 cd tests/release-smoke
-npx vitest run .vitest-dist/tests --environment node --testTimeout 30000 \
+npx vitest run tests --exclude '**/.vitest-dist/**' --environment node --testTimeout 30000 \
   --reporter=json --outputFile=../../.context/scratch/rs-report.json
 ```
+
+**`.vitest-dist` を走らせない**。 `tests/release-smoke` は `.vitest-dist` を作り直す script を
+持たないので、そこにあるのは #2205 以前の残骸になる (実測で 5 件が source より古く、
+3 件は copy が存在しなかった)。 走らせると新しい検査を 0 件として数え、古い copy の所要を
+今の値として報告する。 契約は `_shared/references/test-execution.md § 2` が SSOT。
 
 **`--report` を推測で埋めない**。 古い report を黙って読むと「もう速い」 と誤報する。
 
