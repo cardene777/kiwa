@@ -32,8 +32,10 @@ const m = await import(repoRoot + '/scripts/lib/run-plan.mjs');
 const runner = await import(repoRoot + '/scripts/test-all.mjs');
 const { execFileSync } = await import('node:child_process');
 const { relative } = await import('node:path');
-const projects = JSON.parse(execFileSync('pnpm', ['ls','-r','--depth','-1','--json'],
-  { cwd: repoRoot, encoding: 'utf-8' }));
+// pnpm は JSON の前に warning を出すことがある。 runner 側の parser を使う
+// (素の JSON.parse に渡すと banner 1 行で SyntaxError になる)。
+const projects = runner.parseProjectList(execFileSync('pnpm', ['ls','-r','--depth','-1','--json'],
+  { cwd: repoRoot, encoding: 'utf-8', maxBuffer: 64 * 1024 * 1024 }));
 const packages = runner.discoverPackages(projects, repoRoot);
 const lanes = runner.laneMembership(packages, repoRoot, { roster: packages });
 const laneGroups = [lanes.chromium, lanes.docker]
