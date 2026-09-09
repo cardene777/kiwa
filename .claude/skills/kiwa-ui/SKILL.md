@@ -211,7 +211,7 @@ describe('Counter (interaction mode)', () => {
 
 ## references
 
-- `@kiwa-lab/ui` API ... `packages/ui/README.md` (`/Users/cardene/Desktop/projects/kiwa/packages/ui/README.md`)
+- `@kiwa-lab/ui` API ... `packages/ui/README.md`
 - `@kiwa-lab/core` 共通型 ... `packages/core/README.md`
 - 実 PoC ... `examples/react-component-poc/`
 
